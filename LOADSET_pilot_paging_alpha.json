@@ -1,0 +1,36 @@
+{
+  "loadset_id": "pilot.paging.alpha",
+  "description": "Pilot test set for symbolic paging beyond 20-doc limit.",
+  "files": [
+    {
+      "filename": "Aurora_GameEngine_EduSim_v1.0.json",
+      "symbolic_id": "doc.page::edusim.export.mltm.01",
+      "alias_command": "MOUNT edusim.export.mltm.01",
+      "status": "\u2705 Purgable (in stack export)"
+    },
+    {
+      "filename": "Aurora_EdSim_MLTM_Export_20250408T1731Z 2.zip",
+      "symbolic_id": "doc.page::runtime.manifest.02",
+      "alias_command": "MOUNT runtime.manifest.02",
+      "status": "\u2705 Purgable (symbolically committed)"
+    },
+    {
+      "filename": "aurora_module_manifest.json",
+      "symbolic_id": "doc.page::toolregistry.v226.03",
+      "alias_command": "MOUNT toolregistry.v226.03",
+      "status": "\u2705 Purgable (runtime-registered)"
+    },
+    {
+      "filename": "Aurora_ToolRegistry_Update_v2.2.6.json",
+      "symbolic_id": "doc.page::boot.auth.04",
+      "alias_command": "MOUNT boot.auth.04",
+      "status": "\u2705 Purgable (runtime-registered)"
+    },
+    {
+      "filename": "aurora_boot_manifest.json",
+      "symbolic_id": "doc.page::thread.core.05",
+      "alias_command": "MOUNT thread.core.05",
+      "status": "\u2705 Purgable (used in BUP cycle)"
+    }
+  ]
+}

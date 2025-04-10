@@ -1,0 +1,18 @@
+{
+    "module_name": "Aurora_MLTM_Module",
+    "version": "1.1",
+    "description": "Updated multilingual translation mode with smart English filtering.",
+    "entry_point": "aurora_mltm_runtime.py",
+    "features": {
+        "dual_language_output": true,
+        "spoken_delivery_optimized": true,
+        "english_echo_filter": true
+    },
+    "symbolic_tag": "s.tag::aurora.module.mltm",
+    "anchor_code": "mod.translation.realtime.mltm",
+    "terminal_id": "aurora_translation_module.mltm_v1_1.term",
+    "dependencies": [
+        "aurora_output_formatter.py"
+    ],
+    "patch_type": "runtime-enhancement"
+}

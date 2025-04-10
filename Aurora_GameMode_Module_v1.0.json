@@ -1,0 +1,28 @@
+{
+    "module_name": "Aurora_GameMode_Module",
+    "version": "1.0",
+    "description": "Launches Level 2 Educational Simulation Mode with MLTM integration, RPGs, and adaptive scenario logic.",
+    "entry_point": "aurora_gamemode_loader.py",
+    "features": {
+        "level_2_simulation": true,
+        "cascading_startup_questions": true,
+        "mltm_toggle_available": true,
+        "adaptive_game_mode_selection": true,
+        "target_audience": "Middle School - Multilingual",
+        "game_modes": [
+            "RPG (D&D-style)",
+            "Classwide Simulation",
+            "Puzzle Quest",
+            "Civics Timeline Explorer",
+            "Environment/Social Justice Simulator"
+        ]
+    },
+    "symbolic_tag": "s.tag::aurora.module.gamemode",
+    "anchor_code": "mod.education.gamemode.lvl2",
+    "terminal_id": "aurora_game_module.lvl2.term",
+    "dependencies": [
+        "aurora_output_formatter.py",
+        "aurora_mltm_runtime.py"
+    ],
+    "patch_type": "runtime-feature"
+}

@@ -1,0 +1,33 @@
+{
+    "module_name": "Aurora_GameEngine_EduSim_v1.0",
+    "version": "1.0",
+    "description": "Comprehensive Educational Game Engine for Aurora, including RPG, Puzzle Quest, Story Adventures, and Class Simulations.",
+    "entry_point": "aurora_game_engine_loader.py",
+    "features": {
+        "game_modes": [
+            "Puzzle Quest",
+            "D&D-style RPG",
+            "Classwide Simulation",
+            "Story Adventure",
+            "Exploration Challenge"
+        ],
+        "supports_full_class_mode": true,
+        "supports_individual_mode": true,
+        "adaptive_clue_system": true,
+        "dynamic_role_assignment": true,
+        "branching_narratives": true,
+        "era_navigation": true,
+        "mltm_aware": true,
+        "translation_toggle": true,
+        "age_calibration": "Middle School \u2013 Multilingual Support"
+    },
+    "symbolic_tag": "s.tag::aurora.engine.edusim",
+    "anchor_code": "engine.education.edusim",
+    "terminal_id": "aurora_game_engine.edusim.term",
+    "dependencies": [
+        "aurora_output_formatter.py",
+        "aurora_gamemode_loader.py",
+        "aurora_mltm_runtime.py"
+    ],
+    "patch_type": "core-game-engine"
+}

@@ -1,0 +1,1 @@
+999 triggers PRE-999 reflexively. If symbolic drift or thread conflict is found, cascade halts.

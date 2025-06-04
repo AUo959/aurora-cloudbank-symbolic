@@ -1,0 +1,14 @@
+{
+  "name": "Aurora Symbolic Dev",
+  "dockerComposeFile": "../docker-compose_aurora_gui_cloudhub_UPDATED.yaml",
+  "service": "aurora_gui",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "bash ./git_push_aurora_seed.sh || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  }
+}

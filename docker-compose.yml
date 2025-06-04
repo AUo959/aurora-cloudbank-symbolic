@@ -1,0 +1,10 @@
+
+version: '3.8'
+services:
+  aurora_gui:
+    build:
+      context: ..
+      dockerfile: Dockerfile_aurora_gui_cloudhub
+    volumes:
+      - ../memory:/app/symbols/memory
+      - ../aurora.seed.json:/app/symbols/aurora.seed.json

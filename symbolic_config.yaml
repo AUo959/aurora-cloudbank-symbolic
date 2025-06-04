@@ -1,0 +1,17 @@
+aurora_gui:
+  memory_path: /app/symbols/memory/
+  seed_file: /app/symbols/aurora.seed.json
+  load_on_startup: true
+  memory_contexts:
+    default:
+    - Lord_Marshal_Virex_TalVaren
+    - Mistress_Daela_Syrix
+    explore_all: true
+  routing:
+    api_endpoint: /api/symbolic
+    gui_overlay: true
+    context_panel: true
+  glyph_alignment:
+  - Aurora
+  - GUMAS
+  - Threadcore

@@ -1,0 +1,5 @@
+keyring/
+*.enc
+*.zip
+*.stub.txt
+.env

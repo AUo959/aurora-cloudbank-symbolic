@@ -1,0 +1,14 @@
+
+version: '3.9'
+
+services:
+  aurora-gui:
+    build:
+      context: .
+      dockerfile: Dockerfile_aurora_gui_cloudhub
+    ports:
+      - "8080:8080"
+    container_name: aurora-gui-cloudhub
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped

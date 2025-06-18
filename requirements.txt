@@ -1,0 +1,4 @@
+# Example requirements for Aurora Reflective Autonomy System
+pyyaml
+flake8
+pytest

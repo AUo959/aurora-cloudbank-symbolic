@@ -62,3 +62,9 @@ keyring/
 *.enc
 *.zip
 *.stub.txt
+
+# Large/binary files
+*.zip
+*.tar.gz
+*.7z
+*.rar

@@ -26,3 +26,10 @@ jobs:
     - name: Run tests
       run: |
         if [ -d tests ]; then pytest tests || true; fi
+    - name: Security scan with Bandit
+      run: |
+        pip install bandit
+        bandit -r modules/reflective_autonomy scripts || true
+    - name: Node.js audit (if present)
+      run: |
+        if [ -f services/command_node/package.json ]; then cd services/command_node && npm install && npm audit --omit=dev || true; fi

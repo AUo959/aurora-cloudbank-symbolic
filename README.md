@@ -25,6 +25,20 @@ make run
 - `logs/` — Runtime and audit logs
 - `.github/` — CI/CD and templates
 
+## Node.js Command Node Service
+
+A Node.js command node service is orchestrated alongside the Python backend using Docker Compose.
+
+- Service directory: `services/command_node/`
+- To build and run all services:
+
+```bash
+docker-compose up --build
+```
+
+- The command node listens on port 3001 by default.
+- Replace the placeholder app in `services/command_node/` with your real Node.js code when ready.
+
 ## Contributing
 See `CONTRIBUTING.md` for guidelines.
 

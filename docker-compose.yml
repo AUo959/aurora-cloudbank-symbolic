@@ -1,4 +1,3 @@
-
 version: '3.8'
 services:
   aurora_gui:
@@ -8,3 +7,9 @@ services:
     volumes:
       - ../memory:/app/symbols/memory
       - ../aurora.seed.json:/app/symbols/aurora.seed.json
+  command_node:
+    build:
+      context: ./services/command_node
+    ports:
+      - "3001:3001"
+    restart: unless-stopped

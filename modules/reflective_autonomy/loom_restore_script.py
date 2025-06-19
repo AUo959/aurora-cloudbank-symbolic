@@ -33,8 +33,10 @@ with open(governance_path, 'r') as f:
     governance_config = yaml.safe_load(f)
 
 print("[LOOM RESTORE] Governance Capsule Loaded")
-print("System Identity:", governance_config['system_identity']['symbolic_system'])
-print("Architecture Phase:", governance_config['system_identity']['phase_complete'])
+print("System Identity:",
+      governance_config['system_identity']['symbolic_system'])
+print("Architecture Phase:",
+      governance_config['system_identity']['phase_complete'])
 
 # ====================================
 # STEP 4 — Engage Reflection Autonomy Loop

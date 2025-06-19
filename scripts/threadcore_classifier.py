@@ -69,7 +69,8 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="THREADCORE v2 Tagging Classifier")
+    parser = argparse.ArgumentParser(
+        description="THREADCORE v2 Tagging Classifier")
     parser.add_argument("input_file", help="Path to text file to classify")
     args = parser.parse_args()
 

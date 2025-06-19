@@ -5,7 +5,8 @@ from typing import Dict, List, Tuple, Union
 # ------------------------------------------------------------------
 # Configurable constants (priority thresholds, weighting, fallback)
 # ------------------------------------------------------------------
-PRIORITY_THRESHOLDS = {"high": 3, "medium": 1}  # Total weighted score thresholds
+# Total weighted score thresholds
+PRIORITY_THRESHOLDS = {"high": 3, "medium": 1}
 DEFAULT_RESULT = {
     "primary_folder": "Unsorted",
     "priority": "low",

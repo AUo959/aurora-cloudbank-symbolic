@@ -25,8 +25,8 @@ function decrypt(encryptedData, ivHex) {
     return decrypted;
 }
 
-// CLI usage: node crypto.js encrypt "Hello world"
-//             node crypto.js decrypt "<data>" "<iv>"
+// CLI usage: node crypto_refactored.js encrypt "Hello world"
+//             node crypto_refactored.js decrypt "<data>" "<iv>"
 if (require.main === module) {
     const [,, cmd, ...args] = process.argv;
     if (cmd === 'encrypt') {
@@ -48,8 +48,8 @@ if (require.main === module) {
         }
     } else {
         console.log('Usage:
-  node crypto.js encrypt "your text"
-  node crypto.js decrypt <encryptedData> <iv>');
+  node crypto_refactored.js encrypt "your text"
+  node crypto_refactored.js decrypt <encryptedData> <iv>');
     }
 }
 

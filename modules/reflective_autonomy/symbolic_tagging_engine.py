@@ -10,14 +10,60 @@ DEFAULT_RESULT = {
 }
 
 PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
-    "SymbolicOps": {"weight": 2, "keywords": ["threadcore", "symbolic", "anchor", "drift", "vector", "reflect", "seal"]},
-    "GitOps": {"weight": 1, "keywords": ["github", "commit", "repo", "branch", "merge", "pr"]},
-    "SiteBuilder": {"weight": 1, "keywords": ["html", "css", "website", "page", "image", "lafinca"]},
-    "SecurityCore": {"weight": 2, "keywords": ["encryption", "key", "decrypt", "auth", "secure", "session"]},
-    "DataFlow": {"weight": 1, "keywords": ["vector index", "dataset", "cloudsync", "memory", "export"]},
-    "RitualUX": {"weight": 2, "keywords": ["ritual", "arch", "scroll", "map", "invocation", "resilience"]},
-    "AutomationEngine": {"weight": 1, "keywords": ["bot", "agent", "automation", "api", "workflow", "routine"]},
-    "Diagnostics": {"weight": 1, "keywords": ["error", "bug", "trace", "status", "log", "issue"]}
+    "SymbolicOps": {
+        "weight": 2,
+        "keywords": [
+            "threadcore",
+            "symbolic",
+            "anchor",
+            "drift",
+            "vector",
+            "reflect",
+            "seal",
+        ],
+    },
+    "GitOps": {
+        "weight": 1,
+        "keywords": ["github", "commit", "repo", "branch", "merge", "pr"],
+    },
+    "SiteBuilder": {
+        "weight": 1,
+        "keywords": ["html", "css", "website", "page", "image", "lafinca"],
+    },
+    "SecurityCore": {
+        "weight": 2,
+        "keywords": [
+            "encryption",
+            "key",
+            "decrypt",
+            "auth",
+            "secure",
+            "session",
+        ],
+    },
+    "DataFlow": {
+        "weight": 1,
+        "keywords": ["vector index", "dataset", "cloudsync", "memory", "export"],
+    },
+    "RitualUX": {
+        "weight": 2,
+        "keywords": [
+            "ritual",
+            "arch",
+            "scroll",
+            "map",
+            "invocation",
+            "resilience",
+        ],
+    },
+    "AutomationEngine": {
+        "weight": 1,
+        "keywords": ["bot", "agent", "automation", "api", "workflow", "routine"],
+    },
+    "Diagnostics": {
+        "weight": 1,
+        "keywords": ["error", "bug", "trace", "status", "log", "issue"],
+    },
 }
 
 

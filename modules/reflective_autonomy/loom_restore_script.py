@@ -16,10 +16,10 @@
 # ====================================
 # In GPT runtime or symbolic agent environment:
 
-from reflective_monitor_core import ReflectiveMonitor
-from capsule_linter import CapsuleLinter
-from continuity_manager import ContinuityManager
-from autonomic_correction_engine import AutonomicCorrectionEngine
+from reflective_monitor_core import ReflectiveMonitor  # noqa: F401
+from capsule_linter import CapsuleLinter  # noqa: F401
+from continuity_manager import ContinuityManager  # noqa: F401
+from autonomic_correction_engine import AutonomicCorrectionEngine  # noqa: F401
 from reflective_autonomy_loop import ReflectiveAutonomyLoop
 
 # ====================================

@@ -39,6 +39,13 @@ docker-compose up --build
 - The command node listens on port 3001 by default.
 - Replace the placeholder app in `services/command_node/` with your real Node.js code when ready.
 
+## Orion Backup Sync Utility
+Use `python scripts/orion_backup_sync.py --help` to export and synchronize the staff registry and Orion Station blueprint. Backups are stored in `backups/` and `--rollback` restores the latest snapshot.
+
+## Module Integration Tool
+Use `python scripts/module_integrator.py --help` to merge new modules across branches. The tool validates anchor compliance, logs telemetry to `logs/telemetry.log`, and supports per-module rollback.
+
+
 ## Contributing
 See `CONTRIBUTING.md` for guidelines.
 

@@ -47,9 +47,7 @@ if (require.main === module) {
             console.error('Decryption failed:', err.message);
         }
     } else {
-        console.log('Usage:
-  node crypto.js encrypt "your text"
-  node crypto.js decrypt <encryptedData> <iv>');
+        console.log('Usage:\n  node crypto_refactored.js encrypt "your text"\n  node crypto_refactored.js decrypt <encryptedData> <iv>');
     }
 }
 

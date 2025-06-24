@@ -1,0 +1,7 @@
+{
+  "name": "aurora-cloudbank-symbolic",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node tests/test_crypto.js"
+  }
+}

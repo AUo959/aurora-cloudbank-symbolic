@@ -1,6 +1,9 @@
 # Aurora GUI CloudHub Dockerfile
 FROM python:3.11-slim
 
+# Create a non-root user to run the service
+RUN useradd -m -u 10001 clouduser
+
 # Set working directory
 WORKDIR /app
 
@@ -10,6 +13,9 @@ COPY requirements.txt ./
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Use the non-root user for running the application
+USER clouduser
 
 # Expose the port
 EXPOSE 8080

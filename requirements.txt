@@ -1,4 +1,4 @@
 # Example requirements for Aurora Reflective Autonomy System
-pyyaml
-flake8
-pytest
+pyyaml==6.0.2
+flake8==7.3.0
+pytest==8.4.0

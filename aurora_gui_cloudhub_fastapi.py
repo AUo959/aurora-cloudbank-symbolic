@@ -1,8 +1,8 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-import shutil
+import uuid
 import uvicorn
 import logging
 
@@ -43,13 +43,22 @@ async def index():
     """
 
 
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
+
+
 @app.post("/upload/")
 async def upload_bundle(file: UploadFile = File(...)):
-    upload_path = Path(f"./uploads/{file.filename}")
-    upload_path.parent.mkdir(parents=True, exist_ok=True)
+    data = await file.read()
+    if len(data) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large")
+
+    upload_dir = Path("./uploads")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"{uuid.uuid4().hex}.zip"
+    upload_path = upload_dir / filename
     with open(upload_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return {"message": "Bundle received", "filename": file.filename}
+        buffer.write(data)
+    return {"message": "Bundle received", "filename": filename}
 
 
 @app.on_event("startup")

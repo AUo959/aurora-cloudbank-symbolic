@@ -7,7 +7,8 @@ const path = require('path');
 
 function loadAnchors(pattern) {
     const dir = __dirname;
-    const files = fs.readdirSync(dir).filter(f => f.match(new RegExp(pattern.replace(/\*/g, '.*'))));
+    const regex = new RegExp(pattern.replace(/\*/g, '.*'));
+    const files = fs.readdirSync(dir).filter(f => f.match(regex));
     return files.map(f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
 }
 

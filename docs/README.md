@@ -1,3 +1,14 @@
 # Documentation Directory
 
 Architecture diagrams, system maps, and user/developer guides for the Aurora Reflective Autonomy System.
+
+## [2025-06-25] VSA-Based Symbolic Data & API Schema Update
+
+- Symbolic data structures are now VSA-based (see `modules/symbolic_core/vsa.py`).
+- All symbolic REST/WebSocket endpoints should use the `SymbolicVector` JSON schema for validation and documentation.
+- See `docs/symbolicvector_api_schema.md` for schema details and usage examples.
+- Extension points for quantum/geometric plugins are planned for future stages.
+
+---
+
+For architecture diagrams, see `architecture.md`.

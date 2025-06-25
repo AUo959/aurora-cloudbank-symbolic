@@ -23,6 +23,30 @@ class SymbolicVector:
     def __repr__(self):
         return f"SymbolicVector(symbol={self.symbol!r}, dim={self.dim})"
 
+    def bind(self, other: 'SymbolicVector') -> 'SymbolicVector':
+        """Bind two symbolic vectors (elementwise multiplication)."""
+        assert self.dim == other.dim, "Dimension mismatch in binding."
+        bound_vec = self.vector * other.vector
+        return SymbolicVector(f"({self.symbol})*({other.symbol})", self.dim).from_vector(bound_vec)
+
+    def superpose(self, other: 'SymbolicVector') -> 'SymbolicVector':
+        """Superpose two symbolic vectors (elementwise addition, then sign normalization)."""
+        assert self.dim == other.dim, "Dimension mismatch in superposition."
+        superposed = self.vector + other.vector
+        normed = np.sign(superposed)
+        return SymbolicVector(f"({self.symbol})+({other.symbol})", self.dim).from_vector(normed)
+
+    def from_vector(self, vec: np.ndarray) -> 'SymbolicVector':
+        self.vector = vec
+        return self
+
+    @staticmethod
+    def cleanup(query: np.ndarray, memory: list) -> np.ndarray:
+        """Return the vector in memory most similar to the query."""
+        sims = [float(np.dot(query, v) / len(query)) for v in memory]
+        return memory[int(np.argmax(sims))]
+
+
 # Example utility function
 
 

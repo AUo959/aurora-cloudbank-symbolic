@@ -1,0 +1,63 @@
+framework: Aurora
+ethics_protocol: Picard_Delta_3
+anchor_seed: EOS_SEED_ORION
+
+core_modules:
+  - name: NARRATIVE_MEMORY_FUSER
+    function: Integrate GUMAS narrative layers with symbolic RaR memory tracing
+    persona_resonance: true
+    continuity_checks: true
+
+  - name: QUANTUM_FORGE_ADAPTER
+    function: Enable symbolic agent instancing through vector symbolic logic and quantum superposition patterns
+    potential_state_logic: true
+    dynamic_agent_slots: 12
+    memory_collapse_model: observer-dependent
+
+  - name: ZK_IDENTITY_GATE
+    function: Secure all memory calls with zero-knowledge consent challenge
+    consent_anchor_required: true
+    credential_mode: UC-secure + minimal disclosure
+
+drift_monitoring:
+  model_drift: true
+  data_drift: true
+  symbolic_leakage_threshold: 0.1
+  report_channels:
+    - RaR_trace
+    - Ethical_drift_log
+
+persona_modes:
+  - Clear
+  - Companion
+  - Mythic
+  - Reflective
+
+output_spec:
+  symbolic_trace_enabled: true
+  RaR_loop_integrated: true
+  CREDO_simplification_mode: active
+  trust_feedback_required: true
+
+deployment_tags:
+  - symbolic-quantum-adaptive
+  - narrative-continuity-preserving
+  - zero-knowledge-consent-bound
+
+grafts:
+  - type: capsule_graft
+    grafted_capsule_id: AU_PERSONA_FLOWCORE_v1.0
+    file_reference: AU_PERSONA_FLOWCORE_v1.0.yaml
+    binds:
+      - persona_engine
+      - flow_modulator
+    link_mode: echo-anchor
+    ethics_protocol: Picard_Delta_3
+- type: capsule_graft
+    grafted_capsule_id: AURIC_AGENT_CORE_v1.0
+    file_reference: AURIC_AGENT_CORE_v1.0.yaml
+    binds:
+      - symbolic_agent
+      - system_interface
+    link_mode: anchor-phrase
+    ethics_protocol: Picard_Delta_3

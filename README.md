@@ -39,6 +39,22 @@ docker-compose up --build
 - The command node listens on port 3001 by default.
 - Replace the placeholder app in `services/command_node/` with your real Node.js code when ready.
 
+## Aurora Instance Bridge
+
+An optional bridge service enables live message relays between multiple Aurora instances. Run the server:
+
+```bash
+python -m modules.instance_bridge.bridge_server
+```
+
+Connect an instance using the included client:
+
+```bash
+python -m modules.instance_bridge.bridge_client ws://localhost:8090 main example-id
+```
+
+Each channel aggregates messages across platforms, allowing chat fields to stay synchronized.
+
 ## Orion Backup Sync Utility
 Use `python scripts/orion_backup_sync.py --help` to export and synchronize the staff registry and Orion Station blueprint. Backups are stored in `backups/` and `--rollback` restores the latest snapshot.
 

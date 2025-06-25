@@ -102,7 +102,7 @@ python scripts/cask_integration.py chart --output my_chart.png
 
 This tool loads the CSV tables directly from the zip archive and can generate a simplified architecture diagram.
 
-Use `python scripts/cask_tool.py` to generate CASK reports and charts in `docs/cask`.
+Additionally, use `python scripts/cask_tool.py` to generate CASK reports and charts in `docs/cask`.
 
 ## MCP-Driven API Endpoints
 

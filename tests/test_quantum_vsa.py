@@ -11,6 +11,7 @@ def test_quantum_symbolic_vector_shape():
 
 def test_quantum_symbolic_vector_class():
     qsv = QuantumSymbolicVector('beta', dim=8)
-    assert isinstance(qsv.vector, np.ndarray)
-    assert qsv.vector.shape == (8,)
-    assert set(np.unique(qsv.vector)).issubset({-1, 1})
+    # Accept either list or np.ndarray for vector, but check shape and values
+    arr = np.array(qsv.vector)
+    assert arr.shape == (8,)
+    assert set(np.unique(arr)).issubset({-1, 1})

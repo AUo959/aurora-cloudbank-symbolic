@@ -4,7 +4,8 @@ Quantum-Inspired VSA Prototype using Qiskit
 This module demonstrates how to generate symbolic vectors using quantum circuits.
 """
 import numpy as np
-from qiskit import QuantumCircuit, Aer, execute
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 from modules.symbolic_core.vsa import SymbolicVector
 
 
@@ -22,8 +23,9 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
         if np.random.rand() > 0.5:
             qc.x(i)  # Flip some qubits based on hash
     qc.measure(range(dim), range(dim))
-    backend = Aer.get_backend('qasm_simulator')
-    job = execute(qc, backend, shots=1)
+    backend = Aer.get_backend('aer_simulator')
+    tqc = transpile(qc, backend)
+    job = backend.run(tqc, shots=1)
     result = job.result()
     counts = list(result.get_counts().keys())[0]
     # Convert bitstring to -1/+1 vector
@@ -33,6 +35,7 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
 
 class QuantumSymbolicVector(SymbolicVector):
     def __init__(self, symbol: str, dim: int = 8):
-        self.symbol = symbol
-        self.dim = dim
-        self.vector = quantum_symbolic_vector(symbol, dim)
+        from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector
+        vector = quantum_symbolic_vector(symbol, dim)
+        # Ensure vector is a list for Pydantic validation
+        super().__init__(symbol=symbol, dim=dim, vector=vector.tolist(), vector_type='bipolar')

@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 
-// Load key from ENV only. Abort if not set.
+// Require a key from the environment. Fail fast if missing to avoid insecure
+// encryption defaults. Use a secret manager or injected environment variable
+// in production deployments.
 const keyHex = process.env.AES_KEY_256_HEX;
 if (!keyHex) {
     throw new Error('AES_KEY_256_HEX environment variable must be set. See .env.example for details.');

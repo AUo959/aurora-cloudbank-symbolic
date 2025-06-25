@@ -1,8 +1,9 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 import uuid
+from typing import List
 import uvicorn
 import logging
 
@@ -11,6 +12,9 @@ app = FastAPI(title="Aurora Cloud GUI – ZIP Wizard Dashboard")
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("aurora_gui_cloudhub")
+
+# Active WebSocket connections for basic broadcast
+connections: List[WebSocket] = []
 
 # Serve static files if needed in the future
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -59,6 +63,24 @@ async def upload_bundle(file: UploadFile = File(...)):
     with open(upload_path, "wb") as buffer:
         buffer.write(data)
     return {"message": "Bundle received", "filename": filename}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connections.append(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            for conn in list(connections):
+                if conn is websocket:
+                    continue
+                try:
+                    await conn.send_text(data)
+                except WebSocketDisconnect:
+                    connections.remove(conn)
+    except WebSocketDisconnect:
+        connections.remove(websocket)
 
 
 @app.on_event("startup")

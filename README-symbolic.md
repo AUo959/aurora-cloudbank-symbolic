@@ -64,6 +64,22 @@ Docker Compose mounts symbolic memory for GUI view:
 - Context persistence across GPT sessions
 - Shared symbolic memory federation across constellations
 
+## 🌐 Aurora Interlink Fabric
+
+The **Aurora Interlink Fabric (AIF)** is a lightweight WebSocket hub enabling
+live synchronization of memory anchors between running Aurora instances. Each
+client authenticates with a shared token and publishes anchor updates that the
+hub broadcasts to all connected nodes. This keeps conversations and symbolic
+state consistent across devices and chat platforms.
+
+- Service entry point: `services/aif_hub.py`
+- FastAPI GUI endpoint `/ws` provides basic peer broadcast capabilities
+- Tokens are provided via the `AIF_TOKEN` environment variable
+
+This early prototype prioritizes security and transparent logging with the
+existing telemetry system. Future iterations will extend federation features and
+access controls.
+
 ---
 
 ## 📞 Contact

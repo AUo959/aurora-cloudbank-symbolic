@@ -27,7 +27,7 @@ def cmd_chart(path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Interact with CASK assets")
-    sub = parser.add_subparsers(dest="command")
+    sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("summary", help="Print dataset summaries")
     chart_p = sub.add_parser("chart", help="Generate architecture chart")

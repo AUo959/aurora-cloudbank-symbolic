@@ -180,7 +180,7 @@ def create_research_landscape_chart(output_file: str = "cask_research_landscape.
     fig.update_layout(
         title="Cultural AI Research Landscape",
         xaxis_title="Tech Maturity",
-        yaxis_title="Cultural Aware",
+        yaxis_title="Cultural Awareness",
         legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5),
         showlegend=True,
     )

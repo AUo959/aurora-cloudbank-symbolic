@@ -12,7 +12,8 @@ from modules.symbolic_core.vsa import SymbolicVector
 from pydantic import BaseModel
 from typing import Optional
 import json
-from modules.symbolic_core import load_mcp_bridge_core
+from modules.symbolic_core import get_mcp_bridge_core
+from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 
 app = FastAPI(title="Aurora Cloud GUI – ZIP Wizard Dashboard")
 
@@ -140,22 +141,19 @@ def get_mcp_bridge():
     """
     Returns the MCP Bridge Core configuration as JSON.
     """
-    with open("modules/symbolic_core/mcp_bridge_core.json", "r") as f:
-        data = json.load(f)
+    data = get_mcp_bridge_core()
     return JSONResponse(content=data)
 
 
 @app.post("/mcp_bridge/route_command", summary="Symbolic Command Routing via MCP Bridge", response_description="Routed command result")
 def mcp_route_command(command: str):
     """
-    Example endpoint: Symbolic command routing using MCP Bridge Core config.
+    Symbolic command routing using MCP Bridge Core config and MCPCommandRouter.
     Request body: {"command": str}
-    Response: {"status": str, "routed_command": str, "governance_layer": str}
+    Response: {"status": str, "routed_command": str, "governance_layer": str, "protocol": list}
     """
-    mcp = load_mcp_bridge_core()
-    # Simulate routing logic using MCP config
-    routed = f"[{mcp['governance_layer']}] {command}"
-    return {"status": "ROUTED", "routed_command": routed, "governance_layer": mcp['governance_layer']}
+    router = MCPCommandRouter()
+    return router.route(command)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)

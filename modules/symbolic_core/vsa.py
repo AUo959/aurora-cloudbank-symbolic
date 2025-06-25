@@ -3,19 +3,45 @@ Vector Symbolic Architecture (VSA) utility for symbolic data encoding/decoding.
 """
 import numpy as np
 import hashlib
+from pydantic import BaseModel, validator
+from typing import List, Literal
 
 
-class SymbolicVector:
-    def __init__(self, symbol: str, dim: int = 512):
-        self.symbol = symbol
-        self.dim = dim
-        self.vector = self._encode(symbol)
+class SymbolicVector(BaseModel):
+    symbol: str
+    dim: int = 512
+    vector: list  # Accept any type for vector elements
+    vector_type: Literal['bipolar', 'binary', 'real'] = 'bipolar'
 
-    def _encode(self, symbol: str) -> np.ndarray:
-        # Hash the symbol and use it to seed a random vector
+    @validator('vector')
+    def validate_vector(cls, v, values):
+        dim = values.get('dim', 512)
+        if len(v) != dim:
+            raise ValueError(f"Vector length {len(v)} does not match dim {dim}")
+        return v
+
+    @classmethod
+    def from_symbol(cls, symbol: str, dim: int = 512, vector_type: str = 'bipolar'):
         h = hashlib.sha256(symbol.encode()).digest()
         rng = np.random.default_rng(int.from_bytes(h, 'big'))
-        return rng.choice([-1, 1], size=self.dim)
+        if vector_type == 'bipolar':
+            vec = [int(x) for x in rng.choice([-1, 1], size=dim)]
+        elif vector_type == 'binary':
+            vec = [int(x) for x in rng.choice([0, 1], size=dim)]
+        elif vector_type == 'real':
+            arr = rng.normal(0, 1, size=dim)
+            vec = [float(x) for x in arr.tolist()]
+            return cls(symbol=symbol, dim=dim, vector=vec, vector_type=vector_type)
+        else:
+            raise ValueError(f"Unknown vector_type: {vector_type}")
+        return cls(symbol=symbol, dim=dim, vector=vec, vector_type=vector_type)
+
+    def to_json(self) -> dict:
+        return self.dict()
+
+    @classmethod
+    def from_json(cls, data: dict) -> 'SymbolicVector':
+        return cls(**data)
 
     def similarity(self, other: 'SymbolicVector') -> float:
         return float(np.dot(self.vector, other.vector) / self.dim)
@@ -50,8 +76,8 @@ class SymbolicVector:
 # Example utility function
 
 
-def encode_symbol(symbol: str, dim: int = 512) -> np.ndarray:
-    return SymbolicVector(symbol, dim).vector
+def encode_symbol(symbol: str, dim: int = 512, vector_type: str = 'bipolar') -> list:
+    return SymbolicVector.from_symbol(symbol, dim, vector_type).vector
 
 
 def similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:

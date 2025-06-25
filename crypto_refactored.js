@@ -3,8 +3,14 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-// Load key from ENV or fallback to static dev key (DO NOT USE IN PRODUCTION)
-const keyHex = process.env.AES_KEY_256_HEX || '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff';
+// Require a key from the environment. Fail fast if missing to avoid insecure
+// encryption defaults. Use a secret manager or injected environment variable
+// in production deployments.
+const keyHex = process.env.AES_KEY_256_HEX;
+if (!keyHex) {
+    console.error('AES_KEY_256_HEX environment variable must be set');
+    process.exit(1);
+}
 const key = Buffer.from(keyHex, 'hex');
 
 // Encrypt data with a fresh IV

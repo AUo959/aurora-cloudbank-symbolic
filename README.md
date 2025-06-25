@@ -3,12 +3,39 @@
 A fully operational, ethics-aligned symbolic governance and self-healing system.
 
 ## Features
+
 - Modular symbolic governance engine
 - Self-monitoring and self-healing autonomy loop
 - Ethics protocol and governance capsule
 - Full audit logging and restoration capability
 
+## Requirements
+
+This project requires the following Python packages (see `requirements.txt`):
+
+- pyyaml
+- flake8
+- pytest
+- pandas
+- plotly
+- kaleido
+- fastapi
+- uvicorn
+- httpx
+- qiskit
+- qiskit-aer
+- pydantic
+- numba
+- clifford
+
+To install all dependencies, run:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Quick Start
+
 ```bash
 git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git
 cd aurora-cloudbank-symbolic
@@ -17,6 +44,7 @@ make run
 ```
 
 ## Directory Structure
+
 - `modules/reflective_autonomy/` — Core system modules
 - `config/` — Configuration files
 - `scripts/` — Deployment and helper scripts
@@ -56,9 +84,11 @@ python -m modules.instance_bridge.bridge_client ws://localhost:8090 main example
 Each channel aggregates messages across platforms, allowing chat fields to stay synchronized.
 
 ## Orion Backup Sync Utility
+
 Use `python scripts/orion_backup_sync.py --help` to export and synchronize the staff registry and Orion Station blueprint. Backups are stored in `backups/` and `--rollback` restores the latest snapshot.
 
 ## Module Integration Tool
+
 Use `python scripts/module_integrator.py --help` to merge new modules across branches. The tool validates anchor compliance, logs telemetry to `logs/telemetry.log`, and supports per-module rollback.
 
 ## MCP-Driven API Endpoints
@@ -83,8 +113,11 @@ graph TD
 ```
 
 ---
+
 ## Contributing
+
 See `CONTRIBUTING.md` for guidelines.
 
 ## License
+
 See `LICENSE` for terms.

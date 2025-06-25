@@ -1,4 +1,4 @@
-#!/workspaces/aurora-cloudbank-symbolic/.venv/bin/python3
+#!/workspaces/aurora-cloudbank-symbolic/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

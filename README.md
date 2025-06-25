@@ -91,6 +91,17 @@ Use `python scripts/orion_backup_sync.py --help` to export and synchronize the s
 
 Use `python scripts/module_integrator.py --help` to merge new modules across branches. The tool validates anchor compliance, logs telemetry to `logs/telemetry.log`, and supports per-module rollback.
 
+## CASK Integration Utilities
+
+The repository distributes reference datasets for the Culturally Aware Simulation Knowledge (CASK) system in `CASK_Assets.zip`. A small CLI helper is available for exploring these assets:
+
+```bash
+python scripts/cask_integration.py summary
+python scripts/cask_integration.py chart --output my_chart.png
+```
+
+This tool loads the CSV tables directly from the zip archive and can generate a simplified architecture diagram.
+
 Use `python scripts/cask_tool.py` to generate CASK reports and charts in `docs/cask`.
 
 ## MCP-Driven API Endpoints

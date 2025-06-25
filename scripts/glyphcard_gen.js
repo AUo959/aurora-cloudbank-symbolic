@@ -5,9 +5,14 @@
 const fs = require('fs');
 const path = require('path');
 
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function loadAnchors(pattern) {
     const dir = __dirname;
-    const files = fs.readdirSync(dir).filter(f => f.match(new RegExp(pattern.replace('*', '.*'))));
+    const safePattern = escapeRegExp(pattern).replace(/\\\*/g, '.*');
+    const files = fs.readdirSync(dir).filter(f => f.match(new RegExp(safePattern)));
     return files.map(f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
 }
 

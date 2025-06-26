@@ -1,8 +1,6 @@
 {
-  "name": "aurora-cloudbank-symbolic",
-  "build": {
-    "dockerfile": "Dockerfile"
-  },
+  "name": "aurora-cloudbank",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -11,6 +9,6 @@
       ]
     }
   },
-  "postCreateCommand": "./scripts/dev/on_startup.sh",
+  "postCreateCommand": "npm install",
   "remoteUser": "vscode"
 }

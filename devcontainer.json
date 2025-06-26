@@ -11,6 +11,6 @@
       ]
     }
   },
-  "postCreateCommand": "npm install",
+  "postCreateCommand": "./scripts/dev/on_startup.sh",
   "remoteUser": "vscode"
 }

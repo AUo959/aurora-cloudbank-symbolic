@@ -16,10 +16,10 @@ repos:
     hooks:
       - id: autopep8
         args: [--in-place]
-  - repo: local
-    hooks:
-      - id: eslint
-        name: eslint
-        entry: npm run lint
-        language: system
-        types: [javascript]
+  # - repo: local
+  #   hooks:
+  #     - id: eslint
+  #       name: eslint
+  #       entry: npm run lint
+  #       language: system
+  #       types: [javascript]

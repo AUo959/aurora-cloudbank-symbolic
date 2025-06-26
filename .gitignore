@@ -53,6 +53,7 @@ coverage.xml
 
 # Environment variables
 .env
+!.env.example
 .env.*
 
 # System files

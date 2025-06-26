@@ -29,4 +29,6 @@ touch .aurora/loomfield/halo-anchor.json
 echo "📦 Running npm install..."
 npm install
 
+bash .aurora/system/on_startup.sh && echo "🚀 Aurora Core Initialized"
+
 echo "✅ Onboarding complete!"

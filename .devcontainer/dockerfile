@@ -1,0 +1,19 @@
+# Base: Node.js 20 on Debian
+FROM mcr.microsoft.com/devcontainers/javascript-node:20
+
+# Optional: install Python, zip, jq, git-lfs, and build essentials
+RUN apt-get update && \
+    apt-get install -y \
+    python3 \
+    python3-pip \
+    zip \
+    jq \
+    git-lfs \
+    build-essential \
+    && apt-get clean
+
+# Optional: install global npm tools
+RUN npm install -g nodemon eslint prettier
+
+# Final: verify toolchain versions
+RUN node -v && npm -v && python3 --version && jq --version && git --version

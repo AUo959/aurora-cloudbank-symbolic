@@ -1,6 +1,7 @@
 {
   "name": "aurora-cloudbank",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "postCreateCommand": "npm install",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -9,6 +10,6 @@
       ]
     }
   },
-  "postCreateCommand": "npm install",
-  "remoteUser": "vscode"
+  "forwardPorts": [],
+  "remoteUser": "node"
 }

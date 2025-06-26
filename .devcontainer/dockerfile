@@ -1,4 +1,4 @@
 # Base: Node.js 20 on Debian
 FROM mcr.microsoft.com/devcontainers/javascript-node:20
 
-# Optional: install additional tools here
+# Optional: Add any additional tools here

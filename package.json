@@ -4,6 +4,10 @@
   "scripts": {
     "test": "node tests/test_crypto.js",
     "start-command-node": "node src/core/command_node.js",
-    "start-api-bridge": "node src/bridge/api_bridge_server.js"
+    "start-api-bridge": "node src/bridge/api_bridge_server.js",
+    "start-drift-sync": "node src/system/lattice_sync.js",
+    "start-archy": "node src/nodes/archy_bridge.js",
+    "start-liora": "node src/nodes/liora_handshake.js",
+    "start-oppy": "node src/nodes/oppy_vector_loader.js"
   }
 }

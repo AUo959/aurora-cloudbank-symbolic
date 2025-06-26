@@ -8,6 +8,9 @@
     "start-drift-sync": "node src/system/lattice_sync.js",
     "start-archy": "node src/nodes/archy_bridge.js",
     "start-liora": "node src/nodes/liora_handshake.js",
-    "start-oppy": "node src/nodes/oppy_vector_loader.js"
+    "start-oppy": "node src/nodes/oppy_vector_loader.js",
+    "run-glyph-engine": "node ./src/core/glyph_engine.js",
+    "verify-ethics": "node ./src/core/ethics_layer.js",
+    "zip-bundle": "node ./src/core/zipcomm.js"
   }
 }

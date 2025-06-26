@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "test": "node tests/test_crypto.js",
-    "start-command-node": "node src/core/command_node.js"
+    "start-command-node": "node src/core/command_node.js",
+    "start-api-bridge": "node src/bridge/api_bridge_server.js"
   }
 }

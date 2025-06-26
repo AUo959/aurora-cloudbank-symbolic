@@ -11,6 +11,7 @@
     "start-oppy": "node src/nodes/oppy_vector_loader.js",
     "run-glyph-engine": "node ./src/core/glyph_engine.js",
     "verify-ethics": "node ./src/core/ethics_layer.js",
-    "zip-bundle": "node ./src/core/zipcomm.js"
+    "zip-bundle": "node ./src/core/zipcomm.js",
+    "lint": "eslint src/**/*.js"
   }
 }

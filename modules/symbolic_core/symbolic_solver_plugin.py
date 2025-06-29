@@ -2,11 +2,13 @@
 symbolic_solver_plugin.py
 Abstract base class and registry for symbolic solver plugins.
 """
+
 from abc import ABC, abstractmethod
 
 
 class SymbolicSolverPlugin(ABC):
     """Abstract base class for symbolic solver plugins."""
+
     @abstractmethod
     def name(self):
         pass

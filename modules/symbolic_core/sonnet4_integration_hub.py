@@ -4,8 +4,9 @@ Manages Sonnet 4 capabilities while preserving GPT-4o compatibility
 """
 
 import logging
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Sonnet4Config:
     """Configuration for Claude Sonnet 4 integration"""
+
     enabled: bool = True
     enable_for_all_clients: bool = True
     api_version: str = "2024-06-01"
@@ -43,7 +45,7 @@ class Sonnet4IntegrationHub:
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from YAML file"""
         try:
-            with open(self.config_path, 'r') as f:
+            with open(self.config_path, "r") as f:
                 return yaml.safe_load(f)
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
@@ -51,21 +53,21 @@ class Sonnet4IntegrationHub:
 
     def _parse_sonnet4_config(self) -> Sonnet4Config:
         """Parse Sonnet 4 specific configuration"""
-        sonnet_config = self.config.get('claude_sonnet4', {})
+        sonnet_config = self.config.get("claude_sonnet4", {})
 
         # Extract only the fields that Sonnet4Config expects
         config_fields = {
-            'enabled': sonnet_config.get('enabled', True),
-            'enable_for_all_clients': sonnet_config.get('enable_for_all_clients', True),
-            'api_version': sonnet_config.get('api_version', "2024-06-01"),
-            'model': sonnet_config.get('model', "claude-3-5-sonnet-20241022"),
-            'max_tokens': sonnet_config.get('settings', {}).get('max_tokens', 8192),
-            'temperature': sonnet_config.get('settings', {}).get('temperature', 0.7),
-            'top_p': sonnet_config.get('settings', {}).get('top_p', 0.9),
-            'safety_level': sonnet_config.get('settings', {}).get('safety_level', "high"),
-            'context_window': sonnet_config.get('settings', {}).get('context_window', 200000),
-            'preserve_4o_logic': sonnet_config.get('integration', {}).get('preserve_4o_logic', True),
-            'fallback_model': sonnet_config.get('integration', {}).get('fallback_model', "gpt-4o")
+            "enabled": sonnet_config.get("enabled", True),
+            "enable_for_all_clients": sonnet_config.get("enable_for_all_clients", True),
+            "api_version": sonnet_config.get("api_version", "2024-06-01"),
+            "model": sonnet_config.get("model", "claude-3-5-sonnet-20241022"),
+            "max_tokens": sonnet_config.get("settings", {}).get("max_tokens", 8192),
+            "temperature": sonnet_config.get("settings", {}).get("temperature", 0.7),
+            "top_p": sonnet_config.get("settings", {}).get("top_p", 0.9),
+            "safety_level": sonnet_config.get("settings", {}).get("safety_level", "high"),
+            "context_window": sonnet_config.get("settings", {}).get("context_window", 200000),
+            "preserve_4o_logic": sonnet_config.get("integration", {}).get("preserve_4o_logic", True),
+            "fallback_model": sonnet_config.get("integration", {}).get("fallback_model", "gpt-4o"),
         }
 
         return Sonnet4Config(**config_fields)
@@ -106,7 +108,7 @@ class Sonnet4IntegrationHub:
                 "safety_level": self.sonnet4_config.safety_level,
                 "context_window": self.sonnet4_config.context_window,
                 "preserve_4o_logic": self.sonnet4_config.preserve_4o_logic,
-                "fallback_model": self.sonnet4_config.fallback_model
+                "fallback_model": self.sonnet4_config.fallback_model,
             }
 
             # Register client with Sonnet 4 capabilities
@@ -123,6 +125,7 @@ class Sonnet4IntegrationHub:
 
     def _create_fallback_handler(self, client_id: str):
         """Create fallback handler for GPT-4o compatibility"""
+
         async def fallback_handler(request, error):
             logger.warning(f"Falling back to {self.sonnet4_config.fallback_model} for client {client_id}: {error}")
             # Implement fallback logic here
@@ -140,40 +143,40 @@ class Sonnet4IntegrationHub:
     async def _update_config(self):
         """Update configuration file with current Sonnet 4 settings"""
         try:
-            self.config['claude_sonnet4'] = {
-                'enabled': self.sonnet4_config.enabled,
-                'enable_for_all_clients': self.sonnet4_config.enable_for_all_clients,
-                'api_version': self.sonnet4_config.api_version,
-                'model': self.sonnet4_config.model,
-                'features': {
-                    'quantum_bridge': True,
-                    'symbolic_validation': True,
-                    'ethics_security': True,
-                    'reflective_autonomy': True,
-                    'enhanced_reasoning': True
+            self.config["claude_sonnet4"] = {
+                "enabled": self.sonnet4_config.enabled,
+                "enable_for_all_clients": self.sonnet4_config.enable_for_all_clients,
+                "api_version": self.sonnet4_config.api_version,
+                "model": self.sonnet4_config.model,
+                "features": {
+                    "quantum_bridge": True,
+                    "symbolic_validation": True,
+                    "ethics_security": True,
+                    "reflective_autonomy": True,
+                    "enhanced_reasoning": True,
                 },
-                'settings': {
-                    'max_tokens': self.sonnet4_config.max_tokens,
-                    'temperature': self.sonnet4_config.temperature,
-                    'top_p': self.sonnet4_config.top_p,
-                    'safety_level': self.sonnet4_config.safety_level,
-                    'context_window': self.sonnet4_config.context_window
+                "settings": {
+                    "max_tokens": self.sonnet4_config.max_tokens,
+                    "temperature": self.sonnet4_config.temperature,
+                    "top_p": self.sonnet4_config.top_p,
+                    "safety_level": self.sonnet4_config.safety_level,
+                    "context_window": self.sonnet4_config.context_window,
                 },
-                'integration': {
-                    'aurora_compatibility': True,
-                    'preserve_4o_logic': self.sonnet4_config.preserve_4o_logic,
-                    'conflict_resolution': 'merge_enhanced',
-                    'fallback_model': self.sonnet4_config.fallback_model
+                "integration": {
+                    "aurora_compatibility": True,
+                    "preserve_4o_logic": self.sonnet4_config.preserve_4o_logic,
+                    "conflict_resolution": "merge_enhanced",
+                    "fallback_model": self.sonnet4_config.fallback_model,
                 },
-                'security': {
-                    'ethics_validation': True,
-                    'output_filtering': True,
-                    'content_safety': True,
-                    'data_privacy': True
-                }
+                "security": {
+                    "ethics_validation": True,
+                    "output_filtering": True,
+                    "content_safety": True,
+                    "data_privacy": True,
+                },
             }
 
-            with open(self.config_path, 'w') as f:
+            with open(self.config_path, "w") as f:
                 yaml.dump(self.config, f, default_flow_style=False)
 
         except Exception as e:
@@ -185,7 +188,7 @@ class Sonnet4IntegrationHub:
             return {
                 "sonnet4_enabled": True,
                 "config": self.active_clients[client_id],
-                "fallback_available": client_id in self.fallback_handlers
+                "fallback_available": client_id in self.fallback_handlers,
             }
         return {"sonnet4_enabled": False}
 
@@ -198,7 +201,7 @@ class Sonnet4IntegrationHub:
             "model": self.sonnet4_config.model,
             "api_version": self.sonnet4_config.api_version,
             "preserve_4o_logic": self.sonnet4_config.preserve_4o_logic,
-            "fallback_model": self.sonnet4_config.fallback_model
+            "fallback_model": self.sonnet4_config.fallback_model,
         }
 
 

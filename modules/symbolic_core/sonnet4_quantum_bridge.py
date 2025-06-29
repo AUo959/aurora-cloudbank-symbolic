@@ -3,7 +3,7 @@ Sonnet 4 Quantum Bridge Module
 Placeholder implementation for quantum processing bridge
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class QuantumBridge:

@@ -3,7 +3,7 @@ Sonnet 4 Ethics and Security Module
 Placeholder implementation for ethics and security validation
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class EthicsValidator:

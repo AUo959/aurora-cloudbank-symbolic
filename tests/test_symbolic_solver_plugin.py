@@ -2,7 +2,8 @@
 test_symbolic_solver_plugin.py
 Unit tests for SymbolicSolverPlugin and PluginRegistry.
 """
-from modules.symbolic_core.symbolic_solver_plugin import SymbolicSolverPlugin, PluginRegistry
+
+from modules.symbolic_core.symbolic_solver_plugin import PluginRegistry, SymbolicSolverPlugin
 
 
 class DummyPlugin(SymbolicSolverPlugin):

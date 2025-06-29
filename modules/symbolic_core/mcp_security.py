@@ -1,8 +1,10 @@
 """
 MCP Security & Anchor Validation: Enforce security layers and anchor validation using MCP Bridge Core config.
 """
-from modules.symbolic_core import get_mcp_bridge_core
+
 from fastapi import HTTPException
+
+from modules.symbolic_core import get_mcp_bridge_core
 
 
 class MCPSecurity:

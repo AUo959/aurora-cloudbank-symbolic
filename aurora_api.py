@@ -3,10 +3,13 @@ main FastAPI app for Aurora CloudBank Symbolic
 Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities.
 """
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub, enable_sonnet4_globally
+from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced")
@@ -32,7 +35,7 @@ class Sonnet4EnableRequest(BaseModel):
 
 @app.post("/geometric/vector")
 def create_vector(req: VectorRequest):
-    v = ga.blades['e1'] * req.x + ga.blades['e2'] * req.y + ga.blades['e3'] * req.z
+    v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
     return {"vector": str(v)}
 
 
@@ -57,7 +60,7 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "status": "success",
                 "message": "Claude Sonnet 4 enabled for all clients",
                 "results": results,
-                "global_status": sonnet4_hub.get_global_status()
+                "global_status": sonnet4_hub.get_global_status(),
             }
         elif req and req.client_id:
             result = await sonnet4_hub._enable_sonnet4_for_client(req.client_id)
@@ -65,7 +68,7 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "status": "success" if result else "error",
                 "client_id": req.client_id,
                 "enabled": result,
-                "client_status": sonnet4_hub.get_client_status(req.client_id)
+                "client_status": sonnet4_hub.get_client_status(req.client_id),
             }
         else:
             # Default: enable for all clients
@@ -74,7 +77,7 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "status": "success",
                 "message": "Claude Sonnet 4 enabled for all clients (default action)",
                 "results": results,
-                "global_status": sonnet4_hub.get_global_status()
+                "global_status": sonnet4_hub.get_global_status(),
             }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}")
@@ -90,8 +93,8 @@ def get_sonnet4_status():
             "enable_for_all_clients": sonnet4_hub.sonnet4_config.enable_for_all_clients,
             "model": sonnet4_hub.sonnet4_config.model,
             "preserve_4o_logic": sonnet4_hub.sonnet4_config.preserve_4o_logic,
-            "fallback_model": sonnet4_hub.sonnet4_config.fallback_model
-        }
+            "fallback_model": sonnet4_hub.sonnet4_config.fallback_model,
+        },
     }
 
 
@@ -108,8 +111,9 @@ def health_check():
         "status": "healthy",
         "service": "Aurora CloudBank Symbolic API",
         "sonnet4_enabled": sonnet4_hub.sonnet4_config.enabled,
-        "timestamp": "2025-06-29"
+        "timestamp": "2025-06-29",
     }
+
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")

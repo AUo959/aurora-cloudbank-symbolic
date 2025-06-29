@@ -1,20 +1,19 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, WebSocket, WebSocketDisconnect
+import logging
+import uuid
+from pathlib import Path
+from typing import List, Optional
+
+import uvicorn
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
-import uuid
-from typing import List
-import uvicorn
-import logging
-from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector
 from pydantic import BaseModel
-from typing import Optional
-from modules.symbolic_core import get_mcp_bridge_core
-from modules.symbolic_core.mcp_command_router import MCPCommandRouter
-from modules.symbolic_core.mcp_security import mcp_security_dependency, mcp_security
-from fastapi import Depends
 
+from modules.symbolic_core import get_mcp_bridge_core
+from modules.symbolic_core.geometric_algebra import GeometricAlgebra
+from modules.symbolic_core.mcp_command_router import MCPCommandRouter
+from modules.symbolic_core.mcp_security import mcp_security, mcp_security_dependency
+from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector
 
 app = FastAPI(title="Aurora Cloud GUI – ZIP Wizard Dashboard")
 
@@ -120,8 +119,8 @@ def geometric_product(req: GeometricProductRequest):
     Response: {"result": str}
     """
     ga = GeometricAlgebra()
-    a_mv = req.a * ga.blades['e1']
-    b_mv = req.b * ga.blades['e2']
+    a_mv = req.a * ga.blades["e1"]
+    b_mv = req.b * ga.blades["e2"]
     result = ga.mult(a_mv, b_mv)
     return {"result": ga.pretty(result)}
 

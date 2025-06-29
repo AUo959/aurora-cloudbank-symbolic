@@ -3,7 +3,7 @@ Sonnet 4 Symbolic Validator Module
 Placeholder implementation for symbolic validation
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class SymbolicValidator:

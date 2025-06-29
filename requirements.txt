@@ -13,3 +13,8 @@ qiskit-aer>=0.13.0
 pydantic==1.10.15
 numba==0.60.0
 clifford==1.4.0
+# Linting and formatting tools
+autopep8==2.3.2
+black==24.10.0
+isort==5.13.2
+pylint==3.2.8

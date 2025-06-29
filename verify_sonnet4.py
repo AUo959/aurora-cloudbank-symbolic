@@ -4,11 +4,11 @@ Sonnet 4 Status and Verification Script
 Verifies that Claude Sonnet 4 is properly enabled and configured
 """
 
-from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
 import asyncio
 import sys
-import json
 from pathlib import Path
+
+from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -18,7 +18,7 @@ def print_status_table(title, data):
     """Print a formatted status table"""
     print(f"\n{'='*60}")
     print(f"🔍 {title}")
-    print('='*60)
+    print("=" * 60)
     for key, value in data.items():
         print(f"   {key:<30}: {value}")
 
@@ -43,7 +43,7 @@ async def main():
         "Safety Level": sonnet4_hub.sonnet4_config.safety_level,
         "Context Window": sonnet4_hub.sonnet4_config.context_window,
         "Preserve 4o Logic": sonnet4_hub.sonnet4_config.preserve_4o_logic,
-        "Fallback Model": sonnet4_hub.sonnet4_config.fallback_model
+        "Fallback Model": sonnet4_hub.sonnet4_config.fallback_model,
     }
     print_status_table("Configuration Details", config_details)
 
@@ -55,18 +55,18 @@ async def main():
         "Reflective Autonomy": "✅ Enabled",
         "Enhanced Reasoning": "✅ Enabled",
         "Aurora Compatibility": "✅ Preserved",
-        "GPT-4o Fallback": "✅ Available"
+        "GPT-4o Fallback": "✅ Available",
     }
     print_status_table("Feature Status", features)
 
     # Verify Configuration File
     try:
-        with open(sonnet4_hub.config_path, 'r') as f:
+        with open(sonnet4_hub.config_path, "r") as f:
             config_content = f.read()
-            has_sonnet4_config = 'claude_sonnet4' in config_content
-            has_enabled_flag = 'enabled: true' in config_content
-            has_all_clients = 'enable_for_all_clients: true' in config_content
-    except Exception as e:
+            has_sonnet4_config = "claude_sonnet4" in config_content
+            has_enabled_flag = "enabled: true" in config_content
+            has_all_clients = "enable_for_all_clients: true" in config_content
+    except Exception:
         has_sonnet4_config = has_enabled_flag = has_all_clients = False
 
     verification = {
@@ -74,14 +74,14 @@ async def main():
         "Sonnet 4 Section": "✅ Present" if has_sonnet4_config else "❌ Missing",
         "Globally Enabled": "✅ Yes" if has_enabled_flag else "❌ No",
         "All Clients Enabled": "✅ Yes" if has_all_clients else "❌ No",
-        "Hub Initialized": "✅ Yes" if sonnet4_hub else "❌ No"
+        "Hub Initialized": "✅ Yes" if sonnet4_hub else "❌ No",
     }
     print_status_table("Verification Checklist", verification)
 
     # Summary
     all_good = all(status.startswith("✅") for status in verification.values())
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     if all_good:
         print("🎉 SUCCESS: Claude Sonnet 4 is fully enabled for all clients!")
         print("🚀 Status: OPERATIONAL")
@@ -101,6 +101,7 @@ async def main():
     print("   3. Monitor client connections and Sonnet 4 activation")
 
     return all_good
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

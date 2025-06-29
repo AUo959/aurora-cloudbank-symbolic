@@ -10,9 +10,9 @@ import argparse
 import json
 
 from modules.reflective_autonomy.threadcore_tagging import (
-    tag_thread_context as base_tag_thread_context,
     PROJECT_CATEGORIES,
 )
+from modules.reflective_autonomy.threadcore_tagging import tag_thread_context as base_tag_thread_context
 
 # Live context directive presented when include_directive is True
 LIVE_CONTEXT_DIRECTIVE = """
@@ -51,9 +51,7 @@ def tag_thread_context(content: str, include_directive: bool = True) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Drop-In Thread Context Tagging Agent v2.0"
-    )
+    parser = argparse.ArgumentParser(description="Drop-In Thread Context Tagging Agent v2.0")
     parser.add_argument("input_file", help="Path to text file to classify")
     parser.add_argument(
         "--no-directive",

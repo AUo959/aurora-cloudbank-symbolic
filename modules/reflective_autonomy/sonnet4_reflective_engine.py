@@ -3,7 +3,7 @@ Sonnet 4 Reflective Engine Module
 Placeholder implementation for reflective autonomy
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ReflectiveEngine:

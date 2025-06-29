@@ -18,7 +18,7 @@ class GeometricAlgebra:
         else:
             # Minimal mock fallback
             self.layout = None
-            self.blades = {'e1': 1, 'e2': 2, 'e3': 3}
+            self.blades = {"e1": 1, "e2": 2, "e3": 3}
             self._mock = True
 
     def mult(self, a, b):
@@ -28,6 +28,7 @@ class GeometricAlgebra:
 
     def pretty(self, a):
         return str(a)
+
 
 # Example usage (to be moved to tests):
 # ga = GeometricAlgebra()

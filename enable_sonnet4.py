@@ -4,11 +4,12 @@ Direct Sonnet 4 Enablement Script
 Enables Claude Sonnet 4 for all clients without requiring API to be running
 """
 
-from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub, enable_sonnet4_globally
 import asyncio
-import sys
 import logging
+import sys
 from pathlib import Path
+
+from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -63,6 +64,7 @@ async def main():
         logger.error(f"Failed to enable Sonnet 4: {e}")
         print(f"❌ Failed to enable Claude Sonnet 4: {e}")
         return False
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

@@ -3,14 +3,14 @@ geometric_algebra.py
 Basic geometric algebra utilities using the `clifford` library.
 """
 
-from clifford import Cl
 import numpy as np
+from clifford import Cl
 
 # Initialize 3D Euclidean geometric algebra (can be parameterized)
 layout, blades = Cl(3)
-e1 = blades['e1']
-e2 = blades['e2']
-e3 = blades['e3']
+e1 = blades["e1"]
+e2 = blades["e2"]
+e3 = blades["e3"]
 
 
 def create_vector(x, y, z):

@@ -78,6 +78,20 @@ make install
 make run
 ```
 
+## Infallible Codespaces Bootstrap
+
+The repository includes a helper script that ensures Codespaces always finish
+building successfully. The script performs package installation with automatic
+retries and runs the onboarding checks. It is executed automatically by the
+devcontainer:
+
+```bash
+python3 scripts/infallible_codespace_init.py
+```
+
+You can run the script manually if the environment becomes corrupted to
+re-apply all setup steps.
+
 ## Directory Structure
 
 - `modules/reflective_autonomy/` — Core system modules

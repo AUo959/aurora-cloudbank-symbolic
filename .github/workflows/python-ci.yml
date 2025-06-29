@@ -51,7 +51,7 @@ jobs:
       continue-on-error: true
     - name: Upload security report
       if: always() && hashFiles('bandit-report.json') != ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report
         path: bandit-report.json

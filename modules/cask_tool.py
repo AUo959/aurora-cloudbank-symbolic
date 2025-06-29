@@ -31,19 +31,19 @@ def _open_asset(name: str) -> str:
 def load_specifications() -> pd.DataFrame:
     """Load the CASK technical specifications table."""
     data = _open_asset("cask_technical_specifications.csv")
-    return pd.read_csv(pd.compat.StringIO(data))
+    return pd.read_csv(StringIO(data))
 
 
 def load_risk_assessment() -> pd.DataFrame:
     """Load the CASK risk assessment table."""
     data = _open_asset("cask_risk_assessment.csv")
-    return pd.read_csv(pd.compat.StringIO(data))
+    return pd.read_csv(StringIO(data))
 
 
 def load_vs_sota() -> pd.DataFrame:
     """Load the comparison against state of the art table."""
     data = _open_asset("cask_vs_sota_comparison.csv")
-    return pd.read_csv(pd.compat.StringIO(data))
+    return pd.read_csv(StringIO(data))
 
 
 def generate_architecture_chart(output: str = "cask_architecture.png") -> str:

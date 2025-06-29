@@ -103,7 +103,7 @@ re-apply all setup steps.
 - `modules/reflective_autonomy/` — Core system modules
 - `config/` — Configuration files
 - `scripts/` — Deployment and helper scripts
-- `docs/` — Documentation
+- `docs/` — Documentation (see `docs/INTEROPERABILITY_SUPPORT.md` for integration guidelines)
 - `tests/` — Unit and integration tests
 - `logs/` — Runtime and audit logs
 - `.github/` — CI/CD and templates

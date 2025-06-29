@@ -1,7 +1,7 @@
 # Example requirements for Aurora Reflective Autonomy System
 pyyaml==6.0.2
 flake8==7.3.0
-pytest==8.4.0
+pytest==8.4.1
 pandas==2.3.0
 plotly==5.22.0
 kaleido==1.0.0

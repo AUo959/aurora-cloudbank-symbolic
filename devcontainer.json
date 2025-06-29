@@ -2,7 +2,7 @@
   "name": "aurora-cloudbank",
   "build": {
     "dockerfile": ".devcontainer/Dockerfile",
-    "context": ".."
+    "context": "."
   },
   "postCreateCommand": "pip install -r requirements.txt || true && npm install",
   "customizations": {

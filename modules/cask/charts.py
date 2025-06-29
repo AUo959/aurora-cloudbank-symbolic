@@ -157,7 +157,7 @@ def create_research_landscape_chart(output_file: str = "cask_research_landscape.
         {"name": "Ethical AI", "technical_maturity": 6, "cultural_awareness": 4, "complexity": "Medium", "category": "Current Systems"},
         {"name": "Cross-Cultural", "technical_maturity": 4, "cultural_awareness": 8, "complexity": "Medium", "category": "Emerging Tech"},
     ]
-    df = px.data.frame(data)
+    df = pd.DataFrame(data)
     complexity_map = {"Low": 10, "Medium": 20, "High": 30, "Very High": 40}
     df["size"] = df["complexity"].map(complexity_map)
     color_map = {"Current Systems": "#1FB8CD", "Emerging Tech": "#FFC185", "Proposed CASK": "#ECEBD5"}

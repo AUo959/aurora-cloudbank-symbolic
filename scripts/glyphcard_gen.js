@@ -12,7 +12,8 @@ function escapeRegExp(string) {
 function loadAnchors(pattern) {
     const dir = __dirname;
     const safePattern = escapeRegExp(pattern).replace(/\\\*/g, '.*');
-    const files = fs.readdirSync(dir).filter(f => f.match(new RegExp(safePattern)));
+    const regex = new RegExp(safePattern);
+    const files = fs.readdirSync(dir).filter(f => f.match(regex));
     return files.map(f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
 }
 

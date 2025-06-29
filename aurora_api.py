@@ -17,6 +17,22 @@ app = FastAPI(title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced")
 ga = GeometricAlgebra()
 
 
+def parse_multivector(expression: str, blades: dict):
+    """Safely parse a multivector expression."""
+    allowed_symbols = set(blades.keys())
+    tokens = expression.split()
+    for token in tokens:
+        if token not in allowed_symbols and not token.isnumeric():
+            raise ValueError(f"Invalid token in expression: {token}")
+    # Construct the multivector using the blades dictionary
+    result = None
+    for token in tokens:
+        if token in blades:
+            result = blades[token] if result is None else result + blades[token]
+        elif token.isnumeric():
+            result = float(token) if result is None else result + float(token)
+    return result
+
 class VectorRequest(BaseModel):
     x: float
     y: float
@@ -42,8 +58,8 @@ def create_vector(req: VectorRequest):
 @app.post("/geometric/mult")
 def geometric_product(req: MultivectorRequest):
     try:
-        a = eval(req.a, {**ga.blades})
-        b = eval(req.b, {**ga.blades})
+        a = parse_multivector(req.a, ga.blades)
+        b = parse_multivector(req.b, ga.blades)
         result = ga.mult(a, b)
         return {"result": str(result)}
     except Exception as e:

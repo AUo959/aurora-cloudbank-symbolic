@@ -4,7 +4,6 @@ Placeholder test implementation
 """
 
 import unittest
-from typing import Dict, Any
 
 
 class TestSonnet4Enhancements(unittest.TestCase):

@@ -4,10 +4,9 @@ Manages Sonnet 4 capabilities while preserving GPT-4o compatibility
 """
 
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from dataclasses import dataclass
 import yaml
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

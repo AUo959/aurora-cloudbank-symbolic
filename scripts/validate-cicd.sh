@@ -155,9 +155,11 @@ echo ""
 echo "🔧 Common Issue Checks"
 echo "====================="
 
-# Check for merge conflict markers in tracked files only
-if git ls-files | grep -E "\.(py|js|ts|yml|yaml)$" | xargs grep -l "<<<<<<< HEAD\|>>>>>>> \|=======" 2>/dev/null; then
-    print_status "error" "Merge conflict markers found in tracked files"
+# Check for merge conflict markers in tracked text files only
+conflict_files=$(git ls-files | grep -E "\.(py|js|ts|yml|yaml|md|txt|json)$" | xargs grep -l "^<<<<<<< HEAD\|^=======\|^>>>>>>> " 2>/dev/null || true)
+if [ -n "$conflict_files" ]; then
+    print_status "error" "Merge conflict markers found in tracked files:"
+    echo "$conflict_files"
 else
     print_status "success" "No merge conflict markers found in tracked files"
 fi

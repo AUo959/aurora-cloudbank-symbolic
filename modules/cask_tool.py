@@ -11,9 +11,6 @@ from __future__ import annotations
 
 import os
 import zipfile
-from io import TextIOWrapper
-from typing import IO
-
 import pandas as pd
 
 ASSET_ZIP = "CASK_Assets.zip"

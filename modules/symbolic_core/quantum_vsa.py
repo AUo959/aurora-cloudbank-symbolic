@@ -5,7 +5,7 @@ This module demonstrates how to generate symbolic vectors using quantum circuits
 """
 import numpy as np
 from qiskit import QuantumCircuit, transpile
-from qiskit_aer import Aer
+from qiskit_aer import AerSimulator
 from modules.symbolic_core.vsa import SymbolicVector
 
 
@@ -23,10 +23,9 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
         if np.random.rand() > 0.5:
             qc.x(i)  # Flip some qubits based on hash
     qc.measure(range(dim), range(dim))
-    backend = Aer.get_backend('aer_simulator')
+    backend = AerSimulator()
     tqc = transpile(qc, backend)
-    job = backend.run(tqc, shots=1)
-    result = job.result()
+    result = backend.run(tqc, shots=1).result()
     counts = list(result.get_counts().keys())[0]
     # Convert bitstring to -1/+1 vector
     vec = np.array([1 if b == '1' else -1 for b in counts[::-1]])
@@ -35,7 +34,8 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
 
 class QuantumSymbolicVector(SymbolicVector):
     def __init__(self, symbol: str, dim: int = 8):
-        from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector
-        vector = quantum_symbolic_vector(symbol, dim)
+        vec = quantum_symbolic_vector(symbol, dim)
         # Ensure vector is a list for Pydantic validation
-        super().__init__(symbol=symbol, dim=dim, vector=vector.tolist(), vector_type='bipolar')
+        super().__init__(symbol=symbol, dim=dim, vector=vec.tolist(), vector_type='bipolar')
+        # store numpy array for convenience
+        self.vector = vec

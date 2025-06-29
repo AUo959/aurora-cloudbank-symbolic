@@ -15,6 +15,7 @@ from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 from modules.symbolic_core.mcp_security import mcp_security_dependency, mcp_security
 from fastapi import Depends
 
+
 app = FastAPI(title="Aurora Cloud GUI – ZIP Wizard Dashboard")
 
 # Configure logging
@@ -128,7 +129,7 @@ def geometric_product(req: GeometricProductRequest):
 @app.post(
     "/quantum/symbolic_vector",
     summary="Quantum Symbolic Vector",
-    response_description="Quantum-generated symbolic vector"
+    response_description="Quantum-generated symbolic vector",
 )
 def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     """
@@ -152,13 +153,9 @@ def get_mcp_bridge():
 @app.post(
     "/mcp_bridge/route_command",
     summary="Symbolic Command Routing via MCP Bridge",
-    response_description="Routed command result"
+    response_description="Routed command result",
 )
-def mcp_route_command(
-    command: str,
-    anchor: str = "EOS_SEED_ORION",
-    security: None = Depends(mcp_security_dependency)
-):
+def mcp_route_command(command: str, anchor: str = "EOS_SEED_ORION", security: None = Depends(mcp_security_dependency)):
     """
     Symbolic command routing using MCP Bridge Core config and MCPCommandRouter.
     Enforces MCP security and anchor validation.

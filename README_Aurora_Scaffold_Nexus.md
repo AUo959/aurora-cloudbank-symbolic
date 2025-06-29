@@ -1,6 +1,6 @@
 # 📘 Aurora Scaffold Nexus
 
-**Thread ID:** THREADCORE.UNITY.NODE::aurora_scaffold_nexus  
+**Thread ID:** THREADCORE.UNITY.NODE::aurora_scaffold_nexus
 **Function:** Central relay for deploying and verifying Aurora's foundational architecture across environments.
 
 ---
@@ -30,20 +30,19 @@ This thread manages:
 
 ## 🔗 Related Files
 
-- Aurora_Continuity_Seal_v2.2.5.json  
-- Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json  
-- tools_and_symbolic_index.json  
-- staff_registry_bundle.json  
-- GUMAS_Staff_and_Command_Registry.json  
-- THREADCORE_UNIFIED_DEPLOY_v2_FULL.zip  
-- THREADCORE_MASTER_ACTIVATION_BLOCK.txt  
-- THREADCORE_OPERATOR_CHECKLIST.pdf  
+- Aurora_Continuity_Seal_v2.2.5.json
+- Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json
+- tools_and_symbolic_index.json
+- staff_registry_bundle.json
+- GUMAS_Staff_and_Command_Registry.json
+- THREADCORE_UNIFIED_DEPLOY_v2_FULL.zip
+- THREADCORE_MASTER_ACTIVATION_BLOCK.txt
+- THREADCORE_OPERATOR_CHECKLIST.pdf
 
 ---
 
 ## 🔖 Status
 
-✅ Symbolic alias registered  
-✅ Thread sealed under ethics protocol  
+✅ Symbolic alias registered
+✅ Thread sealed under ethics protocol
 ✅ Awaiting next deployment or audit request
-

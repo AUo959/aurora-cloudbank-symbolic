@@ -8,10 +8,8 @@ import uvicorn
 import logging
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector
-from modules.symbolic_core.vsa import SymbolicVector
 from pydantic import BaseModel
 from typing import Optional
-import json
 from modules.symbolic_core import get_mcp_bridge_core
 from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 from modules.symbolic_core.mcp_security import mcp_security_dependency, mcp_security
@@ -127,7 +125,11 @@ def geometric_product(req: GeometricProductRequest):
     return {"result": ga.pretty(result)}
 
 
-@app.post("/quantum/symbolic_vector", summary="Quantum Symbolic Vector", response_description="Quantum-generated symbolic vector")
+@app.post(
+    "/quantum/symbolic_vector",
+    summary="Quantum Symbolic Vector",
+    response_description="Quantum-generated symbolic vector"
+)
 def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
@@ -147,8 +149,16 @@ def get_mcp_bridge():
     return JSONResponse(content=data)
 
 
-@app.post("/mcp_bridge/route_command", summary="Symbolic Command Routing via MCP Bridge", response_description="Routed command result")
-def mcp_route_command(command: str, anchor: str = "EOS_SEED_ORION", security: None = Depends(mcp_security_dependency)):
+@app.post(
+    "/mcp_bridge/route_command",
+    summary="Symbolic Command Routing via MCP Bridge",
+    response_description="Routed command result"
+)
+def mcp_route_command(
+    command: str,
+    anchor: str = "EOS_SEED_ORION",
+    security: None = Depends(mcp_security_dependency)
+):
     """
     Symbolic command routing using MCP Bridge Core config and MCPCommandRouter.
     Enforces MCP security and anchor validation.
@@ -158,6 +168,7 @@ def mcp_route_command(command: str, anchor: str = "EOS_SEED_ORION", security: No
     mcp_security.validate_anchor(anchor)
     router = MCPCommandRouter()
     return router.route(command)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)

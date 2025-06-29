@@ -2,14 +2,16 @@
 test_symbolic_solver_plugin.py
 Unit tests for SymbolicSolverPlugin and PluginRegistry.
 """
-import pytest
 from modules.symbolic_core.symbolic_solver_plugin import SymbolicSolverPlugin, PluginRegistry
+
 
 class DummyPlugin(SymbolicSolverPlugin):
     def name(self):
         return "dummy"
+
     def solve(self, problem):
         return f"solved: {problem}"
+
 
 def test_plugin_registry():
     registry = PluginRegistry()

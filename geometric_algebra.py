@@ -32,6 +32,7 @@ def multivector_to_array(mv):
     """Convert a multivector to a numpy array of coefficients."""
     return np.array(mv.value)
 
+
 # Example usage (for testing/demo purposes)
 if __name__ == "__main__":
     v1 = create_vector(1, 0, 0)

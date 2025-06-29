@@ -69,3 +69,4 @@ keyring/
 *.tar.gz
 *.7z
 *.rar
+.venv/

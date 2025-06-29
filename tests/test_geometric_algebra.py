@@ -1,6 +1,6 @@
 # test_geometric_algebra.py
-import pytest
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
+
 
 def test_blade_multiplication():
     ga = GeometricAlgebra()
@@ -8,6 +8,7 @@ def test_blade_multiplication():
     e2 = ga.blades['e2']
     result = ga.mult(e1, e2)
     assert str(result) == str(e1 * e2)
+
 
 def test_pretty():
     ga = GeometricAlgebra()

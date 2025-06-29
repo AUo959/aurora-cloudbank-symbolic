@@ -1,10 +1,13 @@
 {
   "name": "aurora-cloudbank",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "postCreateCommand": "npm install",
+  "build": {
+    "dockerfile": ".devcontainer/Dockerfile"
+  },
+  "postCreateCommand": "pip install -r requirements.txt || true && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-python.python",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode"
       ]

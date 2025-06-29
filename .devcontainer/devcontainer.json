@@ -1,8 +1,9 @@
 {
   "name": "Aurora Reflective Autonomy DevContainer",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": {},
-  "postCreateCommand": "pip install -r requirements.txt || true",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "postCreateCommand": "pip install -r requirements.txt || true && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -12,6 +13,7 @@
         "eamodio.gitlens",
         "redhat.vscode-yaml",
         "yzhang.markdown-all-in-one",
+        "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "editorconfig.editorconfig",
         "ms-azuretools.vscode-docker",

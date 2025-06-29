@@ -14,13 +14,4 @@
       ]
     }
   }
-  // Symbolic Anchor: T1 (DevContainer Initialization)
-  // SRB: Ensures both Python and Node environments are initialized for simulation continuity.
-  // DLP: [devcontainer, python, node, simulation]
-  // export_manifest: {
-  //   name: "aurora-cloudbank-devcontainer",
-  //   version: "1.0.0",
-  //   memory_sealing: "stateless",
-  //   cli_chain: "001//devcontainer//init"
-  // }
 }

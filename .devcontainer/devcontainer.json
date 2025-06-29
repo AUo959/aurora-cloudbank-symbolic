@@ -1,7 +1,8 @@
 {
   "name": "Aurora Reflective Autonomy DevContainer",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
   "postCreateCommand": "pip install -r requirements.txt || true; npm install",
   "customizations": {

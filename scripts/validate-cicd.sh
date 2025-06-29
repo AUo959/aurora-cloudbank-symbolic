@@ -155,20 +155,20 @@ echo ""
 echo "🔧 Common Issue Checks"
 echo "====================="
 
-# Check for merge conflict markers
-if find . -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.yml" -o -name "*.yaml" | xargs grep -l "<<<<<<< HEAD\|>>>>>>> \|=======" 2>/dev/null; then
-    print_status "error" "Merge conflict markers found"
+# Check for merge conflict markers in tracked files only
+if git ls-files | grep -E "\.(py|js|ts|yml|yaml)$" | xargs grep -l "<<<<<<< HEAD\|>>>>>>> \|=======" 2>/dev/null; then
+    print_status "error" "Merge conflict markers found in tracked files"
 else
-    print_status "success" "No merge conflict markers found"
+    print_status "success" "No merge conflict markers found in tracked files"
 fi
 
-# Check for large files that might cause CI issues
-large_files=$(find . -type f -size +50M 2>/dev/null | grep -v ".git" | head -5)
+# Check for large files that are tracked by git and might cause CI issues
+large_files=$(git ls-files | xargs -I {} find {} -type f -size +50M 2>/dev/null | head -5)
 if [ -n "$large_files" ]; then
-    print_status "warning" "Large files found (>50MB):"
+    print_status "warning" "Large tracked files found (>50MB):"
     echo "$large_files"
 else
-    print_status "success" "No problematically large files found"
+    print_status "success" "No problematically large tracked files found"
 fi
 
 # Summary

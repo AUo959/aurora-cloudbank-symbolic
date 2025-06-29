@@ -1,10 +1,8 @@
 import logging
 import uuid
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import json
+from typing import List, Optional, Dict
 
-import uvicorn
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,7 +15,6 @@ from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 from modules.symbolic_core.mcp_security import mcp_security, mcp_security_dependency
 from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector, QuantumSymbolicVector
-from modules.symbolic_core.vsa import SymbolicVector
 
 app = FastAPI(title="Aurora Quantum VSA Playground")
 

@@ -4,7 +4,7 @@
     "dockerfile": ".devcontainer/Dockerfile",
     "context": ".."
   },
-  "postCreateCommand": "pip install -r requirements.txt || true && npm install",
+  "postCreateCommand": "pip install -r requirements.txt || true; npm install",
   "customizations": {
     "vscode": {
       "extensions": [

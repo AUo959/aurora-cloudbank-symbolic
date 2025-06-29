@@ -166,6 +166,11 @@ graph TD
 
 See `CONTRIBUTING.md` for guidelines.
 
+## Dev Container Troubleshooting
+
+Node.js 20 is installed via the dev container Dockerfile and `npm install` runs automatically after creation.
+If `node` or `npm` are not found, ensure your shell loads `/etc/profile.d/node.sh` or add `/usr/local/bin` to your `PATH`. Rebuild the container if packages were installed with the wrong user.
+
 ## License
 
 See `LICENSE` for terms.

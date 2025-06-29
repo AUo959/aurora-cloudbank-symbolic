@@ -66,10 +66,10 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     for x, y, text, color in components:
         fig.add_shape(
             type="rect",
-            x0=x - 0.4,
-            y0=y - 0.4,
-            x1=x + 0.4,
-            y1=y + 0.4,
+            x0=x - RECTANGLE_PADDING,
+            y0=y - RECTANGLE_PADDING,
+            x1=x + RECTANGLE_PADDING,
+            y1=y + RECTANGLE_PADDING,
             fillcolor=color,
             line=dict(color="black", width=2),
         )

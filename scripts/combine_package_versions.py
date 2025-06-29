@@ -10,11 +10,13 @@ import zipfile
 
 def combine(output: str, packages: list[str]) -> str:
     with tempfile.TemporaryDirectory() as tmp:
-        for pkg in packages:
+        for i, pkg in enumerate(packages):
             if not zipfile.is_zipfile(pkg):
                 raise ValueError(f"{pkg} is not a valid zip file")
+            subdir = os.path.join(tmp, f"package_{i}")
+            os.makedirs(subdir, exist_ok=True)
             with zipfile.ZipFile(pkg) as z:
-                z.extractall(tmp)
+                z.extractall(subdir)
         archive_path = shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)
     return archive_path
 

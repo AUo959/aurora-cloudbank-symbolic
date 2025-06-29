@@ -78,6 +78,12 @@ make install
 make run
 ```
 
+### 🚀 Development Tools
+
+- **Quick Status Check**: `python3 scripts/dev-status.py`
+- **Start Development Server**: `./scripts/quick-start.sh`
+- **Environment Health**: `bash .aurora/system/on_startup.sh`
+
 ## Infallible Codespaces Bootstrap
 
 The repository includes a helper script that ensures Codespaces always finish

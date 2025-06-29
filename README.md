@@ -191,6 +191,8 @@ graph TD
 ```
 
 ---
+=======
+>>>>>>> origin/codex/search-repo-for-cask-files-and-integrate
 
 ## Contributing
 

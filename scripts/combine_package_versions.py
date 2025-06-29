@@ -15,8 +15,8 @@ def combine(output: str, packages: list[str]) -> str:
                 raise ValueError(f"{pkg} is not a valid zip file")
             with zipfile.ZipFile(pkg) as z:
                 z.extractall(tmp)
-        shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)
-    return os.path.abspath(output)
+        archive_path = shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)
+    return archive_path
 
 
 def main() -> None:

@@ -1,0 +1,5 @@
+opal2:
+  graphics_card:
+    default_dim: 8
+    cache_file: opal2_glyph_cache.json
+

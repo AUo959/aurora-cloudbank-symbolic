@@ -4,6 +4,8 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 
 ## 🌟 **Live Demo Available**
 
+**🎮 Try It Now**: [**Aurora CloudBank Quantum VSA Demo**](https://auo959.github.io/aurora-cloudbank-symbolic) ← **LIVE!**
+
 **Aurora CloudBank Quantum VSA Demo** is now live, showcasing cutting-edge quantum computing, AI, and cultural simulation technologies.
 
 ### 🎯 **Experience the Future**
@@ -16,13 +18,12 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 
 ### 🚀 **Quick Demo Launch**
 
-**🌐 Live Demo**: https://auo959.github.io/aurora-cloudbank-symbolic/
+**Online**: [**https://auo959.github.io/aurora-cloudbank-symbolic**](https://auo959.github.io/aurora-cloudbank-symbolic)
 
-**Local Development**:
+**Local**:
 ```bash
-./start_aurora_gui_cloudhub.sh
-# Visit http://localhost:8000 for interactive demo
-# API docs available at http://localhost:8000/docs
+./launch-demo.sh
+# Visit http://localhost:8000 for full API server
 ```
 
 **Technologies**: Quantum Computing (Qiskit), FastAPI, Geometric Algebra, AI Integration

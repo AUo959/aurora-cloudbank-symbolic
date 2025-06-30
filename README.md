@@ -16,6 +16,9 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 
 ### 🚀 **Quick Demo Launch**
 
+**🌐 Live Demo**: https://auo959.github.io/aurora-cloudbank-symbolic/
+
+**Local Development**:
 ```bash
 ./start_aurora_gui_cloudhub.sh
 # Visit http://localhost:8000 for interactive demo

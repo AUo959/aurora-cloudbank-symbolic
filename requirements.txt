@@ -16,6 +16,6 @@ clifford==1.4.0
 python-multipart>=0.0.6
 # Linting and formatting tools
 autopep8==2.3.2
-black==24.10.0
+black==25.1.0
 isort==5.13.2
 pylint==3.2.8

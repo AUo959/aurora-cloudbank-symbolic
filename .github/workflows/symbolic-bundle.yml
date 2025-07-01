@@ -6,6 +6,12 @@ on:
       - 'v*.*.*'
   workflow_dispatch:
 
+# Explicit permissions for security
+permissions:
+  contents: read
+  actions: read
+  packages: read
+
 jobs:
   bundle:
     runs-on: ubuntu-latest

@@ -145,6 +145,7 @@ markdown_files=(
     "MISSION_COMPLETE_FINAL_STATUS.md"
     "FLEET_DEPLOYMENT_PACKAGE.md"
     "FLEET_DEPLOYMENT_PACKAGE_ENTERPRISE.md"
+    "COMPREHENSIVE_DEPLOYMENT_COMPLETE.md"
 )
 
 echo "🎯 Processing markdown files..."

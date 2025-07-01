@@ -40,7 +40,11 @@ class AuroraSecurityUtils {
 
         // Remove script tags and event handlers
         let sanitized = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-        sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+        let previous;
+        do {
+            previous = sanitized;
+            sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+        } while (sanitized !== previous);
         sanitized = sanitized.replace(/javascript:/gi, '');
         sanitized = sanitized.replace(/data:text\/html/gi, '');
 

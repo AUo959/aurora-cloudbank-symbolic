@@ -16,27 +16,25 @@
 # ====================================
 # In GPT runtime or symbolic agent environment:
 
-from reflective_monitor_core import ReflectiveMonitor  # noqa: F401
+# Load Governance Capsule Descriptor (for symbolic agents)
+import yaml
+from autonomic_correction_engine import AutonomicCorrectionEngine  # noqa: F401
 from capsule_linter import CapsuleLinter  # noqa: F401
 from continuity_manager import ContinuityManager  # noqa: F401
-from autonomic_correction_engine import AutonomicCorrectionEngine  # noqa: F401
 from reflective_autonomy_loop import ReflectiveAutonomyLoop
+from reflective_monitor_core import ReflectiveMonitor  # noqa: F401
 
 # ====================================
 # STEP 3 — Reinitialize Reflective State
 
-# Load Governance Capsule Descriptor (for symbolic agents)
-import yaml
 
 governance_path = "loom_governance_system.yaml"
-with open(governance_path, 'r') as f:
+with open(governance_path, "r") as f:
     governance_config = yaml.safe_load(f)
 
 print("[LOOM RESTORE] Governance Capsule Loaded")
-print("System Identity:",
-      governance_config['system_identity']['symbolic_system'])
-print("Architecture Phase:",
-      governance_config['system_identity']['phase_complete'])
+print("System Identity:", governance_config["system_identity"]["symbolic_system"])
+print("Architecture Phase:", governance_config["system_identity"]["phase_complete"])
 
 # ====================================
 # STEP 4 — Engage Reflection Autonomy Loop

@@ -6,9 +6,10 @@
 # MODULE 1 — Reflective Monitor Core
 # =============================================
 
-import yaml
-from pathlib import Path
 import datetime
+from pathlib import Path
+
+import yaml
 
 
 class ReflectiveMonitor:
@@ -21,7 +22,7 @@ class ReflectiveMonitor:
             self.capsule_registry = {}
             print("[WARN] Capsule registry not found. Initializing empty.")
         else:
-            with open(self.capsule_index_path, 'r') as f:
+            with open(self.capsule_index_path, "r") as f:
                 self.capsule_registry = yaml.safe_load(f) or {}
         print(f"[LOADED] {len(self.capsule_registry)} capsules registered.")
 
@@ -30,23 +31,23 @@ class ReflectiveMonitor:
             "bundle": bundle_name,
             "exported_at": export_time,
             "files": files,
-            "status": "sealed"
+            "status": "sealed",
         }
         self.save_capsule_registry()
         print(f"[REGISTERED] Capsule {anchor_hash} registered.")
 
     def save_capsule_registry(self):
         self.capsule_index_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.capsule_index_path, 'w') as f:
+        with open(self.capsule_index_path, "w") as f:
             yaml.dump(self.capsule_registry, f)
 
     def audit_registry(self):
-        unsealed = [k for k, v in self.capsule_registry.items()
-                    if v.get("status") != "sealed"]
+        unsealed = [k for k, v in self.capsule_registry.items() if v.get("status") != "sealed"]
         print("[AUDIT] Capsule Integrity Check:")
         print(f" - Total Capsules: {len(self.capsule_registry)}")
         print(f" - Unsealed Capsules: {len(unsealed)}")
         return unsealed
+
 
 # =============================================
 # MODULE 2 — Capsule Linter
@@ -62,7 +63,7 @@ class CapsuleLinter:
     def load_registry(self):
         if not self.capsule_index_path.exists():
             raise FileNotFoundError("Capsule registry not found.")
-        with open(self.capsule_index_path, 'r') as f:
+        with open(self.capsule_index_path, "r") as f:
             self.registry = yaml.safe_load(f) or {}
         print(f"[LOADED] {len(self.registry)} capsules indexed.")
 
@@ -96,6 +97,7 @@ class CapsuleLinter:
                 suggestions.append(f"Recover export date for {anchor}")
         return suggestions
 
+
 # =============================================
 # MODULE 3 — Continuity Manager
 # =============================================
@@ -125,6 +127,7 @@ class ContinuityManager:
             print("[CONTINUITY] Recovery Actions Pending:")
             for action in self.recovery_queue:
                 print(f" - {action}")
+
 
 # =============================================
 # MODULE 4 — Autonomic Correction Engine
@@ -163,6 +166,7 @@ class AutonomicCorrectionEngine:
             for correction in self.correction_log:
                 print(f" - {correction}")
 
+
 # =============================================
 # MODULE 5 — Reflective Autonomy Loop
 # =============================================
@@ -181,7 +185,7 @@ class ReflectiveAutonomyLoop:
         print("[RAL] Cycle complete.")
 
     def write_audit_log(self, timestamp):
-        with open(self.audit_log_path, 'a') as f:
+        with open(self.audit_log_path, "a") as f:
             f.write(f"Autonomy Cycle: {timestamp}\n")
             if not self.ace.correction_log:
                 f.write(" - No corrections applied.\n")

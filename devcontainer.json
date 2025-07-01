@@ -1,9 +1,17 @@
 {
-  "name": "Aurora Symbolic Dev",
-  "dockerComposeFile": "docker-compose_aurora_gui_cloudhub_UPDATED.yaml",
-  "service": "aurora_gui",
-  "workspaceFolder": "/workspace/aurora-cloudbank-symbolic",
-  "postCreateCommand": "bash start_aurora_gui_cloudhub.sh",
-  "features": {},
-  "forwardPorts": [8080]
+  "name": "aurora-cloudbank",
+  "build": {
+    "dockerfile": ".devcontainer/Dockerfile",
+    "context": "."
+  },
+  "postCreateCommand": "python3 scripts/infallible_codespace_init.py",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
 }

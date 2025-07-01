@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SymbolicVector",
+  "type": "object",
+  "properties": {
+    "symbol": { "type": "string" },
+    "dim": { "type": "integer", "minimum": 1 },
+    "vector": {
+      "type": "array",
+      "items": { "type": "integer", "enum": [-1, 1] },
+      "minItems": 1
+    }
+  },
+  "required": ["symbol", "dim", "vector"]
+}

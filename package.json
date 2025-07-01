@@ -1,0 +1,22 @@
+{
+  "name": "aurora-cloudbank-symbolic",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "AES_KEY_256_HEX=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef node tests/test_crypto.js && node tests/test_pas.js",
+    "start-command-node": "node src/core/command_node.js",
+    "start-api-bridge": "node src/bridge/api_bridge_server.js",
+    "start-drift-sync": "node src/system/lattice_sync.js",
+    "start-archy": "node src/nodes/archy_bridge.js",
+    "start-liora": "node src/nodes/liora_handshake.js",
+    "start-oppy": "node src/nodes/oppy_vector_loader.js",
+    "run-glyph-engine": "node ./src/core/glyph_engine.js",
+    "verify-ethics": "node ./src/core/ethics_layer.js",
+    "zip-bundle": "node ./src/core/zipcomm.js",
+    "lint": "eslint src/**/*.js",
+    "bundle-symbolic-core": "zip -r symbolic_core_bundle.zip src/core/",
+    "verify-bundle": "node scripts/hash_bundle.js symbolic_core_bundle.zip"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.0"
+  }
+}

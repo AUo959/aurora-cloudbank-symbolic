@@ -1,5 +1,5 @@
-import re
 import json
+import re
 from typing import Dict, List, Union
 
 # ------------------------------------------------------------------
@@ -11,7 +11,7 @@ DEFAULT_RESULT = {
     "primary_folder": "Unsorted",
     "priority": "low",
     "reason": "No content or keywords matched",
-    "all_hits": {}
+    "all_hits": {},
 }
 
 # ------------------------------------------------------------------
@@ -20,36 +20,15 @@ DEFAULT_RESULT = {
 PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
     "SymbolicOps": {
         "weight": 2,
-        "keywords": ["threadcore", "symbolic", "anchor", "drift", "vector", "reflect", "seal"]
+        "keywords": ["threadcore", "symbolic", "anchor", "drift", "vector", "reflect", "seal"],
     },
-    "GitOps": {
-        "weight": 1,
-        "keywords": ["github", "commit", "repo", "branch", "merge", "pr"]
-    },
-    "SiteBuilder": {
-        "weight": 1,
-        "keywords": ["html", "css", "website", "page", "image", "lafinca"]
-    },
-    "SecurityCore": {
-        "weight": 2,
-        "keywords": ["encryption", "key", "decrypt", "auth", "secure", "session"]
-    },
-    "DataFlow": {
-        "weight": 1,
-        "keywords": ["vector index", "dataset", "cloudsync", "memory", "export"]
-    },
-    "RitualUX": {
-        "weight": 2,
-        "keywords": ["ritual", "arch", "scroll", "map", "invocation", "resilience"]
-    },
-    "AutomationEngine": {
-        "weight": 1,
-        "keywords": ["bot", "agent", "automation", "api", "workflow", "routine"]
-    },
-    "Diagnostics": {
-        "weight": 1,
-        "keywords": ["error", "bug", "trace", "status", "log", "issue"]
-    }
+    "GitOps": {"weight": 1, "keywords": ["github", "commit", "repo", "branch", "merge", "pr"]},
+    "SiteBuilder": {"weight": 1, "keywords": ["html", "css", "website", "page", "image", "lafinca"]},
+    "SecurityCore": {"weight": 2, "keywords": ["encryption", "key", "decrypt", "auth", "secure", "session"]},
+    "DataFlow": {"weight": 1, "keywords": ["vector index", "dataset", "cloudsync", "memory", "export"]},
+    "RitualUX": {"weight": 2, "keywords": ["ritual", "arch", "scroll", "map", "invocation", "resilience"]},
+    "AutomationEngine": {"weight": 1, "keywords": ["bot", "agent", "automation", "api", "workflow", "routine"]},
+    "Diagnostics": {"weight": 1, "keywords": ["error", "bug", "trace", "status", "log", "issue"]},
 }
 
 
@@ -95,7 +74,7 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
         "primary_folder": primary_folder,
         "priority": priority,
         "reason": f"Matched weighted score {max_score} for '{primary_folder}'",
-        "all_hits": total_scores
+        "all_hits": total_scores,
     }
 
 

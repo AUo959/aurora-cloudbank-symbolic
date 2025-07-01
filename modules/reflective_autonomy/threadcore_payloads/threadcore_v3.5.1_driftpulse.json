@@ -1,0 +1,10 @@
+{
+  "threadcore_version": "v3.5.1",
+  "capsule_type": "DRIFTPULSE",
+  "beacon_ping": "ZIPWIZ",
+  "pulse_integrity": "Synchronized",
+  "glyph_alignment": ["Glyphon-Active", "Caelion-Linked"],
+  "last_drift_check": "PASS",
+  "response_time_ms": "<40",
+  "lattice_health": "Nominal"
+}

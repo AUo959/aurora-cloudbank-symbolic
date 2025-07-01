@@ -2,8 +2,8 @@
 
 import argparse
 import json
-from typing import Dict, List, Union
 import re
+from typing import Dict, List, Union
 
 # Configuration stays the same as v2
 PRIORITY_THRESHOLDS = {"high": 3, "medium": 1}
@@ -11,7 +11,7 @@ DEFAULT_RESULT = {
     "primary_folder": "Unsorted",
     "priority": "low",
     "reason": "No content or keywords matched",
-    "all_hits": {}
+    "all_hits": {},
 }
 
 PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
@@ -110,17 +110,16 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
         "primary_folder": primary_folder,
         "priority": priority,
         "reason": f"Matched weighted score {max_score} for '{primary_folder}'",
-        "all_hits": total_scores
+        "all_hits": total_scores,
     }
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="THREADCORE v2 Tagging Classifier")
+    parser = argparse.ArgumentParser(description="THREADCORE v2 Tagging Classifier")
     parser.add_argument("input_file", help="Path to text file to classify")
     args = parser.parse_args()
 
-    with open(args.input_file, 'r', encoding='utf-8') as f:
+    with open(args.input_file, "r", encoding="utf-8") as f:
         content = f.read()
 
     result = tag_thread_context(content)

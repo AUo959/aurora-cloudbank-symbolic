@@ -14,6 +14,8 @@ KEYTYPE=${KEYTYPE:-ed25519}
 # Prompt for key filename
 read -p "Enter a filename for your new SSH key [~/.ssh/id_${KEYTYPE}]: " KEYFILE
 KEYFILE=${KEYFILE:-~/.ssh/id_${KEYTYPE}}
+mkdir -p "$(dirname "$KEYFILE")"
+chmod 700 "$(dirname "$KEYFILE")"
 
 # Prompt for passphrase
 read -s -p "Enter a passphrase (leave blank for none): " PASSPHRASE
@@ -26,6 +28,8 @@ if [ "$KEYTYPE" = "rsa" ]; then
 else
   ssh-keygen -t ed25519 -C "$EMAIL" -f "$KEYFILE" ${PASSPHRASE:+-N "$PASSPHRASE"}
 fi
+chmod 600 "$KEYFILE"
+chmod 644 "${KEYFILE}.pub"
 
 # Show the public key
 echo

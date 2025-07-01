@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [ main ]
 
+# Explicit permissions for security
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  security-events: write
+
 jobs:
   build:
     runs-on: ubuntu-latest

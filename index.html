@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Quantum VSA Playground</title>
+    <script src="static/js/aurora-security.js"></script>
     <style>
         * {
             margin: 0;
@@ -348,21 +350,43 @@
                 ws.onopen = () => {
                     console.log('🔗 WebSocket connected to collaboration hub');
                     const collaborationFeed = document.getElementById('collaboration-feed');
-                    collaborationFeed.innerHTML += '<p style="color: #4ade80;">🌟 Connected to Aurora VSA collaboration network!</p>';
+                    const connectionMsg = AuroraSecurity.createSafeElement('p', '🌟 Connected to Aurora VSA collaboration network!', {
+                        style: 'color: #4ade80;'
+                    });
+                    collaborationFeed.appendChild(connectionMsg);
                 };
                 ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    const collaborationFeed = document.getElementById('collaboration-feed');
-                    const timestamp = new Date().toLocaleTimeString();
+                    try {
+                        const rawData = JSON.parse(event.data);
+                        const data = AuroraSecurity.sanitizeWebSocketData(rawData);
+                        const collaborationFeed = document.getElementById('collaboration-feed');
+                        const timestamp = new Date().toLocaleTimeString();
 
-                    if (data.type === 'welcome') {
-                        collaborationFeed.innerHTML += `<p style="color: #4ade80;">🎯 ${data.message} (${data.current_vectors} vectors active)</p>`;
-                    } else if (data.type === 'vsa_update') {
-                        collaborationFeed.innerHTML += `<p><strong>[${timestamp}] ${data.user}:</strong> ${data.operation} on "${data.symbol}"</p>`;
-                    } else {
-                        collaborationFeed.innerHTML += `<p><strong>[${timestamp}]</strong> ${event.data}</p>`;
+                        if (data.type === 'welcome') {
+                            const welcomeMsg = AuroraSecurity.createSafeElement('p',
+                                `🎯 ${data.message || 'Welcome'} (${data.current_vectors || 0} vectors active)`,
+                                { style: 'color: #4ade80;' }
+                            );
+                            collaborationFeed.appendChild(welcomeMsg);
+                        } else if (data.type === 'vsa_update') {
+                            const updateMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
+                            const operation_text = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
+                            updateMsg.appendChild(timestamp_span);
+                            updateMsg.appendChild(operation_text);
+                            collaborationFeed.appendChild(updateMsg);
+                        } else {
+                            const genericMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
+                            const content_text = document.createTextNode(` ${JSON.stringify(data)}`);
+                            genericMsg.appendChild(timestamp_span);
+                            genericMsg.appendChild(content_text);
+                            collaborationFeed.appendChild(genericMsg);
+                        }
+                        collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
                     }
-                    collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
                 };
             } catch (error) {
                 console.log('WebSocket not available, continuing with HTTP only');
@@ -406,7 +430,12 @@
             const endTime = performance.now();
 
             if (result.error) {
-                document.getElementById('quantum-result').innerHTML = `<p style="color: #f87171;">❌ Error: ${result.error}</p>`;
+                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${result.error}`, {
+                    style: 'color: #f87171;'
+                });
+                const resultEl = document.getElementById('quantum-result');
+                resultEl.textContent = '';
+                resultEl.appendChild(errorMsg);
                 return;
             }
 
@@ -427,13 +456,30 @@
             }
 
             const resultDiv = document.getElementById('quantum-result');
-            resultDiv.innerHTML = `
-                <h3>🌟 Quantum Vector for "${symbol}"</h3>
-                <p><strong>Dimension:</strong> ${result.dimension}</p>
-                <p><strong>Vector Type:</strong> ${result.vector_type || 'bipolar'}</p>
-                <p><strong>Quantum Generated:</strong> ${result.quantum_generated ? '✅' : '❌'}</p>
-                <p><strong>Generation Time:</strong> ${metricsData.coherenceTime}ms</p>
-                <p><strong>Full Length:</strong> ${result.vector_full_length} elements</p>
+            resultDiv.textContent = '';
+
+            const header = AuroraSecurity.createSafeElement('h3', `🌟 Quantum Vector for "${symbol}"`);
+            const dimensionP = AuroraSecurity.createSafeElement('p');
+            dimensionP.textContent = '<strong>Dimension:</strong> ' + AuroraSecurity.escapeHtml(String(result.dimension));
+
+            const vectorTypeP = AuroraSecurity.createSafeElement('p');
+            vectorTypeP.textContent = '<strong>Vector Type:</strong> ' + AuroraSecurity.escapeHtml(result.vector_type || 'bipolar');
+
+            const quantumGenP = AuroraSecurity.createSafeElement('p');
+            quantumGenP.textContent = '<strong>Quantum Generated:</strong> ' + (result.quantum_generated ? '✅' : '❌');
+
+            const timeP = AuroraSecurity.createSafeElement('p');
+            timeP.textContent = '<strong>Generation Time:</strong> ' + AuroraSecurity.escapeHtml(String(metricsData.coherenceTime)) + 'ms';
+
+            const lengthP = AuroraSecurity.createSafeElement('p');
+            lengthP.textContent = '<strong>Full Length:</strong> ' + AuroraSecurity.escapeHtml(String(result.vector_full_length)) + ' elements';
+
+            resultDiv.appendChild(header);
+            resultDiv.appendChild(dimensionP);
+            resultDiv.appendChild(vectorTypeP);
+            resultDiv.appendChild(quantumGenP);
+            resultDiv.appendChild(timeP);
+            resultDiv.appendChild(lengthP);
             `;
 
             visualizeVector(result.vector, 'vector-visualization');
@@ -483,7 +529,12 @@
                     <p><strong>Mock Mode:</strong> ${result.mock_mode ? '⚠️ Simplified' : '✅ Full Clifford'}</p>
                 `;
             } catch (error) {
-                document.getElementById('geometric-result').innerHTML = `<p style="color: #f87171;">❌ Error: ${error.message}</p>`;
+                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${error.message}`, {
+                    style: 'color: #f87171;'
+                });
+                const resultEl = document.getElementById('geometric-result');
+                resultEl.innerHTML = '';
+                resultEl.appendChild(errorMsg);
             }
         }
 
@@ -653,7 +704,7 @@
                 // Fallback to local display
                 const collaborationFeed = document.getElementById('collaboration-feed');
                 const timestamp = new Date().toLocaleTimeString();
-                collaborationFeed.innerHTML += `<p><strong>[${timestamp}] You:</strong> ${message}</p>`;
+                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
                 document.getElementById('message-input').value = '';
             }
         }
@@ -665,7 +716,10 @@
             try {
                 const result = await apiCall('/api/vsa/clear', 'DELETE');
                 if (result.message) {
-                    document.getElementById('collaboration-feed').innerHTML += `<p style="color: #fbbf24;">${result.message}</p>`;
+                    const warningMsg = AuroraSecurity.createSafeElement('p', result.message, {
+                        style: 'color: #fbbf24;'
+                    });
+                    document.getElementById('collaboration-feed').appendChild(warningMsg);
                     metricsData.vectorsGenerated = 0;
                     updateMetrics();
                 }
@@ -676,10 +730,10 @@
 
         function visualizeVector(vector, containerId) {
             const container = document.getElementById(containerId);
-            container.innerHTML = '';
+            container.textContent = '';
 
             if (!vector || !Array.isArray(vector)) {
-                container.innerHTML = '<p>No vector data to display</p>';
+                container.textContent = '<p>No vector data to display</p>';
                 return;
             }
 

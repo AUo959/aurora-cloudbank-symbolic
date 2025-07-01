@@ -15,5 +15,8 @@
     "lint": "eslint src/**/*.js",
     "bundle-symbolic-core": "zip -r symbolic_core_bundle.zip src/core/",
     "verify-bundle": "node scripts/hash_bundle.js symbolic_core_bundle.zip"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.0"
   }
 }

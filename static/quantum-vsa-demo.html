@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Quantum VSA Playground</title>
+    <script src="js/aurora-security.js"></script>
     <style>
         * {
             margin: 0;
@@ -347,22 +349,52 @@
                 ws = new WebSocket(`ws://${window.location.host}/api/ws/collaboration`);
                 ws.onopen = () => {
                     console.log('🔗 WebSocket connected to collaboration hub');
+        // WebSocket connection for real-time collaboration
+        let ws;
+
+        function initializeWebSocket() {
+            try {
+                ws = new WebSocket(`ws://${window.location.host}/api/ws/collaboration`);
+                ws.onopen = () => {
+                    console.log('🔗 WebSocket connected to collaboration hub');
                     const collaborationFeed = document.getElementById('collaboration-feed');
-                    collaborationFeed.innerHTML += '<p style="color: #4ade80;">🌟 Connected to Aurora VSA collaboration network!</p>';
+                    const connectionMsg = AuroraSecurity.createSafeElement('p', '🌟 Connected to Aurora VSA collaboration network!', {
+                        style: 'color: #4ade80;'
+                    });
+                    collaborationFeed.appendChild(connectionMsg);
                 };
                 ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    const collaborationFeed = document.getElementById('collaboration-feed');
-                    const timestamp = new Date().toLocaleTimeString();
+                    try {
+                        const rawData = JSON.parse(event.data);
+                        const data = AuroraSecurity.sanitizeWebSocketData(rawData);
+                        const collaborationFeed = document.getElementById('collaboration-feed');
+                        const timestamp = new Date().toLocaleTimeString();
 
-                    if (data.type === 'welcome') {
-                        collaborationFeed.innerHTML += `<p style="color: #4ade80;">🎯 ${data.message} (${data.current_vectors} vectors active)</p>`;
-                    } else if (data.type === 'vsa_update') {
-                        collaborationFeed.innerHTML += `<p><strong>[${timestamp}] ${data.user}:</strong> ${data.operation} on "${data.symbol}"</p>`;
-                    } else {
-                        collaborationFeed.innerHTML += `<p><strong>[${timestamp}]</strong> ${event.data}</p>`;
+                        if (data.type === 'welcome') {
+                            const welcomeMsg = AuroraSecurity.createSafeElement('p',
+                                `🎯 ${data.message || 'Welcome'} (${data.current_vectors || 0} vectors active)`,
+                                { style: 'color: #4ade80;' }
+                            );
+                            collaborationFeed.appendChild(welcomeMsg);
+                        } else if (data.type === 'vsa_update') {
+                            const updateMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
+                            const operation_text = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
+                            updateMsg.appendChild(timestamp_span);
+                            updateMsg.appendChild(operation_text);
+                            collaborationFeed.appendChild(updateMsg);
+                        } else {
+                            const genericMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
+                            const content_text = document.createTextNode(` ${JSON.stringify(data)}`);
+                            genericMsg.appendChild(timestamp_span);
+                            genericMsg.appendChild(content_text);
+                            collaborationFeed.appendChild(genericMsg);
+                        }
+                        collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
                     }
-                    collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
                 };
             } catch (error) {
                 console.log('WebSocket not available, continuing with HTTP only');
@@ -653,7 +685,7 @@
                 // Fallback to local display
                 const collaborationFeed = document.getElementById('collaboration-feed');
                 const timestamp = new Date().toLocaleTimeString();
-                collaborationFeed.innerHTML += `<p><strong>[${timestamp}] You:</strong> ${message}</p>`;
+                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
                 document.getElementById('message-input').value = '';
             }
         }
@@ -676,10 +708,10 @@
 
         function visualizeVector(vector, containerId) {
             const container = document.getElementById(containerId);
-            container.innerHTML = '';
+            container.textContent = '';
 
             if (!vector || !Array.isArray(vector)) {
-                container.innerHTML = '<p>No vector data to display</p>';
+                container.textContent = '<p>No vector data to display</p>';
                 return;
             }
 

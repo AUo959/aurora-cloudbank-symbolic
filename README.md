@@ -1,16 +1,96 @@
-# Aurora Reflective Autonomy System
+# Aurora CloudBank: Quantum VSA Symbolic System
 
-A fully operational, ethics-aligned symbolic governance and self-healing system.
+A fully operational quantum-enhanced symbolic governance and self-healing system featuring Vector Symbolic Architecture (VSA), cultural awareness simulation, and Claude Sonnet 4 integration.
+
+## 🌟 **Live Demo Available**
+
+**🎮 Try It Now**: [**Aurora CloudBank Quantum VSA Demo**](https://auo959.github.io/aurora-cloudbank-symbolic) ← **LIVE!**
+
+**Aurora CloudBank Quantum VSA Demo** is now live, showcasing cutting-edge quantum computing, AI, and cultural simulation technologies.
+
+### 🎯 **Experience the Future**
+
+- **🔬 Interactive Quantum Circuit Builder** - Design and simulate quantum circuits in real-time
+- **🧠 Vector Symbolic Architecture** - Advanced cognitive computing framework
+- **🌍 Cultural Awareness (CASK)** - Inclusive AI with cultural simulation
+- **⚡ AI-Enhanced Processing** - Claude Sonnet 4 powered insights
+- **📊 Real-time Visualization** - Dynamic geometric algebra operations
+
+### 🚀 **Quick Demo Launch**
+
+**Online**: [**https://auo959.github.io/aurora-cloudbank-symbolic**](https://auo959.github.io/aurora-cloudbank-symbolic)
+
+**Local**:
+```bash
+./launch-demo.sh
+# Visit http://localhost:8000 for full API server
+```
+
+**Technologies**: Quantum Computing (Qiskit), FastAPI, Geometric Algebra, AI Integration
+**Status**: ✅ Production-ready demonstration platform with zero security vulnerabilities
+
+---
+
+## ✨ Recent Updates
+
+### 🧠 Claude Sonnet 4 Integration Complete
+
+- **Status**: ✅ **ACTIVE** for all clients
+- **Features**: Quantum Bridge, Symbolic Validation, Ethics & Security, Reflective Autonomy
+- **Compatibility**: Full GPT-4o logic preservation with intelligent fallback systems
+
+### 🔧 DevContainer Resolution
+
+- **Symbolic Anchors**: T1 DevContainer Initialization with structured export metadata
+- **Environment**: Combined Node.js 20 + Python 3 for simulation continuity
+- **Memory Sealing**: Stateless configuration with CLI chain support
 
 Detailed architecture guides and visualization package information can be found in
 [the documentation index](docs/index.md).
 
 ## Features
 
+### 🎮 **Live Demo Capabilities**
+
+- **Quantum VSA Interface**: Interactive quantum circuit builder and VSA calculations
+- **Real-time Visualization**: Dynamic geometric algebra and data visualization
+- **Cultural Simulation**: CASK (Culturally Aware Simulation Knowledge) integration
+- **AI Processing**: Claude Sonnet 4 enhanced cognitive computing
+- **Professional UI**: Modern FastAPI backend with responsive web interface
+
+### 🏗️ **Core System Architecture**
+
 - Modular symbolic governance engine
 - Self-monitoring and self-healing autonomy loop
 - Ethics protocol and governance capsule
 - Full audit logging and restoration capability
+- **NEW**: Claude Sonnet 4 enhanced reasoning and quantum-aware processing
+- **NEW**: Symbolic anchor system with export manifest tracking
+
+## DevContainer Configuration
+
+### Symbolic Anchor: T1 (DevContainer Initialization)
+
+**SRB**: Combined Node.js 20 & Python 3 environment for Aurora simulation stack
+**DLP**: [devcontainer, python, node, simulation]
+
+**Export Manifest**:
+
+```json
+{
+  "name": "aurora-cloudbank-devcontainer",
+  "version": "1.0.0",
+  "memory_sealing": "stateless",
+  "cli_chain": "001//devcontainer//init"
+}
+```
+
+The devcontainer provides:
+
+- Node.js 20 with npm for frontend development
+- Python 3 with pip for backend symbolic processing
+- Automatic dependency installation on container creation
+- VS Code extensions for Python, ESLint, and Prettier
 
 ## Requirements
 
@@ -46,12 +126,32 @@ make install
 make run
 ```
 
+### 🚀 Development Tools
+
+- **Quick Status Check**: `python3 scripts/dev-status.py`
+- **Start Development Server**: `./scripts/quick-start.sh`
+- **Environment Health**: `bash .aurora/system/on_startup.sh`
+
+## Infallible Codespaces Bootstrap
+
+The repository includes a helper script that ensures Codespaces always finish
+building successfully. The script performs package installation with automatic
+retries and runs the onboarding checks. It is executed automatically by the
+devcontainer:
+
+```bash
+python3 scripts/infallible_codespace_init.py
+```
+
+You can run the script manually if the environment becomes corrupted to
+re-apply all setup steps.
+
 ## Directory Structure
 
 - `modules/reflective_autonomy/` — Core system modules
 - `config/` — Configuration files
 - `scripts/` — Deployment and helper scripts
-- `docs/` — Documentation
+- `docs/` — Documentation (see `docs/INTEROPERABILITY_SUPPORT.md` for integration guidelines)
 - `tests/` — Unit and integration tests
 - `logs/` — Runtime and audit logs
 - `.github/` — CI/CD and templates
@@ -97,6 +197,10 @@ Use `python scripts/module_integrator.py --help` to merge new modules across bra
 ## Package Combination Utility
 
 Use `python scripts/combine_package_versions.py OUTPUT.zip FILE1.zip FILE2.zip ...` to merge multiple archive versions into a single package. This helps consolidate legacy module bundles before deployment.
+
+## Staff Node CI Helper
+
+`python scripts/staff_node_ci_helper.py --help` automates the pull/commit/push workflow. It synchronizes the staff registry with `orion_backup_sync.py`, runs CI maintenance and validation, executes tests, and can push updates when complete.
 
 ## CASK Integration Utilities
 

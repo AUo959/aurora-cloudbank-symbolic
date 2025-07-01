@@ -53,7 +53,8 @@ grafts:
       - flow_modulator
     link_mode: echo-anchor
     ethics_protocol: Picard_Delta_3
-- type: capsule_graft
+
+  - type: capsule_graft
     grafted_capsule_id: AURIC_AGENT_CORE_v1.0
     file_reference: AURIC_AGENT_CORE_v1.0.yaml
     binds:

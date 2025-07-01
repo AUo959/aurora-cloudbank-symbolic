@@ -3,14 +3,14 @@ geometric_algebra.py
 Basic geometric algebra utilities using the `clifford` library.
 """
 
-from clifford import Cl
 import numpy as np
+from clifford import Cl
 
 # Initialize 3D Euclidean geometric algebra (can be parameterized)
 layout, blades = Cl(3)
-e1 = blades['e1']
-e2 = blades['e2']
-e3 = blades['e3']
+e1 = blades["e1"]
+e2 = blades["e2"]
+e3 = blades["e3"]
 
 
 def create_vector(x, y, z):
@@ -31,6 +31,7 @@ def add_multivectors(a, b):
 def multivector_to_array(mv):
     """Convert a multivector to a numpy array of coefficients."""
     return np.array(mv.value)
+
 
 # Example usage (for testing/demo purposes)
 if __name__ == "__main__":

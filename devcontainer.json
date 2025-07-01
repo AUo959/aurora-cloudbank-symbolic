@@ -1,15 +1,17 @@
 {
   "name": "aurora-cloudbank",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "postCreateCommand": "npm install",
+  "build": {
+    "dockerfile": ".devcontainer/Dockerfile",
+    "context": "."
+  },
+  "postCreateCommand": "python3 scripts/infallible_codespace_init.py",
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-python.python",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode"
       ]
     }
-  },
-  "forwardPorts": [],
-  "remoteUser": "node"
+  }
 }

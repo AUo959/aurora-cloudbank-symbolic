@@ -22,8 +22,9 @@ Integration Notes:
 import argparse
 import os
 import shutil
-import yaml
 from datetime import datetime
+
+import yaml
 
 from modules.telemetry_logger import get_logger
 
@@ -75,14 +76,10 @@ def rollback_file(dest: str) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Archive and synchronize Orion staff registry and blueprint")
-    parser.add_argument("--command-node", default="command_node_data",
-                        help="Command node data directory")
-    parser.add_argument("--pl-branch", default="pl_branch_data",
-                        help="PL branch data directory")
-    parser.add_argument("--rollback", choices=["staff", "blueprint", "all"],
-                        help="Rollback target")
+    parser = argparse.ArgumentParser(description="Archive and synchronize Orion staff registry and blueprint")
+    parser.add_argument("--command-node", default="command_node_data", help="Command node data directory")
+    parser.add_argument("--pl-branch", default="pl_branch_data", help="PL branch data directory")
+    parser.add_argument("--rollback", choices=["staff", "blueprint", "all"], help="Rollback target")
     args = parser.parse_args()
 
     staff_cmd = os.path.join(args.command_node, "staff_registry.yaml")

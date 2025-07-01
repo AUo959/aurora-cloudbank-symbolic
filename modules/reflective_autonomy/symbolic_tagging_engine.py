@@ -6,7 +6,7 @@ DEFAULT_RESULT = {
     "primary_folder": "Unsorted",
     "priority": "low",
     "reason": "No content or keywords matched",
-    "all_hits": {}
+    "all_hits": {},
 }
 
 PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
@@ -105,5 +105,5 @@ def classify_thread_content(content: str) -> Dict[str, Union[str, Dict[str, int]
         "primary_folder": primary_folder,
         "priority": priority,
         "reason": f"Matched weighted score {max_score} for '{primary_folder}'",
-        "all_hits": total_scores
+        "all_hits": total_scores,
     }

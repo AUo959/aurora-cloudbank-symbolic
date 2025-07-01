@@ -53,6 +53,7 @@ coverage.xml
 
 # Environment variables
 .env
+!.env.example
 .env.*
 
 # System files
@@ -68,3 +69,4 @@ keyring/
 *.tar.gz
 *.7z
 *.rar
+.venv/

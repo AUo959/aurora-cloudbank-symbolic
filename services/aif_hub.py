@@ -1,6 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 import os
 from typing import List
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 from modules.telemetry_logger import get_logger
 

@@ -1,8 +1,11 @@
 """
 MCP Security & Anchor Validation: Enforce security layers and anchor validation using MCP Bridge Core config.
 """
+
+from fastapi import HTTPException
+
 from modules.symbolic_core import get_mcp_bridge_core
-from fastapi import HTTPException, Depends
+
 
 class MCPSecurity:
     def __init__(self):
@@ -23,7 +26,10 @@ class MCPSecurity:
         if anchor != self.mcp.get("anchor_seed"):
             raise HTTPException(status_code=401, detail="Anchor validation failed")
 
+
 # FastAPI dependency for endpoints
 mcp_security = MCPSecurity()
+
+
 def mcp_security_dependency():
     mcp_security.enforce_security()

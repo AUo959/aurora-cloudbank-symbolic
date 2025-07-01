@@ -1,7 +1,9 @@
 """
 MCP Command Router: Centralized symbolic command routing using MCP Bridge Core config.
 """
+
 from modules.symbolic_core import get_mcp_bridge_core
+
 
 class MCPCommandRouter:
     def __init__(self):
@@ -16,5 +18,5 @@ class MCPCommandRouter:
             "status": "ROUTED",
             "protocol": self.routing_protocol,
             "routed_command": routed_command,
-            "governance_layer": self.governance_layer
+            "governance_layer": self.governance_layer,
         }

@@ -13,17 +13,21 @@ All procedures ensure maximum transparency, traceability, and operational integr
 ## 1. Prerequisites & Authority
 
 ### System Health:
+
 - Aurora Core/Command Node must be active, anchor/ethics protocols enforced.
 - System CI/CD, fleet manifest, and agent registry pass all health and drift audits (Δ ≤ 0.02).
 
 ### Personnel & Agent Roles:
+
 - FleetOps officer or authorized AI agent assigned as mission lead.
 - Crew/AI roster up to date in staff_registry.json.
 
 ### Fleet Inventory:
+
 - fleet_manifest.json includes all shuttles, drones, auxiliary craft, their specs, maintenance state, and assigned roles.
 
 ### Mission Planning:
+
 - Each mission is formally proposed, reviewed, and logged prior to launch.
 
 ---
@@ -32,22 +36,22 @@ All procedures ensure maximum transparency, traceability, and operational integr
 
 ### A. Pre-Deployment
 
-1. **System & Crew Validation**
+. **System & Crew Validation**
    - Confirm Aurora Core, anchor, and ethics lock are green.
    - Verify fleet manifest and crew assignments match mission needs.
    - Run preflight_check.sh (or /api/aurora/fleet/preflight) on all assigned craft.
 
-2. **Mission Log Entry**
+1. **Mission Log Entry**
    - Log mission objectives, assignments, and scenario context in fleet_mission_log.md or fleet DB.
    - Ethics review and operator approval are mandatory for all deployments.
 
-3. **Simulation Linkage (if R&D/Training)**
+2. **Simulation Linkage (if R&D/Training)**
    - Assign mission to current simulation scenario or research module.
    - Connect game/simulation engine for visual/audio and telemetry integration.
 
 ### B. Deployment Execution
 
-1. **Deployment Order Filing**
+3. **Deployment Order Filing**
    - Issue a deployment via the dashboard or:
 
 ```json
@@ -61,11 +65,11 @@ POST /api/aurora/fleet/deploy
 }
 ```
 
-2. **Ethics, Anchor, and Security Checks**
+4. **Ethics, Anchor, and Security Checks**
    - Aurora validates all fields for anchor/ethics compliance and logs the operation with a mission hash and operator ID.
    - Security: All comms, telemetry, and API calls use encrypted channels; logs are immutable and access-controlled.
 
-3. **Final Approval**
+5. **Final Approval**
    - FleetOps officer (or simulation agent, if automated) issues final GO/NO-GO.
    - Aurora commits the deployment and initiates real-time mission monitoring.
 
@@ -81,15 +85,15 @@ POST /api/aurora/fleet/deploy
 
 ### D. Post-Mission Protocol
 
-1. **Debrief & Recovery**
+6. **Debrief & Recovery**
    - All crew/agents submit mission reports; Aurora records post-mission status.
    - Update fleet manifest for craft availability/maintenance.
 
-2. **Data & Audit Sync**
+7. **Data & Audit Sync**
    - All mission data, logs, and results are synced to both L1 (operational DB) and L3 (symbolic/mesh archive).
    - Anchor/ethics hashes ensure provenance and traceability.
 
-3. **Continuous Improvement**
+8. **Continuous Improvement**
    - Flag notable events for scenario replay, operator training, or R&D/game-dev feedback.
 
 ---
@@ -120,7 +124,7 @@ All endpoints require authenticated, anchor-validated, and ethics-compliant requ
 
 ## 5. Rapid Operator Checklist
 
-**ORION FLEET DEPLOYMENT CHECKLIST**
+## ORION FLEET DEPLOYMENT CHECKLIST
 
 - [ ] Aurora/Command Node live, anchor/ethics locked
 - [ ] Fleet manifest and crew registry up to date

@@ -70,3 +70,23 @@ keyring/
 *.7z
 *.rar
 .venv/
+
+# GITWiz Auto-generated cleanup patterns
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+# Build artifacts
+*.dylib
+*.dll
+# IDE files
+.vscode/settings.json
+.idea/
+# OS generated files
+# Temporary files
+*.tmp
+*.temp
+# Large archives (consider external storage)
+# Exclude essential deployment packages
+!deploykit_*.zip
+!aurora_core_*.zip

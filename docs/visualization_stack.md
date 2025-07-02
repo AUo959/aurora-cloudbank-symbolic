@@ -8,34 +8,35 @@ This document outlines the recommended toolchain for rendering Aurora's simulati
 - **Cross‑Platform Builds**: Godot exports to desktop, web, and mobile using Vulkan and WebGL.
 
 ## 2. Physics and Simulation
-- Rely on Godot's built‑in Bullet physics for 3D or the Box2D‑style engine for 2D.
-- Keep your simulation logic separate from the engine so core algorithms remain independent from the rendering layer.
+- **Physics Engine**: Rely on Godot's built‑in Bullet physics for 3D or the Box2D‑style engine for 2D. Keep simulation logic separate from physics calls in case a different engine is used later.
 
 ## 3. Audio
-- Godot provides positional audio and mixing out of the box. For advanced features you may integrate libraries such as FMOD or OpenAL later.
+- **Audio Server**: Godot includes positional audio and mixing. Libraries like OpenAL or FMOD can be added if advanced features are required.
 
-## 4. Service Integration
+## 4. Integration with Existing Services
+- **FastAPI and Node.js**: Continue generating simulation data in the existing Python modules. Expose updates via REST or WebSocket endpoints so the game engine can fetch or receive them.
+- **Engine Scripts**: Write Godot scripts that poll these endpoints or subscribe over WebSockets and update the game state accordingly.
+
+## 5. Development Workflow
+- **Docker Compose**: Use the current docker-compose setup to orchestrate Python, Node.js, and game engine services for reproducible local and cloud deployments.
+- **Version Control**: Track large models, textures, and audio using Git LFS.
+- **Automated Builds**: Add a GitHub Actions workflow to build or pack the game project and run headless tests.
+
+## 6. Next Steps
+- **Prototype**: Start with a small Godot project that loads simple geometry and communicates with the services via HTTP or WebSocket.
+- **Data Format**: Define a consistent JSON format for simulation state. Keep it engine-agnostic so other tools can reuse it.
+- **Asset Pipeline**: Configure Blender export scripts that convert models to your engine's preferred format and commit them to version control.
+- **Documentation**: Document API endpoints in `docs/` and illustrate how the engine queries them.
+- **Testing**: Expand unit tests for both Python and Node.js modules. Future integration tests can run the engine in headless mode.
+
+## 7. Advanced Capabilities
+- **Networked Multiplayer**: If multiple participants interact in the simulation, plan for WebSocket or UDP networking using Godot's high-level API or custom networking layers.
+- **VR/AR Support**: Godot offers experimental VR and AR capabilities if immersive experiences are required.
+- **Telemetry**: Use the existing telemetry system to record simulation events and user actions for analysis.
+
+## 8. Service Integration Details
 - Keep simulation data generation within the existing Python modules under `modules/reflective_autonomy`.
 - Expose state updates via REST or WebSocket endpoints in `aurora_gui_cloudhub_fastapi.py` or the Node.js command node.
 - In Godot, write scripts to poll these endpoints or listen for WebSocket events, then update the game world accordingly.
 
-## 5. Development Workflow
-- Continue using `docker-compose` to orchestrate services. Add a container for the game engine when needed to maintain a reproducible setup.
-- Track large assets with **Git LFS** so models and textures live alongside the code base.
-- Create GitHub Actions workflows to build or package the game project and run any headless tests.
-
-## 6. Initial Prototype
-- Start a small Godot project that loads a simple scene and connects to the FastAPI endpoints.
-- Define a concise JSON format for simulation state. Keep this independent from the engine so other tools can reuse it.
-- Add Blender export scripts to convert models to the engine format and save them in version control.
-
-## 7. Documentation and Testing
-- Document the API endpoints used by the engine. Store architecture diagrams and instructions in `docs/`.
-- Expand unit tests for your Python modules and Node.js services. Later, include integration tests that launch the game in headless mode.
-
-## 8. Optional Extensions
-- Plan for multiplayer using WebSocket or UDP networking if needed.
-- Godot's experimental VR/AR support allows immersive scenarios in the future.
-- Reuse the existing telemetry system to log simulation events and user interactions for analysis.
-
-By following this approach, you gain a flexible visualization layer that remains fully open source and integrates cleanly with the existing code. The MIT‑licensed stack keeps Aurora’s tooling consistent while allowing room to adopt more advanced engines if requirements change.
+By adopting an MIT-licensed engine like Godot, integrating it with current services, and establishing clear asset and data pipelines, you will create a flexible foundation for future simulation and visualization work without locking into proprietary tools. This approach maintains Aurora's open-source philosophy while providing professional-grade visualization capabilities.

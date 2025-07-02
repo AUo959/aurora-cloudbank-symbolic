@@ -43,7 +43,11 @@ class AuroraSecurityUtils {
         let previous = text;
         do {
             sanitized = previous.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-            sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+            previous = sanitized;
+        } while (sanitized !== previous);
+
+        do {
+            sanitized = previous.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
             previous = sanitized;
         } while (sanitized !== previous);
         sanitized = sanitized.replace(/javascript:/gi, '');

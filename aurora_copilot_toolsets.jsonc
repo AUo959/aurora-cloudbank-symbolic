@@ -1,0 +1,161 @@
+// Aurora CloudBank Symbolic - Ideal Toolsets for Quantum-Enhanced AI Development
+// These toolsets are optimized for the Aurora CloudBank Symbolic repository
+{
+	"auroraQuantumSymbolic": {
+		"tools": [
+			"codebase",
+			"search",
+			"editFiles",
+			"runCommands",
+			"problems",
+			"usages",
+			"findTestFiles",
+			"runTasks",
+			"configurePythonEnvironment",
+			"getPythonEnvironmentInfo",
+			"installPythonPackage"
+		],
+		"description": "🌟 Comprehensive toolset for Aurora CloudBank Symbolic - quantum-enhanced AI system with multi-agent coordination, symbolic processing, and hybrid quantum-classical computing",
+		"icon": "circuit-board"
+	},
+	"auroraDevOps": {
+		"tools": [
+			"runCommands",
+			"terminalLastCommand", 
+			"search",
+			"editFiles",
+			"problems",
+			"configurePythonEnvironment",
+			"installPythonPackage",
+			"runTasks"
+		],
+		"description": "⚙️ Development operations for Aurora system - deployment, monitoring, service management, and automation scripts including aurora_launch.sh and deployment managers",
+		"icon": "gear"
+	},
+	"auroraCommandNode": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"runCommands",
+			"problems",
+			"usages",
+			"search"
+		],
+		"description": "🧬 Command node integration and routing - central orchestration hub for Aurora's symbolic command dispatch and project synergy via aurora_command_router.js",
+		"icon": "broadcast"
+	},
+	"auroraQuantumCore": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"problems",
+			"configurePythonEnvironment",
+			"installPythonPackage",
+			"findTestFiles",
+			"runCommands",
+			"qsharpRunProgram",
+			"qsharpGenerateCircuit"
+		],
+		"description": "⚛️ Quantum computing and symbolic CPU anchor - quantum-classical hybrid processing, VSA operations, symbolic reasoning, and Q# integration with Qiskit",
+		"icon": "zap"
+	},
+	"auroraAgentSystem": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"usages",
+			"problems",
+			"search",
+			"findTestFiles"
+		],
+		"description": "🤖 Multi-agent coordination system - research agents, interface agents, symbolic coordination, and agent synchronization via quantum symbolic coordinators",
+		"icon": "organization"
+	},
+	"auroraWebInfrastructure": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"runCommands",
+			"problems",
+			"configurePythonEnvironment",
+			"installPythonPackage",
+			"openSimpleBrowser"
+		],
+		"description": "🌐 Web infrastructure and FastAPI backend - quantum-enhanced web services, API endpoints, live demo interfaces, and aurora_api.py development",
+		"icon": "globe"
+	},
+	"auroraSecurity": {
+		"tools": [
+			"codebase",
+			"search",
+			"problems",
+			"runCommands",
+			"editFiles"
+		],
+		"description": "🛡️ Security and ethics framework - XSS protection, ethics protocols (Picard_Delta_3), security auditing, and compliance validation with EOS_SEED_ORION",
+		"icon": "shield"
+	},
+	"auroraVisualization": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"configurePythonEnvironment",
+			"installPythonPackage",
+			"problems",
+			"openSimpleBrowser"
+		],
+		"description": "👁️ 3D quantum visualization and immersive interfaces - dynamic geometric algebra visualization, quantum circuit rendering, and interactive demos",
+		"icon": "eye"
+	},
+	"auroraResearch": {
+		"tools": [
+			"codebase",
+			"editFiles",
+			"configurePythonEnvironment",
+			"installPythonPackage",
+			"findTestFiles",
+			"problems"
+		],
+		"description": "🔬 Research acceleration framework - CASK integration, predictive analytics, collaborative research tools, and future-casting capabilities",
+		"icon": "microscope"
+	},
+	"auroraTesting": {
+		"tools": [
+			"findTestFiles",
+			"runCommands",
+			"problems",
+			"codebase", 
+			"search",
+			"configurePythonEnvironment",
+			"runTasks",
+			"testFailure"
+		],
+		"description": "🧪 Comprehensive testing suite - unit tests, integration tests, quantum module validation, and agent system verification with 45+ test files",
+		"icon": "beaker"
+	},
+	"auroraDocumentation": {
+		"tools": [
+			"codebase",
+			"search",
+			"editFiles",
+			"new"
+		],
+		"description": "📚 Documentation and knowledge management - phase completion docs, implementation guides, architecture diagrams, and API documentation",
+		"icon": "book"
+	},
+	"auroraQuantumAdvanced": {
+		"tools": [
+			"azureQuantumConnectToWorkspace",
+			"azureQuantumGetProviders",
+			"azureQuantumSubmitToTarget",
+			"azureQuantumGetJobs",
+			"qsharpRunProgram",
+			"qsharpGenerateCircuit",
+			"qsharpRunResourceEstimator",
+			"codebase",
+			"editFiles"
+		],
+		"description": "🌌 Advanced quantum computing with Azure Quantum integration - quantum job submission, resource estimation, and Q# development for hybrid quantum-classical workflows",
+		"icon": "sparkle"
+	}
+}

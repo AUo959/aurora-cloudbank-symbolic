@@ -14,6 +14,8 @@ Architecture diagrams, system maps, and user/developer guides for the Aurora Ref
 - Introduces `modules/opal2` with the first Opal2 component.
 - `GlyphGenerator` combines geometric algebra with quantum symbolic vectors.
 - Designed to function as a lightweight graphics card for hybrid symbolic processing.
+- Configuration lives in `config/opal2_graphics.yaml`.
+- `GlyphCache` allows persistent storage of generated glyphs.
 
 ---
 

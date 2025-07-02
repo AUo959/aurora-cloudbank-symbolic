@@ -6,16 +6,29 @@ and quantum symbolic vectors. It acts as a lightweight "graphics card" for the
 hybrid quantum symbolic processor.
 """
 
-from typing import Dict
+from typing import Dict, Any
+from pathlib import Path
+import yaml
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
 
+DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "opal2_graphics.yaml"
+
+
 class GlyphGenerator:
     """Generate glyph structures using geometric algebra and quantum vectors."""
 
-    def __init__(self, dim: int = 8):
+    def __init__(self, dim: int = 8, config_path: str | None = None):
+        if config_path is None:
+            path = DEFAULT_CONFIG
+        else:
+            path = Path(config_path)
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                cfg: Dict[str, Any] = yaml.safe_load(f) or {}
+            dim = cfg.get("opal2", {}).get("graphics_card", {}).get("default_dim", dim)
         self.dim = dim
         self.ga = GeometricAlgebra()
 

@@ -16,7 +16,11 @@ def combine(output: str, packages: list[str]) -> str:
             subdir = os.path.join(tmp, f"package_{i}")
             os.makedirs(subdir, exist_ok=True)
             with zipfile.ZipFile(pkg) as z:
-                z.extractall(subdir)
+                for member in z.namelist():
+                    member_path = os.path.join(subdir, member)
+                    if not os.path.commonpath([subdir, member_path]).startswith(subdir):
+                        raise ValueError(f"Unsafe file path detected: {member}")
+                    z.extract(member, subdir)
         archive_path = shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)
     return archive_path
 

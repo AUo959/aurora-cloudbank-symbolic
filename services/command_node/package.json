@@ -1,12 +1,1 @@
-{
-  "name": "aurora-command-node",
-  "version": "1.0.0",
-  "main": "command_node.js",
-  "type": "commonjs",
-  "description": "Aurora Command Node v1.0 — Main CPU Interface for Orion Core",
-  "scripts": {
-    "start": "node command_node.js"
-  },
-  "author": "AUo959",
-  "license": "MIT"
-}
+{"name":"aurora-command-node","version":"1.0.0","main":"command_node.js","type":"commonjs","description":"Aurora Command Node v1.0 — Main CPU Interface for Orion Core","scripts":{"start":"node command_node.js"},"author":"AUo959","license":"MIT"}

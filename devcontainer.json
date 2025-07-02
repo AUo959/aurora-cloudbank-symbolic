@@ -1,17 +1,1 @@
-{
-  "name": "aurora-cloudbank",
-  "build": {
-    "dockerfile": ".devcontainer/Dockerfile",
-    "context": "."
-  },
-  "postCreateCommand": "python3 scripts/infallible_codespace_init.py",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
-      ]
-    }
-  }
-}
+{"name":"aurora-cloudbank","build":{"dockerfile":".devcontainer/Dockerfile","context":"."},"postCreateCommand":"python3 scripts/infallible_codespace_init.py","customizations":{"vscode":{"extensions":["ms-python.python","dbaeumer.vscode-eslint","esbenp.prettier-vscode"]}}}

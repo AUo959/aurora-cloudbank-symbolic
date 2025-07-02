@@ -58,11 +58,12 @@ class GITWiz:
 
     def precheck(self) -> bool:
         """Run repository status, lint and tests."""
-        self.status()
-        self.lint_python()
-        self.lint_js()
-        self.test()
-        return True
+        all_passed = True
+        all_passed &= self.status()
+        all_passed &= self.lint_python()
+        all_passed &= self.lint_js()
+        all_passed &= self.test()
+        return all_passed
 
     def fix(self) -> bool:
         """Apply automatic formatting and lint fixes."""

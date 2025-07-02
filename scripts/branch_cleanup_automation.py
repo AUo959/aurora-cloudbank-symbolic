@@ -6,7 +6,6 @@ Intelligently identifies and manages stale branches based on configurable rules.
 
 import argparse
 import datetime
-import json
 import re
 import subprocess
 import sys
@@ -41,7 +40,7 @@ class BranchCleanupManager:
         try:
             # Get branch info with dates
             cmd = ["git", "for-each-re", "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)", "refs/remotes/origin/"]
-            _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
             branches = []
             for line in result.stdout.strip().split('\n'):
@@ -82,7 +81,7 @@ class BranchCleanupManager:
             # Remove 'origin/' prefix for merge check
             branch_short = branch_name.replace('origin/', '')
             cmd = ["git", "merge-base", "--is-ancestor", f"origin/{branch_short}", "origin/main"]
-            _ = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except BaseException:
             return False
@@ -188,7 +187,7 @@ class BranchCleanupManager:
             # Remove 'origin/' prefix for deletion
             branch_short = branch_name.replace('origin/', '')
             cmd = ["git", "push", "origin", "--delete", branch_short]
-            _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error deleting branch {branch_name}: {e}")

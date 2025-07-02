@@ -165,8 +165,8 @@ class MaintenanceScheduler:
         """Clean up Python cache files"""
         try:
             # Find and count cache files
-            _ = subprocess.run(['find', '.', '-name', '*.pyc'],
-                               capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-name', '*.pyc'],
+                                    capture_output=True, text=True, shell=False, check=False)
             cache_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
 
             if cache_files:
@@ -185,11 +185,11 @@ class MaintenanceScheduler:
         """Check current repository health"""
         try:
             # Get repository size
-            _ = subprocess.run(['du', '-sm', '.'], capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(['du', '-sm', '.'], capture_output=True, text=True, shell=False, check=False)
             size_mb = float(result.stdout.split()[0])
 
             # Get file count
-            _ = subprocess.run(['find', '.', '-type', ''], capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-type', ''], capture_output=True, text=True, shell=False, check=False)
             file_count = len(result.stdout.strip().split('\n')) if result.stdout.strip() else 0
 
             # Check against thresholds
@@ -211,8 +211,8 @@ class MaintenanceScheduler:
             removed_count = 0
 
             for pattern in temp_patterns:
-                _ = subprocess.run(['find', '.', '-name', pattern],
-                                   capture_output=True, text=True, shell=False, check=False)
+                result = subprocess.run(['find', '.', '-name', pattern],
+                                        capture_output=True, text=True, shell=False, check=False)
                 temp_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
 
                 if temp_files:
@@ -227,8 +227,8 @@ class MaintenanceScheduler:
         """Clean up stale branches"""
         try:
             # Use the branch manager script
-            _ = subprocess.run(['python3', 'scripts/branch_manager.py', '--cleanup', '--dry-run'],
-                               capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(['python3', 'scripts/branch_manager.py', '--cleanup', '--dry-run'],
+                                    capture_output=True, text=True, shell=False, check=False)
 
             if result.returncode == 0:
                 return "Branch cleanup analysis completed"
@@ -241,8 +241,8 @@ class MaintenanceScheduler:
         """Optimize ZIP files"""
         try:
             # Count current ZIP files
-            _ = subprocess.run(['find', '.', '-name', '*.zip'],
-                               capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-name', '*.zip'],
+                                    capture_output=True, text=True, shell=False, check=False)
             zip_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
 
             return f"Found {len(zip_files)} ZIP files for optimization"
@@ -254,8 +254,8 @@ class MaintenanceScheduler:
         try:
             # This would run memory compression if script exists
             if os.path.exists('scripts/memory_compression_optimizer.py'):
-                _ = subprocess.run(['python3', 'scripts/memory_compression_optimizer.py', '--analyze'],
-                                   capture_output=True, text=True, shell=False, check=False)
+                result = subprocess.run(['python3', 'scripts/memory_compression_optimizer.py', '--analyze'],
+                                        capture_output=True, text=True, shell=False, check=False)
                 return "Memory compression analysis completed"
             else:
                 return "Memory compression script not found"
@@ -357,7 +357,7 @@ class MaintenanceScheduler:
                 schedule.run_pending()
                 time.sleep(60)  # Check every minute
 
-        _scheduler_thread = threading.Thread(target=scheduler_loop, daemon=True)
+        scheduler_thread = threading.Thread(target=scheduler_loop, daemon=True)
         scheduler_thread.start()
 
         return scheduler_thread
@@ -390,7 +390,7 @@ def main():
     elif args.monthly:
         scheduler.run_monthly_audit()
     elif args.start:
-        _scheduler_thread = scheduler.start_scheduler()
+        scheduler_thread = scheduler.start_scheduler()
         try:
             print("Maintenance scheduler started. Press Ctrl+C to stop.")
             while True:

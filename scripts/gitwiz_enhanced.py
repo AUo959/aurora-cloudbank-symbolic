@@ -18,7 +18,6 @@ import fnmatch
 import hashlib
 import json
 import logging
-import os
 import re
 import shutil
 import sqlite3
@@ -474,7 +473,7 @@ class EnhancedGITWiz:
             if file_path.is_file() and not any(part.startswith('.git') for part in file_path.parts):
                 try:
                     with open(file_path, 'rb') as f:
-                        file_hash = hashlib.md5(f.read()).hexdigest()
+                        _file_hash = hashlib.md5(f.read()).hexdigest()
                         if file_hash in file_hashes:
                             issues.append(f"Duplicate file: {file_path.name} (matches {file_hashes[file_hash].name})")
                         else:

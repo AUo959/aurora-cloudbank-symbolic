@@ -6,7 +6,6 @@ Comprehensive Python Lint Issue Fixer
 Fixes common Python linting issues that automated tools miss.
 """
 
-import os
 import re
 import sys
 from pathlib import Path

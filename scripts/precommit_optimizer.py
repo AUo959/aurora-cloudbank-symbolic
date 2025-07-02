@@ -5,7 +5,6 @@ Intelligent pre-commit hook configuration and optimization
 """
 
 import datetime
-import json
 import os
 import subprocess
 from typing import Any, Dict, List
@@ -280,8 +279,8 @@ class PreCommitOptimizer:
             import time
 
             start_time = time.time()
-            _ = subprocess.run(['pre-commit', 'run', '--all-files'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['pre-commit', 'run', '--all-files'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             total_time = time.time() - start_time
 
             benchmarks['total_time'] = total_time

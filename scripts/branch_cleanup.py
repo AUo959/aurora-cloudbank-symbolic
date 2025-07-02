@@ -9,7 +9,8 @@ import sys
 
 
 def get_merged_branches():
-    _ = subprocess.run(["git", "branch", "-r", "--merged", "origin/main"], capture_output=True, text=True, shell=False, check=False)
+    result = subprocess.run([
+        "git", "branch", "-r", "--merged", "origin/main"], capture_output=True, text=True, shell=False, check=False)
     merged = [line.strip() for line in result.stdout.splitlines() if line.strip() and not line.strip().endswith("/main")]
     return merged
 

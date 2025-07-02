@@ -6,7 +6,6 @@ Advanced Lint Issue Fixer - Phase 2
 Addresses specific Python linting issues that require manual intervention.
 """
 
-import os
 import re
 import sys
 from pathlib import Path

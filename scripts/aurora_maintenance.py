@@ -10,7 +10,6 @@ import argparse
 import datetime
 import json
 import logging
-import os
 import subprocess
 import sys
 import time
@@ -162,7 +161,8 @@ class MaintenanceScheduler:
             pycache_count = len(pycache_dirs)
 
             if pycache_count > 0:
-                subprocess.run(['find', '.', '-name', '__pycache__', '-type', 'd', '-exec', 'rm', '-r', '{}', '+'], cwd=self.repo_path, shell=False, check=False)
+                subprocess.run([
+                    'find', '.', '-name', '__pycache__', '-type', 'd', '-exec', 'rm', '-r', '{}', '+'], cwd=self.repo_path, shell=False, check=False)
 
             result['details'] = {
                 'pyc_files_removed': pyc_count,
@@ -283,8 +283,10 @@ class MaintenanceScheduler:
                 }
             else:
                 # Basic health check
-                size_result = subprocess.run(['du', '-sm', '.'], capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
-                files_result = subprocess.run(['find', '.', '-type', ''], capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                size_result = subprocess.run([
+                    'du', '-sm', '.'], capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                files_result = subprocess.run([
+                    'find', '.', '-type', ''], capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
                 repo_size = int(size_result.stdout.split()[0]) if size_result.returncode == 0 else 0
                 file_count = len(files_result.stdout.strip().split('\n')) if files_result.returncode == 0 else 0

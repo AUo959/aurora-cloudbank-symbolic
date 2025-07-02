@@ -9,7 +9,6 @@ It analyzes branch patterns, merge status, and age to recommend cleanup actions.
 
 import argparse
 import datetime
-import json
 import re
 import subprocess
 import sys
@@ -59,7 +58,7 @@ class BranchManager:
                 '--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)',
                 'refs/remotes/origin/'
             ]
-            _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
             if result.returncode != 0:
                 print(f"Error getting branch info: {result.stderr}")
@@ -113,7 +112,7 @@ class BranchManager:
         try:
             # Check if branch is merged into main
             cmd = ['git', 'merge-base', '--is-ancestor', branch_name, 'origin/main']
-            _ = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except (OSError, ValueError, RuntimeError):
             return False
@@ -205,7 +204,7 @@ class BranchManager:
                     try:
                         # Delete remote branch
                         cmd = ['git', 'push', 'origin', '--delete', branch_name.replace('origin/', '')]
-                        _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                        result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
                         if result.returncode == 0:
                             summary['deleted'].append(branch_name)

@@ -6,7 +6,6 @@ Intelligently manages repository branches with safety checks and automation.
 
 import argparse
 import datetime
-import json
 import subprocess
 import sys
 from pathlib import Path
@@ -49,7 +48,7 @@ class BranchCleanupManager:
                 '--format=%(refname:short)|%(committerdate:iso)|%(authorname)|%(ahead-behind:HEAD)',
                 'refs/remotes/origin/'
             ]
-            _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
             if result.returncode != 0:
                 print(f"Error getting branch info: {result.stderr}")

@@ -5,7 +5,6 @@ Repository Health Monitoring Script
 - Outputs a health report to repo_health_status.json
 """
 import json
-import os
 import subprocess
 
 

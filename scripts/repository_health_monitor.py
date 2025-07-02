@@ -99,8 +99,8 @@ class RepositoryHealthMonitor:
     def _get_repo_size_mb(self) -> float:
         """Get repository size in MB."""
         try:
-            _ = subprocess.run(['du', '-sm', '.'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['du', '-sm', '.'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 return float(result.stdout.split()[0])
         except (OSError, ValueError, RuntimeError):
@@ -119,8 +119,8 @@ class RepositoryHealthMonitor:
 
         try:
             # Count all files
-            _ = subprocess.run(['find', '.', '-type', ''],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-type', ''],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 files = result.stdout.strip().split('\n')
                 file_stats['file_count'] = len([f for f in files if f])
@@ -157,8 +157,8 @@ class RepositoryHealthMonitor:
                             file_stats['temp_files']['patterns'].get(pattern, 0) + 1
 
             # Count __pycache__ directories
-            _ = subprocess.run(['find', '.', '-name', '__pycache__', '-type', 'd'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-name', '__pycache__', '-type', 'd'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 dirs = [d for d in result.stdout.strip().split('\n') if d]
                 file_stats['cache_files']['pycache_dirs'] = len(dirs)
@@ -187,8 +187,8 @@ class RepositoryHealthMonitor:
         }
 
         try:
-            _ = subprocess.run(['git', 'branch', '-r'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['git', 'branch', '-r'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 branches = [b.strip() for b in result.stdout.split('\n') if b.strip()]
                 branch_stats['total'] = len(branches)
@@ -227,21 +227,21 @@ class RepositoryHealthMonitor:
 
         try:
             # Check for uncommitted changes
-            _ = subprocess.run(['git', 'status', '--porcelain'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['git', 'status', '--porcelain'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             git_metrics['uncommitted_changes'] = bool(result.stdout.strip())
 
             # Count recent commits
             today = datetime.date.today()
             week_ago = today - datetime.timedelta(days=7)
 
-            _ = subprocess.run(['git', 'log', '--since', week_ago.isoformat(, shell=False, check=False), '--oneline'],
-                               capture_output=True, text=True, cwd=self.repo_path)
+            result = subprocess.run(['git', 'log', '--since', week_ago.isoformat(), '--oneline'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_this_week'] = len(result.stdout.strip().split('\n'))
 
-            _ = subprocess.run(['git', 'log', '--since', today.isoformat(, shell=False, check=False), '--oneline'],
-                               capture_output=True, text=True, cwd=self.repo_path)
+            result = subprocess.run(['git', 'log', '--since', today.isoformat(), '--oneline'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_today'] = len(result.stdout.strip().split('\n'))
 

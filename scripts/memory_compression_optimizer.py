@@ -7,7 +7,6 @@ Advanced repository optimization with intelligent compression and deduplication
 import argparse
 import gzip
 import hashlib
-import json
 import os
 import shutil
 import subprocess
@@ -80,7 +79,7 @@ class MemoryCompressionOptimizer:
                     # Check for duplicates
                     if file_path.suffix.lower() in self.deduplication_config['check_extensions']:
                         if file_size > self.deduplication_config['min_file_size_kb'] * 1024:
-                            file_hash = self._calculate_file_hash(file_path)
+                            _file_hash = self._calculate_file_hash(file_path)
                             if file_hash:
                                 file_hashes[file_hash].append({
                                     'path': str(file_path),

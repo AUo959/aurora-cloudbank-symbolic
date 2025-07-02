@@ -185,8 +185,8 @@ class MaintenanceScheduler:
             processes_to_check = ['python', 'node', 'npm', 'jupyter', 'code']
 
             for proc_name in processes_to_check:
-                _ = subprocess.run(['pgrep', '-', proc_name],
-                                   capture_output=True, cwd=self.repo_path, shell=False, check=False)
+                result = subprocess.run(['pgrep', '-', proc_name],
+                                        capture_output=True, cwd=self.repo_path, shell=False, check=False)
                 if result.returncode == 0:
                     # Process found, check if it's related to our repo
                     pids = result.stdout.decode().strip().split('\n')
@@ -210,8 +210,8 @@ class MaintenanceScheduler:
         """Verify branch merge status before cleanup."""
         try:
             # Check if working directory is clean
-            _ = subprocess.run(['git', 'status', '--porcelain'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['git', 'status', '--porcelain'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             return not bool(result.stdout.strip())
         except (OSError, ValueError, RuntimeError):
             return False
@@ -264,8 +264,8 @@ class MaintenanceScheduler:
                 if self.config['safety_settings']['dry_run_mode']:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
-                    _ = subprocess.run(command, shell=True,
-                                       capture_output=True, text=True, cwd=self.repo_path)
+                    result = subprocess.run(command, shell=True,
+                                            capture_output=True, text=True, cwd=self.repo_path)
                     if result.returncode == 0:
                         cleaned_files += 1
 
@@ -312,13 +312,13 @@ class MaintenanceScheduler:
         """Basic health check without full monitoring system."""
         try:
             # Get repository size
-            _ = subprocess.run(['du', '-sm', '.'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['du', '-sm', '.'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             size_mb = float(result.stdout.split()[0]) if result.returncode == 0 else 0
 
             # Count files
-            _ = subprocess.run(['find', '.', '-type', ''],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-type', ''],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             file_count = len(result.stdout.strip().split('\n')) if result.returncode == 0 else 0
 
             return {
@@ -357,8 +357,8 @@ class MaintenanceScheduler:
         """Optimize ZIP file storage."""
         try:
             # Find ZIP files
-            _ = subprocess.run(['find', '.', '-name', '*.zip', '-type', 'f'],
-                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(['find', '.', '-name', '*.zip', '-type', 'f'],
+                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
 
             if result.returncode != 0:
                 return {'status': 'error', 'error': 'Failed to find ZIP files'}
@@ -393,16 +393,16 @@ class MaintenanceScheduler:
 
             # Check Python dependencies
             if (self.repo_path / 'requirements.txt').exists():
-                _ = subprocess.run(['pip', 'list', '--outdated', '--format=json'],
-                                   capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                result = subprocess.run(['pip', 'list', '--outdated', '--format=json'],
+                                        capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
                 if result.returncode == 0:
                     outdated = json.loads(result.stdout)
                     audit_results['python_outdated'] = len(outdated)
 
             # Check Node.js dependencies
             if (self.repo_path / 'package.json').exists():
-                _ = subprocess.run(['npm', 'outdated', '--json'],
-                                   capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                result = subprocess.run(['npm', 'outdated', '--json'],
+                                        capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
                 # npm outdated returns non-zero if there are outdated packages
                 if result.stdout:
                     try:

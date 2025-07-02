@@ -6,7 +6,6 @@ Intelligently manages repository branches with safety checks
 
 import argparse
 import datetime
-import json
 import subprocess
 from dataclasses import dataclass
 from typing import Dict, List, Tuple

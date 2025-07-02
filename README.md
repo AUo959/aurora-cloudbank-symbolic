@@ -45,6 +45,9 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 - **Environment**: Combined Node.js 20 + Python 3 for simulation continuity
 - **Memory Sealing**: Stateless configuration with CLI chain support
 
+Detailed architecture guides and visualization package information can be found in
+[the documentation index](docs/index.md).
+
 ## Features
 
 ### 🎮 **Live Demo Capabilities**
@@ -190,6 +193,10 @@ Use `python scripts/orion_backup_sync.py --help` to export and synchronize the s
 ## Module Integration Tool
 
 Use `python scripts/module_integrator.py --help` to merge new modules across branches. The tool validates anchor compliance, logs telemetry to `logs/telemetry.log`, and supports per-module rollback.
+
+## Package Combination Utility
+
+Use `python scripts/combine_package_versions.py OUTPUT.zip FILE1.zip FILE2.zip ...` to merge multiple archive versions into a single package. This helps consolidate legacy module bundles before deployment.
 
 ## Staff Node CI Helper
 

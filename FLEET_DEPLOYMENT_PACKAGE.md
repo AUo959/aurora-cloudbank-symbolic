@@ -51,12 +51,13 @@ All fleet actions are subject to:
    - Ethics review and operator approval are mandatory for all deployments
 
 . **Simulation Linkage (if R&D/Training)**
+
    - Assign mission to current simulation scenario or research module
    - Connect game/simulation engine for visual/audio and telemetry integration
 
 ### B. Deployment Execution
 
-1. **Deployment Order Filing**
+. **Deployment Order Filing**
    - Issue a deployment via the dashboard or:
 
 ```bash
@@ -74,7 +75,7 @@ POST /api/aurora/fleet/deploy
    - Aurora validates all fields for anchor/ethics compliance and logs the operation with a mission hash and operator ID
    - Security: All comms, telemetry, and API calls use encrypted channels; logs are immutable and access-controlled
 
-2. **Final Approval**
+1. **Final Approval**
    - FleetOps officer (or simulation agent, if automated) issues final GO/NO-GO
    - Aurora commits the deployment and initiates real-time mission monitoring
 
@@ -90,15 +91,15 @@ POST /api/aurora/fleet/deploy
 
 ### D. Post-Mission Protocol
 
-4. **Debrief & Recovery**
+3. **Debrief & Recovery**
    - All crew/agents submit mission reports; Aurora records post-mission status
    - Update fleet manifest for craft availability/maintenance
 
-5. **Data & Audit Sync**
+4. **Data & Audit Sync**
    - All mission data, logs, and results are synced to both L1 (operational DB) and L3 (symbolic/mesh archive)
    - Anchor/ethics hashes ensure provenance and traceability
 
-6. **Continuous Improvement**
+5. **Continuous Improvement**
    - Flag notable events for scenario replay, operator training, or R&D/game-dev feedback
 
 ---

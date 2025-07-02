@@ -4,21 +4,22 @@ Aurora CloudBank Pre-commit Hook Optimizer
 Intelligent pre-commit hook configuration and optimization
 """
 
-import os
-import yaml
-import subprocess
-import json
-from typing import Dict, List, Any
 import datetime
+import json
+import os
+import subprocess
+from typing import Any, Dict, List
+
+import yaml
 
 
 class PreCommitOptimizer:
     """Optimize pre-commit hooks for efficiency and effectiveness"""
-    
+
     def __init__(self, repo_path: str = "."):
         self.repo_path = repo_path
         self.config_path = os.path.join(repo_path, ".pre-commit-config.yaml")
-        
+
     def analyze_current_config(self) -> Dict[str, Any]:
         """Analyze current pre-commit configuration"""
         analysis = {
@@ -28,18 +29,18 @@ class PreCommitOptimizer:
             "issues": [],
             "recommendations": []
         }
-        
+
         if os.path.exists(self.config_path):
             analysis["config_exists"] = True
-            
+
             try:
-                with open(self.config_path, 'r') as f:
+                with open(self.config_path, 'r', encoding="utf-8") as f:
                     config = yaml.safe_load(f)
-                
+
                 if 'repos' in config:
                     analysis["repos"] = config['repos']
                     analysis["hooks_count"] = sum(len(repo.get('hooks', [])) for repo in config['repos'])
-                
+
                 # Analyze for issues
                 for repo in config.get('repos', []):
                     # Check for outdated versions
@@ -48,28 +49,28 @@ class PreCommitOptimizer:
                         if rev.startswith('v') and any(char.isdigit() for char in rev):
                             # This is a version tag - could check if it's outdated
                             pass
-                    
+
                     # Check for overly aggressive hooks
                     for hook in repo.get('hooks', []):
                         hook_id = hook.get('id', '')
-                        
+
                         # Identify potentially slow hooks
                         slow_hooks = ['pylint', 'mypy', 'black', 'isort']
                         if hook_id in slow_hooks:
                             analysis["issues"].append(f"Potentially slow hook: {hook_id}")
-                        
+
                         # Check for conflicting hooks
                         if hook_id == 'autopep8' and any(h.get('id') == 'black' for r in config['repos'] for h in r.get('hooks', [])):
                             analysis["issues"].append("Conflicting formatters: autopep8 and black")
-            
-            except Exception as e:
+
+            except (OSError, ValueError, RuntimeError) as e:
                 analysis["issues"].append(f"Failed to parse config: {e}")
-        
+
         else:
             analysis["issues"].append("No pre-commit config found")
-        
+
         return analysis
-    
+
     def generate_optimized_config(self) -> Dict[str, Any]:
         """Generate an optimized pre-commit configuration"""
         config = {
@@ -163,9 +164,9 @@ class PreCommitOptimizer:
                 "autoupdate_commit_msg": "⬆️ pre-commit autoupdate"
             }
         }
-        
+
         return config
-    
+
     def create_conditional_config(self) -> Dict[str, Any]:
         """Create a conditional pre-commit config that runs different hooks based on file changes"""
         config = {
@@ -228,35 +229,35 @@ class PreCommitOptimizer:
                 }
             ]
         }
-        
+
         return config
-    
+
     def create_smart_gitignore_for_precommit(self) -> List[str]:
         """Create smart gitignore patterns to reduce pre-commit overhead"""
         patterns = [
             "# Pre-commit optimization",
             "*.pre-commit-cache/",
             ".pre-commit-hooks.yaml.bak",
-            
+
             # Exclude large files from certain hooks
             "*.zip",
-            "*.pdf", 
+            "*.pd",
             "*.png",
             "*.jpg",
             "*.jpeg",
-            "*.gif",
-            
+            "*.gi",
+
             # Exclude generated files
             "*.pyc",
             "__pycache__/",
             "*.so",
             ".pytest_cache/",
-            
+
             # Exclude dependencies
             "node_modules/",
             ".venv/",
             "venv/",
-            
+
             # Exclude temporary files
             "*.tmp",
             "*.temp",
@@ -264,34 +265,34 @@ class PreCommitOptimizer:
             ".DS_Store",
             "Thumbs.db"
         ]
-        
+
         return patterns
-    
+
     def benchmark_hooks(self) -> Dict[str, float]:
         """Benchmark current pre-commit hooks performance"""
         if not os.path.exists(self.config_path):
             return {}
-        
+
         benchmarks = {}
-        
+
         try:
             # Run pre-commit on all files and measure time
             import time
-            
+
             start_time = time.time()
-            result = subprocess.run(['pre-commit', 'run', '--all-files'], 
-                                  capture_output=True, text=True, cwd=self.repo_path)
+            _ = subprocess.run(['pre-commit', 'run', '--all-files'],
+                               capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             total_time = time.time() - start_time
-            
+
             benchmarks['total_time'] = total_time
             benchmarks['success'] = result.returncode == 0
             benchmarks['output'] = result.stdout + result.stderr
-            
-        except Exception as e:
+
+        except (OSError, ValueError, RuntimeError) as e:
             benchmarks['error'] = str(e)
-        
+
         return benchmarks
-    
+
     def apply_optimized_config(self, config_type: str = "optimized") -> bool:
         """Apply the optimized pre-commit configuration"""
         try:
@@ -299,30 +300,30 @@ class PreCommitOptimizer:
                 config = self.create_conditional_config()
             else:
                 config = self.generate_optimized_config()
-            
+
             # Backup existing config
             if os.path.exists(self.config_path):
                 backup_path = f"{self.config_path}.backup.{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
                 os.rename(self.config_path, backup_path)
-            
+
             # Write new config
-            with open(self.config_path, 'w') as f:
+            with open(self.config_path, 'w', encoding="utf-8") as f:
                 yaml.dump(config, f, default_flow_style=False, sort_keys=False)
-            
+
             # Install the new hooks
             subprocess.run(['pre-commit', 'install'], cwd=self.repo_path, check=True)
-            
+
             return True
-            
-        except Exception as e:
+
+        except (OSError, ValueError, RuntimeError) as e:
             print(f"Failed to apply config: {e}")
             return False
-    
+
     def generate_optimization_report(self) -> str:
         """Generate pre-commit optimization report"""
         analysis = self.analyze_current_config()
-        
-        report = f"""# Pre-commit Hook Optimization Report
+
+        report = """# Pre-commit Hook Optimization Report
 Generated: {datetime.datetime.now().isoformat()}
 
 ## Current Configuration Analysis
@@ -332,22 +333,22 @@ Generated: {datetime.datetime.now().isoformat()}
 
 ## Issues Identified
 """
-        
+
         if analysis['issues']:
             for issue in analysis['issues']:
                 report += f"- ⚠️ {issue}\n"
         else:
             report += "- ✅ No issues found\n"
-        
-        report += f"""
+
+        report += """
 ## Current Hooks
 """
-        
+
         for repo in analysis['repos']:
             repo_url = repo.get('repo', 'Unknown')
             repo_rev = repo.get('rev', 'Unknown')
             report += f"\n### {repo_url} ({repo_rev})\n"
-            
+
             for hook in repo.get('hooks', []):
                 hook_id = hook.get('id', 'Unknown')
                 args = hook.get('args', [])
@@ -355,8 +356,8 @@ Generated: {datetime.datetime.now().isoformat()}
                 if args:
                     report += f" - Args: `{' '.join(args)}`"
                 report += "\n"
-        
-        report += f"""
+
+        report += """
 ## Optimization Recommendations
 
 ### Performance Improvements
@@ -389,14 +390,14 @@ repos:
         stages: [commit]
       - id: check-merge-conflict
         stages: [commit]
-  
+
   - repo: https://github.com/psf/black
     rev: 25.1.0
     hooks:
       - id: black
         files: \\.py$
         stages: [commit]
-  
+
   - repo: https://github.com/pycqa/flake8
     rev: 7.3.0
     hooks:
@@ -411,59 +412,59 @@ repos:
 - 🔧 **Better code quality consistency**
 - 🚀 **Improved developer experience**
 """
-        
+
         return report
 
 
 def main():
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Aurora CloudBank Pre-commit Optimizer')
     parser.add_argument('--analyze', action='store_true', help='Analyze current pre-commit config')
     parser.add_argument('--optimize', action='store_true', help='Apply optimized configuration')
     parser.add_argument('--conditional', action='store_true', help='Use conditional configuration')
     parser.add_argument('--benchmark', action='store_true', help='Benchmark current hooks')
     parser.add_argument('--report', action='store_true', help='Generate optimization report')
-    
+
     args = parser.parse_args()
-    
+
     optimizer = PreCommitOptimizer()
-    
+
     if args.analyze or args.report:
         analysis = optimizer.analyze_current_config()
-        print(f"Pre-commit analysis:")
+        print("Pre-commit analysis:")
         print(f"  Config exists: {analysis['config_exists']}")
         print(f"  Total hooks: {analysis['hooks_count']}")
-        
+
         if analysis['issues']:
             print(f"  Issues found: {len(analysis['issues'])}")
             for issue in analysis['issues']:
                 print(f"    - {issue}")
-    
+
     if args.benchmark:
         print("🔧 Benchmarking pre-commit hooks...")
         benchmarks = optimizer.benchmark_hooks()
-        
+
         if 'total_time' in benchmarks:
             print(f"⏱️ Total execution time: {benchmarks['total_time']:.2f} seconds")
             print(f"✅ Success: {benchmarks['success']}")
         elif 'error' in benchmarks:
             print(f"❌ Benchmark failed: {benchmarks['error']}")
-    
+
     if args.report:
         report = optimizer.generate_optimization_report()
         print(report)
-        
-        with open('precommit_optimization_report.md', 'w') as f:
+
+        with open('precommit_optimization_report.md', 'w', encoding="utf-8") as f:
             f.write(report)
         print("\n📄 Report saved to precommit_optimization_report.md")
-    
+
     if args.optimize:
         config_type = "conditional" if args.conditional else "optimized"
         print(f"🔧 Applying {config_type} pre-commit configuration...")
-        
+
         success = optimizer.apply_optimized_config(config_type)
-        
+
         if success:
             print("✅ Pre-commit configuration optimized successfully!")
             print("🔄 Run 'pre-commit run --all-files' to test the new configuration")

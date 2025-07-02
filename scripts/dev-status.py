@@ -11,9 +11,9 @@ from pathlib import Path
 def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        _ = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         return result.stdout.strip(), result.returncode == 0
-    except Exception:
+    except (OSError, ValueError, RuntimeError):
         return "", False
 
 

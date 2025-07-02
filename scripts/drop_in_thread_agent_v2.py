@@ -9,9 +9,7 @@ an alias (same as the folder) and optionally a live context directive.
 import argparse
 import json
 
-from modules.reflective_autonomy.threadcore_tagging import (
-    PROJECT_CATEGORIES,
-)
+from modules.reflective_autonomy.threadcore_tagging import PROJECT_CATEGORIES
 from modules.reflective_autonomy.threadcore_tagging import tag_thread_context as base_tag_thread_context
 
 # Live context directive presented when include_directive is True

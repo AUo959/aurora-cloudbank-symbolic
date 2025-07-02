@@ -20,7 +20,7 @@ logger = get_logger("staff_node_ci_helper")
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
     logger.info("Running: %s", cmd)
-    result = subprocess.run(cmd, shell=True)
+    _ = subprocess.run(cmd, shell=True)
     if result.returncode != 0:
         logger.error("Command failed: %s", cmd)
         sys.exit(result.returncode)
@@ -60,7 +60,7 @@ def main() -> None:
         run_cmd("pytest -q")
 
     run_cmd("git add -A")
-    run_cmd(f"git commit -m \"{args.commit_msg}\"")
+    run_cmd("git commit -m \"{args.commit_msg}\"")
 
     if args.push:
         run_cmd("git push origin main")

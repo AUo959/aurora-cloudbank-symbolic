@@ -50,7 +50,7 @@ def sort_file(file_path: str, dry_run: bool = False):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-    except Exception as e:
+    except (OSError, ValueError, RuntimeError) as e:
         logging.error("Error reading '%s': %s", file_path, e)
         print(f"Error reading '{file_path}': {e}")
         return
@@ -83,7 +83,7 @@ def sort_file(file_path: str, dry_run: bool = False):
             shutil.move(file_path, target_file_path)
             logging.info("Moved '%s' to '%s' (Priority: %s)", file_path, target_file_path, classification["priority"])
             print(f"Moved '{file_path}' to '{target_file_path}' (Priority: {classification['priority']})")
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             logging.error("Error moving '%s': %s", file_path, e)
             print(f"Error moving '{file_path}': {e}")
 

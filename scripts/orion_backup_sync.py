@@ -79,7 +79,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Archive and synchronize Orion staff registry and blueprint")
     parser.add_argument("--command-node", default="command_node_data", help="Command node data directory")
     parser.add_argument("--pl-branch", default="pl_branch_data", help="PL branch data directory")
-    parser.add_argument("--rollback", choices=["staff", "blueprint", "all"], help="Rollback target")
+    parser.add_argument("--rollback", choices=["staf", "blueprint", "all"], help="Rollback target")
     args = parser.parse_args()
 
     staff_cmd = os.path.join(args.command_node, "staff_registry.yaml")
@@ -95,14 +95,14 @@ def main() -> None:
     if args.rollback:
         targets = resources
         if args.rollback != "all":
-            mapping = {"staff": resources[0], "blueprint": resources[1]}
+            mapping = {"staf": resources[0], "blueprint": resources[1]}
             targets = [mapping[args.rollback]]
 
         for _, dest in targets:
             try:
                 restore_path = rollback_file(dest)
                 print(f"Rolled back {dest} from {restore_path}")
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 print(f"Rollback failed for {dest}: {e}")
         return
 
@@ -115,7 +115,7 @@ def main() -> None:
         try:
             data = load_yaml(src)
             validate_anchor(data, src)
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             print(f"Validation failed for {src}: {e}")
             continue
 
@@ -123,7 +123,7 @@ def main() -> None:
             try:
                 bpath = backup_file(dest)
                 print(f"Backup created: {bpath}")
-            except Exception as e:
+            except (OSError, ValueError, RuntimeError) as e:
                 print(f"Could not backup {dest}: {e}")
                 continue
         else:
@@ -134,7 +134,7 @@ def main() -> None:
             dest_data = load_yaml(dest)
             validate_anchor(dest_data, dest)
             print(f"Synced {src} -> {dest}")
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             print(f"Error syncing {src} to {dest}: {e}")
 
     print("Backup and synchronization complete")

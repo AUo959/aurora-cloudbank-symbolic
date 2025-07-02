@@ -38,22 +38,14 @@ class AuroraSecurityUtils {
             return '';
         }
 
-        // Remove script tags and event handlers
-        let sanitized;
-        let previous = text;
-        do {
-            sanitized = previous.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-            previous = sanitized;
-        } while (sanitized !== previous);
+        // Use DOMPurify to sanitize the input
+        const DOMPurify = require('dompurify');
+        const { JSDOM } = require('jsdom');
+        const window = new JSDOM('').window;
+        const purify = DOMPurify(window);
 
-        do {
-            sanitized = previous.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
-            previous = sanitized;
-        } while (sanitized !== previous);
-        sanitized = sanitized.replace(/javascript:/gi, '');
-        sanitized = sanitized.replace(/data:text\/html/gi, '');
-
-        return this.escapeHtml(sanitized);
+        const sanitized = purify.sanitize(text);
+        return sanitized;
     }
 
     /**

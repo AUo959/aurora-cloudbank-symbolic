@@ -7,10 +7,10 @@ This script performs comprehensive repository cleanup and health maintenance
 using GITWiz intelligence and automation.
 """
 
-import os
 import sys
 import subprocess
 import json
+import argparse
 from pathlib import Path
 from datetime import datetime
 import shutil
@@ -307,8 +307,6 @@ class GITWizCleanup:
 
 def main():
     """Main entry point."""
-    import argparse
-
     parser = argparse.ArgumentParser(
         description="GITWiz Repository Cleanup Tool"
     )
@@ -345,7 +343,7 @@ def main():
     except KeyboardInterrupt:
         print("\n⚠️ Cleanup interrupted by user")
         sys.exit(1)
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         print(f"❌ Error during cleanup: {e}")
         sys.exit(1)
 

@@ -401,25 +401,29 @@ class LintCleanupManager:
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
 
-            if result.stdout:
-                issues = json.loads(result.stdout)
-                for issue in issues:
-                    lint_issue = LintIssue(
-                        file_path=issue.get("path", ""),
-                        line_number=issue.get("line", 0),
-                        column=issue.get("column", 0),
-                        severity=issue.get("type", "warning"),
-                        rule_code=issue.get("symbol", ""),
-                        message=issue.get("message", ""),
-                        tool="pylint"
-                    )
-                    self.discovered_issues.append(lint_issue)
+            if result.stdout and result.stdout.strip():
+                try:
+                    issues = json.loads(result.stdout)
+                    for issue in issues:
+                        lint_issue = LintIssue(
+                            file_path=issue.get("path", ""),
+                            line_number=issue.get("line", 0),
+                            column=issue.get("column", 0),
+                            severity=issue.get("type", "warning"),
+                            rule_code=issue.get("symbol", ""),
+                            message=issue.get("message", ""),
+                            tool="pylint"
+                        )
+                        self.discovered_issues.append(lint_issue)
 
-                return {"issues_found": len(issues), "raw_output": result.stdout}
+                    return {"issues_found": len(issues), "raw_output": result.stdout}
+                except json.JSONDecodeError:
+                    logger.warning(f"Pylint returned invalid JSON: {result.stdout[:100]}...")
+                    return {"issues_found": 0, "raw_output": result.stdout, "warning": "Invalid JSON output"}
 
-            return {"issues_found": 0, "raw_output": result.stderr}
+            return {"issues_found": 0, "raw_output": result.stderr or "No output from pylint"}
 
-        except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+        except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"Pylint analysis failed: {e}")
             return {"error": str(e)}
 

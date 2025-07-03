@@ -393,76 +393,154 @@ class LintCleanupManager:
         return "\n".join(report_sections)
 
     def _run_pylint(self, target_paths: List[str]) -> Dict[str, Any]:
-        """Run pylint analysis."""
+        """Run pylint analysis with batch processing to avoid argument list too long error."""
         try:
-            cmd = ["pylint", "--output-format=json"] + [
-                str(Path(p)) for p in target_paths if Path(p).suffix == ".py"
-            ]
+            # Collect Python files first
+            python_files = []
+            for path in target_paths:
+                path_obj = Path(path)
+                if path_obj.is_file() and path_obj.suffix == ".py":
+                    python_files.append(str(path_obj))
+                elif path_obj.is_dir():
+                    python_files.extend([str(f) for f in path_obj.rglob("*.py")])
+            
+            # Skip if no Python files found
+            if not python_files:
+                return {"issues_found": 0, "message": "No Python files found for pylint analysis"}
+            
+            # Process files in batches to avoid "Argument list too long" error
+            batch_size = 50  # Process 50 files at a time
+            all_issues = []
+            total_output = []
+            
+            for i in range(0, len(python_files), batch_size):
+                batch_files = python_files[i:i+batch_size]
+                cmd = ["pylint", "--output-format=json"] + batch_files
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
 
-            if result.stdout and result.stdout.strip():
-                try:
-                    issues = json.loads(result.stdout)
-                    for issue in issues:
-                        lint_issue = LintIssue(
-                            file_path=issue.get("path", ""),
-                            line_number=issue.get("line", 0),
-                            column=issue.get("column", 0),
-                            severity=issue.get("type", "warning"),
-                            rule_code=issue.get("symbol", ""),
-                            message=issue.get("message", ""),
-                            tool="pylint"
-                        )
-                        self.discovered_issues.append(lint_issue)
+                # Check if pylint returned "No files to lint" message
+                if "No files to lint" in result.stdout or not result.stdout.strip():
+                    continue
 
-                    return {"issues_found": len(issues), "raw_output": result.stdout}
-                except json.JSONDecodeError:
-                    logger.warning(f"Pylint returned invalid JSON: {result.stdout[:100]}...")
-                    return {"issues_found": 0, "raw_output": result.stdout, "warning": "Invalid JSON output"}
+                if result.stdout and result.stdout.strip():
+                    try:
+                        batch_issues = json.loads(result.stdout)
+                        all_issues.extend(batch_issues)
+                        total_output.append(result.stdout)
+                    except json.JSONDecodeError:
+                        logger.warning(f"Pylint batch returned invalid JSON: {result.stdout[:100]}...")
+                        total_output.append(result.stdout)
 
-            return {"issues_found": 0, "raw_output": result.stderr or "No output from pylint"}
+            # Process all discovered issues
+            for issue in all_issues:
+                lint_issue = LintIssue(
+                    file_path=issue.get("path", ""),
+                    line_number=issue.get("line", 0),
+                    column=issue.get("column", 0),
+                    severity=issue.get("type", "warning"),
+                    rule_code=issue.get("symbol", ""),
+                    message=issue.get("message", ""),
+                    tool="pylint"
+                )
+                self.discovered_issues.append(lint_issue)
+
+            return {
+                "issues_found": len(all_issues), 
+                "files_processed": len(python_files),
+                "batches_processed": len(range(0, len(python_files), batch_size)),
+                "raw_output": "\n".join(total_output) if total_output else "No issues found"
+            }
 
         except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"Pylint analysis failed: {e}")
             return {"error": str(e)}
 
     def _run_flake8(self, target_paths: List[str]) -> Dict[str, Any]:
-        """Run flake8 analysis."""
+        """Run flake8 analysis with batch processing to avoid argument list too long error."""
         try:
-            cmd = ["flake8", "--format=json"] + [
-                str(Path(p)) for p in target_paths if Path(p).suffix == ".py"
-            ]
+            # Collect Python files first
+            python_files = []
+            for path in target_paths:
+                path_obj = Path(path)
+                if path_obj.is_file() and path_obj.suffix == ".py":
+                    python_files.append(str(path_obj))
+                elif path_obj.is_dir():
+                    python_files.extend([str(f) for f in path_obj.rglob("*.py")])
+            
+            # Skip if no Python files found
+            if not python_files:
+                return {"issues_found": 0, "message": "No Python files found for flake8 analysis"}
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            # Process files in batches to avoid "Argument list too long" error
+            batch_size = 50  # Process 50 files at a time
+            all_output = []
+            total_issues = 0
+            
+            for i in range(0, len(python_files), batch_size):
+                batch_files = python_files[i:i+batch_size]
+                cmd = ["flake8", "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s"] + batch_files
 
-            # Parse flake8 output (format may vary)
-            issues_count = len(result.stdout.splitlines()) if result.stdout else 0
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
 
-            return {"issues_found": issues_count, "raw_output": result.stdout}
+                if result.stdout:
+                    batch_issues = len(result.stdout.splitlines())
+                    total_issues += batch_issues
+                    all_output.append(result.stdout)
+
+            return {
+                "issues_found": total_issues, 
+                "files_processed": len(python_files),
+                "batches_processed": len(range(0, len(python_files), batch_size)),
+                "raw_output": "\n".join(all_output) if all_output else "No issues found"
+            }
 
         except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"Flake8 analysis failed: {e}")
             return {"error": str(e)}
 
     def _run_bandit(self, target_paths: List[str]) -> Dict[str, Any]:
-        """Run bandit security analysis."""
+        """Run bandit security analysis using directory scanning for efficiency."""
         try:
-            cmd = ["bandit", "-f", "json", "-r"] + [
-                str(Path(p)) for p in target_paths if Path(p).is_dir()
-            ]
+            # Use directory-based scanning to avoid argument list issues
+            python_dirs = set()
+            python_files = []
+            
+            for path in target_paths:
+                path_obj = Path(path)
+                if path_obj.is_file() and path_obj.suffix == ".py":
+                    python_files.append(str(path_obj))
+                elif path_obj.is_dir():
+                    # Check if directory contains Python files
+                    if any(path_obj.rglob("*.py")):
+                        python_dirs.add(str(path_obj))
+            
+            # Prefer directory scanning over individual files
+            targets = list(python_dirs) if python_dirs else python_files[:20]  # Limit individual files
+            
+            # Skip if no Python targets found
+            if not targets:
+                return {"issues_found": 0, "message": "No Python files or directories found for bandit analysis"}
+
+            cmd = ["bandit", "-f", "json", "-r"] + targets
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
 
-            if result.stdout:
+            if result.stdout and result.stdout.strip():
                 try:
                     bandit_data = json.loads(result.stdout)
                     issues_count = len(bandit_data.get("results", []))
-                    return {"issues_found": issues_count, "raw_output": result.stdout}
+                    return {
+                        "issues_found": issues_count, 
+                        "targets_scanned": len(targets),
+                        "scan_type": "directories" if python_dirs else "files",
+                        "raw_output": result.stdout
+                    }
                 except json.JSONDecodeError:
-                    pass
+                    logger.warning(f"Bandit returned invalid JSON: {result.stdout[:100]}...")
+                    return {"issues_found": 0, "raw_output": result.stdout, "warning": "Invalid JSON output"}
 
-            return {"issues_found": 0, "raw_output": result.stderr}
+            return {"issues_found": 0, "raw_output": result.stderr or "No security issues found"}
 
         except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"Bandit analysis failed: {e}")

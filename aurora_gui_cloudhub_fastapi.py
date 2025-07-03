@@ -1,20 +1,20 @@
 import logging
 import uuid
 from pathlib import Path
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import numpy as np
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from modules.symbolic_core import get_mcp_bridge_core
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 from modules.symbolic_core.mcp_security import mcp_security, mcp_security_dependency
-from modules.symbolic_core.quantum_vsa import quantum_symbolic_vector, QuantumSymbolicVector
+from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector, quantum_symbolic_vector
 
 app = FastAPI(title="Aurora Quantum VSA Playground")
 
@@ -535,9 +535,10 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
     Generate and analyze a quantum circuit for symbolic operations.
     """
     try:
+        import hashlib
+
         from qiskit import QuantumCircuit
         from qiskit_aer import AerSimulator
-        import hashlib
 
         # Create circuit based on symbol hash
         h = int(hashlib.md5(req.symbol.encode()).hexdigest(), 16) % (2**32)

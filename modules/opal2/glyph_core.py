@@ -6,13 +6,13 @@ and quantum symbolic vectors. It acts as a lightweight "graphics card" for the
 hybrid quantum symbolic processor.
 """
 
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any, Dict
+
 import yaml
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
-
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "opal2_graphics.yaml"
 

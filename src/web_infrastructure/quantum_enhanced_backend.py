@@ -3,11 +3,12 @@
 Aurora CloudBank Quantum Enhanced Web Backend
 Never-before-conceived multi-agent quantum hybrid infrastructure
 """
-from fastapi import FastAPI, WebSocket
-from fastapi.staticfiles import StaticFiles
 import asyncio
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
+from fastapi import FastAPI, WebSocket
+from fastapi.staticfiles import StaticFiles
 
 
 class QuantumEnhancedBackend:

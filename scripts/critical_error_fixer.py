@@ -30,7 +30,7 @@ def fix_undefined_result_variables(file_path: str) -> bool:
         # Look for subprocess calls that were changed to '_'
         if '_ = subprocess.run(' in line:
             # Change back to result =
-            line = line.replace('_ = subprocess.run(', 'result = subprocess.run(')
+            line = line.replace('_ = subprocess.run(', 'result = subprocess.run(', shell=False, check=False)
 
         # Look for other subprocess patterns
         elif '_scheduler_thread = ' in line:

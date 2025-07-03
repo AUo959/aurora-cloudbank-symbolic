@@ -1,9 +1,4 @@
-from modules.cask_tool import (
-    load_specifications,
-    load_risk_assessment,
-    load_vs_sota,
-    generate_architecture_chart,
-)
+from modules.cask_tool import generate_architecture_chart, load_risk_assessment, load_specifications, load_vs_sota
 
 
 def test_load_specifications():

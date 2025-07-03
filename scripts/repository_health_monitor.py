@@ -235,12 +235,12 @@ class RepositoryHealthMonitor:
             today = datetime.date.today()
             week_ago = today - datetime.timedelta(days=7)
 
-            result = subprocess.run(['git', 'log', '--since', week_ago.isoformat(), '--oneline'],
+            result = subprocess.run(['git', 'log', '--since', week_ago.isoformat(, shell=False, check=False), '--oneline'],
                                     capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_this_week'] = len(result.stdout.strip().split('\n'))
 
-            result = subprocess.run(['git', 'log', '--since', today.isoformat(), '--oneline'],
+            result = subprocess.run(['git', 'log', '--since', today.isoformat(, shell=False, check=False), '--oneline'],
                                     capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_today'] = len(result.stdout.strip().split('\n'))

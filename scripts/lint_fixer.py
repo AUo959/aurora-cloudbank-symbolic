@@ -52,7 +52,7 @@ def fix_subprocess_calls(file_path: str) -> bool:
         if 'shell=' not in args and 'check=' not in args:
             return f'subprocess.run({args}, shell=False, check=False)'
         return match.group(0)
-    
+
     def fix_subprocess_call(match):
         args = match.group(1)
         if 'shell=' not in args:

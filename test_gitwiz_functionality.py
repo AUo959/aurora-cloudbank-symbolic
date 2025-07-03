@@ -3,9 +3,10 @@
 Quick test script for GITWiz Enhanced functionality
 """
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def test_command(cmd, description):
     """Test a command and report results."""

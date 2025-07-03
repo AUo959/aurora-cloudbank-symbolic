@@ -4,7 +4,7 @@ Revolutionary interaction paradigms for quantum-symbolic systems
 """
 
 import asyncio
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class MultiModalInteractionSystem:

@@ -54,6 +54,13 @@ except ImportError:
         def analyze_repository_structure(self): return {}
         def generate_reorganization_plan(self, analysis): return {}
 
+# Import the new lint cleanup manager
+try:
+    from gitwiz_lint_cleanup_manager import LintCleanupManager
+except ImportError:
+    # Fallback if not available
+    LintCleanupManager = None
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -305,6 +312,7 @@ class EnhancedGITWiz:
         # Initialize new enhanced components (lazy loading)
         self._dependency_manager = None
         self._workflow_optimizer = None
+        self._lint_cleanup_manager = None
 
         # Load common issue patterns
         self._load_common_patterns()
@@ -326,6 +334,16 @@ class EnhancedGITWiz:
         if self._workflow_optimizer is None:
             self._workflow_optimizer = WorkflowOptimizer(self.project_root)
         return self._workflow_optimizer
+
+    @property
+    def lint_cleanup_manager(self):
+        """Lazy-loaded lint cleanup manager."""
+        if self._lint_cleanup_manager is None and LintCleanupManager:
+            self._lint_cleanup_manager = LintCleanupManager(
+                project_root=self.project_root,
+                memory_db=self.memory_db
+            )
+        return self._lint_cleanup_manager
 
     def _load_common_patterns(self):
         """Load pre-defined common issue patterns."""

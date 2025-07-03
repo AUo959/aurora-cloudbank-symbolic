@@ -1,0 +1,173 @@
+name: GitWiz Quality Gates
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install isort black pylint flake8 bandit autopep8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        
+    - name: Install Node.js dependencies
+      run: |
+        npm install -g markdownlint-cli prettier eslint
+        
+    - name: GitWiz Status Check
+      run: |
+        python scripts/gitwiz_integrated_command.py status
+        
+    - name: GitWiz Comprehensive Lint Scan
+      run: |
+        python scripts/gitwiz_integrated_command.py lint-scan --detailed --target scripts/
+        
+    - name: GitWiz Quality Check
+      run: |
+        python scripts/gitwiz_integrated_command.py quality-check --output json > quality_report.json
+        
+    - name: Upload Quality Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: quality-report
+        path: quality_report.json
+        
+    - name: GitWiz Maintenance Check
+      if: github.event_name == 'schedule'
+      run: |
+        python scripts/gitwiz_integrated_command.py maintenance --aggressive --output json > maintenance_report.json
+        
+    - name: Upload Maintenance Report
+      if: github.event_name == 'schedule'
+      uses: actions/upload-artifact@v3
+      with:
+        name: maintenance-report
+        path: maintenance_report.json
+        
+    - name: Security Scan
+      run: |
+        python -m bandit -r scripts/ -f json -o bandit_report.json || true
+        
+    - name: Upload Security Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-report
+        path: bandit_report.json
+        
+    - name: Code Coverage Analysis
+      run: |
+        # Add coverage analysis if tests are present
+        echo "Code coverage analysis placeholder"
+        
+    - name: Performance Benchmarks
+      if: github.event_name == 'pull_request'
+      run: |
+        # Add performance benchmarking
+        echo "Performance benchmarks placeholder"
+        
+    - name: Generate Summary Report
+      run: |
+        python scripts/generate_ci_summary.py
+        
+    - name: Comment PR with Results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          if (fs.existsSync('ci_summary.md')) {
+            const summary = fs.readFileSync('ci_summary.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
+          }
+
+  security-audit:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+        
+    - name: Run Security Audit
+      run: |
+        python scripts/gitwiz_integrated_command.py lint-scan --target scripts/ > security_scan.txt
+        bandit -r . -f json -o bandit_security.json || true
+        
+    - name: Upload Security Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-audit
+        path: |
+          security_scan.txt
+          bandit_security.json
+
+  deployment-quality-check:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [quality-gate]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        pip install isort black pylint flake8 bandit autopep8
+        
+    - name: Pre-deployment Quality Gate
+      run: |
+        python scripts/gitwiz_integrated_command.py workflow --type enhanced --aggressive
+        
+    - name: Generate Deployment Report
+      run: |
+        python scripts/gitwiz_integrated_command.py status > deployment_status.json
+        
+    - name: Upload Deployment Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-report
+        path: deployment_status.json

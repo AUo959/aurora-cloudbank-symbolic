@@ -133,13 +133,36 @@ class LintCleanupManager:
 
     def _detect_available_tools(self) -> Dict[str, bool]:
         """Detect which lint/cleanup tools are available."""
-        tools_to_check = [
-            "autopep8", "isort", "pylint", "flake8", "bandit", "black",
-            "markdownlint", "prettier", "eslint"
-        ]
-        
         available = {}
-        for tool in tools_to_check:
+        
+        # Python tools - check both as commands and modules
+        python_tools = {
+            "autopep8": ["autopep8", "--version"],
+            "isort": [sys.executable, "-m", "isort", "--version"],
+            "pylint": ["pylint", "--version"],
+            "flake8": ["flake8", "--version"],
+            "bandit": ["bandit", "--version"],
+            "black": [sys.executable, "-m", "black", "--version"]
+        }
+        
+        for tool, cmd in python_tools.items():
+            try:
+                result = subprocess.run(cmd, capture_output=True, check=True, timeout=10)
+                available[tool] = True
+            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+                # Try alternative command for some tools
+                if tool == "black":
+                    try:
+                        subprocess.run(["black", "--version"], capture_output=True, check=True, timeout=10)
+                        available[tool] = True
+                    except:
+                        available[tool] = False
+                else:
+                    available[tool] = False
+        
+        # JavaScript/Markdown tools
+        other_tools = ["markdownlint", "prettier", "eslint"]
+        for tool in other_tools:
             try:
                 subprocess.run([tool, "--version"], 
                              capture_output=True, check=True, timeout=10)
@@ -241,6 +264,10 @@ class LintCleanupManager:
         if self.available_tools.get("isort", False):
             isort_result = self._run_isort(dry_run)
             workflow_results["stages"]["isort"] = isort_result
+        
+        if self.available_tools.get("black", False):
+            black_result = self._run_black(dry_run)
+            workflow_results["stages"]["black"] = black_result
         
         # Stage 2: Custom lint fixer
         logger.info("🛠️ Stage 2: Custom lint fixes...")
@@ -581,7 +608,7 @@ class LintCleanupManager:
     def _run_isort(self, dry_run: bool) -> Dict[str, Any]:
         """Run isort import sorting."""
         try:
-            cmd = ["isort"]
+            cmd = [sys.executable, "-m", "isort"]
             if dry_run:
                 cmd.extend(["--check-only", "--diff"])
             else:
@@ -601,6 +628,72 @@ class LintCleanupManager:
             
         except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"isort failed: {e}")
+            return {"error": str(e)}
+
+    def _run_black(self, dry_run: bool) -> Dict[str, Any]:
+        """Run black code formatting."""
+        try:
+            cmd = [sys.executable, "-m", "black"]
+            if dry_run:
+                cmd.extend(["--check", "--diff"])
+            else:
+                cmd.append("--safe")
+            
+            cmd.extend(["--line-length", "88", str(self.project_root)])
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            
+            # Count files that would be reformatted
+            changes_count = result.stdout.count("would reformat") if dry_run else 0
+            files_reformatted = result.stdout.count("reformatted") if not dry_run else 0
+            
+            return {
+                "tool": "black",
+                "changes_detected" if dry_run else "fixes_applied": changes_count or files_reformatted,
+                "output": result.stdout[:1000]
+            }
+            
+        except (subprocess.TimeoutExpired, Exception) as e:
+            logger.error(f"black failed: {e}")
+            return {"error": str(e)}
+
+    def _run_prettier(self, target_paths: List[str], dry_run: bool) -> Dict[str, Any]:
+        """Run prettier formatting for JavaScript/JSON/Markdown files."""
+        try:
+            # Find relevant files
+            relevant_files = []
+            for path in target_paths:
+                path_obj = Path(path)
+                if path_obj.is_file():
+                    if path_obj.suffix in [".js", ".jsx", ".ts", ".tsx", ".json", ".md"]:
+                        relevant_files.append(str(path))
+                elif path_obj.is_dir():
+                    for ext in ["*.js", "*.jsx", "*.ts", "*.tsx", "*.json", "*.md"]:
+                        relevant_files.extend([str(f) for f in path_obj.rglob(ext)])
+            
+            if not relevant_files:
+                return {"issues_found": 0, "message": "No relevant files found for prettier"}
+            
+            cmd = ["prettier"]
+            if dry_run:
+                cmd.extend(["--check", "--list-different"])
+            else:
+                cmd.append("--write")
+            
+            cmd.extend(relevant_files)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            
+            changes_count = len(result.stdout.splitlines()) if result.stdout else 0
+            
+            return {
+                "tool": "prettier",
+                "changes_detected" if dry_run else "fixes_applied": changes_count,
+                "output": result.stdout[:1000]
+            }
+            
+        except (subprocess.TimeoutExpired, Exception) as e:
+            logger.error(f"prettier failed: {e}")
             return {"error": str(e)}
 
     def _run_custom_fixer(self, fixer_path: Path, dry_run: bool) -> Dict[str, Any]:
@@ -697,6 +790,9 @@ class LintCleanupManager:
         
         if not self.available_tools.get("isort", False):
             recommendations.append("Install isort for import statement organization")
+        
+        if not self.available_tools.get("black", False):
+            recommendations.append("Install black for automatic code formatting")
         
         if len(self.discovered_issues) > 100:
             recommendations.append("Consider running automated fix workflow to address bulk issues")

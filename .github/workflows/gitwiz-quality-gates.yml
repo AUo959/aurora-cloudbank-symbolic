@@ -8,6 +8,14 @@ on:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
 
+# Explicit permissions for security
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  security-events: write
+
 jobs:
   quality-gate:
     runs-on: ubuntu-latest

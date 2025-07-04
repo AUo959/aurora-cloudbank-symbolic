@@ -17,9 +17,9 @@ class SymbolicLogicEngine(Opal2Component):
         """Perform a trivial symbolic transformation."""
         if isinstance(data, str):
             try:
-                # Very limited safe eval for arithmetic expressions
-                result = eval(data, {"__builtins__": {}}, {})
+                # Safely evaluate arithmetic expressions using ast.literal_eval
+                result = ast.literal_eval(data)
                 return str(result)
-            except Exception:  # pragma: no cover - eval is best effort
+            except (ValueError, SyntaxError):  # Handle invalid input for literal_eval
                 pass
         return f"symbolic_result({data})"

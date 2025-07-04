@@ -90,3 +90,12 @@ keyring/
 # Exclude essential deployment packages
 !deploykit_*.zip
 !aurora_core_*.zip
+
+# GitWiz runtime/state files (continuously updated)
+.gitwiz/memory.db
+.gitwiz/last_commit_status.json
+.gitwiz/scheduler.log
+
+# GitWiz temporary files
+.gitwiz/*.tmp
+.gitwiz/*.lock

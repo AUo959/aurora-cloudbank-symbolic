@@ -3,8 +3,8 @@
 Quick fix for JavaScript syntax in Python files
 """
 
-import re
 import os
+import re
 
 
 def fix_python_file(filepath):

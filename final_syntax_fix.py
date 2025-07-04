@@ -3,8 +3,8 @@
 Final Python syntax fixer
 """
 
-import re
 import os
+import re
 
 
 def fix_function_declarations(filepath):

@@ -46,7 +46,7 @@ class BranchManager:
             'refs/remotes/origin'
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+        _ = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
         branches = []
 
         for line in result.stdout.strip().split('\n'):
@@ -92,7 +92,7 @@ class BranchManager:
     def _is_branch_merged(self, branch_name: str) -> bool:
         """Check if a branch has been merged into main"""
         cmd = ['git', 'merge-base', '--is-ancestor', f'origin/{branch_name}', 'origin/main']
-        result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
+        _ = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
         return result.returncode == 0
 
     def _categorize_branch(self, branch_name: str) -> str:

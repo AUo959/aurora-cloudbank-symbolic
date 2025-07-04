@@ -39,15 +39,17 @@ jobs:
     - name: Lint with flake8
       run: |
         # Check for critical issues first
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "::warning::Critical linting issues found"
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=__pycache__,*.pyc,*.pyo,*.pyd,.Python,env,pip-log.txt,pip-delete-this-directory.txt,.tox,.coverage,.coverage.*,.pytest_cache,*/.pytest_cache/ || echo "::warning::Critical linting issues found"
         # Then check style issues (non-blocking)
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || true
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=__pycache__,*.pyc,*.pyo,*.pyd,.Python,env,pip-log.txt,pip-delete-this-directory.txt,.tox,.coverage,.coverage.*,.pytest_cache,*/.pytest_cache/ || true
     - name: Run tests
       run: |
         if [ -d tests ]; then
-          pytest tests/ -v || echo "::warning::Tests failed but continuing..."
+          pytest tests/ -v --tb=short || echo "::warning::Tests failed but continuing..."
+        elif [ -f test_*.py ] || [ -f *_test.py ]; then
+          pytest -v --tb=short || echo "::warning::Tests failed but continuing..."
         else
-          echo "::notice::No tests directory found, skipping tests"
+          echo "::notice::No tests found, skipping test execution"
         fi
     - name: Security scan with Bandit
       run: |

@@ -47,13 +47,21 @@ def fix_subprocess_calls(file_path: str) -> bool:
     original_content = content
 
     # Fix subprocess.run() calls
+    def fix_subprocess_run(match):
+        args = match.group(1)
+        if 'shell=' not in args and 'check=' not in args:
+            return f'subprocess.run({args}, shell=False, check=False)'
+        return match.group(0)
+
+    def fix_subprocess_call(match):
+        args = match.group(1)
+        if 'shell=' not in args:
+            return f'subprocess.call({args}, shell=False)'
+        return match.group(0)
+
     patterns = [
-        (r'subprocess\.run\(([^)]+)\)',
-         lambda m: f'subprocess.run({m.group(1, shell=False, check=False)}, shell=False, check=False)'
-         if 'shell=' not in m.group(1) and 'check=' not in m.group(1) else m.group(0)),
-        (r'subprocess\.call\(([^)]+)\)',
-         lambda m: f'subprocess.call({m.group(1, shell=False)}, shell=False)'
-         if 'shell=' not in m.group(1) else m.group(0)),
+        (r'subprocess\.run\(([^)]+)\)', fix_subprocess_run),
+        (r'subprocess\.call\(([^)]+)\)', fix_subprocess_call),
     ]
 
     for pattern, replacement in patterns:

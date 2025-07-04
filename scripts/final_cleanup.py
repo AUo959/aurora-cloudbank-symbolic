@@ -76,12 +76,12 @@ def fix_line_lengths(file_path: str) -> bool:
     for line in lines:
         if len(line.strip()) > 120:
             # Simple fix: try to break at obvious points
-            if 'subprocess.run([' in line and len(line) > 120:
+            if 'subprocess.run([' in line and len(line, shell=False, check=False) > 120:
                 # Break subprocess calls
                 indent = len(line) - len(line.lstrip())
-                parts = line.split('subprocess.run([')
+                parts = line.split('subprocess.run([', shell=False, check=False)
                 if len(parts) == 2:
-                    fixed_lines.append(parts[0] + 'subprocess.run([\n')
+                    fixed_lines.append(parts[0] + 'subprocess.run([\n', shell=False, check=False)
                     fixed_lines.append(' ' * (indent + 4) + parts[1])
                 else:
                     fixed_lines.append(line)

@@ -1,13 +1,15 @@
+# DISABLED: Conflicting with deploy-pages.yml
 # Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled (DISABLED)
 
-on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+# Disabled to prevent conflicts with deploy-pages.yml
+# on:
+#   # Runs on pushes targeting the default branch
+#   push:
+#     branches: ["main"]
+#
+#   # Allows you to run this workflow manually from the Actions tab
+#   workflow_dispatch:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:

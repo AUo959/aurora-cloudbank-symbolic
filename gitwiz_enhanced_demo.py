@@ -4,14 +4,15 @@ GITWiz Enhanced Demo - Repository Optimization Report
 Demonstrates the enhanced capabilities without requiring all dependencies.
 """
 
+import hashlib
 import json
 import os
 import sqlite3
 import subprocess
-import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 class GITWizDemo:
     """Simplified demo of enhanced GITWiz capabilities."""

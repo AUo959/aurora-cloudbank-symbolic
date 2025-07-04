@@ -1,7 +1,7 @@
 """Chart generation utilities for CASK."""
 
-import plotly.graph_objects as go
 import plotly.express as px
+import plotly.graph_objects as go
 
 
 def create_architecture_flowchart(output_file: str = "cask_architecture_flowchart.png") -> None:

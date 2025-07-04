@@ -28,7 +28,7 @@ class GlyphCache:
             "total_items": 0,
             "last_accessed": None
         }
-        
+
         if self.path.exists():
             try:
                 with open(self.path, "r", encoding="utf-8") as f:
@@ -104,4 +104,3 @@ class GlyphCache:
     def __contains__(self, symbol: str) -> bool:
         """Check if symbol exists in cache"""
         return symbol in self.cache
-

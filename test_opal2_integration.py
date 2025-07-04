@@ -21,14 +21,14 @@ async def test_opal2_integration():
     """Test full Opal2 system integration"""
     print("🔮 Testing Opal2 Modular System Integration")
     print("=" * 50)
-    
+
     # Initialize components
     print("📦 Initializing components...")
     glyph_core = GlyphCore()
     glyph_cache = GlyphCache()
     quantum_renderer = QuantumRenderer()
     plugin_system = PluginSystem()
-    
+
     # Test 1: Glyph Core
     print("\n🧬 Testing Glyph Core...")
     try:
@@ -44,14 +44,14 @@ async def test_opal2_integration():
     except Exception as e:
         print(f"❌ Glyph Core test failed: {e}")
         return False
-    
+
     # Test 2: Cache System
     print("\n💾 Testing Cache System...")
     try:
         # Store and retrieve
         await glyph_cache.set_async("test_key", glyph_result)
         cached_result = await glyph_cache.get_async("test_key")
-        
+
         if cached_result:
             print("✅ Cache store/retrieve successful")
             stats = await glyph_cache.get_stats()
@@ -63,7 +63,7 @@ async def test_opal2_integration():
     except Exception as e:
         print(f"❌ Cache test failed: {e}")
         return False
-    
+
     # Test 3: Quantum Renderer
     print("\n⚛️ Testing Quantum Renderer...")
     try:
@@ -77,7 +77,7 @@ async def test_opal2_integration():
     except Exception as e:
         print(f"❌ Quantum Renderer test failed: {e}")
         return False
-    
+
     # Test 4: Plugin System
     print("\n🔌 Testing Plugin System...")
     try:
@@ -89,33 +89,33 @@ async def test_opal2_integration():
     except Exception as e:
         print(f"❌ Plugin System test failed: {e}")
         return False
-    
+
     # Test 5: Full Integration
     print("\n🔗 Testing Full Integration...")
     try:
         # Generate, cache, and render
         expression = {"symbol": "integration_test"}
         glyph_data = await glyph_core.generate_async(expression)
-        
+
         cache_key = "integration_test_key"
         await glyph_cache.set_async(cache_key, glyph_data)
-        
+
         # Simulate render request
         render_context = {
             "glyph_data": glyph_data,
             "dimensions": {"width": 800, "height": 600},
             "quantum_params": {"coherence_factor": 0.8}
         }
-        
+
         print("✅ Full integration test successful")
         print(f"   - Generated glyph with {len(glyph_data)} properties")
         print(f"   - Cached with key: {cache_key}")
         print(f"   - Render context prepared")
-        
+
     except Exception as e:
         print(f"❌ Full integration test failed: {e}")
         return False
-    
+
     print("\n🎉 All tests passed! Opal2 system is fully operational.")
     return True
 

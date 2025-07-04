@@ -48,35 +48,30 @@ class RegexGenerationEngine(Opal2Component):
             if pattern:
                 return pattern
 
-            if desc.startswith("exactly ") and desc.endswith(" digits"):
-                count = desc.replace("exactly ", "").replace(" digits", "")
-                if count.isdigit():
-                    return rf"\d{{{count}}}"
+            result = self.parse_count_based_pattern(desc, "exactly ", " digits", r"\d{{{count}}}")
+            if result:
+                return result
 
-            if desc.startswith("sequence of ") and desc.endswith(" digits"):
-                count = desc.replace("sequence of ", "").replace(" digits", "")
-                if count.isdigit():
-                    return rf"\d{{{count}}}"
+            result = self.parse_count_based_pattern(desc, "sequence of ", " digits", r"\d{{{count}}}")
+            if result:
+                return result
 
-            if desc.startswith("at least ") and desc.endswith(" digits"):
-                count = desc.replace("at least ", "").replace(" digits", "")
-                if count.isdigit():
-                    return rf"\d{{{count},}}"
+            result = self.parse_count_based_pattern(desc, "at least ", " digits", r"\d{{{count},}}")
+            if result:
+                return result
 
             if desc.endswith(" digit number") and desc[0].isdigit():
                 count = desc.split()[0]
                 if count.isdigit():
                     return rf"\d{{{count}}}"
 
-            if desc.startswith("exactly ") and desc.endswith(" letters"):
-                count = desc.replace("exactly ", "").replace(" letters", "")
-                if count.isdigit():
-                    return rf"[A-Za-z]{{{count}}}"
+            result = self.parse_count_based_pattern(desc, "exactly ", " letters", r"[A-Za-z]{{{count}}}")
+            if result:
+                return result
 
-            if desc.startswith("at least ") and desc.endswith(" letters"):
-                count = desc.replace("at least ", "").replace(" letters", "")
-                if count.isdigit():
-                    return rf"[A-Za-z]{{{count},}}"
+            result = self.parse_count_based_pattern(desc, "at least ", " letters", r"[A-Za-z]{{{count},}}")
+            if result:
+                return result
 
         if isinstance(data, dict) and "examples" in data:
             examples = [str(e) for e in data["examples"] if e]

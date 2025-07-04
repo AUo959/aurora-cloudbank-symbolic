@@ -9,7 +9,7 @@ import datetime
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 
 class BranchCleanupManager:
@@ -210,7 +210,7 @@ class BranchCleanupManager:
 
         return True
 
-    def generate_cleanup_report(self, branches: Dict, results: Dict = None) -> str:
+    def generate_cleanup_report(self, branches: Dict[str, list], results: Optional[Dict[str, list]] = None) -> str:
         """Generate a comprehensive cleanup report."""
         report = [
             "# Branch Cleanup Analysis Report",

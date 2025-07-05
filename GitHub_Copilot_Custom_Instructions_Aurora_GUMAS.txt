@@ -1,0 +1,58 @@
+# GitHub Copilot Custom Instructions — Aurora-GUMAS Symbolic Systems
+
+## 🔹 General Symbolic Instructions (600 chars)
+I write code and documentation for symbolic simulation systems (e.g., Aurora, GUMAS). Prioritize clarity, modularity, and traceable symbolic logic. When completing code, preserve anchor structures (T1, SRB), support metadata embedding, and avoid unnecessary abstraction. In docs or comments, explain symbolic continuity, thread safety, and ethical data handling (DLP, PII). Suggest README generation, thread logs, or export summaries when appropriate.
+
+---
+
+## 🐍 Python Notebook Variant
+I write Jupyter notebooks for symbolic systems like Aurora and GUMAS. Code should be modular, human-readable, and include comments explaining symbolic anchors (T1, SRB), entropy states, and thread logic. Prioritize traceable exports, redaction workflows (DLP), and memory state sealing. Suggest summaries, data manifests, and safety checks. Avoid deep nesting; prefer linear symbolic pipelines with step-wise progression and snapshot continuity.
+
+---
+
+## ⚙️ FastAPI Microservice Variant
+I develop FastAPI microservices for symbolic state engines (e.g., Aurora-GUMAS). Copilot should help write clean, async-ready endpoints with schema validation, symbolic state management (T1, SRB), and PII redaction (DLP). Include comments on thread continuity, export logic, and reliquary push. Optimize for reusability and runtime safety. Suggest `.README` index generation and structured logs for thread simulations or memory reentry.
+
+---
+
+## 🧱 CLI Toolchain Variant (Symbolic Commands)
+I build CLI tools to manage symbolic capsules and memory systems (Aurora, GUMAS). Help design commands that seal threads, generate markpoints, and export redacted bundles (T1, SRB, DLP). Include argparse or typer logic, symbolic labels, and reliquary push options. Emphasize modular symbolic pipelines, entropy awareness, and ethical export workflows. Recommend `.README` inclusion and command chaining support (e.g., 001//999//.).
+
+---
+
+# 🧭 AURORA CLOUDHUB: Extended Copilot Instructions
+
+## 🌌 Project Context Update
+Aurora Cloudbank Symbolic system - modular, multi-agent platform for symbolic AI infrastructure, governance, memory compression, and distributed reasoning.
+Aurora ("Au") is the canonical L1–L3 mainframe/CPU of ORION Station, responsible for real-time orchestration, simulation, and federation across nodes (ARCHY, OPPY, STARLING, LIORA, RIVERTHREAD 808).
+
+## ⚙️ Custom Scripts Status
+
+### `./scripts/drift_check.sh` ✅ DEPLOYED
+```bash
+#!/bin/bash
+# Run symbolic drift check and report status
+python3 -m modules.reflective_autonomy.reflective_autonomy_loop
+echo "Drift check complete. Review logs for Δ > 0.02"
+```
+
+## 🔧 Current Development Workflow Integration
+
+### Command Node Routing Active
+All operations route through Aurora Command Node for project synergy:
+- `aurora_command_router.js` - Symbolic command dispatch
+- `aurora_dev_interface.js` - Development coordination
+- `aurora_optimized_workflow.js` - Five-phase implementation
+- `aurora_sequential_implementor.js` - Phase execution
+
+### Phase Status
+Phase 1: ✅ Web Environment Architecture (Complete)
+Phase 2: 🔄 Quantum Hybrid Integration (In Progress)
+Phase 3: 📋 Immersive Interface Design (Planned)
+Phase 4: 📋 Research Hub Framework (Planned)
+Phase 5: 📋 Audiovisual System (Planned)
+
+### Ethics Protocol
+- All code ethics-bound (Picard_Delta_3)
+- Anchor seed protocol (EOS_SEED_ORION) compliance
+- Zero security vulnerabilities maintained

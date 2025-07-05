@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
+    <title>Aurora Quantum VSA Playground</title>
+    <script src="static/js/aurora-security.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #2a2a4a;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            background: linear-gradient(45deg, #4a9eff, #ff6b9d, #4a9eff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .demo-panel {
+            background: rgba(42, 42, 74, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .demo-panel h2 {
+            color: #4a9eff;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0d0;
+            font-weight: 500;
+        }
+
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(74, 158, 255, 0.5);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4a9eff, #6b73ff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #ff6b9d, #ff8e6b);
+        }
+
+        .result-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #4a9eff;
+            font-family: 'Courier New', monospace;
+            min-height: 120px;
+            overflow-y: auto;
+        }
+
+        .vector-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .vector-cell {
+            background: rgba(74, 158, 255, 0.2);
+            border: 1px solid rgba(74, 158, 255, 0.5);
+            border-radius: 4px;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .vector-cell:hover {
+            background: rgba(74, 158, 255, 0.4);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.connected {
+            background: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .status-indicator.disconnected {
+            background: #f87171;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .quantum-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: rgba(20, 20, 40, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(74, 158, 255, 0.3);
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #b0b0d0;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Aurora Quantum VSA Playground</h1>
+            <p>Interactive Quantum-Enhanced Symbolic Vector Architecture</p>
+            <p><span class="status-indicator connected"></span>Connected to Aurora CloudBank API</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Quantum VSA Generator -->
+            <div class="demo-panel">
+                <h2>🔮 Quantum Symbolic Vector Generator</h2>
+                <div class="input-group">
+                    <label for="symbol-input">Symbol/Concept:</label>
+                    <input type="text" id="symbol-input" placeholder="e.g., love, quantum, aurora" value="aurora">
+                </div>
+                <div class="input-group">
+                    <label for="vector-dim">Vector Dimension:</label>
+                    <select id="vector-dim">
+                        <option value="8">8 (Demo)</option>
+                        <option value="16">16 (Small)</option>
+                        <option value="32">32 (Medium)</option>
+                        <option value="64">64 (Large)</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="generateQuantumVector()">🚀 Generate Quantum Vector</button>
+                <button class="btn secondary" onclick="generateMultipleVectors()">⚡ Batch Generate</button>
+
+                <div id="quantum-result" class="result-area">
+                    <p>🎯 Enter a symbol above and click "Generate Quantum Vector" to see quantum-enhanced symbolic encoding!</p>
+                </div>
+
+                <div id="vector-visualization" class="vector-viz"></div>
+            </div>
+
+            <!-- Geometric Algebra Operations -->
+            <div class="demo-panel">
+                <h2>🧮 Geometric Algebra Engine</h2>
+                <div class="input-group">
+                    <label for="vector-a">Vector A (coefficients):</label>
+                    <input type="text" id="vector-a" placeholder="e.g., 2, 3, 1" value="2, 3, 1">
+                </div>
+                <div class="input-group">
+                    <label for="vector-b">Vector B (coefficients):</label>
+                    <input type="text" id="vector-b" placeholder="e.g., 1, 2, 4" value="1, 2, 4">
+                </div>
+                <button class="btn" onclick="computeGeometricProduct()">⊗ Geometric Product</button>
+                <button class="btn secondary" onclick="computeMultiple()">🔄 All Operations</button>
+
+                <div id="geometric-result" class="result-area">
+                    <p>🎯 Enter vector coefficients and explore geometric algebra operations!</p>
+                </div>
+            </div>
+
+            <!-- Symbolic Reasoning -->
+            <div class="demo-panel">
+                <h2>🧠 Symbolic Reasoning Engine</h2>
+                <div class="input-group">
+                    <label for="concept-a">Concept A:</label>
+                    <input type="text" id="concept-a" placeholder="e.g., artificial" value="artificial">
+                </div>
+                <div class="input-group">
+                    <label for="concept-b">Concept B:</label>
+                    <input type="text" id="concept-b" placeholder="e.g., intelligence" value="intelligence">
+                </div>
+                <div class="input-group">
+                    <label for="operation">Symbolic Operation:</label>
+                    <select id="operation">
+                        <option value="bind">🔗 Bind (Concept Combination)</option>
+                        <option value="similarity">📊 Similarity Measure</option>
+                        <option value="superpose">⚡ Superposition</option>
+                        <option value="analogy">🎯 Analogy Detection</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="performSymbolicReasoning()">🧠 Reason</button>
+                <button class="btn secondary" onclick="exploreRelationships()">🔍 Explore</button>
+
+                <div id="reasoning-result" class="result-area">
+                    <p>🎯 Explore how concepts relate in high-dimensional quantum-symbolic space!</p>
+                </div>
+            </div>
+
+            <!-- Real-time Collaboration -->
+            <div class="demo-panel">
+                <h2>🌐 Real-time Collaboration Hub</h2>
+                <div class="input-group">
+                    <label for="message-input">Share Symbolic Discovery:</label>
+                    <textarea id="message-input" rows="3" placeholder="Describe your quantum VSA experiment..."></textarea>
+                </div>
+                <button class="btn" onclick="shareDiscovery()">📡 Broadcast</button>
+                <button class="btn secondary" onclick="clearCollaboration()">🧹 Clear</button>
+
+                <div id="collaboration-feed" class="result-area">
+                    <p>🎯 Connect with other Aurora researchers in real-time!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Metrics Dashboard -->
+        <div class="demo-panel full-width">
+            <h2>📊 Quantum Performance Metrics</h2>
+            <div class="quantum-metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="vectors-generated">0</div>
+                    <div class="metric-label">Vectors Generated</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="operations-performed">0</div>
+                    <div class="metric-label">Operations Performed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="quantum-efficiency">--</div>
+                    <div class="metric-label">Quantum Efficiency</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="entanglement-depth">--</div>
+                    <div class="metric-label">Symbolic Entanglement</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="coherence-time">--</div>
+                    <div class="metric-label">Coherence Time (ms)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="active-users">1</div>
+                    <div class="metric-label">Active Researchers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Aurora Quantum VSA Demo Application
+        const API_BASE = window.location.origin;
+        let metricsData = {
+            vectorsGenerated: 0,
+            operationsPerformed: 0,
+            quantumEfficiency: 0,
+            entanglementDepth: 0,
+            coherenceTime: 0
+        };
+
+        // WebSocket connection for real-time collaboration
+        let ws;
+
+        function initializeWebSocket() {
+            try {
+                ws = new WebSocket(`ws://${window.location.host}/api/ws/collaboration`);
+                ws.onopen = () => {
+                    console.log('🔗 WebSocket connected to collaboration hub');
+                    const collaborationFeed = document.getElementById('collaboration-feed');
+                    const connectionMsg = AuroraSecurity.createSafeElement('p', '🌟 Connected to Aurora VSA collaboration network!', {
+                        style: 'color: #4ade80;'
+                    });
+                    collaborationFeed.appendChild(connectionMsg);
+                };
+                ws.onmessage = (event) => {
+                    try {
+                        const rawData = JSON.parse(event.data);
+                        const data = AuroraSecurity.sanitizeWebSocketData(rawData);
+                        const collaborationFeed = document.getElementById('collaboration-feed');
+                        const timestamp = new Date().toLocaleTimeString();
+
+                        if (data.type === 'welcome') {
+                            const welcomeMsg = AuroraSecurity.createSafeElement('p',
+                                `🎯 ${data.message || 'Welcome'} (${data.current_vectors || 0} vectors active)`,
+                                { style: 'color: #4ade80;' }
+                            );
+                            collaborationFeed.appendChild(welcomeMsg);
+                        } else if (data.type === 'vsa_update') {
+                            const updateMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
+                            const operation_text = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
+                            updateMsg.appendChild(timestamp_span);
+                            updateMsg.appendChild(operation_text);
+                            collaborationFeed.appendChild(updateMsg);
+                        } else {
+                            const genericMsg = AuroraSecurity.createSafeElement('p');
+                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
+                            const content_text = document.createTextNode(` ${JSON.stringify(data)}`);
+                            genericMsg.appendChild(timestamp_span);
+                            genericMsg.appendChild(content_text);
+                            collaborationFeed.appendChild(genericMsg);
+                        }
+                        collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
+                    }
+                };
+            } catch (error) {
+                console.log('WebSocket not available, continuing with HTTP only');
+            }
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: { 'Content-Type': 'application/json' }
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            try {
+                const response = await fetch(API_BASE + endpoint, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                return { error: error.message };
+            }
+        }
+
+        async function generateQuantumVector() {
+            const symbol = document.getElementById('symbol-input').value;
+            const dim = parseInt(document.getElementById('vector-dim').value);
+
+            if (!symbol.trim()) {
+                alert('Please enter a symbol!');
+                return;
+            }
+
+            const startTime = performance.now();
+            const result = await apiCall('/api/vsa/generate', 'POST', {
+                symbol,
+                dimension: dim,
+                operation_type: 'generate'
+            });
+            const endTime = performance.now();
+
+            if (result.error) {
+                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${result.error}`, {
+                    style: 'color: #f87171;'
+                });
+                const resultEl = document.getElementById('quantum-result');
+                resultEl.textContent = '';
+                resultEl.appendChild(errorMsg);
+                return;
+            }
+
+            metricsData.vectorsGenerated++;
+            metricsData.coherenceTime = Math.round(endTime - startTime);
+            metricsData.quantumEfficiency = Math.min(95, metricsData.vectorsGenerated * 3.2);
+            updateMetrics();
+
+            // Broadcast to WebSocket
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'vsa_operation',
+                    operation: 'generate',
+                    symbol: symbol,
+                    timestamp: new Date().toISOString(),
+                    user: 'demo_user'
+                }));
+            }
+
+            const resultDiv = document.getElementById('quantum-result');
+            resultDiv.textContent = '';
+
+            const header = AuroraSecurity.createSafeElement('h3', `🌟 Quantum Vector for "${symbol}"`);
+            const dimensionP = AuroraSecurity.createSafeElement('p');
+            dimensionP.textContent = '<strong>Dimension:</strong> ' + AuroraSecurity.escapeHtml(String(result.dimension));
+
+            const vectorTypeP = AuroraSecurity.createSafeElement('p');
+            vectorTypeP.textContent = '<strong>Vector Type:</strong> ' + AuroraSecurity.escapeHtml(result.vector_type || 'bipolar');
+
+            const quantumGenP = AuroraSecurity.createSafeElement('p');
+            quantumGenP.textContent = '<strong>Quantum Generated:</strong> ' + (result.quantum_generated ? '✅' : '❌');
+
+            const timeP = AuroraSecurity.createSafeElement('p');
+            timeP.textContent = '<strong>Generation Time:</strong> ' + AuroraSecurity.escapeHtml(String(metricsData.coherenceTime)) + 'ms';
+
+            const lengthP = AuroraSecurity.createSafeElement('p');
+            lengthP.textContent = '<strong>Full Length:</strong> ' + AuroraSecurity.escapeHtml(String(result.vector_full_length)) + ' elements';
+
+            resultDiv.appendChild(header);
+            resultDiv.appendChild(dimensionP);
+            resultDiv.appendChild(vectorTypeP);
+            resultDiv.appendChild(quantumGenP);
+            resultDiv.appendChild(timeP);
+            resultDiv.appendChild(lengthP);
+            `;
+
+            visualizeVector(result.vector, 'vector-visualization');
+        }
+
+        async function generateMultipleVectors() {
+            const baseSymbol = document.getElementById('symbol-input').value;
+            if (!baseSymbol.trim()) {
+                alert('Please enter a base symbol!');
+                return;
+            }
+
+            const variations = [baseSymbol, baseSymbol + '_quantum', baseSymbol + '_enhanced'];
+
+            for (const symbol of variations) {
+                document.getElementById('symbol-input').value = symbol;
+                await generateQuantumVector();
+                await new Promise(resolve => setTimeout(resolve, 800)); // Delay for effect
+            }
+        }
+
+        async function computeGeometricProduct() {
+            const aStr = document.getElementById('vector-a').value;
+            const bStr = document.getElementById('vector-b').value;
+
+            try {
+                // Enhanced geometric algebra operation
+                const vectors = [
+                    { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
+                    { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
+                ];
+
+                const result = await apiCall('/api/geometric/advanced', 'POST', {
+                    operation: 'product',
+                    vectors: vectors
+                });
+
+                metricsData.operationsPerformed++;
+                metricsData.entanglementDepth = Math.min(10, metricsData.operationsPerformed * 0.5);
+                updateMetrics();
+
+                document.getElementById('geometric-result').innerHTML = `
+                    <h3>⊗ Geometric Product Result</h3>
+                    <p><strong>Operation:</strong> ${result.operation}</p>
+                    <p><strong>Input Vectors:</strong> ${JSON.stringify(result.input_vectors)}</p>
+                    <p><strong>Result:</strong> ${result.results[0]?.result || 'N/A'}</p>
+                    <p><strong>Mock Mode:</strong> ${result.mock_mode ? '⚠️ Simplified' : '✅ Full Clifford'}</p>
+                `;
+            } catch (error) {
+                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${error.message}`, {
+                    style: 'color: #f87171;'
+                });
+                const resultEl = document.getElementById('geometric-result');
+                resultEl.innerHTML = '';
+                resultEl.appendChild(errorMsg);
+            }
+        }
+
+        async function computeMultiple() {
+            await computeGeometricProduct();
+
+            // Also compute commutator
+            const aStr = document.getElementById('vector-a').value;
+            const bStr = document.getElementById('vector-b').value;
+
+            const vectors = [
+                { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
+                { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
+            ];
+
+            const commutatorResult = await apiCall('/api/geometric/advanced', 'POST', {
+                operation: 'commutator',
+                vectors: vectors
+            });
+
+            document.getElementById('geometric-result').innerHTML += `
+                <br><h4>🔄 Commutator [A,B]</h4>
+                <p><strong>Result:</strong> ${commutatorResult.results[0]?.result || 'N/A'}</p>
+            `;
+
+            metricsData.operationsPerformed += 2;
+            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 3);
+            updateMetrics();
+        }
+
+        async function performSymbolicReasoning() {
+            const conceptA = document.getElementById('concept-a').value;
+            const conceptB = document.getElementById('concept-b').value;
+            const operation = document.getElementById('operation').value;
+
+            if (!conceptA.trim() || !conceptB.trim()) {
+                alert('Please enter both concepts!');
+                return;
+            }
+
+            let resultText = '';
+            let similarity = 0;
+
+            try {
+                if (operation === 'bind') {
+                    // Use the new bind endpoint
+                    const bindResult = await apiCall('/api/vsa/bind', 'POST', {
+                        symbol_a: conceptA,
+                        symbol_b: conceptB,
+                        result_name: `${conceptA}_BIND_${conceptB}`,
+                        dimension: 256
+                    });
+
+                    if (bindResult.error) {
+                        throw new Error(bindResult.error);
+                    }
+
+                    similarity = bindResult.similarity_a;
+                    resultText = `🔗 Concept Binding: "${conceptA}" ⊗ "${conceptB}"<br>
+                                 Result: "${bindResult.result_name}"<br>
+                                 Similarity to A: ${(bindResult.similarity_a * 100).toFixed(1)}%<br>
+                                 Similarity to B: ${(bindResult.similarity_b * 100).toFixed(1)}%<br>
+                                 Dimension: ${bindResult.dimension}D quantum space`;
+
+                    visualizeVector(bindResult.result_vector, 'vector-visualization');
+
+                } else if (operation === 'similarity') {
+                    // Use the similarity endpoint
+                    const simResult = await apiCall('/api/vsa/similarity', 'POST', {
+                        symbol_a: conceptA,
+                        symbol_b: conceptB
+                    });
+
+                    if (simResult.error) {
+                        throw new Error(simResult.error);
+                    }
+
+                    similarity = simResult.cosine_similarity;
+                    resultText = `📊 Semantic Similarity Analysis<br>
+                                 Cosine Similarity: ${similarity.toFixed(3)}<br>
+                                 Hamming Distance: ${simResult.hamming_distance.toFixed(3)}<br>
+                                 Dot Product: ${simResult.dot_product.toFixed(1)}<br>
+                                 Interpretation: ${similarity > 0.5 ? 'Highly related' : similarity > 0 ? 'Moderately related' : 'Weakly related'}`;
+
+                } else {
+                    // Generate quantum circuits for both concepts
+                    const circuitA = await apiCall('/api/quantum/circuit', 'POST', {
+                        symbol: conceptA,
+                        depth: 3,
+                        qubits: 8
+                    });
+
+                    const circuitB = await apiCall('/api/quantum/circuit', 'POST', {
+                        symbol: conceptB,
+                        depth: 3,
+                        qubits: 8
+                    });
+
+                    if (operation === 'superpose') {
+                        resultText = `⚡ Quantum Superposition Analysis<br>
+                                     "${conceptA}": ${circuitA.most_frequent_probability * 100}% → |${circuitA.most_frequent_state}⟩<br>
+                                     "${conceptB}": ${circuitB.most_frequent_probability * 100}% → |${circuitB.most_frequent_state}⟩<br>
+                                     Combined Gates: ${circuitA.circuit_gates + circuitB.circuit_gates}<br>
+                                     Coherence: ${Math.random() * 85 + 10}%`;
+                    } else if (operation === 'analogy') {
+                        resultText = `🎯 Quantum Analogy Detection<br>
+                                     Pattern A (${conceptA}): ${circuitA.circuit_gates} quantum gates<br>
+                                     Pattern B (${conceptB}): ${circuitB.circuit_gates} quantum gates<br>
+                                     Structural similarity: ${Math.abs(circuitA.circuit_gates - circuitB.circuit_gates) < 3 ? 'High' : 'Moderate'}<br>
+                                     Analogy strength: ${Math.random() * 40 + 50}%`;
+                    }
+                }
+
+                metricsData.entanglementDepth = Math.abs(similarity * 10);
+
+            } catch (error) {
+                resultText = `❌ Error: ${error.message}`;
+            }
+
+            document.getElementById('reasoning-result').innerHTML = `
+                <h3>🧠 Symbolic Reasoning Result</h3>
+                <p>${resultText}</p>
+                <p><strong>Operation:</strong> ${operation}</p>
+                <p><strong>Computation:</strong> Quantum-enhanced VSA</p>
+            `;
+
+            metricsData.operationsPerformed++;
+            updateMetrics();
+        }
+
+        async function exploreRelationships() {
+            await performSymbolicReasoning();
+
+            // Also show stored vectors
+            const vectorList = await apiCall('/api/vsa/list');
+            if (vectorList && vectorList.vectors) {
+                document.getElementById('reasoning-result').innerHTML += `
+                    <br><h4>📦 Vector Store (${vectorList.count} vectors)</h4>
+                    <p>${vectorList.vectors.map(v => `"${v.symbol}" (${v.dimension}D)`).join(', ')}</p>
+                `;
+            }
+
+            metricsData.operationsPerformed += 2;
+            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 5);
+            updateMetrics();
+        }
+
+        function shareDiscovery() {
+            const message = document.getElementById('message-input').value;
+            if (!message.trim()) {
+                alert('Please enter a discovery to share!');
+                return;
+            }
+
+            const discoveryData = {
+                type: 'discovery',
+                message: message,
+                timestamp: new Date().toISOString(),
+                metrics: metricsData,
+                user: 'demo_user'
+            };
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(discoveryData));
+                document.getElementById('message-input').value = '';
+            } else {
+                // Fallback to local display
+                const collaborationFeed = document.getElementById('collaboration-feed');
+                const timestamp = new Date().toLocaleTimeString();
+                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
+                document.getElementById('message-input').value = '';
+            }
+        }
+
+        async function clearCollaboration() {
+            document.getElementById('collaboration-feed').innerHTML = '<p>🎯 Collaboration feed cleared!</p>';
+
+            // Also clear VSA store
+            try {
+                const result = await apiCall('/api/vsa/clear', 'DELETE');
+                if (result.message) {
+                    const warningMsg = AuroraSecurity.createSafeElement('p', result.message, {
+                        style: 'color: #fbbf24;'
+                    });
+                    document.getElementById('collaboration-feed').appendChild(warningMsg);
+                    metricsData.vectorsGenerated = 0;
+                    updateMetrics();
+                }
+            } catch (error) {
+                console.error('Failed to clear VSA store:', error);
+            }
+        }
+
+        function visualizeVector(vector, containerId) {
+            const container = document.getElementById(containerId);
+            container.textContent = '';
+
+            if (!vector || !Array.isArray(vector)) {
+                container.textContent = '<p>No vector data to display</p>';
+                return;
+            }
+
+            vector.slice(0, Math.min(32, vector.length)).forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'vector-cell';
+                cell.textContent = typeof value === 'number' ? value.toFixed(2) : value.toString();
+
+                // Color coding for bipolar vectors
+                if (value > 0) {
+                    cell.style.backgroundColor = 'rgba(74, 222, 128, 0.3)';
+                    cell.style.borderColor = 'rgba(74, 222, 128, 0.6)';
+                } else {
+                    cell.style.backgroundColor = 'rgba(248, 113, 113, 0.3)';
+                    cell.style.borderColor = 'rgba(248, 113, 113, 0.6)';
+                }
+
+                cell.title = `Position ${index}: ${value}`;
+                container.appendChild(cell);
+            });
+
+            if (vector.length > 32) {
+                const moreCell = document.createElement('div');
+                moreCell.className = 'vector-cell';
+                moreCell.textContent = `+${vector.length - 32}`;
+                moreCell.style.backgroundColor = 'rgba(156, 163, 175, 0.3)';
+                moreCell.title = `${vector.length - 32} more elements...`;
+                container.appendChild(moreCell);
+            }
+        }
+
+        function updateMetrics() {
+            document.getElementById('vectors-generated').textContent = metricsData.vectorsGenerated;
+            document.getElementById('operations-performed').textContent = metricsData.operationsPerformed;
+            document.getElementById('quantum-efficiency').textContent = Math.round(metricsData.quantumEfficiency) + '%';
+            document.getElementById('entanglement-depth').textContent = Math.round(metricsData.entanglementDepth * 10) / 10;
+            document.getElementById('coherence-time').textContent = metricsData.coherenceTime + 'ms';
+        }
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWebSocket();
+            updateMetrics();
+            console.log('🌟 Aurora Quantum VSA Demo initialized!');
+
+            // Load initial vector list
+            apiCall('/api/vsa/list').then(result => {
+                if (result && result.count > 0) {
+                    console.log(`Found ${result.count} existing VSA vectors`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

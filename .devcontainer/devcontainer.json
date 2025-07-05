@@ -1,0 +1,52 @@
+{
+  "name": "Aurora Reflective Autonomy DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "postCreateCommand": "bash -c 'pip install -r requirements.txt || true; npm install || true; cp .devcontainer/bashrc ~/.bashrc; git config --global user.name \"Aurora CloudBank\" || true; git config --global user.email \"aurora@cloudbank.dev\" || true; git config --global init.defaultBranch main || true; echo \"DevContainer setup complete\"'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "redhat.vscode-yaml",
+        "yzhang.markdown-all-in-one",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "littlefoxteam.vscode-python-test-adapter",
+        "ms-vscode.makefile-tools"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash"
+          }
+        },
+        "terminal.integrated.automationShell.linux": "/bin/bash",
+        "terminal.integrated.shellIntegration.enabled": true,
+        "git.enabled": true,
+        "git.path": "/usr/bin/git",
+        "git.terminalAuthentication": true,
+        "terminal.integrated.inheritEnv": true
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+# Aurora CloudBank - Clean Bash Profile for Copilot Chat Compatibility
+# This profile ensures terminal output is visible to Copilot Chat
+
+# Set simple, clean prompt for Copilot Chat visibility
+export PS1="\u@\h:\w\$ "
+
+# Ensure GPG TTY is set
+export GPG_TTY=$(tty)
+
+# Set PATH for Node.js and Python
+export PATH="/usr/local/bin:$PATH"
+
+# Disable any output that might interfere with Copilot Chat
+# (no echo, printf, figlet, fortune, or other banner commands)
+
+# Enable history
+export HISTSIZE=1000
+export HISTFILESIZE=2000
+
+# Make sure output is flushed properly
+export PYTHONUNBUFFERED=1
+export NODE_OPTIONS="--no-warnings"
+
+# Aurora CloudBank specific environment
+export AURORA_CLOUDBANK_ENV="production"
+export AURORA_CONTAINER_MODE="devcontainer"
+
+# Aliases for Aurora CloudBank development
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+alias aurora-status='git status'
+alias aurora-log='git log --oneline -10'
+alias aurora-check='npm test || python3 -m pytest'
+
+# Function to ensure output is visible to Copilot Chat
+aurora_log() {
+    echo "🔍 Aurora CloudBank Status:"
+    echo "📁 Directory: $(pwd)"
+    echo "🌿 Branch: $(git branch --show-current 2>/dev/null || echo 'Not a git repository')"
+    echo "📊 Status: $(git status --porcelain 2>/dev/null | wc -l) changes"
+    echo "🔐 GPG: $(git config --get commit.gpgsign || echo 'disabled')"
+}
+
+# Ensure terminal output is properly flushed
+stty -ixon 2>/dev/null || true

@@ -21,7 +21,7 @@ class InterfaceAgent {
     };
   }
 
-  generateImmersiveElements(context) {
+  generateImmersiveElements() {
     return {
       visualization_type: '3d_quantum_interactive',
       immersion_level: 'full_environment',
@@ -29,7 +29,7 @@ class InterfaceAgent {
     };
   }
 
-  createAdaptiveLayout(data) {
+  createAdaptiveLayout() {
     return {
       layout_type: 'dynamic_emergent',
       data_integration: 'real_time_symbolic',
@@ -37,7 +37,7 @@ class InterfaceAgent {
     };
   }
 
-  selectInteractionModes(context) {
+  selectInteractionModes() {
     return ['voice', 'gesture', 'symbolic_input', 'quantum_manipulation'];
   }
 }

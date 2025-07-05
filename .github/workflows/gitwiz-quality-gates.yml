@@ -148,6 +148,8 @@ jobs:
   security-audit:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -183,6 +185,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [quality-gate]
+    permissions:
+      contents: read
+      actions: write
     
     steps:
     - name: Checkout code

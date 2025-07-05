@@ -16,6 +16,17 @@ RUN apt-get update \
     && apt-get install -y python3 python3-pip \
     && apt-get clean
 
+# Ensure bash is the default shell and configure for Copilot Chat compatibility
+RUN chsh -s /bin/bash node
+
+# Set up clean bash environment for Copilot Chat visibility
+RUN echo '# Aurora CloudBank - Clean Bash Profile for Copilot Chat' > /home/node/.bashrc \
+    && echo 'export PS1="\u@\h:\w\$ "' >> /home/node/.bashrc \
+    && echo 'export GPG_TTY=$(tty)' >> /home/node/.bashrc \
+    && echo 'export PYTHONUNBUFFERED=1' >> /home/node/.bashrc \
+    && echo 'export NODE_OPTIONS="--no-warnings"' >> /home/node/.bashrc \
+    && echo 'stty -ixon 2>/dev/null || true' >> /home/node/.bashrc
+
 # --- DO NOT add extra PATH or symlink steps, Node/npm already correct ---
 
 USER node

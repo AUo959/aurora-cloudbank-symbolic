@@ -1,0 +1,35 @@
+# Aurora CloudBank - Clean Bash Configuration for Copilot Chat
+# This ensures terminal output is visible to Copilot Chat
+
+# Set a simple, clean prompt that doesn't interfere with Copilot
+export PS1="\u@\h:\w\$ "
+
+# Ensure output is flushed immediately
+export PYTHONUNBUFFERED=1
+
+# Disable any fancy prompts or themes
+unset PROMPT_COMMAND
+
+# Ensure bash history is saved immediately
+export HISTCONTROL=ignoredups:erasedups
+export HISTSIZE=1000
+export HISTFILESIZE=2000
+shopt -s histappend
+
+# Basic aliases for Aurora development
+alias ll='ls -la'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# Aurora CloudBank specific aliases
+alias aurora-status='python3 aurora_system_validator.py'
+alias aurora-api='python3 aurora_api.py'
+alias aurora-gui='python3 aurora_gui_cloudhub_fastapi.py'
+
+# Ensure Node.js and Python are available
+export PATH="/usr/local/bin:$PATH"
+
+# No banner, no figlet, no fancy output - keep it clean for Copilot
+echo "Aurora CloudBank DevContainer Ready"

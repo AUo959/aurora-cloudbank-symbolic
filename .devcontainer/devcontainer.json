@@ -1,10 +1,7 @@
 {
   "name": "Aurora Reflective Autonomy DevContainer",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  "postCreateCommand": "pip install -r requirements.txt || true; npm install",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "postCreateCommand": "pip install -r requirements.txt || true; npm install && cp .devcontainer/bashrc ~/.bashrc && source ~/.bashrc",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -26,11 +23,21 @@
         "terminal.integrated.defaultProfile.linux": "bash",
         "terminal.integrated.profiles.linux": {
           "bash": {
-            "path": "bash",
-            "args": ["-l"]
+            "path": "/bin/bash",
+            "args": ["--login"]
           }
-        }
+        },
+        "terminal.integrated.shellArgs.linux": ["--login"],
+        "terminal.integrated.automationShell.linux": "/bin/bash"
       }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
     }
   }
 }

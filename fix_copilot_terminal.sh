@@ -1,33 +1,66 @@
 #!/bin/bash
 
 # 🔧 AURORA CLOUDBANK - COPILOT CHAT TERMINAL FIX
-# Rebuilds container with terminal output visibility for Copilot Chat
+# Fixes terminal output visibility for Copilot Chat integration
 
 echo "🔧 AURORA CLOUDBANK - COPILOT CHAT TERMINAL FIX"
 echo "==============================================="
-echo ""
 
-echo "🔍 PROBLEM IDENTIFIED:"
-echo "• Shell prompt customization (zsh/oh-my-zsh) breaks Copilot Chat"
-echo "• Terminal output not visible to Copilot due to ANSI control characters"
-echo "• Need to force bash with clean prompt"
-echo ""
+echo "📋 Current shell: $SHELL"
+echo "� Current user: $(whoami)"
+echo "📋 Current directory: $(pwd)"
 
-echo "✅ SOLUTION IMPLEMENTED:"
-echo "• Updated .devcontainer/devcontainer.json to force bash shell"
-echo "• Modified Dockerfile to set clean bash profile"
-echo "• Created clean .bashrc without prompt interference"
-echo "• Added terminal test script for verification"
+# Step 1: Ensure we're using bash
 echo ""
+echo "🔧 Step 1: Setting up bash as default shell..."
+export SHELL=/bin/bash
 
-echo "📋 CHANGES MADE:"
-echo "✅ .devcontainer/devcontainer.json - Added bash shell settings"
-echo "✅ .devcontainer/Dockerfile - Added bash configuration"
-echo "✅ .copilot-bash-profile - Clean profile for Copilot compatibility"
-echo "✅ test_copilot_terminal.sh - Terminal output test script"
+# Step 2: Apply clean bashrc
 echo ""
+echo "🔧 Step 2: Installing clean bashrc..."
+if [ -f ".devcontainer/bashrc" ]; then
+    cp .devcontainer/bashrc ~/.bashrc
+    echo "✅ Clean bashrc installed"
+else
+    echo "⚠️  .devcontainer/bashrc not found, creating minimal one..."
+    cat > ~/.bashrc << 'EOF'
+# Aurora CloudBank - Clean Bash Configuration
+export PS1="\u@\h:\w\$ "
+export PYTHONUNBUFFERED=1
+unset PROMPT_COMMAND
+echo "Aurora CloudBank DevContainer Ready"
+EOF
+    echo "✅ Minimal bashrc created"
+fi
 
-echo "🚀 NEXT STEPS:"
+# Step 3: Test terminal output
+echo ""
+echo "🧪 Step 3: Testing terminal output..."
+echo "Test output: Hello from Aurora CloudBank!"
+node -e "console.log('Node.js test: Hello from Node!')" 2>/dev/null || echo "Node.js not available yet"
+python3 -c "print('Python test: Hello from Python!')" 2>/dev/null || echo "Python not available yet"
+
+# Step 4: Source new bashrc
+echo ""
+echo "🔧 Step 4: Applying new shell configuration..."
+source ~/.bashrc 2>/dev/null || echo "Will apply on next terminal session"
+
+echo ""
+echo "✅ COPILOT TERMINAL FIX COMPLETE!"
+echo "=================================="
+echo ""
+echo "📋 Changes made:"
+echo "• Clean devcontainer.json with bash shell"
+echo "• Simple prompt: user@host:path$"
+echo "• Clean bashrc without interference"
+echo "• Output buffering disabled"
+echo ""
+echo "🔄 Next steps:"
+echo "1. Rebuild the container (F1 → Rebuild Container)"
+echo "2. Test Copilot Chat terminal integration"
+echo "3. Run: echo 'Copilot test' to verify"
+echo ""
+echo "🚀 Aurora CloudBank Copilot integration should now work!"
 echo "1. Save all your work"
 echo "2. Rebuild the container using one of these methods:"
 echo ""

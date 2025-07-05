@@ -21,7 +21,7 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 - ✅ Clean postCreateCommand with bashrc setup
 
 ### 2. Created `.devcontainer/bashrc`
-- ✅ Simple prompt: `user@host:path$ `
+- ✅ Simple prompt: `node@host:path$`
 - ✅ No fancy themes or async prompts
 - ✅ Disabled output buffering (`PYTHONUNBUFFERED=1`)
 - ✅ Aurora-specific aliases and setup
@@ -59,7 +59,7 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 ## 🎯 EXPECTED RESULT
 
 After rebuilding:
-- ✅ Terminal will show clean `user@host:path$ ` prompt
+- ✅ Terminal will show clean `node@host:path$` prompt
 - ✅ Copilot Chat will capture all terminal output
 - ✅ Node.js, Python, and all tools will work normally
 - ✅ Aurora CloudBank development environment fully functional

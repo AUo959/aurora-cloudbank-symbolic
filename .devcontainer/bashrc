@@ -2,7 +2,7 @@
 # This ensures terminal output is visible to Copilot Chat
 
 # Set a simple, clean prompt that doesn't interfere with Copilot
-export PS1="\u@\h:\w\$ "
+export PS1="node@\h:\w\$ "
 
 # Ensure output is flushed immediately
 export PYTHONUNBUFFERED=1

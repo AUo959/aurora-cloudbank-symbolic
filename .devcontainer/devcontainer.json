@@ -1,7 +1,7 @@
 {
   "name": "Aurora Reflective Autonomy DevContainer",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "postCreateCommand": "pip install -r requirements.txt || true; npm install && cp .devcontainer/bashrc ~/.bashrc && source ~/.bashrc",
+  "postCreateCommand": "bash -c 'pip install -r requirements.txt || true; npm install || true; cp .devcontainer/bashrc ~/.bashrc; git config --global user.name \"Aurora CloudBank\" || true; git config --global user.email \"aurora@cloudbank.dev\" || true; git config --global init.defaultBranch main || true; echo \"DevContainer setup complete\"'",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -23,12 +23,15 @@
         "terminal.integrated.defaultProfile.linux": "bash",
         "terminal.integrated.profiles.linux": {
           "bash": {
-            "path": "/bin/bash",
-            "args": ["--login"]
+            "path": "/bin/bash"
           }
         },
-        "terminal.integrated.shellArgs.linux": ["--login"],
-        "terminal.integrated.automationShell.linux": "/bin/bash"
+        "terminal.integrated.automationShell.linux": "/bin/bash",
+        "terminal.integrated.shellIntegration.enabled": true,
+        "git.enabled": true,
+        "git.path": "/usr/bin/git",
+        "git.terminalAuthentication": true,
+        "terminal.integrated.inheritEnv": true
       }
     }
   },
@@ -38,6 +41,12 @@
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
     }
   }
 }

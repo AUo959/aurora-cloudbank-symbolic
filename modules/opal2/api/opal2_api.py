@@ -93,9 +93,11 @@ async def health_check():
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
+        import logging
+        logging.error(f"Health check failed: {str(e)}")
         return JSONResponse(
             status_code=500,
-            content={"healthy": False, "error": str(e)}
+            content={"healthy": False, "error": "An internal error has occurred."}
         )
 
 @app.post("/render")

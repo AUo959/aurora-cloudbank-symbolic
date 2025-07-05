@@ -13,7 +13,10 @@
   "meta": {
     "version": "v1.0",
     "last_synced": "2025-07-05T22:10:00Z",
-    "activation_manifest": ["riverthread_processor.js", "riverthread_config.json"],
+    "activation_manifest": [
+      "riverthread_processor.js",
+      "riverthread_config.json"
+    ],
     "docs": "riverthread_documentation.zip"
   }
 }

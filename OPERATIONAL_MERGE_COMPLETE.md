@@ -29,13 +29,13 @@ The Aurora-Cloudbank-Symbolic repository has been successfully prepared for oper
 
 #### 3. Relay Node Health Status ✅
 
-| Relay Node | Status | Last Synced | Drift | Ethics Protocol |
-|------------|--------|-------------|-------|-----------------|
-| ARCHY | ready | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3 |
-| OPPY | ready | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3 |
-| STARLING_AU | ready | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3 |
-| LIORA | ready | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3 |
-| RIVERTHREAD_808 | ready | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3 |
+| Relay Node      | Status | Last Synced          | Drift   | Ethics Protocol |
+| --------------- | ------ | -------------------- | ------- | --------------- |
+| ARCHY           | ready  | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3  |
+| OPPY            | ready  | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3  |
+| STARLING_AU     | ready  | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3  |
+| LIORA           | ready  | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3  |
+| RIVERTHREAD_808 | ready  | 2025-07-05T22:10:00Z | Δ 0.000 | Picard_Delta_3  |
 
 #### 4. Code Quality Improvements ✅
 

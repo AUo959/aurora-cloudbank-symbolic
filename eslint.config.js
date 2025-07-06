@@ -57,7 +57,10 @@ export default [
         navigator: 'readonly',
         console: 'readonly',
         NodeFilter: 'readonly',
-        require: 'readonly' // For modules that work in both environments
+        // CommonJS/Node.js compatibility for dual-environment files
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly'
       }
     },
     rules: {

@@ -42,7 +42,9 @@ class ReflectiveMonitor:
             yaml.dump(self.capsule_registry, f)
 
     def audit_registry(self):
-        unsealed = [k for k, v in self.capsule_registry.items() if v.get("status") != "sealed"]
+        unsealed = [
+            k for k, v in self.capsule_registry.items() if v.get("status") != "sealed"
+        ]
         print("[AUDIT] Capsule Integrity Check:")
         print(f" - Total Capsules: {len(self.capsule_registry)}")
         print(f" - Unsealed Capsules: {len(unsealed)}")

@@ -15,7 +15,11 @@ BASE_DIR = "sorted_files"
 os.makedirs(BASE_DIR, exist_ok=True)
 
 # Setup logging
-logging.basicConfig(filename="logs/file_sorter.log", level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logging.basicConfig(
+    filename="logs/file_sorter.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
 
 ALLOWED_EXTENSIONS = {".txt", ".md", ".json"}
 RATE_LIMIT = 10  # Max files per run
@@ -72,7 +76,9 @@ def sort_file(file_path: str, dry_run: bool = False):
             counter += 1
 
     if dry_run:
-        logging.info("Dry run: '%s' would be moved to '%s'", file_path, target_file_path)
+        logging.info(
+            "Dry run: '%s' would be moved to '%s'", file_path, target_file_path
+        )
         print(f"Dry run: '{file_path}' would be moved to '{target_file_path}'")
     else:
         backup_path = f"{file_path}.backup_{datetime.now().strftime('%Y%m%d%H%M%S')}"
@@ -81,8 +87,15 @@ def sort_file(file_path: str, dry_run: bool = False):
 
         try:
             shutil.move(file_path, target_file_path)
-            logging.info("Moved '%s' to '%s' (Priority: %s)", file_path, target_file_path, classification["priority"])
-            print(f"Moved '{file_path}' to '{target_file_path}' (Priority: {classification['priority']})")
+            logging.info(
+                "Moved '%s' to '%s' (Priority: %s)",
+                file_path,
+                target_file_path,
+                classification["priority"],
+            )
+            print(
+                f"Moved '{file_path}' to '{target_file_path}' (Priority: {classification['priority']})"
+            )
         except (OSError, ValueError, RuntimeError) as e:
             logging.error("Error moving '%s': %s", file_path, e)
             print(f"Error moving '{file_path}': {e}")
@@ -91,9 +104,13 @@ def sort_file(file_path: str, dry_run: bool = False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Automatically sort files based on heuristic content classification.")
+    parser = argparse.ArgumentParser(
+        description="Automatically sort files based on heuristic content classification."
+    )
     parser.add_argument("file_path", help="Path to the file to sort")
-    parser.add_argument("--dry-run", action="store_true", help="Preview actions without making changes")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Preview actions without making changes"
+    )
     args = parser.parse_args()
 
     sort_file(args.file_path, dry_run=args.dry_run)

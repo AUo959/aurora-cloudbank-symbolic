@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class LintIssue:
     """Represents a lint issue found in the codebase."""
+
     file_path: str
     line_number: int
     column: int
@@ -42,6 +43,7 @@ class LintIssue:
 @dataclass
 class CleanupResult:
     """Result of a cleanup operation."""
+
     operation: str
     files_processed: int
     issues_found: int
@@ -54,6 +56,7 @@ class CleanupResult:
 @dataclass
 class LintCleanupConfig:
     """Configuration for lint and cleanup operations."""
+
     python_tools: List[str]
     markdown_tools: List[str]
     javascript_tools: List[str]
@@ -92,8 +95,12 @@ class LintCleanupManager:
 
         # Custom fixer modules paths
         self.lint_fixer_path = self.project_root / "scripts" / "lint_fixer.py"
-        self.advanced_fixer_path = self.project_root / "scripts" / "advanced_lint_fixer.py"
-        self.critical_fixer_path = self.project_root / "scripts" / "critical_error_fixer.py"
+        self.advanced_fixer_path = (
+            self.project_root / "scripts" / "advanced_lint_fixer.py"
+        )
+        self.critical_fixer_path = (
+            self.project_root / "scripts" / "critical_error_fixer.py"
+        )
         self.final_cleanup_path = self.project_root / "scripts" / "final_cleanup.py"
 
     def _load_config(self) -> LintCleanupConfig:
@@ -106,19 +113,26 @@ class LintCleanupManager:
             javascript_tools=["eslint", "prettier"],
             auto_fix_enabled=True,
             severity_threshold="warning",
-            excluded_patterns=["*.pyc", "__pycache__", ".git", "node_modules", "venv", ".env"],
+            excluded_patterns=[
+                "*.pyc",
+                "__pycache__",
+                ".git",
+                "node_modules",
+                "venv",
+                ".env",
+            ],
             max_line_length=88,
             custom_rules={
                 "require_encoding": True,
                 "fix_subprocess_calls": True,
                 "prefer_pathlib": True,
-                "enforce_type_hints": False
-            }
+                "enforce_type_hints": False,
+            },
         )
 
         if config_path.exists():
             try:
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     config_data = json.load(f)
                 return LintCleanupConfig(**config_data)
             except (json.JSONDecodeError, TypeError) as e:
@@ -126,7 +140,7 @@ class LintCleanupManager:
 
         # Save default config
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(config_path, 'w', encoding='utf-8') as f:
+        with open(config_path, "w", encoding="utf-8") as f:
             json.dump(asdict(default_config), f, indent=2)
 
         return default_config
@@ -142,18 +156,29 @@ class LintCleanupManager:
             "pylint": ["pylint", "--version"],
             "flake8": ["flake8", "--version"],
             "bandit": ["bandit", "--version"],
-            "black": [sys.executable, "-m", "black", "--version"]
+            "black": [sys.executable, "-m", "black", "--version"],
         }
 
         for tool, cmd in python_tools.items():
             try:
-                result = subprocess.run(cmd, capture_output=True, check=True, timeout=10)
+                result = subprocess.run(
+                    cmd, capture_output=True, check=True, timeout=10
+                )
                 available[tool] = True
-            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            except (
+                subprocess.CalledProcessError,
+                FileNotFoundError,
+                subprocess.TimeoutExpired,
+            ):
                 # Try alternative command for some tools
                 if tool == "black":
                     try:
-                        subprocess.run(["black", "--version"], capture_output=True, check=True, timeout=10)
+                        subprocess.run(
+                            ["black", "--version"],
+                            capture_output=True,
+                            check=True,
+                            timeout=10,
+                        )
                         available[tool] = True
                     except (OSError, ValueError, RuntimeError):
                         available[tool] = False
@@ -164,16 +189,23 @@ class LintCleanupManager:
         other_tools = ["markdownlint", "prettier", "eslint"]
         for tool in other_tools:
             try:
-                subprocess.run([tool, "--version"],
-                             capture_output=True, check=True, timeout=10)
+                subprocess.run(
+                    [tool, "--version"], capture_output=True, check=True, timeout=10
+                )
                 available[tool] = True
-            except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+            except (
+                subprocess.CalledProcessError,
+                FileNotFoundError,
+                subprocess.TimeoutExpired,
+            ):
                 available[tool] = False
 
         logger.info(f"Available tools: {[k for k, v in available.items() if v]}")
         return available
 
-    def comprehensive_lint_scan(self, target_paths: Optional[List[str]] = None) -> Dict[str, Any]:
+    def comprehensive_lint_scan(
+        self, target_paths: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """
         Perform comprehensive lint scanning across multiple languages and tools.
 
@@ -197,7 +229,7 @@ class LintCleanupManager:
             "javascript_results": {},
             "custom_results": {},
             "summary": {},
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Python linting
@@ -212,11 +244,15 @@ class LintCleanupManager:
 
         # Markdown linting
         if self.available_tools.get("markdownlint", False):
-            scan_results["markdown_results"]["markdownlint"] = self._run_markdownlint(target_paths)
+            scan_results["markdown_results"]["markdownlint"] = self._run_markdownlint(
+                target_paths
+            )
 
         # JavaScript linting
         if self.available_tools.get("eslint", False):
-            scan_results["javascript_results"]["eslint"] = self._run_eslint(target_paths)
+            scan_results["javascript_results"]["eslint"] = self._run_eslint(
+                target_paths
+            )
 
         # Custom pattern analysis
         scan_results["custom_results"] = self._run_custom_analysis(target_paths)
@@ -252,7 +288,7 @@ class LintCleanupManager:
             "stages": {},
             "total_fixes": 0,
             "errors": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Stage 1: Basic formatting fixes
@@ -341,11 +377,13 @@ class LintCleanupManager:
             "low_priority_fixes": self._apply_priority_fixes(low_priority),
             "total_high": len(high_priority),
             "total_medium": len(medium_priority),
-            "total_low": len(low_priority)
+            "total_low": len(low_priority),
         }
 
-        logger.info(f"Priority fixing: {results['total_high']} high, "
-                   f"{results['total_medium']} medium, {results['total_low']} low")
+        logger.info(
+            f"Priority fixing: {results['total_high']} high, "
+            f"{results['total_medium']} medium, {results['total_low']} low"
+        )
 
         return results
 
@@ -370,7 +408,9 @@ class LintCleanupManager:
             report_sections.append("## Current Issues Summary")
             severity_counts = {}
             for issue in self.discovered_issues:
-                severity_counts[issue.severity] = severity_counts.get(issue.severity, 0) + 1
+                severity_counts[issue.severity] = (
+                    severity_counts.get(issue.severity, 0) + 1
+                )
 
             for severity, count in severity_counts.items():
                 report_sections.append(f"- {severity}: {count}")
@@ -380,8 +420,10 @@ class LintCleanupManager:
         if self.cleanup_history:
             report_sections.append("## Recent Cleanup History")
             for result in self.cleanup_history[-5:]:  # Last 5 operations
-                report_sections.append(f"- {result.operation}: {result.issues_fixed} fixes "
-                                     f"({result.timestamp})")
+                report_sections.append(
+                    f"- {result.operation}: {result.issues_fixed} fixes "
+                    f"({result.timestamp})"
+                )
             report_sections.append("")
 
         # Recommendations
@@ -403,21 +445,31 @@ class LintCleanupManager:
                     python_files.append(str(path_obj))
                 elif path_obj.is_dir():
                     python_files.extend([str(f) for f in path_obj.rglob("*.py")])
-            
+
             # Skip if no Python files found
             if not python_files:
-                return {"issues_found": 0, "message": "No Python files found for pylint analysis"}
-            
+                return {
+                    "issues_found": 0,
+                    "message": "No Python files found for pylint analysis",
+                }
+
             # Process files in batches to avoid "Argument list too long" error
             batch_size = 50  # Process 50 files at a time
             all_issues = []
             total_output = []
-            
+
             for i in range(0, len(python_files), batch_size):
-                batch_files = python_files[i:i+batch_size]
+                batch_files = python_files[i : i + batch_size]
                 cmd = ["pylint", "--output-format=json"] + batch_files
 
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    shell=False,
+                    check=False,
+                )
 
                 # Check if pylint returned "No files to lint" message
                 if "No files to lint" in result.stdout or not result.stdout.strip():
@@ -429,7 +481,9 @@ class LintCleanupManager:
                         all_issues.extend(batch_issues)
                         total_output.append(result.stdout)
                     except json.JSONDecodeError:
-                        logger.warning(f"Pylint batch returned invalid JSON: {result.stdout[:100]}...")
+                        logger.warning(
+                            f"Pylint batch returned invalid JSON: {result.stdout[:100]}..."
+                        )
                         total_output.append(result.stdout)
 
             # Process all discovered issues
@@ -441,15 +495,17 @@ class LintCleanupManager:
                     severity=issue.get("type", "warning"),
                     rule_code=issue.get("symbol", ""),
                     message=issue.get("message", ""),
-                    tool="pylint"
+                    tool="pylint",
                 )
                 self.discovered_issues.append(lint_issue)
 
             return {
-                "issues_found": len(all_issues), 
+                "issues_found": len(all_issues),
                 "files_processed": len(python_files),
                 "batches_processed": len(range(0, len(python_files), batch_size)),
-                "raw_output": "\n".join(total_output) if total_output else "No issues found"
+                "raw_output": (
+                    "\n".join(total_output) if total_output else "No issues found"
+                ),
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -467,21 +523,34 @@ class LintCleanupManager:
                     python_files.append(str(path_obj))
                 elif path_obj.is_dir():
                     python_files.extend([str(f) for f in path_obj.rglob("*.py")])
-            
+
             # Skip if no Python files found
             if not python_files:
-                return {"issues_found": 0, "message": "No Python files found for flake8 analysis"}
+                return {
+                    "issues_found": 0,
+                    "message": "No Python files found for flake8 analysis",
+                }
 
             # Process files in batches to avoid "Argument list too long" error
             batch_size = 50  # Process 50 files at a time
             all_output = []
             total_issues = 0
-            
-            for i in range(0, len(python_files), batch_size):
-                batch_files = python_files[i:i+batch_size]
-                cmd = ["flake8", "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s"] + batch_files
 
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            for i in range(0, len(python_files), batch_size):
+                batch_files = python_files[i : i + batch_size]
+                cmd = [
+                    "flake8",
+                    "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s",
+                ] + batch_files
+
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    shell=False,
+                    check=False,
+                )
 
                 if result.stdout:
                     batch_issues = len(result.stdout.splitlines())
@@ -489,10 +558,12 @@ class LintCleanupManager:
                     all_output.append(result.stdout)
 
             return {
-                "issues_found": total_issues, 
+                "issues_found": total_issues,
                 "files_processed": len(python_files),
                 "batches_processed": len(range(0, len(python_files), batch_size)),
-                "raw_output": "\n".join(all_output) if all_output else "No issues found"
+                "raw_output": (
+                    "\n".join(all_output) if all_output else "No issues found"
+                ),
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -505,7 +576,7 @@ class LintCleanupManager:
             # Use directory-based scanning to avoid argument list issues
             python_dirs = set()
             python_files = []
-            
+
             for path in target_paths:
                 path_obj = Path(path)
                 if path_obj.is_file() and path_obj.suffix == ".py":
@@ -514,33 +585,54 @@ class LintCleanupManager:
                     # Check if directory contains Python files
                     if any(path_obj.rglob("*.py")):
                         python_dirs.add(str(path_obj))
-            
+
             # Prefer directory scanning over individual files
-            targets = list(python_dirs) if python_dirs else python_files[:20]  # Limit individual files
-            
+            targets = (
+                list(python_dirs) if python_dirs else python_files[:20]
+            )  # Limit individual files
+
             # Skip if no Python targets found
             if not targets:
-                return {"issues_found": 0, "message": "No Python files or directories found for bandit analysis"}
+                return {
+                    "issues_found": 0,
+                    "message": "No Python files or directories found for bandit analysis",
+                }
 
             cmd = ["bandit", "-f", "json", "-r"] + targets
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             if result.stdout and result.stdout.strip():
                 try:
                     bandit_data = json.loads(result.stdout)
                     issues_count = len(bandit_data.get("results", []))
                     return {
-                        "issues_found": issues_count, 
+                        "issues_found": issues_count,
                         "targets_scanned": len(targets),
                         "scan_type": "directories" if python_dirs else "files",
-                        "raw_output": result.stdout
+                        "raw_output": result.stdout,
                     }
                 except json.JSONDecodeError:
-                    logger.warning(f"Bandit returned invalid JSON: {result.stdout[:100]}...")
-                    return {"issues_found": 0, "raw_output": result.stdout, "warning": "Invalid JSON output"}
+                    logger.warning(
+                        f"Bandit returned invalid JSON: {result.stdout[:100]}..."
+                    )
+                    return {
+                        "issues_found": 0,
+                        "raw_output": result.stdout,
+                        "warning": "Invalid JSON output",
+                    }
 
-            return {"issues_found": 0, "raw_output": result.stderr or "No security issues found"}
+            return {
+                "issues_found": 0,
+                "raw_output": result.stderr or "No security issues found",
+            }
 
         except (subprocess.TimeoutExpired, Exception) as e:
             logger.error(f"Bandit analysis failed: {e}")
@@ -560,7 +652,14 @@ class LintCleanupManager:
                 return {"issues_found": 0, "message": "No markdown files found"}
 
             cmd = ["markdownlint", "--json"] + md_files
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             issues_count = len(result.stdout.splitlines()) if result.stdout else 0
             return {"issues_found": issues_count, "raw_output": result.stdout}
@@ -574,22 +673,39 @@ class LintCleanupManager:
         try:
             js_files = []
             for path in target_paths:
-                if Path(path).is_file() and Path(path).suffix in [".js", ".jsx", ".ts", ".tsx"]:
+                if Path(path).is_file() and Path(path).suffix in [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx",
+                ]:
                     js_files.append(str(path))
                 elif Path(path).is_dir():
                     for ext in ["*.js", "*.jsx", "*.ts", "*.tsx"]:
                         js_files.extend([str(f) for f in Path(path).rglob(ext)])
 
             if not js_files:
-                return {"issues_found": 0, "message": "No JavaScript/TypeScript files found"}
+                return {
+                    "issues_found": 0,
+                    "message": "No JavaScript/TypeScript files found",
+                }
 
             cmd = ["eslint", "--format", "json"] + js_files
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             if result.stdout:
                 try:
                     eslint_data = json.loads(result.stdout)
-                    issues_count = sum(len(file.get("messages", [])) for file in eslint_data)
+                    issues_count = sum(
+                        len(file.get("messages", [])) for file in eslint_data
+                    )
                     return {"issues_found": issues_count, "raw_output": result.stdout}
                 except json.JSONDecodeError:
                     pass
@@ -610,20 +726,20 @@ class LintCleanupManager:
                 "name": "open_without_encoding",
                 "pattern": r"open\([^)]*\)(?!.*encoding=)",
                 "severity": "warning",
-                "message": "File opened without explicit encoding"
+                "message": "File opened without explicit encoding",
             },
             {
                 "name": "subprocess_without_check",
                 "pattern": r"subprocess\.run\([^)]*\)(?!.*check=)",
                 "severity": "warning",
-                "message": "subprocess.run without check parameter"
+                "message": "subprocess.run without check parameter",
             },
             {
                 "name": "hardcoded_paths",
                 "pattern": r'["\'][A-Za-z]:\\\\[^"\']*["\']',
                 "severity": "info",
-                "message": "Hardcoded Windows path detected"
-            }
+                "message": "Hardcoded Windows path detected",
+            },
         ]
 
         for path in target_paths:
@@ -636,26 +752,30 @@ class LintCleanupManager:
 
         return {"issues_found": len(custom_issues), "issues": custom_issues}
 
-    def _analyze_file_patterns(self, file_path: Path, patterns: List[Dict]) -> List[Dict]:
+    def _analyze_file_patterns(
+        self, file_path: Path, patterns: List[Dict]
+    ) -> List[Dict]:
         """Analyze a file for custom patterns."""
         issues = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             for pattern_info in patterns:
                 matches = re.finditer(pattern_info["pattern"], content, re.MULTILINE)
                 for match in matches:
-                    line_num = content[:match.start()].count('\n') + 1
-                    issues.append({
-                        "file": str(file_path),
-                        "line": line_num,
-                        "pattern": pattern_info["name"],
-                        "severity": pattern_info["severity"],
-                        "message": pattern_info["message"],
-                        "match": match.group()
-                    })
+                    line_num = content[: match.start()].count("\n") + 1
+                    issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "pattern": pattern_info["name"],
+                            "severity": pattern_info["severity"],
+                            "message": pattern_info["message"],
+                            "match": match.group(),
+                        }
+                    )
 
         except (OSError, UnicodeDecodeError) as e:
             logger.warning(f"Could not analyze {file_path}: {e}")
@@ -673,14 +793,21 @@ class LintCleanupManager:
 
             cmd.append(str(self.project_root))
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             changes_count = result.stdout.count("@@") if dry_run else 0
 
             return {
                 "tool": "autopep8",
                 "changes_detected" if dry_run else "fixes_applied": changes_count,
-                "output": result.stdout[:1000]  # Truncate for readability
+                "output": result.stdout[:1000],  # Truncate for readability
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -698,14 +825,21 @@ class LintCleanupManager:
 
             cmd.append(str(self.project_root))
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             changes_count = result.stdout.count("would reformat") if dry_run else 0
 
             return {
                 "tool": "isort",
                 "changes_detected" if dry_run else "fixes_applied": changes_count,
-                "output": result.stdout[:1000]
+                "output": result.stdout[:1000],
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -723,7 +857,14 @@ class LintCleanupManager:
 
             cmd.extend(["--line-length", "88", str(self.project_root)])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             # Count files that would be reformatted
             changes_count = result.stdout.count("would reformat") if dry_run else 0
@@ -731,8 +872,9 @@ class LintCleanupManager:
 
             return {
                 "tool": "black",
-                "changes_detected" if dry_run else "fixes_applied": changes_count or files_reformatted,
-                "output": result.stdout[:1000]
+                "changes_detected" if dry_run else "fixes_applied": changes_count
+                or files_reformatted,
+                "output": result.stdout[:1000],
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -747,14 +889,24 @@ class LintCleanupManager:
             for path in target_paths:
                 path_obj = Path(path)
                 if path_obj.is_file():
-                    if path_obj.suffix in [".js", ".jsx", ".ts", ".tsx", ".json", ".md"]:
+                    if path_obj.suffix in [
+                        ".js",
+                        ".jsx",
+                        ".ts",
+                        ".tsx",
+                        ".json",
+                        ".md",
+                    ]:
                         relevant_files.append(str(path))
                 elif path_obj.is_dir():
                     for ext in ["*.js", "*.jsx", "*.ts", "*.tsx", "*.json", "*.md"]:
                         relevant_files.extend([str(f) for f in path_obj.rglob(ext)])
 
             if not relevant_files:
-                return {"issues_found": 0, "message": "No relevant files found for prettier"}
+                return {
+                    "issues_found": 0,
+                    "message": "No relevant files found for prettier",
+                }
 
             cmd = ["prettier"]
             if dry_run:
@@ -764,14 +916,21 @@ class LintCleanupManager:
 
             cmd.extend(relevant_files)
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                shell=False,
+                check=False,
+            )
 
             changes_count = len(result.stdout.splitlines()) if result.stdout else 0
 
             return {
                 "tool": "prettier",
                 "changes_detected" if dry_run else "fixes_applied": changes_count,
-                "output": result.stdout[:1000]
+                "output": result.stdout[:1000],
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -785,7 +944,14 @@ class LintCleanupManager:
             if dry_run:
                 cmd.append("--dry-run")
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=600, shell=False, check=False)
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=600,
+                shell=False,
+                check=False,
+            )
 
             # Parse output for statistics
             output_lines = result.stdout.splitlines()
@@ -793,7 +959,7 @@ class LintCleanupManager:
             for line in output_lines:
                 if "Fixed" in line or "Applied" in line:
                     # Try to extract number from line
-                    numbers = re.findall(r'\d+', line)
+                    numbers = re.findall(r"\d+", line)
                     if numbers:
                         fixes_applied += int(numbers[0])
 
@@ -801,7 +967,7 @@ class LintCleanupManager:
                 "tool": fixer_path.name,
                 "fixes_applied": fixes_applied,
                 "output": result.stdout,
-                "errors": result.stderr
+                "errors": result.stderr,
             }
 
         except (subprocess.TimeoutExpired, Exception) as e:
@@ -840,7 +1006,9 @@ class LintCleanupManager:
         return {
             "issues_processed": len(issues),
             "fixes_attempted": len([i for i in issues if i.auto_fixable]),
-            "fixes_successful": len([i for i in issues if i.auto_fixable and not i.fixed])
+            "fixes_successful": len(
+                [i for i in issues if i.auto_fixable and not i.fixed]
+            ),
         }
 
     def _generate_scan_summary(self) -> Dict[str, Any]:
@@ -851,7 +1019,9 @@ class LintCleanupManager:
 
         for issue in self.discovered_issues:
             # Count by severity
-            severity_breakdown[issue.severity] = severity_breakdown.get(issue.severity, 0) + 1
+            severity_breakdown[issue.severity] = (
+                severity_breakdown.get(issue.severity, 0) + 1
+            )
 
             # Count by tool
             tool_breakdown[issue.tool] = tool_breakdown.get(issue.tool, 0) + 1
@@ -860,7 +1030,7 @@ class LintCleanupManager:
             "total_issues": total_issues,
             "severity_breakdown": severity_breakdown,
             "tool_breakdown": tool_breakdown,
-            "auto_fixable": len([i for i in self.discovered_issues if i.auto_fixable])
+            "auto_fixable": len([i for i in self.discovered_issues if i.auto_fixable]),
         }
 
     def _generate_recommendations(self) -> List[str]:
@@ -877,10 +1047,14 @@ class LintCleanupManager:
             recommendations.append("Install black for automatic code formatting")
 
         if len(self.discovered_issues) > 100:
-            recommendations.append("Consider running automated fix workflow to address bulk issues")
+            recommendations.append(
+                "Consider running automated fix workflow to address bulk issues"
+            )
 
         if any(issue.severity == "error" for issue in self.discovered_issues):
-            recommendations.append("Address critical errors immediately before proceeding with other fixes")
+            recommendations.append(
+                "Address critical errors immediately before proceeding with other fixes"
+            )
 
         return recommendations
 
@@ -892,7 +1066,7 @@ class LintCleanupManager:
             "Set up continuous monitoring for code quality metrics",
             "Configure automatic dependency updates with lint validation",
             "Implement progressive lint rule enforcement",
-            "Create custom issue patterns for team-specific coding standards"
+            "Create custom issue patterns for team-specific coding standards",
         ]
         return recommendations
 
@@ -902,11 +1076,19 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="GitWiz Lint & Cleanup Manager")
-    parser.add_argument("--scan", action="store_true", help="Run comprehensive lint scan")
+    parser.add_argument(
+        "--scan", action="store_true", help="Run comprehensive lint scan"
+    )
     parser.add_argument("--fix", action="store_true", help="Run automated fix workflow")
-    parser.add_argument("--dry-run", action="store_true", help="Dry run mode (no changes)")
-    parser.add_argument("--report", action="store_true", help="Generate integration report")
-    parser.add_argument("--priority", action="store_true", help="Run intelligent priority fixing")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Dry run mode (no changes)"
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Generate integration report"
+    )
+    parser.add_argument(
+        "--priority", action="store_true", help="Run intelligent priority fixing"
+    )
 
     args = parser.parse_args()
 

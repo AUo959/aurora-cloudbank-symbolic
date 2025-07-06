@@ -29,12 +29,14 @@ def analyze_repository_files():
         "zip_files": [],
         "markdown_files": [],
         "duplicate_names": {},
-        "potential_cleanup": []
+        "potential_cleanup": [],
     }
 
     # Scan all files
     for file_path in project_root.rglob("*"):
-        if file_path.is_file() and not any(part.startswith('.git') for part in file_path.parts):
+        if file_path.is_file() and not any(
+            part.startswith(".git") for part in file_path.parts
+        ):
             analysis["total_files"] += 1
             size = file_path.stat().st_size
             analysis["total_size"] += size
@@ -45,40 +47,58 @@ def analyze_repository_files():
 
             # Track large files (>10MB)
             if size > 10 * 1024 * 1024:
-                analysis["large_files"].append({
-                    "path": str(file_path.relative_to(project_root)),
-                    "size": size,
-                    "size_mb": round(size / (1024 * 1024), 2)
-                })
+                analysis["large_files"].append(
+                    {
+                        "path": str(file_path.relative_to(project_root)),
+                        "size": size,
+                        "size_mb": round(size / (1024 * 1024), 2),
+                    }
+                )
 
             # Collect ZIP files
-            if ext == '.zip':
+            if ext == ".zip":
                 analysis["zip_files"].append(str(file_path.relative_to(project_root)))
 
             # Collect markdown files
-            if ext == '.md':
-                analysis["markdown_files"].append(str(file_path.relative_to(project_root)))
+            if ext == ".md":
+                analysis["markdown_files"].append(
+                    str(file_path.relative_to(project_root))
+                )
 
             # Track potential duplicates by name
             name = file_path.name.lower()
             if name not in analysis["duplicate_names"]:
                 analysis["duplicate_names"][name] = []
-            analysis["duplicate_names"][name].append(str(file_path.relative_to(project_root)))
+            analysis["duplicate_names"][name].append(
+                str(file_path.relative_to(project_root))
+            )
 
     # Find actual duplicates
-    actual_duplicates = {k: v for k, v in analysis["duplicate_names"].items() if len(v) > 1}
+    actual_duplicates = {
+        k: v for k, v in analysis["duplicate_names"].items() if len(v) > 1
+    }
     analysis["duplicate_names"] = actual_duplicates
 
     # Identify potential cleanup candidates
     cleanup_patterns = [
-        "backup", "old", "copy", "temp", "tmp", "_2", " 2", "draft", "test"
+        "backup",
+        "old",
+        "copy",
+        "temp",
+        "tmp",
+        "_2",
+        " 2",
+        "draft",
+        "test",
     ]
 
     for file_path in project_root.rglob("*"):
         if file_path.is_file():
             name_lower = file_path.name.lower()
             if any(pattern in name_lower for pattern in cleanup_patterns):
-                analysis["potential_cleanup"].append(str(file_path.relative_to(project_root)))
+                analysis["potential_cleanup"].append(
+                    str(file_path.relative_to(project_root))
+                )
 
     return analysis
 
@@ -91,7 +111,7 @@ def analyze_zip_files():
     zip_analysis = {
         "total_zip_files": len(zip_files),
         "total_zip_size": 0,
-        "zip_details": []
+        "zip_details": [],
     }
 
     for zip_file in zip_files:
@@ -102,7 +122,7 @@ def analyze_zip_files():
             "name": zip_file.name,
             "size": size,
             "size_mb": round(size / (1024 * 1024), 2),
-            "category": categorize_zip_file(zip_file.name)
+            "category": categorize_zip_file(zip_file.name),
         }
         zip_analysis["zip_details"].append(zip_info)
 
@@ -140,7 +160,7 @@ def analyze_markdown_documentation():
         "status_reports": [],
         "documentation": [],
         "guides": [],
-        "other": []
+        "other": [],
     }
 
     for md_file in md_files:
@@ -160,11 +180,7 @@ def analyze_markdown_documentation():
 
 def generate_recommendations(file_analysis, zip_analysis, md_analysis):
     """Generate optimization recommendations."""
-    recommendations = {
-        "critical": [],
-        "important": [],
-        "suggestions": []
-    }
+    recommendations = {"critical": [], "important": [], "suggestions": []}
 
     # Critical recommendations
     if file_analysis["total_size"] > 500 * 1024 * 1024:  # >500MB
@@ -237,7 +253,7 @@ def main():
         "file_analysis": file_analysis,
         "zip_analysis": zip_analysis,
         "markdown_analysis": md_analysis,
-        "recommendations": recommendations
+        "recommendations": recommendations,
     }
 
     # Print summary
@@ -245,7 +261,9 @@ def main():
     print("-" * 30)
     print(f"Total Files: {file_analysis['total_files']}")
     print(f"Total Size: {file_analysis['total_size'] / (1024*1024):.2f} MB")
-    print(f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_zip_size'] / (1024*1024):.2f} MB)")
+    print(
+        f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_zip_size'] / (1024*1024):.2f} MB)"
+    )
     print(f"Markdown Files: {md_analysis['total_md_files']}")
     print(f"Large Files: {len(file_analysis['large_files'])}")
     print(f"Potential Duplicates: {len(file_analysis['duplicate_names'])}")
@@ -265,7 +283,9 @@ def main():
     print("\n📦 ZIP FILE ANALYSIS")
     print("Top 10 largest ZIP files:")
     for i, zip_info in enumerate(zip_analysis["zip_details"][:10]):
-        print(f"  {i+1}. {zip_info['name']} ({zip_info['size_mb']} MB) - {zip_info['category']}")
+        print(
+            f"  {i+1}. {zip_info['name']} ({zip_info['size_mb']} MB) - {zip_info['category']}"
+        )
 
     print("\n📝 MARKDOWN FILE CATEGORIES")
     print(f"  Status Reports: {len(md_analysis['status_reports'])}")
@@ -274,8 +294,10 @@ def main():
     print(f"  Other: {len(md_analysis['other'])}")
 
     # Save detailed report
-    report_path = Path("/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json")
-    with open(report_path, 'w', encoding="utf-8") as f:
+    report_path = Path(
+        "/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json"
+    )
+    with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
     print(f"\n💾 Detailed report saved to: {report_path}")

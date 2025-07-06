@@ -32,13 +32,16 @@ import schedule
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('/workspaces/aurora-cloudbank-symbolic/.gitwiz/scheduler.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler(
+            "/workspaces/aurora-cloudbank-symbolic/.gitwiz/scheduler.log"
+        ),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 class GitWizScheduler:
     """Advanced scheduler for GitWiz maintenance operations."""
@@ -56,7 +59,7 @@ class GitWizScheduler:
             "total_runs": 0,
             "successful_runs": 0,
             "failed_runs": 0,
-            "avg_execution_time": 0.0
+            "avg_execution_time": 0.0,
         }
 
         # Ensure log directory exists
@@ -70,11 +73,8 @@ class GitWizScheduler:
                 "daily_light_maintenance": {
                     "enabled": True,
                     "time": "02:00",
-                    "commands": [
-                        "status",
-                        "lint-scan --target scripts/"
-                    ],
-                    "notify_on_issues": True
+                    "commands": ["status", "lint-scan --target scripts/"],
+                    "notify_on_issues": True,
                 },
                 "weekly_comprehensive": {
                     "enabled": True,
@@ -83,37 +83,29 @@ class GitWizScheduler:
                     "commands": [
                         "quality-check --auto-fix --output json",
                         "maintenance --aggressive",
-                        "workflow --type enhanced"
+                        "workflow --type enhanced",
                     ],
-                    "generate_report": True
+                    "generate_report": True,
                 },
                 "pre_commit_validation": {
                     "enabled": True,
                     "trigger": "git_hook",
-                    "commands": [
-                        "lint-scan --detailed"
-                    ],
-                    "fail_on_errors": True
-                }
+                    "commands": ["lint-scan --detailed"],
+                    "fail_on_errors": True,
+                },
             },
             "notifications": {
                 "enabled": True,
                 "methods": ["log", "file"],
-                "severity_threshold": "warning"
+                "severity_threshold": "warning",
             },
-            "backup": {
-                "enabled": True,
-                "retention_days": 30
-            },
-            "performance": {
-                "max_concurrent_jobs": 2,
-                "timeout_minutes": 30
-            }
+            "backup": {"enabled": True, "retention_days": 30},
+            "performance": {"max_concurrent_jobs": 2, "timeout_minutes": 30},
         }
 
         if self.config_path.exists():
             try:
-                with open(self.config_path, 'r', encoding='utf-8') as f:
+                with open(self.config_path, "r", encoding="utf-8") as f:
                     loaded_config = json.load(f)
                     # Merge with defaults
                     return {**default_config, **loaded_config}
@@ -122,7 +114,7 @@ class GitWizScheduler:
 
         # Save default config
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_path, 'w', encoding='utf-8') as f:
+        with open(self.config_path, "w", encoding="utf-8") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
@@ -134,10 +126,10 @@ class GitWizScheduler:
             "last_update": datetime.utcnow().isoformat(),
             "last_run_times": self.last_run_times,
             "execution_stats": self.execution_stats,
-            "next_scheduled_runs": self._get_next_runs()
+            "next_scheduled_runs": self._get_next_runs(),
         }
 
-        with open(self.status_file, 'w', encoding='utf-8') as f:
+        with open(self.status_file, "w", encoding="utf-8") as f:
             json.dump(status, f, indent=2)
 
     def _get_next_runs(self) -> Dict[str, str]:
@@ -155,7 +147,7 @@ class GitWizScheduler:
             # Construct full command
             cmd = [
                 sys.executable,
-                str(self.project_root / "scripts" / "gitwiz_integrated_command.py")
+                str(self.project_root / "scripts" / "gitwiz_integrated_command.py"),
             ] + command.split()
 
             logger.info(f"Executing: {' '.join(cmd)}")
@@ -165,8 +157,10 @@ class GitWizScheduler:
                 capture_output=True,
                 text=True,
                 timeout=self.config["performance"]["timeout_minutes"] * 60,
-                cwd=self.project_root
-            , shell=False, check=False)
+                cwd=self.project_root,
+                shell=False,
+                check=False,
+            )
 
             execution_time = (datetime.utcnow() - start_time).total_seconds()
 
@@ -176,15 +170,17 @@ class GitWizScheduler:
                     "success": True,
                     "output": result.stdout,
                     "execution_time": execution_time,
-                    "command": command
+                    "command": command,
                 }
             else:
-                logger.error(f"Command failed with code {result.returncode}: {result.stderr}")
+                logger.error(
+                    f"Command failed with code {result.returncode}: {result.stderr}"
+                )
                 return {
                     "success": False,
                     "error": result.stderr,
                     "execution_time": execution_time,
-                    "command": command
+                    "command": command,
                 }
 
         except subprocess.TimeoutExpired:
@@ -193,7 +189,7 @@ class GitWizScheduler:
                 "success": False,
                 "error": "Command timed out",
                 "execution_time": self.config["performance"]["timeout_minutes"] * 60,
-                "command": command
+                "command": command,
             }
         except Exception as e:
             logger.error(f"Command execution failed: {e}")
@@ -201,7 +197,7 @@ class GitWizScheduler:
                 "success": False,
                 "error": str(e),
                 "execution_time": (datetime.utcnow() - start_time).total_seconds(),
-                "command": command
+                "command": command,
             }
 
     def _run_scheduled_job(self, job_name: str, job_config: Dict[str, Any]):
@@ -213,7 +209,7 @@ class GitWizScheduler:
             "job_name": job_name,
             "start_time": job_start.isoformat(),
             "commands": [],
-            "overall_success": True
+            "overall_success": True,
         }
 
         # Execute each command in the job
@@ -240,9 +236,10 @@ class GitWizScheduler:
 
         # Update average execution time
         self.execution_stats["avg_execution_time"] = (
-            (self.execution_stats["avg_execution_time"] * (self.execution_stats["total_runs"] - 1) + execution_time) /
-            self.execution_stats["total_runs"]
-        )
+            self.execution_stats["avg_execution_time"]
+            * (self.execution_stats["total_runs"] - 1)
+            + execution_time
+        ) / self.execution_stats["total_runs"]
 
         self.last_run_times[job_name] = datetime.utcnow().isoformat()
 
@@ -251,18 +248,28 @@ class GitWizScheduler:
             self._generate_job_report(job_results)
 
         # Send notifications if configured
-        if job_config.get("notify_on_issues", False) and not job_results["overall_success"]:
-            self._send_notification(f"Job {job_name} completed with issues", job_results)
+        if (
+            job_config.get("notify_on_issues", False)
+            and not job_results["overall_success"]
+        ):
+            self._send_notification(
+                f"Job {job_name} completed with issues", job_results
+            )
 
         self._save_status()
         logger.info(f"✅ Job {job_name} completed in {execution_time:.2f}s")
 
     def _generate_job_report(self, job_results: Dict[str, Any]):
         """Generate a detailed report for a job."""
-        report_path = self.project_root / ".gitwiz" / "reports" / f"job_{job_results['job_name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_path = (
+            self.project_root
+            / ".gitwiz"
+            / "reports"
+            / f"job_{job_results['job_name']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
         report_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             json.dump(job_results, f, indent=2)
 
         logger.info(f"📊 Job report saved: {report_path}")
@@ -273,11 +280,7 @@ class GitWizScheduler:
             return
 
         timestamp = datetime.utcnow().isoformat()
-        notification = {
-            "timestamp": timestamp,
-            "message": message,
-            "details": details
-        }
+        notification = {"timestamp": timestamp, "message": message, "details": details}
 
         # Log notification
         if "log" in self.config["notifications"]["methods"]:
@@ -290,7 +293,7 @@ class GitWizScheduler:
 
             if notif_path.exists():
                 try:
-                    with open(notif_path, 'r', encoding='utf-8') as f:
+                    with open(notif_path, "r", encoding="utf-8") as f:
                         notifications = json.load(f)
                 except (OSError, ValueError, RuntimeError):
                     pass
@@ -300,7 +303,7 @@ class GitWizScheduler:
             # Keep only last 100 notifications
             notifications = notifications[-100:]
 
-            with open(notif_path, 'w', encoding='utf-8') as f:
+            with open(notif_path, "w", encoding="utf-8") as f:
                 json.dump(notifications, f, indent=2)
 
     def setup_schedules(self):
@@ -320,7 +323,9 @@ class GitWizScheduler:
                 schedule.every().day.at(job_config["time"]).do(
                     self._run_scheduled_job, job_name, job_config
                 )
-                logger.info(f"📅 Scheduled daily job '{job_name}' at {job_config['time']}")
+                logger.info(
+                    f"📅 Scheduled daily job '{job_name}' at {job_config['time']}"
+                )
 
             elif "day" in job_config and "time" in job_config:
                 # Weekly schedule
@@ -328,19 +333,33 @@ class GitWizScheduler:
                 time = job_config["time"]
 
                 if day == "monday":
-                    schedule.every().monday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().monday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "tuesday":
-                    schedule.every().tuesday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().tuesday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "wednesday":
-                    schedule.every().wednesday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().wednesday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "thursday":
-                    schedule.every().thursday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().thursday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "friday":
-                    schedule.every().friday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().friday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "saturday":
-                    schedule.every().saturday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().saturday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
                 elif day == "sunday":
-                    schedule.every().sunday.at(time).do(self._run_scheduled_job, job_name, job_config)
+                    schedule.every().sunday.at(time).do(
+                        self._run_scheduled_job, job_name, job_config
+                    )
 
                 logger.info(f"📅 Scheduled weekly job '{job_name}' on {day} at {time}")
 
@@ -393,22 +412,33 @@ class GitWizScheduler:
         return {
             "is_running": self.is_running,
             "config_loaded": bool(self.config),
-            "scheduled_jobs": len([j for j in self.config["schedules"].values() if j.get("enabled", False)]),
+            "scheduled_jobs": len(
+                [
+                    j
+                    for j in self.config["schedules"].values()
+                    if j.get("enabled", False)
+                ]
+            ),
             "execution_stats": self.execution_stats,
             "last_run_times": self.last_run_times,
-            "next_runs": self._get_next_runs()
+            "next_runs": self._get_next_runs(),
         }
+
 
 def main():
     """Main entry point for the scheduler."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="GitWiz Automated Maintenance Scheduler")
-    parser.add_argument("command", choices=["start", "stop", "status", "run"],
-                       help="Scheduler command")
+    parser = argparse.ArgumentParser(
+        description="GitWiz Automated Maintenance Scheduler"
+    )
+    parser.add_argument(
+        "command", choices=["start", "stop", "status", "run"], help="Scheduler command"
+    )
     parser.add_argument("--job", help="Job name for 'run' command")
-    parser.add_argument("--daemon", action="store_true",
-                       help="Run in daemon mode (for 'start' command)")
+    parser.add_argument(
+        "--daemon", action="store_true", help="Run in daemon mode (for 'start' command)"
+    )
 
     args = parser.parse_args()
 
@@ -437,6 +467,7 @@ def main():
             logger.error("Job name required for 'run' command")
             sys.exit(1)
         scheduler.run_job_now(args.job)
+
 
 if __name__ == "__main__":
     main()

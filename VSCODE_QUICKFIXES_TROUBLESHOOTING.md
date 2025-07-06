@@ -1,9 +1,11 @@
 # VS Code Quick Fixes Troubleshooting Guide
 
 ## Issue Description
+
 Quick fixes keep popping up but nothing is loading in VS Code for the Aurora CloudBank Symbolic project.
 
 ## Common Causes
+
 1. **Language Server Issues** - ESLint or TypeScript server stuck
 2. **Cache Problems** - Corrupted ESLint or VS Code cache
 3. **Extension Conflicts** - Conflicting VS Code extensions
@@ -13,23 +15,28 @@ Quick fixes keep popping up but nothing is loading in VS Code for the Aurora Clo
 ## Quick Solutions Applied
 
 ### 1. Enhanced VS Code Settings ✅
+
 Updated `.vscode/settings.json` with:
+
 - Better ESLint configuration
 - Improved quick suggestions
 - Optimized file watchers
 - Enhanced cache management
 
 ### 2. Cache Clearing ✅
+
 - Cleared ESLint cache (`.eslintcache`)
 - Cleaned NPM cache
 - Removed workspace cache files
 
 ### 3. Extensions Configuration ✅
+
 Added recommended extensions in `.vscode/extensions.json`
 
 ## Manual Troubleshooting Steps
 
 ### Immediate Fixes
+
 1. **Reload Window**
    - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
    - Type: `Developer: Reload Window`
@@ -48,6 +55,7 @@ Added recommended extensions in `.vscode/extensions.json`
 ### Advanced Fixes
 
 #### 1. Check Extension Health
+
 ```bash
 # List installed extensions
 code --list-extensions
@@ -57,6 +65,7 @@ code --list-extensions
 ```
 
 #### 2. Reset Workspace State
+
 ```bash
 # Close VS Code completely
 # Delete workspace state (if exists)
@@ -67,9 +76,11 @@ rm -rf .vscode/.ropeproject
 ```
 
 #### 3. Memory and Performance
+
 - Close unused tabs
 - Disable unused extensions temporarily
 - Increase VS Code memory limit:
+
   ```json
   "typescript.preferences.maxFileSize": 20971520
   ```
@@ -77,13 +88,16 @@ rm -rf .vscode/.ropeproject
 ## Project-Specific Fixes
 
 ### Aurora CloudBank Configuration
+
 The project now includes:
+
 - ✅ **Optimized ESLint config** - `.eslintrc.json` with proper rules
 - ✅ **VS Code settings** - Enhanced for JavaScript/Python development
 - ✅ **Debug configuration** - `.vscode/launch.json` for debugging
 - ✅ **Extension recommendations** - Essential extensions listed
 
 ### Performance Optimizations
+
 - File watcher exclusions for `node_modules`, `.git`
 - ESLint caching enabled
 - Quick suggestions optimized
@@ -109,6 +123,7 @@ The project now includes:
 ## Emergency Reset
 
 If all else fails:
+
 ```bash
 # Complete reset (use with caution)
 code --disable-extensions

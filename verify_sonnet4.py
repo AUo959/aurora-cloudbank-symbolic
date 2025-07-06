@@ -70,7 +70,9 @@ async def main():
         has_sonnet4_config = has_enabled_flag = has_all_clients = False
 
     verification = {
-        "Config File Exists": "✅ Yes" if Path(sonnet4_hub.config_path).exists() else "❌ No",
+        "Config File Exists": (
+            "✅ Yes" if Path(sonnet4_hub.config_path).exists() else "❌ No"
+        ),
         "Sonnet 4 Section": "✅ Present" if has_sonnet4_config else "❌ Missing",
         "Globally Enabled": "✅ Yes" if has_enabled_flag else "❌ No",
         "All Clients Enabled": "✅ Yes" if has_all_clients else "❌ No",

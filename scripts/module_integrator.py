@@ -79,9 +79,19 @@ def sync_module(src: str, dest: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Integrate modules across branches")
     parser.add_argument("module_path", help="Path to module to integrate")
-    parser.add_argument("--command-node", default="command_node_data/modules", help="Command node modules directory")
-    parser.add_argument("--pl-branch", default="pl_branch_data/modules", help="PL branch modules directory")
-    parser.add_argument("--rollback", action="store_true", help="Rollback latest backup of this module")
+    parser.add_argument(
+        "--command-node",
+        default="command_node_data/modules",
+        help="Command node modules directory",
+    )
+    parser.add_argument(
+        "--pl-branch",
+        default="pl_branch_data/modules",
+        help="PL branch modules directory",
+    )
+    parser.add_argument(
+        "--rollback", action="store_true", help="Rollback latest backup of this module"
+    )
     args = parser.parse_args()
 
     logger.info("Integration start for %s", args.module_path)

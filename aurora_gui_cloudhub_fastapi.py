@@ -4,7 +4,15 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    HTTPException,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -14,7 +22,10 @@ from modules.symbolic_core import get_mcp_bridge_core
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.mcp_command_router import MCPCommandRouter
 from modules.symbolic_core.mcp_security import mcp_security, mcp_security_dependency
-from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector, quantum_symbolic_vector
+from modules.symbolic_core.quantum_vsa import (
+    QuantumSymbolicVector,
+    quantum_symbolic_vector,
+)
 
 app = FastAPI(title="Aurora Quantum VSA Playground")
 
@@ -162,7 +173,11 @@ class QuantumSymbolicVectorRequest(BaseModel):
     dim: Optional[int] = 8
 
 
-@app.post("/geometric/product", summary="Geometric Product", response_description="Result of geometric product")
+@app.post(
+    "/geometric/product",
+    summary="Geometric Product",
+    response_description="Result of geometric product",
+)
 def geometric_product(req: GeometricProductRequest):
     """
     Compute the geometric product of two 3D vectors (a*e1, b*e2) using Clifford algebra.
@@ -191,7 +206,11 @@ def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     return {"symbol": req.symbol, "dim": req.dim, "vector": vec.tolist()}
 
 
-@app.get("/mcp_bridge", summary="MCP Bridge Core JSON", response_description="MCP Bridge configuration JSON")
+@app.get(
+    "/mcp_bridge",
+    summary="MCP Bridge Core JSON",
+    response_description="MCP Bridge configuration JSON",
+)
 def get_mcp_bridge():
     """
     Returns the MCP Bridge Core configuration as JSON.
@@ -205,7 +224,11 @@ def get_mcp_bridge():
     summary="Symbolic Command Routing via MCP Bridge",
     response_description="Routed command result",
 )
-def mcp_route_command(command: str, anchor: str = "EOS_SEED_ORION", security: None = Depends(mcp_security_dependency)):
+def mcp_route_command(
+    command: str,
+    anchor: str = "EOS_SEED_ORION",
+    security: None = Depends(mcp_security_dependency),
+):
     """
     Symbolic command routing using MCP Bridge Core config and MCPCommandRouter.
     Enforces MCP security and anchor validation.
@@ -267,7 +290,11 @@ def vsa_bind(req: VSABindRequest):
     bound_vector = vec_a  # Replace with actual binding logic
     vsa_store[req.result_name] = bound_vector
 
-    return {"result_name": req.result_name, "dimension": req.dimension, "result": bound_vector.tolist()}
+    return {
+        "result_name": req.result_name,
+        "dimension": req.dimension,
+        "result": bound_vector.tolist(),
+    }
 
 
 @app.post(
@@ -290,7 +317,11 @@ def vsa_similarity(req: VSASimilarityRequest):
     # Compute similarity (placeholder logic)
     similarity_score = np.random.rand()  # Replace with actual similarity computation
 
-    return {"symbol_a": req.symbol_a, "symbol_b": req.symbol_b, "similarity": similarity_score}
+    return {
+        "symbol_a": req.symbol_a,
+        "symbol_b": req.symbol_b,
+        "similarity": similarity_score,
+    }
 
 
 @app.post(
@@ -305,7 +336,12 @@ def quantum_circuit(req: QuantumCircuitRequest):
     Response: {"symbol": str, "depth": int, "qubits": int, "result": Any}
     """
     # Placeholder for quantum circuit execution
-    result = {"message": "Quantum circuit executed", "symbol": req.symbol, "depth": req.depth, "qubits": req.qubits}
+    result = {
+        "message": "Quantum circuit executed",
+        "symbol": req.symbol,
+        "depth": req.depth,
+        "qubits": req.qubits,
+    }
 
     return result
 
@@ -330,14 +366,24 @@ def geometric_algebra(req: GeometricAlgebraRequest):
         result = ga.mult(*blades)
     elif req.operation == "add":
         # Compute geometric addition
-        result = sum((ga.blades[f"e{i+1}"] for i in range(len(req.vectors))), start=ga.zero)
+        result = sum(
+            (ga.blades[f"e{i+1}"] for i in range(len(req.vectors))), start=ga.zero
+        )
     elif req.operation == "commutator":
         # Compute commutator
         if len(req.vectors) != 2:
-            raise HTTPException(status_code=400, detail="Commutator requires exactly 2 vectors")
+            raise HTTPException(
+                status_code=400, detail="Commutator requires exactly 2 vectors"
+            )
         v1, v2 = req.vectors
-        blade1 = sum((ga.blades[f"e{i+1}"] * v1[f"e{i+1}"] for i in range(len(v1))), start=ga.zero)
-        blade2 = sum((ga.blades[f"e{i+1}"] * v2[f"e{i+1}"] for i in range(len(v2))), start=ga.zero)
+        blade1 = sum(
+            (ga.blades[f"e{i+1}"] * v1[f"e{i+1}"] for i in range(len(v1))),
+            start=ga.zero,
+        )
+        blade2 = sum(
+            (ga.blades[f"e{i+1}"] * v2[f"e{i+1}"] for i in range(len(v2))),
+            start=ga.zero,
+        )
         result = ga.commutator(blade1, blade2)
     else:
         raise HTTPException(status_code=400, detail="Invalid operation")
@@ -346,6 +392,7 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 
 
 # === New VSA and Quantum Endpoints ===
+
 
 @app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector")
 def generate_vsa_vector(req: VSAOperationRequest):
@@ -362,7 +409,7 @@ def generate_vsa_vector(req: VSAOperationRequest):
             "vector": qsv.vector.tolist()[:32],  # First 32 elements for display
             "vector_full_length": len(qsv.vector),
             "vector_type": "bipolar",
-            "quantum_generated": True
+            "quantum_generated": True,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
@@ -407,7 +454,7 @@ def bind_vsa_vectors(req: VSABindRequest):
             "dimension": min_dim,
             "result_vector": bound_vector.tolist()[:32],
             "similarity_a": float(np.dot(bound_vector, vec_a) / min_dim),
-            "similarity_b": float(np.dot(bound_vector, vec_b) / min_dim)
+            "similarity_b": float(np.dot(bound_vector, vec_b) / min_dim),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
@@ -433,7 +480,9 @@ def calculate_vsa_similarity(req: VSASimilarityRequest):
         vec_b = vec_b[:min_dim]
 
         # Cosine similarity
-        similarity = float(np.dot(vec_a, vec_b) / (np.linalg.norm(vec_a) * np.linalg.norm(vec_b)))
+        similarity = float(
+            np.dot(vec_a, vec_b) / (np.linalg.norm(vec_a) * np.linalg.norm(vec_b))
+        )
 
         # Hamming distance for bipolar vectors
         hamming = float(np.sum(vec_a != vec_b) / min_dim)
@@ -444,10 +493,12 @@ def calculate_vsa_similarity(req: VSASimilarityRequest):
             "cosine_similarity": similarity,
             "hamming_distance": hamming,
             "dot_product": float(np.dot(vec_a, vec_b)),
-            "dimension": min_dim
+            "dimension": min_dim,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Similarity calculation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Similarity calculation failed: {str(e)}"
+        )
 
 
 @app.get("/api/vsa/list", summary="List stored VSA vectors")
@@ -460,12 +511,12 @@ def list_vsa_vectors():
             {
                 "symbol": symbol,
                 "dimension": len(qsv.vector),
-                "vector_type": getattr(qsv, 'vector_type', 'bipolar'),
-                "preview": qsv.vector.tolist()[:8]
+                "vector_type": getattr(qsv, "vector_type", "bipolar"),
+                "preview": qsv.vector.tolist()[:8],
             }
             for symbol, qsv in vsa_store.items()
         ],
-        "count": len(vsa_store)
+        "count": len(vsa_store),
     }
 
 
@@ -523,10 +574,12 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
             "operation": req.operation,
             "input_vectors": req.vectors,
             "results": results,
-            "mock_mode": ga._mock
+            "mock_mode": ga._mock,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Geometric algebra operation failed: {str(e)}"
+        )
 
 
 @app.post("/api/quantum/circuit", summary="Generate Quantum Circuit")
@@ -580,10 +633,13 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
             "most_frequent_state": most_frequent[0],
             "most_frequent_probability": most_frequent[1] / 1000,
             "total_shots": 1000,
-            "circuit_qasm": qc.qasm()
+            "circuit_qasm": qc.qasm(),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Quantum circuit generation failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Quantum circuit generation failed: {str(e)}"
+        )
+
 
 # === Enhanced WebSocket for Real-time Collaboration ===
 
@@ -601,7 +657,7 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
         "type": "welcome",
         "message": "Connected to Aurora VSA Collaboration",
         "current_vectors": len(vsa_store),
-        "vector_list": list(vsa_store.keys())
+        "vector_list": list(vsa_store.keys()),
     }
     await websocket.send_json(welcome_msg)
 
@@ -617,7 +673,7 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
                     "operation": data.get("operation"),
                     "symbol": data.get("symbol"),
                     "timestamp": data.get("timestamp"),
-                    "user": data.get("user", "anonymous")
+                    "user": data.get("user", "anonymous"),
                 }
 
                 for conn in list(connections):
@@ -634,10 +690,11 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "aurora_gui_cloudhub_fastapi:app",
         host="0.0.0.0",
         port=8000,
         reload=True,
-        log_level="info"
+        log_level="info",
     )

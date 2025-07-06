@@ -6,11 +6,11 @@ and quantum symbolic vectors. It acts as a lightweight "graphics card" for the
 hybrid quantum symbolic processor.
 """
 
-from pathlib import Path
-from typing import Any, Dict
 import asyncio
 import json
 import logging
+from pathlib import Path
+from typing import Any, Dict
 
 import yaml
 
@@ -57,8 +57,8 @@ class GlyphGenerator:
             "glyph_data": {
                 "symbol": symbol,
                 "dimension": self.dim,
-                "ascii_pattern": [ord(ch) for ch in symbol]
-            }
+                "ascii_pattern": [ord(ch) for ch in symbol],
+            },
         }
 
 
@@ -70,18 +70,19 @@ class GlyphCore:
         self.generator = GlyphGenerator(dim=dim, config_path=config_path)
         self.dim = dim
 
-    async def generate_async(self, expression: Dict[str, Any],
-                             style_params: Dict[str, Any] | None = None,
-                             quantum_enhancement: bool = True) -> Dict[str, Any]:
+    async def generate_async(
+        self,
+        expression: Dict[str, Any],
+        style_params: Dict[str, Any] | None = None,
+        quantum_enhancement: bool = True,
+    ) -> Dict[str, Any]:
         """Async glyph generation with quantum enhancement"""
         try:
             # Extract symbol from expression
             symbol = expression.get("symbol", str(expression))
 
             # Generate base glyph
-            base_glyph = await asyncio.to_thread(
-                self.generator.generate, symbol
-            )
+            base_glyph = await asyncio.to_thread(self.generator.generate, symbol)
 
             # Apply style parameters
             if style_params:
@@ -96,11 +97,13 @@ class GlyphCore:
                 base_glyph["enhancement_factor"] = enhancement_factor
 
             # Add metadata
-            base_glyph.update({
-                "generated_at": asyncio.get_event_loop().time(),
-                "version": "2.0.0",
-                "type": "quantum_glyph"
-            })
+            base_glyph.update(
+                {
+                    "generated_at": asyncio.get_event_loop().time(),
+                    "version": "2.0.0",
+                    "type": "quantum_glyph",
+                }
+            )
 
             return base_glyph
 
@@ -116,13 +119,10 @@ class GlyphCore:
             return {
                 "success": True,
                 "test_symbol": "test",
-                "generated_keys": list(result.keys())
+                "generated_keys": list(result.keys()),
             }
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
+            return {"success": False, "error": str(e)}
 
     def get_capabilities(self) -> Dict[str, Any]:
         """Get glyph core capabilities"""
@@ -130,5 +130,5 @@ class GlyphCore:
             "dimension": self.dim,
             "quantum_support": True,
             "async_support": True,
-            "supported_types": ["quantum_glyph", "geometric_glyph", "symbolic_glyph"]
+            "supported_types": ["quantum_glyph", "geometric_glyph", "symbolic_glyph"],
         }

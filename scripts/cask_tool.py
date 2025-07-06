@@ -14,10 +14,13 @@ from modules.cask import (
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate CASK assets")
-    parser.add_argument("--output-dir", default="docs/cask", help="Directory for generated files")
+    parser.add_argument(
+        "--output-dir", default="docs/cask", help="Directory for generated files"
+    )
     args = parser.parse_args()
 
     import os
+
     os.makedirs(args.output_dir, exist_ok=True)
 
     specs_csv = os.path.join(args.output_dir, "cask_technical_specifications.csv")

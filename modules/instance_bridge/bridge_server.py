@@ -32,7 +32,9 @@ manager = ConnectionManager()
 
 
 @app.websocket("/ws/{channel}/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str) -> None:
+async def websocket_endpoint(
+    websocket: WebSocket, channel: str, client_id: str
+) -> None:
     await manager.connect(websocket, channel)
     try:
         while True:

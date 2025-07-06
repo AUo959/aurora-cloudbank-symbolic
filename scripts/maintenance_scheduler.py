@@ -31,95 +31,108 @@ class MaintenanceScheduler:
     def _load_maintenance_config(self) -> Dict:
         """Load maintenance configuration."""
         return {
-            'schedules': {
-                'cache_cleanup': {'frequency': 'daily', 'time': '02:00'},
-                'branch_analysis': {'frequency': 'weekly', 'day': 'sunday', 'time': '03:00'},
-                'health_monitoring': {'frequency': 'hourly'},
-                'zip_optimization': {'frequency': 'weekly', 'day': 'saturday', 'time': '04:00'},
-                'dependency_check': {'frequency': 'weekly', 'day': 'monday', 'time': '09:00'},
-                'security_scan': {'frequency': 'daily', 'time': '01:00'}
+            "schedules": {
+                "cache_cleanup": {"frequency": "daily", "time": "02:00"},
+                "branch_analysis": {
+                    "frequency": "weekly",
+                    "day": "sunday",
+                    "time": "03:00",
+                },
+                "health_monitoring": {"frequency": "hourly"},
+                "zip_optimization": {
+                    "frequency": "weekly",
+                    "day": "saturday",
+                    "time": "04:00",
+                },
+                "dependency_check": {
+                    "frequency": "weekly",
+                    "day": "monday",
+                    "time": "09:00",
+                },
+                "security_scan": {"frequency": "daily", "time": "01:00"},
             },
-            'maintenance_tasks': {
-                'cache_cleanup': {
-                    'enabled': True,
-                    'description': 'Remove Python cache files and temporary artifacts',
-                    'safety_checks': ['check_no_running_processes', 'backup_important_files'],
-                    'commands': [
+            "maintenance_tasks": {
+                "cache_cleanup": {
+                    "enabled": True,
+                    "description": "Remove Python cache files and temporary artifacts",
+                    "safety_checks": [
+                        "check_no_running_processes",
+                        "backup_important_files",
+                    ],
+                    "commands": [
                         'find . -name "*.pyc" -delete',
                         'find . -name "__pycache__" -type d -exec rm -rf {} +',
-                        'find . -name "*.pyo" -delete'
-                    ]
+                        'find . -name "*.pyo" -delete',
+                    ],
                 },
-                'branch_cleanup': {
-                    'enabled': False,  # Manual approval required
-                    'description': 'Clean up stale branches automatically',
-                    'safety_checks': ['check_ci_status', 'verify_merge_status'],
-                    'max_branches_per_run': 5
+                "branch_cleanup": {
+                    "enabled": False,  # Manual approval required
+                    "description": "Clean up stale branches automatically",
+                    "safety_checks": ["check_ci_status", "verify_merge_status"],
+                    "max_branches_per_run": 5,
                 },
-                'zip_optimization': {
-                    'enabled': True,
-                    'description': 'Optimize and consolidate ZIP archives',
-                    'safety_checks': ['backup_before_changes'],
-                    'size_threshold_mb': 50
+                "zip_optimization": {
+                    "enabled": True,
+                    "description": "Optimize and consolidate ZIP archives",
+                    "safety_checks": ["backup_before_changes"],
+                    "size_threshold_mb": 50,
                 },
-                'dependency_audit': {
-                    'enabled': True,
-                    'description': 'Check for dependency updates and security issues',
-                    'safety_checks': ['test_environment_first']
+                "dependency_audit": {
+                    "enabled": True,
+                    "description": "Check for dependency updates and security issues",
+                    "safety_checks": ["test_environment_first"],
                 },
-                'health_monitoring': {
-                    'enabled': True,
-                    'description': 'Monitor repository health metrics',
-                    'alert_thresholds': {
-                        'size_mb': 800,
-                        'file_count': 30000,
-                        'branch_count': 25
-                    }
-                }
+                "health_monitoring": {
+                    "enabled": True,
+                    "description": "Monitor repository health metrics",
+                    "alert_thresholds": {
+                        "size_mb": 800,
+                        "file_count": 30000,
+                        "branch_count": 25,
+                    },
+                },
             },
-            'safety_settings': {
-                'require_clean_working_directory': True,
-                'create_backup_before_changes': True,
-                'max_maintenance_duration_minutes': 30,
-                'alert_on_failures': True,
-                'dry_run_mode': False
-            }
+            "safety_settings": {
+                "require_clean_working_directory": True,
+                "create_backup_before_changes": True,
+                "max_maintenance_duration_minutes": 30,
+                "alert_on_failures": True,
+                "dry_run_mode": False,
+            },
         }
 
     def setup_schedules(self):
         """Set up all maintenance schedules."""
-        schedules = self.config['schedules']
+        schedules = self.config["schedules"]
 
         # Cache cleanup - daily
-        if schedules['cache_cleanup']['enabled']:
-            schedule.every().day.at(schedules['cache_cleanup']['time']).do(
-                self._run_maintenance_task, 'cache_cleanup'
+        if schedules["cache_cleanup"]["enabled"]:
+            schedule.every().day.at(schedules["cache_cleanup"]["time"]).do(
+                self._run_maintenance_task, "cache_cleanup"
             )
 
         # Health monitoring - hourly
-        schedule.every().hour.do(
-            self._run_maintenance_task, 'health_monitoring'
-        )
+        schedule.every().hour.do(self._run_maintenance_task, "health_monitoring")
 
         # Branch analysis - weekly
-        day = schedules['branch_analysis']['day']
-        time_str = schedules['branch_analysis']['time']
+        day = schedules["branch_analysis"]["day"]
+        time_str = schedules["branch_analysis"]["time"]
         getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, 'branch_analysis'
+            self._run_maintenance_task, "branch_analysis"
         )
 
         # ZIP optimization - weekly
-        day = schedules['zip_optimization']['day']
-        time_str = schedules['zip_optimization']['time']
+        day = schedules["zip_optimization"]["day"]
+        time_str = schedules["zip_optimization"]["time"]
         getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, 'zip_optimization'
+            self._run_maintenance_task, "zip_optimization"
         )
 
         # Dependency check - weekly
-        day = schedules['dependency_check']['day']
-        time_str = schedules['dependency_check']['time']
+        day = schedules["dependency_check"]["day"]
+        time_str = schedules["dependency_check"]["time"]
         getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, 'dependency_audit'
+            self._run_maintenance_task, "dependency_audit"
         )
 
         self._log("Maintenance schedules configured successfully")
@@ -131,17 +144,19 @@ class MaintenanceScheduler:
 
         try:
             # Get task configuration
-            task_config = self.config['maintenance_tasks'].get(task_name, {})
+            task_config = self.config["maintenance_tasks"].get(task_name, {})
 
-            if not task_config.get('enabled', False):
+            if not task_config.get("enabled", False):
                 self._log(f"Task {task_name} is disabled, skipping")
-                return {'status': 'skipped', 'reason': 'disabled'}
+                return {"status": "skipped", "reason": "disabled"}
 
             # Run safety checks
-            safety_passed = self._run_safety_checks(task_config.get('safety_checks', []))
+            safety_passed = self._run_safety_checks(
+                task_config.get("safety_checks", [])
+            )
             if not safety_passed:
                 self._log(f"Safety checks failed for {task_name}")
-                return {'status': 'failed', 'reason': 'safety_checks_failed'}
+                return {"status": "failed", "reason": "safety_checks_failed"}
 
             # Execute the task
             result = self._execute_maintenance_task(task_name, task_config)
@@ -153,22 +168,22 @@ class MaintenanceScheduler:
 
         except (OSError, ValueError, RuntimeError) as e:
             self._log(f"Error in maintenance task {task_name}: {e}")
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _run_safety_checks(self, checks: List[str]) -> bool:
         """Run pre-maintenance safety checks."""
         for check in checks:
             try:
-                if check == 'check_no_running_processes':
+                if check == "check_no_running_processes":
                     if not self._check_no_running_processes():
                         return False
-                elif check == 'check_ci_status':
+                elif check == "check_ci_status":
                     if not self._check_ci_status():
                         return False
-                elif check == 'verify_merge_status':
+                elif check == "verify_merge_status":
                     if not self._verify_merge_status():
                         return False
-                elif check == 'backup_important_files':
+                elif check == "backup_important_files":
                     if not self._backup_important_files():
                         return False
 
@@ -182,14 +197,19 @@ class MaintenanceScheduler:
         """Check if any development processes are running."""
         try:
             # Check for common development processes
-            processes_to_check = ['python', 'node', 'npm', 'jupyter', 'code']
+            processes_to_check = ["python", "node", "npm", "jupyter", "code"]
 
             for proc_name in processes_to_check:
-                result = subprocess.run(['pgrep', '-', proc_name],
-                                        capture_output=True, cwd=self.repo_path, shell=False, check=False)
+                result = subprocess.run(
+                    ["pgrep", "-", proc_name],
+                    capture_output=True,
+                    cwd=self.repo_path,
+                    shell=False,
+                    check=False,
+                )
                 if result.returncode == 0:
                     # Process found, check if it's related to our repo
-                    pids = result.stdout.decode().strip().split('\n')
+                    pids = result.stdout.decode().strip().split("\n")
                     for pid in pids:
                         if pid:  # Non-empty PID
                             # Could add more sophisticated process checking here
@@ -210,8 +230,14 @@ class MaintenanceScheduler:
         """Verify branch merge status before cleanup."""
         try:
             # Check if working directory is clean
-            result = subprocess.run(['git', 'status', '--porcelain'],
-                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
             return not bool(result.stdout.strip())
         except (OSError, ValueError, RuntimeError):
             return False
@@ -219,17 +245,34 @@ class MaintenanceScheduler:
     def _backup_important_files(self) -> bool:
         """Create backup of important files before maintenance."""
         try:
-            backup_dir = self.repo_path / ".gitwiz" / "backups" / datetime.date.today().isoformat()
+            backup_dir = (
+                self.repo_path
+                / ".gitwiz"
+                / "backups"
+                / datetime.date.today().isoformat()
+            )
             backup_dir.mkdir(parents=True, exist_ok=True)
 
             # Backup critical files
-            critical_files = ['requirements.txt', 'package.json', 'pyproject.toml', '.gitignore']
+            critical_files = [
+                "requirements.txt",
+                "package.json",
+                "pyproject.toml",
+                ".gitignore",
+            ]
 
             for file_name in critical_files:
                 file_path = self.repo_path / file_name
                 if file_path.exists():
                     backup_path = backup_dir / file_name
-                    subprocess.run(['cp', str(file_path, shell=False, check=False), str(backup_path)], cwd=self.repo_path)
+                    subprocess.run(
+                        [
+                            "cp",
+                            str(file_path, shell=False, check=False),
+                            str(backup_path),
+                        ],
+                        cwd=self.repo_path,
+                    )
 
             return True
 
@@ -239,18 +282,18 @@ class MaintenanceScheduler:
 
     def _execute_maintenance_task(self, task_name: str, task_config: Dict) -> Dict:
         """Execute the specific maintenance task."""
-        if task_name == 'cache_cleanup':
+        if task_name == "cache_cleanup":
             return self._cache_cleanup(task_config)
-        elif task_name == 'health_monitoring':
+        elif task_name == "health_monitoring":
             return self._health_monitoring(task_config)
-        elif task_name == 'branch_analysis':
+        elif task_name == "branch_analysis":
             return self._branch_analysis(task_config)
-        elif task_name == 'zip_optimization':
+        elif task_name == "zip_optimization":
             return self._zip_optimization(task_config)
-        elif task_name == 'dependency_audit':
+        elif task_name == "dependency_audit":
             return self._dependency_audit(task_config)
         else:
-            return {'status': 'unknown_task'}
+            return {"status": "unknown_task"}
 
     def _cache_cleanup(self, config: Dict) -> Dict:
         """Clean up cache files and temporary artifacts."""
@@ -258,25 +301,30 @@ class MaintenanceScheduler:
 
         try:
             # Clean Python cache files
-            commands = config.get('commands', [])
+            commands = config.get("commands", [])
 
             for command in commands:
-                if self.config['safety_settings']['dry_run_mode']:
+                if self.config["safety_settings"]["dry_run_mode"]:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
-                    result = subprocess.run(command, shell=True,
-                                            capture_output=True, text=True, cwd=self.repo_path)
+                    result = subprocess.run(
+                        command,
+                        shell=True,
+                        capture_output=True,
+                        text=True,
+                        cwd=self.repo_path,
+                    )
                     if result.returncode == 0:
                         cleaned_files += 1
 
             return {
-                'status': 'success',
-                'cleaned_files': cleaned_files,
-                'message': f'Cleaned {cleaned_files} cache patterns'
+                "status": "success",
+                "cleaned_files": cleaned_files,
+                "message": f"Cleaned {cleaned_files} cache patterns",
             }
 
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _health_monitoring(self, config: Dict) -> Dict:
         """Run health monitoring check."""
@@ -288,48 +336,62 @@ class MaintenanceScheduler:
             result = monitor.run_monitoring_cycle()
 
             # Check if alerts require immediate action
-            alerts = result.get('alerts', [])
-            high_priority_alerts = [a for a in alerts if a.get('severity') == 'high']
+            alerts = result.get("alerts", [])
+            high_priority_alerts = [a for a in alerts if a.get("severity") == "high"]
 
             if high_priority_alerts:
                 self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
                 # Could trigger additional cleanup here
 
             return {
-                'status': 'success',
-                'health_score': result['metrics'].get('health_score', 0),
-                'alerts_count': len(alerts),
-                'high_priority_alerts': len(high_priority_alerts)
+                "status": "success",
+                "health_score": result["metrics"].get("health_score", 0),
+                "alerts_count": len(alerts),
+                "high_priority_alerts": len(high_priority_alerts),
             }
 
         except ImportError:
             # Fallback to basic health check
             return self._basic_health_check()
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _basic_health_check(self) -> Dict:
         """Basic health check without full monitoring system."""
         try:
             # Get repository size
-            result = subprocess.run(['du', '-sm', '.'],
-                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(
+                ["du", "-sm", "."],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
             size_mb = float(result.stdout.split()[0]) if result.returncode == 0 else 0
 
             # Count files
-            result = subprocess.run(['find', '.', '-type', ''],
-                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
-            file_count = len(result.stdout.strip().split('\n')) if result.returncode == 0 else 0
+            result = subprocess.run(
+                ["find", ".", "-type", ""],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
+            file_count = (
+                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
+            )
 
             return {
-                'status': 'success',
-                'size_mb': size_mb,
-                'file_count': file_count,
-                'basic_check': True
+                "status": "success",
+                "size_mb": size_mb,
+                "file_count": file_count,
+                "basic_check": True,
             }
 
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _branch_analysis(self, config: Dict) -> Dict:
         """Analyze branches for cleanup opportunities."""
@@ -339,37 +401,49 @@ class MaintenanceScheduler:
             cleanup_manager = BranchCleanupManager(self.repo_path)
             branches = cleanup_manager.analyze_branches()
 
-            cleanup_candidates = len(branches.get('cleanup_candidates', []))
+            cleanup_candidates = len(branches.get("cleanup_candidates", []))
 
             return {
-                'status': 'success',
-                'total_branches': sum(len(v) for v in branches.values()),
-                'cleanup_candidates': cleanup_candidates,
-                'analysis_complete': True
+                "status": "success",
+                "total_branches": sum(len(v) for v in branches.values()),
+                "cleanup_candidates": cleanup_candidates,
+                "analysis_complete": True,
             }
 
         except ImportError:
-            return {'status': 'error', 'error': 'Branch cleanup manager not available'}
+            return {"status": "error", "error": "Branch cleanup manager not available"}
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _zip_optimization(self, config: Dict) -> Dict:
         """Optimize ZIP file storage."""
         try:
             # Find ZIP files
-            result = subprocess.run(['find', '.', '-name', '*.zip', '-type', 'f'],
-                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(
+                ["find", ".", "-name", "*.zip", "-type", "f"],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
 
             if result.returncode != 0:
-                return {'status': 'error', 'error': 'Failed to find ZIP files'}
+                return {"status": "error", "error": "Failed to find ZIP files"}
 
-            zip_files = [f for f in result.stdout.strip().split('\n') if f]
+            zip_files = [f for f in result.stdout.strip().split("\n") if f]
             total_size_mb = 0
 
             for zip_file in zip_files:
                 try:
-                    size_result = subprocess.run(['du', '-m', zip_file],
-                                                 capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+                    size_result = subprocess.run(
+                        ["du", "-m", zip_file],
+                        capture_output=True,
+                        text=True,
+                        cwd=self.repo_path,
+                        shell=False,
+                        check=False,
+                    )
                     if size_result.returncode == 0:
                         size = float(size_result.stdout.split()[0])
                         total_size_mb += size
@@ -377,14 +451,14 @@ class MaintenanceScheduler:
                     continue
 
             return {
-                'status': 'success',
-                'zip_file_count': len(zip_files),
-                'total_size_mb': total_size_mb,
-                'optimization_complete': True
+                "status": "success",
+                "zip_file_count": len(zip_files),
+                "total_size_mb": total_size_mb,
+                "optimization_complete": True,
             }
 
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _dependency_audit(self, config: Dict) -> Dict:
         """Audit dependencies for updates and security issues."""
@@ -392,33 +466,45 @@ class MaintenanceScheduler:
             audit_results = {}
 
             # Check Python dependencies
-            if (self.repo_path / 'requirements.txt').exists():
-                result = subprocess.run(['pip', 'list', '--outdated', '--format=json'],
-                                        capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            if (self.repo_path / "requirements.txt").exists():
+                result = subprocess.run(
+                    ["pip", "list", "--outdated", "--format=json"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.repo_path,
+                    shell=False,
+                    check=False,
+                )
                 if result.returncode == 0:
                     outdated = json.loads(result.stdout)
-                    audit_results['python_outdated'] = len(outdated)
+                    audit_results["python_outdated"] = len(outdated)
 
             # Check Node.js dependencies
-            if (self.repo_path / 'package.json').exists():
-                result = subprocess.run(['npm', 'outdated', '--json'],
-                                        capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            if (self.repo_path / "package.json").exists():
+                result = subprocess.run(
+                    ["npm", "outdated", "--json"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.repo_path,
+                    shell=False,
+                    check=False,
+                )
                 # npm outdated returns non-zero if there are outdated packages
                 if result.stdout:
                     try:
                         outdated = json.loads(result.stdout)
-                        audit_results['node_outdated'] = len(outdated)
+                        audit_results["node_outdated"] = len(outdated)
                     except json.JSONDecodeError:
-                        audit_results['node_outdated'] = 0
+                        audit_results["node_outdated"] = 0
 
             return {
-                'status': 'success',
-                'audit_results': audit_results,
-                'dependencies_checked': True
+                "status": "success",
+                "audit_results": audit_results,
+                "dependencies_checked": True,
             }
 
         except (OSError, ValueError, RuntimeError) as e:
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _log(self, message: str):
         """Log maintenance activity."""
@@ -427,7 +513,7 @@ class MaintenanceScheduler:
 
         try:
             os.makedirs(self.log_file.parent, exist_ok=True)
-            with open(self.log_file, 'a', encoding="utf-8") as f:
+            with open(self.log_file, "a", encoding="utf-8") as f:
                 f.write(log_entry)
         except (OSError, ValueError, RuntimeError):
             pass  # Don't fail maintenance due to logging issues
@@ -469,23 +555,29 @@ class MaintenanceScheduler:
         else:
             # Run all enabled tasks
             results = {}
-            for task_name, config in self.config['maintenance_tasks'].items():
-                if config.get('enabled', False):
+            for task_name, config in self.config["maintenance_tasks"].items():
+                if config.get("enabled", False):
                     results[task_name] = self._run_maintenance_task(task_name)
             return results
 
 
 def main():
     """Main execution function."""
-    parser = argparse.ArgumentParser(description='Aurora CloudBank Maintenance Scheduler')
-    parser.add_argument('--daemon', action='store_true',
-                        help='Run as daemon with scheduled maintenance')
-    parser.add_argument('--run-now', type=str,
-                        help='Run specific maintenance task immediately')
-    parser.add_argument('--run-all', action='store_true',
-                        help='Run all maintenance tasks immediately')
-    parser.add_argument('--status', action='store_true',
-                        help='Show maintenance status and schedules')
+    parser = argparse.ArgumentParser(
+        description="Aurora CloudBank Maintenance Scheduler"
+    )
+    parser.add_argument(
+        "--daemon", action="store_true", help="Run as daemon with scheduled maintenance"
+    )
+    parser.add_argument(
+        "--run-now", type=str, help="Run specific maintenance task immediately"
+    )
+    parser.add_argument(
+        "--run-all", action="store_true", help="Run all maintenance tasks immediately"
+    )
+    parser.add_argument(
+        "--status", action="store_true", help="Show maintenance status and schedules"
+    )
 
     args = parser.parse_args()
 
@@ -496,9 +588,11 @@ def main():
 
     if args.status:
         print("📋 Configured maintenance tasks:")
-        for task_name, config in scheduler.config['maintenance_tasks'].items():
-            status = "✅ Enabled" if config.get('enabled') else "❌ Disabled"
-            print(f"   {task_name}: {status} - {config.get('description', 'No description')}")
+        for task_name, config in scheduler.config["maintenance_tasks"].items():
+            status = "✅ Enabled" if config.get("enabled") else "❌ Disabled"
+            print(
+                f"   {task_name}: {status} - {config.get('description', 'No description')}"
+            )
         return
 
     if args.run_now:

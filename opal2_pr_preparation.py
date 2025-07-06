@@ -4,13 +4,14 @@ Opal2 Modular System - PR Preparation Script
 Comprehensive preparation for the Opal2 expansion pull request
 """
 
-import os
 import json
+import os
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 class Opal2PRPreparation:
     """
@@ -29,7 +30,7 @@ class Opal2PRPreparation:
             "documentation": False,
             "configuration": False,
             "integration": False,
-            "performance": False
+            "performance": False,
         }
 
         self.created_files = []
@@ -84,7 +85,7 @@ class Opal2PRPreparation:
             "modules/opal2/plugin_system.py",
             "modules/opal2/config_manager.py",
             "modules/opal2/README.md",
-            "tests/test_opal2_system.py"
+            "tests/test_opal2_system.py",
         ]
 
         missing_files = []
@@ -108,9 +109,7 @@ class Opal2PRPreparation:
             # Run flake8 on Opal2 modules
             print("  Running flake8...")
             result = subprocess.run(
-                ["flake8", str(self.opal2_dir)],
-                capture_output=True,
-                text=True
+                ["flake8", str(self.opal2_dir)], capture_output=True, text=True
             )
 
             if result.returncode == 0:
@@ -123,7 +122,7 @@ class Opal2PRPreparation:
             result = subprocess.run(
                 ["black", "--check", str(self.opal2_dir)],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -147,7 +146,7 @@ class Opal2PRPreparation:
             result = subprocess.run(
                 ["pytest", str(self.tests_dir / "test_opal2_system.py"), "-v"],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -169,7 +168,7 @@ class Opal2PRPreparation:
             return False
 
         # Check README content
-        with open(readme_path, 'r') as f:
+        with open(readme_path, "r") as f:
             readme_content = f.read()
 
         required_sections = [
@@ -180,7 +179,7 @@ class Opal2PRPreparation:
             "## API Documentation",
             "## Plugin Development",
             "## Configuration",
-            "## Testing"
+            "## Testing",
         ]
 
         missing_sections = []
@@ -201,7 +200,7 @@ class Opal2PRPreparation:
         config_files = [
             "config/opal2_graphics.yaml",
             "config/plugin_system.yaml",
-            "config/api.yaml"
+            "config/api.yaml",
         ]
 
         existing_configs = []
@@ -222,9 +221,13 @@ class Opal2PRPreparation:
         try:
             print("  Running integration tests...")
             result = subprocess.run(
-                ["pytest", str(self.tests_dir / "test_opal2_system.py::TestIntegration"), "-v"],
+                [
+                    "pytest",
+                    str(self.tests_dir / "test_opal2_system.py::TestIntegration"),
+                    "-v",
+                ],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -241,9 +244,13 @@ class Opal2PRPreparation:
         try:
             print("  Running performance tests...")
             result = subprocess.run(
-                ["pytest", str(self.tests_dir / "test_opal2_system.py::TestPerformance"), "-v"],
+                [
+                    "pytest",
+                    str(self.tests_dir / "test_opal2_system.py::TestPerformance"),
+                    "-v",
+                ],
                 capture_output=True,
-                text=True
+                text=True,
             )
 
             if result.returncode == 0:
@@ -263,12 +270,12 @@ class Opal2PRPreparation:
             "files_created": self.created_files,
             "files_modified": self.modified_files,
             "checklist_status": self.pr_checklist,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Save PR summary
         summary_path = self.project_root / "opal2_pr_summary.json"
-        with open(summary_path, 'w') as f:
+        with open(summary_path, "w") as f:
             json.dump(summary, f, indent=2)
 
         print(f"  ✅ PR summary saved to {summary_path}")
@@ -404,7 +411,7 @@ No migration required - This is a new system addition.
 """
 
         template_path = self.project_root / "opal2_pr_template.md"
-        with open(template_path, 'w') as f:
+        with open(template_path, "w") as f:
             f.write(template)
 
         print(f"  ✅ PR template saved to {template_path}")
@@ -436,9 +443,7 @@ No migration required - This is a new system addition.
         try:
             # Check if branch exists
             result = subprocess.run(
-                ["git", "branch", "--list", branch_name],
-                capture_output=True,
-                text=True
+                ["git", "branch", "--list", branch_name], capture_output=True, text=True
             )
 
             if branch_name not in result.stdout:
@@ -461,19 +466,22 @@ No migration required - This is a new system addition.
             subprocess.run(["git", "add", "opal2_pr_template.md"])
 
             # Commit with descriptive message
-            commit_message = "🔮 Add Opal2 Modular System Expansion\n\n" + \
-                           "- Quantum-enhanced rendering engine\n" + \
-                           "- Modular plugin architecture\n" + \
-                           "- Advanced configuration management\n" + \
-                           "- FastAPI integration with WebSocket support\n" + \
-                           "- Comprehensive test suite\n" + \
-                           "- Full documentation"
+            commit_message = (
+                "🔮 Add Opal2 Modular System Expansion\n\n"
+                + "- Quantum-enhanced rendering engine\n"
+                + "- Modular plugin architecture\n"
+                + "- Advanced configuration management\n"
+                + "- FastAPI integration with WebSocket support\n"
+                + "- Comprehensive test suite\n"
+                + "- Full documentation"
+            )
 
             subprocess.run(["git", "commit", "-m", commit_message])
             print("✅ Files committed successfully")
 
         except Exception as e:
             print(f"❌ Failed to commit files: {e}")
+
 
 def main():
     """Main execution function"""
@@ -500,7 +508,9 @@ def main():
     git_ops = input("\nPerform git operations? (y/n): ").strip().lower()
 
     if git_ops == "y":
-        branch_name = input("Enter branch name (default: feature/opal2-expansion): ").strip()
+        branch_name = input(
+            "Enter branch name (default: feature/opal2-expansion): "
+        ).strip()
         if not branch_name:
             branch_name = "feature/opal2-expansion"
 
@@ -510,6 +520,7 @@ def main():
         print(f"\n🎉 Ready to push to remote!")
         print(f"Run: git push origin {branch_name}")
         print("Then create your PR on GitHub/GitLab")
+
 
 if __name__ == "__main__":
     main()

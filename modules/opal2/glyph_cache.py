@@ -7,12 +7,12 @@ Enhanced with async support for the Opal2 API.
 
 from __future__ import annotations
 
-import json
 import asyncio
+import json
+import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
-from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +22,7 @@ class GlyphCache:
 
     def __init__(self, file: str = "opal2_glyph_cache.json"):
         self.path = Path(file)
-        self.stats = {
-            "hits": 0,
-            "misses": 0,
-            "total_items": 0,
-            "last_accessed": None
-        }
+        self.stats = {"hits": 0, "misses": 0, "total_items": 0, "last_accessed": None}
 
         if self.path.exists():
             try:
@@ -70,7 +65,7 @@ class GlyphCache:
             cache_data = {
                 "cache": self.cache,
                 "stats": self.stats,
-                "saved_at": datetime.now().isoformat()
+                "saved_at": datetime.now().isoformat(),
             }
             with open(self.path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)
@@ -86,7 +81,9 @@ class GlyphCache:
         return {
             **self.stats,
             "cache_size": len(self.cache),
-            "hit_rate": self.stats["hits"] / max(self.stats["hits"] + self.stats["misses"], 1) * 100
+            "hit_rate": self.stats["hits"]
+            / max(self.stats["hits"] + self.stats["misses"], 1)
+            * 100,
         }
 
     async def clear_async(self) -> int:

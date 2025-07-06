@@ -55,14 +55,18 @@ class SymbolicVector(BaseModel):
         """Bind two symbolic vectors (elementwise multiplication)."""
         assert self.dim == other.dim, "Dimension mismatch in binding."
         bound_vec = self.vector * other.vector
-        return SymbolicVector(f"({self.symbol})*({other.symbol})", self.dim).from_vector(bound_vec)
+        return SymbolicVector(
+            f"({self.symbol})*({other.symbol})", self.dim
+        ).from_vector(bound_vec)
 
     def superpose(self, other: "SymbolicVector") -> "SymbolicVector":
         """Superpose two symbolic vectors (elementwise addition, then sign normalization)."""
         assert self.dim == other.dim, "Dimension mismatch in superposition."
         superposed = self.vector + other.vector
         normed = np.sign(superposed)
-        return SymbolicVector(f"({self.symbol})+({other.symbol})", self.dim).from_vector(normed)
+        return SymbolicVector(
+            f"({self.symbol})+({other.symbol})", self.dim
+        ).from_vector(normed)
 
     def from_vector(self, vec: np.ndarray) -> "SymbolicVector":
         self.vector = vec

@@ -60,7 +60,7 @@ def main() -> None:
         run_cmd("pytest -q")
 
     run_cmd("git add -A")
-    run_cmd("git commit -m \"{args.commit_msg}\"")
+    run_cmd('git commit -m "{args.commit_msg}"')
 
     if args.push:
         run_cmd("git push origin main")

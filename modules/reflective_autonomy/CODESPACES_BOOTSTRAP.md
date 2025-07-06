@@ -44,6 +44,7 @@ modules/reflective_autonomy/
 ```
 
 **Files:**
+
 - reflective_monitor_core.py
 - capsule_linter.py
 - continuity_manager.py
@@ -111,6 +112,7 @@ You should see full Reflective Autonomy Loop activation.
 ## 🎯 **Deployment Complete!**
 
 You now have:
+
 - ✅ Full symbolic self-governance system live
 - ✅ Fully auditable reflection logs
 - ✅ GPT-compatible continuity structure

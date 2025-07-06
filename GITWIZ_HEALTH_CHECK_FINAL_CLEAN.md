@@ -57,10 +57,10 @@
 **18 new ignore patterns added:**
 
 - Python cache files (*.pyc, pycache)
-- Build artifacts (*.so, *.dylib, *.dll)
+- Build artifacts (*.so,*.dylib, *.dll)
 - IDE files (.vscode, .idea)
 - OS generated files (.DS_Store, Thumbs.db)
-- Temporary files (*.tmp, *.temp, *.log)
+- Temporary files (*.tmp,*.temp, *.log)
 - Large archives (with deployment exceptions)
 
 ---

@@ -5,13 +5,17 @@ This document outlines how the project integrates with key tooling and services,
 ## 1. Uvicorn Integration
 
 - **FastAPI Servers**: Several modules expose FastAPI apps. Example startup command from the Sonnet 4 status guide:
+
   ```bash
   uvicorn aurora_api:app --host 0.0.0.0 --port 8000
   ```
+
 - **Docker Support**: The `Dockerfile_aurora_gui_cloudhub` runs the GUI service with Uvicorn:
+
   ```Dockerfile
   CMD ["uvicorn", "aurora_gui_cloudhub_fastapi:app", "--host", "0.0.0.0", "--port", "8080"]
   ```
+
 - **Startup Scripts**: Scripts like `enable_sonnet4.sh` launch the API with Uvicorn if it is not already running.
 - **Customization Tips**:
   - Host and port can be overridden with environment variables (`UVICORN_HOST`, `UVICORN_PORT`).
@@ -20,11 +24,13 @@ This document outlines how the project integrates with key tooling and services,
 ## 2. Flake8 Linting
 
 - **Configuration**: The `.flake8` file sets basic options:
+
   ```ini
   [flake8]
   max-line-length = 120
   exclude = deploykit_tmp/*,.venv/*
   ```
+
 - **Pre-commit**: Flake8 runs automatically via `.pre-commit-config.yaml` to ensure consistent style before commits.
 - **CI Pipeline**: GitHub Actions (`python-ci.yml` and `enhanced-ci.yml`) install flake8 and run lint checks on every push.
 - **Local Usage**: Run `flake8 .` at the repository root to check for issues before committing.

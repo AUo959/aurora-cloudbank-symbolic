@@ -1,6 +1,9 @@
 import numpy as np
 
-from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector, quantum_symbolic_vector
+from modules.symbolic_core.quantum_vsa import (
+    QuantumSymbolicVector,
+    quantum_symbolic_vector,
+)
 
 
 def test_quantum_symbolic_vector_shape():

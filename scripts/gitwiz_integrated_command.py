@@ -28,14 +28,14 @@ from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 # Import GitWiz components
 try:
     from gitwiz_enhanced import EnhancedGITWiz
+
     ENHANCED_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Enhanced GitWiz not available: {e}")
@@ -43,6 +43,7 @@ except ImportError as e:
 
 try:
     from gitwiz_lint_cleanup_manager import LintCleanupManager
+
     LINT_MANAGER_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Lint Cleanup Manager not available: {e}")
@@ -50,6 +51,7 @@ except ImportError as e:
 
 try:
     from gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
+
     ORCHESTRATOR_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Workflow Orchestrator not available: {e}")
@@ -86,8 +88,9 @@ class GitWizIntegratedCommand:
         except Exception as e:
             logger.error(f"Component initialization error: {e}")
 
-    def quality_check(self, auto_fix: bool = False, dry_run: bool = True,
-                     output_format: str = "json") -> Dict[str, Any]:
+    def quality_check(
+        self, auto_fix: bool = False, dry_run: bool = True, output_format: str = "json"
+    ) -> Dict[str, Any]:
         """
         Perform comprehensive code quality check.
 
@@ -110,14 +113,18 @@ class GitWizIntegratedCommand:
             "components_used": [],
             "results": {},
             "summary": {},
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Use Enhanced GitWiz if available
-        if self.enhanced_gitwiz and hasattr(self.enhanced_gitwiz, 'comprehensive_code_quality_check'):
+        if self.enhanced_gitwiz and hasattr(
+            self.enhanced_gitwiz, "comprehensive_code_quality_check"
+        ):
             try:
-                enhanced_results = self.enhanced_gitwiz.comprehensive_code_quality_check(
-                    auto_fix=auto_fix, dry_run=dry_run
+                enhanced_results = (
+                    self.enhanced_gitwiz.comprehensive_code_quality_check(
+                        auto_fix=auto_fix, dry_run=dry_run
+                    )
                 )
                 results["results"]["enhanced_gitwiz"] = enhanced_results
                 results["components_used"].append("enhanced_gitwiz")
@@ -135,7 +142,9 @@ class GitWizIntegratedCommand:
 
                 # Run automated fixes if requested
                 if auto_fix:
-                    fix_results = self.lint_manager.automated_fix_workflow(dry_run=dry_run)
+                    fix_results = self.lint_manager.automated_fix_workflow(
+                        dry_run=dry_run
+                    )
                     results["results"]["automated_fixes"] = fix_results
 
                 results["components_used"].append("lint_manager")
@@ -146,7 +155,9 @@ class GitWizIntegratedCommand:
 
         # Generate summary
         results["summary"] = self._generate_quality_summary(results["results"])
-        results["recommendations"] = self._generate_quality_recommendations(results["results"])
+        results["recommendations"] = self._generate_quality_recommendations(
+            results["results"]
+        )
 
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
@@ -161,7 +172,9 @@ class GitWizIntegratedCommand:
         else:
             return results
 
-    def maintenance_workflow(self, aggressive: bool = False, dry_run: bool = True) -> Dict[str, Any]:
+    def maintenance_workflow(
+        self, aggressive: bool = False, dry_run: bool = True
+    ) -> Dict[str, Any]:
         """
         Execute comprehensive maintenance workflow.
 
@@ -182,14 +195,18 @@ class GitWizIntegratedCommand:
             "dry_run": dry_run,
             "components_used": [],
             "stages": {},
-            "summary": {}
+            "summary": {},
         }
 
         # Use Enhanced GitWiz maintenance if available
-        if self.enhanced_gitwiz and hasattr(self.enhanced_gitwiz, 'intelligent_maintenance_workflow'):
+        if self.enhanced_gitwiz and hasattr(
+            self.enhanced_gitwiz, "intelligent_maintenance_workflow"
+        ):
             try:
-                maintenance_results = self.enhanced_gitwiz.intelligent_maintenance_workflow(
-                    aggressive=aggressive
+                maintenance_results = (
+                    self.enhanced_gitwiz.intelligent_maintenance_workflow(
+                        aggressive=aggressive
+                    )
                 )
                 results["stages"]["enhanced_maintenance"] = maintenance_results
                 results["components_used"].append("enhanced_gitwiz")
@@ -202,14 +219,18 @@ class GitWizIntegratedCommand:
         elif self.orchestrator:
             try:
                 # Use the enhanced quality workflow
-                if hasattr(self.orchestrator, 'execute_enhanced_quality_workflow'):
-                    orchestrator_results = self.orchestrator.execute_enhanced_quality_workflow(
-                        aggressive=aggressive, dry_run=dry_run
+                if hasattr(self.orchestrator, "execute_enhanced_quality_workflow"):
+                    orchestrator_results = (
+                        self.orchestrator.execute_enhanced_quality_workflow(
+                            aggressive=aggressive, dry_run=dry_run
+                        )
                     )
                 else:
                     # Fallback to full optimization workflow
-                    orchestrator_results = self.orchestrator.execute_full_optimization_workflow(
-                        dry_run=dry_run
+                    orchestrator_results = (
+                        self.orchestrator.execute_full_optimization_workflow(
+                            dry_run=dry_run
+                        )
                     )
 
                 results["stages"]["orchestrator"] = orchestrator_results
@@ -240,7 +261,9 @@ class GitWizIntegratedCommand:
 
         return results
 
-    def lint_scan(self, detailed: bool = False, target_paths: list = None) -> Dict[str, Any]:
+    def lint_scan(
+        self, detailed: bool = False, target_paths: list = None
+    ) -> Dict[str, Any]:
         """
         Perform comprehensive lint scanning.
 
@@ -260,7 +283,7 @@ class GitWizIntegratedCommand:
             "detailed": detailed,
             "target_paths": target_paths or [str(self.project_root)],
             "scan_results": {},
-            "summary": {}
+            "summary": {},
         }
 
         if self.lint_manager:
@@ -273,7 +296,9 @@ class GitWizIntegratedCommand:
                     results["detailed_analysis"] = {
                         "issue_breakdown": self._analyze_issues_detailed(scan_results),
                         "tool_comparison": self._compare_tool_results(scan_results),
-                        "priority_analysis": self._analyze_issue_priorities(scan_results)
+                        "priority_analysis": self._analyze_issue_priorities(
+                            scan_results
+                        ),
                     }
 
                 logger.info("✅ Lint scan completed")
@@ -293,8 +318,12 @@ class GitWizIntegratedCommand:
 
         return results
 
-    def workflow_execution(self, workflow_type: str = "enhanced",
-                          aggressive: bool = False, dry_run: bool = True) -> Dict[str, Any]:
+    def workflow_execution(
+        self,
+        workflow_type: str = "enhanced",
+        aggressive: bool = False,
+        dry_run: bool = True,
+    ) -> Dict[str, Any]:
         """
         Execute specific workflow type.
 
@@ -316,18 +345,22 @@ class GitWizIntegratedCommand:
             "aggressive": aggressive,
             "dry_run": dry_run,
             "workflow_results": {},
-            "summary": {}
+            "summary": {},
         }
 
         if workflow_type == "enhanced" and self.orchestrator:
             try:
-                if hasattr(self.orchestrator, 'execute_enhanced_quality_workflow'):
-                    workflow_results = self.orchestrator.execute_enhanced_quality_workflow(
-                        aggressive=aggressive, dry_run=dry_run
+                if hasattr(self.orchestrator, "execute_enhanced_quality_workflow"):
+                    workflow_results = (
+                        self.orchestrator.execute_enhanced_quality_workflow(
+                            aggressive=aggressive, dry_run=dry_run
+                        )
                     )
                 else:
-                    workflow_results = self.orchestrator.execute_full_optimization_workflow(
-                        dry_run=dry_run
+                    workflow_results = (
+                        self.orchestrator.execute_full_optimization_workflow(
+                            dry_run=dry_run
+                        )
                     )
                 results["workflow_results"] = workflow_results
                 logger.info("✅ Enhanced workflow completed")
@@ -337,8 +370,10 @@ class GitWizIntegratedCommand:
 
         elif workflow_type == "optimization" and self.enhanced_gitwiz:
             try:
-                optimization_results = self.enhanced_gitwiz.intelligent_maintenance_workflow(
-                    aggressive=aggressive
+                optimization_results = (
+                    self.enhanced_gitwiz.intelligent_maintenance_workflow(
+                        aggressive=aggressive
+                    )
                 )
                 results["workflow_results"] = optimization_results
                 logger.info("✅ Optimization workflow completed")
@@ -350,17 +385,23 @@ class GitWizIntegratedCommand:
             # Standard workflow fallback
             if self.lint_manager:
                 try:
-                    standard_results = self.lint_manager.automated_fix_workflow(dry_run=dry_run)
+                    standard_results = self.lint_manager.automated_fix_workflow(
+                        dry_run=dry_run
+                    )
                     results["workflow_results"] = standard_results
                     logger.info("✅ Standard workflow completed")
                 except Exception as e:
                     logger.error(f"Standard workflow failed: {e}")
                     results["workflow_results"] = {"error": str(e)}
             else:
-                results["workflow_results"] = {"error": "No workflow components available"}
+                results["workflow_results"] = {
+                    "error": "No workflow components available"
+                }
 
         # Generate summary
-        results["summary"] = self._generate_workflow_summary(results["workflow_results"])
+        results["summary"] = self._generate_workflow_summary(
+            results["workflow_results"]
+        )
 
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
@@ -379,7 +420,7 @@ class GitWizIntegratedCommand:
             "project_root": str(self.project_root),
             "components": {},
             "capabilities": {},
-            "system_info": {}
+            "system_info": {},
         }
 
         # Component availability
@@ -409,7 +450,7 @@ class GitWizIntegratedCommand:
             "total_issues": 0,
             "auto_fixable": 0,
             "quality_score": 0,
-            "tools_used": []
+            "tools_used": [],
         }
 
         # Extract from Enhanced GitWiz results
@@ -457,7 +498,9 @@ class GitWizIntegratedCommand:
             recommendations.append("🔴 High issue count - immediate attention needed")
 
         if auto_fixable > 20:
-            recommendations.append(f"🔧 {auto_fixable} auto-fixable issues - run with --auto-fix")
+            recommendations.append(
+                f"🔧 {auto_fixable} auto-fixable issues - run with --auto-fix"
+            )
 
         if not recommendations:
             recommendations.append("ℹ️ Analysis complete - review detailed results")
@@ -470,7 +513,7 @@ class GitWizIntegratedCommand:
             "stages_completed": 0,
             "total_stages": len(stages),
             "success_rate": 0,
-            "total_fixes": 0
+            "total_fixes": 0,
         }
 
         successful_stages = 0
@@ -489,18 +532,16 @@ class GitWizIntegratedCommand:
                         total_fixes += fix_data["total_fixes"]
 
         summary["stages_completed"] = successful_stages
-        summary["success_rate"] = (successful_stages / len(stages) * 100) if stages else 0
+        summary["success_rate"] = (
+            (successful_stages / len(stages) * 100) if stages else 0
+        )
         summary["total_fixes"] = total_fixes
 
         return summary
 
     def _generate_scan_summary(self, scan_results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate summary for lint scan results."""
-        summary = {
-            "issues_by_tool": {},
-            "severity_breakdown": {},
-            "file_count": 0
-        }
+        summary = {"issues_by_tool": {}, "severity_breakdown": {}, "file_count": 0}
 
         if "summary" in scan_results:
             scan_summary = scan_results["summary"]
@@ -509,12 +550,14 @@ class GitWizIntegratedCommand:
 
         return summary
 
-    def _generate_workflow_summary(self, workflow_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_workflow_summary(
+        self, workflow_results: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Generate summary for workflow execution results."""
         summary = {
             "overall_success": False,
             "execution_time": 0,
-            "improvements_made": []
+            "improvements_made": [],
         }
 
         if isinstance(workflow_results, dict):
@@ -549,9 +592,10 @@ class GitWizIntegratedCommand:
         structure = {
             "python_files": len(list(self.project_root.rglob("*.py"))),
             "markdown_files": len(list(self.project_root.rglob("*.md"))),
-            "javascript_files": len(list(self.project_root.rglob("*.js"))) + len(list(self.project_root.rglob("*.ts"))),
+            "javascript_files": len(list(self.project_root.rglob("*.js")))
+            + len(list(self.project_root.rglob("*.ts"))),
             "total_files": len(list(self.project_root.rglob("*"))),
-            "directories": len([p for p in self.project_root.rglob("*") if p.is_dir()])
+            "directories": len([p for p in self.project_root.rglob("*") if p.is_dir()]),
         }
         return structure
 
@@ -565,14 +609,11 @@ class GitWizIntegratedCommand:
             f"- Command: {results['command']}",
             f"- Execution Time: {results.get('execution_time', 0):.2f}s",
             f"- Components Used: {', '.join(results.get('components_used', []))}",
-            ""
+            "",
         ]
 
         if "recommendations" in results and results["recommendations"]:
-            lines.extend([
-                "## Recommendations",
-                ""
-            ])
+            lines.extend(["## Recommendations", ""])
             for rec in results["recommendations"]:
                 lines.append(f"- {rec}")
 
@@ -585,7 +626,7 @@ class GitWizIntegratedCommand:
             "timestamp": results["timestamp"],
             "execution_time": results.get("execution_time", 0),
             "summary": results.get("summary", {}),
-            "recommendations": results.get("recommendations", [])[:3]  # Top 3
+            "recommendations": results.get("recommendations", [])[:3],  # Top 3
         }
 
 
@@ -601,34 +642,64 @@ Examples:
   %(prog)s lint-scan --detailed --target scripts/
   %(prog)s workflow --type enhanced --aggressive
   %(prog)s status
-        """
+        """,
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Quality check command
-    quality_parser = subparsers.add_parser("quality-check", help="Perform comprehensive quality check")
-    quality_parser.add_argument("--auto-fix", action="store_true", help="Automatically fix issues")
-    quality_parser.add_argument("--no-dry-run", action="store_true", help="Apply changes (not dry run)")
-    quality_parser.add_argument("--output", choices=["json", "markdown", "summary"],
-                               default="json", help="Output format")
+    quality_parser = subparsers.add_parser(
+        "quality-check", help="Perform comprehensive quality check"
+    )
+    quality_parser.add_argument(
+        "--auto-fix", action="store_true", help="Automatically fix issues"
+    )
+    quality_parser.add_argument(
+        "--no-dry-run", action="store_true", help="Apply changes (not dry run)"
+    )
+    quality_parser.add_argument(
+        "--output",
+        choices=["json", "markdown", "summary"],
+        default="json",
+        help="Output format",
+    )
 
     # Maintenance command
-    maintenance_parser = subparsers.add_parser("maintenance", help="Execute maintenance workflow")
-    maintenance_parser.add_argument("--aggressive", action="store_true", help="Apply aggressive optimizations")
-    maintenance_parser.add_argument("--no-dry-run", action="store_true", help="Apply changes (not dry run)")
+    maintenance_parser = subparsers.add_parser(
+        "maintenance", help="Execute maintenance workflow"
+    )
+    maintenance_parser.add_argument(
+        "--aggressive", action="store_true", help="Apply aggressive optimizations"
+    )
+    maintenance_parser.add_argument(
+        "--no-dry-run", action="store_true", help="Apply changes (not dry run)"
+    )
 
     # Lint scan command
-    lint_parser = subparsers.add_parser("lint-scan", help="Perform comprehensive lint scan")
-    lint_parser.add_argument("--detailed", action="store_true", help="Include detailed analysis")
+    lint_parser = subparsers.add_parser(
+        "lint-scan", help="Perform comprehensive lint scan"
+    )
+    lint_parser.add_argument(
+        "--detailed", action="store_true", help="Include detailed analysis"
+    )
     lint_parser.add_argument("--target", action="append", help="Target paths to scan")
 
     # Workflow command
-    workflow_parser = subparsers.add_parser("workflow", help="Execute specific workflow")
-    workflow_parser.add_argument("--type", choices=["enhanced", "standard", "optimization"],
-                                default="enhanced", help="Workflow type")
-    workflow_parser.add_argument("--aggressive", action="store_true", help="Apply aggressive settings")
-    workflow_parser.add_argument("--no-dry-run", action="store_true", help="Apply changes (not dry run)")
+    workflow_parser = subparsers.add_parser(
+        "workflow", help="Execute specific workflow"
+    )
+    workflow_parser.add_argument(
+        "--type",
+        choices=["enhanced", "standard", "optimization"],
+        default="enhanced",
+        help="Workflow type",
+    )
+    workflow_parser.add_argument(
+        "--aggressive", action="store_true", help="Apply aggressive settings"
+    )
+    workflow_parser.add_argument(
+        "--no-dry-run", action="store_true", help="Apply changes (not dry run)"
+    )
 
     # Status command
     subparsers.add_parser("status", help="Generate status report")
@@ -659,26 +730,24 @@ Examples:
             results = cmd_interface.quality_check(
                 auto_fix=args.auto_fix,
                 dry_run=not args.no_dry_run,
-                output_format=args.output
+                output_format=args.output,
             )
 
         elif args.command == "maintenance":
             results = cmd_interface.maintenance_workflow(
-                aggressive=args.aggressive,
-                dry_run=not args.no_dry_run
+                aggressive=args.aggressive, dry_run=not args.no_dry_run
             )
 
         elif args.command == "lint-scan":
             results = cmd_interface.lint_scan(
-                detailed=args.detailed,
-                target_paths=args.target
+                detailed=args.detailed, target_paths=args.target
             )
 
         elif args.command == "workflow":
             results = cmd_interface.workflow_execution(
                 workflow_type=args.type,
                 aggressive=args.aggressive,
-                dry_run=not args.no_dry_run
+                dry_run=not args.no_dry_run,
             )
 
         elif args.command == "status":
@@ -703,6 +772,7 @@ Examples:
         logger.error(f"Command execution failed: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

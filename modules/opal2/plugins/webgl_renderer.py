@@ -5,17 +5,17 @@ WebGL-based rendering plugin for high-performance browser-based visualization
 of quantum circuits and symbolic vectors.
 """
 
-from typing import Any, Dict, List, Optional
-import json
 import base64
+import json
 import math
+from typing import Any, Dict, List, Optional
 
-from modules.opal2.plugins.base_plugin import RendererPlugin, PluginMetadata, PluginType
+from modules.opal2.plugins.base_plugin import PluginMetadata, PluginType, RendererPlugin
 
 
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL-based renderer for quantum and symbolic visualizations."""
-    
+
     def __init__(self):
         metadata = PluginMetadata(
             name="WebGLRenderer",
@@ -25,49 +25,51 @@ class WebGLRendererPlugin(RendererPlugin):
             plugin_type=PluginType.RENDERER,
             supported_formats=["webgl", "html", "interactive"],
             performance_tier="high",
-            security_level="safe"
+            security_level="safe",
         )
         super().__init__(metadata)
-        
+
         self.shader_programs = {}
         self.buffer_objects = {}
         self.render_settings = {
-            'antialiasing': True,
-            'depth_testing': True,
-            'alpha_blending': True,
-            'particle_effects': True,
-            'real_time_updates': True
+            "antialiasing": True,
+            "depth_testing": True,
+            "alpha_blending": True,
+            "particle_effects": True,
+            "real_time_updates": True,
         }
-    
+
     def initialize(self, config: Dict[str, Any]) -> bool:
         """Initialize WebGL renderer with configuration."""
         try:
             self.config = config
-            self.render_settings.update(config.get('render_settings', {}))
-            
+            self.render_settings.update(config.get("render_settings", {}))
+
             # Initialize shader programs
             self._initialize_shaders()
-            
+
             self.status = "active"
             return True
         except Exception as e:
             print(f"WebGL Renderer initialization failed: {e}")
             self.status = "error"
             return False
-    
-    def render(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
+
+    def render(
+        self, render_data: Dict[str, Any], options: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Render quantum/symbolic data using WebGL."""
-        render_type = render_data.get('type', 'hybrid')
-        
-        if render_type == 'quantum_circuit':
+        render_type = render_data.get("type", "hybrid")
+
+        if render_type == "quantum_circuit":
             return self._render_quantum_circuit(render_data, options)
-        elif render_type == 'symbolic_vector':
+        elif render_type == "symbolic_vector":
             return self._render_symbolic_vector(render_data, options)
-        elif render_type == 'hybrid':
+        elif render_type == "hybrid":
             return self._render_hybrid(render_data, options)
         else:
             raise ValueError(f"Unsupported render type: {render_type}")
-    
+
     def cleanup(self) -> bool:
         """Clean up WebGL resources."""
         try:
@@ -76,11 +78,13 @@ class WebGLRendererPlugin(RendererPlugin):
             return True
         except Exception:
             return False
-    
+
     def _initialize_shaders(self):
         """Initialize WebGL shader programs."""
         # Quantum Circuit Vertex Shader
-        self.shader_programs['quantum_vertex'] = """
+        self.shader_programs[
+            "quantum_vertex"
+        ] = """
             attribute vec3 position;
             attribute vec3 color;
             attribute float intensity;
@@ -108,9 +112,11 @@ class WebGLRendererPlugin(RendererPlugin):
                 vQuantumPhase = time * 3.14159 + position.x * 0.5;
             }
         """
-        
+
         # Quantum Circuit Fragment Shader
-        self.shader_programs['quantum_fragment'] = """
+        self.shader_programs[
+            "quantum_fragment"
+        ] = """
             precision mediump float;
             
             uniform float time;
@@ -137,9 +143,11 @@ class WebGLRendererPlugin(RendererPlugin):
                 gl_FragColor = vec4(finalColor, alpha);
             }
         """
-        
+
         # Symbolic Vector Vertex Shader
-        self.shader_programs['symbolic_vertex'] = """
+        self.shader_programs[
+            "symbolic_vertex"
+        ] = """
             attribute vec3 position;
             attribute vec3 color;
             attribute vec3 normal;
@@ -173,9 +181,11 @@ class WebGLRendererPlugin(RendererPlugin):
                 vMagnitude = vectorMagnitude;
             }
         """
-        
+
         # Symbolic Vector Fragment Shader
-        self.shader_programs['symbolic_fragment'] = """
+        self.shader_programs[
+            "symbolic_fragment"
+        ] = """
             precision mediump float;
             
             uniform vec3 lightDirection;
@@ -208,363 +218,371 @@ class WebGLRendererPlugin(RendererPlugin):
                 gl_FragColor = vec4(finalColor, 1.0);
             }
         """
-    
-    def _render_quantum_circuit(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _render_quantum_circuit(
+        self, render_data: Dict[str, Any], options: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Render quantum circuit visualization."""
-        circuit_data = render_data['data']
-        metadata = render_data['metadata']
-        
+        circuit_data = render_data["data"]
+        metadata = render_data["metadata"]
+
         # Generate WebGL scene
         scene_data = {
-            'type': 'webgl_scene',
-            'objects': [],
-            'lights': [],
-            'camera': self._create_camera_config(),
-            'shaders': {
-                'vertex': self.shader_programs['quantum_vertex'],
-                'fragment': self.shader_programs['quantum_fragment']
+            "type": "webgl_scene",
+            "objects": [],
+            "lights": [],
+            "camera": self._create_camera_config(),
+            "shaders": {
+                "vertex": self.shader_programs["quantum_vertex"],
+                "fragment": self.shader_programs["quantum_fragment"],
             },
-            'uniforms': {
-                'time': 0.0,
-                'coherence': metadata.get('coherence', 1.0),
-                'entanglement': metadata.get('entanglement_degree', 0.5),
-                'ambientLight': [0.2, 0.2, 0.3]
-            }
+            "uniforms": {
+                "time": 0.0,
+                "coherence": metadata.get("coherence", 1.0),
+                "entanglement": metadata.get("entanglement_degree", 0.5),
+                "ambientLight": [0.2, 0.2, 0.3],
+            },
         }
-        
+
         # Add quantum gates as 3D objects
-        if 'gate_positions' in circuit_data:
-            for gate in circuit_data['gate_positions']:
+        if "gate_positions" in circuit_data:
+            for gate in circuit_data["gate_positions"]:
                 gate_object = self._create_quantum_gate_object(gate)
-                scene_data['objects'].append(gate_object)
-        
+                scene_data["objects"].append(gate_object)
+
         # Add qubit lines
-        if 'qubit_lines' in circuit_data:
-            for line in circuit_data['qubit_lines']:
+        if "qubit_lines" in circuit_data:
+            for line in circuit_data["qubit_lines"]:
                 line_object = self._create_qubit_line_object(line)
-                scene_data['objects'].append(line_object)
-        
+                scene_data["objects"].append(line_object)
+
         # Add entanglement connections
-        if 'connection_paths' in circuit_data:
-            for connection in circuit_data['connection_paths']:
+        if "connection_paths" in circuit_data:
+            for connection in circuit_data["connection_paths"]:
                 connection_object = self._create_entanglement_connection(connection)
-                scene_data['objects'].append(connection_object)
-        
+                scene_data["objects"].append(connection_object)
+
         # Add lighting
-        scene_data['lights'] = [
+        scene_data["lights"] = [
             {
-                'type': 'directional',
-                'position': [1, 1, 1],
-                'color': [1, 1, 1],
-                'intensity': 0.8
+                "type": "directional",
+                "position": [1, 1, 1],
+                "color": [1, 1, 1],
+                "intensity": 0.8,
             },
-            {
-                'type': 'ambient',
-                'color': [0.3, 0.3, 0.4],
-                'intensity': 0.4
-            }
+            {"type": "ambient", "color": [0.3, 0.3, 0.4], "intensity": 0.4},
         ]
-        
+
         return {
-            'format': 'webgl',
-            'scene_data': scene_data,
-            'html_template': self._generate_html_template(scene_data),
-            'javascript_code': self._generate_webgl_javascript(scene_data),
-            'interactive_controls': self._create_interactive_controls(),
-            'metadata': {
-                'render_type': 'quantum_circuit',
-                'performance_tier': 'high',
-                'real_time_capable': True
-            }
-        }
-    
-    def _render_symbolic_vector(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
-        """Render symbolic vector visualization."""
-        vector_data = render_data['data']
-        metadata = render_data['metadata']
-        
-        scene_data = {
-            'type': 'webgl_scene',
-            'objects': [],
-            'lights': [],
-            'camera': self._create_camera_config(),
-            'shaders': {
-                'vertex': self.shader_programs['symbolic_vertex'],
-                'fragment': self.shader_programs['symbolic_fragment']
+            "format": "webgl",
+            "scene_data": scene_data,
+            "html_template": self._generate_html_template(scene_data),
+            "javascript_code": self._generate_webgl_javascript(scene_data),
+            "interactive_controls": self._create_interactive_controls(),
+            "metadata": {
+                "render_type": "quantum_circuit",
+                "performance_tier": "high",
+                "real_time_capable": True,
             },
-            'uniforms': {
-                'time': 0.0,
-                'vectorMagnitude': metadata.get('magnitude', 1.0),
-                'lightDirection': [0.5, 0.5, 1.0],
-                'viewDirection': [0, 0, 1]
-            }
         }
-        
+
+    def _render_symbolic_vector(
+        self, render_data: Dict[str, Any], options: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Render symbolic vector visualization."""
+        vector_data = render_data["data"]
+        metadata = render_data["metadata"]
+
+        scene_data = {
+            "type": "webgl_scene",
+            "objects": [],
+            "lights": [],
+            "camera": self._create_camera_config(),
+            "shaders": {
+                "vertex": self.shader_programs["symbolic_vertex"],
+                "fragment": self.shader_programs["symbolic_fragment"],
+            },
+            "uniforms": {
+                "time": 0.0,
+                "vectorMagnitude": metadata.get("magnitude", 1.0),
+                "lightDirection": [0.5, 0.5, 1.0],
+                "viewDirection": [0, 0, 1],
+            },
+        }
+
         # Create vector visualization objects
-        if 'spatial_coordinates' in vector_data:
-            for i, coord in enumerate(vector_data['spatial_coordinates']):
-                vector_object = self._create_vector_component_object(coord, i, vector_data)
-                scene_data['objects'].append(vector_object)
-        
+        if "spatial_coordinates" in vector_data:
+            for i, coord in enumerate(vector_data["spatial_coordinates"]):
+                vector_object = self._create_vector_component_object(
+                    coord, i, vector_data
+                )
+                scene_data["objects"].append(vector_object)
+
         # Add geometric representation
-        if 'geometric_representation' in vector_data:
-            geometric_object = self._create_geometric_object(vector_data['geometric_representation'])
-            scene_data['objects'].append(geometric_object)
-        
+        if "geometric_representation" in vector_data:
+            geometric_object = self._create_geometric_object(
+                vector_data["geometric_representation"]
+            )
+            scene_data["objects"].append(geometric_object)
+
         return {
-            'format': 'webgl',
-            'scene_data': scene_data,
-            'html_template': self._generate_html_template(scene_data),
-            'javascript_code': self._generate_webgl_javascript(scene_data),
-            'interactive_controls': self._create_interactive_controls(),
-            'metadata': {
-                'render_type': 'symbolic_vector',
-                'performance_tier': 'high',
-                'real_time_capable': True
-            }
+            "format": "webgl",
+            "scene_data": scene_data,
+            "html_template": self._generate_html_template(scene_data),
+            "javascript_code": self._generate_webgl_javascript(scene_data),
+            "interactive_controls": self._create_interactive_controls(),
+            "metadata": {
+                "render_type": "symbolic_vector",
+                "performance_tier": "high",
+                "real_time_capable": True,
+            },
         }
-    
-    def _render_hybrid(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _render_hybrid(
+        self, render_data: Dict[str, Any], options: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Render hybrid quantum-symbolic visualization."""
-        hybrid_data = render_data['data']
-        
+        hybrid_data = render_data["data"]
+
         # Combine quantum and symbolic rendering
-        quantum_layer = self._render_quantum_circuit({
-            'type': 'quantum_circuit',
-            'data': hybrid_data['quantum_layer'],
-            'metadata': render_data['metadata']['quantum_metadata']
-        }, options)
-        
-        symbolic_layer = self._render_symbolic_vector({
-            'type': 'symbolic_vector',
-            'data': hybrid_data['symbolic_layer'],
-            'metadata': render_data['metadata']['symbolic_metadata']
-        }, options)
-        
+        quantum_layer = self._render_quantum_circuit(
+            {
+                "type": "quantum_circuit",
+                "data": hybrid_data["quantum_layer"],
+                "metadata": render_data["metadata"]["quantum_metadata"],
+            },
+            options,
+        )
+
+        symbolic_layer = self._render_symbolic_vector(
+            {
+                "type": "symbolic_vector",
+                "data": hybrid_data["symbolic_layer"],
+                "metadata": render_data["metadata"]["symbolic_metadata"],
+            },
+            options,
+        )
+
         # Merge scene data
-        combined_scene = quantum_layer['scene_data']
-        combined_scene['objects'].extend(symbolic_layer['scene_data']['objects'])
-        
+        combined_scene = quantum_layer["scene_data"]
+        combined_scene["objects"].extend(symbolic_layer["scene_data"]["objects"])
+
         # Add integration mapping
-        if 'integration_mapping' in hybrid_data:
-            integration_objects = self._create_integration_objects(hybrid_data['integration_mapping'])
-            combined_scene['objects'].extend(integration_objects)
-        
+        if "integration_mapping" in hybrid_data:
+            integration_objects = self._create_integration_objects(
+                hybrid_data["integration_mapping"]
+            )
+            combined_scene["objects"].extend(integration_objects)
+
         return {
-            'format': 'webgl',
-            'scene_data': combined_scene,
-            'html_template': self._generate_html_template(combined_scene),
-            'javascript_code': self._generate_webgl_javascript(combined_scene),
-            'interactive_controls': self._create_advanced_controls(),
-            'metadata': {
-                'render_type': 'hybrid',
-                'performance_tier': 'high',
-                'real_time_capable': True,
-                'integration_quality': render_data['metadata'].get('integration_quality', 1.0)
-            }
+            "format": "webgl",
+            "scene_data": combined_scene,
+            "html_template": self._generate_html_template(combined_scene),
+            "javascript_code": self._generate_webgl_javascript(combined_scene),
+            "interactive_controls": self._create_advanced_controls(),
+            "metadata": {
+                "render_type": "hybrid",
+                "performance_tier": "high",
+                "real_time_capable": True,
+                "integration_quality": render_data["metadata"].get(
+                    "integration_quality", 1.0
+                ),
+            },
         }
-    
+
     def _create_camera_config(self) -> Dict[str, Any]:
         """Create camera configuration for 3D scene."""
         return {
-            'type': 'perspective',
-            'fov': 75,
-            'aspect': 16/9,
-            'near': 0.1,
-            'far': 1000,
-            'position': [0, 0, 5],
-            'target': [0, 0, 0],
-            'up': [0, 1, 0]
+            "type": "perspective",
+            "fov": 75,
+            "aspect": 16 / 9,
+            "near": 0.1,
+            "far": 1000,
+            "position": [0, 0, 5],
+            "target": [0, 0, 0],
+            "up": [0, 1, 0],
         }
-    
+
     def _create_quantum_gate_object(self, gate: Dict[str, Any]) -> Dict[str, Any]:
         """Create 3D object for quantum gate."""
         return {
-            'type': 'mesh',
-            'geometry': 'box',
-            'dimensions': [0.3, 0.3, 0.1],
-            'position': [gate['x'] / 50, gate['y'] / 40, 0],
-            'rotation': [0, 0, 0],
-            'material': {
-                'type': 'phong',
-                'color': self._get_gate_color(gate['type']),
-                'opacity': 0.8,
-                'transparent': True
+            "type": "mesh",
+            "geometry": "box",
+            "dimensions": [0.3, 0.3, 0.1],
+            "position": [gate["x"] / 50, gate["y"] / 40, 0],
+            "rotation": [0, 0, 0],
+            "material": {
+                "type": "phong",
+                "color": self._get_gate_color(gate["type"]),
+                "opacity": 0.8,
+                "transparent": True,
             },
-            'animation': {
-                'type': 'rotation',
-                'axis': [0, 1, 0],
-                'speed': 0.5
-            }
+            "animation": {"type": "rotation", "axis": [0, 1, 0], "speed": 0.5},
         }
-    
+
     def _create_qubit_line_object(self, line: Dict[str, Any]) -> Dict[str, Any]:
         """Create 3D object for qubit line."""
         return {
-            'type': 'line',
-            'points': [
-                [0, line['y_position'] / 40, 0],
-                [line['length'] / 50, line['y_position'] / 40, 0]
+            "type": "line",
+            "points": [
+                [0, line["y_position"] / 40, 0],
+                [line["length"] / 50, line["y_position"] / 40, 0],
             ],
-            'material': {
-                'type': 'line_basic',
-                'color': [0.7, 0.7, 0.9],
-                'linewidth': 2
-            }
+            "material": {
+                "type": "line_basic",
+                "color": [0.7, 0.7, 0.9],
+                "linewidth": 2,
+            },
         }
-    
-    def _create_entanglement_connection(self, connection: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _create_entanglement_connection(
+        self, connection: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create 3D object for entanglement connection."""
         return {
-            'type': 'curve',
-            'curve_type': 'bezier',
-            'control_points': self._calculate_bezier_points(connection),
-            'material': {
-                'type': 'line_basic',
-                'color': [1.0, 0.4, 0.7],
-                'linewidth': connection['strength'] * 3,
-                'opacity': connection['strength'],
-                'transparent': True
+            "type": "curve",
+            "curve_type": "bezier",
+            "control_points": self._calculate_bezier_points(connection),
+            "material": {
+                "type": "line_basic",
+                "color": [1.0, 0.4, 0.7],
+                "linewidth": connection["strength"] * 3,
+                "opacity": connection["strength"],
+                "transparent": True,
             },
-            'animation': {
-                'type': 'flow',
-                'speed': 2.0,
-                'direction': 1
-            }
+            "animation": {"type": "flow", "speed": 2.0, "direction": 1},
         }
-    
-    def _create_vector_component_object(self, coord: tuple, index: int, vector_data: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _create_vector_component_object(
+        self, coord: tuple, index: int, vector_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create 3D object for vector component."""
         x, y, z = coord
-        
+
         return {
-            'type': 'mesh',
-            'geometry': 'sphere',
-            'radius': 0.1,
-            'position': [x, y, z],
-            'material': {
-                'type': 'phong',
-                'color': vector_data['color_mapping']['component_colors'][index]['rgb'] if 'color_mapping' in vector_data else [0.5, 0.8, 1.0],
-                'opacity': 0.8,
-                'transparent': True
+            "type": "mesh",
+            "geometry": "sphere",
+            "radius": 0.1,
+            "position": [x, y, z],
+            "material": {
+                "type": "phong",
+                "color": (
+                    vector_data["color_mapping"]["component_colors"][index]["rgb"]
+                    if "color_mapping" in vector_data
+                    else [0.5, 0.8, 1.0]
+                ),
+                "opacity": 0.8,
+                "transparent": True,
             },
-            'animation': {
-                'type': 'pulse',
-                'frequency': 1.0,
-                'amplitude': 0.1
-            }
+            "animation": {"type": "pulse", "frequency": 1.0, "amplitude": 0.1},
         }
-    
-    def _create_geometric_object(self, geometric_data: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _create_geometric_object(
+        self, geometric_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create 3D object for geometric algebra representation."""
         return {
-            'type': 'mesh',
-            'geometry': 'custom',
-            'vertices': self._generate_geometric_vertices(geometric_data),
-            'faces': self._generate_geometric_faces(geometric_data),
-            'material': {
-                'type': 'phong',
-                'color': [0.3, 0.9, 0.6],
-                'opacity': 0.6,
-                'transparent': True,
-                'wireframe': True
-            }
+            "type": "mesh",
+            "geometry": "custom",
+            "vertices": self._generate_geometric_vertices(geometric_data),
+            "faces": self._generate_geometric_faces(geometric_data),
+            "material": {
+                "type": "phong",
+                "color": [0.3, 0.9, 0.6],
+                "opacity": 0.6,
+                "transparent": True,
+                "wireframe": True,
+            },
         }
-    
-    def _create_integration_objects(self, integration_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+
+    def _create_integration_objects(
+        self, integration_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Create 3D objects for quantum-symbolic integration."""
         objects = []
-        
-        if 'overlay_points' in integration_data:
-            for point in integration_data['overlay_points']:
+
+        if "overlay_points" in integration_data:
+            for point in integration_data["overlay_points"]:
                 obj = {
-                    'type': 'mesh',
-                    'geometry': 'octahedron',
-                    'radius': 0.05,
-                    'position': [point['x'] * 2 - 1, point['y'] * 2 - 1, 0],
-                    'material': {
-                        'type': 'phong',
-                        'color': [1.0, 0.8, 0.2],
-                        'emissive': [0.2, 0.16, 0.04]
+                    "type": "mesh",
+                    "geometry": "octahedron",
+                    "radius": 0.05,
+                    "position": [point["x"] * 2 - 1, point["y"] * 2 - 1, 0],
+                    "material": {
+                        "type": "phong",
+                        "color": [1.0, 0.8, 0.2],
+                        "emissive": [0.2, 0.16, 0.04],
                     },
-                    'animation': {
-                        'type': 'oscillation',
-                        'frequency': 3.0,
-                        'amplitude': 0.02
-                    }
+                    "animation": {
+                        "type": "oscillation",
+                        "frequency": 3.0,
+                        "amplitude": 0.02,
+                    },
                 }
                 objects.append(obj)
-        
+
         return objects
-    
+
     def _create_interactive_controls(self) -> Dict[str, Any]:
         """Create interactive control configuration."""
         return {
-            'orbit_controls': True,
-            'zoom': {
-                'enabled': True,
-                'min': 1,
-                'max': 10
-            },
-            'pan': {
-                'enabled': True,
-                'speed': 0.5
-            },
-            'rotate': {
-                'enabled': True,
-                'speed': 0.5
-            },
-            'ui_elements': [
+            "orbit_controls": True,
+            "zoom": {"enabled": True, "min": 1, "max": 10},
+            "pan": {"enabled": True, "speed": 0.5},
+            "rotate": {"enabled": True, "speed": 0.5},
+            "ui_elements": [
                 {
-                    'type': 'slider',
-                    'label': 'Time Speed',
-                    'min': 0,
-                    'max': 5,
-                    'default': 1,
-                    'uniform': 'timeSpeed'
+                    "type": "slider",
+                    "label": "Time Speed",
+                    "min": 0,
+                    "max": 5,
+                    "default": 1,
+                    "uniform": "timeSpeed",
                 },
                 {
-                    'type': 'slider',
-                    'label': 'Coherence',
-                    'min': 0,
-                    'max': 1,
-                    'default': 1,
-                    'uniform': 'coherence'
-                }
-            ]
+                    "type": "slider",
+                    "label": "Coherence",
+                    "min": 0,
+                    "max": 1,
+                    "default": 1,
+                    "uniform": "coherence",
+                },
+            ],
         }
-    
+
     def _create_advanced_controls(self) -> Dict[str, Any]:
         """Create advanced control configuration for hybrid rendering."""
         basic_controls = self._create_interactive_controls()
-        
+
         # Add hybrid-specific controls
-        basic_controls['ui_elements'].extend([
-            {
-                'type': 'slider',
-                'label': 'Quantum Layer Opacity',
-                'min': 0,
-                'max': 1,
-                'default': 0.8,
-                'uniform': 'quantumOpacity'
-            },
-            {
-                'type': 'slider',
-                'label': 'Symbolic Layer Opacity',
-                'min': 0,
-                'max': 1,
-                'default': 0.8,
-                'uniform': 'symbolicOpacity'
-            },
-            {
-                'type': 'button',
-                'label': 'Toggle Integration',
-                'action': 'toggleIntegration'
-            }
-        ])
-        
+        basic_controls["ui_elements"].extend(
+            [
+                {
+                    "type": "slider",
+                    "label": "Quantum Layer Opacity",
+                    "min": 0,
+                    "max": 1,
+                    "default": 0.8,
+                    "uniform": "quantumOpacity",
+                },
+                {
+                    "type": "slider",
+                    "label": "Symbolic Layer Opacity",
+                    "min": 0,
+                    "max": 1,
+                    "default": 0.8,
+                    "uniform": "symbolicOpacity",
+                },
+                {
+                    "type": "button",
+                    "label": "Toggle Integration",
+                    "action": "toggleIntegration",
+                },
+            ]
+        )
+
         return basic_controls
-    
+
     def _generate_html_template(self, scene_data: Dict[str, Any]) -> str:
         """Generate HTML template for WebGL visualization."""
         return f"""
@@ -596,7 +614,7 @@ class WebGLRendererPlugin(RendererPlugin):
 </body>
 </html>
         """
-    
+
     def _generate_webgl_javascript(self, scene_data: Dict[str, Any]) -> str:
         """Generate JavaScript code for WebGL visualization."""
         return """
@@ -802,29 +820,31 @@ class WebGLRendererPlugin(RendererPlugin):
         // Initialize the application
         init();
         """
-    
+
     def _get_gate_color(self, gate_type: str) -> List[float]:
         """Get color for quantum gate type."""
         colors = {
-            'rotation': [1.0, 0.3, 0.3],  # Red
-            'hadamard': [0.3, 1.0, 0.3],  # Green
-            'cnot': [0.3, 0.3, 1.0],      # Blue
-            'phase': [1.0, 1.0, 0.3],     # Yellow
-            'measurement': [1.0, 0.3, 1.0] # Magenta
+            "rotation": [1.0, 0.3, 0.3],  # Red
+            "hadamard": [0.3, 1.0, 0.3],  # Green
+            "cnot": [0.3, 0.3, 1.0],  # Blue
+            "phase": [1.0, 1.0, 0.3],  # Yellow
+            "measurement": [1.0, 0.3, 1.0],  # Magenta
         }
         return colors.get(gate_type, [0.7, 0.7, 0.7])  # Default gray
-    
+
     def _calculate_bezier_points(self, connection: Dict[str, Any]) -> List[List[float]]:
         """Calculate Bezier control points for entanglement connections."""
         # Simplified Bezier calculation
         return [
-            [0, 0, 0],    # Start point
+            [0, 0, 0],  # Start point
             [0.5, 0.5, 0.2],  # Control point 1
-            [0.5, -0.5, 0.2], # Control point 2
-            [1, 0, 0]     # End point
+            [0.5, -0.5, 0.2],  # Control point 2
+            [1, 0, 0],  # End point
         ]
-    
-    def _generate_geometric_vertices(self, geometric_data: Dict[str, Any]) -> List[float]:
+
+    def _generate_geometric_vertices(
+        self, geometric_data: Dict[str, Any]
+    ) -> List[float]:
         """Generate vertices for geometric algebra representation."""
         # Simplified geometric vertices generation
         vertices = []
@@ -834,15 +854,45 @@ class WebGLRendererPlugin(RendererPlugin):
             z = ((i >> 2) & 1) * 2 - 1
             vertices.extend([x * 0.5, y * 0.5, z * 0.5])
         return vertices
-    
+
     def _generate_geometric_faces(self, geometric_data: Dict[str, Any]) -> List[int]:
         """Generate face indices for geometric algebra representation."""
         # Simple cube faces
         return [
-            0, 1, 2, 2, 3, 0,  # Front
-            4, 5, 6, 6, 7, 4,  # Back
-            0, 1, 5, 5, 4, 0,  # Bottom
-            2, 3, 7, 7, 6, 2,  # Top
-            0, 3, 7, 7, 4, 0,  # Left
-            1, 2, 6, 6, 5, 1   # Right
+            0,
+            1,
+            2,
+            2,
+            3,
+            0,  # Front
+            4,
+            5,
+            6,
+            6,
+            7,
+            4,  # Back
+            0,
+            1,
+            5,
+            5,
+            4,
+            0,  # Bottom
+            2,
+            3,
+            7,
+            7,
+            6,
+            2,  # Top
+            0,
+            3,
+            7,
+            7,
+            4,
+            0,  # Left
+            1,
+            2,
+            6,
+            6,
+            5,
+            1,  # Right
         ]

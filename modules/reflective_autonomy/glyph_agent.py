@@ -9,7 +9,9 @@ class GlyphAgent:
         Agents may override or reinforce classifications.
         """
         # Example: Sentari (resonance stabilized) elevates RitualUX priority
-        if self.name == "Sentari" and "RitualUX" in classification_result.get("all_hits", {}):
+        if self.name == "Sentari" and "RitualUX" in classification_result.get(
+            "all_hits", {}
+        ):
             if classification_result["priority"] != "high":
                 classification_result["priority"] = "high"
                 classification_result["reason"] += " (Sentari reinforcement)"

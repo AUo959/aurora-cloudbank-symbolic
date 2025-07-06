@@ -36,6 +36,8 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
 class QuantumSymbolicVector(SymbolicVector):
     def __init__(self, symbol: str, dim: int = 8):
         vec = quantum_symbolic_vector(symbol, dim)
-        super().__init__(symbol=symbol, dim=dim, vector=vec.tolist(), vector_type="bipolar")
+        super().__init__(
+            symbol=symbol, dim=dim, vector=vec.tolist(), vector_type="bipolar"
+        )
         # store numpy array for convenience
         self.vector = vec

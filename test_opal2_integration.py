@@ -12,10 +12,11 @@ from pathlib import Path
 # Add the project root to the Python path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from modules.opal2.glyph_core import GlyphCore
 from modules.opal2.glyph_cache import GlyphCache
-from modules.opal2.quantum_renderer import QuantumRenderer
+from modules.opal2.glyph_core import GlyphCore
 from modules.opal2.plugin_system import PluginSystem
+from modules.opal2.quantum_renderer import QuantumRenderer
+
 
 async def test_opal2_integration():
     """Test full Opal2 system integration"""
@@ -36,7 +37,7 @@ async def test_opal2_integration():
         glyph_result = await glyph_core.generate_async(
             expression=test_expression,
             style_params={"color": "blue", "size": 100},
-            quantum_enhancement=True
+            quantum_enhancement=True,
         )
         print(f"✅ Glyph generated: {len(glyph_result)} properties")
         print(f"   - Type: {glyph_result.get('type')}")
@@ -85,7 +86,9 @@ async def test_opal2_integration():
         print(f"✅ Plugin system operational")
         print(f"   - Available plugins: {len(plugins)}")
         for plugin in plugins[:3]:  # Show first 3
-            print(f"   - {plugin.get('name', 'unknown')}: {plugin.get('type', 'unknown')}")
+            print(
+                f"   - {plugin.get('name', 'unknown')}: {plugin.get('type', 'unknown')}"
+            )
     except Exception as e:
         print(f"❌ Plugin System test failed: {e}")
         return False
@@ -104,7 +107,7 @@ async def test_opal2_integration():
         render_context = {
             "glyph_data": glyph_data,
             "dimensions": {"width": 800, "height": 600},
-            "quantum_params": {"coherence_factor": 0.8}
+            "quantum_params": {"coherence_factor": 0.8},
         }
 
         print("✅ Full integration test successful")
@@ -118,6 +121,7 @@ async def test_opal2_integration():
 
     print("\n🎉 All tests passed! Opal2 system is fully operational.")
     return True
+
 
 if __name__ == "__main__":
     success = asyncio.run(test_opal2_integration())

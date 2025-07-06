@@ -24,12 +24,20 @@ class DependencyAutoUpdater:
         """Create safety backup branch."""
         try:
             # Create backup branch
-            subprocess.run(["git", "checkout", "-b", self.backup_branch],
-                           cwd=self.project_root, check=True, capture_output=True)
+            subprocess.run(
+                ["git", "checkout", "-b", self.backup_branch],
+                cwd=self.project_root,
+                check=True,
+                capture_output=True,
+            )
 
             # Switch back to main
-            subprocess.run(["git", "checkout", "main"],
-                           cwd=self.project_root, check=True, capture_output=True)
+            subprocess.run(
+                ["git", "checkout", "main"],
+                cwd=self.project_root,
+                check=True,
+                capture_output=True,
+            )
 
             print(f"✅ Safety backup created: {self.backup_branch}")
             return True
@@ -43,7 +51,7 @@ class DependencyAutoUpdater:
             "dependencies": [],
             "outdated": [],
             "security_issues": [],
-            "scan_successful": False
+            "scan_successful": False,
         }
 
         # Check requirements.txt
@@ -51,9 +59,21 @@ class DependencyAutoUpdater:
         if req_file.exists():
             try:
                 # Use pip list --outdated to check for updates
-                _ = subprocess.run([
-                    sys.executable, "-m", "pip", "list", "--outdated", "--format=json"
-                ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+                _ = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "list",
+                        "--outdated",
+                        "--format=json",
+                    ],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root,
+                    shell=False,
+                    check=False,
+                )
 
                 if result.returncode == 0:
                     outdated = json.loads(result.stdout)
@@ -62,7 +82,9 @@ class DependencyAutoUpdater:
 
                     print(f"📦 Found {len(outdated)} outdated Python packages")
                     for pkg in outdated[:5]:  # Show first 5
-                        print(f"  • {pkg['name']}: {pkg['version']} → {pkg['latest_version']}")
+                        print(
+                            f"  • {pkg['name']}: {pkg['version']} → {pkg['latest_version']}"
+                        )
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
@@ -76,7 +98,7 @@ class DependencyAutoUpdater:
             "dependencies": [],
             "outdated": [],
             "security_issues": [],
-            "scan_successful": False
+            "scan_successful": False,
         }
 
         # Check package.json
@@ -84,9 +106,14 @@ class DependencyAutoUpdater:
         if package_json.exists():
             try:
                 # Use npm outdated to check for updates
-                _ = subprocess.run([
-                    "npm", "outdated", "--json"
-                ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+                _ = subprocess.run(
+                    ["npm", "outdated", "--json"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root,
+                    shell=False,
+                    check=False,
+                )
 
                 # npm outdated returns non-zero when packages are outdated
                 if result.stdout:
@@ -106,27 +133,37 @@ class DependencyAutoUpdater:
 
     def update_python_dependencies(self, dry_run: bool = True) -> Dict[str, Any]:
         """Update Python dependencies."""
-        update_result = {
-            "updated": [],
-            "failed": [],
-            "skipped": [],
-            "success": False
-        }
+        update_result = {"updated": [], "failed": [], "skipped": [], "success": False}
 
         if dry_run:
             print("🔍 DRY RUN: Python dependency updates")
             scan_result = self.scan_python_dependencies()
             if scan_result["outdated"]:
                 for pkg in scan_result["outdated"]:
-                    print(f"  Would update: {pkg['name']} {pkg['version']} → {pkg['latest_version']}")
+                    print(
+                        f"  Would update: {pkg['name']} {pkg['version']} → {pkg['latest_version']}"
+                    )
             update_result["success"] = True
             return update_result
 
         try:
             # Update all packages
-            _ = subprocess.run([
-                sys.executable, "-m", "pip", "install", "--upgrade", "-r", "requirements.txt"
-            ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+            _ = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "--upgrade",
+                    "-r",
+                    "requirements.txt",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+                shell=False,
+                check=False,
+            )
 
             if result.returncode == 0:
                 print("✅ Python dependencies updated successfully")
@@ -141,27 +178,29 @@ class DependencyAutoUpdater:
 
     def update_node_dependencies(self, dry_run: bool = True) -> Dict[str, Any]:
         """Update Node.js dependencies."""
-        update_result = {
-            "updated": [],
-            "failed": [],
-            "skipped": [],
-            "success": False
-        }
+        update_result = {"updated": [], "failed": [], "skipped": [], "success": False}
 
         if dry_run:
             print("🔍 DRY RUN: Node.js dependency updates")
             scan_result = self.scan_node_dependencies()
             if scan_result["outdated"]:
                 for pkg_name, info in scan_result["outdated"].items():
-                    print(f"  Would update: {pkg_name} {info['current']} → {info['latest']}")
+                    print(
+                        f"  Would update: {pkg_name} {info['current']} → {info['latest']}"
+                    )
             update_result["success"] = True
             return update_result
 
         try:
             # Update packages
-            _ = subprocess.run([
-                "npm", "update"
-            ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+            _ = subprocess.run(
+                ["npm", "update"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+                shell=False,
+                check=False,
+            )
 
             if result.returncode == 0:
                 print("✅ Node.js dependencies updated successfully")
@@ -180,19 +219,29 @@ class DependencyAutoUpdater:
             "python_audit": {},
             "node_audit": {},
             "critical_issues": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Python security audit with pip-audit (if available)
         try:
-            _ = subprocess.run([
-                sys.executable, "-m", "pip", "install", "pip-audit"
-            ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+            _ = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "pip-audit"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+                shell=False,
+                check=False,
+            )
 
             if result.returncode == 0:
-                audit_cmd = subprocess.run([
-                    sys.executable, "-m", "pip_audit", "--format=json"
-                ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+                audit_cmd = subprocess.run(
+                    [sys.executable, "-m", "pip_audit", "--format=json"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root,
+                    shell=False,
+                    check=False,
+                )
 
                 if audit_cmd.returncode == 0:
                     audit_result["python_audit"] = json.loads(audit_cmd.stdout)
@@ -204,9 +253,14 @@ class DependencyAutoUpdater:
         package_json = self.project_root / "package.json"
         if package_json.exists():
             try:
-                _ = subprocess.run([
-                    "npm", "audit", "--json"
-                ], capture_output=True, text=True, cwd=self.project_root, shell=False, check=False)
+                _ = subprocess.run(
+                    ["npm", "audit", "--json"],
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root,
+                    shell=False,
+                    check=False,
+                )
 
                 if result.stdout:
                     audit_result["node_audit"] = json.loads(result.stdout)
@@ -228,7 +282,7 @@ class DependencyAutoUpdater:
             "python_update": {},
             "node_update": {},
             "success": False,
-            "recommendations": []
+            "recommendations": [],
         }
 
         print("🚀 Starting GITWiz Comprehensive Dependency Update")
@@ -256,11 +310,13 @@ class DependencyAutoUpdater:
         workflow_result["node_update"] = self.update_node_dependencies(dry_run)
 
         # Step 5: Generate recommendations
-        workflow_result["recommendations"] = self._generate_recommendations(workflow_result)
+        workflow_result["recommendations"] = self._generate_recommendations(
+            workflow_result
+        )
 
         workflow_result["success"] = (
-            workflow_result["python_update"]["success"] and
-            workflow_result["node_update"]["success"]
+            workflow_result["python_update"]["success"]
+            and workflow_result["node_update"]["success"]
         )
 
         workflow_result["end_time"] = datetime.utcnow().isoformat()
@@ -289,16 +345,20 @@ class DependencyAutoUpdater:
 
         # Security recommendations
         if workflow_result["security_audit"].get("critical_issues"):
-            recommendations.append("Address critical security vulnerabilities immediately")
+            recommendations.append(
+                "Address critical security vulnerabilities immediately"
+            )
 
         # General recommendations
-        recommendations.extend([
-            "Schedule regular dependency updates (monthly)",
-            "Monitor security advisories for your dependencies",
-            "Consider using dependency pinning for production",
-            "Run tests after dependency updates",
-            "Keep a backup before major updates"
-        ])
+        recommendations.extend(
+            [
+                "Schedule regular dependency updates (monthly)",
+                "Monitor security advisories for your dependencies",
+                "Consider using dependency pinning for production",
+                "Run tests after dependency updates",
+                "Keep a backup before major updates",
+            ]
+        )
 
         return recommendations
 
@@ -310,8 +370,12 @@ def main():
     parser = argparse.ArgumentParser(description="GITWiz Dependency Auto-Updater")
     parser.add_argument("--scan", action="store_true", help="Scan dependencies")
     parser.add_argument("--update", action="store_true", help="Update dependencies")
-    parser.add_argument("--security-audit", action="store_true", help="Run security audit")
-    parser.add_argument("--comprehensive", action="store_true", help="Run comprehensive workflow")
+    parser.add_argument(
+        "--security-audit", action="store_true", help="Run security audit"
+    )
+    parser.add_argument(
+        "--comprehensive", action="store_true", help="Run comprehensive workflow"
+    )
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
 
     args = parser.parse_args()
@@ -321,8 +385,12 @@ def main():
     if args.comprehensive:
         result = updater.execute_comprehensive_update(dry_run=args.dry_run)
         print("\n📊 Workflow Result Summary:")
-        print(f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}")
-        print(f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}")
+        print(
+            f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}"
+        )
+        print(
+            f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}"
+        )
         print(f"  Updates successful: {result['success']}")
 
     elif args.scan:

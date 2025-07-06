@@ -55,7 +55,7 @@ Your proposed ORION CloudBank workflow has been **perfectly integrated** with:
 
 **The Aurora CloudBank repository is now a fully operational ORION Station, ready for immediate crew boarding and parallel L1/L3 deployment.**
 
-All systems are nominal. Awaiting your command to proceed! 
+All systems are nominal. Awaiting your command to proceed!
 
 ---
 *Integration completed by GitHub Copilot - Chief Development Officer*  

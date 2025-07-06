@@ -13,7 +13,7 @@ from pathlib import Path
 
 def fix_logging_fstring_interpolation(file_path: str) -> bool:
     """Fix f-string interpolation in logging calls."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
@@ -30,7 +30,7 @@ def fix_logging_fstring_interpolation(file_path: str) -> bool:
         content = re.sub(pattern, replacement, content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -38,22 +38,22 @@ def fix_logging_fstring_interpolation(file_path: str) -> bool:
 
 def fix_unused_variables(file_path: str) -> bool:
     """Fix unused variables by prefixing with underscore."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Common unused variable patterns
     patterns = [
-        (r'(\s+)result = subprocess\.run\(', r'\1_ = subprocess.run('),
-        (r'(\s+)scheduler_thread = ', r'\1_scheduler_thread = '),
+        (r"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (r"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
     ]
 
     for pattern, replacement in patterns:
         content = re.sub(pattern, replacement, content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -61,22 +61,28 @@ def fix_unused_variables(file_path: str) -> bool:
 
 def fix_broad_exceptions_specific(file_path: str) -> bool:
     """Replace broad Exception catches with more specific ones."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Replace common broad exception patterns
     patterns = [
-        (r'except (OSError, ValueError, RuntimeError) as e:', 'except (OSError, ValueError, RuntimeError) as e:'),
-        (r'except (OSError, ValueError, RuntimeError):', 'except (OSError, ValueError, RuntimeError):'),
+        (
+            r"except (OSError, ValueError, RuntimeError) as e:",
+            "except (OSError, ValueError, RuntimeError) as e:",
+        ),
+        (
+            r"except (OSError, ValueError, RuntimeError):",
+            "except (OSError, ValueError, RuntimeError):",
+        ),
     ]
 
     for pattern, replacement in patterns:
         content = content.replace(pattern, replacement)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -84,7 +90,7 @@ def fix_broad_exceptions_specific(file_path: str) -> bool:
 
 def remove_empty_fstrings(file_path: str) -> bool:
     """Remove f-strings that don't have interpolation."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
@@ -94,7 +100,7 @@ def remove_empty_fstrings(file_path: str) -> bool:
 
     def replace_func(match):
         string_content = match.group(1)
-        if '{' not in string_content and '}' not in string_content:
+        if "{" not in string_content and "}" not in string_content:
             return f'"{string_content}"'
         return match.group(0)
 
@@ -105,14 +111,14 @@ def remove_empty_fstrings(file_path: str) -> bool:
 
     def replace_func_single(match):
         string_content = match.group(1)
-        if '{' not in string_content and '}' not in string_content:
+        if "{" not in string_content and "}" not in string_content:
             return f"'{string_content}'"
         return match.group(0)
 
     content = re.sub(pattern, replace_func_single, content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -120,22 +126,28 @@ def remove_empty_fstrings(file_path: str) -> bool:
 
 def add_missing_type_annotations(file_path: str) -> bool:
     """Add missing type annotations for common patterns."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Add return type annotations for simple functions
     patterns = [
-        (r'def (\w+)\(self\):\s*"""([^"]*?)"""', r'def \1(self) -> None:\n        """\2"""'),
-        (r'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""', r'def \1(self, \2: str) -> None:\n        """\3"""'),
+        (
+            r'def (\w+)\(self\):\s*"""([^"]*?)"""',
+            r'def \1(self) -> None:\n        """\2"""',
+        ),
+        (
+            r'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
+            r'def \1(self, \2: str) -> None:\n        """\3"""',
+        ),
     ]
 
     for pattern, replacement in patterns:
         content = re.sub(pattern, replacement, content, flags=re.MULTILINE | re.DOTALL)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -147,9 +159,9 @@ def process_file_advanced(file_path: str) -> dict:
 
     try:
         # fixes['logging_fstring'] = fix_logging_fstring_interpolation(file_path)  # Disabled as it's complex
-        fixes['unused_variables'] = fix_unused_variables(file_path)
-        fixes['broad_exceptions'] = fix_broad_exceptions_specific(file_path)
-        fixes['empty_fstrings'] = remove_empty_fstrings(file_path)
+        fixes["unused_variables"] = fix_unused_variables(file_path)
+        fixes["broad_exceptions"] = fix_broad_exceptions_specific(file_path)
+        fixes["empty_fstrings"] = remove_empty_fstrings(file_path)
         # fixes['type_annotations'] = add_missing_type_annotations(file_path)  # Disabled as it's risky
 
     except (OSError, ValueError, RuntimeError) as e:
@@ -161,13 +173,13 @@ def process_file_advanced(file_path: str) -> dict:
 
 def main():
     """Main function to process all Python files."""
-    scripts_dir = Path('scripts')
+    scripts_dir = Path("scripts")
 
     if not scripts_dir.exists():
         print("Scripts directory not found!")
         return 1
 
-    python_files = list(scripts_dir.glob('*.py'))
+    python_files = list(scripts_dir.glob("*.py"))
     total_fixes = {}
 
     for py_file in python_files:

@@ -26,41 +26,51 @@ class PreCommitOptimizer:
             "hooks_count": 0,
             "repos": [],
             "issues": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         if os.path.exists(self.config_path):
             analysis["config_exists"] = True
 
             try:
-                with open(self.config_path, 'r', encoding="utf-8") as f:
+                with open(self.config_path, "r", encoding="utf-8") as f:
                     config = yaml.safe_load(f)
 
-                if 'repos' in config:
-                    analysis["repos"] = config['repos']
-                    analysis["hooks_count"] = sum(len(repo.get('hooks', [])) for repo in config['repos'])
+                if "repos" in config:
+                    analysis["repos"] = config["repos"]
+                    analysis["hooks_count"] = sum(
+                        len(repo.get("hooks", [])) for repo in config["repos"]
+                    )
 
                 # Analyze for issues
-                for repo in config.get('repos', []):
+                for repo in config.get("repos", []):
                     # Check for outdated versions
-                    if 'rev' in repo:
-                        rev = repo['rev']
-                        if rev.startswith('v') and any(char.isdigit() for char in rev):
+                    if "rev" in repo:
+                        rev = repo["rev"]
+                        if rev.startswith("v") and any(char.isdigit() for char in rev):
                             # This is a version tag - could check if it's outdated
                             pass
 
                     # Check for overly aggressive hooks
-                    for hook in repo.get('hooks', []):
-                        hook_id = hook.get('id', '')
+                    for hook in repo.get("hooks", []):
+                        hook_id = hook.get("id", "")
 
                         # Identify potentially slow hooks
-                        slow_hooks = ['pylint', 'mypy', 'black', 'isort']
+                        slow_hooks = ["pylint", "mypy", "black", "isort"]
                         if hook_id in slow_hooks:
-                            analysis["issues"].append(f"Potentially slow hook: {hook_id}")
+                            analysis["issues"].append(
+                                f"Potentially slow hook: {hook_id}"
+                            )
 
                         # Check for conflicting hooks
-                        if hook_id == 'autopep8' and any(h.get('id') == 'black' for r in config['repos'] for h in r.get('hooks', [])):
-                            analysis["issues"].append("Conflicting formatters: autopep8 and black")
+                        if hook_id == "autopep8" and any(
+                            h.get("id") == "black"
+                            for r in config["repos"]
+                            for h in r.get("hooks", [])
+                        ):
+                            analysis["issues"].append(
+                                "Conflicting formatters: autopep8 and black"
+                            )
 
             except (OSError, ValueError, RuntimeError) as e:
                 analysis["issues"].append(f"Failed to parse config: {e}")
@@ -80,30 +90,21 @@ class PreCommitOptimizer:
                     "hooks": [
                         {
                             "id": "trailing-whitespace",
-                            "args": ["--markdown-linebreak-ext=md"]
+                            "args": ["--markdown-linebreak-ext=md"],
                         },
-                        {
-                            "id": "end-of-file-fixer"
-                        },
-                        {
-                            "id": "check-yaml",
-                            "args": ["--unsafe"]  # Allow custom tags
-                        },
+                        {"id": "end-of-file-fixer"},
+                        {"id": "check-yaml", "args": ["--unsafe"]},  # Allow custom tags
                         {
                             "id": "check-added-large-files",
-                            "args": ["--maxkb=1024"]  # 1MB limit
+                            "args": ["--maxkb=1024"],  # 1MB limit
                         },
-                        {
-                            "id": "check-merge-conflict"
-                        },
-                        {
-                            "id": "check-json"
-                        },
+                        {"id": "check-merge-conflict"},
+                        {"id": "check-json"},
                         {
                             "id": "pretty-format-json",
-                            "args": ["--autofix", "--indent=2"]
-                        }
-                    ]
+                            "args": ["--autofix", "--indent=2"],
+                        },
+                    ],
                 },
                 {
                     "repo": "https://github.com/pycqa/flake8",
@@ -114,10 +115,10 @@ class PreCommitOptimizer:
                             "args": [
                                 "--max-line-length=100",
                                 "--ignore=E203,W503",  # Compatible with black
-                                "--per-file-ignores=__init__.py:F401"
-                            ]
+                                "--per-file-ignores=__init__.py:F401",
+                            ],
                         }
-                    ]
+                    ],
                 },
                 {
                     "repo": "https://github.com/psf/black",
@@ -126,9 +127,9 @@ class PreCommitOptimizer:
                         {
                             "id": "black",
                             "language_version": "python3",
-                            "args": ["--line-length=100"]
+                            "args": ["--line-length=100"],
                         }
-                    ]
+                    ],
                 },
                 {
                     "repo": "https://github.com/pycqa/isort",
@@ -136,12 +137,9 @@ class PreCommitOptimizer:
                     "hooks": [
                         {
                             "id": "isort",
-                            "args": [
-                                "--profile=black",
-                                "--line-length=100"
-                            ]
+                            "args": ["--profile=black", "--line-length=100"],
                         }
-                    ]
+                    ],
                 },
                 {
                     "repo": "https://github.com/igorshubovych/markdownlint-cli",
@@ -152,16 +150,16 @@ class PreCommitOptimizer:
                             "args": [
                                 "--fix",
                                 "--ignore=node_modules",
-                                "--ignore=.venv"
-                            ]
+                                "--ignore=.venv",
+                            ],
                         }
-                    ]
-                }
+                    ],
+                },
             ],
             "ci": {
                 "autofix_commit_msg": "🤖 auto-fix pre-commit hooks",
-                "autoupdate_commit_msg": "⬆️ pre-commit autoupdate"
-            }
+                "autoupdate_commit_msg": "⬆️ pre-commit autoupdate",
+            },
         }
 
         return config
@@ -175,31 +173,16 @@ class PreCommitOptimizer:
                     "repo": "https://github.com/pre-commit/pre-commit-hooks",
                     "rev": "v5.0.0",
                     "hooks": [
-                        {
-                            "id": "trailing-whitespace",
-                            "stages": ["commit"]
-                        },
-                        {
-                            "id": "end-of-file-fixer",
-                            "stages": ["commit"]
-                        },
-                        {
-                            "id": "check-merge-conflict",
-                            "stages": ["commit"]
-                        }
-                    ]
+                        {"id": "trailing-whitespace", "stages": ["commit"]},
+                        {"id": "end-of-file-fixer", "stages": ["commit"]},
+                        {"id": "check-merge-conflict", "stages": ["commit"]},
+                    ],
                 },
                 # Python-specific hooks (only for Python files)
                 {
                     "repo": "https://github.com/psf/black",
                     "rev": "25.1.0",
-                    "hooks": [
-                        {
-                            "id": "black",
-                            "files": "\\.py$",
-                            "stages": ["commit"]
-                        }
-                    ]
+                    "hooks": [{"id": "black", "files": "\\.py$", "stages": ["commit"]}],
                 },
                 # Markdown-specific hooks (only for MD files)
                 {
@@ -210,9 +193,9 @@ class PreCommitOptimizer:
                             "id": "markdownlint",
                             "files": "\\.md$",
                             "args": ["--fix"],
-                            "stages": ["commit"]
+                            "stages": ["commit"],
                         }
-                    ]
+                    ],
                 },
                 # Heavy hooks that only run on push or manual
                 {
@@ -222,10 +205,10 @@ class PreCommitOptimizer:
                         {
                             "id": "flake8",
                             "files": "\\.py$",
-                            "stages": ["push", "manual"]
+                            "stages": ["push", "manual"],
                         }
-                    ]
-                }
+                    ],
+                },
             ]
         }
 
@@ -237,7 +220,6 @@ class PreCommitOptimizer:
             "# Pre-commit optimization",
             "*.pre-commit-cache/",
             ".pre-commit-hooks.yaml.bak",
-
             # Exclude large files from certain hooks
             "*.zip",
             "*.pd",
@@ -245,24 +227,21 @@ class PreCommitOptimizer:
             "*.jpg",
             "*.jpeg",
             "*.gi",
-
             # Exclude generated files
             "*.pyc",
             "__pycache__/",
             "*.so",
             ".pytest_cache/",
-
             # Exclude dependencies
             "node_modules/",
             ".venv/",
             "venv/",
-
             # Exclude temporary files
             "*.tmp",
             "*.temp",
             "*~",
             ".DS_Store",
-            "Thumbs.db"
+            "Thumbs.db",
         ]
 
         return patterns
@@ -279,16 +258,22 @@ class PreCommitOptimizer:
             import time
 
             start_time = time.time()
-            result = subprocess.run(['pre-commit', 'run', '--all-files'],
-                                    capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
+            result = subprocess.run(
+                ["pre-commit", "run", "--all-files"],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
             total_time = time.time() - start_time
 
-            benchmarks['total_time'] = total_time
-            benchmarks['success'] = result.returncode == 0
-            benchmarks['output'] = result.stdout + result.stderr
+            benchmarks["total_time"] = total_time
+            benchmarks["success"] = result.returncode == 0
+            benchmarks["output"] = result.stdout + result.stderr
 
         except (OSError, ValueError, RuntimeError) as e:
-            benchmarks['error'] = str(e)
+            benchmarks["error"] = str(e)
 
         return benchmarks
 
@@ -306,11 +291,11 @@ class PreCommitOptimizer:
                 os.rename(self.config_path, backup_path)
 
             # Write new config
-            with open(self.config_path, 'w', encoding="utf-8") as f:
+            with open(self.config_path, "w", encoding="utf-8") as f:
                 yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
             # Install the new hooks
-            subprocess.run(['pre-commit', 'install'], cwd=self.repo_path, check=True)
+            subprocess.run(["pre-commit", "install"], cwd=self.repo_path, check=True)
 
             return True
 
@@ -333,8 +318,8 @@ Generated: {datetime.datetime.now().isoformat()}
 ## Issues Identified
 """
 
-        if analysis['issues']:
-            for issue in analysis['issues']:
+        if analysis["issues"]:
+            for issue in analysis["issues"]:
                 report += f"- ⚠️ {issue}\n"
         else:
             report += "- ✅ No issues found\n"
@@ -343,14 +328,14 @@ Generated: {datetime.datetime.now().isoformat()}
 ## Current Hooks
 """
 
-        for repo in analysis['repos']:
-            repo_url = repo.get('repo', 'Unknown')
-            repo_rev = repo.get('rev', 'Unknown')
+        for repo in analysis["repos"]:
+            repo_url = repo.get("repo", "Unknown")
+            repo_rev = repo.get("rev", "Unknown")
             report += f"\n### {repo_url} ({repo_rev})\n"
 
-            for hook in repo.get('hooks', []):
-                hook_id = hook.get('id', 'Unknown')
-                args = hook.get('args', [])
+            for hook in repo.get("hooks", []):
+                hook_id = hook.get("id", "Unknown")
+                args = hook.get("args", [])
                 report += f"- **{hook_id}**"
                 if args:
                     report += f" - Args: `{' '.join(args)}`"
@@ -418,12 +403,24 @@ repos:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Aurora CloudBank Pre-commit Optimizer')
-    parser.add_argument('--analyze', action='store_true', help='Analyze current pre-commit config')
-    parser.add_argument('--optimize', action='store_true', help='Apply optimized configuration')
-    parser.add_argument('--conditional', action='store_true', help='Use conditional configuration')
-    parser.add_argument('--benchmark', action='store_true', help='Benchmark current hooks')
-    parser.add_argument('--report', action='store_true', help='Generate optimization report')
+    parser = argparse.ArgumentParser(
+        description="Aurora CloudBank Pre-commit Optimizer"
+    )
+    parser.add_argument(
+        "--analyze", action="store_true", help="Analyze current pre-commit config"
+    )
+    parser.add_argument(
+        "--optimize", action="store_true", help="Apply optimized configuration"
+    )
+    parser.add_argument(
+        "--conditional", action="store_true", help="Use conditional configuration"
+    )
+    parser.add_argument(
+        "--benchmark", action="store_true", help="Benchmark current hooks"
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Generate optimization report"
+    )
 
     args = parser.parse_args()
 
@@ -435,26 +432,26 @@ def main():
         print(f"  Config exists: {analysis['config_exists']}")
         print(f"  Total hooks: {analysis['hooks_count']}")
 
-        if analysis['issues']:
+        if analysis["issues"]:
             print(f"  Issues found: {len(analysis['issues'])}")
-            for issue in analysis['issues']:
+            for issue in analysis["issues"]:
                 print(f"    - {issue}")
 
     if args.benchmark:
         print("🔧 Benchmarking pre-commit hooks...")
         benchmarks = optimizer.benchmark_hooks()
 
-        if 'total_time' in benchmarks:
+        if "total_time" in benchmarks:
             print(f"⏱️ Total execution time: {benchmarks['total_time']:.2f} seconds")
             print(f"✅ Success: {benchmarks['success']}")
-        elif 'error' in benchmarks:
+        elif "error" in benchmarks:
             print(f"❌ Benchmark failed: {benchmarks['error']}")
 
     if args.report:
         report = optimizer.generate_optimization_report()
         print(report)
 
-        with open('precommit_optimization_report.md', 'w', encoding="utf-8") as f:
+        with open("precommit_optimization_report.md", "w", encoding="utf-8") as f:
             f.write(report)
         print("\n📄 Report saved to precommit_optimization_report.md")
 

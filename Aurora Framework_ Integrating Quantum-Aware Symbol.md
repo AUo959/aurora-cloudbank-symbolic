@@ -164,202 +164,34 @@ Future research should focus on integrating these components into a cohesive fra
 
 <div>⁂</div>
 
-[^1]: https://www.semanticscholar.org/paper/96ffc1763e26fd93fdde35f385d540291748dad7
+[^1]: <https://www.semanticscholar.org/paper/96ffc1763e26fd93fdde35f385d540291748dad7>
 
-[^2]: https://peerj.com/articles/cs-2098.pdf
+[^2]: <https://peerj.com/articles/cs-2098.pdf>
 
-[^3]: https://ceur-ws.org/Vol-3432/paper40.pdf
+[^3]: <https://ceur-ws.org/Vol-3432/paper40.pdf>
 
-[^4]: https://metaschool.so/ai-agents/loop-gpt
+[^4]: <https://metaschool.so/ai-agents/loop-gpt>
 
-[^5]: https://delinea.com/what-is/delegated-machine-credential
+[^5]: <https://delinea.com/what-is/delegated-machine-credential>
 
-[^6]: https://arxiv.org/abs/2310.12430
+[^6]: <https://arxiv.org/abs/2310.12430>
 
-[^7]: https://arxiv.org/abs/2404.03648
+[^7]: <https://arxiv.org/abs/2404.03648>
 
-[^8]: https://arxiv.org/html/2401.02009v1
+[^8]: <https://arxiv.org/html/2401.02009v1>
 
-[^9]: https://arxiv.org/html/2406.00799v1
+[^9]: <https://arxiv.org/html/2406.00799v1>
 
-[^10]: https://arxiv.org/abs/2003.05171
+[^10]: <https://arxiv.org/abs/2003.05171>
 
-[^11]: https://www.pondhouse-data.com/blog/document-extraction-with-gpt4o
+[^11]: <https://www.pondhouse-data.com/blog/document-extraction-with-gpt4o>
 
-[^12]: https://arxiv.org/abs/2312.04889
+[^13]: <https://pubmed.ncbi.nlm.nih.gov/23673054/>
 
-[^13]: https://pubmed.ncbi.nlm.nih.gov/23673054/
+[^14]: <https://openai.com/index/introducing-operator/>
 
-[^14]: https://openai.com/index/introducing-operator/
+[^16]: <https://www.semanticscholar.org/paper/fa95f6b09d81ff3c9869b4ed69f272081d0b55d5>
 
-[^15]: https://arxiv.org/abs/1907.02026
+[^17]: <https://arxiv.org/abs/2310.15303>
 
-[^16]: https://www.semanticscholar.org/paper/fa95f6b09d81ff3c9869b4ed69f272081d0b55d5
-
-[^17]: https://arxiv.org/abs/2310.15303
-
-[^18]: https://www.semanticscholar.org/paper/dce001cf7ab64896ba70ca99dab5b1c9d8f4308a
-
-[^19]: https://www.semanticscholar.org/paper/51ab10c32634da959b63ab4cd1e4040637b821df
-
-[^20]: https://techxplore.com/news/2024-06-error-free-quantum-approach-circuits.html
-
-[^21]: https://arxiv.org/abs/2311.17892
-
-[^22]: https://pubmed.ncbi.nlm.nih.gov/23673033/
-
-[^23]: https://www.restack.io/p/neuro-symbolic-ai-answer-quantum-insights-cat-ai
-
-[^24]: https://juliapackages.com/p/quantumsymbolics
-
-[^25]: https://cdn.aaai.org/ojs/12991/12991-52-16508-1-2-20201228.pdf
-
-[^26]: https://aiagentslist.com/agent/loop-gpt
-
-[^27]: https://www.lyzr.ai/glossaries/agent-frameworks/
-
-[^28]: https://arxiv.org/abs/2307.02047
-
-[^29]: https://www.nadcab.com/blog/zero-knowledge-credential-in-web3
-
-[^30]: https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation
-
-[^31]: https://ui8.net/splineone/products/quantum-ui-kit
-
-[^32]: https://inspirehep.net/literature/2175808
-
-[^33]: http://docs.dbgpt.cn/docs/agents/introduction/
-
-[^34]: https://arxiv.org/abs/2405.03989
-
-[^35]: https://www.semanticscholar.org/paper/81050a62dcd6718a2b6fdd063497dd89f814c1b5
-
-[^36]: https://github.com/zylon-ai/private-gpt
-
-[^37]: https://parsio.io/blog/how-to-extract-data-from-pdfs-using-chatgpt/
-
-[^38]: https://arxiv.org/abs/2402.05930
-
-[^39]: https://www.semanticscholar.org/paper/a65f8dd3b90f99ae11a3dcaab8288f1cd4fa038b
-
-[^40]: https://harpa.ai
-
-[^41]: https://stackoverflow.com/questions/70596487/how-to-programmatically-expand-react-reach-ui-reach-menu-button-menu
-
-[^42]: https://www.reddit.com/r/OpenAI/comments/1gby9gk/i_made_a_website_where_you_can_try_out_gpt4o_as/
-
-[^43]: https://discuss.elastic.co/t/programmatically-trigger-the-search-action-react-ui/329943
-
-[^44]: https://agentgpt.reworkd.ai
-
-[^45]: https://www.reddit.com/r/iOSProgramming/comments/cbteqx/wherehow_to_learn_programmatic_ui_designing/
-
-[^46]: https://github.com/browser-use/browser-use
-
-[^47]: https://tiarkrompf.github.io/notes/?%2Fdeconstructing-react%2Faside1
-
-[^48]: https://www.youtube.com/watch?v=IXRkmqEYGZA
-
-[^49]: https://arxiv.org/abs/2408.06037
-
-[^50]: https://arxiv.org/abs/2411.10918
-
-[^51]: https://www.deepchecks.com/user-behavior-data-drift-llms/
-
-[^52]: https://promptengineering.org/llms-learn-humility-how-self-critique-improves-logic-and-reasoning-in-llms-like-chatgpt/
-
-[^53]: https://www.evidentlyai.com/blog/tutorial-detecting-drift-in-text-data
-
-[^54]: https://openreview.net/forum?id=up8EYzyrKV
-
-[^55]: https://vianops.ai/monitoring-data-drift-in-large-language-models/
-
-[^56]: https://aclanthology.org/2024.naacl-long.362.pdf
-
-[^57]: https://www.qeios.com/read/WD5BOW
-
-[^58]: https://www.linkedin.com/pulse/beyond-generative-ai-agents-tackling-llm-limitations-rl-ramachandran-8eaae
-
-[^59]: https://www.voiceflow.com/pathways/architecting-the-future-of-ai-agents-5-flexible-conversation-frameworks-you-need
-
-[^60]: https://arxiv.org/html/2406.08334v1
-
-[^61]: https://sedicii.com/news/zero-knowledge-authentication/
-
-[^62]: https://arxiv.org/abs/2410.21169
-
-[^63]: https://arxiv.org/abs/2412.07626
-
-[^64]: https://www.semanticscholar.org/paper/ac81f1a4465bee1c2f7beb94c17e81cdd560ee28
-
-[^65]: https://arxiv.org/abs/2312.02314
-
-[^66]: https://arxiv.org/abs/2309.04141
-
-[^67]: https://arxiv.org/abs/2212.09656
-
-[^68]: https://arxiv.org/abs/2305.17273
-
-[^69]: https://www.edstem.com/blog/document-parsing-data-pipeline-using-apache-kafka/
-
-[^70]: https://generativeai.pub/understanding-document-parsing-part-2-modern-document-parsing-explained-modular-pipelines-bb605c786293
-
-[^71]: https://www.reddit.com/r/LangChain/comments/1ef12q6/the_rag_engineers_guide_to_document_parsing/
-
-[^72]: https://techcommunity.microsoft.com/blog/azure-ai-services-blog/multimodal-parsing-for-rag-azure-openai-gpt-4o-llamaparse-and-azure-ai-search/4330399/
-
-[^73]: https://cookbook.openai.com/examples/parse_pdf_docs_for_rag
-
-[^74]: https://www.semanticscholar.org/paper/1bdf6986738a32043bf6d267c214323b4fbef6e7
-
-[^75]: https://www.semanticscholar.org/paper/b6f9d72f96feb3224bd675a65ce0362104ea15d2
-
-[^76]: https://arxiv.org/abs/2410.13886
-
-[^77]: https://arxiv.org/abs/2410.02907
-
-[^78]: https://arxiv.org/abs/2502.18356
-
-[^79]: https://arxiv.org/abs/2410.11876
-
-[^80]: https://github.com/m1guelpf/browser-agent
-
-[^81]: https://nimblehq.co/compass/development/ios/user-interface/programmatic-ui/
-
-[^82]: https://www.telerik.com/blogs/how-to-programmatically-add-input-fields-react-forms
-
-[^83]: https://www.linkedin.com/pulse/how-build-autonomous-web-browsing-agent-pablo-schaffner-bofill-emdre
-
-[^84]: https://ui.dev/react-router-programmatically-navigate
-
-[^85]: https://www.browserbase.com
-
-[^86]: https://www.instabug.com/blog/creating-ui-elements-programmatically-using-purelayout
-
-[^87]: https://arxiv.org/abs/2403.02889
-
-[^88]: https://arxiv.org/abs/2411.00914
-
-[^89]: https://arxiv.org/abs/2404.00756
-
-[^90]: https://www.semanticscholar.org/paper/637bd835d1f5909fbc88042ec4678e89f8dbc0b8
-
-[^91]: https://arxiv.org/abs/2502.05843
-
-[^92]: https://arxiv.org/abs/2503.10041
-
-[^93]: https://www.semanticscholar.org/paper/84489e4aa297b44002043445906672faeb9dcb31
-
-[^94]: https://arxiv.org/abs/2411.18506
-
-[^95]: https://arxiv.org/html/2406.00799v6
-
-[^96]: https://www.youtube.com/watch?v=8Npc7-J0kNU
-
-[^97]: https://blog.kore.ai/cobus-greyling/llm-drift-prompt-drift-cascading
-
-[^98]: https://openreview.net/pdf/24349716a9d539637c01aa5aafedffd7e4f3364c.pdf
-
-[^99]: https://www.evidentlyai.com/blog/unstructured-data-monitoring
-
-[^100]: https://arxiv.org/html/2504.00180v1
+[^20]: <https://techxplore.com/news/2024-06-error-free-quantum-approach-circuits.html>

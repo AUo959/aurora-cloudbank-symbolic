@@ -9,7 +9,10 @@ import logging
 import sys
 from pathlib import Path
 
-from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
+from modules.symbolic_core.sonnet4_integration_hub import (
+    enable_sonnet4_globally,
+    sonnet4_hub,
+)
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))

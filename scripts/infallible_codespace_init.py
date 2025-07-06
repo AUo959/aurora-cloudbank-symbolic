@@ -54,7 +54,9 @@ def main():
 
     # Run onboarding script if available
     if os.path.isfile("scripts/dev/on_startup.sh"):
-        overall_success &= run_step("Startup script", ["bash scripts/dev/on_startup.sh"])
+        overall_success &= run_step(
+            "Startup script", ["bash scripts/dev/on_startup.sh"]
+        )
 
     if overall_success:
         print("\n[Bootstrap] Environment initialization complete ✅")

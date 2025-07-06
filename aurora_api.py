@@ -8,7 +8,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
+from modules.symbolic_core.sonnet4_integration_hub import (
+    enable_sonnet4_globally,
+    sonnet4_hub,
+)
 
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
@@ -32,6 +35,7 @@ def parse_multivector(expression: str, blades: dict):
         elif token.isnumeric():
             result = float(token) if result is None else result + float(token)
     return result
+
 
 class VectorRequest(BaseModel):
     x: float
@@ -96,7 +100,9 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "global_status": sonnet4_hub.get_global_status(),
             }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}"
+        )
 
 
 @app.get("/sonnet4/status")

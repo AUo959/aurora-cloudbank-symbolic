@@ -14,6 +14,7 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 ## 🔧 FIXES IMPLEMENTED
 
 ### 1. Updated `.devcontainer/devcontainer.json`
+
 - ✅ Switched from custom Dockerfile to `mcr.microsoft.com/devcontainers/javascript-node:20`
 - ✅ Added explicit bash shell configuration
 - ✅ Forced bash as default terminal profile
@@ -21,17 +22,20 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 - ✅ Clean postCreateCommand with bashrc setup
 
 ### 2. Created `.devcontainer/bashrc`
+
 - ✅ Simple prompt: `node@host:path$`
 - ✅ No fancy themes or async prompts
 - ✅ Disabled output buffering (`PYTHONUNBUFFERED=1`)
 - ✅ Aurora-specific aliases and setup
 
 ### 3. Updated `fix_copilot_terminal.sh`
+
 - ✅ Comprehensive terminal integration fix
 - ✅ Shell cleanup and configuration
 - ✅ Test output validation
 
 ### 4. Enhanced `test_copilot_terminal.sh`
+
 - ✅ Complete terminal output testing
 - ✅ Node.js, Python, and environment validation
 - ✅ Copilot visibility verification
@@ -39,15 +43,19 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 ## 🚀 NEXT STEPS
 
 1. **Rebuild Container**
+
    ```
    F1 → "Dev Containers: Rebuild Container"
    ```
+
    OR
+
    ```
    Ctrl+Shift+P → "Dev Containers: Rebuild Container Without Cache"
    ```
 
 2. **Test Integration**
+
    ```bash
    ./test_copilot_terminal.sh
    ```
@@ -59,6 +67,7 @@ The issue was indeed with the `devcontainer.json` configuration. The original se
 ## 🎯 EXPECTED RESULT
 
 After rebuilding:
+
 - ✅ Terminal will show clean `node@host:path$` prompt
 - ✅ Copilot Chat will capture all terminal output
 - ✅ Node.js, Python, and all tools will work normally

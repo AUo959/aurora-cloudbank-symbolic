@@ -6,11 +6,11 @@
 🌍 Cultural simulation integration (CASK)
 ⚡ Claude Sonnet 4 AI enhancement
 
-🎮 **Live Demo**: https://auo959.github.io/aurora-cloudbank-symbolic
-💻 **Source Code**: https://github.com/AUo959/aurora-cloudbank-symbolic
+🎮 **Live Demo**: <https://auo959.github.io/aurora-cloudbank-symbolic>
+💻 **Source Code**: <https://github.com/AUo959/aurora-cloudbank-symbolic>
 📚 **API Docs**: Full FastAPI documentation included
 
-#QuantumComputing #AI #OpenSource #Education #Research #Innovation
+# QuantumComputing #AI #OpenSource #Education #Research #Innovation
 
 🔥 **Zero vulnerabilities, 45/45 tests passing, production-ready!**
 

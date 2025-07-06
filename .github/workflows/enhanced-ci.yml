@@ -50,9 +50,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run linting
-        run: npm run lint || echo "::warning::Linting failed but continuing..."
+        run: |
+          echo "🔍 Running ESLint checks..."
+          npm run lint
       - name: Run tests
-        run: npm test || echo "::warning::Node.js tests failed but continuing..."
+        run: |
+          echo "🧪 Running Node.js tests..."
+          npm test
 
   # Python CI
   python-ci:
@@ -73,18 +77,21 @@ jobs:
       - name: Lint with flake8
         run: |
           pip install flake8
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "::warning::Critical linting issues found"
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics || echo "::warning::Style issues found"
+          echo "🔍 Running critical Python syntax checks..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          echo "🎨 Running Python style checks..."
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Run Python tests
         if: needs.preflight.outputs.has-tests == 'true'
         run: |
           pip install pytest
-          pytest tests/ -v || echo "::warning::Python tests failed but continuing..."
+          echo "🧪 Running Python tests..."
+          pytest tests/ -v
       - name: Security scan
         run: |
           pip install bandit
-          bandit -r . -f json -o bandit-report.json || echo "::warning::Security issues found"
-        continue-on-error: true
+          echo "🔒 Running security scan..."
+          bandit -r . -f json -o bandit-report.json --severity-level medium
       - name: Upload security report
         if: always()
         uses: actions/upload-artifact@v4

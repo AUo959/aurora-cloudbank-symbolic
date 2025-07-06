@@ -3,7 +3,12 @@
 
 import argparse
 
-from modules.cask_tool import generate_architecture_chart, load_risk_assessment, load_specifications, load_vs_sota
+from modules.cask_tool import (
+    generate_architecture_chart,
+    load_risk_assessment,
+    load_specifications,
+    load_vs_sota,
+)
 
 
 def cmd_summary() -> None:

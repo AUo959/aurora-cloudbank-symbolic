@@ -26,7 +26,7 @@ class GITWizCleanup:
             "files_removed": 0,
             "space_freed": 0,
             "branches_cleaned": 0,
-            "actions_taken": []
+            "actions_taken": [],
         }
 
     def log_action(self, action, details=""):
@@ -45,7 +45,7 @@ class GITWizCleanup:
                 ["du", "-sb", str(self.repo_path)],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             return int(result.stdout.split()[0])
         except (subprocess.CalledProcessError, ValueError, IndexError):
@@ -78,7 +78,7 @@ class GITWizCleanup:
         self.log_action(
             "Python Cache Cleanup",
             f"Removed {cache_files_removed} .pyc files and "
-            f"{cache_dirs_removed} __pycache__ dirs"
+            f"{cache_dirs_removed} __pycache__ dirs",
         )
 
     def analyze_zip_files(self):
@@ -91,11 +91,13 @@ class GITWizCleanup:
         for zip_file in zip_files:
             size = zip_file.stat().st_size
             total_size += size
-            zip_analysis.append({
-                "name": zip_file.name,
-                "size": size,
-                "size_mb": round(size / (1024 * 1024), 1)
-            })
+            zip_analysis.append(
+                {
+                    "name": zip_file.name,
+                    "size": size,
+                    "size_mb": round(size / (1024 * 1024), 1),
+                }
+            )
 
         # Sort by size descending
         zip_analysis.sort(key=lambda x: x["size"], reverse=True)
@@ -103,7 +105,7 @@ class GITWizCleanup:
         self.log_action(
             "ZIP File Analysis",
             f"Found {len(zip_files)} ZIP files totaling "
-            f"{round(total_size / (1024 * 1024), 1)}MB"
+            f"{round(total_size / (1024 * 1024), 1)}MB",
         )
 
         print("📊 Largest ZIP files:")
@@ -121,35 +123,32 @@ class GITWizCleanup:
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                check=True
+                check=True,
             )
-            branches = result.stdout.strip().split('\n')
+            branches = result.stdout.strip().split("\n")
             branch_counts = {
                 "codex": 0,
                 "dependabot": 0,
                 "alert-autofix": 0,
                 "backup": 0,
-                "other": 0
+                "other": 0,
             }
 
             for branch in branches:
                 branch = branch.strip()
-                if 'codex' in branch:
+                if "codex" in branch:
                     branch_counts["codex"] += 1
-                elif 'dependabot' in branch:
+                elif "dependabot" in branch:
                     branch_counts["dependabot"] += 1
-                elif 'alert-autofix' in branch:
+                elif "alert-autofix" in branch:
                     branch_counts["alert-autofix"] += 1
-                elif 'backup' in branch:
+                elif "backup" in branch:
                     branch_counts["backup"] += 1
                 else:
                     branch_counts["other"] += 1
 
             total_branches = len(branches)
-            self.log_action(
-                "Branch Analysis",
-                f"Found {total_branches} total branches"
-            )
+            self.log_action("Branch Analysis", f"Found {total_branches} total branches")
 
             for branch_type, count in branch_counts.items():
                 if count > 0:
@@ -210,7 +209,7 @@ class GITWizCleanup:
         try:
             existing_content = ""
             if gitignore_path.exists():
-                with open(gitignore_path, 'r', encoding='utf-8') as f:
+                with open(gitignore_path, "r", encoding="utf-8") as f:
                     existing_content = f.read()
 
             patterns_to_add = []
@@ -219,20 +218,17 @@ class GITWizCleanup:
                     patterns_to_add.append(pattern)
 
             if patterns_to_add:
-                with open(gitignore_path, 'a', encoding='utf-8') as f:
+                with open(gitignore_path, "a", encoding="utf-8") as f:
                     f.write("\n# GITWiz Auto-generated patterns\n")
                     for pattern in patterns_to_add:
                         f.write(f"{pattern}\n")
 
                 self.log_action(
                     "GitIgnore Update",
-                    f"Added {len([p for p in patterns_to_add if p and not p.startswith('#')])} new ignore patterns"
+                    f"Added {len([p for p in patterns_to_add if p and not p.startswith('#')])} new ignore patterns",
                 )
             else:
-                self.log_action(
-                    "GitIgnore Update",
-                    "No new patterns needed"
-                )
+                self.log_action("GitIgnore Update", "No new patterns needed")
 
         except (OSError, PermissionError) as e:
             self.log_action("GitIgnore Update", f"Failed: {e}")
@@ -259,7 +255,9 @@ class GITWizCleanup:
 
         initial_size = self.get_repo_size()
         if initial_size > 0:
-            print(f"📏 Initial repository size: {round(initial_size / (1024*1024), 1)}MB")
+            print(
+                f"📏 Initial repository size: {round(initial_size / (1024*1024), 1)}MB"
+            )
 
         # Perform cleanup operations
         self.clean_python_cache()
@@ -290,13 +288,13 @@ class GITWizCleanup:
                 "Consider removing duplicate ZIP files",
                 "Review and merge/close stale branches",
                 "Set up automated cleanup workflows",
-                "Monitor repository size regularly"
-            ]
+                "Monitor repository size regularly",
+            ],
         }
 
         report_file = self.repo_path / "gitwiz_cleanup_report.json"
         try:
-            with open(report_file, 'w', encoding='utf-8') as f:
+            with open(report_file, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2)
             print(f"📄 Report saved to: {report_file}")
         except (OSError, PermissionError):
@@ -307,23 +305,21 @@ class GITWizCleanup:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="GITWiz Repository Cleanup Tool"
-    )
+    parser = argparse.ArgumentParser(description="GITWiz Repository Cleanup Tool")
     parser.add_argument(
         "--analyze-only",
         action="store_true",
-        help="Run analysis only, don't make changes"
+        help="Run analysis only, don't make changes",
     )
     parser.add_argument(
         "--update-gitignore",
         action="store_true",
-        help="Update .gitignore with cleanup patterns"
+        help="Update .gitignore with cleanup patterns",
     )
     parser.add_argument(
         "--repo-path",
         default="/workspaces/aurora-cloudbank-symbolic",
-        help="Path to repository"
+        help="Path to repository",
     )
 
     args = parser.parse_args()

@@ -12,21 +12,21 @@ All procedures ensure maximum transparency, traceability, and operational integr
 
 ## 1. Prerequisites & Authority
 
-### System Health:
+### System Health
 
 - Aurora Core/Command Node must be active, anchor/ethics protocols enforced.
 - System CI/CD, fleet manifest, and agent registry pass all health and drift audits (Δ ≤ 0.02).
 
-### Personnel & Agent Roles:
+### Personnel & Agent Roles
 
 - FleetOps officer or authorized AI agent assigned as mission lead.
 - Crew/AI roster up to date in staff_registry.json.
 
-### Fleet Inventory:
+### Fleet Inventory
 
 - fleet_manifest.json includes all shuttles, drones, auxiliary craft, their specs, maintenance state, and assigned roles.
 
-### Mission Planning:
+### Mission Planning
 
 - Each mission is formally proposed, reviewed, and logged prior to launch.
 
@@ -38,24 +38,25 @@ All procedures ensure maximum transparency, traceability, and operational integr
 
 . **System & Crew Validation**
 
-   - Confirm Aurora Core, anchor, and ethics lock are green.
-   - Verify fleet manifest and crew assignments match mission needs.
-   - Run preflight_check.sh (or /api/aurora/fleet/preflight) on all assigned craft.
+- Confirm Aurora Core, anchor, and ethics lock are green.
+- Verify fleet manifest and crew assignments match mission needs.
+- Run preflight_check.sh (or /api/aurora/fleet/preflight) on all assigned craft.
 
 . **Mission Log Entry**
 
-   - Log mission objectives, assignments, and scenario context in fleet_mission_log.md or fleet DB.
-   - Ethics review and operator approval are mandatory for all deployments.
+- Log mission objectives, assignments, and scenario context in fleet_mission_log.md or fleet DB.
+- Ethics review and operator approval are mandatory for all deployments.
 
 . **Simulation Linkage (if R&D/Training)**
 
-   - Assign mission to current simulation scenario or research module.
-   - Connect game/simulation engine for visual/audio and telemetry integration.
+- Assign mission to current simulation scenario or research module.
+- Connect game/simulation engine for visual/audio and telemetry integration.
 
 ### B. Deployment Execution
 
 . **Deployment Order Filing**
-   - Issue a deployment via the dashboard or:
+
+- Issue a deployment via the dashboard or:
 
 ```json
 POST /api/aurora/fleet/deploy

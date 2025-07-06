@@ -14,13 +14,13 @@ from pathlib import Path
 
 def fix_undefined_result_variables(file_path: str) -> bool:
     """Fix undefined 'result' variables in subprocess calls."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Pattern to find where result is used but not defined
-    lines = content.split('\n')
+    lines = content.split("\n")
     fixed_lines = []
 
     i = 0
@@ -28,21 +28,26 @@ def fix_undefined_result_variables(file_path: str) -> bool:
         line = lines[i]
 
         # Look for subprocess calls that were changed to '_'
-        if '_ = subprocess.run(' in line:
+        if "_ = subprocess.run(" in line:
             # Change back to result =
-            line = line.replace('_ = subprocess.run(', 'result = subprocess.run(', shell=False, check=False)
+            line = line.replace(
+                "_ = subprocess.run(",
+                "result = subprocess.run(",
+                shell=False,
+                check=False,
+            )
 
         # Look for other subprocess patterns
-        elif '_scheduler_thread = ' in line:
-            line = line.replace('_scheduler_thread = ', 'scheduler_thread = ')
+        elif "_scheduler_thread = " in line:
+            line = line.replace("_scheduler_thread = ", "scheduler_thread = ")
 
         fixed_lines.append(line)
         i += 1
 
-    new_content = '\n'.join(fixed_lines)
+    new_content = "\n".join(fixed_lines)
 
     if new_content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
         return True
     return False
@@ -50,7 +55,7 @@ def fix_undefined_result_variables(file_path: str) -> bool:
 
 def fix_syntax_errors(file_path: str) -> bool:
     """Fix obvious syntax errors."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
@@ -58,15 +63,21 @@ def fix_syntax_errors(file_path: str) -> bool:
     # Fix common syntax issues
     patterns = [
         # Fix malformed exception handling
-        (r'except \(OSError, ValueError, RuntimeError\) as e:', 'except (OSError, ValueError, RuntimeError) as e:'),
-        (r'except \(OSError, ValueError, RuntimeError\):', 'except (OSError, ValueError, RuntimeError):'),
+        (
+            r"except \(OSError, ValueError, RuntimeError\) as e:",
+            "except (OSError, ValueError, RuntimeError) as e:",
+        ),
+        (
+            r"except \(OSError, ValueError, RuntimeError\):",
+            "except (OSError, ValueError, RuntimeError):",
+        ),
     ]
 
     for pattern, replacement in patterns:
         content = re.sub(pattern, replacement, content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -74,26 +85,26 @@ def fix_syntax_errors(file_path: str) -> bool:
 
 def add_missing_imports(file_path: str) -> bool:
     """Add missing critical imports."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Check for yaml usage without import
-    if 'yaml.' in content and 'import yaml' not in content:
+    if "yaml." in content and "import yaml" not in content:
         # Find import section and add yaml
-        lines = content.split('\n')
+        lines = content.split("\n")
         import_section_end = 0
         for i, line in enumerate(lines):
-            if line.startswith('import ') or line.startswith('from '):
+            if line.startswith("import ") or line.startswith("from "):
                 import_section_end = i + 1
 
         if import_section_end > 0:
-            lines.insert(import_section_end, 'import yaml')
-            content = '\n'.join(lines)
+            lines.insert(import_section_end, "import yaml")
+            content = "\n".join(lines)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -101,24 +112,28 @@ def add_missing_imports(file_path: str) -> bool:
 
 def remove_unused_imports(file_path: str) -> bool:
     """Remove unused imports that are causing warnings."""
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Remove obvious unused imports
     patterns = [
-        r'import os\n' if 'os.' not in content.replace('import os', '') else None,
-        r'import pickle\n' if 'pickle.' not in content.replace('import pickle', '') else None,
-        r'from typing import.*List.*\n' if 'List[' not in content else None,
+        r"import os\n" if "os." not in content.replace("import os", "") else None,
+        (
+            r"import pickle\n"
+            if "pickle." not in content.replace("import pickle", "")
+            else None
+        ),
+        r"from typing import.*List.*\n" if "List[" not in content else None,
     ]
 
     for pattern in patterns:
         if pattern and pattern in content:
-            content = content.replace(pattern, '')
+            content = content.replace(pattern, "")
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -129,10 +144,10 @@ def process_file_critical(file_path: str) -> dict:
     fixes = {}
 
     try:
-        fixes['undefined_result'] = fix_undefined_result_variables(file_path)
-        fixes['syntax_errors'] = fix_syntax_errors(file_path)
-        fixes['missing_imports'] = add_missing_imports(file_path)
-        fixes['unused_imports'] = remove_unused_imports(file_path)
+        fixes["undefined_result"] = fix_undefined_result_variables(file_path)
+        fixes["syntax_errors"] = fix_syntax_errors(file_path)
+        fixes["missing_imports"] = add_missing_imports(file_path)
+        fixes["unused_imports"] = remove_unused_imports(file_path)
 
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
@@ -143,7 +158,7 @@ def process_file_critical(file_path: str) -> dict:
 
 def main():
     """Main function to process problematic Python files."""
-    scripts_dir = Path('scripts')
+    scripts_dir = Path("scripts")
 
     if not scripts_dir.exists():
         print("Scripts directory not found!")
@@ -151,16 +166,16 @@ def main():
 
     # Focus on the most problematic files first
     problem_files = [
-        'aurora_maintenance_scheduler.py',
-        'maintenance_scheduler.py',
-        'aurora_health_monitor.py',
-        'health_monitor.py',
-        'aurora_branch_manager.py',
-        'branch_cleanup_automation.py',
-        'automated_branch_cleanup.py',
-        'repository_health_monitor.py',
-        'precommit_optimizer.py',
-        'branch_cleanup.py'
+        "aurora_maintenance_scheduler.py",
+        "maintenance_scheduler.py",
+        "aurora_health_monitor.py",
+        "health_monitor.py",
+        "aurora_branch_manager.py",
+        "branch_cleanup_automation.py",
+        "automated_branch_cleanup.py",
+        "repository_health_monitor.py",
+        "precommit_optimizer.py",
+        "branch_cleanup.py",
     ]
 
     total_fixes = {}

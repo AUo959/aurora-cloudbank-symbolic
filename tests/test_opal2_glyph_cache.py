@@ -11,4 +11,3 @@ def test_cache_store_and_load(tmp_path):
 
     cache2 = GlyphCache(file=str(cache_file))
     assert cache2.get("alpha") == data
-

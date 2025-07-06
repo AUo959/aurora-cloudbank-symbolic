@@ -25,8 +25,9 @@ class MaintenanceScheduler:
         self.load_config()
 
         # Setup logging
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+        )
         self.logger = logging.getLogger(__name__)
 
         # Register maintenance tasks
@@ -39,31 +40,35 @@ class MaintenanceScheduler:
                 "daily_cleanup": {
                     "time": "02:00",
                     "enabled": True,
-                    "tasks": ["cleanup_cache", "check_health"]
+                    "tasks": ["cleanup_cache", "check_health"],
                 },
                 "weekly_optimization": {
                     "day": "sunday",
                     "time": "01:00",
                     "enabled": True,
-                    "tasks": ["branch_cleanup", "zip_optimization", "memory_compression"]
+                    "tasks": [
+                        "branch_cleanup",
+                        "zip_optimization",
+                        "memory_compression",
+                    ],
                 },
                 "monthly_audit": {
                     "day": 1,
                     "time": "00:00",
                     "enabled": True,
-                    "tasks": ["full_audit", "dependency_update", "health_report"]
-                }
+                    "tasks": ["full_audit", "dependency_update", "health_report"],
+                },
             },
             "thresholds": {
                 "cache_file_limit": 100,
                 "branch_age_days": 90,
                 "zip_file_limit": 15,
-                "repo_size_limit_mb": 800
-            }
+                "repo_size_limit_mb": 800,
+            },
         }
 
         if os.path.exists(self.config_file):
-            with open(self.config_file, 'r', encoding="utf-8") as f:
+            with open(self.config_file, "r", encoding="utf-8") as f:
                 self.config = json.load(f)
         else:
             self.config = default_config
@@ -71,22 +76,22 @@ class MaintenanceScheduler:
 
     def save_config(self):
         """Save maintenance configuration"""
-        with open(self.config_file, 'w', encoding="utf-8") as f:
+        with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=2)
 
     def register_tasks(self):
         """Register scheduled maintenance tasks"""
         # Daily cleanup at 2 AM
         if self.config["schedules"]["daily_cleanup"]["enabled"]:
-            schedule.every().day.at(self.config["schedules"]["daily_cleanup"]["time"]).do(
-                self.run_daily_cleanup
-            )
+            schedule.every().day.at(
+                self.config["schedules"]["daily_cleanup"]["time"]
+            ).do(self.run_daily_cleanup)
 
         # Weekly optimization on Sunday at 1 AM
         if self.config["schedules"]["weekly_optimization"]["enabled"]:
-            schedule.every().sunday.at(self.config["schedules"]["weekly_optimization"]["time"]).do(
-                self.run_weekly_optimization
-            )
+            schedule.every().sunday.at(
+                self.config["schedules"]["weekly_optimization"]["time"]
+            ).do(self.run_weekly_optimization)
 
         # Monthly audit on the 1st at midnight
         if self.config["schedules"]["monthly_audit"]["enabled"]:
@@ -100,7 +105,7 @@ class MaintenanceScheduler:
             ("Cleanup Python cache files", self.cleanup_cache_files),
             ("Check repository health", self.check_repository_health),
             ("Remove temporary files", self.cleanup_temp_files),
-            ("Update gitignore", self.update_gitignore)
+            ("Update gitignore", self.update_gitignore),
         ]
 
         results = []
@@ -123,7 +128,7 @@ class MaintenanceScheduler:
             ("Branch cleanup", self.cleanup_stale_branches),
             ("ZIP file optimization", self.optimize_zip_files),
             ("Memory compression", self.run_memory_compression),
-            ("Dependency audit", self.audit_dependencies)
+            ("Dependency audit", self.audit_dependencies),
         ]
 
         results = []
@@ -146,7 +151,7 @@ class MaintenanceScheduler:
             ("Full repository audit", self.full_repository_audit),
             ("Dependency updates", self.update_dependencies),
             ("Health report generation", self.generate_health_report),
-            ("Security scan", self.run_security_scan)
+            ("Security scan", self.run_security_scan),
         ]
 
         results = []
@@ -165,17 +170,38 @@ class MaintenanceScheduler:
         """Clean up Python cache files"""
         try:
             # Find and count cache files
-            result = subprocess.run(['find', '.', '-name', '*.pyc'],
-                                    capture_output=True, text=True, shell=False, check=False)
-            cache_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+            result = subprocess.run(
+                ["find", ".", "-name", "*.pyc"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            cache_files = (
+                result.stdout.strip().split("\n") if result.stdout.strip() else []
+            )
 
             if cache_files:
                 # Remove cache files
-                subprocess.run(['find', '.', '-name', '*.pyc', '-delete'], check=True)
+                subprocess.run(["find", ".", "-name", "*.pyc", "-delete"], check=True)
 
             # Remove __pycache__ directories
-            subprocess.run(['find', '.', '-name', '__pycache__', '-type', 'd', '-exec', 'rm', '-r', '{}', '+'],
-                           check=True)
+            subprocess.run(
+                [
+                    "find",
+                    ".",
+                    "-name",
+                    "__pycache__",
+                    "-type",
+                    "d",
+                    "-exec",
+                    "rm",
+                    "-r",
+                    "{}",
+                    "+",
+                ],
+                check=True,
+            )
 
             return f"Removed {len(cache_files)} cache files"
         except (OSError, ValueError, RuntimeError) as e:
@@ -185,12 +211,26 @@ class MaintenanceScheduler:
         """Check current repository health"""
         try:
             # Get repository size
-            result = subprocess.run(['du', '-sm', '.'], capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(
+                ["du", "-sm", "."],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
             size_mb = float(result.stdout.split()[0])
 
             # Get file count
-            result = subprocess.run(['find', '.', '-type', ''], capture_output=True, text=True, shell=False, check=False)
-            file_count = len(result.stdout.strip().split('\n')) if result.stdout.strip() else 0
+            result = subprocess.run(
+                ["find", ".", "-type", ""],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            file_count = (
+                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+            )
 
             # Check against thresholds
             alerts = []
@@ -207,16 +247,25 @@ class MaintenanceScheduler:
     def cleanup_temp_files(self) -> str:
         """Clean up temporary files"""
         try:
-            temp_patterns = ['*.tmp', '*.temp', '*~', '.DS_Store', 'Thumbs.db']
+            temp_patterns = ["*.tmp", "*.temp", "*~", ".DS_Store", "Thumbs.db"]
             removed_count = 0
 
             for pattern in temp_patterns:
-                result = subprocess.run(['find', '.', '-name', pattern],
-                                        capture_output=True, text=True, shell=False, check=False)
-                temp_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                result = subprocess.run(
+                    ["find", ".", "-name", pattern],
+                    capture_output=True,
+                    text=True,
+                    shell=False,
+                    check=False,
+                )
+                temp_files = (
+                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                )
 
                 if temp_files:
-                    subprocess.run(['find', '.', '-name', pattern, '-delete'], check=True)
+                    subprocess.run(
+                        ["find", ".", "-name", pattern, "-delete"], check=True
+                    )
                     removed_count += len(temp_files)
 
             return f"Removed {removed_count} temporary files"
@@ -227,8 +276,13 @@ class MaintenanceScheduler:
         """Clean up stale branches"""
         try:
             # Use the branch manager script
-            result = subprocess.run(['python3', 'scripts/branch_manager.py', '--cleanup', '--dry-run'],
-                                    capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(
+                ["python3", "scripts/branch_manager.py", "--cleanup", "--dry-run"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
 
             if result.returncode == 0:
                 return "Branch cleanup analysis completed"
@@ -241,9 +295,16 @@ class MaintenanceScheduler:
         """Optimize ZIP files"""
         try:
             # Count current ZIP files
-            result = subprocess.run(['find', '.', '-name', '*.zip'],
-                                    capture_output=True, text=True, shell=False, check=False)
-            zip_files = result.stdout.strip().split('\n') if result.stdout.strip() else []
+            result = subprocess.run(
+                ["find", ".", "-name", "*.zip"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            zip_files = (
+                result.stdout.strip().split("\n") if result.stdout.strip() else []
+            )
 
             return f"Found {len(zip_files)} ZIP files for optimization"
         except (OSError, ValueError, RuntimeError) as e:
@@ -253,9 +314,14 @@ class MaintenanceScheduler:
         """Run memory compression optimization"""
         try:
             # This would run memory compression if script exists
-            if os.path.exists('scripts/memory_compression_optimizer.py'):
-                result = subprocess.run(['python3', 'scripts/memory_compression_optimizer.py', '--analyze'],
-                                        capture_output=True, text=True, shell=False, check=False)
+            if os.path.exists("scripts/memory_compression_optimizer.py"):
+                result = subprocess.run(
+                    ["python3", "scripts/memory_compression_optimizer.py", "--analyze"],
+                    capture_output=True,
+                    text=True,
+                    shell=False,
+                    check=False,
+                )
                 return "Memory compression analysis completed"
             else:
                 return "Memory compression script not found"
@@ -272,13 +338,13 @@ class MaintenanceScheduler:
                 "*.maintenance",
                 "# Additional cache patterns",
                 "*.pid",
-                "*.lock"
+                "*.lock",
             ]
 
             # Read current .gitignore
             gitignore_path = ".gitignore"
             if os.path.exists(gitignore_path):
-                with open(gitignore_path, 'r', encoding="utf-8") as f:
+                with open(gitignore_path, "r", encoding="utf-8") as f:
                     current_content = f.read()
 
                 # Add new patterns if not already present
@@ -289,7 +355,7 @@ class MaintenanceScheduler:
                         added_count += 1
 
                 if added_count > 0:
-                    with open(gitignore_path, 'w', encoding="utf-8") as f:
+                    with open(gitignore_path, "w", encoding="utf-8") as f:
                         f.write(current_content)
                     return f"Added {added_count} new gitignore patterns"
                 else:
@@ -325,14 +391,14 @@ class MaintenanceScheduler:
         log_entry = {
             "timestamp": timestamp,
             "type": maintenance_type,
-            "results": results
+            "results": results,
         }
 
         log_file = "maintenance_log.json"
 
         # Load existing log or create new
         if os.path.exists(log_file):
-            with open(log_file, 'r', encoding="utf-8") as f:
+            with open(log_file, "r", encoding="utf-8") as f:
                 log_data = json.load(f)
         else:
             log_data = []
@@ -342,7 +408,7 @@ class MaintenanceScheduler:
         # Keep only last 100 entries
         log_data = log_data[-100:]
 
-        with open(log_file, 'w', encoding="utf-8") as f:
+        with open(log_file, "w", encoding="utf-8") as f:
             json.dump(log_data, f, indent=2)
 
         self.logger.info(f"Logged {maintenance_type} results to {log_file}")
@@ -371,12 +437,18 @@ class MaintenanceScheduler:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Aurora CloudBank Maintenance Scheduler')
-    parser.add_argument('--start', action='store_true', help='Start scheduled maintenance')
-    parser.add_argument('--daily', action='store_true', help='Run daily cleanup now')
-    parser.add_argument('--weekly', action='store_true', help='Run weekly optimization now')
-    parser.add_argument('--monthly', action='store_true', help='Run monthly audit now')
-    parser.add_argument('--config', help='Configuration file path')
+    parser = argparse.ArgumentParser(
+        description="Aurora CloudBank Maintenance Scheduler"
+    )
+    parser.add_argument(
+        "--start", action="store_true", help="Start scheduled maintenance"
+    )
+    parser.add_argument("--daily", action="store_true", help="Run daily cleanup now")
+    parser.add_argument(
+        "--weekly", action="store_true", help="Run weekly optimization now"
+    )
+    parser.add_argument("--monthly", action="store_true", help="Run monthly audit now")
+    parser.add_argument("--config", help="Configuration file path")
 
     args = parser.parse_args()
 

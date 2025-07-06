@@ -35,7 +35,7 @@ function encryptSymbolicPayload(payload) {
 
 // --- MAIN COMMAND DISPATCH ---
 function dispatchSymbolicCommand(symbolicCommand) {
-  console.log(`🧬 Dispatching symbolic command node...`);
+  console.log('🧬 Dispatching symbolic command node...');
   const encrypted = encryptSymbolicPayload({
     metadata: SYMBOLIC_NODE_METADATA,
     command: symbolicCommand,
@@ -47,7 +47,7 @@ function dispatchSymbolicCommand(symbolicCommand) {
     JSON.stringify(encrypted, null, 2)
   );
 
-  console.log(`✅ Symbolic command encrypted and stored at /src/nodes/dispatch.encrypted.json`);
+  console.log('✅ Symbolic command encrypted and stored at /src/nodes/dispatch.encrypted.json');
 }
 
 // EXAMPLE USAGE (trigger)

@@ -67,36 +67,36 @@ class AuroraDeploymentManager {
 
     // Create deployment configuration
     const deploymentConfig = {
-      "deployment_name": "aurora-cloudbank-symbolic-v1",
-      "version": "1.0.0",
-      "build_date": new Date().toISOString(),
-      "environment": "production",
-      "services": {
-        "quantum_core": {
-          "enabled": true,
-          "port": 8001,
-          "replicas": 2
+      'deployment_name': 'aurora-cloudbank-symbolic-v1',
+      'version': '1.0.0',
+      'build_date': new Date().toISOString(),
+      'environment': 'production',
+      'services': {
+        'quantum_core': {
+          'enabled': true,
+          'port': 8001,
+          'replicas': 2
         },
-        "web_interface": {
-          "enabled": true,
-          "port": 8080,
-          "replicas": 3
+        'web_interface': {
+          'enabled': true,
+          'port': 8080,
+          'replicas': 3
         },
-        "research_hub": {
-          "enabled": true,
-          "port": 8002,
-          "replicas": 1
+        'research_hub': {
+          'enabled': true,
+          'port': 8002,
+          'replicas': 1
         },
-        "audio_visual": {
-          "enabled": true,
-          "port": 8003,
-          "replicas": 1
+        'audio_visual': {
+          'enabled': true,
+          'port': 8003,
+          'replicas': 1
         }
       },
-      "security": {
-        "encryption": "quantum_safe",
-        "authentication": "multi_factor",
-        "ethics_compliance": "picard_delta_3"
+      'security': {
+        'encryption': 'quantum_safe',
+        'authentication': 'multi_factor',
+        'ethics_compliance': 'picard_delta_3'
       }
     };
 

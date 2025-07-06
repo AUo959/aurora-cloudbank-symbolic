@@ -68,11 +68,11 @@ class AuroraStatusChecker {
     if (exists) {
       const content = fs.readFileSync(summaryPath, 'utf8');
       const hasCompleteStatus = content.includes('FULLY IMPLEMENTED');
-      console.log(`  ✅ Implementation summary exists`);
+      console.log('  ✅ Implementation summary exists');
       console.log(`  ${hasCompleteStatus ? '✅' : '❌'} Status: ${hasCompleteStatus ? 'FULLY IMPLEMENTED' : 'INCOMPLETE'}`);
       return hasCompleteStatus;
     } else {
-      console.log(`  ❌ Implementation summary missing`);
+      console.log('  ❌ Implementation summary missing');
       return false;
     }
   }

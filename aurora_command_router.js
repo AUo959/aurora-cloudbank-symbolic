@@ -38,7 +38,7 @@ class AuroraCommandNode {
     this.logCommand(symbolicCommand);
 
     console.log(`🧬 Command routed through node [${commandId}]: ${commandType}`);
-    console.log(`✅ Project synergy maintained via command node routing`);
+    console.log('✅ Project synergy maintained via command node routing');
 
     return {
       commandId: commandId,

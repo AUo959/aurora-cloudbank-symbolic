@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 // Key generation; replace with a secure KMS in production. The IV will be
 // generated for each encryption call to ensure uniqueness.
@@ -12,10 +12,10 @@ const key = crypto.randomBytes(32); // AES-256 requires 32-byte key
 function encrypt(data) {
   // Generate a unique IV for each encryption call
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-  let encrypted = cipher.update(data, "utf-8", "hex");
-  encrypted += cipher.final("hex");
-  return { encryptedData: encrypted, iv: iv.toString("hex") };
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  let encrypted = cipher.update(data, 'utf-8', 'hex');
+  encrypted += cipher.final('hex');
+  return { encryptedData: encrypted, iv: iv.toString('hex') };
 }
 
 /**
@@ -27,12 +27,12 @@ function encrypt(data) {
  */
 function decrypt(encryptedData, ivHex) {
   const decipher = crypto.createDecipheriv(
-    "aes-256-cbc",
+    'aes-256-cbc',
     key,
-    Buffer.from(ivHex, "hex")
+    Buffer.from(ivHex, 'hex')
   );
-  let decrypted = decipher.update(encryptedData, "hex", "utf-8");
-  decrypted += decipher.final("utf-8");
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf-8');
+  decrypted += decipher.final('utf-8');
   return decrypted;
 }
 

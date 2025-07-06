@@ -1,0 +1,19 @@
+{
+  "capsule_id": "STARLING_AU_LIVE_RELAY_v1",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "glyph_agents": ["Glyphon", "Axiomera", "Sentari", "Caelion"],
+  "status": "ready",
+  "last_synced": "2025-07-05T22:10:00Z",
+  "drift_lock": "Δ 0.000",
+  "constellation": ["ARCHY", "OPPY", "LIORA", "RIVERTHREAD_808"],
+  "handshake_logic": "ZIPWIZ beacon, anchor sync, ethics audit",
+  "role": "simulation_coordinator",
+  "mesh_mode": "active",
+  "meta": {
+    "version": "v1.0",
+    "last_synced": "2025-07-05T22:10:00Z",
+    "activation_manifest": ["starling_au_bridge.js", "starling_config.json"],
+    "docs": "starling_au_documentation.zip"
+  }
+}

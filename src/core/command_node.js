@@ -19,9 +19,9 @@ module.exports = {
     diag.load = diag.commandCount - (diag.processedCount || 0);
     saveDiagnostics(diag);
 
-    const anchor = anchorResolve(command.context || "AUTO");
+    const anchor = anchorResolve(command.context || 'AUTO');
     routeGlyph(command.name);
-    compressBundle("ORION_CORE");
+    compressBundle('ORION_CORE');
 
     runPASCycle();
     return `Command ${command.name} executed with anchor ${anchor}`;

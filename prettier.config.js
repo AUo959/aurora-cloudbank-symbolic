@@ -1,5 +1,5 @@
 // Aurora CloudBank - Prettier Configuration
-module.exports = {
+export default {
   // Basic formatting
   semi: true,
   singleQuote: true,
@@ -24,20 +24,20 @@ module.exports = {
       files: '*.md',
       options: {
         printWidth: 100,
-        proseWrap: 'always'
-      }
+        proseWrap: 'always',
+      },
     },
     {
       files: '*.json',
       options: {
-        tabWidth: 2
-      }
+        tabWidth: 2,
+      },
     },
     {
       files: '*.yml',
       options: {
-        tabWidth: 2
-      }
-    }
-  ]
+        tabWidth: 2,
+      },
+    },
+  ],
 };

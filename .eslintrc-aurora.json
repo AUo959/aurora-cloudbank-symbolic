@@ -1,0 +1,19 @@
+{
+  "extends": ["./eslint.config.js"],
+  "overrides": [
+    {
+      "files": ["aurora_*.js", "test_*.js", "src/**/*.js", "scripts/*.js"],
+      "rules": {
+        "no-console": "off",
+        "camelcase": "off",
+        "no-unused-vars": "warn"
+      }
+    },
+    {
+      "files": ["tests/**/*.js", "test*.js"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ]
+}

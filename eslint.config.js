@@ -26,6 +26,8 @@ export default [
       },
     },
     rules: {
+      // Allow console in development, warn in production
+      'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       semi: ['error', 'always'],
       quotes: ['error', 'single'],
       eqeqeq: 'error',

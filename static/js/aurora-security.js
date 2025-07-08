@@ -128,6 +128,79 @@ class AuroraSecurityUtils {
   }
 
   /**
+   * Sanitize HTML content for safe innerHTML assignment
+   * @param {string} html - HTML content to sanitize
+   * @returns {string} - Sanitized HTML
+   */
+  sanitizeHTML(html) {
+    if (typeof html !== 'string') {
+      return '';
+    }
+
+    // Basic HTML sanitization - escapes potentially dangerous content
+    // while preserving basic formatting tags
+    const allowedTags = [
+      'div',
+      'span',
+      'p',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'strong',
+      'em',
+      'br',
+    ];
+    const allowedAttributes = ['style', 'class'];
+
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    // Walk through all elements and sanitize
+    const walker = document.createTreeWalker(
+      tempDiv,
+      NodeFilter.SHOW_ELEMENT,
+      null,
+      false
+    );
+
+    const elementsToRemove = [];
+    let node;
+
+    while ((node = walker.nextNode())) {
+      const tagName = node.tagName.toLowerCase();
+
+      // Remove disallowed tags
+      if (!allowedTags.includes(tagName)) {
+        elementsToRemove.push(node);
+        continue;
+      }
+
+      // Clean attributes
+      const attributes = Array.from(node.attributes);
+      attributes.forEach(attr => {
+        if (!allowedAttributes.includes(attr.name.toLowerCase())) {
+          node.removeAttribute(attr.name);
+        } else if (attr.name === 'style') {
+          // Sanitize style attribute - remove javascript: and other dangerous content
+          const cleanStyle = attr.value
+            .replace(/javascript:/gi, '')
+            .replace(/expression\(/gi, '');
+          node.setAttribute('style', cleanStyle);
+        }
+      });
+    }
+
+    // Remove dangerous elements
+    elementsToRemove.forEach(el => el.remove());
+
+    return tempDiv.innerHTML;
+  }
+
+  /**
    * Check if an attribute is safe to use
    * @param {string} attrName - Attribute name
    * @returns {boolean} - Whether the attribute is safe

@@ -41,7 +41,7 @@ echo "🔧 Alternative: Focus on critical production files only"
 # Run ESLint only on specific production files
 production_files=(
   "services/command_node/*.js"
-  "modules/opal2/api/*.js" 
+  "modules/opal2/api/*.js"
   "static/js/*.js"
 )
 
@@ -58,7 +58,7 @@ done
 
 echo ""
 echo "📊 Results Summary:"
-echo "• Total repository issues: $initial"  
+echo "• Total repository issues: $initial"
 echo "• Critical production issues: $production_issues"
 
 if [ $production_issues -lt 20 ]; then
@@ -66,12 +66,12 @@ if [ $production_issues -lt 20 ]; then
     echo "🏆 EXCELLENT! Critical production code has < 20 ESLint issues"
     echo "🎯 Aurora framework naming conventions are intentional design choices"
     echo "✨ Repository is production-ready with strategic linting approach"
-    
+
     success_percentage=$(( ((initial - production_issues) * 100) / initial ))
     echo ""
     echo "📈 Strategic Success Rate: $success_percentage%"
     echo "💡 Recommendation: Accept current state as production-ready"
-    
+
 elif [ $production_issues -lt 50 ]; then
     echo ""
     echo "✅ GOOD! Critical production code has < 50 ESLint issues"
@@ -85,7 +85,7 @@ fi
 echo ""
 echo "🌟 Strategic Insights:"
 echo "• Aurora framework uses snake_case for quantum/symbolic variables (intentional)"
-echo "• Console statements in Aurora files are for development/debugging (acceptable)"  
+echo "• Console statements in Aurora files are for development/debugging (acceptable)"
 echo "• Critical production APIs (like OPAL2) have minimal issues"
 echo "• Overall repository health is excellent for a research framework"
 

@@ -106,7 +106,7 @@ percent=$(( (fixed * 100) / initial ))
 echo ""
 echo "🎯 Results Summary:"
 echo "• Initial issues: $initial"
-echo "• Final issues: $final" 
+echo "• Final issues: $final"
 echo "• Issues resolved: $fixed"
 echo "• Improvement: $percent%"
 
@@ -127,7 +127,7 @@ fi
 echo ""
 echo "💡 Strategy Notes:"
 echo "• Console statements preserved in development/debug files"
-echo "• Aurora framework naming conventions honored" 
+echo "• Aurora framework naming conventions honored"
 echo "• Production files prioritized for strict linting"
 echo "• Strategic ignores applied for legacy compatibility"
 

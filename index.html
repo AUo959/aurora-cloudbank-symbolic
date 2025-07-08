@@ -521,13 +521,13 @@
                 metricsData.entanglementDepth = Math.min(10, metricsData.operationsPerformed * 0.5);
                 updateMetrics();
 
-                document.getElementById('geometric-result').innerHTML = `
+                document.getElementById('geometric-result').innerHTML = AuroraSecurity.sanitizeHTML(`
                     <h3>⊗ Geometric Product Result</h3>
-                    <p><strong>Operation:</strong> ${result.operation}</p>
-                    <p><strong>Input Vectors:</strong> ${JSON.stringify(result.input_vectors)}</p>
-                    <p><strong>Result:</strong> ${result.results[0]?.result || 'N/A'}</p>
+                    <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(result.operation)}</p>
+                    <p><strong>Input Vectors:</strong> ${AuroraSecurity.escapeHtml(JSON.stringify(result.input_vectors))}</p>
+                    <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(result.results[0]?.result || 'N/A')}</p>
                     <p><strong>Mock Mode:</strong> ${result.mock_mode ? '⚠️ Simplified' : '✅ Full Clifford'}</p>
-                `;
+                `);
             } catch (error) {
                 const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${error.message}`, {
                     style: 'color: #f87171;'
@@ -555,10 +555,10 @@
                 vectors: vectors
             });
 
-            document.getElementById('geometric-result').innerHTML += `
+            document.getElementById('geometric-result').innerHTML += AuroraSecurity.sanitizeHTML(`
                 <br><h4>🔄 Commutator [A,B]</h4>
-                <p><strong>Result:</strong> ${commutatorResult.results[0]?.result || 'N/A'}</p>
-            `;
+                <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(commutatorResult.results[0]?.result || 'N/A')}</p>
+            `);
 
             metricsData.operationsPerformed += 2;
             metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 3);
@@ -654,12 +654,12 @@
                 resultText = `❌ Error: ${error.message}`;
             }
 
-            document.getElementById('reasoning-result').innerHTML = `
+            document.getElementById('reasoning-result').innerHTML = AuroraSecurity.sanitizeHTML(`
                 <h3>🧠 Symbolic Reasoning Result</h3>
-                <p>${resultText}</p>
-                <p><strong>Operation:</strong> ${operation}</p>
+                <p>${AuroraSecurity.escapeHtml(resultText)}</p>
+                <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(operation)}</p>
                 <p><strong>Computation:</strong> Quantum-enhanced VSA</p>
-            `;
+            `);
 
             metricsData.operationsPerformed++;
             updateMetrics();
@@ -671,10 +671,10 @@
             // Also show stored vectors
             const vectorList = await apiCall('/api/vsa/list');
             if (vectorList && vectorList.vectors) {
-                document.getElementById('reasoning-result').innerHTML += `
+                document.getElementById('reasoning-result').innerHTML += AuroraSecurity.sanitizeHTML(`
                     <br><h4>📦 Vector Store (${vectorList.count} vectors)</h4>
-                    <p>${vectorList.vectors.map(v => `"${v.symbol}" (${v.dimension}D)`).join(', ')}</p>
-                `;
+                    <p>${AuroraSecurity.escapeHtml(vectorList.vectors.map(v => `"${v.symbol}" (${v.dimension}D)`).join(', '))}</p>
+                `);
             }
 
             metricsData.operationsPerformed += 2;
@@ -710,7 +710,7 @@
         }
 
         async function clearCollaboration() {
-            document.getElementById('collaboration-feed').innerHTML = '<p>🎯 Collaboration feed cleared!</p>';
+            document.getElementById('collaboration-feed').innerHTML = AuroraSecurity.sanitizeHTML('<p>🎯 Collaboration feed cleared!</p>');
 
             // Also clear VSA store
             try {

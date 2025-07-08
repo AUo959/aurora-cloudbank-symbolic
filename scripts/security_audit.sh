@@ -70,14 +70,25 @@ check_security_patterns() {
     echo "🔍 Checking $file for security issues..."
 
     # Check for XSS vulnerabilities
-    if grep -q "innerHTML\s*+=" "$file" 2>/dev/null; then
-        echo "  ⚠️  Potential XSS: innerHTML concatenation found"
+    if grep -q "innerHTML\s*+=" "$file" 2>/dev/null && ! grep -q "AuroraSecurity\.sanitizeHTML" "$file" 2>/dev/null; then
+        echo "  ⚠️  Potential XSS: innerHTML concatenation found (not properly sanitized)"
         issues=$((issues + 1))
+    elif grep -q "innerHTML\s*+=" "$file" 2>/dev/null; then
+        # Check if all innerHTML += usages are sanitized
+        unsanitized_innerHTML=$(grep -n "innerHTML\s*+=" "$file" | grep -v "AuroraSecurity\.sanitizeHTML" | wc -l)
+        if [ "$unsanitized_innerHTML" -gt 0 ]; then
+            echo "  ⚠️  Potential XSS: $unsanitized_innerHTML unsanitized innerHTML concatenation(s) found"
+            issues=$((issues + 1))
+        fi
     fi
 
     if grep -q "\.innerHTML\s*=" "$file" 2>/dev/null; then
-        echo "  ⚠️  Potential XSS: Direct innerHTML assignment found"
-        issues=$((issues + 1))
+        # Check for unsafe innerHTML assignments (excluding empty string assignments and sanitized ones)
+        unsanitized_assignments=$(grep -n "\.innerHTML\s*=" "$file" | grep -v "innerHTML\s*=\s*''" | grep -v 'innerHTML\s*=\s*""' | grep -v "AuroraSecurity\.sanitizeHTML" | wc -l)
+        if [ "$unsanitized_assignments" -gt 0 ]; then
+            echo "  ⚠️  Potential XSS: $unsanitized_assignments unsafe innerHTML assignment(s) found"
+            issues=$((issues + 1))
+        fi
     fi
 
     # Check for eval usage

@@ -15,7 +15,7 @@ const AURORA_COMMANDS = {
   MULTI_AGENT_SYNC: 'SYNCHRONIZE_MULTI_AGENT_SYSTEM',
   QUANTUM_ANCHOR: 'ESTABLISH_QUANTUM_SYMBOLIC_ANCHOR',
   RESEARCH_HUB_DEPLOY: 'DEPLOY_RESEARCH_HUB_FRAMEWORK',
-  AUDIOVISUAL_SYNC: 'SYNC_AUDIOVISUAL_ENVIRONMENT'
+  AUDIOVISUAL_SYNC: 'SYNC_AUDIOVISUAL_ENVIRONMENT',
 };
 
 class AuroraCommandInterface {
@@ -25,7 +25,7 @@ class AuroraCommandInterface {
       version: 'v1.1.0',
       mode: 'web_environment_foundation',
       timestamp: new Date().toISOString(),
-      synergy_layer: 'command_node_integration'
+      synergy_layer: 'command_node_integration',
     };
   }
 
@@ -37,7 +37,7 @@ class AuroraCommandInterface {
       payload: payload,
       metadata: this.nodeMetadata,
       anchor: 'AURORA_WEB_ENV_FOUNDATION',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Route through the command node for project synergy
@@ -49,7 +49,7 @@ class AuroraCommandInterface {
     return {
       status: 'routed_through_command_node',
       command: commandType,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -59,7 +59,7 @@ class AuroraCommandInterface {
       command: command,
       payload_size: JSON.stringify(payload).length,
       routed_via: 'command_node',
-      project_synergy: 'active'
+      project_synergy: 'active',
     };
 
     const logPath = path.join(__dirname, 'logs', 'aurora_command_routing.log');
@@ -74,19 +74,22 @@ class AuroraCommandInterface {
         'symbolic_cpu_anchor',
         'interactive_immersive_interface',
         'proprietary_research_hub',
-        'dynamic_audiovisual_system'
+        'dynamic_audiovisual_system',
       ],
-      config: config
+      config: config,
     });
   }
 
   // Multi-agent system synchronization
   async synchronizeMultiAgentSystem(agents) {
-    return await this.routeFoundationalCommand(AURORA_COMMANDS.MULTI_AGENT_SYNC, {
-      agents: agents,
-      synchronization_mode: 'quantum_hybrid_symbolic',
-      anchor_type: 'cpu_anchored'
-    });
+    return await this.routeFoundationalCommand(
+      AURORA_COMMANDS.MULTI_AGENT_SYNC,
+      {
+        agents: agents,
+        synchronization_mode: 'quantum_hybrid_symbolic',
+        anchor_type: 'cpu_anchored',
+      }
+    );
   }
 
   // Establish quantum symbolic anchor
@@ -94,7 +97,7 @@ class AuroraCommandInterface {
     return await this.routeFoundationalCommand(AURORA_COMMANDS.QUANTUM_ANCHOR, {
       anchor_config: anchorConfig,
       quantum_layer: 'symbolic_processing',
-      integration_mode: 'cpu_anchored_hybrid'
+      integration_mode: 'cpu_anchored_hybrid',
     });
   }
 }
@@ -102,7 +105,7 @@ class AuroraCommandInterface {
 // Export for integration
 module.exports = {
   AuroraCommandInterface,
-  AURORA_COMMANDS
+  AURORA_COMMANDS,
 };
 
 // CLI usage if run directly
@@ -113,10 +116,12 @@ if (require.main === module) {
   console.log('🧬 Project synergy routing enabled through command node');
 
   // Example: Initialize web environment through command node
-  aurora.initializeWebEnvironment({
-    foundation_step: 'web_environment_architecture',
-    next_phase: 'multi_agent_quantum_hybrid_development'
-  }).then(result => {
-    console.log('✅ Web environment initialization routed:', result);
-  });
+  aurora
+    .initializeWebEnvironment({
+      foundation_step: 'web_environment_architecture',
+      next_phase: 'multi_agent_quantum_hybrid_development',
+    })
+    .then(result => {
+      console.log('✅ Web environment initialization routed:', result);
+    });
 }

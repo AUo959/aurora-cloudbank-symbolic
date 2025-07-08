@@ -5,11 +5,15 @@ const crypto = require('crypto');
 // in production deployments.
 const keyHex = process.env.AES_KEY_256_HEX;
 if (!keyHex) {
-  throw new Error('AES_KEY_256_HEX environment variable must be set. See .env.example for details.');
+  throw new Error(
+    'AES_KEY_256_HEX environment variable must be set. See .env.example for details.'
+  );
 }
 const key = Buffer.from(keyHex, 'hex');
 if (key.length !== 32) {
-  throw new Error('AES_KEY_256_HEX must be 64 hex characters (32 bytes for AES-256).');
+  throw new Error(
+    'AES_KEY_256_HEX must be 64 hex characters (32 bytes for AES-256).'
+  );
 }
 
 /**
@@ -35,7 +39,10 @@ function encrypt(data) {
  * @returns {string} - Decrypted plaintext.
  */
 function decrypt(encryptedData, ivHex) {
-  if (!/^[0-9a-fA-F]+$/.test(encryptedData) || !/^[0-9a-fA-F]{32}$/.test(ivHex)) {
+  if (
+    !/^[0-9a-fA-F]+$/.test(encryptedData) ||
+    !/^[0-9a-fA-F]{32}$/.test(ivHex)
+  ) {
     throw new Error('Invalid encrypted data or IV format.');
   }
   const iv = Buffer.from(ivHex, 'hex');
@@ -55,7 +62,10 @@ function decrypt(encryptedData, ivHex) {
  * @returns {string} - Path to exported file.
  */
 function exportAnchorManifest(manifest, prefix = 'anchor') {
-  const exportPath = require('path').join(__dirname, `${prefix}_${Date.now()}.json`);
+  const exportPath = require('path').join(
+    __dirname,
+    `${prefix}_${Date.now()}.json`
+  );
   require('fs').writeFileSync(exportPath, JSON.stringify(manifest, null, 2));
   return exportPath;
 }
@@ -63,7 +73,7 @@ function exportAnchorManifest(manifest, prefix = 'anchor') {
 // CLI usage: node crypto_refactored.js encrypt "Hello world"
 //             node crypto_refactored.js decrypt "<data>" "<iv>"
 if (require.main === module) {
-  const [,, cmd, ...args] = process.argv;
+  const [, , cmd, ...args] = process.argv;
   if (cmd === 'encrypt') {
     const input = args.join(' ');
     try {
@@ -90,7 +100,7 @@ if (require.main === module) {
         encryptedData,
         iv,
         continuity: 'preserved',
-        entropy_state: 'post-decrypt'
+        entropy_state: 'post-decrypt',
       };
       const exportPath = exportAnchorManifest(anchorManifest, 'anchor_decrypt');
       encryptedData = null;
@@ -105,12 +115,14 @@ if (require.main === module) {
         timestamp: new Date().toISOString(),
         error: err.message,
         encryptedData,
-        iv
+        iv,
       };
       exportAnchorManifest(errorAnchor, 'anchor_decrypt_error');
     }
   } else {
-    console.log('Usage:\n  node crypto_refactored.js encrypt "your text"\n  node crypto_refactored.js decrypt <encryptedData> <iv>');
+    console.log(
+      'Usage:\n  node crypto_refactored.js encrypt "your text"\n  node crypto_refactored.js decrypt <encryptedData> <iv>'
+    );
   }
 }
 

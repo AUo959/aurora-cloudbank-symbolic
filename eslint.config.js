@@ -22,29 +22,23 @@ export default [
         setTimeout: 'readonly',
         clearInterval: 'readonly',
         clearTimeout: 'readonly',
-        console: 'readonly'
-      }
+        console: 'readonly',
+      },
     },
     rules: {
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'eqeqeq': 'error',
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      eqeqeq: 'error',
       'no-unused-vars': 'warn', // Changed to warn for dev
       'no-undef': 'error',
       'prefer-const': 'error',
-      'camelcase': 'warn',
+      camelcase: 'warn',
       'no-console': 'warn',
-      'indent': ['error', 2]
+      indent: ['error', 2],
     },
-    ignores: [
-      'node_modules/**',
-      '.git/**',
-      'dist/**',
-      'build/**',
-      '*.min.js'
-    ]
+    ignores: ['node_modules/**', '.git/**', 'dist/**', 'build/**', '*.min.js'],
   },
-  // Browser files configuration  
+  // Browser files configuration
   {
     files: ['static/**/*.js', 'public/**/*.js'],
     languageOptions: {
@@ -60,19 +54,19 @@ export default [
         // CommonJS/Node.js compatibility for dual-environment files
         require: 'readonly',
         module: 'readonly',
-        exports: 'readonly'
-      }
+        exports: 'readonly',
+      },
     },
     rules: {
-      'semi': ['error', 'always'],
-      'quotes': ['error', 'single'],
-      'eqeqeq': 'error',
+      semi: ['error', 'always'],
+      quotes: ['error', 'single'],
+      eqeqeq: 'error',
       'no-unused-vars': 'warn',
       'no-undef': 'error',
       'prefer-const': 'error',
-      'camelcase': 'warn',
+      camelcase: 'warn',
       'no-console': 'warn',
-      'indent': ['error', 2]
-    }
-  }
+      indent: ['error', 2],
+    },
+  },
 ];

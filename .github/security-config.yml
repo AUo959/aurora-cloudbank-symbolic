@@ -17,52 +17,52 @@ csp:
 
 # Security headers to be applied
 security_headers:
-  - "X-Content-Type-Options: nosniff"
-  - "X-Frame-Options: DENY"
-  - "X-XSS-Protection: 1; mode=block"
-  - "Referrer-Policy: strict-origin-when-cross-origin"
-  - "Permissions-Policy: camera=(), microphone=(), geolocation=()"
+  - 'X-Content-Type-Options: nosniff'
+  - 'X-Frame-Options: DENY'
+  - 'X-XSS-Protection: 1; mode=block'
+  - 'Referrer-Policy: strict-origin-when-cross-origin'
+  - 'Permissions-Policy: camera=(), microphone=(), geolocation=()'
 
 # Input validation rules
 input_validation:
   max_string_length: 1000
   allowed_html_tags:
-    - "p"
-    - "span"
-    - "strong"
-    - "em"
-    - "br"
+    - 'p'
+    - 'span'
+    - 'strong'
+    - 'em'
+    - 'br'
   blocked_patterns:
-    - "<script"
-    - "javascript:"
-    - "data:text/html"
+    - '<script'
+    - 'javascript:'
+    - 'data:text/html'
     - "on\\w+\\s*="
 
 # WebSocket security
 websocket:
   max_message_size: 8192
-  rate_limit: 100  # messages per minute
+  rate_limit: 100 # messages per minute
   allowed_origins:
-    - "localhost"
-    - "127.0.0.1"
-    - "*.github.io"  # For GitHub Pages
+    - 'localhost'
+    - '127.0.0.1'
+    - '*.github.io' # For GitHub Pages
 
 # File upload restrictions (if applicable)
 file_upload:
-  max_size: 10485760  # 10MB
+  max_size: 10485760 # 10MB
   allowed_types:
-    - ".txt"
-    - ".json"
-    - ".py"
-    - ".js"
-    - ".html"
-    - ".css"
+    - '.txt'
+    - '.json'
+    - '.py'
+    - '.js'
+    - '.html'
+    - '.css'
   blocked_extensions:
-    - ".exe"
-    - ".bat"
-    - ".sh"
-    - ".php"
-    - ".asp"
+    - '.exe'
+    - '.bat'
+    - '.sh'
+    - '.php'
+    - '.asp'
 
 # Database security (if applicable)
 database:
@@ -72,12 +72,12 @@ database:
 
 # API security
 api:
-  rate_limit: 1000  # requests per hour
-  require_authentication: false  # Set to true for production
+  rate_limit: 1000 # requests per hour
+  require_authentication: false # Set to true for production
   cors_origins:
-    - "localhost"
-    - "127.0.0.1"
-    - "*.github.io"
+    - 'localhost'
+    - '127.0.0.1'
+    - '*.github.io'
 
 # Logging and monitoring
 logging:
@@ -85,7 +85,7 @@ logging:
   log_failed_requests: true
   retention_days: 90
   sensitive_fields:
-    - "password"
-    - "token"
-    - "secret"
-    - "key"
+    - 'password'
+    - 'token'
+    - 'secret'
+    - 'key'

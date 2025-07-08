@@ -5,10 +5,10 @@
 codeql:
   # Suppress proxy.log warnings that don't affect security analysis
   suppress_warnings:
-    - "start-proxy post-action step failed: File /home/runner/work/_temp/proxy.log does not exist"
+    - 'start-proxy post-action step failed: File /home/runner/work/_temp/proxy.log does not exist'
 
   # Enhanced cleanup for better reliability
-  cleanup_strategy: "proactive"
+  cleanup_strategy: 'proactive'
 
   # Enable enhanced logging for debugging
   debug_mode: false

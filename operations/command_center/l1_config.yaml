@@ -2,44 +2,44 @@
 # Enterprise Fleet Deployment Package
 
 l1_command_node:
-  station_id: "ORION_STATION_001"
-  deployment_environment: "enterprise"
+  station_id: 'ORION_STATION_001'
+  deployment_environment: 'enterprise'
   anchor_validation: true
   ethics_enforcement: true
   parallel_l3_sync: true
-  
+
   command_center:
     operators_max: 12
-    shifts: ["alpha", "beta", "gamma"]
-    security_clearance_required: "L3_COMMAND"
-    
+    shifts: ['alpha', 'beta', 'gamma']
+    security_clearance_required: 'L3_COMMAND'
+
   fleet_control:
     max_concurrent_missions: 8
     auto_telemetry: true
     emergency_protocols: true
     preflight_mandatory: true
-    
+
   crew_management:
     onboarding_required: true
     role_assignments: true
     skill_tracking: true
     mission_history: true
-    
+
   monitoring:
-    health_check_interval: 300  # 5 minutes
-    alert_threshold: "warning"
-    dashboard_refresh: 30       # 30 seconds
+    health_check_interval: 300 # 5 minutes
+    alert_threshold: 'warning'
+    dashboard_refresh: 30 # 30 seconds
     log_retention_days: 365
-    
+
   security:
-    access_control: "rbac"
+    access_control: 'rbac'
     audit_logging: true
     encryption_required: true
-    session_timeout: 3600       # 1 hour
-    
+    session_timeout: 3600 # 1 hour
+
   endpoints:
-    command_api: "/api/aurora/l1/command"
-    fleet_api: "/api/aurora/fleet"
-    crew_api: "/api/aurora/crew"
-    telemetry_api: "/api/aurora/telemetry"
-    dashboard_api: "/api/aurora/dashboard"
+    command_api: '/api/aurora/l1/command'
+    fleet_api: '/api/aurora/fleet'
+    crew_api: '/api/aurora/crew'
+    telemetry_api: '/api/aurora/telemetry'
+    dashboard_api: '/api/aurora/dashboard'

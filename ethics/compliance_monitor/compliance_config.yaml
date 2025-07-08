@@ -1,46 +1,46 @@
 # ORION Station Compliance Monitoring Configuration
 
 compliance_monitor:
-  monitor_id: "ORION_COMPLIANCE_001"
-  version: "1.0.0"
-  deployment_date: "2025-07-01T00:00:00Z"
-  status: "monitoring"
-  
+  monitor_id: 'ORION_COMPLIANCE_001'
+  version: '1.0.0'
+  deployment_date: '2025-07-01T00:00:00Z'
+  status: 'monitoring'
+
   monitoring_scope:
-    - "mission_operations"
-    - "resource_allocation" 
-    - "crew_management"
-    - "ai_operations"
-    - "data_handling"
-    - "environmental_impact"
-    
+    - 'mission_operations'
+    - 'resource_allocation'
+    - 'crew_management'
+    - 'ai_operations'
+    - 'data_handling'
+    - 'environmental_impact'
+
   compliance_frameworks:
     internal:
-      - "ORION Station Ethics Charter"
-      - "Fleet Operations Manual"
-      - "Emergency Response Protocols"
-      
+      - 'ORION Station Ethics Charter'
+      - 'Fleet Operations Manual'
+      - 'Emergency Response Protocols'
+
     external:
-      - "Galactic Ethics Standards"
-      - "Interstellar Safety Regulations"
-      - "AI Governance Framework"
-      
+      - 'Galactic Ethics Standards'
+      - 'Interstellar Safety Regulations'
+      - 'AI Governance Framework'
+
   monitoring_methods:
     real_time_analysis: true
     predictive_modeling: true
     pattern_recognition: true
     anomaly_detection: true
-    
+
   reporting:
-    frequency: "continuous"
+    frequency: 'continuous'
     alert_thresholds:
-      critical: "immediate"
-      high: "5_minutes"
-      medium: "15_minutes"
-      low: "1_hour"
-      
+      critical: 'immediate'
+      high: '5_minutes'
+      medium: '15_minutes'
+      low: '1_hour'
+
   audit_trails:
-    retention_period: "7_years"
+    retention_period: '7_years'
     immutable_logging: true
     cryptographic_signing: true
     blockchain_anchoring: true

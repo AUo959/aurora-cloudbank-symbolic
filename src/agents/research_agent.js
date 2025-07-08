@@ -1,4 +1,3 @@
-
 /**
  * Research Agent - Quantum Enhanced Discovery Engine
  * Never-before-conceived research acceleration capabilities
@@ -10,7 +9,7 @@ class ResearchAgent {
       'quantum_enhanced_discovery',
       'symbolic_pattern_recognition',
       'future_casting_predictions',
-      'multi_dimensional_analysis'
+      'multi_dimensional_analysis',
     ];
   }
 
@@ -26,7 +25,7 @@ class ResearchAgent {
       ...data,
       quantum_enhanced: true,
       future_casting_predictions: this.generatePredictions(data),
-      symbolic_patterns: this.extractSymbolicPatterns(data)
+      symbolic_patterns: this.extractSymbolicPatterns(data),
     };
   }
 

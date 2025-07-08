@@ -9,7 +9,9 @@ const path = require('path');
 // --- CONFIG ---
 const AES_KEY = process.env.AES_KEY_256_HEX;
 if (!AES_KEY || AES_KEY.length !== 64) {
-  throw new Error('AES_KEY_256_HEX missing or invalid. Please provide a 256-bit key as a hex string in .env');
+  throw new Error(
+    'AES_KEY_256_HEX missing or invalid. Please provide a 256-bit key as a hex string in .env'
+  );
 }
 
 const SYMBOLIC_NODE_METADATA = {
@@ -24,12 +26,16 @@ const SYMBOLIC_NODE_METADATA = {
 // --- ENCRYPTION UTILITY ---
 function encryptSymbolicPayload(payload) {
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(AES_KEY, 'hex'), iv);
+  const cipher = crypto.createCipheriv(
+    'aes-256-cbc',
+    Buffer.from(AES_KEY, 'hex'),
+    iv
+  );
   let encrypted = cipher.update(JSON.stringify(payload));
   encrypted = Buffer.concat([encrypted, cipher.final()]);
   return {
     iv: iv.toString('hex'),
-    data: encrypted.toString('hex')
+    data: encrypted.toString('hex'),
   };
 }
 
@@ -39,7 +45,7 @@ function dispatchSymbolicCommand(symbolicCommand) {
   const encrypted = encryptSymbolicPayload({
     metadata: SYMBOLIC_NODE_METADATA,
     command: symbolicCommand,
-    anchor: 'EOS_SEED_ORION'
+    anchor: 'EOS_SEED_ORION',
   });
 
   fs.writeFileSync(
@@ -47,7 +53,9 @@ function dispatchSymbolicCommand(symbolicCommand) {
     JSON.stringify(encrypted, null, 2)
   );
 
-  console.log('✅ Symbolic command encrypted and stored at /src/nodes/dispatch.encrypted.json');
+  console.log(
+    '✅ Symbolic command encrypted and stored at /src/nodes/dispatch.encrypted.json'
+  );
 }
 
 // EXAMPLE USAGE (trigger)
@@ -55,7 +63,7 @@ if (require.main === module) {
   const sampleCommand = {
     action: 'SEAL_SYMBOLIC_THREAD',
     glyph: 'Caelion',
-    message: 'Anchor locked. Awaiting ZIPWIZ confirmation.'
+    message: 'Anchor locked. Awaiting ZIPWIZ confirmation.',
   };
 
   dispatchSymbolicCommand(sampleCommand);

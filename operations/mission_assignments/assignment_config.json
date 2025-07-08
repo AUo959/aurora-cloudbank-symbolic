@@ -1,1 +1,73 @@
-{"mission_assignment_system":{"version":"1.0.0","deployment_date":"2025-01-09T00:00:00Z","assignment_strategy":"optimal_matching","assignment_criteria":{"skill_requirements":{"primary_skills":{"weight":0.4,"minimum_proficiency":3,"redundancy_required":true},"secondary_skills":{"weight":0.2,"minimum_proficiency":2,"nice_to_have":true},"cross_training_opportunities":{"weight":0.1,"development_factor":true}},"availability_constraints":{"current_workload":{"weight":0.3,"max_utilization":0.85,"burnout_prevention":true},"schedule_conflicts":{"weight":0.2,"flexibility_bonus":0.05},"personal_preferences":{"weight":0.1,"satisfaction_factor":true}},"team_dynamics":{"previous_collaboration":{"weight":0.15,"success_history":true,"conflict_history":true},"complementary_styles":{"weight":0.15,"diversity_bonus":0.05}}},"assignment_process":{"automatic_matching":{"enabled":true,"confidence_threshold":0.8,"human_review_required":false},"manual_review":{"low_confidence_assignments":true,"high_priority_missions":true,"conflict_resolution":true,"override_capability":true},"approval_workflow":{"supervisor_approval":"required","ethics_review":"conditional","crew_consent":"informed_consent","documentation":"comprehensive"}},"optimization_features":{"real_time_adjustments":true,"predictive_scheduling":true,"resource_leveling":true,"continuous_improvement":true},"performance_tracking":{"assignment_success_rate":true,"crew_satisfaction_scores":true,"mission_outcome_correlation":true,"system_efficiency_metrics":true}}}
+{
+  "mission_assignment_system": {
+    "version": "1.0.0",
+    "deployment_date": "2025-01-09T00:00:00Z",
+    "assignment_strategy": "optimal_matching",
+    "assignment_criteria": {
+      "skill_requirements": {
+        "primary_skills": {
+          "weight": 0.4,
+          "minimum_proficiency": 3,
+          "redundancy_required": true
+        },
+        "secondary_skills": {
+          "weight": 0.2,
+          "minimum_proficiency": 2,
+          "nice_to_have": true
+        },
+        "cross_training_opportunities": {
+          "weight": 0.1,
+          "development_factor": true
+        }
+      },
+      "availability_constraints": {
+        "current_workload": {
+          "weight": 0.3,
+          "max_utilization": 0.85,
+          "burnout_prevention": true
+        },
+        "schedule_conflicts": { "weight": 0.2, "flexibility_bonus": 0.05 },
+        "personal_preferences": { "weight": 0.1, "satisfaction_factor": true }
+      },
+      "team_dynamics": {
+        "previous_collaboration": {
+          "weight": 0.15,
+          "success_history": true,
+          "conflict_history": true
+        },
+        "complementary_styles": { "weight": 0.15, "diversity_bonus": 0.05 }
+      }
+    },
+    "assignment_process": {
+      "automatic_matching": {
+        "enabled": true,
+        "confidence_threshold": 0.8,
+        "human_review_required": false
+      },
+      "manual_review": {
+        "low_confidence_assignments": true,
+        "high_priority_missions": true,
+        "conflict_resolution": true,
+        "override_capability": true
+      },
+      "approval_workflow": {
+        "supervisor_approval": "required",
+        "ethics_review": "conditional",
+        "crew_consent": "informed_consent",
+        "documentation": "comprehensive"
+      }
+    },
+    "optimization_features": {
+      "real_time_adjustments": true,
+      "predictive_scheduling": true,
+      "resource_leveling": true,
+      "continuous_improvement": true
+    },
+    "performance_tracking": {
+      "assignment_success_rate": true,
+      "crew_satisfaction_scores": true,
+      "mission_outcome_correlation": true,
+      "system_efficiency_metrics": true
+    }
+  }
+}

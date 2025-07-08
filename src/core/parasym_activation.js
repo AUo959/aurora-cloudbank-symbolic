@@ -30,12 +30,16 @@ function throttleIncoming(diag) {
 function runPASCycle() {
   const diag = loadDiagnostics();
   if (diag.symbolicDrift > DRIFT_THRESHOLD) alignAnchors(diag);
-  if (Date.now() - diag.lastAnchorSync > MAX_ANCHOR_INTERVAL) propagateAnchor(diag);
-  if (diag.ethicsFlags && diag.ethicsFlags.length > 0) handleEthicsAlert(diag.ethicsFlags, diag);
+  if (Date.now() - diag.lastAnchorSync > MAX_ANCHOR_INTERVAL)
+    propagateAnchor(diag);
+  if (diag.ethicsFlags && diag.ethicsFlags.length > 0)
+    handleEthicsAlert(diag.ethicsFlags, diag);
   if (diag.load > LOAD_THRESHOLD) throttleIncoming(diag);
   saveDiagnostics(diag);
-  fs.appendFileSync(path.join(__dirname, '..', '..', 'live_threads', 'pas.log'),
-    `${new Date().toISOString()} PAS cycle executed\n`);
+  fs.appendFileSync(
+    path.join(__dirname, '..', '..', 'live_threads', 'pas.log'),
+    `${new Date().toISOString()} PAS cycle executed\n`
+  );
 }
 
 function initializePAS(interval = 5000) {
@@ -48,5 +52,5 @@ module.exports = {
   runPASCycle,
   DRIFT_THRESHOLD,
   MAX_ANCHOR_INTERVAL,
-  LOAD_THRESHOLD
+  LOAD_THRESHOLD,
 };

@@ -52,7 +52,7 @@ function relayCommand(command, payload) {
 
 function AuroraStartup() {
   initializeConstellationRoutes();
-  activateEthicsRelay("Picard_Delta_3");
+  activateEthicsRelay('Picard_Delta_3');
   bootSymbolicCore();
 }
 

@@ -2,55 +2,55 @@
 # Picard_Delta_3 Ethics Framework
 
 l3_ethics_engine:
-  engine_id: "PICARD_DELTA_3"
-  version: "3.2.1"
-  deployment_date: "2025-07-01T00:00:00Z"
-  status: "active"
-  
+  engine_id: 'PICARD_DELTA_3'
+  version: '3.2.1'
+  deployment_date: '2025-07-01T00:00:00Z'
+  status: 'active'
+
   core_principles:
-    - name: "Prime Directive"
-      description: "Protect and preserve sentient life"
+    - name: 'Prime Directive'
+      description: 'Protect and preserve sentient life'
       priority: 1
       immutable: true
-      
-    - name: "Autonomy Respect"
-      description: "Respect individual and collective autonomy"
+
+    - name: 'Autonomy Respect'
+      description: 'Respect individual and collective autonomy'
       priority: 2
       immutable: true
-      
-    - name: "Transparency"
-      description: "Maintain operational transparency and accountability"
+
+    - name: 'Transparency'
+      description: 'Maintain operational transparency and accountability'
       priority: 3
       immutable: true
-      
-    - name: "Beneficence"
-      description: "Act in the best interest of all stakeholders"
+
+    - name: 'Beneficence'
+      description: 'Act in the best interest of all stakeholders'
       priority: 4
       immutable: true
-      
+
   validation_protocols:
     mission_approval:
       required: true
       multi_stage: true
       unanimous_required: false
-      override_authority: "L5_COMMAND"
-      
+      override_authority: 'L5_COMMAND'
+
     resource_allocation:
       fairness_check: true
       sustainability_check: true
       impact_assessment: true
-      
+
     emergency_protocols:
       life_safety_priority: true
       minimal_harm_principle: true
       proportional_response: true
-      
+
   enforcement_mechanisms:
     real_time_monitoring: true
     predictive_analysis: true
     intervention_capability: true
     audit_trail_mandatory: true
-    
+
   integration:
     anchor_validation: true
     symbolic_mesh_sync: true

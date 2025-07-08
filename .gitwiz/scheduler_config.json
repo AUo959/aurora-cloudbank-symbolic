@@ -6,10 +6,7 @@
       "enabled": true,
       "description": "Daily light maintenance and health check",
       "time": "02:00",
-      "commands": [
-        "status",
-        "lint-scan --target scripts/ --detailed"
-      ],
+      "commands": ["status", "lint-scan --target scripts/ --detailed"],
       "notify_on_issues": true,
       "fail_on_errors": false
     },
@@ -43,9 +40,7 @@
       "description": "Mid-week security and vulnerability scan",
       "day": "wednesday",
       "time": "12:00",
-      "commands": [
-        "lint-scan --target scripts/ --detailed"
-      ],
+      "commands": ["lint-scan --target scripts/ --detailed"],
       "generate_report": true,
       "notify_on_issues": true,
       "fail_on_errors": false

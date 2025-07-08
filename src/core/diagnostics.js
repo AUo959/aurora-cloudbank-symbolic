@@ -1,7 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const DIAG_PATH = path.join(__dirname, '..', '..', 'live_threads', 'diagnostics.json');
+const DIAG_PATH = path.join(
+  __dirname,
+  '..',
+  '..',
+  'live_threads',
+  'diagnostics.json'
+);
 
 function loadDiagnostics() {
   if (!fs.existsSync(DIAG_PATH)) {
@@ -12,7 +18,7 @@ function loadDiagnostics() {
       load: 0,
       commandCount: 0,
       glyphCount: 0,
-      bundleCount: 0
+      bundleCount: 0,
     };
     fs.writeFileSync(DIAG_PATH, JSON.stringify(init, null, 2));
     return init;

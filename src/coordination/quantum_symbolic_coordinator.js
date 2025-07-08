@@ -1,4 +1,3 @@
-
 /**
  * Quantum Symbolic Coordination Layer
  * Never-before-conceived multi-agent quantum coordination
@@ -11,7 +10,7 @@ class QuantumSymbolicCoordinator {
       research_agent: 'active',
       interface_agent: 'active',
       data_agent: 'active',
-      visualization_agent: 'active'
+      visualization_agent: 'active',
     };
   }
 
@@ -24,7 +23,7 @@ class QuantumSymbolicCoordinator {
       quantum_coordination: quantumState,
       symbolic_messaging: symbolicTranslation,
       agent_synchronization: this.agentSynchronization,
-      coordination_timestamp: new Date().toISOString()
+      coordination_timestamp: new Date().toISOString(),
     };
   }
 
@@ -33,7 +32,7 @@ class QuantumSymbolicCoordinator {
     return {
       state_type: 'quantum_symbolic_hybrid',
       coherence_level: 'maximum',
-      entanglement_status: 'multi_agent_synchronized'
+      entanglement_status: 'multi_agent_synchronized',
     };
   }
 
@@ -42,7 +41,7 @@ class QuantumSymbolicCoordinator {
     return {
       symbolic_representation: 'quantum_enhanced_symbolic',
       translation_accuracy: 'perfect_fidelity',
-      multi_agent_compatibility: true
+      multi_agent_compatibility: true,
     };
   }
 }
@@ -52,8 +51,12 @@ class Queue {
     this.items = [];
   }
 
-  enqueue(item) { this.items.push(item); }
-  dequeue() { return this.items.shift(); }
+  enqueue(item) {
+    this.items.push(item);
+  }
+  dequeue() {
+    return this.items.shift();
+  }
 }
 
 module.exports = QuantumSymbolicCoordinator;

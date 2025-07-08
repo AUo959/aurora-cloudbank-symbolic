@@ -11,28 +11,28 @@ class AuroraSecurityUtils {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      '\'': '&#x27;',
-      '/': '&#x2F;'
+      "'": '&#x27;',
+      '/': '&#x2F;',
     };
   }
 
   /**
-     * Escape HTML to prevent XSS attacks
-     * @param {string} text - Text to escape
-     * @returns {string} - Escaped text
-     */
+   * Escape HTML to prevent XSS attacks
+   * @param {string} text - Text to escape
+   * @returns {string} - Escaped text
+   */
   escapeHtml(text) {
     if (typeof text !== 'string') {
       return text;
     }
-    return text.replace(/[&<>"'\/]/g, (char) => this.htmlEntities[char]);
+    return text.replace(/[&<>"'\/]/g, char => this.htmlEntities[char]);
   }
 
   /**
-     * Sanitize text for safe display
-     * @param {string} text - Text to sanitize
-     * @returns {string} - Sanitized text
-     */
+   * Sanitize text for safe display
+   * @param {string} text - Text to sanitize
+   * @returns {string} - Sanitized text
+   */
   sanitizeText(text) {
     if (typeof text !== 'string') {
       return '';
@@ -49,12 +49,12 @@ class AuroraSecurityUtils {
   }
 
   /**
-     * Safe DOM element creation with escaped content
-     * @param {string} tagName - HTML tag name
-     * @param {string} content - Content to add (will be escaped)
-     * @param {Object} attributes - Attributes to set
-     * @returns {HTMLElement} - Created element
-     */
+   * Safe DOM element creation with escaped content
+   * @param {string} tagName - HTML tag name
+   * @param {string} content - Content to add (will be escaped)
+   * @param {Object} attributes - Attributes to set
+   * @returns {HTMLElement} - Created element
+   */
   createSafeElement(tagName, content = '', attributes = {}) {
     const element = document.createElement(tagName);
 
@@ -74,10 +74,10 @@ class AuroraSecurityUtils {
   }
 
   /**
-     * Safe innerHTML replacement using textContent
-     * @param {HTMLElement} element - Target element
-     * @param {string} content - Content to set (will be escaped)
-     */
+   * Safe innerHTML replacement using textContent
+   * @param {HTMLElement} element - Target element
+   * @param {string} content - Content to set (will be escaped)
+   */
   setSafeContent(element, content) {
     if (!element || typeof content !== 'string') {
       return;
@@ -86,10 +86,10 @@ class AuroraSecurityUtils {
   }
 
   /**
-     * Safe innerHTML replacement for formatted content
-     * @param {HTMLElement} element - Target element
-     * @param {string} content - Content to set (will be sanitized)
-     */
+   * Safe innerHTML replacement for formatted content
+   * @param {HTMLElement} element - Target element
+   * @param {string} content - Content to set (will be sanitized)
+   */
   setSafeHTML(element, content) {
     if (!element || typeof content !== 'string') {
       return;
@@ -101,21 +101,17 @@ class AuroraSecurityUtils {
 
     // Only allow safe elements
     const allowedTags = ['p', 'span', 'strong', 'em', 'br'];
-    const walker = document.createTreeWalker(
-      temp,
-      NodeFilter.SHOW_ELEMENT,
-      {
-        acceptNode: (node) => {
-          return allowedTags.includes(node.tagName.toLowerCase())
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_REJECT;
-        }
-      }
-    );
+    const walker = document.createTreeWalker(temp, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: node => {
+        return allowedTags.includes(node.tagName.toLowerCase())
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      },
+    });
 
     const safeContent = document.createDocumentFragment();
     let node;
-    while (node = walker.nextNode()) {
+    while ((node = walker.nextNode())) {
       const clone = node.cloneNode(true);
       // Remove all attributes except safe ones
       for (let i = clone.attributes.length - 1; i >= 0; i--) {
@@ -132,27 +128,37 @@ class AuroraSecurityUtils {
   }
 
   /**
-     * Check if an attribute is safe to use
-     * @param {string} attrName - Attribute name
-     * @returns {boolean} - Whether the attribute is safe
-     */
+   * Check if an attribute is safe to use
+   * @param {string} attrName - Attribute name
+   * @returns {boolean} - Whether the attribute is safe
+   */
   isValidAttribute(attrName) {
     const safeAttributes = [
-      'class', 'id', 'style', 'title', 'alt', 'src', 'href',
-      'data-', 'aria-', 'role'
+      'class',
+      'id',
+      'style',
+      'title',
+      'alt',
+      'src',
+      'href',
+      'data-',
+      'aria-',
+      'role',
     ];
 
     const lowerAttr = attrName.toLowerCase();
-    return safeAttributes.some(safe =>
-      lowerAttr === safe || lowerAttr.startsWith(safe)
-    ) && !lowerAttr.startsWith('on'); // No event handlers
+    return (
+      safeAttributes.some(
+        safe => lowerAttr === safe || lowerAttr.startsWith(safe)
+      ) && !lowerAttr.startsWith('on')
+    ); // No event handlers
   }
 
   /**
-     * Validate and sanitize WebSocket data
-     * @param {any} data - Data from WebSocket
-     * @returns {Object} - Sanitized data
-     */
+   * Validate and sanitize WebSocket data
+   * @param {any} data - Data from WebSocket
+   * @returns {Object} - Sanitized data
+   */
   sanitizeWebSocketData(data) {
     if (typeof data === 'string') {
       try {
@@ -181,25 +187,25 @@ class AuroraSecurityUtils {
   }
 
   /**
-     * Create Content Security Policy meta tag
-     * @returns {HTMLElement} - CSP meta element
-     */
+   * Create Content Security Policy meta tag
+   * @returns {HTMLElement} - CSP meta element
+   */
   createCSPMetaTag() {
     const csp = [
-      'default-src \'self\'',
-      'script-src \'self\' \'unsafe-inline\'', // Note: This should be made stricter in production
-      'style-src \'self\' \'unsafe-inline\'',
-      'img-src \'self\' data: https:',
-      'connect-src \'self\' ws: wss:',
-      'font-src \'self\'',
-      'object-src \'none\'',
-      'media-src \'self\'',
-      'frame-src \'none\''
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'", // Note: This should be made stricter in production
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "connect-src 'self' ws: wss:",
+      "font-src 'self'",
+      "object-src 'none'",
+      "media-src 'self'",
+      "frame-src 'none'",
     ].join('; ');
 
     return this.createSafeElement('meta', '', {
       'http-equiv': 'Content-Security-Policy',
-      'content': csp
+      content: csp,
     });
   }
 }

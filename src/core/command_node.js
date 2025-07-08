@@ -25,5 +25,5 @@ module.exports = {
 
     runPASCycle();
     return `Command ${command.name} executed with anchor ${anchor}`;
-  }
+  },
 };

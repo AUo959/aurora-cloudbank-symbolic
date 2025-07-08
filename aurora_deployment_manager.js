@@ -17,7 +17,7 @@ class AuroraDeploymentManager {
       'CREATE_DEMO_MODE',
       'SETUP_MONITORING',
       'INITIALIZE_SERVICES',
-      'LAUNCH_SYSTEM'
+      'LAUNCH_SYSTEM',
     ];
   }
 
@@ -27,10 +27,13 @@ class AuroraDeploymentManager {
     console.log('🧬 Routing all deployment steps through command node...');
 
     // Route through command node for project synergy
-    const deploymentResult = this.commandNode.routeCommand('DEPLOYMENT_INITIALIZATION', {
-      phase: 'deployment_preparation',
-      action: 'initialize_deployment_workflow'
-    });
+    const deploymentResult = this.commandNode.routeCommand(
+      'DEPLOYMENT_INITIALIZATION',
+      {
+        phase: 'deployment_preparation',
+        action: 'initialize_deployment_workflow',
+      }
+    );
 
     console.log('✅ Command node routing confirmed');
 
@@ -54,7 +57,7 @@ class AuroraDeploymentManager {
       'deployment/scripts',
       'deployment/docker',
       'deployment/monitoring',
-      'deployment/demo'
+      'deployment/demo',
     ];
 
     for (const dir of deploymentDirs) {
@@ -67,37 +70,37 @@ class AuroraDeploymentManager {
 
     // Create deployment configuration
     const deploymentConfig = {
-      'deployment_name': 'aurora-cloudbank-symbolic-v1',
-      'version': '1.0.0',
-      'build_date': new Date().toISOString(),
-      'environment': 'production',
-      'services': {
-        'quantum_core': {
-          'enabled': true,
-          'port': 8001,
-          'replicas': 2
+      deployment_name: 'aurora-cloudbank-symbolic-v1',
+      version: '1.0.0',
+      build_date: new Date().toISOString(),
+      environment: 'production',
+      services: {
+        quantum_core: {
+          enabled: true,
+          port: 8001,
+          replicas: 2,
         },
-        'web_interface': {
-          'enabled': true,
-          'port': 8080,
-          'replicas': 3
+        web_interface: {
+          enabled: true,
+          port: 8080,
+          replicas: 3,
         },
-        'research_hub': {
-          'enabled': true,
-          'port': 8002,
-          'replicas': 1
+        research_hub: {
+          enabled: true,
+          port: 8002,
+          replicas: 1,
         },
-        'audio_visual': {
-          'enabled': true,
-          'port': 8003,
-          'replicas': 1
-        }
+        audio_visual: {
+          enabled: true,
+          port: 8003,
+          replicas: 1,
+        },
       },
-      'security': {
-        'encryption': 'quantum_safe',
-        'authentication': 'multi_factor',
-        'ethics_compliance': 'picard_delta_3'
-      }
+      security: {
+        encryption: 'quantum_safe',
+        authentication: 'multi_factor',
+        ethics_compliance: 'picard_delta_3',
+      },
     };
 
     fs.writeFileSync(
@@ -264,7 +267,12 @@ if __name__ == "__main__":
 `;
 
     fs.writeFileSync(
-      path.join(this.projectRoot, 'deployment', 'monitoring', 'aurora_monitoring.py'),
+      path.join(
+        this.projectRoot,
+        'deployment',
+        'monitoring',
+        'aurora_monitoring.py'
+      ),
       monitoringScript
     );
 
@@ -317,7 +325,10 @@ echo "🎭 Demo mode: http://localhost:8080/demo"
     );
 
     // Make script executable
-    fs.chmodSync(path.join(this.projectRoot, 'deployment', 'scripts', 'start_services.sh'), 0o755);
+    fs.chmodSync(
+      path.join(this.projectRoot, 'deployment', 'scripts', 'start_services.sh'),
+      0o755
+    );
 
     console.log('  ✅ Service initialization script created');
   }
@@ -479,7 +490,8 @@ module.exports = AuroraDeploymentManager;
 // Run deployment if called directly
 if (require.main === module) {
   const deploymentManager = new AuroraDeploymentManager();
-  deploymentManager.initializeDeployment()
+  deploymentManager
+    .initializeDeployment()
     .then(() => deploymentManager.generateDeploymentSummary())
     .catch(console.error);
 }

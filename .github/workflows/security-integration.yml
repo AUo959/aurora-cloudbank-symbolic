@@ -2,11 +2,11 @@ name: Security Integration Workflow
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Mondays at 2 AM
+    - cron: '0 2 * * 1' # Weekly on Mondays at 2 AM
 
 # Explicit permissions for security
 permissions:
@@ -145,7 +145,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'python' ]
+        language: ['javascript', 'python']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -161,4 +161,4 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: '/language:${{matrix.language}}'

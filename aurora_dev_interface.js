@@ -26,7 +26,7 @@ class AuroraDevelopmentInterface {
       description: stepDescription,
       phase: this.currentPhase,
       config: config,
-      methodical_approach: true
+      methodical_approach: true,
     });
 
     console.log(`✅ Step routed with ID: ${result.commandId}`);
@@ -35,14 +35,17 @@ class AuroraDevelopmentInterface {
 
   // Initialize web environment foundation
   initWebEnvironmentFoundation() {
-    return this.executeFoundationalStep('Initialize Web Environment Foundation', {
-      target: 'multi_agent_quantum_hybrid_symbolic_cpu_anchored',
-      features: [
-        'interactive_immersive_interface',
-        'proprietary_research_hub',
-        'dynamic_emergent_audiovisual_environment'
-      ]
-    });
+    return this.executeFoundationalStep(
+      'Initialize Web Environment Foundation',
+      {
+        target: 'multi_agent_quantum_hybrid_symbolic_cpu_anchored',
+        features: [
+          'interactive_immersive_interface',
+          'proprietary_research_hub',
+          'dynamic_emergent_audiovisual_environment',
+        ],
+      }
+    );
   }
 
   // Establish architectural planning
@@ -53,8 +56,8 @@ class AuroraDevelopmentInterface {
         'multi_agent_coordination',
         'quantum_hybrid_processing',
         'symbolic_cpu_anchor',
-        'future_casting_research_hub'
-      ]
+        'future_casting_research_hub',
+      ],
     });
   }
 
@@ -66,8 +69,8 @@ class AuroraDevelopmentInterface {
         'quantum_symbolic_processing',
         'multi_agent_coordination',
         'immersive_interaction',
-        'audiovisual_synthesis'
-      ]
+        'audiovisual_synthesis',
+      ],
     });
   }
 
@@ -82,7 +85,7 @@ class AuroraDevelopmentInterface {
     return this.commandNode.routeCommand('STATUS_REPORT', {
       phase: this.currentPhase,
       steps_completed: this.stepCounter,
-      readiness: 'awaiting_next_step'
+      readiness: 'awaiting_next_step',
     });
   }
 }

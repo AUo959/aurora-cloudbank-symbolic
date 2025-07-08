@@ -12,7 +12,8 @@ try {
 
   console.log('🔄 Starting Phase 5 execution...');
 
-  implementor.implementPhase5_AudiovisualSystem()
+  implementor
+    .implementPhase5_AudiovisualSystem()
     .then(() => {
       console.log('✅ Phase 5 completed successfully!');
 
@@ -39,7 +40,6 @@ try {
     .catch(error => {
       console.error('❌ Error during Phase 4 execution:', error);
     });
-
 } catch (error) {
   console.error('❌ Error loading implementor:', error);
 }

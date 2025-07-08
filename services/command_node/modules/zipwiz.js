@@ -1,4 +1,4 @@
 // modules/zipwiz.js
 module.exports = {
-  pingBeacon: (msg) => console.log('ZIPWIZ.pingBeacon', msg),
+  pingBeacon: msg => console.log('ZIPWIZ.pingBeacon', msg),
 };

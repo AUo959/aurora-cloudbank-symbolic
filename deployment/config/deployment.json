@@ -1,1 +1,17 @@
-{"deployment_name":"aurora-cloudbank-symbolic-v1","version":"1.0.0","build_date":"2025-06-30T22:22:54.316Z","environment":"production","services":{"quantum_core":{"enabled":true,"port":8001,"replicas":2},"web_interface":{"enabled":true,"port":8080,"replicas":3},"research_hub":{"enabled":true,"port":8002,"replicas":1},"audio_visual":{"enabled":true,"port":8003,"replicas":1}},"security":{"encryption":"quantum_safe","authentication":"multi_factor","ethics_compliance":"picard_delta_3"}}
+{
+  "deployment_name": "aurora-cloudbank-symbolic-v1",
+  "version": "1.0.0",
+  "build_date": "2025-06-30T22:22:54.316Z",
+  "environment": "production",
+  "services": {
+    "quantum_core": { "enabled": true, "port": 8001, "replicas": 2 },
+    "web_interface": { "enabled": true, "port": 8080, "replicas": 3 },
+    "research_hub": { "enabled": true, "port": 8002, "replicas": 1 },
+    "audio_visual": { "enabled": true, "port": 8003, "replicas": 1 }
+  },
+  "security": {
+    "encryption": "quantum_safe",
+    "authentication": "multi_factor",
+    "ethics_compliance": "picard_delta_3"
+  }
+}

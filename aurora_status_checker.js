@@ -10,11 +10,27 @@ const path = require('path');
 class AuroraStatusChecker {
   constructor() {
     this.projectRoot = '/workspaces/aurora-cloudbank-symbolic';
-    this.requiredPhases = ['PHASE_1_COMPLETE.md', 'PHASE_2_COMPLETE.md', 'PHASE_3_COMPLETE.md', 'PHASE_4_COMPLETE.md', 'PHASE_5_COMPLETE.md'];
+    this.requiredPhases = [
+      'PHASE_1_COMPLETE.md',
+      'PHASE_2_COMPLETE.md',
+      'PHASE_3_COMPLETE.md',
+      'PHASE_4_COMPLETE.md',
+      'PHASE_5_COMPLETE.md',
+    ];
     this.requiredSrcDirs = [
-      'agents', 'audio', 'collaboration', 'coordination',
-      'interaction', 'interface', 'output', 'prediction',
-      'quantum_core', 'research', 'visual', 'visualization', 'web_infrastructure'
+      'agents',
+      'audio',
+      'collaboration',
+      'coordination',
+      'interaction',
+      'interface',
+      'output',
+      'prediction',
+      'quantum_core',
+      'research',
+      'visual',
+      'visualization',
+      'web_infrastructure',
     ];
   }
 
@@ -27,11 +43,15 @@ class AuroraStatusChecker {
     for (const phase of this.requiredPhases) {
       const phasePath = path.join(this.projectRoot, phase);
       const exists = fs.existsSync(phasePath);
-      console.log(`  ${exists ? '✅' : '❌'} ${phase}: ${exists ? 'COMPLETE' : 'MISSING'}`);
+      console.log(
+        `  ${exists ? '✅' : '❌'} ${phase}: ${exists ? 'COMPLETE' : 'MISSING'}`
+      );
       if (!exists) allPhasesComplete = false;
     }
 
-    console.log(`\n🎯 Overall Phase Status: ${allPhasesComplete ? '✅ ALL PHASES COMPLETE' : '❌ INCOMPLETE'}`);
+    console.log(
+      `\n🎯 Overall Phase Status: ${allPhasesComplete ? '✅ ALL PHASES COMPLETE' : '❌ INCOMPLETE'}`
+    );
     return allPhasesComplete;
   }
 
@@ -50,11 +70,15 @@ class AuroraStatusChecker {
     for (const dir of this.requiredSrcDirs) {
       const dirPath = path.join(srcPath, dir);
       const exists = fs.existsSync(dirPath);
-      console.log(`  ${exists ? '✅' : '❌'} src/${dir}/: ${exists ? 'PRESENT' : 'MISSING'}`);
+      console.log(
+        `  ${exists ? '✅' : '❌'} src/${dir}/: ${exists ? 'PRESENT' : 'MISSING'}`
+      );
       if (!exists) allDirsPresent = false;
     }
 
-    console.log(`\n🏛️ Source Structure: ${allDirsPresent ? '✅ COMPLETE' : '❌ INCOMPLETE'}`);
+    console.log(
+      `\n🏛️ Source Structure: ${allDirsPresent ? '✅ COMPLETE' : '❌ INCOMPLETE'}`
+    );
     return allDirsPresent;
   }
 
@@ -62,14 +86,19 @@ class AuroraStatusChecker {
     console.log('\n📋 CHECKING IMPLEMENTATION SUMMARY');
     console.log('=' * 50);
 
-    const summaryPath = path.join(this.projectRoot, 'IMPLEMENTATION_COMPLETE.md');
+    const summaryPath = path.join(
+      this.projectRoot,
+      'IMPLEMENTATION_COMPLETE.md'
+    );
     const exists = fs.existsSync(summaryPath);
 
     if (exists) {
       const content = fs.readFileSync(summaryPath, 'utf8');
       const hasCompleteStatus = content.includes('FULLY IMPLEMENTED');
       console.log('  ✅ Implementation summary exists');
-      console.log(`  ${hasCompleteStatus ? '✅' : '❌'} Status: ${hasCompleteStatus ? 'FULLY IMPLEMENTED' : 'INCOMPLETE'}`);
+      console.log(
+        `  ${hasCompleteStatus ? '✅' : '❌'} Status: ${hasCompleteStatus ? 'FULLY IMPLEMENTED' : 'INCOMPLETE'}`
+      );
       return hasCompleteStatus;
     } else {
       console.log('  ❌ Implementation summary missing');
@@ -102,7 +131,8 @@ class AuroraStatusChecker {
       console.log('\n⚠️ SYSTEM STATUS: INCOMPLETE');
       console.log('\n🔧 REQUIRED ACTIONS:');
       if (!phasesComplete) console.log('  - Complete missing phases');
-      if (!structureComplete) console.log('  - Build missing source directories');
+      if (!structureComplete)
+        console.log('  - Build missing source directories');
       if (!summaryComplete) console.log('  - Create implementation summary');
 
       return 'NEEDS_COMPLETION';

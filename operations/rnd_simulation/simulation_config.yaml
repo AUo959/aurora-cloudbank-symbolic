@@ -2,66 +2,66 @@
 # Enterprise Fleet Deployment Package
 
 rnd_simulation_core:
-  core_id: "RND_SIM_ORION_001"
-  deployment_environment: "enterprise_parallel"
-  simulation_framework: "aurora_enhanced"
+  core_id: 'RND_SIM_ORION_001'
+  deployment_environment: 'enterprise_parallel'
+  simulation_framework: 'aurora_enhanced'
   parallel_processing: true
-  
+
   simulation_domains:
     space_exploration:
       enabled: true
-      simulation_engine: "aurora_space_sim"
-      physics_accuracy: "high_fidelity"
-      scenario_library: "comprehensive"
-      
+      simulation_engine: 'aurora_space_sim'
+      physics_accuracy: 'high_fidelity'
+      scenario_library: 'comprehensive'
+
     technology_research:
       enabled: true
-      simulation_engine: "aurora_tech_lab"
+      simulation_engine: 'aurora_tech_lab'
       virtual_prototyping: true
       testing_automation: true
-      
+
     human_factors:
       enabled: true
-      simulation_engine: "aurora_crew_sim"
+      simulation_engine: 'aurora_crew_sim'
       psychological_modeling: true
       team_dynamics: true
-      
+
     systems_integration:
       enabled: true
-      simulation_engine: "aurora_systems_sim"
+      simulation_engine: 'aurora_systems_sim'
       complexity_modeling: true
       failure_analysis: true
-      
+
     ethics_scenarios:
       enabled: true
-      simulation_engine: "aurora_ethics_sim"
+      simulation_engine: 'aurora_ethics_sim'
       dilemma_generation: true
       decision_analysis: true
-      
+
   parallel_execution:
     max_concurrent_simulations: 12
-    resource_allocation: "dynamic"
+    resource_allocation: 'dynamic'
     priority_scheduling: true
-    load_balancing: "automatic"
-    
+    load_balancing: 'automatic'
+
   research_integration:
     hypothesis_testing: true
-    data_collection: "automated"
+    data_collection: 'automated'
     statistical_analysis: true
     visualization_tools: true
-    
+
   collaboration_features:
     multi_researcher_access: true
     shared_experiments: true
     peer_review_system: true
     knowledge_sharing: true
-    
+
   performance_optimization:
     adaptive_algorithms: true
     machine_learning: true
     predictive_modeling: true
     continuous_improvement: true
-    
+
   integration_points:
     l1_command: true
     l3_ethics: true

@@ -1,19 +1,7 @@
 {
-  "python_tools": [
-    "autopep8",
-    "isort",
-    "pylint",
-    "flake8",
-    "bandit"
-  ],
-  "markdown_tools": [
-    "markdownlint",
-    "prettier"
-  ],
-  "javascript_tools": [
-    "eslint",
-    "prettier"
-  ],
+  "python_tools": ["autopep8", "isort", "pylint", "flake8", "bandit"],
+  "markdown_tools": ["markdownlint", "prettier"],
+  "javascript_tools": ["eslint", "prettier"],
   "auto_fix_enabled": true,
   "severity_threshold": "warning",
   "excluded_patterns": [

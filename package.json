@@ -23,11 +23,23 @@
     "verify-bundle": "node scripts/hash_bundle.js symbolic_core_bundle.zip"
   },
   "lint-staged": {
-    "*.js": ["eslint --fix", "prettier --write"],
-    "*.md": ["markdownlint --fix", "prettier --write"],
-    "*.json": ["prettier --write"],
-    "*.yml": ["prettier --write"],
-    "*.yaml": ["prettier --write"]
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.md": [
+      "markdownlint --fix",
+      "prettier --write"
+    ],
+    "*.json": [
+      "prettier --write"
+    ],
+    "*.yml": [
+      "prettier --write"
+    ],
+    "*.yaml": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "dotenv": "^17.0.0",

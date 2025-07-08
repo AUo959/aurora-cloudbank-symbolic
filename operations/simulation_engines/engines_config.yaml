@@ -2,14 +2,14 @@
 # Enterprise Fleet Deployment Package
 
 simulation_engines:
-  architecture: "distributed_parallel"
-  orchestration: "aurora_core"
-  resource_management: "dynamic_allocation"
-  
+  architecture: 'distributed_parallel'
+  orchestration: 'aurora_core'
+  resource_management: 'dynamic_allocation'
+
   engine_portfolio:
     aurora_space_sim:
-      type: "physics_simulation"
-      specialization: "space_environment_modeling"
+      type: 'physics_simulation'
+      specialization: 'space_environment_modeling'
       capabilities:
         - gravitational_dynamics
         - orbital_mechanics
@@ -18,12 +18,12 @@ simulation_engines:
         - celestial_mechanics
       performance:
         max_objects: 10000
-        time_acceleration: "1000x"
-        precision: "scientific_grade"
-        
+        time_acceleration: '1000x'
+        precision: 'scientific_grade'
+
     aurora_tech_lab:
-      type: "technology_simulation"
-      specialization: "virtual_prototyping"
+      type: 'technology_simulation'
+      specialization: 'virtual_prototyping'
       capabilities:
         - component_modeling
         - system_integration
@@ -31,13 +31,13 @@ simulation_engines:
         - failure_simulation
         - optimization_algorithms
       performance:
-        complexity_limit: "enterprise_scale"
-        iteration_speed: "real_time"
-        accuracy: "99.5%"
-        
+        complexity_limit: 'enterprise_scale'
+        iteration_speed: 'real_time'
+        accuracy: '99.5%'
+
     aurora_crew_sim:
-      type: "behavioral_simulation"
-      specialization: "human_factors_modeling"
+      type: 'behavioral_simulation'
+      specialization: 'human_factors_modeling'
       capabilities:
         - psychological_profiling
         - team_dynamics
@@ -46,12 +46,12 @@ simulation_engines:
         - learning_curves
       performance:
         crew_size: 50
-        scenario_duration: "unlimited"
-        behavioral_accuracy: "95%"
-        
+        scenario_duration: 'unlimited'
+        behavioral_accuracy: '95%'
+
     aurora_systems_sim:
-      type: "systems_simulation"
-      specialization: "complex_systems_analysis"
+      type: 'systems_simulation'
+      specialization: 'complex_systems_analysis'
       capabilities:
         - network_modeling
         - emergent_behavior
@@ -60,12 +60,12 @@ simulation_engines:
         - risk_assessment
       performance:
         node_capacity: 100000
-        interaction_modeling: "full_mesh"
+        interaction_modeling: 'full_mesh'
         real_time_analysis: true
-        
+
     aurora_ethics_sim:
-      type: "decision_simulation"
-      specialization: "ethical_scenario_modeling"
+      type: 'decision_simulation'
+      specialization: 'ethical_scenario_modeling'
       capabilities:
         - dilemma_generation
         - stakeholder_analysis
@@ -73,24 +73,24 @@ simulation_engines:
         - value_alignment
         - policy_testing
       performance:
-        scenario_complexity: "unlimited"
-        stakeholder_modeling: "comprehensive"
-        ethical_frameworks: "multiple"
-        
+        scenario_complexity: 'unlimited'
+        stakeholder_modeling: 'comprehensive'
+        ethical_frameworks: 'multiple'
+
   parallel_execution:
-    orchestration_engine: "aurora_conductor"
-    load_balancing: "intelligent"
+    orchestration_engine: 'aurora_conductor'
+    load_balancing: 'intelligent'
     resource_pooling: true
     inter_simulation_communication: true
-    
+
   performance_monitoring:
     real_time_metrics: true
     bottleneck_detection: true
     optimization_suggestions: true
     resource_usage_tracking: true
-    
+
   integration_protocols:
-    data_exchange: "standardized_apis"
-    result_synthesis: "automated"
+    data_exchange: 'standardized_apis'
+    result_synthesis: 'automated'
     cross_simulation_validation: true
-    knowledge_transfer: "seamless"
+    knowledge_transfer: 'seamless'

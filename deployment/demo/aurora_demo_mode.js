@@ -11,7 +11,7 @@ class AuroraDemoMode {
       'multi_agent_collaboration',
       'immersive_interface_demo',
       'real_time_visualization',
-      'audio_visual_synthesis'
+      'audio_visual_synthesis',
     ];
   }
 
@@ -21,7 +21,9 @@ class AuroraDemoMode {
 
     console.log('🌟 Available Demo Scenarios:');
     this.demoScenarios.forEach((scenario, index) => {
-      console.log(`  ${index + 1}. ${scenario.replace(/_/g, ' ').toUpperCase()}`);
+      console.log(
+        `  ${index + 1}. ${scenario.replace(/_/g, ' ').toUpperCase()}`
+      );
     });
 
     // Auto-run quantum research simulation
@@ -41,7 +43,7 @@ class AuroraDemoMode {
     return {
       status: 'demo_completed',
       scenarios_run: ['quantum_research_simulation'],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -59,7 +61,7 @@ class AuroraDemoMode {
     return {
       status: 'full_demo_completed',
       results: results,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -70,7 +72,7 @@ class AuroraDemoMode {
       scenario: scenario,
       status: 'completed',
       duration: '1.2s',
-      success: true
+      success: true,
     };
   }
 }

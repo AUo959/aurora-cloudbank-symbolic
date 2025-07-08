@@ -2,9 +2,9 @@ name: Security Audit & Compliance
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run security audit daily at 2 AM UTC
     - cron: '0 2 * * *'

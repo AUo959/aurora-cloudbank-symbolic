@@ -2,57 +2,57 @@
 # Enterprise Fleet Deployment Package
 
 ethics_review_board:
-  board_id: "ERB_ORION_001"
-  composition: "multi_disciplinary"
-  decision_authority: "mission_critical"
-  
+  board_id: 'ERB_ORION_001'
+  composition: 'multi_disciplinary'
+  decision_authority: 'mission_critical'
+
   board_members:
-    - role: "Chief Ethics Officer"
-      clearance: "L5_ETHICS"
-      authority: "policy_creation"
-      
-    - role: "Fleet Operations Representative"
-      clearance: "L4_COMMAND"
-      authority: "operational_review"
-      
-    - role: "AI Ethics Specialist"
-      clearance: "L4_ETHICS"
-      authority: "ai_oversight"
-      
-    - role: "Crew Representative"
-      clearance: "L3_OPERATIONS"
-      authority: "crew_advocacy"
-      
-    - role: "Research Ethics Advisor"
-      clearance: "L3_RESEARCH"
-      authority: "research_protocol"
-      
+    - role: 'Chief Ethics Officer'
+      clearance: 'L5_ETHICS'
+      authority: 'policy_creation'
+
+    - role: 'Fleet Operations Representative'
+      clearance: 'L4_COMMAND'
+      authority: 'operational_review'
+
+    - role: 'AI Ethics Specialist'
+      clearance: 'L4_ETHICS'
+      authority: 'ai_oversight'
+
+    - role: 'Crew Representative'
+      clearance: 'L3_OPERATIONS'
+      authority: 'crew_advocacy'
+
+    - role: 'Research Ethics Advisor'
+      clearance: 'L3_RESEARCH'
+      authority: 'research_protocol'
+
   review_protocols:
     mission_approval:
-      required_for: ["high_risk", "experimental", "long_duration"]
-      review_time: "4_hours_max"
+      required_for: ['high_risk', 'experimental', 'long_duration']
+      review_time: '4_hours_max'
       unanimous_required: false
-      override_authority: "chief_ethics_officer"
-      
+      override_authority: 'chief_ethics_officer'
+
     policy_changes:
-      required_for: ["all_policy_changes"]
-      review_time: "72_hours_max"
+      required_for: ['all_policy_changes']
+      review_time: '72_hours_max'
       unanimous_required: true
       appeal_process: true
-      
+
     emergency_situations:
-      rapid_review: "30_minutes_max"
+      rapid_review: '30_minutes_max'
       minimum_reviewers: 2
-      post_action_review: "mandatory"
-      
+      post_action_review: 'mandatory'
+
   decision_tracking:
     all_decisions_logged: true
     reasoning_documented: true
     minority_opinions_recorded: true
     appeal_process_available: true
-    
+
   audit_requirements:
-    internal_audits: "monthly"
-    external_audits: "annually"
-    transparency_reports: "quarterly"
-    public_accountability: "required"
+    internal_audits: 'monthly'
+    external_audits: 'annually'
+    transparency_reports: 'quarterly'
+    public_accountability: 'required'

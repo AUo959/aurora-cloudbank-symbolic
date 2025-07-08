@@ -7,8 +7,12 @@ class QuantumVisualization3D {
   constructor() {
     this.renderingEngine = {
       type: 'quantum_enhanced_webgl',
-      capabilities: ['real_time_quantum_states', 'entanglement_visualization', 'superposition_rendering'],
-      performance: 'optimized_for_quantum_data'
+      capabilities: [
+        'real_time_quantum_states',
+        'entanglement_visualization',
+        'superposition_rendering',
+      ],
+      performance: 'optimized_for_quantum_data',
     };
     this.visualizationModes = new Map();
     this.quantumStateRenderers = {};
@@ -19,7 +23,7 @@ class QuantumVisualization3D {
     return {
       quantum_canvas: this.createQuantumCanvas(),
       rendering_pipeline: this.setupQuantumRenderingPipeline(),
-      interaction_handlers: this.configureQuantumInteractionHandlers()
+      interaction_handlers: this.configureQuantumInteractionHandlers(),
     };
   }
 
@@ -29,7 +33,7 @@ class QuantumVisualization3D {
       canvas_type: '3d_quantum_interactive',
       quantum_state_support: true,
       real_time_updates: true,
-      immersive_rendering: true
+      immersive_rendering: true,
     };
   }
 
@@ -39,7 +43,7 @@ class QuantumVisualization3D {
       quantum_state_renderer: 'active',
       entanglement_visualizer: 'enabled',
       superposition_display: 'real_time',
-      coherence_indicators: 'visible'
+      coherence_indicators: 'visible',
     };
   }
 
@@ -49,7 +53,7 @@ class QuantumVisualization3D {
       quantum_state_manipulation: true,
       entanglement_interaction: true,
       measurement_simulation: true,
-      quantum_gate_placement: true
+      quantum_gate_placement: true,
     };
   }
 
@@ -59,7 +63,7 @@ class QuantumVisualization3D {
       data: quantumData,
       mode: visualizationMode,
       quantum_enhanced: true,
-      immersive_level: 'maximum'
+      immersive_level: 'maximum',
     };
 
     return this.executeQuantumRendering(renderConfig);
@@ -71,7 +75,7 @@ class QuantumVisualization3D {
       rendering_successful: true,
       quantum_visualization: 'active',
       immersive_experience: 'enhanced',
-      user_interaction: 'enabled'
+      user_interaction: 'enabled',
     };
   }
 
@@ -81,7 +85,7 @@ class QuantumVisualization3D {
       visualization: this.renderQuantumState(researchData.quantum_component),
       interaction: this.enableQuantumInteraction(userContext),
       adaptation: this.adaptToUserBehavior(userContext),
-      enhancement: 'never_before_achieved'
+      enhancement: 'never_before_achieved',
     };
   }
 
@@ -89,7 +93,7 @@ class QuantumVisualization3D {
     return {
       quantum_manipulation: true,
       real_time_feedback: true,
-      immersive_controls: true
+      immersive_controls: true,
     };
   }
 
@@ -97,7 +101,7 @@ class QuantumVisualization3D {
     return {
       behavior_analysis: 'continuous',
       adaptation_rate: 'real_time',
-      personalization: 'quantum_enhanced'
+      personalization: 'quantum_enhanced',
     };
   }
 }

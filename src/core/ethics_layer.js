@@ -4,7 +4,7 @@
 const { loadDiagnostics, saveDiagnostics } = require('./diagnostics');
 
 module.exports = {
-  validatePayload: (payload) => {
+  validatePayload: payload => {
     const protocol = 'Picard_Delta_3';
     console.log(`Validating payload under protocol ${protocol}:`, payload);
     const diag = loadDiagnostics();
@@ -12,5 +12,5 @@ module.exports = {
     saveDiagnostics(diag);
     // Add validation logic here
     return true;
-  }
+  },
 };

@@ -1,13 +1,13 @@
 aurora_gui:
   glyph_alignment:
-  - Aurora
-  - GUMAS
-  - Threadcore
+    - Aurora
+    - GUMAS
+    - Threadcore
   load_on_startup: true
   memory_contexts:
     default:
-    - Lord_Marshal_Virex_TalVaren
-    - Mistress_Daela_Syrix
+      - Lord_Marshal_Virex_TalVaren
+      - Mistress_Daela_Syrix
     explore_all: true
   memory_path: /app/symbols/memory/
   routing:

@@ -9,10 +9,7 @@ import logging
 import sys
 from pathlib import Path
 
-from modules.symbolic_core.sonnet4_integration_hub import (
-    enable_sonnet4_globally,
-    sonnet4_hub,
-)
+from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -64,7 +61,7 @@ async def main():
         return True
 
     except Exception as e:
-        logger.error(f"Failed to enable Sonnet 4: {e}")
+        logger.error("Failed to enable Sonnet 4: %s", e)
         print(f"❌ Failed to enable Claude Sonnet 4: {e}")
         return False
 

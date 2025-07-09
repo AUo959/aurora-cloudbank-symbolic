@@ -42,7 +42,7 @@
     ]
   },
   "dependencies": {
-    "dotenv": "^17.0.0",
+    "dotenv": "^17.1.0",
     "dompurify": "^3.2.6",
     "jsdom": "^26.1.0"
   },

@@ -11,9 +11,12 @@ from pathlib import Path
 def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:
-        _ = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        # Use shlex.split for secure command execution
+        import shlex
+        cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
         return result.stdout.strip(), result.returncode == 0
-    except (OSError, ValueError, RuntimeError):
+    except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False
 
 

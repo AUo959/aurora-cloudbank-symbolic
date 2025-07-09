@@ -307,12 +307,14 @@ class MaintenanceScheduler:
                 if self.config["safety_settings"]["dry_run_mode"]:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
+                    import shlex
+                    cmd_parts = shlex.split(command) if isinstance(command, str) else command
                     result = subprocess.run(
-                        command,
-                        shell=True,
+                        cmd_parts,
                         capture_output=True,
                         text=True,
                         cwd=self.repo_path,
+                        timeout=300
                     )
                     if result.returncode == 0:
                         cleaned_files += 1

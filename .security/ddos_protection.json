@@ -1,0 +1,27 @@
+{
+  "ddos_protection": {
+    "cloud_provider": "AWS_Shield_Advanced",
+    "scrubbing_capacity": "15_Tbps",
+    "auto_scaling": {
+      "enabled": true,
+      "triggers": [
+        "cpu_90_percent",
+        "memory_85_percent"
+      ],
+      "scale_up_threshold": "1000_rps",
+      "scale_down_threshold": "100_rps"
+    },
+    "rate_limiting": {
+      "global_limit": "10000_rps",
+      "per_ip_limit": "100_rps",
+      "burst_capacity": "200_requests"
+    },
+    "bgp_diversion": {
+      "enabled": true,
+      "providers": [
+        "CloudFlare",
+        "AWS_Shield"
+      ]
+    }
+  }
+}

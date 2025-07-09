@@ -19,11 +19,20 @@ logger = get_logger("staff_node_ci_helper")
 
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
+    import shlex
     logger.info("Running: %s", cmd)
-    _ = subprocess.run(cmd, shell=True)
-    if result.returncode != 0:
-        logger.error("Command failed: %s", cmd)
-        sys.exit(result.returncode)
+    try:
+        cmd_parts = shlex.split(cmd)
+        result = subprocess.run(cmd_parts, timeout=300)
+        if result.returncode != 0:
+            logger.error("Command failed: %s", cmd)
+            sys.exit(result.returncode)
+    except subprocess.TimeoutExpired:
+        logger.error("Command timed out: %s", cmd)
+        sys.exit(1)
+    except Exception as e:
+        logger.error("Command execution error: %s", e)
+        sys.exit(1)
 
 
 def main() -> None:

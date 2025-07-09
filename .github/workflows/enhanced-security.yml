@@ -1,0 +1,56 @@
+name: 🛡️ Aurora Enhanced Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM
+
+jobs:
+  comprehensive-security-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 🔍 Multi-Tool Security Scan
+      run: |
+        # Bandit for Python security
+        pip install bandit[toml]
+        bandit -r . -f sarif -o bandit-results.sarif || true
+        
+        # Safety for dependency vulnerabilities
+        pip install safety
+        safety check --json > safety-results.json || true
+        
+        # Semgrep for multi-language analysis
+        python -m pip install semgrep
+        semgrep --config=auto --sarif -o semgrep-results.sarif . || true
+        
+        # Trivy for container and infrastructure scanning
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+        trivy fs --format sarif --output trivy-results.sarif . || true
+    
+    - name: 📊 Upload Security Results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: bandit-results.sarif
+        category: bandit
+    
+    - name: 🚨 Security Alert on High Severity
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '🚨 High Severity Security Alert',
+            body: 'Critical security vulnerabilities detected. Please review immediately.',
+            labels: ['security', 'critical']
+          })

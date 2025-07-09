@@ -615,12 +615,14 @@ class EnhancedGITWiz:
         try:
             # Execute solution commands
             for cmd in best_pattern.solution_commands:
-                _ = subprocess.run(
-                    cmd,
-                    shell=True,
+                import shlex
+                cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
+                result = subprocess.run(
+                    cmd_parts,
                     cwd=self.project_root,
                     capture_output=True,
                     text=True,
+                    timeout=300
                 )
                 if result.returncode != 0:
                     logger.error(f"Command failed: {cmd}")

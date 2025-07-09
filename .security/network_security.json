@@ -1,0 +1,25 @@
+{
+  "network_security": {
+    "zero_trust_model": true,
+    "microsegmentation": {
+      "enabled": true,
+      "platform": "Cisco_Tetration",
+      "policy_enforcement": "deny_by_default"
+    },
+    "network_access_control": {
+      "device_authentication": true,
+      "posture_assessment": true,
+      "dynamic_vlan_assignment": true
+    },
+    "lateral_movement_prevention": {
+      "east_west_traffic_inspection": true,
+      "anomaly_detection": true,
+      "automatic_quarantine": true
+    },
+    "vpn_security": {
+      "suite_b_ciphers": true,
+      "certificate_based_auth": true,
+      "split_tunneling": false
+    }
+  }
+}

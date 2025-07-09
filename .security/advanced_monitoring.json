@@ -1,0 +1,25 @@
+{
+  "advanced_monitoring": {
+    "siem_platform": "Splunk_Enterprise_Security",
+    "threat_hunting": {
+      "mitre_attack_mapping": true,
+      "hypothesis_driven_hunting": true,
+      "automated_hunting_queries": true
+    },
+    "deception_technology": {
+      "honeypots": true,
+      "honey_tokens": true,
+      "canary_files": true
+    },
+    "behavioral_analytics": {
+      "user_behavior": true,
+      "entity_behavior": true,
+      "network_behavior": true
+    },
+    "threat_intelligence": {
+      "ioc_feeds": true,
+      "attribution_analysis": true,
+      "predictive_analytics": true
+    }
+  }
+}

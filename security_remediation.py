@@ -62,7 +62,7 @@ class SecurityRemediator:
         if not file_path.exists():
             return
 
-        with open(file_path, "r", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             content = f.read()
 
         self.log_security_issue("Unsafe shell=True usage in dev-status.py")
@@ -88,7 +88,7 @@ class SecurityRemediator:
         return "", False'''
         )
 
-        with open(file_path, "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(fixed_content)
 
         self.log_fix("Fixed shell injection vulnerability in dev-status.py")
@@ -99,7 +99,7 @@ class SecurityRemediator:
         if not file_path.exists():
             return
 
-        with open(file_path, "r", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             content = f.read()
 
         self.log_security_issue("Unsafe shell=True usage in staff_node_ci_helper.py")
@@ -131,7 +131,7 @@ class SecurityRemediator:
         sys.exit(1)'''
         )
 
-        with open(file_path, "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(fixed_content)
 
         self.log_fix("Fixed shell injection vulnerability in staff_node_ci_helper.py")
@@ -142,7 +142,7 @@ class SecurityRemediator:
         if not file_path.exists():
             return
 
-        with open(file_path, "r", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             content = f.read()
 
         self.log_security_issue("Unsafe shell=True usage in infallible_codespace_init.py")
@@ -177,7 +177,7 @@ class SecurityRemediator:
     return False'''
         )
 
-        with open(file_path, "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(fixed_content)
 
         self.log_fix("Fixed shell injection vulnerability in infallible_codespace_init.py")
@@ -225,7 +225,7 @@ class SecurityRemediator:
             }
         }
 
-        with open(".security/security_policy.json", "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(".security/security_policy.json", "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             json.dump(security_policy, f, indent=2)
 
         self.log_fix("Created comprehensive security policy")
@@ -384,7 +384,7 @@ secure = SecureHelpers()
 '''
 
         Path(".security").mkdir(exist_ok=True)
-        with open(".security/secure_helpers.py", "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(".security/secure_helpers.py", "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(secure_helpers_content)
 
         self.log_fix("Created secure helper functions")
@@ -457,7 +457,7 @@ jobs:
           inputs: requirements.txt
 '''
 
-        with open(".github/security-config.yml", "w", encoding="utf-8", encoding='utf-8') as f:
+        with open(".github/security-config.yml", "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(security_config)
 
         self.log_fix("Updated GitHub security configuration")
@@ -576,7 +576,7 @@ result = secure.secure_eval_alternative(user_expression)
 *Version: 1.0*
 '''
 
-        with open("SECURITY.md", "w", encoding="utf-8", encoding='utf-8') as f:
+        with open("SECURITY.md", "w", encoding="utf-8", encoding="utf-8", encoding="utf-8", encoding='utf-8') as f:
             f.write(security_docs)
 
         self.log_fix("Created comprehensive security documentation")

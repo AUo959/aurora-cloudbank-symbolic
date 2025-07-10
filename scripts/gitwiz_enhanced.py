@@ -528,12 +528,12 @@ class EnhancedGITWiz:
                 try:
                     with open(file_path, "rb") as f:
                         _file_hash = hashlib.md5(f.read()).hexdigest()
-                        if ___file_hash in file_hashes:
+                        if __file_hash in file_hashes:
                             issues.append(
-                                f"Duplicate file: {file_path.name} (matches {file_hashes[file_hash].name})"
+                                f"Duplicate file: {file_path.name} (matches {file_hashes[_file_hash].name})"
                             )
                         else:
-                            file_hashes[file_hash] = file_path
+                            file_hashes[_file_hash] = file_path
                 except (OSError, ValueError, RuntimeError):
                     continue
 

@@ -48,12 +48,17 @@ coverage.xml
 # VS Code
 .vscode/
 
+# DevContainer backups
+.devcontainer/*.backup
+
 # Mac
 .DS_Store
 
 # Environment variables
 .env
 !.env.example
+# Dependencies
+node_modules/
 .env.*
 
 # System files

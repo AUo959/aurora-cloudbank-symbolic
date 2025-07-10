@@ -530,10 +530,10 @@ class EnhancedGITWiz:
                         _file_hash = hashlib.md5(f.read()).hexdigest()
                         if ___file_hash in file_hashes:
                             issues.append(
-                                f"Duplicate file: {file_path.name} (matches {file_hashes[_file_hash].name})"
+                                f"Duplicate file: {file_path.name} (matches {file_hashes[file_hash].name})"
                             )
                         else:
-                            file_hashes[_file_hash] = file_path
+                            file_hashes[file_hash] = file_path
                 except (OSError, ValueError, RuntimeError):
                     continue
 
@@ -668,7 +668,7 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if hasattr(locals(), "result") and result.returncode == 0:
+        if "result" in locals() and result.returncode == 0:
             merged_branches = [
                 b.strip()
                 for b in result.stdout.split("\n")
@@ -724,7 +724,7 @@ class EnhancedGITWiz:
                 shell=False,
                 check=False,
             )
-            if hasattr(locals(), "result") and result.stdout:
+            if "result" in locals() and result.stdout:
                 try:
                     issues = json.loads(result.stdout)
                     lint_issues.extend(
@@ -746,7 +746,7 @@ class EnhancedGITWiz:
                 shell=False,
                 check=False,
             )
-            if hasattr(locals(), "result") and result.stdout:
+            if "result" in locals() and result.stdout:
                 try:
                     issues = json.loads(result.stdout)
                     lint_issues.extend([f"Flake8: {issue['text']}" for issue in issues])
@@ -1005,7 +1005,7 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if hasattr(locals(), "result") and result.stdout:
+        if "result" in locals() and result.stdout:
             print(result.stdout)
         if result.stderr:
             print(result.stderr)

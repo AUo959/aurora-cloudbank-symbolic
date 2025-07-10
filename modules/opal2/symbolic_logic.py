@@ -1,6 +1,7 @@
 """Stub symbolic logic engine."""
 from __future__ import annotations
 
+import ast
 from typing import Any
 
 from .base_component import Opal2Component

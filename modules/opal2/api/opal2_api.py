@@ -8,10 +8,8 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any, Union
-import asyncio
+from typing import Dict, List, Optional, Any
 import json
-import numpy as np
 from datetime import datetime
 import uuid
 
@@ -155,7 +153,7 @@ async def render_glyph(request: RenderRequest):
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/generate")
 async def generate_glyph(request: GlyphGenerationRequest):
@@ -185,7 +183,7 @@ async def generate_glyph(request: GlyphGenerationRequest):
         }
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/plugins")
 async def list_plugins():
@@ -247,7 +245,7 @@ async def notify_clients(message: Dict[str, Any]):
         for connection in active_connections.copy():
             try:
                 await connection.send_text(message_str)
-            except:
+            except Exception:
                 active_connections.remove(connection)
 
 # Component health test functions
@@ -258,7 +256,7 @@ async def test_glyph_core():
         test_result = await glyph_core.test_generation()
         return {"healthy": True, "test_result": test_result}
     except Exception as e:
-        return {"healthy": False, "error": str(e)}
+        return {"healthy": False, "error": "Component health check failed"}
 
 async def test_quantum_renderer():
     """Test quantum renderer functionality"""
@@ -266,7 +264,7 @@ async def test_quantum_renderer():
         test_result = await quantum_renderer.test_render()
         return {"healthy": True, "test_result": test_result}
     except Exception as e:
-        return {"healthy": False, "error": str(e)}
+        return {"healthy": False, "error": "Component health check failed"}
 
 async def test_plugin_system():
     """Test plugin system functionality"""
@@ -274,7 +272,7 @@ async def test_plugin_system():
         plugin_count = len(plugin_system.list_plugins())
         return {"healthy": True, "plugin_count": plugin_count}
     except Exception as e:
-        return {"healthy": False, "error": str(e)}
+        return {"healthy": False, "error": "Component health check failed"}
 
 async def test_cache_system():
     """Test cache system functionality"""
@@ -282,7 +280,7 @@ async def test_cache_system():
         stats = await glyph_cache.get_stats()
         return {"healthy": True, "stats": stats}
     except Exception as e:
-        return {"healthy": False, "error": str(e)}
+        return {"healthy": False, "error": "Component health check failed"}
 
 # Mount static files for web interface
 app.mount("/static", StaticFiles(directory="static"), name="static")

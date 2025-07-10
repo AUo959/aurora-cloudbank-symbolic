@@ -1,5 +1,97 @@
 # Changelog
 
+## 0.38.0
+
+- Add MD059/descriptive-link-text
+- Improve MD025/MD027/MD036/MD038/MD041/MD043/MD045/MD051/MD052
+- `markdown-it` parser no longer a production dependency (breaking change)
+  - Add `markdownItFactory` option, remove `markdownItPlugins` option
+- Remove support for end-of-life Node version 18
+- Improve performance
+- Update dependencies
+
+## 0.37.4
+
+- Stop using `module.createRequire`, export `resolveModule`
+
+## 0.37.3
+
+- Tweak `package.json` dependencies to work with `pnpm`
+
+## 0.37.2
+
+- Add subpath imports for overriding default bundler behavior
+- Improve MD032
+
+## 0.37.1
+
+- Add support for "browser" condition (as used by webpack)
+
+## 0.37.0
+
+- Convert module to ECMAScript (breaking change)
+  - <https://nodejs.org/docs/latest/api/esm.html>
+  - <https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c>
+- Convert module to named exports (breaking change)
+
+## 0.36.1
+
+- Fix behavior of MD054
+
+## 0.36.0
+
+- Improve MD051
+- Move `applyFix` and `applyFixes` from helpers to core
+- Make `micromark` parser available to custom rules
+- Introduce `./micromark` helpers exports
+- Update custom/rule documentation
+- Improve performance
+- Update dependencies
+
+## 0.35.0
+
+- Add MD058/blanks-around-tables
+- Use `micromark` in MD001/MD003/MD009/MD010/MD013/MD014/MD019/MD021/MD023/
+  MD024/MD025/MD039/MD042/MD043
+- Improve MD018/MD020/MD031/MD034/MD044
+- `markdown-it` parser no longer invoked by default
+- Add strict version of JSON schema
+- Improve performance
+- Update dependencies
+
+## 0.34.0
+
+- Use `micromark` in MD027/MD028/MD036/MD040/MD041/MD046/MD048
+- Improve MD013/MD034/MD049/MD050/MD051
+- Update custom rule requirements and documentation
+- Improve various TypeScript declarations
+- Update dependencies
+
+## 0.33.0
+
+- Add MD055/table-pipe-style, MD056/table-column-count
+- Improve MD005/MD007/MD024/MD026/MD038
+- Incorporate `micromark-extension-directive`
+- Improve JSON schema, document validation
+- Reduce size of browser script
+- Update dependencies
+
+## 0.32.1
+
+- Fix behavior of MD054
+
+## 0.32.0
+
+- Remove deprecated MD002/MD006
+- Remove rule aliases for "header"
+- Add MD054/link-image-style
+- Use `micromark` in MD005/MD007/MD030
+- Improve MD022/MD026/MD034/MD037/MD038/MD045/MD051
+- Improve JSON schema and related examples
+- Provide type declaration for Configuration object
+- Remove support for end-of-life Node version 16
+- Update dependencies
+
 ## 0.31.1
 
 - Improve MD032/MD034

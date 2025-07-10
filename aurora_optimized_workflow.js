@@ -110,21 +110,21 @@ class AuroraOptimizedWorkflow {
   // Phase-specific execution logic
   async executePhaseLogic(phase) {
     switch (phase.id) {
-      case 'PHASE_1':
-        await this.planWebEnvironmentArchitecture();
-        break;
-      case 'PHASE_2':
-        await this.establishQuantumHybridIntegration();
-        break;
-      case 'PHASE_3':
-        await this.buildImmersiveInterfaceDesign();
-        break;
-      case 'PHASE_4':
-        await this.createResearchHubFramework();
-        break;
-      case 'PHASE_5':
-        await this.developAudiovisualSystem();
-        break;
+    case 'PHASE_1':
+      await this.planWebEnvironmentArchitecture();
+      break;
+    case 'PHASE_2':
+      await this.establishQuantumHybridIntegration();
+      break;
+    case 'PHASE_3':
+      await this.buildImmersiveInterfaceDesign();
+      break;
+    case 'PHASE_4':
+      await this.createResearchHubFramework();
+      break;
+    case 'PHASE_5':
+      await this.developAudiovisualSystem();
+      break;
     }
   }
 

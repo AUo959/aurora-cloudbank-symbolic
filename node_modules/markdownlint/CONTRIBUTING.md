@@ -14,13 +14,14 @@ Match the coding style of the files you edit. Although everyone has their own
 preferences and opinions, a pull request is not the right forum to debate them.
 
 Do not add new [`dependencies` to `package.json`][dependencies]. The Markdown
-parsers [`markdown-it`][markdown-it] and [`micromark`][micromark] are the
-project's only dependencies.
+parser [`micromark`][micromark] (and its extensions) is this project's only
+dependency.
 
 Package versions for `dependencies` and `devDependencies` should be specified
 exactly (also known as "pinning"). The short explanation is that doing otherwise
-eventually leads to inconsistent behavior and broken functionality. (See [Pin
-your npm/yarn dependencies][pin-dependencies] for a longer explanation.)
+eventually leads to inconsistent behavior and broken functionality. (See [Why I
+pin dependency versions in Node.js packages][version-pinning] for a longer
+explanation.)
 
 If developing a new rule, start by creating a [custom rule][custom-rules] in its
 own project. Once written, published, and tested in real world scenarios, open
@@ -73,8 +74,8 @@ In order to maintain the permissive MIT license this project uses, all
 contributions must be your own and released under that license. Code you add
 should be an original work and should not be copied from elsewhere. Taking code
 from a different project, Stack Overflow, or the like is not allowed. The use of
-tools such as GitHub Copilot that generate code from other projects is not
-allowed.
+tools such as GitHub Copilot, ChatGPT, LLMs (large language models), etc. that
+incorporate code from other projects is not allowed.
 
 Thank you!
 
@@ -84,9 +85,8 @@ Thank you!
 [custom-rules]: doc/CustomRules.md
 [dependencies]: https://docs.npmjs.com/files/package.json#dependencies
 [example-com]: https://en.wikipedia.org/wiki/Example.com
-[markdown-it]: https://www.npmjs.com/package/markdown-it
 [micromark]: https://www.npmjs.com/package/micromark
 [new-rule]: https://github.com/DavidAnson/markdownlint/labels/new%20rule
 [npm-scripts]: https://docs.npmjs.com/misc/scripts
-[pin-dependencies]: https://maxleiter.com/blog/pin-dependencies
 [rewriting-history]: https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History
+[version-pinning]: https://dlaa.me/blog/post/versionpinning

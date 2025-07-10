@@ -436,7 +436,7 @@ class SecurityValidator:
     def generate_validation_report(self, results: Dict[str, Any]):
         """Generate comprehensive validation report."""
 
-        report_content = f"""# 🔍 Aurora CloudBank Security Validation Report
+        report_content = """# 🔍 Aurora CloudBank Security Validation Report
 
 ## Validation Summary
 
@@ -455,7 +455,7 @@ class SecurityValidator:
         for i, result in enumerate(results['validation_results'], 1):
             report_content += f"| {i} | {result['vector']} | {result['score']}% | {result['status']} |\n"
 
-        report_content += f"""
+        report_content += """
 ---
 
 ## 📊 Security Metrics
@@ -487,7 +487,7 @@ class SecurityValidator:
         for recommendation in results['recommendations']:
             report_content += f"- {recommendation}\n"
 
-        report_content += f"""
+        report_content += """
 ---
 
 ## 🎖️ Compliance Status
@@ -526,7 +526,7 @@ class SecurityValidator:
 """
 
         report_file = self.project_root / 'AURORA_SECURITY_VALIDATION_REPORT.md'
-        with open(report_file, 'w') as f:
+        with open(report_file, "w", encoding="utf-8", encoding="utf-8") as f:
             f.write(report_content)
 
         logger.info("✅ Security validation report generated")

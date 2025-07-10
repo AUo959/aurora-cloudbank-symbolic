@@ -25,15 +25,14 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional
 
-import pkg_resources
-import toml
-import yaml
+# import pkg_resources  # Optional dependency
+# import toml  # Optional dependency
+# import yaml  # Optional dependency
 
 # Import HDE++ for decision making
 try:
@@ -529,12 +528,12 @@ class EnhancedGITWiz:
                 try:
                     with open(file_path, "rb") as f:
                         _file_hash = hashlib.md5(f.read()).hexdigest()
-                        if file_hash in file_hashes:
+                        if __file_hash in file_hashes:
                             issues.append(
-                                f"Duplicate file: {file_path.name} (matches {file_hashes[file_hash].name})"
+                                f"Duplicate file: {file_path.name} (matches {file_hashes[_file_hash].name})"
                             )
                         else:
-                            file_hashes[file_hash] = file_path
+                            file_hashes[_file_hash] = file_path
                 except (OSError, ValueError, RuntimeError):
                     continue
 
@@ -669,7 +668,7 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if result.returncode == 0:
+        if hasattr(locals(), "result") and result.returncode == 0:
             merged_branches = [
                 b.strip()
                 for b in result.stdout.split("\n")
@@ -725,7 +724,7 @@ class EnhancedGITWiz:
                 shell=False,
                 check=False,
             )
-            if result.stdout:
+            if hasattr(locals(), "result") and result.stdout:
                 try:
                     issues = json.loads(result.stdout)
                     lint_issues.extend(
@@ -747,7 +746,7 @@ class EnhancedGITWiz:
                 shell=False,
                 check=False,
             )
-            if result.stdout:
+            if hasattr(locals(), "result") and result.stdout:
                 try:
                     issues = json.loads(result.stdout)
                     lint_issues.extend([f"Flake8: {issue['text']}" for issue in issues])
@@ -1006,7 +1005,7 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if result.stdout:
+        if hasattr(locals(), "result") and result.stdout:
             print(result.stdout)
         if result.stderr:
             print(result.stderr)

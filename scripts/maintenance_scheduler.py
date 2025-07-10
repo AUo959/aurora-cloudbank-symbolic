@@ -9,13 +9,12 @@ import datetime
 import json
 import os
 import subprocess
-import sys
 import threading
 import time
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Dict, List
 
-import schedule
+# import schedule  # Optional dependency
 
 
 class MaintenanceScheduler:

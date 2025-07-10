@@ -91,7 +91,7 @@ class AuroraSecurityEnhancer:
         }
 
         mfa_file = self.security_dir / 'mfa_policy.json'
-        with open(mfa_file, 'w') as f:
+        with open(mfa_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(mfa_config, f, indent=2)
 
         self.enhancements_applied.append("MFA Policy Implementation")
@@ -122,7 +122,7 @@ class AuroraSecurityEnhancer:
         }
 
         ddos_file = self.security_dir / 'ddos_protection.json'
-        with open(ddos_file, 'w') as f:
+        with open(ddos_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(ddos_config, f, indent=2)
 
         self.enhancements_applied.append("DDoS Protection Configuration")
@@ -152,7 +152,7 @@ class AuroraSecurityEnhancer:
         }
 
         cspm_file = self.security_dir / 'cspm_configuration.json'
-        with open(cspm_file, 'w') as f:
+        with open(cspm_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(cspm_config, f, indent=2)
 
         self.enhancements_applied.append("Cloud Security Posture Management")
@@ -186,7 +186,7 @@ class AuroraSecurityEnhancer:
         }
 
         email_file = self.security_dir / 'email_security.json'
-        with open(email_file, 'w') as f:
+        with open(email_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(email_security, f, indent=2)
 
         self.enhancements_applied.append("Email Security Gateway")
@@ -223,7 +223,7 @@ class AuroraSecurityEnhancer:
         }
 
         ueba_file = self.security_dir / 'ueba_configuration.json'
-        with open(ueba_file, 'w') as f:
+        with open(ueba_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(ueba_config, f, indent=2)
 
         self.enhancements_applied.append("Insider Threat Detection (UEBA)")
@@ -254,7 +254,7 @@ class AuroraSecurityEnhancer:
         }
 
         zero_day_file = self.security_dir / 'zero_day_response.json'
-        with open(zero_day_file, 'w') as f:
+        with open(zero_day_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(zero_day_config, f, indent=2)
 
         self.enhancements_applied.append("Zero-Day Response Capability")
@@ -289,7 +289,7 @@ class AuroraSecurityEnhancer:
         }
 
         network_file = self.security_dir / 'network_security.json'
-        with open(network_file, 'w') as f:
+        with open(network_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(network_config, f, indent=2)
 
         self.enhancements_applied.append("Network Security & Zero Trust")
@@ -320,7 +320,7 @@ class AuroraSecurityEnhancer:
         }
 
         dns_file = self.security_dir / 'dns_security.json'
-        with open(dns_file, 'w') as f:
+        with open(dns_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(dns_config, f, indent=2)
 
         self.enhancements_applied.append("DNS Security Implementation")
@@ -354,7 +354,7 @@ class AuroraSecurityEnhancer:
         }
 
         storage_file = self.security_dir / 'object_storage_security.json'
-        with open(storage_file, 'w') as f:
+        with open(storage_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(storage_config, f, indent=2)
 
         self.enhancements_applied.append("Object Storage Security")
@@ -389,7 +389,7 @@ class AuroraSecurityEnhancer:
         }
 
         monitoring_file = self.security_dir / 'advanced_monitoring.json'
-        with open(monitoring_file, 'w') as f:
+        with open(monitoring_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(monitoring_config, f, indent=2)
 
         self.enhancements_applied.append("Advanced Monitoring & Threat Hunting")
@@ -426,7 +426,7 @@ class AuroraSecurityEnhancer:
         }
 
         ir_file = self.security_dir / 'incident_response.json'
-        with open(ir_file, 'w') as f:
+        with open(ir_file, "w", encoding="utf-8", encoding="utf-8") as f:
             json.dump(ir_config, f, indent=2)
 
         self.enhancements_applied.append("Automated Incident Response")
@@ -496,7 +496,7 @@ jobs:
 
         workflow_file = self.github_dir / 'workflows' / 'enhanced-security.yml'
         os.makedirs(workflow_file.parent, exist_ok=True)
-        with open(workflow_file, 'w') as f:
+        with open(workflow_file, "w", encoding="utf-8", encoding="utf-8") as f:
             f.write(workflow_content)
 
         self.enhancements_applied.append("Enhanced GitHub Security Workflows")
@@ -505,7 +505,7 @@ jobs:
     def generate_security_report(self, results: Dict[str, Any]):
         """Generate comprehensive security enhancement report."""
 
-        report_content = f"""# 🛡️ Aurora CloudBank Security Enhancement Report
+        report_content = """# 🛡️ Aurora CloudBank Security Enhancement Report
 
 ## Implementation Summary
 
@@ -522,7 +522,7 @@ jobs:
         for i, enhancement in enumerate(results['enhancements'], 1):
             report_content += f"{i}. ✅ **{enhancement}**\n"
 
-        report_content += f"""
+        report_content += """
 ---
 
 ## 🔒 Attack Vector Coverage
@@ -577,7 +577,7 @@ jobs:
 """
 
         report_file = self.project_root / 'AURORA_ENHANCED_SECURITY_REPORT.md'
-        with open(report_file, 'w') as f:
+        with open(report_file, "w", encoding="utf-8", encoding="utf-8") as f:
             f.write(report_content)
 
         logger.info("✅ Security enhancement report generated")

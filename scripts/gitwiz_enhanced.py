@@ -528,7 +528,7 @@ class EnhancedGITWiz:
                 try:
                     with open(file_path, "rb") as f:
                         _file_hash = hashlib.md5(f.read()).hexdigest()
-                        if __file_hash in file_hashes:
+                        if ___file_hash in file_hashes:
                             issues.append(
                                 f"Duplicate file: {file_path.name} (matches {file_hashes[_file_hash].name})"
                             )

@@ -610,8 +610,7 @@ def main():
         return True
     else:
         print(
-            f"\n❌ Security enhancement failed: {results.get('error',
-            'Unknown error')}"
+            f"\n❌ Security enhancement failed: {results.get('error', 'Unknown error')}"
         )
         return False
 

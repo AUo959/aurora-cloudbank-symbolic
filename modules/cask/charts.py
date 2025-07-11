@@ -1,5 +1,6 @@
 """Chart generation utilities for CASK."""
 
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 

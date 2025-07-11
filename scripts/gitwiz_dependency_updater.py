@@ -148,7 +148,7 @@ class DependencyAutoUpdater:
 
         try:
             # Update all packages
-            _ = subprocess.run(
+            result = subprocess.run(
                 [
                     sys.executable,
                     "-m",
@@ -193,7 +193,7 @@ class DependencyAutoUpdater:
 
         try:
             # Update packages
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["npm", "update"],
                 capture_output=True,
                 text=True,
@@ -224,7 +224,7 @@ class DependencyAutoUpdater:
 
         # Python security audit with pip-audit (if available)
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [sys.executable, "-m", "pip", "install", "pip-audit"],
                 capture_output=True,
                 text=True,
@@ -253,7 +253,7 @@ class DependencyAutoUpdater:
         package_json = self.project_root / "package.json"
         if package_json.exists():
             try:
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "audit", "--json"],
                     capture_output=True,
                     text=True,

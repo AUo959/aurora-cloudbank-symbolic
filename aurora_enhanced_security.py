@@ -609,7 +609,10 @@ def main():
         print("📋 See AURORA_ENHANCED_SECURITY_REPORT.md for details")
         return True
     else:
-        print(f"\n❌ Security enhancement failed: {results.get('error', 'Unknown error')}")
+        print(
+            f"\n❌ Security enhancement failed: {results.get('error',
+            'Unknown error')}"
+        )
         return False
 
 

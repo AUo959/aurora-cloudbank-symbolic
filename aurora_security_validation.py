@@ -91,9 +91,13 @@ class SecurityValidator:
 
         # Generate recommendations
         if results["overall_score"] >= 90:
-            results["recommendations"] = ["✅ Excellent security posture - maintain current measures"]
+            results["recommendations"] = (
+    ["✅ Excellent security posture - maintain current measures"]
+)
         elif results["overall_score"] >= 70:
-            results["recommendations"] = ["🟡 Good security - address partial protections"]
+            results["recommendations"] = (
+    ["🟡 Good security - address partial protections"]
+)
         else:
             results["recommendations"] = ["🔴 Critical gaps - immediate action required"]
 

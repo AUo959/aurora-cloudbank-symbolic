@@ -36,8 +36,6 @@ from typing import Any, Dict, List, Optional
 
 # Import HDE++ for decision making
 try:
-    import sys
-
     sys.path.append(str(Path(__file__).parent.parent))
     from hdeplusplus import HeuristicDecisionEnginePlusPlus
 except ImportError:
@@ -452,7 +450,7 @@ class EnhancedGITWiz:
                 shell=False,
                 check=False,
             )
-            commit_hash = result.stdout.strip() if result.returncode == 0 else "unknown"
+            commit_hash = getattr(result, "stdout", "").strip() if hasattr(result, "returncode") and result.returncode == 0 else "unknown"
 
             # Count files and calculate total size
             file_count = 0
@@ -474,7 +472,8 @@ class EnhancedGITWiz:
                 check=False,
             )
             branch_count = (
-                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
+                len(getattr(result, "stdout", "").strip().split("
+")) if hasattr(result, "returncode") and result.returncode == 0 else 0
             )
 
             # Detect issues
@@ -528,7 +527,7 @@ class EnhancedGITWiz:
                 try:
                     with open(file_path, "rb") as f:
                         _file_hash = hashlib.md5(f.read()).hexdigest()
-                        if ___file_hash in file_hashes:
+                        if _file_hash in file_hashes:
                             issues.append(
                                 f"Duplicate file: {file_path.name} (matches {file_hashes[_file_hash].name})"
                             )
@@ -668,7 +667,7 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if "result" in locals() and result.returncode == 0:
+        if "result" in locals() and hasattr(result, "returncode") and result.returncode == 0:
             merged_branches = [
                 b.strip()
                 for b in result.stdout.split("\n")
@@ -1005,11 +1004,11 @@ class EnhancedGITWiz:
             shell=False,
             check=False,
         )
-        if "result" in locals() and result.stdout:
+        if "result" in locals() and hasattr(result, 'stdout') and result.stdout:
             print(result.stdout)
-        if result.stderr:
+        if "result" in locals() and hasattr(result, 'stderr') and result.stderr:
             print(result.stderr)
-        if check and result.returncode != 0:
+        if "check" in locals() and check and "result" in locals() and result.returncode != 0:
             raise RuntimeError(f"Command failed: {' '.join(cmd)}")
         return result.returncode == 0
 

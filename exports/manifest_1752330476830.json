@@ -1,0 +1,158 @@
+{
+  "manifest_name": "comprehensive_aurora_export",
+  "manifest_id": "manifest_1752330476830",
+  "creation_timestamp": 1752330476.830139,
+  "creation_datetime": "2025-07-12T14:27:56.830142",
+  "total_tags": 4,
+  "aurora_version": "3.5.2-optimized",
+  "zero_dependencies": true,
+  "tags": [
+    {
+      "tag_id": "dlp_000001_1752330476828",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1752330476.828614,
+      "datetime": "2025-07-12T14:27:56.828614",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000002_1752330476829",
+      "operation": "symbolic_operation",
+      "data_hash": "4754ded530a0ced68d3781025852f845e5fb3f917b219d904cf5bba8d767c399",
+      "timestamp": 1752330476.8299892,
+      "datetime": "2025-07-12T14:27:56.829989",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "test",
+          "dlp",
+          "integration"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "test",
+          "dlp",
+          "integration"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000003_1752330476829",
+      "operation": "hybrid_operation",
+      "data_hash": "764fad3e45c4b9591d7c6f45359c63779afe20eaa4d5921fd676242b1d7d79a7",
+      "timestamp": 1752330476.8300064,
+      "datetime": "2025-07-12T14:27:56.830006",
+      "dependencies": [
+        "dlp_000001_1752330476828",
+        "dlp_000002_1752330476829"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000001_1752330476828",
+        "symbolic_component": "dlp_000002_1752330476829",
+        "efficiency": 0.7674398446486941,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "PICARD_DELTA_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9999889930823526,
+          "symbolic_entropy": 1.4651093037849645,
+          "combined_entropy": 1.2325491484336586
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000004_1752330476830",
+      "operation": "memory_seal",
+      "data_hash": "c3a360f2461657513c118757e6f03d4a6af1f511f8523e84432934565d9e6d6f",
+      "timestamp": 1752330476.830034,
+      "datetime": "2025-07-12T14:27:56.830034",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1752330476830",
+        "integrity_hash": "dcc24f5b703f325de5f3d002f67f3820226672e9988825ed19015ec68c321a24",
+        "seal_timestamp": 1752330476.8300297
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    }
+  ],
+  "aurora_metadata": {
+    "anchor_protocols": [
+      "EOS_SEED_ORION",
+      "QUANTUM_SYMBOLIC_BRIDGE",
+      "PICARD_DELTA_3",
+      "CONTINUITY_PRESERVATION"
+    ],
+    "t1_srb_anchors": [
+      "T1_CAUSAL_ANCHOR",
+      "T1_SPATIAL_ANCHOR",
+      "T1_TEMPORAL_ANCHOR",
+      "SRB_REALITY_BRIDGE",
+      "SRB_SYMBOLIC_BRIDGE",
+      "SRB_QUANTUM_BRIDGE"
+    ],
+    "symbolic_patterns": {
+      "vsa_encoding": [
+        [
+          "test",
+          "dlp",
+          "integration"
+        ]
+      ],
+      "hybrid_fusion": [
+        {
+          "quantum_entropy": 0.9999889930823526,
+          "symbolic_entropy": 1.4651093037849645,
+          "combined_entropy": 1.2325491484336586
+        }
+      ]
+    },
+    "continuity_preserved": true,
+    "performance_optimized": true
+  }
+}

@@ -62,7 +62,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-asyncio_mode = "auto"
+# asyncio_mode = "auto"  # Commented out - requires pytest-asyncio
 
 # Performance optimized markers for selective testing
 markers = [

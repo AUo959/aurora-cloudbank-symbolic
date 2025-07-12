@@ -17,7 +17,7 @@ class SymbolicVector:
         self.vector_type = vector_type
         
         if vector is None:
-            vector = []
+            vector = NativeMath.generate_random_vector(dim, vector_type)
         
         # Validate vector
         if len(vector) != dim:

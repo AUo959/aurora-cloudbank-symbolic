@@ -1,0 +1,46 @@
+{
+  "type": "scatter",
+  "title": "Cultural AI Research Landscape",
+  "data": {
+    "research_landscape": [
+      {
+        "name": "GPT-4",
+        "technical_maturity": 8,
+        "cultural_awareness": 3,
+        "complexity": "Medium"
+      },
+      {
+        "name": "Multi-Agent Trans",
+        "technical_maturity": 6,
+        "cultural_awareness": 7,
+        "complexity": "High"
+      },
+      {
+        "name": "CAS Score",
+        "technical_maturity": 5,
+        "cultural_awareness": 8,
+        "complexity": "Medium"
+      },
+      {
+        "name": "Neuro-Symbolic",
+        "technical_maturity": 6,
+        "cultural_awareness": 4,
+        "complexity": "High"
+      },
+      {
+        "name": "Real-time Trans",
+        "technical_maturity": 8,
+        "cultural_awareness": 5,
+        "complexity": "Medium"
+      },
+      {
+        "name": "CASK System",
+        "technical_maturity": 3,
+        "cultural_awareness": 9,
+        "complexity": "Very High"
+      }
+    ],
+    "x_axis": "technical_maturity",
+    "y_axis": "cultural_awareness"
+  }
+}

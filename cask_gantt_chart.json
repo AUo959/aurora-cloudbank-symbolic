@@ -1,0 +1,81 @@
+{
+  "type": "gantt",
+  "title": "CASK Project Timeline (84 Months)",
+  "data": {
+    "tasks": [
+      {
+        "task": "Core Ling DB",
+        "start": 1,
+        "end": 12,
+        "phase": "Phase 1: Foundation"
+      },
+      {
+        "task": "Cultural Parameters",
+        "start": 6,
+        "end": 15,
+        "phase": "Phase 1: Foundation"
+      },
+      {
+        "task": "Prototype Trans",
+        "start": 10,
+        "end": 18,
+        "phase": "Phase 1: Foundation"
+      },
+      {
+        "task": "Symbol Fusion",
+        "start": 19,
+        "end": 30,
+        "phase": "Phase 2: Integration"
+      },
+      {
+        "task": "SVCC Compression",
+        "start": 24,
+        "end": 33,
+        "phase": "Phase 2: Integration"
+      },
+      {
+        "task": "GPT Optimization",
+        "start": 30,
+        "end": 36,
+        "phase": "Phase 2: Integration"
+      },
+      {
+        "task": "Ethics Validation",
+        "start": 37,
+        "end": 45,
+        "phase": "Phase 3: Ethics"
+      },
+      {
+        "task": "Bias Detection",
+        "start": 42,
+        "end": 48,
+        "phase": "Phase 3: Ethics"
+      },
+      {
+        "task": "L1-L2-L3 Architecture",
+        "start": 49,
+        "end": 57,
+        "phase": "Phase 4: Simulation"
+      },
+      {
+        "task": "Cultural Integration",
+        "start": 54,
+        "end": 60,
+        "phase": "Phase 4: Simulation"
+      },
+      {
+        "task": "Performance Optimization",
+        "start": 61,
+        "end": 72,
+        "phase": "Phase 5: Deployment"
+      },
+      {
+        "task": "Security Testing",
+        "start": 72,
+        "end": 81,
+        "phase": "Phase 5: Deployment"
+      }
+    ],
+    "timeline_months": 84
+  }
+}

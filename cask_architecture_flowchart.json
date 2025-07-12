@@ -1,0 +1,34 @@
+{
+  "type": "flowchart",
+  "title": "CASK Technical Architecture",
+  "data": {
+    "architecture": {
+      "knowledge_layer": [
+        "Global Cross-Linguistic Database",
+        "Ethics & Value Systems Index",
+        "Cultural Cognition Framework",
+        "Historical Institutional Systems",
+        "Language-to-Symbolic Fusion Layer"
+      ],
+      "processing_layer": [
+        "Symbolic Vector Chain Compressor (SVCC)",
+        "GPT Native Encoding Layer",
+        "Agent Simulation Generation Module"
+      ],
+      "validation_layer": [
+        "Recursive Ethics Validator",
+        "Full ORION Simulation Runtime"
+      ]
+    },
+    "connections": [
+      {
+        "from": "knowledge_layer",
+        "to": "processing_layer"
+      },
+      {
+        "from": "processing_layer",
+        "to": "validation_layer"
+      }
+    ]
+  }
+}

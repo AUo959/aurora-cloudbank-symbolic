@@ -1,7 +1,15 @@
+# Lightweight dependencies for Aurora CloudBank Symbolic
+# Core Python packages only - no heavy numerical libraries
+
+# Optional: FastAPI for web services (can be removed if not needed)
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-pydantic==2.5.0
-numpy==1.24.3
-requests==2.31.0
+
+# Optional: File handling for web uploads (can be removed if not needed)
 python-multipart==0.0.6
+
+# Optional: Template engine (can be removed if not needed)
 jinja2==3.1.2
+
+# Note: numpy, pandas, requests, and other heavy dependencies have been eliminated
+# All symbolic computation is now handled by native Python implementations

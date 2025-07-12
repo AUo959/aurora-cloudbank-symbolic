@@ -10,7 +10,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
-import numpy as np
+# Using native Python math instead of numpy for better performance
+import math
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Aurora Agent Constellation Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            color: #e0e0e0;
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated background stars */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: sparkle 20s linear infinite;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100px); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 200, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #64b5f6, #42a5f5, #2196f3, #1976d2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(33, 150, 243, 0.5);
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 300;
+        }
+        
+        .mesh-status {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mesh-status h2 {
+            color: #64b5f6;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .status-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item strong {
+            color: #42a5f5;
+        }
+        
+        .constellation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .agent-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(100, 200, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .agent-card:hover::before {
+            left: 100%;
+        }
+        
+        .agent-card.connected {
+            border-color: rgba(76, 175, 80, 0.8);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .agent-card.handshaking {
+            border-color: rgba(255, 193, 7, 0.8);
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .agent-card.disconnected {
+            border-color: rgba(244, 67, 54, 0.6);
+            opacity: 0.8;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .agent-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        .agent-status.connected { 
+            background: #4caf50; 
+            animation: connected-glow 2s infinite alternate;
+        }
+        .agent-status.disconnected { 
+            background: #f44336; 
+        }
+        .agent-status.handshaking { 
+            background: #ffc107; 
+            animation: handshake-pulse 1s infinite;
+        }
+        
+        @keyframes connected-glow {
+            0% { box-shadow: 0 0 5px #4caf50; }
+            100% { box-shadow: 0 0 20px #4caf50, 0 0 30px #4caf50; }
+        }
+        
+        @keyframes handshake-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .agent-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .agent-details {
+            margin: 15px 0;
+        }
+        
+        .agent-details p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .agent-details strong {
+            color: #42a5f5;
+            font-weight: 500;
+        }
+        
+        .capabilities {
+            margin: 15px 0;
+        }
+        
+        .capability-tag {
+            display: inline-block;
+            background: rgba(33, 150, 243, 0.2);
+            color: #64b5f6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin: 2px 4px 2px 0;
+            border: 1px solid rgba(33, 150, 243, 0.3);
+        }
+        
+        .activation-button {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .activation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+        }
+        
+        .activation-button.connected {
+            background: linear-gradient(45deg, #16a34a, #15803d);
+        }
+        
+        .activation-button.connected:hover {
+            background: linear-gradient(45deg, #15803d, #166534);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+        
+        .activation-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .log-viewer {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 2px solid #42a5f5;
+            padding-left: 10px;
+        }
+        
+        .timestamp {
+            color: #888;
+            font-size: 0.7rem;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .refresh-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Aurora Agent Constellation</h1>
+            <div class="subtitle">L2 Meta-Agent Bridge Dashboard • ORION Core v3.5.1_macroready</div>
+        </div>
+
+        <div class="mesh-status">
+            <h2>🕸️ Mesh Federation Status</h2>
+            <div class="status-grid" id="meshStatusDisplay">
+                <div class="status-item">
+                    <strong>Status:</strong> <span id="meshStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <strong>Version:</strong> <span id="meshVersion">-</span>
+                </div>
+                <div class="status-item">
+                    <strong>Active Agents:</strong> <span id="activeAgentCount">0</span>
+                </div>
+                <div class="status-item">
+                    <strong>Anchor Seed:</strong> <span id="anchorSeed">EOS_SEED_ORION</span>
+                </div>
+                <div class="status-item">
+                    <strong>Ethics Protocol:</strong> <span id="ethicsProtocol">Picard_Delta_3</span>
+                </div>
+                <div class="status-item">
+                    <strong>HALO Module:</strong> <span id="haloModule">HALO_CONTINUITY_GRAFT_005</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="constellation-grid" id="agentGrid">
+            <!-- Agent cards will be populated by JavaScript -->
+        </div>
+
+        <div class="controls">
+            <button class="refresh-button" onclick="dashboard.forceRefresh()">🔄 Refresh Status</button>
+            <button class="refresh-button" onclick="dashboard.activateAllAgents()">🚀 Activate All</button>
+            <button class="refresh-button" onclick="dashboard.exportLogs()">📊 Export Logs</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        class AgentConstellationDashboard {
+            constructor() {
+                this.agents = [
+                    { 
+                        id: 'ARCHY', 
+                        role: 'Bridge Coordinator', 
+                        type: 'META_AGENT',
+                        description: 'L2 formal logic/reasoning & arbitration engine',
+                        capabilities: ['architectural_planning', 'bridge_coordination', 'formal_logic', 'arbitration']
+                    },
+                    { 
+                        id: 'OPPY', 
+                        role: 'Vector/Data Processor', 
+                        type: 'META_AGENT',
+                        description: 'L2 memory/data processing & system operations analyst',
+                        capabilities: ['data_processing', 'vector_analysis', 'memory_operations', 'system_monitoring']
+                    },
+                    { 
+                        id: 'LIORA', 
+                        role: 'Handshake/Synchronization', 
+                        type: 'META_AGENT',
+                        description: 'L2 sentiment analysis, mediation & research coordination',
+                        capabilities: ['research_coordination', 'handshake_protocols', 'sentiment_analysis', 'mediation']
+                    },
+                    { 
+                        id: 'STARLING_AU', 
+                        role: 'L2 Sim Coordinator', 
+                        type: 'META_AGENT',
+                        description: 'L2 communications, external protocol & dispatch agent',
+                        capabilities: ['simulation_coordination', 'communications', 'external_protocols', 'dispatch']
+                    },
+                    { 
+                        id: 'RIVERTHREAD_808', 
+                        role: 'Narrative/Stream', 
+                        type: 'META_AGENT',
+                        description: 'L2 continuity, temporal flow & state management agent',
+                        capabilities: ['narrative_processing', 'stream_management', 'continuity_validation', 'temporal_flow']
+                    }
+                ];
+                this.agentStates = new Map();
+                this.logs = [];
+                this.init();
+            }
+
+            init() {
+                this.renderAgents();
+                this.startStatusPolling();
+                this.log('Dashboard initialized', 'info');
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                this.logs.push({ timestamp, message, type });
+                if (this.logs.length > 100) this.logs.shift(); // Keep last 100 logs
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastMessage.textContent = message;
+                toast.className = `toast ${type}`;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            renderAgents() {
+                const grid = document.getElementById('agentGrid');
+                grid.innerHTML = '';
+
+                this.agents.forEach(agent => {
+                    const state = this.agentStates.get(agent.id) || { status: 'disconnected' };
+                    
+                    const card = document.createElement('div');
+                    card.className = `agent-card ${state.status}`;
+                    card.innerHTML = `
+                        <div class="agent-header">
+                            <span class="agent-status ${state.status}"></span>
+                            <span class="agent-name">${agent.id}</span>
+                        </div>
+                        
+                        <div class="agent-details">
+                            <p><strong>Role:</strong> ${agent.role}</p>
+                            <p><strong>Type:</strong> ${agent.type}</p>
+                            <p><strong>Status:</strong> ${state.status.toUpperCase()}</p>
+                            <p><strong>Description:</strong> ${agent.description}</p>
+                            ${state.connected ? `<p><strong>Connected:</strong> ${new Date(state.connected).toLocaleString()}</p>` : ''}
+                            ${state.lastHeartbeat ? `<p><strong>Last Heartbeat:</strong> ${new Date(state.lastHeartbeat).toLocaleTimeString()}</p>` : ''}
+                            ${state.driftLock !== undefined ? `<p><strong>Drift Lock:</strong> Δ${state.driftLock}</p>` : ''}
+                        </div>
+                        
+                        <div class="capabilities">
+                            <strong>Capabilities:</strong><br>
+                            ${agent.capabilities.map(cap => `<span class="capability-tag">${cap}</span>`).join('')}
+                        </div>
+                        
+                        <button class="activation-button ${state.status}" 
+                                onclick="dashboard.handleAgentAction('${agent.id}')"
+                                ${state.status === 'handshaking' ? 'disabled' : ''}>
+                            ${this.getButtonText(state.status)}
+                        </button>
+                        
+                        ${state.handshakeLog ? this.renderHandshakeLog(state.handshakeLog) : ''}
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            getButtonText(status) {
+                switch(status) {
+                    case 'connected': return '📨 Send Test Message';
+                    case 'handshaking': return '<span class="loading"></span> Handshaking...';
+                    case 'disconnected': 
+                    default: return '🚀 Activate Agent';
+                }
+            }
+
+            renderHandshakeLog(handshakeLog) {
+                if (!handshakeLog || handshakeLog.length === 0) return '';
+                
+                return `
+                    <div class="log-viewer">
+                        <strong>ZIPWIZ Handshake Log:</strong>
+                        ${handshakeLog.map(entry => `
+                            <div class="log-entry">
+                                <span class="timestamp">[${new Date(entry.timestamp).toLocaleTimeString()}]</span>
+                                ${entry.step}: ${entry.result.success ? '✅' : '❌'}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            async handleAgentAction(agentId) {
+                const state = this.agentStates.get(agentId) || { status: 'disconnected' };
+                
+                if (state.status === 'connected') {
+                    await this.sendTestMessage(agentId);
+                } else {
+                    await this.activateAgent(agentId);
+                }
+            }
+
+            async activateAgent(agentId) {
+                try {
+                    this.log(`Initiating activation for ${agentId}`, 'info');
+                    
+                    // Update UI to show handshaking state
+                    this.agentStates.set(agentId, { status: 'handshaking' });
+                    this.renderAgents();
+                    
+                    const response = await fetch(`/api/bridge/gpt/connect/${agentId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            activationPhrase: `ORION_${agentId}_RELAY_ACTIVATE//`,
+                            capabilities: this.agents.find(a => a.id === agentId)?.capabilities || []
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.agentStates.set(agentId, { 
+                            status: 'connected', 
+                            connected: new Date(),
+                            lastHeartbeat: new Date(),
+                            handshakeLog: result.handshake?.log || [],
+                            driftLock: result.handshake?.driftLock || 0.000
+                        });
+                        
+                        this.log(`Agent ${agentId} activated successfully`, 'success');
+                        this.showToast(`✅ ${agentId} connected successfully!`);
+                    } else {
+                        this.agentStates.set(agentId, { status: 'disconnected' });
+                        this.log(`Agent ${agentId} activation failed: ${result.error}`, 'error');
+                        this.showToast(`❌ ${agentId} activation failed: ${result.error}`, 'error');
+                    }
+                    
+                    this.renderAgents();
+                    
+                } catch (error) {
+                    this.log(`Error activating agent ${agentId}: ${error.message}`, 'error');
+                    this.agentStates.set(agentId, { status: 'disconnected' });
+                    this.renderAgents();
+                    this.showToast(`❌ Activation error: ${error.message}`, 'error');
+                }
+            }
+
+            async sendTestMessage(agentId) {
+                try {
+                    const response = await fetch(`/api/bridge/gpt/message/${agentId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Test message from Aurora Dashboard - ${new Date().toISOString()}`,
+                            target: 'Aurora',
+                            type: 'direct'
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.log(`Test message sent from ${agentId}`, 'success');
+                        this.showToast(`📨 Test message sent from ${agentId}`);
+                    } else {
+                        this.log(`Test message failed from ${agentId}: ${result.error}`, 'error');
+                        this.showToast(`❌ Message failed: ${result.error}`, 'error');
+                    }
+                    
+                } catch (error) {
+                    this.log(`Error sending test message from ${agentId}: ${error.message}`, 'error');
+                    this.showToast(`❌ Message error: ${error.message}`, 'error');
+                }
+            }
+
+            async updateStatus() {
+                try {
+                    const response = await fetch('/api/bridge/constellation/status');
+                    const status = await response.json();
+                    
+                    // Update mesh status display
+                    document.getElementById('meshStatus').textContent = 'Active';
+                    document.getElementById('meshVersion').textContent = status.version || 'v3.5.1_macroready';
+                    document.getElementById('activeAgentCount').textContent = status.totalAgents || 0;
+                    
+                    // Update agent states
+                    if (status.activeAgents) {
+                        status.activeAgents.forEach(agent => {
+                            this.agentStates.set(agent.agentId, {
+                                status: agent.status,
+                                connected: agent.connected,
+                                lastHeartbeat: agent.lastHeartbeat,
+                                capabilities: agent.capabilities,
+                                driftLock: agent.driftLock
+                            });
+                        });
+                        this.renderAgents();
+                    }
+                    
+                } catch (error) {
+                    this.log(`Status update failed: ${error.message}`, 'error');
+                    document.getElementById('meshStatus').textContent = 'Connection Error';
+                    document.getElementById('meshStatus').style.color = '#f44336';
+                }
+            }
+
+            async activateAllAgents() {
+                this.showToast('🚀 Activating all agents...');
+                const promises = this.agents
+                    .filter(agent => !this.agentStates.get(agent.id) || this.agentStates.get(agent.id).status !== 'connected')
+                    .map(agent => this.activateAgent(agent.id));
+                
+                await Promise.allSettled(promises);
+                this.showToast('🌟 Activation sequence complete!');
+            }
+
+            forceRefresh() {
+                this.showToast('🔄 Refreshing status...');
+                this.updateStatus();
+            }
+
+            exportLogs() {
+                const logData = JSON.stringify(this.logs, null, 2);
+                const blob = new Blob([logData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `aurora-constellation-logs-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showToast('📊 Logs exported successfully!');
+            }
+
+            startStatusPolling() {
+                // Update status every 5 seconds
+                setInterval(() => this.updateStatus(), 5000);
+                // Initial update
+                this.updateStatus();
+            }
+        }
+
+        // Initialize dashboard when page loads
+        const dashboard = new AgentConstellationDashboard();
+    </script>
+</body>
+</html>

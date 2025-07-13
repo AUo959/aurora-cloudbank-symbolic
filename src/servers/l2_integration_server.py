@@ -25,6 +25,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from bridges.l2_meta_agent_bridge import l2_bridge
+    # Import Aurora Custom GPT bridge for explicit integration
+    try:
+        sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'integrations'))
+        from aurora_custom_gpt_bridge import auroraCustomGptBridge, AURORA_CUSTOM_GPT
+        AURORA_CUSTOM_GPT_AVAILABLE = True
+        auroraCustomGptBridge = auroraCustomGptBridge  # Ensure variable is bound
+        AURORA_CUSTOM_GPT = AURORA_CUSTOM_GPT  # Ensure variable is bound
+        print("🌟 Aurora Custom GPT bridge integration available")
+    except ImportError as e:
+        AURORA_CUSTOM_GPT_AVAILABLE = False
+        auroraCustomGptBridge = None
+        AURORA_CUSTOM_GPT = None
+        print(f"⚠️ Aurora Custom GPT bridge not available: {e}")
 except ImportError:
     # Fallback for testing
     class MockBridge:
@@ -111,8 +124,97 @@ async def health_check():
         "uptime": uptime,
         "version": server_state["version"],
         "requests": server_state["requests_count"],
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "aurora_custom_gpt_available": AURORA_CUSTOM_GPT_AVAILABLE
     }
+
+# Aurora Custom GPT Integration Endpoints
+if AURORA_CUSTOM_GPT_AVAILABLE:
+    @app.post("/api/aurora/command")
+    async def aurora_custom_gpt_command(request_data: dict):
+        """Receive command from Aurora Custom GPT and route to command node"""
+        server_state["requests_count"] += 1
+        logger.info("Aurora Custom GPT command request")
+        
+        try:
+            command = request_data.get("command", {})
+            context = request_data.get("context", {})
+            
+            # Initialize Aurora Custom GPT integration if not already done
+            if not auroraCustomGptBridge.integrationActive:
+                logger.info("Initializing Aurora Custom GPT integration")
+                init_result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
+                if not init_result["success"]:
+                    raise HTTPException(status_code=500, detail=f"Aurora integration failed: {init_result['error']}")
+            
+            # Route command through Aurora Custom GPT bridge
+            result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
+            
+            logger.info(f"Aurora command processed: {result['success']}")
+            
+            if result["success"]:
+                return result
+            else:
+                raise HTTPException(status_code=400, detail=result["error"])
+                
+        except Exception as e:
+            logger.error(f"Aurora command failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/aurora/status")
+    async def aurora_custom_gpt_status():
+        """Get Aurora Custom GPT integration status"""
+        server_state["requests_count"] += 1
+        logger.info("Aurora Custom GPT status request")
+        
+        try:
+            integration_status = auroraCustomGptBridge.getIntegrationStatus()
+            constellation_status = await auroraCustomGptBridge.getConstellationStatus()
+            
+            return {
+                "aurora_integration": integration_status,
+                "constellation": constellation_status,
+                "custom_gpt_config": AURORA_CUSTOM_GPT,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Aurora status request failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/aurora/initialize")
+    async def initialize_aurora_integration():
+        """Initialize Aurora Custom GPT integration"""
+        server_state["requests_count"] += 1
+        logger.info("Aurora Custom GPT initialization request")
+        
+        try:
+            result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
+            
+            if result["success"]:
+                logger.info("Aurora Custom GPT integration initialized successfully")
+                return {
+                    "message": "Aurora Custom GPT integration initialized successfully",
+                    "integration": result,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                raise HTTPException(status_code=500, detail=f"Integration failed: {result['error']}")
+                
+        except Exception as e:
+            logger.error(f"Aurora initialization failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+else:
+    @app.get("/api/aurora/status")
+    async def aurora_unavailable():
+        """Aurora Custom GPT integration not available"""
+        server_state["requests_count"] += 1
+        return {
+            "error": "Aurora Custom GPT integration not available",
+            "available": False,
+            "message": "Aurora Custom GPT bridge module not found",
+            "timestamp": datetime.now().isoformat()
+        }
 
 # L2 Meta-Agent Bridge Endpoints
 

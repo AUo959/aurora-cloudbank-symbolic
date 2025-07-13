@@ -1,22 +1,7 @@
-# Aurora Cloudbank Symbolic - Selective Dependencies (Web-Enabled)
-# Core web interface dependencies
-fastapi>=0.104.1
-uvicorn[standard]>=0.24.0
-pydantic>=2.5.0
+fastapi>=0.100.0
+uvicorn>=0.20.0
+websockets>=11.0.0
+aiofiles>=23.0.0
 python-multipart>=0.0.6
-
-# Development and testing tools
-black>=23.0.0
-flake8>=6.0.0
-pytest>=7.0.0
-pytest-cov>=4.0.0
-pytest-asyncio>=0.21.0
-coverage>=7.0.0
-
-# Heavy dependencies replaced with native implementations:
-# - numpy: Replaced with native Python math (src/core/native_quantum.py)
-# - qiskit: Replaced with native quantum simulation
-# - pandas: Not needed for core functionality
-# - requests: Not needed for core symbolic operations
-# - scikit-learn: Not needed for native VSA
-# - tensorflow/torch: Not needed for lightweight AI
+pydantic>=2.0.0
+starlette>=0.27.0

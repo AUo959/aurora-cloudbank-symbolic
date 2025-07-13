@@ -16,5 +16,12 @@
   "author": "AUo959",
   "devDependencies": {
     "eslint": "^9.31.0"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "http": "^0.0.1-security",
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1",
+    "util": "^0.12.5"
   }
 }

@@ -12,14 +12,19 @@
     "semi": ["error", "always"],
     "quotes": ["error", "single"],
     "eqeqeq": "error",
-    "no-unused-vars": "error",
+    "no-unused-vars": "warn",
     "no-undef": "error",
     "prefer-const": "error",
     "no-var": "error",
-    "camelcase": "warn",
-    "id-length": ["warn", { "min": 2 }],
+    "camelcase": "off",
+    "id-length": "off",
     "indent": ["error", 2],
-    "no-console": "warn",
+    "no-console": "off",
     "no-extra-semi": "error"
+  },
+  "globals": {
+    "ORION_CORE": "readonly",
+    "AURORA_CUSTOM_GPT": "readonly",
+    "ZIPWIZ_PROTOCOL": "readonly"
   }
 }

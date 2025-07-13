@@ -7,6 +7,7 @@ import math
 import time
 import sys
 import os
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -16,12 +17,16 @@ from src.core.native_quantum import NativeQuantumProcessingLayer, NativeQuantumC
 from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
 
 
+@pytest.mark.native
+@pytest.mark.unit
 class TestNativeVSA:
     """Test native VSA implementation"""
     
+    @pytest.mark.smoke
     def test_vector_creation_bipolar(self):
         """Test bipolar vector creation"""
         vector = NativeSymbolicVector.from_symbol("test", 512, "bipolar")
+        assert vector.symbol == "test"
         assert vector.symbol == "test"
         assert vector.dim == 512
         assert len(vector.vector) == 512

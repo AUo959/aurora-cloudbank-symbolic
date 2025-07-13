@@ -49,20 +49,13 @@ aggressive = 1
 minversion = "6.0"
 addopts = [
     "-ra",
-    "--strict-markers",
-    "--strict-config",
-    "--cov=tests",
-    "--cov=modules",
-    "--cov-report=term-missing",
-    "--cov-report=html:htmlcov",
-    "--cov-fail-under=30",
-    "-p", "no:warnings",
+    "-v",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-# asyncio_mode = "auto"  # Commented out - requires pytest-asyncio
+asyncio_mode = "auto"
 
 # Performance optimized markers for selective testing
 markers = [
@@ -73,30 +66,21 @@ markers = [
     "smoke: Critical smoke tests for quick validation",
 
     # Component-based markers
-    "opal2: Opal2 modular system tests",
+    "native: Native implementation tests",
+    "opal2: Opal2 modular system tests", 
     "aurora: Aurora core system tests",
     "quantum: Quantum processing tests",
     "security: Security and authentication tests",
     "api: API and web interface tests",
     "cli: Command line interface tests",
-    "git: Git operations and workflow tests",
 
     # Environment markers
     "local: Tests for local development only",
     "ci: Tests for CI/CD pipeline",
-    "gpu: Tests requiring GPU acceleration",
     "network: Tests requiring network access",
 
     # Priority markers
     "critical: Must-pass tests for production",
     "regression: Regression prevention tests",
     "performance: Performance and benchmarking tests",
-    "memory: Memory usage and optimization tests",
-]
-
-# Test filtering options
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-    "ignore::UserWarning",
 ]

@@ -1,4 +1,3 @@
-
 {
   "// Performance Optimizations": true,
 
@@ -13,7 +12,7 @@
   "sonarlint.disableTelemetry": true,
 
   "// TypeScript - Optimize performance": true,
-  "typescript.suggest.autoImports": "off",
+  "typescript.suggest.autoImports": false,
   "typescript.preferences.includePackageJsonAutoImports": "off",
   "typescript.disableAutomaticTypeAcquisition": true,
   "typescript.updateImportsOnFileMove.enabled": "never",
@@ -94,5 +93,24 @@
   "editor.semanticHighlighting.enabled": false,
   "editor.experimental.asyncTokenization": true,
   "breadcrumbs.enabled": false,
-  "testing.automaticallyOpenTestResults": "neverOpen"
+  "testing.automaticallyOpenTestResults": "neverOpen",
+
+  "// Aurora CloudBank Copilot Integration": true,
+  "copilot.chat.welcomeMessage": "🌟 Aurora CloudBank Symbolic - Custom instructions loaded. Type @aurora for system context.",
+  "copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "markdown": true,
+    "javascript": true,
+    "typescript": true,
+    "python": true,
+    "json": true,
+    "jsonc": true
+  },
+  "files.associations": {
+    "*.gumas": "yaml",
+    "*.aurora": "json",
+    "*copilot*instructions*.txt": "markdown"
+  },
+  "workbench.startupEditor": "readme"
 }

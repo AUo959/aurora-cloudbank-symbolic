@@ -63,7 +63,7 @@ Detailed architecture guides and visualization package information can be found 
 
 - Modular symbolic governance engine
 - Self-monitoring and self-healing autonomy loop
-- Ethics protocol and governance capsule
+- Picard_Delta_3 and governance capsule
 - Full audit logging and restoration capability
 - **NEW**: Claude Sonnet 4 enhanced reasoning and quantum-aware processing
 - **NEW**: Symbolic anchor system with export manifest tracking

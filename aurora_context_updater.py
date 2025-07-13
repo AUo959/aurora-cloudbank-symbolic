@@ -123,7 +123,7 @@ class AuroraContextUpdater:
         
         # Find and replace the Current Status section
         start_marker = "### Current Status (July 2025)"
-        end_marker = "### Ethics Protocol"
+        end_marker = "### Picard_Delta_3"
         
         start_idx = content.find(start_marker)
         end_idx = content.find(end_marker)

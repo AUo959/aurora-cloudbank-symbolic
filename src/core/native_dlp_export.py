@@ -165,7 +165,7 @@ class NativeDLPTracker:
         
         # Add all anchor protocols for hybrid operations
         tag.add_anchor_protocol("EOS_SEED_ORION")
-        tag.add_anchor_protocol("PICARD_DELTA_3")
+        tag.add_anchor_protocol("Picard_Delta_3")
         tag.add_anchor_protocol("QUANTUM_SYMBOLIC_BRIDGE")
         
         # Add T1/SRB anchors

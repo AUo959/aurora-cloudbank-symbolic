@@ -14,7 +14,7 @@ def run_command(cmd):
         # Use shlex.split for secure command execution
         import shlex
         cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
-        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, shell=False, check=False)
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False

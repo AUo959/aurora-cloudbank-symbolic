@@ -4,9 +4,17 @@
   "description": "Aurora symbolic simulation - JavaScript components",
   "scripts": {
     "test": "echo 'Aurora JS tests passed'",
-    "lint": "echo 'Aurora JS linting passed'",
-    "pre-commit": "echo 'Aurora pre-commit validation passed'"
+    "lint": "eslint src/**/*.js --fix",
+    "lint:check": "eslint src/**/*.js",
+    "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'"
   },
-  "keywords": ["aurora", "symbolic", "simulation"],
-  "author": "AUo959"
+  "keywords": [
+    "aurora",
+    "symbolic",
+    "simulation"
+  ],
+  "author": "AUo959",
+  "devDependencies": {
+    "eslint": "^9.31.0"
+  }
 }

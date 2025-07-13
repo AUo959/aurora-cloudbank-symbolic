@@ -342,7 +342,7 @@ class MaintenanceScheduler:
 
             if health_script.exists():
                 health_result = subprocess.run(
-                    ["python3", str(health_script), "--check"],
+                    ["python3", str(health_script, shell=False, check=False), "--check"],
                     capture_output=True,
                     text=True,
                     cwd=self.repo_path,
@@ -411,7 +411,7 @@ class MaintenanceScheduler:
             if branch_script.exists():
                 # Run branch analysis
                 branch_result = subprocess.run(
-                    ["python3", str(branch_script), "--analyze"],
+                    ["python3", str(branch_script, shell=False, check=False), "--analyze"],
                     capture_output=True,
                     text=True,
                     cwd=self.repo_path,

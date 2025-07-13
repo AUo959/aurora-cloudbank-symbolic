@@ -314,7 +314,7 @@ class MaintenanceScheduler:
                         text=True,
                         cwd=self.repo_path,
                         timeout=300
-                    )
+                    , shell=False, check=False)
                     if result.returncode == 0:
                         cleaned_files += 1
 

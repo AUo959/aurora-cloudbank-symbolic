@@ -429,23 +429,23 @@ cat > data/crew_registry/l1_operational_staff.json << 'EOF'
     "command_staff": [
       {
         "id": "CMD_001",
-        "name": "Commander Sarah Chen",
+        "name": "Commander Alex Thorne",
         "role": "Station Commander",
         "clearance": "L4_COMMAND",
         "status": "on_duty",
         "shift": "alpha",
         "certifications": ["Command", "Station Operations", "Personnel Management"],
-        "contact": "s.chen@orion.station"
+        "contact": "a.thorne@orion.station"
       },
       {
         "id": "CMD_002",
-        "name": "Lt. Commander Marcus Webb",
+        "name": "Lt. Commander Maya Shepard",
         "role": "FleetOps Commander",
         "clearance": "L5_COMMAND",
         "status": "on_duty",
         "shift": "alpha",
         "certifications": ["Command", "Fleet Operations", "Emergency Response"],
-        "contact": "m.webb@orion.station"
+        "contact": "m.shepard@orion.station"
       }
     ],
     

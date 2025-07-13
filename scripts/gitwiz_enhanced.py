@@ -621,7 +621,7 @@ class EnhancedGITWiz:
                     capture_output=True,
                     text=True,
                     timeout=300
-                )
+                , shell=False, check=False)
                 if result.returncode != 0:
                     logger.error(f"Command failed: {cmd}")
                     logger.error(result.stderr)

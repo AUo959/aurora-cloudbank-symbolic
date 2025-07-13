@@ -190,7 +190,7 @@ class NativeSymbolicCPUAnchor:
         # Anchor protocols
         self.anchor_protocols = [
             "EOS_SEED_ORION",
-            "PICARD_DELTA_3", 
+            "Picard_Delta_3", 
             "QUANTUM_SYMBOLIC_BRIDGE",
         ]
         

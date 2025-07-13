@@ -6,6 +6,9 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+// Import Aurora logging system
+const { commandLogger } = require('../utils/aurora_logger.js');
+
 // --- CONFIG ---
 const AES_KEY = process.env.AES_KEY_256_HEX;
 if (!AES_KEY || AES_KEY.length !== 64) {
@@ -18,8 +21,8 @@ const SYMBOLIC_NODE_METADATA = {
   node: 'ORION_CORE_COMMAND',
   version: 'v1.0.0',
   mode: 'secure',
-  deploy_timestamp: new Date().toISOString(),
-  linked_agents: ['ZIPWIZ', 'PATCHWEAVER'],
+  deployTimestamp: new Date().toISOString(),
+  linkedAgents: ['ZIPWIZ', 'PATCHWEAVER'],
   status: 'live',
 };
 
@@ -41,7 +44,12 @@ function encryptSymbolicPayload(payload) {
 
 // --- MAIN COMMAND DISPATCH ---
 function dispatchSymbolicCommand(symbolicCommand) {
-  console.log('🧬 Dispatching symbolic command node...');
+  commandLogger.info('🧬 Dispatching symbolic command node...', {
+    command: symbolicCommand.action,
+    glyph: symbolicCommand.glyph,
+    anchor: 'EOS_SEED_ORION'
+  });
+  
   const encrypted = encryptSymbolicPayload({
     metadata: SYMBOLIC_NODE_METADATA,
     command: symbolicCommand,
@@ -53,9 +61,11 @@ function dispatchSymbolicCommand(symbolicCommand) {
     JSON.stringify(encrypted, null, 2)
   );
 
-  console.log(
-    '✅ Symbolic command encrypted and stored at /src/nodes/dispatch.encrypted.json'
-  );
+  commandLogger.info('✅ Symbolic command encrypted and stored', {
+    location: '/src/nodes/dispatch.encrypted.json',
+    encrypted: true,
+    anchor: 'EOS_SEED_ORION'
+  });
 }
 
 // EXAMPLE USAGE (trigger)

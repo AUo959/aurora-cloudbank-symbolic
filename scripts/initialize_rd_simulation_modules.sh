@@ -66,7 +66,7 @@ cat > research/parallel_modules/module_registry.json << 'EOF'
         "status": "running", 
         "priority": "medium",
         "resources_allocated": "20%",
-        "lead_researcher": "Dr. Marcus Webb",
+        "lead_researcher": "Dr. Varya Lin",
         "current_projects": [
           "Geometric Algebra Applications",
           "Reality-Symbol Mapping",
@@ -94,7 +94,7 @@ cat > research/parallel_modules/module_registry.json << 'EOF'
         "status": "running",
         "priority": "low",
         "resources_allocated": "10%",
-        "lead_researcher": "Dr. Sarah Chen",
+        "lead_researcher": "Dr. Amira Sato",
         "current_projects": [
           "Deep Space Ecosystem Modeling",
           "Sustainability Metrics",

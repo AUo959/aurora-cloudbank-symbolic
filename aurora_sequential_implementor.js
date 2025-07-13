@@ -366,7 +366,7 @@ class SymbolicCPUAnchor:
         self.symbolic_memory = {}
         self.anchor_protocols = [
             'EOS_SEED_ORION',
-            'PICARD_DELTA_3',
+            'Picard_Delta_3',
             'QUANTUM_SYMBOLIC_BRIDGE'
         ]
         self.processing_modes = {

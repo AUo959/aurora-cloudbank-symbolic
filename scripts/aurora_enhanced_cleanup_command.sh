@@ -51,8 +51,32 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
+# Check for Aurora Smart Sync override configuration
+print_action "Step 0.1: Checking Aurora Smart Sync override configuration..."
+
+if [[ -f ".aurora_sync_override.json" ]]; then
+    SYNC_ENABLED=$(grep -o '"sync_enabled":[[:space:]]*[^,}]*' .aurora_sync_override.json | cut -d':' -f2 | tr -d ' "')
+    EMERGENCY_MODE=$(grep -o '"emergency_mode":[[:space:]]*[^,}]*' .aurora_sync_override.json | cut -d':' -f2 | tr -d ' "')
+    AUTO_COMMIT_DISABLED=$(grep -o '"auto_commit_disabled":[[:space:]]*[^,}]*' .aurora_sync_override.json | cut -d':' -f2 | tr -d ' "')
+    
+    if [[ "$SYNC_ENABLED" == "false" || "$AUTO_COMMIT_DISABLED" == "true" ]]; then
+        print_warning "🛑 Aurora Smart Sync is DISABLED by override configuration"
+        print_status "Auto-commit disabled: ${AUTO_COMMIT_DISABLED:-true}"
+        print_status "Emergency mode: ${EMERGENCY_MODE:-false}"
+        
+        # Ask for confirmation to proceed
+        echo -e "${YELLOW}⚠️ Smart Sync override is active. This prevents automatic commits.${NC}"
+        echo -e "${CYAN}🔒 This is likely intentional to prevent validation loops.${NC}"
+        echo -e "${PURPLE}📋 To enable normal operation, remove .aurora_sync_override.json${NC}"
+        echo ""
+        echo -e "${RED}❌ CLEANUP ABORTED - Smart Sync disabled for loop prevention${NC}"
+        echo -e "${CYAN}🛡️ Override configuration is protecting against validation cycles${NC}"
+        exit 0
+    fi
+fi
+
 # Initialize validation manager
-print_action "Step 0: Initializing Aurora Validation Manager..."
+print_action "Step 0.2: Initializing Aurora Validation Manager..."
 
 if [[ -f "scripts/aurora_validation_manager.py" ]]; then
     # Check current validation strategy

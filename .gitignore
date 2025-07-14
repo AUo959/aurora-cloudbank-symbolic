@@ -190,4 +190,10 @@ PRE_COMMIT_VALIDATION_ISSUES.md
 CANONICAL_VALIDATION_REPORT.md
 AURORA_VALIDATION_SUMMARY.md
 .aurora_validation/
+
+# Aurora Smart Sync Loop Prevention - Memory Sealed
 .aurora_validation_config.json
+.aurora_sync_override.json
+.aurora_symbolic_seal
+.aurora_exports_manifest.yml
+.aurora_reliquary_index.md

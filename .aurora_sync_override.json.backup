@@ -1,0 +1,19 @@
+{
+  "sync_enabled": false,
+  "commit_throttle_minutes": 60,
+  "validation_cycle_prevention": true,
+  "symbolic_anchor_preservation": true,
+  "entropy_threshold": 0.1,
+  "emergency_mode": false,
+  "auto_commit_disabled": true,
+  "smart_staging_disabled": true,
+  "exclude_patterns": [
+    "*.validation",
+    ".aurora/*",
+    "validation_*",
+    "*VALIDATION*.md",
+    "*validation*.md",
+    ".aurora_validation_config.json",
+    ".aurora_sync_override.json"
+  ]
+}

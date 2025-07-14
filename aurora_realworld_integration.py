@@ -756,7 +756,9 @@ class AuroraCLI:
                 elif command == "test" or command == "t":
                     self.run_integration_test()
                 elif command == "clear":
-                    subprocess.run("clear", shell=True)
+                    # Cross-platform clear screen - avoid shell=True
+                    import os
+                    os.system('cls' if os.name == 'nt' else 'clear')
                 elif command == "":
                     continue
                 else:

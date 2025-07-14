@@ -5,6 +5,7 @@ Using enhanced GitWiz and Health Monitor tools to prepare for Aurora integration
 """
 
 import json
+import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -12,10 +13,11 @@ from pathlib import Path
 def run_command(cmd):
     """Run shell command and return result."""
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
+        cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=300)
         return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        return f"Error: {e.stderr.strip()}"
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+        return f"Error: {getattr(e, 'stderr', str(e))}"
 
 def main():
     print("🚀 Aurora CloudBank Integration Readiness Assessment")

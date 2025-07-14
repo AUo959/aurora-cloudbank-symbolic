@@ -1,0 +1,19 @@
+{
+    "registry_id": "aurora_tools_update_8a380e",
+    "version": "2.2.6",
+    "registered_by": "Aurora (via The Pilot)",
+    "tools_added": [
+        {
+            "name": "Aurora-GUMAS Staff Dossier Tool",
+            "filename": "Aurora_GUMAS_Staff_Dossier_Tool_v2.2.6.html",
+            "purpose": "Local editing and memory anchoring of individual GUMAS staff dossiers. Includes fields for timeline tracking, relationship notes, and anchor tags."
+        },
+        {
+            "name": "Aurora-GUMAS Version Map Visualizer",
+            "filename": "Aurora_GUMAS_Version_Map_Visualizer_v2.2.6.html",
+            "purpose": "Interactive visual history of Aurora-GUMAS simulation versions. Useful for orientation, presentation, and continuity validation."
+        }
+    ],
+    "thread_context": "Thread Alpha \u2013 v2.2.6 Live",
+    "timestamp": "2025-04-05T04:51:33.715521Z"
+}

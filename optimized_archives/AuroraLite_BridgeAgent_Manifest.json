@@ -1,0 +1,9 @@
+
+{
+  "name": "AuroraLite_BridgeAgent",
+  "version": "1.1_alpha",
+  "description": "Symbolic research assistant for Perplexity and browser-based LLM tools",
+  "tags": ["symbolic", "continuity", "research", "gpt-companion", "web-agent"],
+  "dependencies": [],
+  "author": "The Pilot"
+}

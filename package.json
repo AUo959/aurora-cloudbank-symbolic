@@ -12,7 +12,13 @@
     "cleanup:legacy": "./scripts/aurora_cleanup_command.sh",
     "validation:setup": "python scripts/aurora_validation_manager.py --strategy smart_exclusion",
     "validation:status": "python scripts/aurora_validation_manager.py --status",
-    "validation:cleanup": "python scripts/aurora_validation_manager.py --cleanup"
+    "validation:cleanup": "python scripts/aurora_validation_manager.py --cleanup",
+    "optimize:archives": "./scripts/optimize_archives.sh",
+    "optimize:analyze": "python scripts/archive_optimizer.py --analyze-only",
+    "optimize:summary": "python scripts/optimization_summary.py",
+    "bundles:generate": "python scripts/bundle_generator.py --generate-all",
+    "bundles:analyze": "python scripts/bundle_generator.py --analyze",
+    "bundles:index": "python scripts/bundle_generator.py --create-index"
   },
   "keywords": [
     "aurora",

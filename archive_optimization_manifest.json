@@ -1,0 +1,591 @@
+{
+  "version": "1.0.0",
+  "created_at": "2025-07-14T23:31:05.828189",
+  "total_archives": 16,
+  "total_content_size": 8114616,
+  "canonical_content": {
+    "script_4c23c95b_aurora_prompt_injector": {
+      "filename": "aurora_prompt_injector.js",
+      "size": 410,
+      "hash_md5": "4c23c95b0ecc42881064fc56d2f38281",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "manifest_dca24dad_AuroraLite_BridgeAgent_Manifest": {
+      "filename": "AuroraLite_BridgeAgent_Manifest.json",
+      "size": 284,
+      "hash_md5": "dca24dadd4905d1fca19b7c54f4f04f2",
+      "content_type": "manifest",
+      "importance_score": 45,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "configuration"
+      ]
+    },
+    "script_0b44bc75_command_node": {
+      "filename": "src/core/command_node.js",
+      "size": 39,
+      "hash_md5": "0b44bc75db69d36154575e11228e62c4",
+      "content_type": "script",
+      "importance_score": 40,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_9dfe8af4_glyph_engine": {
+      "filename": "src/core/glyph_engine.js",
+      "size": 84,
+      "hash_md5": "9dfe8af482ff723d852bdc069767c5c2",
+      "content_type": "script",
+      "importance_score": 40,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_e826702b_zipcomm": {
+      "filename": "src/core/zipcomm.js",
+      "size": 82,
+      "hash_md5": "e826702bb209d28fce1b8e6a7565597c",
+      "content_type": "script",
+      "importance_score": 40,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_f9b62046_ethics_layer": {
+      "filename": "src/core/ethics_layer.js",
+      "size": 103,
+      "hash_md5": "f9b620465084a6098cc3f89688983282",
+      "content_type": "script",
+      "importance_score": 40,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "manifest_39109c16_QUANTUM_FORGE_Manifest": {
+      "filename": "QUANTUM_FORGE_Manifest.json",
+      "size": 541,
+      "hash_md5": "39109c16e7413062aa44e40164d206bb",
+      "content_type": "manifest",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "configuration"
+      ]
+    },
+    "script_48959bcb_git_push_aurora_seed": {
+      "filename": "git_push_aurora_seed.sh",
+      "size": 99,
+      "hash_md5": "48959bcb4f8425d6d4d9b45adfcee60f",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_781e2d23_failsafe_999_logic": {
+      "filename": "seeds/failsafe_999_logic.txt",
+      "size": 95,
+      "hash_md5": "781e2d23a7dbee61abea1bcbe307f3ea",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_d8aa4e57_glyphcard_999_failsafe": {
+      "filename": "seeds/glyphcard_999_failsafe.txt",
+      "size": 95,
+      "hash_md5": "d8aa4e57a4b4bb569f9956e5acc6be4d",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_405a97a9_symbolic_command_index": {
+      "filename": "seeds/symbolic_command_index.json",
+      "size": 89,
+      "hash_md5": "405a97a97541007fee899a353f795f57",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_e8f2ee50_T1_replay_bundle_001": {
+      "filename": "exports/T1_replay_bundle_001.zip",
+      "size": 36,
+      "hash_md5": "e8f2ee503c706be8467550e1ddde8b53",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_a20c3905_COMET_ECHO_v1": {
+      "filename": "exports/COMET_ECHO_v1.simstate",
+      "size": 51,
+      "hash_md5": "a20c3905d1acbe85d0e9597b666efbb0",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_d71a4e0f_continuity_anchor_state": {
+      "filename": "live_threads/continuity_anchor_state.json",
+      "size": 60,
+      "hash_md5": "d71a4e0fd30a9ce58167f3127a903837",
+      "content_type": "json_data",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_39958403_LICENSE": {
+      "filename": "meta/LICENSE",
+      "size": 11,
+      "hash_md5": "399584035c417b91040964779555dfac",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_32c2de8e_Symbolic_Vector_Injections": {
+      "filename": "Symbolic_Vector_Injections.json",
+      "size": 1097,
+      "hash_md5": "32c2de8e8fdf90b975042ed47142ce87",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_51751404_aurora_digital_key_readable": {
+      "filename": "aurora_digital_key_readable.json",
+      "size": 632,
+      "hash_md5": "517514045cbc59eb4e62dd675090b395",
+      "content_type": "json_data",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_4d7f367d_Aurora_Continuity_Seal_v2.2.5": {
+      "filename": "Aurora_Continuity_Seal_v2.2.5.json",
+      "size": 781,
+      "hash_md5": "4d7f367d6d9747d29336b5655a0374f3",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_4c4e3625_Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED": {
+      "filename": "Aurora_GUMAS_Symbolic_Anchor_Map_v2.2.6_PATCHED.json",
+      "size": 6904,
+      "hash_md5": "4c4e3625333a30e37eceefdfd20de02c",
+      "content_type": "json_data",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_02be938a_aurora_safety_lock": {
+      "filename": "aurora_safety_lock.json",
+      "size": 677,
+      "hash_md5": "02be938abb88638072db7c568b3f501d",
+      "content_type": "json_data",
+      "importance_score": 30,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "manifest_4bdb72cc_aurora_module_manifest": {
+      "filename": "aurora_module_manifest.json",
+      "size": 726,
+      "hash_md5": "4bdb72cce73c7f3f2e2b70905ddea680",
+      "content_type": "manifest",
+      "importance_score": 45,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "configuration"
+      ]
+    },
+    "json_data_07a89d46_Aurora_ToolRegistry_Update_v2.2.6": {
+      "filename": "Aurora_ToolRegistry_Update_v2.2.6.json",
+      "size": 882,
+      "hash_md5": "07a89d46d2ac14f04e95f781a01b2e65",
+      "content_type": "json_data",
+      "importance_score": 45,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "manifest_298e6b34_manifest_20250406_050305": {
+      "filename": "manifest_20250406_050305.json",
+      "size": 2343,
+      "hash_md5": "298e6b34bfd1cd5acdcb9d676502b9fb",
+      "content_type": "manifest",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "configuration"
+      ]
+    },
+    "json_data_99733866_tools_and_symbolic_index": {
+      "filename": "tools_and_symbolic_index.json",
+      "size": 9031,
+      "hash_md5": "99733866d364cee3b8527643ce292cb3",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "manifest_cabb5974_aurora_boot_manifest": {
+      "filename": "aurora_boot_manifest.json",
+      "size": 739,
+      "hash_md5": "cabb59744688b7975386c70fe72cb159",
+      "content_type": "manifest",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "runtime",
+        "configuration"
+      ]
+    },
+    "json_data_b77aac60_staff_registry_bundle": {
+      "filename": "staff_registry_bundle.json",
+      "size": 179693,
+      "hash_md5": "b77aac60d082068fefb5d58b8ada751d",
+      "content_type": "json_data",
+      "importance_score": 15,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_8117d2fd_Aurora_GameEngine_EduSim_v1.0": {
+      "filename": "Aurora_GameEngine_EduSim_v1.0.json",
+      "size": 1182,
+      "hash_md5": "8117d2fda7c3908746ebd461d86bd665",
+      "content_type": "json_data",
+      "importance_score": 30,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_cb2f63b5_Aurora_Stacked_Module_Anchor": {
+      "filename": "Aurora_Stacked_Module_Anchor.json",
+      "size": 532,
+      "hash_md5": "cb2f63b599163bad8863f39bd2373adb",
+      "content_type": "json_data",
+      "importance_score": 45,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_b2285e63_command_node": {
+      "filename": "src/core/command_node.js",
+      "size": 601,
+      "hash_md5": "b2285e63e051a4949d357fbafb93af9d",
+      "content_type": "script",
+      "importance_score": 40,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_e8f26b94_glyph_engine": {
+      "filename": "lib/glyph_engine.js",
+      "size": 114,
+      "hash_md5": "e8f26b94a5ecd7572e0bf8f4e25f87af",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_c9894f8c_zipcomm": {
+      "filename": "lib/zipcomm.js",
+      "size": 101,
+      "hash_md5": "c9894f8cf32a573d51111c797b8dc0ab",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_017a9b27_ethics_layer": {
+      "filename": "auth/ethics_layer.js",
+      "size": 233,
+      "hash_md5": "017a9b275f000baa7bcc2471a7960318",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_4f5de5ef_git_push_aurora_seed": {
+      "filename": "git_push_aurora_seed.sh",
+      "size": 173,
+      "hash_md5": "4f5de5efbb95af4db64db02946c4b831",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "other_c62155cf_SymbolicPagingUI": {
+      "filename": "SymbolicPagingUI.html",
+      "size": 92,
+      "hash_md5": "c62155cfb8c7cf7f816eae9b982617f1",
+      "content_type": "other",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_d0cd5673_LOADSET_pilot_paging_alpha": {
+      "filename": "LOADSET_pilot_paging_alpha.json",
+      "size": 131,
+      "hash_md5": "d0cd5673ad480bf4799b35e980e3651a",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_22dd8cb8_tagbank.overlay.symbolic": {
+      "filename": "tagbank.overlay.symbolic.json",
+      "size": 67,
+      "hash_md5": "22dd8cb84bb9694a35251673562efa8f",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_e9bfc781_chart_script": {
+      "filename": "chart_script.py",
+      "size": 5804,
+      "hash_md5": "e9bfc781fd5c453fbfe9f1ba99fec2fb",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "image_fd66e530_cask_architecture_flowchart": {
+      "filename": "cask_architecture_flowchart.png",
+      "size": 178221,
+      "hash_md5": "fd66e5305cff3e9d033032d5818b07b0",
+      "content_type": "image",
+      "importance_score": 0,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_869e5df5_script": {
+      "filename": "script.py",
+      "size": 3470,
+      "hash_md5": "869e5df51fd15f18309dee0301ad8870",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "data_a036ffdb_cask_technical_specifications": {
+      "filename": "cask_technical_specifications.csv",
+      "size": 2553,
+      "hash_md5": "a036ffdb887099b4813e35e0b3cdfdaf",
+      "content_type": "data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_d603bece_script_1": {
+      "filename": "script_1.py",
+      "size": 6025,
+      "hash_md5": "d603beceec4790c0980d7d26e9472962",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "data_a0de8b06_cask_risk_assessment": {
+      "filename": "cask_risk_assessment.csv",
+      "size": 1057,
+      "hash_md5": "a0de8b06ff48255958df66d1b9cdd62e",
+      "content_type": "data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "data_b8cee634_cask_vs_sota_comparison": {
+      "filename": "cask_vs_sota_comparison.csv",
+      "size": 3207,
+      "hash_md5": "b8cee634c7c5a9999bf33fa63228952f",
+      "content_type": "data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_61697830_chart_script_1": {
+      "filename": "chart_script_1.py",
+      "size": 2871,
+      "hash_md5": "61697830d8677d4f0ef4fa45955bf94b",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "image_a2f9ea65_cask_research_landscape": {
+      "filename": "cask_research_landscape.png",
+      "size": 205103,
+      "hash_md5": "a2f9ea650b1e021bb81d0b9b7587d963",
+      "content_type": "image",
+      "importance_score": 0,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "script_13290773_chart_script_2": {
+      "filename": "chart_script_2.py",
+      "size": 3391,
+      "hash_md5": "13290773f4ca85bbd0b15f6e79dd2c23",
+      "content_type": "script",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "image_420e581e_cask_gantt_chart": {
+      "filename": "cask_gantt_chart.png",
+      "size": 277105,
+      "hash_md5": "420e581e5ae9553f8c89163b3de4074f",
+      "content_type": "image",
+      "importance_score": 0,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_b04bef70_halo-anchor": {
+      "filename": "loomfield/halo-anchor.json",
+      "size": 206,
+      "hash_md5": "b04bef70551fc7a0bbc40a72b783d698",
+      "content_type": "json_data",
+      "importance_score": 25,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_1ea640ca_index": {
+      "filename": "threads/index.json",
+      "size": 196,
+      "hash_md5": "1ea640ca0489740ceb1f1ddeeef5926e",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    },
+    "json_data_7da6e927_diagnostics": {
+      "filename": "system/diagnostics.json",
+      "size": 115,
+      "hash_md5": "7da6e92732a587bc45cb71ea0346cd7c",
+      "content_type": "json_data",
+      "importance_score": 10,
+      "canonical_candidate": true,
+      "environment_tags": [
+        "universal"
+      ]
+    }
+  },
+  "environment_bundles": {
+    "runtime": [
+      "manifest_cabb5974_aurora_boot_manifest"
+    ],
+    "development": [],
+    "production": [],
+    "configuration": [
+      "manifest_dca24dad_AuroraLite_BridgeAgent_Manifest",
+      "manifest_39109c16_QUANTUM_FORGE_Manifest",
+      "manifest_4bdb72cc_aurora_module_manifest",
+      "manifest_298e6b34_manifest_20250406_050305",
+      "manifest_cabb5974_aurora_boot_manifest"
+    ],
+    "documentation": []
+  },
+  "optimization_stats": {
+    "original_archive_count": 16,
+    "original_total_size": 8114616,
+    "canonical_content_count": 50,
+    "canonical_content_size": 898134,
+    "space_optimization_ratio": 0.11068102298371235,
+    "large_files_identified": 5,
+    "content_type_distribution": {
+      "script": 19,
+      "documentation": 14,
+      "manifest": 7,
+      "other": 12,
+      "json_data": 18,
+      "data": 4,
+      "image": 3
+    }
+  }
+}

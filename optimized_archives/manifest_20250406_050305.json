@@ -1,0 +1,74 @@
+[
+  {
+    "filename": "Aurora_Master_Knowledge_Core_v2.2.6b_CLEANED.md",
+    "description": "Normalized core knowledge base for Aurora v2.2.6b",
+    "layer": "Knowledge Core",
+    "priority": "bootstrap"
+  },
+  {
+    "filename": "Aurora_GUMAS_Knowledge_Index.md",
+    "description": "Symbol-indexed reference map for core entries",
+    "layer": "Knowledge Core",
+    "priority": "bootstrap"
+  },
+  {
+    "filename": "Aurora_GUMAS_Knowledge_Everything.md",
+    "description": "Expanded, uncompressed GUMAS knowledge reference",
+    "layer": "Knowledge Core",
+    "priority": "optional"
+  },
+  {
+    "filename": "Aurora_Command_Alias_Registry_v2.2.6b.json",
+    "description": "Primary alias registry for symbolic command mapping",
+    "layer": "Symbolic Continuity",
+    "priority": "bootstrap"
+  },
+  {
+    "filename": "Aurora_Alias_Overlay_v2.2.6b.json",
+    "description": "Alias patch overlay for runtime command flexibility",
+    "layer": "Symbolic Continuity",
+    "priority": "runtime"
+  },
+  {
+    "filename": "tools_and_symbolic_index.json",
+    "description": "Cross-reference of tools, threads, anchors",
+    "layer": "Symbolic Continuity",
+    "priority": "bootstrap"
+  },
+  {
+    "filename": "Continuity_Assurance_Grid_v1.json",
+    "description": "Continuity threading logic and anchor status map",
+    "layer": "Symbolic Continuity",
+    "priority": "runtime"
+  },
+  {
+    "filename": "staff_registry_bundle.json",
+    "description": "Personnel dossiers and registry-linked authorities",
+    "layer": "Operational Data",
+    "priority": "runtime"
+  },
+  {
+    "filename": "Aurora_v2.2.6b_ThreadExport_Complete.zip",
+    "description": "Full symbolic thread export for Aurora 2.2.6b",
+    "layer": "Thread Archives",
+    "priority": "archive"
+  },
+  {
+    "filename": "Aurora_v2.2.6b_Symbolic_SuperBundle.zip",
+    "description": "Tagged symbolic anchor resources bundle",
+    "layer": "Thread Archives",
+    "priority": "archive"
+  },
+  {
+    "filename": "Aurora_v2.2.6b_LIVE_EXPORT.zip",
+    "description": "Live symbolic runtime state and logic",
+    "layer": "Middleware / Runtime",
+    "priority": "runtime"
+  },
+  {
+    "filename": "Aurora_v2.2.6b_Middleware_Continuity_Archive.zip",
+    "description": "Continuity-preserving logic hooks and patch links",
+    "layer": "Middleware / Runtime",
+    "priority": "archive"
+  }
+]

@@ -191,3 +191,12 @@ CANONICAL_VALIDATION_REPORT.md
 AURORA_VALIDATION_SUMMARY.md
 .aurora_validation/
 .aurora_validation_config.json
+
+# Archive optimization outputs (comment out if you want to commit optimized content)
+# optimized_archives/
+# environment_bundles/
+# archive_optimization_manifest.json
+
+# Archive optimization temporary files
+*.tmp
+*.temp

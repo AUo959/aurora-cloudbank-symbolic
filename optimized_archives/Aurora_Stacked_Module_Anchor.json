@@ -1,0 +1,21 @@
+{
+  "bundle_label": "Aurora_Stacked_Module_Export",
+  "version": "2025.04.08",
+  "timestamp_utc": "2025-04-08T18:26:55.229595",
+  "trust": {
+    "key": "AURORA-PDK-001",
+    "lock": "Picard_Delta_3"
+  },
+  "contents": [
+    {
+      "filename": "Aurora_GameEngine_EduSim_v1.0.json",
+      "symbolic_tag": "s.tag::aurora.engine.edusim"
+    },
+    {
+      "filename": "Aurora_EdSim_MLTM_Export_20250408T1731Z 2.zip",
+      "capsule_type": "T1",
+      "reentry_ready": true
+    }
+  ],
+  "anchor_tag": "anchor.module.edusim.bundle2025"
+}

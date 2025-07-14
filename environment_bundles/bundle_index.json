@@ -1,0 +1,111 @@
+{
+  "created_at": "2025-01-15T00:00:00Z",
+  "available_bundles": {
+    "development_kit.zip": {
+      "size_bytes": 3270,
+      "file_count": 7,
+      "info": {
+        "bundle_name": "Aurora Development Kit",
+        "description": "Complete development environment setup",
+        "created_by": "Aurora Archive Optimizer",
+        "environment_tags": [
+          "development",
+          "runtime",
+          "configuration"
+        ],
+        "content_count": 5,
+        "optimization_level": 6
+      }
+    },
+    "production_deployment.zip": {
+      "size_bytes": 1090,
+      "file_count": 3,
+      "info": {
+        "bundle_name": "Aurora Production Deployment",
+        "description": "Production-ready deployment package",
+        "created_by": "Aurora Archive Optimizer",
+        "environment_tags": [
+          "production",
+          "runtime"
+        ],
+        "content_count": 1,
+        "optimization_level": 9
+      }
+    },
+    "research_assets.zip": {
+      "size_bytes": 153790,
+      "file_count": 11,
+      "info": {
+        "bundle_name": "Aurora Research Assets",
+        "description": "Research data and analysis tools",
+        "created_by": "Aurora Archive Optimizer",
+        "environment_tags": [
+          "universal"
+        ],
+        "content_count": 9,
+        "optimization_level": 6
+      }
+    },
+    "minimal_runtime.zip": {
+      "size_bytes": 3261,
+      "file_count": 7,
+      "info": {
+        "bundle_name": "Aurora Minimal Runtime",
+        "description": "Essential files for runtime operation",
+        "created_by": "Aurora Archive Optimizer",
+        "environment_tags": [
+          "runtime",
+          "configuration"
+        ],
+        "content_count": 5,
+        "optimization_level": 9
+      }
+    }
+  },
+  "bundle_configs": {
+    "minimal_runtime": {
+      "name": "Aurora Minimal Runtime",
+      "description": "Essential files for runtime operation",
+      "environment_tags": [
+        "runtime",
+        "configuration"
+      ],
+      "max_size_mb": 5
+    },
+    "development_kit": {
+      "name": "Aurora Development Kit",
+      "description": "Complete development environment setup",
+      "environment_tags": [
+        "development",
+        "runtime",
+        "configuration"
+      ],
+      "max_size_mb": 50
+    },
+    "production_deployment": {
+      "name": "Aurora Production Deployment",
+      "description": "Production-ready deployment package",
+      "environment_tags": [
+        "production",
+        "runtime"
+      ],
+      "max_size_mb": 20
+    },
+    "documentation_bundle": {
+      "name": "Aurora Documentation Bundle",
+      "description": "Complete documentation and guides",
+      "environment_tags": [
+        "documentation"
+      ],
+      "max_size_mb": 100
+    },
+    "research_assets": {
+      "name": "Aurora Research Assets",
+      "description": "Research data and analysis tools",
+      "environment_tags": [
+        "universal"
+      ],
+      "max_size_mb": 200
+    }
+  }
+}

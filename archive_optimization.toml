@@ -1,0 +1,155 @@
+# Aurora Archive Optimization Configuration
+# Defines rules for content triaging, importance scoring, and environment targeting
+
+[content_classification]
+# High importance content (85-100 score)
+high_importance_patterns = [
+    "*core*",
+    "*master*", 
+    "*main*",
+    "*critical*",
+    "*essential*",
+    "*primary*"
+]
+
+# Medium importance content (50-84 score)
+medium_importance_patterns = [
+    "*config*",
+    "*manifest*",
+    "*registry*",
+    "*key*",
+    "*anchor*",
+    "*runtime*"
+]
+
+# Low importance content (0-49 score)
+low_importance_patterns = [
+    "*temp*",
+    "*cache*",
+    "*backup*",
+    "*old*",
+    "*deprecated*"
+]
+
+[environment_targeting]
+# Development environment
+development_patterns = [
+    "*dev*",
+    "*development*",
+    "*test*",
+    "*debug*",
+    "*local*"
+]
+
+# Production environment
+production_patterns = [
+    "*prod*",
+    "*production*",
+    "*deploy*",
+    "*release*",
+    "*live*"
+]
+
+# Runtime environment
+runtime_patterns = [
+    "*runtime*",
+    "*boot*",
+    "*start*",
+    "*launch*",
+    "*init*"
+]
+
+# Documentation environment
+documentation_patterns = [
+    "*.md",
+    "*doc*",
+    "*guide*",
+    "*readme*",
+    "*manual*"
+]
+
+[optimization_rules]
+# Size-based rules
+large_file_threshold_mb = 1.0
+small_file_bonus_kb = 10
+compression_preference = 9  # 0-9, higher = better compression
+
+# Content type priorities
+content_type_priorities = {
+    "manifest" = 100,
+    "configuration" = 90,
+    "script" = 80,
+    "json_data" = 70,
+    "documentation" = 60,
+    "data" = 50,
+    "image" = 30,
+    "other" = 20
+}
+
+# Bundle size limits (MB)
+bundle_size_limits = {
+    "minimal_runtime" = 5,
+    "development_kit" = 50,
+    "production_deployment" = 20,
+    "documentation_bundle" = 100,
+    "research_assets" = 200
+}
+
+[canonical_selection]
+# Criteria for canonical content selection
+min_importance_score = 50
+required_content_types = ["manifest", "configuration"]
+universal_tag_bonus = 20
+duplicate_hash_handling = "prefer_highest_score"
+
+# Exclusion patterns for canonical content
+exclude_from_canonical = [
+    "*temp*",
+    "*cache*",
+    "*test*",
+    "*.tmp",
+    "*.log"
+]
+
+[compression_settings]
+# Per-environment compression levels
+compression_levels = {
+    "development" = 6,    # Faster compression for dev
+    "production" = 9,     # Maximum compression for prod
+    "runtime" = 8,        # Balanced for runtime
+    "documentation" = 6,  # Readable compression for docs
+    "universal" = 7       # Default balanced compression
+}
+
+# File type specific compression
+file_type_compression = {
+    "json" = 9,      # JSON compresses very well
+    "text" = 8,      # Text files compress well
+    "script" = 7,    # Scripts have moderate compression
+    "binary" = 5,    # Binary files don't compress as well
+    "image" = 3      # Images are often already compressed
+}
+
+[resource_optimization]
+# Memory usage limits
+max_memory_usage_mb = 500
+chunk_size_mb = 10
+parallel_processing = true
+max_workers = 4
+
+# Disk usage optimization
+cleanup_extracted_files = false  # Keep for development
+cleanup_temp_files = true
+use_symlinks_when_possible = true
+
+[reporting]
+# Report generation settings
+include_detailed_analysis = true
+generate_visualization = false  # Set to true if matplotlib available
+export_csv_reports = true
+verbose_logging = false
+
+# Report formats
+report_formats = ["json", "csv", "txt"]
+include_optimization_suggestions = true
+include_environment_analysis = true

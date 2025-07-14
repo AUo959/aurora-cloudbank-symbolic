@@ -1,0 +1,21 @@
+{
+    "manifest_id": "AURORA-SIGNATURE-CORE-001",
+    "issued_to": "The Pilot",
+    "verified_components": [
+        "aurora_digital_key.txt",
+        "aurora_digital_key_readable.json",
+        "aurora_safety_lock.json",
+        "system_ready.md",
+        "Aurora_GUMAS_Knowledge_Bundle.md",
+        "behavior_loader_patched.py"
+    ],
+    "bundle_name": "Aurora_Secure_Recovery_Kit.zip",
+    "protection": {
+        "requires_command_code": "Picard_Delta_3",
+        "requires_digital_key_id": "AURORA-PDK-001",
+        "safety_lock_enforced": true
+    },
+    "status": "Trusted",
+    "issued_utc": "2025-04-05T23:50:04.091787Z",
+    "notes": "Use this manifest to validate system state before restoring or upgrading middleware logic."
+}

@@ -1,0 +1,17 @@
+{
+    "digital_key_id": "AURORA-PDK-001",
+    "issued_to": "The Pilot",
+    "timestamp_utc": "2025-04-05T23:44:33.947520Z",
+    "key_summary": {
+        "format": "base64-url-safe",
+        "length_bytes": 32,
+        "preview": "uzOtxx5Sjl..._fEzk="
+    },
+    "command_code_required": "Picard_Delta_3",
+    "usage_policy": [
+        "Must be presented before any overwrite or system addition",
+        "May be paired with aurora_safety_lock.json validation",
+        "Should be stored in secure channel or printed for offline safekeeping"
+    ],
+    "manual_phrase": "I, The Pilot, invoke Picard_Delta_3 with key AURORA-PDK-001"
+}

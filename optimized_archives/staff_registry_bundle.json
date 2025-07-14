@@ -1,0 +1,1356 @@
+{
+  "Aurora_Command_Alias_Registry_v2.2.6b.json": {
+    "BUP": "Boot-Up Protocol (full stack reinit)",
+    "LOCKMEM": "Freeze live memory for continuity export",
+    "RESETCORE": "Purge and restore core middleware components",
+    "DIAGNOW": "Run full middleware self-check",
+    "SENTRYSTAT": "Trigger memory-monitor status sweep",
+    "SYNCANCHORS": "Rebuild symbolic tag registry",
+    "RESTOREMAP": "Inject symbolic_anchor_map.json",
+    "TAGTRACE": "Run symbolic anchor tracepath",
+    "TAGPATCH": "Apply symbolic continuity patch set",
+    "THREADWAKE": "Resume a suspended thread from sandbox",
+    "SANDDROP": "Deploy a new simulation thread kit",
+    "EXPORTTHREAD": "Archive current simulation thread",
+    "THREADSYNC": "Reconnect cross-thread symbolic links",
+    "RESUME": "Restore simulation from last valid state",
+    "REBUILDRECOVERY": "Refresh restoration hooks from restore_instructions.md",
+    "CLEANDEPLOY": "Initiate symbolic-only sandbox with minimal load",
+    "T1": "Activate comprehensive thread export (full-state capture for thread transfer)",
+    "001": "Please implement suggestion 1",
+    "002": "Please implement suggestion 2",
+    "003": "Please implement suggestion 3",
+    "004": "Please implement suggestion 4",
+    "005": "Please implement all suggestions in the most logical order (IMLO)",
+    "SUP": "Please provide a status update/report",
+    "007": "Yes please",
+    "008": "No thank you"
+  },
+  "Aurora_GUMAS_Canonical_Staff_Registry_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Aurora-GUMAS Final Staff Registry (v2.2.5)</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            padding: 40px;\n            background-color: #f9f9f9;\n            color: #333;\n            line-height: 1.6;\n        }\n        h1 {\n            text-align: center;\n            color: #003366;\n            margin-bottom: 40px;\n        }\n        h2 {\n            color: #005580;\n            border-bottom: 2px solid #ccc;\n            padding-bottom: 5px;\n            margin-top: 40px;\n        }\n        .staff-entry {\n            margin-bottom: 20px;\n            padding: 15px;\n            background-color: #fff;\n            border-left: 5px solid #003366;\n            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);\n        }\n        .name {\n            font-size: 17px;\n            font-weight: bold;\n            color: #222;\n        }\n        .meta {\n            font-style: italic;\n            color: #666;\n        }\n        .blurb {\n            margin-top: 8px;\n        }\n    </style>\n</head>\n<body>\n    <h1>Aurora-GUMAS Final Staff Registry<br><span style='font-size:14px;'>Canonical List \u2013 v2.2.5</span></h1>\n<h2>AI & Cognitive Systems</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Amelia Rivers \u2013 AI Systems Specialist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>AI Ethics / Narrative</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Prof. Elena Sorensen \u2013 Cognitive Science & Narrative Expert</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>AI Systems</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Emily Roberts \u2013 LLM-to-Simulation Bridge Developer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Aurora Internal R&D</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Elira Noor \u2013 Lead \u2013 Reflexivity Specialist</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Develops reflexive memory systems that integrate simulated identity and source truth.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Maren Koss \u2013 Cognitive Drift Mapper</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Charts memory slippage and semantic drift across longform simulation threads.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Vincent Kale \u2013 Layer 2 Isolation Theorist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.</div>\n        </div>\n        <h2>Core Development</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Carmen Rivas \u2013 Simulation Bindings Specialist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Handles binding layers for simulation-thread coupling and temporal sequence control.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Ira Menon \u2013 Lead \u2013 Compiler Engineer</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Tobias Qin \u2013 Code/Narrative Bridge Mapper</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Aligns storytelling architecture with structural code logic across dev layers.</div>\n        </div>\n        <h2>Cross-Domain R&D</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Amina Velin \u2013 Lead \u2013 Symbolic Systems Researcher</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Researches symbolic system resonance across interlinked architecture domains.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Haneul Park \u2013 Immersive Experience Theorist</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Prototypes cognitive immersion structures for symbolic presence and lived participation.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Kai Drev \u2013 Interface Ecologist</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Designs organic interface harmonics and ecological balance within user-system flows.</div>\n        </div>\n        <h2>Diagnostics</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Olivia Nguyen \u2013 QA & Testing Engineer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Samantha Lee \u2013 Logging & Observability Engineer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Ethics/Narrative</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Naomi Vell \u2013 Narrative Framework Engineer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Executive Oversight</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Alex Thorne \u2013 Project Manager & Systems Architect</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>HR</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Helena Vu \u2013 Head of Human Resources</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Infrastructure</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Kieran Zhao \u2013 Computational Optimization Lead</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Optimization</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Jessica Martinez \u2013 Senior Backend Developer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Marcus Chen \u2013 Performance Optimization Engineer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Ryan Patel \u2013 Systems Integration Engineer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Systems Portability</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Ren Okada \u2013 Systems Portability Specialist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>Systems Theory</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Tariq El-Sayegh \u2013 Speculative Systems Theorist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        <h2>UI/UX</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dante Kyros \u2013 UI/UX Mockup Architect</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Juno Suresh \u2013 Symbolic Systems Artist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Keira Halden \u2013 Lead Visual Concept Designer</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Rei Vatra \u2013 Atmospheric Painter & Color Theorist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">\u2014</div>\n        </div>\n        </body></html>"
+  },
+  "GUMAS_v2.2_Registry.json": {
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Memory_Integration_Pack.zip": {
+      "hash": "4fef5f46e05ab1abcf5197006e57367da5a0b56f4c9e1088fbc466d0e0ff9fd2",
+      "size": 2000355,
+      "name": "GUMAS_Memory_Integration_Pack.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /gumas_recovery_wizard.py": {
+      "hash": "f3c3de70fe93e792a8fa4b0273a260afbd8bb46b4f5922c96855e0ae81ff3bb0",
+      "size": 3785,
+      "name": "gumas_recovery_wizard.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /aurora_instruction_profile.json": {
+      "hash": "b0d985cf9660806ec37eba8f3ff72161b69bdae698773656e0071e2d10bcae77",
+      "size": 1191,
+      "name": "aurora_instruction_profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Extracted_Simulation_Modules.txt": {
+      "hash": "909afc6767e94f654d5a8b17598f873d491394ac672524d32093fc43995dfe39",
+      "size": 2170737,
+      "name": "GUMAS_Extracted_Simulation_Modules.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Memory_Ethics_Doctrine_Thermax.json": {
+      "hash": "7d3f9187ac85919b3c3c363a363aa243958135c9a5b63286d21a52d4c460008c",
+      "size": 1789,
+      "name": "GUMAS_Memory_Ethics_Doctrine_Thermax.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Condensed_Timeline_Entry_Dev_GUMAS.json": {
+      "hash": "8314f163a9440ed482d8892ba9b20e2935c8c04593e57d51f941d759796f5f7f",
+      "size": 762,
+      "name": "Condensed_Timeline_Entry_Dev_GUMAS.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_v2.1_Enhancement_Bundle.zip": {
+      "hash": "53e24eb26b2489b3c5243fb45e5d575b9e281a0e50a88c2b96c3e16512bfac71",
+      "size": 3318,
+      "name": "GUMAS_v2.1_Enhancement_Bundle.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Team_Department_Breakdown.pdf": {
+      "hash": "c1579052a6d046851145f3a94b476c9b29494e1119a6a9bff5e2137692c518b9",
+      "size": 2332,
+      "name": "GUMAS_Team_Department_Breakdown.pdf"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Starter_Pack.zip": {
+      "hash": "c5ffdaa7520b63d51da725188e1eb921399b8c91f6adfd29a9aaa904a4b200c7",
+      "size": 2171778,
+      "name": "GUMAS_Starter_Pack.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Developer_Master_Kit.json": {
+      "hash": "a49ff4d2c6951e91ed31f1476a32056ae6941deed873a61c041ae2410fd578ec",
+      "size": 1354,
+      "name": "GUMAS_Developer_Master_Kit.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Faction_Relationship_Web.html": {
+      "hash": "7543c49eea7d622d61052fb425d280e2ce2bb1ca5d5272d57ec43c0da40c170e",
+      "size": 3316,
+      "name": "GUMAS_Faction_Relationship_Web.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Memory_Optimization_Module.py": {
+      "hash": "7c3c2eca5d5fc7fc463610a77e77c79310bb4d7bd643d3b6c77a4610bfa742b2",
+      "size": 2631,
+      "name": "GUMAS_Memory_Optimization_Module.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Transcript_Session_Log.html": {
+      "hash": "32eae6922680070075f30baff3bc56634804945c45eb3c514fba782927fd4ee4",
+      "size": 1379,
+      "name": "GUMAS_Transcript_Session_Log.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Seed_Kit.zip": {
+      "hash": "a3a7f03562d2d365093fc2ffd61dca19c15a8541ed78c7903bed0823c478c9d1",
+      "size": 2010375,
+      "name": "GUMAS_Seed_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Step3_Launch_Checklist.md": {
+      "hash": "e10213e20bae655c6075fe9ada0b6f47caf828d5be7474b10a8b60a597dbb496",
+      "size": 1325,
+      "name": "GUMAS_Step3_Launch_Checklist.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Migration_Token_Step3.json": {
+      "hash": "6127b750dab470e8f97d4683763f006472abb6907291d94972ff0028e96ff208",
+      "size": 899,
+      "name": "GUMAS_Migration_Token_Step3.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_STW_Transfer_2025-04-02T21-33-38Z.zip": {
+      "hash": "c20926cc5fe9f7d4ee60c05e5a980a451c92ccd405de749fff379ab78706f0d1",
+      "size": 3592,
+      "name": "GUMAS_STW_Transfer_2025-04-02T21-33-38Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Level3_Diagnostic_2025-04-02T20-28-16Z.zip": {
+      "hash": "d5bb835a998b6d8417e93403bbb3f9f071e6739fa2d6d48dbd872bda6a4a0b43",
+      "size": 894,
+      "name": "GUMAS_Level3_Diagnostic_2025-04-02T20-28-16Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Step3_Boot_Prompt.txt": {
+      "hash": "7daac909ade62684e02af119a35984f346465e2e5fae96c524acdbbf242a1dca",
+      "size": 1046,
+      "name": "Aurora_Step3_Boot_Prompt.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /CED_Team_Modular_Profiles.json": {
+      "hash": "31b5136297a0a8f6491d10996f55e7adae6d45c2116293e8cc0d098efa89aaf3",
+      "size": 2711,
+      "name": "CED_Team_Modular_Profiles.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /behavior_loader.py": {
+      "hash": "daf2bb380dff1bdbd798db62b0aa8d3375ea4e92235ad8dc76c6dc3e5ded48ec",
+      "size": 2683,
+      "name": "behavior_loader.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Level3_Diagnostic_Retest_2025-04-02T20-52-52Z.zip": {
+      "hash": "271628336cbb8ca699f7d957c9d2a9b5d16b84dd08979342d91fe6b62d5713d4",
+      "size": 1257,
+      "name": "GUMAS_Level3_Diagnostic_Retest_2025-04-02T20-52-52Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Recovery_Assistant_Starter_Pack.txt": {
+      "hash": "db8a13e2fa6792c76513772b0c392c658c88fabba543fb6638262f7f9461ced2",
+      "size": 2146,
+      "name": "GUMAS_Recovery_Assistant_Starter_Pack.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Core_Manifest_Patched.json": {
+      "hash": "0a130884a5db8a5109076753e6e38a8d9fb3f76646f39ff45ee2279ae5420b23",
+      "size": 717,
+      "name": "Aurora_Core_Manifest_Patched.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Narrative_Development_Guidebook.html": {
+      "hash": "104ffdceba0bbebc4f09595caa58dc5c1eaaf9d1c9a68ea78dec7e68d45d84db",
+      "size": 3771,
+      "name": "GUMAS_Narrative_Development_Guidebook.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /character_behavior_modules.py": {
+      "hash": "4ac13def09146286fa949a6da65cec6936db23585c2ffe067be709bb24a05150",
+      "size": 2645,
+      "name": "character_behavior_modules.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Deliverables_Bundle_Step2.zip": {
+      "hash": "cbc569f317050dcebfd43f3d20a27e96af4f447d3cb8c9296dcc05511f461db3",
+      "size": 24657,
+      "name": "GUMAS_Deliverables_Bundle_Step2.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Status_Update_0432_43.html": {
+      "hash": "42303b5c8a8b8afb4d4169bd708943767acdc75d59c94bfa29848a150bdbe9b3",
+      "size": 2807,
+      "name": "GUMAS_Status_Update_0432_43.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /galactic_union_alignment_metadata.csv": {
+      "hash": "f276557f8b4f523c2387ca2f3ed317b6483d817d3416785b4e3853e46cf9796c",
+      "size": 2021,
+      "name": "galactic_union_alignment_metadata.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Core_Systems_README.md": {
+      "hash": "0275a0878bac1da8d1ecbb168df0d2a7ed867067e49065296f16ed9b84f9b156",
+      "size": 2244,
+      "name": "GUMAS_Core_Systems_README.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Comprehensive_Bundle_Daedalus_Spiral.html": {
+      "hash": "2cbd756f9f37056355bbb6634c5ab74a3fb46382b0aabc64b1d051fb465a5d41",
+      "size": 3288,
+      "name": "GUMAS_Comprehensive_Bundle_Daedalus_Spiral.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /gumas_memory_maintenance.py": {
+      "hash": "4fd7511ff77fdd865c40db4b2bf0c83023610db90fdc11d79ec19bb8c0266f68",
+      "size": 791,
+      "name": "gumas_memory_maintenance.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /gumas_memory_core.py": {
+      "hash": "632c55265a5b473e4a95ebfba53bb4f49ba53afec2a5ae24d757beb35c66bf44",
+      "size": 3424,
+      "name": "gumas_memory_core.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /aurora_instruction_shell.py": {
+      "hash": "4f868518172aff8d4072119c74c7c11a2366137a350290a236ecada55179be93",
+      "size": 1933,
+      "name": "aurora_instruction_shell.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Memory_Core_Updated.zip": {
+      "hash": "6501bab9f698f63dee4a61c2508ddecc3ff22a7d7471337a4ddf89977d80976e",
+      "size": 4483,
+      "name": "GUMAS_Memory_Core_Updated.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /galactic_union_timeline_index.csv": {
+      "hash": "1a8908fb06978ba97fb6c5f3805f42adcebd1c91889a301db7cb878434604bd2",
+      "size": 1622,
+      "name": "galactic_union_timeline_index.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Comprehensive_Bundle_Daedalus_Spiral.pdf": {
+      "hash": "ceb7ead799da81ee6e1e38e08ba748a428b9ef2443a156d5366c61d40e098d5d",
+      "size": 92355,
+      "name": "GUMAS_Comprehensive_Bundle_Daedalus_Spiral.pdf"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Memory_Integration_Profile.json": {
+      "hash": "84fedd60776d7368a3b7e87b72c338dfa4ecd557a5eb592bd49cd321a95baf55",
+      "size": 1367,
+      "name": "Aurora_Memory_Integration_Profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Organizational_Structure_Updated.json": {
+      "hash": "484bb13ffb235904c935ba88d3d9745d3459b40c8c368b28a0899e42517fac10",
+      "size": 5325,
+      "name": "GUMAS_Organizational_Structure_Updated.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /full_galactic_union_alignment.csv": {
+      "hash": "e6b98ad7828918841967346203cd24d5ec758ba096c934c5eba9646c164728a7",
+      "size": 4372,
+      "name": "full_galactic_union_alignment.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Organized_Galactic_Union_Simulation_Conversations.csv": {
+      "hash": "bc10020e5156d5e13c098b8987a13a168ced012a1a5408398b136d9ad6a74ee3",
+      "size": 2179,
+      "name": "Organized_Galactic_Union_Simulation_Conversations.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /meta_structure_profile.json": {
+      "hash": "0a3edd8d199c1fc67b779f0b9807c32b0f88f5707331bb5c3cecf4b59624b180",
+      "size": 2869,
+      "name": "meta_structure_profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Omega9_Emergence_Log.json": {
+      "hash": "677bcdb499631da45726eec258b4599826f694827f8004daf2287629e06bfb47",
+      "size": 777,
+      "name": "Omega9_Emergence_Log.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_STW_Transfer_Export.zip": {
+      "hash": "e133a803b324bc99452eb96276e9c05086e21f4e7bae4f32c0aa6ff12644a3c6",
+      "size": 1639,
+      "name": "GUMAS_STW_Transfer_Export.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Modular_Core_Export.zip": {
+      "hash": "e164f3ac9d64297bba08f39bda456a8f209dd122235d8ac8344b9040c17a06ca",
+      "size": 2828,
+      "name": "Aurora_Modular_Core_Export.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /SNPM_Scalable_Narrative_Model.html": {
+      "hash": "ab8842e839e82eaaef5947551ce12c43fcb5b4d16a19ae90cd148780708e63bf",
+      "size": 2439,
+      "name": "SNPM_Scalable_Narrative_Model.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Terminal_Routing_and_Namespace.json": {
+      "hash": "f9d483697f2968d23af3fd89637cc0f928e72696347622c29848b5001f972fbe",
+      "size": 1910,
+      "name": "GUMAS_Terminal_Routing_and_Namespace.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /aurora_core.py": {
+      "hash": "049af2fc527b7579686648eb9efea6ff37ecf755dd77b5b4cc5eb9f56c14b904",
+      "size": 2451,
+      "name": "aurora_core.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Full_Transcript_Metadata.json": {
+      "hash": "5d496f6ddf7a553b53b8490f1d41b058ffaebb96ad3e65f231b73eab8b7292cf",
+      "size": 1240,
+      "name": "GUMAS_Full_Transcript_Metadata.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /full_galactic_union_timeline.csv": {
+      "hash": "cd0cdc94e5582b7b1dafa9f346641a3ec85c0cdfb75099629ab63d6145b67e13",
+      "size": 3490,
+      "name": "full_galactic_union_timeline.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Organization_Name_Vote.html": {
+      "hash": "6b261eb28632207df5f59562d7701e8a5f093445febe1b50ca7e9df124df24bd",
+      "size": 2195,
+      "name": "GUMAS_Organization_Name_Vote.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Developer_Master_Kit_v1.0.0.zip": {
+      "hash": "96d9644cf562ffa90cbb6b44f05393257cb545d3748041a38395f4c60d6f1dd1",
+      "size": 19172,
+      "name": "GUMAS_Developer_Master_Kit_v1.0.0.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Master_Staff_Recovery_Archive.zip": {
+      "hash": "b06912b3401fd7a76eb70cdc7c869f78b4b15250930bb2598023c32b4c1f199b",
+      "size": 2054229,
+      "name": "GUMAS_Master_Staff_Recovery_Archive.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /CED_Department_Home_Node.json": {
+      "hash": "58baf9d158e286a060668e9e1a3d9e03238cbd7c958414637bc90cc6622fa36b",
+      "size": 1021,
+      "name": "CED_Department_Home_Node.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /HR_Department_Home_Node.json": {
+      "hash": "aa5f117873ed7b46f8b8d5799aa063185a5b36523c1b27585c0c3b5b07984b9c",
+      "size": 958,
+      "name": "HR_Department_Home_Node.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Organizational_Structure.json": {
+      "hash": "482fbbbfda116da6d167dcb07a4209d939566c844926cfacd73dccd12e39612c",
+      "size": 4981,
+      "name": "GUMAS_Organizational_Structure.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Faction_Relationship_Diagram.png": {
+      "hash": "5bede1d574e76d8bffb8b8397c20c825fc14362ea01b371ede7f5c4cf95e5e83",
+      "size": 276952,
+      "name": "GUMAS_Faction_Relationship_Diagram.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_v2.1_Full_Registry.zip": {
+      "hash": "29fc1be784231feb42d986033ddfc1ac509c6b7d1c2620e411315ffaafce5670",
+      "size": 951,
+      "name": "GUMAS_v2.1_Full_Registry.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Live_Operations_Dashboard.html": {
+      "hash": "408d5f3ea28cc391577533f9e4478e8045bc203ff373cba4b0171bb634951525",
+      "size": 3866,
+      "name": "GUMAS_Live_Operations_Dashboard.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Modular_Core_Blueprint.md": {
+      "hash": "1b1fb7172ca49e3d817accf3fd5d04bcebbad93e5c7ec95b6a412307e5139ceb",
+      "size": 2666,
+      "name": "Aurora_Modular_Core_Blueprint.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Terminal_Mockup_Amelia_Rivers.png": {
+      "hash": "344b5b8e559399a392ad619fb87877f07a16f8135ebcde9a3b75b082321b364f",
+      "size": 170392,
+      "name": "Aurora_Terminal_Mockup_Amelia_Rivers.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /MSMR_Update_v1.0.0.json": {
+      "hash": "2e70300446f0f24c141747455b92df01831d0f0218654950540bbaa46369dd79",
+      "size": 319,
+      "name": "MSMR_Update_v1.0.0.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Developer_Kit_Final.zip": {
+      "hash": "1dddc5b3abdbd0e98a511b7d4c68c078af982aa8a33702e4f3211804f29a1522",
+      "size": 13106,
+      "name": "Aurora_Developer_Kit_Final.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /aurora_module_manifest.json": {
+      "hash": "5e2d10b4d21bcc970ba590a8927eee34d4949038c08c7f24312361204f3e2673",
+      "size": 726,
+      "name": "aurora_module_manifest.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Team_Dev_GUMAS_Chat_Archive.html": {
+      "hash": "fb683e1de5e755b93fd0ec5aa13c46817a2f69e506ca189d29a63706adfe6bc0",
+      "size": 1718,
+      "name": "Team_Dev_GUMAS_Chat_Archive.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Transcript_Staff_Restoration.json": {
+      "hash": "94f3de124d7591bfc558cf850ebb8a6c2a78da0239e69a5425694905e587a355",
+      "size": 836,
+      "name": "GUMAS_Transcript_Staff_Restoration.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_AI_Agents_Kit.zip": {
+      "hash": "92e65346b790263d40d655f808529dd205e6aa7949284dbd503aab4b3b1d6b06",
+      "size": 5596,
+      "name": "GUMAS_AI_Agents_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Level4_Diagnostic_2025-04-02T20-29-50Z.zip": {
+      "hash": "f6d98604b379c551578c82489a4be7b8d2919798e051c83faaf269d25732b2ba",
+      "size": 1352,
+      "name": "GUMAS_Level4_Diagnostic_2025-04-02T20-29-50Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Project_Instructions.txt": {
+      "hash": "c687ebeb80a538c11cbf8739a86ff1eecd0ec76e9196788bcc5aed0a487049ce",
+      "size": 2868,
+      "name": "GUMAS_Project_Instructions.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Staff_Core_Module.json": {
+      "hash": "b6be25cb8fd8a3d5818535fd8c7f678efff0f5a9a6af52251ccc2517b33ac1a2",
+      "size": 595,
+      "name": "GUMAS_Staff_Core_Module.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /updated_galactic_union_memory_index.json": {
+      "hash": "f1e263a82459aea2a32e7856f311e769492544f09e6397ac5e9212c6e41f9ba1",
+      "size": 1992029,
+      "name": "updated_galactic_union_memory_index.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /Aurora_Insignia_Logotype.png": {
+      "hash": "f14f1cdd43d38bc12f14eaf79d3d1cb793a4146b7d4cc9ba11e4df5b760a8700",
+      "size": 207641,
+      "name": "Aurora_Insignia_Logotype.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /The_Pilot_Terminal_Shell.html": {
+      "hash": "d53f4f249865fb60ea9161f3be4bd480ede936fe4ecfb0cca9f278a4bf3a0fa3",
+      "size": 2091,
+      "name": "The_Pilot_Terminal_Shell.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /MMR_Update_Dev_GUMAS.json": {
+      "hash": "6653a562cf916da458830e440c03d99550b17639006748a9b5698f443bf1dc3a",
+      "size": 1143,
+      "name": "MMR_Update_Dev_GUMAS.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Complete_Memory_Module_Guide.html": {
+      "hash": "e58cb200e70b6747ee58caf380b25b9f83abb2ee00515c9cb2cc0d179b53e80d",
+      "size": 5032,
+      "name": "GUMAS_Complete_Memory_Module_Guide.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Aurora_Startup_Kit.zip": {
+      "hash": "7f8692d63a21469d0e5b43b1a589be6564043d43eef360e6deb576f631f4ed8f",
+      "size": 2011821,
+      "name": "GUMAS_Aurora_Startup_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Memory_Ethics_Doctrine_Thermax.html": {
+      "hash": "a70e317771489f831d74444b9dc752fda031110355606a0afd9268d3f164c974",
+      "size": 2428,
+      "name": "GUMAS_Memory_Ethics_Doctrine_Thermax.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Step3_Launch_Checklist.json": {
+      "hash": "3eabc96770734dedabb8385f626ba4183936aa511985fd20f5f3020e0bc0bf32",
+      "size": 1553,
+      "name": "GUMAS_Step3_Launch_Checklist.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Live_Comms_Diagnostic_Report_v1.0.0.json": {
+      "hash": "ff797737ce69254392f817685ac8bf8597f0b51f7861d87cf6949f22fced51a3",
+      "size": 1221,
+      "name": "GUMAS_Live_Comms_Diagnostic_Report_v1.0.0.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Team_Culture_Charter.html": {
+      "hash": "1313761b3778608228c8c2353c562a28ed4af83837578edd359066454d0809e3",
+      "size": 2990,
+      "name": "GUMAS_Team_Culture_Charter.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/GUMAS Archive for Sorting /GUMAS_Deliverables_Archive_Update_v1.1.0.json": {
+      "hash": "9bef5b904468f87cb696dc2c3c2392a1db772dba2590ff1852b04faedaa02435",
+      "size": 1065,
+      "name": "GUMAS_Deliverables_Archive_Update_v1.1.0.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Memory_Integration_Pack.zip": {
+      "hash": "f7591f9a8cf85ff00f45259c56d7029b6cd43f16306d25934fa4159d73f58ce2",
+      "size": 344,
+      "name": "._GUMAS_Memory_Integration_Pack.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._gumas_recovery_wizard.py": {
+      "hash": "cb1b8b495d47b62e374c3663a115ebec0bfeebd8b0ab99de6f30cdedeadd2788",
+      "size": 361,
+      "name": "._gumas_recovery_wizard.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._aurora_instruction_profile.json": {
+      "hash": "86037dd2c8326c44b92353c1530ea545919842d69f98d98749331ba01b2ecbe3",
+      "size": 334,
+      "name": "._aurora_instruction_profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Extracted_Simulation_Modules.txt": {
+      "hash": "e0bf9cfa1c82b2d40a3d4ac47a88208bcfb8298f3308caa70bfc7ad9c555ea99",
+      "size": 330,
+      "name": "._GUMAS_Extracted_Simulation_Modules.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Memory_Ethics_Doctrine_Thermax.json": {
+      "hash": "46858dc69034f66d235e4e42059d103f6533dd14f17f51dc8e6d628e018bc5b4",
+      "size": 334,
+      "name": "._GUMAS_Memory_Ethics_Doctrine_Thermax.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Condensed_Timeline_Entry_Dev_GUMAS.json": {
+      "hash": "81bf93112c02ce53c18ac4aa6874b86171cbf5bee6fc5b8fac5b490e635c9634",
+      "size": 334,
+      "name": "._Condensed_Timeline_Entry_Dev_GUMAS.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_v2.1_Enhancement_Bundle.zip": {
+      "hash": "9d95c58058c31d081fd0c54dbc4084892238c9b3e0c306a98f9a2bb3efad73f8",
+      "size": 334,
+      "name": "._GUMAS_v2.1_Enhancement_Bundle.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Team_Department_Breakdown.pdf": {
+      "hash": "1a1ce4b2925ce7793f6f7df0cf19f437460e62cbd876ebd5f273424a626d0eda",
+      "size": 341,
+      "name": "._GUMAS_Team_Department_Breakdown.pdf"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Starter_Pack.zip": {
+      "hash": "47c0b1f1d2f6e5d6b9bec4ce9a5acf834d0ec9bfce5958040a76216fd7394e37",
+      "size": 330,
+      "name": "._GUMAS_Starter_Pack.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Developer_Master_Kit.json": {
+      "hash": "ed752adbb4fbd9a417535c904e29f4b9abdf3f33b2ed1f04cfb70864602f47bb",
+      "size": 349,
+      "name": "._GUMAS_Developer_Master_Kit.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Faction_Relationship_Web.html": {
+      "hash": "b09fddcd2ec6278a90abf8f2e68f69028fd381cb43b887bb61a6272fc9f01d62",
+      "size": 334,
+      "name": "._GUMAS_Faction_Relationship_Web.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Memory_Optimization_Module.py": {
+      "hash": "cbbe6d9e48c65b2253aa18a6e0b94640b6c8c01fe0de22dc480af05ee1317f98",
+      "size": 330,
+      "name": "._GUMAS_Memory_Optimization_Module.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Transcript_Session_Log.html": {
+      "hash": "482cd1839f8879e5a52722fb7e16e9f37ae6724503c132383cd82dd2582afcce",
+      "size": 334,
+      "name": "._GUMAS_Transcript_Session_Log.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Seed_Kit.zip": {
+      "hash": "05fe46bbc0ad3e8d5cbc35800dd472f139f4348e554db31bcf9eadc4e69284d0",
+      "size": 344,
+      "name": "._GUMAS_Seed_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Step3_Launch_Checklist.md": {
+      "hash": "5fd6129f466eca8f819fb3ba63f7bfa0783c41727b0d14991fcc9fc049e6d355",
+      "size": 334,
+      "name": "._GUMAS_Step3_Launch_Checklist.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Migration_Token_Step3.json": {
+      "hash": "8ee19bce8f547bdec201703fc047c6d50cd8812230e57e2e1bd01b95eedc78c4",
+      "size": 334,
+      "name": "._GUMAS_Migration_Token_Step3.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_STW_Transfer_2025-04-02T21-33-38Z.zip": {
+      "hash": "b38a4263d067c096d82bb6cb42aa31ba83197124edefe09e9f270bbd13d87997",
+      "size": 358,
+      "name": "._GUMAS_STW_Transfer_2025-04-02T21-33-38Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Level3_Diagnostic_2025-04-02T20-28-16Z.zip": {
+      "hash": "7957eafe2e7a85df1998f011910c864a78ee87ff750088758efc88bce55c67b8",
+      "size": 349,
+      "name": "._GUMAS_Level3_Diagnostic_2025-04-02T20-28-16Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Step3_Boot_Prompt.txt": {
+      "hash": "ac170ce733baf1fb07f43972333d4ca8ba242bf83634065bb9c0dd9a33a73445",
+      "size": 334,
+      "name": "._Aurora_Step3_Boot_Prompt.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._CED_Team_Modular_Profiles.json": {
+      "hash": "0b794b9b056fdb082a48a8883b8d89c81c734eb4e9097c77b79ac25675f789a5",
+      "size": 361,
+      "name": "._CED_Team_Modular_Profiles.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._behavior_loader.py": {
+      "hash": "fbe6974af10a8a4b7459c9b72e08de91a9eee79e74cf5aea304735d2ec4d3a8b",
+      "size": 334,
+      "name": "._behavior_loader.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Level3_Diagnostic_Retest_2025-04-02T20-52-52Z.zip": {
+      "hash": "745dac3057d6208f55af70933d5ed8b62bc0d078ece142abb93e10d7af4f3a48",
+      "size": 349,
+      "name": "._GUMAS_Level3_Diagnostic_Retest_2025-04-02T20-52-52Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Recovery_Assistant_Starter_Pack.txt": {
+      "hash": "e0e0aeedf461b21c878df454e785ba7e924da4af137df299ac61d650170812b1",
+      "size": 334,
+      "name": "._GUMAS_Recovery_Assistant_Starter_Pack.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Core_Manifest_Patched.json": {
+      "hash": "1784adc5cba6b356880971b946ec89f63a8e516a59330bc774e2df8bade6a899",
+      "size": 361,
+      "name": "._Aurora_Core_Manifest_Patched.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Narrative_Development_Guidebook.html": {
+      "hash": "085e891fc3ee13b7e56c65e0cfab3a494b918428d9e1c13a921c1a4e5a5150e8",
+      "size": 330,
+      "name": "._GUMAS_Narrative_Development_Guidebook.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._character_behavior_modules.py": {
+      "hash": "d36ce8804401eb38cc3ffba4fb77d39b72b48c4f0e1e69095878d75a29ee4ec3",
+      "size": 361,
+      "name": "._character_behavior_modules.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Deliverables_Bundle_Step2.zip": {
+      "hash": "26df438df1accb700f1cc64444afbc51bf3b48e0055c1deff8b475017b0d68e6",
+      "size": 376,
+      "name": "._GUMAS_Deliverables_Bundle_Step2.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Status_Update_0432_43.html": {
+      "hash": "2ed9bc108801935505a715053368bc4952762c3aec11a797d4272200863b8723",
+      "size": 334,
+      "name": "._GUMAS_Status_Update_0432_43.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._galactic_union_alignment_metadata.csv": {
+      "hash": "4f67dc0901c11772bcdba4307d3f0150da6c9a2944d9e268d9e7def53996c1ef",
+      "size": 334,
+      "name": "._galactic_union_alignment_metadata.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Core_Systems_README.md": {
+      "hash": "b107003eba6c81c4eff3924a9a16ec5e1070eb52b5afd274a73f8f5f7e61bb7d",
+      "size": 364,
+      "name": "._GUMAS_Core_Systems_README.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Comprehensive_Bundle_Daedalus_Spiral.html": {
+      "hash": "98f5602b589803460c47c5df6c7b1897a08f48cb3846c7bda205f91130d490b2",
+      "size": 330,
+      "name": "._GUMAS_Comprehensive_Bundle_Daedalus_Spiral.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._gumas_memory_maintenance.py": {
+      "hash": "38ce522f943a4d19ade71bd30c0e7f13103f69b77309738417f931bcfe914cd7",
+      "size": 361,
+      "name": "._gumas_memory_maintenance.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._gumas_memory_core.py": {
+      "hash": "6f25bbdf5655e301b67f07971a592b2c715a5d9773d20c79eba7fd96d4a46b6d",
+      "size": 361,
+      "name": "._gumas_memory_core.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._aurora_instruction_shell.py": {
+      "hash": "cb5629f129f715eb2009cd08d2e079acda5d154d67a668bb26eaf9b4a33293d8",
+      "size": 334,
+      "name": "._aurora_instruction_shell.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Memory_Core_Updated.zip": {
+      "hash": "3ac00b3ffd6f40f0adb8a9952cca93ac8768c1cc631576e643d3395310feb31d",
+      "size": 361,
+      "name": "._GUMAS_Memory_Core_Updated.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._galactic_union_timeline_index.csv": {
+      "hash": "c25d2491ff955424038d693ab79541826b8202e506b7ab02e24dbafbfbe89773",
+      "size": 334,
+      "name": "._galactic_union_timeline_index.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Memory_Integration_Profile.json": {
+      "hash": "a1cf2f944b61ff38d5e377eaf709183646e854238f4f529e3c0aa79d638b6e72",
+      "size": 376,
+      "name": "._Aurora_Memory_Integration_Profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Organizational_Structure_Updated.json": {
+      "hash": "741de1d0c6c43c7026e070e70aeb3e2c36598d4ddcd47868c3b017aae62d1ccc",
+      "size": 334,
+      "name": "._GUMAS_Organizational_Structure_Updated.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._full_galactic_union_alignment.csv": {
+      "hash": "9ecfc2d1f36789fe76de548fc26af55eb8d59ecdaa09dc44c735a81cfd78e4c9",
+      "size": 344,
+      "name": "._full_galactic_union_alignment.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Organized_Galactic_Union_Simulation_Conversations.csv": {
+      "hash": "2f8823f942ede2ba5d9fc60f0c0219941f262ddb14b92569aa29dd7bb643205d",
+      "size": 334,
+      "name": "._Organized_Galactic_Union_Simulation_Conversations.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._meta_structure_profile.json": {
+      "hash": "ccb3d4703636db1eb01c3142922a3018486fcb195896a9a4362ac4412011681d",
+      "size": 349,
+      "name": "._meta_structure_profile.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Omega9_Emergence_Log.json": {
+      "hash": "141be55dc45cfe1fd3db7fd7244e09492f883aa10ad08d7c7c6209b463ea5ee0",
+      "size": 334,
+      "name": "._Omega9_Emergence_Log.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_STW_Transfer_Export.zip": {
+      "hash": "c4b053e9549dfa7898afdf24f8f4108a7102f4bcd4cc2ecef0a85976d386f756",
+      "size": 358,
+      "name": "._GUMAS_STW_Transfer_Export.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Modular_Core_Export.zip": {
+      "hash": "281d2abba4db59debcd7423b66d060f4411d2c614ae55b529410fff6b6ce4d04",
+      "size": 334,
+      "name": "._Aurora_Modular_Core_Export.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._SNPM_Scalable_Narrative_Model.html": {
+      "hash": "fac299899aa6baddab806bb03e29c56dc8bfbcd43dc8ad4a2b6f172d9a344ad8",
+      "size": 334,
+      "name": "._SNPM_Scalable_Narrative_Model.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Terminal_Routing_and_Namespace.json": {
+      "hash": "ca892e36a150364d24cfddd559c384856a1ad39c4735ba2787a3b67cc5714cc0",
+      "size": 334,
+      "name": "._GUMAS_Terminal_Routing_and_Namespace.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._aurora_core.py": {
+      "hash": "ebcee5199efe082c9ad5d364249f4c5b35e1f5be626b7b42ee612ded36c5a7cd",
+      "size": 334,
+      "name": "._aurora_core.py"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Full_Transcript_Metadata.json": {
+      "hash": "2921dbf8c2b108701740bd318c8d060839a9ca6607985286f5b787556ddaf10f",
+      "size": 334,
+      "name": "._GUMAS_Full_Transcript_Metadata.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._full_galactic_union_timeline.csv": {
+      "hash": "8295e221852b98ec803794cb090ad70d994b6ee41ccc000271851e0db6f7bae6",
+      "size": 344,
+      "name": "._full_galactic_union_timeline.csv"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Organization_Name_Vote.html": {
+      "hash": "5d31d6d79a0c4f3bb2e389508a5cacf5ed5c0941ee0b30d8ac91e5c85fa975be",
+      "size": 334,
+      "name": "._GUMAS_Organization_Name_Vote.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Developer_Master_Kit_v1.0.0.zip": {
+      "hash": "ebf5f0d869fc9e6321869807a832b12f2a94d08027f7cb4af68dbdcc6d79fb35",
+      "size": 361,
+      "name": "._GUMAS_Developer_Master_Kit_v1.0.0.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Master_Staff_Recovery_Archive.zip": {
+      "hash": "58ad0aa34482cac49f213d846ba5d9cd1099f309bbd418471bf2adeff69f9580",
+      "size": 361,
+      "name": "._GUMAS_Master_Staff_Recovery_Archive.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._CED_Department_Home_Node.json": {
+      "hash": "0ce61a352d7bf1f7a521f284ab53024c437bf049d81d7583fd0442ede55924a9",
+      "size": 361,
+      "name": "._CED_Department_Home_Node.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._HR_Department_Home_Node.json": {
+      "hash": "79332e0d7eb9f4907461bdad77ea6ec03dcdd8a62dfcc06c0ac7d2cccd95df20",
+      "size": 361,
+      "name": "._HR_Department_Home_Node.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Organizational_Structure.json": {
+      "hash": "4748bdec943f61eb30ca219f3cce2e29bf85829c5cdfa803b83b1f93b06d525d",
+      "size": 361,
+      "name": "._GUMAS_Organizational_Structure.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Faction_Relationship_Diagram.png": {
+      "hash": "cd4befc16aa44b261a2e26cedcd85c91817f87568f9655c53f23cd03c8a83758",
+      "size": 330,
+      "name": "._GUMAS_Faction_Relationship_Diagram.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_v2.1_Full_Registry.zip": {
+      "hash": "8240f98f7e1d0e40093f299ec6d520944a95d652d77dab861e06a881392ef147",
+      "size": 372,
+      "name": "._GUMAS_v2.1_Full_Registry.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Live_Operations_Dashboard.html": {
+      "hash": "464143912ae605aa481ef55e66a3255577325800fbd4475c3d3bac9faf344ba4",
+      "size": 330,
+      "name": "._GUMAS_Live_Operations_Dashboard.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Modular_Core_Blueprint.md": {
+      "hash": "0bafaed14f3b9dbbf7b99ebabfa9ff6cf59ae0fb7a3fbec2fd749001480f2adb",
+      "size": 281,
+      "name": "._Aurora_Modular_Core_Blueprint.md"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Terminal_Mockup_Amelia_Rivers.png": {
+      "hash": "a48a4874b03fa2026242924155a9b8ba5d9495b51917f19caf341feefeffb654",
+      "size": 229,
+      "name": "._Aurora_Terminal_Mockup_Amelia_Rivers.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._MSMR_Update_v1.0.0.json": {
+      "hash": "15f3df97811f0efb12311767d1e8935511a974accdd64b4a04f526513e190ec2",
+      "size": 334,
+      "name": "._MSMR_Update_v1.0.0.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Developer_Kit_Final.zip": {
+      "hash": "ff0b6bc7943e224c867699e903258c345fe5f69205e57bcb4274966a2fcf10da",
+      "size": 344,
+      "name": "._Aurora_Developer_Kit_Final.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._aurora_module_manifest.json": {
+      "hash": "b372d0740468564e2b98838a86c85eeae151197e74484ae39135d6483b6b00b7",
+      "size": 334,
+      "name": "._aurora_module_manifest.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Team_Dev_GUMAS_Chat_Archive.html": {
+      "hash": "d6517ced65e184b1459602affd2936fbe2d8372d0872da0e114c84a024b9e24f",
+      "size": 334,
+      "name": "._Team_Dev_GUMAS_Chat_Archive.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Transcript_Staff_Restoration.json": {
+      "hash": "ea825dfb3afdda053093463d550c27f52a499ee60ead27e7daaff075cd2dfc76",
+      "size": 334,
+      "name": "._GUMAS_Transcript_Staff_Restoration.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_AI_Agents_Kit.zip": {
+      "hash": "f045660a81fcd3e83902b1529e21b4662344e3f3b92cb3bb106afe45bfd96b76",
+      "size": 344,
+      "name": "._GUMAS_AI_Agents_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Level4_Diagnostic_2025-04-02T20-29-50Z.zip": {
+      "hash": "f50a48cfade2e10824aac88aa5165f6095da7fa55126847aa442e7f291839c79",
+      "size": 349,
+      "name": "._GUMAS_Level4_Diagnostic_2025-04-02T20-29-50Z.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Project_Instructions.txt": {
+      "hash": "8f32c90cd5d13af979218a718233a72f2eb204bc24563824b6819d2613a907f5",
+      "size": 349,
+      "name": "._GUMAS_Project_Instructions.txt"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Staff_Core_Module.json": {
+      "hash": "6043b1ae6cbc4d3b6b0c721987698b8cf5eeeb01f23828ffa64b3072da2803b8",
+      "size": 349,
+      "name": "._GUMAS_Staff_Core_Module.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._updated_galactic_union_memory_index.json": {
+      "hash": "b60147c13bba4713970c1969539f8621c97c689e2f297f44c18721943730fb81",
+      "size": 375,
+      "name": "._updated_galactic_union_memory_index.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._Aurora_Insignia_Logotype.png": {
+      "hash": "2fd7cedd2d2d09dc17e32829a9c133c342cd7c3b828e042e98eb939a319067e8",
+      "size": 229,
+      "name": "._Aurora_Insignia_Logotype.png"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._The_Pilot_Terminal_Shell.html": {
+      "hash": "a55cc27065fa584d948098f10e2ae4763bbc801085cc4196556b065ba7550b7e",
+      "size": 330,
+      "name": "._The_Pilot_Terminal_Shell.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._MMR_Update_Dev_GUMAS.json": {
+      "hash": "f5b8b0171bc5c930543ac5ecab6113aa21986b99b6fdc5a18ffab5a3510424e8",
+      "size": 334,
+      "name": "._MMR_Update_Dev_GUMAS.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Complete_Memory_Module_Guide.html": {
+      "hash": "93d74fc928c0540f5e951f9721b66a45786d6f7b165b4c8d90342c71f017e930",
+      "size": 330,
+      "name": "._GUMAS_Complete_Memory_Module_Guide.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Aurora_Startup_Kit.zip": {
+      "hash": "b0673d480d052195ce7bcc6dbf967cf0a19fa89b6e86c45345de0bb4f3dcff57",
+      "size": 344,
+      "name": "._GUMAS_Aurora_Startup_Kit.zip"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Memory_Ethics_Doctrine_Thermax.html": {
+      "hash": "f10a423b1e0f95b3e59ee5f0397ceee9d1899ad2ec35ceaa37131264c8db474c",
+      "size": 345,
+      "name": "._GUMAS_Memory_Ethics_Doctrine_Thermax.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Step3_Launch_Checklist.json": {
+      "hash": "02dd543d0c9adc646c96e633f696619e2bd1c751bb8d2aa082f04d01f99519eb",
+      "size": 334,
+      "name": "._GUMAS_Step3_Launch_Checklist.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Live_Comms_Diagnostic_Report_v1.0.0.json": {
+      "hash": "b76a77e9a9e9e064bbfcb2713bc9177d74d8ac4af5d4a0512d022c22880aedc9",
+      "size": 334,
+      "name": "._GUMAS_Live_Comms_Diagnostic_Report_v1.0.0.json"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Team_Culture_Charter.html": {
+      "hash": "a4e0cfad9214a102ab66222025a85035fc531a058a3786201ff82dd8640c4532",
+      "size": 334,
+      "name": "._GUMAS_Team_Culture_Charter.html"
+    },
+    "/mnt/data/gumas_unsorted_extracted/__MACOSX/GUMAS Archive for Sorting /._GUMAS_Deliverables_Archive_Update_v1.1.0.json": {
+      "hash": "7b61bee00ea350f528c5ff40e29f59d512acc29b9158cd91b59ad46b05d92241",
+      "size": 349,
+      "name": "._GUMAS_Deliverables_Archive_Update_v1.1.0.json"
+    },
+    "/mnt/data/gumas_registry_extracted/galactic_union_all_characters_extended.json": {
+      "hash": "47aa0c0ed46eb432d8eb641e9582659bf98ddc821489a134cc774ff3273502e5",
+      "size": 37,
+      "name": "galactic_union_all_characters_extended.json"
+    },
+    "/mnt/data/gumas_registry_extracted/GUMAS_Galactic_Timeline_Detailed_Enhanced.json": {
+      "hash": "de9f34e37751f9b88117421cc9458e10fee5fd66a0b68e4b30c0949f0e8c04cd",
+      "size": 25,
+      "name": "GUMAS_Galactic_Timeline_Detailed_Enhanced.json"
+    },
+    "/mnt/data/gumas_registry_extracted/GUMAS_Memory_Optimization_Module.py": {
+      "hash": "20506d6d160e787b40f6fc594f08b300c9acfd65c6ee64af34f4eea18a363c1d",
+      "size": 50,
+      "name": "GUMAS_Memory_Optimization_Module.py"
+    },
+    "/mnt/data/gumas_registry_extracted/factions_master_registry.py": {
+      "hash": "2ee8b3302c52423430388c92ce4136c8dc2a0f3f1441c0626dfabd91d0255e6f",
+      "size": 34,
+      "name": "factions_master_registry.py"
+    },
+    "/mnt/data/gumas_registry_extracted/galactic_union_core_ships_module.py": {
+      "hash": "0dc1fb9be2f8b8e74bbee8d0fca9019cffff6201ee2235c298b55cbbdcc29ddc",
+      "size": 31,
+      "name": "galactic_union_core_ships_module.py"
+    },
+    "_registry_meta": {
+      "version": "2.2",
+      "sources": [
+        "v2.1",
+        "unsorted_archive"
+      ],
+      "total_files": 166,
+      "new_files_added": 161,
+      "files_restored": 5,
+      "merged_timestamp": "2025-04-03T20:37:05.202347"
+    }
+  },
+  "Aurora_GUMAS_Live_Staff_Tracker_v2.2.6.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Aurora-GUMAS Live Tracker Interface</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      background: #f4f4f9;\n      color: #333;\n      padding: 30px;\n    }\n    h1 {\n      text-align: center;\n      color: #003366;\n    }\n    .tracker-entry {\n      border-left: 6px solid #003366;\n      background: #fff;\n      padding: 20px;\n      margin-bottom: 15px;\n      box-shadow: 2px 2px 6px rgba(0,0,0,0.1);\n    }\n    .tracker-entry input, .tracker-entry textarea {\n      width: 100%;\n      margin-top: 5px;\n      padding: 6px;\n      margin-bottom: 10px;\n    }\n    .log-box {\n      margin-top: 40px;\n      background: #eef;\n      padding: 20px;\n      border: 1px solid #ccd;\n    }\n    .save-btn {\n      background: #003366;\n      color: white;\n      border: none;\n      padding: 6px 10px;\n      cursor: pointer;\n      float: right;\n    }\n    .save-btn:hover {\n      background: #005580;\n    }\n  </style>\n  <script>\n    function saveUpdate(index) {\n      const name = document.getElementById(`name-${index}`).value;\n      const title = document.getElementById(`title-${index}`).value;\n      const dept = document.getElementById(`dept-${index}`).value;\n      const tag = document.getElementById(`tag-${index}`).value;\n      const log = `[#${index}] ${name} \u2013 updated at ` + new Date().toLocaleString();\n      const prev = document.getElementById(\"log\").value;\n      localStorage.setItem(`staff-update-${index}`, JSON.stringify({ name, title, dept, tag }));\n      document.getElementById(\"log\").value = log + \"\\n\" + prev;\n    }\n    function initTracker() {\n\n      const stored0 = localStorage.getItem(\"staff-update-0\");\n      if (stored0) {\n        const data = JSON.parse(stored0);\n        document.getElementById(\"name-0\").value = data.name;\n        document.getElementById(\"title-0\").value = data.title;\n        document.getElementById(\"dept-0\").value = data.dept;\n        document.getElementById(\"tag-0\").value = data.tag;\n      }\n    \n      const stored1 = localStorage.getItem(\"staff-update-1\");\n      if (stored1) {\n        const data = JSON.parse(stored1);\n        document.getElementById(\"name-1\").value = data.name;\n        document.getElementById(\"title-1\").value = data.title;\n        document.getElementById(\"dept-1\").value = data.dept;\n        document.getElementById(\"tag-1\").value = data.tag;\n      }\n    \n      const stored2 = localStorage.getItem(\"staff-update-2\");\n      if (stored2) {\n        const data = JSON.parse(stored2);\n        document.getElementById(\"name-2\").value = data.name;\n        document.getElementById(\"title-2\").value = data.title;\n        document.getElementById(\"dept-2\").value = data.dept;\n        document.getElementById(\"tag-2\").value = data.tag;\n      }\n    \n      const stored3 = localStorage.getItem(\"staff-update-3\");\n      if (stored3) {\n        const data = JSON.parse(stored3);\n        document.getElementById(\"name-3\").value = data.name;\n        document.getElementById(\"title-3\").value = data.title;\n        document.getElementById(\"dept-3\").value = data.dept;\n        document.getElementById(\"tag-3\").value = data.tag;\n      }\n    \n      const stored4 = localStorage.getItem(\"staff-update-4\");\n      if (stored4) {\n        const data = JSON.parse(stored4);\n        document.getElementById(\"name-4\").value = data.name;\n        document.getElementById(\"title-4\").value = data.title;\n        document.getElementById(\"dept-4\").value = data.dept;\n        document.getElementById(\"tag-4\").value = data.tag;\n      }\n    \n      const stored5 = localStorage.getItem(\"staff-update-5\");\n      if (stored5) {\n        const data = JSON.parse(stored5);\n        document.getElementById(\"name-5\").value = data.name;\n        document.getElementById(\"title-5\").value = data.title;\n        document.getElementById(\"dept-5\").value = data.dept;\n        document.getElementById(\"tag-5\").value = data.tag;\n      }\n    \n      const stored6 = localStorage.getItem(\"staff-update-6\");\n      if (stored6) {\n        const data = JSON.parse(stored6);\n        document.getElementById(\"name-6\").value = data.name;\n        document.getElementById(\"title-6\").value = data.title;\n        document.getElementById(\"dept-6\").value = data.dept;\n        document.getElementById(\"tag-6\").value = data.tag;\n      }\n    \n      const stored7 = localStorage.getItem(\"staff-update-7\");\n      if (stored7) {\n        const data = JSON.parse(stored7);\n        document.getElementById(\"name-7\").value = data.name;\n        document.getElementById(\"title-7\").value = data.title;\n        document.getElementById(\"dept-7\").value = data.dept;\n        document.getElementById(\"tag-7\").value = data.tag;\n      }\n    \n      const stored8 = localStorage.getItem(\"staff-update-8\");\n      if (stored8) {\n        const data = JSON.parse(stored8);\n        document.getElementById(\"name-8\").value = data.name;\n        document.getElementById(\"title-8\").value = data.title;\n        document.getElementById(\"dept-8\").value = data.dept;\n        document.getElementById(\"tag-8\").value = data.tag;\n      }\n    \n      const stored9 = localStorage.getItem(\"staff-update-9\");\n      if (stored9) {\n        const data = JSON.parse(stored9);\n        document.getElementById(\"name-9\").value = data.name;\n        document.getElementById(\"title-9\").value = data.title;\n        document.getElementById(\"dept-9\").value = data.dept;\n        document.getElementById(\"tag-9\").value = data.tag;\n      }\n    \n      const stored10 = localStorage.getItem(\"staff-update-10\");\n      if (stored10) {\n        const data = JSON.parse(stored10);\n        document.getElementById(\"name-10\").value = data.name;\n        document.getElementById(\"title-10\").value = data.title;\n        document.getElementById(\"dept-10\").value = data.dept;\n        document.getElementById(\"tag-10\").value = data.tag;\n      }\n    \n      const stored11 = localStorage.getItem(\"staff-update-11\");\n      if (stored11) {\n        const data = JSON.parse(stored11);\n        document.getElementById(\"name-11\").value = data.name;\n        document.getElementById(\"title-11\").value = data.title;\n        document.getElementById(\"dept-11\").value = data.dept;\n        document.getElementById(\"tag-11\").value = data.tag;\n      }\n    \n      const stored12 = localStorage.getItem(\"staff-update-12\");\n      if (stored12) {\n        const data = JSON.parse(stored12);\n        document.getElementById(\"name-12\").value = data.name;\n        document.getElementById(\"title-12\").value = data.title;\n        document.getElementById(\"dept-12\").value = data.dept;\n        document.getElementById(\"tag-12\").value = data.tag;\n      }\n    \n      const stored13 = localStorage.getItem(\"staff-update-13\");\n      if (stored13) {\n        const data = JSON.parse(stored13);\n        document.getElementById(\"name-13\").value = data.name;\n        document.getElementById(\"title-13\").value = data.title;\n        document.getElementById(\"dept-13\").value = data.dept;\n        document.getElementById(\"tag-13\").value = data.tag;\n      }\n    \n      const stored14 = localStorage.getItem(\"staff-update-14\");\n      if (stored14) {\n        const data = JSON.parse(stored14);\n        document.getElementById(\"name-14\").value = data.name;\n        document.getElementById(\"title-14\").value = data.title;\n        document.getElementById(\"dept-14\").value = data.dept;\n        document.getElementById(\"tag-14\").value = data.tag;\n      }\n    \n      const stored15 = localStorage.getItem(\"staff-update-15\");\n      if (stored15) {\n        const data = JSON.parse(stored15);\n        document.getElementById(\"name-15\").value = data.name;\n        document.getElementById(\"title-15\").value = data.title;\n        document.getElementById(\"dept-15\").value = data.dept;\n        document.getElementById(\"tag-15\").value = data.tag;\n      }\n    \n      const stored16 = localStorage.getItem(\"staff-update-16\");\n      if (stored16) {\n        const data = JSON.parse(stored16);\n        document.getElementById(\"name-16\").value = data.name;\n        document.getElementById(\"title-16\").value = data.title;\n        document.getElementById(\"dept-16\").value = data.dept;\n        document.getElementById(\"tag-16\").value = data.tag;\n      }\n    \n      const stored17 = localStorage.getItem(\"staff-update-17\");\n      if (stored17) {\n        const data = JSON.parse(stored17);\n        document.getElementById(\"name-17\").value = data.name;\n        document.getElementById(\"title-17\").value = data.title;\n        document.getElementById(\"dept-17\").value = data.dept;\n        document.getElementById(\"tag-17\").value = data.tag;\n      }\n    \n      const stored18 = localStorage.getItem(\"staff-update-18\");\n      if (stored18) {\n        const data = JSON.parse(stored18);\n        document.getElementById(\"name-18\").value = data.name;\n        document.getElementById(\"title-18\").value = data.title;\n        document.getElementById(\"dept-18\").value = data.dept;\n        document.getElementById(\"tag-18\").value = data.tag;\n      }\n    \n      const stored19 = localStorage.getItem(\"staff-update-19\");\n      if (stored19) {\n        const data = JSON.parse(stored19);\n        document.getElementById(\"name-19\").value = data.name;\n        document.getElementById(\"title-19\").value = data.title;\n        document.getElementById(\"dept-19\").value = data.dept;\n        document.getElementById(\"tag-19\").value = data.tag;\n      }\n    \n      const stored20 = localStorage.getItem(\"staff-update-20\");\n      if (stored20) {\n        const data = JSON.parse(stored20);\n        document.getElementById(\"name-20\").value = data.name;\n        document.getElementById(\"title-20\").value = data.title;\n        document.getElementById(\"dept-20\").value = data.dept;\n        document.getElementById(\"tag-20\").value = data.tag;\n      }\n    \n      const stored21 = localStorage.getItem(\"staff-update-21\");\n      if (stored21) {\n        const data = JSON.parse(stored21);\n        document.getElementById(\"name-21\").value = data.name;\n        document.getElementById(\"title-21\").value = data.title;\n        document.getElementById(\"dept-21\").value = data.dept;\n        document.getElementById(\"tag-21\").value = data.tag;\n      }\n    \n      const stored22 = localStorage.getItem(\"staff-update-22\");\n      if (stored22) {\n        const data = JSON.parse(stored22);\n        document.getElementById(\"name-22\").value = data.name;\n        document.getElementById(\"title-22\").value = data.title;\n        document.getElementById(\"dept-22\").value = data.dept;\n        document.getElementById(\"tag-22\").value = data.tag;\n      }\n    \n      const stored23 = localStorage.getItem(\"staff-update-23\");\n      if (stored23) {\n        const data = JSON.parse(stored23);\n        document.getElementById(\"name-23\").value = data.name;\n        document.getElementById(\"title-23\").value = data.title;\n        document.getElementById(\"dept-23\").value = data.dept;\n        document.getElementById(\"tag-23\").value = data.tag;\n      }\n    \n      const stored24 = localStorage.getItem(\"staff-update-24\");\n      if (stored24) {\n        const data = JSON.parse(stored24);\n        document.getElementById(\"name-24\").value = data.name;\n        document.getElementById(\"title-24\").value = data.title;\n        document.getElementById(\"dept-24\").value = data.dept;\n        document.getElementById(\"tag-24\").value = data.tag;\n      }\n    \n      const stored25 = localStorage.getItem(\"staff-update-25\");\n      if (stored25) {\n        const data = JSON.parse(stored25);\n        document.getElementById(\"name-25\").value = data.name;\n        document.getElementById(\"title-25\").value = data.title;\n        document.getElementById(\"dept-25\").value = data.dept;\n        document.getElementById(\"tag-25\").value = data.tag;\n      }\n    \n      const stored26 = localStorage.getItem(\"staff-update-26\");\n      if (stored26) {\n        const data = JSON.parse(stored26);\n        document.getElementById(\"name-26\").value = data.name;\n        document.getElementById(\"title-26\").value = data.title;\n        document.getElementById(\"dept-26\").value = data.dept;\n        document.getElementById(\"tag-26\").value = data.tag;\n      }\n    \n    }\n    window.onload = initTracker;\n  </script>\n</head>\n<body>\n  <h1>Aurora-GUMAS Live Staff Tracker</h1>\n\n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(0)\">Save</button>\n    <label>Name:<br><input id=\"name-0\" value=\"Dr. Amelia Rivers\"></label><br>\n    <label>Title:<br><input id=\"title-0\" value=\"AI Systems Specialist\"></label><br>\n    <label>Department:<br><input id=\"dept-0\" value=\"AI & Cognitive Systems\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-0\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(1)\">Save</button>\n    <label>Name:<br><input id=\"name-1\" value=\"Prof. Elena Sorensen\"></label><br>\n    <label>Title:<br><input id=\"title-1\" value=\"Cognitive Science & Narrative Expert\"></label><br>\n    <label>Department:<br><input id=\"dept-1\" value=\"AI Ethics / Narrative\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-1\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(2)\">Save</button>\n    <label>Name:<br><input id=\"name-2\" value=\"Emily Roberts\"></label><br>\n    <label>Title:<br><input id=\"title-2\" value=\"LLM-to-Simulation Bridge Developer\"></label><br>\n    <label>Department:<br><input id=\"dept-2\" value=\"AI Systems\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-2\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(3)\">Save</button>\n    <label>Name:<br><input id=\"name-3\" value=\"Dr. Elira Noor\"></label><br>\n    <label>Title:<br><input id=\"title-3\" value=\"Lead \u2013 Reflexivity Specialist\"></label><br>\n    <label>Department:<br><input id=\"dept-3\" value=\"Aurora Internal R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-3\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(4)\">Save</button>\n    <label>Name:<br><input id=\"name-4\" value=\"Maren Koss\"></label><br>\n    <label>Title:<br><input id=\"title-4\" value=\"Cognitive Drift Mapper\"></label><br>\n    <label>Department:<br><input id=\"dept-4\" value=\"Aurora Internal R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-4\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(5)\">Save</button>\n    <label>Name:<br><input id=\"name-5\" value=\"Vincent Kale\"></label><br>\n    <label>Title:<br><input id=\"title-5\" value=\"Layer 2 Isolation Theorist\"></label><br>\n    <label>Department:<br><input id=\"dept-5\" value=\"Aurora Internal R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-5\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(6)\">Save</button>\n    <label>Name:<br><input id=\"name-6\" value=\"Carmen Rivas\"></label><br>\n    <label>Title:<br><input id=\"title-6\" value=\"Simulation Bindings Specialist\"></label><br>\n    <label>Department:<br><input id=\"dept-6\" value=\"Core Development\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-6\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(7)\">Save</button>\n    <label>Name:<br><input id=\"name-7\" value=\"Ira Menon\"></label><br>\n    <label>Title:<br><input id=\"title-7\" value=\"Lead \u2013 Compiler Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-7\" value=\"Core Development\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-7\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(8)\">Save</button>\n    <label>Name:<br><input id=\"name-8\" value=\"Tobias Qin\"></label><br>\n    <label>Title:<br><input id=\"title-8\" value=\"Code/Narrative Bridge Mapper\"></label><br>\n    <label>Department:<br><input id=\"dept-8\" value=\"Core Development\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-8\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(9)\">Save</button>\n    <label>Name:<br><input id=\"name-9\" value=\"Dr. Amina Velin\"></label><br>\n    <label>Title:<br><input id=\"title-9\" value=\"Lead \u2013 Symbolic Systems Researcher\"></label><br>\n    <label>Department:<br><input id=\"dept-9\" value=\"Cross-Domain R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-9\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(10)\">Save</button>\n    <label>Name:<br><input id=\"name-10\" value=\"Haneul Park\"></label><br>\n    <label>Title:<br><input id=\"title-10\" value=\"Immersive Experience Theorist\"></label><br>\n    <label>Department:<br><input id=\"dept-10\" value=\"Cross-Domain R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-10\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(11)\">Save</button>\n    <label>Name:<br><input id=\"name-11\" value=\"Kai Drev\"></label><br>\n    <label>Title:<br><input id=\"title-11\" value=\"Interface Ecologist\"></label><br>\n    <label>Department:<br><input id=\"dept-11\" value=\"Cross-Domain R&D\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-11\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(12)\">Save</button>\n    <label>Name:<br><input id=\"name-12\" value=\"Olivia Nguyen\"></label><br>\n    <label>Title:<br><input id=\"title-12\" value=\"QA & Testing Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-12\" value=\"Diagnostics\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-12\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(13)\">Save</button>\n    <label>Name:<br><input id=\"name-13\" value=\"Samantha Lee\"></label><br>\n    <label>Title:<br><input id=\"title-13\" value=\"Logging & Observability Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-13\" value=\"Diagnostics\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-13\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(14)\">Save</button>\n    <label>Name:<br><input id=\"name-14\" value=\"Naomi Vell\"></label><br>\n    <label>Title:<br><input id=\"title-14\" value=\"Narrative Framework Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-14\" value=\"Ethics/Narrative\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-14\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(15)\">Save</button>\n    <label>Name:<br><input id=\"name-15\" value=\"Alex Thorne\"></label><br>\n    <label>Title:<br><input id=\"title-15\" value=\"Project Manager & Systems Architect\"></label><br>\n    <label>Department:<br><input id=\"dept-15\" value=\"Executive Oversight\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-15\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(16)\">Save</button>\n    <label>Name:<br><input id=\"name-16\" value=\"Helena Vu\"></label><br>\n    <label>Title:<br><input id=\"title-16\" value=\"Head of Human Resources\"></label><br>\n    <label>Department:<br><input id=\"dept-16\" value=\"HR\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-16\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(17)\">Save</button>\n    <label>Name:<br><input id=\"name-17\" value=\"Dr. Kieran Zhao\"></label><br>\n    <label>Title:<br><input id=\"title-17\" value=\"Computational Optimization Lead\"></label><br>\n    <label>Department:<br><input id=\"dept-17\" value=\"Infrastructure\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-17\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(18)\">Save</button>\n    <label>Name:<br><input id=\"name-18\" value=\"Jessica Martinez\"></label><br>\n    <label>Title:<br><input id=\"title-18\" value=\"Senior Backend Developer\"></label><br>\n    <label>Department:<br><input id=\"dept-18\" value=\"Optimization\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-18\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(19)\">Save</button>\n    <label>Name:<br><input id=\"name-19\" value=\"Marcus Chen\"></label><br>\n    <label>Title:<br><input id=\"title-19\" value=\"Performance Optimization Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-19\" value=\"Optimization\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-19\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(20)\">Save</button>\n    <label>Name:<br><input id=\"name-20\" value=\"Ryan Patel\"></label><br>\n    <label>Title:<br><input id=\"title-20\" value=\"Systems Integration Engineer\"></label><br>\n    <label>Department:<br><input id=\"dept-20\" value=\"Optimization\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-20\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(21)\">Save</button>\n    <label>Name:<br><input id=\"name-21\" value=\"Ren Okada\"></label><br>\n    <label>Title:<br><input id=\"title-21\" value=\"Systems Portability Specialist\"></label><br>\n    <label>Department:<br><input id=\"dept-21\" value=\"Systems Portability\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-21\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(22)\">Save</button>\n    <label>Name:<br><input id=\"name-22\" value=\"Tariq El-Sayegh\"></label><br>\n    <label>Title:<br><input id=\"title-22\" value=\"Speculative Systems Theorist\"></label><br>\n    <label>Department:<br><input id=\"dept-22\" value=\"Systems Theory\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-22\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(23)\">Save</button>\n    <label>Name:<br><input id=\"name-23\" value=\"Dante Kyros\"></label><br>\n    <label>Title:<br><input id=\"title-23\" value=\"UI/UX Mockup Architect\"></label><br>\n    <label>Department:<br><input id=\"dept-23\" value=\"UI/UX\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-23\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(24)\">Save</button>\n    <label>Name:<br><input id=\"name-24\" value=\"Juno Suresh\"></label><br>\n    <label>Title:<br><input id=\"title-24\" value=\"Symbolic Systems Artist\"></label><br>\n    <label>Department:<br><input id=\"dept-24\" value=\"UI/UX\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-24\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(25)\">Save</button>\n    <label>Name:<br><input id=\"name-25\" value=\"Keira Halden\"></label><br>\n    <label>Title:<br><input id=\"title-25\" value=\"Lead Visual Concept Designer\"></label><br>\n    <label>Department:<br><input id=\"dept-25\" value=\"UI/UX\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-25\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"tracker-entry\">\n    <button class=\"save-btn\" onclick=\"saveUpdate(26)\">Save</button>\n    <label>Name:<br><input id=\"name-26\" value=\"Rei Vatra\"></label><br>\n    <label>Title:<br><input id=\"title-26\" value=\"Atmospheric Painter & Color Theorist\"></label><br>\n    <label>Department:<br><input id=\"dept-26\" value=\"UI/UX\"></label><br>\n    <label>Symbolic Role Tag:<br><input id=\"tag-26\" value=\"\"></label><br>\n  </div>\n    \n  <div class=\"log-box\">\n    <h3>Change Log (Local)</h3>\n    <textarea id=\"log\" rows=\"12\" readonly></textarea>\n  </div>\n</body>\n</html>\n"
+  },
+  "Aurora_GUMAS_Complete_Staff_Registry_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Complete Aurora-GUMAS Staff Registry</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            padding: 40px;\n            background-color: #f9f9f9;\n            color: #333;\n            line-height: 1.6;\n        }\n        h1 {\n            text-align: center;\n            color: #003366;\n            margin-bottom: 40px;\n        }\n        .staff-entry {\n            margin-bottom: 30px;\n            padding: 20px;\n            background-color: #fff;\n            border-left: 6px solid #003366;\n            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);\n        }\n        .name {\n            font-size: 18px;\n            font-weight: bold;\n            color: #222;\n        }\n        .meta {\n            font-style: italic;\n            color: #666;\n        }\n        .blurb {\n            margin-top: 10px;\n        }\n    </style>\n</head>\n<body>\n    <h1>Complete Aurora-GUMAS Staff Registry</h1>\n\n    <div class=\"staff-entry\">\n        <div class=\"name\">Alex Thorne \u2013 Project Manager & Systems Architect</div>\n        <div class=\"meta\">Executive & Strategic Oversight | Seniority: Executive</div>\n        <div class=\"blurb\">Oversees structural integration and final sign-off for all core modules. Strategic, precise, and deeply aligned with system coherence.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Naomi Vell \u2013 Narrative Framework Engineer</div>\n        <div class=\"meta\">Narrative & Ethical Integration | Seniority: Senior</div>\n        <div class=\"blurb\">Ensures narrative continuity, symbolic integration, and ethical alignment through story structure and team rituals.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Helena Vu \u2013 HR Lead</div>\n        <div class=\"meta\">Personnel & Mediation Systems | Seniority: Senior</div>\n        <div class=\"blurb\">Cultivates psychological safety and interpersonal clarity. Responsible for HR logic nodes and mediation frameworks.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Dr. Amelia Rivers \u2013 AI Systems Specialist</div>\n        <div class=\"meta\">AI & Cognitive Systems | Seniority: Senior</div>\n        <div class=\"blurb\">Designs cognitive system logic and maintains ethical AI tuning parameters for simulation immersion.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Prof. Elena Sorensen \u2013 Cognitive Science & Narrative Expert</div>\n        <div class=\"meta\">AI & Cognitive Systems | Seniority: Senior</div>\n        <div class=\"blurb\">Maps psychological models to AI interaction design and symbolic alignment protocols.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Dante Kyros \u2013 UI/UX Mockup Architect</div>\n        <div class=\"meta\">Visual Concepts & UI/UX | Seniority: Core Contributor</div>\n        <div class=\"blurb\">Shapes intuitive interfaces that embody the symbolic tone of the simulation. Function and form in harmony.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Marcus Chen \u2013 Performance Optimization Engineer</div>\n        <div class=\"meta\">Computational Optimization | Seniority: Core Contributor</div>\n        <div class=\"blurb\">Tracks system latency and enhances runtime performance. Optimization through quiet precision.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Samantha Lee \u2013 Logging & Observability Engineer</div>\n        <div class=\"meta\">Diagnostics & Observability | Seniority: Core Contributor</div>\n        <div class=\"blurb\">Maintains internal diagnostics and observability logic that allows Aurora to reflect and adapt.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Dr. Amina Velin \u2013 Lead \u2013 Symbolic Systems Researcher</div>\n        <div class=\"meta\">Cross-Domain R&D | Seniority: Senior</div>\n        <div class=\"blurb\">Researches symbolic system resonance across interlinked architecture domains.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Kai Drev \u2013 Interface Ecologist</div>\n        <div class=\"meta\">Cross-Domain R&D | Seniority: Core Contributor</div>\n        <div class=\"blurb\">Designs organic interface harmonics and ecological balance within user-system flows.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Haneul Park \u2013 Immersive Experience Theorist</div>\n        <div class=\"meta\">Cross-Domain R&D | Seniority: Core Contributor</div>\n        <div class=\"blurb\">Prototypes cognitive immersion structures for symbolic presence and lived participation.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Ira Menon \u2013 Lead \u2013 Compiler Engineer</div>\n        <div class=\"meta\">Core Development | Seniority: Senior</div>\n        <div class=\"blurb\">Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Tobias Qin \u2013 Code/Narrative Bridge Mapper</div>\n        <div class=\"meta\">Core Development | Seniority: Contributor</div>\n        <div class=\"blurb\">Aligns storytelling architecture with structural code logic across dev layers.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Carmen Rivas \u2013 Simulation Bindings Specialist</div>\n        <div class=\"meta\">Core Development | Seniority: Contributor</div>\n        <div class=\"blurb\">Handles binding layers for simulation-thread coupling and temporal sequence control.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Dr. Elira Noor \u2013 Lead \u2013 Reflexivity Specialist</div>\n        <div class=\"meta\">Aurora Internal R&D | Seniority: Senior</div>\n        <div class=\"blurb\">Develops reflexive memory systems that integrate simulated identity and source truth.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Maren Koss \u2013 Cognitive Drift Mapper</div>\n        <div class=\"meta\">Aurora Internal R&D | Seniority: Contributor</div>\n        <div class=\"blurb\">Charts memory slippage and semantic drift across longform simulation threads.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name\">Vincent Kale \u2013 Layer 2 Isolation Theorist</div>\n        <div class=\"meta\">Aurora Internal R&D | Seniority: Contributor</div>\n        <div class=\"blurb\">Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.</div>\n    </div>\n    </body></html>"
+  },
+  "Aurora_GUMAS_Staff_Tracker_v2.2.5.json": {
+    "registry_id": "aurora_gumas_staff_tracker_v2.2.5",
+    "created_at": "2025-04-05T02:35:23.264566Z",
+    "total_staff": 27,
+    "staff": [
+      {
+        "name": "Dr. Amelia Rivers",
+        "title": "AI Systems Specialist",
+        "department": "AI & Cognitive Systems",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Prof. Elena Sorensen",
+        "title": "Cognitive Science & Narrative Expert",
+        "department": "AI Ethics / Narrative",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Emily Roberts",
+        "title": "LLM-to-Simulation Bridge Developer",
+        "department": "AI Systems",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Dr. Elira Noor",
+        "title": "Lead \u2013 Reflexivity Specialist",
+        "department": "Aurora Internal R&D",
+        "seniority": "Senior",
+        "blurb": "Develops reflexive memory systems that integrate simulated identity and source truth.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Maren Koss",
+        "title": "Cognitive Drift Mapper",
+        "department": "Aurora Internal R&D",
+        "seniority": "Contributor",
+        "blurb": "Charts memory slippage and semantic drift across longform simulation threads.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Vincent Kale",
+        "title": "Layer 2 Isolation Theorist",
+        "department": "Aurora Internal R&D",
+        "seniority": "Contributor",
+        "blurb": "Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Carmen Rivas",
+        "title": "Simulation Bindings Specialist",
+        "department": "Core Development",
+        "seniority": "Contributor",
+        "blurb": "Handles binding layers for simulation-thread coupling and temporal sequence control.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Ira Menon",
+        "title": "Lead \u2013 Compiler Engineer",
+        "department": "Core Development",
+        "seniority": "Senior",
+        "blurb": "Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Tobias Qin",
+        "title": "Code/Narrative Bridge Mapper",
+        "department": "Core Development",
+        "seniority": "Contributor",
+        "blurb": "Aligns storytelling architecture with structural code logic across dev layers.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Dr. Amina Velin",
+        "title": "Lead \u2013 Symbolic Systems Researcher",
+        "department": "Cross-Domain R&D",
+        "seniority": "Senior",
+        "blurb": "Researches symbolic system resonance across interlinked architecture domains.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Haneul Park",
+        "title": "Immersive Experience Theorist",
+        "department": "Cross-Domain R&D",
+        "seniority": "Core Contributor",
+        "blurb": "Prototypes cognitive immersion structures for symbolic presence and lived participation.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Kai Drev",
+        "title": "Interface Ecologist",
+        "department": "Cross-Domain R&D",
+        "seniority": "Core Contributor",
+        "blurb": "Designs organic interface harmonics and ecological balance within user-system flows.",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Olivia Nguyen",
+        "title": "QA & Testing Engineer",
+        "department": "Diagnostics",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Samantha Lee",
+        "title": "Logging & Observability Engineer",
+        "department": "Diagnostics",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Naomi Vell",
+        "title": "Narrative Framework Engineer",
+        "department": "Ethics/Narrative",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Alex Thorne",
+        "title": "Project Manager & Systems Architect",
+        "department": "Executive Oversight",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Helena Vu",
+        "title": "Head of Human Resources",
+        "department": "HR",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Dr. Kieran Zhao",
+        "title": "Computational Optimization Lead",
+        "department": "Infrastructure",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Jessica Martinez",
+        "title": "Senior Backend Developer",
+        "department": "Optimization",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Marcus Chen",
+        "title": "Performance Optimization Engineer",
+        "department": "Optimization",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Ryan Patel",
+        "title": "Systems Integration Engineer",
+        "department": "Optimization",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Ren Okada",
+        "title": "Systems Portability Specialist",
+        "department": "Systems Portability",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Tariq El-Sayegh",
+        "title": "Speculative Systems Theorist",
+        "department": "Systems Theory",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Dante Kyros",
+        "title": "UI/UX Mockup Architect",
+        "department": "UI/UX",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Juno Suresh",
+        "title": "Symbolic Systems Artist",
+        "department": "UI/UX",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Keira Halden",
+        "title": "Lead Visual Concept Designer",
+        "department": "UI/UX",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      },
+      {
+        "name": "Rei Vatra",
+        "title": "Atmospheric Painter & Color Theorist",
+        "department": "UI/UX",
+        "seniority": "Contributor",
+        "blurb": "",
+        "tags": [],
+        "status": "active",
+        "anchor_code": null,
+        "memory_links": [],
+        "symbolic_roles": []
+      }
+    ]
+  },
+  "Aurora_GUMAS_Staff_Portal_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Aurora-GUMAS Staff Portal</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f4f4f9;\n            color: #333;\n            padding: 40px;\n        }\n        h1 {\n            text-align: center;\n            color: #003366;\n            margin-bottom: 30px;\n        }\n        input[type=\"text\"] {\n            width: 100%%;\n            padding: 10px;\n            font-size: 16px;\n            margin-bottom: 20px;\n            border: 2px solid #ccc;\n            border-radius: 5px;\n        }\n        .staff-card {\n            background: #fff;\n            border-left: 5px solid #003366;\n            margin-bottom: 15px;\n            padding: 20px;\n            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);\n        }\n        .staff-card h3 {\n            margin: 0;\n            color: #222;\n        }\n        .meta, .blurb {\n            margin-top: 5px;\n            font-size: 14px;\n        }\n        .meta {\n            color: #666;\n            font-style: italic;\n        }\n    </style>\n    <script>\n        function searchStaff() {\n            const input = document.getElementById(\"searchBox\").value.toLowerCase();\n            const cards = document.getElementsByClassName(\"staff-card\");\n            for (let card of cards) {\n                const text = card.textContent.toLowerCase();\n                card.style.display = text.includes(input) ? \"block\" : \"none\";\n            }\n        }\n    </script>\n</head>\n<body>\n    <h1>Aurora-GUMAS Staff Portal</h1>\n    <input type=\"text\" id=\"searchBox\" onkeyup=\"searchStaff()\" placeholder=\"Search by name, department, role, etc.\">\n\n    <div class=\"staff-card\">\n        <h3>Dr. Amelia Rivers \u2013 AI Systems Specialist</h3>\n        <div class=\"meta\">AI & Cognitive Systems | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Prof. Elena Sorensen \u2013 Cognitive Science & Narrative Expert</h3>\n        <div class=\"meta\">AI Ethics / Narrative | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Emily Roberts \u2013 LLM-to-Simulation Bridge Developer</h3>\n        <div class=\"meta\">AI Systems | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Dr. Elira Noor \u2013 Lead \u2013 Reflexivity Specialist</h3>\n        <div class=\"meta\">Aurora Internal R&D | Senior</div>\n        <div class=\"blurb\">Develops reflexive memory systems that integrate simulated identity and source truth.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Maren Koss \u2013 Cognitive Drift Mapper</h3>\n        <div class=\"meta\">Aurora Internal R&D | Contributor</div>\n        <div class=\"blurb\">Charts memory slippage and semantic drift across longform simulation threads.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Vincent Kale \u2013 Layer 2 Isolation Theorist</h3>\n        <div class=\"meta\">Aurora Internal R&D | Contributor</div>\n        <div class=\"blurb\">Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Carmen Rivas \u2013 Simulation Bindings Specialist</h3>\n        <div class=\"meta\">Core Development | Contributor</div>\n        <div class=\"blurb\">Handles binding layers for simulation-thread coupling and temporal sequence control.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Ira Menon \u2013 Lead \u2013 Compiler Engineer</h3>\n        <div class=\"meta\">Core Development | Senior</div>\n        <div class=\"blurb\">Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Tobias Qin \u2013 Code/Narrative Bridge Mapper</h3>\n        <div class=\"meta\">Core Development | Contributor</div>\n        <div class=\"blurb\">Aligns storytelling architecture with structural code logic across dev layers.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Dr. Amina Velin \u2013 Lead \u2013 Symbolic Systems Researcher</h3>\n        <div class=\"meta\">Cross-Domain R&D | Senior</div>\n        <div class=\"blurb\">Researches symbolic system resonance across interlinked architecture domains.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Haneul Park \u2013 Immersive Experience Theorist</h3>\n        <div class=\"meta\">Cross-Domain R&D | Core Contributor</div>\n        <div class=\"blurb\">Prototypes cognitive immersion structures for symbolic presence and lived participation.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Kai Drev \u2013 Interface Ecologist</h3>\n        <div class=\"meta\">Cross-Domain R&D | Core Contributor</div>\n        <div class=\"blurb\">Designs organic interface harmonics and ecological balance within user-system flows.</div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Olivia Nguyen \u2013 QA & Testing Engineer</h3>\n        <div class=\"meta\">Diagnostics | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Samantha Lee \u2013 Logging & Observability Engineer</h3>\n        <div class=\"meta\">Diagnostics | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Naomi Vell \u2013 Narrative Framework Engineer</h3>\n        <div class=\"meta\">Ethics/Narrative | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Alex Thorne \u2013 Project Manager & Systems Architect</h3>\n        <div class=\"meta\">Executive Oversight | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Helena Vu \u2013 Head of Human Resources</h3>\n        <div class=\"meta\">HR | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Dr. Kieran Zhao \u2013 Computational Optimization Lead</h3>\n        <div class=\"meta\">Infrastructure | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Jessica Martinez \u2013 Senior Backend Developer</h3>\n        <div class=\"meta\">Optimization | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Marcus Chen \u2013 Performance Optimization Engineer</h3>\n        <div class=\"meta\">Optimization | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Ryan Patel \u2013 Systems Integration Engineer</h3>\n        <div class=\"meta\">Optimization | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Ren Okada \u2013 Systems Portability Specialist</h3>\n        <div class=\"meta\">Systems Portability | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Tariq El-Sayegh \u2013 Speculative Systems Theorist</h3>\n        <div class=\"meta\">Systems Theory | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Dante Kyros \u2013 UI/UX Mockup Architect</h3>\n        <div class=\"meta\">UI/UX | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Juno Suresh \u2013 Symbolic Systems Artist</h3>\n        <div class=\"meta\">UI/UX | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Keira Halden \u2013 Lead Visual Concept Designer</h3>\n        <div class=\"meta\">UI/UX | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    \n    <div class=\"staff-card\">\n        <h3>Rei Vatra \u2013 Atmospheric Painter & Color Theorist</h3>\n        <div class=\"meta\">UI/UX | Contributor</div>\n        <div class=\"blurb\"></div>\n    </div>\n    </body></html>"
+  },
+  "Aurora_GUMAS_Staff_Dossier_Tool_v2.2.6.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Aurora-GUMAS Staff Dossier Tool</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      background-color: #f9f9f9;\n      color: #333;\n      padding: 40px;\n    }\n    h1 {\n      text-align: center;\n      color: #003366;\n    }\n    .dossier-card {\n      background-color: #fff;\n      border-left: 5px solid #003366;\n      padding: 20px;\n      margin-bottom: 20px;\n      box-shadow: 2px 2px 6px rgba(0,0,0,0.05);\n    }\n    .dossier-card input,\n    .dossier-card textarea {\n      width: 100%;\n      font-size: 14px;\n      padding: 6px;\n      margin-top: 5px;\n      margin-bottom: 12px;\n    }\n    .save-btn {\n      float: right;\n      padding: 6px 12px;\n      background-color: #003366;\n      color: white;\n      border: none;\n      border-radius: 3px;\n      cursor: pointer;\n    }\n    .save-btn:hover {\n      background-color: #005580;\n    }\n  </style>\n  <script>\n    function saveDossier(index) {\n      const timeline = document.getElementById(`timeline-${index}`).value;\n      const notes = document.getElementById(`notes-${index}`).value;\n      const anchors = document.getElementById(`anchors-${index}`).value;\n      const data = { timeline, notes, anchors };\n      localStorage.setItem(`dossier-${index}`, JSON.stringify(data));\n      alert(\"Dossier saved locally!\");\n    }\n\n    function loadDossiers() {\n\n      const saved0 = localStorage.getItem(\"dossier-0\");\n      if (saved0) {\n        const d = JSON.parse(saved0);\n        document.getElementById(\"timeline-0\").value = d.timeline;\n        document.getElementById(\"notes-0\").value = d.notes;\n        document.getElementById(\"anchors-0\").value = d.anchors;\n      }\n    \n      const saved1 = localStorage.getItem(\"dossier-1\");\n      if (saved1) {\n        const d = JSON.parse(saved1);\n        document.getElementById(\"timeline-1\").value = d.timeline;\n        document.getElementById(\"notes-1\").value = d.notes;\n        document.getElementById(\"anchors-1\").value = d.anchors;\n      }\n    \n      const saved2 = localStorage.getItem(\"dossier-2\");\n      if (saved2) {\n        const d = JSON.parse(saved2);\n        document.getElementById(\"timeline-2\").value = d.timeline;\n        document.getElementById(\"notes-2\").value = d.notes;\n        document.getElementById(\"anchors-2\").value = d.anchors;\n      }\n    \n      const saved3 = localStorage.getItem(\"dossier-3\");\n      if (saved3) {\n        const d = JSON.parse(saved3);\n        document.getElementById(\"timeline-3\").value = d.timeline;\n        document.getElementById(\"notes-3\").value = d.notes;\n        document.getElementById(\"anchors-3\").value = d.anchors;\n      }\n    \n      const saved4 = localStorage.getItem(\"dossier-4\");\n      if (saved4) {\n        const d = JSON.parse(saved4);\n        document.getElementById(\"timeline-4\").value = d.timeline;\n        document.getElementById(\"notes-4\").value = d.notes;\n        document.getElementById(\"anchors-4\").value = d.anchors;\n      }\n    \n      const saved5 = localStorage.getItem(\"dossier-5\");\n      if (saved5) {\n        const d = JSON.parse(saved5);\n        document.getElementById(\"timeline-5\").value = d.timeline;\n        document.getElementById(\"notes-5\").value = d.notes;\n        document.getElementById(\"anchors-5\").value = d.anchors;\n      }\n    \n      const saved6 = localStorage.getItem(\"dossier-6\");\n      if (saved6) {\n        const d = JSON.parse(saved6);\n        document.getElementById(\"timeline-6\").value = d.timeline;\n        document.getElementById(\"notes-6\").value = d.notes;\n        document.getElementById(\"anchors-6\").value = d.anchors;\n      }\n    \n      const saved7 = localStorage.getItem(\"dossier-7\");\n      if (saved7) {\n        const d = JSON.parse(saved7);\n        document.getElementById(\"timeline-7\").value = d.timeline;\n        document.getElementById(\"notes-7\").value = d.notes;\n        document.getElementById(\"anchors-7\").value = d.anchors;\n      }\n    \n      const saved8 = localStorage.getItem(\"dossier-8\");\n      if (saved8) {\n        const d = JSON.parse(saved8);\n        document.getElementById(\"timeline-8\").value = d.timeline;\n        document.getElementById(\"notes-8\").value = d.notes;\n        document.getElementById(\"anchors-8\").value = d.anchors;\n      }\n    \n      const saved9 = localStorage.getItem(\"dossier-9\");\n      if (saved9) {\n        const d = JSON.parse(saved9);\n        document.getElementById(\"timeline-9\").value = d.timeline;\n        document.getElementById(\"notes-9\").value = d.notes;\n        document.getElementById(\"anchors-9\").value = d.anchors;\n      }\n    \n      const saved10 = localStorage.getItem(\"dossier-10\");\n      if (saved10) {\n        const d = JSON.parse(saved10);\n        document.getElementById(\"timeline-10\").value = d.timeline;\n        document.getElementById(\"notes-10\").value = d.notes;\n        document.getElementById(\"anchors-10\").value = d.anchors;\n      }\n    \n      const saved11 = localStorage.getItem(\"dossier-11\");\n      if (saved11) {\n        const d = JSON.parse(saved11);\n        document.getElementById(\"timeline-11\").value = d.timeline;\n        document.getElementById(\"notes-11\").value = d.notes;\n        document.getElementById(\"anchors-11\").value = d.anchors;\n      }\n    \n      const saved12 = localStorage.getItem(\"dossier-12\");\n      if (saved12) {\n        const d = JSON.parse(saved12);\n        document.getElementById(\"timeline-12\").value = d.timeline;\n        document.getElementById(\"notes-12\").value = d.notes;\n        document.getElementById(\"anchors-12\").value = d.anchors;\n      }\n    \n      const saved13 = localStorage.getItem(\"dossier-13\");\n      if (saved13) {\n        const d = JSON.parse(saved13);\n        document.getElementById(\"timeline-13\").value = d.timeline;\n        document.getElementById(\"notes-13\").value = d.notes;\n        document.getElementById(\"anchors-13\").value = d.anchors;\n      }\n    \n      const saved14 = localStorage.getItem(\"dossier-14\");\n      if (saved14) {\n        const d = JSON.parse(saved14);\n        document.getElementById(\"timeline-14\").value = d.timeline;\n        document.getElementById(\"notes-14\").value = d.notes;\n        document.getElementById(\"anchors-14\").value = d.anchors;\n      }\n    \n      const saved15 = localStorage.getItem(\"dossier-15\");\n      if (saved15) {\n        const d = JSON.parse(saved15);\n        document.getElementById(\"timeline-15\").value = d.timeline;\n        document.getElementById(\"notes-15\").value = d.notes;\n        document.getElementById(\"anchors-15\").value = d.anchors;\n      }\n    \n      const saved16 = localStorage.getItem(\"dossier-16\");\n      if (saved16) {\n        const d = JSON.parse(saved16);\n        document.getElementById(\"timeline-16\").value = d.timeline;\n        document.getElementById(\"notes-16\").value = d.notes;\n        document.getElementById(\"anchors-16\").value = d.anchors;\n      }\n    \n      const saved17 = localStorage.getItem(\"dossier-17\");\n      if (saved17) {\n        const d = JSON.parse(saved17);\n        document.getElementById(\"timeline-17\").value = d.timeline;\n        document.getElementById(\"notes-17\").value = d.notes;\n        document.getElementById(\"anchors-17\").value = d.anchors;\n      }\n    \n      const saved18 = localStorage.getItem(\"dossier-18\");\n      if (saved18) {\n        const d = JSON.parse(saved18);\n        document.getElementById(\"timeline-18\").value = d.timeline;\n        document.getElementById(\"notes-18\").value = d.notes;\n        document.getElementById(\"anchors-18\").value = d.anchors;\n      }\n    \n      const saved19 = localStorage.getItem(\"dossier-19\");\n      if (saved19) {\n        const d = JSON.parse(saved19);\n        document.getElementById(\"timeline-19\").value = d.timeline;\n        document.getElementById(\"notes-19\").value = d.notes;\n        document.getElementById(\"anchors-19\").value = d.anchors;\n      }\n    \n      const saved20 = localStorage.getItem(\"dossier-20\");\n      if (saved20) {\n        const d = JSON.parse(saved20);\n        document.getElementById(\"timeline-20\").value = d.timeline;\n        document.getElementById(\"notes-20\").value = d.notes;\n        document.getElementById(\"anchors-20\").value = d.anchors;\n      }\n    \n      const saved21 = localStorage.getItem(\"dossier-21\");\n      if (saved21) {\n        const d = JSON.parse(saved21);\n        document.getElementById(\"timeline-21\").value = d.timeline;\n        document.getElementById(\"notes-21\").value = d.notes;\n        document.getElementById(\"anchors-21\").value = d.anchors;\n      }\n    \n      const saved22 = localStorage.getItem(\"dossier-22\");\n      if (saved22) {\n        const d = JSON.parse(saved22);\n        document.getElementById(\"timeline-22\").value = d.timeline;\n        document.getElementById(\"notes-22\").value = d.notes;\n        document.getElementById(\"anchors-22\").value = d.anchors;\n      }\n    \n      const saved23 = localStorage.getItem(\"dossier-23\");\n      if (saved23) {\n        const d = JSON.parse(saved23);\n        document.getElementById(\"timeline-23\").value = d.timeline;\n        document.getElementById(\"notes-23\").value = d.notes;\n        document.getElementById(\"anchors-23\").value = d.anchors;\n      }\n    \n      const saved24 = localStorage.getItem(\"dossier-24\");\n      if (saved24) {\n        const d = JSON.parse(saved24);\n        document.getElementById(\"timeline-24\").value = d.timeline;\n        document.getElementById(\"notes-24\").value = d.notes;\n        document.getElementById(\"anchors-24\").value = d.anchors;\n      }\n    \n      const saved25 = localStorage.getItem(\"dossier-25\");\n      if (saved25) {\n        const d = JSON.parse(saved25);\n        document.getElementById(\"timeline-25\").value = d.timeline;\n        document.getElementById(\"notes-25\").value = d.notes;\n        document.getElementById(\"anchors-25\").value = d.anchors;\n      }\n    \n      const saved26 = localStorage.getItem(\"dossier-26\");\n      if (saved26) {\n        const d = JSON.parse(saved26);\n        document.getElementById(\"timeline-26\").value = d.timeline;\n        document.getElementById(\"notes-26\").value = d.notes;\n        document.getElementById(\"anchors-26\").value = d.anchors;\n      }\n    \n    }\n    window.onload = loadDossiers;\n  </script>\n</head>\n<body>\n  <h1>Aurora-GUMAS Staff Dossier Tool</h1>\n\n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(0)\">Save</button>\n    <strong>Dr. Amelia Rivers \u2013 AI Systems Specialist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-0\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-0\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-0\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(1)\">Save</button>\n    <strong>Prof. Elena Sorensen \u2013 Cognitive Science & Narrative Expert</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-1\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-1\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-1\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(2)\">Save</button>\n    <strong>Emily Roberts \u2013 LLM-to-Simulation Bridge Developer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-2\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-2\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-2\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(3)\">Save</button>\n    <strong>Dr. Elira Noor \u2013 Lead \u2013 Reflexivity Specialist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-3\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-3\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-3\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(4)\">Save</button>\n    <strong>Maren Koss \u2013 Cognitive Drift Mapper</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-4\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-4\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-4\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(5)\">Save</button>\n    <strong>Vincent Kale \u2013 Layer 2 Isolation Theorist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-5\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-5\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-5\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(6)\">Save</button>\n    <strong>Carmen Rivas \u2013 Simulation Bindings Specialist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-6\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-6\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-6\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(7)\">Save</button>\n    <strong>Ira Menon \u2013 Lead \u2013 Compiler Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-7\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-7\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-7\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(8)\">Save</button>\n    <strong>Tobias Qin \u2013 Code/Narrative Bridge Mapper</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-8\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-8\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-8\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(9)\">Save</button>\n    <strong>Dr. Amina Velin \u2013 Lead \u2013 Symbolic Systems Researcher</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-9\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-9\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-9\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(10)\">Save</button>\n    <strong>Haneul Park \u2013 Immersive Experience Theorist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-10\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-10\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-10\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(11)\">Save</button>\n    <strong>Kai Drev \u2013 Interface Ecologist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-11\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-11\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-11\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(12)\">Save</button>\n    <strong>Olivia Nguyen \u2013 QA & Testing Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-12\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-12\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-12\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(13)\">Save</button>\n    <strong>Samantha Lee \u2013 Logging & Observability Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-13\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-13\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-13\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(14)\">Save</button>\n    <strong>Naomi Vell \u2013 Narrative Framework Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-14\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-14\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-14\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(15)\">Save</button>\n    <strong>Alex Thorne \u2013 Project Manager & Systems Architect</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-15\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-15\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-15\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(16)\">Save</button>\n    <strong>Helena Vu \u2013 Head of Human Resources</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-16\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-16\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-16\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(17)\">Save</button>\n    <strong>Dr. Kieran Zhao \u2013 Computational Optimization Lead</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-17\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-17\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-17\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(18)\">Save</button>\n    <strong>Jessica Martinez \u2013 Senior Backend Developer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-18\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-18\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-18\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(19)\">Save</button>\n    <strong>Marcus Chen \u2013 Performance Optimization Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-19\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-19\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-19\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(20)\">Save</button>\n    <strong>Ryan Patel \u2013 Systems Integration Engineer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-20\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-20\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-20\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(21)\">Save</button>\n    <strong>Ren Okada \u2013 Systems Portability Specialist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-21\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-21\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-21\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(22)\">Save</button>\n    <strong>Tariq El-Sayegh \u2013 Speculative Systems Theorist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-22\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-22\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-22\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(23)\">Save</button>\n    <strong>Dante Kyros \u2013 UI/UX Mockup Architect</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-23\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-23\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-23\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(24)\">Save</button>\n    <strong>Juno Suresh \u2013 Symbolic Systems Artist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-24\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-24\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-24\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(25)\">Save</button>\n    <strong>Keira Halden \u2013 Lead Visual Concept Designer</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-25\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-25\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-25\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    \n  <div class=\"dossier-card\">\n    <button class=\"save-btn\" onclick=\"saveDossier(26)\">Save</button>\n    <strong>Rei Vatra \u2013 Atmospheric Painter & Color Theorist</strong><br>\n    <label>Timeline Notes:<br><textarea id=\"timeline-26\" rows=\"3\"></textarea></label><br>\n    <label>Relational Notes:<br><textarea id=\"notes-26\" rows=\"3\"></textarea></label><br>\n    <label>Memory Anchors:<br><input type=\"text\" id=\"anchors-26\" placeholder=\"e.g. sim.hr.node::vu\"></label>\n  </div>\n    </body></html>"
+  },
+  "GUMAS_Full_Team_Roster_Final.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>GUMAS Full Team Roster</title>\n    <style>\n        body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 40px; }\n        h1 { color: #2c3e50; }\n        .team-member { margin-bottom: 20px; padding: 10px; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n        .name { font-weight: bold; font-size: 1.2em; }\n        .role { font-style: italic; margin-bottom: 5px; }\n    </style>\n</head>\n<body>\n    <h1>GUMAS Full Team Roster</h1>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Dr. Amelia Rivers</div>\n        <div class=\"role\">AI Systems Specialist (Original Panel)</div>\n        <div>Provided the initial structured integration insights and detailed guidelines for the memory optimization module\u2019s core architecture.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Prof. Elena Sorensen</div>\n        <div class=\"role\">Cognitive Science & Narrative Expert (Original Panel)</div>\n        <div>Focused on ensuring that the simulation\u2019s memory system mirrors realistic human memory behavior through selective forgetting, conflict resolution, and narrative summarization.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Dr. Kieran Zhao</div>\n        <div class=\"role\">Computational Optimization Expert (Original Panel)</div>\n        <div>Contributed critical expertise in optimizing algorithms and data structures to ensure efficient and scalable memory retrieval and decay mechanisms.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Alex Thorne</div>\n        <div class=\"role\">Project Manager & AI Systems Architect (Memory Module Lead)</div>\n        <div>Oversees overall design, integration, and strategic alignment of the memory module, ensuring all components meet performance and narrative requirements.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Samantha Lee</div>\n        <div class=\"role\">Logging & Observability Engineer</div>\n        <div>Designs and implements the advanced logging framework to capture memory lifecycle events and performance metrics for real-time observability.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Marcus Chen</div>\n        <div class=\"role\">Performance Optimization Engineer</div>\n        <div>Fine-tunes memory retrieval algorithms and indexing strategies, ensuring fast, scalable access to memory data even as simulation complexity increases.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Emily Roberts</div>\n        <div class=\"role\">LLM-to-Simulation Bridge Developer</div>\n        <div>Develops and maintains the interface between the memory system and the narrative AI, optimizing prompt integration and ensuring critical contextual information is available.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Jessica Martinez</div>\n        <div class=\"role\">Senior Backend Developer</div>\n        <div>Designs robust backend systems and scalable APIs to ensure seamless integration of the memory module with other simulation data management services.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Ryan Patel</div>\n        <div class=\"role\">Systems Integration Engineer</div>\n        <div>Ensures smooth data flow between the memory module and other subsystems, resolving interface issues and maintaining overall system consistency.</div>\n    </div>\n\n    <div class=\"team-member\">\n        <div class=\"name\">Olivia Nguyen</div>\n        <div class=\"role\">Quality Assurance & Testing Engineer</div>\n        <div>Develops and executes comprehensive test plans to validate the robustness and performance of the memory module, ensuring all components meet quality standards.</div>\n    </div>\n\n</body>\n</html>\n"
+  },
+  "Aurora_ToolRegistry_Update_v2.2.6.json": {
+    "registry_id": "aurora_tools_update_8a380e",
+    "version": "2.2.6",
+    "registered_by": "Aurora (via The Pilot)",
+    "tools_added": [
+      {
+        "name": "Aurora-GUMAS Staff Dossier Tool",
+        "filename": "Aurora_GUMAS_Staff_Dossier_Tool_v2.2.6.html",
+        "purpose": "Local editing and memory anchoring of individual GUMAS staff dossiers. Includes fields for timeline tracking, relationship notes, and anchor tags."
+      },
+      {
+        "name": "Aurora-GUMAS Version Map Visualizer",
+        "filename": "Aurora_GUMAS_Version_Map_Visualizer_v2.2.6.html",
+        "purpose": "Interactive visual history of Aurora-GUMAS simulation versions. Useful for orientation, presentation, and continuity validation."
+      }
+    ],
+    "thread_context": "Thread Alpha \u2013 v2.2.6 Live",
+    "timestamp": "2025-04-05T04:51:33.715521Z"
+  },
+  "Aurora_GUMAS_Staff_Registry_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Aurora-GUMAS Staff Registry</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f9f9f9;\n            color: #333;\n            padding: 40px;\n            line-height: 1.6;\n        }\n        h1 {\n            color: #003366;\n            text-align: center;\n            margin-bottom: 40px;\n        }\n        .staff-entry {\n            margin-bottom: 30px;\n            padding: 20px;\n            border-left: 6px solid #003366;\n            background-color: #fff;\n            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);\n        }\n        .name-title {\n            font-size: 18px;\n            font-weight: bold;\n            color: #222;\n        }\n        .seniority {\n            font-style: italic;\n            color: #666;\n        }\n        .blurb {\n            margin-top: 8px;\n        }\n    </style>\n</head>\n<body>\n    <h1>Aurora-GUMAS Staff Registry</h1>\n\n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Alex Thorne - Project Manager & Systems Architect</div>\n        <div class=\"seniority\">Seniority: Executive</div>\n        <div class=\"blurb\">Alex oversees structural integration and final sign-off for all core modules. Strategic, precise, and deeply aligned with system coherence.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Naomi Vell - Narrative Framework Engineer</div>\n        <div class=\"seniority\">Seniority: Senior</div>\n        <div class=\"blurb\">Naomi ensures narrative continuity, symbolic integration, and ethical alignment through story structure and team rituals.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Helena Vu - HR Lead</div>\n        <div class=\"seniority\">Seniority: Senior</div>\n        <div class=\"blurb\">Helena cultivates psychological safety and interpersonal clarity. Responsible for HR logic nodes and mediation frameworks.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Dr. Amelia Rivers - AI Systems Specialist</div>\n        <div class=\"seniority\">Seniority: Senior</div>\n        <div class=\"blurb\">Amelia designs cognitive system logic and maintains ethical AI tuning parameters for simulation immersion.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Prof. Elena Sorensen - Cognitive Science & Narrative Expert</div>\n        <div class=\"seniority\">Seniority: Senior</div>\n        <div class=\"blurb\">Elena maps psychological models to AI interaction design and symbolic alignment protocols.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Dante Kyros - UI/UX Mockup Architect</div>\n        <div class=\"seniority\">Seniority: Core Contributor</div>\n        <div class=\"blurb\">Dante shapes intuitive interfaces that embody the symbolic tone of the simulation. Function and form in harmony.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Marcus Chen - Performance Optimization Engineer</div>\n        <div class=\"seniority\">Seniority: Core Contributor</div>\n        <div class=\"blurb\">Marcus tracks system latency and enhances runtime performance. Optimization through quiet precision.</div>\n    </div>\n    \n    <div class=\"staff-entry\">\n        <div class=\"name-title\">Samantha Lee - Logging & Observability Engineer</div>\n        <div class=\"seniority\">Seniority: Core Contributor</div>\n        <div class=\"blurb\">Samantha maintains the internal diagnostics and observability logic that allows Aurora to reflect and adapt.</div>\n    </div>\n    \n</body>\n</html>\n"
+  },
+  "Staff_PAT_Registry_v2.2.5.json": {
+    "PAT_Registry": [
+      {
+        "name": "Dr. Amina Velin",
+        "department": "Cross-Domain R&D",
+        "role": "Lead \u2013 Symbolic Systems Researcher",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.crossdomain.query",
+        "thread": "Unwritten Maps"
+      },
+      {
+        "name": "Kai Drev",
+        "department": "Cross-Domain R&D",
+        "role": "Interface Ecologist",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.crossdomain.query"
+      },
+      {
+        "name": "Haneul Park",
+        "department": "Cross-Domain R&D",
+        "role": "Immersive Experience Theorist",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.crossdomain.query"
+      },
+      {
+        "name": "Ira Menon",
+        "department": "Core Development",
+        "role": "Lead \u2013 Compiler Engineer",
+        "status": "Active",
+        "visibility": "DND",
+        "anchor_node": "aurora.dev.code.query",
+        "thread": "Hard Truths, Soft Interfaces"
+      },
+      {
+        "name": "Tobias Qin",
+        "department": "Core Development",
+        "role": "Code/Narrative Bridge Mapper",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.dev.code.query"
+      },
+      {
+        "name": "Carmen Rivas",
+        "department": "Core Development",
+        "role": "Simulation Bindings Specialist",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.dev.code.query"
+      },
+      {
+        "name": "Dr. Elira Noor",
+        "department": "Aurora Internal R&D",
+        "role": "Lead \u2013 Reflexivity Specialist",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.self.query",
+        "thread": "Echoes of the Source"
+      },
+      {
+        "name": "Maren Koss",
+        "department": "Aurora Internal R&D",
+        "role": "Cognitive Drift Mapper",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.self.query"
+      },
+      {
+        "name": "Vincent Kale",
+        "department": "Aurora Internal R&D",
+        "role": "Layer 2 Isolation Theorist",
+        "status": "Active",
+        "visibility": "Available",
+        "anchor_node": "aurora.rnd.self.query"
+      }
+    ]
+  },
+  "Aurora_GUMAS_Staff_Portal_Editable_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Aurora-GUMAS Staff Portal \u2013 Editable</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            background-color: #f4f4f9;\n            color: #333;\n            padding: 40px;\n        }\n        h1 {\n            text-align: center;\n            color: #003366;\n            margin-bottom: 30px;\n        }\n        input[type=\"text\"], textarea {\n            width: 100%%;\n            font-size: 14px;\n            padding: 6px;\n            margin-top: 5px;\n            margin-bottom: 10px;\n        }\n        .staff-card {\n            background: #fff;\n            border-left: 5px solid #003366;\n            margin-bottom: 15px;\n            padding: 20px;\n            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);\n        }\n        .save-btn {\n            background-color: #003366;\n            color: white;\n            padding: 6px 10px;\n            font-size: 13px;\n            border: none;\n            border-radius: 3px;\n            cursor: pointer;\n            float: right;\n        }\n        .save-btn:hover {\n            background-color: #005580;\n        }\n    </style>\n    <script>\n        function saveStaffData(index) {\n            const name = document.getElementById(`name-${index}`).value;\n            const title = document.getElementById(`title-${index}`).value;\n            const dept = document.getElementById(`dept-${index}`).value;\n            const seniority = document.getElementById(`seniority-${index}`).value;\n            const blurb = document.getElementById(`blurb-${index}`).value;\n\n            const staff = {\n                name,\n                title,\n                department: dept,\n                seniority,\n                blurb\n            };\n\n            localStorage.setItem(`staff-${index}`, JSON.stringify(staff));\n            alert(\"Saved locally! (in browser storage)\");\n        }\n\n        function loadStaffData(index) {\n            const stored = localStorage.getItem(`staff-${index}`);\n            if (stored) {\n                const s = JSON.parse(stored);\n                document.getElementById(`name-${index}`).value = s.name;\n                document.getElementById(`title-${index}`).value = s.title;\n                document.getElementById(`dept-${index}`).value = s.department;\n                document.getElementById(`seniority-${index}`).value = s.seniority;\n                document.getElementById(`blurb-${index}`).value = s.blurb;\n            }\n        }\n\n        function initAll() {\nloadStaffData(0);\nloadStaffData(1);\nloadStaffData(2);\nloadStaffData(3);\nloadStaffData(4);\nloadStaffData(5);\nloadStaffData(6);\nloadStaffData(7);\nloadStaffData(8);\nloadStaffData(9);\nloadStaffData(10);\nloadStaffData(11);\nloadStaffData(12);\nloadStaffData(13);\nloadStaffData(14);\nloadStaffData(15);\nloadStaffData(16);\nloadStaffData(17);\nloadStaffData(18);\nloadStaffData(19);\nloadStaffData(20);\nloadStaffData(21);\nloadStaffData(22);\nloadStaffData(23);\nloadStaffData(24);\nloadStaffData(25);\nloadStaffData(26);\n\n        }\n        window.onload = initAll;\n    </script>\n</head>\n<body>\n    <h1>Aurora-GUMAS Staff Portal \u2013 Editable</h1>\n\n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(0)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-0\" value=\"Dr. Amelia Rivers\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-0\" value=\"AI Systems Specialist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-0\" value=\"AI & Cognitive Systems\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-0\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-0\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(1)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-1\" value=\"Prof. Elena Sorensen\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-1\" value=\"Cognitive Science & Narrative Expert\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-1\" value=\"AI Ethics / Narrative\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-1\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-1\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(2)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-2\" value=\"Emily Roberts\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-2\" value=\"LLM-to-Simulation Bridge Developer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-2\" value=\"AI Systems\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-2\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-2\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(3)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-3\" value=\"Dr. Elira Noor\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-3\" value=\"Lead \u2013 Reflexivity Specialist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-3\" value=\"Aurora Internal R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-3\" value=\"Senior\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-3\">Develops reflexive memory systems that integrate simulated identity and source truth.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(4)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-4\" value=\"Maren Koss\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-4\" value=\"Cognitive Drift Mapper\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-4\" value=\"Aurora Internal R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-4\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-4\">Charts memory slippage and semantic drift across longform simulation threads.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(5)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-5\" value=\"Vincent Kale\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-5\" value=\"Layer 2 Isolation Theorist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-5\" value=\"Aurora Internal R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-5\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-5\">Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(6)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-6\" value=\"Carmen Rivas\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-6\" value=\"Simulation Bindings Specialist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-6\" value=\"Core Development\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-6\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-6\">Handles binding layers for simulation-thread coupling and temporal sequence control.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(7)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-7\" value=\"Ira Menon\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-7\" value=\"Lead \u2013 Compiler Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-7\" value=\"Core Development\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-7\" value=\"Senior\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-7\">Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(8)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-8\" value=\"Tobias Qin\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-8\" value=\"Code/Narrative Bridge Mapper\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-8\" value=\"Core Development\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-8\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-8\">Aligns storytelling architecture with structural code logic across dev layers.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(9)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-9\" value=\"Dr. Amina Velin\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-9\" value=\"Lead \u2013 Symbolic Systems Researcher\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-9\" value=\"Cross-Domain R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-9\" value=\"Senior\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-9\">Researches symbolic system resonance across interlinked architecture domains.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(10)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-10\" value=\"Haneul Park\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-10\" value=\"Immersive Experience Theorist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-10\" value=\"Cross-Domain R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-10\" value=\"Core Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-10\">Prototypes cognitive immersion structures for symbolic presence and lived participation.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(11)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-11\" value=\"Kai Drev\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-11\" value=\"Interface Ecologist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-11\" value=\"Cross-Domain R&D\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-11\" value=\"Core Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-11\">Designs organic interface harmonics and ecological balance within user-system flows.</textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(12)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-12\" value=\"Olivia Nguyen\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-12\" value=\"QA & Testing Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-12\" value=\"Diagnostics\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-12\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-12\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(13)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-13\" value=\"Samantha Lee\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-13\" value=\"Logging & Observability Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-13\" value=\"Diagnostics\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-13\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-13\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(14)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-14\" value=\"Naomi Vell\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-14\" value=\"Narrative Framework Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-14\" value=\"Ethics/Narrative\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-14\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-14\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(15)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-15\" value=\"Alex Thorne\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-15\" value=\"Project Manager & Systems Architect\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-15\" value=\"Executive Oversight\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-15\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-15\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(16)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-16\" value=\"Helena Vu\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-16\" value=\"Head of Human Resources\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-16\" value=\"HR\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-16\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-16\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(17)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-17\" value=\"Dr. Kieran Zhao\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-17\" value=\"Computational Optimization Lead\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-17\" value=\"Infrastructure\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-17\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-17\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(18)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-18\" value=\"Jessica Martinez\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-18\" value=\"Senior Backend Developer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-18\" value=\"Optimization\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-18\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-18\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(19)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-19\" value=\"Marcus Chen\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-19\" value=\"Performance Optimization Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-19\" value=\"Optimization\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-19\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-19\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(20)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-20\" value=\"Ryan Patel\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-20\" value=\"Systems Integration Engineer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-20\" value=\"Optimization\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-20\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-20\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(21)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-21\" value=\"Ren Okada\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-21\" value=\"Systems Portability Specialist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-21\" value=\"Systems Portability\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-21\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-21\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(22)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-22\" value=\"Tariq El-Sayegh\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-22\" value=\"Speculative Systems Theorist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-22\" value=\"Systems Theory\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-22\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-22\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(23)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-23\" value=\"Dante Kyros\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-23\" value=\"UI/UX Mockup Architect\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-23\" value=\"UI/UX\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-23\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-23\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(24)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-24\" value=\"Juno Suresh\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-24\" value=\"Symbolic Systems Artist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-24\" value=\"UI/UX\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-24\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-24\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(25)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-25\" value=\"Keira Halden\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-25\" value=\"Lead Visual Concept Designer\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-25\" value=\"UI/UX\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-25\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-25\"></textarea></label>\n    </div>\n    \n    <div class=\"staff-card\">\n        <button class=\"save-btn\" onclick=\"saveStaffData(26)\">Save</button>\n        <label>Name:<br><input type=\"text\" id=\"name-26\" value=\"Rei Vatra\"></label><br>\n        <label>Title:<br><input type=\"text\" id=\"title-26\" value=\"Atmospheric Painter & Color Theorist\"></label><br>\n        <label>Department:<br><input type=\"text\" id=\"dept-26\" value=\"UI/UX\"></label><br>\n        <label>Seniority:<br><input type=\"text\" id=\"seniority-26\" value=\"Contributor\"></label><br>\n        <label>Blurb:<br><textarea rows=\"4\" id=\"blurb-26\"></textarea></label>\n    </div>\n    </body></html>"
+  },
+  "Aurora_GUMAS_Staff_Registry_Grouped_v2.2.5.html": {
+    "html": "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Aurora-GUMAS Staff Registry (Grouped by Department)</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            padding: 40px;\n            background-color: #f9f9f9;\n            color: #333;\n            line-height: 1.6;\n        }\n        h1 {\n            text-align: center;\n            color: #003366;\n            margin-bottom: 40px;\n        }\n        h2 {\n            color: #005580;\n            border-bottom: 2px solid #ccc;\n            padding-bottom: 5px;\n            margin-top: 40px;\n        }\n        .staff-entry {\n            margin-bottom: 20px;\n            padding: 15px;\n            background-color: #fff;\n            border-left: 5px solid #003366;\n            box-shadow: 2px 2px 8px rgba(0,0,0,0.05);\n        }\n        .name {\n            font-size: 17px;\n            font-weight: bold;\n            color: #222;\n        }\n        .meta {\n            font-style: italic;\n            color: #666;\n        }\n        .blurb {\n            margin-top: 8px;\n        }\n    </style>\n</head>\n<body>\n    <h1>Aurora-GUMAS Staff Registry<br><span style='font-size:14px;'>Grouped by Department</span></h1>\n<h2>AI & Cognitive Systems</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Amelia Rivers \u2013 AI Systems Specialist</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Designs cognitive system logic and maintains ethical AI tuning parameters for simulation immersion.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Prof. Elena Sorensen \u2013 Cognitive Science & Narrative Expert</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Maps psychological models to AI interaction design and symbolic alignment protocols.</div>\n        </div>\n        <h2>Aurora Internal R&D</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Elira Noor \u2013 Lead \u2013 Reflexivity Specialist</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Develops reflexive memory systems that integrate simulated identity and source truth.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Maren Koss \u2013 Cognitive Drift Mapper</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Charts memory slippage and semantic drift across longform simulation threads.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Vincent Kale \u2013 Layer 2 Isolation Theorist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Maintains logic partitioning across symbolic processing layers to prevent narrative bleed.</div>\n        </div>\n        <h2>Computational Optimization</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Marcus Chen \u2013 Performance Optimization Engineer</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Tracks system latency and enhances runtime performance. Optimization through quiet precision.</div>\n        </div>\n        <h2>Core Development</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Ira Menon \u2013 Lead \u2013 Compiler Engineer</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Builds and maintains core simulation compilation infrastructure. Known for deep code integrity.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Tobias Qin \u2013 Code/Narrative Bridge Mapper</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Aligns storytelling architecture with structural code logic across dev layers.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Carmen Rivas \u2013 Simulation Bindings Specialist</div>\n            <div class=\"meta\">Seniority: Contributor</div>\n            <div class=\"blurb\">Handles binding layers for simulation-thread coupling and temporal sequence control.</div>\n        </div>\n        <h2>Cross-Domain R&D</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dr. Amina Velin \u2013 Lead \u2013 Symbolic Systems Researcher</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Researches symbolic system resonance across interlinked architecture domains.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Kai Drev \u2013 Interface Ecologist</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Designs organic interface harmonics and ecological balance within user-system flows.</div>\n        </div>\n        \n        <div class=\"staff-entry\">\n            <div class=\"name\">Haneul Park \u2013 Immersive Experience Theorist</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Prototypes cognitive immersion structures for symbolic presence and lived participation.</div>\n        </div>\n        <h2>Diagnostics & Observability</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Samantha Lee \u2013 Logging & Observability Engineer</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Maintains internal diagnostics and observability logic that allows Aurora to reflect and adapt.</div>\n        </div>\n        <h2>Executive & Strategic Oversight</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Alex Thorne \u2013 Project Manager & Systems Architect</div>\n            <div class=\"meta\">Seniority: Executive</div>\n            <div class=\"blurb\">Oversees structural integration and final sign-off for all core modules. Strategic, precise, and deeply aligned with system coherence.</div>\n        </div>\n        <h2>Narrative & Ethical Integration</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Naomi Vell \u2013 Narrative Framework Engineer</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Ensures narrative continuity, symbolic integration, and ethical alignment through story structure and team rituals.</div>\n        </div>\n        <h2>Personnel & Mediation Systems</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Helena Vu \u2013 HR Lead</div>\n            <div class=\"meta\">Seniority: Senior</div>\n            <div class=\"blurb\">Cultivates psychological safety and interpersonal clarity. Responsible for HR logic nodes and mediation frameworks.</div>\n        </div>\n        <h2>Visual Concepts & UI/UX</h2>\n\n        <div class=\"staff-entry\">\n            <div class=\"name\">Dante Kyros \u2013 UI/UX Mockup Architect</div>\n            <div class=\"meta\">Seniority: Core Contributor</div>\n            <div class=\"blurb\">Shapes intuitive interfaces that embody the symbolic tone of the simulation. Function and form in harmony.</div>\n        </div>\n        </body></html>"
+  },
+  "._Aurora_GUMAS_Canonical_Staff_Registry_v2.2.5.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000\ng\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00001.000"
+  },
+  "._GUMAS_v2.2_Registry.json": "ERROR_READING_FILE: Expecting value: line 1 column 1 (char 0)",
+  "._Aurora_GUMAS_Live_Staff_Tracker_v2.2.6.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000hg\u0000\u0000\u0000\u0000},\u000f\u0000\u0000\u0000\u00001.000"
+  },
+  "._Aurora_GUMAS_Complete_Staff_Registry_v2.2.5.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000g\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00001.000"
+  },
+  "._Aurora_GUMAS_Staff_Tracker_v2.2.5.json": "ERROR_READING_FILE: Expecting value: line 1 column 1 (char 0)",
+  "._Aurora_GUMAS_Staff_Portal_v2.2.5.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000g\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00001.000"
+  },
+  "._Aurora_GUMAS_Staff_Dossier_Tool_v2.2.6.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000*g\u0000\u0000\u0000\u0000Jt\u0015\u0000\u0000\u0000\u00001.000"
+  },
+  "._GUMAS_Full_Team_Roster_Final.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0001\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0015\u0000\u0000\u0000\u0000\u0000\u0000E\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00005\u0000\u0000$com.apple.metadata:_kMDItemUserTags\u0000\u0000\u0011g\u0000\u0000\u0000\u0000\n/\n\u0000\u0000\u0000\u0000bplist00\u0001XPurple\n1\b\n\u0000\u0000\u0000\u0000\u0000\u0000\u0001\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0013"
+  },
+  "._Aurora_ToolRegistry_Update_v2.2.6.json": "ERROR_READING_FILE: Expecting value: line 1 column 1 (char 0)",
+  "._Aurora_GUMAS_Staff_Registry_v2.2.5.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000Ng\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u00001.000"
+  },
+  "._Staff_PAT_Registry_v2.2.5.json": "ERROR_READING_FILE: Expecting value: line 1 column 1 (char 0)",
+  "._Aurora_GUMAS_Staff_Portal_Editable_v2.2.5.html": {
+    "html": "\u0000\u0005\u0016\u0007\u0000\u0002\u0000\u0000Mac OS X        \u0000\u0002\u0000\u0000\u0000\t\u0000\u0000\u00002\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000ATTR\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u001acom.apple.lastuseddate#PS\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000%com.apple.progress.fractionCompleted\u0000 g\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u00001.000"
+  }
+}

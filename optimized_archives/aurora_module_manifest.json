@@ -1,0 +1,24 @@
+{
+  "module_name": "Aurora",
+  "version": "1.0.0",
+  "description": "Modular system AI and simulation guide for GUMAS. Coordinates memory, narrative coherence, and ethical integrity.",
+  "entry_point": "aurora_runtime_loader.py",
+  "core_interfaces": {
+    "query_memory": "aurora.query_memory(owner, query, top_k=5)",
+    "maintain_memory": "aurora.maintain_memory()",
+    "memory_link": "aurora.memory_system"
+  },
+  "dependencies": [
+    "gumas_memory_core.py",
+    "gumas_memory_maintenance.py",
+    "gumas_recovery_wizard.py"
+  ],
+  "recovery_archives": [
+    "GUMAS_Seed_Kit.zip",
+    "GUMAS_Aurora_Startup_Kit.zip"
+  ],
+  "status": "Stable",
+  "transferable": true,
+  "updatable": true,
+  "last_updated": "2025-04-01"
+}

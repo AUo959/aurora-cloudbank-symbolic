@@ -1,0 +1,191 @@
+[
+    {
+        "name": "Dr. Amelia Rivers",
+        "title": "AI Systems Specialist",
+        "symbolic_tag": "s.tag::ai.dramelia_rivers",
+        "anchor_code": "sim.staff.node::dr._amelia_rivers",
+        "terminal_id": "ai_and_cognitive_systems.dr.term"
+    },
+    {
+        "name": "Prof. Elena Sorensen",
+        "title": "Cognitive Science & Narrative Expert",
+        "symbolic_tag": "s.tag::cognitive.profelena_sorensen",
+        "anchor_code": "sim.staff.node::prof._elena_sorensen",
+        "terminal_id": "ai_ethics__narrative.prof.term"
+    },
+    {
+        "name": "Emily Roberts",
+        "title": "LLM-to-Simulation Bridge Developer",
+        "symbolic_tag": "s.tag::llm-to-simulation.emily_roberts",
+        "anchor_code": "sim.staff.node::emily_roberts",
+        "terminal_id": "ai_systems.emily.term"
+    },
+    {
+        "name": "Dr. Elira Noor",
+        "title": "Lead \u2013 Reflexivity Specialist",
+        "symbolic_tag": "s.tag::lead.drelira_noor",
+        "anchor_code": "sim.staff.node::dr._elira_noor",
+        "terminal_id": "aurora_internal_randd.dr.term"
+    },
+    {
+        "name": "Maren Koss",
+        "title": "Cognitive Drift Mapper",
+        "symbolic_tag": "s.tag::cognitive.maren_koss",
+        "anchor_code": "sim.staff.node::maren_koss",
+        "terminal_id": "aurora_internal_randd.maren.term"
+    },
+    {
+        "name": "Vincent Kale",
+        "title": "Layer 2 Isolation Theorist",
+        "symbolic_tag": "s.tag::layer.vincent_kale",
+        "anchor_code": "sim.staff.node::vincent_kale",
+        "terminal_id": "aurora_internal_randd.vincent.term"
+    },
+    {
+        "name": "Carmen Rivas",
+        "title": "Simulation Bindings Specialist",
+        "symbolic_tag": "s.tag::simulation.carmen_rivas",
+        "anchor_code": "sim.staff.node::carmen_rivas",
+        "terminal_id": "core_development.carmen.term"
+    },
+    {
+        "name": "Ira Menon",
+        "title": "Lead \u2013 Compiler Engineer",
+        "symbolic_tag": "s.tag::lead.ira_menon",
+        "anchor_code": "sim.staff.node::ira_menon",
+        "terminal_id": "core_development.ira.term"
+    },
+    {
+        "name": "Tobias Qin",
+        "title": "Code/Narrative Bridge Mapper",
+        "symbolic_tag": "s.tag::code/narrative.tobias_qin",
+        "anchor_code": "sim.staff.node::tobias_qin",
+        "terminal_id": "core_development.tobias.term"
+    },
+    {
+        "name": "Dr. Amina Velin",
+        "title": "Lead \u2013 Symbolic Systems Researcher",
+        "symbolic_tag": "s.tag::lead.dramina_velin",
+        "anchor_code": "sim.staff.node::dr._amina_velin",
+        "terminal_id": "cross-domain_randd.dr.term"
+    },
+    {
+        "name": "Haneul Park",
+        "title": "Immersive Experience Theorist",
+        "symbolic_tag": "s.tag::immersive.haneul_park",
+        "anchor_code": "sim.staff.node::haneul_park",
+        "terminal_id": "cross-domain_randd.haneul.term"
+    },
+    {
+        "name": "Kai Drev",
+        "title": "Interface Ecologist",
+        "symbolic_tag": "s.tag::interface.kai_drev",
+        "anchor_code": "sim.staff.node::kai_drev",
+        "terminal_id": "cross-domain_randd.kai.term"
+    },
+    {
+        "name": "Olivia Nguyen",
+        "title": "QA & Testing Engineer",
+        "symbolic_tag": "s.tag::qa.olivia_nguyen",
+        "anchor_code": "sim.staff.node::olivia_nguyen",
+        "terminal_id": "diagnostics.olivia.term"
+    },
+    {
+        "name": "Samantha Lee",
+        "title": "Logging & Observability Engineer",
+        "symbolic_tag": "s.tag::logging.samantha_lee",
+        "anchor_code": "sim.staff.node::samantha_lee",
+        "terminal_id": "diagnostics.samantha.term"
+    },
+    {
+        "name": "Naomi Vell",
+        "title": "Narrative Framework Engineer",
+        "symbolic_tag": "s.tag::narrative.naomi_vell",
+        "anchor_code": "sim.staff.node::naomi_vell",
+        "terminal_id": "ethics_narrative.naomi.term"
+    },
+    {
+        "name": "Alex Thorne",
+        "title": "Project Manager & Systems Architect",
+        "symbolic_tag": "s.tag::project.alex_thorne",
+        "anchor_code": "sim.staff.node::alex_thorne",
+        "terminal_id": "executive_oversight.alex.term"
+    },
+    {
+        "name": "Helena Vu",
+        "title": "Head of Human Resources",
+        "symbolic_tag": "s.tag::head.helena_vu",
+        "anchor_code": "sim.staff.node::helena_vu",
+        "terminal_id": "hr.helena.term"
+    },
+    {
+        "name": "Dr. Kieran Zhao",
+        "title": "Computational Optimization Lead",
+        "symbolic_tag": "s.tag::computational.drkieran_zhao",
+        "anchor_code": "sim.staff.node::dr._kieran_zhao",
+        "terminal_id": "infrastructure.dr.term"
+    },
+    {
+        "name": "Jessica Martinez",
+        "title": "Senior Backend Developer",
+        "symbolic_tag": "s.tag::senior.jessica_martinez",
+        "anchor_code": "sim.staff.node::jessica_martinez",
+        "terminal_id": "optimization.jessica.term"
+    },
+    {
+        "name": "Marcus Chen",
+        "title": "Performance Optimization Engineer",
+        "symbolic_tag": "s.tag::performance.marcus_chen",
+        "anchor_code": "sim.staff.node::marcus_chen",
+        "terminal_id": "optimization.marcus.term"
+    },
+    {
+        "name": "Ryan Patel",
+        "title": "Systems Integration Engineer",
+        "symbolic_tag": "s.tag::systems.ryan_patel",
+        "anchor_code": "sim.staff.node::ryan_patel",
+        "terminal_id": "optimization.ryan.term"
+    },
+    {
+        "name": "Ren Okada",
+        "title": "Systems Portability Specialist",
+        "symbolic_tag": "s.tag::systems.ren_okada",
+        "anchor_code": "sim.staff.node::ren_okada",
+        "terminal_id": "systems_portability.ren.term"
+    },
+    {
+        "name": "Tariq El-Sayegh",
+        "title": "Speculative Systems Theorist",
+        "symbolic_tag": "s.tag::speculative.tariq_el-sayegh",
+        "anchor_code": "sim.staff.node::tariq_el-sayegh",
+        "terminal_id": "systems_theory.tariq.term"
+    },
+    {
+        "name": "Dante Kyros",
+        "title": "UI/UX Mockup Architect",
+        "symbolic_tag": "s.tag::ui/ux.dante_kyros",
+        "anchor_code": "sim.staff.node::dante_kyros",
+        "terminal_id": "ui_ux.dante.term"
+    },
+    {
+        "name": "Juno Suresh",
+        "title": "Symbolic Systems Artist",
+        "symbolic_tag": "s.tag::symbolic.juno_suresh",
+        "anchor_code": "sim.staff.node::juno_suresh",
+        "terminal_id": "ui_ux.juno.term"
+    },
+    {
+        "name": "Keira Halden",
+        "title": "Lead Visual Concept Designer",
+        "symbolic_tag": "s.tag::lead.keira_halden",
+        "anchor_code": "sim.staff.node::keira_halden",
+        "terminal_id": "ui_ux.keira.term"
+    },
+    {
+        "name": "Rei Vatra",
+        "title": "Atmospheric Painter & Color Theorist",
+        "symbolic_tag": "s.tag::atmospheric.rei_vatra",
+        "anchor_code": "sim.staff.node::rei_vatra",
+        "terminal_id": "ui_ux.rei.term"
+    }
+]

@@ -1,0 +1,14 @@
+{
+    "module": "Aurora_GUMAS_SafetyLock",
+    "version": "1.0",
+    "purpose": "Prevent unauthorized or accidental overwrite of Aurora middleware logic and context.",
+    "rules": {
+        "overwrite_protection": true,
+        "require_double_confirm": true,
+        "allow_context_fusion": true,
+        "lock_on_ethics_doctrine_mismatch": true,
+        "lock_on_instruction_profile_absence": true
+    },
+    "manual_override_phrase": "I, The Pilot, confirm full overwrite of Aurora Core.",
+    "notes": "This file should be referenced by any system attempting to overwrite Aurora core logic or merge operational context. Remove only if a full system reset is sanctioned."
+}

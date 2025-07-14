@@ -1,0 +1,11 @@
+{
+  "threads": [
+    {
+      "id": "command_node",
+      "status": "live",
+      "anchor": "HALO_CONTINUITY_GRAFT_005",
+      "last_sync": "2025-06-25T22:10:00Z"
+    }
+  ],
+  "snapshot_count": 1
+}

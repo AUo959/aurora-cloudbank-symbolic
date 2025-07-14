@@ -20,28 +20,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          
+
       - name: Install security tools
         run: |
           pip install bandit safety semgrep
-          
+
       - name: Run Bandit security scan
         run: |
           bandit -r . -f json -o bandit-report.json
-          
+
       - name: Run Safety vulnerability check
         run: |
           safety check --json --output safety-report.json
-          
+
       - name: Run Semgrep security analysis
         run: |
           semgrep --config=auto --json --output=semgrep-report.json .
-          
+
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         with:
@@ -50,7 +50,7 @@ jobs:
             bandit-report.json
             safety-report.json
             semgrep-report.json
-            
+
   dependency-check:
     runs-on: ubuntu-latest
     steps:

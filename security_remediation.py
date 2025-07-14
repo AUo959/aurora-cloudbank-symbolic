@@ -207,7 +207,7 @@ class SecurityRemediator:
                         "severity": "HIGH",
                         "mitigation": "Implement CSP headers and input sanitization",
                         "status": "IMPLEMENTED"
-
+                    }
                 },
                 "secure_coding_standards": {
                     "subprocess_usage": "Always use list arguments, never shell=True",
@@ -221,9 +221,9 @@ class SecurityRemediator:
                     "dependency_checking": True,
                     "code_review_required": True,
                     "security_testing": True
-
-
-
+                }
+            }
+        }
 
         with open(".security/security_policy.json", "w", encoding="utf-8") as f:
             json.dump(security_policy, f, indent=2)

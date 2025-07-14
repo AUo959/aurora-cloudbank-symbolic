@@ -308,7 +308,7 @@ class MeshAgent {
   /**
    * Receive and process mesh message
    */
-  async receiveMessage(message) {
+  async receiveMessage(_message) {
     systemLogger.info(`📥 [MESH] Message received by ${this.id}`, {
       from: message.from,
       messageId: message.timestamp,
@@ -413,11 +413,11 @@ class MeshAgent {
     await this.anchorSync();
   }
   
-  async auditMessage(message) {
+  async auditMessage(_message) {
     return { valid: true, reason: null };
   }
   
-  async processMessage(message) {
+  async processMessage(_message) {
     return { processed: true, response: null };
   }
 }

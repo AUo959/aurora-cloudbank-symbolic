@@ -50,6 +50,13 @@ class RepositoryHealthMonitor:
                 'console': True,
                 'file_log': True,
                 'webhook': False  # Can be configured for Slack/Discord
+            }
+        }
+
+
+
+
+
 
 
 
@@ -67,6 +74,15 @@ class RepositoryHealthMonitor:
             'git_metrics': {},
             'disk_usage': {},
             'health_score': 0.0
+        }
+
+
+
+
+
+
+
+
 
 
         try:
@@ -94,6 +110,7 @@ class RepositoryHealthMonitor:
             print(f"Error collecting metrics: {e}")
             metrics['error'] = str(e)
 
+
         return metrics
 
     def _get_repo_size_mb(self) -> float:
@@ -115,6 +132,11 @@ class RepositoryHealthMonitor:
             'zip_files': {'count': 0, 'total_size_mb': 0, 'files': []},
             'cache_files': {'pyc_count': 0, 'pycache_dirs': 0, 'so_files': 0},
             'temp_files': {'count': 0, 'patterns': {}}
+
+
+
+
+
 
 
         try:
@@ -166,6 +188,7 @@ class RepositoryHealthMonitor:
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error analyzing files: {e}")
 
+
         return file_stats
 
     def _get_file_size_mb(self, file_path: str) -> float:
@@ -184,6 +207,8 @@ class RepositoryHealthMonitor:
             'total': 0,
             'stale': 0,
             'categories': {'codex': 0, 'dependabot': 0, 'alert-autofix': 0, 'backup': 0, 'other': 0}
+
+
 
 
         try:
@@ -213,6 +238,7 @@ class RepositoryHealthMonitor:
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error analyzing branches: {e}")
 
+
         return branch_stats
 
     def _collect_git_metrics(self) -> Dict:
@@ -223,6 +249,7 @@ class RepositoryHealthMonitor:
             'contributors': 0,
             'uncommitted_changes': False,
             'unpushed_commits': 0
+
 
 
         try:
@@ -248,6 +275,7 @@ class RepositoryHealthMonitor:
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error collecting git metrics: {e}")
 
+
         return git_metrics
 
     def _get_disk_usage(self) -> Dict:
@@ -260,8 +288,10 @@ class RepositoryHealthMonitor:
                 'free_gb': usage.free / (1024**3),
                 'usage_percent': (usage.used / usage.total) * 100
 
+
         except (OSError, ValueError, RuntimeError):
             return {}
+
 
     def _calculate_health_score(self, metrics: Dict) -> float:
         """Calculate overall repository health score (0-10)."""
@@ -313,6 +343,7 @@ class RepositoryHealthMonitor:
                 'threshold': thresholds['repository_size_mb']
             })
 
+
         # File count alert
         if metrics['file_count'] > thresholds['file_count']:
             alerts.append({
@@ -324,6 +355,7 @@ class RepositoryHealthMonitor:
                 'threshold': thresholds['file_count']
             })
 
+
         # Branch count alert
         if metrics['branches']['total'] > thresholds['branch_count']:
             alerts.append({
@@ -334,6 +366,7 @@ class RepositoryHealthMonitor:
                 'metric': metrics['branches']['total'],
                 'threshold': thresholds['branch_count']
             })
+
 
         # Cache files alert
         cache_total = (metrics['cache_files']['pyc_count'] +
@@ -348,6 +381,7 @@ class RepositoryHealthMonitor:
                 'threshold': 0
             })
 
+
         # Health score alert
         if metrics['health_score'] < 7.0:
             severity = 'high' if metrics['health_score'] < 5.0 else 'medium'
@@ -360,6 +394,7 @@ class RepositoryHealthMonitor:
                 'threshold': 7.0
             })
 
+
         return alerts
 
     def log_metrics(self, metrics: Dict):
@@ -370,6 +405,7 @@ class RepositoryHealthMonitor:
                 f.write(json.dumps(metrics) + '\n')
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error logging metrics: {e}")
+
 
     def save_alerts(self, alerts: List[Dict]):
         """Save current alerts to file."""
@@ -382,6 +418,7 @@ class RepositoryHealthMonitor:
                 }, f, indent=2)
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error saving alerts: {e}")
+
 
     def generate_health_report(self, metrics: Dict, alerts: List[Dict]) -> str:
         """Generate a human-readable health report."""
@@ -399,6 +436,13 @@ class RepositoryHealthMonitor:
             ""
         ]
 
+
+
+
+
+
+
+
         if alerts:
             report.extend([
                 "## 🚨 Active Alerts",
@@ -408,6 +452,8 @@ class RepositoryHealthMonitor:
             for alert in alerts:
                 severity_emoji = {'high': '🔴', 'medium': '🟡', 'low': '🔵'}.get(alert['severity'], '⚪')
                 report.append(f"- {severity_emoji} **{alert['type']}**: {alert['message']}")
+
+
 
             report.append("")
         else:
@@ -428,6 +474,8 @@ class RepositoryHealthMonitor:
                 if count > 0:
                     report.append(f"- **{category}**: {count} branches")
             report.append("")
+
+
 
         return "\n".join(report)
 
@@ -458,10 +506,14 @@ class RepositoryHealthMonitor:
         print(f"🚨 Alerts: {len(alerts)}")
         print(f"📄 Report saved to: {report_path}")
 
+
+
+
         return {
             'metrics': metrics,
             'alerts': alerts,
             'report': report
+
 
 
 
@@ -484,12 +536,17 @@ def main():
     print(f"   Branches: {metrics.get('branches', {}).get('total', 0)}")
     print(f"   Health: {metrics.get('health_score', 0):.1f}/10")
 
+
+
+
+
     if alerts:
         print(f"\n⚠️  {len(alerts)} alerts require attention")
         for alert in alerts[:3]:  # Show first 3 alerts
             print(f"   - {alert['type']}: {alert['message']}")
     else:
         print("\n✅ No alerts - repository health is good!")
+
 
 
 if __name__ == "__main__":

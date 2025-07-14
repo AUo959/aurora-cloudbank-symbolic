@@ -54,8 +54,10 @@ except ImportError:
         def analyze_repository_structure(self):
             return {}
 
+
         def generate_reorganization_plan(self, analysis):
             return {}
+
 
 
 # Import the new lint cleanup manager
@@ -251,6 +253,10 @@ class ZIPWizIntegration:
             "nested_archives": [],
             "potential_duplicates": [],
             "structure": {},
+        }
+
+
+
 
 
         try:
@@ -280,10 +286,13 @@ class ZIPWizIntegration:
                             "size": info.file_size,
                             "compressed_size": info.compress_size,
                             "date": info.date_time,
+                        }
+
 
 
         except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Error analyzing ZIP file {zip_path}: {e}")
+
 
         return analysis
 
@@ -303,6 +312,7 @@ class ZIPWizIntegration:
         except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Error extracting {zip_path}: {e}")
             return False
+
 
     def _reorganize_extracted_files(self, source_dir: Path, target_dir: Path):
         """Intelligently reorganize extracted files."""
@@ -377,6 +387,7 @@ class EnhancedGITWiz:
                     find . -name "*.md" -exec sed -i '/^#{1,6} /{
                         i\\
 
+
                         a\\
 
                     }' {} \\
@@ -397,9 +408,12 @@ class EnhancedGITWiz:
                         if (prev_line != "" && prev_non_list) print ""
                         print; in_list=1; next
 
+
+
                     /^[[:space:]]*[0-9]+\\. / {
                         if (prev_line != "" && prev_non_list) print ""
                         print; in_list=1; next
+
 
                     {
                         if (in_list && $0 != "" && !/^[[:space:]]*[-*+0-9]/):
@@ -434,6 +448,9 @@ class EnhancedGITWiz:
                 confidence_score=0.98,
             ),
         ]
+
+
+
 
         for pattern in common_patterns:
             self.memory.store_issue_pattern(pattern)
@@ -503,6 +520,7 @@ class EnhancedGITWiz:
                 "error", 0, 0, 0, [str(e)], 0.0, 0.0, datetime.utcnow().isoformat()
             )
 
+
     def _detect_issues(self) -> List[str]:
         """Detect various repository issues."""
         issues = []
@@ -517,6 +535,7 @@ class EnhancedGITWiz:
 
         if large_files:
             issues.append(f"Large files detected: {', '.join(large_files[:5])}")
+
 
         # Check for duplicate files
         file_hashes = {}
@@ -535,6 +554,8 @@ class EnhancedGITWiz:
                             file_hashes[_file_hash] = file_path
                 except (OSError, ValueError, RuntimeError):
                     continue
+
+
 
         # Check for security issues
         security_patterns = [
@@ -607,8 +628,10 @@ class EnhancedGITWiz:
             logger.warning(f"No known solution for issue: {issue_description}")
             return False
 
+
         best_pattern = patterns[0]
         logger.info(f"Applying solution: {best_pattern.description}")
+
 
         try:
             # Execute solution commands
@@ -626,6 +649,7 @@ class EnhancedGITWiz:
                     logger.error(f"Command failed: {cmd}")
                     logger.error(result.stderr)
                     return False
+
 
             # Create solution files
             for filename, content in best_pattern.solution_files.items():
@@ -649,6 +673,7 @@ class EnhancedGITWiz:
             ) / (best_pattern.usage_count + 1)
             self.memory.store_issue_pattern(best_pattern)
             return False
+
 
     def optimize_repository(self) -> Dict[str, Any]:
         """Comprehensive repository optimization."""
@@ -682,6 +707,7 @@ class EnhancedGITWiz:
                 )
                 optimizations.append(f"Deleted merged branch: {branch}")
 
+
         # 2. Optimize ZIP files
         zip_files = list(self.project_root.rglob("*.zip"))
         for zip_file in zip_files:
@@ -690,10 +716,12 @@ class EnhancedGITWiz:
                 zip_file.unlink()
                 optimizations.append(f"Removed empty ZIP: {zip_file.name}")
 
+
         # 3. Fix detected issues
         for issue in initial_state.issues_detected:
             if self.intelligent_fix(issue):
                 optimizations.append(f"Fixed issue: {issue}")
+
 
         # 4. Analyze final state
         final_state = self.analyze_repository_state()
@@ -704,6 +732,8 @@ class EnhancedGITWiz:
             "optimizations_applied": optimizations,
             "improvement_score": final_state.optimization_score
             - initial_state.optimization_score,
+        }
+
 
 
     def persistent_lint_fix(self) -> bool:
@@ -735,6 +765,7 @@ class EnhancedGITWiz:
                 except json.JSONDecodeError:
                     pass
 
+
         # Check Python linting
         if shutil.which("flake8"):
             _ = subprocess.run(
@@ -751,6 +782,7 @@ class EnhancedGITWiz:
                     lint_issues.extend([f"Flake8: {issue['text']}" for issue in issues])
                 except json.JSONDecodeError:
                     pass
+
 
         # Apply intelligent fixes
         fixed_count = 0
@@ -779,6 +811,10 @@ class EnhancedGITWiz:
             "outdated": {},
             "security_issues": [],
             "update_report": None,
+        }
+
+
+
 
 
         # Analyze outdated dependencies
@@ -795,7 +831,7 @@ class EnhancedGITWiz:
                         "current_version": dep.current_version,
                         "advisory": dep.security_advisory,
                         "ecosystem": ecosystem,
-
+                    }
                     for dep in security_deps
                 ]
             )
@@ -813,6 +849,7 @@ class EnhancedGITWiz:
     ) -> Dict[str, Any]:
         """Execute comprehensive optimized workflow."""
         logger.info(f"Executing optimized workflow: {workflow_type}")
+
 
         # Initialize workflow optimizer if not already done
         # (using property for lazy loading)
@@ -832,6 +869,10 @@ class EnhancedGITWiz:
             "estimated_benefits": {},
 
 
+
+
+
+
         # Get current state
         current_state = self.analyze_repository_state()
 
@@ -845,6 +886,7 @@ class EnhancedGITWiz:
             "issues_count": len(current_state.issues_detected),
 
 
+
         # Identify optimization opportunities
         if current_state.optimization_score < 0.8:
             analysis["optimization_opportunities"].append(
@@ -853,7 +895,7 @@ class EnhancedGITWiz:
                     "description": "Repository structure can be optimized",
                     "priority": "high",
                     "estimated_impact": "20-30% performance improvement",
-
+                }
             )
 
         if current_state.total_size > 50 * 1024 * 1024:  # 50MB
@@ -863,7 +905,7 @@ class EnhancedGITWiz:
                     "description": "Repository size can be reduced",
                     "priority": "medium",
                     "estimated_impact": "Storage and clone time reduction",
-
+                }
             )
 
         # Security assessment
@@ -879,12 +921,15 @@ class EnhancedGITWiz:
             "recommendations": self._generate_security_recommendations(current_state),
 
 
+
         # Maintenance recommendations using HDE++ if available
         if self.hde:
             context = {
                 "weights": {"logic": 3, "context_hold": 2},
                 "require": ["general"],
                 "analysis_type": "repository_maintenance",
+
+
 
             hde_recommendation = self.hde.recommend_with_explanation(context)
             analysis["ai_recommendations"] = hde_recommendation
@@ -916,6 +961,7 @@ class EnhancedGITWiz:
         report.append(f"Generated: {datetime.utcnow().isoformat()}")
         report.append("")
 
+
         # Repository analysis
         analysis = self.intelligent_repository_analysis()
 
@@ -930,6 +976,12 @@ class EnhancedGITWiz:
         report.append(f"Issues Detected: {health['issues_count']}")
         report.append("")
 
+
+
+
+
+
+
         # Dependency analysis
         if hasattr(self, "dependency_manager"):
             dep_analysis = self.comprehensive_dependency_management()
@@ -942,6 +994,8 @@ class EnhancedGITWiz:
                     f"{ecosystem.capitalize()}: {count} total, {outdated} outdated"
                 )
 
+
+
             if dep_analysis["security_issues"]:
                 report.append(
                     f"🔒 Security Issues: {len(dep_analysis['security_issues'])}"
@@ -949,6 +1003,7 @@ class EnhancedGITWiz:
                 for issue in dep_analysis["security_issues"][:3]:  # Show first 3
                     report.append(f"  - {issue['name']} ({issue['ecosystem']})")
             report.append("")
+
 
         # Optimization opportunities
         if analysis["optimization_opportunities"]:
@@ -959,6 +1014,8 @@ class EnhancedGITWiz:
                 report.append(f"  Impact: {opp['estimated_impact']}")
             report.append("")
 
+
+
         # AI Recommendations
         if "ai_recommendations" in analysis:
             report.append("🤖 AI-POWERED RECOMMENDATIONS")
@@ -968,6 +1025,9 @@ class EnhancedGITWiz:
             report.append(f"Confidence: {ai_rec.get('confidence', 0):.2f}")
             report.append(f"Explanation: {ai_rec.get('explanation', 'N/A')}")
             report.append("")
+
+
+
 
         # Action items
         report.append("✅ RECOMMENDED ACTIONS")
@@ -1013,6 +1073,7 @@ class EnhancedGITWiz:
         return result.returncode == 0
 
 
+
 class RepositoryStructureAnalyzer:
     """Advanced repository structure analysis and optimization."""
 
@@ -1031,6 +1092,7 @@ class RepositoryStructureAnalyzer:
             "config/": ["*.yaml", "*.yml", "*.json", "*config*"],
 
 
+
     def analyze_current_structure(self) -> Dict[str, Any]:
         """Analyze current repository structure against ideal."""
         analysis = {
@@ -1043,8 +1105,11 @@ class RepositoryStructureAnalyzer:
             "organization_score": 0.0,
 
 
+
         file_groups = {}
         file_sizes = {}
+
+
 
         # Scan all files
         for file_path in self.project_root.rglob("*"):
@@ -1064,7 +1129,7 @@ class RepositoryStructureAnalyzer:
                         {
                             "path": str(rel_path),
                             "size_mb": round(size / (1024 * 1024), 2),
-
+                        }
                     )
 
                 # Group similar files
@@ -1085,7 +1150,7 @@ class RepositoryStructureAnalyzer:
                         "base_name": base_name,
                         "files": files,
                         "total_size": sum(file_sizes.get(f, 0) for f in files),
-
+                    }
                 )
 
         # Analyze structure violations
@@ -1148,6 +1213,7 @@ class IntelligentCleanupEngine:
         backup_name = f"pre_cleanup_{timestamp}"
         backup_path = self.backup_dir / backup_name
 
+
         # Create git branch backup
         subprocess.run(
             ["git", "checkout", "-b", f"backup_{backup_name}"],
@@ -1205,6 +1271,8 @@ class IntelligentCleanupEngine:
                             f"Archived different duplicate: {file_path} -> {archive_path}"
                         )
 
+
+
         return actions
 
     def _select_best_duplicate(self, files: List[str]) -> str:
@@ -1218,6 +1286,7 @@ class IntelligentCleanupEngine:
         for file_path in files:
             score = 0
             path_obj = Path(self.project_root / file_path)
+
 
             # Newer files score higher
             score += path_obj.stat().st_mtime / 1000000  # Normalize timestamp
@@ -1387,6 +1456,9 @@ def main():
         ├── .gitignore
         ├── requirements.txt / package.json
         └── docker-compose.yml (if applicable)
+
+
+
 
         📁 Organized Directories:
         ├── 📂 src/ (source code)

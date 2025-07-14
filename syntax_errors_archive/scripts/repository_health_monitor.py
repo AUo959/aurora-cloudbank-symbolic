@@ -50,8 +50,8 @@ class RepositoryHealthMonitor:
                 'console': True,
                 'file_log': True,
                 'webhook': False  # Can be configured for Slack/Discord
-            }
-        }
+
+
 
     def collect_health_metrics(self) -> Dict:
         """Collect comprehensive repository health metrics."""
@@ -67,7 +67,7 @@ class RepositoryHealthMonitor:
             'git_metrics': {},
             'disk_usage': {},
             'health_score': 0.0
-        }
+
 
         try:
             # Repository size
@@ -115,7 +115,7 @@ class RepositoryHealthMonitor:
             'zip_files': {'count': 0, 'total_size_mb': 0, 'files': []},
             'cache_files': {'pyc_count': 0, 'pycache_dirs': 0, 'so_files': 0},
             'temp_files': {'count': 0, 'patterns': {}}
-        }
+
 
         try:
             # Count all files
@@ -184,7 +184,7 @@ class RepositoryHealthMonitor:
             'total': 0,
             'stale': 0,
             'categories': {'codex': 0, 'dependabot': 0, 'alert-autofix': 0, 'backup': 0, 'other': 0}
-        }
+
 
         try:
             result = subprocess.run(['git', 'branch', '-r'],
@@ -223,7 +223,7 @@ class RepositoryHealthMonitor:
             'contributors': 0,
             'uncommitted_changes': False,
             'unpushed_commits': 0
-        }
+
 
         try:
             # Check for uncommitted changes
@@ -235,12 +235,12 @@ class RepositoryHealthMonitor:
             today = datetime.date.today()
             week_ago = today - datetime.timedelta(days=7)
 
-            result = subprocess.run(['git', 'log', '--since', week_ago.isoformat(, shell=False, check=False), '--oneline'],
+            result = subprocess.run(['git', 'log', '--since', week_ago.isoformat(), '--oneline'],
                                     capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_this_week'] = len(result.stdout.strip().split('\n'))
 
-            result = subprocess.run(['git', 'log', '--since', today.isoformat(, shell=False, check=False), '--oneline'],
+            result = subprocess.run(['git', 'log', '--since', today.isoformat(), '--oneline'],
                                     capture_output=True, text=True, cwd=self.repo_path, shell=False, check=False)
             if result.returncode == 0:
                 git_metrics['commits_today'] = len(result.stdout.strip().split('\n'))
@@ -259,7 +259,7 @@ class RepositoryHealthMonitor:
                 'used_gb': usage.used / (1024**3),
                 'free_gb': usage.free / (1024**3),
                 'usage_percent': (usage.used / usage.total) * 100
-            }
+
         except (OSError, ValueError, RuntimeError):
             return {}
 
@@ -462,7 +462,7 @@ class RepositoryHealthMonitor:
             'metrics': metrics,
             'alerts': alerts,
             'report': report
-        }
+
 
 
 def main():

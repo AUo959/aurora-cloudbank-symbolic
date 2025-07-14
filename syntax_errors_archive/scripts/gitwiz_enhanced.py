@@ -148,7 +148,7 @@ class AdaptiveMemory:
                     success_rate REAL DEFAULT 1.0,
                     last_used TEXT,
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                );
+                )
 
                 CREATE TABLE IF NOT EXISTS repo_states (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -160,7 +160,7 @@ class AdaptiveMemory:
                     optimization_score REAL,
                     security_score REAL,
                     timestamp TEXT
-                );
+                )
 
                 CREATE TABLE IF NOT EXISTS optimization_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -170,7 +170,7 @@ class AdaptiveMemory:
                     after_state TEXT,
                     success BOOLEAN,
                     timestamp TEXT
-                );
+                )
 
                 CREATE TABLE IF NOT EXISTS security_findings (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -180,7 +180,7 @@ class AdaptiveMemory:
                     description TEXT,
                     resolved BOOLEAN DEFAULT FALSE,
                     timestamp TEXT
-                );
+                )
             """
             )
 
@@ -251,7 +251,7 @@ class ZIPWizIntegration:
             "nested_archives": [],
             "potential_duplicates": [],
             "structure": {},
-        }
+
 
         try:
             with zipfile.ZipFile(zip_path, "r") as zf:
@@ -280,7 +280,7 @@ class ZIPWizIntegration:
                             "size": info.file_size,
                             "compressed_size": info.compress_size,
                             "date": info.date_time,
-                        }
+
 
         except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Error analyzing ZIP file {zip_path}: {e}")
@@ -379,7 +379,7 @@ class EnhancedGITWiz:
 
                         a\\
 
-                    }' {} \\;
+                    }' {} \\
                     """
                 },
                 confidence_score=0.95,
@@ -396,17 +396,17 @@ class EnhancedGITWiz:
                     /^[[:space:]]*[-*+] / {
                         if (prev_line != "" && prev_non_list) print ""
                         print; in_list=1; next
-                    }
+
                     /^[[:space:]]*[0-9]+\\. / {
                         if (prev_line != "" && prev_non_list) print ""
                         print; in_list=1; next
-                    }
+
                     {
-                        if (in_list && $0 != "" && !/^[[:space:]]*[-*+0-9]/) {
+                        if (in_list && $0 != "" && !/^[[:space:]]*[-*+0-9]/):
                             print ""; in_list=0
-                        }
+
                         print; prev_line=$0; prev_non_list=!in_list
-                    }' {} > {}.tmp && mv {}.tmp {} \\;
+                    }' {} > {}.tmp && mv {}.tmp {} \\
                     """
                 },
                 confidence_score=0.90,
@@ -472,8 +472,8 @@ class EnhancedGITWiz:
                 check=False,
             )
             branch_count = (
-                len(getattr(result, "stdout", "").strip().split("
-")) if hasattr(result, "returncode") and result.returncode == 0 else 0
+                len(getattr(result, "stdout", "").strip().split("\n"))
+                if hasattr(result, "returncode") and result.returncode == 0 else 0
             )
 
             # Detect issues
@@ -704,7 +704,7 @@ class EnhancedGITWiz:
             "optimizations_applied": optimizations,
             "improvement_score": final_state.optimization_score
             - initial_state.optimization_score,
-        }
+
 
     def persistent_lint_fix(self) -> bool:
         """Apply persistent fixes for all linting issues."""
@@ -779,7 +779,7 @@ class EnhancedGITWiz:
             "outdated": {},
             "security_issues": [],
             "update_report": None,
-        }
+
 
         # Analyze outdated dependencies
         for ecosystem, deps in dependencies.items():
@@ -795,7 +795,7 @@ class EnhancedGITWiz:
                         "current_version": dep.current_version,
                         "advisory": dep.security_advisory,
                         "ecosystem": ecosystem,
-                    }
+
                     for dep in security_deps
                 ]
             )
@@ -830,7 +830,7 @@ class EnhancedGITWiz:
             "security_assessment": {},
             "maintenance_recommendations": [],
             "estimated_benefits": {},
-        }
+
 
         # Get current state
         current_state = self.analyze_repository_state()
@@ -843,7 +843,7 @@ class EnhancedGITWiz:
             "total_size_mb": round(current_state.total_size / (1024 * 1024), 2),
             "branch_count": current_state.branch_count,
             "issues_count": len(current_state.issues_detected),
-        }
+
 
         # Identify optimization opportunities
         if current_state.optimization_score < 0.8:
@@ -853,7 +853,7 @@ class EnhancedGITWiz:
                     "description": "Repository structure can be optimized",
                     "priority": "high",
                     "estimated_impact": "20-30% performance improvement",
-                }
+
             )
 
         if current_state.total_size > 50 * 1024 * 1024:  # 50MB
@@ -863,7 +863,7 @@ class EnhancedGITWiz:
                     "description": "Repository size can be reduced",
                     "priority": "medium",
                     "estimated_impact": "Storage and clone time reduction",
-                }
+
             )
 
         # Security assessment
@@ -877,7 +877,7 @@ class EnhancedGITWiz:
                 ]
             ),
             "recommendations": self._generate_security_recommendations(current_state),
-        }
+
 
         # Maintenance recommendations using HDE++ if available
         if self.hde:
@@ -885,7 +885,7 @@ class EnhancedGITWiz:
                 "weights": {"logic": 3, "context_hold": 2},
                 "require": ["general"],
                 "analysis_type": "repository_maintenance",
-            }
+
             hde_recommendation = self.hde.recommend_with_explanation(context)
             analysis["ai_recommendations"] = hde_recommendation
 
@@ -1029,7 +1029,7 @@ class RepositoryStructureAnalyzer:
             "temp/": ["*temp*", "*tmp*", "*backup*", "*old*"],
             "scripts/": ["*.sh", "*script*", "*deploy*"],
             "config/": ["*.yaml", "*.yml", "*.json", "*config*"],
-        }
+
 
     def analyze_current_structure(self) -> Dict[str, Any]:
         """Analyze current repository structure against ideal."""
@@ -1041,7 +1041,7 @@ class RepositoryStructureAnalyzer:
             "archive_consolidation": [],
             "structure_violations": [],
             "organization_score": 0.0,
-        }
+
 
         file_groups = {}
         file_sizes = {}
@@ -1064,7 +1064,7 @@ class RepositoryStructureAnalyzer:
                         {
                             "path": str(rel_path),
                             "size_mb": round(size / (1024 * 1024), 2),
-                        }
+
                     )
 
                 # Group similar files
@@ -1085,7 +1085,7 @@ class RepositoryStructureAnalyzer:
                         "base_name": base_name,
                         "files": files,
                         "total_size": sum(file_sizes.get(f, 0) for f in files),
-                    }
+
                 )
 
         # Analyze structure violations

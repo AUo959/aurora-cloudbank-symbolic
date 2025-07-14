@@ -40,7 +40,7 @@ class SecurityValidator:
             "overall_score": 0,
             "status": "success",
             "recommendations": []
-        }
+
 
         # Validate each attack vector protection
         attack_vectors = [
@@ -530,7 +530,7 @@ class SecurityValidator:
 """
 
         report_file = self.project_root / 'AURORA_SECURITY_VALIDATION_REPORT.md'
-        with open(report_file, "w", encoding="utf-8", encoding="utf-8") as f:
+        with open(report_file, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         logger.info("✅ Security validation report generated")

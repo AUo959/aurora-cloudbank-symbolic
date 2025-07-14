@@ -1,0 +1,111 @@
+{
+  "version": "3.5.1_macroready",
+  "main_branches": {
+    "main": {
+      "description": "Production-ready Aurora CloudBank releases",
+      "protection": "high",
+      "auto_deploy": true,
+      "required_reviews": 2
+    },
+    "develop": {
+      "description": "Integration branch for features",
+      "protection": "medium",
+      "auto_deploy": false,
+      "required_reviews": 1
+    }
+  },
+  "feature_branches": {
+    "naming_pattern": "feature/aurora-{feature-name}",
+    "base_branch": "develop",
+    "auto_cleanup": true,
+    "max_lifetime_days": 30
+  },
+  "hotfix_branches": {
+    "naming_pattern": "hotfix/v{version}-{fix-name}",
+    "base_branch": "main",
+    "auto_merge_to": [
+      "main",
+      "develop"
+    ],
+    "priority": "high"
+  },
+  "release_branches": {
+    "naming_pattern": "release/v{version}",
+    "base_branch": "develop",
+    "merge_to": [
+      "main",
+      "develop"
+    ],
+    "tag_on_merge": true
+  },
+  "agent_branches": {
+    "ARCHY": {
+      "pattern": "agent/archy-{feature}",
+      "description": "Architecture & System Design features",
+      "auto_review": [
+        "OPPY",
+        "LIORA"
+      ]
+    },
+    "OPPY": {
+      "pattern": "agent/oppy-{feature}",
+      "description": "Optimization & Performance features",
+      "auto_review": [
+        "ARCHY",
+        "RIVERTHREAD_808"
+      ]
+    },
+    "LIORA": {
+      "pattern": "agent/liora-{feature}",
+      "description": "Learning & Adaptation features",
+      "auto_review": [
+        "STARLING_AU",
+        "ARCHY"
+      ]
+    },
+    "STARLING_AU": {
+      "pattern": "agent/starling-{feature}",
+      "description": "Stellar Communication features",
+      "auto_review": [
+        "LIORA",
+        "RIVERTHREAD_808"
+      ]
+    },
+    "RIVERTHREAD_808": {
+      "pattern": "agent/riverthread-{feature}",
+      "description": "Data Flow & Threading features",
+      "auto_review": [
+        "OPPY",
+        "STARLING_AU"
+      ]
+    }
+  },
+  "integrations": {
+    "holographic_interface": {
+      "branch": "integration/holographic-ui",
+      "status": "complete",
+      "version": "phase-7"
+    },
+    "aurora_custom_gpt": {
+      "branch": "integration/custom-gpt-bridge",
+      "status": "complete",
+      "version": "v2.4-stellar-accord"
+    },
+    "orion_core": {
+      "branch": "integration/orion-core",
+      "status": "complete",
+      "version": "eos-seed-compliant"
+    }
+  },
+  "automation": {
+    "branch_cleanup": true,
+    "auto_rebase": true,
+    "conflict_resolution": "manual",
+    "ci_cd_triggers": [
+      "develop",
+      "main",
+      "release/*",
+      "hotfix/*"
+    ]
+  }
+}

@@ -9,6 +9,8 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
+const { exec } = require('child_process');
+const fs = require('fs').promises;
 
 const app = express();
 const server = http.createServer(app);
@@ -158,6 +160,220 @@ function processAgentMessage(agentId, message, messageType) {
   };
 }
 
+// Enhanced Aurora Engine for natural language processing
+class AuroraEngine {
+  constructor() {
+    this.activeProcesses = new Map();
+    this.commandHistory = [];
+    this.agentCapabilities = {
+      'ARCHY': ['architecture', 'design', 'structure', 'organize'],
+      'OPPY': ['optimize', 'performance', 'speed', 'efficiency'],
+      'LIORA': ['learn', 'adapt', 'pattern', 'analyze'],
+      'STARLING_AU': ['communicate', 'coordinate', 'broadcast', 'message'],
+      'RIVERTHREAD_808': ['data', 'flow', 'thread', 'concurrent', 'parallel']
+    };
+  }
+
+  async processNaturalLanguage(input, clientId) {
+    const timestamp = new Date().toISOString();
+    const analysis = {
+      input,
+      timestamp,
+      clientId,
+      intents: this.extractIntents(input),
+      agents: this.identifyRelevantAgents(input),
+      systemCommands: this.generateSystemCommands(input),
+      executionPlan: null
+    };
+
+    analysis.executionPlan = this.createExecutionPlan(analysis);
+    this.commandHistory.push(analysis);
+
+    return analysis;
+  }
+
+  extractIntents(input) {
+    const intents = [];
+    const patterns = {
+      cleanup: /clean\s*up|tidy|organize|sync|synchronize|cleanup/i,
+      validation: /valid|check|verify|test|lint|validate/i,
+      deployment: /deploy|publish|release|build/i,
+      status: /status|health|check|monitor|report/i,
+      fileOperation: /create|edit|modify|update|file|write/i,
+      gitOperation: /git|commit|push|pull|branch|merge/i,
+      systemInfo: /info|information|details|specs|system/i,
+      help: /help|assist|guide|explain|how/i
+    };
+
+    for (const [intent, pattern] of Object.entries(patterns)) {
+      if (pattern.test(input)) {
+        intents.push(intent);
+      }
+    }
+
+    return intents;
+  }
+
+  identifyRelevantAgents(input) {
+    const relevantAgents = [];
+    
+    for (const [agent, capabilities] of Object.entries(this.agentCapabilities)) {
+      for (const capability of capabilities) {
+        if (new RegExp(capability, 'i').test(input)) {
+          relevantAgents.push(agent);
+          break;
+        }
+      }
+    }
+
+    // If no specific agents identified, use all for coordination
+    return relevantAgents.length > 0 ? relevantAgents : Object.keys(this.agentCapabilities);
+  }
+
+  generateSystemCommands(input) {
+    const commands = [];
+    
+    if (/clean\s*up|cleanup|sync|synchronize/i.test(input)) {
+      commands.push('npm run time-to-clean-up');
+    }
+    
+    if (/valid|check|verify|test/i.test(input)) {
+      commands.push('npm run validation:status');
+      commands.push('python scripts/canonical_validator.py --status');
+    }
+    
+    if (/status|health|monitor/i.test(input)) {
+      commands.push('git status');
+      commands.push('npm run validation:status');
+      commands.push('ps aux | grep aurora');
+    }
+    
+    if (/optimization|optimize|performance/i.test(input)) {
+      commands.push('npm run lint');
+      commands.push('python scripts/aurora_validation_manager.py --cleanup');
+    }
+
+    return commands;
+  }
+
+  createExecutionPlan(analysis) {
+    return {
+      id: `AURORA-PLAN-${Date.now()}`,
+      phases: [
+        {
+          phase: 'Analysis',
+          agents: ['ARCHY'],
+          duration: '30s',
+          tasks: ['Analyze system architecture', 'Identify optimization targets']
+        },
+        {
+          phase: 'Coordination',
+          agents: analysis.agents,
+          duration: '1-2m',
+          tasks: analysis.systemCommands.map(cmd => `Execute: ${cmd}`)
+        },
+        {
+          phase: 'Optimization',
+          agents: ['OPPY', 'LIORA'],
+          duration: '2-3m',
+          tasks: ['Apply optimizations', 'Learn from execution patterns']
+        }
+      ],
+      estimatedTotal: '3-5 minutes',
+      complexity: analysis.intents.length > 2 ? 'high' : 'medium'
+    };
+  }
+
+  async executeSystemCommand(command) {
+    return new Promise((resolve, reject) => {
+      const processId = `CMD-${Date.now()}`;
+      
+      exec(command, { 
+        cwd: process.cwd(),
+        timeout: 300000, // 5 minutes
+        maxBuffer: 1024 * 1024 // 1MB buffer
+      }, (error, stdout, stderr) => {
+        const result = {
+          processId,
+          command,
+          timestamp: new Date().toISOString(),
+          success: !error,
+          stdout: stdout.trim(),
+          stderr: stderr.trim(),
+          exitCode: error ? error.code : 0
+        };
+
+        if (error) {
+          result.error = error.message;
+          reject(result);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  async readFileForContext(filePath) {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      return {
+        success: true,
+        filePath,
+        content,
+        size: content.length,
+        lines: content.split('\n').length
+      };
+    } catch (error) {
+      return {
+        success: false,
+        filePath,
+        error: error.message
+      };
+    }
+  }
+
+  generateAgentResponse(agent) {
+    const responses = {
+      'ARCHY': [
+        'Analyzing system architecture for optimization opportunities',
+        'Reviewing component dependencies and structural integrity',
+        'Identifying architectural patterns for enhancement',
+        'Coordinating with other agents for systematic improvements'
+      ],
+      'OPPY': [
+        'Running performance analysis on current operations',
+        'Optimizing resource utilization and execution paths',
+        'Implementing efficiency improvements across subsystems',
+        'Monitoring system performance metrics in real-time'
+      ],
+      'LIORA': [
+        'Learning from current operational patterns',
+        'Adapting strategies based on historical performance data',
+        'Analyzing user interaction patterns for optimization',
+        'Developing predictive models for system enhancement'
+      ],
+      'STARLING_AU': [
+        'Coordinating inter-agent communication protocols',
+        'Broadcasting status updates across the constellation',
+        'Maintaining communication channel integrity',
+        'Facilitating collaborative operations between agents'
+      ],
+      'RIVERTHREAD_808': [
+        'Managing concurrent data processing streams',
+        'Optimizing thread allocation and resource distribution',
+        'Coordinating parallel execution pathways',
+        'Ensuring data integrity across all operations'
+      ]
+    };
+
+    const agentResponses = responses[agent] || ['Processing request...'];
+    return agentResponses[Math.floor(Math.random() * agentResponses.length)];
+  }
+}
+
+// Initialize Aurora Engine
+const auroraEngine = new AuroraEngine();
+
 // WebSocket handlers
 io.on('connection', (socket) => {
   chamberState.connectedClients.add(socket.id);
@@ -272,6 +488,220 @@ io.on('connection', (socket) => {
       commandId,
       traceback: traceback || null
     });
+  });
+
+  // Enhanced Aurora natural language processing
+  socket.on('execute_aurora_natural_language', async (data) => {
+    try {
+      const { input, mode } = data;
+      const analysis = await auroraEngine.processNaturalLanguage(input, socket.id);
+      
+      // Emit analysis back to client
+      socket.emit('aurora_analysis_complete', {
+        analysis,
+        timestamp: new Date().toISOString()
+      });
+
+      // Execute system commands if any
+      if (analysis.systemCommands.length > 0) {
+        for (const command of analysis.systemCommands) {
+          try {
+            const result = await auroraEngine.executeSystemCommand(command);
+            socket.emit('system_command_result', {
+              command,
+              result,
+              executionId: `AURORA-${Date.now()}`
+            });
+          } catch (error) {
+            socket.emit('system_command_error', {
+              command,
+              error: error.message,
+              executionId: `AURORA-ERROR-${Date.now()}`
+            });
+          }
+        }
+      }
+
+      // Simulate agent coordination
+      if (analysis.agents.length > 0) {
+        analysis.agents.forEach((agent, index) => {
+          setTimeout(() => {
+            const response = auroraEngine.generateAgentResponse(agent);
+            socket.emit('agent_response', {
+              agent,
+              message: response,
+              timestamp: new Date().toISOString(),
+              context: mode
+            });
+          }, index * 1000 + Math.random() * 2000);
+        });
+      }
+
+    } catch (error) {
+      socket.emit('aurora_error', {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Direct system command execution
+  socket.on('execute_system_command', async (data) => {
+    try {
+      const { command, authority, plan } = data;
+      
+      // Security check - only allow certain commands
+      const allowedCommands = [
+        'npm run time-to-clean-up',
+        'npm run validation:status', 
+        'npm run validation:cleanup',
+        'git status',
+        'python scripts/canonical_validator.py --status',
+        'python scripts/aurora_validation_manager.py --status',
+        'ps aux | grep aurora'
+      ];
+
+      const isAllowed = allowedCommands.some(allowed => command.startsWith(allowed));
+      if (!isAllowed) {
+        socket.emit('command_rejected', {
+          command,
+          reason: 'Command not in allowed list for security',
+          timestamp: new Date().toISOString()
+        });
+        return;
+      }
+
+      const result = await auroraEngine.executeSystemCommand(command);
+      
+      socket.emit('system_command_result', {
+        command,
+        result,
+        authority,
+        plan,
+        timestamp: new Date().toISOString()
+      });
+
+      // Add to traceback
+      const commandId = `SYS-${Date.now()}`;
+      addCommandTraceback(commandId, command, '/api/system/execute', {
+        authority,
+        success: result.success,
+        exitCode: result.exitCode
+      });
+
+    } catch (error) {
+      socket.emit('system_command_error', {
+        command: data.command,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Context transfer preparation
+  socket.on('prepare_context_transfer', async (data) => {
+    try {
+      const { files, instructions, targetEnvironment } = data;
+      const contextData = {
+        timestamp: new Date().toISOString(),
+        auroraVersion: 'v3.5.1_macroready',
+        chamberStatus: 'operational',
+        agentConstellation: Array.from(chamberState.activeAgents.keys()),
+        files: [],
+        instructions,
+        targetEnvironment
+      };
+
+      // Read requested files
+      if (files && files.length > 0) {
+        for (const filePath of files) {
+          const fileContent = await auroraEngine.readFileForContext(filePath);
+          contextData.files.push(fileContent);
+        }
+      }
+
+      socket.emit('context_transfer_ready', {
+        contextData,
+        formattedForTransfer: true,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      socket.emit('context_transfer_error', {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Enhanced agent coordination
+  socket.on('coordinate_agents', async (data) => {
+    try {
+      const { instruction, targetAgents, priority } = data;
+      
+      const coordination = {
+        id: `COORD-${Date.now()}`,
+        instruction,
+        targetAgents: targetAgents || Array.from(chamberState.activeAgents.keys()),
+        priority: priority || 'normal',
+        timestamp: new Date().toISOString(),
+        responses: {}
+      };
+
+      // Simulate agent coordination
+      coordination.targetAgents.forEach((agent, index) => {
+        setTimeout(() => {
+          const response = auroraEngine.generateAgentResponse(agent);
+          coordination.responses[agent] = {
+            message: response,
+            timestamp: new Date().toISOString(),
+            status: 'acknowledged'
+          };
+          
+          socket.emit('agent_coordination_response', {
+            coordinationId: coordination.id,
+            agent,
+            response: coordination.responses[agent]
+          });
+        }, index * 800 + Math.random() * 1200);
+      });
+
+      socket.emit('agent_coordination_started', coordination);
+
+    } catch (error) {
+      socket.emit('agent_coordination_error', {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Real-time system monitoring
+  socket.on('request_system_status', () => {
+    const systemStatus = {
+      timestamp: new Date().toISOString(),
+      chamber: {
+        version: 'v2.0_enhanced',
+        connectedClients: chamberState.connectedClients.size,
+        activeAgents: chamberState.activeAgents.size,
+        commandsProcessed: chamberState.commandCounter
+      },
+      aurora: {
+        engine: 'operational',
+        naturalLanguageProcessing: true,
+        systemCommandExecution: true,
+        contextTransfer: true,
+        agentCoordination: true
+      },
+      system: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage()
+      }
+    };
+
+    socket.emit('system_status_response', systemStatus);
   });
 
   socket.on('disconnect', () => {

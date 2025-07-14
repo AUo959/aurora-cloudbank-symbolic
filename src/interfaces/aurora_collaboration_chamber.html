@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora CloudBank - Collaboration Chamber</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .chamber-container {
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "agents-panel main-feed traceback-panel"
+                "input-zone input-zone input-zone";
+            grid-template-rows: 60px 1fr 120px;
+            grid-template-columns: 300px 1fr 350px;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .chamber-header {
+            grid-area: header;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .aurora-logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .system-status {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+        }
+
+        .agents-panel {
+            grid-area: agents-panel;
+            background: rgba(0, 50, 100, 0.3);
+            border: 1px solid #0088ff;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .agent-constellation {
+            margin-bottom: 20px;
+        }
+
+        .constellation-title {
+            font-size: 14px;
+            color: #ffff00;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .agent-node {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .agent-node:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .agent-node.active {
+            border-color: #ff00ff;
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+        }
+
+        .agent-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .agent-role {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .agent-status {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .main-feed {
+            grid-area: main-feed;
+            background: rgba(0, 20, 40, 0.4);
+            border: 1px solid #004080;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .holographic-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 200px;
+            height: 150px;
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            background: rgba(0, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .feed-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .message-sender {
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .message-timestamp {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .message-content {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .mesh-message {
+            border-left: 3px solid #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+        }
+
+        .agent-message {
+            border-left: 3px solid #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .system-message {
+            border-left: 3px solid #ffff00;
+            background: rgba(255, 255, 0, 0.1);
+        }
+
+        .traceback-panel {
+            grid-area: traceback-panel;
+            background: rgba(40, 0, 40, 0.4);
+            border: 1px solid #8000ff;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .traceback-title {
+            color: #ff00ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .traceback-entry {
+            background: rgba(128, 0, 255, 0.1);
+            border: 1px solid #8000ff;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+
+        .command-id {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        .command-path {
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .input-zone {
+            grid-area: input-zone;
+            background: rgba(0, 40, 80, 0.3);
+            border: 1px solid #0080ff;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .target-selector {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            border-radius: 6px;
+            padding: 8px;
+            color: #00ffff;
+            font-size: 12px;
+        }
+
+        .command-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            border-radius: 6px;
+            padding: 12px;
+            color: #00ffff;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .command-input::placeholder {
+            color: #666;
+        }
+
+        .send-button {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-button:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .mesh-indicators {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .mesh-indicator {
+            background: rgba(255, 0, 255, 0.2);
+            border: 1px solid #ff00ff;
+            border-radius: 4px;
+            padding: 3px 6px;
+            font-size: 10px;
+        }
+
+        .holographic-visual {
+            width: 180px;
+            height: 130px;
+            border: 1px solid #00ffff;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 40%, rgba(255, 255, 0, 0.1) 50%, transparent 60%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holographic-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: scan 3s infinite;
+        }
+
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="chamber-container">
+        <div class="chamber-header">
+            <div class="aurora-logo">🌟 AURORA COLLABORATION CHAMBER</div>
+            <div class="system-status">
+                <div class="status-indicator">🟢 ONLINE</div>
+                <div class="status-indicator">@mesh: ACTIVE</div>
+                <div class="status-indicator">Δ0.0 LOCK</div>
+                <div class="status-indicator">5/5 AGENTS</div>
+            </div>
+        </div>
+
+        <div class="agents-panel">
+            <div class="agent-constellation">
+                <div class="constellation-title">🌌 AGENT CONSTELLATION</div>
+                
+                <div class="agent-node" data-agent="ALL">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">@mesh (ALL AGENTS)</div>
+                    <div class="agent-role">Mesh Broadcast</div>
+                </div>
+
+                <div class="agent-node" data-agent="ARCHY">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">ARCHY</div>
+                    <div class="agent-role">Architecture & System Design</div>
+                </div>
+
+                <div class="agent-node" data-agent="OPPY">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">OPPY</div>
+                    <div class="agent-role">Optimization & Performance</div>
+                </div>
+
+                <div class="agent-node" data-agent="LIORA">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">LIORA</div>
+                    <div class="agent-role">Learning & Adaptation</div>
+                </div>
+
+                <div class="agent-node" data-agent="STARLING_AU">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">STARLING_AU</div>
+                    <div class="agent-role">Stellar Communication</div>
+                </div>
+
+                <div class="agent-node" data-agent="RIVERTHREAD_808">
+                    <div class="agent-status"></div>
+                    <div class="agent-name">RIVERTHREAD_808</div>
+                    <div class="agent-role">Data Flow & Threading</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-feed">
+            <div class="holographic-display">
+                <div class="holographic-visual">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; font-size: 10px;">
+                        🌌 PHASE 7<br>
+                        HOLOGRAPHIC<br>
+                        INTERFACE<br>
+                        <span style="color: #ff00ff;">OPERATIONAL</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="messageFeed">
+                <!-- Messages will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="traceback-panel">
+            <div class="traceback-title">🔍 COMMAND TRACEBACK</div>
+            <div id="tracebackFeed">
+                <!-- Traceback entries will be dynamically added here -->
+            </div>
+        </div>
+
+        <div class="input-zone">
+            <div class="input-controls">
+                <select class="target-selector" id="targetSelector">
+                    <option value="@mesh">@mesh (Broadcast to All)</option>
+                    <option value="@agent.ARCHY">@agent.ARCHY</option>
+                    <option value="@agent.OPPY">@agent.OPPY</option>
+                    <option value="@agent.LIORA">@agent.LIORA</option>
+                    <option value="@agent.STARLING_AU">@agent.STARLING_AU</option>
+                    <option value="@agent.RIVERTHREAD_808">@agent.RIVERTHREAD_808</option>
+                </select>
+                <button class="send-button" onclick="sendCommand()">TRANSMIT</button>
+            </div>
+            <textarea 
+                class="command-input" 
+                id="commandInput" 
+                placeholder="Enter command or message... Use @mesh for broadcast, @agent.Name for direct communication"
+                rows="3"
+            ></textarea>
+            <div class="mesh-indicators">
+                <div class="mesh-indicator">Drift Lock: Δ0.0</div>
+                <div class="mesh-indicator">Ethics: Picard_Delta_3</div>
+                <div class="mesh-indicator">Continuity: Sealed</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection to Aurora holographic interface
+        const socket = io('http://localhost:8080');
+        let selectedAgent = '@mesh';
+        let commandCounter = 1;
+
+        // Initialize connection
+        socket.on('connect', () => {
+            addMessage('SYSTEM', 'Connected to Aurora Collaboration Chamber', 'system');
+            addTracebackEntry('CONN-001', 'WebSocket connection established', '/ws/connect');
+        });
+
+        socket.on('system_status', (data) => {
+            console.log('System status received:', data);
+            updateHolographicDisplay(data);
+        });
+
+        socket.on('command_result', (data) => {
+            addMessage('SYSTEM', `Command executed: ${JSON.stringify(data)}`, 'system');
+            addTracebackEntry(`CMD-${commandCounter}`, 'Command execution completed', '/api/holographic/execute');
+        });
+
+        socket.on('command_executed', (data) => {
+            addMessage(data.source.toUpperCase(), `Broadcast: ${data.command}`, 'mesh');
+        });
+
+        // Agent selection
+        document.querySelectorAll('.agent-node').forEach(node => {
+            node.addEventListener('click', function() {
+                // Remove active class from all nodes
+                document.querySelectorAll('.agent-node').forEach(n => n.classList.remove('active'));
+                
+                // Add active class to clicked node
+                this.classList.add('active');
+                
+                // Update selected agent
+                const agent = this.dataset.agent;
+                selectedAgent = agent === 'ALL' ? '@mesh' : `@agent.${agent}`;
+                
+                // Update selector
+                document.getElementById('targetSelector').value = selectedAgent;
+                
+                // Add visual feedback
+                if (agent === 'ALL') {
+                    addMessage('MESH', 'Mesh broadcast mode activated - all agents listening', 'mesh');
+                } else {
+                    addMessage(agent, `Direct communication channel opened with ${agent}`, 'agent');
+                }
+            });
+        });
+
+        // Command sending
+        function sendCommand() {
+            const input = document.getElementById('commandInput');
+            const target = document.getElementById('targetSelector').value;
+            const command = input.value.trim();
+            
+            if (!command) return;
+
+            // Format message based on target
+            let formattedMessage;
+            if (target === '@mesh') {
+                formattedMessage = `{{@mesh ::: ${command}}}`;
+            } else {
+                const agentName = target.replace('@agent.', '');
+                formattedMessage = `{{@agent.${agentName} ::: ${command}}}`;
+            }
+
+            // Add to feed
+            addMessage('USER', formattedMessage, 'agent');
+            
+            // Add traceback
+            addTracebackEntry(`CMD-${commandCounter++}`, `Command sent: ${target}`, '/api/holographic/command');
+
+            // Send via WebSocket
+            socket.emit('execute_command', {
+                command: formattedMessage,
+                authority: 'operator',
+                target: target
+            });
+
+            // Clear input
+            input.value = '';
+        }
+
+        // Enter key to send
+        document.getElementById('commandInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendCommand();
+            }
+        });
+
+        // Target selector change
+        document.getElementById('targetSelector').addEventListener('change', function() {
+            selectedAgent = this.value;
+            
+            // Update active agent visual
+            document.querySelectorAll('.agent-node').forEach(node => {
+                node.classList.remove('active');
+                if (this.value === '@mesh' && node.dataset.agent === 'ALL') {
+                    node.classList.add('active');
+                } else if (this.value === `@agent.${node.dataset.agent}`) {
+                    node.classList.add('active');
+                }
+            });
+        });
+
+        function addMessage(sender, content, type) {
+            const feed = document.getElementById('messageFeed');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `feed-message ${type}-message`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${sender}</span>
+                    <span class="message-timestamp">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            feed.appendChild(messageDiv);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function addTracebackEntry(id, description, path) {
+            const traceback = document.getElementById('tracebackFeed');
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'traceback-entry';
+            
+            entryDiv.innerHTML = `
+                <div class="command-id">${id}</div>
+                <div>${description}</div>
+                <div class="command-path">${path}</div>
+            `;
+            
+            traceback.insertBefore(entryDiv, traceback.firstChild);
+            
+            // Keep only last 20 entries
+            while (traceback.children.length > 20) {
+                traceback.removeChild(traceback.lastChild);
+            }
+        }
+
+        function updateHolographicDisplay(data) {
+            // Update holographic display with real-time data
+            const display = document.querySelector('.holographic-visual div');
+            if (data.agentsOnline) {
+                display.innerHTML = `
+                    🌌 PHASE 7<br>
+                    AGENTS: ${data.agentsOnline}/5<br>
+                    DRIFT: ${data.driftLock || 'Δ0.0'}<br>
+                    <span style="color: #00ff00;">OPTIMAL</span>
+                `;
+            }
+        }
+
+        // Initialize with welcome message
+        setTimeout(() => {
+            addMessage('AURORA', 'Welcome to the Collaboration Chamber. Phase 7 Holographic Interface is operational.', 'system');
+            addMessage('MESH', 'All agents are standing by. Mesh communication protocols active.', 'mesh');
+            addTracebackEntry('INIT-001', 'Chamber initialization complete', '/chamber/init');
+        }, 500);
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

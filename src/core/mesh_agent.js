@@ -423,6 +423,257 @@ class MeshAgent {
 }
 
 /**
+ * Enhanced Mesh Agent for Collaboration Chamber
+ * Extends core mesh functionality with advanced communication features
+ */
+
+// Add collaboration chamber specific methods to MeshAgent class
+class CollaborationMeshAgent extends MeshAgent {
+  constructor(agentId, config = {}) {
+    super();
+    this.agentId = agentId;
+    this.config = { ...MESH_CONFIG, ...config };
+    this.messageHistory = [];
+    this.collaborationState = 'active';
+    this.specialization = this.getAgentSpecialization(agentId);
+  }
+
+  getAgentSpecialization(agentId) {
+    const specializations = {
+      ARCHY: {
+        role: 'Architecture & System Design',
+        capabilities: ['System Architecture', 'Design Patterns', 'Code Structure'],
+        responseStyle: 'analytical'
+      },
+      OPPY: {
+        role: 'Optimization & Performance',
+        capabilities: ['Performance Optimization', 'Resource Management', 'Efficiency Analysis'],
+        responseStyle: 'performance-focused'
+      },
+      LIORA: {
+        role: 'Learning & Adaptation',
+        capabilities: ['Machine Learning', 'Adaptive Algorithms', 'Pattern Recognition'],
+        responseStyle: 'adaptive'
+      },
+      STARLING_AU: {
+        role: 'Stellar Communication',
+        capabilities: ['Communication Protocols', 'Network Architecture', 'Signal Processing'],
+        responseStyle: 'communication-oriented'
+      },
+      RIVERTHREAD_808: {
+        role: 'Data Flow & Threading',
+        capabilities: ['Data Streaming', 'Parallel Processing', 'Pipeline Management'],
+        responseStyle: 'data-flow-focused'
+      }
+    };
+
+    return specializations[agentId] || {
+      role: 'General AI Agent',
+      capabilities: ['General AI Capabilities'],
+      responseStyle: 'general'
+    };
+  }
+
+  async receiveMessage(message, authority = 'user') {
+    try {
+      // Parse message format
+      const parsedMessage = this.parseMessage(message);
+      
+      // Log message in history
+      this.messageHistory.push({
+        message: parsedMessage,
+        authority,
+        timestamp: new Date().toISOString(),
+        processed: false
+      });
+
+      // Process based on message type
+      let response;
+      if (parsedMessage.type === 'mesh_broadcast') {
+        response = await this.processMeshBroadcast(parsedMessage, authority);
+      } else if (parsedMessage.type === 'direct_message') {
+        response = await this.processDirectMessage(parsedMessage, authority);
+      } else {
+        response = await this.processGeneralMessage(parsedMessage, authority);
+      }
+
+      // Mark as processed
+      this.messageHistory[this.messageHistory.length - 1].processed = true;
+      this.messageHistory[this.messageHistory.length - 1].response = response;
+
+      return response;
+
+    } catch (error) {
+      systemLogger.error(`Agent ${this.agentId} message processing error: ${error.message}`);
+      return {
+        success: false,
+        error: error.message,
+        agentId: this.agentId
+      };
+    }
+  }
+
+  parseMessage(message) {
+    // Parse {{@mesh ::: message}} format
+    const meshBroadcastMatch = message.match(/\{\{@mesh\s*:::\s*(.+)\}\}/);
+    if (meshBroadcastMatch) {
+      return {
+        type: 'mesh_broadcast',
+        content: meshBroadcastMatch[1].trim(),
+        target: 'mesh'
+      };
+    }
+
+    // Parse {{@agent.AgentName ::: message}} format
+    const directMessageMatch = message.match(/\{\{@agent\.(\w+)\s*:::\s*(.+)\}\}/);
+    if (directMessageMatch) {
+      return {
+        type: 'direct_message',
+        content: directMessageMatch[2].trim(),
+        target: directMessageMatch[1],
+        isForMe: directMessageMatch[1] === this.agentId
+      };
+    }
+
+    // General message
+    return {
+      type: 'general',
+      content: message,
+      target: 'general'
+    };
+  }
+
+  async processMeshBroadcast(parsedMessage, authority) {
+    // Generate response based on agent specialization
+    const response = this.generateSpecializedResponse(parsedMessage.content);
+    
+    return {
+      success: true,
+      agentId: this.agentId,
+      messageType: 'mesh_broadcast_response',
+      content: response,
+      specialization: this.specialization.role,
+      authority
+    };
+  }
+
+  async processDirectMessage(parsedMessage, authority) {
+    if (!parsedMessage.isForMe) {
+      // Message not intended for this agent
+      return {
+        success: true,
+        agentId: this.agentId,
+        messageType: 'direct_message_ignored',
+        content: 'Message not intended for this agent'
+      };
+    }
+
+    // Generate personalized response
+    const response = this.generateSpecializedResponse(parsedMessage.content);
+    
+    return {
+      success: true,
+      agentId: this.agentId,
+      messageType: 'direct_message_response',
+      content: response,
+      specialization: this.specialization.role,
+      capabilities: this.specialization.capabilities,
+      authority
+    };
+  }
+
+  async processGeneralMessage(parsedMessage, authority) {
+    // Process general message with context awareness
+    const response = this.generateSpecializedResponse(parsedMessage.content);
+    
+    return {
+      success: true,
+      agentId: this.agentId,
+      messageType: 'general_response',
+      content: response,
+      specialization: this.specialization.role,
+      authority
+    };
+  }
+
+  generateSpecializedResponse(content) {
+    const { responseStyle } = this.specialization;
+    
+    // Base response structure
+    let response = `[${this.agentId}] `;
+
+    // Add specialization context
+    switch (responseStyle) {
+    case 'analytical':
+        response += `Analyzing from architecture perspective: ${content}. `;
+        response += 'Considering system design implications and structural optimization.';
+        break;
+    
+    case 'performance-focused':
+        response += `Performance analysis of: ${content}. `;
+        response += 'Evaluating optimization opportunities and resource efficiency.';
+        break;
+    
+    case 'adaptive':
+        response += `Learning pattern identified in: ${content}. `;
+        response += 'Adapting response based on contextual analysis and pattern recognition.';
+        break;
+    
+    case 'communication-oriented':
+        response += `Communication protocol assessment: ${content}. `;
+        response += 'Optimizing signal clarity and network efficiency.';
+        break;
+    
+    case 'data-flow-focused':
+        response += `Data flow analysis: ${content}. `;
+        response += 'Evaluating threading patterns and pipeline optimization.';
+        break;
+    
+    default:
+        response += `Processing: ${content}. `;
+        response += 'Applying general AI capabilities for analysis.';
+    }
+
+    // Add drift lock status
+    response += ' [Δ0.0 - Drift Lock Maintained]';
+
+    return response;
+  }
+
+  getStatus() {
+    return {
+      agentId: this.agentId,
+      specialization: this.specialization,
+      collaborationState: this.collaborationState,
+      messageHistory: this.messageHistory.length,
+      lastActivity: this.messageHistory.length > 0 ? 
+        this.messageHistory[this.messageHistory.length - 1].timestamp : null,
+      driftLock: 'Δ0.0'
+    };
+  }
+
+  // Mesh federation methods
+  async initializeFederation() {
+    try {
+      // Initialize federation connection
+      this.federationStatus = 'connected';
+      systemLogger.info(`Agent ${this.agentId} federation initialized`);
+      return true;
+    } catch (error) {
+      systemLogger.error(`Agent ${this.agentId} federation initialization failed: ${error.message}`);
+      return false;
+    }
+  }
+
+  async activateAgent(agentId) {
+    // Create and return agent instance
+    const agent = new CollaborationMeshAgent(agentId);
+    await agent.initializeFederation();
+    return agent;
+  }
+}
+
+/**
  * Mesh Federation Manager
  */
 class MeshFederation {
@@ -518,7 +769,8 @@ class MeshFederation {
 module.exports = {
   MESH_CONFIG,
   MeshAgent,
-  MeshFederation
+  MeshFederation,
+  CollaborationMeshAgent
 };
 
 /**

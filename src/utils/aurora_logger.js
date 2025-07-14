@@ -6,8 +6,8 @@
  * Supports L1/L2/L3 layer context and drift monitoring
  */
 
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
 class AuroraLogger {
   constructor(component = 'AURORA_SYSTEM', options = {}) {
@@ -185,9 +185,13 @@ class AuroraLogger {
 }
 
 // Create singleton instances for common components
-export const systemLogger = new AuroraLogger('AURORA_SYSTEM');
-export const bridgeLogger = new AuroraLogger('BRIDGE_AGENTS');
-export const commandLogger = new AuroraLogger('COMMAND_NODE');
-export const ethicsLogger = new AuroraLogger('ETHICS_ENGINE');
+const systemLogger = new AuroraLogger('AURORA_SYSTEM');
+const bridgeLogger = new AuroraLogger('BRIDGE_AGENTS');
+const commandLogger = new AuroraLogger('COMMAND_NODE');
+const ethicsLogger = new AuroraLogger('ETHICS_ENGINE');
 
-export default AuroraLogger;
+module.exports = AuroraLogger;
+module.exports.systemLogger = systemLogger;
+module.exports.bridgeLogger = bridgeLogger;
+module.exports.commandLogger = commandLogger;
+module.exports.ethicsLogger = ethicsLogger;

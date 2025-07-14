@@ -6,7 +6,9 @@
     "test": "echo 'Aurora JS tests passed'",
     "lint": "eslint src/**/*.js --fix",
     "lint:check": "eslint src/**/*.js",
-    "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'"
+    "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'",
+    "cleanup": "./scripts/aurora_cleanup_command.sh",
+    "time-to-clean-up": "./scripts/aurora_cleanup_command.sh"
   },
   "keywords": [
     "aurora",
@@ -22,6 +24,7 @@
     "http": "^0.0.1-security",
     "path": "^0.12.7",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "util": "^0.12.5"
   }
 }

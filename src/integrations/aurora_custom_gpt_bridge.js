@@ -387,14 +387,29 @@ class AuroraCustomGptBridge {
       healthStatus: this.integrationActive ? 'HEALTHY' : 'INACTIVE'
     };
   }
+
+  /**
+   * Initialize Aurora Custom GPT Bridge
+   * Entry point for holographic interface orchestrator
+   */
+  async initialize() {
+    bridgeLogger.info('Aurora Custom GPT Bridge starting initialization...');
+    try {
+      await this.initializeCommandNodeIntegration();
+      bridgeLogger.info('Aurora Custom GPT Bridge initialization complete');
+      return { success: true, message: 'Bridge initialized successfully' };
+    } catch (error) {
+      bridgeLogger.error('Aurora Custom GPT Bridge initialization failed', { error: error.message });
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 // Export singleton instance
 const auroraCustomGptBridge = new AuroraCustomGptBridge();
 
-module.exports = {
-  AuroraCustomGptBridge,
-  auroraCustomGptBridge,
-  AURORA_CUSTOM_GPT,
-  INTEGRATION_POINTS
-};
+module.exports = AuroraCustomGptBridge;
+module.exports.AuroraCustomGptBridge = AuroraCustomGptBridge;
+module.exports.auroraCustomGptBridge = auroraCustomGptBridge;
+module.exports.AURORA_CUSTOM_GPT = AURORA_CUSTOM_GPT;
+module.exports.INTEGRATION_POINTS = INTEGRATION_POINTS;

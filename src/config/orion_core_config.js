@@ -14,7 +14,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable quotes */
 
-export const ORION_CORE = {
+const ORION_CORE = {
   // Core System Identity
   anchor_seed: "EOS_SEED_ORION",
   continuity_seal: "Aurora_Continuity_Seal_v2.2.5", 

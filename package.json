@@ -8,7 +8,11 @@
     "lint:check": "eslint src/**/*.js",
     "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'",
     "cleanup": "./scripts/aurora_cleanup_command.sh",
-    "time-to-clean-up": "./scripts/aurora_cleanup_command.sh"
+    "time-to-clean-up": "./scripts/aurora_enhanced_cleanup_command.sh",
+    "cleanup:legacy": "./scripts/aurora_cleanup_command.sh",
+    "validation:setup": "python scripts/aurora_validation_manager.py --strategy smart_exclusion",
+    "validation:status": "python scripts/aurora_validation_manager.py --status",
+    "validation:cleanup": "python scripts/aurora_validation_manager.py --cleanup"
   },
   "keywords": [
     "aurora",

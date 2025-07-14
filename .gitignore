@@ -184,3 +184,10 @@ bower_components
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Aurora Validation Manager - Auto-generated
+PRE_COMMIT_VALIDATION_ISSUES.md
+CANONICAL_VALIDATION_REPORT.md
+AURORA_VALIDATION_SUMMARY.md
+.aurora_validation/
+.aurora_validation_config.json

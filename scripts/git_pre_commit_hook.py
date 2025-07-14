@@ -137,17 +137,49 @@ def main():
             print("🚫 COMMIT BLOCKED - High-priority violations (AURORA_BLOCK_ON_HIGH=true)")
             return 1
     
-    # Generate quick report for escalations
+    # Generate quick report for escalations using validation manager
     escalations = [r for r in all_results if r.status == "ESCALATE"]
     if escalations:
-        report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
-        with open(report_path, 'w') as f:
-            f.write("# Pre-Commit Validation Issues\n\n")
-            for issue in escalations:
-                f.write(f"## {issue.check_name} ({issue.severity})\n")
-                f.write(f"**Issue**: {issue.message}\n\n")
-                f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
-        print(f"📊 Detailed issues saved to: {report_path}")
+        # Import validation manager to handle file paths intelligently
+        try:
+            sys.path.append(str(Path(__file__).parent))
+            from aurora_validation_manager import ValidationManager
+            
+            manager = ValidationManager()
+            report_path = manager.get_validation_file_path("PRE_COMMIT_VALIDATION_ISSUES.md")
+            
+            # Only write if not in memory-only mode
+            if manager.config["strategy"] != "memory_only":
+                # Ensure directory exists
+                report_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                with open(report_path, 'w') as f:
+                    f.write("# Pre-Commit Validation Issues\n\n")
+                    f.write(f"Generated: {Path(__file__).name} at {Path().cwd()}\n")
+                    f.write(f"Strategy: {manager.config['strategy']}\n\n")
+                    for issue in escalations:
+                        f.write(f"## {issue.check_name} ({issue.severity})\n")
+                        f.write(f"**Issue**: {issue.message}\n\n")
+                        f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
+                
+                print(f"📊 Detailed issues saved to: {report_path}")
+                
+                # If using smart exclusion, don't stage the validation file
+                if manager.config["strategy"] == "smart_exclusion":
+                    print("🔒 Validation file excluded from commit (smart exclusion active)")
+            else:
+                print("📊 Validation complete (memory-only mode - no files written)")
+                
+        except ImportError:
+            # Fallback to original behavior if manager not available
+            report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
+            with open(report_path, 'w') as f:
+                f.write("# Pre-Commit Validation Issues\n\n")
+                for issue in escalations:
+                    f.write(f"## {issue.check_name} ({issue.severity})\n")
+                    f.write(f"**Issue**: {issue.message}\n\n")
+                    f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
+            print(f"📊 Detailed issues saved to: {report_path}")
     
     auto_fixes = [r for r in all_results if r.status == "AUTO_FIXED"]
     if auto_fixes:

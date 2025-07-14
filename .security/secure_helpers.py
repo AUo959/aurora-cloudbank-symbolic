@@ -7,6 +7,7 @@ Provides secure alternatives to common operations.
 import shlex
 import subprocess
 import re
+import bleach
 import html
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
@@ -77,11 +78,12 @@ class SecureHelpers:
         # Remove or escape dangerous characters
         sanitized = html.escape(sanitized)
         
-        # Remove potential script tags and javascript
-        sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
-        sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
-        
+        # Use a well-tested library to sanitize input
+        sanitized = bleach.clean(
+            sanitized, 
+            tags=[],  # Disallow all HTML tags
+            strip=True  # Remove disallowed tags completely
+        )
         return sanitized.strip()
     
     @staticmethod

@@ -10,14 +10,14 @@ from qiskit_aer import AerSimulator
 
 class QuantumProcessingLayer:
     def __init__(self, num_qubits=8):
-        self.num_qubits = num_qubits;
-        self.simulator = AerSimulator();
-        self.quantum_circuits = {};
+        self.num_qubits = num_qubits
+        self.simulator = AerSimulator()
+        self.quantum_circuits = {}
 
     def create_quantum_circuit(self, circuit_name, operations):
         """Create quantum circuit for symbolic processing"""
-        qreg = QuantumRegister(self.num_qubits, 'q');
-        creg = ClassicalRegister(self.num_qubits, 'c')
+        qreg = QuantumRegister(self.num_qubits, "q")
+        creg = ClassicalRegister(self.num_qubits, "c")
         circuit = QuantumCircuit(qreg, creg)
 
         # Apply quantum operations based on symbolic input
@@ -29,16 +29,16 @@ class QuantumProcessingLayer:
 
     def apply_quantum_operation(self, circuit, operation):
         """Apply quantum operations for symbolic processing"""
-        op_type = operation.get('type')
-        qubit = operation.get('qubit', 0)
+        op_type = operation.get("type")
+        qubit = operation.get("qubit", 0)
 
-        if op_type == 'hadamard':
+        if op_type == "hadamard":
             circuit.h(qubit)
-        elif op_type == 'cnot':
-            target = operation.get('target', 1)
+        elif op_type == "cnot":
+            target = operation.get("target", 1)
             circuit.cx(qubit, target)
-        elif op_type == 'rotation':
-            angle = operation.get('angle', np.pi / 4)
+        elif op_type == "rotation":
+            angle = operation.get("angle", np.pi / 4)
             circuit.ry(angle, qubit)
 
     def execute_quantum_symbolic_computation(self, circuit_name, shots=1024):
@@ -54,17 +54,17 @@ class QuantumProcessingLayer:
         counts = result.get_counts()
 
         return {
-            'quantum_results': counts,
-            'symbolic_interpretation': self.interpret_quantum_results(counts),
-            'hybrid_output': self.generate_hybrid_output(counts)
+            "quantum_results": counts,
+            "symbolic_interpretation": self.interpret_quantum_results(counts),
+            "hybrid_output": self.generate_hybrid_output(counts),
         }
 
     def interpret_quantum_results(self, counts):
         """Interpret quantum results for symbolic processing"""
         return {
-            'dominant_state': max(counts, key=counts.get),
-            'quantum_entropy': self.calculate_entropy(counts),
-            'symbolic_patterns': self.extract_symbolic_patterns(counts)
+            "dominant_state": max(counts, key=counts.get),
+            "quantum_entropy": self.calculate_entropy(counts),
+            "symbolic_patterns": self.extract_symbolic_patterns(counts),
         }
 
     def calculate_entropy(self, counts):
@@ -77,16 +77,16 @@ class QuantumProcessingLayer:
     def extract_symbolic_patterns(self, counts):
         """Extract symbolic patterns from quantum measurements"""
         return {
-            'pattern_type': 'quantum_symbolic',
-            'coherence_level': 'high',
-            'symbolic_meaning': 'quantum_enhanced_reasoning'
+            "pattern_type": "quantum_symbolic",
+            "coherence_level": "high",
+            "symbolic_meaning": "quantum_enhanced_reasoning",
         }
 
     def generate_hybrid_output(self, counts):
         """Generate hybrid quantum-symbolic output"""
         return {
-            'hybrid_processing': True,
-            'quantum_component': counts,
-            'symbolic_component': 'processed',
-            'integration_status': 'successful'
+            "hybrid_processing": True,
+            "quantum_component": counts,
+            "symbolic_component": "processed",
+            "integration_status": "successful",
         }

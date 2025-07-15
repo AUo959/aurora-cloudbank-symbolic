@@ -48,9 +48,7 @@ class MultiModalOutputCoordination:
         self.coordination_engine = OutputCoordinationEngine()
         self.synchronization_system = SynchronizationSystem()
 
-    async def coordinate_multi_modal_output(
-        self, output_context=None, content_data=None
-    ):
+    async def coordinate_multi_modal_output(self, output_context=None, content_data=None):
         """Coordinate multiple output modalities for immersive experience"""
         if output_context is None:
             output_context = {"type": "default"}
@@ -114,13 +112,9 @@ class MultiModalOutputCoordination:
 
         for modality in config["modality_selection"]["primary_modalities"]:
             if modality in self.output_modalities:
-                output_streams[modality] = await self.output_modalities[
-                    modality
-                ].generate_output(config)
+                output_streams[modality] = await self.output_modalities[modality].generate_output(config)
 
-        synchronized_output = await self.synchronization_system.synchronize_outputs(
-            output_streams
-        )
+        synchronized_output = await self.synchronization_system.synchronize_outputs(output_streams)
 
         return {
             "coordinated_output": synchronized_output,
@@ -176,9 +170,7 @@ class MultiModalOutputCoordination:
         enhanced_output = {}
 
         for enhancement_type, config in enhancement_config.items():
-            enhanced_output[enhancement_type] = await self.process_enhancement(
-                enhancement_type, config
-            )
+            enhanced_output[enhancement_type] = await self.process_enhancement(enhancement_type, config)
 
         return {
             "enhanced_experience": enhanced_output,

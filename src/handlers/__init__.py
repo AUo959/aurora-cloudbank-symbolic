@@ -9,4 +9,11 @@ from .quantummanipulationhandler import QuantumManipulationHandler
 from .neuralinterfacehandler import NeuralInterfaceHandler
 from .interactionfusionengine import InteractionFusionEngine
 
-__all__ = ['VoiceInteractionHandler', 'GestureRecognitionHandler', 'SymbolicInputHandler', 'QuantumManipulationHandler', 'NeuralInterfaceHandler', 'InteractionFusionEngine']
+__all__ = [
+    "VoiceInteractionHandler",
+    "GestureRecognitionHandler",
+    "SymbolicInputHandler",
+    "QuantumManipulationHandler",
+    "NeuralInterfaceHandler",
+    "InteractionFusionEngine",
+]

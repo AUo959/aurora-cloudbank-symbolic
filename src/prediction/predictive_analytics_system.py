@@ -79,9 +79,7 @@ class PredictiveAnalyticsSystem:
         """Generate future-casting projections"""
         return {
             "future_scenarios": self.project_future_scenarios(predictions),
-            "probability_distributions": self.calculate_scenario_probabilities(
-                predictions
-            ),
+            "probability_distributions": self.calculate_scenario_probabilities(predictions),
             "temporal_projections": self.generate_temporal_projections(predictions),
         }
 

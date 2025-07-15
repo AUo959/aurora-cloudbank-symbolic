@@ -63,7 +63,7 @@ class NativeEntropyTracker:
 
         # Maintain sliding window
         if len(self.entropy_history) > self.tracking_window:
-            self.entropy_history = self.entropy_history[-self.tracking_window :]
+            self.entropy_history = self.entropy_history[-self.tracking_window:]
 
     def get_entropy_trend(self) -> Dict[str, float]:
         """Get entropy trend analysis"""

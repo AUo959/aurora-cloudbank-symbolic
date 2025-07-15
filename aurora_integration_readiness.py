@@ -16,7 +16,9 @@ def run_command(cmd):
         cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
         result = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=300)
         return result.stdout.strip()
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except subprocess.TimeoutExpired as e:
+        return f"Error: Command '{e.cmd}' timed out after {e.timeout} seconds"
+    except subprocess.CalledProcessError as e:
         return f"Error: {getattr(e, 'stderr', str(e))}"
 
 def main():

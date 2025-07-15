@@ -44,7 +44,7 @@ def test_symbolic_engine():
     assert len(results) == 3
     
     # Test manifest export
-    manifest = engine.export_manifest()
+    manifest = engine.export_manifest(legacy_mode=True)
     assert manifest["system"] == "aurora-cloudbank-symbolic"
     assert "t1_anchor" in manifest
     assert "srb_anchor" in manifest

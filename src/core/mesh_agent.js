@@ -271,7 +271,7 @@ class MeshAgent {
       protocol: MESH_CONFIG.commProtocol.direct
     };
     
-    systemLogger.info(`📨 [MESH] Direct message sent`, {
+    systemLogger.info('📨 [MESH] Direct message sent', {
       from: this.id,
       to: targetId,
       messageId: message.timestamp,
@@ -295,7 +295,7 @@ class MeshAgent {
       protocol: MESH_CONFIG.commProtocol.meshBroadcast
     };
     
-    systemLogger.info(`📢 [MESH] Broadcast message sent`, {
+    systemLogger.info('📢 [MESH] Broadcast message sent', {
       from: this.id,
       constellation: MESH_CONFIG.constellation,
       messageId: message.timestamp,
@@ -306,9 +306,10 @@ class MeshAgent {
   }
   
   /**
-   * Receive and process mesh message
+   * Receive and process a message from the mesh network
+   * @param {Object} message - The message to receive
    */
-  async receiveMessage(_message) {
+  async receiveMessage(message) {
     systemLogger.info(`📥 [MESH] Message received by ${this.id}`, {
       from: message.from,
       messageId: message.timestamp,
@@ -319,7 +320,7 @@ class MeshAgent {
     const auditResult = await this.auditMessage(message);
     
     if (!auditResult.valid) {
-      ethicsLogger.ethics(`⚠️ [MESH] Message failed audit`, {
+      ethicsLogger.ethics('⚠️ [MESH] Message failed audit', {
         from: message.from,
         to: this.id,
         reason: auditResult.reason,
@@ -413,11 +414,11 @@ class MeshAgent {
     await this.anchorSync();
   }
   
-  async auditMessage(_message) {
+  async auditMessage(message) {
     return { valid: true, reason: null };
   }
   
-  async processMessage(_message) {
+  async processMessage(message) {
     return { processed: true, response: null };
   }
 }
@@ -605,33 +606,33 @@ class CollaborationMeshAgent extends MeshAgent {
     // Add specialization context
     switch (responseStyle) {
     case 'analytical':
-        response += `Analyzing from architecture perspective: ${content}. `;
-        response += 'Considering system design implications and structural optimization.';
-        break;
+      response += `Analyzing from architecture perspective: ${content}. `;
+      response += 'Considering system design implications and structural optimization.';
+      break;
     
     case 'performance-focused':
-        response += `Performance analysis of: ${content}. `;
-        response += 'Evaluating optimization opportunities and resource efficiency.';
-        break;
+      response += `Performance analysis of: ${content}. `;
+      response += 'Evaluating optimization opportunities and resource efficiency.';
+      break;
     
     case 'adaptive':
-        response += `Learning pattern identified in: ${content}. `;
-        response += 'Adapting response based on contextual analysis and pattern recognition.';
-        break;
+      response += `Learning pattern identified in: ${content}. `;
+      response += 'Adapting response based on contextual analysis and pattern recognition.';
+      break;
     
     case 'communication-oriented':
-        response += `Communication protocol assessment: ${content}. `;
-        response += 'Optimizing signal clarity and network efficiency.';
-        break;
+      response += `Communication protocol assessment: ${content}. `;
+      response += 'Optimizing signal clarity and network efficiency.';
+      break;
     
     case 'data-flow-focused':
-        response += `Data flow analysis: ${content}. `;
-        response += 'Evaluating threading patterns and pipeline optimization.';
-        break;
+      response += `Data flow analysis: ${content}. `;
+      response += 'Evaluating threading patterns and pipeline optimization.';
+      break;
     
     default:
-        response += `Processing: ${content}. `;
-        response += 'Applying general AI capabilities for analysis.';
+      response += `Processing: ${content}. `;
+      response += 'Applying general AI capabilities for analysis.';
     }
 
     // Add drift lock status

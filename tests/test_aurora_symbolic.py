@@ -46,9 +46,12 @@ def test_symbolic_engine():
     # Test manifest export
     manifest = engine.export_manifest()
     assert manifest["system"] == "aurora-cloudbank-symbolic"
-    assert "t1_anchor" in manifest
-    assert "srb_anchor" in manifest
+    assert "anchors" in manifest
+    assert "t1" in manifest["anchors"]
+    assert "srb" in manifest["anchors"]
+    assert "eos_seed" in manifest["anchors"]
     assert "chains" in manifest
+    assert "entropy_monitoring" in manifest
 
 def test_chain_notation():
     """Test symbolic chain notation (001//999//)"""

@@ -1,0 +1,96 @@
+{
+  "system": "aurora-cloudbank-symbolic",
+  "version": "2.0.0",
+  "anchors": {
+    "t1": {
+      "type": "T1",
+      "state": 125
+    },
+    "srb": {
+      "type": "SRB",
+      "resolution": 2700
+    },
+    "eos_seed": {
+      "type": "EOS_SEED",
+      "seed_count": 125,
+      "stream_terminated": false
+    }
+  },
+  "entropy_monitoring": {
+    "current_entropy": 0.9655108357520404,
+    "threshold": 0.8,
+    "violations": 1,
+    "last_update": 1752725700.113216
+  },
+  "chains": {
+    "001//005//": [
+      {
+        "step": 1,
+        "t1_state": 25,
+        "srb_resolution": 363,
+        "eos_seed_count": 25,
+        "entropy": 0.9655108357520404,
+        "entropy_violations": 1
+      },
+      {
+        "step": 2,
+        "t1_state": 50,
+        "srb_resolution": 578,
+        "eos_seed_count": 50,
+        "entropy": 0.9655108357520404,
+        "entropy_violations": 1
+      },
+      {
+        "step": 3,
+        "t1_state": 75,
+        "srb_resolution": 948,
+        "eos_seed_count": 75,
+        "entropy": 0.9655108357520404,
+        "entropy_violations": 1
+      },
+      {
+        "step": 4,
+        "t1_state": 100,
+        "srb_resolution": 1750,
+        "eos_seed_count": 100,
+        "entropy": 0.9655108357520404,
+        "entropy_violations": 1
+      },
+      {
+        "step": 5,
+        "t1_state": 125,
+        "srb_resolution": 2700,
+        "eos_seed_count": 125,
+        "entropy": 0.9655108357520404,
+        "entropy_violations": 1
+      }
+    ]
+  },
+  "sealed_threads": {
+    "workflow_thread_1": {
+      "dlp_classification": "public",
+      "entropy_signature": "f7af8017cc797d461fc519f567d2ea86bb50e0351def1b941fd9f15e74641040",
+      "timestamp": 1752725700.1132455,
+      "sealed": true
+    },
+    "workflow_thread_2": {
+      "dlp_classification": "confidential",
+      "entropy_signature": "a0d101f0ea11507b400cdd20018b4f2a1272e74b834f1df1db40d819f769abd4",
+      "timestamp": 1752725700.1134531,
+      "sealed": true
+    }
+  },
+  "memory_sealing_manifest": {
+    "workflow_thread_1": {
+      "dlp_classification": "public",
+      "timestamp": 1752725700.1132655,
+      "content_hash": "8b7807e5ed26c57d96ec74f85e3756169fabdc1f8b7b240b8d636268d1b0211f"
+    },
+    "workflow_thread_2": {
+      "dlp_classification": "confidential",
+      "timestamp": 1752725700.1134725,
+      "content_hash": "b7b25644b3d4eaaa64a77bf54da3c4906a761e03b64dbbc5b745daae6c6ebc33"
+    }
+  },
+  "export_timestamp": 1752725700.113633
+}

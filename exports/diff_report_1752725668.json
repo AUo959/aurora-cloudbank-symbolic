@@ -1,0 +1,46 @@
+{
+  "comparison_timestamp": 1752725668.2541964,
+  "anchor_diffs": {
+    "t1": {
+      "current": {
+        "type": "T1",
+        "state": 24
+      },
+      "other": {
+        "type": "T1",
+        "state": 12
+      }
+    },
+    "srb": {
+      "current": {
+        "type": "SRB",
+        "resolution": 1934
+      },
+      "other": {
+        "type": "SRB",
+        "resolution": 1286
+      }
+    },
+    "eos_seed": {
+      "current": {
+        "type": "EOS_SEED",
+        "seed_count": 24,
+        "stream_terminated": false
+      },
+      "other": {
+        "type": "EOS_SEED",
+        "seed_count": 12,
+        "stream_terminated": false
+      }
+    }
+  },
+  "entropy_diff": {},
+  "chain_diffs": {
+    "added": [
+      "003//004//"
+    ],
+    "removed": [],
+    "modified": []
+  },
+  "thread_diffs": {}
+}

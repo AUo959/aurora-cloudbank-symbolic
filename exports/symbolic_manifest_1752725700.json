@@ -1,0 +1,48 @@
+{
+  "system": "aurora-cloudbank-symbolic",
+  "version": "2.0.0",
+  "anchors": {
+    "t1": {
+      "type": "T1",
+      "state": 12
+    },
+    "srb": {
+      "type": "SRB",
+      "resolution": 578
+    },
+    "eos_seed": {
+      "type": "EOS_SEED",
+      "seed_count": 12,
+      "stream_terminated": false
+    }
+  },
+  "entropy_monitoring": {
+    "current_entropy": 0.0,
+    "threshold": 0.8,
+    "violations": 0,
+    "last_update": 1752725700.1087122
+  },
+  "chains": {
+    "001//002//": [
+      {
+        "step": 1,
+        "t1_state": 6,
+        "srb_resolution": 363,
+        "eos_seed_count": 6,
+        "entropy": 0.0,
+        "entropy_violations": 0
+      },
+      {
+        "step": 2,
+        "t1_state": 12,
+        "srb_resolution": 578,
+        "eos_seed_count": 12,
+        "entropy": 0.0,
+        "entropy_violations": 0
+      }
+    ]
+  },
+  "sealed_threads": {},
+  "memory_sealing_manifest": {},
+  "export_timestamp": 1752725700.1087718
+}

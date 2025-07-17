@@ -1,0 +1,12 @@
+{
+  "thread_id": "production_thread",
+  "glyph_signature": "50ff69ebe922bff1",
+  "dlp_class": "confidential",
+  "anchor_summary": {
+    "t1_state": 0,
+    "srb_resolution": 0,
+    "eos_seed_count": 0
+  },
+  "timestamp": 1752725837.3362494,
+  "sealed": true
+}

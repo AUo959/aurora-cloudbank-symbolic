@@ -1,0 +1,26 @@
+{
+  "comparison_timestamp": 1752725877.958753,
+  "anchor_diffs": {},
+  "entropy_diff": {
+    "current": {
+      "current_entropy": 0.9592072092383473,
+      "threshold": 0.8,
+      "violations": 2,
+      "last_update": 1752725877.9583755
+    },
+    "other": {
+      "current_entropy": 0.9655108357520404,
+      "threshold": 0.8,
+      "violations": 1,
+      "last_update": 1752725877.9575834
+    }
+  },
+  "chain_diffs": {
+    "added": [
+      "006//010//"
+    ],
+    "removed": [],
+    "modified": []
+  },
+  "thread_diffs": {}
+}

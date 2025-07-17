@@ -8,7 +8,7 @@
     },
     "srb": {
       "type": "SRB",
-      "resolution": 2700
+      "resolution": 3750
     },
     "eos_seed": {
       "type": "EOS_SEED",
@@ -20,14 +20,14 @@
     "current_entropy": 0.9655108357520404,
     "threshold": 0.8,
     "violations": 1,
-    "last_update": 1752725700.113216
+    "last_update": 1752725877.9575834
   },
   "chains": {
     "001//005//": [
       {
         "step": 1,
         "t1_state": 25,
-        "srb_resolution": 363,
+        "srb_resolution": 843,
         "eos_seed_count": 25,
         "entropy": 0.9655108357520404,
         "entropy_violations": 1
@@ -35,7 +35,7 @@
       {
         "step": 2,
         "t1_state": 50,
-        "srb_resolution": 578,
+        "srb_resolution": 1733,
         "eos_seed_count": 50,
         "entropy": 0.9655108357520404,
         "entropy_violations": 1
@@ -43,7 +43,7 @@
       {
         "step": 3,
         "t1_state": 75,
-        "srb_resolution": 948,
+        "srb_resolution": 2713,
         "eos_seed_count": 75,
         "entropy": 0.9655108357520404,
         "entropy_violations": 1
@@ -51,7 +51,7 @@
       {
         "step": 4,
         "t1_state": 100,
-        "srb_resolution": 1750,
+        "srb_resolution": 3362,
         "eos_seed_count": 100,
         "entropy": 0.9655108357520404,
         "entropy_violations": 1
@@ -59,7 +59,7 @@
       {
         "step": 5,
         "t1_state": 125,
-        "srb_resolution": 2700,
+        "srb_resolution": 3750,
         "eos_seed_count": 125,
         "entropy": 0.9655108357520404,
         "entropy_violations": 1
@@ -69,28 +69,28 @@
   "sealed_threads": {
     "workflow_thread_1": {
       "dlp_classification": "public",
-      "entropy_signature": "f7af8017cc797d461fc519f567d2ea86bb50e0351def1b941fd9f15e74641040",
-      "timestamp": 1752725700.1132455,
+      "entropy_signature": "eed84f5ab167d10fe601b9b40391e44f1c1d5179d9eb4d4871fd843e9a9f372a",
+      "timestamp": 1752725877.9576116,
       "sealed": true
     },
     "workflow_thread_2": {
       "dlp_classification": "confidential",
-      "entropy_signature": "a0d101f0ea11507b400cdd20018b4f2a1272e74b834f1df1db40d819f769abd4",
-      "timestamp": 1752725700.1134531,
+      "entropy_signature": "63a6d5bf55476040a6513bd2a28332339380d17fe163de1386f4867133257579",
+      "timestamp": 1752725877.9578035,
       "sealed": true
     }
   },
   "memory_sealing_manifest": {
     "workflow_thread_1": {
       "dlp_classification": "public",
-      "timestamp": 1752725700.1132655,
-      "content_hash": "8b7807e5ed26c57d96ec74f85e3756169fabdc1f8b7b240b8d636268d1b0211f"
+      "timestamp": 1752725877.957632,
+      "content_hash": "0069561e17844f3f8dfedce97c1cba9d12069d7aaa5a1d8f70ca37efccf37bcc"
     },
     "workflow_thread_2": {
       "dlp_classification": "confidential",
-      "timestamp": 1752725700.1134725,
-      "content_hash": "b7b25644b3d4eaaa64a77bf54da3c4906a761e03b64dbbc5b745daae6c6ebc33"
+      "timestamp": 1752725877.9578228,
+      "content_hash": "7d4268e2bd3480dbf3abf96050305300a463d4a011a2c5312772537005b55cd0"
     }
   },
-  "export_timestamp": 1752725700.113633
+  "export_timestamp": 1752725877.9581149
 }

@@ -1,12 +1,12 @@
 {
   "thread_id": "workflow_thread_1",
-  "glyph_signature": "f7af8017cc797d46",
+  "glyph_signature": "eed84f5ab167d10f",
   "dlp_class": "public",
   "anchor_summary": {
     "t1_state": 125,
-    "srb_resolution": 2700,
+    "srb_resolution": 3750,
     "eos_seed_count": 125
   },
-  "timestamp": 1752725700.1132455,
+  "timestamp": 1752725877.9576116,
   "sealed": true
 }

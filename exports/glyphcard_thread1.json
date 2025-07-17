@@ -1,12 +1,12 @@
 {
   "thread_id": "thread1",
-  "glyph_signature": "8369440abd9598cc",
+  "glyph_signature": "acd3bbebb92df5b5",
   "dlp_class": "public",
   "anchor_summary": {
     "t1_state": 0,
     "srb_resolution": 0,
     "eos_seed_count": 0
   },
-  "timestamp": 1752725700.112038,
+  "timestamp": 1752725877.9564774,
   "sealed": true
 }

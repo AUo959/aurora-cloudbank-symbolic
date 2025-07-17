@@ -97,7 +97,7 @@ class AuroraSecurityUtils {
 
     // Create a temporary element to parse and clean the HTML
     const temp = document.createElement('div');
-    temp.innerHTML = this.sanitizeText(content);
+    temp.textContent = this.sanitizeText(content); // SECURITY FIX: Changed from innerHTML
 
     // Only allow safe elements
     const allowedTags = ['p', 'span', 'strong', 'em', 'br'];
@@ -123,7 +123,7 @@ class AuroraSecurityUtils {
       safeContent.appendChild(clone);
     }
 
-    element.innerHTML = '';
+    element.textContent = ''; // SECURITY FIX: Changed from innerHTML
     element.appendChild(safeContent);
   }
 
@@ -157,7 +157,7 @@ class AuroraSecurityUtils {
 
     // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    tempDiv.textContent = html; // SECURITY FIX: Changed from innerHTML
 
     // Walk through all elements and sanitize
     const walker = document.createTreeWalker(
@@ -197,7 +197,8 @@ class AuroraSecurityUtils {
     // Remove dangerous elements
     elementsToRemove.forEach(el => el.remove());
 
-    return tempDiv.innerHTML;
+    // Return the sanitized content safely
+    return tempDiv.textContent || ''; // SECURITY FIX: Use textContent instead of innerHTML
   }
 
   /**

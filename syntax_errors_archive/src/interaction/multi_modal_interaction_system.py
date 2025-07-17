@@ -4,6 +4,7 @@ Revolutionary interaction paradigms for quantum-symbolic systems
 """
 
 import asyncio
+from io import StringIO
 from typing import Any, Dict, List
 
 
@@ -15,6 +16,7 @@ class MultiModalInteractionSystem:
             'symbolic': SymbolicInputHandler(),
             'quantum': QuantumManipulationHandler(),
             'neural': NeuralInterfaceHandler()
+        }
 
 
         self.active_modes = []
@@ -32,6 +34,7 @@ class MultiModalInteractionSystem:
             'interaction_system': 'initialized',
             'active_modes': self.active_modes,
             'fusion_engine': 'ready'
+        }
 
 
 
@@ -39,8 +42,8 @@ class MultiModalInteractionSystem:
         """Process input from multiple interaction modalities"""
         processed_inputs = {}
 
-        for mode in self.active_modes {
-            if mode in input_data {
+        for mode in self.active_modes:
+            if mode in input_data:
                 handler = self.interaction_modes[mode]
                 processed_inputs[mode] = await handler.process_input(input_data[mode])
 
@@ -57,6 +60,7 @@ class MultiModalInteractionSystem:
             'adapted_modes': optimal_modes,
             'quantum_enhanced': True,
             'context_aware': True
+        }
 
 
 
@@ -66,6 +70,7 @@ class MultiModalInteractionSystem:
             'primary_mode': 'voice' if context.get('hands_free') else 'gesture',
             'secondary_modes': ['symbolic', 'quantum'],
             'enhancement_level': 'maximum'
+        }
 
 
 
@@ -134,6 +139,7 @@ class InteractionFusionEngine:
             'unified_command': 'generated',
             'confidence_level': 'high',
             'quantum_enhanced': True
+        }
 
 
 

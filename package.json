@@ -4,9 +4,16 @@
   "description": "Aurora symbolic simulation - JavaScript components",
   "scripts": {
     "test": "echo 'Aurora JS tests passed'",
+    "test:framework": "npx jest tests/framework.test.ts",
+    "build": "npx tsc --build",
+    "build:watch": "npx tsc --build --watch",
     "lint": "eslint src/**/*.js --fix",
+    "lint:ts": "eslint src/**/*.ts --fix",
     "lint:check": "eslint src/**/*.js",
-    "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'",
+    "pre-commit": "npm run lint && npm run build && echo 'Aurora pre-commit validation passed'",
+    "framework:init": "./scripts/aurora_cli.sh init",
+    "framework:status": "./scripts/aurora_cli.sh status",
+    "framework:seal": "./scripts/aurora_cli.sh seal",
     "cleanup": "./scripts/aurora_cleanup_command.sh",
     "time-to-clean-up": "./scripts/aurora_enhanced_cleanup_command.sh",
     "cleanup:legacy": "./scripts/aurora_cleanup_command.sh",
@@ -21,7 +28,11 @@
   ],
   "author": "AUo959",
   "devDependencies": {
-    "eslint": "^9.31.0"
+    "@types/node": "^24.0.14",
+    "eslint": "^9.31.0",
+    "typescript": "^5.8.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
   },
   "dependencies": {
     "express": "^5.1.0",

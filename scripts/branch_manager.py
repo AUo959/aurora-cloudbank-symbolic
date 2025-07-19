@@ -48,7 +48,7 @@ class BranchManager:
             "refs/remotes/origin",
         ]
 
-        _ = subprocess.run(
+        result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
@@ -109,7 +109,7 @@ class BranchManager:
             f"origin/{branch_name}",
             "origin/main",
         ]
-        _ = subprocess.run(
+        result = subprocess.run(
             cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
         )
         return result.returncode == 0

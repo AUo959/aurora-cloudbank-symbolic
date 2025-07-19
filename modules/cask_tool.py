@@ -11,10 +11,12 @@ from __future__ import annotations
 
 import os
 import zipfile
+from io import StringIO
 
 import pandas as pd
 
 ASSET_ZIP = "CASK_Assets.zip"
+RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles
 
 
 def _open_asset(name: str) -> str:
@@ -85,5 +87,11 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
         height=400,
         title="CASK Architecture (simplified)",
     )
-    fig.write_image(output)
+    try:
+        fig.write_image(output)
+    except Exception:
+        # Fallback to HTML if image writing fails
+        html_output = output.replace('.png', '.html')
+        fig.write_html(html_output)
+        return html_output
     return output

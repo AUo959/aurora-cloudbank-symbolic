@@ -1,6 +1,7 @@
 {
   "name": "aurora-cloudbank-symbolic",
   "version": "1.0.0",
+  "type": "module",
   "description": "Aurora symbolic simulation - JavaScript components",
   "scripts": {
     "test": "echo 'Aurora JS tests passed'",

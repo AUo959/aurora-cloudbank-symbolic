@@ -48,7 +48,7 @@ class AutomatedBranchManager:
                 "--format=%(refname:short)|%(committerdate:iso)|%(objectname)",
                 "refs/remotes/origin",
             ]
-            _ = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             branches = []
             for line in result.stdout.strip().split("\n"):
@@ -108,7 +108,7 @@ class AutomatedBranchManager:
                 f"origin/{branch_name}",
                 "origin/main",
             ]
-            _ = subprocess.run(cmd, capture_output=True, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, shell=False, check=False)
             return result.returncode == 0
         except subprocess.CalledProcessError:
             return False

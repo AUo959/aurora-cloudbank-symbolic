@@ -53,7 +53,8 @@ class GlyphGenerator:
 
         return {
             "symbol": symbol,
-            "vector": qvec.vector,
+            "quantum_vector": qvec,  # Include the full qvec object for backward compatibility
+            "vector": qvec.vector,  # Retain the vector attribute for new functionality
             "multivector": str(mv),
         }
 

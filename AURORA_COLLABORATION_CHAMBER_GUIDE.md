@@ -1,16 +1,19 @@
 # 🌟 Aurora CloudBank Collaboration Chamber - User Guide
 
 ## Overview
+
 The Aurora Collaboration Chamber is your **Phase 7 Holographic Command Interface** - a live inter-agent collaboration hub with advanced @mesh system integration, real-time visual representation, and comprehensive command traceback capabilities.
 
 ## 🏛️ Access Points
 
 ### Web Interface
-- **Primary Interface**: http://localhost:8080/chamber
-- **Status API**: http://localhost:8080/api/chamber/status
-- **Agents API**: http://localhost:8080/api/chamber/agents
+
+- **Primary Interface**: <http://localhost:8080/chamber>
+- **Status API**: <http://localhost:8080/api/chamber/status>
+- **Agents API**: <http://localhost:8080/api/chamber/agents>
 
 ### Features Overview
+
 - 🕸️ **@mesh System**: Broadcast to all agents simultaneously
 - 🤖 **Direct Agent Communication**: Chat with specific agents
 - 📡 **Live Feed**: Real-time message streaming
@@ -21,6 +24,7 @@ The Aurora Collaboration Chamber is your **Phase 7 Holographic Command Interface
 ## 🤖 Agent Constellation
 
 ### Active Agents (5/5 Online)
+
 | Agent | Specialization | Communication Format |
 |-------|---------------|---------------------|
 | **ARCHY** | Architecture & System Design | `@agent.ARCHY` |
@@ -34,6 +38,7 @@ The Aurora Collaboration Chamber is your **Phase 7 Holographic Command Interface
 ## 🕸️ @mesh Communication Protocol
 
 ### Mesh Broadcast (All Agents)
+
 ```javascript
 // Format: {{@mesh ::: message}}
 // Target: @mesh
@@ -43,6 +48,7 @@ Example: "{{@mesh ::: System optimization analysis required}}"
 ```
 
 ### Direct Agent Communication
+
 ```javascript
 // Format: {{@agent.AgentName ::: message}}  
 // Target: @agent.ARCHY (or other agent)
@@ -52,6 +58,7 @@ Example: "{{@agent.ARCHY ::: Review system architecture}}"
 ```
 
 ### Authority Levels
+
 - **operator**: Full system access
 - **user**: Standard user commands  
 - **system**: System-level operations
@@ -59,7 +66,8 @@ Example: "{{@agent.ARCHY ::: Review system architecture}}"
 ## 🎮 How to Interact
 
 ### 1. Web Interface Interaction
-1. Open http://localhost:8080/chamber
+
+1. Open <http://localhost:8080/chamber>
 2. Select target (mesh or specific agent) from dropdown
 3. Type your command in the input field
 4. Click **TRANSMIT** or press Enter
@@ -67,19 +75,24 @@ Example: "{{@agent.ARCHY ::: Review system architecture}}"
 6. Monitor traceback panel for command execution details
 
 ### 2. Agent Selection
+
 - Click any agent in the constellation panel to activate direct communication
 - **@mesh (ALL AGENTS)** - Broadcasts to entire constellation
 - Individual agents provide specialized responses based on their roles
 
 ### 3. Live Feed Monitoring
+
 The live feed shows:
+
 - **MESH** messages (purple border) - Broadcasts to all agents
 - **AGENT** messages (green border) - Direct agent communications
 - **SYSTEM** messages (yellow border) - System notifications
 - **USER** messages - Your commands and inputs
 
 ### 4. Command Traceback System
+
 Every command generates a detailed traceback showing:
+
 - **Command ID**: Unique identifier for tracking
 - **Execution Path**: Route through the system
 - **Processing Steps**: Detailed step-by-step execution
@@ -89,12 +102,14 @@ Every command generates a detailed traceback showing:
 ## 🌌 Advanced Features
 
 ### Holographic Display
+
 - Real-time system visualization
 - Agent status indicators
 - System health monitoring
 - Phase 7 operational status
 
 ### WebSocket API
+
 ```javascript
 // Connect to chamber
 const socket = io('http://localhost:8080');
@@ -122,6 +137,7 @@ socket.on('command_result', (data) => {
 ## 📝 Example Commands
 
 ### System Analysis
+
 ```
 Target: @mesh
 Command: "Perform comprehensive system health analysis"
@@ -129,6 +145,7 @@ Result: All agents provide specialized analysis from their perspective
 ```
 
 ### Architecture Review
+
 ```
 Target: @agent.ARCHY  
 Command: "Review current system architecture and suggest optimizations"
@@ -136,6 +153,7 @@ Result: ARCHY provides detailed architectural analysis
 ```
 
 ### Performance Optimization
+
 ```
 Target: @agent.OPPY
 Command: "Identify performance bottlenecks and optimization opportunities"  
@@ -143,6 +161,7 @@ Result: OPPY provides performance-focused recommendations
 ```
 
 ### Learning Pattern Analysis
+
 ```
 Target: @agent.LIORA
 Command: "Analyze user interaction patterns and suggest improvements"
@@ -150,6 +169,7 @@ Result: LIORA provides adaptive learning insights
 ```
 
 ### Communication Protocol Review
+
 ```
 Target: @agent.STARLING_AU
 Command: "Assess current communication protocols for efficiency"
@@ -157,6 +177,7 @@ Result: STARLING_AU provides communication optimization analysis
 ```
 
 ### Data Flow Analysis
+
 ```
 Target: @agent.RIVERTHREAD_808
 Command: "Examine data processing pipelines for optimization"

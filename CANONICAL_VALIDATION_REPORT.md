@@ -1,9 +1,11 @@
 
 # Aurora CloudBank Canonical Validation Report
+
 **Generated**: Mon Jul 14 05:32:10 AM UTC 2025
 **Workspace**: /workspaces/aurora-cloudbank-symbolic
 
 ## 📊 Validation Summary
+
 - ✅ **Passed**: 0
 - 🔧 **Auto-Fixed**: 0
 - ⚠️ **Escalations**: 217
@@ -14,13 +16,14 @@
 ## ⚠️ Escalations Required (217)
 
 ### 🚨 Critical Issues (1)
+
 - ❗ **anchor_seed_validation**: Non-canonical anchor seed found in PRE_COMMIT_VALIDATION_ISSUES.md
   - **Suggested Fix**: Replace with canonical EOS_SEED_ORION anchor seed
-
 
 ### 🔴 High Priority Issues (0)
 
 ### 🟡 Medium Priority Issues (195)
+
 - 🟡 **staff_name_validation_Commander**: Non-canonical name for Commander: (Alex Thorne) - EXECUTIVE clearance
   - **Suggested Fix**: Replace with canonical name: Alex Thorne
 
@@ -507,7 +510,7 @@
 - 🟡 **staff_name_validation_Engineering**: Non-canonical name for Engineering: _lab
   - **Suggested Fix**: Replace with canonical name: Jiro Tanaka
 
-- 🟡 **staff_name_validation_Engineering**: Non-canonical name for Engineering: 
+- 🟡 **staff_name_validation_Engineering**: Non-canonical name for Engineering:
   - **Suggested Fix**: Replace with canonical name: Jiro Tanaka
 
 - 🟡 **staff_name_validation_Engineering**: Non-canonical name for Engineering: echo
@@ -591,7 +594,7 @@
 - 🟡 **staff_name_validation_XO**: Non-canonical name for XO: .*:
   - **Suggested Fix**: Replace with canonical name: Maya Shepard
 
-- 🟡 **staff_name_validation_Commander**: Non-canonical name for Commander: 
+- 🟡 **staff_name_validation_Commander**: Non-canonical name for Commander:
   - **Suggested Fix**: Replace with canonical name: Alex Thorne
 
 - 🟡 **staff_name_validation_Engineering**: Non-canonical name for Engineering: ai_assisted
@@ -606,8 +609,8 @@
 - 🟡 **staff_name_validation_Commander**: Non-canonical name for Commander: ): Active
   - **Suggested Fix**: Replace with canonical name: Alex Thorne
 
-
 ### 🟢 Low Priority Issues (21)
+
 - 🟢 **comm_syntax_direct_msg**: Communication syntax may not be canonical: {{@mesh ::: System-wide drift correction initiated}}
   - **Suggested Fix**: Verify message format follows {{@agent.Name ::: message}} syntax
 
@@ -671,7 +674,7 @@
 - 🟢 **comm_syntax_direct_msg**: Communication syntax may not be canonical: {{@mesh ::: message}}
   - **Suggested Fix**: Verify message format follows {{@agent.Name ::: message}} syntax
 
-
 ## 🎯 Canonical Compliance Status
+
 - **Status**: ❌ CRITICAL ISSUES DETECTED
 - **Action Required**: Immediate remediation of critical issues

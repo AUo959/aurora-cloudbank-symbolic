@@ -74,30 +74,30 @@ class FileAnalysis:
 
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
-    
+
     def __init__(self, repo_path: str = "."):
         """Initialize GitWiz with repository path."""
         self.repo_path = Path(repo_path).resolve()
         self.git_dir = self.repo_path / ".git"
         self.gitwiz_dir = self.repo_path / ".gitwiz"
-        
+
         # Ensure .gitwiz directory exists
         self.gitwiz_dir.mkdir(exist_ok=True)
-        
+
         # Configuration
         self.config = self._load_config()
         self.thresholds = self.config.get("thresholds", {})
-        
+
         # Validate git repository
         if not self.git_dir.exists():
             raise ValueError(f"Not a git repository: {self.repo_path}")
-        
+
         logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load GitWiz configuration."""
         config_file = self.gitwiz_dir / "config.json"
-        
+
         default_config = {
             "thresholds": {
                 "large_file_mb": 10,
@@ -120,7 +120,7 @@ class GitWizEnhanced:
                 "node_modules", ".DS_Store", "Thumbs.db"
             ]
         }
-        
+
         if config_file.exists():
             try:
                 with open(config_file, 'r') as f:
@@ -129,11 +129,11 @@ class GitWizEnhanced:
                 default_config.update(user_config)
             except Exception as e:
                 logger.warning(f"Failed to load config: {e}. Using defaults.")
-        
+
         # Save current config
         with open(config_file, 'w') as f:
             json.dump(default_config, f, indent=2)
-        
+
         return default_config
 
     def run_git_command(self, command: List[str], check: bool = True) -> subprocess.CompletedProcess:
@@ -155,13 +155,13 @@ class GitWizEnhanced:
     def analyze_repository(self) -> RepositoryMetrics:
         """Comprehensive repository analysis."""
         logger.info("Starting comprehensive repository analysis...")
-        
+
         metrics = RepositoryMetrics()
-        
+
         # Basic file statistics
         total_size = 0
         file_count = 0
-        
+
         for file_path in self.repo_path.rglob("*"):
             if file_path.is_file() and not self._should_ignore_file(file_path):
                 try:
@@ -170,70 +170,70 @@ class GitWizEnhanced:
                     file_count += 1
                 except (OSError, PermissionError):
                     continue
-        
+
         metrics.total_files = file_count
         metrics.total_size_mb = total_size / (1024 * 1024)
-        
+
         # Git-specific metrics
         try:
             # Git directory size
             git_size = sum(
-                f.stat().st_size for f in self.git_dir.rglob("*") 
+                f.stat().st_size for f in self.git_dir.rglob("*")
                 if f.is_file()
             )
             metrics.git_size_mb = git_size / (1024 * 1024)
-            
+
             # Branch information
             branches_result = self.run_git_command(["branch", "-r"])
             metrics.branch_count = len(branches_result.stdout.strip().split('\n'))
-            
+
             # Commit count
             commits_result = self.run_git_command(["rev-list", "--count", "HEAD"])
             metrics.commit_count = int(commits_result.stdout.strip())
-            
+
             # Contributors
             contributors_result = self.run_git_command(["shortlog", "-sn", "--all"])
             metrics.contributors = len(contributors_result.stdout.strip().split('\n'))
-            
+
             # Last commit
             last_commit_result = self.run_git_command(["log", "-1", "--format=%H"])
             metrics.last_commit = last_commit_result.stdout.strip()
-            
+
             # Stale branches
             metrics.stale_branches = self._count_stale_branches()
-            
+
         except Exception as e:
             logger.error(f"Error collecting git metrics: {e}")
             metrics.issues_detected.append(f"Git metrics collection failed: {e}")
-        
+
         # Calculate scores
         metrics.optimization_score = self._calculate_optimization_score(metrics)
         metrics.security_score = self._calculate_security_score()
-        
+
         logger.info(f"Repository analysis complete: {metrics.total_files} files, {metrics.total_size_mb:.1f}MB")
         return metrics
 
     def analyze_files(self) -> FileAnalysis:
         """Detailed file analysis for optimization opportunities."""
         logger.info("Analyzing files for optimization opportunities...")
-        
+
         analysis = FileAnalysis()
         file_hashes = {}
         file_sizes = {}
-        
+
         for file_path in self.repo_path.rglob("*"):
             if not file_path.is_file() or self._should_ignore_file(file_path):
                 continue
-            
+
             try:
                 rel_path = file_path.relative_to(self.repo_path)
                 size = file_path.stat().st_size
                 file_sizes[str(rel_path)] = size
-                
+
                 # Track file types
                 suffix = file_path.suffix.lower()
                 analysis.file_types[suffix] = analysis.file_types.get(suffix, 0) + 1
-                
+
                 # Large files
                 if size > self.thresholds.get("large_file_mb", 10) * 1024 * 1024:
                     analysis.large_files.append({
@@ -241,7 +241,7 @@ class GitWizEnhanced:
                         "size_mb": round(size / (1024 * 1024), 2),
                         "type": suffix or "no extension"
                     })
-                
+
                 # Cache and temp files
                 if self._is_cache_file(file_path):
                     analysis.cache_files.append(str(rel_path))
@@ -252,7 +252,7 @@ class GitWizEnhanced:
                         "path": str(rel_path),
                         "size_mb": round(size / (1024 * 1024), 2)
                     })
-                
+
                 # Calculate hash for duplicate detection
                 if size > 1024:  # Only for files > 1KB
                     file_hash = self._calculate_file_hash(file_path)
@@ -260,10 +260,10 @@ class GitWizEnhanced:
                         file_hashes[file_hash].append(str(rel_path))
                     else:
                         file_hashes[file_hash] = [str(rel_path)]
-                
+
             except (OSError, PermissionError) as e:
                 logger.warning(f"Could not analyze {file_path}: {e}")
-        
+
         # Find duplicates
         for file_hash, paths in file_hashes.items():
             if len(paths) > 1:
@@ -275,15 +275,15 @@ class GitWizEnhanced:
                     "total_size_mb": round(total_size / (1024 * 1024), 2),
                     "potential_savings_mb": round((total_size * (len(paths) - 1)) / (1024 * 1024), 2)
                 })
-        
+
         logger.info(f"File analysis complete: {len(analysis.large_files)} large files, "
-                   f"{len(analysis.duplicate_candidates)} duplicate groups found")
+                    f"{len(analysis.duplicate_candidates)} duplicate groups found")
         return analysis
 
     def optimize_repository(self, dry_run: bool = True) -> Dict[str, Any]:
         """Optimize repository with various cleanup operations."""
         logger.info(f"Starting repository optimization (dry_run={dry_run})...")
-        
+
         optimization_report = {
             "timestamp": datetime.now().isoformat(),
             "dry_run": dry_run,
@@ -292,7 +292,7 @@ class GitWizEnhanced:
             "files_processed": 0,
             "errors": []
         }
-        
+
         try:
             # Git cleanup operations
             git_operations = [
@@ -301,7 +301,7 @@ class GitWizEnhanced:
                 (["reflog", "expire", "--expire=now", "--all"], "Clean reflog"),
                 (["remote", "prune", "origin"], "Prune remote references")
             ]
-            
+
             for git_cmd, description in git_operations:
                 try:
                     if not dry_run:
@@ -316,10 +316,10 @@ class GitWizEnhanced:
                     error_msg = f"Git operation failed: {description} - {e}"
                     optimization_report["errors"].append(error_msg)
                     logger.error(error_msg)
-            
+
             # File cleanup operations
             file_analysis = self.analyze_files()
-            
+
             # Clean cache files
             if file_analysis.cache_files:
                 cache_size = self._calculate_files_size(file_analysis.cache_files)
@@ -333,7 +333,7 @@ class GitWizEnhanced:
                 })
                 optimization_report["space_saved_mb"] += cache_size / (1024 * 1024)
                 optimization_report["files_processed"] += len(file_analysis.cache_files)
-            
+
             # Clean temp files
             if file_analysis.temp_files:
                 temp_size = self._calculate_files_size(file_analysis.temp_files)
@@ -347,45 +347,45 @@ class GitWizEnhanced:
                 })
                 optimization_report["space_saved_mb"] += temp_size / (1024 * 1024)
                 optimization_report["files_processed"] += len(file_analysis.temp_files)
-            
+
         except Exception as e:
             error_msg = f"Optimization failed: {e}"
             optimization_report["errors"].append(error_msg)
             logger.error(error_msg)
-        
+
         # Save report
         report_file = self.gitwiz_dir / f"optimization_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w') as f:
             json.dump(optimization_report, f, indent=2)
-        
+
         logger.info(f"Optimization complete. Report saved to: {report_file}")
         return optimization_report
 
     def manage_branches(self, action: str = "analyze") -> Dict[str, Any]:
         """Manage repository branches."""
         logger.info(f"Managing branches: {action}")
-        
+
         result = {
             "action": action,
             "timestamp": datetime.now().isoformat(),
             "branches": {},
             "recommendations": []
         }
-        
+
         try:
             # Get all branches
             local_branches = self.run_git_command(["branch"])
             remote_branches = self.run_git_command(["branch", "-r"])
-            
+
             current_branch_result = self.run_git_command(["branch", "--show-current"])
             current_branch = current_branch_result.stdout.strip()
-            
+
             # Analyze local branches
             for line in local_branches.stdout.strip().split('\n'):
                 branch_name = line.strip().lstrip('* ')
                 if not branch_name:
                     continue
-                
+
                 # Get last commit date
                 try:
                     last_commit_result = self.run_git_command([
@@ -395,7 +395,7 @@ class GitWizEnhanced:
                         last_commit_result.stdout.strip().replace(' +', '+')
                     )
                     days_since_commit = (datetime.now() - last_commit_date.replace(tzinfo=None)).days
-                    
+
                     result["branches"][branch_name] = {
                         "type": "local",
                         "is_current": branch_name == current_branch,
@@ -403,7 +403,7 @@ class GitWizEnhanced:
                         "days_since_commit": days_since_commit,
                         "is_stale": days_since_commit > self.thresholds.get("stale_branch_days", 30)
                     }
-                    
+
                     # Add recommendations
                     if days_since_commit > self.thresholds.get("stale_branch_days", 30) and branch_name != current_branch:
                         result["recommendations"].append({
@@ -412,10 +412,10 @@ class GitWizEnhanced:
                             "reason": f"No commits in {days_since_commit} days",
                             "command": f"git branch -d {branch_name}"
                         })
-                
+
                 except Exception as e:
                     logger.warning(f"Could not analyze branch {branch_name}: {e}")
-            
+
             # Execute actions if requested
             if action == "cleanup_stale" and result["recommendations"]:
                 cleanup_result = []
@@ -427,21 +427,21 @@ class GitWizEnhanced:
                         except Exception as e:
                             cleanup_result.append(f"Failed to delete {rec['branch']}: {e}")
                 result["cleanup_result"] = cleanup_result
-        
+
         except Exception as e:
             logger.error(f"Branch management failed: {e}")
             result["error"] = str(e)
-        
+
         return result
 
     def generate_report(self) -> Dict[str, Any]:
         """Generate comprehensive repository health report."""
         logger.info("Generating comprehensive repository report...")
-        
+
         metrics = self.analyze_repository()
         file_analysis = self.analyze_files()
         branch_info = self.manage_branches("analyze")
-        
+
         report = {
             "timestamp": datetime.now().isoformat(),
             "repository_path": str(self.repo_path),
@@ -460,12 +460,12 @@ class GitWizEnhanced:
             "recommendations": self._generate_recommendations(metrics, file_analysis),
             "config": self.config
         }
-        
+
         # Save report
         report_file = self.gitwiz_dir / f"health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         logger.info(f"Report generated: {report_file}")
         return report
 
@@ -473,16 +473,16 @@ class GitWizEnhanced:
     def _should_ignore_file(self, file_path: Path) -> bool:
         """Check if file should be ignored based on patterns."""
         rel_path = str(file_path.relative_to(self.repo_path))
-        
+
         # Git directory
         if '.git/' in rel_path:
             return True
-        
+
         # Check ignore patterns
         for pattern in self.config.get("ignore_patterns", []):
             if file_path.match(pattern) or rel_path.endswith(pattern.lstrip('*')):
                 return True
-        
+
         return False
 
     def _is_cache_file(self, file_path: Path) -> bool:
@@ -552,37 +552,37 @@ class GitWizEnhanced:
     def _calculate_optimization_score(self, metrics: RepositoryMetrics) -> float:
         """Calculate repository optimization score (0-1)."""
         score = 1.0
-        
+
         # Size penalty
         if metrics.total_size_mb > self.thresholds.get("repo_size_mb", 500):
             score -= 0.2
-        
+
         # Branch penalty
         if metrics.branch_count > self.thresholds.get("max_branches", 20):
             score -= 0.2
-        
+
         # Stale branch penalty
         if metrics.stale_branches > 0:
             score -= min(0.3, metrics.stale_branches * 0.1)
-        
+
         # Git size ratio
         if metrics.total_size_mb > 0:
             git_ratio = metrics.git_size_mb / metrics.total_size_mb
             if git_ratio > 0.5:  # Git directory is too large
                 score -= 0.2
-        
+
         return max(0.0, score)
 
     def _calculate_security_score(self) -> float:
         """Calculate basic security score."""
         score = 1.0
-        
+
         # Check for common security issues
         security_files = ['.env', '.env.local', 'config.json', 'secrets.json']
         for sec_file in security_files:
             if (self.repo_path / sec_file).exists():
                 score -= 0.2
-        
+
         # Check for committed credentials (basic)
         try:
             result = self.run_git_command([
@@ -592,7 +592,7 @@ class GitWizEnhanced:
                 score -= 0.3
         except Exception:
             pass
-        
+
         return max(0.0, score)
 
     def _determine_health_status(self, metrics: RepositoryMetrics) -> str:
@@ -609,7 +609,7 @@ class GitWizEnhanced:
     def _generate_recommendations(self, metrics: RepositoryMetrics, file_analysis: FileAnalysis) -> List[Dict[str, Any]]:
         """Generate optimization recommendations."""
         recommendations = []
-        
+
         # Large files
         if file_analysis.large_files:
             recommendations.append({
@@ -619,7 +619,7 @@ class GitWizEnhanced:
                 "action": "Consider using Git LFS for large files",
                 "files": file_analysis.large_files[:5]  # Show first 5
             })
-        
+
         # Duplicates
         if file_analysis.duplicate_candidates:
             total_savings = sum(d["potential_savings_mb"] for d in file_analysis.duplicate_candidates)
@@ -630,7 +630,7 @@ class GitWizEnhanced:
                 "action": f"Remove duplicates to save {total_savings:.1f}MB",
                 "potential_savings_mb": total_savings
             })
-        
+
         # Cache files
         if file_analysis.cache_files:
             recommendations.append({
@@ -639,7 +639,7 @@ class GitWizEnhanced:
                 "description": f"Found {len(file_analysis.cache_files)} cache files",
                 "action": "Run cleanup to remove cache files"
             })
-        
+
         # Stale branches
         if metrics.stale_branches > 0:
             recommendations.append({
@@ -648,37 +648,37 @@ class GitWizEnhanced:
                 "description": f"Found {metrics.stale_branches} stale branches",
                 "action": "Consider removing unused branches"
             })
-        
+
         return recommendations
 
 
 def main():
     """Main CLI interface."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="GitWiz Enhanced v2.0 - Intelligent Git Repository Management")
     parser.add_argument("--repo", default=".", help="Repository path (default: current directory)")
-    parser.add_argument("--action", choices=["analyze", "optimize", "branches", "report"], 
-                       default="report", help="Action to perform")
+    parser.add_argument("--action", choices=["analyze", "optimize", "branches", "report"],
+                        default="report", help="Action to perform")
     parser.add_argument("--dry-run", action="store_true", help="Perform dry run (no changes)")
-    
+
     args = parser.parse_args()
-    
+
     try:
         gitwiz = GitWizEnhanced(args.repo)
-        
+
         if args.action == "analyze":
             metrics = gitwiz.analyze_repository()
             print(json.dumps(asdict(metrics), indent=2))
-        
+
         elif args.action == "optimize":
             result = gitwiz.optimize_repository(dry_run=args.dry_run)
             print(json.dumps(result, indent=2))
-        
+
         elif args.action == "branches":
             result = gitwiz.manage_branches("analyze")
             print(json.dumps(result, indent=2))
-        
+
         elif args.action == "report":
             report = gitwiz.generate_report()
             print(f"✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
@@ -686,11 +686,11 @@ def main():
             print(f"🗂️  Files: {report['summary']['total_files']}")
             print(f"💾 Size: {report['summary']['total_size_mb']:.1f}MB")
             print(f"⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
-    
+
     except Exception as e:
         logger.error(f"GitWiz operation failed: {e}")
         return 1
-    
+
     return 0
 
 

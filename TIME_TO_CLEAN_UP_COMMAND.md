@@ -1,16 +1,19 @@
 # 🧹 "Time to Clean Up" - Custom Aurora Command
 
 ## Overview
+
 You now have a powerful custom command that responds to your natural language request: **"time to clean up"**
 
 ## Usage Methods
 
 ### Method 1: Direct Script Execution
+
 ```bash
 ./scripts/aurora_cleanup_command.sh
 ```
 
 ### Method 2: NPM Script
+
 ```bash
 npm run time-to-clean-up
 # OR
@@ -18,6 +21,7 @@ npm run cleanup
 ```
 
 ### Method 3: Natural Language (Future Enhancement)
+
 ```bash
 node aurora_command_handler.js "time to clean up"
 ```
@@ -27,6 +31,7 @@ node aurora_command_handler.js "time to clean up"
 When you say **"time to clean up"**, the system performs a comprehensive repository maintenance workflow:
 
 ### 🔄 Git Workflow
+
 1. **Pull** latest changes from remote
 2. **Stage** all uncommitted changes
 3. **Commit** with auto-generated descriptive message
@@ -34,6 +39,7 @@ When you say **"time to clean up"**, the system performs a comprehensive reposit
 5. **Sync** all other branches
 
 ### 📊 Repository Health Check
+
 - Repository size analysis
 - Commit count tracking
 - Large file detection (>10MB)
@@ -41,12 +47,14 @@ When you say **"time to clean up"**, the system performs a comprehensive reposit
 - Index refresh
 
 ### 🌟 Aurora-Specific Validations
+
 - Collaboration Chamber status check
 - Aurora core file verification
 - Component operational status
 - System health validation
 
 ### 📝 Detailed Reporting
+
 - Color-coded status messages
 - File change breakdown (Added/Modified/Deleted)
 - Branch synchronization results
@@ -55,6 +63,7 @@ When you say **"time to clean up"**, the system performs a comprehensive reposit
 ## Auto-Generated Commit Messages
 
 The command creates descriptive commit messages like:
+
 ```
 🧹 Aurora Cleanup - Comprehensive sync 20250714_052722
 
@@ -71,6 +80,7 @@ The command creates descriptive commit messages like:
 ## Command Features
 
 ### 🎨 Visual Feedback
+
 - **Green ✅**: Successful operations
 - **Yellow ⚠️**: Warnings (non-critical)
 - **Red ❌**: Errors requiring attention
@@ -79,12 +89,14 @@ The command creates descriptive commit messages like:
 - **Cyan 📋**: Information displays
 
 ### 🔍 Comprehensive Tracking
+
 - Staged file breakdown with status indicators
 - Branch synchronization results
 - Repository health metrics
 - Aurora component verification
 
 ### 🛡️ Safety Features
+
 - Pre-commit validation integration
 - Git garbage collection
 - Large file detection
@@ -152,6 +164,7 @@ The cleanup command is specifically designed for the Aurora CloudBank ecosystem 
 ---
 
 **From now on, whenever you say "time to clean up", just run:**
+
 ```bash
 npm run time-to-clean-up
 ```

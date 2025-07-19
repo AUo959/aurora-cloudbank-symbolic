@@ -459,7 +459,7 @@ class LintCleanupManager:
             total_output = []
 
             for i in range(0, len(python_files), batch_size):
-                batch_files = python_files[i : i + batch_size]
+                batch_files = python_files[i: i + batch_size]
                 cmd = ["pylint", "--output-format=json"] + batch_files
 
                 result = subprocess.run(
@@ -537,7 +537,7 @@ class LintCleanupManager:
             total_issues = 0
 
             for i in range(0, len(python_files), batch_size):
-                batch_files = python_files[i : i + batch_size]
+                batch_files = python_files[i: i + batch_size]
                 cmd = [
                     "flake8",
                     "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s",

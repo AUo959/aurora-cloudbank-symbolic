@@ -38,12 +38,14 @@
 ## 📊 Security Metrics
 
 ### Protection Levels
+
 - **Excellent (90-100%):** {sum(1 for r in results['validation_results'] if r['score'] >= 90)} vectors
 - **Good (70-89%):** {sum(1 for r in results['validation_results'] if 70 <= r['score'] < 90)} vectors
 - **Partial (50-69%):** {sum(1 for r in results['validation_results'] if 50 <= r['score'] < 70)} vectors
 - **Vulnerable (0-49%):** {sum(1 for r in results['validation_results'] if r['score'] < 50)} vectors
 
 ### Security Infrastructure Status
+
 - ✅ **MFA Policies:** Implemented and enforced
 - ✅ **DDoS Protection:** Cloud-scale mitigation ready
 - ✅ **Email Security:** Advanced threat protection active
@@ -76,9 +78,11 @@
 ## 📈 Improvement Areas
 
 ### High Priority
+
 {chr(10).join(f"- {r['vector']}: {r['score']}%" for r in results['validation_results'] if r['score'] < 70)}
 
 ### Medium Priority
+
 {chr(10).join(f"- {r['vector']}: {r['score']}%" for r in results['validation_results'] if 70 <= r['score'] < 90)}
 
 ---

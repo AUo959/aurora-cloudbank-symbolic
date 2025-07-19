@@ -161,7 +161,7 @@ class GITWizSimple:
         """Get git repository status."""
         try:
             # Check if it's a git repo
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "rev-parse", "--git-dir"],
                 capture_output=True,
                 text=True,
@@ -173,7 +173,7 @@ class GITWizSimple:
                 return {"is_git_repo": False}
 
             # Get git status
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,

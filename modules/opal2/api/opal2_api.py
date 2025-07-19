@@ -276,7 +276,7 @@ async def notify_clients(message: Dict[str, Any]):
         for connection in active_connections.copy():
             try:
                 await connection.send_text(message_str)
-            except:
+            except BaseException:
                 active_connections.remove(connection)
 
 
@@ -353,16 +353,16 @@ async def demo_interface():
             <div id="render-area" class="render-area"></div>
             <div id="status"></div>
         </div>
-        
+
         <script>
             async function generateAndRender() {
                 const expression = document.getElementById('expression').value;
                 const renderer = document.getElementById('renderer').value;
                 const status = document.getElementById('status');
-                
+
                 try {
                     status.textContent = 'Generating glyph...';
-                    
+
                     // Generate glyph
                     const generateResponse = await fetch('/generate', {
                         method: 'POST',
@@ -372,12 +372,12 @@ async def demo_interface():
                             quantum_enhancement: true
                         })
                     });
-                    
+
                     const generateResult = await generateResponse.json();
-                    
+
                     if (generateResult.success) {
                         status.textContent = 'Rendering...';
-                        
+
                         // Render glyph
                         const renderResponse = await fetch('/render', {
                             method: 'POST',
@@ -388,9 +388,9 @@ async def demo_interface():
                                 dimensions: { width: 800, height: 600 }
                             })
                         });
-                        
+
                         const renderResult = await renderResponse.json();
-                        
+
                         if (renderResult.success) {
                             status.textContent = 'Render complete!';
                             document.getElementById('render-area').innerHTML = renderResult.result;

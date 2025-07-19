@@ -109,7 +109,7 @@ class MaintenanceScheduler:
         if schedule is None:
             self.logger.warning("Schedule module not available, skipping schedule setup")
             return
-        
+
         schedules = self.config["schedules"]
 
         # Cache cleanup - daily
@@ -324,8 +324,7 @@ class MaintenanceScheduler:
                         capture_output=True,
                         text=True,
                         cwd=self.repo_path,
-                        timeout=300
-                    , shell=False, check=False)
+                        timeout=300, shell=False, check=False)
                     if result.returncode == 0:
                         cleaned_files += 1
 

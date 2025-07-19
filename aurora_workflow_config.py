@@ -13,23 +13,24 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
+
 class AuroraWorkflowConfig:
     """Manages Aurora CloudBank workflow configurations"""
-    
+
     def __init__(self, config_dir: str = "workflow/config"):
         self.config_dir = Path(config_dir)
         self.config_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Setup logging
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        
+
         # Load default configuration
         self.config = self.load_default_config()
-        
+
         # Load environment-specific config if exists
         self.load_environment_config()
-    
+
     def load_default_config(self) -> Dict[str, Any]:
         """Load default Aurora workflow configuration"""
         return {
@@ -47,7 +48,7 @@ class AuroraWorkflowConfig:
                     "retry_count": 3,
                     "health_checks": [
                         "system_resources",
-                        "network_connectivity", 
+                        "network_connectivity",
                         "disk_space",
                         "dependencies"
                     ]
@@ -60,7 +61,7 @@ class AuroraWorkflowConfig:
                     "services": [
                         "quantum-core",
                         "multi-agent",
-                        "research-hub", 
+                        "research-hub",
                         "av-system"
                     ]
                 },
@@ -102,7 +103,7 @@ class AuroraWorkflowConfig:
                 "multi-agent": {
                     "port": 8002,
                     "replicas": 1,
-                    "cpu_limit": "500m", 
+                    "cpu_limit": "500m",
                     "memory_limit": "1Gi",
                     "health_check": "/status",
                     "startup_timeout": 45
@@ -111,7 +112,7 @@ class AuroraWorkflowConfig:
                     "port": 8003,
                     "replicas": 1,
                     "cpu_limit": "2000m",
-                    "memory_limit": "4Gi", 
+                    "memory_limit": "4Gi",
                     "health_check": "/api/health",
                     "startup_timeout": 90
                 },
@@ -181,12 +182,12 @@ class AuroraWorkflowConfig:
                 "backup_region": "us-west-2"
             }
         }
-    
+
     def load_environment_config(self):
         """Load environment-specific configuration overrides"""
         env = os.getenv('AURORA_ENV', 'development')
         env_config_file = self.config_dir / f"{env}.yaml"
-        
+
         if env_config_file.exists():
             try:
                 with open(env_config_file, 'r') as f:
@@ -195,7 +196,7 @@ class AuroraWorkflowConfig:
                     self.logger.info(f"Loaded environment config: {env}")
             except Exception as e:
                 self.logger.error(f"Failed to load environment config: {e}")
-    
+
     def merge_config(self, base: Dict, override: Dict) -> Dict:
         """Recursively merge configuration dictionaries"""
         for key, value in override.items():
@@ -204,24 +205,24 @@ class AuroraWorkflowConfig:
             else:
                 base[key] = value
         return base
-    
+
     def save_config(self, filename: str = "default.yaml"):
         """Save current configuration to file"""
         config_file = self.config_dir / filename
-        
+
         with open(config_file, 'w') as f:
             yaml.dump(self.config, f, default_flow_style=False, indent=2)
-        
+
         self.logger.info(f"Configuration saved to {config_file}")
-    
+
     def get_service_config(self, service_name: str) -> Optional[Dict]:
         """Get configuration for specific service"""
         return self.config.get("services", {}).get(service_name)
-    
+
     def get_phase_config(self, phase_name: str) -> Optional[Dict]:
         """Get configuration for specific workflow phase"""
         return self.config.get("phases", {}).get(phase_name)
-    
+
     def validate_config(self) -> bool:
         """Validate workflow configuration"""
         try:
@@ -230,7 +231,7 @@ class AuroraWorkflowConfig:
             for section in required_sections:
                 if section not in self.config:
                     raise ValueError(f"Missing required section: {section}")
-            
+
             # Validate service ports are unique
             ports = []
             for service, config in self.config["services"].items():
@@ -238,23 +239,23 @@ class AuroraWorkflowConfig:
                 if port in ports:
                     raise ValueError(f"Duplicate port {port} found")
                 ports.append(port)
-            
+
             # Validate phase dependencies
             phases = self.config["phases"]
             if not phases.get("initialize", {}).get("enabled", True):
                 raise ValueError("Initialize phase must be enabled")
-            
+
             self.logger.info("Configuration validation passed")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"Configuration validation failed: {e}")
             return False
-    
+
     def generate_docker_compose(self) -> str:
         """Generate Docker Compose configuration from workflow config"""
         services = {}
-        
+
         for service_name, service_config in self.config["services"].items():
             services[service_name] = {
                 "build": f"./services/{service_name}",
@@ -279,7 +280,7 @@ class AuroraWorkflowConfig:
                     "retries": 3
                 }
             }
-        
+
         compose_config = {
             "version": "3.8",
             "services": services,
@@ -289,13 +290,13 @@ class AuroraWorkflowConfig:
                 }
             }
         }
-        
+
         return yaml.dump(compose_config, default_flow_style=False)
-    
+
     def generate_kubernetes_manifests(self) -> Dict[str, str]:
         """Generate Kubernetes manifests from workflow config"""
         manifests = {}
-        
+
         # Generate deployment manifests for each service
         for service_name, service_config in self.config["services"].items():
             manifest = {
@@ -347,11 +348,11 @@ class AuroraWorkflowConfig:
                     }
                 }
             }
-            
+
             manifests[f"{service_name}-deployment.yaml"] = yaml.dump(manifest, default_flow_style=False)
-        
+
         return manifests
-    
+
     def create_environment_template(self, environment: str):
         """Create environment-specific configuration template"""
         env_config = {
@@ -362,7 +363,7 @@ class AuroraWorkflowConfig:
                 "name": environment
             }
         }
-        
+
         # Environment-specific overrides
         if environment == "development":
             env_config["services"] = {
@@ -379,47 +380,48 @@ class AuroraWorkflowConfig:
             env_config["security"] = {
                 "compliance": {"gdpr": True, "sox": True}
             }
-        
+
         # Save template
         template_file = self.config_dir / f"{environment}.yaml"
         with open(template_file, 'w') as f:
             yaml.dump(env_config, f, default_flow_style=False, indent=2)
-        
+
         self.logger.info(f"Created environment template: {template_file}")
+
 
 def main():
     """Main configuration manager CLI"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Aurora Workflow Configuration Manager")
     parser.add_argument("--validate", action="store_true", help="Validate configuration")
     parser.add_argument("--save", help="Save configuration to file")
     parser.add_argument("--generate-docker", action="store_true", help="Generate Docker Compose")
     parser.add_argument("--generate-k8s", action="store_true", help="Generate Kubernetes manifests")
     parser.add_argument("--create-env", help="Create environment template")
-    
+
     args = parser.parse_args()
-    
+
     # Initialize configuration manager
     config_manager = AuroraWorkflowConfig()
-    
+
     if args.validate:
         if config_manager.validate_config():
             print("✅ Configuration validation passed")
         else:
             print("❌ Configuration validation failed")
             exit(1)
-    
+
     if args.save:
         config_manager.save_config(args.save)
         print(f"✅ Configuration saved to {args.save}")
-    
+
     if args.generate_docker:
         compose_config = config_manager.generate_docker_compose()
         with open("docker-compose.yml", 'w') as f:
             f.write(compose_config)
         print("✅ Docker Compose configuration generated")
-    
+
     if args.generate_k8s:
         manifests = config_manager.generate_kubernetes_manifests()
         os.makedirs("k8s", exist_ok=True)
@@ -427,10 +429,11 @@ def main():
             with open(f"k8s/{filename}", 'w') as f:
                 f.write(content)
         print(f"✅ Generated {len(manifests)} Kubernetes manifests")
-    
+
     if args.create_env:
         config_manager.create_environment_template(args.create_env)
         print(f"✅ Created environment template for {args.create_env}")
+
 
 if __name__ == "__main__":
     main()

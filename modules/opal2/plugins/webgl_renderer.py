@@ -88,25 +88,25 @@ class WebGLRendererPlugin(RendererPlugin):
             attribute vec3 position;
             attribute vec3 color;
             attribute float intensity;
-            
+
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
             uniform float time;
             uniform float coherence;
-            
+
             varying vec3 vColor;
             varying float vIntensity;
             varying float vQuantumPhase;
-            
+
             void main() {
                 vec3 pos = position;
-                
+
                 // Quantum oscillation effect
                 float quantumOscillation = sin(time * 2.0 + position.x * 0.1) * coherence * 0.1;
                 pos.y += quantumOscillation;
-                
+
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                
+
                 vColor = color;
                 vIntensity = intensity;
                 vQuantumPhase = time * 3.14159 + position.x * 0.5;
@@ -118,28 +118,28 @@ class WebGLRendererPlugin(RendererPlugin):
             "quantum_fragment"
         ] = """
             precision mediump float;
-            
+
             uniform float time;
             uniform float entanglement;
             uniform vec3 ambientLight;
-            
+
             varying vec3 vColor;
             varying float vIntensity;
             varying float vQuantumPhase;
-            
+
             void main() {
                 // Quantum interference pattern
                 float interference = sin(vQuantumPhase) * cos(vQuantumPhase * 2.0) * 0.3;
-                
+
                 // Entanglement glow effect
                 float entanglementGlow = entanglement * sin(time * 4.0) * 0.2 + 0.8;
-                
+
                 // Superposition alpha blending
                 float alpha = vIntensity * entanglementGlow + interference;
-                
+
                 vec3 finalColor = vColor * entanglementGlow + ambientLight * 0.1;
                 finalColor += vec3(interference * 0.5, interference * 0.3, interference * 0.7);
-                
+
                 gl_FragColor = vec4(finalColor, alpha);
             }
         """
@@ -151,19 +151,19 @@ class WebGLRendererPlugin(RendererPlugin):
             attribute vec3 position;
             attribute vec3 color;
             attribute vec3 normal;
-            
+
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
             uniform float time;
             uniform float vectorMagnitude;
-            
+
             varying vec3 vColor;
             varying vec3 vNormal;
             varying float vMagnitude;
-            
+
             void main() {
                 vec3 pos = position;
-                
+
                 // Geometric algebra transformation
                 float rotation = time * vectorMagnitude * 0.5;
                 mat3 rotationMatrix = mat3(
@@ -171,11 +171,11 @@ class WebGLRendererPlugin(RendererPlugin):
                     sin(rotation), cos(rotation), 0.0,
                     0.0, 0.0, 1.0
                 );
-                
+
                 pos = rotationMatrix * pos;
-                
+
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                
+
                 vColor = color;
                 vNormal = normal;
                 vMagnitude = vectorMagnitude;
@@ -187,34 +187,34 @@ class WebGLRendererPlugin(RendererPlugin):
             "symbolic_fragment"
         ] = """
             precision mediump float;
-            
+
             uniform vec3 lightDirection;
             uniform vec3 viewDirection;
             uniform float time;
-            
+
             varying vec3 vColor;
             varying vec3 vNormal;
             varying float vMagnitude;
-            
+
             void main() {
                 // Phong lighting model
                 vec3 normal = normalize(vNormal);
                 vec3 lightDir = normalize(lightDirection);
                 vec3 viewDir = normalize(viewDirection);
                 vec3 reflectDir = reflect(-lightDir, normal);
-                
+
                 float diff = max(dot(normal, lightDir), 0.0);
                 float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
-                
+
                 // Symbolic intensity based on vector magnitude
                 float intensity = vMagnitude * sin(time * 2.0) * 0.1 + 0.9;
-                
+
                 vec3 ambient = vColor * 0.3;
                 vec3 diffuse = vColor * diff * 0.7;
                 vec3 specular = vec3(1.0) * spec * 0.3;
-                
+
                 vec3 finalColor = (ambient + diffuse + specular) * intensity;
-                
+
                 gl_FragColor = vec4(finalColor, 1.0);
             }
         """
@@ -606,7 +606,7 @@ class WebGLRendererPlugin(RendererPlugin):
     <div id="controls">
         <!-- Controls will be generated by JavaScript -->
     </div>
-    
+
     <script>
         const sceneData = {json.dumps(scene_data)};
         {self._generate_webgl_javascript(scene_data)}
@@ -622,11 +622,11 @@ class WebGLRendererPlugin(RendererPlugin):
         let scene, camera, renderer, controls;
         let animationId;
         let startTime = Date.now();
-        
+
         function init() {
             // Create scene
             scene = new THREE.Scene();
-            
+
             // Create camera
             const cameraConfig = sceneData.camera;
             camera = new THREE.PerspectiveCamera(
@@ -637,31 +637,31 @@ class WebGLRendererPlugin(RendererPlugin):
             );
             camera.position.set(...cameraConfig.position);
             camera.lookAt(...cameraConfig.target);
-            
+
             // Create renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setClearColor(0x000011, 1);
             document.getElementById('container').appendChild(renderer.domElement);
-            
+
             // Add orbit controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.1;
-            
+
             // Create scene objects
             createSceneObjects();
-            
+
             // Add lights
             addLights();
-            
+
             // Create UI controls
             createUIControls();
-            
+
             // Start animation loop
             animate();
         }
-        
+
         function createSceneObjects() {
             sceneData.objects.forEach(objData => {
                 const object = createObject(objData);
@@ -670,17 +670,17 @@ class WebGLRendererPlugin(RendererPlugin):
                 }
             });
         }
-        
+
         function createObject(objData) {
             let geometry, material, mesh;
-            
+
             switch (objData.type) {
                 case 'mesh':
                     geometry = createGeometry(objData.geometry, objData);
                     material = createMaterial(objData.material);
                     mesh = new THREE.Mesh(geometry, material);
                     break;
-                    
+
                 case 'line':
                     geometry = new THREE.BufferGeometry().setFromPoints(
                         objData.points.map(p => new THREE.Vector3(...p))
@@ -688,7 +688,7 @@ class WebGLRendererPlugin(RendererPlugin):
                     material = new THREE.LineBasicMaterial(objData.material);
                     mesh = new THREE.Line(geometry, material);
                     break;
-                    
+
                 case 'curve':
                     const curve = new THREE.CubicBezierCurve3(...objData.control_points.map(p => new THREE.Vector3(...p)));
                     geometry = new THREE.TubeGeometry(curve, 20, 0.01, 8, false);
@@ -696,16 +696,16 @@ class WebGLRendererPlugin(RendererPlugin):
                     mesh = new THREE.Mesh(geometry, material);
                     break;
             }
-            
+
             if (mesh) {
                 mesh.position.set(...(objData.position || [0, 0, 0]));
                 mesh.rotation.set(...(objData.rotation || [0, 0, 0]));
                 mesh.userData = objData;
             }
-            
+
             return mesh;
         }
-        
+
         function createGeometry(type, objData) {
             switch (type) {
                 case 'box':
@@ -723,14 +723,14 @@ class WebGLRendererPlugin(RendererPlugin):
                     return new THREE.SphereGeometry(0.1, 16, 16);
             }
         }
-        
+
         function createMaterial(matData) {
             const materialProps = {
                 color: new THREE.Color().fromArray(matData.color || [1, 1, 1]),
                 transparent: matData.transparent || false,
                 opacity: matData.opacity || 1.0
             };
-            
+
             switch (matData.type) {
                 case 'phong':
                     return new THREE.MeshPhongMaterial(materialProps);
@@ -740,11 +740,11 @@ class WebGLRendererPlugin(RendererPlugin):
                     return new THREE.MeshBasicMaterial(materialProps);
             }
         }
-        
+
         function addLights() {
             sceneData.lights.forEach(lightData => {
                 let light;
-                
+
                 switch (lightData.type) {
                     case 'directional':
                         light = new THREE.DirectionalLight(
@@ -753,7 +753,7 @@ class WebGLRendererPlugin(RendererPlugin):
                         );
                         light.position.set(...lightData.position);
                         break;
-                        
+
                     case 'ambient':
                         light = new THREE.AmbientLight(
                             new THREE.Color().fromArray(lightData.color),
@@ -761,39 +761,39 @@ class WebGLRendererPlugin(RendererPlugin):
                         );
                         break;
                 }
-                
+
                 if (light) {
                     scene.add(light);
                 }
             });
         }
-        
+
         function createUIControls() {
             // This would create the UI controls based on the interactive_controls configuration
             // Implementation depends on the specific UI framework being used
         }
-        
+
         function animate() {
             animationId = requestAnimationFrame(animate);
-            
+
             const time = (Date.now() - startTime) * 0.001;
-            
+
             // Update uniforms
             scene.traverse(child => {
                 if (child.material && child.material.uniforms) {
                     child.material.uniforms.time.value = time;
                 }
-                
+
                 // Apply animations
                 if (child.userData && child.userData.animation) {
                     applyAnimation(child, child.userData.animation, time);
                 }
             });
-            
+
             controls.update();
             renderer.render(scene, camera);
         }
-        
+
         function applyAnimation(object, animData, time) {
             switch (animData.type) {
                 case 'rotation':
@@ -808,15 +808,15 @@ class WebGLRendererPlugin(RendererPlugin):
                     break;
             }
         }
-        
+
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-        
+
         window.addEventListener('resize', onWindowResize, false);
-        
+
         // Initialize the application
         init();
         """

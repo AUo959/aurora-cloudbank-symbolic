@@ -15,6 +15,10 @@ from pathlib import Path
 from typing import Dict, List
 
 # import schedule  # Optional dependency
+try:
+    import schedule
+except ImportError:
+    schedule = None
 
 
 class MaintenanceScheduler:
@@ -102,6 +106,10 @@ class MaintenanceScheduler:
 
     def setup_schedules(self):
         """Set up all maintenance schedules."""
+        if schedule is None:
+            self.logger.warning("Schedule module not available, skipping schedule setup")
+            return
+        
         schedules = self.config["schedules"]
 
         # Cache cleanup - daily
@@ -116,23 +124,26 @@ class MaintenanceScheduler:
         # Branch analysis - weekly
         day = schedules["branch_analysis"]["day"]
         time_str = schedules["branch_analysis"]["time"]
-        getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, "branch_analysis"
-        )
+        if schedule:
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "branch_analysis"
+            )
 
         # ZIP optimization - weekly
         day = schedules["zip_optimization"]["day"]
         time_str = schedules["zip_optimization"]["time"]
-        getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, "zip_optimization"
-        )
+        if schedule:
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "zip_optimization"
+            )
 
         # Dependency check - weekly
         day = schedules["dependency_check"]["day"]
         time_str = schedules["dependency_check"]["time"]
-        getattr(schedule.every(), day).at(time_str).do(
-            self._run_maintenance_task, "dependency_audit"
-        )
+        if schedule:
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "dependency_audit"
+            )
 
         self._log("Maintenance schedules configured successfully")
 
@@ -533,7 +544,8 @@ class MaintenanceScheduler:
         def run_scheduler():
             self._log("Maintenance scheduler started")
             while self.running:
-                schedule.run_pending()
+                if schedule:
+                    schedule.run_pending()
                 time.sleep(60)  # Check every minute
             self._log("Maintenance scheduler stopped")
 

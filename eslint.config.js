@@ -35,7 +35,6 @@ export default [
       'no-undef': 'error',
       'prefer-const': 'error',
       camelcase: 'warn',
-      'no-console': 'warn',
       indent: ['error', 2],
     },
     ignores: ['node_modules/**', '.git/**', 'dist/**', 'build/**', '*.min.js'],

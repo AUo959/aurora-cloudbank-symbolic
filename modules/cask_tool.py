@@ -13,8 +13,10 @@ import os
 import zipfile
 
 import pandas as pd
+from io import StringIO
 
 ASSET_ZIP = "CASK_Assets.zip"
+RECTANGLE_PADDING = 0.4
 
 
 def _open_asset(name: str) -> str:
@@ -85,5 +87,8 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
         height=400,
         title="CASK Architecture (simplified)",
     )
-    fig.write_image(output)
+    try:
+        fig.write_image(output)
+    except Exception:
+        fig.write_html(output)
     return output

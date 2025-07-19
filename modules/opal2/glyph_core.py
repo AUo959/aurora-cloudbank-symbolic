@@ -52,13 +52,9 @@ class GlyphGenerator:
         mv = self.ga.mult(mv, blades[0])
 
         return {
-            "quantum_vector": qvec,
+            "symbol": symbol,
+            "vector": qvec.vector,
             "multivector": str(mv),
-            "glyph_data": {
-                "symbol": symbol,
-                "dimension": self.dim,
-                "ascii_pattern": [ord(ch) for ch in symbol],
-            },
         }
 
 

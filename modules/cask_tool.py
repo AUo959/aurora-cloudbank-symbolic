@@ -89,7 +89,7 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     )
     try:
         fig.write_image(output)
-    except Exception:
+    except (OSError, ValueError, plotly.exceptions.PlotlyError) as e:
         # Fallback to HTML if image writing fails
         html_output = output.replace('.png', '.html')
         fig.write_html(html_output)

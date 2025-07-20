@@ -58,7 +58,7 @@ class ValidationManager:
 
         if self.config_file.exists():
             try:
-                with open(self.config_file) as f:
+                with open(self.config_file, encoding="utf-8") as f:
                     config = json.load(f)
                 self.config = {**default_config, **config}
             except BaseException:
@@ -69,7 +69,7 @@ class ValidationManager:
 
     def save_config(self):
         """Save configuration to file"""
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, 'w', encoding="utf-8") as f:
             json.dump(self.config, f, indent=2)
 
     def is_validation_file(self, file_path: str) -> bool:
@@ -131,7 +131,7 @@ class ValidationManager:
         # Read existing gitignore
         existing_lines = []
         if gitignore_path.exists():
-            with open(gitignore_path) as f:
+            with open(gitignore_path, encoding="utf-8") as f:
                 existing_lines = f.read().splitlines()
 
         # Add patterns if not already present
@@ -141,7 +141,7 @@ class ValidationManager:
                 lines_to_add.append(pattern)
 
         if lines_to_add:
-            with open(gitignore_path, 'a') as f:
+            with open(gitignore_path, 'a', encoding="utf-8") as f:
                 f.write("\n")
                 f.write("\n".join(lines_to_add))
                 f.write("\n")
@@ -169,7 +169,7 @@ fi
 echo "✅ Post-commit validation update complete"
 '''
 
-        with open(post_commit_hook, 'w') as f:
+        with open(post_commit_hook, 'w', encoding="utf-8") as f:
             f.write(hook_content)
 
         # Make executable

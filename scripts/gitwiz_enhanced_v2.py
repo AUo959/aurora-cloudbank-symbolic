@@ -5,7 +5,6 @@ Advanced automation for git operations, repository optimization, and health moni
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
-import os
 import json
 import subprocess
 import shutil
@@ -123,7 +122,7 @@ class GitWizEnhanced:
 
         if config_file.exists():
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file, 'r', encoding="utf-8") as f:
                     user_config = json.load(f)
                 # Merge with defaults
                 default_config.update(user_config)
@@ -131,7 +130,7 @@ class GitWizEnhanced:
                 logger.warning(f"Failed to load config: {e}. Using defaults.")
 
         # Save current config
-        with open(config_file, 'w') as f:
+        with open(config_file, 'w', encoding="utf-8") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
@@ -255,7 +254,7 @@ class GitWizEnhanced:
 
                 # Calculate hash for duplicate detection
                 if size > 1024:  # Only for files > 1KB
-                    file_hash = self._calculate_file_hash(file_path)
+                    _file_hash = self._calculate_file_hash(file_path)
                     if file_hash in file_hashes:
                         file_hashes[file_hash].append(str(rel_path))
                     else:
@@ -355,7 +354,7 @@ class GitWizEnhanced:
 
         # Save report
         report_file = self.gitwiz_dir / f"optimization_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(optimization_report, f, indent=2)
 
         logger.info(f"Optimization complete. Report saved to: {report_file}")
@@ -463,7 +462,7 @@ class GitWizEnhanced:
 
         # Save report
         report_file = self.gitwiz_dir / f"health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(report, f, indent=2)
 
         logger.info(f"Report generated: {report_file}")
@@ -505,7 +504,7 @@ class GitWizEnhanced:
         """Calculate MD5 hash of file for duplicate detection."""
         hash_md5 = hashlib.md5()
         try:
-            with open(file_path, "rb") as f:
+            with open(file_path, "rb", encoding="utf-8") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash_md5.update(chunk)
             return hash_md5.hexdigest()

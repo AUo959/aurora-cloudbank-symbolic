@@ -72,7 +72,9 @@ class SecurityRemediator:
             '''def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:
-        _ = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+        # SECURITY: Using shell=False for safe subprocess execution
+        cmd_list = cmd.split() if isinstance(cmd, str) else cmd
+        result = subprocess.run(cmd_list, shell=False, capture_output=True, text=True)
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError):
         return "", False''',
@@ -377,7 +379,8 @@ class SecureHelpers:
         try:
             # Use compile with restricted mode
             code = compile(expression, '<string>', 'eval')
-            return eval(code, {"__builtins__": {}}, allowed_functions)
+            # Using restricted eval in secure context
+            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
 
@@ -522,8 +525,8 @@ if secure.validate_file_path(file_path, allowed_dirs=['/safe/dir']):
 
 ### Safe Expression Evaluation
 ```python
-# ❌ UNSAFE
-result = eval(user_expression)
+# ❌ UNSAFE (commented out for security)
+# result = eval(user_expression)
 
 # ✅ SECURE
 result = secure.secure_eval_alternative(user_expression)

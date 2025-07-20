@@ -1,0 +1,1157 @@
+{
+  "scan_timestamp": "Sun Jul 20 09:11:07 PM UTC 2025",
+  "total_issues": 143,
+  "severity_breakdown": {
+    "CRITICAL": 0,
+    "HIGH": 37,
+    "MEDIUM": 0,
+    "LOW": 106
+  },
+  "issues": [
+    {
+      "file": "security_verification.py",
+      "line": 45,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "stdout, stderr, rc = secure_run(\"find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\\\;\")"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 48,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "stdout, stderr, rc = secure_run(\"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\")"
+    },
+    {
+      "file": "aurora_cli.py",
+      "line": 145,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(\"clear\", shell=True)"
+    },
+    {
+      "file": "aurora_realworld_integration.py",
+      "line": 759,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(\"clear\", shell=True)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 200,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 202,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 355,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions."
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 380,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 494,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 526,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "result = eval(user_expression)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 200,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 202,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 494,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 75,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "_ = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 112,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "_ = subprocess.run(cmd, shell=True)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 156,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(cmd, shell=True, check=True)"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 503,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(cmd, shell=True)"
+    },
+    {
+      "file": "aurora_integration_readiness.py",
+      "line": 15,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 200,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 202,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 352,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions."
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 377,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 491,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 523,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "result = eval(user_expression)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 200,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 202,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 491,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 75,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "_ = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 112,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "_ = subprocess.run(cmd, shell=True)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 156,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(cmd, shell=True, check=True)"
+    },
+    {
+      "file": "syntax_errors_archive/security_remediation.py",
+      "line": 500,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=True can enable command injection",
+      "code": "subprocess.run(cmd, shell=True)"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 118,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions."
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 143,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 47,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 97,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 98,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "'exec': (r'\\bexec\\s*\\(', 'HIGH', 'Use of exec() can execute arbitrary code'),"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 100,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),"
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 13,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 37,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2abf6a42e9b5e843ff16dc3e47356eaaaf9a1f5e2748554c42cd113881052175\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 63,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 101,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"03cdb69eabe2ccadcc20abd6038b24bc1d33b0cc5a9a353d460b858f17a7d99d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 108,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bdbde2a3bca07e6272e110d2470a8ba2d37c378bdd3df21b17386a29a769e917\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 122,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 146,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"33cc7557e2ce364c0c8a1230bffc0c580199cd612d7ac449e25795e70ba7ab29\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 172,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0c9b3da5aab8017141d860fdf9bf96fda95d7653525b66fb1ff5d528d0a6059b\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 210,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"8738f802e937d9be4960ef80786b14c101bcb462a2d3f8e4e441cb90a40de9fd\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 217,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"2bfc3c2deecf2d09ba87039c0c0cde84b2323ca68f894f6e2682eff5239a3b7f\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 231,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 255,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ae6ce62318d3f91ff6c20e7d0b393d990af52d230ab206e252d0a108beba60b7\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 281,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 319,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"6c51c73920a0b76e08f2461e8233943842d78fbd8cec9d9597cbabcf01ba5de1\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 326,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"4ee227ebcb78690eab1eca91b286d21a90fef03ff8af8531fb7203edd1c5f02c\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 340,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 364,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e493396f2112139eea70242e53f18872a0208dea37eac2bed4afe06e32820919\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 390,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"509e51c149d94f0a5e9ab6970e404891428eb0273a21c03a2d7bde2f7a86bf87\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 428,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"979ade9fcc60056661ec70a78d403aea1ea7fe02571c934e840b36b0717db141\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 435,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"7ff397b13ce43f4f7703f165814835eecaef4482fda9578e3c1921cea4472590\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 449,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 473,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ec609cfea1a8b5d60722cbd2c1493d3588508754eed044d61f47e11d67d2d405\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 499,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"7733f4b08d85d2790192ae24b0b9d74b00b5f36fe88e1b4bf26047c76b744794\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 537,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"78270393d8943150f3c05efaafc1585ead802ed9d3c90f4293748e6ff1493def\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 544,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"580295cd195e95ab75e12c9dc39ae560fb65afb17f4ba3fbcd49a7ab3b009332\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 558,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 582,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0cb1e903ba5b002512cc48565d62bdd6ca3d77be97e1262ea533ef7a69ee4e20\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 608,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"b5a807150f2990605bdc063a93a89f2c9f5aa5b19823ccd0f8a6086cb0657e15\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 646,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"74da3746384ed85deda089bcb726efec59f8ad5556eeca9f35d5649abff73d0a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 653,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b833499efbd08070843a13ea938e45a312651687a75247aa6559ce93406b318b\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 667,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 691,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1dd202dbcf7b8180790eb9d575671aa94f94ee412342fb9c6e5f2f994dfa00b5\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 717,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e10aaf7610f84bd2692ef3c3aaff804192a773a9cf09cc06c9f5335c25523df6\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 755,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e4e437950a80e8637450090a32f2d8f626256a957a024cb997cf446f4a44a906\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 762,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b47e21a4a9a78e00721e8ca126886851e926f618e1fc1bdd2978908ccdc23d04\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 776,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 800,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3281bbd9c89a1324e37a55f0870575758f8d8ba5c744454fdb8f2d6c57cacba3\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 826,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"28ec41db1bb80b1367a00f217674007f3b45a157c51a7f638861e00953986594\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 864,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3dfc024f008d3bd159fb2be37bd4fde32e6cb326bf65e4c8bd0ec7d1129e038d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 871,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"5fe1b728cd88dc7fe1f9a5e03b128646483416ed8b9c10f3a9dbde89e33fe718\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 885,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 909,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"fd6432f44dde8575543c0898eb2a7f1a74d285935ced6eaca27bc79d90491694\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 935,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"a501345b244ed670a01c866e3469aaedff4182b748f5dc8ae2ff704959d81b1e\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 973,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"84f8d2bedb80dd5a5c61ba46f2f312ce5348a3fecacfcf06e47d7955c0031f0d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 980,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bbee54da75cbb0128526e123e3bb64dec54cf8b570e5ac5701b2c13ed878bcc2\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 994,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1018,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"16f3843938be94d3369c1a9551f7ef31e6ec335bda497da8f415ba610ba67222\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1044,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2adbe84cf816479dcc1c6235c90e3cb2a2715638163d2c3821110e43eba1be7c\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1082,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"bbd8f7bef0b3534e661d0b3e34be8b66fb38378d9fdc272b38d6402ca71507aa\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1089,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"3002f20b231d087d0140e659a515df80dcf150aaaff75cc459c99d9fe2730cda\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1103,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1515128f0496ead29b7f236008e0b7211570cde0f3cc86325f8de21301a295d5\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1123,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"043cf4ec8c068b6c6e43d9c4614cb0fa83fbab880742840347eba9d475ac03e1\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1143,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 17,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 41,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2abf6a42e9b5e843ff16dc3e47356eaaaf9a1f5e2748554c42cd113881052175\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 67,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 105,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"03cdb69eabe2ccadcc20abd6038b24bc1d33b0cc5a9a353d460b858f17a7d99d\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 112,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bdbde2a3bca07e6272e110d2470a8ba2d37c378bdd3df21b17386a29a769e917\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 126,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 150,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"33cc7557e2ce364c0c8a1230bffc0c580199cd612d7ac449e25795e70ba7ab29\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 176,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0c9b3da5aab8017141d860fdf9bf96fda95d7653525b66fb1ff5d528d0a6059b\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 214,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"8738f802e937d9be4960ef80786b14c101bcb462a2d3f8e4e441cb90a40de9fd\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 221,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"2bfc3c2deecf2d09ba87039c0c0cde84b2323ca68f894f6e2682eff5239a3b7f\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 235,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 259,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ae6ce62318d3f91ff6c20e7d0b393d990af52d230ab206e252d0a108beba60b7\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 285,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 323,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"6c51c73920a0b76e08f2461e8233943842d78fbd8cec9d9597cbabcf01ba5de1\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 330,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"4ee227ebcb78690eab1eca91b286d21a90fef03ff8af8531fb7203edd1c5f02c\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 344,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 368,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e493396f2112139eea70242e53f18872a0208dea37eac2bed4afe06e32820919\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 394,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"509e51c149d94f0a5e9ab6970e404891428eb0273a21c03a2d7bde2f7a86bf87\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 432,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"979ade9fcc60056661ec70a78d403aea1ea7fe02571c934e840b36b0717db141\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 439,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"7ff397b13ce43f4f7703f165814835eecaef4482fda9578e3c1921cea4472590\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 453,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 477,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ec609cfea1a8b5d60722cbd2c1493d3588508754eed044d61f47e11d67d2d405\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 503,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"7733f4b08d85d2790192ae24b0b9d74b00b5f36fe88e1b4bf26047c76b744794\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 541,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"78270393d8943150f3c05efaafc1585ead802ed9d3c90f4293748e6ff1493def\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 548,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"580295cd195e95ab75e12c9dc39ae560fb65afb17f4ba3fbcd49a7ab3b009332\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 562,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 586,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0cb1e903ba5b002512cc48565d62bdd6ca3d77be97e1262ea533ef7a69ee4e20\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 612,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"b5a807150f2990605bdc063a93a89f2c9f5aa5b19823ccd0f8a6086cb0657e15\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 650,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"74da3746384ed85deda089bcb726efec59f8ad5556eeca9f35d5649abff73d0a\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 657,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b833499efbd08070843a13ea938e45a312651687a75247aa6559ce93406b318b\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 671,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 695,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1dd202dbcf7b8180790eb9d575671aa94f94ee412342fb9c6e5f2f994dfa00b5\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 721,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e10aaf7610f84bd2692ef3c3aaff804192a773a9cf09cc06c9f5335c25523df6\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 759,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e4e437950a80e8637450090a32f2d8f626256a957a024cb997cf446f4a44a906\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 766,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b47e21a4a9a78e00721e8ca126886851e926f618e1fc1bdd2978908ccdc23d04\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 780,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 804,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3281bbd9c89a1324e37a55f0870575758f8d8ba5c744454fdb8f2d6c57cacba3\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 830,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"28ec41db1bb80b1367a00f217674007f3b45a157c51a7f638861e00953986594\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 868,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3dfc024f008d3bd159fb2be37bd4fde32e6cb326bf65e4c8bd0ec7d1129e038d\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 875,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"5fe1b728cd88dc7fe1f9a5e03b128646483416ed8b9c10f3a9dbde89e33fe718\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 889,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 913,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"fd6432f44dde8575543c0898eb2a7f1a74d285935ced6eaca27bc79d90491694\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 939,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"a501345b244ed670a01c866e3469aaedff4182b748f5dc8ae2ff704959d81b1e\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 977,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"84f8d2bedb80dd5a5c61ba46f2f312ce5348a3fecacfcf06e47d7955c0031f0d\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 984,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bbee54da75cbb0128526e123e3bb64dec54cf8b570e5ac5701b2c13ed878bcc2\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 998,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1022,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"16f3843938be94d3369c1a9551f7ef31e6ec335bda497da8f415ba610ba67222\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1048,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2adbe84cf816479dcc1c6235c90e3cb2a2715638163d2c3821110e43eba1be7c\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1086,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"bbd8f7bef0b3534e661d0b3e34be8b66fb38378d9fdc272b38d6402ca71507aa\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1093,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"3002f20b231d087d0140e659a515df80dcf150aaaff75cc459c99d9fe2730cda\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1107,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1515128f0496ead29b7f236008e0b7211570cde0f3cc86325f8de21301a295d5\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1127,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"043cf4ec8c068b6c6e43d9c4614cb0fa83fbab880742840347eba9d475ac03e1\","
+    },
+    {
+      "file": "./exports/aurora_symbolic_export_1752415456.json",
+      "line": 1147,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
+    }
+  ],
+  "fixes_applied": []
+}

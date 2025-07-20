@@ -187,7 +187,8 @@ class AuroraSecurityScanner:
             if issue['type'] == 'innerHTML' and issue['severity'] == 'MEDIUM':
                 self._fix_innerHTML_usage(issue)
             elif issue['type'] == 'subprocess_shell':
-                self._fix_subprocess_shell(issue)
+                # Skip subprocess_shell fixes for now - would need file-specific logic
+                print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
         """Fix innerHTML usage by suggesting textContent"""
@@ -233,7 +234,7 @@ class AuroraSecurityScanner:
                 print(f"  Line {issue['line']}: {issue.get('code', '')}")
             print(f"  {issue['message']}")
 
-        print(f"\n📊 SUMMARY:")
+        print("\n📊 SUMMARY:")
         print(f"  CRITICAL: {severity_counts['CRITICAL']}")
         print(f"  HIGH: {severity_counts['HIGH']}")
         print(f"  MEDIUM: {severity_counts['MEDIUM']}")
@@ -241,7 +242,7 @@ class AuroraSecurityScanner:
         print(f"  TOTAL: {len(self.issues)}")
 
         if self.fixes_applied:
-            print(f"\n✅ FIXES APPLIED:")
+            print("\n✅ FIXES APPLIED:")
             for fix in self.fixes_applied:
                 print(f"  • {fix}")
 
@@ -257,7 +258,7 @@ class AuroraSecurityScanner:
         with open('security_scan_report.json', 'w') as f:
             json.dump(report, f, indent=2)
 
-        print(f"\n📋 Detailed report saved to: security_scan_report.json")
+        print("\n📋 Detailed report saved to: security_scan_report.json")
 
         return len([i for i in self.issues if i['severity'] in ['CRITICAL', 'HIGH']])
 
@@ -285,7 +286,7 @@ def main():
         print(f"\n⚠️ Found {critical_high_count} critical/high severity issues!")
         sys.exit(1)
     else:
-        print(f"\n✅ No critical or high severity issues found!")
+        print("\n✅ No critical or high severity issues found!")
         sys.exit(0)
 
 

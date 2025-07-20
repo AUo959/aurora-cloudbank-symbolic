@@ -142,7 +142,8 @@ class AuroraCLI:
                 elif command == "test" or command == "t":
                     self.run_integration_test()
                 elif command == "clear":
-                    subprocess.run("clear", shell=True)
+                    # SECURITY: Using shell=False for safe subprocess execution
+                    subprocess.run(["clear"], shell=False)
                 elif command == "":
                     continue
                 else:

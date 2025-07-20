@@ -5,7 +5,6 @@ Advanced automation for git operations, repository optimization, and health moni
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
-import os
 import json
 import subprocess
 import shutil
@@ -123,7 +122,7 @@ class GitWizEnhanced:
 
         if config_file.exists():
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file, 'r', encoding="utf-8") as f:
                     user_config = json.load(f)
                 # Merge with defaults
                 default_config.update(user_config)
@@ -131,7 +130,7 @@ class GitWizEnhanced:
                 logger.warning(f"Failed to load config: {e}. Using defaults.")
 
         # Save current config
-        with open(config_file, 'w') as f:
+        with open(config_file, 'w', encoding="utf-8") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
@@ -355,7 +354,7 @@ class GitWizEnhanced:
 
         # Save report
         report_file = self.gitwiz_dir / f"optimization_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(optimization_report, f, indent=2)
 
         logger.info(f"Optimization complete. Report saved to: {report_file}")
@@ -463,7 +462,7 @@ class GitWizEnhanced:
 
         # Save report
         report_file = self.gitwiz_dir / f"health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(report, f, indent=2)
 
         logger.info(f"Report generated: {report_file}")
@@ -650,6 +649,151 @@ class GitWizEnhanced:
             })
 
         return recommendations
+
+    def comprehensive_code_quality_check(self, auto_fix: bool = False, dry_run: bool = True) -> Dict[str, Any]:
+        """
+        Perform comprehensive code quality check.
+        
+        Args:
+            auto_fix: Whether to automatically fix issues
+            dry_run: If True, only analyze without making changes
+            
+        Returns:
+            Dictionary containing quality check results
+        """
+        logger.info(f"🔍 Starting comprehensive code quality check (auto_fix={auto_fix}, dry_run={dry_run})")
+        
+        start_time = datetime.now()
+        
+        # Analyze repository metrics and files
+        metrics = self.analyze_repository()
+        file_analysis = self.analyze_files()
+        
+        # Generate quality score based on various factors
+        quality_factors = {
+            "optimization_score": metrics.optimization_score,
+            "security_score": metrics.security_score,
+            "file_organization": 1.0 - min(len(file_analysis.large_files) / 50.0, 1.0),
+            "branch_management": 1.0 - min(metrics.stale_branches / 20.0, 1.0)
+        }
+        
+        overall_quality_score = sum(quality_factors.values()) / len(quality_factors) * 100
+        
+        # Collect scan results
+        scan_results = {
+            "summary": {
+                "total_issues": len(file_analysis.large_files) + len(file_analysis.duplicate_candidates) + metrics.stale_branches,
+                "auto_fixable": len(file_analysis.cache_files) + len(file_analysis.temp_files),
+                "quality_factors": quality_factors
+            },
+            "file_analysis": asdict(file_analysis),
+            "metrics": asdict(metrics)
+        }
+        
+        # Auto-fix if requested and not dry run
+        fix_results = {"total_fixes": 0, "fixes_applied": []}
+        
+        if auto_fix and not dry_run:
+            logger.info("🔧 Applying automatic fixes...")
+            
+            # Remove cache and temp files
+            cache_files = file_analysis.cache_files
+            temp_files = file_analysis.temp_files
+            
+            files_to_remove = cache_files + temp_files
+            if files_to_remove:
+                try:
+                    self._remove_files(files_to_remove)
+                    fix_results["total_fixes"] = len(files_to_remove)
+                    fix_results["fixes_applied"].append(f"Removed {len(files_to_remove)} cache/temp files")
+                    logger.info(f"✅ Removed {len(files_to_remove)} cache/temp files")
+                except Exception as e:
+                    logger.error(f"Failed to remove files: {e}")
+        
+        execution_time = (datetime.now() - start_time).total_seconds()
+        
+        return {
+            "scan_results": scan_results,
+            "fix_results": fix_results,
+            "quality_score": overall_quality_score,
+            "execution_time": execution_time,
+            "recommendations": self._generate_recommendations(metrics, file_analysis)
+        }
+
+    def intelligent_maintenance_workflow(self, aggressive: bool = False) -> Dict[str, Any]:
+        """
+        Execute intelligent maintenance workflow.
+        
+        Args:
+            aggressive: Whether to apply aggressive optimizations
+            
+        Returns:
+            Dictionary containing maintenance results
+        """
+        logger.info(f"🔧 Starting intelligent maintenance workflow (aggressive={aggressive})")
+        
+        start_time = datetime.now()
+        
+        stages = {}
+        total_fixes = 0
+        
+        # Stage 1: Repository analysis
+        logger.info("📊 Stage 1: Repository analysis...")
+        try:
+            metrics = self.analyze_repository()
+            file_analysis = self.analyze_files()
+            stages["analysis"] = {
+                "status": "success",
+                "metrics": asdict(metrics),
+                "file_analysis": asdict(file_analysis)
+            }
+        except Exception as e:
+            stages["analysis"] = {"status": "error", "error": str(e)}
+        
+        # Stage 2: File optimization
+        logger.info("🗂️ Stage 2: File optimization...")
+        try:
+            optimization_result = self.optimize_repository(dry_run=not aggressive)
+            stages["optimization"] = optimization_result
+            total_fixes += optimization_result.get("files_processed", 0)
+        except Exception as e:
+            stages["optimization"] = {"status": "error", "error": str(e)}
+            
+        # Stage 3: Branch management
+        logger.info("🌿 Stage 3: Branch management...")
+        try:
+            branch_result = self.manage_branches("cleanup" if aggressive else "analyze")
+            stages["branches"] = branch_result
+            if aggressive and "branches_cleaned" in branch_result:
+                total_fixes += branch_result["branches_cleaned"]
+        except Exception as e:
+            stages["branches"] = {"status": "error", "error": str(e)}
+            
+        # Stage 4: Generate report
+        logger.info("📋 Stage 4: Generating maintenance report...")
+        try:
+            report = self.generate_report()
+            stages["report"] = {"status": "success", "report_path": str(report.get("report_path", ""))}
+        except Exception as e:
+            stages["report"] = {"status": "error", "error": str(e)}
+        
+        execution_time = (datetime.now() - start_time).total_seconds()
+        
+        # Calculate overall success
+        successful_stages = sum(1 for stage in stages.values() if stage.get("status") != "error")
+        overall_success = successful_stages == len(stages)
+        
+        return {
+            "overall_success": overall_success,
+            "execution_time": execution_time,
+            "stages": stages,
+            "total_fixes": total_fixes,
+            "aggressive": aggressive
+        }
+
+
+# Create alias for backward compatibility
+EnhancedGITWiz = GitWizEnhanced
 
 
 def main():

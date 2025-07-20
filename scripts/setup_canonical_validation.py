@@ -16,7 +16,6 @@ import sys
 import subprocess
 import shutil
 from pathlib import Path
-import json
 
 
 def print_header():
@@ -80,7 +79,7 @@ python3 scripts/git_pre_commit_hook.py
 """
 
     try:
-        with open(pre_commit_hook, 'w') as f:
+        with open(pre_commit_hook, 'w', encoding="utf-8") as f:
             f.write(hook_content)
 
         # Make executable
@@ -312,7 +311,7 @@ python3 scripts/canonical_validator.py --file myfile.md --auto-fix
 **Support**: Aurora CloudBank Development Team
 """
 
-    with open("CANONICAL_VALIDATION_USAGE.md", 'w') as f:
+    with open("CANONICAL_VALIDATION_USAGE.md", 'w', encoding="utf-8") as f:
         f.write(usage_doc)
 
     print("  ✅ Usage documentation created")

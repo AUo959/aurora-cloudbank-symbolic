@@ -49,6 +49,9 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 Detailed architecture guides and visualization package information can be found in
 [the documentation index](docs/index.md).
 
+For operational documentation, status reports, and deployment guides, see the
+[operational documentation](docs/operational/README.md).
+
 ## Features
 
 ### 🎮 **Live Demo Capabilities**

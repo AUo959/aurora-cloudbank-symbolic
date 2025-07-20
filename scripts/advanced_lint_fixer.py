@@ -45,7 +45,7 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Common unused variable patterns
     patterns = [
-        (r"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (r"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run(", shell=False, check=False),
         (r"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
     ]
 

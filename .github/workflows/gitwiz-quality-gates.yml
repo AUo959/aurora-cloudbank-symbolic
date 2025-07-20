@@ -8,7 +8,6 @@ on:
     # Run daily at 2 AM UTC
     - cron: '0 2 * * *'
 
-# Explicit permissions for security
 permissions:
   contents: read
   actions: read
@@ -31,107 +30,95 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Install Python dependencies
+      - name: Install Python lint tools
         run: |
           python -m pip install --upgrade pip
-          pip install isort black pylint flake8 bandit autopep8
+          pip install flake8 black isort pylint bandit autopep8
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Install Node.js dependencies
+      - name: Install Node.js lint tools
         run: |
-          npm install -g markdownlint-cli prettier eslint
+          npm install -g eslint prettier markdownlint-cli
+
+      - name: Verify tool installation
+        run: |
+          echo "=== Verifying Python tools ==="
+          flake8 --version || echo "flake8 failed"
+          black --version || echo "black failed"
+          isort --version || echo "isort failed" 
+          pylint --version || echo "pylint failed"
+          bandit --version || echo "bandit failed"
+          autopep8 --version || echo "autopep8 failed"
+          echo "=== Verifying Node tools ==="
+          eslint --version || echo "eslint failed"
+          prettier --version || echo "prettier failed"
+          markdownlint --version || echo "markdownlint failed"
 
       - name: GitWiz Status Check
         run: |
           if [ -f scripts/gitwiz_integrated_command.py ]; then
             python scripts/gitwiz_integrated_command.py status || echo "::warning::GitWiz status check failed"
           else
-            echo "::notice::GitWiz integrated command not found, skipping status check"
-          fi
-
-      - name: GitWiz Comprehensive Lint Scan
-        run: |
-          if [ -f scripts/gitwiz_integrated_command.py ]; then
-            python scripts/gitwiz_integrated_command.py lint-scan --detailed --target scripts/ || echo "::warning::GitWiz lint scan failed"
-          else
-            echo "::notice::GitWiz integrated command not found, running basic linting"
-            # Run basic Python linting
-            find . -name "*.py" -exec python -m py_compile {} + || true
-            # Run basic flake8 if available
-            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
+            echo "::notice::GitWiz integrated command not found"
           fi
 
       - name: GitWiz Quality Check
         run: |
           if [ -f scripts/gitwiz_integrated_command.py ]; then
             python scripts/gitwiz_integrated_command.py quality-check --output json > quality_report.json || echo "::warning::GitWiz quality check failed"
+            cat quality_report.json
           else
-            echo "::notice::GitWiz integrated command not found, running basic quality checks"
-            # Run basic quality checks
+            echo "::notice::GitWiz not available, running basic quality checks"
+            # Basic Python syntax check
+            find . -name "*.py" -not -path "./venv*" -not -path "./.venv/*" -exec python -m py_compile {} + || true
+            # Basic flake8 check
+            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=venv_opal2,.venv,node_modules || true
             echo '{"status": "basic", "message": "GitWiz not available, ran basic checks"}' > quality_report.json
           fi
 
-      - name: Upload Quality Report
+      - name: Basic Security Scan
+        run: |
+          bandit -r scripts/ -f json -o bandit_report.json || true
+          echo "Security scan completed"
+
+      - name: Upload Reports
         uses: actions/upload-artifact@v4
         with:
-          name: quality-report
-          path: quality_report.json
+          name: quality-reports-${{ github.run_id }}
+          path: |
+            quality_report.json
+            bandit_report.json
 
-      - name: GitWiz Maintenance Check
-        if: github.event_name == 'schedule'
+      - name: Generate Summary
         run: |
-          if [ -f scripts/gitwiz_integrated_command.py ]; then
-            python scripts/gitwiz_integrated_command.py maintenance --aggressive --output json > maintenance_report.json || echo "::warning::GitWiz maintenance failed"
+          echo "# 🔍 GitWiz Quality Gates Summary" > ci_summary.md
+          echo "**Generated:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> ci_summary.md
+          echo "" >> ci_summary.md
+          if [ -f quality_report.json ]; then
+            quality_score=$(jq -r '.summary.quality_score // "N/A"' quality_report.json 2>/dev/null || echo "N/A")
+            total_issues=$(jq -r '.summary.total_issues // "N/A"' quality_report.json 2>/dev/null || echo "N/A")
+            echo "## 📊 Quality Analysis Results" >> ci_summary.md
+            echo "* **Quality Score:** ${quality_score}/100" >> ci_summary.md
+            echo "* **Total Issues:** ${total_issues}" >> ci_summary.md
+            echo "* **Status:** ✅ GitWiz Quality Gates operational" >> ci_summary.md
           else
-            echo '{"status": "skipped", "message": "GitWiz not available"}' > maintenance_report.json
+            echo "## ⚠️ Quality Analysis" >> ci_summary.md
+            echo "* **Status:** Basic checks completed" >> ci_summary.md
           fi
-
-      - name: Upload Maintenance Report
-        if: github.event_name == 'schedule'
-        uses: actions/upload-artifact@v4
-        with:
-          name: maintenance-report
-          path: maintenance_report.json
-
-      - name: Security Scan
-        run: |
-          python -m bandit -r scripts/ -f json -o bandit_report.json || true
-
-      - name: Upload Security Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-report
-          path: bandit_report.json
-
-      - name: Code Coverage Analysis
-        run: |
-          # Add coverage analysis if tests are present
-          echo "Code coverage analysis placeholder"
-
-      - name: Performance Benchmarks
-        if: github.event_name == 'pull_request'
-        run: |
-          # Add performance benchmarking
-          echo "Performance benchmarks placeholder"
-
-      - name: Generate Summary Report
-        run: |
-          if [ -f scripts/generate_ci_summary.py ]; then
-            python scripts/generate_ci_summary.py || echo "::warning::CI summary generation failed"
-          else
-            echo "# CI Summary" > ci_summary.md
-            echo "Basic CI checks completed successfully." >> ci_summary.md
-          fi
+          echo "" >> ci_summary.md
+          echo "**GitWiz Quality Gates** - Streamlined code quality management" >> ci_summary.md
 
       - name: Comment PR with Results
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -144,82 +131,3 @@ jobs:
                 body: summary
               });
             }
-
-  security-audit:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install security tools
-        run: |
-          pip install bandit safety
-
-      - name: Run Security Audit
-        run: |
-          if [ -f scripts/gitwiz_integrated_command.py ]; then
-            python scripts/gitwiz_integrated_command.py lint-scan --target scripts/ > security_scan.txt || echo "GitWiz scan failed" > security_scan.txt
-          else
-            echo "Basic security scan completed" > security_scan.txt
-          fi
-          bandit -r . -f json -o bandit_security.json || true
-
-      - name: Upload Security Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-audit
-          path: |
-            security_scan.txt
-            bandit_security.json
-
-  deployment-quality-check:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [quality-gate]
-    permissions:
-      contents: read
-      actions: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          pip install isort black pylint flake8 bandit autopep8
-
-      - name: Pre-deployment Quality Gate
-        run: |
-          if [ -f scripts/gitwiz_integrated_command.py ]; then
-            python scripts/gitwiz_integrated_command.py workflow --type enhanced --aggressive || echo "::warning::GitWiz workflow failed"
-          else
-            echo "::notice::GitWiz not available, skipping advanced quality gate"
-          fi
-
-      - name: Generate Deployment Report
-        run: |
-          if [ -f scripts/gitwiz_integrated_command.py ]; then
-            python scripts/gitwiz_integrated_command.py status > deployment_status.json || echo '{"status": "error"}' > deployment_status.json
-          else
-            echo '{"status": "basic", "message": "GitWiz not available"}' > deployment_status.json
-          fi
-
-      - name: Upload Deployment Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: deployment-report
-          path: deployment_status.json

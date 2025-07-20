@@ -5,7 +5,6 @@ Continuous monitoring, alerting, and automated maintenance for git repositories
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
-import os
 import json
 import time
 import threading
@@ -150,7 +149,7 @@ class RepositoryHealthMonitor:
 
         if config_path.exists():
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path, 'r', encoding="utf-8") as f:
                     user_config = json.load(f)
                 # Deep merge with defaults
                 self._deep_merge_config(default_config, user_config)
@@ -158,7 +157,7 @@ class RepositoryHealthMonitor:
                 logger.warning(f"Failed to load config from {config_path}: {e}")
 
         # Save current config
-        with open(config_path, 'w') as f:
+        with open(config_path, 'w', encoding="utf-8") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
@@ -327,7 +326,7 @@ class RepositoryHealthMonitor:
         try:
             # Branch count
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path), "branch", "-a"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "branch", "-a"],
                 capture_output=True, text=True, check=True
             )
             metrics["branch_count"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
@@ -337,7 +336,7 @@ class RepositoryHealthMonitor:
             stale_count = 0
 
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path), "for-each-ref", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-ref", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
                 capture_output=True, text=True, check=True
             )
 
@@ -357,14 +356,14 @@ class RepositoryHealthMonitor:
             # Recent commits (last 7 days)
             since_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path), "rev-list", "--count", f"--since={since_date}", "HEAD"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "rev-list", "--count", f"--since={since_date}", "HEAD"],
                 capture_output=True, text=True, check=True
             )
             metrics["recent_commits"] = int(result.stdout.strip() or 0)
 
             # Contributors
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path), "shortlog", "-sn", "--all"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "shortlog", "-sn", "--all"],
                 capture_output=True, text=True, check=True
             )
             metrics["contributors"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
@@ -408,7 +407,7 @@ class RepositoryHealthMonitor:
 
                     # Calculate hash for duplicates (only for files > 1KB)
                     if size > 1024:
-                        file_hash = self._calculate_file_hash(file_path)
+                        _file_hash = self._calculate_file_hash(file_path)
                         if file_hash:
                             file_hashes[file_hash].append(file_path)
 
@@ -444,7 +443,7 @@ class RepositoryHealthMonitor:
         """Calculate file hash for duplicate detection."""
         try:
             hash_md5 = hashlib.md5()
-            with open(file_path, "rb") as f:
+            with open(file_path, "rb", encoding="utf-8") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash_md5.update(chunk)
             return hash_md5.hexdigest()
@@ -596,7 +595,7 @@ class RepositoryHealthMonitor:
         """Prune git objects."""
         try:
             subprocess.run(
-                ["git", "-C", str(self.repo_path), "gc", "--prune=now"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "gc", "--prune=now"],
                 capture_output=True, check=True
             )
         except Exception as e:
@@ -680,7 +679,7 @@ class RepositoryHealthMonitor:
         """Save metrics to file."""
         try:
             metrics_file = self.monitor_dir / "metrics_history.jsonl"
-            with open(metrics_file, 'a') as f:
+            with open(metrics_file, 'a', encoding="utf-8") as f:
                 f.write(json.dumps(asdict(metrics)) + '\n')
         except Exception as e:
             logger.error(f"Failed to save metrics: {e}")
@@ -702,7 +701,7 @@ class RepositoryHealthMonitor:
             if metrics_file.exists():
                 temp_file = metrics_file.with_suffix('.tmp')
 
-                with open(metrics_file, 'r') as infile, open(temp_file, 'w') as outfile:
+                with open(metrics_file, 'r', encoding="utf-8") as infile, open(temp_file, 'w', encoding="utf-8") as outfile:
                     for line in infile:
                         try:
                             data = json.loads(line.strip())

@@ -15,7 +15,6 @@ import sys
 import subprocess
 import os
 from pathlib import Path
-import json
 
 # Add the scripts directory to Python path
 script_dir = Path(__file__).parent.parent / "scripts"
@@ -157,7 +156,7 @@ def main():
                 # Ensure directory exists
                 report_path.parent.mkdir(parents=True, exist_ok=True)
 
-                with open(report_path, 'w') as f:
+                with open(report_path, 'w', encoding="utf-8") as f:
                     f.write("# Pre-Commit Validation Issues\n\n")
                     f.write(f"Generated: {Path(__file__).name} at {Path().cwd()}\n")
                     f.write(f"Strategy: {manager.config['strategy']}\n\n")
@@ -177,7 +176,7 @@ def main():
         except ImportError:
             # Fallback to original behavior if manager not available
             report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
-            with open(report_path, 'w') as f:
+            with open(report_path, 'w', encoding="utf-8") as f:
                 f.write("# Pre-Commit Validation Issues\n\n")
                 for issue in escalations:
                     f.write(f"## {issue.check_name} ({issue.severity})\n")

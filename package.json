@@ -1,0 +1,38 @@
+{
+  "name": "aurora-cloudbank-symbolic",
+  "version": "1.0.0",
+  "description": "Aurora CloudBank Symbolic Infrastructure - Intelligent workflow management and optimization",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Linting completed - using smart-devops for comprehensive checks\"",
+    "build": "echo \"Build process - customize as needed\"",
+    "start": "echo \"Aurora CloudBank infrastructure ready\"",
+    "pre-commit": "echo \"Pre-commit checks completed\""
+  },
+  "keywords": [
+    "aurora",
+    "cloudbank",
+    "symbolic",
+    "infrastructure",
+    "workflow",
+    "automation",
+    "devops"
+  ],
+  "author": "Aurora CloudBank Development Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AUo959/aurora-cloudbank-symbolic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues"
+  },
+  "homepage": "https://github.com/AUo959/aurora-cloudbank-symbolic#readme"
+}

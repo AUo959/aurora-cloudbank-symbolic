@@ -1,0 +1,30 @@
+# Smart Retry Configuration for GitHub Actions
+
+# Add to workflow steps that commonly have transient failures:
+
+- name: Install dependencies with retry
+  uses: nick-invision/retry@v2
+  with:
+    timeout_minutes: 10
+    max_attempts: 3
+    retry_wait_seconds: 30
+    command: npm install
+
+- name: Run tests with retry
+  uses: nick-invision/retry@v2
+  with:
+    timeout_minutes: 15
+    max_attempts: 2
+    retry_wait_seconds: 60
+    command: npm test
+
+# For network-dependent operations:
+- name: Download dependencies
+  run: |
+    for i in {1..3}; do
+      if curl -f https://example.com/resource; then
+        break
+      fi
+      echo "Attempt $i failed, retrying..."
+      sleep $((i * 10))
+    done

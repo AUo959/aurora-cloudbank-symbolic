@@ -44,7 +44,7 @@ class AuroraSecurityScanner:
 
         # Check for dangerous patterns
         dangerous_patterns = {
-            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
             'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
             'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
             'setTimeout_string': (r'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
@@ -94,10 +94,14 @@ class AuroraSecurityScanner:
         """Check Python content for security issues"""
 
         dangerous_patterns = {
-            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),
-            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),
-            'subprocess_shell': (r'subprocess\.\w+.*shell\s*=\s*True', 'HIGH', 'subprocess with shell=True can enable command injection'),
-            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
+            'subprocess_shell': (
+                r'subprocess\.\w+.*shell\s*=\s*True',
+                'HIGH',
+                'subprocess with shell=True can enable command injection'
+            ),
+            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
             'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
             'pickle_load': (r'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
             'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
@@ -247,8 +251,12 @@ class AuroraSecurityScanner:
                 print(f"  • {fix}")
 
         # Save detailed report
+        date_cmd = ['date']
+        timestamp = (
+            subprocess.run(date_cmd, capture_output=True, text=True, shell=False, check=False).stdout.strip()
+        )
         report = {
-            'scan_timestamp': str(subprocess.run(['date'], capture_output=True, text=True, shell=False, check=False).stdout.strip()),
+            'scan_timestamp': str(timestamp),
             'total_issues': len(self.issues),
             'severity_breakdown': severity_counts,
             'issues': sorted_issues,

@@ -42,10 +42,12 @@ def main():
         print("✅ shell=True vulnerabilities: RESOLVED")
 
     # Check for eval/exec usage
-    stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;")
+    find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
+    stdout, stderr, rc = secure_run(find_eval_cmd)
     eval_files = stdout.strip().split('\n') if stdout.strip() else []
 
-    stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;")
+    find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
+    stdout, stderr, rc = secure_run(find_exec_cmd)
     exec_files = stdout.strip().split('\n') if stdout.strip() else []
 
     if eval_files or exec_files:

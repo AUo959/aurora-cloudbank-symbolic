@@ -61,5 +61,19 @@
     "seal_id": "FILE_test_t71_tools_20250720T204314",
     "description": "Verification status: valid",
     "user": "runner"
+  },
+  {
+    "timestamp": "2025-07-20T21:48:34.041305",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20250720T214834",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "node"
+  },
+  {
+    "timestamp": "2025-07-20T21:48:34.041659",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20250720T214834",
+    "description": "Verification status: valid",
+    "user": "node"
   }
 ]

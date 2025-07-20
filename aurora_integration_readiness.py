@@ -10,12 +10,17 @@ from datetime import datetime
 from pathlib import Path
 
 def run_command(cmd):
-    """Run shell command and return result."""
+    """Run shell command safely without shell injection."""
+    import shlex
     try:
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
+        cmd_parts = shlex.split(cmd)
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=30)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return f"Error: {e.stderr.strip()}"
+    except subprocess.TimeoutExpired:
+        return "Error: Command timed out"
+
 
 def main():
     print("🚀 Aurora CloudBank Integration Readiness Assessment")
@@ -154,6 +159,7 @@ def main():
     print("   3. Deploy holographic command interface")
     print("   4. Activate agent constellation")
     print("   5. Validate Aurora CloudBank v3.5.1 integration")
+
 
 if __name__ == "__main__":
     main()

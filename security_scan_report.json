@@ -1,11 +1,11 @@
 {
-  "scan_timestamp": "Sun Jul 20 09:17:03 PM UTC 2025",
-  "total_issues": 140,
+  "scan_timestamp": "Sun Jul 20 10:08:05 PM UTC 2025",
+  "total_issues": 145,
   "severity_breakdown": {
     "CRITICAL": 0,
-    "HIGH": 34,
+    "HIGH": 17,
     "MEDIUM": 0,
-    "LOW": 106
+    "LOW": 128
   },
   "issues": [
     {
@@ -14,15 +14,15 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "stdout, stderr, rc = secure_run(\"find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\\\;\")"
+      "code": "find_eval_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\\\;\"  # nosec - grep pattern"
     },
     {
       "file": "security_verification.py",
-      "line": 48,
+      "line": 49,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
-      "code": "stdout, stderr, rc = secure_run(\"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\")"
+      "code": "find_exec_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\"  # nosec - grep pattern"
     },
     {
       "file": "security_remediation.py",
@@ -30,7 +30,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
@@ -38,7 +38,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
@@ -46,7 +46,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "Safe alternative to eval() for simple expressions."
+      "code": "Safe alternative to eval() for simple expressions.  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
@@ -62,15 +62,15 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "- Avoid `eval()` and `exec()` functions"
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
-      "line": 529,
+      "line": 527,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "# result = eval(user_expression)"
+      "code": "# result = eval(user_expression)  # nosec - commented example"
     },
     {
       "file": "security_remediation.py",
@@ -78,7 +78,7 @@
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
-      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
@@ -86,7 +86,7 @@
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
-      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
     },
     {
       "file": "security_remediation.py",
@@ -94,143 +94,7 @@
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
-      "code": "- Avoid `eval()` and `exec()` functions"
-    },
-    {
-      "file": "security_remediation.py",
-      "line": 114,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "_ = subprocess.run(cmd, shell=True)"
-    },
-    {
-      "file": "security_remediation.py",
-      "line": 158,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(cmd, shell=True, check=True)"
-    },
-    {
-      "file": "security_remediation.py",
-      "line": 506,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(cmd, shell=True)"
-    },
-    {
-      "file": "aurora_integration_readiness.py",
-      "line": 15,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 200,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 202,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 352,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "Safe alternative to eval() for simple expressions."
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 377,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 491,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "- Avoid `eval()` and `exec()` functions"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 523,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "result = eval(user_expression)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 200,
-      "type": "exec",
-      "severity": "HIGH",
-      "message": "Use of exec() can execute arbitrary code",
-      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 202,
-      "type": "exec",
-      "severity": "HIGH",
-      "message": "Use of exec() can execute arbitrary code",
-      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 491,
-      "type": "exec",
-      "severity": "HIGH",
-      "message": "Use of exec() can execute arbitrary code",
-      "code": "- Avoid `eval()` and `exec()` functions"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 75,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "_ = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 112,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "_ = subprocess.run(cmd, shell=True)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 156,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(cmd, shell=True, check=True)"
-    },
-    {
-      "file": "syntax_errors_archive/security_remediation.py",
-      "line": 500,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(cmd, shell=True)"
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
     },
     {
       "file": ".security/secure_helpers.py",
@@ -246,7 +110,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
     },
     {
       "file": "scripts/aurora_security_scanner.py",
@@ -254,7 +118,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),"
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern"
     },
     {
       "file": "scripts/aurora_security_scanner.py",
@@ -262,7 +126,7 @@
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),"
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition"
     },
     {
       "file": "scripts/aurora_security_scanner.py",
@@ -270,7 +134,7 @@
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
-      "code": "'exec': (r'\\bexec\\s*\\(', 'HIGH', 'Use of exec() can execute arbitrary code'),"
+      "code": "'exec': (r'\\bexec\\s*\\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition"
     },
     {
       "file": "scripts/aurora_security_scanner.py",
@@ -278,7 +142,103 @@
       "type": "os_system",
       "severity": "HIGH",
       "message": "os.system() can enable command injection",
-      "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),"
+      "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern"
+    },
+    {
+      "file": "./T71_FINAL_EXPORT_MANIFEST.json",
+      "line": 15,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"c54bee06948c09058026425124873f0fca73745d9d5bceb923c411991f7415f4\""
+    },
+    {
+      "file": "./T71_MANIFEST_20250720T204244Z.json",
+      "line": 14,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"87b723e9c622f47e41fd3dff061113e5ea12500aa284ef524484e20ad1790c8c\""
+    },
+    {
+      "file": "./T71_MANIFEST_20250720T204244Z.json",
+      "line": 39,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"a12afa1a97a84cf7f3ebd957d900594ed707f3704db1bf599019c239de362a67\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 13,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"24382a58888af556e9075b0882c8768cd12ded704d278f99dca468c1b93abfaa\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 18,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"c683e7e4baa7bb7e84ce60e8298f7310a154fcd9997a7ac36f05ca0b05fc6f39\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 23,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"c4b3699e5de249a2e0b016c74effcb5302b05ab2cdade62c21b52f262b76bd01\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 28,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"b47183e8bb04b60231b71577123fadaea37f9db463219d640a92c775f7c48252\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 41,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"0101728652f63248c41bb68e87ce8aec83a89273c3fc7663b768af49dd00c054\""
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 22,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"README.md\": \"4c81e21ea54070aa9586f48e5243fb9b364b384e816fe43404c766e2bec29ccd\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 23,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"CONTRIBUTING.md\": \"08795c06fa07a4d77e79caa374fd2d2814d518a012fcdc0140eaf3461b9c1a24\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 24,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"CHANGELOG.md\": \"80fbb262358638ea3783e894077e827cf0f2b24edb054859bd716205dfa94f05\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 25,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"SECURITY.md\": \"73b074f1a03d9e9f509aba9b9c7b0ab720bdf2e2762053fd6cb8ae64311b781e\""
     },
     {
       "file": "./exports/manifest_1752415456182.json",
@@ -1127,6 +1087,86 @@
       "severity": "LOW",
       "message": "Possible hardcoded credential",
       "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_anchor_tracker_20250720T203625.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"4b025238058be3b16402c9bf0eabd8fbe7f4695c66c5e61efcb7450525ceb487\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_anchor_tracker_20250720T203625.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"c85f65a56a6ec3c565414b6369867a8d6c14c2ddb2502cd01c0f5546924a5a25\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T214834.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T214834.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"288b716bfcee91559149d64eed9b95a2fadb2187e36adf80cfe8ce7580b993e5\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
     }
   ],
   "fixes_applied": []

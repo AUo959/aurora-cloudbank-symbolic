@@ -1,0 +1,32 @@
+name: Aurora Release Pipeline
+'on':
+  push:
+    tags:
+    - v*
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version
+        required: true
+        default: v1.0.0
+jobs:
+  create-release:
+    name: "\U0001F4E6 Create Release"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Generate changelog
+      run: git log --oneline --since="1 month ago" > CHANGELOG.md || true
+    - name: Create GitHub release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Aurora CloudBank ${{ github.ref }}
+        body_path: CHANGELOG.md
+        draft: false
+        prerelease: false

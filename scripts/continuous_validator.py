@@ -12,7 +12,6 @@ This monitor:
 """
 
 import time
-import os
 import sys
 from pathlib import Path
 from watchdog.observers import Observer
@@ -152,7 +151,7 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         alert_file = f"CANONICAL_ALERT_{severity}_{timestamp.replace(':', '-').replace(' ', '_')}.md"
 
-        with open(alert_file, 'w') as f:
+        with open(alert_file, 'w', encoding="utf-8") as f:
             f.write(f"# Aurora CloudBank Canonical Alert - {severity}\n\n")
             f.write(f"**Timestamp**: {timestamp}\n")
             f.write(f"**File**: {file_path}\n")
@@ -194,7 +193,7 @@ class CanonicalValidationHandler(FileSystemEventHandler):
 
         # Append to validation log
         log_file = "canonical_validation.log"
-        with open(log_file, 'a') as f:
+        with open(log_file, 'a', encoding="utf-8") as f:
             f.write(json.dumps(log_entry) + '\n')
 
 
@@ -213,7 +212,7 @@ class ContinuousValidator:
         config_file = self.workspace_path / "config" / "canonical_validation.yaml"
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file, 'r', encoding="utf-8") as f:
                 config = yaml.safe_load(f)
                 return config.get('integration', {}).get('file_watcher', {})
 

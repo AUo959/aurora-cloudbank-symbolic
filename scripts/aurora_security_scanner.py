@@ -124,7 +124,7 @@ class AuroraSecurityScanner:
         if os.path.exists('package.json'):
             try:
                 result = subprocess.run(['npm', 'audit', '--json'],
-                                        capture_output=True, text=True, timeout=30)
+                                        capture_output=True, text=True, timeout=30, shell=False, check=False)
                 if result.returncode != 0 and result.stdout:
                     audit_data = json.loads(result.stdout)
                     if 'vulnerabilities' in audit_data:
@@ -248,7 +248,7 @@ class AuroraSecurityScanner:
 
         # Save detailed report
         report = {
-            'scan_timestamp': str(subprocess.run(['date'], capture_output=True, text=True).stdout.strip()),
+            'scan_timestamp': str(subprocess.run(['date'], capture_output=True, text=True, shell=False, check=False).stdout.strip()),
             'total_issues': len(self.issues),
             'severity_breakdown': severity_counts,
             'issues': sorted_issues,

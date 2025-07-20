@@ -12,10 +12,6 @@ services:
     volumes:
       - ./uploads:/app/uploads
     restart: unless-stopped
-
-
-services:
-  aurora_gui:
     environment:
       - AURORA_SEED_PATH=/app/symbols/aurora.seed.json
     volumes:

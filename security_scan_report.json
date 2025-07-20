@@ -1,9 +1,9 @@
 {
-  "scan_timestamp": "Sun Jul 20 09:11:07 PM UTC 2025",
-  "total_issues": 143,
+  "scan_timestamp": "Sun Jul 20 09:17:03 PM UTC 2025",
+  "total_issues": 140,
   "severity_breakdown": {
     "CRITICAL": 0,
-    "HIGH": 37,
+    "HIGH": 34,
     "MEDIUM": 0,
     "LOW": 106
   },
@@ -25,24 +25,8 @@
       "code": "stdout, stderr, rc = secure_run(\"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\")"
     },
     {
-      "file": "aurora_cli.py",
-      "line": 145,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(\"clear\", shell=True)"
-    },
-    {
-      "file": "aurora_realworld_integration.py",
-      "line": 759,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "subprocess.run(\"clear\", shell=True)"
-    },
-    {
       "file": "security_remediation.py",
-      "line": 200,
+      "line": 202,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -50,7 +34,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 202,
+      "line": 204,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -58,7 +42,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 355,
+      "line": 357,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -66,15 +50,15 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 380,
+      "line": 383,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)"
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
     },
     {
       "file": "security_remediation.py",
-      "line": 494,
+      "line": 497,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -82,19 +66,11 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 526,
+      "line": 529,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "result = eval(user_expression)"
-    },
-    {
-      "file": "security_remediation.py",
-      "line": 200,
-      "type": "exec",
-      "severity": "HIGH",
-      "message": "Use of exec() can execute arbitrary code",
-      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+      "code": "# result = eval(user_expression)"
     },
     {
       "file": "security_remediation.py",
@@ -102,11 +78,19 @@
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\","
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 204,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
       "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\","
     },
     {
       "file": "security_remediation.py",
-      "line": 494,
+      "line": 497,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -114,15 +98,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 75,
-      "type": "subprocess_shell",
-      "severity": "HIGH",
-      "message": "subprocess with shell=True can enable command injection",
-      "code": "_ = subprocess.run(cmd, shell=True, capture_output=True, text=True)"
-    },
-    {
-      "file": "security_remediation.py",
-      "line": 112,
+      "line": 114,
       "type": "subprocess_shell",
       "severity": "HIGH",
       "message": "subprocess with shell=True can enable command injection",
@@ -130,7 +106,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 156,
+      "line": 158,
       "type": "subprocess_shell",
       "severity": "HIGH",
       "message": "subprocess with shell=True can enable command injection",
@@ -138,7 +114,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 503,
+      "line": 506,
       "type": "subprocess_shell",
       "severity": "HIGH",
       "message": "subprocess with shell=True can enable command injection",

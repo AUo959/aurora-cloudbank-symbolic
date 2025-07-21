@@ -53,7 +53,7 @@ class GlyphGenerator:
 
         return {
             "symbol": symbol,
-            "vector": qvec.vector.tolist(),
+            "vector": qvec.vector.tolist() if hasattr(qvec.vector, "tolist") else TypeError("qvec.vector does not support .tolist()"),
             "multivector": str(mv),
         }
 

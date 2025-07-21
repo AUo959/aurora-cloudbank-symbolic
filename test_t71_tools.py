@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """
+
+    from tools.symbolic.anchor_tracker import SymbolicAnchorTracker
+    from tools.symbolic.memory_sealer import MemorySealingEngine
+    from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
+    from tools.symbolic.manifest_generator import ManifestGenerator
+        import traceback
+
 Basic test for T71 Symbolic Infrastructure tools
 """
 
-import sys
-import os
-from pathlib import Path
 
 # Add tools to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
 
 def test_anchor_tracker():
     """Test anchor tracker functionality"""
-    from tools.symbolic.anchor_tracker import SymbolicAnchorTracker
 
     print("🔍 Testing Anchor Tracker...")
     tracker = SymbolicAnchorTracker(".")
@@ -29,7 +32,6 @@ def test_anchor_tracker():
 
 def test_memory_sealer():
     """Test memory sealing functionality"""
-    from tools.symbolic.memory_sealer import MemorySealingEngine
 
     print("🔐 Testing Memory Sealer...")
     sealer = MemorySealingEngine(".")
@@ -52,7 +54,6 @@ def test_cli_integration():
     print("🖥️  Testing CLI Integration...")
 
     # Test importing CLI
-    from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
 
     cli = AuroraDeveloperCLI(".")
     assert cli.version == "1.0.0", "CLI should have correct version"
@@ -63,7 +64,6 @@ def test_manifest_generator():
     """Test manifest generation"""
     print("📄 Testing Manifest Generator...")
 
-    from tools.symbolic.manifest_generator import ManifestGenerator
 
     generator = ManifestGenerator(".")
 
@@ -89,7 +89,6 @@ def main():
 
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
-        import traceback
         traceback.print_exc()
         return 1
 

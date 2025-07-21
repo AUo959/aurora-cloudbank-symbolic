@@ -22,7 +22,7 @@ def fix_logging_fstring_interpolation(file_path: str) -> bool:
         (r'\.info\("([^"]*{[^}]*}[^"]*)"\)', r'.info(r"\1", TODO_FIX_ARGS)'),
         (r'\.error\("([^"]*{[^}]*}[^"]*)"\)', r'.error(r"\1", TODO_FIX_ARGS)'),
         (r'\.warning\("([^"]*{[^}]*}[^"]*)"\)', r'.warning(r"\1", TODO_FIX_ARGS)'),
-        (r'\.debug\("([^"]*{[^}]*}[^"]*)"\)', r'.debug(r"\1", TODO_FIX_ARGS)'),
+        (r'\.debug\("([^"]*{[^}]*}[^"]*)"\)', r'.debug(r"\1", TODO_FIX_ARGS)r'),
     ]
 
     for pattern, replacement in patterns:
@@ -43,8 +43,8 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Common unused variable patterns
     patterns = [
-        (r"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
-        (r"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
+        (rr"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (rr"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
     ]
 
     for pattern, replacement in patterns:
@@ -121,7 +121,7 @@ def remove_empty_fstrings(file_path: str) -> bool:
 
 def add_missing_type_annotations(file_path: str) -> bool:
     """Add missing type annotations for common patterns."""
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, "r", encoding="utf-8r") as f:
         content = f.read()
 
     original_content = content
@@ -129,11 +129,11 @@ def add_missing_type_annotations(file_path: str) -> bool:
     # Add return type annotations for simple functions
     patterns = [
         (
-            r'def (\w+)\(self\):\s*"""([^"]*?)"""',
-            r'def \1(self) -> None:\n        """\2"""',
+            rr'def (\w+)\(self\):\s*"""([^"]*?)"""',
+            r'def \1(self) -> None:\n        """\2""r"',
         ),
         (
-            r'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
+            rr'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
             r'def \1(self, \2: str) -> None:\n        """\3"""',
         ),
     ]

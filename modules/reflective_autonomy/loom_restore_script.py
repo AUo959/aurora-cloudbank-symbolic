@@ -18,11 +18,7 @@
 
 # Load Governance Capsule Descriptor (for symbolic agents)
 import yaml
-from autonomic_correction_engine import AutonomicCorrectionEngine  # noqa: F401
-from capsule_linter import CapsuleLinter  # noqa: F401
-from continuity_manager import ContinuityManager  # noqa: F401
 from reflective_autonomy_loop import ReflectiveAutonomyLoop
-from reflective_monitor_core import ReflectiveMonitor  # noqa: F401
 
 # ====================================
 # STEP 3 — Reinitialize Reflective State

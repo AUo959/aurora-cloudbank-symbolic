@@ -1,6 +1,7 @@
 from symbolic_tagging_engine import classify_thread_content
 
 class ThreadcoreClassifierCapsule:
+
     def __init__(self):
         self.module_name = "THREADCORE_TaggingEngine_v2"
         self.version = "v2.0"

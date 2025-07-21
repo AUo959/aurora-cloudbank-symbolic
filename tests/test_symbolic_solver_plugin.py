@@ -9,6 +9,7 @@ from modules.symbolic_core.symbolic_solver_plugin import (
 )
 
 class DummyPlugin(SymbolicSolverPlugin):
+
     def name(self):
         return "dummy"
 

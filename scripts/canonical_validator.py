@@ -13,10 +13,8 @@ import json
 import re
 import subprocess
 import difflib
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from pathlib import Path
-import yaml
 
 @dataclass
 class ValidationResult:
@@ -159,7 +157,7 @@ class CanonicalValidator:
                     break
 
         # Check drift lock values
-        drift_pattern = r"drift_lock[\"'\s]*:?[\"'\s]*([0-9.]+)"
+        drift_pattern = r"drift_lock[\r"r'\s]*:?[\"'\s]*([0-9.]+)"
         drift_matches = re.findall(drift_pattern, content, re.IGNORECASE)
         for match in drift_matches:
             if float(match) != 0.000:
@@ -206,7 +204,7 @@ class CanonicalValidator:
                         break
 
             # Also check with role pattern for structured content
-            role_pattern = rf"{re.escape(role)}[\"'\s]*:?[\"'\s]*([^\"',\n}}]+)"
+            role_pattern = rf"{re.escape(role)}[\r"r'\s]*:?[\"'\s]*([^\"',\n}}]+)"
             matches = re.findall(role_pattern, updated_content, re.IGNORECASE)
 
             for match in matches:
@@ -224,7 +222,7 @@ class CanonicalValidator:
                         ))
                     else:
                         results.append(ValidationResult(
-                            f"staff_name_validation_{role.replace(' ', '_')}", "ESCALATE", "MEDIUM",
+                            f"staff_name_validation_{role.replace(' ', '_r')}", "ESCALATE", "MEDIUM",
                             f"Non-canonical name for {role}: {match}",
                             f"Replace with canonical name: {canonical_name}"
                         ))
@@ -273,8 +271,8 @@ class CanonicalValidator:
 
         # Check for message syntax patterns
         msg_patterns = [
-            (r"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
-            (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
+            (rr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
+            (rr"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
         ]
 
         for pattern, msg_type in msg_patterns:
@@ -339,7 +337,7 @@ class CanonicalValidator:
         if "anchor" in content.lower() and "EOS_SEED_ORION" not in content:
             results.append(ValidationResult(
                 "python_anchor_reference", "ESCALATE", "MEDIUM",
-                f"Python file references anchor but not canonical EOS_SEED_ORION",
+                "Python file references anchor but not canonical EOS_SEED_ORION",
                 "Ensure anchor references use canonical EOS_SEED_ORION"
             ))
 
@@ -446,7 +444,7 @@ class CanonicalValidator:
         medium = [r for r in escalations if r.severity == "MEDIUM"]
         low = [r for r in escalations if r.severity == "LOW"]
 
-        report = f"""
+        report = """
 # Aurora CloudBank Canonical Validation Report
 **Generated**: {subprocess.check_output(['date']).decode().strip()}
 **Workspace**: {self.workspace_path.absolute()}
@@ -463,7 +461,7 @@ class CanonicalValidator:
         for result in auto_fixed:
             report += f"- ✅ {result.check_name}: {result.message}\n"
 
-        report += f"""
+        report += """
 ## ⚠️ Escalations Required ({len(escalations)})
 
 ### 🚨 Critical Issues ({len(critical)})
@@ -472,21 +470,21 @@ class CanonicalValidator:
             report += f"- ❗ **{result.check_name}**: {result.message}\n"
             report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += f"""
+        report += """
 ### 🔴 High Priority Issues ({len(high)})
 """
         for result in high:
             report += f"- 🔴 **{result.check_name}**: {result.message}\n"
             report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += f"""
+        report += """
 ### 🟡 Medium Priority Issues ({len(medium)})
 """
         for result in medium:
             report += f"- 🟡 **{result.check_name}**: {result.message}\n"
             report += f"  - **Suggested Fix**: {result.suggested_fix}\n\n"
 
-        report += f"""
+        report += """
 ### 🟢 Low Priority Issues ({len(low)})
 """
         for result in low:
@@ -540,7 +538,7 @@ def main():
     escalations = [r for r in results if r.status == "ESCALATE"]
     auto_fixes = [r for r in results if r.status == "AUTO_FIXED"]
 
-    print(f"\n🎯 Validation Complete:")
+    print("\n🎯 Validation Complete:")
     print(f"  - Auto-fixes applied: {len(auto_fixes)}")
     print(f"  - Escalations raised: {len(escalations)}")
 

@@ -11,12 +11,9 @@ Primary functions:
 """
 
 import sys
-import os
 import argparse
-import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 
 # Add tools directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -35,7 +32,7 @@ class AuroraDeveloperCLI:
 
     def print_banner(self):
         """Print Aurora Developer CLI banner"""
-        banner = f"""
+        banner = """
 ╔═══════════════════════════════════════════════════╗
 ║              Aurora Developer CLI                 ║
 ║        T71 Symbolic Infrastructure Genesis        ║
@@ -129,7 +126,7 @@ class AuroraDeveloperCLI:
             anchor = self.anchor_tracker.resolve_anchor(args.anchor_id)
 
             if anchor:
-                print(f"\n⚓ Anchor Details:")
+                print("\n⚓ Anchor Details:")
                 print(f"  ID: {anchor.anchor_id}")
                 print(f"  Type: {anchor.anchor_type}")
                 print(f"  Location: {anchor.file_path}:{anchor.line_number}")
@@ -142,7 +139,7 @@ class AuroraDeveloperCLI:
                 lineage = lineages.get(args.anchor_id)
 
                 if lineage:
-                    print(f"\n🔗 Lineage Information:")
+                    print("\n🔗 Lineage Information:")
                     print(f"  Generation: {lineage.generation}")
                     print(f"  Ancestors: {lineage.ancestors if lineage.ancestors else 'None'}")
                     print(f"  Descendants: {lineage.descendants if lineage.descendants else 'None'}")
@@ -171,7 +168,7 @@ class AuroraDeveloperCLI:
             description = f"Thread seal for {args.anchor_id}"
             seal = self.memory_sealer.seal_thread(args.anchor_id, description)
 
-            print(f"✅ Thread sealed successfully:")
+            print("✅ Thread sealed successfully:")
             print(f"  Seal ID: {seal.seal_id}")
             print(f"  Hash: {seal.sha256_hash}")
             print(f"  Files: {seal.recovery_data.get('file_count', 'Unknown')}")
@@ -268,7 +265,7 @@ class AuroraDeveloperCLI:
     def cmd_manifest(self, args) -> int:
         """Generate export manifest"""
         try:
-            print(f"📄 Generating manifest...")
+            print("📄 Generating manifest...")
 
             # Scan repository first
             self.anchor_tracker.scan_repository()
@@ -281,7 +278,7 @@ class AuroraDeveloperCLI:
             else:
                 # Generate repository-wide manifest
                 manifest = self.anchor_tracker.generate_export_manifest()
-                print(f"✅ Repository manifest generated")
+                print("✅ Repository manifest generated")
 
             # Save manifest
             output_path = args.output or f"T71_MANIFEST_{datetime.now().strftime('%Y%m%dT%H%M%SZ')}.json"
@@ -330,7 +327,7 @@ class AuroraDeveloperCLI:
                 return 1
 
             # Compare basic properties
-            print(f"\n📍 Anchor Comparison:")
+            print("\n📍 Anchor Comparison:")
             print(f"  {args.anchor1}:")
             print(f"    Type: {anchor1.anchor_type}")
             print(f"    Location: {anchor1.file_path}:{anchor1.line_number}")
@@ -346,16 +343,20 @@ class AuroraDeveloperCLI:
             lineage2 = self.anchor_tracker.lineages.get(args.anchor2)
 
             if lineage1 and lineage2:
-                print(f"\n🔗 Lineage Comparison:")
-                print(f"  {args.anchor1}: Gen {lineage1.generation}, {len(lineage1.ancestors)} ancestors, {len(lineage1.descendants)} descendants")
-                print(f"  {args.anchor2}: Gen {lineage2.generation}, {len(lineage2.ancestors)} ancestors, {len(lineage2.descendants)} descendants")
+                print("\n🔗 Lineage Comparison:")
+                print(f"  {args.anchor1}: Gen {lineage1.generation},
+                    {len(lineage1.ancestors)} ancestors,
+                    {len(lineage1.descendants)} descendants")
+                print(f"  {args.anchor2}: Gen {lineage2.generation},
+                    {len(lineage2.ancestors)} ancestors,
+                    {len(lineage2.descendants)} descendants")
 
                 # Find common ancestors
                 common_ancestors = set(lineage1.ancestors) & set(lineage2.ancestors)
                 if common_ancestors:
                     print(f"  Common ancestors: {list(common_ancestors)}")
                 else:
-                    print(f"  No common ancestors found")
+                    print("  No common ancestors found")
 
             return 0
 
@@ -462,7 +463,7 @@ Examples:
     manifest_parser.add_argument("--output", "-o", help="Output file path")
 
     # State comparison
-    diff_parser = subparsers.add_parser("diff", help="Compare anchor states")
+    diff_parser = subparsers.add_parser("dif", help="Compare anchor states")
     diff_parser.add_argument("anchor1", help="First anchor to compare")
     diff_parser.add_argument("anchor2", help="Second anchor to compare")
 
@@ -491,7 +492,7 @@ def main():
         return cli.cmd_restore(args)
     elif args.command == "manifest":
         return cli.cmd_manifest(args)
-    elif args.command == "diff":
+    elif args.command == "dif":
         return cli.cmd_diff(args)
     elif args.command == "status":
         return cli.cmd_status(args)

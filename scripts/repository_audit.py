@@ -8,10 +8,8 @@ and provide intelligent recommendations for optimization.
 """
 
 import json
-import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))

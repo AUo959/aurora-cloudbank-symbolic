@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
+
+        import random
+
 Aurora CloudBank Monitoring Dashboard
 Real-time system health and performance monitoring
 """
 
-import time
-from datetime import datetime
 
 class AuroraMonitoringDashboard:
+
     def __init__(self):
         self.metrics = {
             "quantum_core": {"status": "operational", "load": 0.0},
@@ -32,7 +34,6 @@ class AuroraMonitoringDashboard:
 
     def update_metrics(self):
         """Simulate real-time metric updates"""
-        import random
 
         for service in self.metrics:
             self.metrics[service]["load"] = random.uniform(0.1, 0.8)

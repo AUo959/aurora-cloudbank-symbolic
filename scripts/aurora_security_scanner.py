@@ -11,8 +11,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 class AuroraSecurityScanner:
+
     def __init__(self):
         self.issues = []
         self.fixes_applied = []
@@ -40,15 +40,15 @@ class AuroraSecurityScanner:
                 })
 
     def _check_js_content(self, file_path, content):
-        """Check JavaScript content for security issues"""
+        """Check JavaScript content for security issues""r"
 
         # Check for dangerous patterns
         dangerous_patterns = {
-            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
-            'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
-            'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
-            'setTimeout_string': (r'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
-            'Function_constructor': (r'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
+            'eval': (rr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
+            'innerHTML': (rr'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
+            'document.write': (rr'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
+            'setTimeout_string': (rr'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
+            'Function_constructor': (rr'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
             'dangerouslySetInnerHTML': (
                 r'dangerouslySetInnerHTML',
                 'HIGH',
@@ -91,20 +91,20 @@ class AuroraSecurityScanner:
                 })
 
     def _check_py_content(self, file_path, content):
-        """Check Python content for security issues"""
+        """Check Python content for security issues""r"
 
         dangerous_patterns = {
-            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
-            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
+            'eval': (rr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+            'exec': (rr'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
-                r'subprocess\.\w+.*shell\s*=\s*True',
+                rr'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
                 'subprocess with shell=True can enable command injection'
             ),
-            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
-            'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
-            'pickle_load': (r'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
-            'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
+            'os_system': (rr'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
+            'sql_format': (rr'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
+            'pickle_load': (rr'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
+            'yaml_unsafe': (rr'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
@@ -147,14 +147,14 @@ class AuroraSecurityScanner:
 
     def check_configuration_security(self):
         """Check for security configuration issues"""
-        print("🔍 Checking configuration security...")
+        print("🔍 Checking configuration security...r")
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'"]', 'HIGH', 'Possible hardcoded password'),
-            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded secret'),
-            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded API key'),
-            (r'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
+            (rr'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
+            (rr'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
+            (rr'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
+            (rr'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
 
@@ -195,7 +195,7 @@ class AuroraSecurityScanner:
                 print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
-        """Fix innerHTML usage by suggesting textContent"""
+        """Fix innerHTML usage by suggesting textContent""r"
         file_path = issue['file']
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -203,7 +203,7 @@ class AuroraSecurityScanner:
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
-                r'(\w+)\.innerHTML\s*=\s*([^;]+);',
+                rr'(\w+)\.innerHTML\s*=\s*([^;]+);',
                 r'\1.textContent = \2; // SECURITY FIX: Changed from innerHTML',
                 content
             )
@@ -270,7 +270,6 @@ class AuroraSecurityScanner:
 
         return len([i for i in self.issues if i['severity'] in ['CRITICAL', 'HIGH']])
 
-
 def main():
     scanner = AuroraSecurityScanner()
 
@@ -296,7 +295,6 @@ def main():
     else:
         print("\n✅ No critical or high severity issues found!")
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()

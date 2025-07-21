@@ -7,11 +7,9 @@ Bridge connector for L2 Custom GPT meta-agents with full ZIPWIZ handshake protoc
 """
 
 import asyncio
-import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -367,7 +365,12 @@ class L2MetaAgentBridge:
             "timestamp": datetime.now().isoformat()
         }
 
-    async def relay_message(self, from_agent: str, to_agent: str, message: str, message_type: str = "direct") -> Dict[str, Any]:
+    async def relay_message(self,
+        from_agent: str,
+        to_agent: str,
+        message: str,
+        message_type: str = "direct") -> Dict[str,
+        Any]:
         """Relay message between agents or broadcast to mesh"""
 
         if from_agent not in self.agents:
@@ -465,6 +468,7 @@ class L2MetaAgentBridge:
 l2_bridge = L2MetaAgentBridge()
 
 # Example usage and testing
+
 async def main():
     """Example usage of the L2 Meta-Agent Bridge"""
 

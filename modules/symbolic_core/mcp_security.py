@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from modules.symbolic_core import get_mcp_bridge_core
 
 class MCPSecurity:
+
     def __init__(self):
         self.mcp = get_mcp_bridge_core()
         self.security_layers = self.mcp.get("security_layers", {})

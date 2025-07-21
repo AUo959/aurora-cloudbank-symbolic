@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
 """
 
-import json
-import subprocess
-import sys
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 # Import the enhanced GitWiz with lint cleanup integration
 try:
-    from gitwiz_enhanced import EnhancedGITWiz
 except ImportError:
     EnhancedGITWiz = None
 
@@ -684,7 +679,6 @@ class GITWizWorkflowOrchestrator:
 
 def main():
     """Main CLI interface for workflow orchestrator."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="GITWiz Workflow Orchestrator")
     parser.add_argument(

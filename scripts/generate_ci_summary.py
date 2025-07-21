@@ -14,7 +14,6 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
 
 def load_json_report(file_path: str) -> Dict[str, Any]:
     """Load JSON report if it exists."""
@@ -223,9 +222,9 @@ def generate_ci_summary():
     with open("ci_summary.json", "w", encoding="utf-8") as f:
         json.dump(json_summary, f, indent=2)
 
-    print(f"\nSummary files generated:")
-    print(f"- ci_summary.md (Markdown format)")
-    print(f"- ci_summary.json (JSON format)")
+    print("\nSummary files generated:")
+    print("- ci_summary.md (Markdown format)")
+    print("- ci_summary.json (JSON format)")
 
     return json_summary["overall_status"] == "PASS"
 

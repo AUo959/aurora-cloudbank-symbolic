@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 """
+
+            from scripts.gitwiz_enhanced import EnhancedGITWiz
+            from scripts.gitwiz_lint_cleanup_manager import LintCleanupManager
+            from scripts.gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
+                import yaml
+                import yaml
+
 GitWiz Pre-commit Hooks Audit Tool
 ==================================
 
@@ -16,13 +23,6 @@ This script:
 Author: GitHub Copilot for Aurora CloudBank
 """
 
-import json
-import subprocess
-import sys
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List
 
 class GitWizPrecommitAuditor:
     """Comprehensive auditor for GitWiz pre-commit system."""
@@ -80,7 +80,6 @@ class GitWizPrecommitAuditor:
 
         # Test GitWiz Enhanced
         try:
-            from scripts.gitwiz_enhanced import EnhancedGITWiz
             gitwiz = EnhancedGITWiz(self.repo_path)
             components["enhanced_gitwiz"] = {
                 "available": True,
@@ -94,7 +93,6 @@ class GitWizPrecommitAuditor:
 
         # Test Lint Cleanup Manager
         try:
-            from scripts.gitwiz_lint_cleanup_manager import LintCleanupManager
             manager = LintCleanupManager(self.repo_path)
             components["lint_manager"] = {
                 "available": True,
@@ -107,7 +105,6 @@ class GitWizPrecommitAuditor:
 
         # Test Workflow Orchestrator
         try:
-            from scripts.gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
             orchestrator = GITWizWorkflowOrchestrator(self.repo_path)
             components["orchestrator"] = {"available": True}
             print("  ✅ Workflow Orchestrator - Available")
@@ -125,7 +122,6 @@ class GitWizPrecommitAuditor:
         precommit_config = self.repo_path / ".pre-commit-config.yaml"
         if precommit_config.exists():
             try:
-                import yaml
                 with open(precommit_config) as f:
                     config_data = yaml.safe_load(f)
                 configs["pre_commit_config"] = {
@@ -195,7 +191,6 @@ class GitWizPrecommitAuditor:
             for tool in tool_list:
                 try:
                     result = subprocess.run([tool, "--version"],
-                                         capture_output=True, text=True, timeout=10)
                     available = result.returncode == 0
                     tool_results[category][tool] = {
                         "available": available,
@@ -218,7 +213,6 @@ class GitWizPrecommitAuditor:
         try:
             result = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py", "status"
-            ], capture_output=True, text=True, timeout=30, cwd=self.repo_path)
 
             if result.returncode == 0:
                 status_data = json.loads(result.stdout)
@@ -236,7 +230,6 @@ class GitWizPrecommitAuditor:
             result = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py",
                 "quality-check", "--output", "summary"
-            ], capture_output=True, text=True, timeout=60, cwd=self.repo_path)
 
             if result.returncode == 0:
                 quality_data = json.loads(result.stdout)
@@ -257,7 +250,6 @@ class GitWizPrecommitAuditor:
 
         if workflow_path.exists():
             try:
-                import yaml
                 with open(workflow_path) as f:
                     workflow_data = yaml.safe_load(f)
 
@@ -293,7 +285,6 @@ class GitWizPrecommitAuditor:
                 # Try to run the hook
                 result = subprocess.run([
                     "bash", str(precommit_hook)
-                ], capture_output=True, text=True, timeout=30, cwd=self.repo_path)
 
                 hook_tests["husky_hook"] = {
                     "success": result.returncode == 0,
@@ -319,7 +310,6 @@ class GitWizPrecommitAuditor:
         try:
             result = subprocess.run([
                 "npm", "run", "pre-commit"
-            ], capture_output=True, text=True, timeout=30, cwd=self.repo_path)
 
             hook_tests["npm_precommit"] = {
                 "success": result.returncode == 0,
@@ -408,7 +398,7 @@ class GitWizPrecommitAuditor:
         self.audit_results["recommendations"] = recommendations
 
         # Print summary
-        print(f"\n📊 Audit Summary:")
+        print("\n📊 Audit Summary:")
         print(f"  Issues found: {len(issues)}")
         print(f"  Recommendations: {len(recommendations)}")
 
@@ -421,7 +411,7 @@ class GitWizPrecommitAuditor:
 
         # Print top recommendations
         if recommendations:
-            print(f"\n💡 Key Recommendations:")
+            print("\n💡 Key Recommendations:")
             for i, rec in enumerate(recommendations[:5], 1):
                 print(f"  {i}. {rec}")
 
@@ -448,7 +438,7 @@ def main():
         print(f"\n⚠️ Audit completed with {len(issues)} non-critical issues.")
         return 0
     else:
-        print(f"\n✅ Audit completed successfully - no issues found!")
+        print("\n✅ Audit completed successfully - no issues found!")
         return 0
 
 if __name__ == "__main__":

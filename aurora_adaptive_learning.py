@@ -6,10 +6,7 @@ Advanced pattern recognition and adaptive learning framework
 
 import json
 import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
-import pickle
-from pathlib import Path
 
 class AdaptiveLearningNode:
     """Individual learning node with adaptive capabilities"""

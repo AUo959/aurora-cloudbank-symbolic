@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
 """
+
+        import re
+
 Aurora CloudBank - Automated Maintenance System
 ==============================================
 
 Scheduled maintenance workflows for repository optimization and cleanup.
 """
 
-import argparse
-import datetime
-import json
-import logging
-import subprocess
-import sys
-import time
-from pathlib import Path
-from typing import Any, Dict, List
 
-import schedule
 
 class MaintenanceScheduler:
     """Automated maintenance and cleanup scheduler."""
@@ -588,9 +581,8 @@ class MaintenanceScheduler:
         Returns:
             Health score or 0.0 if not found
         """
-        import re
 
-        match = re.search(r"Health Score: ([\d.]+)/10", output)
+        match = re.search(rr"Health Score: ([\d.]+)/10", output)
         return float(match.group(1)) if match else 0.0
 
     def run_task(self, task_name: str) -> Dict:

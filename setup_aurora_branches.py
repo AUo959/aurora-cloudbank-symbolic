@@ -9,11 +9,11 @@ multi-agent system with proper GitFlow and feature branch strategies.
 
 import subprocess
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 
 class AuroraBranchManager:
+
     def __init__(self):
         self.repo_path = Path.cwd()
         self.config_file = self.repo_path / ".aurora" / "branch_config.json"
@@ -138,7 +138,7 @@ class AuroraBranchManager:
         try:
             # Check if develop branch exists
             result = subprocess.run(
-                ["git", "show-ref", "--verify", "--quiet", "refs/heads/develop"],
+                ["git", "show-re", "--verify", "--quiet", "refs/heads/develop"],
                 cwd=self.repo_path
             )
 
@@ -244,10 +244,10 @@ jobs:
         print("⚡ Setting up Aurora GitFlow aliases...")
 
         aliases = {
-            "aurora-feature": "!f() { git checkout develop && git pull && git checkout -b feature/aurora-$1; }; f",
-            "aurora-hotfix": "!f() { git checkout main && git pull && git checkout -b hotfix/v$(date +%Y%m%d)-$1; }; f",
-            "aurora-release": "!f() { git checkout develop && git pull && git checkout -b release/v$1; }; f",
-            "aurora-finish": "!f() { git checkout develop && git merge --no-ff $1 && git branch -d $1; }; f",
+            "aurora-feature": "!f() { git checkout develop && git pull && git checkout -b feature/aurora-$1; }; ",
+            "aurora-hotfix": "!f() { git checkout main && git pull && git checkout -b hotfix/v$(date +%Y%m%d)-$1; }; ",
+            "aurora-release": "!f() { git checkout develop && git pull && git checkout -b release/v$1; }; ",
+            "aurora-finish": "!f() { git checkout develop && git merge --no-ff $1 && git branch -d $1; }; ",
             "aurora-status": "!git branch -a | grep -E 'feature/aurora|hotfix/|release/|agent/' | head -10",
             "aurora-sync": "!git checkout develop && git pull origin develop && git checkout main && git pull origin main"
         }
@@ -308,7 +308,7 @@ jobs:
             print(f"✅ Branch status report saved: {report_file}")
 
             # Display summary
-            print(f"\n📋 Current Status:")
+            print("\n📋 Current Status:")
             print(f"   🌿 Current Branch: {current_branch}")
             print(f"   📊 Total Branches: {len(branches)}")
             print(f"   🔄 Aurora Version: {self.default_config['version']}")

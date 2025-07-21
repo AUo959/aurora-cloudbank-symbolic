@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     moved_count = create_syntax_errors_archive()
 
-    print(f"\n🎯 Summary:")
+    print("\n🎯 Summary:")
     print(f"✅ Files archived: {moved_count}")
     print("🔍 CodeQL scanning should now work properly")
     print("🚀 Core Aurora CloudBank functionality preserved")

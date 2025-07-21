@@ -11,7 +11,13 @@ from typing import List, Literal, Dict, Any
 class NativeSymbolicVector:
     """Native Python implementation of Vector Symbolic Architecture"""
 
-    def __init__(self, symbol: str, dim: int = 512, vector: List[float] = None, vector_type: Literal["bipolar", "binary", "real"] = "bipolar"):
+    def __init__(self,
+        symbol: str,
+        dim: int = 512,
+        vector: List[float] = None,
+        vector_type: Literal["bipolar",
+        "binary",
+        "real"] = "bipolar"):
         self.symbol = symbol
         self.dim = dim
         self.vector_type = vector_type

@@ -1,27 +1,16 @@
 #!/usr/bin/env python3
 """
+
+        import logging
+    import uvicorn
+
 Opal2 Modular System - FastAPI Integration
 Enhanced quantum visualization API with modular renderer support
 """
 
-import asyncio
-import json
-import uuid
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
 
 # Using native Python math instead of numpy for better performance
-import math
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
 
-from ...symbolic.symbolic_core import SymbolicCore
-from ..glyph_cache import GlyphCache
-from ..glyph_core import GlyphCore
-from ..plugin_system import PluginSystem
-from ..quantum_renderer import QuantumRenderer
 
 app = FastAPI(
     title="Opal2 Modular Visualization System",
@@ -108,7 +97,6 @@ async def health_check():
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
-        import logging
 
         logging.error("Health check failed: %s", str(e), exc_info=True)
         return JSONResponse(
@@ -268,6 +256,7 @@ async def notify_clients(message: Dict[str, Any]):
                 active_connections.remove(connection)
 
 # Component health test functions
+
 async def test_glyph_core():
     """Test glyph core functionality"""
     try:
@@ -338,12 +327,12 @@ async def demo_interface():
 
         <script>
             async function generateAndRender() {
-                const expression = document.getElementById('expression').value;
-                const renderer = document.getElementById('renderer').value;
-                const status = document.getElementById('status');
+                const expression = document.getElementById('expression').value
+                const renderer = document.getElementById('renderer').value
+                const status = document.getElementById('status')
 
                 try {
-                    status.textContent = 'Generating glyph...';
+                    status.textContent = 'Generating glyph...'
 
                     // Generate glyph
                     const generateResponse = await fetch('/generate', {
@@ -353,12 +342,12 @@ async def demo_interface():
                             symbolic_expression: expression,
                             quantum_enhancement: true
                         })
-                    });
+                    })
 
-                    const generateResult = await generateResponse.json();
+                    const generateResult = await generateResponse.json()
 
                     if (generateResult.success) {
-                        status.textContent = 'Rendering...';
+                        status.textContent = 'Rendering...'
 
                         // Render glyph
                         const renderResponse = await fetch('/render', {
@@ -369,21 +358,21 @@ async def demo_interface():
                                 renderer_type: renderer,
                                 dimensions: { width: 800, height: 600 }
                             })
-                        });
+                        })
 
-                        const renderResult = await renderResponse.json();
+                        const renderResult = await renderResponse.json()
 
                         if (renderResult.success) {
-                            status.textContent = 'Render complete!';
-                            document.getElementById('render-area').innerHTML = renderResult.result;
+                            status.textContent = 'Render complete!'
+                            document.getElementById('render-area').innerHTML = renderResult.result
                         } else {
-                            status.textContent = 'Render failed: ' + renderResult.error;
+                            status.textContent = 'Render failed: ' + renderResult.error
                         }
                     } else {
-                        status.textContent = 'Generation failed: ' + generateResult.error;
+                        status.textContent = 'Generation failed: ' + generateResult.error
                     }
                 } catch (error) {
-                    status.textContent = 'Error: ' + error.message;
+                    status.textContent = 'Error: ' + error.message
                 }
             }
         </script>
@@ -392,6 +381,5 @@ async def demo_interface():
     """
 
 if __name__ == "__main__":
-    import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)

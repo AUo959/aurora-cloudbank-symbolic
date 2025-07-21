@@ -13,6 +13,9 @@ AIF_TOKEN = os.environ.get("AIF_TOKEN", "change-me")
 class ConnectionManager:
     """Manage active WebSocket connections."""
 
+    import uvicorn
+
+
     def __init__(self) -> None:
         self.active_connections: List[WebSocket] = []
 
@@ -58,6 +61,5 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         manager.disconnect(websocket)
 
 if __name__ == "__main__":
-    import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8090)

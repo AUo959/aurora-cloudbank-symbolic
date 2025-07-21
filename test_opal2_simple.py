@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
+
+        from fastapi import FastAPI
+
 Simple Opal2 API Test
 Test the FastAPI application
 """
 
-import sys
-from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -17,11 +18,8 @@ def test_api_imports():
 
     try:
         # Test basic imports
-        from fastapi import FastAPI
 
         print("✅ FastAPI import successful")
-
-        from pydantic import BaseModel
 
         print("✅ Pydantic import successful")
 
@@ -60,9 +58,9 @@ def test_opal2_structure():
 
     api_path = opal2_path / "api" / "opal2_api.py"
     if api_path.exists():
-        print(f"✅ opal2_api.py exists")
+        print("✅ opal2_api.py exists")
     else:
-        print(f"❌ opal2_api.py missing")
+        print("❌ opal2_api.py missing")
 
     print("\n📊 Module structure check complete")
 

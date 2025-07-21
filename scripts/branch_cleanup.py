@@ -5,7 +5,6 @@ Deletes merged feature branches, archives backup branches, and closes stale depe
 """
 import re
 import subprocess
-import sys
 
 def get_merged_branches():
     result = subprocess.run(

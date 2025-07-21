@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+            import traceback
+
 GitWiz Integrated Command Interface
 ==================================
 
@@ -17,14 +20,6 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
-import argparse
-import json
-import logging
-import sys
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(
@@ -34,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 # Import GitWiz components
 try:
-    from gitwiz_enhanced import EnhancedGITWiz
 
     ENHANCED_AVAILABLE = True
 except ImportError as e:
@@ -42,7 +36,6 @@ except ImportError as e:
     ENHANCED_AVAILABLE = False
 
 try:
-    from gitwiz_lint_cleanup_manager import LintCleanupManager
 
     LINT_MANAGER_AVAILABLE = True
 except ImportError as e:
@@ -50,7 +43,6 @@ except ImportError as e:
     LINT_MANAGER_AVAILABLE = False
 
 try:
-    from gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
 
     ORCHESTRATOR_AVAILABLE = True
 except ImportError as e:
@@ -601,10 +593,10 @@ class GitWizIntegratedCommand:
     def _format_markdown_output(self, results: Dict[str, Any]) -> str:
         """Format results as markdown."""
         lines = [
-            f"# GitWiz Quality Check Report",
+            "# GitWiz Quality Check Report",
             f"Generated: {results['timestamp']}",
             "",
-            f"## Summary",
+            "## Summary",
             f"- Command: {results['command']}",
             f"- Execution Time: {results.get('execution_time', 0):.2f}s",
             f"- Components Used: {', '.join(results.get('components_used', []))}",
@@ -769,7 +761,6 @@ Examples:
     except Exception as e:
         logger.error(f"Command execution failed: {e}")
         if args.verbose:
-            import traceback
 
             traceback.print_exc()
         sys.exit(1)

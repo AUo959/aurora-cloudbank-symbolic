@@ -7,8 +7,6 @@ goal is to keep the repository stable while providing convenient automation for
 developers.
 """
 
-from __future__ import annotations
-
 import argparse
 import shutil
 import subprocess
@@ -22,6 +20,7 @@ class GITWiz:
         self.project_root = root or Path(__file__).resolve().parent.parent
 
     # ------------------------------------------------------------------ utils
+
     def _run(self, cmd: list[str], check: bool = False) -> bool:
         """Run a command in the project root and echo output."""
         print(f"+ {' '.join(cmd)}")
@@ -42,6 +41,7 @@ class GITWiz:
         return result.returncode == 0
 
     # ----------------------------------------------------------------- actions
+
     def status(self) -> bool:
         return self._run(["git", "status"])
 
@@ -94,6 +94,7 @@ class GITWiz:
         return self._run(["git", "push", "origin", branch])
 
     # ------------------------------------------------------------- branch utils
+
     def branch_list(self) -> bool:
         """List local and remote branches."""
         return self._run(["git", "branch", "-a"])
@@ -117,6 +118,7 @@ class GITWiz:
         return self._run(["git", "merge", source], check=True)
 
     # ------------------------------------------------------------------- PR util
+
     def create_pr(self, title: str | None = None, body: str | None = None) -> bool:
         """Create a pull request using GitHub CLI if available."""
         if shutil.which("gh"):

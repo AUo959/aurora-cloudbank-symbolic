@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank Memory Compression Optimizer
 Advanced memory optimization and compression techniques
 """
 
-import datetime
-import gzip
-import hashlib
-import json
-import os
-import subprocess
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 class MemoryOptimizer:
     """Advanced memory compression and optimization system"""
@@ -458,7 +453,6 @@ Found {len(duplicates)} sets of duplicate files:
         return results
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(description="Aurora CloudBank Memory Optimizer")
     parser.add_argument(

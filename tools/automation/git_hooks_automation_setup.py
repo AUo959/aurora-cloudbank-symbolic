@@ -10,6 +10,7 @@ import shutil
 from pathlib import Path
 
 class GitHooksAutomationSetup:
+
     def __init__(self):
         self.git_hooks_dir = Path('.git/hooks')
         self.hooks_created = []
@@ -188,8 +189,8 @@ fi
 
 # Check branch protection (if pushing to main/master)
 while read local_ref local_sha remote_ref remote_sha; do
-    if [[ "$remote_ref" == "refs/heads/main" ]] || [[ "$remote_ref" == "refs/heads/master" ]]; then
-        echo "🔒 Pushing to protected branch: $(basename "$remote_ref")"
+    if [[ "$remote_re" == "refs/heads/main" ]] || [[ "$remote_re" == "refs/heads/master" ]]; then
+        echo "🔒 Pushing to protected branch: $(basename "$remote_re")"
         echo "Ensure you have proper authorization and code review"
     fi
 done
@@ -483,12 +484,12 @@ For issues with Git hooks:
         for hook in report['hooks_installed']:
             print(f"   • {hook}")
 
-        print(f"\n🚀 Key Benefits:")
+        print("\n🚀 Key Benefits:")
         for benefit in report['benefits'][:4]:  # Show top 4 benefits
             print(f"   • {benefit}")
 
-        print(f"\n📚 Documentation: GIT_HOOKS_README.md")
-        print(f"💡 Test hooks: Run a git commit or push to see them in action!")
+        print("\n📚 Documentation: GIT_HOOKS_README.md")
+        print("💡 Test hooks: Run a git commit or push to see them in action!")
 
         return report
 

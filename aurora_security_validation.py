@@ -91,11 +91,11 @@ class SecurityValidator:
         # Generate recommendations
         if results["overall_score"] >= 90:
             results["recommendations"] = (
-    ["✅ Excellent security posture - maintain current measures"]
+                ["✅ Excellent security posture - maintain current measures"]
 )
         elif results["overall_score"] >= 70:
             results["recommendations"] = (
-    ["🟡 Good security - address partial protections"]
+                ["🟡 Good security - address partial protections"]
 )
         else:
             results["recommendations"] = ["🔴 Critical gaps - immediate action required"]
@@ -250,7 +250,10 @@ class SecurityValidator:
         if (self.security_dir / 'security_policy.json').exists():
             with open(self.security_dir / 'security_policy.json') as f:
                 config = json.load(f)
-                if config.get('security_policy', {}).get('vulnerabilities', {}).get('shell_injection', {}).get('status') == 'REMEDIATED':
+                if config.get('security_policy',
+                    {}).get('vulnerabilities',
+                    {}).get('shell_injection',
+                    {}).get('status') == 'REMEDIATED':
                     score += 50
 
         return score
@@ -312,7 +315,10 @@ class SecurityValidator:
         if (self.security_dir / 'security_policy.json').exists():
             with open(self.security_dir / 'security_policy.json') as f:
                 config = json.load(f)
-                if config.get('security_policy', {}).get('vulnerabilities', {}).get('shell_injection', {}).get('status') == 'REMEDIATED':
+                if config.get('security_policy',
+                    {}).get('vulnerabilities',
+                    {}).get('shell_injection',
+                    {}).get('status') == 'REMEDIATED':
                     score += 60
 
         # Check secure helpers

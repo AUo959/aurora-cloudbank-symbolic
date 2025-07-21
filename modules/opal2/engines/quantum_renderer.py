@@ -5,12 +5,9 @@ Advanced quantum-enhanced rendering engine for the Opal2 modular system.
 Provides high-performance quantum circuit visualization and symbolic rendering.
 """
 
-from __future__ import annotations
-
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -301,7 +298,7 @@ class QuantumRenderer:
 
     def _hsl_to_rgb(self, h: float, s: float, l: float) -> Tuple[int, int, int]:
         """Convert HSL to RGB color values."""
-        h, s, l = h / 360, s / 100, l / 100
+        h, s, line = h / 360, s / 100, l / 100
 
         def hue_to_rgb(p, q, t):
             if t < 0:
@@ -328,6 +325,7 @@ class QuantumRenderer:
         return (int(r * 255), int(g * 255), int(b * 255))
 
     # Additional helper methods for quantum visualization
+
     def _extract_quantum_gates(
         self, vector: QuantumSymbolicVector
     ) -> List[Dict[str, Any]]:

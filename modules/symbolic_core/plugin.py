@@ -1,5 +1,6 @@
 # plugin.py
 """
+
 Abstract base class and registry for SymbolicSolverPlugin system.
 """
 from abc import ABC, abstractmethod
@@ -10,6 +11,7 @@ class SymbolicSolverPlugin(ABC):
         pass
 
 class PluginRegistry:
+
     def __init__(self):
         self.plugins = {}
 

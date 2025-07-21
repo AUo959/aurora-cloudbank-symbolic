@@ -6,7 +6,6 @@ Lightweight quantum computation simulation without qiskit.
 import math
 import random
 import cmath
-from typing import List, Dict, Tuple, Any, Optional
 
 class NativeQuantumState:
     """Native implementation of quantum state representation"""

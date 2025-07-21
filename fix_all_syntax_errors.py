@@ -11,11 +11,10 @@ import os
 import re
 import subprocess
 import sys
-from pathlib import Path
 
 def fix_js_style_syntax(file_path):
     """Fix JavaScript/Java-style syntax mixed into Python files"""
-    print(f"🔧 Fixing JS-style syntax in {file_path}")
+    print(f"🔧 Fixing JS-style syntax in {file_path}r")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
@@ -23,13 +22,13 @@ def fix_js_style_syntax(file_path):
     original_content = content
 
     # Fix common JS/Java to Python conversions
-    content = re.sub(r'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
-    content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
+    content = re.sub(rr'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
+    content = re.sub(rr'\)\s*\{', '):', content)  # ) { -> ):
     content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-    content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+    content = re.sub(rr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
     content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-    content = re.sub(r'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
-    content = re.sub(r'\}\s*;', '}', content)  # }; -> }
+    content = re.sub(rr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+    content = re.sub(rr'\}\s*;', '}', content)  # }; -> }
 
     if content != original_content:
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -109,12 +108,12 @@ def find_and_fix_python_files():
                 else:
                     print(f"⚠️  Could not automatically fix {file_path}")
 
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"   ✅ Files fixed: {files_fixed}")
     print(f"   ❌ Files still with errors: {len(syntax_errors)}")
 
     if syntax_errors:
-        print(f"\n🚨 Remaining syntax errors:")
+        print("\n🚨 Remaining syntax errors:")
         for file_path, error_msg in syntax_errors:
             print(f"   {file_path}: {error_msg.strip()}")
 

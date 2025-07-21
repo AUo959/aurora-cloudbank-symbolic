@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import shlex
+
 staff_node_ci_helper.py
 
 Automation tool to streamline the pull-commit-push workflow.
@@ -7,18 +10,12 @@ It integrates Orion staff node sync and existing CI helpers
 so Copilot or other agents can easily maintain the repo.
 """
 
-import argparse
-import os
-import subprocess
-import sys
 
-from modules.telemetry_logger import get_logger
 
 logger = get_logger("staff_node_ci_helper")
 
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
-    import shlex
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)

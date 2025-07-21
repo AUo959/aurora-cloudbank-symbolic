@@ -4,18 +4,14 @@ Opal2 Modular System - Plugin System
 Dynamic plugin loading and management for extensible rendering
 """
 
-import asyncio
 import importlib
 import inspect
 import json
 import logging
-import os
-import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -81,6 +77,7 @@ class PluginInterface:
         return True
 
 class RendererPlugin(PluginInterface):
+
     """Base class for renderer plugins"""
 
     async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Any:
@@ -96,6 +93,7 @@ class RendererPlugin(PluginInterface):
         return []
 
 class ProcessorPlugin(PluginInterface):
+
     """Base class for processor plugins"""
 
     async def process(
@@ -105,6 +103,7 @@ class ProcessorPlugin(PluginInterface):
         raise NotImplementedError("Processor plugins must implement process()")
 
 class FilterPlugin(PluginInterface):
+
     """Base class for filter plugins"""
 
     async def apply_filter(
@@ -398,20 +397,20 @@ class WebGLRendererPlugin(RendererPlugin):
 
     def _generate_vertex_shader(self) -> str:
         return """
-        attribute vec3 position;
-        uniform mat4 modelViewMatrix;
-        uniform mat4 projectionMatrix;
+        attribute vec3 position
+        uniform mat4 modelViewMatrix
+        uniform mat4 projectionMatrix
         void main() {
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0)
         }
         """
 
     def _generate_fragment_shader(self) -> str:
         return """
-        precision mediump float;
-        uniform vec3 color;
+        precision mediump float
+        uniform vec3 color
         void main() {
-            gl_FragColor = vec4(color, 1.0);
+            gl_FragColor = vec4(color, 1.0)
         }
         """
 
@@ -578,6 +577,7 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
         return processed_data
 
 # Plugin Factory
+
 class PluginFactory:
     """Factory for creating plugins"""
 

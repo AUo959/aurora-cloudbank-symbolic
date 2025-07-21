@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
+
+from dataclasses import asdict'''
+
 🔧 Aurora CloudBank Critical Issue Resolver
 Fixes the most critical problems identified in error analysis.
 """
 
-import re
-import sys
-from pathlib import Path
 
 def fix_critical_gitwiz_issues():
     """Fix critical undefined variable and import issues in gitwiz_enhanced.py"""
@@ -22,7 +22,7 @@ def fix_critical_gitwiz_issues():
 
     # Fix undefined variables around line 1008-1014
     content = re.sub(
-        r'if "result" in locals\(\) and result\.stdout:\s*\n\s*print\(result\.stdout\)\s*\n\s*if result\.stderr:\s*\n\s*print\(result\.stderr\)',
+        rr'if "resultr" in locals\(\) and result\.stdout:\s*\n\s*print\(result\.stdout\)\s*\n\s*if result\.stderr:\s*\n\s*print\(result\.stderr\)',
         '''if "result" in locals() and hasattr(result, 'stdout') and result.stdout:
             print(result.stdout)
         if "result" in locals() and hasattr(result, 'stderr') and result.stderr:
@@ -33,7 +33,7 @@ def fix_critical_gitwiz_issues():
     # Fix the check variable issue
     content = re.sub(
         r'if check and result\.returncode != 0:',
-        'if "check" in locals() and check and "result" in locals() and result.returncode != 0:',
+        'if "check" in locals() and check and "resultr" in locals() and result.returncode != 0:',
         content
     )
 
@@ -42,7 +42,6 @@ def fix_critical_gitwiz_issues():
         content = content.replace(
             'import json',
             '''import json
-from dataclasses import asdict'''
         )
 
     # Fix attribute access issues - add missing methods as stubs
@@ -53,7 +52,7 @@ from dataclasses import asdict'''
         )
 
         # Add missing methods at the end of the class
-        class_end_pattern = r'(\s+def __del__\(self\):.*?pass)'
+        class_end_pattern = rr'(\s+def __del__\(self\):.*?pass)'
         if re.search(class_end_pattern, content, re.DOTALL):
             content = re.sub(
                 class_end_pattern,
@@ -80,14 +79,14 @@ def fix_security_file_issues():
         if not file_path.exists():
             continue
 
-        print(f"🔧 Fixing critical issues in {filename}...")
+        print(f"🔧 Fixing critical issues in {filename}...r")
 
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         # Fix file encoding issues
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\'"](?!\s*,)', r'open(\1, "w", encoding="utf-8"', content)
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\'"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
 
         # Fix line length issues by breaking long lines
         lines = content.split('\n')

@@ -12,7 +12,6 @@ import datetime
 import re
 import subprocess
 import sys
-from typing import Dict, List, Tuple
 
 class BranchManager:
     """Automated branch management and cleanup system."""

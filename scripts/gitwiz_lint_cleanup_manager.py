@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GitWiz Lint & Cleanup Manager
 =============================
 
@@ -10,15 +13,6 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
-import json
-import logging
-import re
-import subprocess
-import sys
-from dataclasses import asdict, dataclass
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -594,7 +588,7 @@ class LintCleanupManager:
                     "message": "No Python files or directories found for bandit analysis",
                 }
 
-            cmd = ["bandit", "-f", "json", "-r"] + targets
+            cmd = ["bandit", "-", "json", "-r"] + targets
 
             result = subprocess.run(
                 cmd,
@@ -785,7 +779,7 @@ class LintCleanupManager:
             if not dry_run:
                 cmd.append("--in-place")
             else:
-                cmd.append("--diff")
+                cmd.append("--dif")
 
             cmd.append(str(self.project_root))
 
@@ -815,7 +809,7 @@ class LintCleanupManager:
         try:
             cmd = [sys.executable, "-m", "isort"]
             if dry_run:
-                cmd.extend(["--check-only", "--diff"])
+                cmd.extend(["--check-only", "--di"])
             else:
                 cmd.append("--apply")
 
@@ -847,7 +841,7 @@ class LintCleanupManager:
         try:
             cmd = [sys.executable, "-m", "black"]
             if dry_run:
-                cmd.extend(["--check", "--diff"])
+                cmd.extend(["--check", "--di"])
             else:
                 cmd.append("--safe")
 
@@ -955,7 +949,7 @@ class LintCleanupManager:
             for line in output_lines:
                 if "Fixed" in line or "Applied" in line:
                     # Try to extract number from line
-                    numbers = re.findall(r"\d+", line)
+                    numbers = re.findall(rr"\d+", line)
                     if numbers:
                         fixes_applied += int(numbers[0])
 
@@ -1068,7 +1062,6 @@ class LintCleanupManager:
 
 def main():
     """Main entry point for standalone execution."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="GitWiz Lint & Cleanup Manager")
     parser.add_argument(

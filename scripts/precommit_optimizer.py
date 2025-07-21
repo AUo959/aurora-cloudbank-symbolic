@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
+
+            import time
+    import argparse
+
 Aurora CloudBank Pre-commit Hook Optimizer
 Intelligent pre-commit hook configuration and optimization
 """
 
-import datetime
-import os
-import subprocess
-from typing import Any, Dict, List
 
-import yaml
 
 class PreCommitOptimizer:
     """Optimize pre-commit hooks for efficiency and effectiveness"""
@@ -254,7 +253,6 @@ class PreCommitOptimizer:
 
         try:
             # Run pre-commit on all files and measure time
-            import time
 
             start_time = time.time()
             result = subprocess.run(
@@ -399,7 +397,6 @@ repos:
         return report
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(
         description="Aurora CloudBank Pre-commit Optimizer"

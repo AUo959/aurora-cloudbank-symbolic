@@ -13,18 +13,18 @@ def fix_python_file(filepath):
 
     # Fix function declarations
     content = re.sub(
-        r"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
+        rr"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
     )
     content = re.sub(
-        r"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
+        rr"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
     )
 
     # Remove extra closing braces
-    content = re.sub(r"    }\s*$", "", content, flags=re.MULTILINE)
+    content = re.sub(rr"    }\s*$", "", content, flags=re.MULTILINE)
     content = re.sub(r"};$", "", content, flags=re.MULTILINE)
 
     # Remove class definitions with JavaScript syntax
-    content = re.sub(r"class (\w+):\s*async def", r"class \1:\n    async def", content)
+    content = re.sub(rr"class (\w+):\s*async de", r"class \1:\n    async de", content)
 
     with open(filepath, "w") as f:
         f.write(content)

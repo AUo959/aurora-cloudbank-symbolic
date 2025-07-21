@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
+
+from modules.opal2.quantum_renderer import QuantumRenderer
+
 Opal2 Modular System - PR Preparation Script
 Comprehensive preparation for the Opal2 expansion pull request
 """
 
-import json
-import os
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List
 
 class Opal2PRPreparation:
     """
@@ -343,7 +339,6 @@ The system includes comprehensive configuration management with:
 
 ```python
 # Basic usage
-from modules.opal2.quantum_renderer import QuantumRenderer
 
 renderer = QuantumRenderer()
 result = await renderer.render_async(
@@ -375,7 +370,7 @@ The Opal2 system is now ready for advanced quantum-enhanced visualization workfl
 
     def generate_pr_template(self):
         """Generate PR template"""
-        template = f"""# 🔮 Opal2 Modular System Expansion
+        template = """# 🔮 Opal2 Modular System Expansion
 
 ## Summary
 {self.generate_pr_description()}
@@ -515,7 +510,7 @@ def main():
         pr_prep.create_git_branch(branch_name)
         pr_prep.add_and_commit_files()
 
-        print(f"\n🎉 Ready to push to remote!")
+        print("\n🎉 Ready to push to remote!")
         print(f"Run: git push origin {branch_name}")
         print("Then create your PR on GitHub/GitLab")
 

@@ -1,20 +1,15 @@
 """
+
+        import sys
+
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
 """
 
-import math
-import time
-import sys
-import os
-import pytest
 
 # Add src to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from src.core.native_vsa import NativeSymbolicVector, NativeVSAMemory
-from src.core.native_quantum import NativeQuantumProcessingLayer, NativeQuantumCircuit
-from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
 
 @pytest.mark.native
 @pytest.mark.unit
@@ -367,7 +362,6 @@ class TestPerformanceOptimizations:
 
     def test_memory_usage(self):
         """Test memory efficiency of native implementations"""
-        import sys
 
         # Create multiple vectors and check memory usage is reasonable
         vectors = []

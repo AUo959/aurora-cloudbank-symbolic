@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+            from aurora_validation_manager import ValidationManager
+
 Aurora CloudBank - Git Pre-commit Hook
 Automatically validates changes against canonical specifications
 Prevents commits that violate critical canonical requirements
@@ -11,17 +14,12 @@ This hook runs before each commit and:
 4. Provides clear feedback and remediation guidance
 """
 
-import sys
-import subprocess
-import os
-from pathlib import Path
 
 # Add the scripts directory to Python path
 script_dir = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(script_dir))
 
 try:
-    from canonical_validator import CanonicalValidator, ValidationResult
 except ImportError:
     print("❌ Error: Could not import canonical_validator")
     print("   Ensure scripts/canonical_validator.py exists")
@@ -31,7 +29,7 @@ def get_staged_files():
     """Get list of staged files for commit"""
     try:
         result = subprocess.run(
-            ["git", "diff", "--cached", "--name-only"],
+            ["git", "dif", "--cached", "--name-only"],
             capture_output=True, text=True, check=True
         )
         return [f.strip() for f in result.stdout.split('\n') if f.strip()]
@@ -142,7 +140,6 @@ def main():
         # Import validation manager to handle file paths intelligently
         try:
             sys.path.append(str(Path(__file__).parent))
-            from aurora_validation_manager import ValidationManager
 
             manager = ValidationManager()
             report_path = manager.get_validation_file_path("PRE_COMMIT_VALIDATION_ISSUES.md")

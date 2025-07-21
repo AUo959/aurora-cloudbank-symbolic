@@ -11,7 +11,6 @@ import html
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
 
-
 class SecureHelpers:
     """Secure helper functions for Aurora CloudBank."""
 
@@ -69,7 +68,7 @@ class SecureHelpers:
             Sanitized input string
         """
         if not isinstance(user_input, str):
-            return ""
+            return "r"
 
         # Truncate to max length
         sanitized = user_input[:max_length]
@@ -82,7 +81,7 @@ class SecureHelpers:
             re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         )
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(rr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -125,7 +124,7 @@ class SecureHelpers:
 
         Returns:
             Result of safe evaluation
-        """
+        ""r"
         if allowed_functions is None:
             allowed_functions = {
                 'abs': abs,
@@ -136,7 +135,7 @@ class SecureHelpers:
             }
 
         # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:
@@ -145,7 +144,6 @@ class SecureHelpers:
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
-
 
 # Global instance for easy importing
 secure = SecureHelpers()

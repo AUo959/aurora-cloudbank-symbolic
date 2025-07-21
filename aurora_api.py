@@ -128,5 +128,6 @@ def health_check():
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")
+
 # def quantum_vsa_endpoint(...):
 #     ...

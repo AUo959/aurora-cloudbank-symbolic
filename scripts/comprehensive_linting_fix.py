@@ -79,7 +79,7 @@ def fix_f_string_issues(file_path):
             content = f.read()
 
         # Fix f-string without expressions (F541)
-        # Replace f"string" with "string" when no {} expressions
+        # Replace "string" with "string" when no {} expressions
         content = re.sub(r'f(["\'])([^"\'{}]*?)\1', r'\1\2\1', content)
 
         with open(file_path, 'w', encoding='utf-8') as f:

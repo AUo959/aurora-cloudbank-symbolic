@@ -18,6 +18,7 @@ import subprocess
 from pathlib import Path
 
 class AuroraProblemResolver:
+
     def __init__(self):
         self.repo_path = Path.cwd()
         self.fixes_applied = []
@@ -34,10 +35,10 @@ class AuroraProblemResolver:
                 content = f.read()
 
             # Fix double quotes to single quotes (ESLint requirement)
-            content = re.sub(r'"([^"]*)"', r"'\1'", content)
+            content = re.sub(r'"([^"]*)"', r"'\1'r", content)
 
             # Fix unused message parameters
-            content = re.sub(r'async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
+            content = re.sub(rr'async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
 
             with open(mesh_agent_path, 'w') as f:
                 f.write(content)
@@ -87,14 +88,14 @@ class AuroraProblemResolver:
             self.errors_found.append(f"{file_path}: {e}")
 
     def apply_python_syntax_fixes(self, content):
-        """Apply comprehensive Python syntax fixes"""
+        """Apply comprehensive Python syntax fixes""r"
         # Fix JavaScript-style syntax in Python
-        content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
-        content = re.sub(r'class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
+        content = re.sub(rr'\)\s*\{', '):', content)  # ) { -> ):
+        content = re.sub(rr'class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
         content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-        content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+        content = re.sub(rr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
         content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-        content = re.sub(r'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+        content = re.sub(rr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
 
         # Fix unclosed braces by ensuring proper dictionary/list syntax
         lines = content.split('\n')
@@ -212,7 +213,7 @@ class AuroraProblemResolver:
         for handler in handler_classes:
             handler_file = handlers_dir / f"{handler.lower()}.py"
             if not handler_file.exists():
-                handler_content = f'''"""
+                handler_content = '''"""
 {handler} - Aurora CloudBank Multi-Modal Interaction
 """
 
@@ -239,7 +240,7 @@ class {handler}:
         # Create __init__.py for the handlers module
         init_file = handlers_dir / "__init__.py"
         if not init_file.exists():
-            init_content = f'''"""
+            init_content = '''"""
 Aurora CloudBank Multi-Modal Interaction Handlers
 """
 
@@ -317,29 +318,29 @@ __all__ = {handler_classes}
 
         success, py_errors, js_errors = self.validate_fixes()
 
-        print(f"\n📊 Resolution Summary:")
+        print("\n📊 Resolution Summary:")
         print(f"   ✅ Fixes Applied: {len(self.fixes_applied)}")
         print(f"   ❌ Errors Found: {len(self.errors_found)}")
         print(f"   🐍 Python Files: {'✅ Clean' if not py_errors else f'❌ {len(py_errors)} errors'}")
         print(f"   📜 JavaScript Files: {'✅ Clean' if not js_errors else f'❌ {len(js_errors)} errors'}")
 
         if self.fixes_applied:
-            print(f"\n🔧 Fixes Applied:")
+            print("\n🔧 Fixes Applied:")
             for fix in self.fixes_applied:
                 print(f"   ✅ {fix}")
 
         if self.errors_found:
-            print(f"\n⚠️  Remaining Issues:")
+            print("\n⚠️  Remaining Issues:")
             for error in self.errors_found:
                 print(f"   ❌ {error}")
 
         if py_errors:
-            print(f"\n🐍 Python Syntax Errors:")
+            print("\n🐍 Python Syntax Errors:")
             for error in py_errors:
                 print(f"   ❌ {error}")
 
         if js_errors:
-            print(f"\n📜 JavaScript Syntax Errors:")
+            print("\n📜 JavaScript Syntax Errors:")
             for error in js_errors:
                 print(f"   ❌ {error}")
 

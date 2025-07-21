@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GITWiz Dependency Auto-Updater
 Comprehensive dependency management and auto-updating system.
 """
 
-import json
-import subprocess
-import sys
-import tempfile
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 class DependencyAutoUpdater:
     """Advanced dependency auto-updater for GITWiz."""
@@ -363,7 +359,6 @@ class DependencyAutoUpdater:
 
 def main():
     """Main CLI interface for dependency auto-updater."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="GITWiz Dependency Auto-Updater")
     parser.add_argument("--scan", action="store_true", help="Scan dependencies")

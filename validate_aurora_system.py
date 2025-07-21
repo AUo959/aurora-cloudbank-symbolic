@@ -11,7 +11,6 @@ import os
 import sys
 import subprocess
 import json
-from pathlib import Path
 
 def test_holographic_interface():
     """Test the holographic interface orchestrator"""
@@ -99,7 +98,7 @@ def test_git_repository_status():
         if result.returncode == 0:
             uncommitted = result.stdout.strip()
             if uncommitted:
-                print(f"⚠️  Uncommitted changes found:")
+                print("⚠️  Uncommitted changes found:")
                 for line in uncommitted.split('\n'):
                     print(f"   {line}")
             else:
@@ -164,8 +163,8 @@ def generate_validation_report():
         if success:
             passed += 1
 
-    print(f"\n" + "="*60)
-    print(f"🎯 VALIDATION SUMMARY")
+    print("\n" + "="*60)
+    print("🎯 VALIDATION SUMMARY")
     print("="*60)
     print(f"✅ Tests Passed: {passed}/{total}")
     print(f"📊 Success Rate: {(passed/total)*100:.1f}%")
@@ -193,7 +192,7 @@ def generate_validation_report():
     with open("AURORA_VALIDATION_REPORT.json", "w") as f:
         json.dump(report, f, indent=2)
 
-    print(f"\n📄 Validation report saved to: AURORA_VALIDATION_REPORT.json")
+    print("\n📄 Validation report saved to: AURORA_VALIDATION_REPORT.json")
 
     return status == "READY" or status == "MOSTLY_READY"
 

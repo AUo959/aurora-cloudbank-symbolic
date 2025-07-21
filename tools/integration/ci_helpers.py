@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
+
+from tools.integration.ci_helpers import CIHelpers
+            import sys
+            from symbolic.anchor_tracker import SymbolicAnchorTracker
+            import sys
+            from symbolic.memory_sealer import MemorySealingEngine
+    import argparse
+
 CI/CD Integration Helpers
 Part of T71 Symbolic Infrastructure Genesis
 
 Automation helpers for continuous integration and deployment
 """
 
-import os
-import json
-import subprocess
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Any, Optional
 
 class CIHelpers:
     """CI/CD automation and integration helpers"""
@@ -166,7 +168,6 @@ jobs:
     - name: Generate Deployment Manifest
       run: |
         python -c "
-from tools.integration.ci_helpers import CIHelpers
 ci = CIHelpers()
 manifest = ci.generate_deployment_manifest()
 print('✅ Deployment manifest generated')
@@ -211,10 +212,8 @@ print('✅ Deployment manifest generated')
 
         try:
             # Import and run anchor tracker
-            import sys
             sys.path.insert(0, str(self.repo_path / "tools"))
 
-            from symbolic.anchor_tracker import SymbolicAnchorTracker
 
             tracker = SymbolicAnchorTracker(str(self.repo_path))
             tracker.scan_repository()
@@ -240,10 +239,8 @@ print('✅ Deployment manifest generated')
         result = {"status": "unknown", "issues": []}
 
         try:
-            import sys
             sys.path.insert(0, str(self.repo_path / "tools"))
 
-            from symbolic.memory_sealer import MemorySealingEngine
 
             sealer = MemorySealingEngine(str(self.repo_path))
 
@@ -395,7 +392,6 @@ print('✅ Deployment manifest generated')
 
 def main():
     """CLI interface for CI helpers"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="CI/CD Integration Helpers")
     parser.add_argument("command", choices=["check", "manifest", "validate", "workflow"])
@@ -439,7 +435,7 @@ def main():
             print(f"  {check_icon} {check_name}: {check_result['status']}")
 
         if validation["issues"]:
-            print(f"\n⚠️  Issues found:")
+            print("\n⚠️  Issues found:")
             for issue in validation["issues"]:
                 print(f"    - {issue}")
 

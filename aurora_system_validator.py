@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 class AuroraSystemValidator:
+
     def __init__(self):
         self.project_root = Path("/workspaces/aurora-cloudbank-symbolic")
         self.results = {}

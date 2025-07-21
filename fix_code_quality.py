@@ -16,7 +16,7 @@ def fix_maintenance_scheduler():
     if not file_path.exists():
         return
 
-    print("🔧 Fixing maintenance_scheduler.py...")
+    print("🔧 Fixing maintenance_scheduler.py...r")
 
     with open(file_path, 'r') as f:
         content = f.read()
@@ -28,7 +28,7 @@ def fix_maintenance_scheduler():
 
     # Fix subprocess calls
     content = re.sub(
-        r'subprocess\.run\(\s*\[\s*"cp",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
+        rr'subprocess\.run\(\s*\[\s*"cpr",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
         'subprocess.run(["cp", str(file_path), str(backup_path)], check=False)',
         content
     )
@@ -59,8 +59,22 @@ def fix_gitwiz_enhanced():
 
     # Fix imports - remove unused ones
     content = re.sub(r'^from collections import defaultdict\n', '', content, flags=re.MULTILINE)
-    content = re.sub(r'from typing import Any, Dict, List, Optional, Set, Tuple, Union', 'from typing import Any, Dict, List, Optional', content)
-    content = re.sub(r'^import pkg_resources\n', '# import pkg_resources  # Optional dependency\n', content, flags=re.MULTILINE)
+    content = re.sub(r'from typing import Any,
+        Dict,
+        List,
+        Optional,
+        Set,
+        Tuple,
+        Union',
+        'from typing import Any,
+        Dict,
+        List,
+        Optional',
+        content)
+    content = re.sub(r'^import pkg_resources\n',
+        '# import pkg_resources  # Optional dependency\n',
+        content,
+        flags=re.MULTILINE)
     content = re.sub(r'^import toml\n', '# import toml  # Optional dependency\n', content, flags=re.MULTILINE)
     content = re.sub(r'^import yaml\n', '# import yaml  # Optional dependency\n', content, flags=re.MULTILINE)
 
@@ -122,11 +136,11 @@ def fix_security_scripts():
         content = re.sub(r'\\t', '\\\\t', content)
 
         # Fix f-string without interpolation
-        content = re.sub(r'f"([^{]*)"', r'"\1"', content)
+        content = re.sub(r'f"([^{]*)"', r'"\1r"', content)
 
         # Add encoding to file opens
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8"', content)
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
 
         with open(file_path, 'w') as f:
             f.write(content)

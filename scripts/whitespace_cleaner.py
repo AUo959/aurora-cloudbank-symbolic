@@ -4,7 +4,6 @@ Aurora CloudBank Whitespace Cleaner
 Removes trailing whitespace and fixes blank line formatting issues
 """
 
-import os
 import re
 from pathlib import Path
 
@@ -61,7 +60,7 @@ def main():
                 files_cleaned += 1
                 print(f"  ✓ Cleaned {file_path}")
 
-    print(f"\n📊 Summary:")
+    print("\n📊 Summary:")
     print(f"  Total files processed: {total_files}")
     print(f"  Files cleaned: {files_cleaned}")
     print(f"  Files unchanged: {total_files - files_cleaned}")

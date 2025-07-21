@@ -5,22 +5,16 @@ A simplified version without external dependencies for testing
 """
 
 import argparse
-import hashlib
 import json
 import logging
 import os
-import re
-import shutil
 import sqlite3
 import subprocess
-import sys
-import tempfile
 import zipfile
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 # Configure logging
 logging.basicConfig(
@@ -44,7 +38,6 @@ class RepositoryIssue:
 class GITWizSimple:
     """Simplified GITWiz for basic repository management."""
 
-    def __init__(self, repo_path: str = None):
         self.repo_path = Path(repo_path or os.getcwd())
         self.db_path = self.repo_path / ".gitwiz" / "memory.db"
         self.init_memory()

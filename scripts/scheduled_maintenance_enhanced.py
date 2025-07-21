@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank - Scheduled Maintenance System
 Automated repository maintenance with intelligent scheduling
 """
 
-import datetime
-import json
-import os
-import subprocess
-import time
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Callable, Dict, List, Optional
 
-import schedule
 
 @dataclass
 class MaintenanceTask:
@@ -553,7 +547,6 @@ class ScheduledMaintenanceSystem:
 
 def main():
     """Main maintenance function"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Scheduled maintenance system")
     parser.add_argument(

@@ -4,6 +4,7 @@ Never-before-conceived spatial audio and quantum-enhanced sound
 """
 
 class ImmersiveAudioEngine:
+
     def __init__(self):
         self.audio_capabilities = {
             "spatial_audio_3d": True,
@@ -58,7 +59,7 @@ class ImmersiveAudioEngine:
         return {
             "binaural_synthesis": "active",
             "head_tracking": "enabled",
-            "personalized_hrtf": "adaptive",
+            "personalized_hrt": "adaptive",
             "spatial_accuracy": "maximum",
         }
 

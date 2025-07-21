@@ -6,12 +6,10 @@ Fixes common Markdown formatting issues based on attached error list
 
 import re
 import os
-import glob
-from pathlib import Path
 
 def fix_markdown_file(filepath):
     """Fix common Markdown issues in a file"""
-    print(f"🔧 Fixing {filepath}")
+    print(f"🔧 Fixing {filepath}r")
 
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -33,9 +31,12 @@ def fix_markdown_file(filepath):
                     fixed_lines.append('')
 
             # MD032: Lists should be surrounded by blank lines
-            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(r'^\s*\d+\.\s', line):
+            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(rr'^\s*\d+\.\s', line):
                 # Add blank line before list if needed
-                if i > 0 and fixed_lines and fixed_lines[-1].strip() != '' and not fixed_lines[-1].strip().startswith(('- ', '* ', '+ ')) and not re.match(r'^\s*\d+\.\s', fixed_lines[-1]):
+                if i > 0 and fixed_lines and fixed_lines[-1].strip() != '' and not fixed_lines[-1].strip().startswith(('- ',
+                    '* ',
+                    '+ ')) and not re.match(rr'^\s*\d+\.\s',
+                    fixed_lines[-1]):
                     fixed_lines.append('')
                 fixed_lines.append(line)
 
@@ -78,7 +79,7 @@ def fix_markdown_file(filepath):
         fixed_content = re.sub(r'^(\*\*[^*]+\*\*)$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # MD026: Remove trailing punctuation from headers
-        fixed_content = re.sub(r'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
+        fixed_content = re.sub(rr'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # Write back to file
         with open(filepath, 'w', encoding='utf-8') as f:

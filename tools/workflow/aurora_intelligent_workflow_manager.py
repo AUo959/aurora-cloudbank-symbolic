@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank Intelligent Workflow Manager
 Master orchestrator that integrates all workflow optimization systems
 """
-
-import json
-import subprocess
-import sys
-from pathlib import Path
-from typing import Dict
-import datetime
 
 
 class IntelligentWorkflowManager:
@@ -277,10 +273,8 @@ class IntelligentWorkflowManager:
             json.dump(results, f, indent=2)
         print(f"📄 Detailed report saved to: {report_file}")
 
-
 def main():
     """CLI interface for intelligent workflow manager."""
-    import argparse
 
     parser = argparse.ArgumentParser(description='Aurora Intelligent Workflow Manager')
     parser.add_argument('operation', nargs='?', default='general',
@@ -317,7 +311,6 @@ def main():
         else:
             print(f"\n⚠️  '{args.operation}' operation needs attention before proceeding")
             sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

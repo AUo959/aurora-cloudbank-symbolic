@@ -9,7 +9,6 @@ Fixes common Python linting issues that automated tools miss.
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List
 
 def fix_encoding_specifications(file_path: str) -> bool:
     """Add encoding specification to file open statements."""
@@ -20,10 +19,10 @@ def fix_encoding_specifications(file_path: str) -> bool:
 
     # Fix open() calls without encoding
     patterns = [
-        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8")'),
-        (r'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
-        (r'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
-        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
+        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8r")'),
+        (rr'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (rr'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (rr'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
     ]
 
     for pattern, replacement in patterns:
@@ -45,6 +44,7 @@ def fix_subprocess_calls(file_path: str) -> bool:
     original_content = content
 
     # Fix subprocess.run() calls
+
     def fix_subprocess_run(match):
         args = match.group(1)
         if "shell=" not in args and "check=" not in args:
@@ -80,7 +80,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
     content = re.sub(
-        r"except\s*:", "except (OSError, ValueError, RuntimeError):", content
+        rr"except\s*:", "except (OSError, ValueError, RuntimeError):", content
     )
 
     if content != original_content:

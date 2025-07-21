@@ -4,7 +4,6 @@
 Manages staged deployment of enhancements with safety checks.
 """
 
-import json
 import subprocess
 import sys
 from datetime import datetime
@@ -38,7 +37,7 @@ class DeploymentManager:
             clean = len(result.stdout.strip()) == 0
             print(f"   Repository state: {'✅ Clean' if clean else '⚠️ Has changes'}")
             return True  # Allow deployment with changes for now
-        except:
+        except Exception:
             return False
 
     def _check_security_status(self):

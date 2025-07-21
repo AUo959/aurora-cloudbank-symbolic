@@ -13,10 +13,10 @@ def fix_function_declarations(filepath):
 
     # Fix async def with incorrect syntax
     content = re.sub(
-        r"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content
+        rr"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content
     )
     content = re.sub(
-        r"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content
+        rr"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content
     )
 
     # Remove trailing semicolons in Python

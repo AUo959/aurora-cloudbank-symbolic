@@ -5,11 +5,11 @@ Resolves 403 author invalid errors by configuring GPG signing properly
 """
 
 import subprocess
-import os
 import sys
 from pathlib import Path
 
 class GPGPersistentFix:
+
     def __init__(self):
         self.config_applied = False
 

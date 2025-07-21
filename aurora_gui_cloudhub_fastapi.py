@@ -80,6 +80,12 @@ class GeometricAlgebraRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """Serve the quantum VSA demo application"""
+
+        import hashlib
+        from qiskit import QuantumCircuit
+        from qiskit_aer import AerSimulator
+    import uvicorn
+
     return FileResponse("static/quantum-vsa-demo.html")
 
 @app.get("/legacy", response_class=HTMLResponse)
@@ -163,6 +169,7 @@ class QuantumSymbolicVectorRequest(BaseModel):
     summary="Geometric Product",
     response_description="Result of geometric product",
 )
+
 def geometric_product(req: GeometricProductRequest):
     """
     Compute the geometric product of two 3D vectors (a*e1, b*e2) using Clifford algebra.
@@ -180,6 +187,7 @@ def geometric_product(req: GeometricProductRequest):
     summary="Quantum Symbolic Vector",
     response_description="Quantum-generated symbolic vector",
 )
+
 def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
@@ -194,6 +202,7 @@ def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     summary="MCP Bridge Core JSON",
     response_description="MCP Bridge configuration JSON",
 )
+
 def get_mcp_bridge():
     """
     Returns the MCP Bridge Core configuration as JSON.
@@ -206,6 +215,7 @@ def get_mcp_bridge():
     summary="Symbolic Command Routing via MCP Bridge",
     response_description="Routed command result",
 )
+
 def mcp_route_command(
     command: str,
     anchor: str = "EOS_SEED_ORION",
@@ -226,6 +236,7 @@ def mcp_route_command(
     summary="VSA Operation",
     response_description="Result of VSA operation",
 )
+
 def vsa_operation(req: VSAOperationRequest):
     """
     Perform an operation on the VSA symbolic vector.
@@ -254,6 +265,7 @@ def vsa_operation(req: VSAOperationRequest):
     summary="VSA Bind",
     response_description="Result of VSA bind operation",
 )
+
 def vsa_bind(req: VSABindRequest):
     """
     Bind two symbolic vectors in the VSA.
@@ -281,6 +293,7 @@ def vsa_bind(req: VSABindRequest):
     summary="VSA Similarity",
     response_description="Similarity score between two symbolic vectors",
 )
+
 def vsa_similarity(req: VSASimilarityRequest):
     """
     Compute similarity between two symbolic vectors in the VSA.
@@ -307,6 +320,7 @@ def vsa_similarity(req: VSASimilarityRequest):
     summary="Quantum Circuit",
     response_description="Result of quantum circuit operation",
 )
+
 def quantum_circuit(req: QuantumCircuitRequest):
     """
     Execute a quantum circuit and return the result.
@@ -328,6 +342,7 @@ def quantum_circuit(req: QuantumCircuitRequest):
     summary="Geometric Algebra Operation",
     response_description="Result of geometric algebra operation",
 )
+
 def geometric_algebra(req: GeometricAlgebraRequest):
     """
     Perform a geometric algebra operation on the given vectors.
@@ -557,10 +572,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
     Generate and analyze a quantum circuit for symbolic operations.
     """
     try:
-        import hashlib
 
-        from qiskit import QuantumCircuit
-        from qiskit_aer import AerSimulator
 
         # Create circuit based on symbol hash
         h = int(hashlib.md5(req.symbol.encode()).hexdigest(), 16) % (2**32)
@@ -655,7 +667,6 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
         connections.remove(websocket)
 
 if __name__ == "__main__":
-    import uvicorn
 
     uvicorn.run(
         "aurora_gui_cloudhub_fastapi:app",

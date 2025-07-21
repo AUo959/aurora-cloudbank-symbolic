@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Test script for enhanced GITWiz."""
 
-try:
     from scripts.gitwiz_enhanced import EnhancedGITWiz
+    import traceback
+
+
+try:
 
     print("✅ Enhanced GITWiz imported successfully")
 
@@ -26,6 +29,5 @@ except ImportError as e:
     print(f"❌ Import error: {e}")
 except Exception as e:
     print(f"❌ Error: {e}")
-    import traceback
 
     traceback.print_exc()

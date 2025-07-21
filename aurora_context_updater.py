@@ -5,12 +5,12 @@ Automatically updates custom instructions based on current repository state
 """
 
 import json
-import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
 
 class AuroraContextUpdater:
+
     def __init__(self):
         self.project_root = Path("/workspaces/aurora-cloudbank-symbolic")
         self.instructions_file = self.project_root / "GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt"
@@ -35,7 +35,7 @@ class AuroraContextUpdater:
                 capture_output=True, text=True, cwd=self.project_root
             )
             return result.stdout.strip()
-        except:
+        except Exception:
             return "Unable to determine git status"
 
     def get_test_status(self):
@@ -148,7 +148,7 @@ class AuroraContextUpdater:
         """Generate updated status section"""
         missing_count = len(status["missing_components"])
 
-        section = f"""### Current Status (July 2025)
+        section = """### Current Status (July 2025)
 - ✅ All 5 development phases completed
 - ✅ Test environment with 24 passing native implementation tests
 - ✅ Performance optimization: {status["performance_metrics"]["startup_improvement"]} startup improvement, {status["performance_metrics"]["memory_reduction"]} memory reduction

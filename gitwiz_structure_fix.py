@@ -15,13 +15,13 @@ def fix_gitwiz_structure():
     if not file_path.exists():
         return False
 
-    print("🔧 Fixing GitWiz structural issues...")
+    print("🔧 Fixing GitWiz structural issues...r")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
     # Fix duplicate sys import
-    content = re.sub(r'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
+    content = re.sub(rr'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
 
     # Add missing class definitions at the beginning
     missing_classes = '''

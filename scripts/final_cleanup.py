@@ -6,7 +6,6 @@ Final Cleanup Pass - Address Remaining Issues
 Comprehensive fix for remaining linting issues.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -20,10 +19,10 @@ def fix_logging_fstrings(file_path: str) -> bool:
 
     # Simple fix: just remove f from f-strings in logging calls for now
     patterns = [
-        (r'\.info\(f"([^"]+)"\)', r'.info("\1")'),
-        (r'\.error\(f"([^"]+)"\)', r'.error("\1")'),
-        (r'\.warning\(f"([^"]+)"\)', r'.warning("\1")'),
-        (r'\.debug\(f"([^"]+)"\)', r'.debug("\1")'),
+        (r'\.info\("([^"]+)"\)', r'.info("\1")'),
+        (r'\.error\("([^"]+)"\)', r'.error("\1")'),
+        (r'\.warning\("([^"]+)"\)', r'.warning("\1")'),
+        (r'\.debug\("([^"]+)"\)', r'.debug("\1")r'),
     ]
 
     for pattern, replacement in patterns:
@@ -50,9 +49,9 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Fix specific unused variables
     patterns = [
-        (r"(\s+)task_info = ", r"\1_task_info = "),
-        (r"(\s+)dirnames = ", r"\1_dirnames = "),
-        (r"(\s+)file_hash = ", r"\1_file_hash = "),
+        (rr"(\s+)task_info = ", r"\1_task_info = "),
+        (rr"(\s+)dirnames = ", r"\1_dirnames = "),
+        (rr"(\s+)file_hash = ", r"\1_file_hash = "),
     ]
 
     for pattern, replacement in patterns:
@@ -107,7 +106,6 @@ def clean_unused_imports(file_path: str) -> bool:
 
     # Remove specific unused imports
     import_removals = [
-        ("import os", "os."),
         ("import json", "json."),
         ("import pickle", "pickle."),
         ("from typing import List", "List["),

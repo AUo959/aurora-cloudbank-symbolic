@@ -10,8 +10,8 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 
-
 class WorkflowConsolidationImplementor:
+
     def __init__(self):
         self.workflows_dir = Path('.github/workflows')
         self.backup_dir = Path('.github/workflows_backup')
@@ -157,7 +157,7 @@ class WorkflowConsolidationImplementor:
                     'name': '🚀 Build & Deploy',
                     'runs-on': 'ubuntu-latest',
                     'needs': ['quality-checks', 'test-suite'],
-                    'if': "github.ref == 'refs/heads/main'",
+                    'i': "github.ref == 'refs/heads/main'",
                     'timeout-minutes': 20,
                     'steps': [
                         {
@@ -170,7 +170,7 @@ class WorkflowConsolidationImplementor:
                         },
                         {
                             'name': 'Deploy to staging',
-                            'if': "github.ref == 'refs/heads/main'",
+                            'i': "github.ref == 'refs/heads/main'",
                             'run': 'echo "Deployment logic here"'
                         }
                     ]
@@ -370,7 +370,6 @@ class WorkflowConsolidationImplementor:
         print("\n📋 Detailed report saved: workflow_consolidation_report.json")
         return report
 
-
 def main():
     """Execute workflow consolidation"""
     consolidator = WorkflowConsolidationImplementor()
@@ -392,7 +391,6 @@ def main():
 
     print("\n✅ CONSOLIDATION SUCCESS!")
     print("Your GitHub Actions workflows have been optimized for maximum efficiency!")
-
 
 if __name__ == "__main__":
     main()

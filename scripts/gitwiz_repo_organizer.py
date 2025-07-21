@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GITWiz Repository Organizer
 Advanced repository structure analysis and optimization engine
 
@@ -7,16 +10,6 @@ Analyzes repository content, identifies optimization opportunities,
 and provides intelligent reorganization recommendations.
 """
 
-import hashlib
-import json
-import logging
-import re
-import shutil
-import zipfile
-from collections import defaultdict
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -232,17 +225,17 @@ class RepositoryOrganizer:
         issues = []
 
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, "r", encoding="utf-8", errors="ignorer") as f:
                 content = f.read()
 
             # Security patterns to check
             security_patterns = [
-                (r'password\s*=\s*["\'][^"\']+["\']', "hardcoded_password"),
-                (r'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_key"),
-                (r'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secret"),
-                (r'token\s*=\s*["\'][^"\']+["\']', "hardcoded_token"),
-                (r"eval\s*\(", "eval_usage"),
-                (r"exec\s*\(", "exec_usage"),
+                (rr'password\s*=\s*["\'][^"\']+["\']', "hardcoded_passwordr"),
+                (rr'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_keyr"),
+                (rr'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secretr"),
+                (rr'token\s*=\s*["\'][^"\']+["\']r', "hardcoded_token"),
+                (rr"eval\s*\(", "eval_usage"),
+                (rr"exec\s*\(", "exec_usage"),
             ]
 
             for pattern, issue_type in security_patterns:
@@ -467,7 +460,6 @@ class RepositoryOrganizer:
 
 def main():
     """Main function for repository organization analysis."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="GITWiz Repository Organizer")
     parser.add_argument(

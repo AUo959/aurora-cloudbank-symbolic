@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GitWiz Automated Maintenance Scheduler
 =====================================
 
@@ -17,17 +20,7 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
-import json
-import logging
-import subprocess
-import sys
-import threading
-import time
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, Optional
 
-import schedule
 
 # Configure logging
 logging.basicConfig(
@@ -425,7 +418,6 @@ class GitWizScheduler:
 
 def main():
     """Main entry point for the scheduler."""
-    import argparse
 
     parser = argparse.ArgumentParser(
         description="GitWiz Automated Maintenance Scheduler"

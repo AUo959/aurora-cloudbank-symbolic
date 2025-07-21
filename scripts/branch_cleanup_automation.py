@@ -8,17 +8,16 @@ import argparse
 import datetime
 import re
 import subprocess
-import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 class BranchCleanupManager:
+
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
         self.config = {
             "stale_days": 30,
             "force_delete_patterns": [
-                r"^origin/alert-autofix-\d+$",  # Old security fixes
+                rr"^origin/alert-autofix-\d+$",  # Old security fixes
                 r"^origin/.*-backup-.*$",  # Backup branches
             ],
             "review_patterns": [

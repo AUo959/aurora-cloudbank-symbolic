@@ -1,31 +1,21 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Repository Health Monitor v2.0 - Advanced Repository Health Monitoring
 Continuous monitoring, alerting, and automated maintenance for git repositories
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
-import json
-import time
-import threading
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-import logging
-import subprocess
-import hashlib
-from collections import defaultdict
 
 # Optional imports
 try:
-    import psutil
     HAS_PSUTIL = True
 except ImportError:
     HAS_PSUTIL = False
 
 try:
-    import schedule
     HAS_SCHEDULE = True
 except ImportError:
     HAS_SCHEDULE = False
@@ -333,7 +323,7 @@ class RepositoryHealthMonitor:
             stale_count = 0
 
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-ref", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
+                ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-re", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
                 capture_output=True, text=True, check=True
             )
 
@@ -460,7 +450,6 @@ class RepositoryHealthMonitor:
             return metrics
 
         try:
-            import psutil as ps
             # Disk usage
             disk_usage = ps.disk_usage(str(self.repo_path))
             metrics["disk_usage_percent"] = (disk_usage.used / disk_usage.total) * 100
@@ -613,7 +602,6 @@ class RepositoryHealthMonitor:
 
         # Setup scheduled monitoring
         interval_minutes = self.config["monitoring"]["interval_minutes"]
-        import schedule as sched
         sched.every(interval_minutes).minutes.do(self._monitoring_cycle)
 
         # Start monitoring thread
@@ -632,7 +620,6 @@ class RepositoryHealthMonitor:
         self.is_monitoring = False
 
         if HAS_SCHEDULE:
-            import schedule as sched
             sched.clear()
 
         if self.monitor_thread:
@@ -645,7 +632,6 @@ class RepositoryHealthMonitor:
 
         while self.is_monitoring:
             try:
-                import schedule as sched
                 sched.run_pending()
                 time.sleep(60)  # Check every minute
             except Exception as e:
@@ -698,7 +684,12 @@ class RepositoryHealthMonitor:
             if metrics_file.exists():
                 temp_file = metrics_file.with_suffix('.tmp')
 
-                with open(metrics_file, 'r', encoding="utf-8") as infile, open(temp_file, 'w', encoding="utf-8") as outfile:
+                with open(metrics_file,
+                    'r',
+                    encoding="utf-8") as infile,
+                    open(temp_file,
+                    'w',
+                    encoding="utf-8") as outfile:
                     for line in infile:
                         try:
                             data = json.loads(line.strip())
@@ -822,7 +813,6 @@ class RepositoryHealthMonitor:
 
 def main():
     """Main CLI interface."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Repository Health Monitor v2.0")
     parser.add_argument("--repo", default=".", help="Repository path")
@@ -853,7 +843,7 @@ def main():
 
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
-            print(f"✅ Health Check Complete")
+            print("✅ Health Check Complete")
             print(f"📊 Health Score: {metrics.health_score:.2f}")
             print(f"📁 Files: {metrics.file_count}")
             print(f"💾 Size: {metrics.repository_size_mb:.1f}MB")

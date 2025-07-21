@@ -10,7 +10,6 @@ import random
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from datetime import datetime
-import threading
 
 @dataclass
 class ConsciousnessState:
@@ -185,7 +184,7 @@ def test_consciousness_simulation():
 
     # Analyze patterns
     analysis = engine.analyze_consciousness_patterns()
-    print(f"\n📊 Consciousness Analysis:")
+    print("\n📊 Consciousness Analysis:")
     print(f"Peak Awareness: {analysis['awareness_evolution']['peak']:.3f}")
     print(f"Final Coherence: {analysis['quantum_coherence_evolution']['final']:.3f}")
 

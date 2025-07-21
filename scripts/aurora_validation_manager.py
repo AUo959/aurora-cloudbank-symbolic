@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank - Validation Manager
 Elegant solution for handling validation file regeneration cycles
 
@@ -14,14 +17,6 @@ Version: 1.0.0
 Date: July 14, 2025
 """
 
-import os
-import sys
-import json
-import subprocess
-import tempfile
-from pathlib import Path
-from datetime import datetime
-from typing import List, Set, Optional
 
 class ValidationManager:
     """Manages validation file lifecycle to prevent regeneration cycles"""
@@ -240,7 +235,7 @@ echo "✅ Post-commit validation update complete"
         pre_commit = hooks_dir / "pre-commit"
         post_commit = hooks_dir / "post-commit"
 
-        print(f"\nGit Hooks:")
+        print("\nGit Hooks:")
         print(f"  Pre-commit: {'✅' if pre_commit.exists() else '❌'}")
         print(f"  Post-commit: {'✅' if post_commit.exists() else '❌'}")
 
@@ -252,7 +247,7 @@ echo "✅ Post-commit validation update complete"
             print(f"  Reports: {len(reports)}")
 
         # Check current validation files
-        print(f"\nCurrent Validation Files:")
+        print("\nCurrent Validation Files:")
         for vf in self.validation_files:
             path = self.repo_root / vf
             if path.exists():
@@ -263,7 +258,6 @@ echo "✅ Post-commit validation update complete"
 
 def main():
     """CLI interface for validation manager"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Aurora Validation Manager")
     parser.add_argument("--strategy", choices=["smart_exclusion", "timestamped", "post_commit", "memory_only"],

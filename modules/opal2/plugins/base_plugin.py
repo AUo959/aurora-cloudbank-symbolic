@@ -1,21 +1,13 @@
 """Opal2 Plugin System - Base Plugin Interface
+
+        import os
+
 =============================================
 
 Provides the foundation for the Opal2 modular plugin architecture.
 Supports hot-swappable rendering plugins with validation and security.
 """
 
-from __future__ import annotations
-
-import hashlib
-import importlib
-import inspect
-import json
-import time
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
 
 class PluginType(Enum):
     """Types of plugins supported by the Opal2 system."""
@@ -67,6 +59,7 @@ class PluginMetadata:
         }
 
 class BasePlugin(ABC):
+
     """Abstract base class for all Opal2 plugins."""
 
     def __init__(self, metadata: PluginMetadata):
@@ -125,6 +118,7 @@ class BasePlugin(ABC):
             self.performance_metrics["error_count"] += 1
 
 class RendererPlugin(BasePlugin):
+
     """Base class for rendering plugins."""
 
     def __init__(self, metadata: PluginMetadata):
@@ -155,6 +149,7 @@ class RendererPlugin(BasePlugin):
         self.render_cache.clear()
 
 class ExporterPlugin(BasePlugin):
+
     """Base class for export plugins."""
 
     @abstractmethod
@@ -177,6 +172,7 @@ class ExporterPlugin(BasePlugin):
             raise e
 
 class FilterPlugin(BasePlugin):
+
     """Base class for filter/effect plugins."""
 
     @abstractmethod
@@ -202,7 +198,6 @@ class PluginRegistry:
 
     def __init__(self):
         self.plugins: Dict[str, BasePlugin] = {}
-        self.plugin_types: Dict[PluginType, List[str]] = {
             plugin_type: [] for plugin_type in PluginType
         }
         self.validation_rules = {
@@ -274,7 +269,7 @@ class PluginRegistry:
 
             # Validate plugin class
             if not issubclass(plugin_class, BasePlugin):
-                raise ValueError(f"Plugin class must inherit from BasePlugin")
+                raise ValueError("Plugin class must inherit from BasePlugin")
 
             # Create plugin instance
             # Note: This assumes the plugin class has a default constructor or factory method
@@ -368,7 +363,6 @@ class PluginManager:
 
     def load_plugins_from_directory(self, directory_path: str) -> int:
         """Load all plugins from a directory."""
-        import os
 
         loaded_count = 0
 

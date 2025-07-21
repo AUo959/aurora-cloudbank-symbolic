@@ -9,7 +9,6 @@ import datetime
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 class BranchCleanupManager:
     """Manages automated cleanup of stale repository branches."""

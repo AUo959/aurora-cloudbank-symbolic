@@ -5,8 +5,6 @@ Interactive CLI for Aurora CloudBank operations
 """
 
 import sys
-import json
-import asyncio
 import argparse
 from datetime import datetime
 from pathlib import Path
@@ -20,7 +18,7 @@ class AuroraCLI:
 
     def print_banner(self):
         """Print Aurora CloudBank banner"""
-        banner = f"""
+        banner = """
 
 ╔═══════════════════════════════════════╗
 ║         Aurora CloudBank CLI          ║

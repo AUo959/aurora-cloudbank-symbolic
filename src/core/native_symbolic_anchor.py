@@ -338,7 +338,14 @@ class NativeSymbolicCPUAnchor:
             }
         }
 
-    def _coordinate_hybrid_processing(self, data: Dict[str, Any], quantum_result: Dict[str, Any], symbolic_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _coordinate_hybrid_processing(self,
+        data: Dict[str,
+        Any],
+        quantum_result: Dict[str,
+        Any],
+        symbolic_result: Dict[str,
+        Any]) -> Dict[str,
+        Any]:
         """Coordinate quantum-symbolic hybrid processing"""
         # Combine quantum and symbolic entropies
         q_entropy = quantum_result.get('entropy', 0.0)

@@ -16,7 +16,6 @@ import numpy as np
 
 from ...symbolic.geometric_algebra import GeometricAlgebra
 from ...symbolic.quantum_symbolic_vector import QuantumSymbolicVector
-from ..glyph_core import GlyphCore
 
 class RenderMode(Enum):
     """Rendering mode enumeration"""
@@ -427,46 +426,46 @@ class QuantumRenderer:
         """Generate WebGL vertex shader"""
         return """
         #version 300 es
-        precision highp float;
+        precision highp float
 
-        in vec3 position;
-        in vec3 normal;
-        in vec2 texCoord;
-        in vec4 quantumState;
+        in vec3 position
+        in vec3 normal
+        in vec2 texCoord
+        in vec4 quantumState
 
-        uniform mat4 modelMatrix;
-        uniform mat4 viewMatrix;
-        uniform mat4 projectionMatrix;
-        uniform mat4 coherenceMatrix;
-        uniform float time;
-        uniform float coherenceFactor;
+        uniform mat4 modelMatrix
+        uniform mat4 viewMatrix
+        uniform mat4 projectionMatrix
+        uniform mat4 coherenceMatrix
+        uniform float time
+        uniform float coherenceFactor
 
-        out vec3 vPosition;
-        out vec3 vNormal;
-        out vec2 vTexCoord;
-        out vec4 vQuantumState;
-        out float vCoherence;
+        out vec3 vPosition
+        out vec3 vNormal
+        out vec2 vTexCoord
+        out vec4 vQuantumState
+        out float vCoherence
 
         void main() {
             // Apply quantum coherence transformation
-            vec4 quantumPosition = coherenceMatrix * vec4(position, 1.0);
+            vec4 quantumPosition = coherenceMatrix * vec4(position, 1.0)
 
             // Calculate coherence factor
-            vCoherence = coherenceFactor * (0.5 + 0.5 * sin(time + quantumState.x));
+            vCoherence = coherenceFactor * (0.5 + 0.5 * sin(time + quantumState.x))
 
             // Apply superposition effects
-            vec3 modifiedPosition = position + 0.1 * sin(time + quantumState.y) * normal;
+            vec3 modifiedPosition = position + 0.1 * sin(time + quantumState.y) * normal
 
             // Transform position
-            vec4 worldPosition = modelMatrix * vec4(modifiedPosition, 1.0);
-            vec4 viewPosition = viewMatrix * worldPosition;
-            gl_Position = projectionMatrix * viewPosition;
+            vec4 worldPosition = modelMatrix * vec4(modifiedPosition, 1.0)
+            vec4 viewPosition = viewMatrix * worldPosition
+            gl_Position = projectionMatrix * viewPosition
 
             // Pass through attributes
-            vPosition = worldPosition.xyz;
-            vNormal = normalize(mat3(modelMatrix) * normal);
-            vTexCoord = texCoord;
-            vQuantumState = quantumState;
+            vPosition = worldPosition.xyz
+            vNormal = normalize(mat3(modelMatrix) * normal)
+            vTexCoord = texCoord
+            vQuantumState = quantumState
         }
         """
 
@@ -476,51 +475,51 @@ class QuantumRenderer:
         """Generate WebGL fragment shader"""
         return """
         #version 300 es
-        precision highp float;
+        precision highp float
 
-        in vec3 vPosition;
-        in vec3 vNormal;
-        in vec2 vTexCoord;
-        in vec4 vQuantumState;
-        in float vCoherence;
+        in vec3 vPosition
+        in vec3 vNormal
+        in vec2 vTexCoord
+        in vec4 vQuantumState
+        in float vCoherence
 
-        uniform vec3 cameraPosition;
-        uniform float time;
-        uniform float entanglementStrength;
-        uniform int superpositionDepth;
+        uniform vec3 cameraPosition
+        uniform float time
+        uniform float entanglementStrength
+        uniform int superpositionDepth
 
-        out vec4 fragColor;
+        out vec4 fragColor
 
         // Quantum color calculation
         vec3 quantumColor(vec4 quantumState, float coherence) {
-            vec3 baseColor = vec3(0.3, 0.6, 0.9);
+            vec3 baseColor = vec3(0.3, 0.6, 0.9)
 
             // Apply quantum interference
             float interference = sin(quantumState.x * 10.0 + time) *
-                               cos(quantumState.y * 10.0 + time) * coherence;
+                               cos(quantumState.y * 10.0 + time) * coherence
 
             // Entanglement effects
             vec3 entanglementColor = vec3(
                 0.5 + 0.5 * sin(time + quantumState.z),
                 0.5 + 0.5 * cos(time + quantumState.w),
                 0.5 + 0.5 * sin(time + quantumState.x + quantumState.y)
-            );
+            )
 
-            return mix(baseColor, entanglementColor, entanglementStrength * interference);
+            return mix(baseColor, entanglementColor, entanglementStrength * interference)
         }
 
         void main() {
             // Calculate quantum-enhanced color
-            vec3 color = quantumColor(vQuantumState, vCoherence);
+            vec3 color = quantumColor(vQuantumState, vCoherence)
 
             // Apply superposition visualization
-            float superpositionFactor = 1.0;
+            float superpositionFactor = 1.0
             if (superpositionDepth > 1) {
-                superpositionFactor = 0.5 + 0.5 * sin(time * float(superpositionDepth) + vQuantumState.x);
+                superpositionFactor = 0.5 + 0.5 * sin(time * float(superpositionDepth) + vQuantumState.x)
             }
 
             // Final color with quantum effects
-            fragColor = vec4(color * superpositionFactor, 0.8 + 0.2 * vCoherence);
+            fragColor = vec4(color * superpositionFactor, 0.8 + 0.2 * vCoherence)
         }
         """
 

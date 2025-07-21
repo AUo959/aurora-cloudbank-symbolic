@@ -12,6 +12,7 @@ from pathlib import Path
 import yaml
 
 class ReflectiveMonitor:
+
     def __init__(self, capsule_index_path=".loom/reflect/capsule_registry.yaml"):
         self.capsule_index_path = Path(capsule_index_path)
         self.load_capsule_registry()
@@ -54,6 +55,7 @@ class ReflectiveMonitor:
 # =============================================
 
 class CapsuleLinter:
+
     def __init__(self, capsule_index_path=".loom/reflect/capsule_registry.yaml"):
         self.capsule_index_path = Path(capsule_index_path)
         self.diagnostics = []
@@ -101,6 +103,7 @@ class CapsuleLinter:
 # =============================================
 
 class ContinuityManager:
+
     def __init__(self):
         self.linter = CapsuleLinter()
         self.recovery_queue = []
@@ -130,6 +133,7 @@ class ContinuityManager:
 # =============================================
 
 class AutonomicCorrectionEngine:
+
     def __init__(self):
         self.manager = ContinuityManager()
         self.correction_log = []
@@ -166,6 +170,7 @@ class AutonomicCorrectionEngine:
 # =============================================
 
 class ReflectiveAutonomyLoop:
+
     def __init__(self):
         self.ace = AutonomicCorrectionEngine()
         self.audit_log_path = ".loom/reflect/autonomy_audit_log.txt"

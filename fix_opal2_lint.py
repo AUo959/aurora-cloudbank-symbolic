@@ -5,8 +5,6 @@ Removes trailing whitespace and fixes basic issues
 """
 
 import os
-import re
-from pathlib import Path
 
 def fix_file(file_path):
     """Fix basic lint issues in a file"""

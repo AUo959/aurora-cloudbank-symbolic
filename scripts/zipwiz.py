@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 ZIPWiz - Advanced Archive Management Integration
 Part of the GITWiz Enhanced ecosystem
 
@@ -10,15 +13,6 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
-import hashlib
-import json
-import logging
-import shutil
-import tempfile
-import zipfile
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -429,7 +423,6 @@ class ZIPWiz:
 
 def main():
     """CLI interface for ZIPWiz."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="ZIPWiz - Advanced Archive Management")
     parser.add_argument("archive", help="Path to ZIP archive")

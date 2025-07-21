@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+
+        import fnmatch
+    import argparse
+
 Memory Sealing Engine - Automated SHA256 sealing with state recovery
 Part of T71 Symbolic Infrastructure Genesis
 
@@ -10,16 +14,6 @@ Primary functions:
 - Memory drift detection and correction protocols
 """
 
-import os
-import json
-import hashlib
-import shutil
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
-from dataclasses import dataclass, asdict
-import zipfile
-import tempfile
 
 @dataclass
 class MemorySeal:
@@ -359,7 +353,6 @@ class MemorySealingEngine:
 
     def _should_exclude(self, name: str, exclude_patterns: List[str]) -> bool:
         """Check if file/directory should be excluded based on patterns"""
-        import fnmatch
         for pattern in exclude_patterns:
             if fnmatch.fnmatch(name, pattern):
                 return True
@@ -572,7 +565,6 @@ class MemorySealingEngine:
 
 def main():
     """CLI interface for memory sealing"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Memory Sealing Engine")
     parser.add_argument("command", choices=["seal", "verify", "restore", "list"])

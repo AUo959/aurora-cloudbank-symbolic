@@ -82,7 +82,7 @@ def main() -> None:
         "--pl-branch", default="pl_branch_data", help="PL branch data directory"
     )
     parser.add_argument(
-        "--rollback", choices=["staf", "blueprint", "all"], help="Rollback target"
+        "--rollback", choices=["sta", "blueprint", "all"], help="Rollback target"
     )
     args = parser.parse_args()
 
@@ -99,7 +99,7 @@ def main() -> None:
     if args.rollback:
         targets = resources
         if args.rollback != "all":
-            mapping = {"staf": resources[0], "blueprint": resources[1]}
+            mapping = {"sta": resources[0], "blueprint": resources[1]}
             targets = [mapping[args.rollback]]
 
         for _, dest in targets:

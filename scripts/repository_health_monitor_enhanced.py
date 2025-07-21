@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring with alerts and automated remediation
 """
 
-import datetime
-import json
-import os
-import smtplib
-import subprocess
-import time
-from dataclasses import asdict, dataclass
-from email.mime.text import MIMEText
-from pathlib import Path
-from typing import Dict, List, Optional
 
 @dataclass
 class HealthMetrics:
@@ -481,7 +474,6 @@ class RepositoryHealthMonitor:
 
 def main():
     """Main monitoring function"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Repository health monitor")
     parser.add_argument(

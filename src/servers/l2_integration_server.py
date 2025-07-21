@@ -1,34 +1,22 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora L2 Integration Server
 Aurora CloudBank v3.5.1_macroready
 
 FastAPI server for L2 Meta-Agent Integration with real-time dashboard
 """
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-import asyncio
-import json
-import logging
-from pathlib import Path
-from typing import Dict, Any
-from datetime import datetime
 
 # Import our L2 bridge
-import sys
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from bridges.l2_meta_agent_bridge import l2_bridge
     # Import Aurora Custom GPT bridge for explicit integration
     try:
         sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'integrations'))
-        from aurora_custom_gpt_bridge import auroraCustomGptBridge, AURORA_CUSTOM_GPT
         AURORA_CUSTOM_GPT_AVAILABLE = True
         auroraCustomGptBridge = auroraCustomGptBridge  # Ensure variable is bound
         AURORA_CUSTOM_GPT = AURORA_CUSTOM_GPT  # Ensure variable is bound
@@ -40,9 +28,12 @@ try:
         print(f"⚠️ Aurora Custom GPT bridge not available: {e}")
 except ImportError:
     # Fallback for testing
+
     class MockBridge:
+
         async def activate_agent(self, agent_id, phrase):
             return {"success": True, "agent_id": agent_id}
+
         def get_constellation_status(self):
             return {"constellation": "L2_META_AGENTS", "totalAgents": 0}
     l2_bridge = MockBridge()
@@ -436,9 +427,9 @@ async def startup_event():
     """Server startup event"""
     logger.info("🌟 Aurora L2 Integration Server starting up")
     logger.info(f"Version: {server_state['version']}")
-    logger.info(f"Dashboard URL: http://localhost:8000")
-    logger.info(f"API Documentation: http://localhost:8000/api/docs")
-    logger.info(f"Health Check: http://localhost:8000/health")
+    logger.info("Dashboard URL: http://localhost:8000")
+    logger.info("API Documentation: http://localhost:8000/api/docs")
+    logger.info("Health Check: http://localhost:8000/health")
 
     # Initialize any background tasks here
     pass
@@ -457,9 +448,9 @@ async def shutdown_event():
                 logger.error(f"Error disconnecting {agent_id}: {str(e)}")
 
 # Main entry point
+
 def main():
     """Main entry point for the server"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Aurora L2 Integration Server")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")

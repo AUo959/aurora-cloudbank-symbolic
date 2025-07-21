@@ -1,7 +1,5 @@
 """CASK data generation utilities."""
 
-from __future__ import annotations
-
 import pandas as pd
 
 def generate_technical_specifications(output_csv: str | None = None) -> pd.DataFrame:

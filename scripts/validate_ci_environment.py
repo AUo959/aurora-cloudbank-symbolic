@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 CI Environment Validation Script
 ===============================
 
@@ -14,12 +17,6 @@ Usage:
 Author: Aurora/ORION Core
 """
 
-import json
-import shutil
-import subprocess
-import sys
-from pathlib import Path
-from typing import Dict, List, Tuple
 
 class CIEnvironmentValidator:
     """Validates and optionally fixes CI environment setup."""
@@ -229,7 +226,6 @@ class CIEnvironmentValidator:
 
 def main():
     """Main entry point."""
-    import argparse
 
     parser = argparse.ArgumentParser(description='Validate CI environment setup')
     parser.add_argument('--fix-missing', action='store_true', help='Attempt to install missing tools')

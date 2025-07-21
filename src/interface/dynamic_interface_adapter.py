@@ -4,6 +4,7 @@ Never-before-conceived adaptive interface evolution
 """
 
 class DynamicInterfaceAdapter:
+
     def __init__(self):
         self.adaptation_modes = {
             'context_aware': True,
@@ -29,7 +30,7 @@ class DynamicInterfaceAdapter:
         """Determine optimal interface type based on context"""
         if context.get('research_intensity') == 'high':
             return 'research_focused_immersive'
-        elif context.get('collaboration_mode') == True:
+        elif context.get('collaboration_mode') is True:
             return 'multi_agent_collaborative'
         else:
             return 'adaptive_hybrid'

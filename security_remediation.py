@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
 """
+
+        import shlex
+    import shlex
+    import shlex
+import shlex
+import subprocess
+import re
+import html
+from typing import List, Dict, Any, Optional, Union
+from pathlib import Path
+import shlex
+from .security.secure_helpers import secure
+
 🔒 Aurora CloudBank Security Remediation Script
 Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
 """
 
-import json
-import shlex
-import subprocess
-import sys
-from pathlib import Path
-from typing import Tuple
 
 class SecurityRemediator:
     """Comprehensive security vulnerability fixer for Aurora CloudBank."""
@@ -81,7 +88,6 @@ class SecurityRemediator:
     """Run command and return output, handling errors gracefully."""
     try:
         # Use shlex.split for secure command execution
-        import shlex
         cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
         result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
         return result.stdout.strip(), result.returncode == 0
@@ -116,7 +122,6 @@ class SecurityRemediator:
         sys.exit(result.returncode)''',
             '''def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
-    import shlex
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)
@@ -163,7 +168,6 @@ class SecurityRemediator:
     print(f"[{step_name}] All attempts failed\\n")
     return False''',
             '''def run_step(step_name, commands):
-    import shlex
     for i, cmd in enumerate(commands, 1):
         print(f"\\n[{step_name}] Attempt {i}: {cmd}")
         try:
@@ -239,12 +243,6 @@ class SecurityRemediator:
 Provides secure alternatives to common operations.
 """
 
-import shlex
-import subprocess
-import re
-import html
-from typing import List, Dict, Any, Optional, Union
-from pathlib import Path
 
 class SecureHelpers:
     """Secure helper functions for Aurora CloudBank."""
@@ -303,7 +301,7 @@ class SecureHelpers:
             Sanitized input string
         """
         if not isinstance(user_input, str):
-            return ""
+            return "r"
 
         # Truncate to max length
         sanitized = user_input[:max_length]
@@ -314,7 +312,7 @@ class SecureHelpers:
         # Remove potential script tags and javascript
         sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(rr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -357,7 +355,7 @@ class SecureHelpers:
 
         Returns:
             Result of safe evaluation
-        """
+        ""r"
         if allowed_functions is None:
             allowed_functions = {
                 'abs': abs,
@@ -367,7 +365,7 @@ class SecureHelpers:
                 'len': len
 
         # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:
@@ -497,14 +495,12 @@ This document outlines the security measures, policies, and best practices for t
 ```python
 # ❌ UNSAFE
         subprocess.run(cmd_parts, timeout=300)  # Use parsed command without shell# ✅ SECURE
-import shlex
 cmd_parts = shlex.split(cmd)
 subprocess.run(cmd_parts, timeout=30)
 ```
 
 ### Input Sanitization
 ```python
-from .security.secure_helpers import secure
 
 # Sanitize user input
 clean_input = secure.sanitize_input(user_input)

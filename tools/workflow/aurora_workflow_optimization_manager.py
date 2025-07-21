@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank Workflow Optimization Manager
 Streamlines and optimizes existing workflow systems for maximum efficiency
 """
-
-import json
-import subprocess
-import sys
-from pathlib import Path
-from typing import Dict
-import datetime
 
 
 class WorkflowOptimizationManager:
@@ -598,7 +594,7 @@ case "$1" in
     "quick-check")
         echo "🚀 Running quick development checks..."
         python3 tools/workflow/aurora_failure_prevention_system.py --check
-        ;;
+        
     "pre-deploy")
         echo "🚀 Pre-deployment validation..."
         python3 tools/workflow/aurora_failure_prevention_system.py --check
@@ -607,15 +603,15 @@ case "$1" in
         else
             echo "❌ Fix issues before deploying"
         fi
-        ;;
+        
     "optimize")
         echo "⚡ Running workflow optimization..."
         python3 tools/workflow/aurora_workflow_optimization_manager.py
-        ;;
+        
     *)
         echo "Aurora Development Utilities"
         echo "Usage: $0 [quick-check|pre-deploy|optimize]"
-        ;;
+        
 esac
 '''
 
@@ -683,10 +679,8 @@ esac
 
         print("\n✨ Your workflows are now optimized for maximum efficiency!")
 
-
 def main():
     """CLI interface for workflow optimization."""
-    import argparse
 
     parser = argparse.ArgumentParser(description='Aurora Workflow Optimization Manager')
     parser.add_argument('--optimize', action='store_true', help='Run comprehensive optimization')
@@ -713,7 +707,6 @@ def main():
     print("2. Implement suggested configurations")
     print("3. Run: python3 tools/workflow/aurora_failure_prevention_system.py")
     print("4. Monitor performance improvements")
-
 
 if __name__ == "__main__":
     main()

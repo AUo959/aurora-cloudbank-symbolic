@@ -5,7 +5,6 @@ Test all components working together
 """
 
 import asyncio
-import json
 import sys
 from pathlib import Path
 
@@ -82,7 +81,7 @@ async def test_opal2_integration():
     print("\n🔌 Testing Plugin System...")
     try:
         plugins = plugin_system.list_plugins()
-        print(f"✅ Plugin system operational")
+        print("✅ Plugin system operational")
         print(f"   - Available plugins: {len(plugins)}")
         for plugin in plugins[:3]:  # Show first 3
             print(
@@ -112,7 +111,7 @@ async def test_opal2_integration():
         print("✅ Full integration test successful")
         print(f"   - Generated glyph with {len(glyph_data)} properties")
         print(f"   - Cached with key: {cache_key}")
-        print(f"   - Render context prepared")
+        print("   - Render context prepared")
 
     except Exception as e:
         print(f"❌ Full integration test failed: {e}")

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 class RepositoryHealthMonitor:
+
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
         self.config = {

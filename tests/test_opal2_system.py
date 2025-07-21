@@ -7,7 +7,6 @@ Basic testing for Opal2 concepts without complex imports
 import shutil
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pytest
 
@@ -79,6 +78,7 @@ class TestOpal2BasicConcepts:
     @pytest.mark.asyncio
     async def test_opal2_async_concept(self):
         """Test async processing concept"""
+
         async def mock_render_async(data):
             # Simulate async rendering
             return {

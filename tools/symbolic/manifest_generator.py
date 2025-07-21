@@ -8,7 +8,6 @@ import json
 import hashlib
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
 
 class ManifestGenerator:
     """Automated manifest generation with SHA256 sealing"""

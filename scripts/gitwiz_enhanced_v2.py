@@ -1,22 +1,12 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 GitWiz Enhanced v2.0 - Intelligent Git Repository Management
-Advanced automation for git operations, repository optimization, and health monitoring
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
-import json
-import subprocess
-import shutil
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-import logging
-import tempfile
-import zipfile
-import re
-import hashlib
 
 # Configure logging
 logging.basicConfig(
@@ -71,7 +61,6 @@ class FileAnalysis:
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
 
-    def __init__(self, repo_path: str = "."):
         """Initialize GitWiz with repository path."""
         self.repo_path = Path(repo_path).resolve()
         self.git_dir = self.repo_path / ".git"
@@ -401,7 +390,8 @@ class GitWizEnhanced:
                     }
 
                     # Add recommendations
-                    if days_since_commit > self.thresholds.get("stale_branch_days", 30) and branch_name != current_branch:
+                    if days_since_commit > self.thresholds.get("stale_branch_days",
+                        30) and branch_name != current_branch:
                         result["recommendations"].append({
                             "type": "delete_stale_branch",
                             "branch": branch_name,
@@ -418,7 +408,6 @@ class GitWizEnhanced:
                 for rec in result["recommendations"]:
                     if rec["type"] == "delete_stale_branch":
                         try:
-                            self.run_git_command(["branch", "-d", rec["branch"]])
                             cleanup_result.append(f"Deleted stale branch: {rec['branch']}")
                         except Exception as e:
                             cleanup_result.append(f"Failed to delete {rec['branch']}: {e}")
@@ -446,8 +435,6 @@ class GitWizEnhanced:
                 "total_files": metrics.total_files,
                 "total_size_mb": round(metrics.total_size_mb, 2),
                 "git_size_mb": round(metrics.git_size_mb, 2),
-                "optimization_score": round(metrics.optimization_score, 2),
-                "security_score": round(metrics.security_score, 2),
                 "health_status": self._determine_health_status(metrics)
             },
             "metrics": asdict(metrics),
@@ -466,6 +453,7 @@ class GitWizEnhanced:
         return report
 
     # Helper methods
+
     def _should_ignore_file(self, file_path: Path) -> bool:
         """Check if file should be ignored based on patterns."""
         rel_path = str(file_path.relative_to(self.repo_path))
@@ -602,7 +590,10 @@ class GitWizEnhanced:
         else:
             return "needs_attention"
 
-    def _generate_recommendations(self, metrics: RepositoryMetrics, file_analysis: FileAnalysis) -> List[Dict[str, Any]]:
+    def _generate_recommendations(self,
+        metrics: RepositoryMetrics,
+        file_analysis: FileAnalysis) -> List[Dict[str,
+        Any]]:
         """Generate optimization recommendations."""
         recommendations = []
 
@@ -649,7 +640,6 @@ class GitWizEnhanced:
 
 def main():
     """Main CLI interface."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="GitWiz Enhanced v2.0 - Intelligent Git Repository Management")
     parser.add_argument("--repo", default=".", help="Repository path (default: current directory)")

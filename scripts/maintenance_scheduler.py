@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """
+
+                    import shlex
+            from .repository_health_monitor import RepositoryHealthMonitor
+            from .automated_branch_cleanup import BranchCleanupManager
+
 Aurora CloudBank - Scheduled Repository Maintenance System
 Automated maintenance workflows with configurable schedules and safety checks.
 """
 
-import argparse
-import datetime
-import json
-import os
-import subprocess
-import threading
-import time
-from pathlib import Path
-from typing import Dict, List
 
 # import schedule  # Optional dependency
 try:
-    import schedule
 except ImportError:
     schedule = None
 
@@ -316,7 +311,6 @@ class MaintenanceScheduler:
                 if self.config["safety_settings"]["dry_run_mode"]:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
-                    import shlex
                     cmd_parts = shlex.split(command) if isinstance(command, str) else command
                     result = subprocess.run(
                         cmd_parts,
@@ -340,7 +334,6 @@ class MaintenanceScheduler:
         """Run health monitoring check."""
         try:
             # Import and run the health monitor
-            from .repository_health_monitor import RepositoryHealthMonitor
 
             monitor = RepositoryHealthMonitor(self.repo_path)
             result = monitor.run_monitoring_cycle()
@@ -406,7 +399,6 @@ class MaintenanceScheduler:
     def _branch_analysis(self, config: Dict) -> Dict:
         """Analyze branches for cleanup opportunities."""
         try:
-            from .automated_branch_cleanup import BranchCleanupManager
 
             cleanup_manager = BranchCleanupManager(self.repo_path)
             branches = cleanup_manager.analyze_branches()

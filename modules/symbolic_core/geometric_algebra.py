@@ -10,6 +10,7 @@ except Exception:
     cf = None
 
 class GeometricAlgebra:
+
     def __init__(self):
         if cf is not None:
             self.layout, self.blades = cf.Cl(3)

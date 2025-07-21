@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+        from canonical_validator import CanonicalValidator
+
 Aurora CloudBank Canonical Validation System - Setup Script
 Installs and configures the canonical validation mechanism
 
@@ -11,11 +14,6 @@ This script:
 5. Provides usage instructions
 """
 
-import os
-import sys
-import subprocess
-import shutil
-from pathlib import Path
 
 def print_header():
     """Print setup header"""
@@ -134,7 +132,6 @@ def test_validation_system():
     try:
         # Import and test validator
         sys.path.insert(0, "scripts")
-        from canonical_validator import CanonicalValidator
 
         validator = CanonicalValidator()
         print("  ✅ Validator import successful")

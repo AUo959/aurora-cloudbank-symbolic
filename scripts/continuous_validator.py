@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank - Continuous Canonical Validation Monitor
 Real-time monitoring and validation of file changes against canonical specifications
 
@@ -11,22 +14,12 @@ This monitor:
 5. Maintains continuous canonical compliance
 """
 
-import time
-import sys
-from pathlib import Path
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-import threading
-from datetime import datetime
-import json
-import yaml
 
 # Add scripts directory to path
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 try:
-    from canonical_validator import CanonicalValidator, ValidationResult
 except ImportError:
     print("❌ Error: Could not import canonical_validator")
     sys.exit(1)
@@ -285,7 +278,6 @@ class ContinuousValidator:
 
 def main():
     """Main execution function"""
-    import argparse
 
     parser = argparse.ArgumentParser(
         description="Aurora CloudBank Continuous Canonical Validation Monitor"

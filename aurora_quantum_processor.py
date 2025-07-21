@@ -5,8 +5,6 @@ Advanced quantum-aware vector operations for symbolic processing
 """
 
 import numpy as np
-from typing import List, Dict, Any, Optional
-import json
 from dataclasses import dataclass
 
 @dataclass

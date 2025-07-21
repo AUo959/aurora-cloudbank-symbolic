@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 """
+
+    import argparse
+
 Aurora CloudBank Maintenance Scheduler
 Automated maintenance workflows and scheduling system
 """
 
-import datetime
-import json
-import logging
-import os
-import subprocess
-import threading
-import time
-from typing import List
 
-import schedule
 
 class MaintenanceScheduler:
     """Automated maintenance scheduling and execution system"""
@@ -433,7 +427,6 @@ class MaintenanceScheduler:
         self.logger.info("Stopping maintenance scheduler")
 
 def main():
-    import argparse
 
     parser = argparse.ArgumentParser(
         description="Aurora CloudBank Maintenance Scheduler"

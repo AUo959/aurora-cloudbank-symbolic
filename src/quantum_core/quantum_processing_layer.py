@@ -8,14 +8,15 @@ from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit_aer import AerSimulator
 
 class QuantumProcessingLayer:
+
     def __init__(self, num_qubits=8):
-        self.num_qubits = num_qubits;
-        self.simulator = AerSimulator();
-        self.quantum_circuits = {};
+        self.num_qubits = num_qubits
+        self.simulator = AerSimulator()
+        self.quantum_circuits = {}
 
     def create_quantum_circuit(self, circuit_name, operations):
         """Create quantum circuit for symbolic processing"""
-        qreg = QuantumRegister(self.num_qubits, 'q');
+        qreg = QuantumRegister(self.num_qubits, 'q')
         creg = ClassicalRegister(self.num_qubits, 'c')
         circuit = QuantumCircuit(qreg, creg)
 

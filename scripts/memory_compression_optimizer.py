@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
 """
+
+    import datetime
+
 Aurora CloudBank - Memory Compression and Optimization System
 Advanced repository optimization with intelligent compression and deduplication
 """
 
-import argparse
-import gzip
-import hashlib
-import os
-import shutil
-import subprocess
-from collections import defaultdict
-from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 class MemoryCompressionOptimizer:
     """Advanced memory and storage optimization system"""
@@ -563,6 +557,5 @@ def main():
         optimizer.run_full_optimization()
 
 if __name__ == "__main__":
-    import datetime
 
     main()

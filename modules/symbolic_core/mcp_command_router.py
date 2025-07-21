@@ -5,6 +5,7 @@ MCP Command Router: Centralized symbolic command routing using MCP Bridge Core c
 from modules.symbolic_core import get_mcp_bridge_core
 
 class MCPCommandRouter:
+
     def __init__(self):
         self.mcp = get_mcp_bridge_core()
         self.governance_layer = self.mcp.get("governance_layer", "UNKNOWN")

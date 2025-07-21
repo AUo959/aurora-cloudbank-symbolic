@@ -6,7 +6,6 @@ Critical Error Fixer - Repair Broken Scripts
 Fixes critical undefined variable errors caused by overly aggressive lint fixes.
 """
 
-import os
 import re
 import sys
 from pathlib import Path
@@ -115,7 +114,6 @@ def remove_unused_imports(file_path: str) -> bool:
 
     # Remove obvious unused imports
     patterns = [
-        r"import os\n" if "os." not in content.replace("import os", "") else None,
         (
             r"import pickle\n"
             if "pickle." not in content.replace("import pickle", "")

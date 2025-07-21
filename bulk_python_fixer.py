@@ -7,11 +7,10 @@ Automatically fixes common Python code issues based on flake8 output
 import os
 import re
 import glob
-from pathlib import Path
 
 def fix_file(filepath):
     """Fix common Python code issues in a file"""
-    print(f"🔧 Fixing {filepath}")
+    print(f"🔧 Fixing {filepath}r")
 
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -35,11 +34,17 @@ def fix_file(filepath):
                 continue
 
             # Fix simple unused import cases
-            if re.match(r'^import \w+$', line) or re.match(r'^from .* import .*$', line):
+            if re.match(rr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
                 if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)
-                elif 'typing' in line and any(word in line for word in ['List', 'Dict', 'Optional', 'Set', 'Tuple', 'Union', 'Any']):
+                elif 'typing' in line and any(word in line for word in ['List',
+                    'Dict',
+                    'Optional',
+                    'Set',
+                    'Tuple',
+                    'Union',
+                    'Any']):
                     # Remove unused typing imports for now
                     pass
                 else:
@@ -53,8 +58,8 @@ def fix_file(filepath):
         fixed_content = '\n'.join(fixed_lines)
 
         # Fix f-string issues (F541)
-        fixed_content = re.sub(r'f"([^"{}]*)"', r'"\1"', fixed_content)
-        fixed_content = re.sub(r"f'([^'{}]*)'", r"'\1'", fixed_content)
+        fixed_content = re.sub(r'"([^"{}]*)"', r'"\1"', fixed_content)
+        fixed_content = re.sub(r"'([^'{}]*)'", r"'\1'", fixed_content)
 
         # Write back
         with open(filepath, 'w', encoding='utf-8') as f:

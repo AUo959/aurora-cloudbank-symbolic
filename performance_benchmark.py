@@ -11,7 +11,6 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.native_vsa import NativeSymbolicVector, NativeVSAMemory
 from src.core.native_quantum import NativeQuantumProcessingLayer
 from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
 
@@ -173,7 +172,7 @@ def estimate_heavy_dependency_overhead():
     total_import_time = sum(heavy_imports.values())
 
     print(f"  📚 Estimated import time for heavy dependencies: {total_import_time:.1f} seconds")
-    print(f"  ⚡ Native implementation import time: ~0.001 seconds")
+    print("  ⚡ Native implementation import time: ~0.001 seconds")
     print(f"  🚀 Import speedup: {total_import_time / 0.001:.0f}x faster")
 
     # Memory usage estimates
@@ -219,21 +218,21 @@ def main():
     # Performance summary
     print("\n🎯 Performance Optimization Summary")
     print("=" * 40)
-    print(f"✅ Zero Dependencies: True")
-    print(f"✅ Native Algorithms: True")
-    print(f"✅ Symbolic Patterns Preserved: True (T1/SRB anchors)")
-    print(f"✅ DLP Tagging: True")
-    print(f"✅ Export Manifests: True")
-    print(f"✅ Continuity Preservation: True")
-    print(f"✅ CLI Chaining: True (001//999//.)")
+    print("✅ Zero Dependencies: True")
+    print("✅ Native Algorithms: True")
+    print("✅ Symbolic Patterns Preserved: True (T1/SRB anchors)")
+    print("✅ DLP Tagging: True")
+    print("✅ Export Manifests: True")
+    print("✅ Continuity Preservation: True")
+    print("✅ CLI Chaining: True (001//999//.)")
 
-    print(f"\n⚡ Performance Gains:")
+    print("\n⚡ Performance Gains:")
     print(f"  🚀 Startup time improvement: {import_overhead / 0.001:.0f}x faster")
     print(f"  💾 Memory usage reduction: {memory_overhead / 2:.0f}x less memory")
-    print(f"  🎯 Operation speed: Optimized for performance")
-    print(f"  🔗 Modular design: Zero coupling to heavy libs")
+    print("  🎯 Operation speed: Optimized for performance")
+    print("  🔗 Modular design: Zero coupling to heavy libs")
 
-    print(f"\n🌟 Aurora CloudBank v3.5.2-optimized: Performance Mission Complete!")
+    print("\n🌟 Aurora CloudBank v3.5.2-optimized: Performance Mission Complete!")
 
 if __name__ == "__main__":
     main()

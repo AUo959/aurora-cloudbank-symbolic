@@ -4,6 +4,7 @@ Never-before-conceived quantum-symbolic hybrid processing core
 """
 
 class SymbolicCPUAnchor:
+
     def __init__(self):
         self.quantum_state = {}
         self.symbolic_memory = {}

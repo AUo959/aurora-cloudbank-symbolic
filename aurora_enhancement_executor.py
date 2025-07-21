@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-🚀 Aurora CloudBank Enhancement Sequence Executor
-Implements the next phase of optimal staging deployment.
-"""
 
 import json
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+
+🚀 Aurora CloudBank Enhancement Sequence Executor
+Implements the next phase of optimal staging deployment.
+"""
+
 
 class AuroraEnhancementExecutor:
     """Executes the next phase of Aurora CloudBank enhancements."""
@@ -113,11 +115,6 @@ echo "✅ Automation pipeline completed successfully!"
 Manages staged deployment of enhancements with safety checks.
 """
 
-import json
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 class DeploymentManager:
     """Manages intelligent deployment of Aurora CloudBank enhancements."""
@@ -147,7 +144,7 @@ class DeploymentManager:
             clean = len(result.stdout.strip()) == 0
             print(f"   Repository state: {'✅ Clean' if clean else '⚠️ Has changes'}")
             return True  # Allow deployment with changes for now
-        except:
+        except Exception:
             return False
 
     def _check_security_status(self):
@@ -223,7 +220,7 @@ if __name__ == "__main__":
 
         pr_status = self.check_pr_status()
 
-        report = f"""# 🚀 Aurora CloudBank Enhancement Status Report
+        report = """# 🚀 Aurora CloudBank Enhancement Status Report
 ## Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 ### 🎯 Current Phase Status

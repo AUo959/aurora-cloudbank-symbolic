@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
 """Utilities for interacting with the CASK reference assets.
 
+    import plotly.graph_objects as go
+
+
 This module loads data from ``CASK_Assets.zip`` and provides helper
 functions to parse the included CSV files as pandas ``DataFrame``
 objects. It can also generate a simplified architecture chart for
 quick visualization.
 """
 
-from __future__ import annotations
 
-import os
-import zipfile
-from io import StringIO
-
-import pandas as pd
 
 ASSET_ZIP = "CASK_Assets.zip"
 RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles
@@ -43,7 +40,6 @@ def load_vs_sota() -> pd.DataFrame:
 
 def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     """Generate a simple architecture diagram and return the output path."""
-    import plotly.graph_objects as go
 
     fig = go.Figure()
     colors = {

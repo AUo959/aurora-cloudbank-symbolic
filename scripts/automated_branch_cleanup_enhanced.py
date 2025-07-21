@@ -8,7 +8,6 @@ import argparse
 import datetime
 import subprocess
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 @dataclass
 class BranchInfo:

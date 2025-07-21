@@ -8,6 +8,8 @@ Quick overview of repository health and development readiness
 """
 
 
+from pathlib import Path
+
 def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:

@@ -8,6 +8,10 @@ Comprehensive preparation for the Opal2 expansion pull request
 """
 
 
+from datetime import datetime
+from pathlib import Path
+import json
+
 class Opal2PRPreparation:
     """
     PR preparation utility for Opal2 expansion

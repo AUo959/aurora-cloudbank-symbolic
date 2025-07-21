@@ -12,6 +12,9 @@ so Copilot or other agents can easily maintain the repo.
 
 
 
+import os
+import sys
+
 logger = get_logger("staff_node_ci_helper")
 
 def run_cmd(cmd: str) -> None:

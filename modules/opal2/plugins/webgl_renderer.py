@@ -9,6 +9,10 @@ import json
 
 from modules.opal2.plugins.base_plugin import PluginMetadata, PluginType, RendererPlugin
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL-based renderer for quantum and symbolic visualizations."""
 

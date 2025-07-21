@@ -14,6 +14,12 @@ FastAPI-based REST API for Aurora CloudBank services
 
 # Pydantic models for API
 
+from datetime import datetime
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+
 class QuantumVectorRequest(BaseModel):
     dimension: int = 128
     quantum_state: str = "coherent"

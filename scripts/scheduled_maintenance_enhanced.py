@@ -9,6 +9,15 @@ Automated repository maintenance with intelligent scheduling
 
 
 
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Callable
+from typing import Dict
+from typing import Optional
+import json
+import os
+import time
+
 @dataclass
 class MaintenanceTask:
     """Maintenance task definition"""

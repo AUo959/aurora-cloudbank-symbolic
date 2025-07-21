@@ -18,6 +18,8 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 # Configure logging
+from dataclasses import dataclass
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

@@ -14,6 +14,11 @@ from enum import Enum
 from pathlib import Path
 
 # Configure logging
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

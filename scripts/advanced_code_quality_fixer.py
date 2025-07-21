@@ -9,6 +9,8 @@ import ast
 import subprocess
 from pathlib import Path
 
+from typing import Dict
+
 class AdvancedCodeQualityFixer:
 
     def __init__(self):

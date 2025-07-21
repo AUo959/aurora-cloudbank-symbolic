@@ -12,6 +12,9 @@ Basic test for T71 Symbolic Infrastructure tools
 
 
 # Add tools to path
+from pathlib import Path
+import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
 
 def test_anchor_tracker():

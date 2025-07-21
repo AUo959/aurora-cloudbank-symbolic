@@ -12,6 +12,8 @@ quick visualization.
 
 
 
+import os
+
 ASSET_ZIP = "CASK_Assets.zip"
 RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles
 

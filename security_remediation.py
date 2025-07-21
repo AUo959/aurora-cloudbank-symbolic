@@ -18,6 +18,10 @@ Fixes all security vulnerabilities found in PR #43 and performs comprehensive se
 """
 
 
+from typing import Tuple
+import json
+import sys
+
 class SecurityRemediator:
     """Comprehensive security vulnerability fixer for Aurora CloudBank."""
 

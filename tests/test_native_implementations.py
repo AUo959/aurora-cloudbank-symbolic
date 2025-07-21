@@ -8,6 +8,10 @@ Validates core symbolic simulation functionality without heavy dependencies
 
 
 # Add src to path for imports
+import math
+import os
+import time
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 

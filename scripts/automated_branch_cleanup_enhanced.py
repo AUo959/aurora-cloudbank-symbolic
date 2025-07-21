@@ -9,6 +9,9 @@ import datetime
 import subprocess
 from dataclasses import dataclass
 
+from typing import Dict
+from typing import List
+
 @dataclass
 class BranchInfo:
     """Branch information container"""

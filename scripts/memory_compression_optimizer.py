@@ -8,6 +8,13 @@ Advanced repository optimization with intelligent compression and deduplication
 """
 
 
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict
+from typing import List
+import os
+
 class MemoryCompressionOptimizer:
     """Advanced memory and storage optimization system"""
 

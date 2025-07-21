@@ -18,6 +18,12 @@ Author: Aurora/ORION Core
 """
 
 
+from pathlib import Path
+from typing import Dict
+from typing import Tuple
+import json
+import sys
+
 class CIEnvironmentValidator:
     """Validates and optionally fixes CI environment setup."""
 

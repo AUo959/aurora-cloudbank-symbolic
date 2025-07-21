@@ -15,6 +15,10 @@ This script:
 """
 
 
+from pathlib import Path
+import os
+import sys
+
 def print_header():
     """Print setup header"""
     print("🛰️ Aurora CloudBank Canonical Validation System Setup")

@@ -7,6 +7,10 @@ Advanced quantum-aware vector operations for symbolic processing
 import numpy as np
 from dataclasses import dataclass
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 @dataclass
 class QuantumVector:
     """Quantum-aware vector with symbolic metadata"""

@@ -10,6 +10,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+from typing import Dict
+from typing import List
+from typing import Optional
+
 class BranchCleanupManager:
     """Manages automated cleanup of stale repository branches."""
 

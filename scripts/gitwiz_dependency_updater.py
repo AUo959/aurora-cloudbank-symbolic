@@ -8,6 +8,14 @@ Comprehensive dependency management and auto-updating system.
 """
 
 
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+from typing import Dict
+from typing import List
+import json
+import sys
+
 class DependencyAutoUpdater:
     """Advanced dependency auto-updater for GITWiz."""
 

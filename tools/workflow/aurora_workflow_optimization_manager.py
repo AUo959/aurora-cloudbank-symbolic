@@ -8,6 +8,12 @@ Streamlines and optimizes existing workflow systems for maximum efficiency
 """
 
 
+from datetime import datetime
+from pathlib import Path
+from typing import Dict
+import json
+import sys
+
 class WorkflowOptimizationManager:
     """Optimizes existing Aurora workflows for speed and reliability."""
 

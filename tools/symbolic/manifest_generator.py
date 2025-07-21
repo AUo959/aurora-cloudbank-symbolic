@@ -9,6 +9,10 @@ import hashlib
 from datetime import datetime
 from pathlib import Path
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 class ManifestGenerator:
     """Automated manifest generation with SHA256 sealing"""
 

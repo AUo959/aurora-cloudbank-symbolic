@@ -12,6 +12,13 @@ Enhanced quantum visualization API with modular renderer support
 # Using native Python math instead of numpy for better performance
 
 
+from datetime import datetime
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+import json
+
 app = FastAPI(
     title="Opal2 Modular Visualization System",
     description="Quantum-enhanced modular visualization with real-time rendering",

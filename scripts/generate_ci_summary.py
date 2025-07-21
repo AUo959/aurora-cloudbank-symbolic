@@ -15,6 +15,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from typing import Any
+from typing import Dict
+
 def load_json_report(file_path: str) -> Dict[str, Any]:
     """Load JSON report if it exists."""
     if Path(file_path).exists():

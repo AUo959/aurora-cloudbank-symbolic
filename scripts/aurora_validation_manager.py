@@ -18,6 +18,12 @@ Date: July 14, 2025
 """
 
 
+from datetime import datetime
+from pathlib import Path
+from typing import List
+import json
+import os
+
 class ValidationManager:
     """Manages validation file lifecycle to prevent regeneration cycles"""
 

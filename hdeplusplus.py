@@ -4,6 +4,9 @@ Heuristic Decision Engine PlusPlus (HDE++)
 Lightweight version for GITWiz integration
 """
 
+from typing import Any
+from typing import Dict
+
 class HeuristicDecisionEnginePlusPlus:
     """Simplified HDE++ for decision making."""
 

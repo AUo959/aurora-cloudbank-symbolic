@@ -13,6 +13,9 @@ import re
 import subprocess
 import sys
 
+from typing import Dict
+from typing import List
+
 class BranchManager:
     """Automated branch management and cleanup system."""
 

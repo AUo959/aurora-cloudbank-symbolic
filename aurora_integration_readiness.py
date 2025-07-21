@@ -8,6 +8,10 @@ Using enhanced GitWiz and Health Monitor tools to prepare for Aurora integration
 """
 
 
+from datetime import datetime
+from pathlib import Path
+import json
+
 def run_command(cmd):
     """Run shell command safely without shell injection."""
     try:

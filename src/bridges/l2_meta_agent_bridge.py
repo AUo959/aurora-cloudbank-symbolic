@@ -12,6 +12,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 
 # Configure logging
+from dataclasses import dataclass
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 

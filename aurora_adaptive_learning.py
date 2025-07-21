@@ -8,6 +8,10 @@ import json
 import numpy as np
 from datetime import datetime
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 class AdaptiveLearningNode:
     """Individual learning node with adaptive capabilities"""
 

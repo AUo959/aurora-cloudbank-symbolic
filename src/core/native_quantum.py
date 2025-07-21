@@ -7,6 +7,10 @@ import math
 import random
 import cmath
 
+from typing import Any
+from typing import Dict
+from typing import List
+
 class NativeQuantumState:
     """Native implementation of quantum state representation"""
 

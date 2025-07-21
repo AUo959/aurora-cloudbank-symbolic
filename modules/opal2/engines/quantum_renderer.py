@@ -14,6 +14,12 @@ import numpy as np
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+
 class RenderingMode(Enum):
     """Rendering modes for different use cases."""
 

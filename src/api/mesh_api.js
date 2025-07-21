@@ -22,7 +22,7 @@ async function initializeMeshFederation() {
 
     systemLogger.info('🕸️ [MESH_API] Mesh federation initialized', {
       status: meshFederation.status,
-      agentCount: meshFederation.agents.size
+      agentCount: meshFederation.agents.size,
     });
   }
   return meshFederation;
@@ -39,24 +39,24 @@ router.get('/status', async (req, res) => {
 
     systemLogger.info('📊 [MESH_API] Status requested', {
       meshStatus: status.meshStatus,
-      agentCount: status.agentCount
+      agentCount: status.agentCount,
     });
 
     res.json({
       success: true,
       timestamp: Date.now(),
       mesh: status,
-      endpoints: MESH_CONFIG.relayApiEndpoints
+      endpoints: MESH_CONFIG.relayApiEndpoints,
     });
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Status request failed', {
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -74,7 +74,7 @@ router.post('/message', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: from, content',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -83,7 +83,7 @@ router.post('/message', async (req, res) => {
       return res.status(404).json({
         success: false,
         error: `Agent ${from} not found in constellation`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -95,7 +95,7 @@ router.post('/message', async (req, res) => {
         return res.status(400).json({
           success: false,
           error: 'Direct messages require "to" field',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
       message = await agent.sendMessage(to, content);
@@ -105,25 +105,24 @@ router.post('/message', async (req, res) => {
       from: from,
       to: to || 'BROADCAST',
       type: type,
-      messageId: message.timestamp
+      messageId: message.timestamp,
     });
 
     res.json({
       success: true,
       message: message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Message send failed', {
       error: error.message,
-      body: req.body
+      body: req.body,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -141,7 +140,7 @@ router.post('/arbitration', async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: initiator, description',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -150,7 +149,7 @@ router.post('/arbitration', async (req, res) => {
       return res.status(404).json({
         success: false,
         error: `Agent ${initiator} not found in constellation`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -159,25 +158,24 @@ router.post('/arbitration', async (req, res) => {
     systemLogger.info('⚖️ [MESH_API] Arbitration initiated', {
       initiator: initiator,
       description: description,
-      arbitrationId: arbitration.timestamp
+      arbitrationId: arbitration.timestamp,
     });
 
     res.json({
       success: true,
       arbitration: arbitration,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Arbitration initiation failed', {
       error: error.message,
-      body: req.body
+      body: req.body,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -196,7 +194,7 @@ router.get('/agents/:agentId', async (req, res) => {
       return res.status(404).json({
         success: false,
         error: `Agent ${agentId} not found in constellation`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -209,30 +207,29 @@ router.get('/agents/:agentId', async (req, res) => {
       lastSync: agent.lastSync,
       meshConnected: agent.meshConnected,
       apiEndpoint: agent.apiEndpoint,
-      sessionId: agent.sessionId
+      sessionId: agent.sessionId,
     };
 
     systemLogger.info(`🔍 [MESH_API] Agent info requested for ${agentId}`, {
       status: agent.status,
-      role: agent.role
+      role: agent.role,
     });
 
     res.json({
       success: true,
       agent: agentInfo,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Agent info request failed', {
       error: error.message,
-      agentId: req.params.agentId
+      agentId: req.params.agentId,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -252,7 +249,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       return res.status(404).json({
         success: false,
         error: `Agent ${agentId} not found in constellation`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -261,7 +258,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       return res.status(401).json({
         success: false,
         error: 'Invalid activation phrase',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
 
@@ -273,7 +270,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
     bridgeLogger.bridge(`🚀 [MESH_API] Agent ${agentId} activated`, {
       agentId: agentId,
       status: agent.status,
-      activationPhrase: expectedPhrase
+      activationPhrase: expectedPhrase,
     });
 
     res.json({
@@ -281,21 +278,20 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       agent: {
         id: agent.id,
         status: agent.status,
-        activated: true
+        activated: true,
       },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Agent activation failed', {
       error: error.message,
-      agentId: req.params.agentId
+      agentId: req.params.agentId,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -317,20 +313,19 @@ router.get('/config', (req, res) => {
         constellation: MESH_CONFIG.constellation,
         commProtocol: MESH_CONFIG.commProtocol,
         endpoints: MESH_CONFIG.relayApiEndpoints,
-        activationPhrases: Object.keys(MESH_CONFIG.activationPhrases)
+        activationPhrases: Object.keys(MESH_CONFIG.activationPhrases),
       },
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Configuration request failed', {
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 });
@@ -338,5 +333,5 @@ router.get('/config', (req, res) => {
 module.exports = {
   router,
   initializeMeshFederation,
-  MESH_CONFIG
+  MESH_CONFIG,
 };

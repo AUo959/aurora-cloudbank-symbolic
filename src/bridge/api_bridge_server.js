@@ -33,7 +33,9 @@ class ApiBridgeServer {
 
     this.server.listen(this.port, () => {
       this.status = 'OPERATIONAL';
-      process.stdout.write(`🌐 [API_BRIDGE] Server running on port ${this.port}\n`);
+      process.stdout.write(
+        `🌐 [API_BRIDGE] Server running on port ${this.port}\n`
+      );
     });
   }
 

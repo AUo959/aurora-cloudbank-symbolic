@@ -17,8 +17,8 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: '*',
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 const PORT = 8080;
@@ -27,15 +27,27 @@ const PORT = 8080;
 const chamberState = {
   connectedClients: new Set(),
   activeAgents: new Map([
-    ['ARCHY', { status: 'active', specialization: 'Architecture & System Design' }],
-    ['OPPY', { status: 'active', specialization: 'Optimization & Performance' }],
+    [
+      'ARCHY',
+      { status: 'active', specialization: 'Architecture & System Design' },
+    ],
+    [
+      'OPPY',
+      { status: 'active', specialization: 'Optimization & Performance' },
+    ],
     ['LIORA', { status: 'active', specialization: 'Learning & Adaptation' }],
-    ['STARLING_AU', { status: 'active', specialization: 'Stellar Communication' }],
-    ['RIVERTHREAD_808', { status: 'active', specialization: 'Data Flow & Threading' }]
+    [
+      'STARLING_AU',
+      { status: 'active', specialization: 'Stellar Communication' },
+    ],
+    [
+      'RIVERTHREAD_808',
+      { status: 'active', specialization: 'Data Flow & Threading' },
+    ],
   ]),
   liveFeed: [],
   commandTraceback: new Map(),
-  commandCounter: 1
+  commandCounter: 1,
 };
 
 // Static file serving
@@ -48,7 +60,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/chamber', (req, res) => {
-  res.sendFile(path.join(__dirname, 'src/interfaces/aurora_collaboration_chamber.html'));
+  res.sendFile(
+    path.join(__dirname, 'src/interfaces/aurora_collaboration_chamber.html')
+  );
 });
 
 app.get('/api/chamber/status', (req, res) => {
@@ -59,22 +73,24 @@ app.get('/api/chamber/status', (req, res) => {
     activeAgents: Array.from(chamberState.activeAgents.keys()),
     meshStatus: 'ACTIVE',
     driftLock: 'Δ0.0',
-    phase: 'PHASE 7 - OPERATIONAL'
+    phase: 'PHASE 7 - OPERATIONAL',
   });
 });
 
 app.get('/api/chamber/agents', (req, res) => {
-  const agents = Array.from(chamberState.activeAgents.entries()).map(([id, info]) => ({
-    id,
-    status: info.status,
-    specialization: info.specialization,
-    driftLock: 'Δ0.0'
-  }));
+  const agents = Array.from(chamberState.activeAgents.entries()).map(
+    ([id, info]) => ({
+      id,
+      status: info.status,
+      specialization: info.specialization,
+      driftLock: 'Δ0.0',
+    })
+  );
 
   res.json({
     success: true,
     agents,
-    constellationHealth: 'optimal'
+    constellationHealth: 'optimal',
   });
 });
 
@@ -86,7 +102,7 @@ function addToLiveFeed(sender, content, type, metadata = {}) {
     content,
     type,
     timestamp: new Date().toISOString(),
-    metadata
+    metadata,
   };
 
   chamberState.liveFeed.push(message);
@@ -105,7 +121,7 @@ function addCommandTraceback(commandId, command, path, metadata = {}) {
     path,
     timestamp: new Date().toISOString(),
     metadata,
-    steps: []
+    steps: [],
   };
 
   chamberState.commandTraceback.set(commandId, traceback);
@@ -124,12 +140,12 @@ function addTracebackStep(commandId, step, result = null, error = null) {
       step,
       result,
       error,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     io.emit('traceback_update', {
       commandId,
-      step: traceback.steps[traceback.steps.length - 1]
+      step: traceback.steps[traceback.steps.length - 1],
     });
   }
 }
@@ -145,7 +161,7 @@ function processAgentMessage(agentId, message, messageType) {
     OPPY: 'Performance analysis and optimization',
     LIORA: 'Learning pattern identification',
     STARLING_AU: 'Communication protocol assessment',
-    RIVERTHREAD_808: 'Data flow analysis'
+    RIVERTHREAD_808: 'Data flow analysis',
   };
 
   const responsePrefix = specializations[agentId] || 'Processing';
@@ -156,7 +172,7 @@ function processAgentMessage(agentId, message, messageType) {
     agentId,
     messageType,
     content: response,
-    specialization: agent.specialization
+    specialization: agent.specialization,
   };
 }
 
@@ -166,11 +182,11 @@ class AuroraEngine {
     this.activeProcesses = new Map();
     this.commandHistory = [];
     this.agentCapabilities = {
-      'ARCHY': ['architecture', 'design', 'structure', 'organize'],
-      'OPPY': ['optimize', 'performance', 'speed', 'efficiency'],
-      'LIORA': ['learn', 'adapt', 'pattern', 'analyze'],
-      'STARLING_AU': ['communicate', 'coordinate', 'broadcast', 'message'],
-      'RIVERTHREAD_808': ['data', 'flow', 'thread', 'concurrent', 'parallel']
+      ARCHY: ['architecture', 'design', 'structure', 'organize'],
+      OPPY: ['optimize', 'performance', 'speed', 'efficiency'],
+      LIORA: ['learn', 'adapt', 'pattern', 'analyze'],
+      STARLING_AU: ['communicate', 'coordinate', 'broadcast', 'message'],
+      RIVERTHREAD_808: ['data', 'flow', 'thread', 'concurrent', 'parallel'],
     };
   }
 
@@ -183,7 +199,7 @@ class AuroraEngine {
       intents: this.extractIntents(input),
       agents: this.identifyRelevantAgents(input),
       systemCommands: this.generateSystemCommands(input),
-      executionPlan: null
+      executionPlan: null,
     };
 
     analysis.executionPlan = this.createExecutionPlan(analysis);
@@ -202,7 +218,7 @@ class AuroraEngine {
       fileOperation: /create|edit|modify|update|file|write/i,
       gitOperation: /git|commit|push|pull|branch|merge/i,
       systemInfo: /info|information|details|specs|system/i,
-      help: /help|assist|guide|explain|how/i
+      help: /help|assist|guide|explain|how/i,
     };
 
     for (const [intent, pattern] of Object.entries(patterns)) {
@@ -217,7 +233,9 @@ class AuroraEngine {
   identifyRelevantAgents(input) {
     const relevantAgents = [];
 
-    for (const [agent, capabilities] of Object.entries(this.agentCapabilities)) {
+    for (const [agent, capabilities] of Object.entries(
+      this.agentCapabilities
+    )) {
       for (const capability of capabilities) {
         if (new RegExp(capability, 'i').test(input)) {
           relevantAgents.push(agent);
@@ -227,7 +245,9 @@ class AuroraEngine {
     }
 
     // If no specific agents identified, use all for coordination
-    return relevantAgents.length > 0 ? relevantAgents : Object.keys(this.agentCapabilities);
+    return relevantAgents.length > 0
+      ? relevantAgents
+      : Object.keys(this.agentCapabilities);
   }
 
   generateSystemCommands(input) {
@@ -264,23 +284,26 @@ class AuroraEngine {
           phase: 'Analysis',
           agents: ['ARCHY'],
           duration: '30s',
-          tasks: ['Analyze system architecture', 'Identify optimization targets']
+          tasks: [
+            'Analyze system architecture',
+            'Identify optimization targets',
+          ],
         },
         {
           phase: 'Coordination',
           agents: analysis.agents,
           duration: '1-2m',
-          tasks: analysis.systemCommands.map(cmd => `Execute: ${cmd}`)
+          tasks: analysis.systemCommands.map(cmd => `Execute: ${cmd}`),
         },
         {
           phase: 'Optimization',
           agents: ['OPPY', 'LIORA'],
           duration: '2-3m',
-          tasks: ['Apply optimizations', 'Learn from execution patterns']
-        }
+          tasks: ['Apply optimizations', 'Learn from execution patterns'],
+        },
       ],
       estimatedTotal: '3-5 minutes',
-      complexity: analysis.intents.length > 2 ? 'high' : 'medium'
+      complexity: analysis.intents.length > 2 ? 'high' : 'medium',
     };
   }
 
@@ -288,28 +311,32 @@ class AuroraEngine {
     return new Promise((resolve, reject) => {
       const processId = `CMD-${Date.now()}`;
 
-      exec(command, {
-        cwd: process.cwd(),
-        timeout: 300000, // 5 minutes
-        maxBuffer: 1024 * 1024 // 1MB buffer
-      }, (error, stdout, stderr) => {
-        const result = {
-          processId,
-          command,
-          timestamp: new Date().toISOString(),
-          success: !error,
-          stdout: stdout.trim(),
-          stderr: stderr.trim(),
-          exitCode: error ? error.code : 0
-        };
+      exec(
+        command,
+        {
+          cwd: process.cwd(),
+          timeout: 300000, // 5 minutes
+          maxBuffer: 1024 * 1024, // 1MB buffer
+        },
+        (error, stdout, stderr) => {
+          const result = {
+            processId,
+            command,
+            timestamp: new Date().toISOString(),
+            success: !error,
+            stdout: stdout.trim(),
+            stderr: stderr.trim(),
+            exitCode: error ? error.code : 0,
+          };
 
-        if (error) {
-          result.error = error.message;
-          reject(result);
-        } else {
-          resolve(result);
+          if (error) {
+            result.error = error.message;
+            reject(result);
+          } else {
+            resolve(result);
+          }
         }
-      });
+      );
     });
   }
 
@@ -321,49 +348,49 @@ class AuroraEngine {
         filePath,
         content,
         size: content.length,
-        lines: content.split('\n').length
+        lines: content.split('\n').length,
       };
     } catch (error) {
       return {
         success: false,
         filePath,
-        error: error.message
+        error: error.message,
       };
     }
   }
 
   generateAgentResponse(agent) {
     const responses = {
-      'ARCHY': [
+      ARCHY: [
         'Analyzing system architecture for optimization opportunities',
         'Reviewing component dependencies and structural integrity',
         'Identifying architectural patterns for enhancement',
-        'Coordinating with other agents for systematic improvements'
+        'Coordinating with other agents for systematic improvements',
       ],
-      'OPPY': [
+      OPPY: [
         'Running performance analysis on current operations',
         'Optimizing resource utilization and execution paths',
         'Implementing efficiency improvements across subsystems',
-        'Monitoring system performance metrics in real-time'
+        'Monitoring system performance metrics in real-time',
       ],
-      'LIORA': [
+      LIORA: [
         'Learning from current operational patterns',
         'Adapting strategies based on historical performance data',
         'Analyzing user interaction patterns for optimization',
-        'Developing predictive models for system enhancement'
+        'Developing predictive models for system enhancement',
       ],
-      'STARLING_AU': [
+      STARLING_AU: [
         'Coordinating inter-agent communication protocols',
         'Broadcasting status updates across the constellation',
         'Maintaining communication channel integrity',
-        'Facilitating collaborative operations between agents'
+        'Facilitating collaborative operations between agents',
       ],
-      'RIVERTHREAD_808': [
+      RIVERTHREAD_808: [
         'Managing concurrent data processing streams',
         'Optimizing thread allocation and resource distribution',
         'Coordinating parallel execution pathways',
-        'Ensuring data integrity across all operations'
-      ]
+        'Ensuring data integrity across all operations',
+      ],
     };
 
     const agentResponses = responses[agent] || ['Processing request...'];
@@ -375,7 +402,7 @@ class AuroraEngine {
 const auroraEngine = new AuroraEngine();
 
 // WebSocket handlers
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   chamberState.connectedClients.add(socket.id);
   console.log(`🔗 Collaboration Chamber client connected: ${socket.id}`);
 
@@ -386,13 +413,13 @@ io.on('connection', (socket) => {
     agentsOnline: chamberState.activeAgents.size,
     driftLock: 'Δ0.0',
     meshStatus: 'ACTIVE',
-    chamberMode: 'OPERATIONAL'
+    chamberMode: 'OPERATIONAL',
   });
 
   socket.emit('live_feed_history', chamberState.liveFeed.slice(-20));
 
   // Handle command execution
-  socket.on('execute_command', async (data) => {
+  socket.on('execute_command', async data => {
     try {
       const { command, authority, target } = data;
       const commandId = `ws-${chamberState.commandCounter++}-${socket.id}`;
@@ -400,7 +427,7 @@ io.on('connection', (socket) => {
       addCommandTraceback(commandId, command, '/ws/execute_command', {
         socketId: socket.id,
         target,
-        authority
+        authority,
       });
 
       let result;
@@ -411,31 +438,39 @@ io.on('connection', (socket) => {
         // Simulate mesh broadcast to all agents
         const responses = {};
         for (const agentId of chamberState.activeAgents.keys()) {
-          const agentResponse = processAgentMessage(agentId, command, 'mesh_broadcast');
+          const agentResponse = processAgentMessage(
+            agentId,
+            command,
+            'mesh_broadcast'
+          );
           responses[agentId] = agentResponse;
         }
 
         result = {
           messageType: 'mesh_broadcast',
           responses,
-          recipients: Array.from(chamberState.activeAgents.keys())
+          recipients: Array.from(chamberState.activeAgents.keys()),
         };
 
-        addToLiveFeed('MESH', `Broadcast: ${command}`, 'mesh', { commandId, authority });
-
+        addToLiveFeed('MESH', `Broadcast: ${command}`, 'mesh', {
+          commandId,
+          authority,
+        });
       } else if (target.startsWith('@agent.')) {
         const agentId = target.replace('@agent.', '');
         addTracebackStep(commandId, `Processing direct message to ${agentId}`);
 
         result = processAgentMessage(agentId, command, 'direct_message');
-        addToLiveFeed(agentId, `Direct: ${command}`, 'agent', { commandId, authority });
-
+        addToLiveFeed(agentId, `Direct: ${command}`, 'agent', {
+          commandId,
+          authority,
+        });
       } else {
         addTracebackStep(commandId, 'Processing general command');
         result = {
           messageType: 'general',
           content: `Command processed: ${command}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         addToLiveFeed('SYSTEM', command, 'system', { commandId, authority });
@@ -445,7 +480,7 @@ io.on('connection', (socket) => {
         success: true,
         result,
         commandId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       io.emit('command_executed', {
@@ -454,52 +489,56 @@ io.on('connection', (socket) => {
         commandId,
         timestamp: new Date().toISOString(),
         source: 'collaboration_chamber',
-        authority
+        authority,
       });
 
       addTracebackStep(commandId, 'Command execution completed', result);
-
     } catch (error) {
       socket.emit('command_result', {
         success: false,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   });
 
   // Handle agent selection
-  socket.on('select_agent', (agentName) => {
+  socket.on('select_agent', agentName => {
     const agent = chamberState.activeAgents.get(agentName);
     socket.emit('agent_selected', {
       agent: agentName,
       status: agent ? 'active' : 'unavailable',
       capabilities: agent ? [agent.specialization] : [],
-      driftLock: 'Δ0.0'
+      driftLock: 'Δ0.0',
     });
 
-    addToLiveFeed('SYSTEM', `Agent ${agentName} selected`, 'system', { socketId: socket.id });
+    addToLiveFeed('SYSTEM', `Agent ${agentName} selected`, 'system', {
+      socketId: socket.id,
+    });
   });
 
   // Handle traceback requests
-  socket.on('get_traceback', (commandId) => {
+  socket.on('get_traceback', commandId => {
     const traceback = chamberState.commandTraceback.get(commandId);
     socket.emit('traceback_data', {
       commandId,
-      traceback: traceback || null
+      traceback: traceback || null,
     });
   });
 
   // Enhanced Aurora natural language processing
-  socket.on('execute_aurora_natural_language', async (data) => {
+  socket.on('execute_aurora_natural_language', async data => {
     try {
       const { input, mode } = data;
-      const analysis = await auroraEngine.processNaturalLanguage(input, socket.id);
+      const analysis = await auroraEngine.processNaturalLanguage(
+        input,
+        socket.id
+      );
 
       // Emit analysis back to client
       socket.emit('aurora_analysis_complete', {
         analysis,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Execute system commands if any
@@ -510,13 +549,13 @@ io.on('connection', (socket) => {
             socket.emit('system_command_result', {
               command,
               result,
-              executionId: `AURORA-${Date.now()}`
+              executionId: `AURORA-${Date.now()}`,
             });
           } catch (error) {
             socket.emit('system_command_error', {
               command,
               error: error.message,
-              executionId: `AURORA-ERROR-${Date.now()}`
+              executionId: `AURORA-ERROR-${Date.now()}`,
             });
           }
         }
@@ -525,28 +564,30 @@ io.on('connection', (socket) => {
       // Simulate agent coordination
       if (analysis.agents.length > 0) {
         analysis.agents.forEach((agent, index) => {
-          setTimeout(() => {
-            const response = auroraEngine.generateAgentResponse(agent);
-            socket.emit('agent_response', {
-              agent,
-              message: response,
-              timestamp: new Date().toISOString(),
-              context: mode
-            });
-          }, index * 1000 + Math.random() * 2000);
+          setTimeout(
+            () => {
+              const response = auroraEngine.generateAgentResponse(agent);
+              socket.emit('agent_response', {
+                agent,
+                message: response,
+                timestamp: new Date().toISOString(),
+                context: mode,
+              });
+            },
+            index * 1000 + Math.random() * 2000
+          );
         });
       }
-
     } catch (error) {
       socket.emit('aurora_error', {
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   });
 
   // Direct system command execution
-  socket.on('execute_system_command', async (data) => {
+  socket.on('execute_system_command', async data => {
     try {
       const { command, authority, plan } = data;
 
@@ -558,15 +599,17 @@ io.on('connection', (socket) => {
         'git status',
         'python scripts/canonical_validator.py --status',
         'python scripts/aurora_validation_manager.py --status',
-        'ps aux | grep aurora'
+        'ps aux | grep aurora',
       ];
 
-      const isAllowed = allowedCommands.some(allowed => command.startsWith(allowed));
+      const isAllowed = allowedCommands.some(allowed =>
+        command.startsWith(allowed)
+      );
       if (!isAllowed) {
         socket.emit('command_rejected', {
           command,
           reason: 'Command not in allowed list for security',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
         return;
       }
@@ -578,7 +621,7 @@ io.on('connection', (socket) => {
         result,
         authority,
         plan,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Add to traceback
@@ -586,20 +629,19 @@ io.on('connection', (socket) => {
       addCommandTraceback(commandId, command, '/api/system/execute', {
         authority,
         success: result.success,
-        exitCode: result.exitCode
+        exitCode: result.exitCode,
       });
-
     } catch (error) {
       socket.emit('system_command_error', {
         command: data.command,
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   });
 
   // Context transfer preparation
-  socket.on('prepare_context_transfer', async (data) => {
+  socket.on('prepare_context_transfer', async data => {
     try {
       const { files, instructions, targetEnvironment } = data;
       const contextData = {
@@ -609,7 +651,7 @@ io.on('connection', (socket) => {
         agentConstellation: Array.from(chamberState.activeAgents.keys()),
         files: [],
         instructions,
-        targetEnvironment
+        targetEnvironment,
       };
 
       // Read requested files
@@ -623,55 +665,57 @@ io.on('connection', (socket) => {
       socket.emit('context_transfer_ready', {
         contextData,
         formattedForTransfer: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       socket.emit('context_transfer_error', {
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   });
 
   // Enhanced agent coordination
-  socket.on('coordinate_agents', async (data) => {
+  socket.on('coordinate_agents', async data => {
     try {
       const { instruction, targetAgents, priority } = data;
 
       const coordination = {
         id: `COORD-${Date.now()}`,
         instruction,
-        targetAgents: targetAgents || Array.from(chamberState.activeAgents.keys()),
+        targetAgents:
+          targetAgents || Array.from(chamberState.activeAgents.keys()),
         priority: priority || 'normal',
         timestamp: new Date().toISOString(),
-        responses: {}
+        responses: {},
       };
 
       // Simulate agent coordination
       coordination.targetAgents.forEach((agent, index) => {
-        setTimeout(() => {
-          const response = auroraEngine.generateAgentResponse(agent);
-          coordination.responses[agent] = {
-            message: response,
-            timestamp: new Date().toISOString(),
-            status: 'acknowledged'
-          };
+        setTimeout(
+          () => {
+            const response = auroraEngine.generateAgentResponse(agent);
+            coordination.responses[agent] = {
+              message: response,
+              timestamp: new Date().toISOString(),
+              status: 'acknowledged',
+            };
 
-          socket.emit('agent_coordination_response', {
-            coordinationId: coordination.id,
-            agent,
-            response: coordination.responses[agent]
-          });
-        }, index * 800 + Math.random() * 1200);
+            socket.emit('agent_coordination_response', {
+              coordinationId: coordination.id,
+              agent,
+              response: coordination.responses[agent],
+            });
+          },
+          index * 800 + Math.random() * 1200
+        );
       });
 
       socket.emit('agent_coordination_started', coordination);
-
     } catch (error) {
       socket.emit('agent_coordination_error', {
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   });
@@ -684,21 +728,21 @@ io.on('connection', (socket) => {
         version: 'v2.0_enhanced',
         connectedClients: chamberState.connectedClients.size,
         activeAgents: chamberState.activeAgents.size,
-        commandsProcessed: chamberState.commandCounter
+        commandsProcessed: chamberState.commandCounter,
       },
       aurora: {
         engine: 'operational',
         naturalLanguageProcessing: true,
         systemCommandExecution: true,
         contextTransfer: true,
-        agentCoordination: true
+        agentCoordination: true,
       },
       system: {
         nodeVersion: process.version,
         platform: process.platform,
         uptime: process.uptime(),
-        memoryUsage: process.memoryUsage()
-      }
+        memoryUsage: process.memoryUsage(),
+      },
     };
 
     socket.emit('system_status_response', systemStatus);
@@ -710,7 +754,7 @@ io.on('connection', (socket) => {
 
     io.emit('client_disconnected', {
       socketId: socket.id,
-      connectedClients: chamberState.connectedClients.size
+      connectedClients: chamberState.connectedClients.size,
     });
   });
 });
@@ -726,8 +770,16 @@ server.listen(PORT, () => {
 
   // Add welcome messages
   setTimeout(() => {
-    addToLiveFeed('AURORA', 'Collaboration Chamber initialized. All systems operational.', 'system');
-    addToLiveFeed('MESH', 'Agent constellation active. Mesh communication protocols ready.', 'mesh');
+    addToLiveFeed(
+      'AURORA',
+      'Collaboration Chamber initialized. All systems operational.',
+      'system'
+    );
+    addToLiveFeed(
+      'MESH',
+      'Agent constellation active. Mesh communication protocols ready.',
+      'mesh'
+    );
   }, 1000);
 });
 

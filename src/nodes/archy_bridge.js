@@ -30,7 +30,7 @@ class ArchyBridge {
     // Agent constellation coordination
     this.connectedAgents = {
       l2: ['ARCHY', 'STARLING_AU', 'DAEDALUS'],
-      l3: ['Glyphon', 'Axiomera', 'Caelion']
+      l3: ['Glyphon', 'Axiomera', 'Caelion'],
     };
 
     // Drift monitoring
@@ -43,11 +43,14 @@ class ArchyBridge {
 
   async initialize() {
     try {
-      bridgeLogger.bridge('🏗️ [ARCHY_BRIDGE] Initializing architectural planning agent...', {
-        phase: 'initialization',
-        agent: 'archy_bridge',
-        layer: 'L1'
-      });
+      bridgeLogger.bridge(
+        '🏗️ [ARCHY_BRIDGE] Initializing architectural planning agent...',
+        {
+          phase: 'initialization',
+          agent: 'archy_bridge',
+          layer: 'L1',
+        }
+      );
 
       // Register with Aurora command node
       await this.commandRouter.registerAgent({
@@ -59,8 +62,8 @@ class ArchyBridge {
           'structural_planning',
           'system_coordination',
           'l2_agent_bridge',
-          'ethics_validation'
-        ]
+          'ethics_validation',
+        ],
       });
 
       // Initialize ethics validation
@@ -73,17 +76,23 @@ class ArchyBridge {
       this.lastSyncTime = Date.now();
       this.syncStatus = 'SYNCHRONIZED';
 
-      bridgeLogger.bridge('✅ [ARCHY_BRIDGE] Agent operational - L1-L2-L3 integration active', {
-        status: 'operational',
-        syncStatus: 'synchronized',
-        capabilities: ['architectural_analysis', 'structural_planning', 'system_coordination']
-      });
-
+      bridgeLogger.bridge(
+        '✅ [ARCHY_BRIDGE] Agent operational - L1-L2-L3 integration active',
+        {
+          status: 'operational',
+          syncStatus: 'synchronized',
+          capabilities: [
+            'architectural_analysis',
+            'structural_planning',
+            'system_coordination',
+          ],
+        }
+      );
     } catch (error) {
       bridgeLogger.error('❌ [ARCHY_BRIDGE] Initialization failed', {
         error: error.message,
         stack: error.stack,
-        phase: 'initialization'
+        phase: 'initialization',
       });
       this.status = 'ERROR';
       throw error;
@@ -96,15 +105,18 @@ class ArchyBridge {
       sourceAgent: this.agentId,
       targetAgent: 'ARCHY',
       layer: 'L2_GUMAS',
-      protocol: 'aurora_secure_channel'
+      protocol: 'aurora_secure_channel',
     });
 
     if (l2Connection.status === 'CONNECTED') {
-      bridgeLogger.bridge('🔗 [ARCHY_BRIDGE] L2 ARCHY agent connection established', {
-        connectionType: 'L2_GUMAS',
-        protocol: 'aurora_secure_channel',
-        status: 'connected'
-      });
+      bridgeLogger.bridge(
+        '🔗 [ARCHY_BRIDGE] L2 ARCHY agent connection established',
+        {
+          connectionType: 'L2_GUMAS',
+          protocol: 'aurora_secure_channel',
+          status: 'connected',
+        }
+      );
       return true;
     } else {
       throw new Error('Failed to establish L2 ARCHY connection');
@@ -128,8 +140,8 @@ class ArchyBridge {
           sourceAgent: this.agentId,
           ethicsValidation: ethicsCheck.signature,
           timestamp: Date.now(),
-          clearanceLevel: this.clearanceLevel
-        }
+          clearanceLevel: this.clearanceLevel,
+        },
       });
 
       // Validate with L3 glyph agents if needed
@@ -146,21 +158,20 @@ class ArchyBridge {
         agentId: this.agentId,
         l2Agent: 'ARCHY',
         ethicsValidated: true,
-        timestamp: this.lastSyncTime
+        timestamp: this.lastSyncTime,
       };
-
     } catch (error) {
       bridgeLogger.error('❌ [ARCHY_BRIDGE] Command processing failed', {
         error: error.message,
         stack: error.stack,
         commandType: command.type,
-        agentId: this.agentId
+        agentId: this.agentId,
       });
       return {
         success: false,
         error: error.message,
         agentId: this.agentId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -174,8 +185,8 @@ class ArchyBridge {
         command: command,
         result: result,
         source: this.agentId,
-        validationType: 'SYMBOLIC_CONSISTENCY'
-      }
+        validationType: 'SYMBOLIC_CONSISTENCY',
+      },
     });
 
     return l3Validation;
@@ -188,7 +199,8 @@ class ArchyBridge {
     // Calculate drift based on sync latency and agent coordination
     let driftLevel = 0;
 
-    if (timeSinceSync > 30000) { // 30 seconds without sync
+    if (timeSinceSync > 30000) {
+      // 30 seconds without sync
       driftLevel = Math.min(0.5, timeSinceSync / 60000); // Max 0.5 drift
     }
 
@@ -205,7 +217,7 @@ class ArchyBridge {
       status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED',
       lastSync: this.lastSyncTime,
       timeSinceSync: timeSinceSync,
-      l2Connection: l2Status
+      l2Connection: l2Status,
     };
   }
 
@@ -228,16 +240,19 @@ class ArchyBridge {
         'system_coordination',
         'l1_l2_bridge_operation',
         'l3_validation_routing',
-        'ethics_enforcement'
-      ]
+        'ethics_enforcement',
+      ],
     };
   }
 
   async shutdown() {
-    bridgeLogger.bridge('🔄 [ARCHY_BRIDGE] Shutting down architectural planning agent...', {
-      phase: 'shutdown',
-      agent: 'archy_bridge'
-    });
+    bridgeLogger.bridge(
+      '🔄 [ARCHY_BRIDGE] Shutting down architectural planning agent...',
+      {
+        phase: 'shutdown',
+        agent: 'archy_bridge',
+      }
+    );
 
     // Graceful disconnect from L2 agents
     await this.commandRouter.disconnectBridge(this.agentId, 'ARCHY');
@@ -248,7 +263,7 @@ class ArchyBridge {
     this.status = 'SHUTDOWN';
     bridgeLogger.bridge('✅ [ARCHY_BRIDGE] Agent shutdown complete', {
       status: 'shutdown',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 }
@@ -257,11 +272,14 @@ module.exports = ArchyBridge;
 
 // Emergency initialization for drift correction
 if (require.main === module) {
-  bridgeLogger.drift('🚨 [EMERGENCY] Deploying ARCHY_BRIDGE for Agent Constellation drift correction...', {
-    deployment: 'emergency',
-    purpose: 'drift_correction',
-    agentType: 'archy_bridge'
-  });
+  bridgeLogger.drift(
+    '🚨 [EMERGENCY] Deploying ARCHY_BRIDGE for Agent Constellation drift correction...',
+    {
+      deployment: 'emergency',
+      purpose: 'drift_correction',
+      agentType: 'archy_bridge',
+    }
+  );
 
   const archyBridge = new ArchyBridge();
 
@@ -269,7 +287,7 @@ if (require.main === module) {
   process.on('SIGINT', async () => {
     bridgeLogger.bridge('🛑 [ARCHY_BRIDGE] Received shutdown signal', {
       signal: 'SIGINT',
-      gracefulShutdown: true
+      gracefulShutdown: true,
     });
     await archyBridge.shutdown();
     process.exit(0);
@@ -277,6 +295,6 @@ if (require.main === module) {
 
   bridgeLogger.bridge('🏗️ [ARCHY_BRIDGE] Agent deployed and operational', {
     status: 'operational',
-    deploymentComplete: true
+    deploymentComplete: true,
   });
 }

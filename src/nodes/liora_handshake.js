@@ -20,7 +20,7 @@ class LioraHandshake {
         command: command,
         timestamp: Date.now(),
         layer: 'L1_L2_BRIDGE',
-        researchData: 'processed'
+        researchData: 'processed',
       };
 
       this.lastSyncTime = Date.now();
@@ -29,7 +29,7 @@ class LioraHandshake {
       return {
         success: false,
         error: error.message,
-        agentId: this.agentId
+        agentId: this.agentId,
       };
     }
   }
@@ -42,7 +42,7 @@ class LioraHandshake {
       agentId: this.agentId,
       driftLevel: driftLevel,
       threshold: this.driftThreshold,
-      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
+      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED',
     };
   }
 
@@ -52,7 +52,7 @@ class LioraHandshake {
       role: this.role,
       status: this.status,
       driftStatus: this.getDriftStatus(),
-      deployed: true
+      deployed: true,
     };
   }
 }

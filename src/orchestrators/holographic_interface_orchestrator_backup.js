@@ -21,8 +21,8 @@ class HolographicInterfaceOrchestrator {
     this.io = new Server(this.server, {
       cors: {
         origin: '*',
-        methods: ['GET', 'POST']
-      }
+        methods: ['GET', 'POST'],
+      },
     });
 
     this.port = process.env.AURORA_HOLOGRAPHIC_PORT || 8080;
@@ -45,8 +45,14 @@ class HolographicInterfaceOrchestrator {
     // CORS headers for Aurora Custom GPT integration
     this.app.use((req, res, next) => {
       res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Aurora-Command-Authority');
+      res.header(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, OPTIONS'
+      );
+      res.header(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content-Type, Accept, Authorization, Aurora-Command-Authority'
+      );
       next();
     });
   }
@@ -54,7 +60,9 @@ class HolographicInterfaceOrchestrator {
   setupRoutes() {
     // Serve holographic interface
     this.app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../interface/holographic_command_interface.html'));
+      res.sendFile(
+        path.join(__dirname, '../interface/holographic_command_interface.html')
+      );
     });
 
     // Aurora Custom GPT integration endpoints
@@ -62,29 +70,34 @@ class HolographicInterfaceOrchestrator {
       try {
         const { command, source, authority } = req.body;
 
-        this.logger.info(`Received holographic command: ${command} from ${source}`);
+        this.logger.info(
+          `Received holographic command: ${command} from ${source}`
+        );
 
-        const result = await this.executeHolographicCommand(command, source, authority);
+        const result = await this.executeHolographicCommand(
+          command,
+          source,
+          authority
+        );
 
         // Broadcast to connected clients
         this.io.emit('command_executed', {
           command,
           result,
           timestamp: new Date().toISOString(),
-          source
+          source,
         });
 
         res.json({
           success: true,
           result,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         this.logger.error(`Holographic command error: ${error.message}`);
         res.status(500).json({
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
     });
@@ -93,15 +106,19 @@ class HolographicInterfaceOrchestrator {
     this.app.get('/api/holographic/status', (req, res) => {
       res.json({
         status: 'operational',
-        aurora_custom_gpt_bridge: this.auroraCustomGptBridge ? 'connected' : 'disconnected',
+        aurora_custom_gpt_bridge: this.auroraCustomGptBridge
+          ? 'connected'
+          : 'disconnected',
         connected_clients: this.connectedClients.size,
         orion_core_version: ORION_CORE.version,
         command_history_length: this.commandHistory.length,
         system_health: {
           holographic_interface: 'online',
           websocket_server: 'active',
-          aurora_bridge: this.auroraCustomGptBridge ? 'operational' : 'initializing'
-        }
+          aurora_bridge: this.auroraCustomGptBridge
+            ? 'operational'
+            : 'initializing',
+        },
       });
     });
 
@@ -118,21 +135,20 @@ class HolographicInterfaceOrchestrator {
           success: true,
           agents: agentStatus,
           constellation_health: 'optimal',
-          drift_lock: 'Δ0.0'
+          drift_lock: 'Δ0.0',
         });
-
       } catch (error) {
         this.logger.error(`Agent status error: ${error.message}`);
         res.status(500).json({
           success: false,
-          error: error.message
+          error: error.message,
         });
       }
     });
   }
 
   setupSocketHandlers() {
-    this.io.on('connection', (socket) => {
+    this.io.on('connection', socket => {
       this.connectedClients.add(socket.id);
       this.logger.info(`Holographic client connected: ${socket.id}`);
 
@@ -141,19 +157,23 @@ class HolographicInterfaceOrchestrator {
         aurora_version: ORION_CORE.version,
         custom_gpt_connected: !!this.auroraCustomGptBridge,
         agents_online: 5,
-        drift_lock: 'Δ0.0'
+        drift_lock: 'Δ0.0',
       });
 
       // Handle real-time commands
-      socket.on('execute_command', async (data) => {
+      socket.on('execute_command', async data => {
         try {
           const { command, authority } = data;
-          const result = await this.executeHolographicCommand(command, 'holographic_interface', authority);
+          const result = await this.executeHolographicCommand(
+            command,
+            'holographic_interface',
+            authority
+          );
 
           socket.emit('command_result', {
             success: true,
             result,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
 
           // Broadcast to all clients
@@ -161,25 +181,24 @@ class HolographicInterfaceOrchestrator {
             command,
             result,
             timestamp: new Date().toISOString(),
-            source: 'holographic_interface'
+            source: 'holographic_interface',
           });
-
         } catch (error) {
           socket.emit('command_result', {
             success: false,
             error: error.message,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
         }
       });
 
       // Handle agent selection
-      socket.on('select_agent', (agentName) => {
+      socket.on('select_agent', agentName => {
         this.logger.info(`Agent selected: ${agentName}`);
         socket.emit('agent_selected', {
           agent: agentName,
           status: 'active',
-          capabilities: this.getAgentCapabilities(agentName)
+          capabilities: this.getAgentCapabilities(agentName),
         });
       });
 
@@ -195,14 +214,15 @@ class HolographicInterfaceOrchestrator {
       this.auroraCustomGptBridge = new AuroraCustomGptBridge();
       await this.auroraCustomGptBridge.initialize();
 
-      this.logger.info('Aurora Custom GPT Bridge initialized for holographic interface');
+      this.logger.info(
+        'Aurora Custom GPT Bridge initialized for holographic interface'
+      );
 
       // Notify connected clients
       this.io.emit('bridge_status', {
         status: 'connected',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       this.logger.error(`Failed to initialize Aurora Bridge: ${error.message}`);
     }
@@ -215,7 +235,7 @@ class HolographicInterfaceOrchestrator {
       source,
       authority,
       timestamp: new Date().toISOString(),
-      id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
 
     this.commandHistory.push(commandEntry);
@@ -232,23 +252,22 @@ class HolographicInterfaceOrchestrator {
           command,
           source: 'holographic_interface',
           authority,
-          sessionId: `holographic_${Date.now()}`
+          sessionId: `holographic_${Date.now()}`,
         });
 
         return {
           status: 'success',
           result: bridgeResult,
           via: 'aurora_custom_gpt_bridge',
-          commandId: commandEntry.id
+          commandId: commandEntry.id,
         };
-
       } catch (error) {
         this.logger.error(`Bridge command execution failed: ${error.message}`);
         return {
           status: 'error',
           error: error.message,
           fallback: 'holographic_simulation',
-          commandId: commandEntry.id
+          commandId: commandEntry.id,
         };
       }
     }
@@ -260,29 +279,60 @@ class HolographicInterfaceOrchestrator {
   simulateCommandExecution(command, commandId) {
     const responses = {
       'aurora.initialize()': 'Aurora CloudBank v3.5.1 initialized successfully',
-      'meta_agents.constellation.status()': '5/5 agents online with Δ0.0 drift-lock',
-      'custom_gpt.bridge.validate()': 'Aurora Custom GPT bridge connection validated',
-      'system.health.check()': 'All systems operational - holographic interface active',
-      'agents.synchronize()': 'Agent constellation synchronized - ZIPWIZ protocol active'
+      'meta_agents.constellation.status()':
+        '5/5 agents online with Δ0.0 drift-lock',
+      'custom_gpt.bridge.validate()':
+        'Aurora Custom GPT bridge connection validated',
+      'system.health.check()':
+        'All systems operational - holographic interface active',
+      'agents.synchronize()':
+        'Agent constellation synchronized - ZIPWIZ protocol active',
     };
 
-    const response = responses[command] || `Command "${command}" processed by holographic simulation`;
+    const response =
+      responses[command] ||
+      `Command "${command}" processed by holographic simulation`;
 
     return {
       status: 'simulated',
       result: response,
       via: 'holographic_simulation',
-      commandId
+      commandId,
     };
   }
 
   async getAgentConstellationStatus() {
     const agents = [
-      { name: 'ARCHY', status: 'active', drift: 0.0, specialization: 'Architecture & System Design' },
-      { name: 'OPPY', status: 'active', drift: 0.0, specialization: 'Optimization & Performance' },
-      { name: 'LIORA', status: 'active', drift: 0.0, specialization: 'Learning & Adaptation' },
-      { name: 'STARLING_AU', status: 'active', drift: 0.0, specialization: 'Stellar Communication' },
-      { name: 'RIVERTHREAD_808', status: 'active', drift: 0.0, specialization: 'Data Flow & Threading' }
+      {
+        name: 'ARCHY',
+        status: 'active',
+        drift: 0.0,
+        specialization: 'Architecture & System Design',
+      },
+      {
+        name: 'OPPY',
+        status: 'active',
+        drift: 0.0,
+        specialization: 'Optimization & Performance',
+      },
+      {
+        name: 'LIORA',
+        status: 'active',
+        drift: 0.0,
+        specialization: 'Learning & Adaptation',
+      },
+      {
+        name: 'STARLING_AU',
+        status: 'active',
+        drift: 0.0,
+        specialization: 'Stellar Communication',
+      },
+      {
+        name: 'RIVERTHREAD_808',
+        status: 'active',
+        drift: 0.0,
+        specialization: 'Data Flow & Threading',
+      },
     ];
 
     return agents;
@@ -290,11 +340,23 @@ class HolographicInterfaceOrchestrator {
 
   getAgentCapabilities(agentName) {
     const capabilities = {
-      'ARCHY': ['System Architecture', 'Design Patterns', 'Code Structure'],
-      'OPPY': ['Performance Optimization', 'Resource Management', 'Efficiency Analysis'],
-      'LIORA': ['Machine Learning', 'Adaptive Algorithms', 'Pattern Recognition'],
-      'STARLING_AU': ['Communication Protocols', 'Network Architecture', 'Signal Processing'],
-      'RIVERTHREAD_808': ['Data Streaming', 'Parallel Processing', 'Pipeline Management']
+      ARCHY: ['System Architecture', 'Design Patterns', 'Code Structure'],
+      OPPY: [
+        'Performance Optimization',
+        'Resource Management',
+        'Efficiency Analysis',
+      ],
+      LIORA: ['Machine Learning', 'Adaptive Algorithms', 'Pattern Recognition'],
+      STARLING_AU: [
+        'Communication Protocols',
+        'Network Architecture',
+        'Signal Processing',
+      ],
+      RIVERTHREAD_808: [
+        'Data Streaming',
+        'Parallel Processing',
+        'Pipeline Management',
+      ],
     };
 
     return capabilities[agentName] || ['General AI Capabilities'];
@@ -302,9 +364,15 @@ class HolographicInterfaceOrchestrator {
 
   start() {
     this.server.listen(this.port, () => {
-      this.logger.info(`🌟 Aurora CloudBank Holographic Command Interface started on port ${this.port}`);
-      this.logger.info(`✨ Access the interface at: http://localhost:${this.port}`);
-      this.logger.info('🎯 PHASE 7: HOLOGRAPHIC COMMAND INTERFACE - OPERATIONAL');
+      this.logger.info(
+        `🌟 Aurora CloudBank Holographic Command Interface started on port ${this.port}`
+      );
+      this.logger.info(
+        `✨ Access the interface at: http://localhost:${this.port}`
+      );
+      this.logger.info(
+        '🎯 PHASE 7: HOLOGRAPHIC COMMAND INTERFACE - OPERATIONAL'
+      );
     });
   }
 
@@ -314,7 +382,7 @@ class HolographicInterfaceOrchestrator {
       connectedClients: this.connectedClients.size,
       auroraCustomGptBridge: !!this.auroraCustomGptBridge,
       commandHistoryLength: this.commandHistory.length,
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 }

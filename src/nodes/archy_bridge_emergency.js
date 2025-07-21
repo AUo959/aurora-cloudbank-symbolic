@@ -18,7 +18,7 @@ class ArchyBridge {
       agentId: this.agentId,
       role: this.role,
       driftThreshold: this.driftThreshold,
-      deployment: 'emergency'
+      deployment: 'emergency',
     });
   }
 
@@ -30,7 +30,7 @@ class ArchyBridge {
         agentId: this.agentId,
         command: command,
         timestamp: Date.now(),
-        layer: 'L1_L2_BRIDGE'
+        layer: 'L1_L2_BRIDGE',
       };
 
       this.lastSyncTime = Date.now();
@@ -39,7 +39,7 @@ class ArchyBridge {
       return {
         success: false,
         error: error.message,
-        agentId: this.agentId
+        agentId: this.agentId,
       };
     }
   }
@@ -52,7 +52,7 @@ class ArchyBridge {
       agentId: this.agentId,
       driftLevel: driftLevel,
       threshold: this.driftThreshold,
-      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
+      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED',
     };
   }
 
@@ -62,7 +62,7 @@ class ArchyBridge {
       role: this.role,
       status: this.status,
       driftStatus: this.getDriftStatus(),
-      deployed: true
+      deployed: true,
     };
   }
 }

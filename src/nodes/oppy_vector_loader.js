@@ -24,7 +24,7 @@ class OppyVectorLoader {
         vectorId: vectorId,
         dataSize: JSON.stringify(data).length,
         timestamp: Date.now(),
-        layer: 'L1_L2_BRIDGE'
+        layer: 'L1_L2_BRIDGE',
       };
 
       this.lastSyncTime = Date.now();
@@ -33,7 +33,7 @@ class OppyVectorLoader {
       return {
         success: false,
         error: error.message,
-        agentId: this.agentId
+        agentId: this.agentId,
       };
     }
   }
@@ -50,7 +50,7 @@ class OppyVectorLoader {
       agentId: this.agentId,
       driftLevel: driftLevel,
       threshold: this.driftThreshold,
-      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
+      status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED',
     };
   }
 
@@ -61,7 +61,7 @@ class OppyVectorLoader {
       status: this.status,
       vectorsLoaded: this.vectorCache.size,
       driftStatus: this.getDriftStatus(),
-      deployed: true
+      deployed: true,
     };
   }
 }

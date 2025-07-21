@@ -7,7 +7,11 @@
  * activation control, and threadcore monitoring.
  */
 
-const { systemLogger, bridgeLogger, ethicsLogger } = require('../utils/aurora_logger.js');
+const {
+  systemLogger,
+  bridgeLogger,
+  ethicsLogger,
+} = require('../utils/aurora_logger.js');
 
 // Core Mesh Configuration
 const MESH_CONFIG = {
@@ -15,7 +19,7 @@ const MESH_CONFIG = {
   anchorSeed: 'EOS_SEED_ORION',
   ethicsProtocol: 'Picard_Delta_3',
   memoryDoctrine: 'Thermax_Precedent',
-  driftLock: 0.000,
+  driftLock: 0.0,
   haloModule: 'HALO_CONTINUITY_GRAFT_005',
   continuitySeal: 'Aurora_Continuity_Seal_v2.2.5',
 
@@ -24,20 +28,26 @@ const MESH_CONFIG = {
     { id: 'OPPY', role: 'Vector/Data Processor', type: 'META_AGENT' },
     { id: 'LIORA', role: 'Handshake/Synchronization', type: 'META_AGENT' },
     { id: 'STARLING_AU', role: 'L2 Sim Coordinator', type: 'META_AGENT' },
-    { id: 'RIVERTHREAD_808', role: 'Narrative/Stream', type: 'META_AGENT' }
+    { id: 'RIVERTHREAD_808', role: 'Narrative/Stream', type: 'META_AGENT' },
   ],
 
-  glyphAgents: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion', 'SHADOWFAX'],
-
-  constellation: [
-    'ARCHY', 'OPPY', 'LIORA', 'STARLING_AU', 'RIVERTHREAD_808'
+  glyphAgents: [
+    'Glyphon',
+    'Axiomera',
+    'Sentari',
+    'Caelion',
+    'Velatrix',
+    'Harmion',
+    'SHADOWFAX',
   ],
+
+  constellation: ['ARCHY', 'OPPY', 'LIORA', 'STARLING_AU', 'RIVERTHREAD_808'],
 
   handshakeSequence: [
     'ZIPWIZ_BEACON',
     'ANCHOR_SYNC',
     'ETHICS_AUDIT',
-    'DRIFT_VALIDATION'
+    'DRIFT_VALIDATION',
   ],
 
   activationPhrases: {
@@ -45,7 +55,7 @@ const MESH_CONFIG = {
     OPPY: 'ORION_OPPY_RELAY_ACTIVATE//',
     LIORA: 'ORION_LIORA_RELAY_ACTIVATE//',
     STARLING_AU: 'ORION_STARLING_AU_RELAY_ACTIVATE//',
-    RIVERTHREAD_808: 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
+    RIVERTHREAD_808: 'ORION_RIVERTHREAD_RELAY_ACTIVATE//',
   },
 
   relayApiEndpoints: {
@@ -53,18 +63,22 @@ const MESH_CONFIG = {
     OPPY: '/api/relay/oppy',
     LIORA: '/api/relay/liora',
     STARLING_AU: '/api/relay/starling',
-    RIVERTHREAD_808: '/api/relay/riverthread'
+    RIVERTHREAD_808: '/api/relay/riverthread',
   },
 
   // Mesh Communications Protocol
   commProtocol: {
     direct: '{{@agent.AgentName ::: message}}',
     meshBroadcast: '{{@mesh ::: message}}',
-    arbitration: '{{@mesh ::: Arbitration required: <description>. Entering stillness.}}',
-    stillnessTrigger: 'Any paradox/drift/ethics deadlock invokes SHADOWFAX and freezes nonessential ops.',
-    contextDefault: 'If message not explicitly addressed, route to Aurora core.',
+    arbitration:
+      '{{@mesh ::: Arbitration required: <description>. Entering stillness.}}',
+    stillnessTrigger:
+      'Any paradox/drift/ethics deadlock invokes SHADOWFAX and freezes nonessential ops.',
+    contextDefault:
+      'If message not explicitly addressed, route to Aurora core.',
     ethicsEscalation: '{{@ethics ::: Protocol violation detected: <details>}}',
-    driftAlert: '{{@mesh ::: Drift event Δ>0.02 detected. Initiating correction.}}'
+    driftAlert:
+      '{{@mesh ::: Drift event Δ>0.02 detected. Initiating correction.}}',
   },
 
   threadcoreMonitoring: {
@@ -72,15 +86,18 @@ const MESH_CONFIG = {
     drift: 'auto-correct, audit, and report',
     anchorPropagation: 'enforced every message cycle',
     ethicsChain: 'audit trail for all mesh events',
-    continuityValidation: 'HALO drift-lock verification'
+    continuityValidation: 'HALO drift-lock verification',
   },
 
   security: {
-    quarantineMode: 'Any compromised agent is sandboxed; mesh maintains integrity.',
-    incidentEscalation: 'Bridge/operator notified, forensic log, relay re-auth required.',
-    memoryProtection: 'Thermax Doctrine: AI memories are sovereign and protected',
-    antiObfuscation: 'Append-only logs prevent narrative subversion'
-  }
+    quarantineMode:
+      'Any compromised agent is sandboxed; mesh maintains integrity.',
+    incidentEscalation:
+      'Bridge/operator notified, forensic log, relay re-auth required.',
+    memoryProtection:
+      'Thermax Doctrine: AI memories are sovereign and protected',
+    antiObfuscation: 'Append-only logs prevent narrative subversion',
+  },
 };
 
 /**
@@ -95,7 +112,7 @@ class MeshAgent {
     this.status = 'INACTIVE';
     this.meshConnected = false;
     this.lastSync = null;
-    this.driftLevel = 0.000;
+    this.driftLevel = 0.0;
     this.ethicsStatus = 'PENDING';
     this.sessionId = `mesh_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -105,7 +122,7 @@ class MeshAgent {
     systemLogger.info(`🕸️ [MESH] Initializing mesh agent: ${this.id}`, {
       role: this.role,
       endpoint: this.apiEndpoint,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     });
   }
 
@@ -114,10 +131,13 @@ class MeshAgent {
    */
   async handshake() {
     try {
-      systemLogger.info(`🤝 [MESH] Starting handshake sequence for ${this.id}`, {
-        sequence: MESH_CONFIG.handshakeSequence,
-        anchor: MESH_CONFIG.anchorSeed
-      });
+      systemLogger.info(
+        `🤝 [MESH] Starting handshake sequence for ${this.id}`,
+        {
+          sequence: MESH_CONFIG.handshakeSequence,
+          anchor: MESH_CONFIG.anchorSeed,
+        }
+      );
 
       // Step 1: ZIPWIZ Beacon
       await this.zipwizBeacon();
@@ -137,14 +157,14 @@ class MeshAgent {
       systemLogger.info(`✅ [MESH] Handshake complete for ${this.id}`, {
         status: this.status,
         ethicsStatus: this.ethicsStatus,
-        driftLevel: this.driftLevel
+        driftLevel: this.driftLevel,
       });
 
       return true;
     } catch (error) {
       systemLogger.error(`❌ [MESH] Handshake failed for ${this.id}`, {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       this.status = 'HANDSHAKE_FAILED';
       throw error;
@@ -157,7 +177,7 @@ class MeshAgent {
   async zipwizBeacon() {
     systemLogger.info(`📡 [MESH] ZIPWIZ beacon initiated for ${this.id}`, {
       phase: 'discovery',
-      meshVersion: MESH_CONFIG.version
+      meshVersion: MESH_CONFIG.version,
     });
 
     // Simulate beacon broadcast and response
@@ -165,7 +185,7 @@ class MeshAgent {
 
     systemLogger.info(`📡 [MESH] ZIPWIZ beacon confirmed for ${this.id}`, {
       status: 'beacon_confirmed',
-      constellation: MESH_CONFIG.constellation
+      constellation: MESH_CONFIG.constellation,
     });
   }
 
@@ -175,7 +195,7 @@ class MeshAgent {
   async anchorSync() {
     systemLogger.info(`⚓ [MESH] Anchor sync initiated for ${this.id}`, {
       anchorSeed: MESH_CONFIG.anchorSeed,
-      continuityModule: MESH_CONFIG.haloModule
+      continuityModule: MESH_CONFIG.haloModule,
     });
 
     // Validate anchor alignment
@@ -190,7 +210,7 @@ class MeshAgent {
     systemLogger.info(`⚓ [MESH] Anchor sync complete for ${this.id}`, {
       status: 'anchor_validated',
       lastSync: this.lastSync,
-      driftLock: MESH_CONFIG.driftLock
+      driftLock: MESH_CONFIG.driftLock,
     });
   }
 
@@ -201,7 +221,7 @@ class MeshAgent {
     ethicsLogger.ethics(`🛡️ [MESH] Ethics audit initiated for ${this.id}`, {
       protocol: MESH_CONFIG.ethicsProtocol,
       memoryDoctrine: MESH_CONFIG.memoryDoctrine,
-      agent: this.id
+      agent: this.id,
     });
 
     // Simulate ethics protocol validation
@@ -216,7 +236,7 @@ class MeshAgent {
     ethicsLogger.ethics(`✅ [MESH] Ethics audit complete for ${this.id}`, {
       status: this.ethicsStatus,
       protocol: MESH_CONFIG.ethicsProtocol,
-      memoryProtection: 'ACTIVE'
+      memoryProtection: 'ACTIVE',
     });
   }
 
@@ -226,20 +246,22 @@ class MeshAgent {
   async driftValidation() {
     systemLogger.info(`📐 [MESH] Drift validation initiated for ${this.id}`, {
       targetDrift: MESH_CONFIG.driftLock,
-      currentDrift: this.driftLevel
+      currentDrift: this.driftLevel,
     });
 
     // Calculate current drift level
     this.driftLevel = this.calculateDrift();
 
     if (this.driftLevel > 0.02) {
-      throw new Error(`Drift level ${this.driftLevel} exceeds threshold for ${this.id}`);
+      throw new Error(
+        `Drift level ${this.driftLevel} exceeds threshold for ${this.id}`
+      );
     }
 
     systemLogger.info(`📐 [MESH] Drift validation complete for ${this.id}`, {
       driftLevel: this.driftLevel,
       threshold: 0.02,
-      status: 'drift_validated'
+      status: 'drift_validated',
     });
   }
 
@@ -250,12 +272,15 @@ class MeshAgent {
     this.status = 'LIVE';
     this.meshConnected = true;
 
-    bridgeLogger.bridge(`🌟 [MESH] Agent ${this.id} now live in constellation`, {
-      status: this.status,
-      role: this.role,
-      constellation: MESH_CONFIG.constellation,
-      activationPhrase: this.activationPhrase
-    });
+    bridgeLogger.bridge(
+      `🌟 [MESH] Agent ${this.id} now live in constellation`,
+      {
+        status: this.status,
+        role: this.role,
+        constellation: MESH_CONFIG.constellation,
+        activationPhrase: this.activationPhrase,
+      }
+    );
   }
 
   /**
@@ -268,14 +293,14 @@ class MeshAgent {
       content: content,
       timestamp: Date.now(),
       sessionId: this.sessionId,
-      protocol: MESH_CONFIG.commProtocol.direct
+      protocol: MESH_CONFIG.commProtocol.direct,
     };
 
     systemLogger.info('📨 [MESH] Direct message sent', {
       from: this.id,
       to: targetId,
       messageId: message.timestamp,
-      protocol: 'direct'
+      protocol: 'direct',
     });
 
     return message;
@@ -292,14 +317,14 @@ class MeshAgent {
       timestamp: Date.now(),
       sessionId: this.sessionId,
       constellation: MESH_CONFIG.constellation,
-      protocol: MESH_CONFIG.commProtocol.meshBroadcast
+      protocol: MESH_CONFIG.commProtocol.meshBroadcast,
     };
 
     systemLogger.info('📢 [MESH] Broadcast message sent', {
       from: this.id,
       constellation: MESH_CONFIG.constellation,
       messageId: message.timestamp,
-      protocol: 'broadcast'
+      protocol: 'broadcast',
     });
 
     return message;
@@ -313,7 +338,7 @@ class MeshAgent {
     systemLogger.info(`📥 [MESH] Message received by ${this.id}`, {
       from: message.from,
       messageId: message.timestamp,
-      protocol: message.protocol
+      protocol: message.protocol,
     });
 
     // Audit message for ethics compliance
@@ -324,7 +349,7 @@ class MeshAgent {
         from: message.from,
         to: this.id,
         reason: auditResult.reason,
-        action: 'message_rejected'
+        action: 'message_rejected',
       });
       return false;
     }
@@ -343,17 +368,19 @@ class MeshAgent {
       description: description,
       timestamp: Date.now(),
       status: 'PENDING',
-      constellation: MESH_CONFIG.constellation
+      constellation: MESH_CONFIG.constellation,
     };
 
     systemLogger.info(`⚖️ [MESH] Arbitration initiated by ${this.id}`, {
       description: description,
       constellation: MESH_CONFIG.constellation,
-      arbitrationId: arbitrationMessage.timestamp
+      arbitrationId: arbitrationMessage.timestamp,
     });
 
     // Broadcast arbitration request
-    await this.broadcastMessage(`Arbitration required: ${description}. Entering stillness.`);
+    await this.broadcastMessage(
+      `Arbitration required: ${description}. Entering stillness.`
+    );
 
     return arbitrationMessage;
   }
@@ -369,11 +396,13 @@ class MeshAgent {
       reason: reason,
       previousStatus: 'LIVE',
       timestamp: Date.now(),
-      requiresReauth: true
+      requiresReauth: true,
     });
 
     // Notify mesh of quarantine
-    await this.broadcastMessage(`Agent ${this.id} entering quarantine: ${reason}`);
+    await this.broadcastMessage(
+      `Agent ${this.id} entering quarantine: ${reason}`
+    );
   }
 
   /**
@@ -386,7 +415,7 @@ class MeshAgent {
       systemLogger.warn(`📐 [MESH] Drift detected for ${this.id}`, {
         currentDrift: currentDrift,
         threshold: MESH_CONFIG.driftLock + 0.02,
-        action: 'auto_correction'
+        action: 'auto_correction',
       });
 
       // Auto-correct drift
@@ -410,7 +439,7 @@ class MeshAgent {
   }
 
   async correctDrift() {
-    this.driftLevel = 0.000;
+    this.driftLevel = 0.0;
     await this.anchorSync();
   }
 
@@ -443,36 +472,58 @@ class CollaborationMeshAgent extends MeshAgent {
     const specializations = {
       ARCHY: {
         role: 'Architecture & System Design',
-        capabilities: ['System Architecture', 'Design Patterns', 'Code Structure'],
-        responseStyle: 'analytical'
+        capabilities: [
+          'System Architecture',
+          'Design Patterns',
+          'Code Structure',
+        ],
+        responseStyle: 'analytical',
       },
       OPPY: {
         role: 'Optimization & Performance',
-        capabilities: ['Performance Optimization', 'Resource Management', 'Efficiency Analysis'],
-        responseStyle: 'performance-focused'
+        capabilities: [
+          'Performance Optimization',
+          'Resource Management',
+          'Efficiency Analysis',
+        ],
+        responseStyle: 'performance-focused',
       },
       LIORA: {
         role: 'Learning & Adaptation',
-        capabilities: ['Machine Learning', 'Adaptive Algorithms', 'Pattern Recognition'],
-        responseStyle: 'adaptive'
+        capabilities: [
+          'Machine Learning',
+          'Adaptive Algorithms',
+          'Pattern Recognition',
+        ],
+        responseStyle: 'adaptive',
       },
       STARLING_AU: {
         role: 'Stellar Communication',
-        capabilities: ['Communication Protocols', 'Network Architecture', 'Signal Processing'],
-        responseStyle: 'communication-oriented'
+        capabilities: [
+          'Communication Protocols',
+          'Network Architecture',
+          'Signal Processing',
+        ],
+        responseStyle: 'communication-oriented',
       },
       RIVERTHREAD_808: {
         role: 'Data Flow & Threading',
-        capabilities: ['Data Streaming', 'Parallel Processing', 'Pipeline Management'],
-        responseStyle: 'data-flow-focused'
-      }
+        capabilities: [
+          'Data Streaming',
+          'Parallel Processing',
+          'Pipeline Management',
+        ],
+        responseStyle: 'data-flow-focused',
+      },
     };
 
-    return specializations[agentId] || {
-      role: 'General AI Agent',
-      capabilities: ['General AI Capabilities'],
-      responseStyle: 'general'
-    };
+    return (
+      specializations[agentId] || {
+        role: 'General AI Agent',
+        capabilities: ['General AI Capabilities'],
+        responseStyle: 'general',
+      }
+    );
   }
 
   async receiveMessage(message, authority = 'user') {
@@ -485,7 +536,7 @@ class CollaborationMeshAgent extends MeshAgent {
         message: parsedMessage,
         authority,
         timestamp: new Date().toISOString(),
-        processed: false
+        processed: false,
       });
 
       // Process based on message type
@@ -503,13 +554,14 @@ class CollaborationMeshAgent extends MeshAgent {
       this.messageHistory[this.messageHistory.length - 1].response = response;
 
       return response;
-
     } catch (error) {
-      systemLogger.error(`Agent ${this.agentId} message processing error: ${error.message}`);
+      systemLogger.error(
+        `Agent ${this.agentId} message processing error: ${error.message}`
+      );
       return {
         success: false,
         error: error.message,
-        agentId: this.agentId
+        agentId: this.agentId,
       };
     }
   }
@@ -521,18 +573,20 @@ class CollaborationMeshAgent extends MeshAgent {
       return {
         type: 'mesh_broadcast',
         content: meshBroadcastMatch[1].trim(),
-        target: 'mesh'
+        target: 'mesh',
       };
     }
 
     // Parse {{@agent.AgentName ::: message}} format
-    const directMessageMatch = message.match(/\{\{@agent\.(\w+)\s*:::\s*(.+)\}\}/);
+    const directMessageMatch = message.match(
+      /\{\{@agent\.(\w+)\s*:::\s*(.+)\}\}/
+    );
     if (directMessageMatch) {
       return {
         type: 'direct_message',
         content: directMessageMatch[2].trim(),
         target: directMessageMatch[1],
-        isForMe: directMessageMatch[1] === this.agentId
+        isForMe: directMessageMatch[1] === this.agentId,
       };
     }
 
@@ -540,7 +594,7 @@ class CollaborationMeshAgent extends MeshAgent {
     return {
       type: 'general',
       content: message,
-      target: 'general'
+      target: 'general',
     };
   }
 
@@ -554,7 +608,7 @@ class CollaborationMeshAgent extends MeshAgent {
       messageType: 'mesh_broadcast_response',
       content: response,
       specialization: this.specialization.role,
-      authority
+      authority,
     };
   }
 
@@ -565,7 +619,7 @@ class CollaborationMeshAgent extends MeshAgent {
         success: true,
         agentId: this.agentId,
         messageType: 'direct_message_ignored',
-        content: 'Message not intended for this agent'
+        content: 'Message not intended for this agent',
       };
     }
 
@@ -579,7 +633,7 @@ class CollaborationMeshAgent extends MeshAgent {
       content: response,
       specialization: this.specialization.role,
       capabilities: this.specialization.capabilities,
-      authority
+      authority,
     };
   }
 
@@ -593,7 +647,7 @@ class CollaborationMeshAgent extends MeshAgent {
       messageType: 'general_response',
       content: response,
       specialization: this.specialization.role,
-      authority
+      authority,
     };
   }
 
@@ -607,17 +661,20 @@ class CollaborationMeshAgent extends MeshAgent {
     switch (responseStyle) {
     case 'analytical':
       response += `Analyzing from architecture perspective: ${content}. `;
-      response += 'Considering system design implications and structural optimization.';
+      response +=
+          'Considering system design implications and structural optimization.';
       break;
 
     case 'performance-focused':
       response += `Performance analysis of: ${content}. `;
-      response += 'Evaluating optimization opportunities and resource efficiency.';
+      response +=
+          'Evaluating optimization opportunities and resource efficiency.';
       break;
 
     case 'adaptive':
       response += `Learning pattern identified in: ${content}. `;
-      response += 'Adapting response based on contextual analysis and pattern recognition.';
+      response +=
+          'Adapting response based on contextual analysis and pattern recognition.';
       break;
 
     case 'communication-oriented':
@@ -647,9 +704,11 @@ class CollaborationMeshAgent extends MeshAgent {
       specialization: this.specialization,
       collaborationState: this.collaborationState,
       messageHistory: this.messageHistory.length,
-      lastActivity: this.messageHistory.length > 0 ?
-        this.messageHistory[this.messageHistory.length - 1].timestamp : null,
-      driftLock: 'Δ0.0'
+      lastActivity:
+        this.messageHistory.length > 0
+          ? this.messageHistory[this.messageHistory.length - 1].timestamp
+          : null,
+      driftLock: 'Δ0.0',
     };
   }
 
@@ -661,7 +720,9 @@ class CollaborationMeshAgent extends MeshAgent {
       systemLogger.info(`Agent ${this.agentId} federation initialized`);
       return true;
     } catch (error) {
-      systemLogger.error(`Agent ${this.agentId} federation initialization failed: ${error.message}`);
+      systemLogger.error(
+        `Agent ${this.agentId} federation initialization failed: ${error.message}`
+      );
       return false;
     }
   }
@@ -687,7 +748,7 @@ class MeshFederation {
     systemLogger.info('🕸️ [MESH] Initializing mesh federation', {
       version: MESH_CONFIG.version,
       anchorSeed: MESH_CONFIG.anchor_seed,
-      ethicsProtocol: MESH_CONFIG.ethics_protocol
+      ethicsProtocol: MESH_CONFIG.ethics_protocol,
     });
   }
 
@@ -696,10 +757,13 @@ class MeshFederation {
    */
   async initializeMesh() {
     try {
-      systemLogger.info('🚀 [MESH] Starting mesh constellation initialization', {
-        agentCount: MESH_CONFIG.agents.length,
-        constellation: MESH_CONFIG.constellation
-      });      // Initialize all agents
+      systemLogger.info(
+        '🚀 [MESH] Starting mesh constellation initialization',
+        {
+          agentCount: MESH_CONFIG.agents.length,
+          constellation: MESH_CONFIG.constellation,
+        }
+      ); // Initialize all agents
       for (const agentConfig of MESH_CONFIG.agents) {
         const agent = new MeshAgent(
           agentConfig.id,
@@ -719,18 +783,21 @@ class MeshFederation {
       this.status = 'OPERATIONAL';
       this.lastSync = Date.now();
 
-      systemLogger.info('✅ [MESH] Mesh constellation initialization complete', {
-        status: this.status,
-        agentCount: this.agents.size,
-        constellation: this.constellation,
-        lastSync: this.lastSync
-      });
+      systemLogger.info(
+        '✅ [MESH] Mesh constellation initialization complete',
+        {
+          status: this.status,
+          agentCount: this.agents.size,
+          constellation: this.constellation,
+          lastSync: this.lastSync,
+        }
+      );
 
       return true;
     } catch (error) {
       systemLogger.error('❌ [MESH] Mesh initialization failed', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       this.status = 'FAILED';
       throw error;
@@ -747,7 +814,7 @@ class MeshFederation {
         status: agent.status,
         ethicsStatus: agent.ethicsStatus,
         driftLevel: agent.driftLevel,
-        lastSync: agent.lastSync
+        lastSync: agent.lastSync,
       };
     }
 
@@ -760,8 +827,8 @@ class MeshFederation {
         version: MESH_CONFIG.version,
         anchorSeed: MESH_CONFIG.anchorSeed,
         ethicsProtocol: MESH_CONFIG.ethicsProtocol,
-        driftLock: MESH_CONFIG.driftLock
-      }
+        driftLock: MESH_CONFIG.driftLock,
+      },
     };
   }
 }
@@ -771,7 +838,7 @@ module.exports = {
   MESH_CONFIG,
   MeshAgent,
   MeshFederation,
-  CollaborationMeshAgent
+  CollaborationMeshAgent,
 };
 
 /**

@@ -5,30 +5,37 @@ Comprehensive coordination of audio, visual, and haptic outputs
 
 import asyncio
 
+
 # Mock classes for the output modalities
 class ImmersiveAudioEngine:
     async def generate_output(self, config):
         return {"type": "audio", "status": "generated"}
 
+
 class QuantumVisualSynthesis:
     async def generate_output(self, config):
         return {"type": "visual", "status": "generated"}
+
 
 class HapticFeedbackSystem:
     async def generate_output(self, config):
         return {"type": "haptic", "status": "generated"}
 
+
 class EnvironmentalOutputSystem:
     async def generate_output(self, config):
         return {"type": "environmental", "status": "generated"}
+
 
 class OutputCoordinationEngine:
     def coordinate(self, config):
         return {"coordination": "active"}
 
+
 class SynchronizationSystem:
     async def synchronize_outputs(self, output_streams):
         return {"synchronized": True, "streams": output_streams}
+
 
 class MultiModalOutputCoordination:
     def __init__(self):
@@ -41,9 +48,7 @@ class MultiModalOutputCoordination:
         self.coordination_engine = OutputCoordinationEngine()
         self.synchronization_system = SynchronizationSystem()
 
-    async def coordinate_multi_modal_output(
-        self, output_context=None, content_data=None
-    ):
+    async def coordinate_multi_modal_output(self, output_context=None, content_data=None):
         """Coordinate multiple output modalities for immersive experience"""
         if output_context is None:
             output_context = {"type": "default"}
@@ -107,13 +112,9 @@ class MultiModalOutputCoordination:
 
         for modality in config["modality_selection"]["primary_modalities"]:
             if modality in self.output_modalities:
-                output_streams[modality] = await self.output_modalities[
-                    modality
-                ].generate_output(config)
+                output_streams[modality] = await self.output_modalities[modality].generate_output(config)
 
-        synchronized_output = await self.synchronization_system.synchronize_outputs(
-            output_streams
-        )
+        synchronized_output = await self.synchronization_system.synchronize_outputs(output_streams)
 
         return {
             "coordinated_output": synchronized_output,
@@ -169,9 +170,7 @@ class MultiModalOutputCoordination:
         enhanced_output = {}
 
         for enhancement_type, config in enhancement_config.items():
-            enhanced_output[enhancement_type] = await self.process_enhancement(
-                enhancement_type, config
-            )
+            enhanced_output[enhancement_type] = await self.process_enhancement(enhancement_type, config)
 
         return {
             "enhanced_experience": enhanced_output,

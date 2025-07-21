@@ -47,7 +47,7 @@ function dispatchSymbolicCommand(symbolicCommand) {
   commandLogger.info('🧬 Dispatching symbolic command node...', {
     command: symbolicCommand.action,
     glyph: symbolicCommand.glyph,
-    anchor: 'EOS_SEED_ORION'
+    anchor: 'EOS_SEED_ORION',
   });
 
   const encrypted = encryptSymbolicPayload({
@@ -64,7 +64,7 @@ function dispatchSymbolicCommand(symbolicCommand) {
   commandLogger.info('✅ Symbolic command encrypted and stored', {
     location: '/src/nodes/dispatch.encrypted.json',
     encrypted: true,
-    anchor: 'EOS_SEED_ORION'
+    anchor: 'EOS_SEED_ORION',
   });
 }
 

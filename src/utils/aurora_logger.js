@@ -45,12 +45,12 @@ class AuroraLogger {
       sessionId: this.sessionId,
       anchorSeed: this.anchorSeed,
       ethicsProtocol: this.ethicsProtocol,
-      ...metadata
+      ...metadata,
     };
 
     return {
       console: `[${timestamp}] ${level} [${this.component}] ${message}${Object.keys(metadata).length ? ' ' + JSON.stringify(metadata) : ''}`,
-      structured: logEntry
+      structured: logEntry,
     };
   }
 
@@ -58,7 +58,10 @@ class AuroraLogger {
     if (!this.enableFile) return;
 
     try {
-      const logFile = path.join(this.logDir, `aurora-${this.component.toLowerCase()}.log`);
+      const logFile = path.join(
+        this.logDir,
+        `aurora-${this.component.toLowerCase()}.log`
+      );
       const logLine = JSON.stringify(formattedLog.structured) + '\n';
 
       // Check file size and rotate if necessary
@@ -112,8 +115,12 @@ class AuroraLogger {
     // Write to console if enabled (ESLint exception for logging utility)
     if (this.enableConsole) {
       /* eslint-disable no-console */
-      const consoleMethod = level === 'ERROR' ? console.error :
-        level === 'WARN' ? console.warn : console.log;
+      const consoleMethod =
+        level === 'ERROR'
+          ? console.error
+          : level === 'WARN'
+            ? console.warn
+            : console.log;
       consoleMethod(formatted.console);
       /* eslint-enable no-console */
     }
@@ -144,7 +151,7 @@ class AuroraLogger {
       drift: driftValue,
       threshold: 0.02,
       type: 'DRIFT_MONITORING',
-      ...metadata
+      ...metadata,
     });
   }
 
@@ -152,7 +159,7 @@ class AuroraLogger {
     this.log('INFO', message, {
       ethicsProtocol: protocol,
       type: 'ETHICS_VALIDATION',
-      ...metadata
+      ...metadata,
     });
   }
 
@@ -160,7 +167,7 @@ class AuroraLogger {
     this.log('INFO', message, {
       anchorSeed: seed,
       type: 'ANCHOR_VALIDATION',
-      ...metadata
+      ...metadata,
     });
   }
 
@@ -169,7 +176,7 @@ class AuroraLogger {
       fromLayer,
       toLayer,
       type: 'BRIDGE_COMMUNICATION',
-      ...metadata
+      ...metadata,
     });
   }
 

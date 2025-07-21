@@ -41,13 +41,13 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
         'multi-agent': 8002,
         'research-hub': 8003,
         'av-system': 8004,
-        'monitoring': 8080
+        monitoring: 8080,
       },
       healthCheck: {
         interval: 30000, // 30 seconds
-        timeout: 5000,   // 5 seconds
-        retries: 3
-      }
+        timeout: 5000, // 5 seconds
+        retries: 3,
+      },
     };
 
     this.initializeWorkflow();
@@ -80,7 +80,7 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       'workflow/config',
       'workflow/metrics',
       'workflow/health',
-      'workflow/scripts'
+      'workflow/scripts',
     ];
 
     dirs.forEach(dir => {
@@ -95,13 +95,13 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
    * Setup event listeners for workflow events
    */
   setupEventListeners() {
-    this.on('phase-start', (phase) => {
+    this.on('phase-start', phase => {
       this.log(`🔄 Phase ${phase} Starting`, 'INFO');
       this.currentPhase = phase;
       this.state = 'RUNNING';
     });
 
-    this.on('phase-complete', (phase) => {
+    this.on('phase-complete', phase => {
       this.log(`✅ Phase ${phase} Complete`, 'INFO');
       this.currentPhase = null;
     });
@@ -128,10 +128,10 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       system: {
         cpu: 0,
         memory: 0,
-        disk: 0
+        disk: 0,
       },
       errors: 0,
-      warnings: 0
+      warnings: 0,
     };
 
     // Start metrics collection interval
@@ -156,7 +156,6 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
 
       this.emit('workflow-complete');
       return this.generateWorkflowReport();
-
     } catch (error) {
       this.log(`❌ Workflow execution failed: ${error.message}`, 'ERROR');
       this.state = 'ERROR';
@@ -178,7 +177,7 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
         const commandResult = this.commandNode.routeCommand('WORKFLOW_PHASE', {
           phase: phaseName,
           workflow_id: this.workflowId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
         // Execute phase-specific logic
@@ -188,16 +187,15 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
         this.metrics.phases[phaseName] = {
           duration: endTime - startTime,
           status: 'SUCCESS',
-          commandId: commandResult.commandId
+          commandId: commandResult.commandId,
         };
 
         this.emit('phase-complete', phaseName);
         resolve();
-
       } catch (error) {
         this.metrics.phases[phaseName] = {
           status: 'ERROR',
-          error: error.message
+          error: error.message,
         };
 
         this.emit('phase-error', phaseName, error);
@@ -211,23 +209,23 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
    */
   async executePhaseLogic(phase) {
     switch (phase) {
-      case 'INITIALIZE':
-        await this.executeInitializePhase();
-        break;
-      case 'DEPLOY':
-        await this.executeDeployPhase();
-        break;
-      case 'MONITOR':
-        await this.executeMonitorPhase();
-        break;
-      case 'SCALE':
-        await this.executeScalePhase();
-        break;
-      case 'MAINTAIN':
-        await this.executeMaintainPhase();
-        break;
-      default:
-        throw new Error(`Unknown phase: ${phase}`);
+    case 'INITIALIZE':
+      await this.executeInitializePhase();
+      break;
+    case 'DEPLOY':
+      await this.executeDeployPhase();
+      break;
+    case 'MONITOR':
+      await this.executeMonitorPhase();
+      break;
+    case 'SCALE':
+      await this.executeScalePhase();
+      break;
+    case 'MAINTAIN':
+      await this.executeMaintainPhase();
+      break;
+    default:
+      throw new Error(`Unknown phase: ${phase}`);
     }
   }
 
@@ -347,7 +345,7 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       () => this.checkSystemResources(),
       () => this.checkNetworkConnectivity(),
       () => this.checkDiskSpace(),
-      () => this.checkDependencies()
+      () => this.checkDependencies(),
     ];
 
     for (const check of checks) {
@@ -387,7 +385,10 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
     const monitoringScript = this.generateMonitoringScript();
 
     // Write monitoring script
-    const scriptPath = path.join(process.cwd(), 'workflow/scripts/monitoring.py');
+    const scriptPath = path.join(
+      process.cwd(),
+      'workflow/scripts/monitoring.py'
+    );
     fs.writeFileSync(scriptPath, monitoringScript);
 
     // Make executable and start
@@ -409,11 +410,15 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       services: this.metrics.services,
       system: this.metrics.system,
       logs: this.logs.slice(-100), // Last 100 log entries
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Save report to file
-    const reportPath = path.join(process.cwd(), 'workflow/reports', `${this.workflowId}.json`);
+    const reportPath = path.join(
+      process.cwd(),
+      'workflow/reports',
+      `${this.workflowId}.json`
+    );
     fs.mkdirSync(path.dirname(reportPath), { recursive: true });
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
@@ -430,42 +435,94 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       level,
       message,
       phase: this.currentPhase,
-      workflowId: this.workflowId
+      workflowId: this.workflowId,
     };
 
     this.logs.push(logEntry);
     console.log(`[${timestamp}] ${level}: ${message}`);
 
     // Write to log file
-    const logPath = path.join(process.cwd(), 'workflow/logs', 'orchestrator.log');
+    const logPath = path.join(
+      process.cwd(),
+      'workflow/logs',
+      'orchestrator.log'
+    );
     fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\\n');
   }
 
   // Placeholder methods for detailed implementation
-  async checkSystemResources() { /* Implementation */ }
-  async checkNetworkConnectivity() { /* Implementation */ }
-  async checkDiskSpace() { /* Implementation */ }
-  async checkDependencies() { /* Implementation */ }
-  async loadConfiguration() { /* Implementation */ }
-  async setEnvironmentVariables() { /* Implementation */ }
-  async verifyDependencies() { /* Implementation */ }
-  async activateSecurityProtocols() { /* Implementation */ }
-  async startService(service) { /* Implementation */ }
-  async configureLoadBalancing() { /* Implementation */ }
-  async registerAPIEndpoints() { /* Implementation */ }
-  async deploySecurityCertificates() { /* Implementation */ }
-  async setupErrorDetection() { /* Implementation */ }
-  async initializeAnalytics() { /* Implementation */ }
-  async analyzeCurrentLoad() { /* Implementation */ }
-  async configureAutoScaling() { /* Implementation */ }
-  async optimizeResourceAllocation() { /* Implementation */ }
-  async scheduleBackups() { /* Implementation */ }
-  async applySecurityUpdates() { /* Implementation */ }
-  async optimizePerformance() { /* Implementation */ }
-  async generateHealthReports() { /* Implementation */ }
-  async executeScript(path, args) { /* Implementation */ }
-  async collectSystemMetrics() { /* Implementation */ }
-  async handlePhaseError(phase, error) { /* Implementation */ }
+  async checkSystemResources() {
+    /* Implementation */
+  }
+  async checkNetworkConnectivity() {
+    /* Implementation */
+  }
+  async checkDiskSpace() {
+    /* Implementation */
+  }
+  async checkDependencies() {
+    /* Implementation */
+  }
+  async loadConfiguration() {
+    /* Implementation */
+  }
+  async setEnvironmentVariables() {
+    /* Implementation */
+  }
+  async verifyDependencies() {
+    /* Implementation */
+  }
+  async activateSecurityProtocols() {
+    /* Implementation */
+  }
+  async startService(service) {
+    /* Implementation */
+  }
+  async configureLoadBalancing() {
+    /* Implementation */
+  }
+  async registerAPIEndpoints() {
+    /* Implementation */
+  }
+  async deploySecurityCertificates() {
+    /* Implementation */
+  }
+  async setupErrorDetection() {
+    /* Implementation */
+  }
+  async initializeAnalytics() {
+    /* Implementation */
+  }
+  async analyzeCurrentLoad() {
+    /* Implementation */
+  }
+  async configureAutoScaling() {
+    /* Implementation */
+  }
+  async optimizeResourceAllocation() {
+    /* Implementation */
+  }
+  async scheduleBackups() {
+    /* Implementation */
+  }
+  async applySecurityUpdates() {
+    /* Implementation */
+  }
+  async optimizePerformance() {
+    /* Implementation */
+  }
+  async generateHealthReports() {
+    /* Implementation */
+  }
+  async executeScript(path, args) {
+    /* Implementation */
+  }
+  async collectSystemMetrics() {
+    /* Implementation */
+  }
+  async handlePhaseError(phase, error) {
+    /* Implementation */
+  }
 
   generateMonitoringScript() {
     return `#!/usr/bin/env python3
@@ -503,16 +560,16 @@ class AuroraWorkflowCLI {
 
   async handleCommand(command, args) {
     switch (command) {
-      case 'start':
-        return await this.orchestrator.executeWorkflow(args.phases);
-      case 'status':
-        return this.getWorkflowStatus();
-      case 'stop':
-        return this.stopWorkflow(args.graceful);
-      case 'restart':
-        return this.restartWorkflow(args.strategy);
-      default:
-        console.log('Unknown command. Available: start, status, stop, restart');
+    case 'start':
+      return await this.orchestrator.executeWorkflow(args.phases);
+    case 'status':
+      return this.getWorkflowStatus();
+    case 'stop':
+      return this.stopWorkflow(args.graceful);
+    case 'restart':
+      return this.restartWorkflow(args.strategy);
+    default:
+      console.log('Unknown command. Available: start, status, stop, restart');
     }
   }
 
@@ -521,13 +578,15 @@ class AuroraWorkflowCLI {
       state: this.orchestrator.state,
       currentPhase: this.orchestrator.currentPhase,
       workflowId: this.orchestrator.workflowId,
-      metrics: this.orchestrator.metrics
+      metrics: this.orchestrator.metrics,
     };
   }
 
   async stopWorkflow(graceful = true) {
     // Implementation for stopping workflow
-    console.log(`Stopping workflow ${graceful ? 'gracefully' : 'immediately'}...`);
+    console.log(
+      `Stopping workflow ${graceful ? 'gracefully' : 'immediately'}...`
+    );
   }
 
   async restartWorkflow(strategy = 'rolling') {
@@ -544,14 +603,17 @@ if (require.main === module) {
   const cli = new AuroraWorkflowCLI();
   const command = process.argv[2] || 'start';
   const args = {
-    phases: process.argv.includes('--phase') ?
-      process.argv[process.argv.indexOf('--phase') + 1].split(',') : null,
+    phases: process.argv.includes('--phase')
+      ? process.argv[process.argv.indexOf('--phase') + 1].split(',')
+      : null,
     graceful: process.argv.includes('--graceful'),
-    strategy: process.argv.includes('--strategy') ?
-      process.argv[process.argv.indexOf('--strategy') + 1] : 'rolling'
+    strategy: process.argv.includes('--strategy')
+      ? process.argv[process.argv.indexOf('--strategy') + 1]
+      : 'rolling',
   };
 
-  cli.handleCommand(command, args)
+  cli
+    .handleCommand(command, args)
     .then(result => {
       console.log('🎉 Workflow command completed successfully');
       if (result) console.log(JSON.stringify(result, null, 2));

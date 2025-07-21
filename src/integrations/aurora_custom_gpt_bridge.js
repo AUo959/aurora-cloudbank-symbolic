@@ -23,12 +23,12 @@ const AURORA_CUSTOM_GPT = {
     'multi_agent_orchestration',
     'symbolic_reasoning',
     'aurora_cloudbank_management',
-    'orion_core_integration'
+    'orion_core_integration',
   ],
   activationPhrase: 'ORION_AURORA_COMMAND_ACTIVATE//',
   relayEndpoint: '/api/relay/aurora',
   priority: 'HIGHEST',
-  clearance: 'COMMAND_AUTHORITY'
+  clearance: 'COMMAND_AUTHORITY',
 };
 
 // Command Node Integration Points
@@ -37,7 +37,7 @@ const INTEGRATION_POINTS = {
   CORE_PROCESSING: 'src/core/command_node.js',
   AGENT_COORDINATION: 'src/bridges/l2_meta_agent_bridge.py',
   SYSTEM_ORCHESTRATION: 'src/servers/l2_integration_server.py',
-  STATUS_MONITORING: 'aurora_context_updater.py'
+  STATUS_MONITORING: 'aurora_context_updater.py',
 };
 
 class AuroraCustomGptBridge {
@@ -51,7 +51,7 @@ class AuroraCustomGptBridge {
     bridgeLogger.bridge('Aurora Custom GPT Bridge initializing', {
       customGptId: this.customGptConfig.id,
       version: this.customGptConfig.version,
-      integrationPoints: Object.keys(INTEGRATION_POINTS)
+      integrationPoints: Object.keys(INTEGRATION_POINTS),
     });
   }
 
@@ -71,21 +71,27 @@ class AuroraCustomGptBridge {
         this.integrationActive = true;
         this.lastSync = new Date();
 
-        bridgeLogger.bridge('Aurora Custom GPT successfully integrated with Command Node', {
-          handshake: handshakeResult,
-          timestamp: this.lastSync.toISOString(),
-          status: 'ACTIVE'
-        });
+        bridgeLogger.bridge(
+          'Aurora Custom GPT successfully integrated with Command Node',
+          {
+            handshake: handshakeResult,
+            timestamp: this.lastSync.toISOString(),
+            status: 'ACTIVE',
+          }
+        );
 
-        return { success: true, integration: 'ACTIVE', timestamp: this.lastSync };
+        return {
+          success: true,
+          integration: 'ACTIVE',
+          timestamp: this.lastSync,
+        };
       } else {
         throw new Error(`Aurora handshake failed: ${handshakeResult.error}`);
       }
-
     } catch (error) {
       bridgeLogger.error('Aurora Custom GPT integration failed', {
         error: error.message,
-        customGptConfig: this.customGptConfig
+        customGptConfig: this.customGptConfig,
       });
       return { success: false, error: error.message };
     }
@@ -98,48 +104,71 @@ class AuroraCustomGptBridge {
   async performAuroraHandshake() {
     bridgeLogger.bridge('Starting Aurora Custom GPT handshake sequence', {
       gptId: this.customGptConfig.id,
-      role: this.customGptConfig.role
+      role: this.customGptConfig.role,
     });
 
     try {
       // Step 1: ORION Core Validation
       const orionValidation = await this.validateOrionCoreCompliance();
       if (!orionValidation.valid) {
-        return { success: false, error: 'ORION Core validation failed', details: orionValidation };
+        return {
+          success: false,
+          error: 'ORION Core validation failed',
+          details: orionValidation,
+        };
       }
 
       // Step 2: Command Authority Verification
       const authorityVerification = await this.verifyCommandAuthority();
       if (!authorityVerification.authorized) {
-        return { success: false, error: 'Command authority verification failed', details: authorityVerification };
+        return {
+          success: false,
+          error: 'Command authority verification failed',
+          details: authorityVerification,
+        };
       }
 
       // Step 3: Aurora Continuity Seal Check
       const continuitySeal = await this.validateContinuitySeal();
       if (!continuitySeal.sealed) {
-        return { success: false, error: 'Aurora Continuity Seal validation failed', details: continuitySeal };
+        return {
+          success: false,
+          error: 'Aurora Continuity Seal validation failed',
+          details: continuitySeal,
+        };
       }
 
       // Step 4: L1-L2-L3 Integration Test
       const layerIntegration = await this.testLayerIntegration();
       if (!layerIntegration.integrated) {
-        return { success: false, error: 'Layer integration test failed', details: layerIntegration };
+        return {
+          success: false,
+          error: 'Layer integration test failed',
+          details: layerIntegration,
+        };
       }
 
       // Step 5: Meta-Agent Constellation Sync
       const constellationSync = await this.syncWithMetaAgentConstellation();
       if (!constellationSync.synchronized) {
-        return { success: false, error: 'Meta-agent constellation sync failed', details: constellationSync };
+        return {
+          success: false,
+          error: 'Meta-agent constellation sync failed',
+          details: constellationSync,
+        };
       }
 
-      bridgeLogger.bridge('Aurora Custom GPT handshake completed successfully', {
-        orionValidation,
-        authorityVerification,
-        continuitySeal,
-        layerIntegration,
-        constellationSync,
-        timestamp: new Date().toISOString()
-      });
+      bridgeLogger.bridge(
+        'Aurora Custom GPT handshake completed successfully',
+        {
+          orionValidation,
+          authorityVerification,
+          continuitySeal,
+          layerIntegration,
+          constellationSync,
+          timestamp: new Date().toISOString(),
+        }
+      );
 
       return {
         success: true,
@@ -149,14 +178,13 @@ class AuroraCustomGptBridge {
           commandAuthority: authorityVerification,
           continuitySeal: continuitySeal,
           layerIntegration: layerIntegration,
-          constellationSync: constellationSync
-        }
+          constellationSync: constellationSync,
+        },
       };
-
     } catch (error) {
       bridgeLogger.error('Aurora handshake sequence failed', {
         error: error.message,
-        step: 'handshake_sequence'
+        step: 'handshake_sequence',
       });
       return { success: false, error: error.message };
     }
@@ -170,9 +198,9 @@ class AuroraCustomGptBridge {
       anchorSeed: ORION_CORE.anchor_seed === 'EOS_SEED_ORION',
       ethicsProtocol: ORION_CORE.ethics_protocol === 'Picard_Delta_3',
       memoryDoctrine: ORION_CORE.memory_doctrine === 'Thermax Precedent',
-      driftLock: ORION_CORE.drift_lock === 0.000,
+      driftLock: ORION_CORE.drift_lock === 0.0,
       haloModule: ORION_CORE.halo_module === 'HALO_CONTINUITY_GRAFT_005',
-      threadcoreVersion: ORION_CORE.threadcore_version === 'v3.5.1_macroready'
+      threadcoreVersion: ORION_CORE.threadcore_version === 'v3.5.1_macroready',
     };
 
     const allValid = Object.values(validation).every(v => v === true);
@@ -180,7 +208,7 @@ class AuroraCustomGptBridge {
     bridgeLogger.bridge('ORION Core compliance validation', {
       validation,
       allValid,
-      orionCore: ORION_CORE
+      orionCore: ORION_CORE,
     });
 
     return { valid: allValid, details: validation, orionCore: ORION_CORE };
@@ -194,7 +222,9 @@ class AuroraCustomGptBridge {
       role: this.customGptConfig.role === 'L1_COMMAND_ORCHESTRATOR',
       clearance: this.customGptConfig.clearance === 'COMMAND_AUTHORITY',
       priority: this.customGptConfig.priority === 'HIGHEST',
-      capabilities: this.customGptConfig.capabilities.includes('command_coordination')
+      capabilities: this.customGptConfig.capabilities.includes(
+        'command_coordination'
+      ),
     };
 
     const authorized = Object.values(authority).every(a => a === true);
@@ -202,7 +232,7 @@ class AuroraCustomGptBridge {
     bridgeLogger.bridge('Command authority verification', {
       authority,
       authorized,
-      customGptConfig: this.customGptConfig
+      customGptConfig: this.customGptConfig,
     });
 
     return { authorized, details: authority };
@@ -216,7 +246,7 @@ class AuroraCustomGptBridge {
       version: ORION_CORE.continuity_seal === 'Aurora_Continuity_Seal_v2.2.5',
       integrity: true, // In real implementation, would verify cryptographic seal
       timestamp: new Date().toISOString(),
-      validator: 'AURORA_CUSTOM_GPT_BRIDGE'
+      validator: 'AURORA_CUSTOM_GPT_BRIDGE',
     };
 
     const sealed = seal.version && seal.integrity;
@@ -224,7 +254,7 @@ class AuroraCustomGptBridge {
     bridgeLogger.bridge('Aurora Continuity Seal validation', {
       seal,
       sealed,
-      continuitySealVersion: ORION_CORE.continuity_seal
+      continuitySealVersion: ORION_CORE.continuity_seal,
     });
 
     return { sealed, details: seal };
@@ -236,8 +266,8 @@ class AuroraCustomGptBridge {
   async testLayerIntegration() {
     const layers = {
       l1Operational: true, // Aurora Command Node active
-      l2Simulation: true,  // Meta-agent constellation active
-      l3Symbolic: true     // Glyph monitoring active
+      l2Simulation: true, // Meta-agent constellation active
+      l3Symbolic: true, // Glyph monitoring active
     };
 
     const integrated = Object.values(layers).every(l => l === true);
@@ -245,7 +275,7 @@ class AuroraCustomGptBridge {
     bridgeLogger.bridge('Layer integration test', {
       layers,
       integrated,
-      simulationLayers: ORION_CORE.simulation_layers
+      simulationLayers: ORION_CORE.simulation_layers,
     });
 
     return { integrated, details: layers };
@@ -265,19 +295,18 @@ class AuroraCustomGptBridge {
         connectedAgents: constellationStatus.connected_agents,
         constellation: constellationStatus.constellation,
         synchronized: constellationStatus.connected_agents === 5, // All 5 meta-agents
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       bridgeLogger.bridge('Meta-agent constellation sync', {
         sync,
-        constellationStatus
+        constellationStatus,
       });
 
       return sync;
-
     } catch (error) {
       bridgeLogger.error('Meta-agent constellation sync failed', {
-        error: error.message
+        error: error.message,
       });
       return { synchronized: false, error: error.message };
     }
@@ -288,13 +317,15 @@ class AuroraCustomGptBridge {
    */
   async routeCommandFromCustomGpt(command, context = {}) {
     if (!this.integrationActive) {
-      throw new Error('Aurora Custom GPT integration not active. Call initializeCommandNodeIntegration() first.');
+      throw new Error(
+        'Aurora Custom GPT integration not active. Call initializeCommandNodeIntegration() first.'
+      );
     }
 
     bridgeLogger.bridge('Routing command from Aurora Custom GPT', {
       command: command.type || 'unknown',
       context,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -304,34 +335,33 @@ class AuroraCustomGptBridge {
         source: 'AURORA_CUSTOM_GPT',
         gptId: this.customGptConfig.id,
         authority: 'COMMAND_AUTHORITY',
-        context
+        context,
       });
 
       bridgeLogger.bridge('Command routed successfully', {
         command: command.type,
         result: result ? 'SUCCESS' : 'FAILURE',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       return {
         success: true,
         result,
         source: 'AURORA_COMMAND_NODE',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       bridgeLogger.error('Command routing failed', {
         command,
         error: error.message,
-        source: 'AURORA_CUSTOM_GPT'
+        source: 'AURORA_CUSTOM_GPT',
       });
 
       return {
         success: false,
         error: error.message,
         command,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -353,7 +383,7 @@ class AuroraCustomGptBridge {
       target: 'AURORA_CUSTOM_GPT',
       status,
       constellation: await this.getConstellationStatus(),
-      orionCore: ORION_CORE
+      orionCore: ORION_CORE,
     };
 
     bridgeLogger.bridge('Status update for Aurora Custom GPT', statusUpdate);
@@ -369,7 +399,10 @@ class AuroraCustomGptBridge {
       const l2Bridge = require('../bridges/l2_meta_agent_bridge.py');
       return l2Bridge.get_constellation_status();
     } catch (error) {
-      return { error: 'Constellation status unavailable', details: error.message };
+      return {
+        error: 'Constellation status unavailable',
+        details: error.message,
+      };
     }
   }
 
@@ -384,7 +417,7 @@ class AuroraCustomGptBridge {
       commandNodeConnected: this.commandNode !== null,
       messageQueueLength: this.messageQueue.length,
       timestamp: new Date().toISOString(),
-      healthStatus: this.integrationActive ? 'HEALTHY' : 'INACTIVE'
+      healthStatus: this.integrationActive ? 'HEALTHY' : 'INACTIVE',
     };
   }
 
@@ -399,7 +432,9 @@ class AuroraCustomGptBridge {
       bridgeLogger.info('Aurora Custom GPT Bridge initialization complete');
       return { success: true, message: 'Bridge initialized successfully' };
     } catch (error) {
-      bridgeLogger.error('Aurora Custom GPT Bridge initialization failed', { error: error.message });
+      bridgeLogger.error('Aurora Custom GPT Bridge initialization failed', {
+        error: error.message,
+      });
       return { success: false, error: error.message };
     }
   }

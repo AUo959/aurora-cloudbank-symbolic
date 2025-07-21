@@ -18,10 +18,10 @@ class AgentSynchronizer {
       l1: {
         archy: new ArchyBridge(),
         liora: new LioraHandshake(),
-        oppy: new OppyVectorLoader()
+        oppy: new OppyVectorLoader(),
       },
       l2: ['STARLING_AU', 'ARCHY', 'LIORA', 'DAEDALUS', 'VOIDWHISPER'],
-      l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion']
+      l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion'],
     };
 
     this.lastSyncTime = Date.now();
@@ -35,19 +35,26 @@ class AgentSynchronizer {
         l1Agents: {},
         l2Status: 'PENDING_INTEGRATION',
         l3Status: 'MONITORING_ACTIVE',
-        overallDrift: 0
+        overallDrift: 0,
       };
 
       // Sync L1 agents
       for (const [agentName, agent] of Object.entries(this.agents.l1)) {
         const status = agent.getStatus();
         syncResults.l1Agents[agentName] = status;
-        syncResults.overallDrift = Math.max(syncResults.overallDrift, status.driftStatus.driftLevel);
+        syncResults.overallDrift = Math.max(
+          syncResults.overallDrift,
+          status.driftStatus.driftLevel
+        );
       }
 
       // Calculate overall sync status
-      syncResults.syncStatus = syncResults.overallDrift < this.driftThreshold ? 'SYNCHRONIZED' : 'DRIFT_DETECTED';
-      syncResults.driftCorrectionNeeded = syncResults.overallDrift > this.driftThreshold;
+      syncResults.syncStatus =
+        syncResults.overallDrift < this.driftThreshold
+          ? 'SYNCHRONIZED'
+          : 'DRIFT_DETECTED';
+      syncResults.driftCorrectionNeeded =
+        syncResults.overallDrift > this.driftThreshold;
 
       this.lastSyncTime = Date.now();
 
@@ -56,7 +63,7 @@ class AgentSynchronizer {
       return {
         success: false,
         error: error.message,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }
@@ -73,10 +80,10 @@ class AgentSynchronizer {
       agentCount: {
         l1: Object.keys(this.agents.l1).length,
         l2: this.agents.l2.length,
-        l3: this.agents.l3.length
+        l3: this.agents.l3.length,
       },
       deployedAgents: syncResult.l1Agents,
-      driftCorrectionActive: true
+      driftCorrectionActive: true,
     };
   }
 
@@ -87,10 +94,10 @@ class AgentSynchronizer {
       agentCount: {
         l1: Object.keys(this.agents.l1).length,
         l2: this.agents.l2.length,
-        l3: this.agents.l3.length
+        l3: this.agents.l3.length,
       },
       lastSync: this.lastSyncTime,
-      deployed: true
+      deployed: true,
     };
   }
 }
@@ -104,8 +111,12 @@ if (require.main === module) {
   // Test emergency synchronization
   synchronizer.synchronizeAllLayers().then(result => {
     const driftFixed = result.overallDrift < 0.02;
-    const status = driftFixed ? '✅ DRIFT CORRECTED' : '⚠️ DRIFT REDUCTION IN PROGRESS';
+    const status = driftFixed
+      ? '✅ DRIFT CORRECTED'
+      : '⚠️ DRIFT REDUCTION IN PROGRESS';
 
-    process.stdout.write(`${status} - Overall drift: ${result.overallDrift.toFixed(4)}\n`);
+    process.stdout.write(
+      `${status} - Overall drift: ${result.overallDrift.toFixed(4)}\n`
+    );
   });
 }

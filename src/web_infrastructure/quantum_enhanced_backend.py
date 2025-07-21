@@ -10,6 +10,7 @@ from typing import Any, Dict
 from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 
+
 class QuantumEnhancedBackend:
     def __init__(self):
         self.app = FastAPI(title="Aurora CloudBank Quantum Hybrid Backend")
@@ -48,6 +49,7 @@ class QuantumEnhancedBackend:
             "agents_active": len(self.quantum_agents),
             "symbolic_streams": len(self.symbolic_streams),
         }
+
 
 # Initialize quantum enhanced backend
 backend = QuantumEnhancedBackend()

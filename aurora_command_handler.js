@@ -12,16 +12,19 @@ const path = require('path');
 const COMMAND_PATTERNS = {
   'time to clean up': {
     script: './scripts/aurora_cleanup_command.sh',
-    description: 'Complete repository cleanup: pull, stage, commit, push, sync branches'
+    description:
+      'Complete repository cleanup: pull, stage, commit, push, sync branches',
   },
-  'cleanup': {
+  cleanup: {
     script: './scripts/aurora_cleanup_command.sh',
-    description: 'Complete repository cleanup: pull, stage, commit, push, sync branches'
+    description:
+      'Complete repository cleanup: pull, stage, commit, push, sync branches',
   },
   'clean up': {
     script: './scripts/aurora_cleanup_command.sh',
-    description: 'Complete repository cleanup: pull, stage, commit, push, sync branches'
-  }
+    description:
+      'Complete repository cleanup: pull, stage, commit, push, sync branches',
+  },
 };
 
 function executeCommand(userInput) {
@@ -41,7 +44,7 @@ function executeCommand(userInput) {
     try {
       execSync(command.script, {
         stdio: 'inherit',
-        cwd: path.dirname(__dirname)
+        cwd: path.dirname(__dirname),
       });
     } catch (error) {
       console.error('❌ Command execution failed:', error.message);
@@ -52,10 +55,13 @@ function executeCommand(userInput) {
 
   // Check for partial matches
   for (const [pattern, command] of Object.entries(COMMAND_PATTERNS)) {
-    if (normalizedInput.includes(pattern) || pattern.includes(normalizedInput)) {
+    if (
+      normalizedInput.includes(pattern) ||
+      pattern.includes(normalizedInput)
+    ) {
       console.log(`🎯 Partial match found for: "${pattern}"`);
       console.log(`📋 Description: ${command.description}`);
-      console.log(`❓ Did you mean to run the cleanup command? (y/n)`);
+      console.log('❓ Did you mean to run the cleanup command? (y/n)');
 
       // For now, just run it - in a real implementation you might want confirmation
       console.log('🚀 Executing cleanup command...');
@@ -64,7 +70,7 @@ function executeCommand(userInput) {
       try {
         execSync(command.script, {
           stdio: 'inherit',
-          cwd: path.dirname(__dirname)
+          cwd: path.dirname(__dirname),
         });
       } catch (error) {
         console.error('❌ Command execution failed:', error.message);

@@ -6,12 +6,19 @@ Lightweight symbolic data encoding/decoding without numpy.
 import hashlib
 import math
 import random
-from typing import List, Literal, Dict, Any
+from typing import Any, Dict, List, Literal
+
 
 class NativeSymbolicVector:
     """Native Python implementation of Vector Symbolic Architecture"""
 
-    def __init__(self, symbol: str, dim: int = 512, vector: List[float] = None, vector_type: Literal["bipolar", "binary", "real"] = "bipolar"):
+    def __init__(
+        self,
+        symbol: str,
+        dim: int = 512,
+        vector: List[float] = None,
+        vector_type: Literal["bipolar", "binary", "real"] = "bipolar",
+    ):
         self.symbol = symbol
         self.dim = dim
         self.vector_type = vector_type
@@ -46,7 +53,7 @@ class NativeSymbolicVector:
                 u1, u2 = random.random(), random.random()
                 z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
                 vec.append(z0)
-            return vec[:self.dim]
+            return vec[: self.dim]
         else:
             raise ValueError(f"Unknown vector_type: {self.vector_type}")
 
@@ -57,22 +64,12 @@ class NativeSymbolicVector:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation"""
-        return {
-            "symbol": self.symbol,
-            "dim": self.dim,
-            "vector": self.vector,
-            "vector_type": self.vector_type
-        }
+        return {"symbol": self.symbol, "dim": self.dim, "vector": self.vector, "vector_type": self.vector_type}
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "NativeSymbolicVector":
         """Create from dictionary representation"""
-        return cls(
-            symbol=data["symbol"],
-            dim=data["dim"],
-            vector=data["vector"],
-            vector_type=data["vector_type"]
-        )
+        return cls(symbol=data["symbol"], dim=data["dim"], vector=data["vector"], vector_type=data["vector_type"])
 
     def similarity(self, other: "NativeSymbolicVector") -> float:
         """Calculate cosine similarity with another vector"""
@@ -90,12 +87,7 @@ class NativeSymbolicVector:
         bound_vec = [a * b for a, b in zip(self.vector, other.vector)]
         bound_symbol = f"({self.symbol})*({other.symbol})"
 
-        return NativeSymbolicVector(
-            symbol=bound_symbol,
-            dim=self.dim,
-            vector=bound_vec,
-            vector_type=self.vector_type
-        )
+        return NativeSymbolicVector(symbol=bound_symbol, dim=self.dim, vector=bound_vec, vector_type=self.vector_type)
 
     def superpose(self, other: "NativeSymbolicVector") -> "NativeSymbolicVector":
         """Superpose two symbolic vectors (elementwise addition with normalization)"""
@@ -114,12 +106,7 @@ class NativeSymbolicVector:
 
         superposed_symbol = f"({self.symbol})+({other.symbol})"
 
-        return NativeSymbolicVector(
-            symbol=superposed_symbol,
-            dim=self.dim,
-            vector=normed,
-            vector_type=self.vector_type
-        )
+        return NativeSymbolicVector(symbol=superposed_symbol, dim=self.dim, vector=normed, vector_type=self.vector_type)
 
     def permute(self, shift: int = 1) -> "NativeSymbolicVector":
         """Permute vector elements (circular shift)"""
@@ -128,14 +115,12 @@ class NativeSymbolicVector:
         permuted_symbol = f"perm({self.symbol},{shift})"
 
         return NativeSymbolicVector(
-            symbol=permuted_symbol,
-            dim=self.dim,
-            vector=permuted_vec,
-            vector_type=self.vector_type
+            symbol=permuted_symbol, dim=self.dim, vector=permuted_vec, vector_type=self.vector_type
         )
 
     def __repr__(self):
         return f"NativeSymbolicVector(symbol={self.symbol!r}, dim={self.dim}, type={self.vector_type})"
+
 
 class NativeVSAMemory:
     """Native VSA associative memory system"""
@@ -176,7 +161,7 @@ class NativeVSAMemory:
             raise ValueError(f"Query vector dimension {query_vector.dim} does not match memory dimension {self.dim}")
 
         best_vector = None
-        best_similarity = float('-inf')
+        best_similarity = float("-inf")
 
         for stored_vector in self.memory:
             similarity = query_vector.similarity(stored_vector)
@@ -197,10 +182,12 @@ class NativeVSAMemory:
         """Get number of stored vectors"""
         return len(self.memory)
 
+
 def encode_symbol(symbol: str, dim: int = 512, vector_type: str = "bipolar") -> List[float]:
     """Utility function to encode symbol as vector"""
     vector = NativeSymbolicVector.from_symbol(symbol, dim, vector_type)
     return vector.vector
+
 
 def calculate_similarity(vec1: List[float], vec2: List[float]) -> float:
     """Calculate similarity between two raw vectors"""
@@ -210,12 +197,14 @@ def calculate_similarity(vec1: List[float], vec2: List[float]) -> float:
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
     return dot_product / len(vec1)
 
+
 def bind_vectors(vec1: List[float], vec2: List[float]) -> List[float]:
     """Bind two raw vectors (elementwise multiplication)"""
     if len(vec1) != len(vec2):
         raise ValueError("Vector dimensions must match")
 
     return [a * b for a, b in zip(vec1, vec2)]
+
 
 def superpose_vectors(vec1: List[float], vec2: List[float]) -> List[float]:
     """Superpose two raw vectors (elementwise addition with sign normalization)"""

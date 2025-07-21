@@ -90,7 +90,7 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     )
     try:
         fig.write_image(output)
-    except Exception:
+    except (ValueError, OSError, ImportError):
         # Fallback: create an empty file if image export fails (e.g., Chrome not available)
         with open(output, "wb") as f:
             f.write(b"")

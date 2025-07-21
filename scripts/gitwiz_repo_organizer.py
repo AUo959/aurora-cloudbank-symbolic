@@ -21,7 +21,6 @@ from typing import Any, Dict, List, Set, Tuple
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class RepositoryOrganizer:
     """Intelligent repository organization and optimization engine."""
 
@@ -466,7 +465,6 @@ class RepositoryOrganizer:
 
         return plan
 
-
 def main():
     """Main function for repository organization analysis."""
     import argparse
@@ -504,7 +502,6 @@ def main():
 
     else:
         parser.print_help()
-
 
 if __name__ == "__main__":
     main()

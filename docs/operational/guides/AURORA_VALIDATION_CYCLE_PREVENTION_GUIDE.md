@@ -66,7 +66,7 @@ npm run cleanup:legacy    # Uses original v1.0 if needed
 
 1. **🧠 Smart File Detection**: Automatically identifies validation files
 2. **🔒 Intelligent Exclusion**: Excludes validation files from staging
-3. **📊 Strategy Integration**: Works with all 4 validation strategies  
+3. **📊 Strategy Integration**: Works with all 4 validation strategies
 4. **🔄 Cycle Prevention**: Guaranteed no infinite loops
 5. **📈 Enhanced Reporting**: Better status and progress information
 
@@ -147,7 +147,7 @@ The validation manager creates `.aurora_validation_config.json`:
 ```json
 {
   "strategy": "smart_exclusion",
-  "validation_dir": ".aurora_validation", 
+  "validation_dir": ".aurora_validation",
   "max_reports": 10,
   "exclude_from_commit": true,
   "auto_cleanup": true

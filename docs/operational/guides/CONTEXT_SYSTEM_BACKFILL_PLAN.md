@@ -229,20 +229,20 @@ class AuroraContextBackfillSystem:
         self.component_analyzer = ComponentAnalyzer()
         self.relationship_mapper = RelationshipMapper()
         self.knowledge_graph = KnowledgeGraphBuilder()
-    
+
     def execute_backfill(self):
         # Scan all project documentation
         docs = self.documentation_scanner.scan_all()
-        
+
         # Analyze component architecture
         components = self.component_analyzer.analyze_systems()
-        
+
         # Build relationship mappings
         relationships = self.relationship_mapper.map_dependencies()
-        
+
         # Construct knowledge graph
         knowledge_base = self.knowledge_graph.build(docs, components, relationships)
-        
+
         return knowledge_base
 ```
 

@@ -13,7 +13,7 @@ class ArchyBridge {
     this.status = 'OPERATIONAL';
     this.driftThreshold = 0.02;
     this.lastSyncTime = Date.now();
-    
+
     bridgeLogger.bridge('🏗️ [ARCHY_BRIDGE] Emergency deployment complete', {
       agentId: this.agentId,
       role: this.role,
@@ -21,7 +21,7 @@ class ArchyBridge {
       deployment: 'emergency'
     });
   }
-  
+
   async processCommand(command) {
     try {
       // Emergency bridge functionality for drift correction
@@ -32,7 +32,7 @@ class ArchyBridge {
         timestamp: Date.now(),
         layer: 'L1_L2_BRIDGE'
       };
-      
+
       this.lastSyncTime = Date.now();
       return result;
     } catch (error) {
@@ -43,11 +43,11 @@ class ArchyBridge {
       };
     }
   }
-  
+
   getDriftStatus() {
     const timeSinceSync = Date.now() - this.lastSyncTime;
     const driftLevel = Math.min(0.5, timeSinceSync / 60000);
-    
+
     return {
       agentId: this.agentId,
       driftLevel: driftLevel,
@@ -55,7 +55,7 @@ class ArchyBridge {
       status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
     };
   }
-  
+
   getStatus() {
     return {
       agentId: this.agentId,

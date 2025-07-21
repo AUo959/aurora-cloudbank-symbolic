@@ -15,7 +15,6 @@ from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Dict, List, Optional
 
-
 @dataclass
 class HealthMetrics:
     """Repository health metrics container"""
@@ -30,7 +29,6 @@ class HealthMetrics:
     health_score: float
     issues: List[str]
     recommendations: List[str]
-
 
 class RepositoryHealthMonitor:
     """Comprehensive repository health monitoring system"""
@@ -481,7 +479,6 @@ class RepositoryHealthMonitor:
 
         return metrics
 
-
 def main():
     """Main monitoring function"""
     import argparse
@@ -517,7 +514,6 @@ def main():
     else:
         # Single run
         monitor.run_monitoring_cycle()
-
 
 if __name__ == "__main__":
     main()

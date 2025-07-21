@@ -11,7 +11,6 @@ from typing import Any, Dict, List
 
 import yaml
 
-
 class PreCommitOptimizer:
     """Optimize pre-commit hooks for efficiency and effectiveness"""
 
@@ -399,7 +398,6 @@ repos:
 
         return report
 
-
 def main():
     import argparse
 
@@ -466,7 +464,6 @@ def main():
             print("🔄 Run 'pre-commit run --all-files' to test the new configuration")
         else:
             print("❌ Failed to optimize pre-commit configuration")
-
 
 if __name__ == "__main__":
     main()

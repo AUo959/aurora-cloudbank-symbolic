@@ -1,7 +1,7 @@
 /**
  * Aurora CloudBank Symbolic - Enhanced Logging System
  * ORION CORE v3.5.1 Compliant Structured Logging
- * 
+ *
  * Provides ethical, traceable logging with anchor validation
  * Supports L1/L2/L3 layer context and drift monitoring
  */
@@ -17,17 +17,17 @@ class AuroraLogger {
     this.enableFile = options.file !== false;
     this.anchorSeed = options.anchorSeed || 'EOS_SEED_ORION';
     this.ethicsProtocol = options.ethicsProtocol || 'Picard_Delta_3';
-    
+
     // Create logs directory if it doesn't exist
     this.logDir = path.join(process.cwd(), 'logs');
     if (this.enableFile && !fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
     }
-    
+
     // Log rotation settings
     this.maxFileSize = options.maxFileSize || 10 * 1024 * 1024; // 10MB
     this.maxFiles = options.maxFiles || 5;
-    
+
     this.sessionId = this.generateSessionId();
   }
 
@@ -47,7 +47,7 @@ class AuroraLogger {
       ethicsProtocol: this.ethicsProtocol,
       ...metadata
     };
-    
+
     return {
       console: `[${timestamp}] ${level} [${this.component}] ${message}${Object.keys(metadata).length ? ' ' + JSON.stringify(metadata) : ''}`,
       structured: logEntry
@@ -56,11 +56,11 @@ class AuroraLogger {
 
   writeToFile(formattedLog) {
     if (!this.enableFile) return;
-    
+
     try {
       const logFile = path.join(this.logDir, `aurora-${this.component.toLowerCase()}.log`);
       const logLine = JSON.stringify(formattedLog.structured) + '\n';
-      
+
       // Check file size and rotate if necessary
       if (fs.existsSync(logFile)) {
         const stats = fs.statSync(logFile);
@@ -68,7 +68,7 @@ class AuroraLogger {
           this.rotateLogFile(logFile);
         }
       }
-      
+
       fs.appendFileSync(logFile, logLine);
     } catch (error) {
       // Fallback - minimal error handling to prevent logging loops
@@ -94,7 +94,7 @@ class AuroraLogger {
           }
         }
       }
-      
+
       // Move current log to .1
       if (fs.existsSync(logFile)) {
         fs.renameSync(logFile, `${logFile}.1`);
@@ -106,18 +106,18 @@ class AuroraLogger {
 
   log(level, message, metadata = {}) {
     if (!this.shouldLog(level)) return;
-    
+
     const formatted = this.formatMessage(level, message, metadata);
-    
+
     // Write to console if enabled (ESLint exception for logging utility)
     if (this.enableConsole) {
       /* eslint-disable no-console */
-      const consoleMethod = level === 'ERROR' ? console.error : 
+      const consoleMethod = level === 'ERROR' ? console.error :
         level === 'WARN' ? console.warn : console.log;
       consoleMethod(formatted.console);
       /* eslint-enable no-console */
     }
-    
+
     // Write to file
     this.writeToFile(formatted);
   }
@@ -140,36 +140,36 @@ class AuroraLogger {
 
   // Aurora-specific logging methods
   drift(message, driftValue, metadata = {}) {
-    this.log('WARN', message, { 
-      drift: driftValue, 
+    this.log('WARN', message, {
+      drift: driftValue,
       threshold: 0.02,
       type: 'DRIFT_MONITORING',
-      ...metadata 
+      ...metadata
     });
   }
 
   ethics(message, protocol = this.ethicsProtocol, metadata = {}) {
-    this.log('INFO', message, { 
+    this.log('INFO', message, {
       ethicsProtocol: protocol,
       type: 'ETHICS_VALIDATION',
-      ...metadata 
+      ...metadata
     });
   }
 
   anchor(message, seed = this.anchorSeed, metadata = {}) {
-    this.log('INFO', message, { 
+    this.log('INFO', message, {
       anchorSeed: seed,
       type: 'ANCHOR_VALIDATION',
-      ...metadata 
+      ...metadata
     });
   }
 
   bridge(message, fromLayer, toLayer, metadata = {}) {
-    this.log('INFO', message, { 
+    this.log('INFO', message, {
       fromLayer,
       toLayer,
       type: 'BRIDGE_COMMUNICATION',
-      ...metadata 
+      ...metadata
     });
   }
 

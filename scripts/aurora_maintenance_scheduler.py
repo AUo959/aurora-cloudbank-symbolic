@@ -15,7 +15,6 @@ from typing import List
 
 import schedule
 
-
 class MaintenanceScheduler:
     """Automated maintenance scheduling and execution system"""
 
@@ -433,7 +432,6 @@ class MaintenanceScheduler:
         self.running = False
         self.logger.info("Stopping maintenance scheduler")
 
-
 def main():
     import argparse
 
@@ -470,7 +468,6 @@ def main():
         except KeyboardInterrupt:
             scheduler.stop_scheduler()
             print("Maintenance scheduler stopped.")
-
 
 if __name__ == "__main__":
     main()

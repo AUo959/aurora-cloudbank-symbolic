@@ -4,7 +4,6 @@ Quick fix for missing closing braces in Python files
 """
 import os
 
-
 def fix_missing_braces(filepath):
     """Fix missing closing braces in Python dictionaries"""
     with open(filepath, "r") as f:
@@ -77,7 +76,6 @@ def fix_missing_braces(filepath):
         f.write("\n".join(fixed_lines))
 
     print(f"Fixed: {filepath}")
-
 
 # Fix the problematic files
 files_to_fix = [

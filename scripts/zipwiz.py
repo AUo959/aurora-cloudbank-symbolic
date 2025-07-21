@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ArchiveAnalysis:
     """Comprehensive analysis of an archive file."""
@@ -39,7 +38,6 @@ class ArchiveAnalysis:
     structure_depth: int
     potential_issues: List[str]
     recommendations: List[str]
-
 
 class ZIPWiz:
     """Advanced ZIP archive management and optimization."""
@@ -429,7 +427,6 @@ class ZIPWiz:
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
-
 def main():
     """CLI interface for ZIPWiz."""
     import argparse
@@ -473,7 +470,6 @@ def main():
 
     finally:
         zipwiz.cleanup()
-
 
 if __name__ == "__main__":
     main()

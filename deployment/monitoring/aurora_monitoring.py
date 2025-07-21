@@ -7,7 +7,6 @@ Real-time system health and performance monitoring
 import time
 from datetime import datetime
 
-
 class AuroraMonitoringDashboard:
     def __init__(self):
         self.metrics = {
@@ -48,7 +47,6 @@ class AuroraMonitoringDashboard:
             )
             print(f"{status_icon} {service:15} [{load_bar}] {metrics['load']:.1%}")
         print("-" * 30)
-
 
 if __name__ == "__main__":
     dashboard = AuroraMonitoringDashboard()

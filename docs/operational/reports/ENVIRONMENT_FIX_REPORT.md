@@ -56,7 +56,7 @@ Now you can use these npm commands:
 
 ```bash
 npm run lint          # Check code style issues
-npm run lint:fix      # Auto-fix code style issues  
+npm run lint:fix      # Auto-fix code style issues
 npm run format        # Format all files with Prettier
 npm run format:check  # Check if files are properly formatted
 npm run pre-commit    # Run both linting and format checks

@@ -42,7 +42,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 class GitWizScheduler:
     """Advanced scheduler for GitWiz maintenance operations."""
 
@@ -424,7 +423,6 @@ class GitWizScheduler:
             "next_runs": self._get_next_runs(),
         }
 
-
 def main():
     """Main entry point for the scheduler."""
     import argparse
@@ -467,7 +465,6 @@ def main():
             logger.error("Job name required for 'run' command")
             sys.exit(1)
         scheduler.run_job_now(args.job)
-
 
 if __name__ == "__main__":
     main()

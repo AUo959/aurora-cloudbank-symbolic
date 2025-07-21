@@ -5,7 +5,6 @@ Placeholder implementation for reflective autonomy
 
 from typing import Any, Dict
 
-
 class ReflectiveEngine:
     """Reflective autonomy engine for Sonnet 4"""
 

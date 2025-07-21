@@ -18,7 +18,6 @@ from dataclasses import dataclass
 from pathlib import Path
 import yaml
 
-
 @dataclass
 class ValidationResult:
     """Represents the result of a canonical validation check"""
@@ -28,7 +27,6 @@ class ValidationResult:
     message: str
     suggested_fix: Optional[str] = None
     auto_applied: bool = False
-
 
 @dataclass
 class CanonicalSpec:
@@ -81,7 +79,6 @@ class CanonicalSpec:
         "mesh_broadcast": r"\{\{@mesh ::: message\}\}",
         "activation_phrase": r"ORION_[A-Z_]+_RELAY_ACTIVATE//"
     }
-
 
 class CanonicalValidator:
     """Main validation engine for Aurora CloudBank canonical compliance"""
@@ -525,7 +522,6 @@ class CanonicalValidator:
             f.write(report)
         print(f"📊 Validation report saved to: {output_path}")
 
-
 def main():
     """Main execution function"""
     print("🛰️ Aurora CloudBank Canonical Validation Engine")
@@ -553,7 +549,6 @@ def main():
         print("📊 See CANONICAL_VALIDATION_REPORT.md for details")
     else:
         print("\n✅ All canonical validations passed!")
-
 
 if __name__ == "__main__":
     main()

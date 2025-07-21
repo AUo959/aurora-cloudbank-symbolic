@@ -7,7 +7,6 @@ import re
 import subprocess
 import sys
 
-
 def get_merged_branches():
     result = subprocess.run(
         ["git", "branch", "-r", "--merged", "origin/main"],
@@ -23,7 +22,6 @@ def get_merged_branches():
     ]
     return merged
 
-
 def delete_remote_branch(branch):
     remote = branch.split("/")[0]
     name = "/".join(branch.split("/")[1:])
@@ -31,12 +29,10 @@ def delete_remote_branch(branch):
         return
     subprocess.run(["git", "push", remote, f":{name}"], shell=False, check=False)
 
-
 def archive_branch(branch):
     tag_name = f"archive/{branch.replace('/', '_')}"
     subprocess.run(["git", "tag", tag_name, branch], shell=False, check=False)
     delete_remote_branch(branch)
-
 
 def main():
     merged = get_merged_branches()
@@ -49,7 +45,6 @@ def main():
         elif backup_pattern.search(branch):
             print(f"Archiving backup branch: {branch}")
             archive_branch(branch)
-
 
 if __name__ == "__main__":
     main()

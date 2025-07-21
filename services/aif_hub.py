@@ -10,7 +10,6 @@ logger = get_logger("aif_hub")
 
 AIF_TOKEN = os.environ.get("AIF_TOKEN", "change-me")
 
-
 class ConnectionManager:
     """Manage active WebSocket connections."""
 
@@ -34,9 +33,7 @@ class ConnectionManager:
             except Exception:
                 self.disconnect(connection)
 
-
 manager = ConnectionManager()
-
 
 def _validate_token(websocket: WebSocket) -> None:
     token = websocket.headers.get("authorization", "")
@@ -45,7 +42,6 @@ def _validate_token(websocket: WebSocket) -> None:
     if token != AIF_TOKEN:
         logger.warning("Unauthorized WebSocket connection attempt")
         raise HTTPException(status_code=403, detail="Unauthorized")
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
@@ -60,7 +56,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     except WebSocketDisconnect:
         logger.info("Client disconnected from AIF hub")
         manager.disconnect(websocket)
-
 
 if __name__ == "__main__":
     import uvicorn

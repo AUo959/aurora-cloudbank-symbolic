@@ -7,7 +7,6 @@ import numpy as np
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister
 from qiskit_aer import AerSimulator
 
-
 class QuantumProcessingLayer:
     def __init__(self, num_qubits=8):
         self.num_qubits = num_qubits;

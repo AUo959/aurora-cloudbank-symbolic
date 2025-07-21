@@ -8,7 +8,6 @@ from typing import Literal
 import numpy as np
 from pydantic import BaseModel, validator
 
-
 class SymbolicVector(BaseModel):
     symbol: str
     dim: int = 512
@@ -78,13 +77,10 @@ class SymbolicVector(BaseModel):
         sims = [float(np.dot(query, v) / len(query)) for v in memory]
         return memory[int(np.argmax(sims))]
 
-
 # Example utility function
-
 
 def encode_symbol(symbol: str, dim: int = 512, vector_type: str = "bipolar") -> list:
     return SymbolicVector.from_symbol(symbol, dim, vector_type).vector
-
 
 def similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     return float(np.dot(vec1, vec2) / len(vec1))

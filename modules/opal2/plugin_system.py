@@ -21,7 +21,6 @@ from typing import Any, Callable, Dict, List, Optional, Type
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class PluginType(Enum):
     """Plugin type enumeration"""
 
@@ -32,7 +31,6 @@ class PluginType(Enum):
     IMPORTER = "importer"
     ANALYZER = "analyzer"
 
-
 class PluginStatus(Enum):
     """Plugin status enumeration"""
 
@@ -40,7 +38,6 @@ class PluginStatus(Enum):
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"
-
 
 @dataclass
 class PluginInfo:
@@ -57,7 +54,6 @@ class PluginInfo:
     status: PluginStatus = PluginStatus.PENDING
     load_time: Optional[datetime] = None
     error_message: Optional[str] = None
-
 
 class PluginInterface:
     """Base interface for all plugins"""
@@ -84,7 +80,6 @@ class PluginInterface:
         """Validate plugin configuration"""
         return True
 
-
 class RendererPlugin(PluginInterface):
     """Base class for renderer plugins"""
 
@@ -100,7 +95,6 @@ class RendererPlugin(PluginInterface):
         """Get required data keys for rendering"""
         return []
 
-
 class ProcessorPlugin(PluginInterface):
     """Base class for processor plugins"""
 
@@ -110,7 +104,6 @@ class ProcessorPlugin(PluginInterface):
         """Process data with given parameters"""
         raise NotImplementedError("Processor plugins must implement process()")
 
-
 class FilterPlugin(PluginInterface):
     """Base class for filter plugins"""
 
@@ -119,7 +112,6 @@ class FilterPlugin(PluginInterface):
     ) -> Dict[str, Any]:
         """Apply filter to data"""
         raise NotImplementedError("Filter plugins must implement apply_filter()")
-
 
 class PluginSystem:
     """
@@ -375,9 +367,7 @@ class PluginSystem:
 
         return stats
 
-
 # Built-in Plugin Implementations
-
 
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL renderer plugin"""
@@ -430,7 +420,6 @@ class WebGLRendererPlugin(RendererPlugin):
     ) -> Dict[str, Any]:
         return {"color": [0.3, 0.6, 0.9], "time": 0.0}
 
-
 class CanvasRendererPlugin(RendererPlugin):
     """Canvas 2D renderer plugin"""
 
@@ -463,7 +452,6 @@ class CanvasRendererPlugin(RendererPlugin):
             commands.append("ctx.stroke();")
 
         return "\n".join(commands)
-
 
 class SVGRendererPlugin(RendererPlugin):
     """SVG renderer plugin"""
@@ -506,7 +494,6 @@ class SVGRendererPlugin(RendererPlugin):
         svg_parts.append("</svg>")
 
         return "\n".join(svg_parts)
-
 
 class QuantumFieldRendererPlugin(RendererPlugin):
     """Quantum field renderer plugin"""
@@ -557,7 +544,6 @@ class QuantumFieldRendererPlugin(RendererPlugin):
         # Simplified quantum field calculation
         return complex(0.5 * (x + y) / 1000, 0.3 * (x - y) / 1000)
 
-
 class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
     """Geometric algebra processor plugin"""
 
@@ -590,7 +576,6 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
         }
 
         return processed_data
-
 
 # Plugin Factory
 class PluginFactory:

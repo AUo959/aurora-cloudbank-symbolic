@@ -15,7 +15,7 @@ Aurora CloudBank uses intelligent Git hooks to maintain code quality and automat
 - Sensitive data scanning
 - Lint checking
 
-### Pre-push Hook  
+### Pre-push Hook
 **Triggers:** Before pushing to remote repository
 **Purpose:** Comprehensive validation before sharing code
 **Features:**
@@ -89,7 +89,7 @@ chmod -x .git/hooks/hook-name  # Disable specific hook
 
 ## Customization
 
-Hooks can be customized by editing files in `.git/hooks/`. 
+Hooks can be customized by editing files in `.git/hooks/`.
 Backup originals first: `cp .git/hooks/pre-commit .git/hooks/pre-commit.backup`
 
 ## Best Practices

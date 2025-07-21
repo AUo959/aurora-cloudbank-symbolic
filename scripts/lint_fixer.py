@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
-
 def fix_encoding_specifications(file_path: str) -> bool:
     """Add encoding specification to file open statements."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -37,7 +36,6 @@ def fix_encoding_specifications(file_path: str) -> bool:
             f.write(content)
         return True
     return False
-
 
 def fix_subprocess_calls(file_path: str) -> bool:
     """Add shell=False and check=True to subprocess calls."""
@@ -73,7 +71,6 @@ def fix_subprocess_calls(file_path: str) -> bool:
         return True
     return False
 
-
 def fix_broad_exceptions(file_path: str) -> bool:
     """Replace broad exception catches with specific ones."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -91,7 +88,6 @@ def fix_broad_exceptions(file_path: str) -> bool:
             f.write(content)
         return True
     return False
-
 
 def remove_trailing_whitespace(file_path: str) -> bool:
     """Remove trailing whitespace from all lines."""
@@ -113,7 +109,6 @@ def remove_trailing_whitespace(file_path: str) -> bool:
             f.writelines(fixed_lines)
         return True
     return False
-
 
 def fix_unused_imports(file_path: str) -> bool:
     """Remove obvious unused imports."""
@@ -177,7 +172,6 @@ def fix_unused_imports(file_path: str) -> bool:
         return True
     return False
 
-
 def process_file(file_path: str) -> Dict[str, bool]:
     """Process a single Python file to fix linting issues."""
     fixes = {}
@@ -194,7 +188,6 @@ def process_file(file_path: str) -> Dict[str, bool]:
         return {}
 
     return fixes
-
 
 def main():
     """Main function to process all Python files in scripts directory."""
@@ -226,7 +219,6 @@ def main():
 
     print(f"\nProcessed {len(python_files)} Python files.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

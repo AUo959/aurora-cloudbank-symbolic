@@ -31,7 +31,6 @@ except ImportError:
     print("❌ Error: Could not import canonical_validator")
     sys.exit(1)
 
-
 class CanonicalValidationHandler(FileSystemEventHandler):
     """File system event handler for canonical validation"""
 
@@ -196,7 +195,6 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         with open(log_file, 'a', encoding="utf-8") as f:
             f.write(json.dumps(log_entry) + '\n')
 
-
 class ContinuousValidator:
     """Main continuous validation system"""
 
@@ -285,7 +283,6 @@ class ContinuousValidator:
         self.validator.save_report("CONTINUOUS_VALIDATION_REPORT.md")
         return results
 
-
 def main():
     """Main execution function"""
     import argparse
@@ -313,7 +310,6 @@ def main():
     else:
         # Start continuous monitoring
         monitor.start()
-
 
 if __name__ == "__main__":
     try:

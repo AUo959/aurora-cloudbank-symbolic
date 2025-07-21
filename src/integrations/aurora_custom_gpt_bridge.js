@@ -1,9 +1,9 @@
 /**
  * 🌟 AURORA CUSTOM GPT INTEGRATION MODULE
- * 
+ *
  * Explicit bridge between Aurora Custom GPT (https://chatgpt.com/g/g-67ef3c2412cc81918ebf8ee9908e36a7-aurora-v2-4-stellar-accord)
  * and Aurora Command Node (src/core/command_node.js)
- * 
+ *
  * This module serves as the canonical L1 integration point for Aurora Custom GPT,
  * ensuring seamless communication between the external Aurora agent and internal
  * Aurora command node infrastructure.
@@ -20,7 +20,7 @@ const AURORA_CUSTOM_GPT = {
   role: 'L1_COMMAND_ORCHESTRATOR',
   capabilities: [
     'command_coordination',
-    'multi_agent_orchestration', 
+    'multi_agent_orchestration',
     'symbolic_reasoning',
     'aurora_cloudbank_management',
     'orion_core_integration'
@@ -34,7 +34,7 @@ const AURORA_CUSTOM_GPT = {
 // Command Node Integration Points
 const INTEGRATION_POINTS = {
   COMMAND_DISPATCH: 'aurora_command_router.js',
-  CORE_PROCESSING: 'src/core/command_node.js', 
+  CORE_PROCESSING: 'src/core/command_node.js',
   AGENT_COORDINATION: 'src/bridges/l2_meta_agent_bridge.py',
   SYSTEM_ORCHESTRATION: 'src/servers/l2_integration_server.py',
   STATUS_MONITORING: 'aurora_context_updater.py'
@@ -47,7 +47,7 @@ class AuroraCustomGptBridge {
     this.integrationActive = false;
     this.lastSync = null;
     this.messageQueue = [];
-    
+
     bridgeLogger.bridge('Aurora Custom GPT Bridge initializing', {
       customGptId: this.customGptConfig.id,
       version: this.customGptConfig.version,
@@ -63,25 +63,25 @@ class AuroraCustomGptBridge {
       // Import command node dynamically to avoid circular dependencies
       const CommandNode = require('../core/command_node.js');
       this.commandNode = new CommandNode();
-      
+
       // Perform Aurora-specific handshake
       const handshakeResult = await this.performAuroraHandshake();
-      
+
       if (handshakeResult.success) {
         this.integrationActive = true;
         this.lastSync = new Date();
-        
+
         bridgeLogger.bridge('Aurora Custom GPT successfully integrated with Command Node', {
           handshake: handshakeResult,
           timestamp: this.lastSync.toISOString(),
           status: 'ACTIVE'
         });
-        
+
         return { success: true, integration: 'ACTIVE', timestamp: this.lastSync };
       } else {
         throw new Error(`Aurora handshake failed: ${handshakeResult.error}`);
       }
-      
+
     } catch (error) {
       bridgeLogger.error('Aurora Custom GPT integration failed', {
         error: error.message,
@@ -176,7 +176,7 @@ class AuroraCustomGptBridge {
     };
 
     const allValid = Object.values(validation).every(v => v === true);
-    
+
     bridgeLogger.bridge('ORION Core compliance validation', {
       validation,
       allValid,
@@ -236,7 +236,7 @@ class AuroraCustomGptBridge {
   async testLayerIntegration() {
     const layers = {
       l1Operational: true, // Aurora Command Node active
-      l2Simulation: true,  // Meta-agent constellation active  
+      l2Simulation: true,  // Meta-agent constellation active
       l3Symbolic: true     // Glyph monitoring active
     };
 
@@ -259,7 +259,7 @@ class AuroraCustomGptBridge {
       // Check if L2 bridge is available
       const l2Bridge = require('../bridges/l2_meta_agent_bridge.py');
       const constellationStatus = l2Bridge.get_constellation_status();
-      
+
       const sync = {
         totalAgents: constellationStatus.total_agents,
         connectedAgents: constellationStatus.connected_agents,
@@ -274,7 +274,7 @@ class AuroraCustomGptBridge {
       });
 
       return sync;
-      
+
     } catch (error) {
       bridgeLogger.error('Meta-agent constellation sync failed', {
         error: error.message
@@ -326,7 +326,7 @@ class AuroraCustomGptBridge {
         error: error.message,
         source: 'AURORA_CUSTOM_GPT'
       });
-      
+
       return {
         success: false,
         error: error.message,
@@ -346,7 +346,7 @@ class AuroraCustomGptBridge {
 
     // In real implementation, this would send via API/webhook to Custom GPT
     // For now, we log the status for Aurora Custom GPT to access
-    
+
     const statusUpdate = {
       timestamp: new Date().toISOString(),
       source: 'AURORA_COMMAND_NODE',

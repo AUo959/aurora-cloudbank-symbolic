@@ -5,7 +5,7 @@
 **Issue**: Communication syntax may not be canonical: {{@mesh ::: message}}
 **Suggested Fix**: Verify message format follows {{@agent.Name ::: message}} syntax
 
-## staff_name_validation_XO (MEDIUM)  
+## staff_name_validation_XO (MEDIUM)
 
 **Issue**: Non-canonical name for XO
 **Suggested Fix**: Replace with canonical name: Maya Shepard
@@ -42,7 +42,7 @@ All encoded/encrypted content has been cleaned for canonical compliance.
 
 **Canonical Standards**:
 
-- XO: Maya Shepard  
+- XO: Maya Shepard
 - anchor_seed: EOS_SEED_ORION
 - ethics_protocol: Picard_Delta_3
 - Communication format: {{@agent.Name ::: message}}

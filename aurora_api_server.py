@@ -16,21 +16,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 # Pydantic models for API
 class QuantumVectorRequest(BaseModel):
     dimension: int = 128
     quantum_state: str = "coherent"
-    
+
 class ConsciousnessRequest(BaseModel):
     stimulus: Dict[str, Any]
     duration: Optional[int] = 10
-    
+
 class LearningRequest(BaseModel):
     pattern_data: List[float]
     pattern_id: str
     feedback_score: Optional[float] = None
-
 
 app = FastAPI(
     title="Aurora CloudBank API",
@@ -50,12 +48,11 @@ app.add_middleware(
 # Global status
 system_status = {
     "quantum_processor": "active",
-    "consciousness_engine": "active", 
+    "consciousness_engine": "active",
     "adaptive_learning": "active",
     "symbolic_framework": "active",
     "api_server": "active"
 }
-
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard():
@@ -88,7 +85,7 @@ async def generate_quantum_vector(request: QuantumVectorRequest):
         # Simulate quantum vector generation
         import random
         vector_data = [random.uniform(-1, 1) for _ in range(request.dimension)]
-        
+
         result = {
             "vector": vector_data,
             "dimension": request.dimension,
@@ -96,7 +93,7 @@ async def generate_quantum_vector(request: QuantumVectorRequest):
             "coherence": random.uniform(0.8, 1.0),
             "timestamp": datetime.now().isoformat()
         }
-        
+
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Quantum processing error: {str(e)}")
@@ -107,7 +104,7 @@ async def evolve_consciousness(request: ConsciousnessRequest):
     try:
         # Simulate consciousness evolution
         import random
-        
+
         result = {
             "consciousness_state": {
                 "awareness_level": random.uniform(0.6, 1.0),
@@ -120,7 +117,7 @@ async def evolve_consciousness(request: ConsciousnessRequest):
             "evolution_time": request.duration,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Consciousness processing error: {str(e)}")
@@ -132,10 +129,10 @@ async def process_learning_pattern(request: LearningRequest):
         # Simulate pattern processing
         import random
         import numpy as np
-        
+
         pattern_array = np.array(request.pattern_data)
         similarity_score = random.uniform(0.6, 0.95)
-        
+
         result = {
             "pattern_id": request.pattern_id,
             "pattern_analysis": {
@@ -148,7 +145,7 @@ async def process_learning_pattern(request: LearningRequest):
             "feedback_score": request.feedback_score,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Learning processing error: {str(e)}")
@@ -165,7 +162,7 @@ async def run_integration_test():
                 "vector_dimensions": 128
             },
             "consciousness_simulation": {
-                "status": "passed", 
+                "status": "passed",
                 "awareness_level": 0.847,
                 "active_threads": 12
             },
@@ -180,12 +177,12 @@ async def run_integration_test():
                 "symbolic_depth": "L3"
             }
         }
-        
+
         overall_status = all(
-            result["status"] in ["passed", "active"] 
+            result["status"] in ["passed", "active"]
             for result in test_results.values()
         )
-        
+
         return {
             "overall_status": "passed" if overall_status else "failed",
             "test_results": test_results,
@@ -206,14 +203,14 @@ async def get_system_info(system_name: str):
             "status": "active"
         },
         "consciousness_engine": {
-            "name": "Consciousness Simulation Engine", 
+            "name": "Consciousness Simulation Engine",
             "version": "1.0",
             "capabilities": ["dream_synthesis", "state_evolution", "pattern_analysis"],
             "status": "active"
         },
         "adaptive_learning": {
             "name": "Adaptive Learning Network",
-            "version": "1.0", 
+            "version": "1.0",
             "capabilities": ["pattern_recognition", "similarity_detection", "adaptive_weights"],
             "status": "active"
         },
@@ -224,10 +221,10 @@ async def get_system_info(system_name: str):
             "status": "active"
         }
     }
-    
+
     if system_name not in system_info:
         raise HTTPException(status_code=404, detail="System not found")
-    
+
     return system_info[system_name]
 
 @app.get("/api/health")
@@ -240,11 +237,10 @@ async def health_check():
         "version": "3.5.1"
     }
 
-
 if __name__ == "__main__":
     import uvicorn
     print("🌐 Starting Aurora CloudBank API Server...")
     print("🔗 Dashboard: http://localhost:8000")
     print("📖 API Docs: http://localhost:8000/docs")
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

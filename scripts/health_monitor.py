@@ -12,7 +12,6 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
-
 class RepositoryHealthMonitor:
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
@@ -436,7 +435,6 @@ class RepositoryHealthMonitor:
         except KeyboardInterrupt:
             print("\n🛑 Monitoring stopped by user")
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Aurora CloudBank Repository Health Monitor"
@@ -459,7 +457,6 @@ def main():
         monitor.monitor_continuously(args.interval)
     else:
         monitor.run_health_check(save_report=not args.no_report)
-
 
 if __name__ == "__main__":
     main()

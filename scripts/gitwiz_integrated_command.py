@@ -57,7 +57,6 @@ except ImportError as e:
     logger.warning(f"Workflow Orchestrator not available: {e}")
     ORCHESTRATOR_AVAILABLE = False
 
-
 class GitWizIntegratedCommand:
     """Unified command interface for all GitWiz capabilities."""
 
@@ -629,7 +628,6 @@ class GitWizIntegratedCommand:
             "recommendations": results.get("recommendations", [])[:3],  # Top 3
         }
 
-
 def main():
     """Main command-line interface."""
     parser = argparse.ArgumentParser(
@@ -775,7 +773,6 @@ Examples:
 
             traceback.print_exc()
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

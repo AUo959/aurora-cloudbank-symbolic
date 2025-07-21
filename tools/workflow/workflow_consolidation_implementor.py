@@ -21,12 +21,12 @@ class WorkflowConsolidationImplementor:
     def analyze_existing_workflows(self):
         """Analyze current workflow structure"""
         print("🔍 Analyzing existing workflows...")
-        
+
         if not self.workflows_dir.exists():
             print("  ⚠️  No workflows directory found - creating optimized structure")
             self.workflows_dir.mkdir(parents=True, exist_ok=True)
             return {}
-        
+
         workflows = {}
         for workflow_file in self.workflows_dir.glob('*.yml'):
             try:
@@ -40,14 +40,14 @@ class WorkflowConsolidationImplementor:
                     }
             except Exception as e:
                 print(f"  ⚠️  Could not parse {workflow_file}: {e}")
-        
+
         print(f"  📊 Found {len(workflows)} workflows to analyze")
         return workflows
 
     def create_backup(self):
         """Create backup of existing workflows"""
         print("💾 Creating workflow backup...")
-        
+
         if self.workflows_dir.exists():
             if self.backup_dir.exists():
                 shutil.rmtree(self.backup_dir)
@@ -290,28 +290,28 @@ class WorkflowConsolidationImplementor:
     def implement_consolidation(self):
         """Implement the consolidated workflow structure"""
         print("🔄 Implementing workflow consolidation...")
-        
+
         # Clear existing workflows
         if self.workflows_dir.exists():
             for old_file in self.workflows_dir.glob('*.yml'):
                 old_file.unlink()
-        
+
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create new consolidated workflows
         workflows_to_create = {
             'aurora-ci-cd.yml': self.generate_consolidated_ci_workflow(),
             'aurora-maintenance.yml': self.generate_maintenance_workflow(),
             'aurora-release.yml': self.generate_release_workflow()
         }
-        
+
         for filename, workflow_data in workflows_to_create.items():
             workflow_path = self.workflows_dir / filename
             with open(workflow_path, 'w') as f:
                 yaml.dump(workflow_data, f, default_flow_style=False, sort_keys=False)
             print(f"  ✅ Created {filename}")
             self.optimization_log.append(f"Created optimized workflow: {filename}")
-        
+
         # Create workflow configuration file
         config = {
             'consolidation_date': datetime.now().isoformat(),
@@ -325,7 +325,7 @@ class WorkflowConsolidationImplementor:
                 'estimated_time_savings': '60-80% per CI run'
             }
         }
-        
+
         with open(self.workflows_dir / 'consolidation_config.json', 'w') as f:
             json.dump(config, f, indent=2)
 
@@ -333,7 +333,7 @@ class WorkflowConsolidationImplementor:
         """Generate comprehensive optimization report"""
         print("\n🎯 WORKFLOW CONSOLIDATION COMPLETE!")
         print("=" * 50)
-        
+
         report = {
             'timestamp': datetime.now().isoformat(),
             'consolidation_summary': {
@@ -356,17 +356,17 @@ class WorkflowConsolidationImplementor:
                 'aurora-release.yml': 'Automated release management and changelog generation'
             }
         }
-        
+
         print(f"📊 Workflows: {report['consolidation_summary']['original_workflows']} → "
               f"{report['consolidation_summary']['consolidated_workflows']} "
               f"({report['consolidation_summary']['reduction_percentage']}% reduction)")
         print(f"⚡ Estimated CI time savings: {report['consolidation_summary']['estimated_savings']}")
         print(f"🔧 Applied {len(report['optimizations_applied'])} optimization strategies")
-        
+
         # Save detailed report
         with open('workflow_consolidation_report.json', 'w') as f:
             json.dump(report, f, indent=2)
-        
+
         print("\n📋 Detailed report saved: workflow_consolidation_report.json")
         return report
 
@@ -374,22 +374,22 @@ class WorkflowConsolidationImplementor:
 def main():
     """Execute workflow consolidation"""
     consolidator = WorkflowConsolidationImplementor()
-    
+
     print("🚀 Aurora Workflow Consolidation Implementor")
     print("=" * 50)
-    
+
     # Analyze current state
     consolidator.analyze_existing_workflows()
-    
+
     # Create backup
     consolidator.create_backup()
-    
+
     # Implement consolidation
     consolidator.implement_consolidation()
-    
+
     # Generate report
     consolidator.generate_optimization_report()
-    
+
     print("\n✅ CONSOLIDATION SUCCESS!")
     print("Your GitHub Actions workflows have been optimized for maximum efficiency!")
 

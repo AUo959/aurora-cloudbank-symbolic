@@ -11,7 +11,6 @@ from datetime import datetime
 import pickle
 from pathlib import Path
 
-
 class AdaptiveLearningNode:
     """Individual learning node with adaptive capabilities"""
 
@@ -54,7 +53,6 @@ class AdaptiveLearningNode:
 
         # Update adaptation factor
         self.adaptation_factor = min(2.0, max(0.1, self.adaptation_factor + error * 0.01))
-
 
 class AdaptiveLearningNetwork:
     """Network of adaptive learning nodes"""
@@ -207,7 +205,6 @@ class AdaptiveLearningNetwork:
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(network_state, f, indent=2)
 
-
 def test_adaptive_learning():
     """Test adaptive learning system"""
     print("🎯 Testing Adaptive Learning System")
@@ -242,7 +239,6 @@ def test_adaptive_learning():
     print("Network state saved")
 
     return {"test": "passed", "statistics": stats}
-
 
 if __name__ == "__main__":
     test_adaptive_learning()

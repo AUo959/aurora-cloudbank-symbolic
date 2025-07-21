@@ -9,7 +9,6 @@ import os
 import sys
 from pathlib import Path
 
-
 class AuroraSystemValidator:
     def __init__(self):
         self.project_root = Path("/workspaces/aurora-cloudbank-symbolic")
@@ -211,7 +210,6 @@ class AuroraSystemValidator:
 
         print("=" * 60)
         return completion_percentage
-
 
 if __name__ == "__main__":
     validator = AuroraSystemValidator()

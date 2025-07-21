@@ -14,7 +14,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
 
-
 class MemoryCompressionOptimizer:
     """Advanced memory and storage optimization system"""
 
@@ -524,7 +523,6 @@ class MemoryCompressionOptimizer:
             "report_file": report_file,
         }
 
-
 def main():
     """Main optimization function"""
     parser = argparse.ArgumentParser(description="Memory compression and optimization")
@@ -563,7 +561,6 @@ def main():
     else:
         # Run full optimization
         optimizer.run_full_optimization()
-
 
 if __name__ == "__main__":
     import datetime

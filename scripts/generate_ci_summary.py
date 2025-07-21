@@ -16,7 +16,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 def load_json_report(file_path: str) -> Dict[str, Any]:
     """Load JSON report if it exists."""
     if Path(file_path).exists():
@@ -26,7 +25,6 @@ def load_json_report(file_path: str) -> Dict[str, Any]:
         except Exception as e:
             print(f"Warning: Failed to load {file_path}: {e}")
     return {}
-
 
 def generate_ci_summary():
     """Generate comprehensive CI summary report."""
@@ -230,7 +228,6 @@ def generate_ci_summary():
     print(f"- ci_summary.json (JSON format)")
 
     return json_summary["overall_status"] == "PASS"
-
 
 if __name__ == "__main__":
     success = generate_ci_summary()

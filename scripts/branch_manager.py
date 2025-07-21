@@ -10,7 +10,6 @@ import subprocess
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-
 @dataclass
 class BranchInfo:
     """Information about a git branch"""
@@ -22,7 +21,6 @@ class BranchInfo:
     is_merged: bool
     days_old: int
     category: str
-
 
 class BranchManager:
     """Automated branch management and cleanup system"""
@@ -251,7 +249,6 @@ Generated: {datetime.datetime.now().isoformat()}
 
         return report
 
-
 def main():
     parser = argparse.ArgumentParser(description="Aurora CloudBank Branch Manager")
     parser.add_argument(
@@ -306,7 +303,6 @@ def main():
             print(f"\n❌ Errors: {len(results['errors'])}")
             for error in results["errors"]:
                 print(f"  - {error}")
-
 
 if __name__ == "__main__":
     main()

@@ -21,9 +21,9 @@
 
 ```javascript
 // Available throughout the system:
-const { 
+const {
   systemLogger,      // General system operations
-  bridgeLogger,      // L1-L2-L3 bridge communications  
+  bridgeLogger,      // L1-L2-L3 bridge communications
   commandLogger,     // Command dispatch and routing
   ethicsLogger       // Ethics protocol validations
 } = require('./src/utils/aurora_logger.js');
@@ -48,7 +48,7 @@ const {
 {
   "timestamp": "2025-07-13T20:27:46.725Z",
   "level": "INFO",
-  "component": "BRIDGE_AGENTS", 
+  "component": "BRIDGE_AGENTS",
   "message": "🚀 Aurora Logging System Test",
   "sessionId": "1752438466724-y49iaho0e",
   "anchorSeed": "EOS_SEED_ORION",
@@ -80,7 +80,7 @@ bridgeLogger.bridge('🔗 L2 connection established', {
   status: 'connected'
 });
 
-// Drift Correction Events  
+// Drift Correction Events
 bridgeLogger.drift('🚨 Emergency drift correction', {
   deployment: 'emergency',
   driftLevel: 0.02,
@@ -102,7 +102,7 @@ ethicsLogger.ethics('🛡️ Ethics protocol validation', {
 ## 🎉 System Operational Status
 
 - ✅ **Core Infrastructure**: Fully operational
-- ✅ **Bridge Agents**: Clean and compliant  
+- ✅ **Bridge Agents**: Clean and compliant
 - ✅ **Logging System**: Production-ready
 - ✅ **ORION CORE Compliance**: v3.5.1 confirmed
 - ✅ **ESLint Clean**: Zero console violations

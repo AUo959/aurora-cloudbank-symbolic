@@ -13,7 +13,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 class GITWizDemo:
     """Simplified demo of enhanced GITWiz capabilities."""
 
@@ -321,7 +320,6 @@ class GITWizDemo:
 
         return "\n".join(report)
 
-
 def main():
     """Run GITWiz Enhanced demo analysis."""
     demo = GITWizDemo()
@@ -334,7 +332,6 @@ def main():
         f.write(f"# GITWiz Enhanced Analysis Report\n\n```\n{report}\n```\n")
 
     print(f"\n📄 Report saved to: {report_file}")
-
 
 if __name__ == "__main__":
     main()

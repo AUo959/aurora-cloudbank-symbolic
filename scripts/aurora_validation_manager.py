@@ -23,7 +23,6 @@ from pathlib import Path
 from datetime import datetime
 from typing import List, Set, Optional
 
-
 class ValidationManager:
     """Manages validation file lifecycle to prevent regeneration cycles"""
 
@@ -262,7 +261,6 @@ echo "✅ Post-commit validation update complete"
             else:
                 print(f"  {vf}: Not found")
 
-
 def main():
     """CLI interface for validation manager"""
     import argparse
@@ -290,7 +288,6 @@ def main():
         print(f"Exclude from commit: {excluded}")
     else:
         parser.print_help()
-
 
 if __name__ == "__main__":
     main()

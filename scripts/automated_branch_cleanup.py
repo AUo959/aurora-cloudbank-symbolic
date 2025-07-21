@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-
 class BranchCleanupManager:
     """Manages automated cleanup of stale repository branches."""
 
@@ -288,7 +287,6 @@ class BranchCleanupManager:
 
         return "\n".join(report)
 
-
 def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(
@@ -346,7 +344,6 @@ def main():
     if dry_run:
         print("\n🔍 DRY RUN MODE - No changes made")
         print("Use --execute to perform actual cleanup")
-
 
 if __name__ == "__main__":
     main()

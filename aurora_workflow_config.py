@@ -13,7 +13,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-
 class AuroraWorkflowConfig:
     """Manages Aurora CloudBank workflow configurations"""
 
@@ -388,7 +387,6 @@ class AuroraWorkflowConfig:
 
         self.logger.info(f"Created environment template: {template_file}")
 
-
 def main():
     """Main configuration manager CLI"""
     import argparse
@@ -433,7 +431,6 @@ def main():
     if args.create_env:
         config_manager.create_environment_template(args.create_env)
         print(f"✅ Created environment template for {args.create_env}")
-
 
 if __name__ == "__main__":
     main()

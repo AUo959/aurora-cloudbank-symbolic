@@ -11,7 +11,6 @@ import re
 import sys
 from pathlib import Path
 
-
 def fix_undefined_result_variables(file_path: str) -> bool:
     """Fix undefined 'result' variables in subprocess calls."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -52,7 +51,6 @@ def fix_undefined_result_variables(file_path: str) -> bool:
         return True
     return False
 
-
 def fix_syntax_errors(file_path: str) -> bool:
     """Fix obvious syntax errors."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -82,7 +80,6 @@ def fix_syntax_errors(file_path: str) -> bool:
         return True
     return False
 
-
 def add_missing_imports(file_path: str) -> bool:
     """Add missing critical imports."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -108,7 +105,6 @@ def add_missing_imports(file_path: str) -> bool:
             f.write(content)
         return True
     return False
-
 
 def remove_unused_imports(file_path: str) -> bool:
     """Remove unused imports that are causing warnings."""
@@ -138,7 +134,6 @@ def remove_unused_imports(file_path: str) -> bool:
         return True
     return False
 
-
 def process_file_critical(file_path: str) -> dict:
     """Process a single Python file with critical fixes."""
     fixes = {}
@@ -154,7 +149,6 @@ def process_file_critical(file_path: str) -> dict:
         return {}
 
     return fixes
-
 
 def main():
     """Main function to process problematic Python files."""
@@ -199,7 +193,6 @@ def main():
 
     print(f"\nProcessed {len(problem_files)} critical Python files.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -21,7 +21,6 @@ import os
 
 TELEMETRY_LOG = "logs/telemetry.log"
 
-
 def get_logger(name: str = "telemetry") -> logging.Logger:
     os.makedirs(os.path.dirname(TELEMETRY_LOG), exist_ok=True)
     logger = logging.getLogger(name)

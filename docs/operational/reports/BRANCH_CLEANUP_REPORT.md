@@ -1,8 +1,8 @@
 # 🧹 Aurora CloudBank - Branch Cleanup Report
 
-**Generated:** July 8, 2025  
-**Total Remote Branches:** 53  
-**Recommended for Cleanup:** 36  
+**Generated:** July 8, 2025
+**Total Remote Branches:** 53
+**Recommended for Cleanup:** 36
 **To Keep:** 17
 
 ## 🎯 Executive Summary

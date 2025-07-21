@@ -9,7 +9,7 @@
 Get current Aurora CloudBank system status including:
 
 - Phase completion status
-- Test framework status  
+- Test framework status
 - Performance metrics
 - Missing components
 - Next priorities
@@ -24,7 +24,7 @@ Focus on Aurora's multi-agent constellation:
 - Missing node implementations
 - Bridge system requirements
 
-### @aurora-performance  
+### @aurora-performance
 
 Performance optimization context:
 
@@ -104,7 +104,7 @@ Generate documentation:
 
 - README updates
 - Status reports
-- Context logs  
+- Context logs
 - Configuration summaries
 
 ## 🚀 Quick Actions

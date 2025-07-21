@@ -27,7 +27,7 @@ This document provides a comprehensive analysis of all integrated GPTs, crew/sta
 
 #### Aurora System Coordinator (Symbolic Processing GPT)
 
-- **Type**: SYSTEM_AGENT  
+- **Type**: SYSTEM_AGENT
 - **Status**: STANDBY
 - **Station Role**: SYMBOLIC_MESH_COORDINATOR
 - **Clearance Level**: L3_SYMBOLIC_MESH

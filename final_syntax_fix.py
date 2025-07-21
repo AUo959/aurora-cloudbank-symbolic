@@ -6,7 +6,6 @@ Final Python syntax fixer
 import os
 import re
 
-
 def fix_function_declarations(filepath):
     """Fix Python function declaration syntax"""
     with open(filepath, "r") as f:
@@ -30,7 +29,6 @@ def fix_function_declarations(filepath):
         f.write(content)
 
     print(f"Fixed {filepath}")
-
 
 # Fix the problematic files
 files = [

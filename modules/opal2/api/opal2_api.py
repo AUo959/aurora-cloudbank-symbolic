@@ -39,7 +39,6 @@ symbolic_core = SymbolicCore()
 # Active WebSocket connections
 active_connections: List[WebSocket] = []
 
-
 class RenderRequest(BaseModel):
     """Request model for quantum rendering"""
 
@@ -57,7 +56,6 @@ class RenderRequest(BaseModel):
         default=None, description="Cache key for optimization"
     )
 
-
 class GlyphGenerationRequest(BaseModel):
     """Request model for glyph generation"""
 
@@ -67,14 +65,12 @@ class GlyphGenerationRequest(BaseModel):
         default=True, description="Enable quantum enhancement"
     )
 
-
 class WebSocketMessage(BaseModel):
     """WebSocket message model"""
 
     type: str = Field(..., description="Message type")
     data: Dict[str, Any] = Field(..., description="Message data")
     timestamp: datetime = Field(default_factory=datetime.now)
-
 
 @app.get("/")
 async def root():
@@ -91,7 +87,6 @@ async def root():
             "cache_system": "active",
         },
     }
-
 
 @app.get("/health")
 async def health_check():
@@ -120,7 +115,6 @@ async def health_check():
             status_code=500,
             content={"healthy": False, "error": "An internal error has occurred."},
         )
-
 
 @app.post("/render")
 async def render_glyph(request: RenderRequest):
@@ -181,7 +175,6 @@ async def render_glyph(request: RenderRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/generate")
 async def generate_glyph(request: GlyphGenerationRequest):
     """Generate a new glyph from symbolic expression"""
@@ -212,13 +205,11 @@ async def generate_glyph(request: GlyphGenerationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/plugins")
 async def list_plugins():
     """List available renderer plugins"""
     plugins = plugin_system.list_plugins()
     return {"plugins": plugins, "count": len(plugins)}
-
 
 @app.get("/cache/stats")
 async def cache_stats():
@@ -226,13 +217,11 @@ async def cache_stats():
     stats = await glyph_cache.get_stats()
     return stats
 
-
 @app.delete("/cache/clear")
 async def clear_cache():
     """Clear the glyph cache"""
     cleared_count = await glyph_cache.clear_async()
     return {"success": True, "cleared_items": cleared_count}
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -268,7 +257,6 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         active_connections.remove(websocket)
 
-
 async def notify_clients(message: Dict[str, Any]):
     """Notify all connected WebSocket clients"""
     if active_connections:
@@ -278,7 +266,6 @@ async def notify_clients(message: Dict[str, Any]):
                 await connection.send_text(message_str)
             except BaseException:
                 active_connections.remove(connection)
-
 
 # Component health test functions
 async def test_glyph_core():
@@ -290,7 +277,6 @@ async def test_glyph_core():
     except Exception as e:
         return {"healthy": False, "error": str(e)}
 
-
 async def test_quantum_renderer():
     """Test quantum renderer functionality"""
     try:
@@ -298,7 +284,6 @@ async def test_quantum_renderer():
         return {"healthy": True, "test_result": test_result}
     except Exception as e:
         return {"healthy": False, "error": str(e)}
-
 
 async def test_plugin_system():
     """Test plugin system functionality"""
@@ -308,7 +293,6 @@ async def test_plugin_system():
     except Exception as e:
         return {"healthy": False, "error": str(e)}
 
-
 async def test_cache_system():
     """Test cache system functionality"""
     try:
@@ -317,10 +301,8 @@ async def test_cache_system():
     except Exception as e:
         return {"healthy": False, "error": str(e)}
 
-
 # Mount static files for web interface
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 @app.get("/demo", response_class=HTMLResponse)
 async def demo_interface():
@@ -408,7 +390,6 @@ async def demo_interface():
     </body>
     </html>
     """
-
 
 if __name__ == "__main__":
     import uvicorn

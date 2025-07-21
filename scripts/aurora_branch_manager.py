@@ -14,7 +14,6 @@ import subprocess
 import sys
 from typing import Dict, List, Tuple
 
-
 class BranchManager:
     """Automated branch management and cleanup system."""
 
@@ -337,7 +336,6 @@ class BranchManager:
 
         return "\n".join(report)
 
-
 def main():
     """Main function for branch management CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Branch Management")
@@ -401,7 +399,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

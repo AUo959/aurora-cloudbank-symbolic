@@ -28,7 +28,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("GITWiz")
 
-
 @dataclass
 class RepositoryIssue:
     """Represents a repository issue that GITWiz can track and fix."""
@@ -41,7 +40,6 @@ class RepositoryIssue:
     first_seen: str = None
     last_seen: str = None
     fix_count: int = 0
-
 
 class GITWizSimple:
     """Simplified GITWiz for basic repository management."""
@@ -431,7 +429,6 @@ class GITWizSimple:
                 except (OSError, PermissionError):
                     continue
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="GITWiz Simple - Basic Repository Management"
@@ -496,7 +493,6 @@ def main():
                 print(
                     f"  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})"
                 )
-
 
 if __name__ == "__main__":
     main()

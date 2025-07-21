@@ -11,7 +11,6 @@ from modules.cask import (
     generate_vs_sota_comparison,
 )
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate CASK assets")
     parser.add_argument(
@@ -38,7 +37,6 @@ def main() -> None:
     create_project_gantt_chart(gantt_png)
 
     print(f"CASK assets written to {args.output_dir}")
-
 
 if __name__ == "__main__":
     main()

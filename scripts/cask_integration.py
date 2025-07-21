@@ -10,7 +10,6 @@ from modules.cask_tool import (
     load_vs_sota,
 )
 
-
 def cmd_summary() -> None:
     specs = load_specifications()
     risks = load_risk_assessment()
@@ -19,11 +18,9 @@ def cmd_summary() -> None:
     print("Risk assessment rows:", len(risks))
     print("Comparison rows:", len(comp))
 
-
 def cmd_chart(path: str) -> None:
     out = generate_architecture_chart(path)
     print(f"Chart written to {out}")
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Interact with CASK assets")
@@ -41,7 +38,6 @@ def main() -> None:
         cmd_chart(args.output)
     else:
         parser.print_help()
-
 
 if __name__ == "__main__":
     main()

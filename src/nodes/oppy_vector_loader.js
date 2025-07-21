@@ -12,12 +12,12 @@ class OppyVectorLoader {
     this.lastSyncTime = Date.now();
     this.vectorCache = new Map();
   }
-  
+
   async processVectorData(data) {
     try {
       const vectorId = `vector_${Date.now()}`;
       this.vectorCache.set(vectorId, data);
-      
+
       const result = {
         success: true,
         agentId: this.agentId,
@@ -26,7 +26,7 @@ class OppyVectorLoader {
         timestamp: Date.now(),
         layer: 'L1_L2_BRIDGE'
       };
-      
+
       this.lastSyncTime = Date.now();
       return result;
     } catch (error) {
@@ -37,15 +37,15 @@ class OppyVectorLoader {
       };
     }
   }
-  
+
   getVectorData(vectorId) {
     return this.vectorCache.get(vectorId);
   }
-  
+
   getDriftStatus() {
     const timeSinceSync = Date.now() - this.lastSyncTime;
     const driftLevel = Math.min(0.5, timeSinceSync / 60000);
-    
+
     return {
       agentId: this.agentId,
       driftLevel: driftLevel,
@@ -53,7 +53,7 @@ class OppyVectorLoader {
       status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
     };
   }
-  
+
   getStatus() {
     return {
       agentId: this.agentId,

@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 from typing import Tuple
 
-
 class SecurityRemediator:
     """Comprehensive security vulnerability fixer for Aurora CloudBank."""
 
@@ -227,9 +226,6 @@ class SecurityRemediator:
             }
         }
 
-
-
-
         with open(".security/security_policy.json", "w", encoding="utf-8") as f:
             json.dump(security_policy, f, indent=2)
 
@@ -249,7 +245,6 @@ import re
 import html
 from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
-
 
 class SecureHelpers:
     """Secure helper functions for Aurora CloudBank."""
@@ -371,7 +366,6 @@ class SecureHelpers:
                 'sum': sum,
                 'len': len
 
-
         # Only allow safe characters and patterns
         if not re.match(r'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
@@ -383,7 +377,6 @@ class SecureHelpers:
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
-
 
 # Global instance for easy importing
 secure = SecureHelpers()
@@ -621,7 +614,6 @@ result = secure.secure_eval_alternative(user_expression)
             print("❌ SOME ISSUES REMAIN")
             return False
 
-
 def main():
     """Main execution function."""
     remediator = SecurityRemediator()
@@ -634,7 +626,6 @@ def main():
     else:
         print("\n⚠️  Some security issues need manual attention")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

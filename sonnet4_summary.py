@@ -12,7 +12,6 @@ from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-
 def main():
     """Generate final summary"""
     print("🎉 CLAUDE SONNET 4 ENABLEMENT COMPLETE")
@@ -53,7 +52,6 @@ def main():
 
     print("\n✨ RESULT: Claude Sonnet 4 is now active for ALL CLIENTS")
     print("🎯 Aurora CloudBank Symbolic is enhanced and ready!")
-
 
 if __name__ == "__main__":
     main()

@@ -11,7 +11,6 @@ from pathlib import Path
 
 import yaml
 
-
 class ReflectiveMonitor:
     def __init__(self, capsule_index_path=".loom/reflect/capsule_registry.yaml"):
         self.capsule_index_path = Path(capsule_index_path)
@@ -50,11 +49,9 @@ class ReflectiveMonitor:
         print(f" - Unsealed Capsules: {len(unsealed)}")
         return unsealed
 
-
 # =============================================
 # MODULE 2 — Capsule Linter
 # =============================================
-
 
 class CapsuleLinter:
     def __init__(self, capsule_index_path=".loom/reflect/capsule_registry.yaml"):
@@ -99,11 +96,9 @@ class CapsuleLinter:
                 suggestions.append(f"Recover export date for {anchor}")
         return suggestions
 
-
 # =============================================
 # MODULE 3 — Continuity Manager
 # =============================================
-
 
 class ContinuityManager:
     def __init__(self):
@@ -130,11 +125,9 @@ class ContinuityManager:
             for action in self.recovery_queue:
                 print(f" - {action}")
 
-
 # =============================================
 # MODULE 4 — Autonomic Correction Engine
 # =============================================
-
 
 class AutonomicCorrectionEngine:
     def __init__(self):
@@ -168,11 +161,9 @@ class AutonomicCorrectionEngine:
             for correction in self.correction_log:
                 print(f" - {correction}")
 
-
 # =============================================
 # MODULE 5 — Reflective Autonomy Loop
 # =============================================
-
 
 class ReflectiveAutonomyLoop:
     def __init__(self):

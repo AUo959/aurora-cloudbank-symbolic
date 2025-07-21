@@ -17,7 +17,6 @@ from modules.opal2.glyph_core import GlyphCore
 from modules.opal2.plugin_system import PluginSystem
 from modules.opal2.quantum_renderer import QuantumRenderer
 
-
 async def test_opal2_integration():
     """Test full Opal2 system integration"""
     print("🔮 Testing Opal2 Modular System Integration")
@@ -121,7 +120,6 @@ async def test_opal2_integration():
 
     print("\n🎉 All tests passed! Opal2 system is fully operational.")
     return True
-
 
 if __name__ == "__main__":
     success = asyncio.run(test_opal2_integration())

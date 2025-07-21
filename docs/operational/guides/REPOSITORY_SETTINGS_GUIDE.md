@@ -56,7 +56,7 @@
 Once settings are adjusted, we can immediately:
 
 1. Delete confirmed merged branches (10+ ready)
-2. Merge 2 critical security fixes  
+2. Merge 2 critical security fixes
 3. Complete systematic cleanup to achieve 0 open PRs
 
 ---

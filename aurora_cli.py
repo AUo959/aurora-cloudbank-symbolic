@@ -12,7 +12,6 @@ from datetime import datetime
 from pathlib import Path
 import subprocess
 
-
 class AuroraCLI:
     """Aurora CloudBank Command Line Interface"""
 
@@ -183,7 +182,6 @@ Examples:
 """
         print(help_text)
 
-
 def main():
     """Main CLI function"""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Command Line Interface")
@@ -216,7 +214,6 @@ def main():
         elif args.interactive:
             cli.print_banner()
             cli.interactive_mode()
-
 
 if __name__ == "__main__":
     main()

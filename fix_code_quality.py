@@ -9,7 +9,6 @@ import re
 import sys
 from pathlib import Path
 
-
 def fix_maintenance_scheduler():
     """Fix critical issues in maintenance_scheduler.py"""
     file_path = Path("scripts/maintenance_scheduler.py")
@@ -45,7 +44,6 @@ def fix_maintenance_scheduler():
         f.write(content)
 
     print("✅ Fixed maintenance_scheduler.py")
-
 
 def fix_gitwiz_enhanced():
     """Fix critical issues in gitwiz_enhanced.py"""
@@ -101,7 +99,6 @@ class GitWizEnhanced:'''
 
     print("✅ Fixed gitwiz_enhanced.py")
 
-
 def fix_security_scripts():
     """Fix minor issues in security scripts"""
     files_to_fix = [
@@ -136,7 +133,6 @@ def fix_security_scripts():
 
         print(f"✅ Fixed {filename}")
 
-
 def main():
     """Main fix function"""
     print("🔧 Aurora CloudBank Code Quality Fix")
@@ -156,7 +152,6 @@ def main():
     except Exception as e:
         print(f"❌ Error during fixes: {e}")
         return False
-
 
 if __name__ == "__main__":
     success = main()

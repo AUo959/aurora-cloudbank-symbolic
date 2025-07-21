@@ -11,7 +11,6 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class Sonnet4Config:
     """Configuration for Claude Sonnet 4 integration"""
@@ -27,7 +26,6 @@ class Sonnet4Config:
     context_window: int = 200000
     preserve_4o_logic: bool = True
     fallback_model: str = "gpt-4o"
-
 
 class Sonnet4IntegrationHub:
     """
@@ -219,10 +217,8 @@ class Sonnet4IntegrationHub:
             "fallback_model": self.sonnet4_config.fallback_model,
         }
 
-
 # Global instance
 sonnet4_hub = Sonnet4IntegrationHub()
-
 
 async def enable_sonnet4_globally():
     """Convenience function to enable Sonnet 4 for all clients"""

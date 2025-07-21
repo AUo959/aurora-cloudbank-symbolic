@@ -17,7 +17,7 @@ GitWiz is a comprehensive, automated code quality management system that provide
 ### 🛠️ Supported Tools (8/9 Active)
 
 - ✅ **autopep8** - Python code formatting
-- ✅ **isort** - Import statement organization  
+- ✅ **isort** - Import statement organization
 - ✅ **pylint** - Comprehensive Python analysis
 - ✅ **flake8** - Style guide enforcement
 - ✅ **bandit** - Security vulnerability scanning
@@ -235,7 +235,7 @@ python3 scripts/gitwiz_integrated_command.py lint-scan --target staged_files
 ### Current System Status
 
 - **Python Files Analyzed:** 22,118
-- **Markdown Files:** 117  
+- **Markdown Files:** 117
 - **JavaScript Files:** 67
 - **Total Files:** 29,542
 - **Analysis Speed:** ~2-4 seconds for comprehensive scan

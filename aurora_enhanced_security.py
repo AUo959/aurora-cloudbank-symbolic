@@ -19,7 +19,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 class AuroraSecurityEnhancer:
     """Enhanced security implementation for Aurora CloudBank."""
 
@@ -583,7 +582,6 @@ jobs:
 
         logger.info("✅ Security enhancement report generated")
 
-
 def main():
     """Main execution function."""
 
@@ -613,7 +611,6 @@ def main():
             f"\n❌ Security enhancement failed: {results.get('error', 'Unknown error')}"
         )
         return False
-
 
 if __name__ == "__main__":
     success = main()

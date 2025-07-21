@@ -11,7 +11,6 @@ import re
 import sys
 from pathlib import Path
 
-
 def fix_logging_fstrings(file_path: str) -> bool:
     """Fix f-string interpolation in logging calls."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -42,7 +41,6 @@ def fix_logging_fstrings(file_path: str) -> bool:
         return True
     return False
 
-
 def fix_unused_variables(file_path: str) -> bool:
     """Fix unused variables by prefixing with underscore."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -65,7 +63,6 @@ def fix_unused_variables(file_path: str) -> bool:
             f.write(content)
         return True
     return False
-
 
 def fix_line_lengths(file_path: str) -> bool:
     """Fix long lines by breaking them up."""
@@ -100,7 +97,6 @@ def fix_line_lengths(file_path: str) -> bool:
         return True
     return False
 
-
 def clean_unused_imports(file_path: str) -> bool:
     """Remove unused imports more carefully."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -134,7 +130,6 @@ def clean_unused_imports(file_path: str) -> bool:
         return True
     return False
 
-
 def process_file_final(file_path: str) -> dict:
     """Process a file with final cleanup fixes."""
     fixes = {}
@@ -150,7 +145,6 @@ def process_file_final(file_path: str) -> dict:
         return {}
 
     return fixes
-
 
 def main():
     """Main function to process all Python files."""
@@ -180,7 +174,6 @@ def main():
 
     print(f"\nProcessed {len(python_files)} Python files.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

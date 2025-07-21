@@ -8,7 +8,6 @@ import re
 import sys
 from pathlib import Path
 
-
 def fix_critical_gitwiz_issues():
     """Fix critical undefined variable and import issues in gitwiz_enhanced.py"""
     file_path = Path("scripts/gitwiz_enhanced.py")
@@ -68,7 +67,6 @@ from dataclasses import asdict'''
 
     print("✅ Fixed critical issues in gitwiz_enhanced.py")
     return True
-
 
 def fix_security_file_issues():
     """Fix critical issues in security files"""
@@ -136,7 +134,6 @@ def fix_security_file_issues():
 
         print(f"✅ Fixed critical issues in {filename}")
 
-
 def clean_temp_files():
     """Remove problematic temporary files"""
     temp_files = [
@@ -153,7 +150,6 @@ def clean_temp_files():
                 print(f"🗑️ Removed problematic temp file: {filename}")
             except Exception as e:
                 print(f"⚠️ Could not remove {filename}: {e}")
-
 
 def main():
     """Main function to fix critical issues"""
@@ -175,7 +171,6 @@ def main():
     except Exception as e:
         print(f"❌ Error during critical fixes: {e}")
         return False
-
 
 if __name__ == "__main__":
     success = main()

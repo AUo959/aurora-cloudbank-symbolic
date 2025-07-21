@@ -5,7 +5,6 @@ Placeholder implementation for quantum processing bridge
 
 from typing import Any, Dict
 
-
 class QuantumBridge:
     """Quantum processing bridge for Sonnet 4"""
 

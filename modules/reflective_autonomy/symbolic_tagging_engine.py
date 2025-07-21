@@ -66,10 +66,8 @@ PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
     },
 }
 
-
 def _word_boundary_search(text: str, keyword: str) -> bool:
     return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
-
 
 def classify_thread_content(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
     if not isinstance(content, str) or not content.strip():

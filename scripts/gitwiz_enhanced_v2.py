@@ -25,7 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger('GitWizEnhanced')
 
-
 @dataclass
 class RepositoryMetrics:
     """Repository health and optimization metrics."""
@@ -44,7 +43,6 @@ class RepositoryMetrics:
     def __post_init__(self):
         if self.issues_detected is None:
             self.issues_detected = []
-
 
 @dataclass
 class FileAnalysis:
@@ -69,7 +67,6 @@ class FileAnalysis:
             self.archive_files = []
         if self.file_types is None:
             self.file_types = {}
-
 
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
@@ -650,7 +647,6 @@ class GitWizEnhanced:
 
         return recommendations
 
-
 def main():
     """Main CLI interface."""
     import argparse
@@ -691,7 +687,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     exit(main())

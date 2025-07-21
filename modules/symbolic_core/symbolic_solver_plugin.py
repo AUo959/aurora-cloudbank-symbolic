@@ -5,7 +5,6 @@ Abstract base class and registry for symbolic solver plugins.
 
 from abc import ABC, abstractmethod
 
-
 class SymbolicSolverPlugin(ABC):
     """Abstract base class for symbolic solver plugins."""
 
@@ -16,7 +15,6 @@ class SymbolicSolverPlugin(ABC):
     @abstractmethod
     def solve(self, problem):
         pass
-
 
 class PluginRegistry:
     """Registry for symbolic solver plugins."""

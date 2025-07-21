@@ -5,7 +5,7 @@
 ### ✅ SAFE TO DELETE (Already Merged)
 
 - **24 codex/* branches** - Completed feature work
-- **10 dependabot/* branches** - Outdated dependency updates  
+- **10 dependabot/* branches** - Outdated dependency updates
 - **4 alert-autofix/* branches** - Applied security fixes
 - **Various integration branches** - Already merged to main
 
@@ -23,7 +23,7 @@
 git branch --merged main | grep -v "main\|backup"
 ```
 
-### Step 2: Delete Merged Local Branches  
+### Step 2: Delete Merged Local Branches
 
 ```bash
 git branch -d $(git branch --merged main | grep -E "codex|dependabot|alert-autofix" | tr -d ' ')

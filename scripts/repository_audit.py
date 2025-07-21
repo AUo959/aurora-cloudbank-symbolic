@@ -16,7 +16,6 @@ from typing import Any, Dict, List
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
-
 def analyze_repository_files():
     """Analyze all files in the repository."""
     project_root = Path("/workspaces/aurora-cloudbank-symbolic")
@@ -102,7 +101,6 @@ def analyze_repository_files():
 
     return analysis
 
-
 def analyze_zip_files():
     """Analyze all ZIP files in the repository."""
     project_root = Path("/workspaces/aurora-cloudbank-symbolic")
@@ -131,7 +129,6 @@ def analyze_zip_files():
 
     return zip_analysis
 
-
 def categorize_zip_file(filename: str) -> str:
     """Categorize ZIP file based on name patterns."""
     name_lower = filename.lower()
@@ -148,7 +145,6 @@ def categorize_zip_file(filename: str) -> str:
         return "documentation"
     else:
         return "other"
-
 
 def analyze_markdown_documentation():
     """Analyze markdown documentation structure."""
@@ -176,7 +172,6 @@ def analyze_markdown_documentation():
             md_analysis["other"].append(md_file.name)
 
     return md_analysis
-
 
 def generate_recommendations(file_analysis, zip_analysis, md_analysis):
     """Generate optimization recommendations."""
@@ -227,7 +222,6 @@ def generate_recommendations(file_analysis, zip_analysis, md_analysis):
         )
 
     return recommendations
-
 
 def main():
     """Main audit function."""
@@ -303,7 +297,6 @@ def main():
     print(f"\n💾 Detailed report saved to: {report_path}")
 
     return report
-
 
 if __name__ == "__main__":
     main()

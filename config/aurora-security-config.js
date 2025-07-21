@@ -98,7 +98,7 @@ class AuroraSecurityConfig {
    * Generate JWT token
    */
   generateToken(payload, expiresIn = '1h') {
-    return jwt.sign(payload, this.jwtSecret, { 
+    return jwt.sign(payload, this.jwtSecret, {
       expiresIn,
       issuer: 'aurora-cloudbank',
       audience: 'aurora-users'
@@ -124,7 +124,7 @@ class AuroraSecurityConfig {
    */
   sanitizeSQL(input) {
     if (typeof input !== 'string') return input;
-    
+
     // Escape SQL special characters
     return input
       .replace(/'/g, "''")
@@ -178,7 +178,7 @@ class AuroraSecurityConfig {
       /^10\./, // Internal IPs
       /^172\.(1[6-9]|2[0-9]|3[01])\./ // Internal IPs
     ];
-    
+
     return suspiciousPatterns.some(pattern => pattern.test(ip));
   }
 
@@ -193,10 +193,10 @@ class AuroraSecurityConfig {
       details,
       severity: this.getEventSeverity(event)
     };
-    
+
     // In production, send to security monitoring system
     console.log(`[SECURITY] ${timestamp} - ${event}:`, details);
-    
+
     // Store in security log file
     const fs = require('fs');
     fs.appendFileSync('security.log', JSON.stringify(logEntry) + '\n');
@@ -208,7 +208,7 @@ class AuroraSecurityConfig {
   getEventSeverity(event) {
     const highSeverity = ['login_failure', 'xss_attempt', 'sql_injection', 'unauthorized_access'];
     const mediumSeverity = ['rate_limit_exceeded', 'suspicious_activity'];
-    
+
     if (highSeverity.includes(event)) return 'HIGH';
     if (mediumSeverity.includes(event)) return 'MEDIUM';
     return 'LOW';

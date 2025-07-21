@@ -92,7 +92,7 @@ class AuroraSecurityMiddleware {
     this.app.use((req, res, next) => {
       // Add CSP nonce for inline scripts if needed
       res.locals.nonce = require('crypto').randomBytes(16).toString('base64');
-      res.setHeader('Content-Security-Policy', 
+      res.setHeader('Content-Security-Policy',
         `script-src 'self' 'nonce-${res.locals.nonce}'; object-src 'none';`
       );
       next();
@@ -148,12 +148,12 @@ class AuroraSecurityMiddleware {
           req.query[key] = this.sanitizeInput(req.query[key]);
         }
       }
-      
+
       // Sanitize request body
       if (req.body && typeof req.body === 'object') {
         req.body = this.sanitizeObject(req.body);
       }
-      
+
       next();
     });
   }
@@ -163,7 +163,7 @@ class AuroraSecurityMiddleware {
    */
   sanitizeInput(input) {
     if (typeof input !== 'string') return input;
-    
+
     // Remove potential XSS
     return input
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -177,7 +177,7 @@ class AuroraSecurityMiddleware {
    */
   sanitizeObject(obj) {
     if (typeof obj !== 'object' || obj === null) return obj;
-    
+
     const sanitized = {};
     for (const key in obj) {
       if (typeof obj[key] === 'string') {

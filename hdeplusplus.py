@@ -7,7 +7,6 @@ Lightweight version for GITWiz integration
 import json
 from typing import Any, Dict, List, Optional
 
-
 class HeuristicDecisionEnginePlusPlus:
     """Simplified HDE++ for decision making."""
 

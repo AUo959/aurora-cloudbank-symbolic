@@ -7,7 +7,6 @@ os.environ["AIF_TOKEN"] = "test-token"
 
 from services.aif_hub import app  # noqa: E402
 
-
 def test_websocket_broadcast():
     """Test websocket broadcast functionality."""
     try:

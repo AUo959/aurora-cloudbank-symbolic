@@ -6,7 +6,6 @@ Quick fix for JavaScript syntax in Python files
 import os
 import re
 
-
 def fix_python_file(filepath):
     """Fix JavaScript syntax in Python files"""
     with open(filepath, "r") as f:
@@ -31,7 +30,6 @@ def fix_python_file(filepath):
         f.write(content)
 
     print(f"Fixed: {filepath}")
-
 
 # Fix the problematic files
 files_to_fix = [

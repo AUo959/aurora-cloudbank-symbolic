@@ -7,7 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 def test_command(cmd, description):
     """Test a command and report results."""
     print(f"\n🧪 Testing: {description}")
@@ -30,7 +29,6 @@ def test_command(cmd, description):
         print(f"⏰ TIMEOUT: {description}")
     except Exception as e:
         print(f"❌ ERROR: {description} - {str(e)}")
-
 
 def main():
     print("🚀 GITWiz Enhanced - Functionality Test Suite")
@@ -92,7 +90,6 @@ def main():
     print("\n" + "=" * 60)
     print("🎯 Test Suite Complete!")
     print("If all tests show ✅ SUCCESS, GITWiz Enhanced is fully operational!")
-
 
 if __name__ == "__main__":
     main()

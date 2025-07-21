@@ -15,7 +15,6 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-
 class GITWizCleanup:
     """Repository cleanup and health maintenance tool."""
 
@@ -302,7 +301,6 @@ class GITWizCleanup:
 
         return report
 
-
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="GITWiz Repository Cleanup Tool")
@@ -342,7 +340,6 @@ def main():
     except (OSError, subprocess.SubprocessError) as e:
         print(f"❌ Error during cleanup: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

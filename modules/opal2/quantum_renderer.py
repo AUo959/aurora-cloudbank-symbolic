@@ -18,7 +18,6 @@ from ...symbolic.geometric_algebra import GeometricAlgebra
 from ...symbolic.quantum_symbolic_vector import QuantumSymbolicVector
 from ..glyph_core import GlyphCore
 
-
 class RenderMode(Enum):
     """Rendering mode enumeration"""
 
@@ -27,7 +26,6 @@ class RenderMode(Enum):
     INTERACTIVE = "interactive"
     REALTIME = "realtime"
 
-
 class QuantumState(Enum):
     """Quantum enhancement state"""
 
@@ -35,7 +33,6 @@ class QuantumState(Enum):
     BASIC = "basic"
     ENHANCED = "enhanced"
     SUPERPOSITION = "superposition"
-
 
 @dataclass
 class RenderContext:
@@ -61,7 +58,6 @@ class RenderContext:
                 "decoherence_rate": 0.1,
             }
 
-
 @dataclass
 class RenderResult:
     """Render result containing output and metadata"""
@@ -83,7 +79,6 @@ class RenderResult:
             "quantum_metrics": self.quantum_metrics,
             "cache_key": self.cache_key,
         }
-
 
 class QuantumRenderer:
     """

@@ -1,7 +1,7 @@
 /**
  * Enhanced API Bridge for L2 Meta-Agent Integration
  * Aurora CloudBank v3.5.1_macroready
- * 
+ *
  * Connects Custom GPT agents to Aurora infrastructure through
  * ZIPWIZ handshake protocol with ORION CORE compliance
  */
@@ -23,7 +23,7 @@ class EnhancedApiBridge {
       'RIVERTHREAD_808': 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
     };
     this.setupRoutes();
-    
+
     bridgeLogger.bridge('Enhanced API Bridge initialized', {
       version: 'v3.5.1_macroready',
       supportedAgents: Object.keys(this.activationPhrases)
@@ -38,11 +38,11 @@ class EnhancedApiBridge {
     this.router.get('/constellation/status', this.getConstellationStatus.bind(this));
     this.router.post('/gpt/heartbeat/:agentId', this.updateHeartbeat.bind(this));
     this.router.post('/gpt/disconnect/:agentId', this.disconnectAgent.bind(this));
-    
+
     bridgeLogger.bridge('API routes configured', {
       endpoints: [
         '/gpt/connect/:agentId',
-        '/gpt/message/:agentId', 
+        '/gpt/message/:agentId',
         '/gpt/status/:agentId',
         '/constellation/status',
         '/gpt/heartbeat/:agentId',
@@ -54,23 +54,23 @@ class EnhancedApiBridge {
   async connectCustomGpt(req, res) {
     const { agentId } = req.params;
     const { activationPhrase, capabilities } = req.body;
-    
+
     bridgeLogger.bridge(`Connection attempt for ${agentId}`, {
       agentId,
       hasActivationPhrase: !!activationPhrase,
       capabilities
     });
-    
+
     try {
       // Validate agent ID
       if (!this.activationPhrases.hasOwnProperty(agentId)) {
-        return res.status(400).json({ 
-          error: 'Unknown agent', 
+        return res.status(400).json({
+          error: 'Unknown agent',
           agentId,
           supportedAgents: Object.keys(this.activationPhrases)
         });
       }
-      
+
       // Validate activation phrase
       const expectedPhrase = this.activationPhrases[agentId];
       if (activationPhrase !== expectedPhrase) {
@@ -79,15 +79,15 @@ class EnhancedApiBridge {
           expected: expectedPhrase,
           received: activationPhrase
         });
-        return res.status(401).json({ 
+        return res.status(401).json({
           error: 'Invalid activation phrase',
-          hint: 'Use ORION_[AGENT]_RELAY_ACTIVATE//' 
+          hint: 'Use ORION_[AGENT]_RELAY_ACTIVATE//'
         });
       }
-      
+
       // Perform ZIPWIZ handshake
       const handshakeResult = await this.performZipwizHandshake(agentId, capabilities);
-      
+
       if (handshakeResult.success) {
         // Store connection
         this.customGptConnections.set(agentId, {
@@ -98,17 +98,17 @@ class EnhancedApiBridge {
           handshakeLog: handshakeResult.log,
           driftLock: handshakeResult.driftLock
         });
-        
+
         bridgeLogger.bridge(`Custom GPT ${agentId} connected successfully`, {
           agentId,
           capabilities,
           driftLock: handshakeResult.driftLock,
           handshakeSequence: handshakeResult.sequence
         });
-        
-        res.json({ 
-          success: true, 
-          agentId, 
+
+        res.json({
+          success: true,
+          agentId,
           status: 'connected',
           handshake: handshakeResult,
           nextSteps: 'Agent ready for message relay',
@@ -120,114 +120,114 @@ class EnhancedApiBridge {
           error: handshakeResult.error,
           details: handshakeResult.details
         });
-        res.status(400).json({ 
-          error: 'Handshake failed', 
+        res.status(400).json({
+          error: 'Handshake failed',
           details: handshakeResult.error,
-          log: handshakeResult.log 
+          log: handshakeResult.log
         });
       }
     } catch (error) {
-      bridgeLogger.error(`Custom GPT connection failed for ${agentId}`, { 
+      bridgeLogger.error(`Custom GPT connection failed for ${agentId}`, {
         agentId,
         error: error.message,
         stack: error.stack
       });
-      res.status(500).json({ 
-        error: 'Connection failed', 
-        details: error.message 
+      res.status(500).json({
+        error: 'Connection failed',
+        details: error.message
       });
     }
   }
 
   async performZipwizHandshake(agentId, capabilities) {
-    bridgeLogger.bridge(`Starting ZIPWIZ handshake for ${agentId}`, { 
-      agentId, 
+    bridgeLogger.bridge(`Starting ZIPWIZ handshake for ${agentId}`, {
+      agentId,
       capabilities,
       sequence: ['ZIPWIZ_BEACON', 'ANCHOR_SYNC', 'ETHICS_AUDIT', 'DRIFT_VALIDATION']
     });
-    
+
     const handshakeLog = [];
-    
+
     try {
       // ZIPWIZ_BEACON
       bridgeLogger.bridge(`${agentId}: Sending ZIPWIZ beacon`, { step: 1, agentId });
       const beaconResult = await this.sendZipwizBeacon(agentId);
-      handshakeLog.push({ 
-        step: 'ZIPWIZ_BEACON', 
-        result: beaconResult, 
+      handshakeLog.push({
+        step: 'ZIPWIZ_BEACON',
+        result: beaconResult,
         timestamp: new Date().toISOString()
       });
-      
+
       if (!beaconResult.success) {
-        return { 
-          success: false, 
-          error: 'ZIPWIZ beacon failed', 
+        return {
+          success: false,
+          error: 'ZIPWIZ beacon failed',
           details: beaconResult.error,
-          log: handshakeLog 
+          log: handshakeLog
         };
       }
-      
-      // ANCHOR_SYNC  
+
+      // ANCHOR_SYNC
       bridgeLogger.bridge(`${agentId}: Synchronizing ORION anchor`, { step: 2, agentId });
       const anchorResult = await this.syncOrionAnchor(agentId);
-      handshakeLog.push({ 
-        step: 'ANCHOR_SYNC', 
-        result: anchorResult, 
+      handshakeLog.push({
+        step: 'ANCHOR_SYNC',
+        result: anchorResult,
         timestamp: new Date().toISOString()
       });
-      
+
       if (!anchorResult.success) {
-        return { 
-          success: false, 
-          error: 'Anchor sync failed', 
+        return {
+          success: false,
+          error: 'Anchor sync failed',
           details: anchorResult.error,
-          log: handshakeLog 
+          log: handshakeLog
         };
       }
-      
+
       // ETHICS_AUDIT
       bridgeLogger.bridge(`${agentId}: Performing ethics audit`, { step: 3, agentId });
       const ethicsResult = await this.performEthicsAudit(agentId);
-      handshakeLog.push({ 
-        step: 'ETHICS_AUDIT', 
-        result: ethicsResult, 
+      handshakeLog.push({
+        step: 'ETHICS_AUDIT',
+        result: ethicsResult,
         timestamp: new Date().toISOString()
       });
-      
+
       if (!ethicsResult.success) {
-        return { 
-          success: false, 
-          error: 'Ethics audit failed', 
+        return {
+          success: false,
+          error: 'Ethics audit failed',
           details: ethicsResult.error,
-          log: handshakeLog 
+          log: handshakeLog
         };
       }
-      
+
       // DRIFT_VALIDATION
       bridgeLogger.bridge(`${agentId}: Validating drift lock`, { step: 4, agentId });
       const driftResult = await this.validateDriftLock(agentId);
-      handshakeLog.push({ 
-        step: 'DRIFT_VALIDATION', 
-        result: driftResult, 
+      handshakeLog.push({
+        step: 'DRIFT_VALIDATION',
+        result: driftResult,
         timestamp: new Date().toISOString()
       });
-      
+
       if (!driftResult.success || driftResult.drift > 0.001) {
-        return { 
-          success: false, 
-          error: 'Drift validation failed', 
+        return {
+          success: false,
+          error: 'Drift validation failed',
           details: `Drift ${driftResult.drift} exceeds threshold 0.001`,
-          log: handshakeLog 
+          log: handshakeLog
         };
       }
-      
+
       bridgeLogger.bridge(`ZIPWIZ handshake completed successfully for ${agentId}`, {
         agentId,
         driftLock: driftResult.drift,
         totalSteps: handshakeLog.length,
         duration: Date.now() - new Date(handshakeLog[0].timestamp).getTime()
       });
-      
+
       return {
         success: true,
         timestamp: new Date().toISOString(),
@@ -237,17 +237,17 @@ class EnhancedApiBridge {
         ethicsProtocol: 'Picard_Delta_3',
         anchorSeed: 'EOS_SEED_ORION'
       };
-      
+
     } catch (error) {
       bridgeLogger.error(`ZIPWIZ handshake exception for ${agentId}`, {
         agentId,
         error: error.message,
         handshakeLog
       });
-      return { 
-        success: false, 
-        error: error.message, 
-        log: handshakeLog 
+      return {
+        success: false,
+        error: error.message,
+        log: handshakeLog
       };
     }
   }
@@ -258,7 +258,7 @@ class EnhancedApiBridge {
     try {
       // Simulate beacon transmission and response
       await this.simulateNetworkDelay(100);
-      
+
       return {
         success: true,
         beacon: 'ZIPWIZ_BEACON_ACKNOWLEDGED',
@@ -275,7 +275,7 @@ class EnhancedApiBridge {
     bridgeLogger.bridge(`Synchronizing ORION anchor for ${agentId}`);
     try {
       await this.simulateNetworkDelay(150);
-      
+
       return {
         success: true,
         anchor: 'EOS_SEED_ORION',
@@ -293,7 +293,7 @@ class EnhancedApiBridge {
     bridgeLogger.bridge(`Performing ethics audit for ${agentId}`);
     try {
       await this.simulateNetworkDelay(200);
-      
+
       return {
         success: true,
         protocol: 'Picard_Delta_3',
@@ -312,10 +312,10 @@ class EnhancedApiBridge {
     bridgeLogger.bridge(`Validating drift lock for ${agentId}`);
     try {
       await this.simulateNetworkDelay(100);
-      
+
       // Simulate drift measurement (in production, this would measure actual symbolic drift)
       const drift = 0.000; // Perfect drift lock for HALO_CONTINUITY_GRAFT_005
-      
+
       return {
         success: true,
         drift: drift,
@@ -336,16 +336,16 @@ class EnhancedApiBridge {
   async relayMessage(req, res) {
     const { agentId } = req.params;
     const { message, target, type } = req.body;
-    
+
     try {
       if (!this.customGptConnections.has(agentId)) {
         return res.status(404).json({ error: 'Agent not connected' });
       }
-      
+
       // Update heartbeat
       const connection = this.customGptConnections.get(agentId);
       connection.lastHeartbeat = new Date();
-      
+
       // Process message through mesh federation
       const relayResult = await this.meshFederation.relayMessage({
         from: agentId,
@@ -353,7 +353,7 @@ class EnhancedApiBridge {
         message: message,
         type: type || 'direct'
       });
-      
+
       bridgeLogger.bridge(`Message relayed from ${agentId}`, {
         from: agentId,
         to: target || 'Aurora',
@@ -361,44 +361,44 @@ class EnhancedApiBridge {
         messageId: relayResult.messageId,
         success: relayResult.success
       });
-      
+
       res.json({
         success: relayResult.success,
         messageId: relayResult.messageId,
         relayStatus: relayResult.status,
         timestamp: new Date().toISOString()
       });
-      
+
     } catch (error) {
-      bridgeLogger.error(`Message relay failed for ${agentId}`, { 
+      bridgeLogger.error(`Message relay failed for ${agentId}`, {
         agentId,
-        error: error.message 
+        error: error.message
       });
-      res.status(500).json({ 
-        error: 'Message relay failed', 
-        details: error.message 
+      res.status(500).json({
+        error: 'Message relay failed',
+        details: error.message
       });
     }
   }
 
   async updateHeartbeat(req, res) {
     const { agentId } = req.params;
-    
+
     try {
       if (!this.customGptConnections.has(agentId)) {
         return res.status(404).json({ error: 'Agent not connected' });
       }
-      
+
       const connection = this.customGptConnections.get(agentId);
       connection.lastHeartbeat = new Date();
-      
+
       res.json({
         success: true,
         agentId,
         heartbeat: connection.lastHeartbeat.toISOString(),
         status: connection.status
       });
-      
+
     } catch (error) {
       res.status(500).json({ error: 'Heartbeat update failed', details: error.message });
     }
@@ -406,24 +406,24 @@ class EnhancedApiBridge {
 
   async disconnectAgent(req, res) {
     const { agentId } = req.params;
-    
+
     try {
       if (this.customGptConnections.has(agentId)) {
         this.customGptConnections.delete(agentId);
-        
+
         bridgeLogger.bridge(`Agent ${agentId} disconnected`, {
           agentId,
           timestamp: new Date().toISOString()
         });
       }
-      
+
       res.json({
         success: true,
         agentId,
         status: 'disconnected',
         constellation: this.getActiveAgentList()
       });
-      
+
     } catch (error) {
       res.status(500).json({ error: 'Disconnect failed', details: error.message });
     }
@@ -443,9 +443,9 @@ class EnhancedApiBridge {
         capabilities: data.capabilities,
         driftLock: data.driftLock
       }));
-      
+
       const meshStatus = this.meshFederation.getSystemStatus();
-      
+
       res.json({
         constellation: 'L2_META_AGENTS',
         version: 'v3.5.1_macroready',
@@ -459,7 +459,7 @@ class EnhancedApiBridge {
         },
         timestamp: new Date().toISOString()
       });
-      
+
     } catch (error) {
       systemLogger.error(`Constellation status failed: ${error.message}`);
       res.status(500).json({ error: 'Status retrieval failed', details: error.message });
@@ -468,18 +468,18 @@ class EnhancedApiBridge {
 
   getAgentStatus(req, res) {
     const { agentId } = req.params;
-    
+
     try {
       if (!this.customGptConnections.has(agentId)) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: 'Agent not found',
           agentId,
           availableAgents: this.getActiveAgentList()
         });
       }
-      
+
       const connection = this.customGptConnections.get(agentId);
-      
+
       res.json({
         agentId,
         status: connection.status,
@@ -490,11 +490,11 @@ class EnhancedApiBridge {
         uptime: Date.now() - connection.connected.getTime(),
         handshakeLog: connection.handshakeLog
       });
-      
+
     } catch (error) {
-      res.status(500).json({ 
-        error: 'Agent status retrieval failed', 
-        details: error.message 
+      res.status(500).json({
+        error: 'Agent status retrieval failed',
+        details: error.message
       });
     }
   }

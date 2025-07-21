@@ -16,7 +16,6 @@ from modules.telemetry_logger import get_logger
 
 logger = get_logger("staff_node_ci_helper")
 
-
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
     import shlex
@@ -33,7 +32,6 @@ def run_cmd(cmd: str) -> None:
     except Exception as e:
         logger.error("Command execution error: %s", e)
         sys.exit(1)
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -73,7 +71,6 @@ def main() -> None:
 
     if args.push:
         run_cmd("git push origin main")
-
 
 if __name__ == "__main__":
     main()

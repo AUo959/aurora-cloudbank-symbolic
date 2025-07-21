@@ -9,7 +9,6 @@ import stat
 import shutil
 from pathlib import Path
 
-
 class GitHooksAutomationSetup:
     def __init__(self):
         self.git_hooks_dir = Path('.git/hooks')
@@ -19,14 +18,14 @@ class GitHooksAutomationSetup:
     def create_backup(self):
         """Create backup of existing hooks"""
         print("💾 Creating Git hooks backup...")
-        
+
         if not self.git_hooks_dir.exists():
             print("  ℹ️  No existing hooks directory")
             return
-        
+
         if self.hooks_backup_dir.exists():
             shutil.rmtree(self.hooks_backup_dir)
-        
+
         # Copy existing hooks
         existing_hooks = list(self.git_hooks_dir.glob('*'))
         if existing_hooks:
@@ -57,7 +56,7 @@ if [ -x "./smart-devops" ]; then
     echo "✅ Pre-flight check passed!"
 else
     echo "⚠️  smart-devops not found, running basic checks..."
-    
+
     # Basic syntax check for Python files
     if command -v python3 &> /dev/null; then
         echo "🐍 Checking Python syntax..."
@@ -71,7 +70,7 @@ else
         done
         echo "✅ Python syntax OK"
     fi
-    
+
     # Basic JavaScript syntax check
     if command -v node &> /dev/null; then
         echo "📜 Checking JavaScript syntax..."
@@ -85,7 +84,7 @@ else
         done
         echo "✅ JavaScript syntax OK"
     fi
-    
+
     # Check for large files
     echo "📁 Checking file sizes..."
     for file in $(git diff --cached --name-only --diff-filter=ACM); do
@@ -123,11 +122,11 @@ echo "🎯 Pre-commit checks completed successfully!"
 echo "Ready for commit! 🚀"
 exit 0
 '''
-        
+
         hook_path = self.git_hooks_dir / 'pre-commit'
         with open(hook_path, 'w') as f:
             f.write(hook_content)
-        
+
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
         self.hooks_created.append('pre-commit')
@@ -161,7 +160,7 @@ if [ -x "./smart-devops" ]; then
     echo "✅ Full-cycle validation passed!"
 else
     echo "⚠️  smart-devops not found, running basic validation..."
-    
+
     # Run tests if available
     if [ -f "package.json" ] && command -v npm &> /dev/null; then
         if npm run test --if-present; then
@@ -170,7 +169,7 @@ else
             echo "⚠️  Some tests failed, but continuing..."
         fi
     fi
-    
+
     # Check for Python requirements
     if [ -f "requirements.txt" ] && command -v python3 &> /dev/null; then
         echo "🐍 Checking Python requirements..."
@@ -199,11 +198,11 @@ echo "🎯 Pre-push validation completed!"
 echo "Proceeding with push... 🚀"
 exit 0
 '''
-        
+
         hook_path = self.git_hooks_dir / 'pre-push'
         with open(hook_path, 'w') as f:
             f.write(hook_content)
-        
+
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
         self.hooks_created.append('pre-push')
@@ -230,7 +229,7 @@ else
     echo "📋 Commit Message Guidelines:"
     echo "Option 1 - Emoji format:"
     echo "  🎯 Main feature or goal"
-    echo "  ✨ New feature" 
+    echo "  ✨ New feature"
     echo "  🐛 Bug fix"
     echo "  📝 Documentation"
     echo "  🔧 Configuration/tools"
@@ -243,7 +242,7 @@ else
     echo "Option 2 - Conventional format:"
     echo "  feat: add new feature"
     echo "  fix: resolve bug"
-    echo "  docs: update documentation" 
+    echo "  docs: update documentation"
     echo "  style: formatting changes"
     echo "  refactor: code restructure"
     echo "  test: add/update tests"
@@ -254,11 +253,11 @@ else
     exit 1
 fi
 '''
-        
+
         hook_path = self.git_hooks_dir / 'commit-msg'
         with open(hook_path, 'w') as f:
             f.write(hook_content)
-        
+
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
         self.hooks_created.append('commit-msg')
@@ -294,11 +293,11 @@ fi
 echo "✅ Post-commit automation completed"
 exit 0
 '''
-        
+
         hook_path = self.git_hooks_dir / 'post-commit'
         with open(hook_path, 'w') as f:
             f.write(hook_content)
-        
+
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
         self.hooks_created.append('post-commit')
@@ -307,22 +306,22 @@ exit 0
     def setup_hooks(self):
         """Set up all Git hooks"""
         print("🔗 Setting up Aurora Git hooks...")
-        
+
         # Ensure hooks directory exists
         self.git_hooks_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create all hooks
         self.create_pre_commit_hook()
         self.create_pre_push_hook()
         self.create_commit_msg_hook()
         self.create_post_commit_hook()
-        
+
         print(f"  🎯 Created {len(self.hooks_created)} Git hooks")
 
     def test_hooks(self):
         """Test that hooks are properly installed"""
         print("🧪 Testing Git hooks installation...")
-        
+
         all_working = True
         for hook_name in self.hooks_created:
             hook_path = self.git_hooks_dir / hook_name
@@ -331,7 +330,7 @@ exit 0
             else:
                 print(f"  ❌ {hook_name} hook has issues")
                 all_working = False
-        
+
         return all_working
 
     def generate_hooks_documentation(self):
@@ -353,7 +352,7 @@ Aurora CloudBank uses intelligent Git hooks to maintain code quality and automat
 - Sensitive data scanning
 - Lint checking
 
-### Pre-push Hook  
+### Pre-push Hook
 **Triggers:** Before pushing to remote repository
 **Purpose:** Comprehensive validation before sharing code
 **Features:**
@@ -427,7 +426,7 @@ chmod -x .git/hooks/hook-name  # Disable specific hook
 
 ## Customization
 
-Hooks can be customized by editing files in `.git/hooks/`. 
+Hooks can be customized by editing files in `.git/hooks/`.
 Backup originals first: `cp .git/hooks/pre-commit .git/hooks/pre-commit.backup`
 
 ## Best Practices
@@ -445,24 +444,24 @@ For issues with Git hooks:
 3. Review logs and error messages
 4. Contact the development team if needed
 """
-        
+
         with open('GIT_HOOKS_README.md', 'w') as f:
             f.write(documentation)
-        
+
         print("  📚 Created comprehensive hooks documentation")
 
     def generate_setup_report(self):
         """Generate setup completion report"""
         print("\n🎯 GIT HOOKS AUTOMATION SETUP COMPLETE!")
         print("=" * 50)
-        
+
         report = {
             'setup_completed': True,
             'hooks_installed': self.hooks_created,
             'total_hooks': len(self.hooks_created),
             'features': [
                 'Intelligent pre-commit quality checks',
-                'Comprehensive pre-push validation', 
+                'Comprehensive pre-push validation',
                 'Commit message standardization',
                 'Post-commit automation',
                 'Smart-devops integration',
@@ -479,49 +478,47 @@ For issues with Git hooks:
                 'Provides helpful developer guidance'
             ]
         }
-        
+
         print(f"✅ Installed {report['total_hooks']} intelligent Git hooks:")
         for hook in report['hooks_installed']:
             print(f"   • {hook}")
-        
+
         print(f"\n🚀 Key Benefits:")
         for benefit in report['benefits'][:4]:  # Show top 4 benefits
             print(f"   • {benefit}")
-        
+
         print(f"\n📚 Documentation: GIT_HOOKS_README.md")
         print(f"💡 Test hooks: Run a git commit or push to see them in action!")
-        
-        return report
 
+        return report
 
 def main():
     """Execute Git hooks automation setup"""
     setup = GitHooksAutomationSetup()
-    
+
     print("🔗 Aurora Git Hooks Automation Setup")
     print("=" * 40)
-    
+
     # Create backup of existing hooks
     setup.create_backup()
-    
+
     # Install all hooks
     setup.setup_hooks()
-    
+
     # Test installation
     if setup.test_hooks():
         print("✅ All hooks installed and working correctly!")
     else:
         print("⚠️  Some hooks may have installation issues")
-    
+
     # Generate documentation
     setup.generate_hooks_documentation()
-    
+
     # Generate report
     setup.generate_setup_report()
-    
+
     print("\n🎉 Git hooks automation is now active!")
     print("Your repository is protected by intelligent quality gates!")
-
 
 if __name__ == "__main__":
     main()

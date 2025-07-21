@@ -15,7 +15,6 @@ from typing import Callable, Dict, List, Optional
 
 import schedule
 
-
 @dataclass
 class MaintenanceTask:
     """Maintenance task definition"""
@@ -29,7 +28,6 @@ class MaintenanceTask:
     last_run: Optional[str] = None
     success_count: int = 0
     failure_count: int = 0
-
 
 class ScheduledMaintenanceSystem:
     """Comprehensive scheduled maintenance system"""
@@ -553,7 +551,6 @@ class ScheduledMaintenanceSystem:
             }
         return status
 
-
 def main():
     """Main maintenance function"""
     import argparse
@@ -597,7 +594,6 @@ def main():
         print(
             "Use --daemon to start scheduler, --run-task to run specific task, or --status to check status"
         )
-
 
 if __name__ == "__main__":
     main()

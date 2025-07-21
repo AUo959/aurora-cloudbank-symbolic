@@ -3,7 +3,6 @@ import pytest
 
 from modules.symbolic_core.vsa import SymbolicVector, encode_symbol, similarity
 
-
 def test_symbolic_vector_encoding():
     sv1 = SymbolicVector.from_symbol("alpha")
     sv2 = SymbolicVector.from_symbol("alpha")
@@ -15,7 +14,6 @@ def test_symbolic_vector_encoding():
         sv1.vector, sv3.vector
     ), "Different symbols should have different encodings."
 
-
 def test_symbolic_vector_similarity():
     sv1 = SymbolicVector.from_symbol("alpha")
     sv2 = SymbolicVector.from_symbol("alpha")
@@ -23,7 +21,6 @@ def test_symbolic_vector_similarity():
     sim_same = similarity(sv1.vector, sv2.vector)
     sim_diff = similarity(sv1.vector, sv3.vector)
     assert sim_same > sim_diff, "Similarity should be higher for same symbol."
-
 
 def test_symbolic_vector_bind_superpose():
     sv1 = SymbolicVector.from_symbol("alpha")
@@ -34,12 +31,10 @@ def test_symbolic_vector_bind_superpose():
     assert np.array(bound).shape == np.array(sv1.vector).shape
     assert np.array(superposed).shape == np.array(sv1.vector).shape
 
-
 def test_encode_symbol_utility():
     vec = encode_symbol("gamma")
     assert isinstance(vec, list)
     assert len(vec) == 512
-
 
 def test_similarity_utility():
     v1 = encode_symbol("a")
@@ -48,7 +43,6 @@ def test_similarity_utility():
     assert similarity(np.array(v1), np.array(v2)) > similarity(
         np.array(v1), np.array(v3)
     )
-
 
 def test_symbolicvector_pydantic_validation():
     # Valid vector

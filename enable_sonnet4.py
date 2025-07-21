@@ -14,10 +14,8 @@ from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globall
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 async def main():
     """Main enablement function"""
@@ -64,7 +62,6 @@ async def main():
         logger.error("Failed to enable Sonnet 4: %s", e)
         print(f"❌ Failed to enable Claude Sonnet 4: {e}")
         return False
-
 
 if __name__ == "__main__":
     success = asyncio.run(main())

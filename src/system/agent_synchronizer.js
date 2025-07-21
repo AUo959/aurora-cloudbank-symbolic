@@ -12,7 +12,7 @@ class AgentSynchronizer {
     this.synchronizerId = 'AGENT_SYNC_MASTER';
     this.status = 'INITIALIZING';
     this.driftThreshold = 0.02;
-    
+
     // Initialize L1 agent bridges
     this.agents = {
       l1: {
@@ -23,11 +23,11 @@ class AgentSynchronizer {
       l2: ['STARLING_AU', 'ARCHY', 'LIORA', 'DAEDALUS', 'VOIDWHISPER'],
       l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion']
     };
-    
+
     this.lastSyncTime = Date.now();
     this.status = 'OPERATIONAL';
   }
-  
+
   async synchronizeAllLayers() {
     try {
       const syncResults = {
@@ -37,20 +37,20 @@ class AgentSynchronizer {
         l3Status: 'MONITORING_ACTIVE',
         overallDrift: 0
       };
-      
+
       // Sync L1 agents
       for (const [agentName, agent] of Object.entries(this.agents.l1)) {
         const status = agent.getStatus();
         syncResults.l1Agents[agentName] = status;
         syncResults.overallDrift = Math.max(syncResults.overallDrift, status.driftStatus.driftLevel);
       }
-      
+
       // Calculate overall sync status
       syncResults.syncStatus = syncResults.overallDrift < this.driftThreshold ? 'SYNCHRONIZED' : 'DRIFT_DETECTED';
       syncResults.driftCorrectionNeeded = syncResults.overallDrift > this.driftThreshold;
-      
+
       this.lastSyncTime = Date.now();
-      
+
       return syncResults;
     } catch (error) {
       return {
@@ -60,10 +60,10 @@ class AgentSynchronizer {
       };
     }
   }
-  
+
   async getDriftReport() {
     const syncResult = await this.synchronizeAllLayers();
-    
+
     return {
       synchronizerId: this.synchronizerId,
       timestamp: Date.now(),
@@ -79,7 +79,7 @@ class AgentSynchronizer {
       driftCorrectionActive: true
     };
   }
-  
+
   getStatus() {
     return {
       synchronizerId: this.synchronizerId,
@@ -100,12 +100,12 @@ module.exports = AgentSynchronizer;
 // Emergency deployment
 if (require.main === module) {
   const synchronizer = new AgentSynchronizer();
-  
+
   // Test emergency synchronization
   synchronizer.synchronizeAllLayers().then(result => {
     const driftFixed = result.overallDrift < 0.02;
     const status = driftFixed ? '✅ DRIFT CORRECTED' : '⚠️ DRIFT REDUCTION IN PROGRESS';
-    
+
     process.stdout.write(`${status} - Overall drift: ${result.overallDrift.toFixed(4)}\n`);
   });
 }

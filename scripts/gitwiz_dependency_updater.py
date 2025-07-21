@@ -12,7 +12,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-
 class DependencyAutoUpdater:
     """Advanced dependency auto-updater for GITWiz."""
 
@@ -362,7 +361,6 @@ class DependencyAutoUpdater:
 
         return recommendations
 
-
 def main():
     """Main CLI interface for dependency auto-updater."""
     import argparse
@@ -414,7 +412,6 @@ def main():
         print("  python3 gitwiz_dependency_updater.py --scan")
         print("  python3 gitwiz_dependency_updater.py --comprehensive --dry-run")
         print("  python3 gitwiz_dependency_updater.py --update --dry-run")
-
 
 if __name__ == "__main__":
     main()

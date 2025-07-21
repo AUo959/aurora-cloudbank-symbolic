@@ -10,7 +10,6 @@ import subprocess
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
-
 @dataclass
 class BranchInfo:
     """Branch information container"""
@@ -21,7 +20,6 @@ class BranchInfo:
     is_merged: bool
     days_old: int
     category: str
-
 
 class AutomatedBranchManager:
     """Automated branch cleanup with intelligent categorization"""
@@ -292,7 +290,6 @@ class AutomatedBranchManager:
 
         return "\n".join(report_lines)
 
-
 def main():
     """Main execution function"""
     parser = argparse.ArgumentParser(description="Automated branch cleanup")
@@ -346,7 +343,6 @@ def main():
         f.write(report)
 
     print(f"📄 Report saved to: {report_file}")
-
 
 if __name__ == "__main__":
     main()

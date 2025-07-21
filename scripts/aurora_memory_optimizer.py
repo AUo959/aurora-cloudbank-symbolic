@@ -13,7 +13,6 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-
 class MemoryOptimizer:
     """Advanced memory compression and optimization system"""
 
@@ -458,7 +457,6 @@ Found {len(duplicates)} sets of duplicate files:
 
         return results
 
-
 def main():
     import argparse
 
@@ -518,7 +516,6 @@ def main():
 
         else:
             print("🔍 Analysis complete. Use --execute to run actual optimization.")
-
 
 if __name__ == "__main__":
     main()

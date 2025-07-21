@@ -21,10 +21,9 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-
 class CIEnvironmentValidator:
     """Validates and optionally fixes CI environment setup."""
-    
+
     def __init__(self):
         self.required_python_tools = [
             'flake8', 'black', 'isort', 'pylint', 'bandit', 'autopep8'
@@ -39,14 +38,14 @@ class CIEnvironmentValidator:
             'missing_tools': [],
             'recommendations': []
         }
-    
+
     def check_tool_availability(self, tool: str) -> Tuple[bool, str]:
         """Check if a tool is available and get version."""
         try:
             result = subprocess.run(
-                [tool, '--version'], 
-                capture_output=True, 
-                text=True, 
+                [tool, '--version'],
+                capture_output=True,
+                text=True,
                 timeout=10
             )
             if result.returncode == 0:
@@ -55,7 +54,7 @@ class CIEnvironmentValidator:
             return False, f"Exit code: {result.returncode}"
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             return False, "Not found or timeout"
-    
+
     def validate_python_tools(self) -> None:
         """Validate Python lint tools."""
         print("🐍 Validating Python tools...")
@@ -70,11 +69,11 @@ class CIEnvironmentValidator:
             print(f"  {status} {tool}: {info}")
             if not available:
                 self.results['missing_tools'].append(f"python:{tool}")
-    
+
     def validate_node_tools(self) -> None:
         """Validate Node.js lint tools."""
         print("\n📦 Validating Node.js tools...")
-        
+
         # Check if npm is available first
         npm_available, npm_info = self.check_tool_availability('npm')
         if not npm_available:
@@ -86,9 +85,9 @@ class CIEnvironmentValidator:
                     'error': 'npm not available'
                 }
             return
-        
+
         print(f"  ✅ npm: {npm_info}")
-        
+
         for tool in self.required_node_tools:
             available, info = self.check_tool_availability(tool)
             self.results['node_tools'][tool] = {
@@ -100,41 +99,41 @@ class CIEnvironmentValidator:
             print(f"  {status} {tool}: {info}")
             if not available:
                 self.results['missing_tools'].append(f"node:{tool}")
-    
+
     def generate_recommendations(self) -> None:
         """Generate recommendations for fixing issues."""
         if not self.results['missing_tools']:
             self.results['recommendations'].append("✅ All required tools are available")
             self.results['overall_status'] = 'success'
             return
-        
+
         self.results['overall_status'] = 'issues_found'
-        
+
         python_missing = [t.split(':')[1] for t in self.results['missing_tools'] if t.startswith('python:')]
         node_missing = [t.split(':')[1] for t in self.results['missing_tools'] if t.startswith('node:')]
-        
+
         if python_missing:
             tools_str = ' '.join(python_missing)
             self.results['recommendations'].append(
                 f"Install missing Python tools: pip install {tools_str}"
             )
-        
+
         if node_missing:
             tools_str = ' '.join(node_missing)
             self.results['recommendations'].append(
                 f"Install missing Node.js tools: npm install -g {tools_str}"
             )
-    
+
     def test_gitwiz_integration(self) -> None:
         """Test GitWiz integration if available."""
         print("\n🔧 Testing GitWiz integration...")
         gitwiz_script = Path("scripts/gitwiz_integrated_command.py")
-        
+
         if not gitwiz_script.exists():
             print("  ❌ GitWiz integrated command not found")
             self.results['gitwiz_status'] = 'not_found'
             return
-        
+
         try:
             result = subprocess.run(
                 [sys.executable, str(gitwiz_script), "status"],
@@ -143,11 +142,11 @@ class CIEnvironmentValidator:
                 timeout=30,
                 cwd=gitwiz_script.parent.parent
             )
-            
+
             if result.returncode == 0:
                 print("  ✅ GitWiz status check successful")
                 self.results['gitwiz_status'] = 'working'
-                
+
                 # Try to parse the JSON output
                 try:
                     # Find the JSON output in the stdout
@@ -157,7 +156,7 @@ class CIEnvironmentValidator:
                         if line.strip().startswith('{'):
                             json_line = line.strip()
                             break
-                    
+
                     if json_line:
                         gitwiz_data = json.loads(json_line)
                         capabilities = gitwiz_data.get('capabilities', {}).get('lint_tools', {})
@@ -181,37 +180,37 @@ class CIEnvironmentValidator:
         except Exception as e:
             print(f"  ❌ GitWiz test error: {e}")
             self.results['gitwiz_status'] = 'error'
-    
+
     def validate(self) -> Dict:
         """Run complete validation."""
         print("🔍 CI Environment Validation Starting...\n")
-        
+
         self.validate_python_tools()
         self.validate_node_tools()
         self.test_gitwiz_integration()
         self.generate_recommendations()
-        
+
         print("\n" + "="*60)
         print(f"📊 Overall Status: {self.results['overall_status'].upper()}")
-        
+
         if self.results['recommendations']:
             print("\n💡 Recommendations:")
             for rec in self.results['recommendations']:
                 print(f"  {rec}")
-        
+
         return self.results
-    
+
     def fix_missing_tools(self) -> None:
         """Attempt to install missing tools."""
         if not self.results['missing_tools']:
             print("✅ No missing tools to install")
             return
-        
+
         print("🔧 Attempting to install missing tools...")
-        
+
         python_missing = [t.split(':')[1] for t in self.results['missing_tools'] if t.startswith('python:')]
         node_missing = [t.split(':')[1] for t in self.results['missing_tools'] if t.startswith('node:')]
-        
+
         if python_missing:
             print(f"Installing Python tools: {' '.join(python_missing)}")
             try:
@@ -219,7 +218,7 @@ class CIEnvironmentValidator:
                 print("✅ Python tools installed successfully")
             except subprocess.CalledProcessError as e:
                 print(f"❌ Failed to install Python tools: {e}")
-        
+
         if node_missing and shutil.which('npm'):
             print(f"Installing Node.js tools: {' '.join(node_missing)}")
             try:
@@ -228,34 +227,32 @@ class CIEnvironmentValidator:
             except subprocess.CalledProcessError as e:
                 print(f"❌ Failed to install Node.js tools: {e}")
 
-
 def main():
     """Main entry point."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Validate CI environment setup')
     parser.add_argument('--fix-missing', action='store_true', help='Attempt to install missing tools')
     parser.add_argument('--output', choices=['json', 'text'], default='text', help='Output format')
-    
+
     args = parser.parse_args()
-    
+
     validator = CIEnvironmentValidator()
     results = validator.validate()
-    
+
     if args.fix_missing and results['missing_tools']:
         print("\n" + "="*60)
         validator.fix_missing_tools()
-        
+
         # Re-validate after fixing
         print("\n🔄 Re-validating after fixes...")
         results = validator.validate()
-    
+
     if args.output == 'json':
         print("\n" + json.dumps(results, indent=2))
-    
+
     # Exit with appropriate code
     sys.exit(0 if results['overall_status'] == 'success' else 1)
-
 
 if __name__ == '__main__':
     main()

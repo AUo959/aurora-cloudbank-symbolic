@@ -26,7 +26,6 @@ RATE_LIMIT = 10  # Max files per run
 
 processed_files = 0
 
-
 def sort_file(file_path: str, dry_run: bool = False):
     global processed_files
 
@@ -101,7 +100,6 @@ def sort_file(file_path: str, dry_run: bool = False):
             print(f"Error moving '{file_path}': {e}")
 
     processed_files += 1
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

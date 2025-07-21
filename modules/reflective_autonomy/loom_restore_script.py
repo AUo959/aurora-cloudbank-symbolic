@@ -27,7 +27,6 @@ from reflective_monitor_core import ReflectiveMonitor  # noqa: F401
 # ====================================
 # STEP 3 — Reinitialize Reflective State
 
-
 governance_path = "loom_governance_system.yaml"
 with open(governance_path, "r") as f:
     governance_config = yaml.safe_load(f)

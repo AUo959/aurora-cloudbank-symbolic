@@ -12,26 +12,21 @@ e1 = blades["e1"]
 e2 = blades["e2"]
 e3 = blades["e3"]
 
-
 def create_vector(x, y, z):
     """Create a 3D vector as a multivector."""
     return x * e1 + y * e2 + z * e3
-
 
 def geometric_product(a, b):
     """Compute the geometric product of two multivectors."""
     return a * b
 
-
 def add_multivectors(a, b):
     """Add two multivectors."""
     return a + b
 
-
 def multivector_to_array(mv):
     """Convert a multivector to a numpy array of coefficients."""
     return np.array(mv.value)
-
 
 # Example usage (for testing/demo purposes)
 if __name__ == "__main__":

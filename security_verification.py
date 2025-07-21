@@ -9,7 +9,6 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-
 def secure_run(cmd: str) -> tuple[str, str, int]:
     """Securely execute command without shell injection."""
     try:
@@ -18,7 +17,6 @@ def secure_run(cmd: str) -> tuple[str, str, int]:
         return result.stdout, result.stderr, result.returncode
     except (subprocess.TimeoutExpired, OSError) as e:
         return "", str(e), 1
-
 
 def main():
     """Generate final security verification report."""
@@ -113,7 +111,6 @@ def main():
     print("🔒 All critical vulnerabilities have been resolved")
     print("🛡️  Comprehensive security measures are in place")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

@@ -3,7 +3,6 @@ Aurora CloudBank - Dynamic Interface Adaptation System
 Never-before-conceived adaptive interface evolution
 """
 
-
 class DynamicInterfaceAdapter:
     def __init__(self):
         self.adaptation_modes = {

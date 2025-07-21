@@ -31,15 +31,15 @@ class EnhancedApiBridge {
   async connectCustomGpt(req, res) {
     const { agentId } = req.params;
     const { activationPhrase, capabilities } = req.body;
-    
+
     try {
       // Validate activation phrase
       const validPhrase = this.meshFederation.validateActivationPhrase(agentId, activationPhrase);
-      
+
       if (validPhrase) {
         // Perform ZIPWIZ handshake
         const handshakeResult = await this.performZipwizHandshake(agentId, capabilities);
-        
+
         if (handshakeResult.success) {
           this.customGptConnections.set(agentId, {
             status: 'active',
@@ -47,16 +47,16 @@ class EnhancedApiBridge {
             capabilities: capabilities,
             lastHeartbeat: new Date()
           });
-          
+
           bridgeLogger.bridge(`Custom GPT ${agentId} connected successfully`, {
             agentId,
             capabilities,
             handshake: handshakeResult
           });
-          
-          res.json({ 
-            success: true, 
-            agentId, 
+
+          res.json({
+            success: true,
+            agentId,
             status: 'connected',
             nextSteps: 'Agent ready for message relay'
           });
@@ -74,30 +74,30 @@ class EnhancedApiBridge {
 
   async performZipwizHandshake(agentId, capabilities) {
     bridgeLogger.bridge(`Starting ZIPWIZ handshake for ${agentId}`, { agentId, capabilities });
-    
+
     try {
       // ZIPWIZ_BEACON
       const beaconResult = await this.meshFederation.sendBeacon(agentId);
-      
-      // ANCHOR_SYNC  
+
+      // ANCHOR_SYNC
       const anchorResult = await this.meshFederation.syncAnchor(agentId, 'EOS_SEED_ORION');
-      
+
       // ETHICS_AUDIT
       const ethicsResult = await this.meshFederation.ethicsAudit(agentId, 'Picard_Delta_3');
-      
+
       // DRIFT_VALIDATION
       const driftResult = await this.meshFederation.validateDrift(agentId);
-      
+
       if (beaconResult && anchorResult && ethicsResult && driftResult.drift <= 0.000) {
-        return { 
-          success: true, 
+        return {
+          success: true,
           timestamp: new Date(),
           handshakeSequence: ['ZIPWIZ_BEACON', 'ANCHOR_SYNC', 'ETHICS_AUDIT', 'DRIFT_VALIDATION'],
           driftLock: driftResult.drift
         };
       } else {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: 'Handshake validation failed',
           details: { beaconResult, anchorResult, ethicsResult, driftResult }
         };
@@ -110,15 +110,15 @@ class EnhancedApiBridge {
   async relayMessage(req, res) {
     const { agentId } = req.params;
     const { message, target, type } = req.body;
-    
+
     try {
       if (!this.customGptConnections.has(agentId)) {
         return res.status(404).json({ error: 'Agent not connected' });
       }
-      
+
       // Update heartbeat
       this.customGptConnections.get(agentId).lastHeartbeat = new Date();
-      
+
       // Process message through mesh federation
       const relayResult = await this.meshFederation.relayMessage({
         from: agentId,
@@ -126,20 +126,20 @@ class EnhancedApiBridge {
         message: message,
         type: type || 'direct'
       });
-      
+
       bridgeLogger.bridge(`Message relayed from ${agentId}`, {
         from: agentId,
         to: target,
         messageType: type,
         success: relayResult.success
       });
-      
+
       res.json({
         success: relayResult.success,
         messageId: relayResult.messageId,
         relayStatus: relayResult.status
       });
-      
+
     } catch (error) {
       bridgeLogger.error(`Message relay failed for ${agentId}`, { error: error.message });
       res.status(500).json({ error: 'Message relay failed', details: error.message });
@@ -154,7 +154,7 @@ class EnhancedApiBridge {
       lastHeartbeat: data.lastHeartbeat,
       capabilities: data.capabilities
     }));
-    
+
     res.json({
       constellation: 'L2_META_AGENTS',
       totalAgents: this.customGptConnections.size,
@@ -190,14 +190,14 @@ module.exports = { EnhancedApiBridge };
             margin: 0;
             padding: 20px;
         }
-        
+
         .constellation-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
-        
+
         .agent-card {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(100, 200, 255, 0.3);
@@ -206,17 +206,17 @@ module.exports = { EnhancedApiBridge };
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
-        
+
         .agent-card.connected {
             border-color: rgba(100, 255, 100, 0.6);
             box-shadow: 0 0 20px rgba(100, 255, 100, 0.2);
         }
-        
+
         .agent-card.disconnected {
             border-color: rgba(255, 100, 100, 0.6);
             opacity: 0.7;
         }
-        
+
         .agent-status {
             display: inline-block;
             width: 10px;
@@ -224,11 +224,11 @@ module.exports = { EnhancedApiBridge };
             border-radius: 50%;
             margin-right: 10px;
         }
-        
+
         .agent-status.connected { background: #4ade80; }
         .agent-status.disconnected { background: #ef4444; }
         .agent-status.handshaking { background: #fbbf24; }
-        
+
         .activation-button {
             background: linear-gradient(45deg, #3b82f6, #1d4ed8);
             border: none;
@@ -239,12 +239,12 @@ module.exports = { EnhancedApiBridge };
             font-weight: bold;
             transition: all 0.2s ease;
         }
-        
+
         .activation-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
         }
-        
+
         .mesh-status {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
@@ -261,7 +261,7 @@ module.exports = { EnhancedApiBridge };
     </div>
 
     <h1>🌟 L2 Meta-Agent Constellation</h1>
-    
+
     <div class="constellation-grid" id="agentGrid">
         <!-- Agent cards will be populated by JavaScript -->
     </div>
@@ -291,7 +291,7 @@ module.exports = { EnhancedApiBridge };
 
                 this.agents.forEach(agent => {
                     const state = this.agentStates.get(agent.id) || { status: 'disconnected' };
-                    
+
                     const card = document.createElement('div');
                     card.className = `agent-card ${state.status}`;
                     card.innerHTML = `
@@ -314,11 +314,11 @@ module.exports = { EnhancedApiBridge };
             async activateAgent(agentId) {
                 try {
                     console.log(`Activating agent: ${agentId}`);
-                    
+
                     // Update UI to show handshaking state
                     this.agentStates.set(agentId, { status: 'handshaking' });
                     this.renderAgents();
-                    
+
                     // Simulate agent activation (in real implementation, this would call the API)
                     const response = await fetch(`/api/bridge/gpt/connect/${agentId}`, {
                         method: 'POST',
@@ -328,12 +328,12 @@ module.exports = { EnhancedApiBridge };
                             capabilities: ['message_relay', 'handshake_protocol', 'ethics_audit']
                         })
                     });
-                    
+
                     const result = await response.json();
-                    
+
                     if (result.success) {
-                        this.agentStates.set(agentId, { 
-                            status: 'connected', 
+                        this.agentStates.set(agentId, {
+                            status: 'connected',
                             connected: new Date(),
                             lastHeartbeat: new Date()
                         });
@@ -343,9 +343,9 @@ module.exports = { EnhancedApiBridge };
                         console.error(`Agent ${agentId} activation failed:`, result.error);
                         alert(`Agent activation failed: ${result.error}`);
                     }
-                    
+
                     this.renderAgents();
-                    
+
                 } catch (error) {
                     console.error(`Error activating agent ${agentId}:`, error);
                     this.agentStates.set(agentId, { status: 'disconnected' });
@@ -358,7 +358,7 @@ module.exports = { EnhancedApiBridge };
                 try {
                     const response = await fetch('/api/bridge/constellation/status');
                     const status = await response.json();
-                    
+
                     // Update mesh status
                     document.getElementById('meshStatusDisplay').innerHTML = `
                         <strong>Mesh Version:</strong> ${status.meshStatus?.version || 'Unknown'}<br>
@@ -366,7 +366,7 @@ module.exports = { EnhancedApiBridge };
                         <strong>Constellation:</strong> ${status.constellation}<br>
                         <strong>Last Update:</strong> ${new Date(status.timestamp).toLocaleTimeString()}
                     `;
-                    
+
                     // Update agent states
                     if (status.activeAgents) {
                         status.activeAgents.forEach(agent => {
@@ -379,10 +379,10 @@ module.exports = { EnhancedApiBridge };
                         });
                         this.renderAgents();
                     }
-                    
+
                 } catch (error) {
                     console.error('Status update failed:', error);
-                    document.getElementById('meshStatusDisplay').innerHTML = 
+                    document.getElementById('meshStatusDisplay').innerHTML =
                         `<span style="color: #ef4444;">Status update failed: ${error.message}</span>`;
                 }
             }
@@ -432,7 +432,7 @@ class CustomGptAgent:
 
 class L2MetaAgentBridge:
     """Bridge connector for L2 Custom GPT meta-agents"""
-    
+
     def __init__(self):
         self.agents = {
             'ARCHY': CustomGptAgent(
@@ -444,7 +444,7 @@ class L2MetaAgentBridge:
                 api_endpoint='/api/relay/archy'
             ),
             'OPPY': CustomGptAgent(
-                agent_id='OPPY', 
+                agent_id='OPPY',
                 role='Vector/Data Processor',
                 type='META_AGENT',
                 status='disconnected',
@@ -453,7 +453,7 @@ class L2MetaAgentBridge:
             ),
             'LIORA': CustomGptAgent(
                 agent_id='LIORA',
-                role='Handshake/Synchronization', 
+                role='Handshake/Synchronization',
                 type='META_AGENT',
                 status='disconnected',
                 capabilities=['research_coordination', 'handshake_protocols', 'sentiment_analysis'],
@@ -462,7 +462,7 @@ class L2MetaAgentBridge:
             'STARLING_AU': CustomGptAgent(
                 agent_id='STARLING_AU',
                 role='L2 Sim Coordinator',
-                type='META_AGENT', 
+                type='META_AGENT',
                 status='disconnected',
                 capabilities=['simulation_coordination', 'communications', 'external_protocols'],
                 api_endpoint='/api/relay/starling'
@@ -471,12 +471,12 @@ class L2MetaAgentBridge:
                 agent_id='RIVERTHREAD_808',
                 role='Narrative/Stream',
                 type='META_AGENT',
-                status='disconnected', 
+                status='disconnected',
                 capabilities=['narrative_processing', 'stream_management', 'continuity_validation'],
                 api_endpoint='/api/relay/riverthread'
             )
         }
-        
+
         self.activation_phrases = {
             'ARCHY': 'ORION_ARCHY_RELAY_ACTIVATE//',
             'OPPY': 'ORION_OPPY_RELAY_ACTIVATE//',
@@ -484,14 +484,14 @@ class L2MetaAgentBridge:
             'STARLING_AU': 'ORION_STARLING_AU_RELAY_ACTIVATE//',
             'RIVERTHREAD_808': 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
         }
-        
+
         self.handshake_sequence = [
             'ZIPWIZ_BEACON',
-            'ANCHOR_SYNC', 
+            'ANCHOR_SYNC',
             'ETHICS_AUDIT',
             'DRIFT_VALIDATION'
         ]
-        
+
         bridge_logger.bridge("L2 Meta-Agent Bridge initialized", {
             "total_agents": len(self.agents),
             "agent_ids": list(self.agents.keys())
@@ -499,35 +499,35 @@ class L2MetaAgentBridge:
 
     async def activate_agent(self, agent_id: str, activation_phrase: str) -> Dict:
         """Activate a Custom GPT agent with full ZIPWIZ handshake"""
-        
+
         if agent_id not in self.agents:
             return {"success": False, "error": f"Unknown agent: {agent_id}"}
-            
+
         if activation_phrase != self.activation_phrases.get(agent_id):
             return {"success": False, "error": "Invalid activation phrase"}
-            
+
         agent = self.agents[agent_id]
-        
+
         bridge_logger.bridge(f"Starting activation sequence for {agent_id}", {
             "agent_id": agent_id,
             "role": agent.role
         })
-        
+
         try:
             # Perform ZIPWIZ handshake sequence
             handshake_result = await self._perform_zipwiz_handshake(agent)
-            
+
             if handshake_result["success"]:
                 agent.status = "connected"
                 agent.connected = datetime.now()
                 agent.last_heartbeat = datetime.now()
-                
+
                 bridge_logger.bridge(f"Agent {agent_id} successfully activated", {
                     "agent_id": agent_id,
                     "handshake_result": handshake_result,
                     "connected_time": agent.connected.isoformat()
                 })
-                
+
                 return {
                     "success": True,
                     "agent_id": agent_id,
@@ -541,7 +541,7 @@ class L2MetaAgentBridge:
                     "handshake_result": handshake_result
                 })
                 return {"success": False, "error": "Handshake failed", "details": handshake_result}
-                
+
         except Exception as e:
             bridge_logger.error(f"Agent activation failed for {agent_id}", {
                 "agent_id": agent_id,
@@ -551,44 +551,44 @@ class L2MetaAgentBridge:
 
     async def _perform_zipwiz_handshake(self, agent: CustomGptAgent) -> Dict:
         """Perform complete ZIPWIZ handshake sequence"""
-        
+
         handshake_log = []
-        
+
         try:
             # ZIPWIZ_BEACON
             beacon_result = await self._send_zipwiz_beacon(agent)
             handshake_log.append({"step": "ZIPWIZ_BEACON", "result": beacon_result})
-            
+
             if not beacon_result:
                 return {"success": False, "error": "ZIPWIZ beacon failed", "log": handshake_log}
-            
+
             # ANCHOR_SYNC
             anchor_result = await self._sync_orion_anchor(agent)
             handshake_log.append({"step": "ANCHOR_SYNC", "result": anchor_result})
-            
+
             if not anchor_result:
                 return {"success": False, "error": "Anchor sync failed", "log": handshake_log}
-            
+
             # ETHICS_AUDIT
             ethics_result = await self._perform_ethics_audit(agent)
             handshake_log.append({"step": "ETHICS_AUDIT", "result": ethics_result})
-            
+
             if not ethics_result:
                 return {"success": False, "error": "Ethics audit failed", "log": handshake_log}
-            
+
             # DRIFT_VALIDATION
             drift_result = await self._validate_drift_lock(agent)
             handshake_log.append({"step": "DRIFT_VALIDATION", "result": drift_result})
-            
+
             if drift_result.get("drift", 1.0) > 0.001:
                 return {"success": False, "error": "Drift validation failed", "log": handshake_log}
-            
+
             bridge_logger.bridge(f"ZIPWIZ handshake completed for {agent.agent_id}", {
                 "agent_id": agent.agent_id,
                 "handshake_sequence": self.handshake_sequence,
                 "handshake_log": handshake_log
             })
-            
+
             return {
                 "success": True,
                 "timestamp": datetime.now().isoformat(),
@@ -596,7 +596,7 @@ class L2MetaAgentBridge:
                 "log": handshake_log,
                 "drift_lock": drift_result.get("drift", 0.000)
             }
-            
+
         except Exception as e:
             bridge_logger.error(f"ZIPWIZ handshake exception for {agent.agent_id}", {
                 "agent_id": agent.agent_id,
@@ -632,7 +632,7 @@ class L2MetaAgentBridge:
 
     def get_constellation_status(self) -> Dict:
         """Get status of entire agent constellation"""
-        
+
         active_agents = [
             {
                 "agent_id": agent_id,
@@ -644,9 +644,9 @@ class L2MetaAgentBridge:
             }
             for agent_id, agent in self.agents.items()
         ]
-        
+
         connected_count = sum(1 for agent in self.agents.values() if agent.status == "connected")
-        
+
         return {
             "constellation": "L2_META_AGENTS",
             "total_agents": len(self.agents),
@@ -658,21 +658,21 @@ class L2MetaAgentBridge:
 
     async def relay_message(self, from_agent: str, to_agent: str, message: str, message_type: str = "direct") -> Dict:
         """Relay message between agents or broadcast to mesh"""
-        
+
         if from_agent not in self.agents:
             return {"success": False, "error": f"Unknown source agent: {from_agent}"}
-            
+
         source_agent = self.agents[from_agent]
         if source_agent.status != "connected":
             return {"success": False, "error": f"Source agent {from_agent} not connected"}
-        
+
         # Update heartbeat
         source_agent.last_heartbeat = datetime.now()
-        
+
         # Process message based on type
         if message_type == "broadcast":
             # Mesh broadcast to all connected agents
-            target_agents = [aid for aid, agent in self.agents.items() 
+            target_agents = [aid for aid, agent in self.agents.items()
                            if agent.status == "connected" and aid != from_agent]
         elif to_agent == "Aurora" or to_agent == "AU":
             # Route to Aurora core
@@ -682,9 +682,9 @@ class L2MetaAgentBridge:
             if to_agent not in self.agents:
                 return {"success": False, "error": f"Unknown target agent: {to_agent}"}
             target_agents = [to_agent]
-        
+
         message_id = f"msg_{datetime.now().timestamp()}"
-        
+
         bridge_logger.bridge(f"Message relay from {from_agent}", {
             "from": from_agent,
             "to": target_agents,
@@ -692,7 +692,7 @@ class L2MetaAgentBridge:
             "message_id": message_id,
             "message_preview": message[:100] + "..." if len(message) > 100 else message
         })
-        
+
         # In real implementation, this would actually relay to target agents
         return {
             "success": True,
@@ -745,15 +745,15 @@ async def connect_custom_gpt(agent_id: str, request_data: dict):
     try:
         activation_phrase = request_data.get("activationPhrase")
         capabilities = request_data.get("capabilities", [])
-        
+
         result = await l2_bridge.activate_agent(agent_id, activation_phrase)
-        
+
         if result["success"]:
             system_logger.info(f"Custom GPT {agent_id} connected successfully")
             return result
         else:
             raise HTTPException(status_code=400, detail=result["error"])
-            
+
     except Exception as e:
         system_logger.error(f"Custom GPT connection failed for {agent_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -765,14 +765,14 @@ async def relay_message(agent_id: str, request_data: dict):
         message = request_data.get("message")
         target = request_data.get("target", "Aurora")
         message_type = request_data.get("type", "direct")
-        
+
         result = await l2_bridge.relay_message(agent_id, target, message, message_type)
-        
+
         if result["success"]:
             return result
         else:
             raise HTTPException(status_code=400, detail=result["error"])
-            
+
     except Exception as e:
         system_logger.error(f"Message relay failed for {agent_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -793,7 +793,7 @@ async def get_agent_status(agent_id: str):
     try:
         if agent_id not in l2_bridge.agents:
             raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
-            
+
         agent = l2_bridge.agents[agent_id]
         return {
             "agent_id": agent_id,
@@ -842,7 +842,7 @@ if __name__ == "__main__":
 ### **Expected Results**
 
 - ✅ Operational L2 meta-agent bridge system
-- ✅ Real-time agent constellation dashboard  
+- ✅ Real-time agent constellation dashboard
 - ✅ ZIPWIZ handshake protocol functional
 - ✅ Message relay between Custom GPTs and Aurora
 - ✅ Live status monitoring and agent management

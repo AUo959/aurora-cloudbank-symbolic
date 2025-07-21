@@ -11,7 +11,7 @@ class LioraHandshake {
     this.driftThreshold = 0.02;
     this.lastSyncTime = Date.now();
   }
-  
+
   async processResearchCommand(command) {
     try {
       const result = {
@@ -22,7 +22,7 @@ class LioraHandshake {
         layer: 'L1_L2_BRIDGE',
         researchData: 'processed'
       };
-      
+
       this.lastSyncTime = Date.now();
       return result;
     } catch (error) {
@@ -33,11 +33,11 @@ class LioraHandshake {
       };
     }
   }
-  
+
   getDriftStatus() {
     const timeSinceSync = Date.now() - this.lastSyncTime;
     const driftLevel = Math.min(0.5, timeSinceSync / 60000);
-    
+
     return {
       agentId: this.agentId,
       driftLevel: driftLevel,
@@ -45,7 +45,7 @@ class LioraHandshake {
       status: driftLevel < this.driftThreshold ? 'STABLE' : 'DRIFT_DETECTED'
     };
   }
-  
+
   getStatus() {
     return {
       agentId: this.agentId,

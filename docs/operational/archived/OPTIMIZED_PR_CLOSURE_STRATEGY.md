@@ -15,7 +15,7 @@
 ```bash
 # ALL ALREADY MERGED - SAFE TO DELETE
 git push origin --delete alert-autofix-2
-git push origin --delete alert-autofix-32  
+git push origin --delete alert-autofix-32
 git push origin --delete alert-autofix-34
 git push origin --delete alert-autofix-43
 git push origin --delete alert-autofix-51
@@ -27,7 +27,7 @@ git push origin --delete alert-autofix-6
 ```bash
 # ALL FILES ALREADY IN MAIN - SAFE TO DELETE
 git push origin --delete AUo959-patch-1  # docker-image.yml ✅
-git push origin --delete AUo959-patch-2  # python-package-conda.yml ✅ 
+git push origin --delete AUo959-patch-2  # python-package-conda.yml ✅
 git push origin --delete AUo959-patch-3  # codacy.yml ✅
 ```
 
@@ -46,7 +46,7 @@ git push origin --delete AUo959-patch-3  # codacy.yml ✅
 ### Strategy
 
 1. **Categorize by functionality**
-2. **Identify duplicate/redundant work**  
+2. **Identify duplicate/redundant work**
 3. **Preserve unique valuable features**
 4. **Consolidate into optimal feature set**
 

@@ -41,7 +41,7 @@ I've systematically addressed non-canonical staff names across key files:
 **Canonical Staff Registry Now Aligned**:
 
 - ✅ Commander: Alex Thorne
-- ✅ XO/Second-in-Command: Maya Shepard (✓ canonical)  
+- ✅ XO/Second-in-Command: Maya Shepard (✓ canonical)
 - ✅ Chief Science Officer: Varya Lin (✓ canonical)
 - ✅ Chief Ethics Officer: Dr. Amira Sato
 - ✅ Chief Security Officer: Julian Markov
@@ -62,7 +62,7 @@ I've systematically addressed non-canonical staff names across key files:
 The validation system is now parsing its own report files, creating false positives. The increasing escalation count (668) includes:
 
 1. **Real Issues**: Legitimate canonical violations needing attention
-2. **Report Artifacts**: Validation report content being parsed as violations  
+2. **Report Artifacts**: Validation report content being parsed as violations
 3. **Historical References**: Old staff names in log/report files
 
 ## 🎯 **Next Phase Strategy**
@@ -76,7 +76,7 @@ The validation system is now parsing its own report files, creating false positi
 
 2. **Target High-Impact Files**:
    - Core system configurations
-   - Active script files  
+   - Active script files
    - Documentation that serves as reference
 
 3. **Systematic Clean-up**:

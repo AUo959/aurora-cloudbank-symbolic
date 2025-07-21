@@ -9,7 +9,6 @@ try:
 except Exception:
     cf = None
 
-
 class GeometricAlgebra:
     def __init__(self):
         if cf is not None:
@@ -28,7 +27,6 @@ class GeometricAlgebra:
 
     def pretty(self, a):
         return str(a)
-
 
 # Example usage (to be moved to tests):
 # ga = GeometricAlgebra()

@@ -6,7 +6,7 @@ This guide provides comprehensive instructions for deploying Aurora CloudBank in
 
 ### Prerequisites
 - Node.js 20 or higher
-- Python 3.12 or higher  
+- Python 3.12 or higher
 - Git
 - Docker (optional, for containerized deployment)
 

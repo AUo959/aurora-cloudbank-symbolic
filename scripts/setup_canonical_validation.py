@@ -17,14 +17,12 @@ import subprocess
 import shutil
 from pathlib import Path
 
-
 def print_header():
     """Print setup header"""
     print("🛰️ Aurora CloudBank Canonical Validation System Setup")
     print("=" * 60)
     print("Configuring automatic canonical compliance validation...")
     print()
-
 
 def check_dependencies():
     """Check and install required dependencies"""
@@ -58,7 +56,6 @@ def check_dependencies():
 
     return True
 
-
 def setup_git_hooks():
     """Set up Git hooks for validation"""
     print("\n🔗 Setting up Git hooks...")
@@ -91,7 +88,6 @@ python3 scripts/git_pre_commit_hook.py
         print(f"  ❌ Failed to setup Git hooks: {e}")
         return False
 
-
 def create_validation_scripts():
     """Ensure validation scripts are executable"""
     print("\n🔧 Configuring validation scripts...")
@@ -114,7 +110,6 @@ def create_validation_scripts():
 
     return True
 
-
 def create_validation_directories():
     """Create necessary directories for validation"""
     print("\n📁 Creating validation directories...")
@@ -131,7 +126,6 @@ def create_validation_directories():
         print(f"  ✅ {dir_name}/ directory ready")
 
     return True
-
 
 def test_validation_system():
     """Test the validation system"""
@@ -160,7 +154,6 @@ def test_validation_system():
     except Exception as e:
         print(f"  ❌ Validation system test failed: {e}")
         return False
-
 
 def create_usage_documentation():
     """Create usage documentation"""
@@ -317,7 +310,6 @@ python3 scripts/canonical_validator.py --file myfile.md --auto-fix
     print("  ✅ Usage documentation created")
     return True
 
-
 def main():
     """Main setup function"""
     print_header()
@@ -358,7 +350,6 @@ def main():
         print("- Blocks critical violations")
         print("- Auto-fixes minor issues")
         print("\n🛰️ Aurora CloudBank canonical compliance is now automated!")
-
 
 if __name__ == "__main__":
     main()

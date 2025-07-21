@@ -23,7 +23,7 @@ The CI environment has been streamlined to focus on **essential quality checks**
 - ✅ **trailing-whitespace**: Fast file cleanup
 - ✅ **end-of-file-fixer**: Ensures consistent file endings
 - ✅ **check-yaml**: Validates YAML syntax
-- ✅ **check-json**: Validates JSON syntax  
+- ✅ **check-json**: Validates JSON syntax
 - ✅ **check-merge-conflict**: Prevents accidental commits with conflict markers
 - ✅ **flake8**: Essential Python linting only
 

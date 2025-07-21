@@ -53,12 +53,10 @@ vsa_store: Dict[str, QuantumSymbolicVector] = {}
 
 # === Enhanced Data Models ===
 
-
 class VSAOperationRequest(BaseModel):
     symbol: str
     dimension: int = 512
     operation_type: str = "generate"  # generate, bind, unbind, similarity
-
 
 class VSABindRequest(BaseModel):
     symbol_a: str
@@ -66,28 +64,23 @@ class VSABindRequest(BaseModel):
     result_name: str
     dimension: int = 512
 
-
 class VSASimilarityRequest(BaseModel):
     symbol_a: str
     symbol_b: str
-
 
 class QuantumCircuitRequest(BaseModel):
     symbol: str
     depth: int = 3
     qubits: int = 8
 
-
 class GeometricAlgebraRequest(BaseModel):
     operation: str  # product, add, commutator
     vectors: List[Dict[str, float]]  # e.g., [{"e1": 1.0, "e2": 0.5}]
-
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """Serve the quantum VSA demo application"""
     return FileResponse("static/quantum-vsa-demo.html")
-
 
 @app.get("/legacy", response_class=HTMLResponse)
 async def legacy_upload():
@@ -116,9 +109,7 @@ async def legacy_upload():
     </html>
     """
 
-
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
-
 
 @app.post("/upload/")
 async def upload_bundle(file: UploadFile = File(...)):
@@ -133,7 +124,6 @@ async def upload_bundle(file: UploadFile = File(...)):
     with open(upload_path, "wb") as buffer:
         buffer.write(data)
     return {"message": "Bundle received", "filename": filename}
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -152,26 +142,21 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         connections.remove(websocket)
 
-
 @app.on_event("startup")
 async def startup_event():
     logger.info("Aurora Cloud GUI FastAPI service starting up...")
-
 
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info("Aurora Cloud GUI FastAPI service shutting down...")
 
-
 class GeometricProductRequest(BaseModel):
     a: float
     b: float
 
-
 class QuantumSymbolicVectorRequest(BaseModel):
     symbol: str
     dim: Optional[int] = 8
-
 
 @app.post(
     "/geometric/product",
@@ -190,7 +175,6 @@ def geometric_product(req: GeometricProductRequest):
     result = ga.mult(a_mv, b_mv)
     return {"result": ga.pretty(result)}
 
-
 @app.post(
     "/quantum/symbolic_vector",
     summary="Quantum Symbolic Vector",
@@ -205,7 +189,6 @@ def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
     vec = quantum_symbolic_vector(req.symbol, req.dim)
     return {"symbol": req.symbol, "dim": req.dim, "vector": vec.tolist()}
 
-
 @app.get(
     "/mcp_bridge",
     summary="MCP Bridge Core JSON",
@@ -217,7 +200,6 @@ def get_mcp_bridge():
     """
     data = get_mcp_bridge_core()
     return JSONResponse(content=data)
-
 
 @app.post(
     "/mcp_bridge/route_command",
@@ -238,7 +220,6 @@ def mcp_route_command(
     mcp_security.validate_anchor(anchor)
     router = MCPCommandRouter()
     return router.route(command)
-
 
 @app.post(
     "/vsa/operation",
@@ -268,7 +249,6 @@ def vsa_operation(req: VSAOperationRequest):
 
     return {"symbol": req.symbol, "dimension": req.dimension, "result": result}
 
-
 @app.post(
     "/vsa/bind",
     summary="VSA Bind",
@@ -296,7 +276,6 @@ def vsa_bind(req: VSABindRequest):
         "result": bound_vector.tolist(),
     }
 
-
 @app.post(
     "/vsa/similarity",
     summary="VSA Similarity",
@@ -323,7 +302,6 @@ def vsa_similarity(req: VSASimilarityRequest):
         "similarity": similarity_score,
     }
 
-
 @app.post(
     "/quantum/circuit",
     summary="Quantum Circuit",
@@ -344,7 +322,6 @@ def quantum_circuit(req: QuantumCircuitRequest):
     }
 
     return result
-
 
 @app.post(
     "/geometric/algebra",
@@ -390,9 +367,7 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 
     return {"operation": req.operation, "result": ga.pretty(result)}
 
-
 # === New VSA and Quantum Endpoints ===
-
 
 @app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector")
 def generate_vsa_vector(req: VSAOperationRequest):
@@ -413,7 +388,6 @@ def generate_vsa_vector(req: VSAOperationRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
-
 
 @app.post("/api/vsa/bind", summary="Bind two VSA vectors")
 def bind_vsa_vectors(req: VSABindRequest):
@@ -459,7 +433,6 @@ def bind_vsa_vectors(req: VSABindRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
 
-
 @app.post("/api/vsa/similarity", summary="Calculate VSA similarity")
 def calculate_vsa_similarity(req: VSASimilarityRequest):
     """
@@ -500,7 +473,6 @@ def calculate_vsa_similarity(req: VSASimilarityRequest):
             status_code=500, detail=f"Similarity calculation failed: {str(e)}"
         )
 
-
 @app.get("/api/vsa/list", summary="List stored VSA vectors")
 def list_vsa_vectors():
     """
@@ -519,7 +491,6 @@ def list_vsa_vectors():
         "count": len(vsa_store),
     }
 
-
 @app.delete("/api/vsa/clear", summary="Clear VSA store")
 def clear_vsa_store():
     """
@@ -529,7 +500,6 @@ def clear_vsa_store():
     count = len(vsa_store)
     vsa_store = {}
     return {"message": f"Cleared {count} VSA vectors", "count": count}
-
 
 @app.post("/api/geometric/advanced", summary="Advanced Geometric Algebra Operations")
 def advanced_geometric_operations(req: GeometricAlgebraRequest):
@@ -580,7 +550,6 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
         raise HTTPException(
             status_code=500, detail=f"Geometric algebra operation failed: {str(e)}"
         )
-
 
 @app.post("/api/quantum/circuit", summary="Generate Quantum Circuit")
 def generate_quantum_circuit(req: QuantumCircuitRequest):
@@ -640,9 +609,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
             status_code=500, detail=f"Quantum circuit generation failed: {str(e)}"
         )
 
-
 # === Enhanced WebSocket for Real-time Collaboration ===
-
 
 @app.websocket("/api/ws/collaboration")
 async def websocket_collaboration_endpoint(websocket: WebSocket):
@@ -686,7 +653,6 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         connections.remove(websocket)
-
 
 if __name__ == "__main__":
     import uvicorn

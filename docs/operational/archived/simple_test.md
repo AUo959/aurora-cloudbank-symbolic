@@ -5,7 +5,7 @@
 Commander: Alex Thorne
 Second: maya shepard
 
-## Protocol Test  
+## Protocol Test
 
 Ethics: Picard_Delta_3
 Memory: thermax precedent

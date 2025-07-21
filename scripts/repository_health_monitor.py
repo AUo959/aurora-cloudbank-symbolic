@@ -37,7 +37,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger('RepoHealthMonitor')
 
-
 @dataclass
 class HealthMetrics:
     """Repository health metrics snapshot."""
@@ -63,7 +62,6 @@ class HealthMetrics:
         if self.alerts is None:
             self.alerts = []
 
-
 @dataclass
 class AlertRule:
     """Health monitoring alert rule."""
@@ -73,7 +71,6 @@ class AlertRule:
     message: str
     cooldown_minutes: int = 60
     last_triggered: Optional[datetime] = None
-
 
 class RepositoryHealthMonitor:
     """Advanced repository health monitoring system."""
@@ -823,7 +820,6 @@ class RepositoryHealthMonitor:
 
         return recommendations
 
-
 def main():
     """Main CLI interface."""
     import argparse
@@ -873,7 +869,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     exit(main())

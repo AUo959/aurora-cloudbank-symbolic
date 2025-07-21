@@ -18,7 +18,6 @@ import pandas as pd
 ASSET_ZIP = "CASK_Assets.zip"
 RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles
 
-
 def _open_asset(name: str) -> str:
     """Return the contents of ``name`` within ``ASSET_ZIP`` as a string."""
     if not os.path.exists(ASSET_ZIP):
@@ -27,24 +26,20 @@ def _open_asset(name: str) -> str:
         with zf.open(name) as file:
             return file.read().decode("utf-8")
 
-
 def load_specifications() -> pd.DataFrame:
     """Load the CASK technical specifications table."""
     data = _open_asset("cask_technical_specifications.csv")
     return pd.read_csv(StringIO(data))
-
 
 def load_risk_assessment() -> pd.DataFrame:
     """Load the CASK risk assessment table."""
     data = _open_asset("cask_risk_assessment.csv")
     return pd.read_csv(StringIO(data))
 
-
 def load_vs_sota() -> pd.DataFrame:
     """Load the comparison against state of the art table."""
     data = _open_asset("cask_vs_sota_comparison.csv")
     return pd.read_csv(StringIO(data))
-
 
 def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     """Generate a simple architecture diagram and return the output path."""

@@ -135,28 +135,28 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Receive command from Aurora Custom GPT and route to command node"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT command request")
-        
+
         try:
             command = request_data.get("command", {})
             context = request_data.get("context", {})
-            
+
             # Initialize Aurora Custom GPT integration if not already done
             if not auroraCustomGptBridge.integrationActive:
                 logger.info("Initializing Aurora Custom GPT integration")
                 init_result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
                 if not init_result["success"]:
                     raise HTTPException(status_code=500, detail=f"Aurora integration failed: {init_result['error']}")
-            
+
             # Route command through Aurora Custom GPT bridge
             result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
-            
+
             logger.info(f"Aurora command processed: {result['success']}")
-            
+
             if result["success"]:
                 return result
             else:
                 raise HTTPException(status_code=400, detail=result["error"])
-                
+
         except Exception as e:
             logger.error(f"Aurora command failed: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
@@ -166,11 +166,11 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Get Aurora Custom GPT integration status"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT status request")
-        
+
         try:
             integration_status = auroraCustomGptBridge.getIntegrationStatus()
             constellation_status = await auroraCustomGptBridge.getConstellationStatus()
-            
+
             return {
                 "aurora_integration": integration_status,
                 "constellation": constellation_status,
@@ -186,10 +186,10 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Initialize Aurora Custom GPT integration"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT initialization request")
-        
+
         try:
             result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
-            
+
             if result["success"]:
                 logger.info("Aurora Custom GPT integration initialized successfully")
                 return {
@@ -199,7 +199,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 }
             else:
                 raise HTTPException(status_code=500, detail=f"Integration failed: {result['error']}")
-                
+
         except Exception as e:
             logger.error(f"Aurora initialization failed: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
@@ -223,18 +223,18 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
         logger.info(f"Connection request for agent: {agent_id}")
-        
+
         activation_phrase = request_data.get("activationPhrase")
         capabilities = request_data.get("capabilities", [])
-        
+
         if not activation_phrase:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="Missing activation phrase"
             )
-        
+
         result = await l2_bridge.activate_agent(agent_id, activation_phrase)
-        
+
         if result["success"]:
             logger.info(f"Custom GPT {agent_id} connected successfully")
             return JSONResponse(
@@ -250,10 +250,10 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
         else:
             logger.warning(f"Custom GPT {agent_id} connection failed: {result.get('error')}")
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=result.get("error", "Connection failed")
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -265,26 +265,26 @@ async def relay_message(agent_id: str, request_data: Dict[str, Any]):
     """Relay message from Custom GPT agent"""
     try:
         logger.info(f"Message relay request from: {agent_id}")
-        
+
         message = request_data.get("message")
         target = request_data.get("target", "Aurora")
         message_type = request_data.get("type", "direct")
-        
+
         if not message:
             raise HTTPException(status_code=400, detail="Missing message content")
-        
+
         result = await l2_bridge.relay_message(agent_id, target, message, message_type)
-        
+
         if result["success"]:
             logger.info(f"Message relayed successfully from {agent_id}")
             return JSONResponse(status_code=200, content=result)
         else:
             logger.warning(f"Message relay failed from {agent_id}: {result.get('error')}")
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=result.get("error", "Message relay failed")
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -296,9 +296,9 @@ async def get_constellation_status():
     """Get status of the entire agent constellation"""
     try:
         logger.info("Constellation status request")
-        
+
         status = l2_bridge.get_constellation_status()
-        
+
         # Add server information
         status["server_info"] = {
             "uptime": (datetime.now() - server_state["start_time"]).total_seconds(),
@@ -306,9 +306,9 @@ async def get_constellation_status():
             "version": server_state["version"],
             "timestamp": datetime.now().isoformat()
         }
-        
+
         return JSONResponse(status_code=200, content=status)
-        
+
     except Exception as e:
         logger.error(f"Status retrieval failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
@@ -318,17 +318,17 @@ async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
     try:
         logger.info(f"Agent status request for: {agent_id}")
-        
+
         result = l2_bridge.get_agent_status(agent_id)
-        
+
         if result.get("success", True):
             return JSONResponse(status_code=200, content=result)
         else:
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=result.get("error", f"Agent {agent_id} not found")
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -342,7 +342,7 @@ async def update_heartbeat(agent_id: str):
         # Update heartbeat in bridge
         if hasattr(l2_bridge, 'agents') and agent_id in l2_bridge.agents:
             l2_bridge.agents[agent_id].last_heartbeat = datetime.now()
-            
+
             return JSONResponse(status_code=200, content={
                 "success": True,
                 "agent_id": agent_id,
@@ -351,7 +351,7 @@ async def update_heartbeat(agent_id: str):
             })
         else:
             raise HTTPException(status_code=404, detail="Agent not found")
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -363,18 +363,18 @@ async def disconnect_agent(agent_id: str):
     """Disconnect an agent from the constellation"""
     try:
         logger.info(f"Disconnect request for: {agent_id}")
-        
+
         result = await l2_bridge.disconnect_agent(agent_id)
-        
+
         if result["success"]:
             logger.info(f"Agent {agent_id} disconnected successfully")
             return JSONResponse(status_code=200, content=result)
         else:
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=result.get("error", "Disconnect failed")
             )
-            
+
     except HTTPException:
         raise
     except Exception as e:
@@ -439,7 +439,7 @@ async def startup_event():
     logger.info(f"Dashboard URL: http://localhost:8000")
     logger.info(f"API Documentation: http://localhost:8000/api/docs")
     logger.info(f"Health Check: http://localhost:8000/health")
-    
+
     # Initialize any background tasks here
     pass
 
@@ -447,7 +447,7 @@ async def startup_event():
 async def shutdown_event():
     """Server shutdown event"""
     logger.info("Aurora L2 Integration Server shutting down")
-    
+
     # Cleanup any resources here
     if hasattr(l2_bridge, 'agents'):
         for agent_id in l2_bridge.agents:
@@ -460,15 +460,15 @@ async def shutdown_event():
 def main():
     """Main entry point for the server"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Aurora L2 Integration Server")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", help="Log level")
-    
+
     args = parser.parse_args()
-    
+
     print("\n" + "="*60)
     print("🌟 AURORA L2 META-AGENT INTEGRATION SERVER")
     print("="*60)
@@ -477,7 +477,7 @@ def main():
     print(f"📚 API Docs: http://{args.host}:{args.port}/api/docs")
     print(f"🔍 Health: http://{args.host}:{args.port}/health")
     print("="*60)
-    
+
     uvicorn.run(
         "l2_integration_server:app",
         host=args.host,

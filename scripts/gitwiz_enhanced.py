@@ -25,7 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger('GitWizEnhanced')
 
-
 @dataclass
 class RepositoryMetrics:
     """Repository health and optimization metrics."""
@@ -44,7 +43,6 @@ class RepositoryMetrics:
     def __post_init__(self):
         if self.issues_detected is None:
             self.issues_detected = []
-
 
 @dataclass
 class FileAnalysis:
@@ -69,7 +67,6 @@ class FileAnalysis:
             self.archive_files = []
         if self.file_types is None:
             self.file_types = {}
-
 
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
@@ -653,22 +650,22 @@ class GitWizEnhanced:
     def comprehensive_code_quality_check(self, auto_fix: bool = False, dry_run: bool = True) -> Dict[str, Any]:
         """
         Perform comprehensive code quality check.
-        
+
         Args:
             auto_fix: Whether to automatically fix issues
             dry_run: If True, only analyze without making changes
-            
+
         Returns:
             Dictionary containing quality check results
         """
         logger.info(f"🔍 Starting comprehensive code quality check (auto_fix={auto_fix}, dry_run={dry_run})")
-        
+
         start_time = datetime.now()
-        
+
         # Analyze repository metrics and files
         metrics = self.analyze_repository()
         file_analysis = self.analyze_files()
-        
+
         # Generate quality score based on various factors
         quality_factors = {
             "optimization_score": metrics.optimization_score,
@@ -676,9 +673,9 @@ class GitWizEnhanced:
             "file_organization": 1.0 - min(len(file_analysis.large_files) / 50.0, 1.0),
             "branch_management": 1.0 - min(metrics.stale_branches / 20.0, 1.0)
         }
-        
+
         overall_quality_score = sum(quality_factors.values()) / len(quality_factors) * 100
-        
+
         # Collect scan results
         scan_results = {
             "summary": {
@@ -689,17 +686,17 @@ class GitWizEnhanced:
             "file_analysis": asdict(file_analysis),
             "metrics": asdict(metrics)
         }
-        
+
         # Auto-fix if requested and not dry run
         fix_results = {"total_fixes": 0, "fixes_applied": []}
-        
+
         if auto_fix and not dry_run:
             logger.info("🔧 Applying automatic fixes...")
-            
+
             # Remove cache and temp files
             cache_files = file_analysis.cache_files
             temp_files = file_analysis.temp_files
-            
+
             files_to_remove = cache_files + temp_files
             if files_to_remove:
                 try:
@@ -709,9 +706,9 @@ class GitWizEnhanced:
                     logger.info(f"✅ Removed {len(files_to_remove)} cache/temp files")
                 except Exception as e:
                     logger.error(f"Failed to remove files: {e}")
-        
+
         execution_time = (datetime.now() - start_time).total_seconds()
-        
+
         return {
             "scan_results": scan_results,
             "fix_results": fix_results,
@@ -723,20 +720,20 @@ class GitWizEnhanced:
     def intelligent_maintenance_workflow(self, aggressive: bool = False) -> Dict[str, Any]:
         """
         Execute intelligent maintenance workflow.
-        
+
         Args:
             aggressive: Whether to apply aggressive optimizations
-            
+
         Returns:
             Dictionary containing maintenance results
         """
         logger.info(f"🔧 Starting intelligent maintenance workflow (aggressive={aggressive})")
-        
+
         start_time = datetime.now()
-        
+
         stages = {}
         total_fixes = 0
-        
+
         # Stage 1: Repository analysis
         logger.info("📊 Stage 1: Repository analysis...")
         try:
@@ -749,7 +746,7 @@ class GitWizEnhanced:
             }
         except Exception as e:
             stages["analysis"] = {"status": "error", "error": str(e)}
-        
+
         # Stage 2: File optimization
         logger.info("🗂️ Stage 2: File optimization...")
         try:
@@ -758,7 +755,7 @@ class GitWizEnhanced:
             total_fixes += optimization_result.get("files_processed", 0)
         except Exception as e:
             stages["optimization"] = {"status": "error", "error": str(e)}
-            
+
         # Stage 3: Branch management
         logger.info("🌿 Stage 3: Branch management...")
         try:
@@ -768,7 +765,7 @@ class GitWizEnhanced:
                 total_fixes += branch_result["branches_cleaned"]
         except Exception as e:
             stages["branches"] = {"status": "error", "error": str(e)}
-            
+
         # Stage 4: Generate report
         logger.info("📋 Stage 4: Generating maintenance report...")
         try:
@@ -776,13 +773,13 @@ class GitWizEnhanced:
             stages["report"] = {"status": "success", "report_path": str(report.get("report_path", ""))}
         except Exception as e:
             stages["report"] = {"status": "error", "error": str(e)}
-        
+
         execution_time = (datetime.now() - start_time).total_seconds()
-        
+
         # Calculate overall success
         successful_stages = sum(1 for stage in stages.values() if stage.get("status") != "error")
         overall_success = successful_stages == len(stages)
-        
+
         return {
             "overall_success": overall_success,
             "execution_time": execution_time,
@@ -791,10 +788,8 @@ class GitWizEnhanced:
             "aggressive": aggressive
         }
 
-
 # Create alias for backward compatibility
 EnhancedGITWiz = GitWizEnhanced
-
 
 def main():
     """Main CLI interface."""
@@ -836,7 +831,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     exit(main())

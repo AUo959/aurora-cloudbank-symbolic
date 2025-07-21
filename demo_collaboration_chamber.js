@@ -15,7 +15,7 @@ console.log('=====================================');
 socket.on('connect', () => {
   console.log('✅ Connected to Collaboration Chamber');
   console.log('🌌 Phase 7 Holographic Interface Active\n');
-  
+
   // Demo sequence
   setTimeout(() => demoMeshBroadcast(), 1000);
   setTimeout(() => demoDirectAgentMessage(), 3000);
@@ -48,7 +48,7 @@ socket.on('traceback_update', (data) => {
 function demoMeshBroadcast() {
   console.log('\n🕸️ Demo 1: Mesh Broadcast (@mesh system)');
   console.log('Broadcasting to all agents...');
-  
+
   socket.emit('execute_command', {
     command: 'System status report and performance optimization recommendations',
     authority: 'operator',
@@ -59,7 +59,7 @@ function demoMeshBroadcast() {
 function demoDirectAgentMessage() {
   console.log('\n🤖 Demo 2: Direct Agent Communication');
   console.log('Sending direct message to ARCHY...');
-  
+
   socket.emit('execute_command', {
     command: 'Analyze the current system architecture and suggest improvements',
     authority: 'user',
@@ -70,7 +70,7 @@ function demoDirectAgentMessage() {
 function demoTraceback() {
   console.log('\n🔍 Demo 3: Command Traceback System');
   console.log('Executing complex command with full traceback...');
-  
+
   socket.emit('execute_command', {
     command: 'Initialize quantum-aware symbolic processing pipeline',
     authority: 'system',

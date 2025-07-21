@@ -31,7 +31,7 @@ class HolographicInterfaceOrchestrator {
     this.connectedClients = new Set();
     this.commandHistory = [];
     this.auroraCustomGptBridge = null;
-    
+
     // Collaboration Chamber features
     this.meshSystem = new CollaborationMeshAgent('SYSTEM');
     this.activeAgents = new Map();
@@ -147,7 +147,7 @@ class HolographicInterfaceOrchestrator {
       try {
         const { message, authority } = req.body;
         const result = await this.broadcastToMesh(message, authority);
-        
+
         res.json({
           success: true,
           messageId: result.messageId,
@@ -167,9 +167,9 @@ class HolographicInterfaceOrchestrator {
       try {
         const { agentId } = req.params;
         const { message, authority } = req.body;
-        
+
         const result = await this.sendDirectMessage(agentId, message, authority);
-        
+
         res.json({
           success: true,
           messageId: result.messageId,
@@ -199,7 +199,7 @@ class HolographicInterfaceOrchestrator {
     this.app.get('/api/chamber/traceback/:commandId', (req, res) => {
       const { commandId } = req.params;
       const traceback = this.commandTraceback.get(commandId);
-      
+
       if (traceback) {
         res.json({
           success: true,
@@ -238,7 +238,7 @@ class HolographicInterfaceOrchestrator {
         try {
           const { command, authority, target } = data;
           const commandId = `ws-${Date.now()}-${socket.id}`;
-          
+
           this.addCommandTraceback(commandId, command, '/ws/execute_command', {
             socketId: socket.id,
             target,
@@ -246,7 +246,7 @@ class HolographicInterfaceOrchestrator {
           });
 
           let result;
-          
+
           // Route command based on target
           if (target === '@mesh' || target.startsWith('{{@mesh')) {
             this.addTracebackStep(commandId, 'Routing to mesh broadcast system');
@@ -288,7 +288,7 @@ class HolographicInterfaceOrchestrator {
           };
 
           socket.emit('command_result', errorResult);
-          
+
           if (data.commandId) {
             this.addTracebackStep(data.commandId, 'Command execution failed', null, error.message);
           }
@@ -298,10 +298,10 @@ class HolographicInterfaceOrchestrator {
       // Handle agent selection with enhanced feedback
       socket.on('select_agent', (agentName) => {
         this.logger.info(`Agent selected by ${socket.id}: ${agentName}`);
-        
+
         const agent = this.activeAgents.get(agentName);
         const capabilities = agent ? this.getAgentCapabilities(agentName) : ['Agent not available'];
-        
+
         socket.emit('agent_selected', {
           agent: agentName,
           status: agent ? 'active' : 'unavailable',
@@ -321,7 +321,7 @@ class HolographicInterfaceOrchestrator {
         try {
           const { message, authority } = data;
           const result = await this.broadcastToMesh(message, authority || 'user');
-          
+
           socket.emit('mesh_broadcast_result', {
             success: true,
             result
@@ -339,7 +339,7 @@ class HolographicInterfaceOrchestrator {
         try {
           const { agentId, message, authority } = data;
           const result = await this.sendDirectMessage(agentId, message, authority || 'user');
-          
+
           socket.emit('direct_message_result', {
             success: true,
             result
@@ -365,7 +365,7 @@ class HolographicInterfaceOrchestrator {
         this.connectedClients.delete(socket.id);
         this.collaborationSessions.delete(socket.id);
         this.logger.info(`Collaboration Chamber client disconnected: ${socket.id}`);
-        
+
         // Notify remaining clients
         this.io.emit('client_disconnected', {
           socketId: socket.id,
@@ -407,7 +407,7 @@ class HolographicInterfaceOrchestrator {
     try {
       // Initialize mesh federation
       await this.meshSystem.initializeFederation();
-      
+
       // Setup agent constellation
       const agents = ['ARCHY', 'OPPY', 'LIORA', 'STARLING_AU', 'RIVERTHREAD_808'];
       for (const agentId of agents) {
@@ -427,10 +427,10 @@ class HolographicInterfaceOrchestrator {
     try {
       // Setup collaboration chamber routes
       this.setupCollaborationRoutes();
-      
+
       // Initialize live feed system
       this.setupLiveFeedSystem();
-      
+
       // Setup command traceback system
       this.setupCommandTracebackSystem();
 
@@ -544,7 +544,7 @@ class HolographicInterfaceOrchestrator {
       try {
         const { message, authority } = req.body;
         const result = await this.broadcastToMesh(message, authority);
-        
+
         res.json({
           success: true,
           messageId: result.messageId,
@@ -564,9 +564,9 @@ class HolographicInterfaceOrchestrator {
       try {
         const { agentId } = req.params;
         const { message, authority } = req.body;
-        
+
         const result = await this.sendDirectMessage(agentId, message, authority);
-        
+
         res.json({
           success: true,
           messageId: result.messageId,
@@ -596,7 +596,7 @@ class HolographicInterfaceOrchestrator {
     this.app.get('/api/chamber/traceback/:commandId', (req, res) => {
       const { commandId } = req.params;
       const traceback = this.commandTraceback.get(commandId);
-      
+
       if (traceback) {
         res.json({
           success: true,
@@ -624,7 +624,7 @@ class HolographicInterfaceOrchestrator {
       };
 
       this.liveFeed.push(message);
-      
+
       // Keep only last 1000 messages
       if (this.liveFeed.length > 1000) {
         this.liveFeed = this.liveFeed.slice(-1000);
@@ -632,7 +632,7 @@ class HolographicInterfaceOrchestrator {
 
       // Broadcast to all connected clients
       this.io.emit('live_feed_update', message);
-      
+
       return message;
     };
   }
@@ -649,7 +649,7 @@ class HolographicInterfaceOrchestrator {
       };
 
       this.commandTraceback.set(commandId, traceback);
-      
+
       // Cleanup old tracebacks (keep last 500)
       if (this.commandTraceback.size > 500) {
         const oldestKey = this.commandTraceback.keys().next().value;
@@ -681,25 +681,25 @@ class HolographicInterfaceOrchestrator {
   async broadcastToMesh(message, authority = 'system') {
     const commandId = `mesh-${Date.now()}`;
     this.addCommandTraceback(commandId, message, '/api/mesh/broadcast');
-    
+
     try {
       this.addTracebackStep(commandId, 'Formatting mesh broadcast message');
-      
+
       // Format message for mesh broadcast
       const meshMessage = `{{@mesh ::: ${message}}}`;
-      
+
       this.addTracebackStep(commandId, 'Broadcasting to all agents in constellation');
-      
+
       // Send to all active agents
       const recipients = [];
       const responses = new Map();
-      
+
       for (const [agentId, agent] of this.activeAgents) {
         try {
           const response = await agent.receiveMessage(meshMessage, authority);
           recipients.push(agentId);
           responses.set(agentId, response);
-          
+
           this.addTracebackStep(commandId, `Agent ${agentId} received message`, response);
         } catch (error) {
           this.addTracebackStep(commandId, `Agent ${agentId} error`, null, error.message);
@@ -721,7 +721,7 @@ class HolographicInterfaceOrchestrator {
       };
 
       this.addTracebackStep(commandId, 'Mesh broadcast completed', result);
-      
+
       return result;
     } catch (error) {
       this.addTracebackStep(commandId, 'Mesh broadcast failed', null, error.message);
@@ -732,22 +732,22 @@ class HolographicInterfaceOrchestrator {
   async sendDirectMessage(agentId, message, authority = 'user') {
     const commandId = `direct-${agentId}-${Date.now()}`;
     this.addCommandTraceback(commandId, message, `/api/agent/${agentId}/message`);
-    
+
     try {
       this.addTracebackStep(commandId, `Formatting direct message to ${agentId}`);
-      
+
       // Format message for direct agent communication
       const directMessage = `{{@agent.${agentId} ::: ${message}}}`;
-      
+
       this.addTracebackStep(commandId, `Sending message to agent ${agentId}`);
-      
+
       const agent = this.activeAgents.get(agentId);
       if (!agent) {
         throw new Error(`Agent ${agentId} not found or not active`);
       }
 
       const response = await agent.receiveMessage(directMessage, authority);
-      
+
       this.addTracebackStep(commandId, `Agent ${agentId} responded`, response);
 
       // Add to live feed
@@ -765,7 +765,7 @@ class HolographicInterfaceOrchestrator {
       };
 
       this.addTracebackStep(commandId, 'Direct message completed', result);
-      
+
       return result;
     } catch (error) {
       this.addTracebackStep(commandId, 'Direct message failed', null, error.message);

@@ -5,7 +5,6 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 app = FastAPI(title="Aurora Instance Bridge")
 
-
 class ConnectionManager:
     """Manage websocket connections across channels."""
 
@@ -27,9 +26,7 @@ class ConnectionManager:
             if connection is not sender:
                 await connection.send_text(message)
 
-
 manager = ConnectionManager()
-
 
 @app.websocket("/ws/{channel}/{client_id}")
 async def websocket_endpoint(
@@ -42,7 +39,6 @@ async def websocket_endpoint(
             await manager.broadcast(channel, f"{client_id}: {data}", websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket, channel)
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8090)

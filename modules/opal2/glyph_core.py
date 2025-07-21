@@ -19,7 +19,6 @@ from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "opal2_graphics.yaml"
 
-
 class GlyphGenerator:
     """Generate glyph structures using geometric algebra and quantum vectors."""
 
@@ -57,7 +56,6 @@ class GlyphGenerator:
             "vector": qvec.vector,  # Retain the vector attribute for new functionality
             "multivector": str(mv),
         }
-
 
 class GlyphCore:
     """Enhanced glyph core with async support for the Opal2 API"""

@@ -18,7 +18,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 class SecurityValidator:
     """Comprehensive security validation for Aurora CloudBank."""
 
@@ -41,7 +40,6 @@ class SecurityValidator:
             "status": "success",
             "recommendations": []
         }
-
 
         # Validate each attack vector protection
         attack_vectors = [
@@ -536,7 +534,6 @@ class SecurityValidator:
 
         logger.info("✅ Security validation report generated")
 
-
 def main():
     """Main execution function."""
 
@@ -565,7 +562,6 @@ def main():
     print("\n📋 See AURORA_SECURITY_VALIDATION_REPORT.md for complete details")
 
     return results['overall_score'] >= 70
-
 
 if __name__ == "__main__":
     success = main()

@@ -13,12 +13,12 @@ class ApiBridgeServer {
     this.synchronizer = new AgentSynchronizer();
     this.status = 'INITIALIZING';
   }
-  
+
   start() {
     this.server = http.createServer((req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Access-Control-Allow-Origin', '*');
-      
+
       if (req.url === '/agent-status' && req.method === 'GET') {
         this.handleAgentStatus(req, res);
       } else if (req.url === '/drift-report' && req.method === 'GET') {
@@ -30,13 +30,13 @@ class ApiBridgeServer {
         res.end(JSON.stringify({ error: 'Endpoint not found' }));
       }
     });
-    
+
     this.server.listen(this.port, () => {
       this.status = 'OPERATIONAL';
       process.stdout.write(`🌐 [API_BRIDGE] Server running on port ${this.port}\n`);
     });
   }
-  
+
   async handleAgentStatus(req, res) {
     try {
       const status = this.synchronizer.getStatus();
@@ -47,7 +47,7 @@ class ApiBridgeServer {
       res.end(JSON.stringify({ error: error.message }));
     }
   }
-  
+
   async handleDriftReport(req, res) {
     try {
       const report = await this.synchronizer.getDriftReport();
@@ -58,7 +58,7 @@ class ApiBridgeServer {
       res.end(JSON.stringify({ error: error.message }));
     }
   }
-  
+
   async handleSync(req, res) {
     try {
       const syncResult = await this.synchronizer.synchronizeAllLayers();
@@ -69,7 +69,7 @@ class ApiBridgeServer {
       res.end(JSON.stringify({ error: error.message }));
     }
   }
-  
+
   stop() {
     if (this.server) {
       this.server.close();
@@ -84,7 +84,7 @@ module.exports = ApiBridgeServer;
 if (require.main === module) {
   const bridge = new ApiBridgeServer();
   bridge.start();
-  
+
   process.on('SIGINT', () => {
     bridge.stop();
     process.exit(0);

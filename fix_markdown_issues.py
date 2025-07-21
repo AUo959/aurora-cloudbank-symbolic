@@ -9,7 +9,6 @@ import os
 import glob
 from pathlib import Path
 
-
 def fix_markdown_file(filepath):
     """Fix common Markdown issues in a file"""
     print(f"🔧 Fixing {filepath}")
@@ -90,7 +89,6 @@ def fix_markdown_file(filepath):
     except Exception as e:
         print(f"❌ Error fixing {filepath}: {e}")
 
-
 def main():
     """Fix all Markdown files with issues"""
 
@@ -118,7 +116,6 @@ def main():
             print(f"⚠️  File not found: {filepath}")
 
     print("🎯 Markdown fixing complete!")
-
 
 if __name__ == "__main__":
     main()

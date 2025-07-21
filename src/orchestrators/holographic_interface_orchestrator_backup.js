@@ -61,11 +61,11 @@ class HolographicInterfaceOrchestrator {
     this.app.post('/api/holographic/command', async (req, res) => {
       try {
         const { command, source, authority } = req.body;
-                
+
         this.logger.info(`Received holographic command: ${command} from ${source}`);
-                
+
         const result = await this.executeHolographicCommand(command, source, authority);
-                
+
         // Broadcast to connected clients
         this.io.emit('command_executed', {
           command,
@@ -73,13 +73,13 @@ class HolographicInterfaceOrchestrator {
           timestamp: new Date().toISOString(),
           source
         });
-                
+
         res.json({
           success: true,
           result,
           timestamp: new Date().toISOString()
         });
-                
+
       } catch (error) {
         this.logger.error(`Holographic command error: ${error.message}`);
         res.status(500).json({
@@ -113,14 +113,14 @@ class HolographicInterfaceOrchestrator {
         }
 
         const agentStatus = await this.getAgentConstellationStatus();
-                
+
         res.json({
           success: true,
           agents: agentStatus,
           constellation_health: 'optimal',
           drift_lock: 'Δ0.0'
         });
-                
+
       } catch (error) {
         this.logger.error(`Agent status error: ${error.message}`);
         res.status(500).json({
@@ -135,7 +135,7 @@ class HolographicInterfaceOrchestrator {
     this.io.on('connection', (socket) => {
       this.connectedClients.add(socket.id);
       this.logger.info(`Holographic client connected: ${socket.id}`);
-            
+
       // Send initial system status
       socket.emit('system_status', {
         aurora_version: ORION_CORE.version,
@@ -149,13 +149,13 @@ class HolographicInterfaceOrchestrator {
         try {
           const { command, authority } = data;
           const result = await this.executeHolographicCommand(command, 'holographic_interface', authority);
-                    
+
           socket.emit('command_result', {
             success: true,
             result,
             timestamp: new Date().toISOString()
           });
-                    
+
           // Broadcast to all clients
           this.io.emit('command_executed', {
             command,
@@ -163,7 +163,7 @@ class HolographicInterfaceOrchestrator {
             timestamp: new Date().toISOString(),
             source: 'holographic_interface'
           });
-                    
+
         } catch (error) {
           socket.emit('command_result', {
             success: false,
@@ -194,15 +194,15 @@ class HolographicInterfaceOrchestrator {
     try {
       this.auroraCustomGptBridge = new AuroraCustomGptBridge();
       await this.auroraCustomGptBridge.initialize();
-            
+
       this.logger.info('Aurora Custom GPT Bridge initialized for holographic interface');
-            
+
       // Notify connected clients
       this.io.emit('bridge_status', {
         status: 'connected',
         timestamp: new Date().toISOString()
       });
-            
+
     } catch (error) {
       this.logger.error(`Failed to initialize Aurora Bridge: ${error.message}`);
     }
@@ -217,9 +217,9 @@ class HolographicInterfaceOrchestrator {
       timestamp: new Date().toISOString(),
       id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
-        
+
     this.commandHistory.push(commandEntry);
-        
+
     // Keep only last 100 commands
     if (this.commandHistory.length > 100) {
       this.commandHistory.shift();
@@ -234,14 +234,14 @@ class HolographicInterfaceOrchestrator {
           authority,
           sessionId: `holographic_${Date.now()}`
         });
-                
+
         return {
           status: 'success',
           result: bridgeResult,
           via: 'aurora_custom_gpt_bridge',
           commandId: commandEntry.id
         };
-                
+
       } catch (error) {
         this.logger.error(`Bridge command execution failed: ${error.message}`);
         return {
@@ -267,7 +267,7 @@ class HolographicInterfaceOrchestrator {
     };
 
     const response = responses[command] || `Command "${command}" processed by holographic simulation`;
-        
+
     return {
       status: 'simulated',
       result: response,

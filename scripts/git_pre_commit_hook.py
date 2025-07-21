@@ -27,7 +27,6 @@ except ImportError:
     print("   Ensure scripts/canonical_validator.py exists")
     sys.exit(1)
 
-
 def get_staged_files():
     """Get list of staged files for commit"""
     try:
@@ -39,7 +38,6 @@ def get_staged_files():
     except subprocess.CalledProcessError:
         return []
 
-
 def has_critical_violations(results):
     """Check if validation results contain critical violations"""
     critical_escalations = [
@@ -47,7 +45,6 @@ def has_critical_violations(results):
         if r.status == "ESCALATE" and r.severity == "CRITICAL"
     ]
     return len(critical_escalations) > 0
-
 
 def print_validation_summary(results):
     """Print formatted validation summary"""
@@ -79,7 +76,6 @@ def print_validation_summary(results):
             print(f"     Fix: {issue.suggested_fix}")
         if len(high) > 2:
             print(f"  ... and {len(high) - 2} more (see full report)")
-
 
 def main():
     """Main pre-commit hook execution"""
@@ -198,7 +194,6 @@ def main():
         print("\n✅ All canonical validations passed - commit proceeding")
 
     return 0
-
 
 if __name__ == "__main__":
     exit_code = main()

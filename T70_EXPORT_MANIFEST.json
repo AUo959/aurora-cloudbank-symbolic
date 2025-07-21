@@ -1,6 +1,6 @@
 {
   "anchor": "T70_DOC_REORG_COMPLETION",
-  "srb": "AURORA_DOC_STRUCTURE_V2", 
+  "srb": "AURORA_DOC_STRUCTURE_V2",
   "export_time": "2025-07-20T19:41:00Z",
   "version": "2.0.0",
   "team": "AUo959",
@@ -26,7 +26,7 @@
   },
   "success_criteria_status": {
     "root_directory_4_essential_files": "✅ ACHIEVED",
-    "organized_hierarchy": "✅ ACHIEVED", 
+    "organized_hierarchy": "✅ ACHIEVED",
     "zero_test_failures": "✅ ACHIEVED",
     "complete_audit_trail": "✅ ACHIEVED",
     "sha256_verification": "✅ ACHIEVED",

@@ -7,7 +7,6 @@ Quick overview of repository health and development readiness
 import subprocess
 from pathlib import Path
 
-
 def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:
@@ -19,11 +18,9 @@ def run_command(cmd):
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False
 
-
 def check_file_exists(path):
     """Check if file exists and return status."""
     return "✅" if Path(path).exists() else "❌"
-
 
 def main():
     print("🌟 Aurora CloudBank Development Status Dashboard")
@@ -99,7 +96,6 @@ def main():
 
     print("\n" + "=" * 50)
     print("🎯 Aurora Development Environment Ready!")
-
 
 if __name__ == "__main__":
     main()

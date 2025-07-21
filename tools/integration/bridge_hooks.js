@@ -14,22 +14,22 @@ class AuroraGPTBridge {
         this.repoPath = path.resolve(repoPath);
         this.hooksDir = path.join(this.repoPath, '.aurora', 'hooks');
         this.version = '1.0.0';
-        
+
         this.ensureHooksDirectory();
     }
-    
+
     ensureHooksDirectory() {
         if (!fs.existsSync(this.hooksDir)) {
             fs.mkdirSync(this.hooksDir, { recursive: true });
         }
     }
-    
+
     /**
      * Register hook for Aurora Custom GPT integration
      */
     registerHook(hookName, callback) {
         const hookPath = path.join(this.hooksDir, `${hookName}.json`);
-        
+
         const hookConfig = {
             name: hookName,
             timestamp: new Date().toISOString(),
@@ -40,24 +40,24 @@ class AuroraGPTBridge {
                 dlp_classification: "Internal_Integration_Tool"
             }
         };
-        
+
         fs.writeFileSync(hookPath, JSON.stringify(hookConfig, null, 2));
         console.log(`✅ Registered hook: ${hookName}`);
     }
-    
+
     /**
      * Execute registered hook
      */
     executeHook(hookName, payload = {}) {
         const hookPath = path.join(this.hooksDir, `${hookName}.json`);
-        
+
         if (!fs.existsSync(hookPath)) {
             throw new Error(`Hook not found: ${hookName}`);
         }
-        
+
         const hookConfig = JSON.parse(fs.readFileSync(hookPath, 'utf8'));
         console.log(`🔗 Executing hook: ${hookName}`);
-        
+
         // For now, just log the payload - in future versions this would
         // execute the actual callback function
         return {
@@ -67,13 +67,13 @@ class AuroraGPTBridge {
             payload: payload
         };
     }
-    
+
     /**
      * Generate bridge status report
      */
     getStatus() {
         const hookFiles = fs.readdirSync(this.hooksDir).filter(f => f.endsWith('.json'));
-        
+
         return {
             bridge_version: this.version,
             hooks_registered: hookFiles.length,
@@ -93,9 +93,9 @@ if (typeof module !== 'undefined' && module.exports) {
 function main() {
     const args = process.argv.slice(2);
     const command = args[0];
-    
+
     const bridge = new AuroraGPTBridge();
-    
+
     switch (command) {
         case 'status':
             const status = bridge.getStatus();
@@ -107,27 +107,27 @@ function main() {
                 status.hooks.forEach(hook => console.log(`     - ${hook}`));
             }
             break;
-            
+
         case 'register':
             const hookName = args[1];
             if (!hookName) {
                 console.error('❌ Hook name required');
                 process.exit(1);
             }
-            
+
             // Register a basic example hook
             bridge.registerHook(hookName, function(payload) {
                 console.log(`Hook ${hookName} executed with payload:`, payload);
             });
             break;
-            
+
         case 'execute':
             const execHook = args[1];
             if (!execHook) {
                 console.error('❌ Hook name required');
                 process.exit(1);
             }
-            
+
             try {
                 const result = bridge.executeHook(execHook, { timestamp: new Date().toISOString() });
                 console.log('✅ Hook execution result:', result);
@@ -136,7 +136,7 @@ function main() {
                 process.exit(1);
             }
             break;
-            
+
         default:
             console.log(`
 ╔═══════════════════════════════════════════════════╗

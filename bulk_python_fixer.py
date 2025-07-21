@@ -9,7 +9,6 @@ import re
 import glob
 from pathlib import Path
 
-
 def fix_file(filepath):
     """Fix common Python code issues in a file"""
     print(f"🔧 Fixing {filepath}")
@@ -66,7 +65,6 @@ def fix_file(filepath):
     except Exception as e:
         print(f"❌ Error fixing {filepath}: {e}")
 
-
 def main():
     """Fix all Python files with issues"""
 
@@ -98,7 +96,6 @@ def main():
             fix_file(filepath)
 
     print("🎯 Python fixing complete!")
-
 
 if __name__ == "__main__":
     main()

@@ -17,7 +17,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type, Union
 
-
 class PluginType(Enum):
     """Types of plugins supported by the Opal2 system."""
 
@@ -28,7 +27,6 @@ class PluginType(Enum):
     EFFECT = "effect"
     SHADER = "shader"
 
-
 class PluginStatus(Enum):
     """Plugin operational status."""
 
@@ -37,7 +35,6 @@ class PluginStatus(Enum):
     ERROR = "error"
     LOADING = "loading"
     VALIDATING = "validating"
-
 
 @dataclass
 class PluginMetadata:
@@ -68,7 +65,6 @@ class PluginMetadata:
             "security_level": self.security_level,
             "api_version": self.api_version,
         }
-
 
 class BasePlugin(ABC):
     """Abstract base class for all Opal2 plugins."""
@@ -128,7 +124,6 @@ class BasePlugin(ABC):
         if not success:
             self.performance_metrics["error_count"] += 1
 
-
 class RendererPlugin(BasePlugin):
     """Base class for rendering plugins."""
 
@@ -159,7 +154,6 @@ class RendererPlugin(BasePlugin):
         """Clear rendering cache."""
         self.render_cache.clear()
 
-
 class ExporterPlugin(BasePlugin):
     """Base class for export plugins."""
 
@@ -182,7 +176,6 @@ class ExporterPlugin(BasePlugin):
             self._update_metrics(time.time() - start_time, False)
             raise e
 
-
 class FilterPlugin(BasePlugin):
     """Base class for filter/effect plugins."""
 
@@ -203,7 +196,6 @@ class FilterPlugin(BasePlugin):
         except Exception as e:
             self._update_metrics(time.time() - start_time, False)
             raise e
-
 
 class PluginRegistry:
     """Registry for managing Opal2 plugins."""
@@ -366,7 +358,6 @@ class PluginRegistry:
         # Implement signature verification logic
         return True
 
-
 class PluginManager:
     """High-level plugin management interface."""
 
@@ -466,7 +457,6 @@ class PluginManager:
             },
             "plugins": self.registry.list_plugins(),
         }
-
 
 # Global plugin manager instance
 plugin_manager = PluginManager()

@@ -18,7 +18,6 @@ try:
 except ImportError:
     EnhancedGITWiz = None
 
-
 class GITWizWorkflowOrchestrator:
     """Master orchestrator for all GITWiz enhanced workflows."""
 
@@ -683,7 +682,6 @@ class GITWizWorkflowOrchestrator:
 
         print("\n" + "=" * 70)
 
-
 def main():
     """Main CLI interface for workflow orchestrator."""
     import argparse
@@ -741,7 +739,6 @@ def main():
             "  python3 scripts/gitwiz_workflow_orchestrator.py --full-optimization --live"
         )
         print("  python3 scripts/gitwiz_workflow_orchestrator.py --security-audit")
-
 
 if __name__ == "__main__":
     main()

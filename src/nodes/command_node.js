@@ -49,7 +49,7 @@ function dispatchSymbolicCommand(symbolicCommand) {
     glyph: symbolicCommand.glyph,
     anchor: 'EOS_SEED_ORION'
   });
-  
+
   const encrypted = encryptSymbolicPayload({
     metadata: SYMBOLIC_NODE_METADATA,
     command: symbolicCommand,

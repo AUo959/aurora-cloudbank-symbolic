@@ -5,7 +5,6 @@ Placeholder implementation for ethics and security validation
 
 from typing import Any, Dict
 
-
 class EthicsValidator:
     """Ethics validation for Sonnet 4 operations"""
 
@@ -16,7 +15,6 @@ class EthicsValidator:
     def validate_response(self, response: Dict[str, Any]) -> bool:
         """Validate response meets ethical guidelines"""
         return True
-
 
 class SecurityValidator:
     """Security validation for Sonnet 4 operations"""

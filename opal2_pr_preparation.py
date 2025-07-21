@@ -12,7 +12,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 class Opal2PRPreparation:
     """
     PR preparation utility for Opal2 expansion
@@ -482,7 +481,6 @@ No migration required - This is a new system addition.
         except Exception as e:
             print(f"❌ Failed to commit files: {e}")
 
-
 def main():
     """Main execution function"""
     pr_prep = Opal2PRPreparation()
@@ -520,7 +518,6 @@ def main():
         print(f"\n🎉 Ready to push to remote!")
         print(f"Run: git push origin {branch_name}")
         print("Then create your PR on GitHub/GitLab")
-
 
 if __name__ == "__main__":
     main()

@@ -11,7 +11,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-
 @pytest.mark.opal2
 @pytest.mark.unit
 @pytest.mark.smoke
@@ -95,7 +94,6 @@ class TestOpal2BasicConcepts:
         assert result["render_time"] > 0
         assert "test_123" in result["output"]
 
-
 @pytest.mark.opal2
 @pytest.mark.integration
 class TestOpal2Integration:
@@ -173,7 +171,6 @@ class TestOpal2Integration:
             assert metrics["total_renders"] > 0
             assert 0 <= metrics["cache_hit_rate"] <= 1.0
 
-
 # Test fixtures
 @pytest.fixture
 def sample_opal2_data():
@@ -192,7 +189,6 @@ def sample_opal2_data():
             "dimensions": {"width": 800, "height": 600}
         }
     }
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

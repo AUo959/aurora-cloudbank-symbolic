@@ -10,7 +10,6 @@ from pathlib import Path
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
-
 def main():
     """Generate conflict resolution summary"""
     print("🎉 DEVCONTAINER CONFLICT RESOLUTION COMPLETE")
@@ -58,7 +57,6 @@ def main():
 
     print("\n✨ RESULT: DevContainer conflicts resolved with symbolic compliance")
     print("🎯 Aurora CloudBank Symbolic ready for development!")
-
 
 if __name__ == "__main__":
     main()

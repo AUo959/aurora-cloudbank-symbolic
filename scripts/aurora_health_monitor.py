@@ -16,7 +16,6 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-
 class HealthMonitor:
     """Repository health monitoring and alerting system."""
 
@@ -536,7 +535,6 @@ class HealthMonitor:
                 self.logger.error(f"Error in monitoring loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
-
 def main():
     """Main function for health monitoring CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Health Monitoring")
@@ -593,7 +591,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

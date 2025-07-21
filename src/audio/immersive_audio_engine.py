@@ -3,7 +3,6 @@ Aurora CloudBank - Immersive Audio Engine
 Never-before-conceived spatial audio and quantum-enhanced sound
 """
 
-
 class ImmersiveAudioEngine:
     def __init__(self):
         self.audio_capabilities = {

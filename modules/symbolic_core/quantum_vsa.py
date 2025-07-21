@@ -10,7 +10,6 @@ from qiskit_aer import AerSimulator
 
 from modules.symbolic_core.vsa import SymbolicVector
 
-
 def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
@@ -31,7 +30,6 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
     # Convert bitstring to -1/+1 vector
     vec = np.array([1 if b == "1" else -1 for b in counts[::-1]])
     return vec
-
 
 class QuantumSymbolicVector(SymbolicVector):
     def __init__(self, symbol: str, dim: int = 8):

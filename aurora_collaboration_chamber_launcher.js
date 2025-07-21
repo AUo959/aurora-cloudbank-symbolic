@@ -216,7 +216,7 @@ class AuroraEngine {
 
   identifyRelevantAgents(input) {
     const relevantAgents = [];
-    
+
     for (const [agent, capabilities] of Object.entries(this.agentCapabilities)) {
       for (const capability of capabilities) {
         if (new RegExp(capability, 'i').test(input)) {
@@ -232,22 +232,22 @@ class AuroraEngine {
 
   generateSystemCommands(input) {
     const commands = [];
-    
+
     if (/clean\s*up|cleanup|sync|synchronize/i.test(input)) {
       commands.push('npm run time-to-clean-up');
     }
-    
+
     if (/valid|check|verify|test/i.test(input)) {
       commands.push('npm run validation:status');
       commands.push('python scripts/canonical_validator.py --status');
     }
-    
+
     if (/status|health|monitor/i.test(input)) {
       commands.push('git status');
       commands.push('npm run validation:status');
       commands.push('ps aux | grep aurora');
     }
-    
+
     if (/optimization|optimize|performance/i.test(input)) {
       commands.push('npm run lint');
       commands.push('python scripts/aurora_validation_manager.py --cleanup');
@@ -287,8 +287,8 @@ class AuroraEngine {
   async executeSystemCommand(command) {
     return new Promise((resolve, reject) => {
       const processId = `CMD-${Date.now()}`;
-      
-      exec(command, { 
+
+      exec(command, {
         cwd: process.cwd(),
         timeout: 300000, // 5 minutes
         maxBuffer: 1024 * 1024 // 1MB buffer
@@ -396,7 +396,7 @@ io.on('connection', (socket) => {
     try {
       const { command, authority, target } = data;
       const commandId = `ws-${chamberState.commandCounter++}-${socket.id}`;
-      
+
       addCommandTraceback(commandId, command, '/ws/execute_command', {
         socketId: socket.id,
         target,
@@ -404,17 +404,17 @@ io.on('connection', (socket) => {
       });
 
       let result;
-      
+
       if (target === '@mesh') {
         addTracebackStep(commandId, 'Processing mesh broadcast');
-        
+
         // Simulate mesh broadcast to all agents
         const responses = {};
         for (const agentId of chamberState.activeAgents.keys()) {
           const agentResponse = processAgentMessage(agentId, command, 'mesh_broadcast');
           responses[agentId] = agentResponse;
         }
-        
+
         result = {
           messageType: 'mesh_broadcast',
           responses,
@@ -422,14 +422,14 @@ io.on('connection', (socket) => {
         };
 
         addToLiveFeed('MESH', `Broadcast: ${command}`, 'mesh', { commandId, authority });
-        
+
       } else if (target.startsWith('@agent.')) {
         const agentId = target.replace('@agent.', '');
         addTracebackStep(commandId, `Processing direct message to ${agentId}`);
-        
+
         result = processAgentMessage(agentId, command, 'direct_message');
         addToLiveFeed(agentId, `Direct: ${command}`, 'agent', { commandId, authority });
-        
+
       } else {
         addTracebackStep(commandId, 'Processing general command');
         result = {
@@ -437,7 +437,7 @@ io.on('connection', (socket) => {
           content: `Command processed: ${command}`,
           timestamp: new Date().toISOString()
         };
-        
+
         addToLiveFeed('SYSTEM', command, 'system', { commandId, authority });
       }
 
@@ -495,7 +495,7 @@ io.on('connection', (socket) => {
     try {
       const { input, mode } = data;
       const analysis = await auroraEngine.processNaturalLanguage(input, socket.id);
-      
+
       // Emit analysis back to client
       socket.emit('aurora_analysis_complete', {
         analysis,
@@ -549,11 +549,11 @@ io.on('connection', (socket) => {
   socket.on('execute_system_command', async (data) => {
     try {
       const { command, authority, plan } = data;
-      
+
       // Security check - only allow certain commands
       const allowedCommands = [
         'npm run time-to-clean-up',
-        'npm run validation:status', 
+        'npm run validation:status',
         'npm run validation:cleanup',
         'git status',
         'python scripts/canonical_validator.py --status',
@@ -572,7 +572,7 @@ io.on('connection', (socket) => {
       }
 
       const result = await auroraEngine.executeSystemCommand(command);
-      
+
       socket.emit('system_command_result', {
         command,
         result,
@@ -638,7 +638,7 @@ io.on('connection', (socket) => {
   socket.on('coordinate_agents', async (data) => {
     try {
       const { instruction, targetAgents, priority } = data;
-      
+
       const coordination = {
         id: `COORD-${Date.now()}`,
         instruction,
@@ -657,7 +657,7 @@ io.on('connection', (socket) => {
             timestamp: new Date().toISOString(),
             status: 'acknowledged'
           };
-          
+
           socket.emit('agent_coordination_response', {
             coordinationId: coordination.id,
             agent,
@@ -707,7 +707,7 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     chamberState.connectedClients.delete(socket.id);
     console.log(`📤 Collaboration Chamber client disconnected: ${socket.id}`);
-    
+
     io.emit('client_disconnected', {
       socketId: socket.id,
       connectedClients: chamberState.connectedClients.size
@@ -723,7 +723,7 @@ server.listen(PORT, () => {
   console.log('🎯 Agents: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808');
   console.log('📡 Features: Live Feed | Command Traceback | Agent Selection');
   console.log('🌌 Phase 7: HOLOGRAPHIC COMMAND INTERFACE - OPERATIONAL');
-  
+
   // Add welcome messages
   setTimeout(() => {
     addToLiveFeed('AURORA', 'Collaboration Chamber initialized. All systems operational.', 'system');

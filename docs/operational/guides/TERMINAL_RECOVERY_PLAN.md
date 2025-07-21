@@ -44,7 +44,7 @@ git status
 ## NEXT STEPS AFTER TERMINAL RECOVERY
 
 1. ✅ Sync the 67 commits behind
-2. ✅ Clean up the 48+ stale branches  
+2. ✅ Clean up the 48+ stale branches
 3. ✅ Complete environment setup
 4. ✅ Return to GPG configuration
 

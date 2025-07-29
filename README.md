@@ -34,6 +34,14 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 
 ## ✨ Recent Updates
 
+### 🤖 ChatGPT Agent Mode Integration Complete
+
+- **Status**: ✅ **READY** for ChatGPT agent interactions
+- **Features**: Function calling, tool execution, session persistence, real-time WebSocket communication
+- **Tools Available**: 4 core tools (symbolic processing, geometric algebra, session management, system status)
+- **API Endpoints**: `/agent/tools`, `/agent/execute`, `/agent/session`, `/agent/stream`, `/agent/status`
+- **Documentation**: See `docs/CHATGPT_AGENT_MODE_INTEGRATION.md`
+
 ### 🧠 Claude Sonnet 4 Integration Complete
 
 - **Status**: ✅ **ACTIVE** for all clients
@@ -81,6 +89,7 @@ The Aurora CloudBank documentation follows a structured organization system for 
 - **Cultural Simulation**: CASK (Culturally Aware Simulation Knowledge) integration
 - **AI Processing**: Claude Sonnet 4 enhanced cognitive computing
 - **Professional UI**: Modern FastAPI backend with responsive web interface
+- **ChatGPT Agent Mode**: Advanced agent integration with function calling and tool execution
 
 ### 🏗️ **Core System Architecture**
 
@@ -155,6 +164,8 @@ make run
 - **Quick Status Check**: `python3 scripts/dev-status.py`
 - **Start Development Server**: `./scripts/quick-start.sh`
 - **Environment Health**: `bash .aurora/system/on_startup.sh`
+- **ChatGPT Agent Mode Validation**: `python3 scripts/validate_agent_mode.py`
+- **Agent Mode Demo**: `python3 scripts/demo_agent_mode.py`
 
 ## Infallible Codespaces Bootstrap
 
@@ -245,6 +256,25 @@ Additionally, use `python scripts/cask_tool.py` to generate CASK reports and cha
 - `/quantum/symbolic_vector` — Quantum-inspired symbolic vector generation
 - `/mcp_bridge` — MCP Bridge Core configuration (JSON)
 - `/mcp_bridge/route_command` — Symbolic command routing (MCP-governed, with security/anchor validation)
+
+## ChatGPT Agent Mode API Endpoints
+
+Aurora CloudBank now includes comprehensive **ChatGPT Agent Mode integration** with the following endpoints:
+
+- **`GET /agent/tools`** — Discover available agent tools with OpenAPI-compatible schemas
+- **`POST /agent/execute`** — Execute agent tools with validated parameters and Aurora symbolic anchoring
+- **`POST /agent/session`** — Manage agent session state and context persistence
+- **`WebSocket /agent/stream`** — Real-time agent communication with streaming responses
+- **`GET /agent/status`** — Get current agent system status and health information
+
+### Available Agent Tools
+
+1. **Symbolic Processing** — Execute Aurora's quantum-enhanced symbolic operations
+2. **Geometric Algebra** — Perform geometric algebra computations with multivectors
+3. **Session Management** — Manage persistent agent context and state
+4. **System Status** — Get real-time health monitoring and capability reporting
+
+For detailed agent mode documentation, see `docs/CHATGPT_AGENT_MODE_INTEGRATION.md`.
 
 ## Architecture Diagram
 

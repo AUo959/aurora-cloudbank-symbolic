@@ -13,6 +13,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 class GITWiz:
     """Provide pre-checks, rapid fixes and deployment helpers."""
 
@@ -132,6 +133,7 @@ class GITWiz:
         print("GitHub CLI not found; please create the PR manually")
         return False
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="GITWiz repo management tool")
     sub = parser.add_subparsers(dest="cmd")
@@ -194,6 +196,7 @@ def main() -> None:
             wiz.create_pr(args.title, args.body)
         case _:
             parser.print_help()
+
 
 if __name__ == "__main__":  # pragma: no cover - script entry point
     try:

@@ -5,13 +5,10 @@ WebGL-based rendering plugin for high-performance browser-based visualization
 of quantum circuits and symbolic vectors.
 """
 
-import json
+from typing import Any, Dict, List
 
 from modules.opal2.plugins.base_plugin import PluginMetadata, PluginType, RendererPlugin
 
-from typing import Any
-from typing import Dict
-from typing import List
 
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL-based renderer for quantum and symbolic visualizations."""
@@ -55,9 +52,7 @@ class WebGLRendererPlugin(RendererPlugin):
             self.status = "error"
             return False
 
-    def render(
-        self, render_data: Dict[str, Any], options: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def render(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
         """Render quantum/symbolic data using WebGL."""
         render_type = render_data.get("type", "hybrid")
 
@@ -219,9 +214,7 @@ class WebGLRendererPlugin(RendererPlugin):
             }
         """
 
-    def _render_quantum_circuit(
-        self, render_data: Dict[str, Any], options: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _render_quantum_circuit(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
         """Render quantum circuit visualization."""
         circuit_data = render_data["data"]
         metadata = render_data["metadata"]
@@ -286,9 +279,7 @@ class WebGLRendererPlugin(RendererPlugin):
             },
         }
 
-    def _render_symbolic_vector(
-        self, render_data: Dict[str, Any], options: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _render_symbolic_vector(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
         """Render symbolic vector visualization."""
         vector_data = render_data["data"]
         metadata = render_data["metadata"]
@@ -313,16 +304,12 @@ class WebGLRendererPlugin(RendererPlugin):
         # Create vector visualization objects
         if "spatial_coordinates" in vector_data:
             for i, coord in enumerate(vector_data["spatial_coordinates"]):
-                vector_object = self._create_vector_component_object(
-                    coord, i, vector_data
-                )
+                vector_object = self._create_vector_component_object(coord, i, vector_data)
                 scene_data["objects"].append(vector_object)
 
         # Add geometric representation
         if "geometric_representation" in vector_data:
-            geometric_object = self._create_geometric_object(
-                vector_data["geometric_representation"]
-            )
+            geometric_object = self._create_geometric_object(vector_data["geometric_representation"])
             scene_data["objects"].append(geometric_object)
 
         return {
@@ -338,9 +325,7 @@ class WebGLRendererPlugin(RendererPlugin):
             },
         }
 
-    def _render_hybrid(
-        self, render_data: Dict[str, Any], options: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _render_hybrid(self, render_data: Dict[str, Any], options: Dict[str, Any]) -> Dict[str, Any]:
         """Render hybrid quantum-symbolic visualization."""
         hybrid_data = render_data["data"]
 
@@ -369,9 +354,7 @@ class WebGLRendererPlugin(RendererPlugin):
 
         # Add integration mapping
         if "integration_mapping" in hybrid_data:
-            integration_objects = self._create_integration_objects(
-                hybrid_data["integration_mapping"]
-            )
+            integration_objects = self._create_integration_objects(hybrid_data["integration_mapping"])
             combined_scene["objects"].extend(integration_objects)
 
         return {
@@ -384,9 +367,7 @@ class WebGLRendererPlugin(RendererPlugin):
                 "render_type": "hybrid",
                 "performance_tier": "high",
                 "real_time_capable": True,
-                "integration_quality": render_data["metadata"].get(
-                    "integration_quality", 1.0
-                ),
+                "integration_quality": render_data["metadata"].get("integration_quality", 1.0),
             },
         }
 
@@ -435,9 +416,7 @@ class WebGLRendererPlugin(RendererPlugin):
             },
         }
 
-    def _create_entanglement_connection(
-        self, connection: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _create_entanglement_connection(self, connection: Dict[str, Any]) -> Dict[str, Any]:
         """Create 3D object for entanglement connection."""
         return {
             "type": "curve",
@@ -453,9 +432,7 @@ class WebGLRendererPlugin(RendererPlugin):
             "animation": {"type": "flow", "speed": 2.0, "direction": 1},
         }
 
-    def _create_vector_component_object(
-        self, coord: tuple, index: int, vector_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _create_vector_component_object(self, coord: tuple, index: int, vector_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create 3D object for vector component."""
         x, y, z = coord
 
@@ -477,9 +454,7 @@ class WebGLRendererPlugin(RendererPlugin):
             "animation": {"type": "pulse", "frequency": 1.0, "amplitude": 0.1},
         }
 
-    def _create_geometric_object(
-        self, geometric_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _create_geometric_object(self, geometric_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create 3D object for geometric algebra representation."""
         return {
             "type": "mesh",
@@ -495,9 +470,7 @@ class WebGLRendererPlugin(RendererPlugin):
             },
         }
 
-    def _create_integration_objects(
-        self, integration_data: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    def _create_integration_objects(self, integration_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Create 3D objects for quantum-symbolic integration."""
         objects = []
 
@@ -842,9 +815,7 @@ class WebGLRendererPlugin(RendererPlugin):
             [1, 0, 0],  # End point
         ]
 
-    def _generate_geometric_vertices(
-        self, geometric_data: Dict[str, Any]
-    ) -> List[float]:
+    def _generate_geometric_vertices(self, geometric_data: Dict[str, Any]) -> List[float]:
         """Generate vertices for geometric algebra representation."""
         # Simplified geometric vertices generation
         vertices = []

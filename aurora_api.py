@@ -9,20 +9,11 @@ Enhanced with Claude Sonnet 4 capabilities.
 """
 
 from fastapi import FastAPI, HTTPException
-
-
 from pydantic import BaseModel
 
-
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-
-
 from modules.symbolic_core.sonnet4_integration_hub import (
-
-
     enable_sonnet4_globally,
-
-
     sonnet4_hub,
 )
 
@@ -38,9 +29,7 @@ def parse_multivector(expression: str, blades: dict):
     """Safely parse a multivector expression."""
     allowed_symbols = set(blades.keys())
 
-
     tokens = expression.split()
-
 
     for token in tokens:
         if token not in allowed_symbols and not token.isnumeric():
@@ -48,15 +37,12 @@ def parse_multivector(expression: str, blades: dict):
     # Construct the multivector using the blades dictionary
     result = None
 
-
     for token in tokens:
         if token in blades:
             result = blades[token] if result is None else result + blades[token]
 
-
         elif token.isnumeric():
             result = float(token) if result is None else result + float(token)
-
 
     return result
 
@@ -64,9 +50,7 @@ def parse_multivector(expression: str, blades: dict):
 class VectorRequest(BaseModel):
     x: float
 
-
     y: float
-
 
     z: float
 
@@ -74,54 +58,43 @@ class VectorRequest(BaseModel):
 class MultivectorRequest(BaseModel):
     a: str
 
-
     b: str
 
 
 class Sonnet4EnableRequest(BaseModel):
     client_id: str = None
 
-
     enable_all: bool = True
 
+
 @app.post("/geometric/vector")
-
-
 def create_vector(req: VectorRequest):
     v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
 
-
     return {"vector": str(v)}
 
+
 @app.post("/geometric/mult")
-
-
 def geometric_product(req: MultivectorRequest):
     try:
         a = parse_multivector(req.a, ga.blades)
 
-
         b = parse_multivector(req.b, ga.blades)
-
 
         result = ga.mult(a, b)
 
-
         return {"result": str(result)}
-
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @app.post("/sonnet4/enable")
-
-
 async def enable_sonnet4(req: Sonnet4EnableRequest = None):
     """Enable Claude Sonnet 4 for all clients or specific client"""
     try:
         if req and req.enable_all:
             results = await enable_sonnet4_globally()
-
 
             return {
                 "status": "success",
@@ -130,10 +103,8 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "global_status": sonnet4_hub.get_global_status(),
             }
 
-
         elif req and req.client_id:
             result = await sonnet4_hub._enable_sonnet4_for_client(req.client_id)
-
 
             return {
                 "status": "success" if result else "error",
@@ -142,11 +113,9 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "client_status": sonnet4_hub.get_client_status(req.client_id),
             }
 
-
         else:
             # Default: enable for all clients
             results = await enable_sonnet4_globally()
-
 
             return {
                 "status": "success",
@@ -155,17 +124,11 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
                 "global_status": sonnet4_hub.get_global_status(),
             }
 
-
     except Exception as e:
-        raise HTTPException(
+        raise HTTPException(status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}")
 
-
-            status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}"
-        )
 
 @app.get("/sonnet4/status")
-
-
 def get_sonnet4_status():
     """Get Claude Sonnet 4 status"""
     return {
@@ -179,16 +142,14 @@ def get_sonnet4_status():
         },
     }
 
+
 @app.get("/sonnet4/clients/{client_id}")
-
-
 def get_client_sonnet4_status(client_id: str):
     """Get Claude Sonnet 4 status for specific client"""
     return sonnet4_hub.get_client_status(client_id)
 
+
 @app.get("/health")
-
-
 def health_check():
     """Health check endpoint"""
     return {
@@ -197,6 +158,7 @@ def health_check():
         "sonnet4_enabled": sonnet4_hub.sonnet4_config.enabled,
         "timestamp": "2025-06-29",
     }
+
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")

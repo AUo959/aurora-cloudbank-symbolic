@@ -6,13 +6,12 @@ Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
 """
 
-
 # Add src to path for imports
 import math
 import os
 import time
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 
 @pytest.mark.native
@@ -127,6 +126,7 @@ class TestNativeVSA:
         best_match = memory.cleanup(vector1)
         assert best_match.symbol == "cleanup1"
 
+
 class TestNativeQuantum:
     """Test native quantum implementation"""
 
@@ -176,7 +176,7 @@ class TestNativeQuantum:
         assert total_counts == 1000
 
         # Check that we get expected states
-        expected_states = {'00', '10'}
+        expected_states = {"00", "10"}
         actual_states = set(counts.keys())
         assert actual_states.issubset(expected_states)
 
@@ -185,9 +185,9 @@ class TestNativeQuantum:
         processor = NativeQuantumProcessingLayer(3)
 
         operations = [
-            {'type': 'hadamard', 'qubit': 0},
-            {'type': 'cnot', 'qubit': 0, 'target': 1},
-            {'type': 'rotation', 'qubit': 2, 'angle': math.pi / 4}
+            {"type": "hadamard", "qubit": 0},
+            {"type": "cnot", "qubit": 0, "target": 1},
+            {"type": "rotation", "qubit": 2, "angle": math.pi / 4},
         ]
 
         circuit = processor.create_quantum_circuit("test_circuit", operations)
@@ -195,14 +195,15 @@ class TestNativeQuantum:
 
         result = processor.execute_quantum_symbolic_computation("test_circuit", 100)
 
-        assert 'quantum_results' in result
-        assert 'symbolic_interpretation' in result
-        assert 'hybrid_output' in result
+        assert "quantum_results" in result
+        assert "symbolic_interpretation" in result
+        assert "hybrid_output" in result
 
-        interpretation = result['symbolic_interpretation']
-        assert 'dominant_state' in interpretation
-        assert 'quantum_entropy' in interpretation
-        assert 'symbolic_patterns' in interpretation
+        interpretation = result["symbolic_interpretation"]
+        assert "dominant_state" in interpretation
+        assert "quantum_entropy" in interpretation
+        assert "symbolic_patterns" in interpretation
+
 
 class TestNativeSymbolicAnchor:
     """Test native symbolic CPU anchor"""
@@ -224,32 +225,29 @@ class TestNativeSymbolicAnchor:
         anchor = NativeSymbolicCPUAnchor()
 
         test_data = {
-            'quantum_operations': [
-                {'type': 'hadamard', 'qubit': 0},
-                {'type': 'cnot', 'qubit': 0, 'target': 1}
-            ],
-            'symbolic_concepts': ['test', 'anchor', 'quantum']
+            "quantum_operations": [{"type": "hadamard", "qubit": 0}, {"type": "cnot", "qubit": 0, "target": 1}],
+            "symbolic_concepts": ["test", "anchor", "quantum"],
         }
 
         result = anchor.anchor_quantum_symbolic_state(test_data)
 
-        assert 'quantum_anchor' in result
-        assert 'symbolic_anchor' in result
-        assert 'hybrid_coordination' in result
-        assert 'entropy_tracking' in result
-        assert 'memory_sealed' in result
+        assert "quantum_anchor" in result
+        assert "symbolic_anchor" in result
+        assert "hybrid_coordination" in result
+        assert "entropy_tracking" in result
+        assert "memory_sealed" in result
 
         # Check quantum anchor results
-        quantum_anchor = result['quantum_anchor']
-        assert quantum_anchor['quantum_processed'] is True
-        assert quantum_anchor['coherence_maintained'] is True
-        assert 'entropy' in quantum_anchor
+        quantum_anchor = result["quantum_anchor"]
+        assert quantum_anchor["quantum_processed"] is True
+        assert quantum_anchor["coherence_maintained"] is True
+        assert "entropy" in quantum_anchor
 
         # Check symbolic anchor results
-        symbolic_anchor = result['symbolic_anchor']
-        assert symbolic_anchor['symbolic_patterns_extracted'] is True
-        assert symbolic_anchor['reasoning_chains_constructed'] is True
-        assert 'symbolic_entropy' in symbolic_anchor
+        symbolic_anchor = result["symbolic_anchor"]
+        assert symbolic_anchor["symbolic_patterns_extracted"] is True
+        assert symbolic_anchor["reasoning_chains_constructed"] is True
+        assert "symbolic_entropy" in symbolic_anchor
 
     def test_entropy_tracking(self):
         """Test entropy tracking functionality"""
@@ -261,16 +259,16 @@ class TestNativeSymbolicAnchor:
             anchor.entropy_tracker.track_entropy(entropy_val)
 
         trend = anchor.entropy_tracker.get_entropy_trend()
-        assert 'trend' in trend
-        assert 'stability' in trend
-        assert 'current' in trend
-        assert trend['samples'] == 10
+        assert "trend" in trend
+        assert "stability" in trend
+        assert "current" in trend
+        assert trend["samples"] == 10
 
     def test_memory_sealing(self):
         """Test memory sealing functionality"""
         anchor = NativeSymbolicCPUAnchor()
 
-        test_state = {'data': 'test_state', 'value': 42}
+        test_state = {"data": "test_state", "value": 42}
         seal_hash = anchor.memory_sealer.seal_state("test_seal", test_state)
 
         assert len(seal_hash) == 64  # SHA256 hash length
@@ -287,24 +285,24 @@ class TestNativeSymbolicAnchor:
         anchor = NativeSymbolicCPUAnchor()
 
         # Seal some states
-        anchor.memory_sealer.seal_state("state1", {'data': 'test1'})
-        anchor.memory_sealer.seal_state("state2", {'data': 'test2'})
+        anchor.memory_sealer.seal_state("state1", {"data": "test1"})
+        anchor.memory_sealer.seal_state("state2", {"data": "test2"})
 
         continuity_result = anchor.perform_continuity_check()
 
-        assert 'continuity_status' in continuity_result
-        assert 'anchor_integrity' in continuity_result
-        assert 'sealed_integrity' in continuity_result
+        assert "continuity_status" in continuity_result
+        assert "anchor_integrity" in continuity_result
+        assert "sealed_integrity" in continuity_result
 
         # All anchors should be intact
-        anchor_integrity = continuity_result['anchor_integrity']
+        anchor_integrity = continuity_result["anchor_integrity"]
         assert len(anchor_integrity) == 3  # Three anchor protocols
-        assert all(a['status'] == 'intact' for a in anchor_integrity)
+        assert all(a["status"] == "intact" for a in anchor_integrity)
 
         # Sealed states should be verified
-        sealed_integrity = continuity_result['sealed_integrity']
+        sealed_integrity = continuity_result["sealed_integrity"]
         assert len(sealed_integrity) == 2
-        assert all(s['integrity'] == 'verified' for s in sealed_integrity)
+        assert all(s["integrity"] == "verified" for s in sealed_integrity)
 
     def test_anchor_status(self):
         """Test anchor status reporting"""
@@ -312,12 +310,13 @@ class TestNativeSymbolicAnchor:
 
         status = anchor.get_anchor_status()
 
-        assert 'anchor_protocols' in status
-        assert 'processing_modes' in status
-        assert 'quantum_qubits' in status
-        assert 'symbolic_dimension' in status
-        assert 'entropy_tracking' in status
-        assert status['system_status'] == 'operational'
+        assert "anchor_protocols" in status
+        assert "processing_modes" in status
+        assert "quantum_qubits" in status
+        assert "symbolic_dimension" in status
+        assert "entropy_tracking" in status
+        assert status["system_status"] == "operational"
+
 
 class TestPerformanceOptimizations:
     """Test performance characteristics of native implementations"""
@@ -350,9 +349,7 @@ class TestPerformanceOptimizations:
 
         processor = NativeQuantumProcessingLayer(6)  # 6 qubits = 64 states
 
-        operations = [
-            {'type': 'hadamard', 'qubit': i} for i in range(6)
-        ]
+        operations = [{"type": "hadamard", "qubit": i} for i in range(6)]
 
         processor.create_quantum_circuit("perf_test", operations)
         result = processor.execute_quantum_symbolic_computation("perf_test", 1000)
@@ -362,7 +359,7 @@ class TestPerformanceOptimizations:
 
         # Should complete in reasonable time
         assert duration < 2.0
-        assert 'quantum_results' in result
+        assert "quantum_results" in result
 
     def test_memory_usage(self):
         """Test memory efficiency of native implementations"""
@@ -381,6 +378,7 @@ class TestPerformanceOptimizations:
         # In production, you might use memory profiling tools
         total_elements = sum(len(v.vector) for v in vectors)
         assert total_elements == 100 * 512
+
 
 if __name__ == "__main__":
     # Run basic smoke tests

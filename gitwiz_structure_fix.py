@@ -8,6 +8,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_gitwiz_structure():
     """Fix the fundamental structural issues in gitwiz_enhanced.py"""
     file_path = Path("scripts/gitwiz_enhanced.py")
@@ -21,7 +22,7 @@ def fix_gitwiz_structure():
         content = f.read()
 
     # Fix duplicate sys import
-    content = re.sub(rr'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
+    content = re.sub(rrr'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
 
     # Add missing class definitions at the beginning
     missing_classes = '''
@@ -96,7 +97,7 @@ class WorkflowOptimizer:
             match = re.search(class_pattern, content, re.DOTALL | re.MULTILINE)
             if match:
                 class_content = match.group(1)
-                rest_content = content[match.end()-len(match.group(2)):]
+                rest_content = content[match.end() - len(match.group(2)):]
                 content = class_content + missing_methods + '\n' + rest_content
 
     with open(file_path, 'w', encoding='utf-8') as f:
@@ -104,6 +105,7 @@ class WorkflowOptimizer:
 
     print("✅ Fixed GitWiz structural issues")
     return True
+
 
 def create_security_verification_stub():
     """Create a minimal security verification file to resolve import issues"""
@@ -143,6 +145,7 @@ class SecurityVerifier:
     print("✅ Created security verification stub")
     return True
 
+
 def main():
     """Main function to fix critical structural issues"""
     print("🏗️ Aurora CloudBank GitWiz Structure Fix")
@@ -162,6 +165,7 @@ def main():
     except Exception as e:
         print(f"❌ Error during structural fixes: {e}")
         return False
+
 
 if __name__ == "__main__":
     success = main()

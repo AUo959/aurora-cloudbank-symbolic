@@ -2,11 +2,12 @@
 VoiceInteractionHandler - Aurora CloudBank Multi-Modal Interaction
 """
 
+
 class VoiceInteractionHandler:
     """Placeholder implementation for VoiceInteractionHandler"""
 
     def __init__(self):
-        self.status = 'active'
+        self.status = "active"
         self.capabilities = []
 
     async def initialize(self):

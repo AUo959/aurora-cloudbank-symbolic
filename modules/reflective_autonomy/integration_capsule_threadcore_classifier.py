@@ -1,5 +1,6 @@
 from symbolic_tagging_engine import classify_thread_content
 
+
 class ThreadcoreClassifierCapsule:
 
     def __init__(self):

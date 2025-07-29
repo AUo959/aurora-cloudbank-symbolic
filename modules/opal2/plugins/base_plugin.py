@@ -19,6 +19,7 @@ class PluginType(Enum):
     EFFECT = "effect"
     SHADER = "shader"
 
+
 class PluginStatus(Enum):
     """Plugin operational status."""
 
@@ -27,6 +28,7 @@ class PluginStatus(Enum):
     ERROR = "error"
     LOADING = "loading"
     VALIDATING = "validating"
+
 
 @dataclass
 class PluginMetadata:
@@ -58,6 +60,7 @@ class PluginMetadata:
             "api_version": self.api_version,
         }
 
+
 class BasePlugin(ABC):
 
     """Abstract base class for all Opal2 plugins."""
@@ -77,17 +80,14 @@ class BasePlugin(ABC):
     @abstractmethod
     def initialize(self, config: Dict[str, Any]) -> bool:
         """Initialize the plugin with configuration."""
-        pass
 
     @abstractmethod
     def process(self, input_data: Any, options: Dict[str, Any]) -> Any:
         """Process input data according to plugin functionality."""
-        pass
 
     @abstractmethod
     def cleanup(self) -> bool:
         """Clean up plugin resources."""
-        pass
 
     def validate_input(self, input_data: Any) -> bool:
         """Validate input data format and structure."""
@@ -117,6 +117,7 @@ class BasePlugin(ABC):
         if not success:
             self.performance_metrics["error_count"] += 1
 
+
 class RendererPlugin(BasePlugin):
 
     """Base class for rendering plugins."""
@@ -131,7 +132,6 @@ class RendererPlugin(BasePlugin):
         self, render_data: Dict[str, Any], options: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Render visual output from input data."""
-        pass
 
     def process(self, input_data: Any, options: Dict[str, Any]) -> Any:
         """Process input data by rendering."""
@@ -148,6 +148,7 @@ class RendererPlugin(BasePlugin):
         """Clear rendering cache."""
         self.render_cache.clear()
 
+
 class ExporterPlugin(BasePlugin):
 
     """Base class for export plugins."""
@@ -157,7 +158,6 @@ class ExporterPlugin(BasePlugin):
         self, data: Dict[str, Any], output_format: str, options: Dict[str, Any]
     ) -> bytes:
         """Export data to specified format."""
-        pass
 
     def process(self, input_data: Any, options: Dict[str, Any]) -> Any:
         """Process input data by exporting."""
@@ -171,6 +171,7 @@ class ExporterPlugin(BasePlugin):
             self._update_metrics(time.time() - start_time, False)
             raise e
 
+
 class FilterPlugin(BasePlugin):
 
     """Base class for filter/effect plugins."""
@@ -180,7 +181,6 @@ class FilterPlugin(BasePlugin):
         self, data: Dict[str, Any], filter_params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Apply filter effect to data."""
-        pass
 
     def process(self, input_data: Any, options: Dict[str, Any]) -> Any:
         """Process input data by applying filter."""
@@ -193,29 +193,30 @@ class FilterPlugin(BasePlugin):
             self._update_metrics(time.time() - start_time, False)
             raise e
 
+
 class PluginRegistry:
     """Registry for managing Opal2 plugins."""
 
     def __init__(self):
         self.plugins: Dict[str, BasePlugin] = {}
-            plugin_type: [] for plugin_type in PluginType
+           plugin_type: [] for plugin_type in PluginType
         }
-        self.validation_rules = {
-            "max_execution_time": 5.0,  # seconds
+            self.validation_rules = {
+           "max_execution_time": 5.0,  # seconds
             "max_memory_usage": 100,  # MB
             "required_methods": ["initialize", "process", "cleanup"],
         }
 
-    def register_plugin(self, plugin: BasePlugin) -> bool:
+        def register_plugin(self, plugin: BasePlugin) -> bool:
         """Register a new plugin."""
         try:
             # Validate plugin
-            if not self._validate_plugin(plugin):
-                return False
+        if not self._validate_plugin(plugin):
+        return False
 
             # Check for conflicts
             if plugin.metadata.name in self.plugins:
-                raise ValueError(f"Plugin '{plugin.metadata.name}' already registered")
+        raise ValueError(f"Plugin '{plugin.metadata.name}' already registered")
 
             # Register plugin
             self.plugins[plugin.metadata.name] = plugin
@@ -226,21 +227,21 @@ class PluginRegistry:
 
             return True
         except Exception as e:
-            plugin.status = PluginStatus.ERROR
+        plugin.status = PluginStatus.ERROR
             raise e
 
-    def unregister_plugin(self, plugin_name: str) -> bool:
+        def unregister_plugin(self, plugin_name: str) -> bool:
         """Unregister a plugin."""
         if plugin_name not in self.plugins:
-            return False
+        return False
 
         plugin = self.plugins[plugin_name]
 
         # Cleanup plugin
         try:
-            plugin.cleanup()
+        plugin.cleanup()
         except Exception:
-            pass  # Continue with unregistration even if cleanup fails
+        pass  # Continue with unregistration even if cleanup fails
 
         # Remove from registry
         del self.plugins[plugin_name]
@@ -249,27 +250,27 @@ class PluginRegistry:
         plugin.status = PluginStatus.INACTIVE
         return True
 
-    def get_plugin(self, plugin_name: str) -> Optional[BasePlugin]:
+        def get_plugin(self, plugin_name: str) -> Optional[BasePlugin]:
         """Get plugin by name."""
         return self.plugins.get(plugin_name)
 
-    def get_plugins_by_type(self, plugin_type: PluginType) -> List[BasePlugin]:
+        def get_plugins_by_type(self, plugin_type: PluginType) -> List[BasePlugin]:
         """Get all plugins of a specific type."""
         plugin_names = self.plugin_types[plugin_type]
         return [self.plugins[name] for name in plugin_names]
 
-    def load_plugin_from_module(self, module_path: str, plugin_class_name: str) -> bool:
+        def load_plugin_from_module(self, module_path: str, plugin_class_name: str) -> bool:
         """Load plugin from a Python module."""
         try:
             # Import module
-            module = importlib.import_module(module_path)
+        module = importlib.import_module(module_path)
 
             # Get plugin class
             plugin_class = getattr(module, plugin_class_name)
 
             # Validate plugin class
             if not issubclass(plugin_class, BasePlugin):
-                raise ValueError("Plugin class must inherit from BasePlugin")
+        raise ValueError("Plugin class must inherit from BasePlugin")
 
             # Create plugin instance
             # Note: This assumes the plugin class has a default constructor or factory method
@@ -279,26 +280,26 @@ class PluginRegistry:
             return self.register_plugin(plugin_instance)
 
         except Exception as e:
-            print(f"Failed to load plugin from {module_path}: {e}")
+        print(f"Failed to load plugin from {module_path}: {e}")
             return False
 
-    def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
+        def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
         """Get detailed information about a plugin."""
         plugin = self.plugins.get(plugin_name)
         if not plugin:
-            return None
+        return None
 
         return {
-            "metadata": plugin.metadata.to_dict(),
+           "metadata": plugin.metadata.to_dict(),
             "status": plugin.status.value,
             "performance_metrics": plugin.get_performance_metrics(),
             "config": plugin.config,
         }
 
-    def list_plugins(self) -> List[Dict[str, Any]]:
+        def list_plugins(self) -> List[Dict[str, Any]]:
         """List all registered plugins."""
         return [
-            {
+           {
                 "name": name,
                 "type": plugin.metadata.plugin_type.value,
                 "status": plugin.status.value,
@@ -307,137 +308,137 @@ class PluginRegistry:
             for name, plugin in self.plugins.items()
         ]
 
-    def validate_plugin_security(self, plugin: BasePlugin) -> bool:
+        def validate_plugin_security(self, plugin: BasePlugin) -> bool:
         """Validate plugin security requirements."""
         # Basic security validation
         security_level = plugin.metadata.security_level
 
         if security_level == "safe":
             # Safe plugins have minimal restrictions
-            return True
+        return True
         elif security_level == "sandbox":
             # Sandbox plugins need additional validation
-            return self._validate_sandbox_plugin(plugin)
+        return self._validate_sandbox_plugin(plugin)
         elif security_level == "trusted":
             # Trusted plugins require signature verification
-            return self._validate_trusted_plugin(plugin)
+        return self._validate_trusted_plugin(plugin)
 
         return False
 
-    def _validate_plugin(self, plugin: BasePlugin) -> bool:
+        def _validate_plugin(self, plugin: BasePlugin) -> bool:
         """Validate plugin meets requirements."""
         # Check required methods
         for method_name in self.validation_rules["required_methods"]:
-            if not hasattr(plugin, method_name):
-                return False
+        if not hasattr(plugin, method_name):
+        return False
 
         # Check security
         if not self.validate_plugin_security(plugin):
-            return False
+        return False
 
         # Check dependencies
         for dependency in plugin.metadata.dependencies:
-            if dependency not in self.plugins:
-                print(f"Missing dependency: {dependency}")
+        if dependency not in self.plugins:
+        print(f"Missing dependency: {dependency}")
                 return False
 
         return True
 
-    def _validate_sandbox_plugin(self, plugin: BasePlugin) -> bool:
+        def _validate_sandbox_plugin(self, plugin: BasePlugin) -> bool:
         """Validate sandbox plugin (additional restrictions)."""
         # Implement sandbox validation logic
         return True
 
-    def _validate_trusted_plugin(self, plugin: BasePlugin) -> bool:
+        def _validate_trusted_plugin(self, plugin: BasePlugin) -> bool:
         """Validate trusted plugin (signature verification)."""
         # Implement signature verification logic
         return True
 
-class PluginManager:
-    """High-level plugin management interface."""
+        class PluginManager:
+        """High-level plugin management interface."""
 
-    def __init__(self):
+        def __init__(self):
         self.registry = PluginRegistry()
         self.active_plugins = {}
         self.plugin_configs = {}
 
-    def load_plugins_from_directory(self, directory_path: str) -> int:
+        def load_plugins_from_directory(self, directory_path: str) -> int:
         """Load all plugins from a directory."""
 
         loaded_count = 0
 
         if not os.path.exists(directory_path):
-            return 0
+        return 0
 
         for filename in os.listdir(directory_path):
-            if filename.endswith(".py") and not filename.startswith("__"):
-                module_name = filename[:-3]  # Remove .py extension
+        if filename.endswith(".py") and not filename.startswith("__"):
+        module_name = filename[:-3]  # Remove .py extension
                 module_path = f"{directory_path.replace('/', '.')}.{module_name}"
 
                 try:
                     # Try to load plugin (assuming class name matches module name)
-                    if self.registry.load_plugin_from_module(
-                        module_path, module_name.title()
+        if self.registry.load_plugin_from_module(
+                       module_path, module_name.title()
                     ):
-                        loaded_count += 1
-                except Exception as e:
+                    loaded_count += 1
+                    except Exception as e:
                     print(f"Failed to load plugin {module_name}: {e}")
 
-        return loaded_count
+                    return loaded_count
 
-    def execute_plugin(
+                    def execute_plugin(
         self, plugin_name: str, input_data: Any, options: Dict[str, Any] = None
     ) -> Any:
-        """Execute a plugin with input data."""
+    """Execute a plugin with input data."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-            raise ValueError(f"Plugin '{plugin_name}' not found")
+    raise ValueError(f"Plugin '{plugin_name}' not found")
 
         if plugin.status != PluginStatus.ACTIVE:
-            raise ValueError(f"Plugin '{plugin_name}' is not active")
+    raise ValueError(f"Plugin '{plugin_name}' is not active")
 
         return plugin.process(input_data, options or {})
 
-    def configure_plugin(self, plugin_name: str, config: Dict[str, Any]) -> bool:
-        """Configure a plugin."""
+        def configure_plugin(self, plugin_name: str, config: Dict[str, Any]) -> bool:
+    """Configure a plugin."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-            return False
+    return False
 
         try:
-            plugin.config.update(config)
+    plugin.config.update(config)
             return plugin.initialize(plugin.config)
         except Exception:
-            return False
+    return False
 
-    def get_plugin_chain(self, plugin_names: List[str]) -> List[BasePlugin]:
-        """Get a chain of plugins for processing pipeline."""
+        def get_plugin_chain(self, plugin_names: List[str]) -> List[BasePlugin]:
+    """Get a chain of plugins for processing pipeline."""
         chain = []
         for name in plugin_names:
-            plugin = self.registry.get_plugin(name)
+    plugin = self.registry.get_plugin(name)
             if plugin and plugin.status == PluginStatus.ACTIVE:
-                chain.append(plugin)
+    chain.append(plugin)
         return chain
 
-    def execute_plugin_chain(
-        self,
+        def execute_plugin_chain(
+       self,
         plugin_chain: List[BasePlugin],
         input_data: Any,
         options: Dict[str, Any] = None,
     ) -> Any:
-        """Execute a chain of plugins in sequence."""
+    """Execute a chain of plugins in sequence."""
         result = input_data
         options = options or {}
 
         for plugin in plugin_chain:
-            result = plugin.process(result, options)
+    result = plugin.process(result, options)
 
         return result
 
-    def get_system_status(self) -> Dict[str, Any]:
-        """Get comprehensive system status."""
+        def get_system_status(self) -> Dict[str, Any]:
+    """Get comprehensive system status."""
         return {
-            "total_plugins": len(self.registry.plugins),
+           "total_plugins": len(self.registry.plugins),
             "active_plugins": len(
                 [
                     p
@@ -452,5 +453,5 @@ class PluginManager:
             "plugins": self.registry.list_plugins(),
         }
 
-# Global plugin manager instance
-plugin_manager = PluginManager()
+        # Global plugin manager instance
+        plugin_manager = PluginManager()

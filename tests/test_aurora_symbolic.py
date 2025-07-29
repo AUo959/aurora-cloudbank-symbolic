@@ -1,9 +1,11 @@
 """Tests for Aurora Cloudbank Symbolic Engine"""
+
 import sys
 from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 
 def test_t1_anchor():
     """Test T1 temporal anchor"""
@@ -19,6 +21,7 @@ def test_t1_anchor():
     assert export["type"] == "T1"
     assert export["state"] == state
 
+
 def test_srb_anchor():
     """Test SRB boundary anchor"""
     from aurora.core.symbolic_engine import SRBAnchor
@@ -32,6 +35,7 @@ def test_srb_anchor():
     export = srb.export()
     assert export["type"] == "SRB"
     assert export["resolution"] == resolution
+
 
 def test_symbolic_engine():
     """Test complete symbolic engine"""
@@ -49,6 +53,7 @@ def test_symbolic_engine():
     assert "t1_anchor" in manifest
     assert "srb_anchor" in manifest
     assert "chains" in manifest
+
 
 def test_chain_notation():
     """Test symbolic chain notation (001//999//)"""

@@ -18,11 +18,12 @@ Date: July 14, 2025
 """
 
 
+import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List
-import json
-import os
+
 
 class ValidationManager:
     """Manages validation file lifecycle to prevent regeneration cycles"""
@@ -32,7 +33,7 @@ class ValidationManager:
         self.validation_files = {
             "PRE_COMMIT_VALIDATION_ISSUES.md",
             "CANONICAL_VALIDATION_REPORT.md",
-            "AURORA_VALIDATION_SUMMARY.md"
+            "AURORA_VALIDATION_SUMMARY.md",
         }
         self.config_file = self.repo_root / ".aurora_validation_config.json"
         self.load_config()
@@ -53,7 +54,7 @@ class ValidationManager:
             "validation_dir": ".aurora_validation",
             "max_reports": 10,
             "exclude_from_commit": True,
-            "auto_cleanup": True
+            "auto_cleanup": True,
         }
 
         if self.config_file.exists():
@@ -69,7 +70,7 @@ class ValidationManager:
 
     def save_config(self):
         """Save configuration to file"""
-        with open(self.config_file, 'w', encoding="utf-8") as f:
+        with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=2)
 
     def is_validation_file(self, file_path: str) -> bool:
@@ -125,7 +126,7 @@ class ValidationManager:
             "CANONICAL_VALIDATION_REPORT.md",
             "AURORA_VALIDATION_SUMMARY.md",
             ".aurora_validation/",
-            ".aurora_validation_config.json"
+            ".aurora_validation_config.json",
         ]
 
         # Read existing gitignore
@@ -141,7 +142,7 @@ class ValidationManager:
                 lines_to_add.append(pattern)
 
         if lines_to_add:
-            with open(gitignore_path, 'a', encoding="utf-8") as f:
+            with open(gitignore_path, "a", encoding="utf-8") as f:
                 f.write("\n")
                 f.write("\n".join(lines_to_add))
                 f.write("\n")
@@ -155,7 +156,7 @@ class ValidationManager:
 
         post_commit_hook = hooks_dir / "post-commit"
 
-        hook_content = '''#!/bin/bash
+        hook_content = """#!/bin/bash
 # Aurora CloudBank - Post-commit validation update
 # Updates validation files after successful commit
 
@@ -167,9 +168,9 @@ if [ -f "scripts/canonical_validator.py" ]; then
 fi
 
 echo "✅ Post-commit validation update complete"
-'''
+"""
 
-        with open(post_commit_hook, 'w', encoding="utf-8") as f:
+        with open(post_commit_hook, "w", encoding="utf-8") as f:
             f.write(hook_content)
 
         # Make executable
@@ -262,12 +263,16 @@ echo "✅ Post-commit validation update complete"
             else:
                 print(f"  {vf}: Not found")
 
+
 def main():
     """CLI interface for validation manager"""
 
     parser = argparse.ArgumentParser(description="Aurora Validation Manager")
-    parser.add_argument("--strategy", choices=["smart_exclusion", "timestamped", "post_commit", "memory_only"],
-                        help="Implement validation strategy")
+    parser.add_argument(
+        "--strategy",
+        choices=["smart_exclusion", "timestamped", "post_commit", "memory_only"],
+        help="Implement validation strategy",
+    )
     parser.add_argument("--status", action="store_true", help="Show current status")
     parser.add_argument("--cleanup", action="store_true", help="Clean up old reports")
     parser.add_argument("--exclude-file", help="Check if file should be excluded")
@@ -288,6 +293,7 @@ def main():
         print(f"Exclude from commit: {excluded}")
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

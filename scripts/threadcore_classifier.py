@@ -71,8 +71,10 @@ PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
     },
 }
 
+
 def _word_boundary_search(text: str, keyword: str) -> bool:
     return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
+
 
 def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
     if not isinstance(content, str) or not content.strip():
@@ -111,6 +113,7 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
         "all_hits": total_scores,
     }
 
+
 def main():
     parser = argparse.ArgumentParser(description="THREADCORE v2 Tagging Classifier")
     parser.add_argument("input_file", help="Path to text file to classify")
@@ -121,6 +124,7 @@ def main():
 
     result = tag_thread_context(content)
     print(json.dumps(result, indent=2))
+
 
 if __name__ == "__main__":
     main()

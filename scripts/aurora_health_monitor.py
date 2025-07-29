@@ -16,6 +16,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
+
 class HealthMonitor:
     """Repository health monitoring and alerting system."""
 
@@ -133,9 +134,7 @@ class HealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
-                metrics["branch_count"] = len(
-                    [line for line in result.stdout.strip().split("\n") if line.strip()]
-                )
+                metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
             # ZIP file count
             zip_files = list(self.repo_path.glob("*.zip"))
@@ -178,9 +177,7 @@ class HealthMonitor:
             )
             if result.returncode == 0:
                 temp_dirs = result.stdout.strip().split("\n")
-                metrics["temp_dir_count"] = len(
-                    [d for d in temp_dirs if d and not d.startswith("./.venv")]
-                )
+                metrics["temp_dir_count"] = len([d for d in temp_dirs if d and not d.startswith("./.venv")])
 
             # Large files (>10MB)
             result = subprocess.run(
@@ -227,21 +224,15 @@ class HealthMonitor:
 
         # File count penalty
         if metrics["file_count"] > self.thresholds["max_files"]:
-            score -= min(
-                2.0, (metrics["file_count"] - self.thresholds["max_files"]) / 5000
-            )
+            score -= min(2.0, (metrics["file_count"] - self.thresholds["max_files"]) / 5000)
 
         # Branch penalty
         if metrics["branch_count"] > self.thresholds["max_branches"]:
-            score -= min(
-                1.5, (metrics["branch_count"] - self.thresholds["max_branches"]) / 10
-            )
+            score -= min(1.5, (metrics["branch_count"] - self.thresholds["max_branches"]) / 10)
 
         # ZIP file penalty
         if metrics["zip_file_count"] > self.thresholds["max_zip_files"]:
-            score -= min(
-                1.0, (metrics["zip_file_count"] - self.thresholds["max_zip_files"]) / 5
-            )
+            score -= min(1.0, (metrics["zip_file_count"] - self.thresholds["max_zip_files"]) / 5)
 
         # Python cache penalty
         if metrics["pyc_file_count"] > self.thresholds["max_pyc_files"]:
@@ -249,9 +240,7 @@ class HealthMonitor:
 
         # Temporary directories penalty
         if metrics["temp_dir_count"] > self.thresholds["max_temp_dirs"]:
-            score -= min(
-                1.0, (metrics["temp_dir_count"] - self.thresholds["max_temp_dirs"]) / 5
-            )
+            score -= min(1.0, (metrics["temp_dir_count"] - self.thresholds["max_temp_dirs"]) / 5)
 
         # Large files penalty
         if len(metrics["large_files"]) > 3:
@@ -276,9 +265,7 @@ class HealthMonitor:
             )
 
         if metrics["file_count"] > self.thresholds["max_files"]:
-            issues.append(
-                f"File count ({metrics['file_count']}) exceeds threshold ({self.thresholds['max_files']})"
-            )
+            issues.append(f"File count ({metrics['file_count']}) exceeds threshold ({self.thresholds['max_files']})")
 
         if metrics["branch_count"] > self.thresholds["max_branches"]:
             issues.append(
@@ -289,14 +276,10 @@ class HealthMonitor:
             issues.append(f"Python cache files detected ({metrics['pyc_file_count']})")
 
         if metrics["temp_dir_count"] > self.thresholds["max_temp_dirs"]:
-            issues.append(
-                f"Too many temporary directories ({metrics['temp_dir_count']})"
-            )
+            issues.append(f"Too many temporary directories ({metrics['temp_dir_count']})")
 
         if len(metrics["large_files"]) > 3:
-            issues.append(
-                f"Multiple large files detected ({len(metrics['large_files'])})"
-            )
+            issues.append(f"Multiple large files detected ({len(metrics['large_files'])})")
 
         return issues
 
@@ -337,9 +320,7 @@ class HealthMonitor:
         Args:
             metrics_dir: Directory containing metric files
         """
-        cutoff_date = datetime.datetime.now() - datetime.timedelta(
-            days=self.config["metrics_retention_days"]
-        )
+        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=self.config["metrics_retention_days"])
 
         for file_path in metrics_dir.glob("health_*.json"):
             try:
@@ -358,10 +339,7 @@ class HealthMonitor:
         Args:
             metrics: Current metrics dictionary
         """
-        if (
-            not metrics["issues"]
-            and metrics["health_score"] >= self.thresholds["min_health_score"]
-        ):
+        if not metrics["issues"] and metrics["health_score"] >= self.thresholds["min_health_score"]:
             return
 
         alert_message = self.format_alert_message(metrics)
@@ -372,9 +350,7 @@ class HealthMonitor:
         # File notification
         if self.config["notifications"]["file"]:
             try:
-                with open(
-                    self.config["notifications"]["file"], "a", encoding="utf-8"
-                ) as f:
+                with open(self.config["notifications"]["file"], "a", encoding="utf-8") as f:
                     f.write(f"{datetime.datetime.now().isoformat()}: {alert_message}\n")
             except (OSError, ValueError, RuntimeError) as e:
                 self.logger.error(f"Error writing alert to file: {e}")
@@ -437,9 +413,7 @@ class HealthMonitor:
         report = []
         report.append("# Aurora CloudBank - Health Monitoring Report")
         report.append(f"**Period:** Last {days} days")
-        report.append(
-            f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}"
-        )
+        report.append(f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         report.append("")
 
         # Latest metrics
@@ -447,9 +421,7 @@ class HealthMonitor:
         report.append("## Current Status")
         report.append("")
         report.append(f"- **Health Score:** {latest.get('health_score', 'N/A')}/10")
-        report.append(
-            f"- **Repository Size:** {latest.get('repository_size_mb', 'N/A')}MB"
-        )
+        report.append(f"- **Repository Size:** {latest.get('repository_size_mb', 'N/A')}MB")
         report.append(f"- **File Count:** {latest.get('file_count', 'N/A')}")
         report.append(f"- **Branch Count:** {latest.get('branch_count', 'N/A')}")
         report.append(f"- **ZIP Files:** {latest.get('zip_file_count', 'N/A')}")
@@ -477,22 +449,14 @@ class HealthMonitor:
                     if scores[-1] > scores[0]
                     else "📉 Declining" if scores[-1] < scores[0] else "➡️ Stable"
                 )
-                report.append(
-                    f"- **Health Score:** {trend} (7-day avg: {avg_score:.1f})"
-                )
+                report.append(f"- **Health Score:** {trend} (7-day avg: {avg_score:.1f})")
 
             # Size trend
             sizes = [m.get("repository_size_mb", 0) for m in historical_metrics[-7:]]
             if sizes:
                 size_change = sizes[-1] - sizes[0]
-                trend = (
-                    "📈 Growing"
-                    if size_change > 10
-                    else "📉 Shrinking" if size_change < -10 else "➡️ Stable"
-                )
-                report.append(
-                    f"- **Repository Size:** {trend} ({size_change:+.0f}MB over 7 days)"
-                )
+                trend = "📈 Growing" if size_change > 10 else "📉 Shrinking" if size_change < -10 else "➡️ Stable"
+                report.append(f"- **Repository Size:** {trend} ({size_change:+.0f}MB over 7 days)")
 
         return "\n".join(report)
 
@@ -502,9 +466,7 @@ class HealthMonitor:
         Args:
             interval_minutes: Minutes between health checks
         """
-        self.logger.info(
-            f"Starting health monitoring (interval: {interval_minutes} minutes)"
-        )
+        self.logger.info(f"Starting health monitoring (interval: {interval_minutes} minutes)")
 
         while True:
             try:
@@ -535,17 +497,14 @@ class HealthMonitor:
                 self.logger.error(f"Error in monitoring loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
+
 def main():
     """Main function for health monitoring CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Health Monitoring")
     parser.add_argument("--check", action="store_true", help="Run single health check")
-    parser.add_argument(
-        "--monitor", action="store_true", help="Start continuous monitoring"
-    )
+    parser.add_argument("--monitor", action="store_true", help="Start continuous monitoring")
     parser.add_argument("--report", action="store_true", help="Generate health report")
-    parser.add_argument(
-        "--interval", type=int, default=60, help="Monitoring interval in minutes"
-    )
+    parser.add_argument("--interval", type=int, default=60, help="Monitoring interval in minutes")
     parser.add_argument("--days", type=int, default=7, help="Days to include in report")
     parser.add_argument("--output", help="Output file for report")
 
@@ -591,6 +550,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

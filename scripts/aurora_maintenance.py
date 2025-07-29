@@ -10,7 +10,6 @@ Scheduled maintenance workflows for repository optimization and cleanup.
 """
 
 
-
 class MaintenanceScheduler:
     """Automated maintenance and cleanup scheduler."""
 
@@ -684,6 +683,7 @@ class MaintenanceScheduler:
                 self.logger.error(f"Error in scheduler: {e}")
                 time.sleep(60)
 
+
 def main():
     """Main function for maintenance CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance System")
@@ -748,6 +748,7 @@ def main():
     else:
         parser.print_help()
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

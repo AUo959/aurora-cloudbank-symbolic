@@ -14,6 +14,7 @@ and provides intelligent reorganization recommendations.
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class RepositoryOrganizer:
     """Intelligent repository organization and optimization engine."""
 
@@ -234,8 +235,8 @@ class RepositoryOrganizer:
                 (rr'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_keyr"),
                 (rr'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secretr"),
                 (rr'token\s*=\s*["\'][^"\']+["\']r', "hardcoded_token"),
-                (rr"eval\s*\(", "eval_usage"),
-                (rr"exec\s*\(", "exec_usage"),
+                (rrr"eval\s*\(", "eval_usage"),
+                (rrr"exec\s*\(", "exec_usage"),
             ]
 
             for pattern, issue_type in security_patterns:
@@ -297,7 +298,7 @@ class RepositoryOrganizer:
                     "priority": "medium",
                     "description": f"Remove {len(analysis['duplicate_files'])} duplicate files",
                     "action": "Delete duplicate files",
-                    "impact": f"Save {total_duplicate_size / (1024*1024):.1f}MB of space",
+                    "impact": f"Save {total_duplicate_size / (1024 * 1024):.1f}MB of space",
                 }
             )
 
@@ -458,6 +459,7 @@ class RepositoryOrganizer:
 
         return plan
 
+
 def main():
     """Main function for repository organization analysis."""
 
@@ -494,6 +496,7 @@ def main():
 
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

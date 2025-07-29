@@ -11,6 +11,7 @@ from pathlib import Path
 
 import yaml
 
+
 class ReflectiveMonitor:
 
     def __init__(self, capsule_index_path=".loom/reflect/capsule_registry.yaml"):
@@ -42,17 +43,17 @@ class ReflectiveMonitor:
             yaml.dump(self.capsule_registry, f)
 
     def audit_registry(self):
-        unsealed = [
-            k for k, v in self.capsule_registry.items() if v.get("status") != "sealed"
-        ]
+        unsealed = [k for k, v in self.capsule_registry.items() if v.get("status") != "sealed"]
         print("[AUDIT] Capsule Integrity Check:")
         print(f" - Total Capsules: {len(self.capsule_registry)}")
         print(f" - Unsealed Capsules: {len(unsealed)}")
         return unsealed
 
+
 # =============================================
 # MODULE 2 — Capsule Linter
 # =============================================
+
 
 class CapsuleLinter:
 
@@ -98,9 +99,11 @@ class CapsuleLinter:
                 suggestions.append(f"Recover export date for {anchor}")
         return suggestions
 
+
 # =============================================
 # MODULE 3 — Continuity Manager
 # =============================================
+
 
 class ContinuityManager:
 
@@ -128,9 +131,11 @@ class ContinuityManager:
             for action in self.recovery_queue:
                 print(f" - {action}")
 
+
 # =============================================
 # MODULE 4 — Autonomic Correction Engine
 # =============================================
+
 
 class AutonomicCorrectionEngine:
 
@@ -165,9 +170,11 @@ class AutonomicCorrectionEngine:
             for correction in self.correction_log:
                 print(f" - {correction}")
 
+
 # =============================================
 # MODULE 5 — Reflective Autonomy Loop
 # =============================================
+
 
 class ReflectiveAutonomyLoop:
 

@@ -43,13 +43,7 @@ class AuroraRealWorldIntegration:
     def log_status(self, message, level="INFO"):
         """Log status with timestamp"""
         timestamp = datetime.now().strftime("%H:%M:%S")
-        prefix = {
-            "INFO": "ℹ️",
-            "SUCCESS": "✅",
-            "WARNING": "⚠️",
-            "ERROR": "❌",
-            "APP": "🌍"
-        }.get(level, "📝")
+        prefix = {"INFO": "ℹ️", "SUCCESS": "✅", "WARNING": "⚠️", "ERROR": "❌", "APP": "🌍"}.get(level, "📝")
 
         print(f"[{timestamp}] {prefix} {message}")
 
@@ -57,7 +51,7 @@ class AuroraRealWorldIntegration:
         """Create web-based dashboard for Aurora CloudBank"""
         self.log_status("Creating web dashboard interface...", "INFO")
 
-        dashboard_html = '''<!DOCTYPE html>
+        dashboard_html = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -362,7 +356,7 @@ class AuroraRealWorldIntegration:
         }, 5000)
     </script>
 </body>
-</html>'''
+</html>"""
 
         with open("aurora_dashboard.html", "w", encoding="utf-8") as f:
             f.write(dashboard_html)
@@ -870,7 +864,7 @@ if __name__ == "__main__":
         """Create Docker deployment configuration"""
         self.log_status("Creating Docker deployment configuration...", "INFO")
 
-        dockerfile_content = '''# Aurora CloudBank Docker Container
+        dockerfile_content = """# Aurora CloudBank Docker Container
 FROM python:3.11-slim
 
 LABEL maintainer="Aurora CloudBank Team"
@@ -916,13 +910,13 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\
 
 # Default command
 CMD ["python", "aurora_api_server.py"]
-'''
+"""
 
         with open("Dockerfile", "w", encoding="utf-8") as f:
             f.write(dockerfile_content)
 
         # Create docker-compose.yml
-        docker_compose_content = '''version: '3.8'
+        docker_compose_content = """version: '3.8'
 
 services:
   aurora-cloudbank:
@@ -962,20 +956,20 @@ services:
 networks:
   default:
     name: aurora-network
-'''
+"""
 
         with open("docker-compose.yml", "w", encoding="utf-8") as f:
             f.write(docker_compose_content)
 
         # Create requirements.txt for Docker
-        requirements_content = '''fastapi==0.104.1
+        requirements_content = """fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
 numpy==1.24.3
 requests==2.31.0
 python-multipart==0.0.6
 jinja2==3.1.2
-'''
+"""
 
         with open("requirements.txt", "w", encoding="utf-8") as f:
             f.write(requirements_content)
@@ -987,7 +981,7 @@ jinja2==3.1.2
         """Create comprehensive startup script"""
         self.log_status("Creating startup script...", "INFO")
 
-        startup_script = '''#!/bin/bash
+        startup_script = """#!/bin/bash
 # Aurora CloudBank Comprehensive Startup Script
 # Launches all Phase 4 real-world applications
 
@@ -1061,15 +1055,15 @@ case $choice in
     1)
         echo "🌐 Starting API Server..."
         python3 aurora_api_server.py
-        
+
     2)
         echo "⌨️ Starting CLI Interactive mode..."
         python3 aurora_cli.py --interactive
-        
+
     3)
         echo "🧪 Running full integration test..."
         python3 aurora_master_integration.py
-        
+
     4)
         echo "🚀 Starting all services..."
 
@@ -1096,22 +1090,22 @@ case $choice in
 
         echo ""
         echo "🛑 To stop services, run: ./stop_aurora.sh"
-        
+
     *)
         echo "❓ Invalid choice. Exiting."
         exit 1
-        
+
 esac
 
 echo ""
 echo "🎉 Aurora CloudBank startup complete!"
-'''
+"""
 
         with open("start_aurora.sh", "w", encoding="utf-8") as f:
             f.write(startup_script)
 
         # Create stop script
-        stop_script = '''#!/bin/bash
+        stop_script = """#!/bin/bash
 # Aurora CloudBank Stop Script
 
 echo "🛑 Stopping Aurora CloudBank services..."
@@ -1131,7 +1125,7 @@ pkill -f "aurora_api_server.py" 2>/dev/null || true
 pkill -f "aurora_cli.py" 2>/dev/null || true
 
 echo "🎉 Aurora CloudBank services stopped"
-'''
+"""
 
         with open("stop_aurora.sh", "w", encoding="utf-8") as f:
             f.write(stop_script)
@@ -1267,15 +1261,12 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             self.log_status("Phase 4 Real-World Application Integration COMPLETE!", "SUCCESS")
             self.log_status(f"Completion report: {report_file}", "INFO")
 
-            return {
-                "status": "complete",
-                "applications_created": self.applications_created,
-                "report_file": report_file
-            }
+            return {"status": "complete", "applications_created": self.applications_created, "report_file": report_file}
 
         except Exception as e:
             self.log_status(f"Phase 4 integration error: {e}", "ERROR")
             return {"status": "error", "error": str(e)}
+
 
 async def main():
     """Main execution function"""
@@ -1300,6 +1291,7 @@ async def main():
         print(f"\n❌ Phase 4 integration failed: {result.get('error', 'Unknown error')}")
 
     return result
+
 
 if __name__ == "__main__":
     asyncio.run(main())

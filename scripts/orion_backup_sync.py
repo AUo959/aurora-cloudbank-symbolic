@@ -32,16 +32,19 @@ ANCHOR_SEED = "EOS_SEED_ORION"
 BACKUP_DIR = "backups"
 logger = get_logger("orion_backup_sync")
 
+
 def load_yaml(path: str) -> dict:
     if not os.path.exists(path):
         raise FileNotFoundError(f"{path} does not exist")
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
+
 def validate_anchor(data: dict, path: str) -> None:
     anchor = data.get("anchor_seed")
     if anchor != ANCHOR_SEED:
         raise ValueError(f"Anchor mismatch in {path}: {anchor} != {ANCHOR_SEED}")
+
 
 def backup_file(src: str) -> str:
     os.makedirs(BACKUP_DIR, exist_ok=True)
@@ -52,9 +55,11 @@ def backup_file(src: str) -> str:
     logger.info("Backup created for %s -> %s", src, backup_path)
     return backup_path
 
+
 def sync_file(src: str, dest: str) -> None:
     shutil.copy2(src, dest)
     logger.info("Synchronized %s -> %s", src, dest)
+
 
 def rollback_file(dest: str) -> str:
     if not os.path.isdir(BACKUP_DIR):
@@ -69,21 +74,16 @@ def rollback_file(dest: str) -> str:
     logger.info("Rolled back %s from %s", dest, backup_path)
     return backup_path
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Archive and synchronize Orion staff registry and blueprint"
-    )
+    parser = argparse.ArgumentParser(description="Archive and synchronize Orion staff registry and blueprint")
     parser.add_argument(
         "--command-node",
         default="command_node_data",
         help="Command node data directory",
     )
-    parser.add_argument(
-        "--pl-branch", default="pl_branch_data", help="PL branch data directory"
-    )
-    parser.add_argument(
-        "--rollback", choices=["sta", "blueprint", "all"], help="Rollback target"
-    )
+    parser.add_argument("--pl-branch", default="pl_branch_data", help="PL branch data directory")
+    parser.add_argument("--rollback", choices=["sta", "blueprint", "all"], help="Rollback target")
     args = parser.parse_args()
 
     staff_cmd = os.path.join(args.command_node, "staff_registry.yaml")
@@ -142,6 +142,7 @@ def main() -> None:
             print(f"Error syncing {src} to {dest}: {e}")
 
     print("Backup and synchronization complete")
+
 
 if __name__ == "__main__":
     main()

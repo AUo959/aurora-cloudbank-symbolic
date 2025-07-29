@@ -11,6 +11,7 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Sonnet4Config:
     """Configuration for Claude Sonnet 4 integration"""
@@ -26,6 +27,7 @@ class Sonnet4Config:
     context_window: int = 200000
     preserve_4o_logic: bool = True
     fallback_model: str = "gpt-4o"
+
 
 class Sonnet4IntegrationHub:
     """
@@ -62,18 +64,10 @@ class Sonnet4IntegrationHub:
             "max_tokens": sonnet_config.get("settings", {}).get("max_tokens", 8192),
             "temperature": sonnet_config.get("settings", {}).get("temperature", 0.7),
             "top_p": sonnet_config.get("settings", {}).get("top_p", 0.9),
-            "safety_level": sonnet_config.get("settings", {}).get(
-                "safety_level", "high"
-            ),
-            "context_window": sonnet_config.get("settings", {}).get(
-                "context_window", 200000
-            ),
-            "preserve_4o_logic": sonnet_config.get("integration", {}).get(
-                "preserve_4o_logic", True
-            ),
-            "fallback_model": sonnet_config.get("integration", {}).get(
-                "fallback_model", "gpt-4o"
-            ),
+            "safety_level": sonnet_config.get("settings", {}).get("safety_level", "high"),
+            "context_window": sonnet_config.get("settings", {}).get("context_window", 200000),
+            "preserve_4o_logic": sonnet_config.get("integration", {}).get("preserve_4o_logic", True),
+            "fallback_model": sonnet_config.get("integration", {}).get("fallback_model", "gpt-4o"),
         }
 
         return Sonnet4Config(**config_fields)
@@ -122,9 +116,7 @@ class Sonnet4IntegrationHub:
 
             # Set up fallback handler if needed
             if self.sonnet4_config.preserve_4o_logic:
-                self.fallback_handlers[client_id] = self._create_fallback_handler(
-                    client_id
-                )
+                self.fallback_handlers[client_id] = self._create_fallback_handler(client_id)
 
             return True
         except Exception as e:
@@ -135,9 +127,7 @@ class Sonnet4IntegrationHub:
         """Create fallback handler for GPT-4o compatibility"""
 
         async def fallback_handler(request, error):
-            logger.warning(
-                f"Falling back to {self.sonnet4_config.fallback_model} for client {client_id}: {error}"
-            )
+            logger.warning(f"Falling back to {self.sonnet4_config.fallback_model} for client {client_id}: {error}")
             # Implement fallback logic here
             return await self._handle_fallback_request(request, client_id)
 
@@ -217,8 +207,10 @@ class Sonnet4IntegrationHub:
             "fallback_model": self.sonnet4_config.fallback_model,
         }
 
+
 # Global instance
 sonnet4_hub = Sonnet4IntegrationHub()
+
 
 async def enable_sonnet4_globally():
     """Convenience function to enable Sonnet 4 for all clients"""

@@ -9,6 +9,7 @@ import sys
 import time
 from pathlib import Path
 
+
 class AuroraTestRunner:
     """Comprehensive test runner for Aurora CloudBank"""
 
@@ -18,45 +19,25 @@ class AuroraTestRunner:
     def run_native_tests(self):
         """Run tests for native implementations"""
         print("🧪 Running Native Implementation Tests...")
-        cmd = [
-            sys.executable, "-m", "pytest",
-            "tests/test_native_implementations.py",
-            "-v",
-            "--tb=short"
-        ]
+        cmd = [sys.executable, "-m", "pytest", "tests/test_native_implementations.py", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
     def run_unit_tests(self):
         """Run fast unit tests"""
         print("⚡ Running Unit Tests...")
-        cmd = [
-            sys.executable, "-m", "pytest",
-            "-m", "unit",
-            "-v",
-            "--tb=short"
-        ]
+        cmd = [sys.executable, "-m", "pytest", "-m", "unit", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
     def run_smoke_tests(self):
         """Run critical smoke tests"""
         print("💨 Running Smoke Tests...")
-        cmd = [
-            sys.executable, "-m", "pytest",
-            "-m", "smoke",
-            "-v",
-            "--tb=short"
-        ]
+        cmd = [sys.executable, "-m", "pytest", "-m", "smoke", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
     def run_api_tests(self):
         """Run API and web interface tests"""
         print("🌐 Running API Tests...")
-        cmd = [
-            sys.executable, "-m", "pytest",
-            "-m", "api",
-            "-v",
-            "--tb=short"
-        ]
+        cmd = [sys.executable, "-m", "pytest", "-m", "api", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
     def run_performance_benchmark(self):
@@ -81,9 +62,9 @@ class AuroraTestRunner:
 
         results = {}
         for test_name, test_func in tests:
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"Starting: {test_name}")
-            print('='*50)
+            print("=" * 50)
 
             result = test_func()
             results[test_name] = result.returncode == 0
@@ -94,16 +75,16 @@ class AuroraTestRunner:
                 print(f"✅ {test_name} passed!")
 
         # Run performance benchmark
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print("Performance Benchmark")
-        print('='*50)
+        print("=" * 50)
         self.run_performance_benchmark()
 
         # Summary
         total_time = time.time() - start_time
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print("TEST SUMMARY")
-        print('='*50)
+        print("=" * 50)
 
         for test_name, passed in results.items():
             status = "✅ PASS" if passed else "❌ FAIL"
@@ -113,6 +94,7 @@ class AuroraTestRunner:
 
         # Return overall success
         return all(results.values())
+
 
 def main():
     """Main test runner entry point"""
@@ -144,6 +126,7 @@ def main():
         # Default: run native tests
         result = runner.run_native_tests()
         sys.exit(result.returncode)
+
 
 if __name__ == "__main__":
     main()

@@ -10,6 +10,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_encoding_specifications(file_path: str) -> bool:
     """Add encoding specification to file open statements."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -20,9 +21,9 @@ def fix_encoding_specifications(file_path: str) -> bool:
     # Fix open() calls without encoding
     patterns = [
         (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8r")'),
-        (rr'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rr'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rr'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
+        (rrr'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (rrr'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (rrr'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
     ]
 
     for pattern, replacement in patterns:
@@ -35,6 +36,7 @@ def fix_encoding_specifications(file_path: str) -> bool:
             f.write(content)
         return True
     return False
+
 
 def fix_subprocess_calls(file_path: str) -> bool:
     """Add shell=False and check=True to subprocess calls."""
@@ -71,6 +73,7 @@ def fix_subprocess_calls(file_path: str) -> bool:
         return True
     return False
 
+
 def fix_broad_exceptions(file_path: str) -> bool:
     """Replace broad exception catches with specific ones."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -80,7 +83,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
     content = re.sub(
-        rr"except\s*:", "except (OSError, ValueError, RuntimeError):", content
+        rrr"except\s*:", "except (OSError, ValueError, RuntimeError):", content
     )
 
     if content != original_content:
@@ -88,6 +91,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
             f.write(content)
         return True
     return False
+
 
 def remove_trailing_whitespace(file_path: str) -> bool:
     """Remove trailing whitespace from all lines."""
@@ -109,6 +113,7 @@ def remove_trailing_whitespace(file_path: str) -> bool:
             f.writelines(fixed_lines)
         return True
     return False
+
 
 def fix_unused_imports(file_path: str) -> bool:
     """Remove obvious unused imports."""
@@ -172,6 +177,7 @@ def fix_unused_imports(file_path: str) -> bool:
         return True
     return False
 
+
 def process_file(file_path: str) -> Dict[str, bool]:
     """Process a single Python file to fix linting issues."""
     fixes = {}
@@ -188,6 +194,7 @@ def process_file(file_path: str) -> Dict[str, bool]:
         return {}
 
     return fixes
+
 
 def main():
     """Main function to process all Python files in scripts directory."""
@@ -219,6 +226,7 @@ def main():
 
     print(f"\nProcessed {len(python_files)} Python files.")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

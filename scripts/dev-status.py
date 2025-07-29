@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
         import shlex
@@ -10,6 +12,7 @@ Quick overview of repository health and development readiness
 
 from pathlib import Path
 
+
 def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
     try:
@@ -20,9 +23,11 @@ def run_command(cmd):
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False
 
+
 def check_file_exists(path):
     """Check if file exists and return status."""
     return "✅" if Path(path).exists() else "❌"
+
 
 def main():
     print("🌟 Aurora CloudBank Development Status Dashboard")
@@ -52,14 +57,10 @@ def main():
     deps_check, deps_ok = run_command(
         "python3 -c 'import fastapi, uvicorn, numpy, yaml; print(\"All core packages available\")'"
     )
-    print(
-        f"   {'✅' if deps_ok else '⚠️ '} Core Python packages: {'OK' if deps_ok else 'Some missing'}"
-    )
+    print(f"   {'✅' if deps_ok else '⚠️ '} Core Python packages: {'OK' if deps_ok else 'Some missing'}")
 
     npm_check, npm_ok = run_command("npm --version")
-    print(
-        f"   {'✅' if npm_ok else '❌'} Node.js/NPM: {'v' + npm_check if npm_ok else 'Not available'}"
-    )
+    print(f"   {'✅' if npm_ok else '❌'} Node.js/NPM: {'v' + npm_check if npm_ok else 'Not available'}")
 
     # 4. Code Quality Check
     print("\n🧪 Code Quality:")
@@ -81,12 +82,8 @@ def main():
     print("\n🌐 Development Ports:")
     ports = [8000, 8080, 3001]
     for port in ports:
-        port_check, port_free = run_command(
-            f"netstat -tuln 2>/dev/null | grep ':{port} ' || echo 'free'"
-        )
-        status = (
-            "✅ Available" if "free" in port_check or not port_check else "⚠️  In use"
-        )
+        port_check, port_free = run_command(f"netstat -tuln 2>/dev/null | grep ':{port} ' || echo 'free'")
+        status = "✅ Available" if "free" in port_check or not port_check else "⚠️  In use"
         print(f"   {status.split()[0]} Port {port}: {status.split()[1]}")
 
     # 7. Quick Actions
@@ -98,6 +95,7 @@ def main():
 
     print("\n" + "=" * 50)
     print("🎯 Aurora Development Environment Ready!")
+
 
 if __name__ == "__main__":
     main()

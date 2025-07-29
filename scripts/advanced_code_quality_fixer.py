@@ -4,12 +4,12 @@ Aurora CloudBank Advanced Code Quality Fixer
 Systematic resolution of all remaining linting issues
 """
 
-import re
 import ast
+import re
 import subprocess
 from pathlib import Path
-
 from typing import Dict
+
 
 class AdvancedCodeQualityFixer:
 
@@ -17,18 +17,26 @@ class AdvancedCodeQualityFixer:
         self.fixes_applied = 0
         self.files_processed = 0
         self.issue_counts = {
-            'E302': 0, 'E305': 0, 'F401': 0, 'F541': 0, 'E501': 0,
-            'E128': 0, 'E122': 0, 'F821': 0, 'F841': 0, 'other': 0
+            "E302": 0,
+            "E305": 0,
+            "F401": 0,
+            "F541": 0,
+            "E501": 0,
+            "E128": 0,
+            "E122": 0,
+            "F821": 0,
+            "F841": 0,
+            "other": 0,
         }
 
     def fix_blank_line_issues(self, file_path: Path) -> bool:
         """Fix E302 and E305 blank line issues"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
-            lines = content.split('\n')
+            lines = content.split("\n")
 
             # Parse AST to identify function and class definitions
             try:
@@ -55,31 +63,31 @@ class AdvancedCodeQualityFixer:
                         # Count preceding blank lines
                         blank_count = 0
                         j = i - 1
-                        while j >= 0 and lines[j].strip() == '':
+                        while j >= 0 and lines[j].strip() == "":
                             blank_count += 1
                             j -= 1
 
                         if j >= 0:  # Not at file start
                             # Remove existing blank lines and add exactly 2
-                            while new_lines and new_lines[-1].strip() == '':
+                            while new_lines and new_lines[-1].strip() == "":
                                 new_lines.pop()
-                            new_lines.extend(['', ''])
+                            new_lines.extend(["", ""])
 
                 new_lines.append(line)
 
                 # Check if this line ends a function or class (E305)
-                if line.strip() and not line.startswith(' ') and not line.startswith('\t'):
+                if line.strip() and not line.startswith(" ") and not line.startswith("\t"):
                     # This might be the end of a function/class, look ahead
                     if i + 1 < len(lines) and lines[i + 1].strip():
                         # Next line is not blank, might need 2 blank lines
-                        if any(keyword in lines[i + 1] for keyword in ['def ', 'class ', 'async def ']):
-                            new_lines.extend([''])
+                        if any(keyword in lines[i + 1] for keyword in ["def ", "class ", "async def "]):
+                            new_lines.extend([""])
 
                 i += 1
 
-            new_content = '\n'.join(new_lines)
+            new_content = "\n".join(new_lines)
             if new_content != original_content:
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(new_content)
                 return True
 
@@ -91,7 +99,7 @@ class AdvancedCodeQualityFixer:
     def remove_unused_imports(self, file_path: Path) -> bool:
         """Fix F401 unused import issues"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
@@ -132,17 +140,19 @@ class AdvancedCodeQualityFixer:
             unused_imports = imported_names - used_names
 
             if unused_imports:
-                lines = content.split('\n')
+                lines = content.split("\n")
                 lines_to_remove = set()
 
                 # Mark import lines for removal
                 for line_num, line in enumerate(lines, 1):
                     for unused in unused_imports:
-                        if (f'import {unused}' in line or
-                            f'from {unused} import' in line or
-                            f'import {unused},' in line or
-                            f', {unused}' in line or
-                            f'{unused},' in line):
+                        if (
+                            f"import {unused}" in line
+                            or f"from {unused} import" in line
+                            or f"import {unused}," in line
+                            or f", {unused}" in line
+                            or f"{unused}," in line
+                        ):
                             lines_to_remove.add(line_num - 1)
 
                 # Remove lines (in reverse order to maintain indices)
@@ -150,9 +160,9 @@ class AdvancedCodeQualityFixer:
                     if line_idx < len(lines):
                         lines.pop(line_idx)
 
-                new_content = '\n'.join(lines)
+                new_content = "\n".join(lines)
                 if new_content != original_content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(new_content)
                     return True
 
@@ -164,7 +174,7 @@ class AdvancedCodeQualityFixer:
     def fix_f_string_issues(self, file_path: Path) -> bool:
         """Fix F541 f-string without placeholders"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
@@ -181,11 +191,11 @@ class AdvancedCodeQualityFixer:
                 matches = re.finditer(pattern, content)
                 for match in matches:
                     string_content = match.group(1)
-                    if '{' not in string_content and '}' not in string_content:
-                        content = content.replace(match.group(0), replacement.replace(r'\1', string_content))
+                    if "{" not in string_content and "}" not in string_content:
+                        content = content.replace(match.group(0), replacement.replace(r"\1", string_content))
 
             if content != original_content:
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 return True
 
@@ -197,29 +207,29 @@ class AdvancedCodeQualityFixer:
     def fix_line_length_issues(self, file_path: Path) -> bool:
         """Fix E501 line too long issues"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
-            lines = content.split('\n')
+            lines = content.split("\n")
             new_lines = []
 
             for line in lines:
                 if len(line) > 120:
                     # Try to break long lines intelligently
-                    if ',' in line and '(' in line:
+                    if "," in line and "(" in line:
                         # Function call or list with parameters
                         indent = len(line) - len(line.lstrip())
-                        if line.strip().endswith(','):
+                        if line.strip().endswith(","):
                             new_lines.append(line)
                         else:
                             # Split at commas
-                            parts = line.split(',')
+                            parts = line.split(",")
                             if len(parts) > 1:
-                                base_indent = ' ' * (indent + 4)
-                                new_lines.append(parts[0] + ',')
+                                base_indent = " " * (indent + 4)
+                                new_lines.append(parts[0] + ",")
                                 for part in parts[1:-1]:
-                                    new_lines.append(base_indent + part.strip() + ',')
+                                    new_lines.append(base_indent + part.strip() + ",")
                                 if parts[-1].strip():
                                     new_lines.append(base_indent + parts[-1].strip())
                             else:
@@ -229,9 +239,9 @@ class AdvancedCodeQualityFixer:
                 else:
                     new_lines.append(line)
 
-            new_content = '\n'.join(new_lines)
+            new_content = "\n".join(new_lines)
             if new_content != original_content:
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(new_content)
                 return True
 
@@ -243,31 +253,34 @@ class AdvancedCodeQualityFixer:
     def fix_indentation_issues(self, file_path: Path) -> bool:
         """Fix E128 and E122 indentation issues"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
-            lines = content.split('\n')
+            lines = content.split("\n")
             new_lines = []
 
             for i, line in enumerate(lines):
                 if line.strip():  # Non-empty line
                     # Check for continuation lines that need proper indentation
-                    if (i > 0 and lines[i-1].rstrip().endswith('(') and
-                        not line.lstrip().startswith((')', 'else:', 'eli', 'except', 'finally'))):
+                    if (
+                        i > 0
+                        and lines[i - 1].rstrip().endswith("(")
+                        and not line.lstrip().startswith((")", "else:", "eli", "except", "finally"))
+                    ):
                         # This should be indented as a continuation
-                        base_indent = len(lines[i-1]) - len(lines[i-1].lstrip())
+                        base_indent = len(lines[i - 1]) - len(lines[i - 1].lstrip())
                         expected_indent = base_indent + 4
                         actual_indent = len(line) - len(line.lstrip())
 
                         if actual_indent != expected_indent:
-                            line = ' ' * expected_indent + line.lstrip()
+                            line = " " * expected_indent + line.lstrip()
 
                 new_lines.append(line)
 
-            new_content = '\n'.join(new_lines)
+            new_content = "\n".join(new_lines)
             if new_content != original_content:
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(new_content)
                 return True
 
@@ -281,11 +294,11 @@ class AdvancedCodeQualityFixer:
         results = {}
 
         # Apply fixes in order of safety/importance
-        results['blank_lines'] = self.fix_blank_line_issues(file_path)
-        results['unused_imports'] = self.remove_unused_imports(file_path)
-        results['f_strings'] = self.fix_f_string_issues(file_path)
-        results['line_length'] = self.fix_line_length_issues(file_path)
-        results['indentation'] = self.fix_indentation_issues(file_path)
+        results["blank_lines"] = self.fix_blank_line_issues(file_path)
+        results["unused_imports"] = self.remove_unused_imports(file_path)
+        results["f_strings"] = self.fix_f_string_issues(file_path)
+        results["line_length"] = self.fix_line_length_issues(file_path)
+        results["indentation"] = self.fix_indentation_issues(file_path)
 
         return results
 
@@ -295,12 +308,12 @@ class AdvancedCodeQualityFixer:
         print("=" * 60)
 
         # Get all Python files
-        py_files = list(Path('.').rglob('*.py'))
+        py_files = list(Path(".").rglob("*.py"))
 
         # Filter out unwanted directories
         filtered_files = []
         for file_path in py_files:
-            if not any(skip in str(file_path) for skip in ['.git', 'node_modules', 'venv', '__pycache__']):
+            if not any(skip in str(file_path) for skip in [".git", "node_modules", "venv", "__pycache__"]):
                 filtered_files.append(file_path)
 
         print(f"Processing {len(filtered_files)} Python files...")
@@ -333,8 +346,9 @@ class AdvancedCodeQualityFixer:
     def run_final_validation(self) -> None:
         """Run flake8 to check remaining issues"""
         try:
-            result = subprocess.run(['python3', '-m', 'flake8', '--statistics', '--count'],
-                                    capture_output=True, text=True, timeout=60)
+            result = subprocess.run(
+                ["python3", "-m", "flake8", "--statistics", "--count"], capture_output=True, text=True, timeout=60
+            )
 
             if result.returncode == 0:
                 print("✅ All linting issues resolved!")
@@ -354,8 +368,7 @@ class AdvancedCodeQualityFixer:
 
         # Get current flake8 count
         try:
-            result = subprocess.run(['python3', '-m', 'flake8', '--count'],
-                                    capture_output=True, text=True)
+            result = subprocess.run(["python3", "-m", "flake8", "--count"], capture_output=True, text=True)
             if result.stdout.strip().isdigit():
                 remaining = int(result.stdout.strip())
                 print(f"Remaining Issues: {remaining}")
@@ -367,9 +380,11 @@ class AdvancedCodeQualityFixer:
         print("\n✅ Code quality polish completed!")
         print("Repository now meets professional development standards.")
 
+
 def main():
     fixer = AdvancedCodeQualityFixer()
     fixer.run_comprehensive_fix()
+
 
 if __name__ == "__main__":
     main()

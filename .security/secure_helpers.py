@@ -6,30 +6,18 @@
 Provides secure alternatives to common operations.
 """
 
-import shlex
-
-
-import subprocess
-
-
-import re
-
-
 import html
-
-
-from typing import List, Dict, Any, Optional, Union
-
-
+import re
+import shlex
+import subprocess
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 
 class SecureHelpers:
     """Secure helper functions for Aurora CloudBank."""
 
     @staticmethod
-
-
     def secure_run_command(
 
 
@@ -68,10 +56,8 @@ class SecureHelpers:
             if isinstance(cmd, str):
                 cmd_parts = shlex.split(cmd)
 
-
             else:
                 cmd_parts = cmd
-
 
             result = subprocess.run(
 
@@ -94,20 +80,15 @@ class SecureHelpers:
                 check=False
             )
 
-
             return result.stdout, result.stderr, result.returncode
-
 
         except subprocess.TimeoutExpired:
             return "", "Command timed out", 124
-
 
         except (OSError, ValueError) as e:
             return "", f"Command execution error: {e}", 1
 
     @staticmethod
-
-
     def sanitize_input(user_input: str, max_length: int = 1000) -> str:
         """
         Sanitize user input to prevent injection attacks.
@@ -139,18 +120,13 @@ class SecureHelpers:
             re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         )
 
-
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
 
-
-        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
-
+        sanitized = re.sub(rrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
     @staticmethod
-
-
     def validate_file_path(file_path: str, allowed_dirs: List[str] = None) -> bool:
         """
         Validate file path to prevent directory traversal attacks.
@@ -177,16 +153,12 @@ class SecureHelpers:
             if allowed_dirs:
                 return any(str(path).startswith(allowed_dir) for allowed_dir in allowed_dirs)
 
-
             return True
-
 
         except (OSError, ValueError):
             return False
 
     @staticmethod
-
-
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
         Safe alternative to eval() for simple expressions.
@@ -212,20 +184,18 @@ class SecureHelpers:
             }
 
         # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rrr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
-
 
         try:
             # Use compile with restricted mode
             code = compile(expression, '<string>', 'eval')
 
-
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
-
 
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
+
 
 # Global instance for easy importing
 secure = SecureHelpers()

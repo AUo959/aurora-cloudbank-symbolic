@@ -3,8 +3,10 @@ import shutil
 import subprocess
 import time
 
+
 def run_step(step_name, commands):
     import shlex
+
     for i, cmd in enumerate(commands, 1):
         print(f"\n[{step_name}] Attempt {i}: {cmd}")
         try:
@@ -17,6 +19,7 @@ def run_step(step_name, commands):
             time.sleep(2)
     print(f"[{step_name}] All attempts failed\n")
     return False
+
 
 def main():
     overall_success = True
@@ -54,16 +57,13 @@ def main():
 
     # Run onboarding script if available
     if os.path.isfile("scripts/dev/on_startup.sh"):
-        overall_success &= run_step(
-            "Startup script", ["bash scripts/dev/on_startup.sh"]
-        )
+        overall_success &= run_step("Startup script", ["bash scripts/dev/on_startup.sh"])
 
     if overall_success:
         print("\n[Bootstrap] Environment initialization complete ✅")
     else:
-        print(
-            "\n[Bootstrap] Completed with some failures. Review the log above to diagnose issues."
-        )
+        print("\n[Bootstrap] Completed with some failures. Review the log above to diagnose issues.")
+
 
 if __name__ == "__main__":
     main()

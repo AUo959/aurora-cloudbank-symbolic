@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import argparse
@@ -8,15 +10,13 @@ Automated repository maintenance with intelligent scheduling
 """
 
 
-
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Callable
-from typing import Dict
-from typing import Optional
 import json
 import os
 import time
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Callable, Dict, Optional
+
 
 @dataclass
 class MaintenanceTask:
@@ -31,6 +31,7 @@ class MaintenanceTask:
     last_run: Optional[str] = None
     success_count: int = 0
     failure_count: int = 0
+
 
 class ScheduledMaintenanceSystem:
     """Comprehensive scheduled maintenance system"""
@@ -141,9 +142,7 @@ class ScheduledMaintenanceSystem:
                 continue
 
             if task.schedule_type == "daily":
-                schedule.every().day.at(task.schedule_time).do(
-                    self._run_task, task_name
-                )
+                schedule.every().day.at(task.schedule_time).do(self._run_task, task_name)
             elif task.schedule_type == "weekly":
                 day = task.schedule_time.lower()
                 getattr(schedule.every(), day).at("02:00").do(self._run_task, task_name)
@@ -159,7 +158,7 @@ class ScheduledMaintenanceSystem:
         self._log(f"Starting task: {task.name}")
 
         try:
-            result = task.function()
+            task.function()
             task.success_count += 1
             task.last_run = start_time.isoformat()
 
@@ -270,9 +269,7 @@ class ScheduledMaintenanceSystem:
             _ = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             branches = [
-                line.strip()
-                for line in result.stdout.split("\n")
-                if line.strip() and "origin/HEAD" not in line
+                line.strip() for line in result.stdout.split("\n") if line.strip() and "origin/HEAD" not in line
             ]
             results["total_branches"] = len(branches)
 
@@ -310,9 +307,7 @@ class ScheduledMaintenanceSystem:
 
                             if age_days > 7:  # Merged and older than a week
                                 stale_count += 1
-                                results["recommendations"].append(
-                                    f"Consider deleting merged branch: {branch_name}"
-                                )
+                                results["recommendations"].append(f"Consider deleting merged branch: {branch_name}")
 
                 except subprocess.CalledProcessError:
                     continue
@@ -356,9 +351,7 @@ class ScheduledMaintenanceSystem:
                 shell=False,
                 check=False,
             )
-            results["file_count"] = (
-                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-            )
+            results["file_count"] = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             results["file_count"] = 0
 
@@ -398,9 +391,7 @@ class ScheduledMaintenanceSystem:
                 )
                 if result.returncode == 0 and result.stdout.strip():
                     results["outdated_packages"] = ["Some packages are outdated"]
-                    results["recommendations"].append(
-                        "Review and update Python packages"
-                    )
+                    results["recommendations"].append("Review and update Python packages")
             except subprocess.CalledProcessError:
                 pass
 
@@ -414,12 +405,8 @@ class ScheduledMaintenanceSystem:
                     shell=False,
                     check=False,
                 )
-                if (
-                    result.returncode != 0
-                ):  # npm outdated returns non-zero if outdated packages exist
-                    results["outdated_packages"].append(
-                        "Some npm packages are outdated"
-                    )
+                if result.returncode != 0:  # npm outdated returns non-zero if outdated packages exist
+                    results["outdated_packages"].append("Some npm packages are outdated")
                     results["recommendations"].append("Review and update npm packages")
             except subprocess.CalledProcessError:
                 pass
@@ -433,9 +420,7 @@ class ScheduledMaintenanceSystem:
         try:
             # Find files larger than 50MB
             cmd = ["find", ".", "-type", "", "-size", "+50M"]
-            _ = subprocess.run(
-                cmd, capture_output=True, text=True, shell=False, check=False
-            )
+            _ = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
 
             for line in result.stdout.strip().split("\n"):
                 if not line.strip():
@@ -554,13 +539,12 @@ class ScheduledMaintenanceSystem:
             }
         return status
 
+
 def main():
     """Main maintenance function"""
 
     parser = argparse.ArgumentParser(description="Scheduled maintenance system")
-    parser.add_argument(
-        "--daemon", action="store_true", help="Run as daemon (continuous scheduling)"
-    )
+    parser.add_argument("--daemon", action="store_true", help="Run as daemon (continuous scheduling)")
     parser.add_argument("--run-task", type=str, help="Run specific task now")
     parser.add_argument("--status", action="store_true", help="Show task status")
 
@@ -576,9 +560,7 @@ def main():
             print(f"\n{name}:")
             print(f"  Enabled: {info['enabled']}")
             print(f"  Last Run: {info['last_run'] or 'Never'}")
-            print(
-                f"  Success/Failures: {info['success_count']}/{info['failure_count']}"
-            )
+            print(f"  Success/Failures: {info['success_count']}/{info['failure_count']}")
             print(f"  Description: {info['description']}")
 
     elif args.run_task:
@@ -593,9 +575,8 @@ def main():
         maintenance.run_scheduler()
 
     else:
-        print(
-            "Use --daemon to start scheduler, --run-task to run specific task, or --status to check status"
-        )
+        print("Use --daemon to start scheduler, --run-task to run specific task, or --status to check status")
+
 
 if __name__ == "__main__":
     main()

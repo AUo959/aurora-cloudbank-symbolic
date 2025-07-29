@@ -8,22 +8,23 @@ import os
 import re
 import subprocess
 
+
 def fix_trailing_whitespace(file_path):
     """Remove trailing whitespace from all lines"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Remove trailing whitespace from each line
-        lines = content.split('\n')
+        lines = content.split("\n")
         fixed_lines = [line.rstrip() for line in lines]
-        fixed_content = '\n'.join(fixed_lines)
+        fixed_content = "\n".join(fixed_lines)
 
         # Ensure single newline at end of file
-        if fixed_content and not fixed_content.endswith('\n'):
-            fixed_content += '\n'
+        if fixed_content and not fixed_content.endswith("\n"):
+            fixed_content += "\n"
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
         return True
@@ -31,26 +32,26 @@ def fix_trailing_whitespace(file_path):
         print(f"Error fixing whitespace in {file_path}: {e}")
         return False
 
+
 def fix_indentation_errors(file_path):
     """Fix common indentation issues"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        lines = content.split('\n')
+        lines = content.split("\n")
         fixed_lines = []
 
         for i, line in enumerate(lines):
             # Fix common indentation continuation issues (E128)
             if line.strip() and i > 0:
-                prev_line = lines[i-1].rstrip()
+                prev_line = lines[i - 1].rstrip()
 
                 # Handle hanging indents for function calls/definitions
-                if (prev_line.endswith('(') or prev_line.endswith(',') or
-                        'def ' in prev_line or 'class ' in prev_line):
+                if prev_line.endswith("(") or prev_line.endswith(",") or "def " in prev_line or "class " in prev_line:
 
                     # Ensure proper continuation indentation
-                    if line.startswith(' ') and not line.startswith('    '):
+                    if line.startswith(" ") and not line.startswith("    "):
                         # Convert tabs to spaces and fix indentation
                         line = line.expandtabs(4)
                         if line.strip():
@@ -58,13 +59,13 @@ def fix_indentation_errors(file_path):
                             if leading_spaces % 4 != 0:
                                 # Round up to nearest multiple of 4
                                 new_indent = ((leading_spaces + 3) // 4) * 4
-                                line = ' ' * new_indent + line.lstrip()
+                                line = " " * new_indent + line.lstrip()
 
             fixed_lines.append(line)
 
-        fixed_content = '\n'.join(fixed_lines)
+        fixed_content = "\n".join(fixed_lines)
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
         return True
@@ -72,17 +73,18 @@ def fix_indentation_errors(file_path):
         print(f"Error fixing indentation in {file_path}: {e}")
         return False
 
+
 def fix_f_string_issues(file_path):
     """Fix f-string formatting issues"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Fix f-string without expressions (F541)
         # Replace "string" with "string" when no {} expressions
-        content = re.sub(r'f(["\'])([^"\'{}]*?)\1', r'\1\2\1', content)
+        content = re.sub(r'f(["\'])([^"\'{}]*?)\1', r"\1\2\1", content)
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return True
@@ -90,36 +92,37 @@ def fix_f_string_issues(file_path):
         print(f"Error fixing f-strings in {file_path}: {e}")
         return False
 
+
 def fix_line_length_issues(file_path):
     """Fix line length issues (E501)"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        lines = content.split('\n')
+        lines = content.split("\n")
         fixed_lines = []
 
         for line in lines:
             if len(line) > 88:  # PEP 8 recommends 79, but we'll use 88 for Black compatibility
                 # Try to break long lines at logical points
-                if ' = ' in line and len(line.split(' = ')) == 2:
+                if " = " in line and len(line.split(" = ")) == 2:
                     # Assignment statements
-                    left, right = line.split(' = ', 1)
+                    left, right = line.split(" = ", 1)
                     indent = len(line) - len(line.lstrip())
                     if len(right) > 60:
                         fixed_lines.append(f"{left} = (")
                         fixed_lines.append(f"{' ' * (indent + 4)}{right}")
                         fixed_lines.append(f"{' ' * indent})")
                         continue
-                elif '(' in line and ')' in line:
+                elif "(" in line and ")" in line:
                     # Function calls - already handled by indentation
                     pass
 
             fixed_lines.append(line)
 
-        fixed_content = '\n'.join(fixed_lines)
+        fixed_content = "\n".join(fixed_lines)
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
         return True
@@ -127,13 +130,15 @@ def fix_line_length_issues(file_path):
         print(f"Error fixing line lengths in {file_path}: {e}")
         return False
 
+
 def run_autopep8(file_path):
     """Run autopep8 for automated fixes"""
     try:
-        subprocess.run([
-            'python3', '-m', 'autopep8', '--in-place', '--aggressive',
-            '--max-line-length=88', str(file_path)
-        ], check=True, capture_output=True)
+        subprocess.run(
+            ["python3", "-m", "autopep8", "--in-place", "--aggressive", "--max-line-length=88", str(file_path)],
+            check=True,
+            capture_output=True,
+        )
         return True
     except subprocess.CalledProcessError:
         print(f"autopep8 not available for {file_path}")
@@ -141,6 +146,7 @@ def run_autopep8(file_path):
     except Exception as e:
         print(f"Error running autopep8 on {file_path}: {e}")
         return False
+
 
 def fix_python_file(file_path):
     """Apply all fixes to a Python file"""
@@ -159,6 +165,7 @@ def fix_python_file(file_path):
 
     return success
 
+
 def main():
     """Main execution"""
     print("🔧 Comprehensive Python Linting Fix")
@@ -166,11 +173,11 @@ def main():
 
     # Find Python files with issues
     problem_files = [
-        'tools/workflow/aurora_failure_prevention_system.py',
-        'tools/workflow/aurora_workflow_optimization_manager.py',
-        'tools/workflow/aurora_intelligent_workflow_manager.py',
-        '.security/secure_helpers.py',
-        'scripts/aurora_security_scanner.py'
+        "tools/workflow/aurora_failure_prevention_system.py",
+        "tools/workflow/aurora_workflow_optimization_manager.py",
+        "tools/workflow/aurora_intelligent_workflow_manager.py",
+        ".security/secure_helpers.py",
+        "scripts/aurora_security_scanner.py",
     ]
 
     fixed_count = 0
@@ -192,21 +199,33 @@ def main():
     # Run final validation
     print("\n🔍 Running final validation...")
     try:
-        result = subprocess.run([
-            'python3', '-m', 'flake8', '--count', '--statistics',
-            'tools/workflow/', '.security/', 'scripts/aurora_security_scanner.py'
-        ], capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            [
+                "python3",
+                "-m",
+                "flake8",
+                "--count",
+                "--statistics",
+                "tools/workflow/",
+                ".security/",
+                "scripts/aurora_security_scanner.py",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
         if result.returncode == 0:
             print("✅ All linting issues resolved!")
         else:
-            remaining_issues = result.stdout.count('\n') if result.stdout else 0
+            remaining_issues = result.stdout.count("\n") if result.stdout else 0
             print(f"⚠️ {remaining_issues} issues remaining")
             if result.stdout:
                 print("Remaining issues:")
                 print(result.stdout[:1000])  # Show first 1000 chars
     except Exception as e:
         print(f"Could not run final validation: {e}")
+
 
 if __name__ == "__main__":
     main()

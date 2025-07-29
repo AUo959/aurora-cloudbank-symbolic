@@ -9,6 +9,7 @@ import os
 import sys
 from pathlib import Path
 
+
 class AuroraSystemValidator:
 
     def __init__(self):
@@ -182,17 +183,12 @@ class AuroraSystemValidator:
 
         if completion_percentage >= 90:
             status = "🎉 EXCELLENT"
-            color = "GREEN"
         elif completion_percentage >= 75:
             status = "✅ GOOD"
-            color = "YELLOW"
         else:
             status = "❌ NEEDS WORK"
-            color = "RED"
 
-        print(
-            f"🎯 VALIDATION SCORE: {total_score}/{max_score} ({completion_percentage:.0f}%)"
-        )
+        print(f"🎯 VALIDATION SCORE: {total_score}/{max_score} ({completion_percentage:.0f}%)")
         print(f"📊 OVERALL STATUS: {status}")
 
         if completion_percentage >= 75:
@@ -211,6 +207,7 @@ class AuroraSystemValidator:
 
         print("=" * 60)
         return completion_percentage
+
 
 if __name__ == "__main__":
     validator = AuroraSystemValidator()

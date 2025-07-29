@@ -6,6 +6,7 @@ Removes trailing whitespace and fixes basic issues
 
 import os
 
+
 def fix_file(file_path):
     """Fix basic lint issues in a file"""
     try:
@@ -35,6 +36,7 @@ def fix_file(file_path):
         print(f"❌ Error fixing {file_path}: {e}")
         return False
 
+
 def main():
     """Fix Opal2 files"""
     opal2_files = [
@@ -54,6 +56,7 @@ def main():
             print(f"⚠️  File not found: {file_path}")
 
     print("🎉 Basic lint fixes complete!")
+
 
 if __name__ == "__main__":
     main()

@@ -15,6 +15,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+
 class GITWizCleanup:
     """Repository cleanup and health maintenance tool."""
 
@@ -76,8 +77,7 @@ class GITWizCleanup:
         self.stats["files_removed"] += cache_files_removed
         self.log_action(
             "Python Cache Cleanup",
-            f"Removed {cache_files_removed} .pyc files and "
-            f"{cache_dirs_removed} __pycache__ dirs",
+            f"Removed {cache_files_removed} .pyc files and " f"{cache_dirs_removed} __pycache__ dirs",
         )
 
     def analyze_zip_files(self):
@@ -103,8 +103,7 @@ class GITWizCleanup:
 
         self.log_action(
             "ZIP File Analysis",
-            f"Found {len(zip_files)} ZIP files totaling "
-            f"{round(total_size / (1024 * 1024), 1)}MB",
+            f"Found {len(zip_files)} ZIP files totaling " f"{round(total_size / (1024 * 1024), 1)}MB",
         )
 
         print("📊 Largest ZIP files:")
@@ -239,7 +238,7 @@ class GITWizCleanup:
 
         initial_size = self.get_repo_size()
         if initial_size > 0:
-            print(f"📏 Repository size: {round(initial_size / (1024*1024), 1)}MB")
+            print(f"📏 Repository size: {round(initial_size / (1024 * 1024), 1)}MB")
 
         self.analyze_zip_files()
         self.analyze_branches()
@@ -254,9 +253,7 @@ class GITWizCleanup:
 
         initial_size = self.get_repo_size()
         if initial_size > 0:
-            print(
-                f"📏 Initial repository size: {round(initial_size / (1024*1024), 1)}MB"
-            )
+            print(f"📏 Initial repository size: {round(initial_size / (1024 * 1024), 1)}MB")
 
         # Perform cleanup operations
         self.clean_python_cache()
@@ -271,8 +268,8 @@ class GITWizCleanup:
         if initial_size > 0 and final_size > 0:
             space_saved = initial_size - final_size
             self.stats["space_freed"] = space_saved
-            print(f"\n💾 Space saved: {round(space_saved / (1024*1024), 1)}MB")
-            print(f"📏 Final repository size: {round(final_size / (1024*1024), 1)}MB")
+            print(f"\n💾 Space saved: {round(space_saved / (1024 * 1024), 1)}MB")
+            print(f"📏 Final repository size: {round(final_size / (1024 * 1024), 1)}MB")
 
         print("\n✅ Cleanup complete!")
         return self.stats
@@ -300,6 +297,7 @@ class GITWizCleanup:
             print("⚠️ Could not save report file")
 
         return report
+
 
 def main():
     """Main entry point."""
@@ -340,6 +338,7 @@ def main():
     except (OSError, subprocess.SubprocessError) as e:
         print(f"❌ Error during cleanup: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

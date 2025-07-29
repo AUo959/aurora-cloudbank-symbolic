@@ -7,6 +7,7 @@ Fixes common Markdown formatting issues based on attached error list
 import re
 import os
 
+
 def fix_markdown_file(filepath):
     """Fix common Markdown issues in a file"""
     print(f"🔧 Fixing {filepath}r")
@@ -31,12 +32,12 @@ def fix_markdown_file(filepath):
                     fixed_lines.append('')
 
             # MD032: Lists should be surrounded by blank lines
-            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(rr'^\s*\d+\.\s', line):
+            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(rrr'^\s*\d+\.\s', line):
                 # Add blank line before list if needed
                 if i > 0 and fixed_lines and fixed_lines[-1].strip() != '' and not fixed_lines[-1].strip().startswith(('- ',
-                    '* ',
-                    '+ ')) and not re.match(rr'^\s*\d+\.\s',
-                    fixed_lines[-1]):
+                                                                                                                       '* ',
+                                                                                                                       '+ ')) and not re.match(rrr'^\s*\d+\.\s',
+                                                                                                                                               fixed_lines[-1]):
                     fixed_lines.append('')
                 fixed_lines.append(line)
 
@@ -79,7 +80,7 @@ def fix_markdown_file(filepath):
         fixed_content = re.sub(r'^(\*\*[^*]+\*\*)$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # MD026: Remove trailing punctuation from headers
-        fixed_content = re.sub(rr'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
+        fixed_content = re.sub(rrr'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # Write back to file
         with open(filepath, 'w', encoding='utf-8') as f:
@@ -89,6 +90,7 @@ def fix_markdown_file(filepath):
 
     except Exception as e:
         print(f"❌ Error fixing {filepath}: {e}")
+
 
 def main():
     """Fix all Markdown files with issues"""
@@ -117,6 +119,7 @@ def main():
             print(f"⚠️  File not found: {filepath}")
 
     print("🎯 Markdown fixing complete!")
+
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """
 Opal2 Modular System - Test Suite (Simplified)
 Basic testing for Opal2 concepts without complex imports
@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 
 @pytest.mark.opal2
 @pytest.mark.unit
@@ -55,7 +56,7 @@ class TestOpal2BasicConcepts:
             "cache_key": "test_glyph_123",
             "data": {"vertices": [[0, 0], [1, 1]]},
             "timestamp": "2025-07-11",
-            "ttl": 3600
+            "ttl": 3600,
         }
 
         assert cache_data["cache_key"] is not None
@@ -68,7 +69,7 @@ class TestOpal2BasicConcepts:
             "engine": "webgl",
             "dimensions": {"width": 800, "height": 600},
             "quantum_enhanced": True,
-            "performance_mode": "balanced"
+            "performance_mode": "balanced",
         }
 
         assert renderer_config["engine"] in ["webgl", "canvas", "svg"]
@@ -81,11 +82,7 @@ class TestOpal2BasicConcepts:
 
         async def mock_render_async(data):
             # Simulate async rendering
-            return {
-                "status": "completed",
-                "render_time": 0.1,
-                "output": f"rendered_{data['id']}"
-            }
+            return {"status": "completed", "render_time": 0.1, "output": f"rendered_{data['id']}"}
 
         test_data = {"id": "test_123", "type": "glyph"}
         result = await mock_render_async(test_data)
@@ -93,6 +90,7 @@ class TestOpal2BasicConcepts:
         assert result["status"] == "completed"
         assert result["render_time"] > 0
         assert "test_123" in result["output"]
+
 
 @pytest.mark.opal2
 @pytest.mark.integration
@@ -113,14 +111,8 @@ class TestOpal2Integration:
 
         # Mock configuration
         config_data = {
-            "renderer": {
-                "default_engine": "webgl",
-                "quantum_enhancement": True
-            },
-            "cache": {
-                "enabled": True,
-                "max_size": 1000
-            }
+            "renderer": {"default_engine": "webgl", "quantum_enhancement": True},
+            "cache": {"enabled": True, "max_size": 1000},
         }
 
         # Write config (simulated)
@@ -133,18 +125,8 @@ class TestOpal2Integration:
     def test_opal2_plugin_system_concept(self):
         """Test plugin system concept"""
         plugin_registry = {
-            "webgl_renderer": {
-                "name": "WebGL Renderer",
-                "version": "1.0.0",
-                "type": "renderer",
-                "enabled": True
-            },
-            "canvas_renderer": {
-                "name": "Canvas Renderer",
-                "version": "1.0.0",
-                "type": "renderer",
-                "enabled": True
-            }
+            "webgl_renderer": {"name": "WebGL Renderer", "version": "1.0.0", "type": "renderer", "enabled": True},
+            "canvas_renderer": {"name": "Canvas Renderer", "version": "1.0.0", "type": "renderer", "enabled": True},
         }
 
         assert len(plugin_registry) == 2
@@ -154,16 +136,8 @@ class TestOpal2Integration:
     def test_opal2_performance_monitoring(self):
         """Test performance monitoring concept"""
         performance_metrics = {
-            "webgl": {
-                "average_render_time": 0.05,
-                "total_renders": 100,
-                "cache_hit_rate": 0.85
-            },
-            "canvas": {
-                "average_render_time": 0.1,
-                "total_renders": 50,
-                "cache_hit_rate": 0.75
-            }
+            "webgl": {"average_render_time": 0.05, "total_renders": 100, "cache_hit_rate": 0.85},
+            "canvas": {"average_render_time": 0.1, "total_renders": 50, "cache_hit_rate": 0.75},
         }
 
         for engine, metrics in performance_metrics.items():
@@ -171,24 +145,19 @@ class TestOpal2Integration:
             assert metrics["total_renders"] > 0
             assert 0 <= metrics["cache_hit_rate"] <= 1.0
 
+
 # Test fixtures
+
+
 @pytest.fixture
 def sample_opal2_data():
     """Provide sample Opal2 data for testing"""
     return {
-        "glyph": {
-            "vertices": [[0, 0], [100, 0], [100, 100], [0, 100]],
-            "style": {"color": "blue", "width": 2}
-        },
-        "quantum": {
-            "coherence_factor": 0.8,
-            "entanglement_strength": 0.6
-        },
-        "renderer": {
-            "engine": "webgl",
-            "dimensions": {"width": 800, "height": 600}
-        }
+        "glyph": {"vertices": [[0, 0], [100, 0], [100, 100], [0, 100]], "style": {"color": "blue", "width": 2}},
+        "quantum": {"coherence_factor": 0.8, "entanglement_strength": 0.6},
+        "renderer": {"engine": "webgl", "dimensions": {"width": 800, "height": 600}},
     }
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

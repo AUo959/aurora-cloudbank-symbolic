@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+import subprocess
+from fastapi import FastAPI
+
+# !/usr/bin/env python3
 """
 
 from modules.opal2.quantum_renderer import QuantumRenderer
@@ -8,9 +11,10 @@ Comprehensive preparation for the Opal2 expansion pull request
 """
 
 
+import json
 from datetime import datetime
 from pathlib import Path
-import json
+
 
 class Opal2PRPreparation:
     """
@@ -107,9 +111,7 @@ class Opal2PRPreparation:
         try:
             # Run flake8 on Opal2 modules
             print("  Running flake8...")
-            result = subprocess.run(
-                ["flake8", str(self.opal2_dir)], capture_output=True, text=True
-            )
+            result = subprocess.run(["flake8", str(self.opal2_dir)], capture_output=True, text=True)
 
             if result.returncode == 0:
                 print("  ✅ flake8: No issues found")
@@ -440,9 +442,7 @@ No migration required - This is a new system addition.
         """Create git branch for the PR"""
         try:
             # Check if branch exists
-            result = subprocess.run(
-                ["git", "branch", "--list", branch_name], capture_output=True, text=True
-            )
+            result = subprocess.run(["git", "branch", "--list", branch_name], capture_output=True, text=True)
 
             if branch_name not in result.stdout:
                 # Create new branch
@@ -480,6 +480,7 @@ No migration required - This is a new system addition.
         except Exception as e:
             print(f"❌ Failed to commit files: {e}")
 
+
 def main():
     """Main execution function"""
     pr_prep = Opal2PRPreparation()
@@ -505,9 +506,7 @@ def main():
     git_ops = input("\nPerform git operations? (y/n): ").strip().lower()
 
     if git_ops == "y":
-        branch_name = input(
-            "Enter branch name (default: feature/opal2-expansion): "
-        ).strip()
+        branch_name = input("Enter branch name (default: feature/opal2-expansion): ").strip()
         if not branch_name:
             branch_name = "feature/opal2-expansion"
 
@@ -517,6 +516,7 @@ def main():
         print("\n🎉 Ready to push to remote!")
         print(f"Run: git push origin {branch_name}")
         print("Then create your PR on GitHub/GitLab")
+
 
 if __name__ == "__main__":
     main()

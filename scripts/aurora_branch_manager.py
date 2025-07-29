@@ -12,9 +12,8 @@ import datetime
 import re
 import subprocess
 import sys
+from typing import Dict, List
 
-from typing import Dict
-from typing import List
 
 class BranchManager:
     """Automated branch management and cleanup system."""
@@ -84,12 +83,8 @@ class BranchManager:
 
                     # Parse date
                     try:
-                        commit_date = datetime.datetime.fromisoformat(
-                            date_str.replace("Z", "+00:00")
-                        )
-                        days_old = (
-                            datetime.datetime.now(datetime.timezone.utc) - commit_date
-                        ).days
+                        commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                        days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
                     except ValueError:
                         days_old = 0
 
@@ -102,14 +97,10 @@ class BranchManager:
                             "date": date_str,
                             "days_old": days_old,
                             "author": author,
-                            "subject": (
-                                subject[:50] + "..." if len(subject) > 50 else subject
-                            ),
+                            "subject": (subject[:50] + "..." if len(subject) > 50 else subject),
                             "is_merged": is_merged,
                             "category": self.categorize_branch(branch_name),
-                            "action": self.recommend_action(
-                                branch_name, days_old, is_merged
-                            ),
+                            "action": self.recommend_action(branch_name, days_old, is_merged),
                         }
                     )
 
@@ -131,9 +122,7 @@ class BranchManager:
         try:
             # Check if branch is merged into main
             cmd = ["git", "merge-base", "--is-ancestor", branch_name, "origin/main"]
-            result = subprocess.run(
-                cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
-            )
+            result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except (OSError, ValueError, RuntimeError):
             return False
@@ -238,9 +227,7 @@ class BranchManager:
                         if result.returncode == 0:
                             summary["deleted"].append(branch_name)
                         else:
-                            summary["errors"].append(
-                                f"Failed to delete {branch_name}: {result.stderr}"
-                            )
+                            summary["errors"].append(f"Failed to delete {branch_name}: {result.stderr}")
                     except (OSError, ValueError, RuntimeError) as e:
                         summary["errors"].append(f"Error deleting {branch_name}: {e}")
                 else:
@@ -248,9 +235,7 @@ class BranchManager:
 
             elif action == "archive":
                 # Create tag for archive
-                tag_name = (
-                    f"archive/{branch_name.replace('origin/', '').replace('/', '-')}"
-                )
+                tag_name = f"archive/{branch_name.replace('origin/', '').replace('/', '-')}"
                 if confirm and not self.dry_run:
                     try:
                         cmd = ["git", "tag", tag_name, branch_name]
@@ -283,9 +268,7 @@ class BranchManager:
         """
         report = []
         report.append("# Aurora CloudBank - Branch Management Report")
-        report.append(
-            f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}"
-        )
+        report.append(f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         report.append("")
 
         # Summary
@@ -310,9 +293,7 @@ class BranchManager:
         report.append("")
         report.append("### By Category:")
         for category, count in sorted(by_category.items()):
-            report.append(
-                f"- **{category.replace('-', ' ').title()}**: {count} branches"
-            )
+            report.append(f"- **{category.replace('-', ' ').title()}**: {count} branches")
 
         report.append("")
         report.append("## Branch Details")
@@ -338,23 +319,18 @@ class BranchManager:
 
         return "\n".join(report)
 
+
 def main():
     """Main function for branch management CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Branch Management")
-    parser.add_argument(
-        "--analyze", action="store_true", help="Analyze branches and generate report"
-    )
-    parser.add_argument(
-        "--cleanup", action="store_true", help="Execute cleanup actions"
-    )
+    parser.add_argument("--analyze", action="store_true", help="Analyze branches and generate report")
+    parser.add_argument("--cleanup", action="store_true", help="Execute cleanup actions")
     parser.add_argument(
         "--confirm",
         action="store_true",
         help="Actually execute deletions (not dry-run)",
     )
-    parser.add_argument(
-        "--stale-days", type=int, default=30, help="Days to consider branch stale"
-    )
+    parser.add_argument("--stale-days", type=int, default=30, help="Days to consider branch stale")
     parser.add_argument("--output", help="Output file for report")
 
     args = parser.parse_args()
@@ -401,6 +377,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

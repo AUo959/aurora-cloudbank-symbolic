@@ -211,23 +211,23 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
    */
   async executePhaseLogic(phase) {
     switch (phase) {
-      case 'INITIALIZE':
-        await this.executeInitializePhase();
-        break;
-      case 'DEPLOY':
-        await this.executeDeployPhase();
-        break;
-      case 'MONITOR':
-        await this.executeMonitorPhase();
-        break;
-      case 'SCALE':
-        await this.executeScalePhase();
-        break;
-      case 'MAINTAIN':
-        await this.executeMaintainPhase();
-        break;
-      default:
-        throw new Error(`Unknown phase: ${phase}`);
+    case 'INITIALIZE':
+      await this.executeInitializePhase();
+      break;
+    case 'DEPLOY':
+      await this.executeDeployPhase();
+      break;
+    case 'MONITOR':
+      await this.executeMonitorPhase();
+      break;
+    case 'SCALE':
+      await this.executeScalePhase();
+      break;
+    case 'MAINTAIN':
+      await this.executeMaintainPhase();
+      break;
+    default:
+      throw new Error(`Unknown phase: ${phase}`);
     }
   }
 
@@ -503,16 +503,16 @@ class AuroraWorkflowCLI {
 
   async handleCommand(command, args) {
     switch (command) {
-      case 'start':
-        return await this.orchestrator.executeWorkflow(args.phases);
-      case 'status':
-        return this.getWorkflowStatus();
-      case 'stop':
-        return this.stopWorkflow(args.graceful);
-      case 'restart':
-        return this.restartWorkflow(args.strategy);
-      default:
-        console.log('Unknown command. Available: start, status, stop, restart');
+    case 'start':
+      return await this.orchestrator.executeWorkflow(args.phases);
+    case 'status':
+      return this.getWorkflowStatus();
+    case 'stop':
+      return this.stopWorkflow(args.graceful);
+    case 'restart':
+      return this.restartWorkflow(args.strategy);
+    default:
+      console.log('Unknown command. Available: start, status, stop, restart');
     }
   }
 

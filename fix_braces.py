@@ -4,6 +4,7 @@ Quick fix for missing closing braces in Python files
 """
 import os
 
+
 def fix_missing_braces(filepath):
     """Fix missing closing braces in Python dictionaries"""
     with open(filepath, "r") as f:
@@ -77,10 +78,9 @@ def fix_missing_braces(filepath):
 
     print(f"Fixed: {filepath}")
 
+
 # Fix the problematic files
-files_to_fix = [
-    "/workspaces/aurora-cloudbank-symbolic/src/output/multi_modal_output_coordination.py"
-]
+files_to_fix = ["/workspaces/aurora-cloudbank-symbolic/src/output/multi_modal_output_coordination.py"]
 
 for filepath in files_to_fix:
     if os.path.exists(filepath):

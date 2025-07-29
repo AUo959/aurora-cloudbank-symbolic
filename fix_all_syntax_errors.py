@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 
+
 def fix_js_style_syntax(file_path):
     """Fix JavaScript/Java-style syntax mixed into Python files"""
     print(f"🔧 Fixing JS-style syntax in {file_path}r")
@@ -22,19 +23,20 @@ def fix_js_style_syntax(file_path):
     original_content = content
 
     # Fix common JS/Java to Python conversions
-    content = re.sub(rr'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
-    content = re.sub(rr'\)\s*\{', '):', content)  # ) { -> ):
+    content = re.sub(rrrr'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
+    content = re.sub(rrr'\)\s*\{', '):', content)  # ) { -> ):
     content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-    content = re.sub(rr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+    content = re.sub(rrr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
     content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-    content = re.sub(rr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
-    content = re.sub(rr'\}\s*;', '}', content)  # }; -> }
+    content = re.sub(rrr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+    content = re.sub(rrr'\}\s*;', '}', content)  # }; -> }
 
     if content != original_content:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
         return True
     return False
+
 
 def fix_duplicate_encoding(file_path):
     """Fix duplicate encoding parameters in file operations"""
@@ -54,6 +56,7 @@ def fix_duplicate_encoding(file_path):
         return True
     return False
 
+
 def check_syntax(file_path):
     """Check if a Python file has valid syntax"""
     try:
@@ -65,6 +68,7 @@ def check_syntax(file_path):
         return result.returncode == 0, result.stderr
     except Exception as e:
         return False, str(e)
+
 
 def find_and_fix_python_files():
     """Find and fix all Python files with syntax errors"""
@@ -118,6 +122,7 @@ def find_and_fix_python_files():
             print(f"   {file_path}: {error_msg.strip()}")
 
     return len(syntax_errors) == 0
+
 
 if __name__ == "__main__":
     print("🌟 Aurora CloudBank Syntax Error Fixer")

@@ -3,16 +3,17 @@ Performance Comparison: Heavy Dependencies vs Native Implementation
 Demonstrates the performance improvements achieved by eliminating heavy dependencies
 """
 
-import time
 import math
 import sys
+import time
 from pathlib import Path
+
+from src.core.native_quantum import NativeQuantumProcessingLayer
+from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.native_quantum import NativeQuantumProcessingLayer
-from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
 
 def benchmark_native_vsa():
     """Benchmark native VSA implementation"""
@@ -31,15 +32,16 @@ def benchmark_native_vsa():
         v2 = vectors[i + 50]
 
         # Binding and superposition operations
-        bound = v1.bind(v2)
-        superposed = v1.superpose(v2)
-        similarity = v1.similarity(v2)
+        v1.bind(v2)
+        v1.superpose(v2)
+        v1.similarity(v2)
 
     end_time = time.time()
     duration = end_time - start_time
 
     print(f"  ✅ Native VSA: {duration:.4f} seconds for 100 vectors + 50 operations")
     return duration
+
 
 def benchmark_native_quantum():
     """Benchmark native quantum implementation"""
@@ -51,22 +53,23 @@ def benchmark_native_quantum():
     # Create multiple quantum circuits
     for circuit_id in range(10):
         operations = [
-            {'type': 'hadamard', 'qubit': 0},
-            {'type': 'hadamard', 'qubit': 1},
-            {'type': 'cnot', 'qubit': 0, 'target': 1},
-            {'type': 'rotation', 'qubit': 2, 'angle': math.pi / 4},
-            {'type': 'hadamard', 'qubit': 3}
+            {"type": "hadamard", "qubit": 0},
+            {"type": "hadamard", "qubit": 1},
+            {"type": "cnot", "qubit": 0, "target": 1},
+            {"type": "rotation", "qubit": 2, "angle": math.pi / 4},
+            {"type": "hadamard", "qubit": 3},
         ]
 
         circuit_name = f"benchmark_circuit_{circuit_id}"
         processor.create_quantum_circuit(circuit_name, operations)
-        result = processor.execute_quantum_symbolic_computation(circuit_name, 500)
+        processor.execute_quantum_symbolic_computation(circuit_name, 500)
 
     end_time = time.time()
     duration = end_time - start_time
 
     print(f"  ✅ Native Quantum: {duration:.4f} seconds for 10 circuits (6 qubits each)")
     return duration
+
 
 def benchmark_symbolic_anchor():
     """Benchmark symbolic anchor system"""
@@ -78,21 +81,22 @@ def benchmark_symbolic_anchor():
     # Perform multiple anchor operations
     for i in range(20):
         test_data = {
-            'quantum_operations': [
-                {'type': 'hadamard', 'qubit': 0},
-                {'type': 'cnot', 'qubit': 0, 'target': 1},
-                {'type': 'rotation', 'qubit': 1, 'angle': math.pi / 6}
+            "quantum_operations": [
+                {"type": "hadamard", "qubit": 0},
+                {"type": "cnot", "qubit": 0, "target": 1},
+                {"type": "rotation", "qubit": 1, "angle": math.pi / 6},
             ],
-            'symbolic_concepts': [f'concept_{i}', f'test_{i}', f'benchmark_{i}']
+            "symbolic_concepts": [f"concept_{i}", f"test_{i}", f"benchmark_{i}"],
         }
 
-        result = anchor.anchor_quantum_symbolic_state(test_data)
+        anchor.anchor_quantum_symbolic_state(test_data)
 
     end_time = time.time()
     duration = end_time - start_time
 
     print(f"  ✅ Symbolic Anchor: {duration:.4f} seconds for 20 hybrid operations")
     return duration
+
 
 def benchmark_memory_operations():
     """Benchmark memory and DLP operations"""
@@ -103,29 +107,25 @@ def benchmark_memory_operations():
 
     # Memory sealing operations
     for i in range(50):
-        test_state = {'data': f'test_state_{i}', 'value': i * 10}
-        seal_hash = anchor.memory_sealer.seal_state(f"test_seal_{i}", test_state)
-        unsealed = anchor.memory_sealer.unseal_state(f"test_seal_{i}")
-        integrity_ok = anchor.memory_sealer.verify_integrity(f"test_seal_{i}")
+        test_state = {"data": f"test_state_{i}", "value": i * 10}
+        anchor.memory_sealer.seal_state(f"test_seal_{i}", test_state)
+        anchor.memory_sealer.unseal_state(f"test_seal_{i}")
+        anchor.memory_sealer.verify_integrity(f"test_seal_{i}")
 
     # DLP tracking operations
     for i in range(30):
-        quantum_tag = anchor.dlp_tracker.tag_quantum_operation({
-            'num_qubits': 4,
-            'operations': [{'type': 'hadamard', 'qubit': 0}],
-            'shots': 1000
-        })
+        quantum_tag = anchor.dlp_tracker.tag_quantum_operation(
+            {"num_qubits": 4, "operations": [{"type": "hadamard", "qubit": 0}], "shots": 1000}
+        )
 
-        symbolic_tag = anchor.dlp_tracker.tag_symbolic_operation({
-            'dimension': 512,
-            'concepts': [f'dlp_test_{i}']
-        })
+        symbolic_tag = anchor.dlp_tracker.tag_symbolic_operation({"dimension": 512, "concepts": [f"dlp_test_{i}"]})
 
     end_time = time.time()
     duration = end_time - start_time
 
     print(f"  ✅ Memory & DLP: {duration:.4f} seconds for 50 seals + 30 DLP tags")
     return duration
+
 
 def benchmark_export_operations():
     """Benchmark export operations"""
@@ -137,17 +137,17 @@ def benchmark_export_operations():
     # Create some data for export
     for i in range(10):
         test_data = {
-            'quantum_operations': [{'type': 'hadamard', 'qubit': 0}],
-            'symbolic_concepts': [f'export_test_{i}']
+            "quantum_operations": [{"type": "hadamard", "qubit": 0}],
+            "symbolic_concepts": [f"export_test_{i}"],
         }
         anchor.anchor_quantum_symbolic_state(test_data)
 
     # Perform exports
-    for format_type in ['json', 'aurora_symbolic', 'gumas_compatible']:
-        export_result = anchor.export_anchor_state(format_type)
+    for format_type in ["json", "aurora_symbolic", "gumas_compatible"]:
+        anchor.export_anchor_state(format_type)
 
     # Create export manifest
-    manifest_file = anchor.create_export_manifest("benchmark_export")
+    anchor.create_export_manifest("benchmark_export")
 
     end_time = time.time()
     duration = end_time - start_time
@@ -155,18 +155,19 @@ def benchmark_export_operations():
     print(f"  ✅ Export Operations: {duration:.4f} seconds for 3 formats + manifest")
     return duration
 
+
 def estimate_heavy_dependency_overhead():
     """Estimate performance overhead of heavy dependencies"""
     print("📊 Estimating Heavy Dependency Overhead...")
 
     # Typical import times for heavy dependencies (estimated)
     heavy_imports = {
-        'numpy': 0.5,      # Large numerical computing library
-        'qiskit': 2.0,     # Quantum computing framework with many dependencies
-        'pandas': 0.8,     # Data manipulation library
-        'requests': 0.3,   # HTTP library with many dependencies
-        'scipy': 1.2,      # Scientific computing library
-        'scikit-learn': 1.5  # Machine learning library
+        "numpy": 0.5,  # Large numerical computing library
+        "qiskit": 2.0,  # Quantum computing framework with many dependencies
+        "pandas": 0.8,  # Data manipulation library
+        "requests": 0.3,  # HTTP library with many dependencies
+        "scipy": 1.2,  # Scientific computing library
+        "scikit-learn": 1.5,  # Machine learning library
     }
 
     total_import_time = sum(heavy_imports.values())
@@ -177,12 +178,12 @@ def estimate_heavy_dependency_overhead():
 
     # Memory usage estimates
     heavy_memory = {
-        'numpy': 15,       # MB
-        'qiskit': 50,      # MB
-        'pandas': 25,      # MB
-        'requests': 8,     # MB
-        'scipy': 30,       # MB
-        'scikit-learn': 40 # MB
+        "numpy": 15,  # MB
+        "qiskit": 50,  # MB
+        "pandas": 25,  # MB
+        "requests": 8,  # MB
+        "scipy": 30,  # MB
+        "scikit-learn": 40,  # MB
     }
 
     total_memory = sum(heavy_memory.values())
@@ -193,6 +194,7 @@ def estimate_heavy_dependency_overhead():
     print(f"  🚀 Memory reduction: {total_memory / native_memory:.0f}x less memory")
 
     return total_import_time, total_memory
+
 
 def main():
     """Run comprehensive performance benchmarks"""
@@ -233,6 +235,7 @@ def main():
     print("  🔗 Modular design: Zero coupling to heavy libs")
 
     print("\n🌟 Aurora CloudBank v3.5.2-optimized: Performance Mission Complete!")
+
 
 if __name__ == "__main__":
     main()

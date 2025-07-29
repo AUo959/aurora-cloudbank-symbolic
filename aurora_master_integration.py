@@ -5,10 +5,11 @@ Unified interface for all Phase 3 advanced features
 """
 
 import asyncio
-from datetime import datetime
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
+
 
 class AuroraMasterInterface:
     """Master interface for Aurora CloudBank advanced features"""
@@ -25,7 +26,7 @@ class AuroraMasterInterface:
         systems_to_init = [
             ("quantum_processor", "aurora_quantum_processor.py"),
             ("consciousness_engine", "aurora_consciousness_engine.py"),
-            ("adaptive_learning", "aurora_adaptive_learning.py")
+            ("adaptive_learning", "aurora_adaptive_learning.py"),
         ]
 
         for system_name, module_file in systems_to_init:
@@ -54,9 +55,9 @@ class AuroraMasterInterface:
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-                result = subprocess.run([
-                    sys.executable, "aurora_quantum_processor.py"
-                ], capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    [sys.executable, "aurora_quantum_processor.py"], capture_output=True, text=True, timeout=30
+                )
 
                 if result.returncode == 0:
                     print("✅ Quantum processing test passed")
@@ -71,9 +72,9 @@ class AuroraMasterInterface:
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):
             try:
-                result = subprocess.run([
-                    sys.executable, "aurora_consciousness_engine.py"
-                ], capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    [sys.executable, "aurora_consciousness_engine.py"], capture_output=True, text=True, timeout=30
+                )
 
                 if result.returncode == 0:
                     print("✅ Consciousness simulation test passed")
@@ -88,9 +89,9 @@ class AuroraMasterInterface:
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
             try:
-                result = subprocess.run([
-                    sys.executable, "aurora_adaptive_learning.py"
-                ], capture_output=True, text=True, timeout=30)
+                result = subprocess.run(
+                    [sys.executable, "aurora_adaptive_learning.py"], capture_output=True, text=True, timeout=30
+                )
 
                 if result.returncode == 0:
                     print("✅ Adaptive learning test passed")
@@ -120,7 +121,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         for system_name, status in self.initialized_systems.items():
             status_icon = "✅" if status else "❌"
             report_content += f"- {status_icon} **{system_name.replace('_',
-                ' ').title()}**: {self.integration_status[system_name]}\n"
+                                                                       ' ').title()}**: {self.integration_status[system_name]}\n"
 
         report_content += """
 ### Advanced Features Activated
@@ -150,7 +151,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
         total_systems = len(self.initialized_systems)
         successful_systems = sum(1 for status in self.initialized_systems.values() if status)
-        completion_percentage = (successful_systems / total_systems * 100) if total_systems > 0 else 0
+        (successful_systems / total_systems * 100) if total_systems > 0 else 0
 
         report_content += """
 **Overall Integration**: {completion_percentage:.1f}% Complete ({successful_systems}/{total_systems} systems)
@@ -195,12 +196,12 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             "demo_results": demo_results,
             "status_report": status_report,
             "test_timestamp": datetime.now().isoformat(),
-            "overall_success": all(init_results.values()) and all(
-                result in ["success", "warning"] for result in demo_results.values()
-            )
+            "overall_success": all(init_results.values())
+            and all(result in ["success", "warning"] for result in demo_results.values()),
         }
 
         return comprehensive_results
+
 
 async def main():
     """Main function for Aurora Master Interface"""
@@ -216,13 +217,14 @@ async def main():
     print(f"Overall Success: {'✅ PASSED' if results['overall_success'] else '❌ FAILED'}")
     print(f"Status Report: {results['status_report']}")
 
-    if results['overall_success']:
+    if results["overall_success"]:
         print("\n🎉 Phase 3 Advanced Integration COMPLETE!")
         print("🚀 Ready for Phase 4: Real-World Application Integration")
     else:
         print("\n⚠️ Some systems need attention before proceeding to Phase 4")
 
     return results
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -9,6 +9,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+
 class DeploymentManager:
     """Manages intelligent deployment of Aurora CloudBank enhancements."""
 
@@ -32,8 +33,7 @@ class DeploymentManager:
     def _check_repository_state(self):
         """Check repository is in clean state."""
         try:
-            result = subprocess.run(["git", "status", "--porcelain"],
-                                  capture_output=True, text=True, check=False)
+            result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=False)
             clean = len(result.stdout.strip()) == 0
             print(f"   Repository state: {'✅ Clean' if clean else '⚠️ Has changes'}")
             return True  # Allow deployment with changes for now
@@ -42,11 +42,7 @@ class DeploymentManager:
 
     def _check_security_status(self):
         """Verify security protections are active."""
-        security_files = [
-            "aurora_enhanced_security.py",
-            "aurora_security_validation.py",
-            "security_remediation.py"
-        ]
+        security_files = ["aurora_enhanced_security.py", "aurora_security_validation.py", "security_remediation.py"]
 
         existing = sum(1 for f in security_files if Path(f).exists())
         print(f"   Security files: {existing}/{len(security_files)} present")
@@ -54,11 +50,7 @@ class DeploymentManager:
 
     def _check_critical_files(self):
         """Check critical system files are intact."""
-        critical_files = [
-            "scripts/gitwiz_enhanced.py",
-            "critical_issue_resolver.py",
-            "package.json"
-        ]
+        critical_files = ["scripts/gitwiz_enhanced.py", "critical_issue_resolver.py", "package.json"]
 
         existing = sum(1 for f in critical_files if Path(f).exists())
         print(f"   Critical files: {existing}/{len(critical_files)} present")
@@ -73,14 +65,13 @@ class DeploymentManager:
         print("🚀 Executing deployment sequence...")
 
         # Log deployment
-        self.deployment_log.append({
-            "timestamp": datetime.now().isoformat(),
-            "status": "initiated",
-            "safety_checks": "passed"
-        })
+        self.deployment_log.append(
+            {"timestamp": datetime.now().isoformat(), "status": "initiated", "safety_checks": "passed"}
+        )
 
         print("✅ Deployment sequence completed")
         return True
+
 
 def main():
     """Main deployment execution."""
@@ -95,6 +86,7 @@ def main():
     else:
         print("❌ Deployment aborted due to safety check failures")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

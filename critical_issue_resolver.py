@@ -48,11 +48,11 @@ def fix_critical_gitwiz_issues():
     if 'def _analyze_all_zip_files(self):' not in content:
         content = content.replace(
             'class GitWizEnhanced:',
-            '''class GitWizEnhanced:'''
+            '''class GitWizEnhanced: '''
         )
 
         # Add missing methods at the end of the class
-        class_end_pattern = rr'(\s+def __del__\(self\):.*?pass)'
+        class_end_pattern = rrr'(\s+def __del__\(self\):.*?pass)'
         if re.search(class_end_pattern, content, re.DOTALL):
             content = re.sub(
                 class_end_pattern,
@@ -85,8 +85,8 @@ def fix_security_file_issues():
             content = f.read()
 
         # Fix file encoding issues
-        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
-        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
 
         # Fix line length issues by breaking long lines
         lines = content.split('\n')

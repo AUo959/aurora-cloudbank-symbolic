@@ -7,10 +7,11 @@ Validates the core functionality of Aurora CloudBank to ensure everything
 we've built is working correctly before proceeding with branch configuration.
 """
 
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
+import sys
+
 
 def test_holographic_interface():
     """Test the holographic interface orchestrator"""
@@ -23,11 +24,7 @@ def test_holographic_interface():
 
     # Test syntax
     try:
-        result = subprocess.run(
-            ["node", "-c", orchestrator_path],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"✅ {orchestrator_path} - Valid Node.js syntax")
             return True
@@ -37,6 +34,7 @@ def test_holographic_interface():
     except Exception as e:
         print(f"⚠️  Could not test Node.js syntax: {e}")
         return True  # Assume OK if Node.js not available
+
 
 def test_aurora_custom_gpt_bridge():
     """Test Aurora Custom GPT bridge connection"""
@@ -50,6 +48,7 @@ def test_aurora_custom_gpt_bridge():
         print(f"⚠️  {bridge_path} not found (may be in different location)")
         return True  # Not critical for core tests
 
+
 def test_orion_core_config():
     """Test ORION Core configuration"""
     print("🛰️ Testing ORION Core Configuration...")
@@ -62,6 +61,7 @@ def test_orion_core_config():
         print(f"⚠️  {config_path} not found")
         return True  # Not critical
 
+
 def test_core_documentation():
     """Test that core documentation exists"""
     print("📚 Testing Core Documentation...")
@@ -69,7 +69,7 @@ def test_core_documentation():
     docs = [
         "AURORA_ERROR_RESOLUTION_SUCCESS.md",
         "AURORA_CLOUDBANK_FINAL_STATUS.md",
-        "CANONICAL_INTEGRATION_COMPLETE.md"
+        "CANONICAL_INTEGRATION_COMPLETE.md",
     ]
 
     all_exist = True
@@ -82,24 +82,20 @@ def test_core_documentation():
 
     return all_exist
 
+
 def test_git_repository_status():
     """Test git repository status"""
     print("📦 Testing Git Repository Status...")
 
     try:
         # Check if we're in a git repository
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            cwd="."
-        )
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
 
         if result.returncode == 0:
             uncommitted = result.stdout.strip()
             if uncommitted:
                 print("⚠️  Uncommitted changes found:")
-                for line in uncommitted.split('\n'):
+                for line in uncommitted.split("\n"):
                     print(f"   {line}")
             else:
                 print("✅ Repository is clean")
@@ -112,16 +108,13 @@ def test_git_repository_status():
         print(f"❌ Git error: {e}")
         return False
 
+
 def test_system_integration():
     """Test overall system integration"""
     print("⚡ Testing System Integration...")
 
     # Check for key files that indicate successful integration
-    key_files = [
-        "package.json",
-        "requirements.txt",
-        "src/orchestrators/holographic_interface_orchestrator.js"
-    ]
+    key_files = ["package.json", "requirements.txt", "src/orchestrators/holographic_interface_orchestrator.js"]
 
     integration_score = 0
     for file_path in key_files:
@@ -136,11 +129,12 @@ def test_system_integration():
 
     return success_rate >= 80
 
+
 def generate_validation_report():
     """Generate comprehensive validation report"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🌟 AURORA CLOUDBANK VALIDATION REPORT")
-    print("="*60)
+    print("=" * 60)
 
     tests = [
         ("Holographic Interface", test_holographic_interface),
@@ -148,7 +142,7 @@ def generate_validation_report():
         ("ORION Core Config", test_orion_core_config),
         ("Core Documentation", test_core_documentation),
         ("Git Repository Status", test_git_repository_status),
-        ("System Integration", test_system_integration)
+        ("System Integration", test_system_integration),
     ]
 
     results = {}
@@ -163,11 +157,11 @@ def generate_validation_report():
         if success:
             passed += 1
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎯 VALIDATION SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print(f"✅ Tests Passed: {passed}/{total}")
-    print(f"📊 Success Rate: {(passed/total)*100:.1f}%")
+    print(f"📊 Success Rate: {(passed / total) * 100:.1f}%")
 
     if passed == total:
         print("🎉 ALL TESTS PASSED - SYSTEM READY!")
@@ -185,8 +179,8 @@ def generate_validation_report():
         "status": status,
         "total_tests": total,
         "passed_tests": passed,
-        "success_rate": f"{(passed/total)*100:.1f}%",
-        "test_results": results
+        "success_rate": f"{(passed / total) * 100:.1f}%",
+        "test_results": results,
     }
 
     with open("AURORA_VALIDATION_REPORT.json", "w") as f:
@@ -195,6 +189,7 @@ def generate_validation_report():
     print("\n📄 Validation report saved to: AURORA_VALIDATION_REPORT.json")
 
     return status == "READY" or status == "MOSTLY_READY"
+
 
 if __name__ == "__main__":
     print("🚀 Starting Aurora CloudBank System Validation...")

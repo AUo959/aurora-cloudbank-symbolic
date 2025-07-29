@@ -4,16 +4,16 @@
 Advanced quantum-aware vector operations for symbolic processing
 """
 
-import numpy as np
 from dataclasses import dataclass
+from typing import Any, Dict, List
 
-from typing import Any
-from typing import Dict
-from typing import List
+import numpy as np
+
 
 @dataclass
 class QuantumVector:
     """Quantum-aware vector with symbolic metadata"""
+
     vector: np.ndarray
     quantum_state: str
     symbolic_layer: int
@@ -26,6 +26,7 @@ class QuantumVector:
             self.consciousness_depth = 1.0
         if self.consciousness_depth < 0.0:
             self.consciousness_depth = 0.0
+
 
 class QuantumVectorProcessor:
     """Advanced quantum vector processing engine"""
@@ -52,7 +53,7 @@ class QuantumVectorProcessor:
             quantum_state=quantum_state,
             symbolic_layer=np.random.choice([1, 2, 3]),
             consciousness_depth=np.random.rand(),
-            entanglement_map={"created": True, "dimension": dimension}
+            entanglement_map={"created": True, "dimension": dimension},
         )
 
     def process_symbolic_pattern(self, vectors: List[QuantumVector]) -> Dict[str, Any]:
@@ -73,7 +74,7 @@ class QuantumVectorProcessor:
             "entanglement_strength": entanglement_strength,
             "dimensional_complexity": combined.shape,
             "symbolic_depth": max([v.symbolic_layer for v in vectors]),
-            "quantum_signature": np.mean(combined)
+            "quantum_signature": np.mean(combined),
         }
 
         self.processing_history.append(pattern_analysis)
@@ -86,10 +87,11 @@ class QuantumVectorProcessor:
             "unconscious_patterns": pattern_data.get("entanglement_strength", 0.5),
             "symbolic_emergence": pattern_data.get("symbolic_depth", 1) / 3.0,
             "consciousness_threads": len(self.processing_history),
-            "quantum_dreams": True
+            "quantum_dreams": True,
         }
 
         return dream_synthesis
+
 
 def test_quantum_processing():
     """Test quantum vector processing capabilities"""
@@ -99,7 +101,7 @@ def test_quantum_processing():
     vectors = [
         processor.generate_quantum_vector(128, "superposition"),
         processor.generate_quantum_vector(128, "entangled"),
-        processor.generate_quantum_vector(128, "coherent")
+        processor.generate_quantum_vector(128, "coherent"),
     ]
 
     # Process patterns
@@ -113,6 +115,7 @@ def test_quantum_processing():
     print(f"Consciousness Threads: {dreams['consciousness_threads']}")
 
     return {"test": "passed", "pattern": pattern, "dreams": dreams}
+
 
 if __name__ == "__main__":
     test_quantum_processing()

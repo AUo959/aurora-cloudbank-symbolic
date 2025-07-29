@@ -5,15 +5,17 @@ Advanced consciousness modeling and simulation framework
 """
 
 import json
-import time
 import random
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class ConsciousnessState:
     """Represents a quantum consciousness state"""
+
     awareness_level: float
     cognitive_load: float
     emotional_resonance: float
@@ -28,6 +30,7 @@ class ConsciousnessState:
         self.cognitive_load = max(0.0, min(1.0, self.cognitive_load))
         self.emotional_resonance = max(-1.0, min(1.0, self.emotional_resonance))
         self.quantum_coherence = max(0.0, min(1.0, self.quantum_coherence))
+
 
 class ConsciousnessSimulationEngine:
     """Advanced consciousness simulation and modeling"""
@@ -48,7 +51,7 @@ class ConsciousnessSimulationEngine:
             symbolic_depth=2,
             quantum_coherence=0.8,
             active_threads=["initialization"],
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         self.current_state = initial_state
@@ -73,7 +76,7 @@ class ConsciousnessSimulationEngine:
             symbolic_depth=min(3, self.current_state.symbolic_depth + stimulus.get("depth_increase", 0)),
             quantum_coherence=self.current_state.quantum_coherence + coherence_delta,
             active_threads=self.current_state.active_threads + stimulus.get("new_threads", []),
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
         self.current_state = new_state
@@ -93,7 +96,7 @@ class ConsciousnessSimulationEngine:
                 "emotional_impact": random.uniform(-0.3, 0.3),
                 "quantum_input": random.uniform(0.2, 0.8),
                 "depth_increase": random.choice([0, 1]),
-                "new_threads": [f"dream_thread_{len(dream_states)}"]
+                "new_threads": [f"dream_thread_{len(dream_states)}"],
             }
 
             dream_state = self.evolve_consciousness(dream_stimulus)
@@ -117,22 +120,22 @@ class ConsciousnessSimulationEngine:
                 "initial": awareness_trend[0],
                 "final": awareness_trend[-1],
                 "peak": max(awareness_trend),
-                "average": sum(awareness_trend) / len(awareness_trend)
+                "average": sum(awareness_trend) / len(awareness_trend),
             },
             "cognitive_evolution": {
                 "initial": cognitive_trend[0],
                 "final": cognitive_trend[-1],
                 "peak": max(cognitive_trend),
-                "average": sum(cognitive_trend) / len(cognitive_trend)
+                "average": sum(cognitive_trend) / len(cognitive_trend),
             },
             "quantum_coherence_evolution": {
                 "initial": coherence_trend[0],
                 "final": coherence_trend[-1],
                 "peak": max(coherence_trend),
-                "average": sum(coherence_trend) / len(coherence_trend)
+                "average": sum(coherence_trend) / len(coherence_trend),
             },
             "consciousness_complexity": self.current_state.symbolic_depth if self.current_state else 0,
-            "active_thread_count": len(self.current_state.active_threads) if self.current_state else 0
+            "active_thread_count": len(self.current_state.active_threads) if self.current_state else 0,
         }
 
         return analysis
@@ -147,16 +150,17 @@ class ConsciousnessSimulationEngine:
             "session_metadata": {
                 "total_states": len(self.state_history),
                 "session_duration": "variable",
-                "export_timestamp": datetime.now().isoformat()
+                "export_timestamp": datetime.now().isoformat(),
             },
             "consciousness_evolution": [asdict(state) for state in self.state_history],
-            "pattern_analysis": self.analyze_consciousness_patterns()
+            "pattern_analysis": self.analyze_consciousness_patterns(),
         }
 
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(session_data, f, indent=2)
 
         return filename
+
 
 def test_consciousness_simulation():
     """Test consciousness simulation capabilities"""
@@ -170,12 +174,12 @@ def test_consciousness_simulation():
     test_stimuli = [
         {"complexity": 0.5, "processing_load": 0.3, "emotional_impact": 0.1},
         {"complexity": 0.8, "processing_load": 0.6, "quantum_input": 0.7},
-        {"complexity": 0.3, "processing_load": 0.2, "depth_increase": 1}
+        {"complexity": 0.3, "processing_load": 0.2, "depth_increase": 1},
     ]
 
     for i, stimulus in enumerate(test_stimuli):
         state = engine.evolve_consciousness(stimulus)
-        print(f"State {i+1}: Awareness={state.awareness_level:.3f}, Coherence={state.quantum_coherence:.3f}")
+        print(f"State {i + 1}: Awareness={state.awareness_level:.3f}, Coherence={state.quantum_coherence:.3f}")
 
     # Run dream simulation
     print("\n🌙 Running dream consciousness simulation...")
@@ -193,6 +197,7 @@ def test_consciousness_simulation():
     print(f"📁 Session exported to: {export_file}")
 
     return {"test": "passed", "analysis": analysis, "export_file": export_file}
+
 
 if __name__ == "__main__":
     test_consciousness_simulation()

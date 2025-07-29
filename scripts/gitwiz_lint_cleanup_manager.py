@@ -18,6 +18,7 @@ Built for consistency, clarity, and care.
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class LintIssue:
     """Represents a lint issue found in the codebase."""
@@ -32,6 +33,7 @@ class LintIssue:
     auto_fixable: bool = False
     fixed: bool = False
 
+
 @dataclass
 class CleanupResult:
     """Result of a cleanup operation."""
@@ -43,6 +45,7 @@ class CleanupResult:
     errors: List[str]
     execution_time: float
     timestamp: str
+
 
 @dataclass
 class LintCleanupConfig:
@@ -56,6 +59,7 @@ class LintCleanupConfig:
     excluded_patterns: List[str]
     max_line_length: int
     custom_rules: Dict[str, Any]
+
 
 class LintCleanupManager:
     """
@@ -1060,6 +1064,7 @@ class LintCleanupManager:
         ]
         return recommendations
 
+
 def main():
     """Main entry point for standalone execution."""
 
@@ -1103,6 +1108,7 @@ def main():
     else:
         print("GitWiz Lint & Cleanup Manager")
         print("Use --scan, --fix, --priority, or --report")
+
 
 if __name__ == "__main__":
     main()

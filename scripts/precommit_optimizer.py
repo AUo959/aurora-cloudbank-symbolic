@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
             import time
@@ -9,12 +11,10 @@ Intelligent pre-commit hook configuration and optimization
 """
 
 
-
-from datetime import datetime
-from typing import Any
-from typing import Dict
-from typing import List
 import os
+from datetime import datetime
+from typing import Any, Dict, List
+
 
 class PreCommitOptimizer:
     """Optimize pre-commit hooks for efficiency and effectiveness"""
@@ -42,9 +42,7 @@ class PreCommitOptimizer:
 
                 if "repos" in config:
                     analysis["repos"] = config["repos"]
-                    analysis["hooks_count"] = sum(
-                        len(repo.get("hooks", [])) for repo in config["repos"]
-                    )
+                    analysis["hooks_count"] = sum(len(repo.get("hooks", [])) for repo in config["repos"])
 
                 # Analyze for issues
                 for repo in config.get("repos", []):
@@ -62,19 +60,13 @@ class PreCommitOptimizer:
                         # Identify potentially slow hooks
                         slow_hooks = ["pylint", "mypy", "black", "isort"]
                         if hook_id in slow_hooks:
-                            analysis["issues"].append(
-                                f"Potentially slow hook: {hook_id}"
-                            )
+                            analysis["issues"].append(f"Potentially slow hook: {hook_id}")
 
                         # Check for conflicting hooks
                         if hook_id == "autopep8" and any(
-                            h.get("id") == "black"
-                            for r in config["repos"]
-                            for h in r.get("hooks", [])
+                            h.get("id") == "black" for r in config["repos"] for h in r.get("hooks", [])
                         ):
-                            analysis["issues"].append(
-                                "Conflicting formatters: autopep8 and black"
-                            )
+                            analysis["issues"].append("Conflicting formatters: autopep8 and black")
 
             except (OSError, ValueError, RuntimeError) as e:
                 analysis["issues"].append(f"Failed to parse config: {e}")
@@ -402,26 +394,15 @@ repos:
 
         return report
 
+
 def main():
 
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Pre-commit Optimizer"
-    )
-    parser.add_argument(
-        "--analyze", action="store_true", help="Analyze current pre-commit config"
-    )
-    parser.add_argument(
-        "--optimize", action="store_true", help="Apply optimized configuration"
-    )
-    parser.add_argument(
-        "--conditional", action="store_true", help="Use conditional configuration"
-    )
-    parser.add_argument(
-        "--benchmark", action="store_true", help="Benchmark current hooks"
-    )
-    parser.add_argument(
-        "--report", action="store_true", help="Generate optimization report"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Pre-commit Optimizer")
+    parser.add_argument("--analyze", action="store_true", help="Analyze current pre-commit config")
+    parser.add_argument("--optimize", action="store_true", help="Apply optimized configuration")
+    parser.add_argument("--conditional", action="store_true", help="Use conditional configuration")
+    parser.add_argument("--benchmark", action="store_true", help="Benchmark current hooks")
+    parser.add_argument("--report", action="store_true", help="Generate optimization report")
 
     args = parser.parse_args()
 
@@ -467,6 +448,7 @@ def main():
             print("🔄 Run 'pre-commit run --all-files' to test the new configuration")
         else:
             print("❌ Failed to optimize pre-commit configuration")
+
 
 if __name__ == "__main__":
     main()

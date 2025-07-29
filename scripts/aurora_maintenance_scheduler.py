@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import argparse
@@ -8,13 +10,13 @@ Automated maintenance workflows and scheduling system
 """
 
 
-
-from datetime import datetime
-from typing import List
 import json
 import logging
 import os
 import time
+from datetime import datetime
+from typing import List
+
 
 class MaintenanceScheduler:
     """Automated maintenance scheduling and execution system"""
@@ -25,9 +27,7 @@ class MaintenanceScheduler:
         self.load_config()
 
         # Setup logging
-        logging.basicConfig(
-            level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
         self.logger = logging.getLogger(__name__)
 
         # Register maintenance tasks
@@ -83,15 +83,13 @@ class MaintenanceScheduler:
         """Register scheduled maintenance tasks"""
         # Daily cleanup at 2 AM
         if self.config["schedules"]["daily_cleanup"]["enabled"]:
-            schedule.every().day.at(
-                self.config["schedules"]["daily_cleanup"]["time"]
-            ).do(self.run_daily_cleanup)
+            schedule.every().day.at(self.config["schedules"]["daily_cleanup"]["time"]).do(self.run_daily_cleanup)
 
         # Weekly optimization on Sunday at 1 AM
         if self.config["schedules"]["weekly_optimization"]["enabled"]:
-            schedule.every().sunday.at(
-                self.config["schedules"]["weekly_optimization"]["time"]
-            ).do(self.run_weekly_optimization)
+            schedule.every().sunday.at(self.config["schedules"]["weekly_optimization"]["time"]).do(
+                self.run_weekly_optimization
+            )
 
         # Monthly audit on the 1st at midnight
         if self.config["schedules"]["monthly_audit"]["enabled"]:
@@ -177,9 +175,7 @@ class MaintenanceScheduler:
                 shell=False,
                 check=False,
             )
-            cache_files = (
-                result.stdout.strip().split("\n") if result.stdout.strip() else []
-            )
+            cache_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
             if cache_files:
                 # Remove cache files
@@ -228,9 +224,7 @@ class MaintenanceScheduler:
                 shell=False,
                 check=False,
             )
-            file_count = (
-                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-            )
+            file_count = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
 
             # Check against thresholds
             alerts = []
@@ -258,14 +252,10 @@ class MaintenanceScheduler:
                     shell=False,
                     check=False,
                 )
-                temp_files = (
-                    result.stdout.strip().split("\n") if result.stdout.strip() else []
-                )
+                temp_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
                 if temp_files:
-                    subprocess.run(
-                        ["find", ".", "-name", pattern, "-delete"], check=True
-                    )
+                    subprocess.run(["find", ".", "-name", pattern, "-delete"], check=True)
                     removed_count += len(temp_files)
 
             return f"Removed {removed_count} temporary files"
@@ -302,9 +292,7 @@ class MaintenanceScheduler:
                 shell=False,
                 check=False,
             )
-            zip_files = (
-                result.stdout.strip().split("\n") if result.stdout.strip() else []
-            )
+            zip_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
             return f"Found {len(zip_files)} ZIP files for optimization"
         except (OSError, ValueError, RuntimeError) as e:
@@ -433,18 +421,13 @@ class MaintenanceScheduler:
         self.running = False
         self.logger.info("Stopping maintenance scheduler")
 
+
 def main():
 
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Maintenance Scheduler"
-    )
-    parser.add_argument(
-        "--start", action="store_true", help="Start scheduled maintenance"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance Scheduler")
+    parser.add_argument("--start", action="store_true", help="Start scheduled maintenance")
     parser.add_argument("--daily", action="store_true", help="Run daily cleanup now")
-    parser.add_argument(
-        "--weekly", action="store_true", help="Run weekly optimization now"
-    )
+    parser.add_argument("--weekly", action="store_true", help="Run weekly optimization now")
     parser.add_argument("--monthly", action="store_true", help="Run monthly audit now")
     parser.add_argument("--config", help="Configuration file path")
 
@@ -460,7 +443,7 @@ def main():
     elif args.monthly:
         scheduler.run_monthly_audit()
     elif args.start:
-        scheduler_thread = scheduler.start_scheduler()
+        scheduler.start_scheduler()
         try:
             print("Maintenance scheduler started. Press Ctrl+C to stop.")
             while True:
@@ -468,6 +451,7 @@ def main():
         except KeyboardInterrupt:
             scheduler.stop_scheduler()
             print("Maintenance scheduler stopped.")
+
 
 if __name__ == "__main__":
     main()

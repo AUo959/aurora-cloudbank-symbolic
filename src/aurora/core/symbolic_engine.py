@@ -1,5 +1,6 @@
 """Aurora Cloudbank Symbolic Engine - Core Implementation"""
 
+
 class T1Anchor:
     """Temporal T1 anchor for Aurora symbolic operations"""
 
@@ -16,6 +17,7 @@ class T1Anchor:
         """Export T1 anchor state"""
         return {"type": "T1", "state": self.state}
 
+
 class SRBAnchor:
     """Spatial-Relational Boundary (SRB) anchor"""
 
@@ -31,6 +33,7 @@ class SRBAnchor:
     def export(self):
         """Export SRB anchor state"""
         return {"type": "SRB", "resolution": self.resolution}
+
 
 class SymbolicEngine:
     """Aurora symbolic simulation engine"""
@@ -49,7 +52,7 @@ class SymbolicEngine:
             step_result = {
                 "step": i,
                 "t1_state": self.t1.advance(f"step_{i}"),
-                "srb_resolution": self.srb.resolve(f"boundary_{i}")
+                "srb_resolution": self.srb.resolve(f"boundary_{i}"),
             }
             results.append(step_result)
 
@@ -63,5 +66,5 @@ class SymbolicEngine:
             "t1_anchor": self.t1.export(),
             "srb_anchor": self.srb.export(),
             "chains": self.chains,
-            "timestamp": "2025-07-12T03:06:08Z"
+            "timestamp": "2025-07-12T03:06:08Z",
         }

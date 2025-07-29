@@ -17,10 +17,9 @@ from datetime import datetime
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("GITWiz")
+
 
 @dataclass
 class RepositoryIssue:
@@ -35,12 +34,13 @@ class RepositoryIssue:
     last_seen: str = None
     fix_count: int = 0
 
+
 class GITWizSimple:
     """Simplified GITWiz for basic repository management."""
 
-        self.repo_path = Path(repo_path or os.getcwd())
-        self.db_path = self.repo_path / ".gitwiz" / "memory.db"
-        self.init_memory()
+    self.repo_path = Path(repo_path or os.getcwd())
+    self.db_path = self.repo_path / ".gitwiz" / "memory.db"
+    self.init_memory()
 
     def init_memory(self):
         """Initialize the SQLite memory database."""
@@ -238,9 +238,7 @@ class GITWizSimple:
 
                         # Track ZIP files
                         if ext in [".zip", ".tar", ".gz", ".bz2"]:
-                            stats["zip_files"].append(
-                                str(file_path.relative_to(self.repo_path))
-                            )
+                            stats["zip_files"].append(str(file_path.relative_to(self.repo_path)))
 
                     except (OSError, PermissionError):
                         continue
@@ -324,7 +322,7 @@ class GITWizSimple:
                             issue = RepositoryIssue(
                                 issue_type="MD022",
                                 file_path=str(md_file.relative_to(self.repo_path)),
-                                description=f"Header at line {i+1} should have blank line before it",
+                                description=f"Header at line {i + 1} should have blank line before it",
                                 severity="low",
                             )
                             self.record_issue(issue)
@@ -335,7 +333,7 @@ class GITWizSimple:
                             issue = RepositoryIssue(
                                 issue_type="MD022",
                                 file_path=str(md_file.relative_to(self.repo_path)),
-                                description=f"Header at line {i+1} should have blank line after it",
+                                description=f"Header at line {i + 1} should have blank line after it",
                                 severity="low",
                             )
                             self.record_issue(issue)
@@ -360,13 +358,9 @@ class GITWizSimple:
                         "total_uncompressed_size": total_size,
                         "compressed_size": zip_file.stat().st_size,
                         "compression_ratio": (
-                            (1 - zip_file.stat().st_size / total_size) * 100
-                            if total_size > 0
-                            else 0
+                            (1 - zip_file.stat().st_size / total_size) * 100 if total_size > 0 else 0
                         ),
-                        "contains_nested_archives": any(
-                            name.endswith((".zip", ".tar", ".gz")) for name in file_list
-                        ),
+                        "contains_nested_archives": any(name.endswith((".zip", ".tar", ".gz")) for name in file_list),
                     }
 
                     analysis["archive_analysis"].append(zip_analysis)
@@ -374,7 +368,7 @@ class GITWizSimple:
                     # Flag large archives as potential optimization targets
                     if zip_file.stat().st_size > 50 * 1024 * 1024:  # >50MB
                         analysis["optimizations"].append(
-                            f"Large archive: {zip_file.name} ({zip_file.stat().st_size / (1024*1024):.1f}MB)"
+                            f"Large archive: {zip_file.name} ({zip_file.stat().st_size / (1024 * 1024):.1f}MB)"
                         )
 
             except (OSError, ValueError, RuntimeError) as e:
@@ -384,10 +378,7 @@ class GITWizSimple:
         """Check for common repository structure issues."""
 
         # Check for README
-        if not any(
-            (self.repo_path / name).exists()
-            for name in ["README.md", "README.txt", "README"]
-        ):
+        if not any((self.repo_path / name).exists() for name in ["README.md", "README.txt", "README"]):
             analysis["issues_found"].append(
                 {
                     "issue_type": "missing_readme",
@@ -422,17 +413,12 @@ class GITWizSimple:
                 except (OSError, PermissionError):
                     continue
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="GITWiz Simple - Basic Repository Management"
-    )
-    parser.add_argument(
-        "command", choices=["status", "analyze", "memory"], help="Command to execute"
-    )
+    parser = argparse.ArgumentParser(description="GITWiz Simple - Basic Repository Management")
+    parser.add_argument("command", choices=["status", "analyze", "memory"], help="Command to execute")
     parser.add_argument("--detailed", action="store_true", help="Show detailed output")
-    parser.add_argument(
-        "--repo", default=None, help="Repository path (default: current directory)"
-    )
+    parser.add_argument("--repo", default=None, help="Repository path (default: current directory)")
 
     args = parser.parse_args()
 
@@ -446,14 +432,10 @@ def main():
             print(f"Repository: {status['repo_path']}")
             print(f"Git repo: {status['git_status'].get('is_git_repo', False)}")
             if status["git_status"].get("is_git_repo"):
-                print(
-                    f"Current branch: {status['git_status'].get('current_branch', 'unknown')}"
-                )
+                print(f"Current branch: {status['git_status'].get('current_branch', 'unknown')}")
                 print(f"Total changes: {status['git_status'].get('total_changes', 0)}")
             print(f"Total files: {status['file_stats']['total_files']}")
-            print(
-                f"Total size: {status['file_stats']['total_size'] / (1024*1024):.1f} MB"
-            )
+            print(f"Total size: {status['file_stats']['total_size'] / (1024 * 1024):.1f} MB")
             print(f"Stored issues: {len(status['issues'])}")
 
     elif args.command == "analyze":
@@ -483,9 +465,8 @@ def main():
         if issues:
             print("\nRecent issues:")
             for issue in issues[:10]:
-                print(
-                    f"  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})"
-                )
+                print(f"  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})")
+
 
 if __name__ == "__main__":
     main()

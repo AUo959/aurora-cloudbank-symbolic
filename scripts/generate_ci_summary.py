@@ -14,9 +14,8 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict
 
-from typing import Any
-from typing import Dict
 
 def load_json_report(file_path: str) -> Dict[str, Any]:
     """Load JSON report if it exists."""
@@ -27,6 +26,7 @@ def load_json_report(file_path: str) -> Dict[str, Any]:
         except Exception as e:
             print(f"Warning: Failed to load {file_path}: {e}")
     return {}
+
 
 def generate_ci_summary():
     """Generate comprehensive CI summary report."""
@@ -75,17 +75,11 @@ def generate_ci_summary():
             )
 
             # Add issue breakdown if available
-            severity_breakdown = quality_report.get("summary", {}).get(
-                "severity_breakdown", {}
-            )
+            severity_breakdown = quality_report.get("summary", {}).get("severity_breakdown", {})
             if severity_breakdown:
                 summary_lines.append("**Issue Breakdown:**")
                 for severity, count in severity_breakdown.items():
-                    emoji = (
-                        "🔴"
-                        if severity == "error"
-                        else "🟡" if severity == "warning" else "🔵"
-                    )
+                    emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "🔵"
                     summary_lines.append(f"- {emoji} {severity.title()}: {count}")
                 summary_lines.append("")
 
@@ -93,9 +87,7 @@ def generate_ci_summary():
     if bandit_report:
         security_issues = len(bandit_report.get("results", []))
         if security_issues == 0:
-            summary_lines.extend(
-                ["### 🛡️ Security: SECURE", "- No security vulnerabilities detected", ""]
-            )
+            summary_lines.extend(["### 🛡️ Security: SECURE", "- No security vulnerabilities detected", ""])
         else:
             summary_lines.extend(
                 [
@@ -137,9 +129,7 @@ def generate_ci_summary():
         recommendations.append("- Review and address security vulnerabilities")
 
     if not recommendations:
-        recommendations.append(
-            "- ✅ No immediate actions required - code quality is excellent!"
-        )
+        recommendations.append("- ✅ No immediate actions required - code quality is excellent!")
 
     summary_lines.extend(recommendations)
 
@@ -192,30 +182,14 @@ def generate_ci_summary():
     # Create JSON version for programmatic access
     json_summary = {
         "timestamp": timestamp,
-        "quality_issues": (
-            quality_report.get("summary", {}).get("total_issues", 0)
-            if quality_report
-            else 0
-        ),
-        "security_issues": (
-            len(bandit_report.get("results", [])) if bandit_report else 0
-        ),
-        "maintenance_fixes": (
-            maintenance_report.get("total_fixes", 0) if maintenance_report else 0
-        ),
+        "quality_issues": (quality_report.get("summary", {}).get("total_issues", 0) if quality_report else 0),
+        "security_issues": (len(bandit_report.get("results", [])) if bandit_report else 0),
+        "maintenance_fixes": (maintenance_report.get("total_fixes", 0) if maintenance_report else 0),
         "overall_status": (
             "PASS"
             if (
-                (
-                    quality_report.get("summary", {}).get("total_issues", 0) == 0
-                    if quality_report
-                    else True
-                )
-                and (
-                    len(bandit_report.get("results", [])) == 0
-                    if bandit_report
-                    else True
-                )
+                (quality_report.get("summary", {}).get("total_issues", 0) == 0 if quality_report else True)
+                and (len(bandit_report.get("results", [])) == 0 if bandit_report else True)
             )
             else "ATTENTION_REQUIRED"
         ),
@@ -230,6 +204,7 @@ def generate_ci_summary():
     print("- ci_summary.json (JSON format)")
 
     return json_summary["overall_status"] == "PASS"
+
 
 if __name__ == "__main__":
     success = generate_ci_summary()

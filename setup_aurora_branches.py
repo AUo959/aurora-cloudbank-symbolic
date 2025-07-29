@@ -7,10 +7,11 @@ Implements advanced branch management and configuration for the Aurora CloudBank
 multi-agent system with proper GitFlow and feature branch strategies.
 """
 
-import subprocess
 import json
+import subprocess
 from datetime import datetime
 from pathlib import Path
+
 
 class AuroraBranchManager:
 
@@ -27,83 +28,83 @@ class AuroraBranchManager:
                     "description": "Production-ready Aurora CloudBank releases",
                     "protection": "high",
                     "auto_deploy": True,
-                    "required_reviews": 2
+                    "required_reviews": 2,
                 },
                 "develop": {
                     "description": "Integration branch for features",
                     "protection": "medium",
                     "auto_deploy": False,
-                    "required_reviews": 1
-                }
+                    "required_reviews": 1,
+                },
             },
             "feature_branches": {
                 "naming_pattern": "feature/aurora-{feature-name}",
                 "base_branch": "develop",
                 "auto_cleanup": True,
-                "max_lifetime_days": 30
+                "max_lifetime_days": 30,
             },
             "hotfix_branches": {
                 "naming_pattern": "hotfix/v{version}-{fix-name}",
                 "base_branch": "main",
                 "auto_merge_to": ["main", "develop"],
-                "priority": "high"
+                "priority": "high",
             },
             "release_branches": {
                 "naming_pattern": "release/v{version}",
                 "base_branch": "develop",
                 "merge_to": ["main", "develop"],
-                "tag_on_merge": True
+                "tag_on_merge": True,
             },
             "agent_branches": {
                 "ARCHY": {
                     "pattern": "agent/archy-{feature}",
                     "description": "Architecture & System Design features",
-                    "auto_review": ["OPPY", "LIORA"]
+                    "auto_review": ["OPPY", "LIORA"],
                 },
                 "OPPY": {
                     "pattern": "agent/oppy-{feature}",
                     "description": "Optimization & Performance features",
-                    "auto_review": ["ARCHY", "RIVERTHREAD_808"]
+                    "auto_review": ["ARCHY", "RIVERTHREAD_808"],
                 },
                 "LIORA": {
                     "pattern": "agent/liora-{feature}",
                     "description": "Learning & Adaptation features",
-                    "auto_review": ["STARLING_AU", "ARCHY"]
+                    "auto_review": ["STARLING_AU", "ARCHY"],
                 },
                 "STARLING_AU": {
                     "pattern": "agent/starling-{feature}",
                     "description": "Stellar Communication features",
-                    "auto_review": ["LIORA", "RIVERTHREAD_808"]
+                    "auto_review": ["LIORA", "RIVERTHREAD_808"],
                 },
                 "RIVERTHREAD_808": {
                     "pattern": "agent/riverthread-{feature}",
                     "description": "Data Flow & Threading features",
-                    "auto_review": ["OPPY", "STARLING_AU"]
-                }
+                    "auto_review": ["OPPY", "STARLING_AU"],
+                },
             },
             "integrations": {
                 "holographic_interface": {
                     "branch": "integration/holographic-ui",
                     "status": "complete",
-                    "version": "phase-7"
+                    "version": "phase-7",
                 },
                 "aurora_custom_gpt": {
                     "branch": "integration/custom-gpt-bridge",
                     "status": "complete",
-                    "version": "v2.4-stellar-accord"
+                    "version": "v2.4-stellar-accord",
                 },
                 "orion_core": {
                     "branch": "integration/orion-core",
                     "status": "complete",
-                    "version": "eos-seed-compliant"
-                }
+                    "version": "eos-seed-compliant",
+                },
             },
             "automation": {
                 "branch_cleanup": True,
                 "auto_rebase": True,
                 "conflict_resolution": "manual",
-                "ci_cd_triggers": ["develop", "main", "release/*", "hotfix/*"]
-            }
+                "ci_cd_triggers": ["develop", "main", "release/*", "hotfix/*"],
+            },
         }
 
     def initialize_branch_config(self):
@@ -111,7 +112,7 @@ class AuroraBranchManager:
         print("🌟 Initializing Aurora CloudBank Branch Configuration...")
 
         # Save default configuration
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(self.default_config, f, indent=2)
 
         print(f"✅ Configuration saved to: {self.config_file}")
@@ -120,10 +121,7 @@ class AuroraBranchManager:
         """Get current git branch"""
         try:
             result = subprocess.run(
-                ["git", "branch", "--show-current"],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path
+                ["git", "branch", "--show-current"], capture_output=True, text=True, cwd=self.repo_path
             )
             return result.stdout.strip() if result.returncode == 0 else "unknown"
         except Exception:
@@ -137,28 +135,18 @@ class AuroraBranchManager:
 
         try:
             # Check if develop branch exists
-            result = subprocess.run(
-                ["git", "show-re", "--verify", "--quiet", "refs/heads/develop"],
-                cwd=self.repo_path
-            )
+            result = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
 
             if result.returncode == 0:
                 print("✅ develop branch already exists")
             else:
                 # Create develop branch from main
-                subprocess.run(
-                    ["git", "checkout", "-b", "develop"],
-                    cwd=self.repo_path,
-                    check=True
-                )
+                subprocess.run(["git", "checkout", "-b", "develop"], cwd=self.repo_path, check=True)
                 print("✅ Created develop branch from main")
 
                 # Switch back to original branch
                 if current_branch != "develop":
-                    subprocess.run(
-                        ["git", "checkout", current_branch],
-                        cwd=self.repo_path
-                    )
+                    subprocess.run(["git", "checkout", current_branch], cwd=self.repo_path)
         except subprocess.CalledProcessError as e:
             print(f"❌ Error creating develop branch: {e}")
 
@@ -234,7 +222,7 @@ jobs:
         fi
 """
 
-        with open(branch_protection_workflow, 'w') as f:
+        with open(branch_protection_workflow, "w") as f:
             f.write(workflow_content)
 
         print(f"✅ Branch protection workflow created: {branch_protection_workflow}")
@@ -249,16 +237,12 @@ jobs:
             "aurora-release": "!f() { git checkout develop && git pull && git checkout -b release/v$1; }; ",
             "aurora-finish": "!f() { git checkout develop && git merge --no-ff $1 && git branch -d $1; }; ",
             "aurora-status": "!git branch -a | grep -E 'feature/aurora|hotfix/|release/|agent/' | head -10",
-            "aurora-sync": "!git checkout develop && git pull origin develop && git checkout main && git pull origin main"
+            "aurora-sync": "!git checkout develop && git pull origin develop && git checkout main && git pull origin main",
         }
 
         for alias, command in aliases.items():
             try:
-                subprocess.run(
-                    ["git", "config", "--local", f"alias.{alias}", command],
-                    cwd=self.repo_path,
-                    check=True
-                )
+                subprocess.run(["git", "config", "--local", f"alias.{alias}", command], cwd=self.repo_path, check=True)
                 print(f"✅ Added alias: git {alias}")
             except subprocess.CalledProcessError:
                 print(f"⚠️  Could not add alias: {alias}")
@@ -269,40 +253,32 @@ jobs:
 
         try:
             # Get all branches
-            result = subprocess.run(
-                ["git", "branch", "-a"],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path
-            )
+            result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
 
-            branches = result.stdout.strip().split('\n') if result.returncode == 0 else []
+            branches = result.stdout.strip().split("\n") if result.returncode == 0 else []
             current_branch = self.get_current_branch()
 
             # Get recent commits
             commits_result = subprocess.run(
-                ["git", "log", "--oneline", "-5"],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path
+                ["git", "log", "--oneline", "-5"], capture_output=True, text=True, cwd=self.repo_path
             )
 
-            recent_commits = commits_result.stdout.strip().split('\n') if commits_result.returncode == 0 else []
+            recent_commits = commits_result.stdout.strip().split("\n") if commits_result.returncode == 0 else []
 
             # Create report
             report = {
                 "timestamp": datetime.now().isoformat(),
                 "current_branch": current_branch,
                 "total_branches": len(branches),
-                "branches": [b.strip().replace('* ', '') for b in branches],
+                "branches": [b.strip().replace("* ", "") for b in branches],
                 "recent_commits": recent_commits,
                 "configuration_status": "active",
-                "aurora_version": self.default_config["version"]
+                "aurora_version": self.default_config["version"],
             }
 
             # Save report
             report_file = self.repo_path / "AURORA_BRANCH_STATUS.json"
-            with open(report_file, 'w') as f:
+            with open(report_file, "w") as f:
                 json.dump(report, f, indent=2)
 
             print(f"✅ Branch status report saved: {report_file}")
@@ -349,10 +325,12 @@ jobs:
         for integration, details in self.default_config["integrations"].items():
             print(f"   ✅ {integration}: {details['status']} ({details['version']})")
 
+
 def main():
     """Main function to set up Aurora branch configuration"""
     manager = AuroraBranchManager()
     manager.setup_complete_branch_system()
+
 
 if __name__ == "__main__":
     main()

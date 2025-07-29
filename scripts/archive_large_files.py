@@ -11,10 +11,7 @@ SIZE_THRESHOLD_MB = 1  # Move files larger than 1MB
 os.makedirs(ARCHIVE_DIR, exist_ok=True)
 
 for fname in os.listdir("."):
-    if (
-        fname.endswith(".zip")
-        and os.path.getsize(fname) > SIZE_THRESHOLD_MB * 1024 * 1024
-    ):
+    if fname.endswith(".zip") and os.path.getsize(fname) > SIZE_THRESHOLD_MB * 1024 * 1024:
         print(f"Moving {fname} to {ARCHIVE_DIR}/")
         shutil.move(fname, os.path.join(ARCHIVE_DIR, fname))
 print("Done.")

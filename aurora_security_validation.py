@@ -12,19 +12,17 @@ from pathlib import Path
 from typing import Any, Dict
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 class SecurityValidator:
     """Comprehensive security validation for Aurora CloudBank."""
 
     def __init__(self):
         self.project_root = Path(__file__).parent
-        self.security_dir = self.project_root / '.security'
-        self.github_dir = self.project_root / '.github'
+        self.security_dir = self.project_root / ".security"
+        self.github_dir = self.project_root / ".github"
         self.validation_results = []
 
     def validate_all_security_measures(self) -> Dict[str, Any]:
@@ -38,7 +36,7 @@ class SecurityValidator:
             "validation_results": [],
             "overall_score": 0,
             "status": "success",
-            "recommendations": []
+            "recommendations": [],
         }
 
         # Validate each attack vector protection
@@ -62,7 +60,7 @@ class SecurityValidator:
             ("SSRF", self._validate_ssrf_protection),
             ("Advanced Persistent Threat", self._validate_apt_protection),
             ("Exposed Object Storage", self._validate_storage_security),
-            ("Cryptojacking", self._validate_cryptojacking_protection)
+            ("Cryptojacking", self._validate_cryptojacking_protection),
         ]
 
         total_score = 0
@@ -70,33 +68,28 @@ class SecurityValidator:
             try:
                 score = validation_func()
                 total_score += score
-                self.validation_results.append({
-                    "vector": vector_name,
-                    "score": score,
-                    "status": "✅ PROTECTED" if score >= 80 else "⚠️ PARTIAL" if score >= 50 else "❌ VULNERABLE"
-                })
+                self.validation_results.append(
+                    {
+                        "vector": vector_name,
+                        "score": score,
+                        "status": "✅ PROTECTED" if score >= 80 else "⚠️ PARTIAL" if score >= 50 else "❌ VULNERABLE",
+                    }
+                )
                 logger.info(f"✅ {vector_name}: {score}%")
             except Exception as e:
                 logger.error(f"❌ Error validating {vector_name}: {e}")
-                self.validation_results.append({
-                    "vector": vector_name,
-                    "score": 0,
-                    "status": "❌ ERROR",
-                    "error": str(e)
-                })
+                self.validation_results.append(
+                    {"vector": vector_name, "score": 0, "status": "❌ ERROR", "error": str(e)}
+                )
 
         results["validation_results"] = self.validation_results
         results["overall_score"] = total_score / len(attack_vectors)
 
         # Generate recommendations
         if results["overall_score"] >= 90:
-            results["recommendations"] = (
-                ["✅ Excellent security posture - maintain current measures"]
-)
+            results["recommendations"] = ["✅ Excellent security posture - maintain current measures"]
         elif results["overall_score"] >= 70:
-            results["recommendations"] = (
-                ["🟡 Good security - address partial protections"]
-)
+            results["recommendations"] = ["🟡 Good security - address partial protections"]
         else:
             results["recommendations"] = ["🔴 Critical gaps - immediate action required"]
 
@@ -107,15 +100,15 @@ class SecurityValidator:
         score = 0
 
         # Check MFA policy
-        if (self.security_dir / 'mfa_policy.json').exists():
+        if (self.security_dir / "mfa_policy.json").exists():
             score += 30
 
         # Check backup strategy (simulated)
-        if (self.security_dir / 'incident_response.json').exists():
+        if (self.security_dir / "incident_response.json").exists():
             score += 30
 
         # Check monitoring
-        if (self.security_dir / 'advanced_monitoring.json').exists():
+        if (self.security_dir / "advanced_monitoring.json").exists():
             score += 40
 
         return score
@@ -125,14 +118,14 @@ class SecurityValidator:
         score = 0
 
         # Check DDoS configuration
-        if (self.security_dir / 'ddos_protection.json').exists():
-            with open(self.security_dir / 'ddos_protection.json') as f:
+        if (self.security_dir / "ddos_protection.json").exists():
+            with open(self.security_dir / "ddos_protection.json") as f:
                 config = json.load(f)
-                if config.get('ddos_protection', {}).get('auto_scaling', {}).get('enabled'):
+                if config.get("ddos_protection", {}).get("auto_scaling", {}).get("enabled"):
                     score += 50
-                if config.get('ddos_protection', {}).get('rate_limiting'):
+                if config.get("ddos_protection", {}).get("rate_limiting"):
                     score += 30
-                if config.get('ddos_protection', {}).get('bgp_diversion', {}).get('enabled'):
+                if config.get("ddos_protection", {}).get("bgp_diversion", {}).get("enabled"):
                     score += 20
 
         return score
@@ -142,14 +135,14 @@ class SecurityValidator:
         score = 0
 
         # Check email security
-        if (self.security_dir / 'email_security.json').exists():
-            with open(self.security_dir / 'email_security.json') as f:
+        if (self.security_dir / "email_security.json").exists():
+            with open(self.security_dir / "email_security.json") as f:
                 config = json.load(f)
-                if config.get('email_security', {}).get('dmarc_policy'):
+                if config.get("email_security", {}).get("dmarc_policy"):
                     score += 30
-                if config.get('email_security', {}).get('anti_phishing', {}).get('enabled'):
+                if config.get("email_security", {}).get("anti_phishing", {}).get("enabled"):
                     score += 40
-                if config.get('email_security', {}).get('user_training', {}).get('simulated_phishing'):
+                if config.get("email_security", {}).get("user_training", {}).get("simulated_phishing"):
                     score += 30
 
         return score
@@ -159,12 +152,12 @@ class SecurityValidator:
         score = 0
 
         # Check MFA policy
-        if (self.security_dir / 'mfa_policy.json').exists():
-            with open(self.security_dir / 'mfa_policy.json') as f:
+        if (self.security_dir / "mfa_policy.json").exists():
+            with open(self.security_dir / "mfa_policy.json") as f:
                 config = json.load(f)
-                if config.get('mfa_policy', {}).get('enforcement') == 'required':
+                if config.get("mfa_policy", {}).get("enforcement") == "required":
                     score += 60
-                if 'FIDO2' in config.get('mfa_policy', {}).get('methods', []):
+                if "FIDO2" in config.get("mfa_policy", {}).get("methods", []):
                     score += 40
 
         return score
@@ -174,15 +167,15 @@ class SecurityValidator:
         score = 0
 
         # Check existing security scanning
-        if (self.security_dir / 'security_policy.json').exists():
+        if (self.security_dir / "security_policy.json").exists():
             score += 30
 
         # Check GitHub security workflows
-        if (self.github_dir / 'workflows' / 'enhanced-security.yml').exists():
+        if (self.github_dir / "workflows" / "enhanced-security.yml").exists():
             score += 50
 
         # Check secure helpers
-        if (self.security_dir / 'secure_helpers.py').exists():
+        if (self.security_dir / "secure_helpers.py").exists():
             score += 20
 
         return score
@@ -192,14 +185,14 @@ class SecurityValidator:
         score = 0
 
         # Check zero-day response configuration
-        if (self.security_dir / 'zero_day_response.json').exists():
-            with open(self.security_dir / 'zero_day_response.json') as f:
+        if (self.security_dir / "zero_day_response.json").exists():
+            with open(self.security_dir / "zero_day_response.json") as f:
                 config = json.load(f)
-                if config.get('zero_day_response', {}).get('virtual_patching'):
+                if config.get("zero_day_response", {}).get("virtual_patching"):
                     score += 40
-                if config.get('zero_day_response', {}).get('threat_intelligence'):
+                if config.get("zero_day_response", {}).get("threat_intelligence"):
                     score += 30
-                if config.get('zero_day_response', {}).get('incident_response', {}).get('automated_containment'):
+                if config.get("zero_day_response", {}).get("incident_response", {}).get("automated_containment"):
                     score += 30
 
         return score
@@ -209,14 +202,14 @@ class SecurityValidator:
         score = 0
 
         # Check UEBA configuration
-        if (self.security_dir / 'ueba_configuration.json').exists():
-            with open(self.security_dir / 'ueba_configuration.json') as f:
+        if (self.security_dir / "ueba_configuration.json").exists():
+            with open(self.security_dir / "ueba_configuration.json") as f:
                 config = json.load(f)
-                if config.get('ueba_configuration', {}).get('ml_models', {}).get('anomaly_detection'):
+                if config.get("ueba_configuration", {}).get("ml_models", {}).get("anomaly_detection"):
                     score += 40
-                if config.get('ueba_configuration', {}).get('response_actions', {}).get('automatic_account_disable'):
+                if config.get("ueba_configuration", {}).get("response_actions", {}).get("automatic_account_disable"):
                     score += 30
-                if 'privileged_users' in config.get('ueba_configuration', {}).get('monitoring_scope', []):
+                if "privileged_users" in config.get("ueba_configuration", {}).get("monitoring_scope", []):
                     score += 30
 
         return score
@@ -226,14 +219,14 @@ class SecurityValidator:
         score = 0
 
         # Check CSPM configuration
-        if (self.security_dir / 'cspm_configuration.json').exists():
-            with open(self.security_dir / 'cspm_configuration.json') as f:
+        if (self.security_dir / "cspm_configuration.json").exists():
+            with open(self.security_dir / "cspm_configuration.json") as f:
                 config = json.load(f)
-                if config.get('cspm_configuration', {}).get('automated_remediation'):
+                if config.get("cspm_configuration", {}).get("automated_remediation"):
                     score += 40
-                if config.get('cspm_configuration', {}).get('guardrails', {}).get('prevent_public_buckets'):
+                if config.get("cspm_configuration", {}).get("guardrails", {}).get("prevent_public_buckets"):
                     score += 30
-                if config.get('cspm_configuration', {}).get('real_time_monitoring'):
+                if config.get("cspm_configuration", {}).get("real_time_monitoring"):
                     score += 30
 
         return score
@@ -243,17 +236,20 @@ class SecurityValidator:
         score = 0
 
         # Check existing injection protection
-        if (self.security_dir / 'secure_helpers.py').exists():
+        if (self.security_dir / "secure_helpers.py").exists():
             score += 50
 
         # Check security policy
-        if (self.security_dir / 'security_policy.json').exists():
-            with open(self.security_dir / 'security_policy.json') as f:
+        if (self.security_dir / "security_policy.json").exists():
+            with open(self.security_dir / "security_policy.json") as f:
                 config = json.load(f)
-                if config.get('security_policy',
-                    {}).get('vulnerabilities',
-                    {}).get('shell_injection',
-                    {}).get('status') == 'REMEDIATED':
+                if (
+                    config.get("security_policy", {})
+                    .get("vulnerabilities", {})
+                    .get("shell_injection", {})
+                    .get("status")
+                    == "REMEDIATED"
+                ):
                     score += 50
 
         return score
@@ -263,14 +259,14 @@ class SecurityValidator:
         score = 0
 
         # Check email security configuration
-        if (self.security_dir / 'email_security.json').exists():
-            with open(self.security_dir / 'email_security.json') as f:
+        if (self.security_dir / "email_security.json").exists():
+            with open(self.security_dir / "email_security.json") as f:
                 config = json.load(f)
-                if config.get('email_security', {}).get('bec_protection', {}).get('executive_protection'):
+                if config.get("email_security", {}).get("bec_protection", {}).get("executive_protection"):
                     score += 40
-                if config.get('email_security', {}).get('bec_protection', {}).get('financial_verification'):
+                if config.get("email_security", {}).get("bec_protection", {}).get("financial_verification"):
                     score += 30
-                if config.get('email_security', {}).get('dmarc_policy'):
+                if config.get("email_security", {}).get("dmarc_policy"):
                     score += 30
 
         return score
@@ -280,12 +276,12 @@ class SecurityValidator:
         score = 0
 
         # Check network security configuration
-        if (self.security_dir / 'network_security.json').exists():
-            with open(self.security_dir / 'network_security.json') as f:
+        if (self.security_dir / "network_security.json").exists():
+            with open(self.security_dir / "network_security.json") as f:
                 config = json.load(f)
-                if config.get('network_security', {}).get('vpn_security', {}).get('certificate_based_auth'):
+                if config.get("network_security", {}).get("vpn_security", {}).get("certificate_based_auth"):
                     score += 50
-                if config.get('network_security', {}).get('vpn_security', {}).get('suite_b_ciphers'):
+                if config.get("network_security", {}).get("vpn_security", {}).get("suite_b_ciphers"):
                     score += 50
 
         return score
@@ -295,14 +291,14 @@ class SecurityValidator:
         score = 0
 
         # Check DNS security configuration
-        if (self.security_dir / 'dns_security.json').exists():
-            with open(self.security_dir / 'dns_security.json') as f:
+        if (self.security_dir / "dns_security.json").exists():
+            with open(self.security_dir / "dns_security.json") as f:
                 config = json.load(f)
-                if config.get('dns_security', {}).get('dnssec_enabled'):
+                if config.get("dns_security", {}).get("dnssec_enabled"):
                     score += 40
-                if config.get('dns_security', {}).get('certificate_transparency', {}).get('monitoring'):
+                if config.get("dns_security", {}).get("certificate_transparency", {}).get("monitoring"):
                     score += 30
-                if config.get('dns_security', {}).get('registrar_security', {}).get('mfa_enabled'):
+                if config.get("dns_security", {}).get("registrar_security", {}).get("mfa_enabled"):
                     score += 30
 
         return score
@@ -312,17 +308,20 @@ class SecurityValidator:
         score = 0
 
         # Check if shell injection is remediated
-        if (self.security_dir / 'security_policy.json').exists():
-            with open(self.security_dir / 'security_policy.json') as f:
+        if (self.security_dir / "security_policy.json").exists():
+            with open(self.security_dir / "security_policy.json") as f:
                 config = json.load(f)
-                if config.get('security_policy',
-                    {}).get('vulnerabilities',
-                    {}).get('shell_injection',
-                    {}).get('status') == 'REMEDIATED':
+                if (
+                    config.get("security_policy", {})
+                    .get("vulnerabilities", {})
+                    .get("shell_injection", {})
+                    .get("status")
+                    == "REMEDIATED"
+                ):
                     score += 60
 
         # Check secure helpers
-        if (self.security_dir / 'secure_helpers.py').exists():
+        if (self.security_dir / "secure_helpers.py").exists():
             score += 40
 
         return score
@@ -332,12 +331,12 @@ class SecurityValidator:
         score = 0
 
         # Check network security for zero trust
-        if (self.security_dir / 'network_security.json').exists():
-            with open(self.security_dir / 'network_security.json') as f:
+        if (self.security_dir / "network_security.json").exists():
+            with open(self.security_dir / "network_security.json") as f:
                 config = json.load(f)
-                if config.get('network_security', {}).get('zero_trust_model'):
+                if config.get("network_security", {}).get("zero_trust_model"):
                     score += 60
-                if config.get('network_security', {}).get('microsegmentation', {}).get('enabled'):
+                if config.get("network_security", {}).get("microsegmentation", {}).get("enabled"):
                     score += 40
 
         return score
@@ -347,14 +346,14 @@ class SecurityValidator:
         score = 0
 
         # Check GitHub security workflows
-        if (self.github_dir / 'workflows' / 'enhanced-security.yml').exists():
+        if (self.github_dir / "workflows" / "enhanced-security.yml").exists():
             score += 50
 
         # Check security policy monitoring
-        if (self.security_dir / 'security_policy.json').exists():
-            with open(self.security_dir / 'security_policy.json') as f:
+        if (self.security_dir / "security_policy.json").exists():
+            with open(self.security_dir / "security_policy.json") as f:
                 config = json.load(f)
-                if config.get('security_policy', {}).get('monitoring', {}).get('dependency_checking'):
+                if config.get("security_policy", {}).get("monitoring", {}).get("dependency_checking"):
                     score += 50
 
         return score
@@ -364,11 +363,11 @@ class SecurityValidator:
         score = 0
 
         # Check CSPM configuration
-        if (self.security_dir / 'cspm_configuration.json').exists():
+        if (self.security_dir / "cspm_configuration.json").exists():
             score += 60
 
         # Check security policies
-        if (self.security_dir / 'security_policy.json').exists():
+        if (self.security_dir / "security_policy.json").exists():
             score += 40
 
         return score
@@ -378,12 +377,12 @@ class SecurityValidator:
         score = 0
 
         # Check network security for segmentation
-        if (self.security_dir / 'network_security.json').exists():
-            with open(self.security_dir / 'network_security.json') as f:
+        if (self.security_dir / "network_security.json").exists():
+            with open(self.security_dir / "network_security.json") as f:
                 config = json.load(f)
-                if config.get('network_security', {}).get('microsegmentation', {}).get('enabled'):
+                if config.get("network_security", {}).get("microsegmentation", {}).get("enabled"):
                     score += 50
-                if config.get('network_security', {}).get('lateral_movement_prevention'):
+                if config.get("network_security", {}).get("lateral_movement_prevention"):
                     score += 50
 
         return score
@@ -393,14 +392,14 @@ class SecurityValidator:
         score = 0
 
         # Check advanced monitoring
-        if (self.security_dir / 'advanced_monitoring.json').exists():
-            with open(self.security_dir / 'advanced_monitoring.json') as f:
+        if (self.security_dir / "advanced_monitoring.json").exists():
+            with open(self.security_dir / "advanced_monitoring.json") as f:
                 config = json.load(f)
-                if config.get('advanced_monitoring', {}).get('threat_hunting', {}).get('mitre_attack_mapping'):
+                if config.get("advanced_monitoring", {}).get("threat_hunting", {}).get("mitre_attack_mapping"):
                     score += 40
-                if config.get('advanced_monitoring', {}).get('deception_technology', {}).get('honeypots'):
+                if config.get("advanced_monitoring", {}).get("deception_technology", {}).get("honeypots"):
                     score += 30
-                if config.get('advanced_monitoring', {}).get('threat_intelligence', {}).get('ioc_feeds'):
+                if config.get("advanced_monitoring", {}).get("threat_intelligence", {}).get("ioc_feeds"):
                     score += 30
 
         return score
@@ -410,14 +409,14 @@ class SecurityValidator:
         score = 0
 
         # Check object storage security
-        if (self.security_dir / 'object_storage_security.json').exists():
-            with open(self.security_dir / 'object_storage_security.json') as f:
+        if (self.security_dir / "object_storage_security.json").exists():
+            with open(self.security_dir / "object_storage_security.json") as f:
                 config = json.load(f)
-                if config.get('object_storage_security', {}).get('access_control', {}).get('block_public_access'):
+                if config.get("object_storage_security", {}).get("access_control", {}).get("block_public_access"):
                     score += 40
-                if config.get('object_storage_security', {}).get('encryption', {}).get('at_rest'):
+                if config.get("object_storage_security", {}).get("encryption", {}).get("at_rest"):
                     score += 30
-                if config.get('object_storage_security', {}).get('monitoring', {}).get('anomaly_detection'):
+                if config.get("object_storage_security", {}).get("monitoring", {}).get("anomaly_detection"):
                     score += 30
 
         return score
@@ -427,17 +426,17 @@ class SecurityValidator:
         score = 0
 
         # Check advanced monitoring for resource anomalies
-        if (self.security_dir / 'advanced_monitoring.json').exists():
-            with open(self.security_dir / 'advanced_monitoring.json') as f:
+        if (self.security_dir / "advanced_monitoring.json").exists():
+            with open(self.security_dir / "advanced_monitoring.json") as f:
                 config = json.load(f)
-                if config.get('advanced_monitoring', {}).get('behavioral_analytics', {}).get('network_behavior'):
+                if config.get("advanced_monitoring", {}).get("behavioral_analytics", {}).get("network_behavior"):
                     score += 50
 
         # Check incident response for automated containment
-        if (self.security_dir / 'incident_response.json').exists():
-            with open(self.security_dir / 'incident_response.json') as f:
+        if (self.security_dir / "incident_response.json").exists():
+            with open(self.security_dir / "incident_response.json") as f:
                 config = json.load(f)
-                if config.get('incident_response', {}).get('automated_playbooks', {}).get('malware_containment'):
+                if config.get("incident_response", {}).get("automated_playbooks", {}).get("malware_containment"):
                     score += 50
 
         return score
@@ -461,7 +460,7 @@ class SecurityValidator:
 |---|---|---|---|
 """
 
-        for i, result in enumerate(results['validation_results'], 1):
+        for i, result in enumerate(results["validation_results"], 1):
             report_content += f"| {i} | {result['vector']} | {result['score']}% | {result['status']} |\n"
 
         report_content += """
@@ -493,7 +492,7 @@ class SecurityValidator:
 
 """
 
-        for recommendation in results['recommendations']:
+        for recommendation in results["recommendations"]:
             report_content += f"- {recommendation}\n"
 
         report_content += """
@@ -534,11 +533,12 @@ class SecurityValidator:
 *Next Validation: Monthly*
 """
 
-        report_file = self.project_root / 'AURORA_SECURITY_VALIDATION_REPORT.md'
+        report_file = self.project_root / "AURORA_SECURITY_VALIDATION_REPORT.md"
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         logger.info("✅ Security validation report generated")
+
 
 def main():
     """Main execution function."""
@@ -554,20 +554,21 @@ def main():
     # Display results
     print(f"\n🎯 OVERALL SECURITY SCORE: {results['overall_score']:.1f}%")
 
-    if results['overall_score'] >= 90:
+    if results["overall_score"] >= 90:
         print("🟢 EXCELLENT - Enterprise-grade security achieved")
-    elif results['overall_score'] >= 70:
+    elif results["overall_score"] >= 70:
         print("🟡 GOOD - Strong security with minor gaps")
     else:
         print("🔴 NEEDS IMPROVEMENT - Critical security gaps identified")
 
     print("\n📊 Attack Vector Protection Summary:")
-    for result in results['validation_results']:
+    for result in results["validation_results"]:
         print(f"   {result['status']} {result['vector']}: {result['score']}%")
 
     print("\n📋 See AURORA_SECURITY_VALIDATION_REPORT.md for complete details")
 
-    return results['overall_score'] >= 70
+    return results["overall_score"] >= 70
+
 
 if __name__ == "__main__":
     success = main()

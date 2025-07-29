@@ -55,7 +55,7 @@ function executeCommand(userInput) {
     if (normalizedInput.includes(pattern) || pattern.includes(normalizedInput)) {
       console.log(`🎯 Partial match found for: "${pattern}"`);
       console.log(`📋 Description: ${command.description}`);
-      console.log(`❓ Did you mean to run the cleanup command? (y/n)`);
+      console.log('❓ Did you mean to run the cleanup command? (y/n)');
 
       // For now, just run it - in a real implementation you might want confirmation
       console.log('🚀 Executing cleanup command...');

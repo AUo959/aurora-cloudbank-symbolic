@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class GlyphCache:
     """Cache glyphs to a JSON file for reuse."""
 
@@ -78,9 +79,7 @@ class GlyphCache:
         return {
             **self.stats,
             "cache_size": len(self.cache),
-            "hit_rate": self.stats["hits"]
-            / max(self.stats["hits"] + self.stats["misses"], 1)
-            * 100,
+            "hit_rate": self.stats["hits"] / max(self.stats["hits"] + self.stats["misses"], 1) * 100,
         }
 
     async def clear_async(self) -> int:

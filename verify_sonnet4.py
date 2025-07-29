@@ -13,13 +13,15 @@ from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
+
 def print_status_table(title, data):
     """Print a formatted status table"""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"🔍 {title}")
     print("=" * 60)
     for key, value in data.items():
         print(f"   {key:<30}: {value}")
+
 
 async def main():
     """Main verification function"""
@@ -68,9 +70,7 @@ async def main():
         has_sonnet4_config = has_enabled_flag = has_all_clients = False
 
     verification = {
-        "Config File Exists": (
-            "✅ Yes" if Path(sonnet4_hub.config_path).exists() else "❌ No"
-        ),
+        "Config File Exists": ("✅ Yes" if Path(sonnet4_hub.config_path).exists() else "❌ No"),
         "Sonnet 4 Section": "✅ Present" if has_sonnet4_config else "❌ Missing",
         "Globally Enabled": "✅ Yes" if has_enabled_flag else "❌ No",
         "All Clients Enabled": "✅ Yes" if has_all_clients else "❌ No",
@@ -101,6 +101,7 @@ async def main():
     print("   3. Monitor client connections and Sonnet 4 activation")
 
     return all_good
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 async def main():
     """Main enablement function"""
     print("🚀 Aurora CloudBank Symbolic - Enabling Claude Sonnet 4")
@@ -62,6 +63,7 @@ async def main():
         logger.error("Failed to enable Sonnet 4: %s", e)
         print(f"❌ Failed to enable Claude Sonnet 4: {e}")
         return False
+
 
 if __name__ == "__main__":
     success = asyncio.run(main())

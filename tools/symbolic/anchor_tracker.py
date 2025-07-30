@@ -25,6 +25,7 @@ class SymbolicAnchor:
     timestamp: str
     sha256_hash: str
 
+
 @dataclass
 class AnchorLineage:
     """Represents the lineage chain of a symbolic anchor"""
@@ -33,6 +34,7 @@ class AnchorLineage:
     descendants: List[str]
     generation: int
     lineage_hash: str
+
 
 class SymbolicAnchorTracker:
     """Core symbolic anchor resolution and lineage tracking system"""

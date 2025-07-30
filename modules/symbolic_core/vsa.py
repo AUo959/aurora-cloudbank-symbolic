@@ -8,6 +8,7 @@ from typing import Literal
 import numpy as np
 from pydantic import BaseModel, validator
 
+
 class SymbolicVector(BaseModel):
     symbol: str
     dim: int = 512
@@ -54,18 +55,14 @@ class SymbolicVector(BaseModel):
         """Bind two symbolic vectors (elementwise multiplication)."""
         assert self.dim == other.dim, "Dimension mismatch in binding."
         bound_vec = self.vector * other.vector
-        return SymbolicVector(
-            f"({self.symbol})*({other.symbol})", self.dim
-        ).from_vector(bound_vec)
+        return SymbolicVector(f"({self.symbol})*({other.symbol})", self.dim).from_vector(bound_vec)
 
     def superpose(self, other: "SymbolicVector") -> "SymbolicVector":
         """Superpose two symbolic vectors (elementwise addition, then sign normalization)."""
         assert self.dim == other.dim, "Dimension mismatch in superposition."
         superposed = self.vector + other.vector
         normed = np.sign(superposed)
-        return SymbolicVector(
-            f"({self.symbol})+({other.symbol})", self.dim
-        ).from_vector(normed)
+        return SymbolicVector(f"({self.symbol})+({other.symbol})", self.dim).from_vector(normed)
 
     def from_vector(self, vec: np.ndarray) -> "SymbolicVector":
         self.vector = vec
@@ -77,10 +74,13 @@ class SymbolicVector(BaseModel):
         sims = [float(np.dot(query, v) / len(query)) for v in memory]
         return memory[int(np.argmax(sims))]
 
+
 # Example utility function
+
 
 def encode_symbol(symbol: str, dim: int = 512, vector_type: str = "bipolar") -> list:
     return SymbolicVector.from_symbol(symbol, dim, vector_type).vector
+
 
 def similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     return float(np.dot(vec1, vec2) / len(vec1))

@@ -11,6 +11,7 @@ import os
 import shutil
 from pathlib import Path
 
+
 def create_syntax_errors_archive():
     """Move problematic files to archive directory"""
     print("🔧 Resolving CodeQL scanning issues...")
@@ -25,7 +26,7 @@ def create_syntax_errors_archive():
         "security_remediation.py",
         "src/interaction/multi_modal_interaction_system.py",
         "scripts/gitwiz_enhanced.py",
-        "scripts/repository_health_monitor.py"
+        "scripts/repository_health_monitor.py",
     ]
 
     moved_files = []
@@ -74,6 +75,7 @@ rm -rf syntax_errors_archive/
     print(f"📄 Archive documentation: {archive_dir}/README.md")
 
     return len(moved_files)
+
 
 if __name__ == "__main__":
     print("🌟 Aurora CloudBank CodeQL Issue Resolver")

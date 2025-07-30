@@ -3,16 +3,14 @@ import pytest
 
 from modules.symbolic_core.vsa import SymbolicVector, encode_symbol, similarity
 
+
 def test_symbolic_vector_encoding():
     sv1 = SymbolicVector.from_symbol("alpha")
     sv2 = SymbolicVector.from_symbol("alpha")
     sv3 = SymbolicVector.from_symbol("beta")
-    assert np.allclose(
-        sv1.vector, sv2.vector
-    ), "Encoding should be deterministic for same symbol."
-    assert not np.allclose(
-        sv1.vector, sv3.vector
-    ), "Different symbols should have different encodings."
+    assert np.allclose(sv1.vector, sv2.vector), "Encoding should be deterministic for same symbol."
+    assert not np.allclose(sv1.vector, sv3.vector), "Different symbols should have different encodings."
+
 
 def test_symbolic_vector_similarity():
     sv1 = SymbolicVector.from_symbol("alpha")
@@ -21,6 +19,7 @@ def test_symbolic_vector_similarity():
     sim_same = similarity(sv1.vector, sv2.vector)
     sim_diff = similarity(sv1.vector, sv3.vector)
     assert sim_same > sim_diff, "Similarity should be higher for same symbol."
+
 
 def test_symbolic_vector_bind_superpose():
     sv1 = SymbolicVector.from_symbol("alpha")
@@ -31,18 +30,19 @@ def test_symbolic_vector_bind_superpose():
     assert np.array(bound).shape == np.array(sv1.vector).shape
     assert np.array(superposed).shape == np.array(sv1.vector).shape
 
+
 def test_encode_symbol_utility():
     vec = encode_symbol("gamma")
     assert isinstance(vec, list)
     assert len(vec) == 512
 
+
 def test_similarity_utility():
     v1 = encode_symbol("a")
     v2 = encode_symbol("a")
     v3 = encode_symbol("b")
-    assert similarity(np.array(v1), np.array(v2)) > similarity(
-        np.array(v1), np.array(v3)
-    )
+    assert similarity(np.array(v1), np.array(v2)) > similarity(np.array(v1), np.array(v3))
+
 
 def test_symbolicvector_pydantic_validation():
     # Valid vector
@@ -61,6 +61,4 @@ def test_symbolicvector_pydantic_validation():
     sv_real = SymbolicVector.from_symbol("real", dim=4, vector_type="real")
     import numpy as np
 
-    assert all(
-        isinstance(x, float) or isinstance(x, np.floating) for x in sv_real.vector
-    )
+    assert all(isinstance(x, float) or isinstance(x, np.floating) for x in sv_real.vector)

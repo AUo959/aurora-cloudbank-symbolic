@@ -10,6 +10,7 @@ import re
 import subprocess
 from pathlib import Path
 
+
 class BranchCleanupManager:
 
     def __init__(self, repo_path: str = "."):
@@ -261,6 +262,7 @@ class BranchCleanupManager:
 
         return {"branches": branches, "categories": categories, "report": report}
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Aurora CloudBank Branch Cleanup Automation"
@@ -292,6 +294,7 @@ def main():
             print(f"  Deleted: {cleanup_results['deleted']} branches")
             print(f"  Errors: {cleanup_results['errors']} branches")
             print(f"  Skipped: {cleanup_results['skipped']} branches")
+
 
 if __name__ == "__main__":
     main()

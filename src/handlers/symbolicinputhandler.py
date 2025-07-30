@@ -2,11 +2,12 @@
 SymbolicInputHandler - Aurora CloudBank Multi-Modal Interaction
 """
 
+
 class SymbolicInputHandler:
     """Placeholder implementation for SymbolicInputHandler"""
 
     def __init__(self):
-        self.status = 'active'
+        self.status = "active"
         self.capabilities = []
 
     async def initialize(self):

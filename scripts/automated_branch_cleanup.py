@@ -9,10 +9,8 @@ import datetime
 import subprocess
 import sys
 from pathlib import Path
+from typing import Dict, List, Optional
 
-from typing import Dict
-from typing import List
-from typing import Optional
 
 class BranchCleanupManager:
     """Manages automated cleanup of stale repository branches."""
@@ -104,9 +102,7 @@ class BranchCleanupManager:
     def _calculate_age_days(self, commit_date: str) -> int:
         """Calculate branch age in days."""
         try:
-            commit_dt = datetime.datetime.fromisoformat(
-                commit_date.replace("Z", "+00:00")
-            )
+            commit_dt = datetime.datetime.fromisoformat(commit_date.replace("Z", "+00:00"))
             now = datetime.datetime.now(datetime.timezone.utc)
             return (now - commit_dt).days
         except (OSError, ValueError, RuntimeError):
@@ -130,11 +126,7 @@ class BranchCleanupManager:
                     return "keep"
 
         # Default: manual review if old, keep if recent
-        return (
-            "cleanup_candidates"
-            if age_days > self.config["stale_days_threshold"]
-            else "manual_review"
-        )
+        return "cleanup_candidates" if age_days > self.config["stale_days_threshold"] else "manual_review"
 
     def _matches_pattern(self, branch_name: str, pattern: str) -> bool:
         """Check if branch name matches cleanup pattern."""
@@ -143,9 +135,7 @@ class BranchCleanupManager:
             return branch_name.startswith(prefix)
         return branch_name == pattern
 
-    def execute_cleanup(
-        self, branches: Dict[str, List[Dict]], dry_run: bool = True
-    ) -> Dict:
+    def execute_cleanup(self, branches: Dict[str, List[Dict]], dry_run: bool = True) -> Dict:
         """Execute branch cleanup with safety checks."""
         results = {
             "deleted": [],
@@ -169,18 +159,14 @@ class BranchCleanupManager:
 
                 if dry_run:
                     print(f"🔍 DRY RUN: Would {action} branch {branch['name']}")
-                    results["skipped"].append(
-                        {"branch": branch["name"], "action": action}
-                    )
+                    results["skipped"].append({"branch": branch["name"], "action": action})
                 else:
                     success = self._execute_branch_action(branch, action)
                     if success:
                         results[action].append(branch["name"])
                         print(f"✅ {action.title()} branch: {branch['name']}")
                     else:
-                        results["errors"].append(
-                            {"branch": branch["name"], "action": action}
-                        )
+                        results["errors"].append({"branch": branch["name"], "action": action})
 
             except (OSError, ValueError, RuntimeError) as e:
                 print(f"❌ Error processing {branch['name']}: {e}")
@@ -217,9 +203,7 @@ class BranchCleanupManager:
                     check=True,
                     cwd=self.repo_path,
                 )
-                subprocess.run(
-                    ["git", "push", "origin", tag_name], check=True, cwd=self.repo_path
-                )
+                subprocess.run(["git", "push", "origin", tag_name], check=True, cwd=self.repo_path)
 
             elif action == "merged":
                 # This would require more complex logic to safely merge
@@ -245,9 +229,7 @@ class BranchCleanupManager:
 
         return True
 
-    def generate_cleanup_report(
-        self, branches: Dict[str, list], results: Optional[Dict[str, list]] = None
-    ) -> str:
+    def generate_cleanup_report(self, branches: Dict[str, list], results: Optional[Dict[str, list]] = None) -> str:
         """Generate a comprehensive cleanup report."""
         report = [
             "# Branch Cleanup Analysis Report",
@@ -279,9 +261,7 @@ class BranchCleanupManager:
                 report.extend([f"## {category.title().replace('_', ' ')}", ""])
 
                 for branch in branch_list[:10]:  # Limit output
-                    report.append(
-                        f"- `{branch['name']}` ({branch['age_days']} days old)"
-                    )
+                    report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
 
                 if len(branch_list) > 10:
                     report.append(f"- ... and {len(branch_list) - 10} more")
@@ -290,11 +270,10 @@ class BranchCleanupManager:
 
         return "\n".join(report)
 
+
 def main():
     """Main execution function."""
-    parser = argparse.ArgumentParser(
-        description="Automated branch cleanup for Aurora CloudBank"
-    )
+    parser = argparse.ArgumentParser(description="Automated branch cleanup for Aurora CloudBank")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -306,9 +285,7 @@ def main():
         action="store_true",
         help="Actually execute cleanup (overrides dry-run)",
     )
-    parser.add_argument(
-        "--report-only", action="store_true", help="Generate analysis report only"
-    )
+    parser.add_argument("--report-only", action="store_true", help="Generate analysis report only")
 
     args = parser.parse_args()
 
@@ -347,6 +324,7 @@ def main():
     if dry_run:
         print("\n🔍 DRY RUN MODE - No changes made")
         print("Use --execute to perform actual cleanup")
+
 
 if __name__ == "__main__":
     main()

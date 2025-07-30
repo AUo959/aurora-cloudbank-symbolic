@@ -5,16 +5,17 @@ Intelligent Git hooks for quality assurance and workflow optimization
 """
 
 import os
-import stat
 import shutil
+import stat
 from pathlib import Path
+
 
 class GitHooksAutomationSetup:
 
     def __init__(self):
-        self.git_hooks_dir = Path('.git/hooks')
+        self.git_hooks_dir = Path(".git/hooks")
         self.hooks_created = []
-        self.hooks_backup_dir = Path('.git/hooks_backup')
+        self.hooks_backup_dir = Path(".git/hooks_backup")
 
     def create_backup(self):
         """Create backup of existing hooks"""
@@ -28,7 +29,7 @@ class GitHooksAutomationSetup:
             shutil.rmtree(self.hooks_backup_dir)
 
         # Copy existing hooks
-        existing_hooks = list(self.git_hooks_dir.glob('*'))
+        existing_hooks = list(self.git_hooks_dir.glob("*"))
         if existing_hooks:
             shutil.copytree(self.git_hooks_dir, self.hooks_backup_dir)
             print(f"  ✅ Backed up {len(existing_hooks)} existing hooks")
@@ -37,7 +38,7 @@ class GitHooksAutomationSetup:
 
     def create_pre_commit_hook(self):
         """Create intelligent pre-commit hook"""
-        hook_content = '''#!/bin/bash
+        hook_content = """#!/bin/bash
 # Aurora CloudBank Pre-commit Hook
 # Intelligent quality checks before commits
 
@@ -122,20 +123,20 @@ done
 echo "🎯 Pre-commit checks completed successfully!"
 echo "Ready for commit! 🚀"
 exit 0
-'''
+"""
 
-        hook_path = self.git_hooks_dir / 'pre-commit'
-        with open(hook_path, 'w') as f:
+        hook_path = self.git_hooks_dir / "pre-commit"
+        with open(hook_path, "w") as f:
             f.write(hook_content)
 
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
-        self.hooks_created.append('pre-commit')
+        self.hooks_created.append("pre-commit")
         print("  ✅ Created intelligent pre-commit hook")
 
     def create_pre_push_hook(self):
         """Create intelligent pre-push hook"""
-        hook_content = '''#!/bin/bash
+        hook_content = """#!/bin/bash
 # Aurora CloudBank Pre-push Hook
 # Comprehensive validation before pushing to remote
 
@@ -198,20 +199,20 @@ done
 echo "🎯 Pre-push validation completed!"
 echo "Proceeding with push... 🚀"
 exit 0
-'''
+"""
 
-        hook_path = self.git_hooks_dir / 'pre-push'
-        with open(hook_path, 'w') as f:
+        hook_path = self.git_hooks_dir / "pre-push"
+        with open(hook_path, "w") as f:
             f.write(hook_content)
 
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
-        self.hooks_created.append('pre-push')
+        self.hooks_created.append("pre-push")
         print("  ✅ Created intelligent pre-push hook")
 
     def create_commit_msg_hook(self):
         """Create commit message validation hook"""
-        hook_content = '''#!/bin/bash
+        hook_content = """#!/bin/bash
 # Aurora CloudBank Commit Message Hook
 # Ensures commit messages follow best practices
 
@@ -253,20 +254,20 @@ else
     echo ""
     exit 1
 fi
-'''
+"""
 
-        hook_path = self.git_hooks_dir / 'commit-msg'
-        with open(hook_path, 'w') as f:
+        hook_path = self.git_hooks_dir / "commit-msg"
+        with open(hook_path, "w") as f:
             f.write(hook_content)
 
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
-        self.hooks_created.append('commit-msg')
+        self.hooks_created.append("commit-msg")
         print("  ✅ Created commit message validation hook")
 
     def create_post_commit_hook(self):
         """Create post-commit automation hook"""
-        hook_content = '''#!/bin/bash
+        hook_content = """#!/bin/bash
 # Aurora CloudBank Post-commit Hook
 # Automated tasks after successful commits
 
@@ -293,15 +294,15 @@ fi
 
 echo "✅ Post-commit automation completed"
 exit 0
-'''
+"""
 
-        hook_path = self.git_hooks_dir / 'post-commit'
-        with open(hook_path, 'w') as f:
+        hook_path = self.git_hooks_dir / "post-commit"
+        with open(hook_path, "w") as f:
             f.write(hook_content)
 
         # Make executable
         hook_path.chmod(hook_path.stat().st_mode | stat.S_IEXEC)
-        self.hooks_created.append('post-commit')
+        self.hooks_created.append("post-commit")
         print("  ✅ Created post-commit automation hook")
 
     def setup_hooks(self):
@@ -446,7 +447,7 @@ For issues with Git hooks:
 4. Contact the development team if needed
 """
 
-        with open('GIT_HOOKS_README.md', 'w') as f:
+        with open("GIT_HOOKS_README.md", "w") as f:
             f.write(documentation)
 
         print("  📚 Created comprehensive hooks documentation")
@@ -457,41 +458,42 @@ For issues with Git hooks:
         print("=" * 50)
 
         report = {
-            'setup_completed': True,
-            'hooks_installed': self.hooks_created,
-            'total_hooks': len(self.hooks_created),
-            'features': [
-                'Intelligent pre-commit quality checks',
-                'Comprehensive pre-push validation',
-                'Commit message standardization',
-                'Post-commit automation',
-                'Smart-devops integration',
-                'Security scanning',
-                'Syntax validation',
-                'Performance monitoring'
+            "setup_completed": True,
+            "hooks_installed": self.hooks_created,
+            "total_hooks": len(self.hooks_created),
+            "features": [
+                "Intelligent pre-commit quality checks",
+                "Comprehensive pre-push validation",
+                "Commit message standardization",
+                "Post-commit automation",
+                "Smart-devops integration",
+                "Security scanning",
+                "Syntax validation",
+                "Performance monitoring",
             ],
-            'benefits': [
-                'Prevents broken code from being committed',
-                'Ensures consistent commit message format',
-                'Automated security and quality checks',
-                'Reduces CI/CD failures',
-                'Maintains code quality standards',
-                'Provides helpful developer guidance'
-            ]
+            "benefits": [
+                "Prevents broken code from being committed",
+                "Ensures consistent commit message format",
+                "Automated security and quality checks",
+                "Reduces CI/CD failures",
+                "Maintains code quality standards",
+                "Provides helpful developer guidance",
+            ],
         }
 
         print(f"✅ Installed {report['total_hooks']} intelligent Git hooks:")
-        for hook in report['hooks_installed']:
+        for hook in report["hooks_installed"]:
             print(f"   • {hook}")
 
         print("\n🚀 Key Benefits:")
-        for benefit in report['benefits'][:4]:  # Show top 4 benefits
+        for benefit in report["benefits"][:4]:  # Show top 4 benefits
             print(f"   • {benefit}")
 
         print("\n📚 Documentation: GIT_HOOKS_README.md")
         print("💡 Test hooks: Run a git commit or push to see them in action!")
 
         return report
+
 
 def main():
     """Execute Git hooks automation setup"""
@@ -520,6 +522,7 @@ def main():
 
     print("\n🎉 Git hooks automation is now active!")
     print("Your repository is protected by intelligent quality gates!")
+
 
 if __name__ == "__main__":
     main()

@@ -18,9 +18,10 @@ Fixes all security vulnerabilities found in PR #43 and performs comprehensive se
 """
 
 
-from typing import Tuple
 import json
 import sys
+from typing import Tuple
+
 
 class SecurityRemediator:
     """Comprehensive security vulnerability fixer for Aurora CloudBank."""
@@ -54,13 +55,7 @@ class SecurityRemediator:
         try:
             # Split command safely
             cmd_parts = shlex.split(cmd)
-            result = subprocess.run(
-                cmd_parts,
-                capture_output=True,
-                text=True,
-                timeout=30,
-                check=False
-            )
+            result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
             return result.stdout.strip(), result.returncode == 0
         except (subprocess.TimeoutExpired, OSError, ValueError) as e:
             print(f"Command execution error: {e}")
@@ -96,7 +91,7 @@ class SecurityRemediator:
         result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
-        return "", False'''
+        return "", False''',
         )
 
         with open(file_path, "w", encoding="utf-8") as f:
@@ -138,7 +133,7 @@ class SecurityRemediator:
         sys.exit(1)
     except Exception as e:
         logger.error("Command execution error: %s", e)
-        sys.exit(1)'''
+        sys.exit(1)''',
         )
 
         with open(file_path, "w", encoding="utf-8") as f:
@@ -159,7 +154,7 @@ class SecurityRemediator:
 
         # Fix the vulnerable function
         fixed_content = content.replace(
-            '''def run_step(step_name, commands):
+            """def run_step(step_name, commands):
     for i, cmd in enumerate(commands, 1):
         print(f"\\n[{step_name}] Attempt {i}: {cmd}")
         try:
@@ -170,8 +165,8 @@ class SecurityRemediator:
             print(f"[{step_name}] Failed attempt {i}: {e}")
             time.sleep(2)
     print(f"[{step_name}] All attempts failed\\n")
-    return False''',
-            '''def run_step(step_name, commands):
+    return False""",
+            """def run_step(step_name, commands):
     for i, cmd in enumerate(commands, 1):
         print(f"\\n[{step_name}] Attempt {i}: {cmd}")
         try:
@@ -183,7 +178,7 @@ class SecurityRemediator:
             print(f"[{step_name}] Failed attempt {i}: {e}")
             time.sleep(2)
     print(f"[{step_name}] All attempts failed\\n")
-    return False'''
+    return False""",
         )
 
         with open(file_path, "w", encoding="utf-8") as f:
@@ -203,34 +198,34 @@ class SecurityRemediator:
                         "description": "Commands executed with shell=True pose injection risks",
                         "severity": "HIGH",
                         "mitigation": "Use shlex.split() and avoid shell=True",
-                        "status": "REMEDIATED"
+                        "status": "REMEDIATED",
                     },
                     "code_execution": {
                         "description": "Dynamic code execution via eval() or exec()",  # nosec - documentation
                         "severity": "CRITICAL",
                         "mitigation": "Avoid eval() and exec(), use safe alternatives",  # nosec - documentation
-                        "status": "MONITORED"
+                        "status": "MONITORED",
                     },
                     "xss_prevention": {
                         "description": "Cross-site scripting vulnerabilities",
                         "severity": "HIGH",
                         "mitigation": "Implement CSP headers and input sanitization",
-                        "status": "IMPLEMENTED"
-                    }
+                        "status": "IMPLEMENTED",
+                    },
                 },
                 "secure_coding_standards": {
                     "subprocess_usage": "Always use list arguments, never shell=True",
                     "input_validation": "Validate and sanitize all user inputs",
                     "output_encoding": "Properly encode all outputs",
                     "authentication": "Implement proper session management",
-                    "authorization": "Follow principle of least privilege"
+                    "authorization": "Follow principle of least privilege",
                 },
                 "monitoring": {
                     "automated_scans": True,
                     "dependency_checking": True,
                     "code_review_required": True,
-                    "security_testing": True
-                }
+                    "security_testing": True,
+                },
             }
         }
 
@@ -316,7 +311,7 @@ class SecureHelpers:
         # Remove potential script tags and javascript
         sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(rr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(rrrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -369,7 +364,7 @@ class SecureHelpers:
                 'len': len
 
         # Only allow safe characters and patterns
-        if not re.match(rr'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rrrr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:
@@ -395,7 +390,7 @@ secure = SecureHelpers()
         github_dir = Path(".github")
         github_dir.mkdir(exist_ok=True)
 
-        security_config = '''# GitHub Security Configuration
+        security_config = """# GitHub Security Configuration
 # Automated security scanning and vulnerability management
 
 name: Security Configuration
@@ -456,7 +451,7 @@ jobs:
         uses: pypa/gh-action-pip-audit@v1.0.8
         with:
           inputs: requirements.txt
-'''
+"""
 
         with open(".github/security-config.yml", "w", encoding="utf-8") as f:
             f.write(security_config)
@@ -465,7 +460,7 @@ jobs:
 
     def create_security_documentation(self):
         """Create comprehensive security documentation."""
-        security_docs = '''# 🔒 Aurora CloudBank Security Guide
+        security_docs = """# 🔒 Aurora CloudBank Security Guide
 
 ## Overview
 This document outlines the security measures, policies, and best practices for the Aurora CloudBank Symbolic project.
@@ -571,7 +566,7 @@ result = secure.secure_eval_alternative(user_expression)
 ---
 *Last Updated: 2025-01-09*
 *Version: 1.0*
-'''
+"""
 
         with open("SECURITY.md", "w", encoding="utf-8") as f:
             f.write(security_docs)
@@ -614,6 +609,7 @@ result = secure.secure_eval_alternative(user_expression)
             print("❌ SOME ISSUES REMAIN")
             return False
 
+
 def main():
     """Main execution function."""
     remediator = SecurityRemediator()
@@ -626,6 +622,7 @@ def main():
     else:
         print("\n⚠️  Some security issues need manual attention")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

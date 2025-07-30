@@ -8,12 +8,12 @@ Advanced repository optimization with intelligent compression and deduplication
 """
 
 
+import os
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
-from typing import List
-import os
+from typing import Dict, List
+
 
 class MemoryCompressionOptimizer:
     """Advanced memory and storage optimization system"""
@@ -52,12 +52,7 @@ class MemoryCompressionOptimizer:
         for root, dirs, files in os.walk("."):
             # Skip excluded directories
             dirs[:] = [
-                d
-                for d in dirs
-                if not any(
-                    ex in str(Path(root) / d)
-                    for ex in self.compression_config["exclude_paths"]
-                )
+                d for d in dirs if not any(ex in str(Path(root) / d) for ex in self.compression_config["exclude_paths"])
             ]
 
             for file in files:
@@ -72,40 +67,23 @@ class MemoryCompressionOptimizer:
                     analysis["total_size_mb"] += file_size / (1024 * 1024)
 
                     # Check for compressible files
-                    if (
-                        file_path.suffix.lower()
-                        in self.compression_config["compress_extensions"]
-                    ):
-                        if (
-                            file_size
-                            > self.compression_config["min_file_size_kb"] * 1024
-                        ):
-                            compression_potential = self._estimate_compression_savings(
-                                file_path
-                            )
+                    if file_path.suffix.lower() in self.compression_config["compress_extensions"]:
+                        if file_size > self.compression_config["min_file_size_kb"] * 1024:
+                            compression_potential = self._estimate_compression_savings(file_path)
                             if compression_potential > 0:
                                 analysis["compressible_files"].append(
                                     {
                                         "path": str(file_path),
                                         "size_kb": file_size / 1024,
-                                        "estimated_savings_kb": compression_potential
-                                        / 1024,
+                                        "estimated_savings_kb": compression_potential / 1024,
                                     }
                                 )
-                                analysis[
-                                    "optimization_potential_mb"
-                                ] += compression_potential / (1024 * 1024)
+                                analysis["optimization_potential_mb"] += compression_potential / (1024 * 1024)
 
                     # Check for duplicates
-                    if (
-                        file_path.suffix.lower()
-                        in self.deduplication_config["check_extensions"]
-                    ):
-                        if (
-                            file_size
-                            > self.deduplication_config["min_file_size_kb"] * 1024
-                        ):
-                            _file_hash = self._calculate_file_hash(file_path)
+                    if file_path.suffix.lower() in self.deduplication_config["check_extensions"]:
+                        if file_size > self.deduplication_config["min_file_size_kb"] * 1024:
+                            self._calculate_file_hash(file_path)
                             if file_hash:
                                 file_hashes[file_hash].append(
                                     {
@@ -124,13 +102,8 @@ class MemoryCompressionOptimizer:
                         )
 
                     # Check for cache files
-                    if any(
-                        pattern in str(file_path)
-                        for pattern in ["cache", ".pyc", "__pycache__", ".tmp"]
-                    ):
-                        analysis["cache_files"].append(
-                            {"path": str(file_path), "size_kb": file_size / 1024}
-                        )
+                    if any(pattern in str(file_path) for pattern in ["cache", ".pyc", "__pycache__", ".tmp"]):
+                        analysis["cache_files"].append({"path": str(file_path), "size_kb": file_size / 1024})
 
                 except (OSError, PermissionError):
                     continue
@@ -142,9 +115,7 @@ class MemoryCompressionOptimizer:
                 files.sort(key=lambda x: x["size_kb"], reverse=True)
                 savings_kb = sum(f["size_kb"] for f in files[1:])
 
-                analysis["duplicate_files"].append(
-                    {"hash": file_hash, "files": files, "savings_kb": savings_kb}
-                )
+                analysis["duplicate_files"].append({"hash": file_hash, "files": files, "savings_kb": savings_kb})
                 analysis["optimization_potential_mb"] += savings_kb / 1024
 
         return analysis
@@ -154,9 +125,7 @@ class MemoryCompressionOptimizer:
         try:
             hash_sha256 = hashlib.sha256()
             with open(file_path, "rb", encoding="utf-8") as f:
-                for chunk in iter(
-                    lambda: f.read(self.deduplication_config["hash_chunk_size"]), b""
-                ):
+                for chunk in iter(lambda: f.read(self.deduplication_config["hash_chunk_size"]), b""):
                     hash_sha256.update(chunk)
             return hash_sha256.hexdigest()
         except (OSError, PermissionError):
@@ -176,10 +145,7 @@ class MemoryCompressionOptimizer:
             compressed_sample = gzip.compress(sample_data)
             compression_ratio = len(compressed_sample) / len(sample_data)
 
-            if (
-                compression_ratio
-                < self.compression_config["compression_ratio_threshold"]
-            ):
+            if compression_ratio < self.compression_config["compression_ratio_threshold"]:
                 estimated_compressed_size = int(original_size * compression_ratio)
                 return original_size - estimated_compressed_size
 
@@ -200,9 +166,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print(
-                    f"  Would compress: {file_path} (est. {file_info['estimated_savings_kb']:.1f}KB saved)"
-                )
+                print(f"  Would compress: {file_path} (est. {file_info['estimated_savings_kb']:.1f}KB saved)")
                 results["compressed_files"].append(file_info["path"])
                 results["total_savings_mb"] += file_info["estimated_savings_kb"] / 1024
                 continue
@@ -220,10 +184,7 @@ class MemoryCompressionOptimizer:
                 compressed_size = compressed_path.stat().st_size
                 actual_ratio = compressed_size / original_size
 
-                if (
-                    actual_ratio
-                    < self.compression_config["compression_ratio_threshold"]
-                ):
+                if actual_ratio < self.compression_config["compression_ratio_threshold"]:
                     # Good compression, replace original
                     file_path.unlink()
                     actual_savings = original_size - compressed_size
@@ -231,18 +192,14 @@ class MemoryCompressionOptimizer:
                     results["compressed_files"].append(str(file_path))
                     results["total_savings_mb"] += actual_savings / (1024 * 1024)
 
-                    print(
-                        f"✅ Compressed: {file_path} ({actual_savings / 1024:.1f}KB saved)"
-                    )
+                    print(f"✅ Compressed: {file_path} ({actual_savings / 1024:.1f}KB saved)")
                 else:
                     # Poor compression, remove compressed version
                     compressed_path.unlink()
                     print(f"⚠️  Skipped: {file_path} (poor compression ratio)")
 
             except (OSError, PermissionError) as e:
-                results["failed_compressions"].append(
-                    {"path": str(file_path), "error": str(e)}
-                )
+                results["failed_compressions"].append({"path": str(file_path), "error": str(e)})
                 print(f"❌ Failed to compress: {file_path} - {e}")
 
         return results
@@ -281,9 +238,7 @@ class MemoryCompressionOptimizer:
                     print(f"✅ Removed duplicate: {file_path}")
 
                 except (OSError, PermissionError) as e:
-                    results["failed_removals"].append(
-                        {"path": str(file_path), "error": str(e)}
-                    )
+                    results["failed_removals"].append({"path": str(file_path), "error": str(e)})
                     print(f"❌ Failed to remove: {file_path} - {e}")
 
         return results
@@ -332,9 +287,7 @@ class MemoryCompressionOptimizer:
                             "potential_savings_mb": compression_savings / (1024 * 1024),
                         }
                     )
-                    results["total_potential_savings_mb"] += compression_savings / (
-                        1024 * 1024
-                    )
+                    results["total_potential_savings_mb"] += compression_savings / (1024 * 1024)
 
         return results
 
@@ -362,16 +315,12 @@ class MemoryCompressionOptimizer:
                 print(f"✅ Removed cache: {file_path}")
 
             except (OSError, PermissionError) as e:
-                results["failed_removals"].append(
-                    {"path": str(file_path), "error": str(e)}
-                )
+                results["failed_removals"].append({"path": str(file_path), "error": str(e)})
                 print(f"❌ Failed to remove cache: {file_path} - {e}")
 
         return results
 
-    def generate_optimization_report(
-        self, analysis: Dict, optimization_results: Dict = None
-    ) -> str:
+    def generate_optimization_report(self, analysis: Dict, optimization_results: Dict = None) -> str:
         """Generate comprehensive optimization report"""
         report_lines = [
             "# Memory Compression and Optimization Report",
@@ -389,9 +338,7 @@ class MemoryCompressionOptimizer:
 
         # Compressible files
         if analysis["compressible_files"]:
-            total_compressible = sum(
-                f["estimated_savings_kb"] for f in analysis["compressible_files"]
-            )
+            total_compressible = sum(f["estimated_savings_kb"] for f in analysis["compressible_files"])
             report_lines.extend(
                 [
                     f"### Compressible Files ({len(analysis['compressible_files'])} files)",
@@ -407,17 +354,13 @@ class MemoryCompressionOptimizer:
                 )
 
             if len(analysis["compressible_files"]) > 10:
-                report_lines.append(
-                    f"- ... and {len(analysis['compressible_files']) - 10} more"
-                )
+                report_lines.append(f"- ... and {len(analysis['compressible_files']) - 10} more")
 
             report_lines.append("")
 
         # Duplicate files
         if analysis["duplicate_files"]:
-            total_duplicate_savings = sum(
-                g["savings_kb"] for g in analysis["duplicate_files"]
-            )
+            total_duplicate_savings = sum(g["savings_kb"] for g in analysis["duplicate_files"])
             report_lines.extend(
                 [
                     f"### Duplicate Files ({len(analysis['duplicate_files'])} groups)",
@@ -427,22 +370,16 @@ class MemoryCompressionOptimizer:
             )
 
             for group in analysis["duplicate_files"][:5]:
-                report_lines.append(
-                    f"- {len(group['files'])} duplicates, save {group['savings_kb'] / 1024:.1f}MB"
-                )
+                report_lines.append(f"- {len(group['files'])} duplicates, save {group['savings_kb'] / 1024:.1f}MB")
 
             report_lines.append("")
 
         # Large files
         if analysis["large_files"]:
-            report_lines.extend(
-                [f"### Large Files ({len(analysis['large_files'])} files)", ""]
-            )
+            report_lines.extend([f"### Large Files ({len(analysis['large_files'])} files)", ""])
 
             for file_info in analysis["large_files"][:5]:
-                report_lines.append(
-                    f"- `{file_info['path']}` - {file_info['size_mb']:.1f}MB"
-                )
+                report_lines.append(f"- `{file_info['path']}` - {file_info['size_mb']:.1f}MB")
 
             report_lines.append("")
 
@@ -483,27 +420,19 @@ class MemoryCompressionOptimizer:
 
         if analysis["compressible_files"]:
             print("\n📦 Compressing files...")
-            optimization_results["compression"] = self.compress_files(
-                analysis["compressible_files"]
-            )
+            optimization_results["compression"] = self.compress_files(analysis["compressible_files"])
 
         if analysis["duplicate_files"]:
             print("\n🔄 Removing duplicates...")
-            optimization_results["deduplication"] = self.deduplicate_files(
-                analysis["duplicate_files"]
-            )
+            optimization_results["deduplication"] = self.deduplicate_files(analysis["duplicate_files"])
 
         if analysis["cache_files"]:
             print("\n🧹 Cleaning cache files...")
-            optimization_results["cache_cleanup"] = self.clean_cache_files(
-                analysis["cache_files"]
-            )
+            optimization_results["cache_cleanup"] = self.clean_cache_files(analysis["cache_files"])
 
         if analysis["large_files"]:
             print("\n📊 Analyzing large files...")
-            optimization_results["large_file_optimization"] = self.optimize_large_files(
-                analysis["large_files"]
-            )
+            optimization_results["large_file_optimization"] = self.optimize_large_files(analysis["large_files"])
 
         # Generate report
         report = self.generate_optimization_report(analysis, optimization_results)
@@ -524,6 +453,7 @@ class MemoryCompressionOptimizer:
             "report_file": report_file,
         }
 
+
 def main():
     """Main optimization function"""
     parser = argparse.ArgumentParser(description="Memory compression and optimization")
@@ -532,15 +462,9 @@ def main():
         action="store_true",
         help="Execute optimizations (default is dry-run)",
     )
-    parser.add_argument(
-        "--compress-only", action="store_true", help="Only run compression optimization"
-    )
-    parser.add_argument(
-        "--dedupe-only", action="store_true", help="Only run deduplication"
-    )
-    parser.add_argument(
-        "--cache-only", action="store_true", help="Only clean cache files"
-    )
+    parser.add_argument("--compress-only", action="store_true", help="Only run compression optimization")
+    parser.add_argument("--dedupe-only", action="store_true", help="Only run deduplication")
+    parser.add_argument("--cache-only", action="store_true", help="Only clean cache files")
 
     args = parser.parse_args()
 
@@ -562,6 +486,7 @@ def main():
     else:
         # Run full optimization
         optimizer.run_full_optimization()
+
 
 if __name__ == "__main__":
 

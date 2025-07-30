@@ -2,6 +2,7 @@
 
 import pandas as pd
 
+
 def generate_technical_specifications(output_csv: str | None = None) -> pd.DataFrame:
     """Return CASK technical specifications as a DataFrame and optionally save CSV."""
     data = {
@@ -58,6 +59,7 @@ def generate_technical_specifications(output_csv: str | None = None) -> pd.DataF
     if output_csv:
         df.to_csv(output_csv, index=False)
     return df
+
 
 def generate_vs_sota_comparison(output_csv: str | None = None) -> pd.DataFrame:
     """Return comparison of CASK against state of the art and optionally save CSV."""
@@ -127,6 +129,7 @@ def generate_vs_sota_comparison(output_csv: str | None = None) -> pd.DataFrame:
     if output_csv:
         df.to_csv(output_csv, index=False)
     return df
+
 
 def generate_risk_assessment(output_csv: str | None = None) -> pd.DataFrame:
     """Return CASK project risk assessment DataFrame and optionally save CSV."""

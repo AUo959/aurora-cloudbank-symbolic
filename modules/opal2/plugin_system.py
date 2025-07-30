@@ -14,13 +14,11 @@ from enum import Enum
 from pathlib import Path
 
 # Configure logging
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class PluginType(Enum):
     """Plugin type enumeration"""
@@ -32,6 +30,7 @@ class PluginType(Enum):
     IMPORTER = "importer"
     ANALYZER = "analyzer"
 
+
 class PluginStatus(Enum):
     """Plugin status enumeration"""
 
@@ -39,6 +38,7 @@ class PluginStatus(Enum):
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"
+
 
 @dataclass
 class PluginInfo:
@@ -55,6 +55,7 @@ class PluginInfo:
     status: PluginStatus = PluginStatus.PENDING
     load_time: Optional[datetime] = None
     error_message: Optional[str] = None
+
 
 class PluginInterface:
     """Base interface for all plugins"""
@@ -81,8 +82,8 @@ class PluginInterface:
         """Validate plugin configuration"""
         return True
 
-class RendererPlugin(PluginInterface):
 
+class RendererPlugin(PluginInterface):
     """Base class for renderer plugins"""
 
     async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Any:
@@ -97,25 +98,22 @@ class RendererPlugin(PluginInterface):
         """Get required data keys for rendering"""
         return []
 
-class ProcessorPlugin(PluginInterface):
 
+class ProcessorPlugin(PluginInterface):
     """Base class for processor plugins"""
 
-    async def process(
-        self, data: Dict[str, Any], params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def process(self, data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with given parameters"""
         raise NotImplementedError("Processor plugins must implement process()")
 
-class FilterPlugin(PluginInterface):
 
+class FilterPlugin(PluginInterface):
     """Base class for filter plugins"""
 
-    async def apply_filter(
-        self, data: Dict[str, Any], filter_params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def apply_filter(self, data: Dict[str, Any], filter_params: Dict[str, Any]) -> Dict[str, Any]:
         """Apply filter to data"""
         raise NotImplementedError("Filter plugins must implement apply_filter()")
+
 
 class PluginSystem:
     """
@@ -158,15 +156,11 @@ class PluginSystem:
         self.register_plugin("quantum_field_renderer", QuantumFieldRendererPlugin())
 
         # Geometric Algebra Processor Plugin
-        self.register_plugin(
-            "geometric_algebra_processor", GeometricAlgebraProcessorPlugin()
-        )
+        self.register_plugin("geometric_algebra_processor", GeometricAlgebraProcessorPlugin())
 
         logger.info(f"Loaded {len(self.plugins)} built-in plugins")
 
-    def register_plugin(
-        self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None
-    ):
+    def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
         """Register a plugin instance"""
         try:
             # Validate plugin
@@ -221,11 +215,7 @@ class PluginSystem:
             # Find plugin classes
             plugin_classes = []
             for name, obj in inspect.getmembers(module):
-                if (
-                    inspect.isclass(obj)
-                    and issubclass(obj, PluginInterface)
-                    and obj != PluginInterface
-                ):
+                if inspect.isclass(obj) and issubclass(obj, PluginInterface) and obj != PluginInterface:
                     plugin_classes.append(obj)
 
             # Register found plugins
@@ -302,7 +292,7 @@ class PluginSystem:
             return False
 
         # Get current config
-        config = self.plugin_configs.get(name)
+        self.plugin_configs.get(name)
 
         # Unload plugin
         if not self.unload_plugin(name):
@@ -338,40 +328,22 @@ class PluginSystem:
         """Get plugin system statistics"""
         stats = {
             "total_plugins": len(self.plugin_info),
-            "loaded_plugins": len(
-                [
-                    p
-                    for p in self.plugin_info.values()
-                    if p.status == PluginStatus.LOADED
-                ]
-            ),
-            "failed_plugins": len(
-                [
-                    p
-                    for p in self.plugin_info.values()
-                    if p.status == PluginStatus.FAILED
-                ]
-            ),
-            "disabled_plugins": len(
-                [
-                    p
-                    for p in self.plugin_info.values()
-                    if p.status == PluginStatus.DISABLED
-                ]
-            ),
+            "loaded_plugins": len([p for p in self.plugin_info.values() if p.status == PluginStatus.LOADED]),
+            "failed_plugins": len([p for p in self.plugin_info.values() if p.status == PluginStatus.FAILED]),
+            "disabled_plugins": len([p for p in self.plugin_info.values() if p.status == PluginStatus.DISABLED]),
             "plugin_types": {},
         }
 
         # Count by type
         for plugin_type in PluginType:
-            count = len(
-                [p for p in self.plugin_info.values() if p.plugin_type == plugin_type]
-            )
+            count = len([p for p in self.plugin_info.values() if p.plugin_type == plugin_type])
             stats["plugin_types"][plugin_type.value] = count
 
         return stats
 
+
 # Built-in Plugin Implementations
+
 
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL renderer plugin"""
@@ -419,10 +391,9 @@ class WebGLRendererPlugin(RendererPlugin):
         }
         """
 
-    def _generate_uniforms(
-        self, data: Dict[str, Any], context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _generate_uniforms(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         return {"color": [0.3, 0.6, 0.9], "time": 0.0}
+
 
 class CanvasRendererPlugin(RendererPlugin):
     """Canvas 2D renderer plugin"""
@@ -457,6 +428,7 @@ class CanvasRendererPlugin(RendererPlugin):
 
         return "\n".join(commands)
 
+
 class SVGRendererPlugin(RendererPlugin):
     """SVG renderer plugin"""
 
@@ -476,9 +448,7 @@ class SVGRendererPlugin(RendererPlugin):
         height = context.get("height", 600)
 
         svg_parts = []
-        svg_parts.append(
-            f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">'
-        )
+        svg_parts.append(f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">')
 
         # Render vertices as path
         vertices = data.get("vertices", [])
@@ -491,13 +461,12 @@ class SVGRendererPlugin(RendererPlugin):
                     path_data.append(f"L {vertex[0]} {vertex[1]}")
 
             path_string = " ".join(path_data)
-            svg_parts.append(
-                f'<path d="{path_string}" stroke="blue" stroke-width="2" fill="none" />'
-            )
+            svg_parts.append(f'<path d="{path_string}" stroke="blue" stroke-width="2" fill="none" />')
 
         svg_parts.append("</svg>")
 
         return "\n".join(svg_parts)
+
 
 class QuantumFieldRendererPlugin(RendererPlugin):
     """Quantum field renderer plugin"""
@@ -512,9 +481,7 @@ class QuantumFieldRendererPlugin(RendererPlugin):
             capabilities=["quantum_field", "field_visualization", "particle_effects"],
         )
 
-    async def render(
-        self, data: Dict[str, Any], context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Render quantum field"""
         width = context.get("width", 800)
         height = context.get("height", 600)
@@ -548,6 +515,7 @@ class QuantumFieldRendererPlugin(RendererPlugin):
         # Simplified quantum field calculation
         return complex(0.5 * (x + y) / 1000, 0.3 * (x - y) / 1000)
 
+
 class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
     """Geometric algebra processor plugin"""
 
@@ -565,9 +533,7 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
             ],
         )
 
-    async def process(
-        self, data: Dict[str, Any], params: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def process(self, data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
         """Process data using geometric algebra"""
         # This would integrate with the GeometricAlgebra class
         processed_data = data.copy()
@@ -581,15 +547,15 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
 
         return processed_data
 
+
 # Plugin Factory
+
 
 class PluginFactory:
     """Factory for creating plugins"""
 
     @staticmethod
-    def create_plugin(
-        plugin_type: str, config: Dict[str, Any] = None
-    ) -> Optional[PluginInterface]:
+    def create_plugin(plugin_type: str, config: Dict[str, Any] = None) -> Optional[PluginInterface]:
         """Create a plugin instance"""
         plugin_classes = {
             "webgl_renderer": WebGLRendererPlugin,

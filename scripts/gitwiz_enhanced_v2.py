@@ -15,6 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('GitWizEnhanced')
 
+
 @dataclass
 class RepositoryMetrics:
     """Repository health and optimization metrics."""
@@ -33,6 +34,7 @@ class RepositoryMetrics:
     def __post_init__(self):
         if self.issues_detected is None:
             self.issues_detected = []
+
 
 @dataclass
 class FileAnalysis:
@@ -58,23 +60,24 @@ class FileAnalysis:
         if self.file_types is None:
             self.file_types = {}
 
+
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
 
-        """Initialize GitWiz with repository path."""
-        self.repo_path = Path(repo_path).resolve()
-        self.git_dir = self.repo_path / ".git"
-        self.gitwiz_dir = self.repo_path / ".gitwiz"
+    """Initialize GitWiz with repository path."""
+    self.repo_path = Path(repo_path).resolve()
+    self.git_dir = self.repo_path / ".git"
+    self.gitwiz_dir = self.repo_path / ".gitwiz"
 
-        # Ensure .gitwiz directory exists
-        self.gitwiz_dir.mkdir(exist_ok=True)
+    # Ensure .gitwiz directory exists
+    self.gitwiz_dir.mkdir(exist_ok=True)
 
-        # Configuration
-        self.config = self._load_config()
-        self.thresholds = self.config.get("thresholds", {})
+     # Configuration
+     self.config = self._load_config()
+      self.thresholds = self.config.get("thresholds", {})
 
-        # Validate git repository
-        if not self.git_dir.exists():
+       # Validate git repository
+       if not self.git_dir.exists():
             raise ValueError(f"Not a git repository: {self.repo_path}")
 
         logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
@@ -391,7 +394,7 @@ class GitWizEnhanced:
 
                     # Add recommendations
                     if days_since_commit > self.thresholds.get("stale_branch_days",
-                        30) and branch_name != current_branch:
+                                                               30) and branch_name != current_branch:
                         result["recommendations"].append({
                             "type": "delete_stale_branch",
                             "branch": branch_name,
@@ -591,9 +594,9 @@ class GitWizEnhanced:
             return "needs_attention"
 
     def _generate_recommendations(self,
-        metrics: RepositoryMetrics,
-        file_analysis: FileAnalysis) -> List[Dict[str,
-        Any]]:
+                                  metrics: RepositoryMetrics,
+                                  file_analysis: FileAnalysis) -> List[Dict[str,
+                                                                            Any]]:
         """Generate optimization recommendations."""
         recommendations = []
 
@@ -638,6 +641,7 @@ class GitWizEnhanced:
 
         return recommendations
 
+
 def main():
     """Main CLI interface."""
 
@@ -677,6 +681,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     exit(main())

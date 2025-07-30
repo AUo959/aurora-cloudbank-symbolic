@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 """
-
-        import fnmatch
-    import argparse
-
 Memory Sealing Engine - Automated SHA256 sealing with state recovery
 Part of T71 Symbolic Infrastructure Genesis
 
@@ -14,20 +10,22 @@ Primary functions:
 - Memory drift detection and correction protocols
 """
 
-
-from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Union
+import argparse
+import fnmatch
+import hashlib
 import json
 import os
+import zipfile
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Union
+
 
 @dataclass
 class MemorySeal:
     """Represents a cryptographic memory seal"""
+
     seal_id: str
     target_path: str
     seal_type: str  # file, directory, thread, module
@@ -37,9 +35,11 @@ class MemorySeal:
     audit_trail: List[str]
     recovery_data: Dict[str, Any]
 
+
 @dataclass
 class StateSnapshot:
     """Represents a complete state snapshot for recovery"""
+
     snapshot_id: str
     seal_id: str
     timestamp: str
@@ -47,6 +47,7 @@ class StateSnapshot:
     directory_structure: Dict[str, Any]
     metadata: Dict[str, Any]
     integrity_hash: str
+
 
 class MemorySealingEngine:
     """Automated SHA256 sealing and state recovery system"""
@@ -80,7 +81,7 @@ class MemorySealingEngine:
             seal_id = f"FILE_{file_path.stem}_{timestamp}"
 
         # Calculate file hash
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             content = f.read()
             file_hash = hashlib.sha256(content).hexdigest()
 
@@ -89,7 +90,7 @@ class MemorySealingEngine:
             "size": len(content),
             "modified": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat(),
             "permissions": oct(file_path.stat().st_mode)[-3:],
-            "relative_path": str(file_path.relative_to(self.repo_path))
+            "relative_path": str(file_path.relative_to(self.repo_path)),
         }
 
         # Calculate metadata hash
@@ -105,7 +106,7 @@ class MemorySealingEngine:
             sha256_hash=file_hash,
             metadata_hash=metadata_hash,
             audit_trail=[f"Created seal for file: {file_path.name}"],
-            recovery_data=metadata
+            recovery_data=metadata,
         )
 
         # Save seal and create backup
@@ -115,8 +116,9 @@ class MemorySealingEngine:
 
         return seal
 
-    def seal_directory(self, dir_path: Union[str, Path], seal_id: str = None,
-                      exclude_patterns: List[str] = None) -> MemorySeal:
+    def seal_directory(
+        self, dir_path: Union[str, Path], seal_id: str = None, exclude_patterns: List[str] = None
+    ) -> MemorySeal:
         """Seal an entire directory with SHA256 integrity"""
         dir_path = Path(dir_path).resolve()
 
@@ -128,7 +130,7 @@ class MemorySealingEngine:
             seal_id = f"DIR_{dir_path.name}_{timestamp}"
 
         if exclude_patterns is None:
-            exclude_patterns = ['.git', '__pycache__', '*.pyc', 'node_modules']
+            exclude_patterns = [".git", "__pycache__", "*.pyc", "node_modules"]
 
         # Calculate directory hash tree
         file_hashes = {}
@@ -144,7 +146,7 @@ class MemorySealingEngine:
 
                 file_path = Path(root) / file
                 try:
-                    with open(file_path, 'rb') as f:
+                    with open(file_path, "rb") as f:
                         content = f.read()
                         file_hash = hashlib.sha256(content).hexdigest()
 
@@ -152,7 +154,7 @@ class MemorySealingEngine:
                     file_hashes[rel_path] = {
                         "hash": file_hash,
                         "size": len(content),
-                        "modified": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
+                        "modified": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat(),
                     }
                     total_size += len(content)
 
@@ -168,7 +170,7 @@ class MemorySealingEngine:
             "file_count": len(file_hashes),
             "total_size": total_size,
             "files": file_hashes,
-            "relative_path": str(dir_path.relative_to(self.repo_path))
+            "relative_path": str(dir_path.relative_to(self.repo_path)),
         }
 
         metadata_str = json.dumps(metadata, sort_keys=True)
@@ -183,7 +185,7 @@ class MemorySealingEngine:
             sha256_hash=directory_hash,
             metadata_hash=metadata_hash,
             audit_trail=[f"Created seal for directory: {dir_path.name} ({len(file_hashes)} files)"],
-            recovery_data=metadata
+            recovery_data=metadata,
         )
 
         # Save seal and create backup
@@ -211,15 +213,12 @@ class MemorySealingEngine:
         thread_data = {}
         for file_path in thread_files:
             try:
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     content = f.read()
                     file_hash = hashlib.sha256(content).hexdigest()
 
                 rel_path = str(file_path.relative_to(self.repo_path))
-                thread_data[rel_path] = {
-                    "hash": file_hash,
-                    "size": len(content)
-                }
+                thread_data[rel_path] = {"hash": file_hash, "size": len(content)}
             except (IOError, OSError) as e:
                 print(f"Warning: Could not read file {file_path}: {e}")
 
@@ -233,7 +232,7 @@ class MemorySealingEngine:
             "description": description,
             "file_count": len(thread_files),
             "files": thread_data,
-            "capture_method": "symbolic_thread_analysis"
+            "capture_method": "symbolic_thread_analysis",
         }
 
         metadata_str = json.dumps(metadata, sort_keys=True)
@@ -248,7 +247,7 @@ class MemorySealingEngine:
             sha256_hash=thread_hash,
             metadata_hash=metadata_hash,
             audit_trail=[f"Created thread seal: {description}"],
-            recovery_data=metadata
+            recovery_data=metadata,
         )
 
         # Save seal and create snapshot
@@ -269,7 +268,7 @@ class MemorySealingEngine:
             "timestamp": datetime.now().isoformat(),
             "status": "unknown",
             "issues": [],
-            "details": {}
+            "details": {},
         }
 
         try:
@@ -314,7 +313,7 @@ class MemorySealingEngine:
             "timestamp": datetime.now().isoformat(),
             "dry_run": dry_run,
             "actions": [],
-            "status": "unknown"
+            "status": "unknown",
         }
 
         try:
@@ -325,7 +324,7 @@ class MemorySealingEngine:
 
             if dry_run:
                 # Just analyze what would be restored
-                with zipfile.ZipFile(backup_path, 'r') as backup_zip:
+                with zipfile.ZipFile(backup_path, "r") as backup_zip:
                     restore_result["actions"] = [f"Would restore: {name}" for name in backup_zip.namelist()]
                     restore_result["status"] = "dry_run_complete"
             else:
@@ -334,15 +333,15 @@ class MemorySealingEngine:
                     # Create backup of current state
                     current_backup = self.seals_dir / f"current_state_{datetime.now().strftime('%Y%m%dT%H%M%S')}.zip"
                     if target_path.is_file():
-                        with zipfile.ZipFile(current_backup, 'w') as zip_file:
+                        with zipfile.ZipFile(current_backup, "w") as zip_file:
                             zip_file.write(target_path, target_path.name)
                     else:
-                        shutil.make_archive(str(current_backup.with_suffix('')), 'zip', target_path)
+                        shutil.make_archive(str(current_backup.with_suffix("")), "zip", target_path)
 
                     restore_result["actions"].append(f"Created backup of current state: {current_backup}")
 
                 # Extract backup to target location
-                with zipfile.ZipFile(backup_path, 'r') as backup_zip:
+                with zipfile.ZipFile(backup_path, "r") as backup_zip:
                     if seal.seal_type == "file":
                         target_path.parent.mkdir(parents=True, exist_ok=True)
                         backup_zip.extractall(target_path.parent)
@@ -374,13 +373,13 @@ class MemorySealingEngine:
 
         # Search for files containing the thread anchor
         for root, dirs, files in os.walk(self.repo_path):
-            dirs[:] = [d for d in dirs if not d.startswith('.')]
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
 
             for file in files:
-                if file.endswith(('.py', '.js', '.md', '.json', '.yaml', '.yml')):
+                if file.endswith((".py", ".js", ".md", ".json", ".yaml", ".yml")):
                     file_path = Path(root) / file
                     try:
-                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                             content = f.read()
                             if thread_anchor in content:
                                 thread_files.append(file_path)
@@ -397,19 +396,14 @@ class MemorySealingEngine:
             return {"valid": False, "error": f"File not found: {file_path}"}
 
         # Calculate current hash
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             content = f.read()
             current_hash = hashlib.sha256(content).hexdigest()
 
         if current_hash == seal.sha256_hash:
             return {"valid": True, "hash_match": True}
         else:
-            return {
-                "valid": False,
-                "error": "Hash mismatch",
-                "expected": seal.sha256_hash,
-                "actual": current_hash
-            }
+            return {"valid": False, "error": "Hash mismatch", "expected": seal.sha256_hash, "actual": current_hash}
 
     def _verify_directory_seal(self, seal: MemorySeal) -> Dict[str, Any]:
         """Verify integrity of a directory seal"""
@@ -423,7 +417,7 @@ class MemorySealingEngine:
         for file_info in seal.recovery_data.get("files", {}).values():
             file_path = self.repo_path / file_info
             if file_path.exists():
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     content = f.read()
                     current_hash = hashlib.sha256(content).hexdigest()
                     current_files[str(file_path.relative_to(self.repo_path))] = {"hash": current_hash}
@@ -438,7 +432,7 @@ class MemorySealingEngine:
                 "valid": False,
                 "error": "Directory hash mismatch",
                 "expected": seal.sha256_hash,
-                "actual": current_hash
+                "actual": current_hash,
             }
 
     def _verify_thread_seal(self, seal: MemorySeal) -> Dict[str, Any]:
@@ -454,7 +448,7 @@ class MemorySealingEngine:
         current_data = {}
         for file_path in current_files:
             try:
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     content = f.read()
                     file_hash = hashlib.sha256(content).hexdigest()
 
@@ -473,7 +467,7 @@ class MemorySealingEngine:
                 "valid": False,
                 "error": "Thread hash mismatch",
                 "expected": seal.sha256_hash,
-                "actual": current_hash
+                "actual": current_hash,
             }
 
     def _save_seal(self, seal: MemorySeal):
@@ -481,21 +475,21 @@ class MemorySealingEngine:
         self.seals[seal.seal_id] = seal
 
         seal_path = self.seals_dir / f"{seal.seal_id}.json"
-        with open(seal_path, 'w') as f:
+        with open(seal_path, "w") as f:
             json.dump(asdict(seal), f, indent=2)
 
     def _create_file_backup(self, file_path: Path, seal_id: str):
         """Create backup of sealed file"""
         backup_path = self.seals_dir / f"{seal_id}_backup.zip"
 
-        with zipfile.ZipFile(backup_path, 'w') as zip_file:
+        with zipfile.ZipFile(backup_path, "w") as zip_file:
             zip_file.write(file_path, file_path.name)
 
     def _create_directory_backup(self, dir_path: Path, seal_id: str, exclude_patterns: List[str]):
         """Create backup of sealed directory"""
         backup_path = self.seals_dir / f"{seal_id}_backup.zip"
 
-        with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
             for root, dirs, files in os.walk(dir_path):
                 dirs[:] = [d for d in dirs if not self._should_exclude(d, exclude_patterns)]
 
@@ -513,7 +507,7 @@ class MemorySealingEngine:
         backup_path = self.seals_dir / f"{seal.seal_id}_backup.zip"
 
         # Create backup of all thread files
-        with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
             for file_path in thread_files:
                 arcname = file_path.relative_to(self.repo_path)
                 zip_file.write(file_path, arcname)
@@ -523,16 +517,22 @@ class MemorySealingEngine:
             snapshot_id=snapshot_id,
             seal_id=seal.seal_id,
             timestamp=datetime.now().isoformat(),
-            file_checksums={str(f.relative_to(self.repo_path)): seal.recovery_data["files"][str(f.relative_to(self.repo_path))]["hash"] for f in thread_files if str(f.relative_to(self.repo_path)) in seal.recovery_data["files"]},
+            file_checksums={
+                str(f.relative_to(self.repo_path)): seal.recovery_data["files"][str(f.relative_to(self.repo_path))][
+                    "hash"
+                ]
+                for f in thread_files
+                if str(f.relative_to(self.repo_path)) in seal.recovery_data["files"]
+            },
             directory_structure={},
             metadata={"thread_files": [str(f.relative_to(self.repo_path)) for f in thread_files]},
-            integrity_hash=seal.sha256_hash
+            integrity_hash=seal.sha256_hash,
         )
 
         self.snapshots[snapshot_id] = snapshot
 
         snapshot_path = self.snapshots_dir / f"{snapshot_id}.json"
-        with open(snapshot_path, 'w') as f:
+        with open(snapshot_path, "w") as f:
             json.dump(asdict(snapshot), f, indent=2)
 
     def _load_existing_seals(self):
@@ -541,7 +541,7 @@ class MemorySealingEngine:
             for seal_file in self.seals_dir.glob("*.json"):
                 if not seal_file.name.endswith("_snapshot.json"):
                     try:
-                        with open(seal_file, 'r') as f:
+                        with open(seal_file, "r") as f:
                             seal_data = json.load(f)
                             seal = MemorySeal(**seal_data)
                             self.seals[seal.seal_id] = seal
@@ -552,7 +552,7 @@ class MemorySealingEngine:
         """Load audit trail from disk"""
         if self.audit_file.exists():
             try:
-                with open(self.audit_file, 'r') as f:
+                with open(self.audit_file, "r") as f:
                     self.audit_trail = json.load(f)
             except (json.JSONDecodeError, IOError):
                 self.audit_trail = []
@@ -564,14 +564,15 @@ class MemorySealingEngine:
             "event_type": event_type,
             "seal_id": seal_id,
             "description": description,
-            "user": os.getenv("USER", "unknown")
+            "user": os.getenv("USER", "unknown"),
         }
 
         self.audit_trail.append(event)
 
         # Save audit trail
-        with open(self.audit_file, 'w') as f:
+        with open(self.audit_file, "w") as f:
             json.dump(self.audit_trail, f, indent=2)
+
 
 def main():
     """CLI interface for memory sealing"""
@@ -628,11 +629,7 @@ def main():
             print("❌ --seal-id required for restore command")
             return
 
-        result = engine.restore_sealed_state(
-            args.seal_id,
-            args.restore_path,
-            args.dry_run
-        )
+        result = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)
 
         print(f"🔄 Restore result for {args.seal_id}: {result['status']}")
         for action in result["actions"]:
@@ -651,6 +648,7 @@ def main():
             print(f"     Created: {seal.timestamp}")
             print(f"     Hash: {seal.sha256_hash[:16]}...")
             print()
+
 
 if __name__ == "__main__":
     main()

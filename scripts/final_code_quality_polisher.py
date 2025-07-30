@@ -9,6 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 
+
 class FinalCodeQualityPolisher:
     def __init__(self):
         self.fixes_applied = 0
@@ -109,7 +110,7 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace bare except Exception: with except Exception:
-            content = re.sub(rr'except\s*:', 'except Exception:', content)
+            content = re.sub(rrr'except\s*:', 'except Exception:', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -122,7 +123,7 @@ class FinalCodeQualityPolisher:
         return False
 
     def fix_comparison_to_true(self, file_path: Path) -> bool:
-        """Fix E712 - comparison to True/False""r"
+        """Fix E712 - comparison to True / False""r"
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -130,10 +131,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Fix is True and is False comparisons
-            content = re.sub(rr'==\s*True\b', 'is True', content)
-            content = re.sub(rr'==\s*False\b', 'is False', content)
-            content = re.sub(rr'!=\s*True\b', 'is not True', content)
-            content = re.sub(rr'!=\s*False\b', 'is not False', content)
+            content = re.sub(rrr'==\s*True\b', 'is True', content)
+            content = re.sub(rrr'==\s*False\b', 'is False', content)
+            content = re.sub(rrr'!=\s*True\b', 'is not True', content)
+            content = re.sub(rrr'!=\s*False\b', 'is not False', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -154,10 +155,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace single-letter variable names in common patterns
-            content = re.sub(rr'\bl\s*=', 'line =', content)
-            content = re.sub(rr'for\s+l\s+in', 'for line in', content)
-            content = re.sub(rr'\bI\s*=', 'idx =', content)
-            content = re.sub(rr'for\s+I\s+in', 'for idx in', content)
+            content = re.sub(rrr'\bl\s*=', 'line =', content)
+            content = re.sub(rrr'for\s+l\s+in', 'for line in', content)
+            content = re.sub(rrr'\bI\s*=', 'idx =', content)
+            content = re.sub(rrr'for\s+I\s+in', 'for idx in', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -200,8 +201,8 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Remove semicolons at end of lines
-            content = re.sub(rr';(\s*\n)', r'\1', content)
-            content = re.sub(rr';(\s*)$', r'\1', content, flags=re.MULTILINE)
+            content = re.sub(rrr';(\s*\n)', r'\1', content)
+            content = re.sub(rrr';(\s*)$', r'\1', content, flags=re.MULTILINE)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:

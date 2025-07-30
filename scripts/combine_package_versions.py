@@ -7,6 +7,7 @@ import shutil
 import tempfile
 import zipfile
 
+
 def combine(output: str, packages: list[str]) -> str:
     with tempfile.TemporaryDirectory() as tmp:
         for i, pkg in enumerate(packages):
@@ -23,6 +24,7 @@ def combine(output: str, packages: list[str]) -> str:
         archive_path = shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)
     return archive_path
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Merge package zip files")
     parser.add_argument("output", help="Output combined zip file")
@@ -31,6 +33,7 @@ def main() -> None:
 
     out_path = combine(args.output, args.packages)
     print(f"Combined package created at {out_path}")
+
 
 if __name__ == "__main__":
     main()

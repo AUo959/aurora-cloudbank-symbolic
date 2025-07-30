@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import shlex
@@ -11,11 +13,11 @@ so Copilot or other agents can easily maintain the repo.
 """
 
 
-
 import os
 import sys
 
 logger = get_logger("staff_node_ci_helper")
+
 
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
@@ -33,29 +35,23 @@ def run_cmd(cmd: str) -> None:
         logger.error("Command execution error: %s", e)
         sys.exit(1)
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Automate pull/commit/push pipeline with staff node support"
-    )
+    parser = argparse.ArgumentParser(description="Automate pull/commit/push pipeline with staff node support")
     parser.add_argument(
         "--commit-msg",
         default="🔧 Update via staff node helper",
         help="Commit message to use",
     )
     parser.add_argument("--skip-tests", action="store_true", help="Skip pytest")
-    parser.add_argument(
-        "--skip-sync", action="store_true", help="Skip staff registry sync"
-    )
+    parser.add_argument("--skip-sync", action="store_true", help="Skip staff registry sync")
     parser.add_argument("--push", action="store_true", help="Push after commit")
     args = parser.parse_args()
 
     run_cmd("git pull origin main")
 
     if not args.skip_sync and os.path.exists("scripts/orion_backup_sync.py"):
-        sync_cmd = (
-            "python scripts/orion_backup_sync.py --command-node command_node_data "
-            "--pl-branch pl_branch_data"
-        )
+        sync_cmd = "python scripts/orion_backup_sync.py --command-node command_node_data " "--pl-branch pl_branch_data"
         run_cmd(sync_cmd)
     else:
         logger.info("Staff sync skipped")
@@ -71,6 +67,7 @@ def main() -> None:
 
     if args.push:
         run_cmd("git push origin main")
+
 
 if __name__ == "__main__":
     main()

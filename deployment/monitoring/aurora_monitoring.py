@@ -8,8 +8,9 @@ Real-time system health and performance monitoring
 """
 
 
-from datetime import datetime
 import time
+from datetime import datetime
+
 
 class AuroraMonitoringDashboard:
 
@@ -46,11 +47,10 @@ class AuroraMonitoringDashboard:
         print("-" * 30)
         for service, metrics in self.metrics.items():
             status_icon = "🟢" if metrics["status"] == "operational" else "🔴"
-            load_bar = "█" * int(metrics["load"] * 10) + "░" * (
-                10 - int(metrics["load"] * 10)
-            )
+            load_bar = "█" * int(metrics["load"] * 10) + "░" * (10 - int(metrics["load"] * 10))
             print(f"{status_icon} {service:15} [{load_bar}] {metrics['load']:.1%}")
         print("-" * 30)
+
 
 if __name__ == "__main__":
     dashboard = AuroraMonitoringDashboard()

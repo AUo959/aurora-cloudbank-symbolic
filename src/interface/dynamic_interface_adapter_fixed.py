@@ -3,6 +3,7 @@ Aurora CloudBank - Dynamic Interface Adaptation System
 Never-before-conceived adaptive interface evolution
 """
 
+
 class DynamicInterfaceAdapter:
 
     def __init__(self):
@@ -21,9 +22,7 @@ class DynamicInterfaceAdapter:
             "interface_type": self.determine_optimal_interface(user_context),
             "visualization_mode": self.select_visualization_mode(research_data),
             "interaction_modalities": self.configure_interaction_modes(user_context),
-            "quantum_enhancement": self.apply_quantum_interface_enhancement(
-                quantum_state
-            ),
+            "quantum_enhancement": self.apply_quantum_interface_enhancement(quantum_state),
         }
 
         return self.generate_adaptive_interface(adaptation_config)

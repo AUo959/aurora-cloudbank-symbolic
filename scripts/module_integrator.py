@@ -31,6 +31,7 @@ from modules.telemetry_logger import get_logger
 ANCHOR_SEED = "EOS_SEED_ORION"
 logger = get_logger("module_integrator")
 
+
 def load_metadata(path: str) -> dict:
     meta_path = os.path.join(path, "module.yaml")
     if not os.path.exists(meta_path):
@@ -42,6 +43,7 @@ def load_metadata(path: str) -> dict:
         raise ValueError(f"Anchor mismatch in {meta_path}: {anchor} != {ANCHOR_SEED}")
     return data
 
+
 def backup_module(dest: str) -> str:
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     backup_dir = os.path.join("backups", os.path.basename(dest))
@@ -51,6 +53,7 @@ def backup_module(dest: str) -> str:
     backup_path = os.path.join(backup_dir, archive_name + ".zip")
     logger.info("Backup created: %s", backup_path)
     return backup_path
+
 
 def restore_module(dest: str) -> str:
     backup_dir = os.path.join("backups", os.path.basename(dest))
@@ -65,11 +68,13 @@ def restore_module(dest: str) -> str:
     logger.info("Restored %s from %s", dest, latest)
     return latest
 
+
 def sync_module(src: str, dest: str) -> None:
     if os.path.exists(dest):
         shutil.rmtree(dest)
     shutil.copytree(src, dest)
     logger.info("Synchronized %s -> %s", src, dest)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Integrate modules across branches")
@@ -84,9 +89,7 @@ def main() -> None:
         default="pl_branch_data/modules",
         help="PL branch modules directory",
     )
-    parser.add_argument(
-        "--rollback", action="store_true", help="Rollback latest backup of this module"
-    )
+    parser.add_argument("--rollback", action="store_true", help="Rollback latest backup of this module")
     args = parser.parse_args()
 
     logger.info("Integration start for %s", args.module_path)
@@ -120,6 +123,7 @@ def main() -> None:
     except Exception as exc:
         logger.error("Integration failed: %s", exc)
         print(f"Error: {exc}")
+
 
 if __name__ == "__main__":
     main()

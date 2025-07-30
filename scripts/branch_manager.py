@@ -10,6 +10,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
+
 @dataclass
 class BranchInfo:
     """Information about a git branch"""
@@ -21,6 +22,7 @@ class BranchInfo:
     is_merged: bool
     days_old: int
     category: str
+
 
 class BranchManager:
     """Automated branch management and cleanup system"""
@@ -71,9 +73,7 @@ class BranchManager:
 
             # Calculate days old
             try:
-                commit_datetime = datetime.datetime.fromisoformat(
-                    commit_date.replace(" ", "T").replace("+00:00", "")
-                )
+                commit_datetime = datetime.datetime.fromisoformat(commit_date.replace(" ", "T").replace("+00:00", ""))
                 days_old = (datetime.datetime.now() - commit_datetime).days
             except ValueError:
                 # Fallback for problematic date formats
@@ -107,9 +107,7 @@ class BranchManager:
             f"origin/{branch_name}",
             "origin/main",
         ]
-        result = subprocess.run(
-            cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
         return result.returncode == 0
 
     def _categorize_branch(self, branch_name: str) -> str:
@@ -152,29 +150,19 @@ class BranchManager:
                 analysis["cleanup_candidates"]["backup_old"].append(branch.name)
 
         # Generate recommendations
-        total_cleanup = sum(
-            len(candidates) for candidates in analysis["cleanup_candidates"].values()
-        )
+        total_cleanup = sum(len(candidates) for candidates in analysis["cleanup_candidates"].values())
         if total_cleanup > 0:
-            analysis["recommendations"].append(
-                f"Can safely delete {total_cleanup} stale branches"
-            )
+            analysis["recommendations"].append(f"Can safely delete {total_cleanup} stale branches")
 
         if len(analysis["categories"].get("dependency", [])) > 5:
-            analysis["recommendations"].append(
-                "Consider bulk-processing dependabot PRs"
-            )
+            analysis["recommendations"].append("Consider bulk-processing dependabot PRs")
 
         if analysis["total_branches"] > 30:
-            analysis["recommendations"].append(
-                "Repository has excessive branch count - cleanup recommended"
-            )
+            analysis["recommendations"].append("Repository has excessive branch count - cleanup recommended")
 
         return analysis
 
-    def cleanup_stale_branches(
-        self, max_age_days: int = 90, categories: Optional[List[str]] = None
-    ) -> Dict:
+    def cleanup_stale_branches(self, max_age_days: int = 90, categories: Optional[List[str]] = None) -> Dict:
         """Clean up stale branches based on criteria"""
         if categories is None:
             categories = ["feature", "dependency", "security"]
@@ -192,18 +180,14 @@ class BranchManager:
 
             if should_delete:
                 if self.dry_run:
-                    cleanup_results["deleted"].append(
-                        f"[DRY RUN] Would delete: {branch.name}"
-                    )
+                    cleanup_results["deleted"].append(f"[DRY RUN] Would delete: {branch.name}")
                 else:
                     try:
                         cmd = ["git", "push", "origin", "--delete", branch.name]
                         subprocess.run(cmd, check=True, cwd=self.repo_path)
                         cleanup_results["deleted"].append(branch.name)
                     except subprocess.CalledProcessError as e:
-                        cleanup_results["errors"].append(
-                            f"Failed to delete {branch.name}: {e}"
-                        )
+                        cleanup_results["errors"].append(f"Failed to delete {branch.name}: {e}")
             else:
                 cleanup_results["skipped"].append(branch.name)
 
@@ -249,23 +233,18 @@ Generated: {datetime.datetime.now().isoformat()}
 
         return report
 
+
 def main():
     parser = argparse.ArgumentParser(description="Aurora CloudBank Branch Manager")
-    parser.add_argument(
-        "--analyze", action="store_true", help="Analyze branches and generate report"
-    )
+    parser.add_argument("--analyze", action="store_true", help="Analyze branches and generate report")
     parser.add_argument("--cleanup", action="store_true", help="Perform branch cleanup")
-    parser.add_argument(
-        "--dry-run", action="store_true", default=True, help="Dry run mode (default)"
-    )
+    parser.add_argument("--dry-run", action="store_true", default=True, help="Dry run mode (default)")
     parser.add_argument(
         "--execute",
         action="store_true",
         help="Execute actual cleanup (overrides dry-run)",
     )
-    parser.add_argument(
-        "--max-age", type=int, default=90, help="Maximum age in days for cleanup"
-    )
+    parser.add_argument("--max-age", type=int, default=90, help="Maximum age in days for cleanup")
     parser.add_argument(
         "--categories",
         nargs="+",
@@ -288,9 +267,7 @@ def main():
         print("\n📄 Report saved to branch_management_report.md")
 
     if args.cleanup:
-        print(
-            f"🧹 Starting branch cleanup {'(DRY RUN)' if manager.dry_run else '(EXECUTING)'}"
-        )
+        print(f"🧹 Starting branch cleanup {'(DRY RUN)' if manager.dry_run else '(EXECUTING)'}")
         results = manager.cleanup_stale_branches(args.max_age, args.categories)
 
         print(f"\n✅ Deleted: {len(results['deleted'])}")
@@ -303,6 +280,7 @@ def main():
             print(f"\n❌ Errors: {len(results['errors'])}")
             for error in results["errors"]:
                 print(f"  - {error}")
+
 
 if __name__ == "__main__":
     main()

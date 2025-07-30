@@ -9,6 +9,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_maintenance_scheduler():
     """Fix critical issues in maintenance_scheduler.py"""
     file_path = Path("scripts/maintenance_scheduler.py")
@@ -44,6 +45,7 @@ def fix_maintenance_scheduler():
         f.write(content)
 
     print("✅ Fixed maintenance_scheduler.py")
+
 
 def fix_gitwiz_enhanced():
     """Fix critical issues in gitwiz_enhanced.py"""
@@ -139,8 +141,8 @@ def fix_security_scripts():
         content = re.sub(r'f"([^{]*)"', r'"\1r"', content)
 
         # Add encoding to file opens
-        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
-        content = re.sub(rr'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
 
         with open(file_path, 'w') as f:
             f.write(content)

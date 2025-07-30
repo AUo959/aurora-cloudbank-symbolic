@@ -8,6 +8,7 @@ from typing import Any, Dict
 
 from fastapi import FastAPI, WebSocket
 
+
 class QuantumEnhancedBackend:
 
     def __init__(self):
@@ -47,6 +48,7 @@ class QuantumEnhancedBackend:
             "agents_active": len(self.quantum_agents),
             "symbolic_streams": len(self.symbolic_streams),
         }
+
 
 # Initialize quantum enhanced backend
 backend = QuantumEnhancedBackend()

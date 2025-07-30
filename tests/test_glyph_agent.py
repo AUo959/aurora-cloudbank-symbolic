@@ -1,5 +1,6 @@
 from modules.reflective_autonomy.glyph_agent import GlyphAgent
 
+
 def test_sentari_reinforcement():
     agent = GlyphAgent("Sentari", "resonance")
     classification = {
@@ -10,6 +11,7 @@ def test_sentari_reinforcement():
     result = agent.advise_classification(classification)
     assert result["priority"] == "high"
     assert "Sentari reinforcement" in result["reason"]
+
 
 def test_other_agent_no_reinforcement():
     agent = GlyphAgent("Axiomera", "observer")

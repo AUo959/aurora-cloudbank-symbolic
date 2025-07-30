@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
 from tools.integration.ci_helpers import CIHelpers
@@ -15,12 +17,11 @@ Automation helpers for continuous integration and deployment
 """
 
 
+import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
-import json
+from typing import Any, Dict, List
+
 
 class CIHelpers:
     """CI/CD automation and integration helpers"""
@@ -39,7 +40,7 @@ class CIHelpers:
             "timestamp": datetime.now().isoformat(),
             "checks": {},
             "overall_status": "unknown",
-            "anchor_seed": "T71_CI_PRE_COMMIT"
+            "anchor_seed": "T71_CI_PRE_COMMIT",
         }
 
         # Check 1: Lint Python files
@@ -73,15 +74,11 @@ class CIHelpers:
                 "requires_memory_seal_validation": True,
                 "requires_anchor_integrity_check": True,
                 "requires_test_coverage": True,
-                "minimum_coverage_percent": 90
+                "minimum_coverage_percent": 90,
             },
             "components": self._scan_components(),
             "dependencies": self._get_dependencies(),
-            "environment_requirements": {
-                "python": ">=3.8",
-                "node": ">=14.0",
-                "git": ">=2.0"
-            }
+            "environment_requirements": {"python": ">=3.8", "node": ">=14.0", "git": ">=2.0"},
         }
 
         return manifest
@@ -95,7 +92,7 @@ class CIHelpers:
             "anchor_seed": "T71_REPO_VALIDATION",
             "status": "unknown",
             "validations": {},
-            "issues": []
+            "issues": [],
         }
 
         # Check for uncommitted changes
@@ -184,7 +181,7 @@ print('✅ Deployment manifest generated')
         workflow_path = self.repo_path / ".github" / "workflows" / "t71_validation.yml"
         workflow_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(workflow_path, 'w') as f:
+        with open(workflow_path, "w") as f:
             f.write(workflow_content.strip())
 
         print(f"📄 GitHub Actions workflow created: {workflow_path}")
@@ -198,14 +195,16 @@ print('✅ Deployment manifest generated')
             # Run flake8
             process = subprocess.run(
                 ["flake8", "tools/", "--max-line-length=120", "--extend-ignore=E203,W503"],
-                capture_output=True, text=True, cwd=self.repo_path
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
             )
 
             if process.returncode == 0:
                 result["status"] = "passed"
             else:
                 result["status"] = "failed"
-                result["issues"] = process.stdout.split('\n') if process.stdout else ["Linting failed"]
+                result["issues"] = process.stdout.split("\n") if process.stdout else ["Linting failed"]
 
         except FileNotFoundError:
             result["status"] = "skipped"
@@ -220,7 +219,6 @@ print('✅ Deployment manifest generated')
         try:
             # Import and run anchor tracker
             sys.path.insert(0, str(self.repo_path / "tools"))
-
 
             tracker = SymbolicAnchorTracker(str(self.repo_path))
             tracker.scan_repository()
@@ -247,7 +245,6 @@ print('✅ Deployment manifest generated')
 
         try:
             sys.path.insert(0, str(self.repo_path / "tools"))
-
 
             sealer = MemorySealingEngine(str(self.repo_path))
 
@@ -277,8 +274,7 @@ print('✅ Deployment manifest generated')
         try:
             # Run the T71 test suite
             process = subprocess.run(
-                ["python", "test_t71_tools.py"],
-                capture_output=True, text=True, cwd=self.repo_path
+                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
             )
 
             if process.returncode == 0:
@@ -306,7 +302,7 @@ print('✅ Deployment manifest generated')
                     components[rel_path] = {
                         "type": "python_module",
                         "size": py_file.stat().st_size,
-                        "modified": datetime.fromtimestamp(py_file.stat().st_mtime).isoformat()
+                        "modified": datetime.fromtimestamp(py_file.stat().st_mtime).isoformat(),
                     }
 
             for js_file in tools_dir.rglob("*.js"):
@@ -314,7 +310,7 @@ print('✅ Deployment manifest generated')
                 components[rel_path] = {
                     "type": "javascript_module",
                     "size": js_file.stat().st_size,
-                    "modified": datetime.fromtimestamp(js_file.stat().st_mtime).isoformat()
+                    "modified": datetime.fromtimestamp(js_file.stat().st_mtime).isoformat(),
                 }
 
         return components
@@ -329,8 +325,7 @@ print('✅ Deployment manifest generated')
 
         try:
             process = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True, text=True, cwd=self.repo_path
+                ["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo_path
             )
 
             if process.returncode == 0:
@@ -358,7 +353,7 @@ print('✅ Deployment manifest generated')
             "tools/symbolic/anchor_tracker.py",
             "tools/symbolic/memory_sealer.py",
             "tools/cli/aurora_dev_cli.py",
-            "tools/indexing/reliquary_indexer.js"
+            "tools/indexing/reliquary_indexer.js",
         ]
 
         missing_files = []
@@ -381,8 +376,7 @@ print('✅ Deployment manifest generated')
         try:
             # Run basic functionality test
             process = subprocess.run(
-                ["python", "test_t71_tools.py"],
-                capture_output=True, text=True, cwd=self.repo_path
+                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
             )
 
             if process.returncode == 0:
@@ -396,6 +390,7 @@ print('✅ Deployment manifest generated')
             result["issues"] = [str(e)]
 
         return result
+
 
 def main():
     """CLI interface for CI helpers"""
@@ -415,7 +410,9 @@ def main():
         print(f"\n📊 Pre-commit Check Results: {results['overall_status']}")
 
         for check_name, check_result in results["checks"].items():
-            status_icon = "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
+            status_icon = (
+                "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
+            )
             print(f"{status_icon} {check_name}: {check_result['status']}")
 
             if check_result.get("issues"):
@@ -426,7 +423,7 @@ def main():
         manifest = ci.generate_deployment_manifest()
 
         output_path = args.output or "T71_DEPLOYMENT_MANIFEST.json"
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
         print(f"📦 Deployment manifest saved: {output_path}")
@@ -438,7 +435,9 @@ def main():
         print(f"{status_icon} Repository Validation: {validation['status']}")
 
         for check_name, check_result in validation["validations"].items():
-            check_icon = "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
+            check_icon = (
+                "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
+            )
             print(f"  {check_icon} {check_name}: {check_result['status']}")
 
         if validation["issues"]:
@@ -449,6 +448,7 @@ def main():
     elif args.command == "workflow":
         workflow_path = ci.create_github_actions_workflow()
         print(f"📄 GitHub Actions workflow created: {workflow_path}")
+
 
 if __name__ == "__main__":
     main()

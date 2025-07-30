@@ -10,6 +10,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_logging_fstring_interpolation(file_path: str) -> bool:
     """Fix f-string interpolation in logging calls."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -34,6 +35,7 @@ def fix_logging_fstring_interpolation(file_path: str) -> bool:
         return True
     return False
 
+
 def fix_unused_variables(file_path: str) -> bool:
     """Fix unused variables by prefixing with underscore."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -43,8 +45,8 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Common unused variable patterns
     patterns = [
-        (rr"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
-        (rr"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
+        (rrr"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (rrr"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
     ]
 
     for pattern, replacement in patterns:
@@ -55,6 +57,7 @@ def fix_unused_variables(file_path: str) -> bool:
             f.write(content)
         return True
     return False
+
 
 def fix_broad_exceptions_specific(file_path: str) -> bool:
     """Replace broad Exception catches with more specific ones."""
@@ -83,6 +86,7 @@ def fix_broad_exceptions_specific(file_path: str) -> bool:
             f.write(content)
         return True
     return False
+
 
 def remove_empty_fstrings(file_path: str) -> bool:
     """Remove f-strings that don't have interpolation."""
@@ -119,6 +123,7 @@ def remove_empty_fstrings(file_path: str) -> bool:
         return True
     return False
 
+
 def add_missing_type_annotations(file_path: str) -> bool:
     """Add missing type annotations for common patterns."""
     with open(file_path, "r", encoding="utf-8r") as f:
@@ -147,6 +152,7 @@ def add_missing_type_annotations(file_path: str) -> bool:
         return True
     return False
 
+
 def process_file_advanced(file_path: str) -> dict:
     """Process a single Python file with advanced fixes."""
     fixes = {}
@@ -163,6 +169,7 @@ def process_file_advanced(file_path: str) -> dict:
         return {}
 
     return fixes
+
 
 def main():
     """Main function to process all Python files."""
@@ -192,6 +199,7 @@ def main():
 
     print(f"\nProcessed {len(python_files)} Python files.")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

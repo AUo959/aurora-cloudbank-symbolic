@@ -4,6 +4,7 @@ from modules.cask import (
     generate_vs_sota_comparison,
 )
 
+
 def test_specifications_columns():
     df = generate_technical_specifications()
     assert set(df.columns) == {
@@ -13,9 +14,11 @@ def test_specifications_columns():
         "Integration_Challenge",
     }
 
+
 def test_comparison_rows():
     df = generate_vs_sota_comparison()
     assert len(df) == 10
+
 
 def test_risk_assessment_priority():
     df = generate_risk_assessment()

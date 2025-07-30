@@ -8,6 +8,7 @@ import os
 import re
 import glob
 
+
 def fix_file(filepath):
     """Fix common Python code issues in a file"""
     print(f"🔧 Fixing {filepath}r")
@@ -34,17 +35,17 @@ def fix_file(filepath):
                 continue
 
             # Fix simple unused import cases
-            if re.match(rr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
+            if re.match(rrr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
                 if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)
                 elif 'typing' in line and any(word in line for word in ['List',
-                    'Dict',
-                    'Optional',
-                    'Set',
-                    'Tuple',
-                    'Union',
-                    'Any']):
+                                                                        'Dict',
+                                                                        'Optional',
+                                                                        'Set',
+                                                                        'Tuple',
+                                                                        'Union',
+                                                                        'Any']):
                     # Remove unused typing imports for now
                     pass
                 else:
@@ -69,6 +70,7 @@ def fix_file(filepath):
 
     except Exception as e:
         print(f"❌ Error fixing {filepath}: {e}")
+
 
 def main():
     """Fix all Python files with issues"""
@@ -101,6 +103,7 @@ def main():
             fix_file(filepath)
 
     print("🎯 Python fixing complete!")
+
 
 if __name__ == "__main__":
     main()

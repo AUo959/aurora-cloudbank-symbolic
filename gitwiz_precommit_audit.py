@@ -191,27 +191,27 @@ class GitWizPrecommitAuditor:
             for tool in tool_list:
                 try:
                     result = subprocess.run([tool, "--version"],
-                    available = result.returncode == 0
-                    tool_results[category][tool] = {
+                    available=result.returncode == 0
+                    tool_results[category][tool]={
                         "available": available,
                         "version": result.stdout.strip() if available else None,
                         "error": result.stderr.strip() if result.stderr else None
                     }
-                    status = "✅" if available else "❌"
+                    status="✅" if available else "❌"
                     print(f"  {status} {tool} - {'Available' if available else 'Not available'}")
                 except (subprocess.TimeoutExpired, FileNotFoundError):
-                    tool_results[category][tool] = {"available": False, "error": "Not found"}
+                    tool_results[category][tool]={"available": False, "error": "Not found"}
                     print(f"  ❌ {tool} - Not found")
 
-        self.audit_results["lint_tools"] = tool_results
+        self.audit_results["lint_tools"]=tool_results
 
     def _test_gitwiz_functionality(self):
         """Test core GitWiz functionality."""
-        tests = {}
+        tests={}
 
         # Test GitWiz status
         try:
-            result = subprocess.run([
+            result=subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py", "status"
 
             if result.returncode == 0:

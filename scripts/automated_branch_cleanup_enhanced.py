@@ -8,9 +8,8 @@ import argparse
 import datetime
 import subprocess
 from dataclasses import dataclass
+from typing import Dict, List
 
-from typing import Dict
-from typing import List
 
 @dataclass
 class BranchInfo:
@@ -22,6 +21,7 @@ class BranchInfo:
     is_merged: bool
     days_old: int
     category: str
+
 
 class AutomatedBranchManager:
     """Automated branch cleanup with intelligent categorization"""
@@ -157,9 +157,7 @@ class AutomatedBranchManager:
                 category_stats[branch.category]["merged"] += 1
 
             # Apply cleanup rules
-            rules = self.cleanup_rules.get(
-                branch.category, {"max_age_days": 60, "keep_recent": 2}
-            )
+            rules = self.cleanup_rules.get(branch.category, {"max_age_days": 60, "keep_recent": 2})
 
             if branch.is_merged and branch.days_old > 7:
                 # Merged branches older than a week can be safely deleted
@@ -186,9 +184,7 @@ class AutomatedBranchManager:
         if self.dry_run:
             print("🔍 DRY RUN MODE - No branches will be deleted")
             for branch in safe_branches:
-                print(
-                    f"  Would delete: {branch.name} (merged {branch.days_old} days ago)"
-                )
+                print(f"  Would delete: {branch.name} (merged {branch.days_old} days ago)")
                 results["deleted"].append(branch.name)
             return results
 
@@ -227,15 +223,12 @@ class AutomatedBranchManager:
         stats = analysis["stats"]
         total = analysis["total_branches"]
 
-        report_lines.extend(
-            [f"**Total Branches Analyzed**: {total}", "", "### By Category:", ""]
-        )
+        report_lines.extend([f"**Total Branches Analyzed**: {total}", "", "### By Category:", ""])
 
         for category, data in stats.items():
             report_lines.extend(
                 [
-                    f"- **{category.title()}**: {data['total']} total "
-                    f"({data['merged']} merged, {data['old']} old)",
+                    f"- **{category.title()}**: {data['total']} total " f"({data['merged']} merged, {data['old']} old)",
                     "",
                 ]
             )
@@ -252,15 +245,10 @@ class AutomatedBranchManager:
         )
 
         for branch in candidates["safe_to_delete"][:10]:  # Show first 10
-            report_lines.append(
-                f"- `{branch.name}` - {branch.category} - "
-                f"merged {branch.days_old} days ago"
-            )
+            report_lines.append(f"- `{branch.name}` - {branch.category} - " f"merged {branch.days_old} days ago")
 
         if len(candidates["safe_to_delete"]) > 10:
-            report_lines.append(
-                f"- ... and {len(candidates['safe_to_delete']) - 10} more"
-            )
+            report_lines.append(f"- ... and {len(candidates['safe_to_delete']) - 10} more")
 
         report_lines.extend(
             [
@@ -271,10 +259,7 @@ class AutomatedBranchManager:
         )
 
         for branch in candidates["requires_review"][:5]:  # Show first 5
-            report_lines.append(
-                f"- `{branch.name}` - {branch.category} - "
-                f"unmerged, {branch.days_old} days old"
-            )
+            report_lines.append(f"- `{branch.name}` - {branch.category} - " f"unmerged, {branch.days_old} days old")
 
         # Cleanup results if available
         if cleanup_results:
@@ -292,12 +277,11 @@ class AutomatedBranchManager:
 
         return "\n".join(report_lines)
 
+
 def main():
     """Main execution function"""
     parser = argparse.ArgumentParser(description="Automated branch cleanup")
-    parser.add_argument(
-        "--execute", action="store_true", help="Execute cleanup (default is dry-run)"
-    )
+    parser.add_argument("--execute", action="store_true", help="Execute cleanup (default is dry-run)")
     parser.add_argument(
         "--max-delete",
         type=int,
@@ -345,6 +329,7 @@ def main():
         f.write(report)
 
     print(f"📄 Report saved to: {report_file}")
+
 
 if __name__ == "__main__":
     main()

@@ -8,6 +8,36 @@
 
 When managing multiple codespaces with different dev container configurations and uncommitted changes, Aurora CloudBank provides a systematic approach to safely migrate, backup, and consolidate your work.
 
+## 🤖 **Copilot Commands for Old Codespaces**
+
+**Simply tell Copilot in any old codespace:**
+
+> *"migrate this codespace to Aurora CloudBank"*  
+> *"run Aurora migration with backup"*  
+> *"backup uncommitted changes and standardize container"*  
+> *"sync this codespace with main repository"*  
+> *"emergency backup and migrate"*  
+
+**Or use these specific commands:**
+
+```bash
+# Option 1: Download and run migration automator (if script not available locally)
+curl -sSL https://raw.githubusercontent.com/AUo959/aurora-cloudbank-symbolic/main/aurora_codespace_migration_automator.sh | bash
+
+# Option 2: If you have the repository
+git pull origin main && ./migrate
+
+# Option 3: Direct execution
+git pull origin main && ./aurora_codespace_migration_automator.sh
+```
+
+**What Copilot will understand:**
+- **"migrate this codespace"** → Runs full automated migration
+- **"backup my uncommitted changes"** → Creates emergency backup branch  
+- **"standardize dev container"** → Applies Aurora optimization
+- **"sync dependencies"** → Installs Python/Node packages
+- **"clean up this workspace"** → Full migration with cleanup
+
 ## 🔍 Pre-Migration Assessment
 
 ### 1. **Inventory Your Codespaces**

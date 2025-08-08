@@ -8,8 +8,6 @@ FastAPI server for L2 Meta-Agent Integration with real-time dashboard
 
 import argparse
 import logging
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
 
@@ -17,6 +15,9 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

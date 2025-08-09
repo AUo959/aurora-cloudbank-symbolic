@@ -8,15 +8,13 @@ import asyncio
 import sys
 from pathlib import Path
 
+# Add the project root to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from modules.opal2.glyph_cache import GlyphCache
 from modules.opal2.glyph_core import GlyphCore
 from modules.opal2.plugin_system import PluginSystem
 from modules.opal2.quantum_renderer import QuantumRenderer
-
-# Add the project root to the Python path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-
 async def test_opal2_integration():
     """Test full Opal2 system integration"""
     print("🔮 Testing Opal2 Modular System Integration")

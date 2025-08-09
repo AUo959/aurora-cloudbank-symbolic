@@ -56,4 +56,4 @@ def test_hash_and_metadata_generation():
         assert meta["sha256"] == digest
         assert meta["anchor"] == "T3A_DECISION_PR77"
     finally:
-        pathlib.Path(sample.name).unlink()
+    pathlib.Path(sample.name).unlink()

@@ -1,0 +1,14 @@
+pr_number: 77
+anchor: T3A_DECISION_PR77
+decision: merged_as_baseline
+merged_sha: b8f8c8b59be9989d8f46f23e571cdf9af7c985a1
+merge_method: squash
+rationale: Establish formatting baseline to reduce diff entropy for segmentation of PR #76.
+abandoned_paths:
+  - subsumption_diff_artifact_generation
+divergent_truths_resolved:
+  - id: DT_PR77_SUBSUMPTION
+    resolution: baseline_merge_rendered_subsumption_unnecessary
+dlp: L1_OK
+timestamp_utc: 2025-08-08T23:45:17Z
+schema_version: 1.0.0

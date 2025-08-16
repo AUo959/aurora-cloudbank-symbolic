@@ -17,7 +17,7 @@ After careful analysis of the open pull requests, here's the recommended resolut
 ### Example Broken Code:
 ```python
 # From .security/secure_helpers.py in PR #76:
-sanitized = re.sub(rrrrr'on\\w+\\s*=', '', sanitized, flags=re.IGNORECASE)
+sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 # This would cause a SyntaxError
 ```
 

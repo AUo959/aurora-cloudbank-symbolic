@@ -248,7 +248,33 @@ class ChatGPTAgentModeIntegration:
         for param in schema.get("required", []):
             if param not in parameters:
                 raise ValueError(f"Required parameter '{param}' missing")
-    
+        properties = schema.get("properties", {})
+        required_params = schema.get("required", [])
+        # Check for missing required parameters
+        for param in required_params:
+            if param not in parameters:
+                raise ValueError(f"Required parameter '{param}' missing")
+        # Check for unexpected parameters
+        for param in parameters:
+            if param not in properties:
+                raise ValueError(f"Unexpected parameter '{param}'")
+        # Type validation for all parameters
+        type_map = {
+            "string": str,
+            "integer": int,
+            "number": (int, float),
+            "boolean": bool,
+            "array": list,
+            "object": dict,
+            # Add more types as needed
+        }
+        for param, value in parameters.items():
+            expected = properties.get(param, {})
+            expected_type = expected.get("type")
+            if expected_type:
+                py_type = type_map.get(expected_type)
+                if py_type and not isinstance(value, py_type):
+                    raise ValueError(f"Parameter '{param}' should be of type '{expected_type}', got '{type(value).__name__}'")
     async def _handle_symbolic_processing(self, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Handle symbolic processing operations with Aurora's engine"""
         operation = parameters.get("operation")

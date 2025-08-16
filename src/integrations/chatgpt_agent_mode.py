@@ -13,6 +13,10 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional, Union
 import uuid
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Handle missing dependencies gracefully
 try:
@@ -193,10 +197,11 @@ class ChatGPTAgentModeIntegration:
         # Validate parameters against schema
         try:
             self._validate_parameters(parameters, tool_def["parameters"])
+            logging.error("Parameter validation failed for tool '%s': %s", tool_name, str(e), exc_info=True)
         except Exception as e:
             return {
                 "success": False,
-                "error": f"Parameter validation failed: {str(e)}",
+                "error": "Parameter validation failed. Please check your input and try again.",
                 "tool_schema": tool_def["parameters"],
                 "recovery_suggestions": self._get_recovery_suggestions(tool_name, e)
             }
@@ -224,12 +229,13 @@ class ChatGPTAgentModeIntegration:
                 "memory_seal": self._compute_memory_seal()
             }
             
+            logging.error("Tool execution failed for tool '%s': %s", tool_name, str(e), exc_info=True)
             return response
             
         except Exception as e:
             error_response = {
                 "success": False,
-                "error": str(e),
+                "error": "Tool execution failed due to an internal error.",
                 "execution_context": execution_context,
                 "recovery_suggestions": self._get_recovery_suggestions(tool_name, e),
                 "dlp_level": "DLP_L1_OK"

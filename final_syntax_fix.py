@@ -6,6 +6,7 @@ Final Python syntax fixer
 import os
 import re
 
+
 def fix_function_declarations(filepath):
     """Fix Python function declaration syntax"""
     with open(filepath, "r") as f:
@@ -13,10 +14,10 @@ def fix_function_declarations(filepath):
 
     # Fix async def with incorrect syntax
     content = re.sub(
-        rr"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content
+        rrr"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content
     )
     content = re.sub(
-        rr"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content
+        rrr"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content
     )
 
     # Remove trailing semicolons in Python
@@ -29,6 +30,7 @@ def fix_function_declarations(filepath):
         f.write(content)
 
     print(f"Fixed {filepath}")
+
 
 # Fix the problematic files
 files = [

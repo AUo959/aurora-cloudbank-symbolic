@@ -7,9 +7,8 @@ Demonstrates the enhanced capabilities without requiring all dependencies.
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict
 
-from typing import Any
-from typing import Dict
 
 class GITWizDemo:
     """Simplified demo of enhanced GITWiz capabilities."""
@@ -33,9 +32,7 @@ class GITWizDemo:
         total_size = 0
 
         for file_path in self.project_root.rglob("*"):
-            if file_path.is_file() and not any(
-                part.startswith(".git") for part in file_path.parts
-            ):
+            if file_path.is_file() and not any(part.startswith(".git") for part in file_path.parts):
                 file_counts["total"] += 1
                 total_size += file_path.stat().st_size
 
@@ -45,23 +42,15 @@ class GITWizDemo:
         analysis["file_analysis"] = {
             "total_files": file_counts["total"],
             "total_size_mb": round(total_size / (1024 * 1024), 2),
-            "file_types": dict(
-                sorted(
-                    file_counts["by_type"].items(), key=lambda x: x[1], reverse=True
-                )[:10]
-            ),
+            "file_types": dict(sorted(file_counts["by_type"].items(), key=lambda x: x[1], reverse=True)[:10]),
         }
 
         # ZIP file analysis
         zip_files = list(self.project_root.rglob("*.zip"))
         analysis["zip_analysis"] = {
             "total_zip_files": len(zip_files),
-            "zip_locations": [
-                str(f.relative_to(self.project_root)) for f in zip_files[:10]
-            ],
-            "total_zip_size_mb": round(
-                sum(f.stat().st_size for f in zip_files) / (1024 * 1024), 2
-            ),
+            "zip_locations": [str(f.relative_to(self.project_root)) for f in zip_files[:10]],
+            "total_zip_size_mb": round(sum(f.stat().st_size for f in zip_files) / (1024 * 1024), 2),
         }
 
         # Documentation analysis
@@ -76,18 +65,11 @@ class GITWizDemo:
                 [
                     f
                     for f in doc_files
-                    if any(
-                        word in f.name.lower()
-                        for word in ["status", "complete", "ready", "report"]
-                    )
+                    if any(word in f.name.lower() for word in ["status", "complete", "ready", "report"])
                 ]
             ),
-            "integration_files": len(
-                [f for f in doc_files if "integration" in f.name.lower()]
-            ),
-            "deployment_files": len(
-                [f for f in doc_files if "deploy" in f.name.lower()]
-            ),
+            "integration_files": len([f for f in doc_files if "integration" in f.name.lower()]),
+            "deployment_files": len([f for f in doc_files if "deploy" in f.name.lower()]),
         }
 
         # Dependency analysis
@@ -95,8 +77,7 @@ class GITWizDemo:
         found_deps = [f for f in dep_files if (self.project_root / f).exists()]
         analysis["dependency_status"] = {
             "dependency_files_found": found_deps,
-            "python_project": "requirements.txt" in found_deps
-            or "pyproject.toml" in found_deps,
+            "python_project": "requirements.txt" in found_deps or "pyproject.toml" in found_deps,
             "node_project": "package.json" in found_deps,
         }
 
@@ -147,11 +128,7 @@ class GITWizDemo:
         if req_file.exists():
             try:
                 with open(req_file, "r") as f:
-                    deps = [
-                        line.strip()
-                        for line in f
-                        if line.strip() and not line.startswith("#")
-                    ]
+                    deps = [line.strip() for line in f if line.strip() and not line.startswith("#")]
                     plan["python_dependencies"] = {
                         "total_dependencies": len(deps),
                         "sample_dependencies": deps[:5],
@@ -261,9 +238,7 @@ class GITWizDemo:
             report.append("🎯 OPTIMIZATION OPPORTUNITIES")
             report.append("-" * 50)
             for i, opp in enumerate(analysis["optimization_opportunities"], 1):
-                report.append(
-                    f"{i}. {opp['description']} (Priority: {opp['priority']})"
-                )
+                report.append(f"{i}. {opp['description']} (Priority: {opp['priority']})")
                 report.append(
                     f"   Impact: {opp.get('estimated_space_savings', opp.get('estimated_improvement', 'N/A'))}"
                 )
@@ -281,9 +256,7 @@ class GITWizDemo:
         if dep_plan["node_dependencies"]:
             node_deps = dep_plan["node_dependencies"]
             if "dependencies" in node_deps:
-                report.append(
-                    f"Node Dependencies: {node_deps['dependencies']} + {node_deps['devDependencies']} dev"
-                )
+                report.append(f"Node Dependencies: {node_deps['dependencies']} + {node_deps['devDependencies']} dev")
                 report.append(f"Update Command: {node_deps['update_command']}")
         report.append("")
 
@@ -297,15 +270,9 @@ class GITWizDemo:
         # Recommendations
         report.append("✅ IMMEDIATE ACTION ITEMS")
         report.append("-" * 50)
-        report.append(
-            "1. Run enhanced GITWiz analysis: python3 scripts/gitwiz_enhanced.py analyze"
-        )
-        report.append(
-            "2. Scan dependencies: python3 scripts/gitwiz_enhanced.py dependencies --scan"
-        )
-        report.append(
-            "3. Generate optimization report: python3 scripts/gitwiz_enhanced.py report"
-        )
+        report.append("1. Run enhanced GITWiz analysis: python3 scripts/gitwiz_enhanced.py analyze")
+        report.append("2. Scan dependencies: python3 scripts/gitwiz_enhanced.py dependencies --scan")
+        report.append("3. Generate optimization report: python3 scripts/gitwiz_enhanced.py report")
         report.append(
             "4. Execute optimized workflow: python3 scripts/gitwiz_enhanced.py workflow --execute full_optimization --dry-run"
         )
@@ -317,6 +284,7 @@ class GITWizDemo:
         report.append("=" * 80)
 
         return "\n".join(report)
+
 
 def main():
     """Run GITWiz Enhanced demo analysis."""
@@ -330,6 +298,7 @@ def main():
         f.write(f"# GITWiz Enhanced Analysis Report\n\n```\n{report}\n```\n")
 
     print(f"\n📄 Report saved to: {report_file}")
+
 
 if __name__ == "__main__":
     main()

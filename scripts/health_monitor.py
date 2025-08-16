@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
+
 class RepositoryHealthMonitor:
 
     def __init__(self, repo_path: str = "."):
@@ -87,9 +88,7 @@ class RepositoryHealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
-                metrics["branch_count"] = len(
-                    [line for line in result.stdout.strip().split("\n") if line.strip()]
-                )
+                metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
             # ZIP file count
             result = subprocess.run(
@@ -123,14 +122,10 @@ class RepositoryHealthMonitor:
             )
 
             pyc_count = (
-                len([f for f in pyc_result.stdout.strip().split("\n") if f])
-                if pyc_result.returncode == 0
-                else 0
+                len([f for f in pyc_result.stdout.strip().split("\n") if f]) if pyc_result.returncode == 0 else 0
             )
             cache_count = (
-                len([f for f in cache_result.stdout.strip().split("\n") if f])
-                if cache_result.returncode == 0
-                else 0
+                len([f for f in cache_result.stdout.strip().split("\n") if f]) if cache_result.returncode == 0 else 0
             )
             metrics["cache_files"] = pyc_count + cache_count
 
@@ -144,9 +139,7 @@ class RepositoryHealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
-                metrics["large_files"] = [
-                    f.strip() for f in result.stdout.strip().split("\n") if f.strip()
-                ]
+                metrics["large_files"] = [f.strip() for f in result.stdout.strip().split("\n") if f.strip()]
 
             # Git status
             result = subprocess.run(
@@ -175,14 +168,8 @@ class RepositoryHealthMonitor:
                 history = json.load(f)
 
             # Clean old entries
-            cutoff_date = datetime.datetime.now() - datetime.timedelta(
-                days=self.config["history_days"]
-            )
-            history = [
-                entry
-                for entry in history
-                if datetime.datetime.fromisoformat(entry["timestamp"]) > cutoff_date
-            ]
+            cutoff_date = datetime.datetime.now() - datetime.timedelta(days=self.config["history_days"])
+            history = [entry for entry in history if datetime.datetime.fromisoformat(entry["timestamp"]) > cutoff_date]
 
             return history
         except (OSError, ValueError, RuntimeError) as e:
@@ -218,12 +205,8 @@ class RepositoryHealthMonitor:
             week_ago = history[-7]
             days_diff = 7
 
-            trends["daily_size_growth"] = (
-                current["size_mb"] - week_ago["size_mb"]
-            ) / days_diff
-            trends["daily_file_growth"] = (
-                current["file_count"] - week_ago["file_count"]
-            ) / days_diff
+            trends["daily_size_growth"] = (current["size_mb"] - week_ago["size_mb"]) / days_diff
+            trends["daily_file_growth"] = (current["file_count"] - week_ago["file_count"]) / days_diff
 
         return trends
 
@@ -280,10 +263,7 @@ class RepositoryHealthMonitor:
             )
 
         # Growth rate alerts
-        if (
-            "daily_size_growth" in trends
-            and trends["daily_size_growth"] > self.config["alerts"]["size_growth_rate"]
-        ):
+        if "daily_size_growth" in trends and trends["daily_size_growth"] > self.config["alerts"]["size_growth_rate"]:
             alerts.append(
                 {
                     "type": "rapid_size_growth",
@@ -296,9 +276,7 @@ class RepositoryHealthMonitor:
 
         return alerts
 
-    def generate_health_report(
-        self, metrics: Dict, trends: Dict, alerts: List[Dict]
-    ) -> str:
+    def generate_health_report(self, metrics: Dict, trends: Dict, alerts: List[Dict]) -> str:
         """Generate a comprehensive health report."""
         report = []
         report.append("# Aurora CloudBank - Repository Health Report")
@@ -316,11 +294,7 @@ class RepositoryHealthMonitor:
                 score -= 0.5
 
         score = max(0.0, score)
-        health_status = (
-            "EXCELLENT"
-            if score >= 9
-            else "GOOD" if score >= 7 else "MODERATE" if score >= 5 else "POOR"
-        )
+        health_status = "EXCELLENT" if score >= 9 else "GOOD" if score >= 7 else "MODERATE" if score >= 5 else "POOR"
 
         report.append(f"## Overall Health Score: {health_status} ({score:.1f}/10)")
         report.append("")
@@ -346,9 +320,7 @@ class RepositoryHealthMonitor:
             report.append(f"- **ZIP Change**: {trends['zip_change']:+d}")
 
             if "daily_size_growth" in trends:
-                report.append(
-                    f"- **Daily Growth Rate**: {trends['daily_size_growth']:+.1f}MB/day"
-                )
+                report.append(f"- **Daily Growth Rate**: {trends['daily_size_growth']:+.1f}MB/day")
             report.append("")
 
         # Alerts
@@ -356,12 +328,8 @@ class RepositoryHealthMonitor:
             report.append("## Alerts")
             report.append("")
             for alert in alerts:
-                severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(
-                    alert["severity"], ""
-                )
-                report.append(
-                    f"- {severity_emoji} **{alert['type'].replace('_', ' ').title()}**: {alert['message']}"
-                )
+                severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert["severity"], "")
+                report.append(f"- {severity_emoji} **{alert['type'].replace('_', ' ').title()}**: {alert['message']}")
             report.append("")
 
         # Large files
@@ -411,9 +379,7 @@ class RepositoryHealthMonitor:
         if alerts:
             print("\n🚨 Active Alerts:")
             for alert in alerts:
-                severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(
-                    alert["severity"], ""
-                )
+                severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert["severity"], "")
                 print(f"  {severity_emoji} {alert['message']}")
 
         return {
@@ -436,19 +402,12 @@ class RepositoryHealthMonitor:
         except KeyboardInterrupt:
             print("\n🛑 Monitoring stopped by user")
 
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Repository Health Monitor"
-    )
-    parser.add_argument(
-        "--monitor", action="store_true", help="Run continuous monitoring"
-    )
-    parser.add_argument(
-        "--interval", type=int, default=3600, help="Monitoring interval in seconds"
-    )
-    parser.add_argument(
-        "--no-report", action="store_true", help="Skip saving report file"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Repository Health Monitor")
+    parser.add_argument("--monitor", action="store_true", help="Run continuous monitoring")
+    parser.add_argument("--interval", type=int, default=3600, help="Monitoring interval in seconds")
+    parser.add_argument("--no-report", action="store_true", help="Skip saving report file")
 
     args = parser.parse_args()
 
@@ -458,6 +417,7 @@ def main():
         monitor.monitor_continuously(args.interval)
     else:
         monitor.run_health_check(save_report=not args.no_report)
+
 
 if __name__ == "__main__":
     main()

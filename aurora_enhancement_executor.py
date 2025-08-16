@@ -25,10 +25,12 @@ class AuroraEnhancementExecutor:
 
         try:
             # Check PR #43 status
-            result = subprocess.run([
-                "gh", "pr", "view", "43", "--json",
-                "mergeable,mergeStateStatus,statusCheckRollup"
-            ], capture_output=True, text=True, check=False)
+            result = subprocess.run(
+                ["gh", "pr", "view", "43", "--json", "mergeable,mergeStateStatus,statusCheckRollup"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
 
             if result.returncode == 0:
                 pr_data = json.loads(result.stdout)
@@ -48,7 +50,7 @@ class AuroraEnhancementExecutor:
                 return {
                     "mergeable": mergeable == "MERGEABLE",
                     "checks_passing": success_count >= 5,  # 5/6 is acceptable
-                    "ready_for_merge": mergeable == "MERGEABLE" and success_count >= 5
+                    "ready_for_merge": mergeable == "MERGEABLE" and success_count >= 5,
                 }
 
         except Exception as e:
@@ -61,7 +63,7 @@ class AuroraEnhancementExecutor:
         print("\n⚡ Implementing automation enhancements...")
 
         # Create enhanced automation workflow
-        automation_script = '''#!/bin/bash
+        automation_script = """#!/bin/bash
 # 🔄 Aurora CloudBank Automated Enhancement Pipeline
 # Intelligent automation for continuous improvement
 
@@ -93,10 +95,10 @@ echo "⚙️ Phase 4: Enhancement Readiness Check"
 git status --porcelain | wc -l | xargs -I {} echo "Pending changes: {}"
 
 echo "✅ Automation pipeline completed successfully!"
-'''
+"""
 
         automation_path = self.project_root / "aurora_automation_pipeline.sh"
-        with open(automation_path, 'w', encoding='utf-8') as f:
+        with open(automation_path, "w", encoding="utf-8") as f:
             f.write(automation_script)
 
         # Make executable
@@ -208,7 +210,7 @@ if __name__ == "__main__":
 '''
 
         deployment_path = self.project_root / "aurora_deployment_manager_v2.py"
-        with open(deployment_path, 'w', encoding='utf-8') as f:
+        with open(deployment_path, "w", encoding="utf-8") as f:
             f.write(deployment_code)
 
         print("   ✅ Created intelligent deployment manager")
@@ -218,7 +220,7 @@ if __name__ == "__main__":
         """Generate comprehensive status report."""
         print("\n📊 Generating status report...")
 
-        pr_status = self.check_pr_status()
+        self.check_pr_status()
 
         report = """# 🚀 Aurora CloudBank Enhancement Status Report
 ## Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -256,7 +258,7 @@ if __name__ == "__main__":
 """
 
         report_path = self.project_root / f"ENHANCEMENT_STATUS_REPORT_{self.timestamp}.md"
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
 
         print(f"   ✅ Status report: {report_path.name}")
@@ -290,12 +292,13 @@ if __name__ == "__main__":
                 "automation_pipeline": str(automation_path),
                 "deployment_manager": str(deployment_path),
                 "status_report": str(report_path),
-                "pr_ready": pr_status['ready_for_merge']
+                "pr_ready": pr_status["ready_for_merge"],
             }
 
         except Exception as e:
             print(f"❌ Enhancement sequence error: {e}")
             return {"success": False, "error": str(e)}
+
 
 def main():
     """Main execution function."""
@@ -303,6 +306,7 @@ def main():
     result = executor.execute_enhancement_sequence()
 
     sys.exit(0 if result["success"] else 1)
+
 
 if __name__ == "__main__":
     main()

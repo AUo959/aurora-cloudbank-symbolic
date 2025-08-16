@@ -17,6 +17,7 @@ import re
 import subprocess
 from pathlib import Path
 
+
 class AuroraProblemResolver:
 
     def __init__(self):
@@ -38,7 +39,7 @@ class AuroraProblemResolver:
             content = re.sub(r'"([^"]*)"', r"'\1'r", content)
 
             # Fix unused message parameters
-            content = re.sub(rr'async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
+            content = re.sub(rrrr'async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
 
             with open(mesh_agent_path, 'w') as f:
                 f.write(content)
@@ -90,12 +91,12 @@ class AuroraProblemResolver:
     def apply_python_syntax_fixes(self, content):
         """Apply comprehensive Python syntax fixes""r"
         # Fix JavaScript-style syntax in Python
-        content = re.sub(rr'\)\s*\{', '):', content)  # ) { -> ):
-        content = re.sub(rr'class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
+        content = re.sub(rrr'\)\s*\{', '):', content)  # ) { -> ):
+        content = re.sub(rrrr'class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
         content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-        content = re.sub(rr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+        content = re.sub(rrr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
         content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-        content = re.sub(rr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+        content = re.sub(rrr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
 
         # Fix unclosed braces by ensuring proper dictionary/list syntax
         lines = content.split('\n')
@@ -214,7 +215,9 @@ class AuroraProblemResolver:
             handler_file = handlers_dir / f"{handler.lower()}.py"
             if not handler_file.exists():
                 handler_content = '''"""
-{handler} - Aurora CloudBank Multi-Modal Interaction
+
+
+{handler} - Aurora CloudBank Multi - Modal Interaction
 """
 
 class {handler}:
@@ -241,7 +244,7 @@ class {handler}:
         init_file = handlers_dir / "__init__.py"
         if not init_file.exists():
             init_content = '''"""
-Aurora CloudBank Multi-Modal Interaction Handlers
+Aurora CloudBank Multi - Modal Interaction Handlers
 """
 
 {chr(10).join([f"from .{handler.lower()} import {handler}" for handler in handler_classes])}

@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+from fastapi import FastAPI
+
+# !/usr/bin/env python3
 """
 Aurora CloudBank Context Updater
 Automatically updates custom instructions based on current repository state
@@ -8,6 +10,7 @@ import json
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
 
 class AuroraContextUpdater:
 
@@ -23,7 +26,7 @@ class AuroraContextUpdater:
             "test_status": self.get_test_status(),
             "missing_components": self.get_missing_components(),
             "performance_metrics": self.get_performance_metrics(),
-            "next_priorities": self.get_next_priorities()
+            "next_priorities": self.get_next_priorities(),
         }
         return status
 
@@ -31,8 +34,7 @@ class AuroraContextUpdater:
         """Get current git status"""
         try:
             result = subprocess.run(
-                ["git", "log", "--oneline", "-1"],
-                capture_output=True, text=True, cwd=self.project_root
+                ["git", "log", "--oneline", "-1"], capture_output=True, text=True, cwd=self.project_root
             )
             return result.stdout.strip()
         except Exception:
@@ -40,11 +42,7 @@ class AuroraContextUpdater:
 
     def get_test_status(self):
         """Check test framework status"""
-        test_files = [
-            "test_runner.py",
-            "run_tests.sh",
-            "tests/test_native_implementations.py"
-        ]
+        test_files = ["test_runner.py", "run_tests.sh", "tests/test_native_implementations.py"]
 
         status = {}
         for test_file in test_files:
@@ -59,7 +57,7 @@ class AuroraContextUpdater:
             "src/nodes/liora_handshake.js",
             "src/nodes/oppy_vector_loader.js",
             "src/bridge/api_bridge_server.js",
-            "src/system/lattice_sync.js"
+            "src/system/lattice_sync.js",
         ]
 
         missing = []
@@ -72,20 +70,14 @@ class AuroraContextUpdater:
     def get_performance_metrics(self):
         """Get current performance status"""
         # Check if native implementations exist
-        native_files = [
-            "src/core/native_quantum.py",
-            "src/core/native_vsa.py",
-            "src/core/native_symbolic_anchor.py"
-        ]
+        native_files = ["src/core/native_quantum.py", "src/core/native_vsa.py", "src/core/native_symbolic_anchor.py"]
 
-        native_implemented = all(
-            (self.project_root / f).exists() for f in native_files
-        )
+        native_implemented = all((self.project_root / f).exists() for f in native_files)
 
         return {
             "native_implementations": native_implemented,
             "startup_improvement": "6300x" if native_implemented else "pending",
-            "memory_reduction": "84x" if native_implemented else "pending"
+            "memory_reduction": "84x" if native_implemented else "pending",
         }
 
     def get_next_priorities(self):
@@ -96,13 +88,13 @@ class AuroraContextUpdater:
             return {
                 "priority": "agent_infrastructure",
                 "missing_count": len(missing),
-                "focus": "Implement missing agent nodes and bridge systems"
+                "focus": "Implement missing agent nodes and bridge systems",
             }
         else:
             return {
                 "priority": "integration_testing",
                 "missing_count": 0,
-                "focus": "Test agent communication and constellation mesh"
+                "focus": "Test agent communication and constellation mesh",
             }
 
     def update_instructions(self):
@@ -114,7 +106,7 @@ class AuroraContextUpdater:
         status = self.get_current_status()
 
         # Read current instructions
-        with open(self.instructions_file, 'r') as f:
+        with open(self.instructions_file, "r") as f:
             content = f.read()
 
         # Generate updated status section
@@ -128,14 +120,10 @@ class AuroraContextUpdater:
         end_idx = content.find(end_marker)
 
         if start_idx != -1 and end_idx != -1:
-            new_content = (
-                content[:start_idx] +
-                updated_status + "\n\n" +
-                content[end_idx:]
-            )
+            new_content = content[:start_idx] + updated_status + "\n\n" + content[end_idx:]
 
             # Write updated content
-            with open(self.instructions_file, 'w') as f:
+            with open(self.instructions_file, "w") as f:
                 f.write(new_content)
 
             print("✅ Custom instructions updated")
@@ -146,7 +134,7 @@ class AuroraContextUpdater:
 
     def generate_status_section(self, status):
         """Generate updated status section"""
-        missing_count = len(status["missing_components"])
+        len(status["missing_components"])
 
         section = """### Current Status (July 2025)
 - ✅ All 5 development phases completed
@@ -171,11 +159,12 @@ class AuroraContextUpdater:
         log_file = self.project_root / f"logs/aurora_context_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         log_file.parent.mkdir(exist_ok=True)
 
-        with open(log_file, 'w') as f:
+        with open(log_file, "w") as f:
             json.dump(status, f, indent=2)
 
         print(f"📊 Context log exported: {log_file}")
         return log_file
+
 
 def main():
     updater = AuroraContextUpdater()
@@ -195,6 +184,7 @@ def main():
     print(f"\n📋 Current Priority: {status['next_priorities']['priority']}")
     print(f"🎯 Focus: {status['next_priorities']['focus']}")
     print(f"⏰ Last Update: {status['timestamp'][:19]}")
+
 
 if __name__ == "__main__":
     main()

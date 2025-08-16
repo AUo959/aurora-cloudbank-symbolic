@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank Intelligent Workflow Manager
 Master orchestrator that integrates all workflow optimization systems
 """
 
-
+import argparse
+import json
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
-import json
-import sys
+
 
 class IntelligentWorkflowManager:
     """Master workflow manager that prevents failures and optimizes performance."""
 
     def __init__(self):
-        self.tools_dir = Path('tools/workflow')
-        self.failure_prevention_tool = self.tools_dir / 'aurora_failure_prevention_system.py'
-        self.optimization_tool = self.tools_dir / 'aurora_workflow_optimization_manager.py'
+        self.tools_dir = Path("tools/workflow")
+        self.failure_prevention_tool = self.tools_dir / "aurora_failure_prevention_system.py"
+        self.optimization_tool = self.tools_dir / "aurora_workflow_optimization_manager.py"
 
     def run_intelligent_workflow_cycle(self, operation_name: str = "workflow") -> Dict:
         """Run complete intelligent workflow cycle."""
@@ -36,7 +35,7 @@ class IntelligentWorkflowManager:
             "phases": {},
             "total_time_saved_minutes": 0,
             "execution_ready": False,
-            "summary": {}
+            "summary": {},
         }
 
         # Phase 1: Pre-flight validation
@@ -84,7 +83,7 @@ class IntelligentWorkflowManager:
             "execution_ready": results["execution_ready"],
             "total_time_saved_minutes": total_time_saved,
             "roi_ratio": total_time_saved / max(cycle_duration / 60, 0.1),  # Time saved vs time spent
-            "recommendation": "PROCEED" if results["execution_ready"] else "FIX_ISSUES"
+            "recommendation": "PROCEED" if results["execution_ready"] else "FIX_ISSUES",
         }
 
         self.print_cycle_summary(results)
@@ -93,12 +92,12 @@ class IntelligentWorkflowManager:
     def run_preflight_checks(self) -> Dict:
         """Run pre-flight validation checks."""
         try:
-            result = subprocess.run([
-                sys.executable, str(self.failure_prevention_tool)
-            ], capture_output=True, text=True, timeout=120)
+            result = subprocess.run(
+                [sys.executable, str(self.failure_prevention_tool)], capture_output=True, text=True, timeout=120
+            )
 
             # Parse the output for key metrics
-            output_lines = result.stdout.split('\n')
+            output_lines = result.stdout.split("\n")
             time_saved = 0
             execution_ready = result.returncode == 0
 
@@ -114,7 +113,7 @@ class IntelligentWorkflowManager:
                 "execution_ready": execution_ready,
                 "time_saved_minutes": time_saved,
                 "output": result.stdout,
-                "details": "Pre-flight validation completed"
+                "details": "Pre-flight validation completed",
             }
 
         except subprocess.TimeoutExpired:
@@ -122,25 +121,25 @@ class IntelligentWorkflowManager:
                 "status": "TIMEOUT",
                 "execution_ready": False,
                 "time_saved_minutes": 0,
-                "details": "Pre-flight check timed out"
+                "details": "Pre-flight check timed out",
             }
         except Exception as e:
             return {
                 "status": "ERROR",
                 "execution_ready": False,
                 "time_saved_minutes": 0,
-                "details": f"Pre-flight check failed: {str(e)}"
+                "details": f"Pre-flight check failed: {str(e)}",
             }
 
     def run_workflow_optimization(self) -> Dict:
         """Run comprehensive workflow optimization."""
         try:
-            result = subprocess.run([
-                sys.executable, str(self.optimization_tool)
-            ], capture_output=True, text=True, timeout=180)
+            result = subprocess.run(
+                [sys.executable, str(self.optimization_tool)], capture_output=True, text=True, timeout=180
+            )
 
             # Parse optimization results
-            output_lines = result.stdout.split('\n')
+            output_lines = result.stdout.split("\n")
             time_saved = 0
             optimizations_applied = 0
 
@@ -161,7 +160,7 @@ class IntelligentWorkflowManager:
                 "optimizations_applied": optimizations_applied,
                 "time_saved_minutes": time_saved,
                 "output": result.stdout,
-                "details": f"Applied {optimizations_applied} workflow optimizations"
+                "details": f"Applied {optimizations_applied} workflow optimizations",
             }
 
         except subprocess.TimeoutExpired:
@@ -169,14 +168,14 @@ class IntelligentWorkflowManager:
                 "status": "TIMEOUT",
                 "optimizations_applied": 0,
                 "time_saved_minutes": 0,
-                "details": "Workflow optimization timed out"
+                "details": "Workflow optimization timed out",
             }
         except Exception as e:
             return {
                 "status": "ERROR",
                 "optimizations_applied": 0,
                 "time_saved_minutes": 0,
-                "details": f"Workflow optimization failed: {str(e)}"
+                "details": f"Workflow optimization failed: {str(e)}",
             }
 
     def generate_execution_plan(self, results: Dict) -> Dict:
@@ -186,7 +185,7 @@ class IntelligentWorkflowManager:
             "confidence": 0,
             "next_steps": [],
             "risk_assessment": "UNKNOWN",
-            "estimated_success_rate": 0
+            "estimated_success_rate": 0,
         }
 
         # Analyze results to generate recommendations
@@ -194,49 +193,55 @@ class IntelligentWorkflowManager:
         total_time_saved = results.get("total_time_saved_minutes", 0)
 
         if execution_ready:
-            plan.update({
-                "recommendation": "PROCEED_WITH_CONFIDENCE",
-                "confidence": 95,
-                "risk_assessment": "LOW",
-                "estimated_success_rate": 95,
-                "next_steps": [
-                    "🚀 Execute planned workflow/operation",
-                    "📊 Monitor execution metrics",
-                    "🔄 Apply lessons learned for future runs"
-                ]
-            })
+            plan.update(
+                {
+                    "recommendation": "PROCEED_WITH_CONFIDENCE",
+                    "confidence": 95,
+                    "risk_assessment": "LOW",
+                    "estimated_success_rate": 95,
+                    "next_steps": [
+                        "🚀 Execute planned workflow/operation",
+                        "📊 Monitor execution metrics",
+                        "🔄 Apply lessons learned for future runs",
+                    ],
+                }
+            )
         elif total_time_saved > 30:
-            plan.update({
-                "recommendation": "FIX_CRITICAL_THEN_PROCEED",
-                "confidence": 80,
-                "risk_assessment": "MEDIUM",
-                "estimated_success_rate": 70,
-                "next_steps": [
-                    "🔧 Address critical issues identified",
-                    "✅ Re-run pre-flight validation",
-                    "🚀 Proceed when validation passes"
-                ]
-            })
+            plan.update(
+                {
+                    "recommendation": "FIX_CRITICAL_THEN_PROCEED",
+                    "confidence": 80,
+                    "risk_assessment": "MEDIUM",
+                    "estimated_success_rate": 70,
+                    "next_steps": [
+                        "🔧 Address critical issues identified",
+                        "✅ Re-run pre-flight validation",
+                        "🚀 Proceed when validation passes",
+                    ],
+                }
+            )
         else:
-            plan.update({
-                "recommendation": "MANUAL_REVIEW_REQUIRED",
-                "confidence": 60,
-                "risk_assessment": "HIGH",
-                "estimated_success_rate": 40,
-                "next_steps": [
-                    "👀 Manual review of identified issues",
-                    "🛠️  Apply targeted fixes",
-                    "🔄 Re-run intelligent workflow cycle"
-                ]
-            })
+            plan.update(
+                {
+                    "recommendation": "MANUAL_REVIEW_REQUIRED",
+                    "confidence": 60,
+                    "risk_assessment": "HIGH",
+                    "estimated_success_rate": 40,
+                    "next_steps": [
+                        "👀 Manual review of identified issues",
+                        "🛠️  Apply targeted fixes",
+                        "🔄 Re-run intelligent workflow cycle",
+                    ],
+                }
+            )
 
         return plan
 
     def print_cycle_summary(self, results: Dict):
         """Print comprehensive cycle summary."""
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print("🧠 INTELLIGENT WORKFLOW CYCLE SUMMARY")
-        print(f"{'='*50}")
+        print(f"{'=' * 50}")
 
         summary = results["summary"]
         execution_plan = results["phases"].get("execution_plan", {})
@@ -272,23 +277,21 @@ class IntelligentWorkflowManager:
         print("\n🎉 Intelligent workflow cycle complete!")
 
         # Save detailed results
-        report_file = (
-            f"intelligent_workflow_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
-        with open(report_file, 'w') as f:
+        report_file = f"intelligent_workflow_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        with open(report_file, "w") as f:
             json.dump(results, f, indent=2)
         print(f"📄 Detailed report saved to: {report_file}")
+
 
 def main():
     """CLI interface for intelligent workflow manager."""
 
-    parser = argparse.ArgumentParser(description='Aurora Intelligent Workflow Manager')
-    parser.add_argument('operation', nargs='?', default='general',
-                        help='Operation name (e.g., "deploy", "test", "build")')
-    parser.add_argument('--quick', action='store_true',
-                        help='Run quick validation only')
-    parser.add_argument('--force-optimize', action='store_true',
-                        help='Force optimization even if pre-flight passes')
+    parser = argparse.ArgumentParser(description="Aurora Intelligent Workflow Manager")
+    parser.add_argument(
+        "operation", nargs="?", default="general", help='Operation name (e.g., "deploy", "test", "build")'
+    )
+    parser.add_argument("--quick", action="store_true", help="Run quick validation only")
+    parser.add_argument("--force-optimize", action="store_true", help="Force optimization even if pre-flight passes")
 
     args = parser.parse_args()
 
@@ -317,6 +320,7 @@ def main():
         else:
             print(f"\n⚠️  '{args.operation}' operation needs attention before proceeding")
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

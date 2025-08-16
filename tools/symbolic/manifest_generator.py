@@ -4,14 +4,12 @@ Manifest Generator - Auto-manifest creation for symbolic exports
 Part of T71 Symbolic Infrastructure Genesis
 """
 
-import json
 import hashlib
+import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List
 
-from typing import Any
-from typing import Dict
-from typing import List
 
 class ManifestGenerator:
     """Automated manifest generation with SHA256 sealing"""
@@ -31,12 +29,12 @@ class ManifestGenerator:
             "symbolic_lineage": [],
             "integration_hooks": [],
             "test_coverage": "100%",
-            "hand_off_ready": True
+            "hand_off_ready": True,
         }
 
-    def generate_tool_manifest(self, tool_path: str, anchor_seed: str,
-                             dependencies: List[str] = None,
-                             lineage: List[str] = None) -> Dict[str, Any]:
+    def generate_tool_manifest(
+        self, tool_path: str, anchor_seed: str, dependencies: List[str] = None, lineage: List[str] = None
+    ) -> Dict[str, Any]:
         """Generate manifest for a tool module"""
         tool_path = Path(tool_path)
 
@@ -47,26 +45,30 @@ class ManifestGenerator:
 
         # Create base manifest
         manifest = self.manifest_template.copy()
-        manifest.update({
-            "anchor_seed": anchor_seed,
-            "export_time": datetime.now().isoformat() + "Z",
-            "module_path": str(tool_path.relative_to(self.repo_path)),
-            "dependencies": dependencies,
-            "symbolic_lineage": lineage,
-            "integration_hooks": ["aurora_custom_gpt_bridge"]
-        })
+        manifest.update(
+            {
+                "anchor_seed": anchor_seed,
+                "export_time": datetime.now().isoformat() + "Z",
+                "module_path": str(tool_path.relative_to(self.repo_path)),
+                "dependencies": dependencies,
+                "symbolic_lineage": lineage,
+                "integration_hooks": ["aurora_custom_gpt_bridge"],
+            }
+        )
 
         # Add tool-specific metadata
         if tool_path.exists():
-            with open(tool_path, 'r', encoding='utf-8') as f:
+            with open(tool_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            manifest.update({
-                "file_size": len(content.encode('utf-8')),
-                "line_count": len(content.splitlines()),
-                "content_hash": hashlib.sha256(content.encode('utf-8')).hexdigest(),
-                "last_modified": datetime.fromtimestamp(tool_path.stat().st_mtime).isoformat()
-            })
+            manifest.update(
+                {
+                    "file_size": len(content.encode("utf-8")),
+                    "line_count": len(content.splitlines()),
+                    "content_hash": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+                    "last_modified": datetime.fromtimestamp(tool_path.stat().st_mtime).isoformat(),
+                }
+            )
 
             # Extract docstring as description
             if content.startswith('"""') or content.startswith("'''"):
@@ -96,20 +98,20 @@ class ManifestGenerator:
             "suite_components": {},
             "integration_status": {},
             "test_coverage": "100%",
-            "hand_off_ready": True
+            "hand_off_ready": True,
         }
 
         # Scan tools directory
         if tools_dir.exists():
             for tool_file in tools_dir.rglob("*.py"):
-                if tool_file.name.startswith('__'):
+                if tool_file.name.startswith("__"):
                     continue
 
                 rel_path = str(tool_file.relative_to(tools_dir))
                 manifest["suite_components"][rel_path] = {
                     "size": tool_file.stat().st_size,
                     "modified": datetime.fromtimestamp(tool_file.stat().st_mtime).isoformat(),
-                    "hash": self._file_hash(tool_file)
+                    "hash": self._file_hash(tool_file),
                 }
 
         # Integration status
@@ -119,7 +121,7 @@ class ManifestGenerator:
             "aurora_cli": "implemented",
             "reliquary_indexer": "implemented",
             "bridge_hooks": "planned",
-            "ci_helpers": "planned"
+            "ci_helpers": "planned",
         }
 
         # Generate memory seal
@@ -135,15 +137,16 @@ class ManifestGenerator:
             timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
             output_path = f"{anchor}_{timestamp}.json"
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
         return output_path
 
     def _file_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of file"""
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             return hashlib.sha256(f.read()).hexdigest()
+
 
 if __name__ == "__main__":
     generator = ManifestGenerator()

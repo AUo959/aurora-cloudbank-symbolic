@@ -11,11 +11,13 @@ Basic test for T71 Symbolic Infrastructure tools
 """
 
 
-# Add tools to path
-from pathlib import Path
 import sys
 
+# Add tools to path
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
+
 
 def test_anchor_tracker():
     """Test anchor tracker functionality"""
@@ -32,6 +34,7 @@ def test_anchor_tracker():
     assert len(lineages) >= 0, "Lineage building should work"
 
     print("✅ Anchor Tracker tests passed")
+
 
 def test_memory_sealer():
     """Test memory sealing functionality"""
@@ -52,6 +55,7 @@ def test_memory_sealer():
 
     print("✅ Memory Sealer tests passed")
 
+
 def test_cli_integration():
     """Test CLI integration"""
     print("🖥️  Testing CLI Integration...")
@@ -63,10 +67,10 @@ def test_cli_integration():
 
     print("✅ CLI Integration tests passed")
 
+
 def test_manifest_generator():
     """Test manifest generation"""
     print("📄 Testing Manifest Generator...")
-
 
     generator = ManifestGenerator(".")
 
@@ -76,6 +80,7 @@ def test_manifest_generator():
     assert "memory_seal" in manifest, "Manifest should have memory seal"
 
     print("✅ Manifest Generator tests passed")
+
 
 def main():
     """Run all tests"""
@@ -94,6 +99,7 @@ def main():
         print(f"\n❌ Test failed: {e}")
         traceback.print_exc()
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

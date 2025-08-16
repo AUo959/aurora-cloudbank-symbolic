@@ -8,11 +8,13 @@ Test the FastAPI application
 """
 
 
-# Add project root to path
-from pathlib import Path
 import sys
 
+# Add project root to path
+from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent))
+
 
 def test_api_imports():
     """Test that all API imports work"""
@@ -36,6 +38,7 @@ def test_api_imports():
     except Exception as e:
         print(f"❌ Import failed: {e}")
         return False
+
 
 def test_opal2_structure():
     """Test Opal2 module structure"""
@@ -66,6 +69,7 @@ def test_opal2_structure():
         print("❌ opal2_api.py missing")
 
     print("\n📊 Module structure check complete")
+
 
 if __name__ == "__main__":
     success = test_api_imports()

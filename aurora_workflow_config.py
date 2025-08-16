@@ -8,13 +8,12 @@ Manages workflow configurations, environments, and deployment settings
 """
 
 
-from datetime import datetime
-from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import Optional
 import logging
 import os
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
+
 
 class AuroraWorkflowConfig:
     """Manages Aurora CloudBank workflow configurations"""
@@ -41,42 +40,27 @@ class AuroraWorkflowConfig:
                 "version": "1.0.0",
                 "description": "Optimal workflow for Aurora CloudBank deployment",
                 "author": "Aurora CloudBank Team",
-                "created": datetime.now().isoformat()
+                "created": datetime.now().isoformat(),
             },
             "phases": {
                 "initialize": {
                     "enabled": True,
                     "timeout": 300,
                     "retry_count": 3,
-                    "health_checks": [
-                        "system_resources",
-                        "network_connectivity",
-                        "disk_space",
-                        "dependencies"
-                    ]
+                    "health_checks": ["system_resources", "network_connectivity", "disk_space", "dependencies"],
                 },
                 "deploy": {
                     "enabled": True,
                     "timeout": 600,
                     "retry_count": 2,
                     "strategy": "rolling",
-                    "services": [
-                        "quantum-core",
-                        "multi-agent",
-                        "research-hub",
-                        "av-system"
-                    ]
+                    "services": ["quantum-core", "multi-agent", "research-hub", "av-system"],
                 },
                 "monitor": {
                     "enabled": True,
                     "interval": 30,
                     "metrics_retention": "7d",
-                    "alert_thresholds": {
-                        "cpu_usage": 80,
-                        "memory_usage": 85,
-                        "disk_usage": 90,
-                        "response_time": 5000
-                    }
+                    "alert_thresholds": {"cpu_usage": 80, "memory_usage": 85, "disk_usage": 90, "response_time": 5000},
                 },
                 "scale": {
                     "enabled": True,
@@ -84,14 +68,14 @@ class AuroraWorkflowConfig:
                     "min_instances": 1,
                     "max_instances": 10,
                     "scale_up_threshold": 70,
-                    "scale_down_threshold": 30
+                    "scale_down_threshold": 30,
                 },
                 "maintain": {
                     "enabled": True,
                     "backup_interval": "24h",
                     "cleanup_interval": "7d",
-                    "security_scan_interval": "24h"
-                }
+                    "security_scan_interval": "24h",
+                },
             },
             "services": {
                 "quantum-core": {
@@ -100,7 +84,7 @@ class AuroraWorkflowConfig:
                     "cpu_limit": "1000m",
                     "memory_limit": "2Gi",
                     "health_check": "/health",
-                    "startup_timeout": 60
+                    "startup_timeout": 60,
                 },
                 "multi-agent": {
                     "port": 8002,
@@ -108,7 +92,7 @@ class AuroraWorkflowConfig:
                     "cpu_limit": "500m",
                     "memory_limit": "1Gi",
                     "health_check": "/status",
-                    "startup_timeout": 45
+                    "startup_timeout": 45,
                 },
                 "research-hub": {
                     "port": 8003,
@@ -116,7 +100,7 @@ class AuroraWorkflowConfig:
                     "cpu_limit": "2000m",
                     "memory_limit": "4Gi",
                     "health_check": "/api/health",
-                    "startup_timeout": 90
+                    "startup_timeout": 90,
                 },
                 "av-system": {
                     "port": 8004,
@@ -124,75 +108,44 @@ class AuroraWorkflowConfig:
                     "cpu_limit": "1500m",
                     "memory_limit": "3Gi",
                     "health_check": "/health",
-                    "startup_timeout": 75
-                }
+                    "startup_timeout": 75,
+                },
             },
             "networking": {
                 "load_balancer": {
                     "enabled": True,
                     "algorithm": "round_robin",
                     "health_check_interval": 10,
-                    "ssl_termination": True
+                    "ssl_termination": True,
                 },
-                "service_mesh": {
-                    "enabled": True,
-                    "encryption": "tls_1_3",
-                    "tracing": True,
-                    "metrics": True
-                }
+                "service_mesh": {"enabled": True, "encryption": "tls_1_3", "tracing": True, "metrics": True},
             },
             "security": {
-                "authentication": {
-                    "method": "oauth2",
-                    "token_expiry": "1h",
-                    "refresh_enabled": True
-                },
-                "encryption": {
-                    "data_at_rest": "aes_256",
-                    "data_in_transit": "tls_1_3",
-                    "quantum_safe": True
-                },
-                "compliance": {
-                    "gdpr": True,
-                    "sox": True,
-                    "hipaa": False
-                }
+                "authentication": {"method": "oauth2", "token_expiry": "1h", "refresh_enabled": True},
+                "encryption": {"data_at_rest": "aes_256", "data_in_transit": "tls_1_3", "quantum_safe": True},
+                "compliance": {"gdpr": True, "sox": True, "hipaa": False},
             },
             "monitoring": {
-                "metrics": {
-                    "enabled": True,
-                    "provider": "prometheus",
-                    "scrape_interval": "15s",
-                    "retention": "15d"
-                },
-                "logging": {
-                    "enabled": True,
-                    "level": "INFO",
-                    "format": "json",
-                    "retention": "30d"
-                },
-                "alerting": {
-                    "enabled": True,
-                    "channels": ["email", "slack"],
-                    "escalation_policy": "tiered"
-                }
+                "metrics": {"enabled": True, "provider": "prometheus", "scrape_interval": "15s", "retention": "15d"},
+                "logging": {"enabled": True, "level": "INFO", "format": "json", "retention": "30d"},
+                "alerting": {"enabled": True, "channels": ["email", "slack"], "escalation_policy": "tiered"},
             },
             "environment": {
                 "name": "production",
                 "region": "us-east-1",
                 "availability_zones": ["us-east-1a", "us-east-1b"],
-                "backup_region": "us-west-2"
-            }
+                "backup_region": "us-west-2",
+            },
         }
 
     def load_environment_config(self):
         """Load environment-specific configuration overrides"""
-        env = os.getenv('AURORA_ENV', 'development')
+        env = os.getenv("AURORA_ENV", "development")
         env_config_file = self.config_dir / f"{env}.yaml"
 
         if env_config_file.exists():
             try:
-                with open(env_config_file, 'r') as f:
+                with open(env_config_file, "r") as f:
                     env_config = yaml.safe_load(f)
                     self.merge_config(self.config, env_config)
                     self.logger.info(f"Loaded environment config: {env}")
@@ -212,7 +165,7 @@ class AuroraWorkflowConfig:
         """Save current configuration to file"""
         config_file = self.config_dir / filename
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             yaml.dump(self.config, f, default_flow_style=False, indent=2)
 
         self.logger.info(f"Configuration saved to {config_file}")
@@ -262,36 +215,22 @@ class AuroraWorkflowConfig:
             services[service_name] = {
                 "build": f"./services/{service_name}",
                 "ports": [f"{service_config['port']}:{service_config['port']}"],
-                "environment": [
-                    f"PORT={service_config['port']}",
-                    "AURORA_ENV=${AURORA_ENV:-production}"
-                ],
+                "environment": [f"PORT={service_config['port']}", "AURORA_ENV=${AURORA_ENV:-production}"],
                 "deploy": {
                     "replicas": service_config["replicas"],
                     "resources": {
-                        "limits": {
-                            "cpus": service_config["cpu_limit"],
-                            "memory": service_config["memory_limit"]
-                        }
-                    }
+                        "limits": {"cpus": service_config["cpu_limit"], "memory": service_config["memory_limit"]}
+                    },
                 },
                 "healthcheck": {
                     "test": f"curl -f http://localhost:{service_config['port']}{service_config['health_check']} || exit 1",
                     "interval": "30s",
                     "timeout": "10s",
-                    "retries": 3
-                }
+                    "retries": 3,
+                },
             }
 
-        compose_config = {
-            "version": "3.8",
-            "services": services,
-            "networks": {
-                "aurora-network": {
-                    "driver": "bridge"
-                }
-            }
-        }
+        compose_config = {"version": "3.8", "services": services, "networks": {"aurora-network": {"driver": "bridge"}}}
 
         return yaml.dump(compose_config, default_flow_style=False)
 
@@ -306,49 +245,38 @@ class AuroraWorkflowConfig:
                 "kind": "Deployment",
                 "metadata": {
                     "name": f"aurora-{service_name}",
-                    "labels": {
-                        "app": service_name,
-                        "component": "aurora-cloudbank"
-                    }
+                    "labels": {"app": service_name, "component": "aurora-cloudbank"},
                 },
                 "spec": {
                     "replicas": service_config["replicas"],
-                    "selector": {
-                        "matchLabels": {
-                            "app": service_name
-                        }
-                    },
+                    "selector": {"matchLabels": {"app": service_name}},
                     "template": {
-                        "metadata": {
-                            "labels": {
-                                "app": service_name
-                            }
-                        },
+                        "metadata": {"labels": {"app": service_name}},
                         "spec": {
-                            "containers": [{
-                                "name": service_name,
-                                "image": f"aurora/{service_name}:latest",
-                                "ports": [{
-                                    "containerPort": service_config["port"]
-                                }],
-                                "resources": {
-                                    "limits": {
-                                        "cpu": service_config["cpu_limit"],
-                                        "memory": service_config["memory_limit"]
-                                    }
-                                },
-                                "livenessProbe": {
-                                    "httpGet": {
-                                        "path": service_config["health_check"],
-                                        "port": service_config["port"]
+                            "containers": [
+                                {
+                                    "name": service_name,
+                                    "image": f"aurora/{service_name}:latest",
+                                    "ports": [{"containerPort": service_config["port"]}],
+                                    "resources": {
+                                        "limits": {
+                                            "cpu": service_config["cpu_limit"],
+                                            "memory": service_config["memory_limit"],
+                                        }
                                     },
-                                    "initialDelaySeconds": 30,
-                                    "periodSeconds": 10
+                                    "livenessProbe": {
+                                        "httpGet": {
+                                            "path": service_config["health_check"],
+                                            "port": service_config["port"],
+                                        },
+                                        "initialDelaySeconds": 30,
+                                        "periodSeconds": 10,
+                                    },
                                 }
-                            }]
-                        }
-                    }
-                }
+                            ]
+                        },
+                    },
+                },
             }
 
             manifests[f"{service_name}-deployment.yaml"] = yaml.dump(manifest, default_flow_style=False)
@@ -357,38 +285,24 @@ class AuroraWorkflowConfig:
 
     def create_environment_template(self, environment: str):
         """Create environment-specific configuration template"""
-        env_config = {
-            "workflow": {
-                "name": f"aurora-cloudbank-{environment}"
-            },
-            "environment": {
-                "name": environment
-            }
-        }
+        env_config = {"workflow": {"name": f"aurora-cloudbank-{environment}"}, "environment": {"name": environment}}
 
         # Environment-specific overrides
         if environment == "development":
-            env_config["services"] = {
-                service: {"replicas": 1} for service in self.config["services"]
-            }
-            env_config["monitoring"] = {
-                "logging": {"level": "DEBUG"}
-            }
+            env_config["services"] = {service: {"replicas": 1} for service in self.config["services"]}
+            env_config["monitoring"] = {"logging": {"level": "DEBUG"}}
         elif environment == "staging":
-            env_config["services"] = {
-                service: {"replicas": 2} for service in self.config["services"]
-            }
+            env_config["services"] = {service: {"replicas": 2} for service in self.config["services"]}
         elif environment == "production":
-            env_config["security"] = {
-                "compliance": {"gdpr": True, "sox": True}
-            }
+            env_config["security"] = {"compliance": {"gdpr": True, "sox": True}}
 
         # Save template
         template_file = self.config_dir / f"{environment}.yaml"
-        with open(template_file, 'w') as f:
+        with open(template_file, "w") as f:
             yaml.dump(env_config, f, default_flow_style=False, indent=2)
 
         self.logger.info(f"Created environment template: {template_file}")
+
 
 def main():
     """Main configuration manager CLI"""
@@ -418,7 +332,7 @@ def main():
 
     if args.generate_docker:
         compose_config = config_manager.generate_docker_compose()
-        with open("docker-compose.yml", 'w') as f:
+        with open("docker-compose.yml", "w") as f:
             f.write(compose_config)
         print("✅ Docker Compose configuration generated")
 
@@ -426,13 +340,14 @@ def main():
         manifests = config_manager.generate_kubernetes_manifests()
         os.makedirs("k8s", exist_ok=True)
         for filename, content in manifests.items():
-            with open(f"k8s/{filename}", 'w') as f:
+            with open(f"k8s/{filename}", "w") as f:
                 f.write(content)
         print(f"✅ Generated {len(manifests)} Kubernetes manifests")
 
     if args.create_env:
         config_manager.create_environment_template(args.create_env)
         print(f"✅ Created environment template for {args.create_env}")
+
 
 if __name__ == "__main__":
     main()

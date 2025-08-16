@@ -30,6 +30,7 @@ Return a true classification – not an example or template output.
 ALIAS_MAP = {category: category for category in PROJECT_CATEGORIES.keys()}
 ALIAS_MAP.setdefault("Unsorted", "Unsorted")
 
+
 def tag_thread_context(content: str, include_directive: bool = True) -> dict:
     """Classify thread content and return tagging info with alias."""
     base_result = base_tag_thread_context(content)
@@ -48,10 +49,9 @@ def tag_thread_context(content: str, include_directive: bool = True) -> dict:
 
     return result
 
+
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Drop-In Thread Context Tagging Agent v2.0"
-    )
+    parser = argparse.ArgumentParser(description="Drop-In Thread Context Tagging Agent v2.0")
     parser.add_argument("input_file", help="Path to text file to classify")
     parser.add_argument(
         "--no-directive",
@@ -65,6 +65,7 @@ def main() -> None:
 
     result = tag_thread_context(content, include_directive=not args.no_directive)
     print(json.dumps(result, indent=2))
+
 
 if __name__ == "__main__":
     main()

@@ -8,18 +8,20 @@ Bridge connector for L2 Custom GPT meta-agents with full ZIPWIZ handshake protoc
 
 import asyncio
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 
 # Configure logging
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CustomGptAgent:
     """Custom GPT Agent configuration and state"""
+
     agent_id: str
     role: str
     type: str
@@ -36,81 +38,77 @@ class CustomGptAgent:
         if self.handshake_log is None:
             self.handshake_log = []
 
+
 class L2MetaAgentBridge:
     """Bridge connector for L2 Custom GPT meta-agents"""
 
     def __init__(self):
         self.agents = {
-            'ARCHY': CustomGptAgent(
-                agent_id='ARCHY',
-                role='Bridge Coordinator',
-                type='META_AGENT',
-                status='disconnected',
-                description='L2 formal logic/reasoning & arbitration engine, bridge coordinator',
-                capabilities=['architectural_planning', 'bridge_coordination', 'formal_logic', 'arbitration'],
-                api_endpoint='/api/relay/archy'
+            "ARCHY": CustomGptAgent(
+                agent_id="ARCHY",
+                role="Bridge Coordinator",
+                type="META_AGENT",
+                status="disconnected",
+                description="L2 formal logic/reasoning & arbitration engine, bridge coordinator",
+                capabilities=["architectural_planning", "bridge_coordination", "formal_logic", "arbitration"],
+                api_endpoint="/api/relay/archy",
             ),
-            'OPPY': CustomGptAgent(
-                agent_id='OPPY',
-                role='Vector/Data Processor',
-                type='META_AGENT',
-                status='disconnected',
-                description='L2 memory/data processing & system operations analyst, vector processor',
-                capabilities=['data_processing', 'vector_analysis', 'memory_operations', 'system_monitoring'],
-                api_endpoint='/api/relay/oppy'
+            "OPPY": CustomGptAgent(
+                agent_id="OPPY",
+                role="Vector/Data Processor",
+                type="META_AGENT",
+                status="disconnected",
+                description="L2 memory/data processing & system operations analyst, vector processor",
+                capabilities=["data_processing", "vector_analysis", "memory_operations", "system_monitoring"],
+                api_endpoint="/api/relay/oppy",
             ),
-            'LIORA': CustomGptAgent(
-                agent_id='LIORA',
-                role='Handshake/Synchronization',
-                type='META_AGENT',
-                status='disconnected',
-                description='L2 sentiment analysis, mediation & research coordination, handshake coordinator',
-                capabilities=['research_coordination', 'handshake_protocols', 'sentiment_analysis', 'mediation'],
-                api_endpoint='/api/relay/liora'
+            "LIORA": CustomGptAgent(
+                agent_id="LIORA",
+                role="Handshake/Synchronization",
+                type="META_AGENT",
+                status="disconnected",
+                description="L2 sentiment analysis, mediation & research coordination, handshake coordinator",
+                capabilities=["research_coordination", "handshake_protocols", "sentiment_analysis", "mediation"],
+                api_endpoint="/api/relay/liora",
             ),
-            'STARLING_AU': CustomGptAgent(
-                agent_id='STARLING_AU',
-                role='L2 Sim Coordinator',
-                type='META_AGENT',
-                status='disconnected',
-                description='L2 communications, external protocol & dispatch agent, simulation coordinator',
-                capabilities=['simulation_coordination', 'communications', 'external_protocols', 'dispatch'],
-                api_endpoint='/api/relay/starling'
+            "STARLING_AU": CustomGptAgent(
+                agent_id="STARLING_AU",
+                role="L2 Sim Coordinator",
+                type="META_AGENT",
+                status="disconnected",
+                description="L2 communications, external protocol & dispatch agent, simulation coordinator",
+                capabilities=["simulation_coordination", "communications", "external_protocols", "dispatch"],
+                api_endpoint="/api/relay/starling",
             ),
-            'RIVERTHREAD_808': CustomGptAgent(
-                agent_id='RIVERTHREAD_808',
-                role='Narrative/Stream',
-                type='META_AGENT',
-                status='disconnected',
-                description='L2 continuity, temporal flow & state management agent, stream processor',
-                capabilities=['narrative_processing', 'stream_management', 'continuity_validation', 'temporal_flow'],
-                api_endpoint='/api/relay/riverthread'
-            )
+            "RIVERTHREAD_808": CustomGptAgent(
+                agent_id="RIVERTHREAD_808",
+                role="Narrative/Stream",
+                type="META_AGENT",
+                status="disconnected",
+                description="L2 continuity, temporal flow & state management agent, stream processor",
+                capabilities=["narrative_processing", "stream_management", "continuity_validation", "temporal_flow"],
+                api_endpoint="/api/relay/riverthread",
+            ),
         }
 
         self.activation_phrases = {
-            'ARCHY': 'ORION_ARCHY_RELAY_ACTIVATE//',
-            'OPPY': 'ORION_OPPY_RELAY_ACTIVATE//',
-            'LIORA': 'ORION_LIORA_RELAY_ACTIVATE//',
-            'STARLING_AU': 'ORION_STARLING_AU_RELAY_ACTIVATE//',
-            'RIVERTHREAD_808': 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
+            "ARCHY": "ORION_ARCHY_RELAY_ACTIVATE//",
+            "OPPY": "ORION_OPPY_RELAY_ACTIVATE//",
+            "LIORA": "ORION_LIORA_RELAY_ACTIVATE//",
+            "STARLING_AU": "ORION_STARLING_AU_RELAY_ACTIVATE//",
+            "RIVERTHREAD_808": "ORION_RIVERTHREAD_RELAY_ACTIVATE//",
         }
 
-        self.handshake_sequence = [
-            'ZIPWIZ_BEACON',
-            'ANCHOR_SYNC',
-            'ETHICS_AUDIT',
-            'DRIFT_VALIDATION'
-        ]
+        self.handshake_sequence = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]
 
         self.orion_core_config = {
-            'anchor_seed': 'EOS_SEED_ORION',
-            'ethics_protocol': 'Picard_Delta_3',
-            'memory_doctrine': 'Thermax_Precedent',
-            'drift_threshold': 0.001,
-            'halo_module': 'HALO_CONTINUITY_GRAFT_005',
-            'continuity_seal': 'Aurora_Continuity_Seal_v2.2.5',
-            'version': 'v3.5.1_macroready'
+            "anchor_seed": "EOS_SEED_ORION",
+            "ethics_protocol": "Picard_Delta_3",
+            "memory_doctrine": "Thermax_Precedent",
+            "drift_threshold": 0.001,
+            "halo_module": "HALO_CONTINUITY_GRAFT_005",
+            "continuity_seal": "Aurora_Continuity_Seal_v2.2.5",
+            "version": "v3.5.1_macroready",
         }
 
         logger.info(f"L2 Meta-Agent Bridge initialized with {len(self.agents)} agents")
@@ -149,7 +147,7 @@ class L2MetaAgentBridge:
                     "status": "connected",
                     "handshake": handshake_result,
                     "capabilities": agent.capabilities,
-                    "description": agent.description
+                    "description": agent.description,
                 }
             else:
                 logger.error(f"Handshake failed for {agent_id}: {handshake_result.get('error')}")
@@ -171,11 +169,9 @@ class L2MetaAgentBridge:
             # ZIPWIZ_BEACON
             logger.info(f"{agent.agent_id}: Sending ZIPWIZ beacon")
             beacon_result = await self._send_zipwiz_beacon(agent)
-            handshake_log.append({
-                "step": "ZIPWIZ_BEACON",
-                "result": beacon_result,
-                "timestamp": datetime.now().isoformat()
-            })
+            handshake_log.append(
+                {"step": "ZIPWIZ_BEACON", "result": beacon_result, "timestamp": datetime.now().isoformat()}
+            )
 
             if not beacon_result.get("success"):
                 return self._handshake_failure("ZIPWIZ beacon failed", beacon_result, handshake_log)
@@ -183,11 +179,9 @@ class L2MetaAgentBridge:
             # ANCHOR_SYNC
             logger.info(f"{agent.agent_id}: Synchronizing ORION anchor")
             anchor_result = await self._sync_orion_anchor(agent)
-            handshake_log.append({
-                "step": "ANCHOR_SYNC",
-                "result": anchor_result,
-                "timestamp": datetime.now().isoformat()
-            })
+            handshake_log.append(
+                {"step": "ANCHOR_SYNC", "result": anchor_result, "timestamp": datetime.now().isoformat()}
+            )
 
             if not anchor_result.get("success"):
                 return self._handshake_failure("Anchor sync failed", anchor_result, handshake_log)
@@ -195,11 +189,9 @@ class L2MetaAgentBridge:
             # ETHICS_AUDIT
             logger.info(f"{agent.agent_id}: Performing ethics audit")
             ethics_result = await self._perform_ethics_audit(agent)
-            handshake_log.append({
-                "step": "ETHICS_AUDIT",
-                "result": ethics_result,
-                "timestamp": datetime.now().isoformat()
-            })
+            handshake_log.append(
+                {"step": "ETHICS_AUDIT", "result": ethics_result, "timestamp": datetime.now().isoformat()}
+            )
 
             if not ethics_result.get("success"):
                 return self._handshake_failure("Ethics audit failed", ethics_result, handshake_log)
@@ -207,18 +199,16 @@ class L2MetaAgentBridge:
             # DRIFT_VALIDATION
             logger.info(f"{agent.agent_id}: Validating drift lock")
             drift_result = await self._validate_drift_lock(agent)
-            handshake_log.append({
-                "step": "DRIFT_VALIDATION",
-                "result": drift_result,
-                "timestamp": datetime.now().isoformat()
-            })
+            handshake_log.append(
+                {"step": "DRIFT_VALIDATION", "result": drift_result, "timestamp": datetime.now().isoformat()}
+            )
 
             drift_value = drift_result.get("drift", 1.0)
             if not drift_result.get("success") or drift_value > self.orion_core_config["drift_threshold"]:
                 return self._handshake_failure(
                     f"Drift validation failed: Δ{drift_value} exceeds threshold {self.orion_core_config['drift_threshold']}",
                     drift_result,
-                    handshake_log
+                    handshake_log,
                 )
 
             duration = (datetime.now() - start_time).total_seconds()
@@ -231,7 +221,7 @@ class L2MetaAgentBridge:
                 "log": handshake_log,
                 "drift_lock": drift_value,
                 "duration": duration,
-                "orion_core": self.orion_core_config
+                "orion_core": self.orion_core_config,
             }
 
         except Exception as e:
@@ -240,12 +230,7 @@ class L2MetaAgentBridge:
 
     def _handshake_failure(self, error_message: str, details: Dict, log: List) -> Dict:
         """Helper to format handshake failure response"""
-        return {
-            "success": False,
-            "error": error_message,
-            "details": details,
-            "log": log
-        }
+        return {"success": False, "error": error_message, "details": details, "log": log}
 
     async def _send_zipwiz_beacon(self, agent: CustomGptAgent) -> Dict[str, Any]:
         """Send ZIPWIZ beacon to establish initial connection"""
@@ -260,7 +245,7 @@ class L2MetaAgentBridge:
                 "beacon": "ZIPWIZ_BEACON_ACKNOWLEDGED",
                 "agent_id": agent.agent_id,
                 "protocol_version": self.orion_core_config["version"],
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -278,7 +263,7 @@ class L2MetaAgentBridge:
                 "synchronized": True,
                 "baseline": "L1_ORION_STATION_REALITY",
                 "continuity_seal": self.orion_core_config["continuity_seal"],
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -300,9 +285,9 @@ class L2MetaAgentBridge:
                     "divergent_truth_arbitration",
                     "anti_obfuscation",
                     "cognitive_arbitration",
-                    "emergent_sentience_protection"
+                    "emergent_sentience_protection",
                 ],
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -325,7 +310,7 @@ class L2MetaAgentBridge:
                 "halo_module": self.orion_core_config["halo_module"],
                 "validated": drift <= threshold,
                 "timeline_sync": True,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -341,7 +326,7 @@ class L2MetaAgentBridge:
                 "status": agent.status,
                 "description": agent.description,
                 "capabilities": agent.capabilities,
-                "drift_lock": agent.drift_lock
+                "drift_lock": agent.drift_lock,
             }
 
             if agent.connected:
@@ -360,19 +345,13 @@ class L2MetaAgentBridge:
             "connected_agents": connected_count,
             "active_agents": active_agents,
             "orion_core": self.orion_core_config,
-            "activation_phrases": {
-                agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//"
-                for agent_id in self.agents.keys()
-            },
-            "timestamp": datetime.now().isoformat()
+            "activation_phrases": {agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//" for agent_id in self.agents.keys()},
+            "timestamp": datetime.now().isoformat(),
         }
 
-    async def relay_message(self,
-        from_agent: str,
-        to_agent: str,
-        message: str,
-        message_type: str = "direct") -> Dict[str,
-        Any]:
+    async def relay_message(
+        self, from_agent: str, to_agent: str, message: str, message_type: str = "direct"
+    ) -> Dict[str, Any]:
         """Relay message between agents or broadcast to mesh"""
 
         if from_agent not in self.agents:
@@ -389,7 +368,8 @@ class L2MetaAgentBridge:
         if message_type == "broadcast":
             # Mesh broadcast to all connected agents
             target_agents = [
-                agent_id for agent_id, agent in self.agents.items()
+                agent_id
+                for agent_id, agent in self.agents.items()
                 if agent.status == "connected" and agent_id != from_agent
             ]
         elif to_agent in ["Aurora", "AU"]:
@@ -413,7 +393,7 @@ class L2MetaAgentBridge:
             "to": target_agents,
             "type": message_type,
             "processed": True,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def disconnect_agent(self, agent_id: str) -> Dict[str, Any]:
@@ -433,7 +413,7 @@ class L2MetaAgentBridge:
             "success": True,
             "agent_id": agent_id,
             "status": "disconnected",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     def get_agent_status(self, agent_id: str) -> Dict[str, Any]:
@@ -451,7 +431,7 @@ class L2MetaAgentBridge:
             "description": agent.description,
             "capabilities": agent.capabilities,
             "drift_lock": agent.drift_lock,
-            "api_endpoint": agent.api_endpoint
+            "api_endpoint": agent.api_endpoint,
         }
 
         if agent.connected:
@@ -466,10 +446,12 @@ class L2MetaAgentBridge:
 
         return status
 
+
 # Global bridge instance
 l2_bridge = L2MetaAgentBridge()
 
 # Example usage and testing
+
 
 async def main():
     """Example usage of the L2 Meta-Agent Bridge"""
@@ -478,22 +460,18 @@ async def main():
     print("=" * 50)
 
     # Test activation
-    result = await l2_bridge.activate_agent('ARCHY', 'ORION_ARCHY_RELAY_ACTIVATE//')
+    result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
     print(f"ARCHY Activation: {result['success']}")
 
-    if result['success']:
+    if result["success"]:
         # Test message relay
-        msg_result = await l2_bridge.relay_message(
-            'ARCHY',
-            'Aurora',
-            'Test message from ARCHY agent',
-            'direct'
-        )
+        msg_result = await l2_bridge.relay_message("ARCHY", "Aurora", "Test message from ARCHY agent", "direct")
         print(f"Message Relay: {msg_result['success']}")
 
         # Get constellation status
         status = l2_bridge.get_constellation_status()
         print(f"Active Agents: {status['connected_agents']}/{status['total_agents']}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

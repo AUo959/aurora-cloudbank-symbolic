@@ -2,11 +2,12 @@
 NeuralInterfaceHandler - Aurora CloudBank Multi-Modal Interaction
 """
 
+
 class NeuralInterfaceHandler:
     """Placeholder implementation for NeuralInterfaceHandler"""
 
     def __init__(self):
-        self.status = 'active'
+        self.status = "active"
         self.capabilities = []
 
     async def initialize(self):

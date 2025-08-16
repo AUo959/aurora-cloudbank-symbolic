@@ -14,15 +14,14 @@ Built for consistency, clarity, and care.
 """
 
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
 import json
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ArchiveAnalysis:
@@ -40,6 +39,7 @@ class ArchiveAnalysis:
     structure_depth: int
     potential_issues: List[str]
     recommendations: List[str]
+
 
 class ZIPWiz:
     """Advanced ZIP archive management and optimization."""
@@ -144,9 +144,7 @@ class ZIPWiz:
 
                 # Calculate compression ratio
                 if analysis.total_size > 0:
-                    analysis.compression_ratio = (
-                        analysis.compressed_size / analysis.total_size
-                    )
+                    analysis.compression_ratio = analysis.compressed_size / analysis.total_size
 
                 # Generate issues and recommendations
                 analysis.potential_issues = self._identify_issues(analysis)
@@ -168,14 +166,10 @@ class ZIPWiz:
             issues.append("Poor compression ratio - files may already be compressed")
 
         if analysis.structure_depth > 8:
-            issues.append(
-                "Very deep directory structure - may be difficult to navigate"
-            )
+            issues.append("Very deep directory structure - may be difficult to navigate")
 
         if len(analysis.duplicate_files) > 0:
-            issues.append(
-                f"Found {len(analysis.duplicate_files)} sets of duplicate files"
-            )
+            issues.append(f"Found {len(analysis.duplicate_files)} sets of duplicate files")
 
         if len(analysis.large_files) > 0:
             issues.append(f"Contains {len(analysis.large_files)} large files (>10MB)")
@@ -205,9 +199,7 @@ class ZIPWiz:
             recommendations.append("Extract and organize nested archives")
 
         if analysis.file_count > 1000:
-            recommendations.append(
-                "Consider splitting into smaller, topic-specific archives"
-            )
+            recommendations.append("Consider splitting into smaller, topic-specific archives")
 
         # Suggest organization by file type
         type_count = len(analysis.file_types)
@@ -216,9 +208,7 @@ class ZIPWiz:
 
         return recommendations
 
-    def extract_with_optimization(
-        self, archive_path: Path, target_dir: Path
-    ) -> Dict[str, Any]:
+    def extract_with_optimization(self, archive_path: Path, target_dir: Path) -> Dict[str, Any]:
         """Extract archive with intelligent optimization and organization."""
         logger.info(f"Extracting and optimizing: {archive_path}")
 
@@ -255,9 +245,7 @@ class ZIPWiz:
                 for nested_archive in analysis.nested_archives:
                     nested_path = extract_dir / nested_archive
                     if nested_path.exists():
-                        nested_extract_dir = (
-                            nested_path.parent / f"{nested_path.stem}_extracted"
-                        )
+                        nested_extract_dir = nested_path.parent / f"{nested_path.stem}_extracted"
                         try:
                             if nested_path.suffix.lower() == ".zip":
                                 with zipfile.ZipFile(nested_path, "r") as nested_zf:
@@ -265,9 +253,7 @@ class ZIPWiz:
                                 nested_path.unlink()  # Remove original nested archive
                                 optimization_log["nested_archives_processed"] += 1
                         except (OSError, ValueError, RuntimeError) as e:
-                            logger.warning(
-                                f"Could not extract nested archive {nested_archive}: {e}"
-                            )
+                            logger.warning(f"Could not extract nested archive {nested_archive}: {e}")
 
                 # Intelligent reorganization
                 self._reorganize_by_type(extract_dir, optimization_log)
@@ -285,7 +271,6 @@ class ZIPWiz:
 
     def _reorganize_by_type(self, directory: Path, optimization_log: Dict[str, Any]):
         """Reorganize files by type within the directory."""
-        type_dirs = {}
 
         for file_path in directory.rglob("*"):
             if not file_path.is_file():
@@ -345,22 +330,15 @@ class ZIPWiz:
         }
 
         try:
-            with zipfile.ZipFile(
-                output_path, "w", zipfile.ZIP_DEFLATED, compresslevel=compression_level
-            ) as zf:
+            with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED, compresslevel=compression_level) as zf:
 
                 for file_path in source_dir.rglob("*"):
                     if not file_path.is_file():
                         continue
 
                     # Check if file should be skipped
-                    if any(
-                        pattern.replace("*", "") in file_path.name
-                        for pattern in skip_patterns
-                    ):
-                        stats["skipped_files"].append(
-                            str(file_path.relative_to(source_dir))
-                        )
+                    if any(pattern.replace("*", "") in file_path.name for pattern in skip_patterns):
+                        stats["skipped_files"].append(str(file_path.relative_to(source_dir)))
                         continue
 
                     relative_path = file_path.relative_to(source_dir)
@@ -371,9 +349,7 @@ class ZIPWiz:
 
             stats["compressed_size"] = output_path.stat().st_size
             if stats["total_size"] > 0:
-                stats["compression_ratio"] = (
-                    stats["compressed_size"] / stats["total_size"]
-                )
+                stats["compression_ratio"] = stats["compressed_size"] / stats["total_size"]
 
         except (OSError, ValueError, RuntimeError) as e:
             logger.error(f"Error creating archive: {e}")
@@ -406,20 +382,16 @@ class ZIPWiz:
                 # Estimate savings (excluding the first file in each duplicate set)
                 for duplicate_file in duplicate_set[1:]:
                     # This is a rough estimate; actual savings would need file extraction
-                    estimated_size = (
-                        analysis.total_size / analysis.file_count
-                    )  # Average file size
+                    estimated_size = analysis.total_size / analysis.file_count  # Average file size
                     audit_report["potential_savings"] += estimated_size
 
         # Generate overall recommendations
         if audit_report["total_archives"] > 20:
-            audit_report["overall_recommendations"].append(
-                "Consider consolidating related archives"
-            )
+            audit_report["overall_recommendations"].append("Consider consolidating related archives")
 
         if audit_report["potential_savings"] > 50 * 1024 * 1024:  # 50MB
             audit_report["overall_recommendations"].append(
-                f"Potential space savings of ~{audit_report['potential_savings'] / (1024*1024):.1f}MB by removing duplicates"
+                f"Potential space savings of ~{audit_report['potential_savings'] / (1024 * 1024):.1f}MB by removing duplicates"
             )
 
         return audit_report
@@ -429,6 +401,7 @@ class ZIPWiz:
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
+
 def main():
     """CLI interface for ZIPWiz."""
 
@@ -436,12 +409,8 @@ def main():
     parser.add_argument("archive", help="Path to ZIP archive")
     parser.add_argument("--analyze", action="store_true", help="Analyze archive")
     parser.add_argument("--extract", help="Extract to directory")
-    parser.add_argument(
-        "--optimize", action="store_true", help="Extract with optimization"
-    )
-    parser.add_argument(
-        "--audit", action="store_true", help="Audit all archives in repository"
-    )
+    parser.add_argument("--optimize", action="store_true", help="Extract with optimization")
+    parser.add_argument("--audit", action="store_true", help="Audit all archives in repository")
 
     args = parser.parse_args()
 
@@ -457,9 +426,7 @@ def main():
             print(json.dumps(analysis, indent=2, default=str))
         elif args.extract:
             if args.optimize:
-                result = zipwiz.extract_with_optimization(
-                    Path(args.archive), Path(args.extract)
-                )
+                result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
                 print(f"Optimization complete: {result}")
             else:
                 # Standard extraction
@@ -471,6 +438,7 @@ def main():
 
     finally:
         zipwiz.cleanup()
+
 
 if __name__ == "__main__":
     main()

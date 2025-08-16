@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
         from canonical_validator import CanonicalValidator
@@ -15,9 +17,10 @@ This script:
 """
 
 
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
+
 
 def print_header():
     """Print setup header"""
@@ -26,20 +29,21 @@ def print_header():
     print("Configuring automatic canonical compliance validation...")
     print()
 
+
 def check_dependencies():
     """Check and install required dependencies"""
     print("📦 Checking dependencies...")
 
     required_packages = [
         "watchdog",  # For file monitoring
-        "pyyaml",    # For configuration files
+        "pyyaml",  # For configuration files
     ]
 
     missing_packages = []
 
     for package in required_packages:
         try:
-            __import__(package.replace('-', '_'))
+            __import__(package.replace("-", "_"))
             print(f"  ✅ {package}")
         except ImportError:
             missing_packages.append(package)
@@ -48,15 +52,14 @@ def check_dependencies():
     if missing_packages:
         print(f"\n📥 Installing missing packages: {', '.join(missing_packages)}")
         try:
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", *missing_packages
-            ])
+            subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
             print("✅ Dependencies installed successfully")
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed to install dependencies: {e}")
             return False
 
     return True
+
 
 def setup_git_hooks():
     """Set up Git hooks for validation"""
@@ -78,7 +81,7 @@ python3 scripts/git_pre_commit_hook.py
 """
 
     try:
-        with open(pre_commit_hook, 'w', encoding="utf-8") as f:
+        with open(pre_commit_hook, "w", encoding="utf-8") as f:
             f.write(hook_content)
 
         # Make executable
@@ -90,15 +93,12 @@ python3 scripts/git_pre_commit_hook.py
         print(f"  ❌ Failed to setup Git hooks: {e}")
         return False
 
+
 def create_validation_scripts():
     """Ensure validation scripts are executable"""
     print("\n🔧 Configuring validation scripts...")
 
-    scripts = [
-        "scripts/canonical_validator.py",
-        "scripts/git_pre_commit_hook.py",
-        "scripts/continuous_validator.py"
-    ]
+    scripts = ["scripts/canonical_validator.py", "scripts/git_pre_commit_hook.py", "scripts/continuous_validator.py"]
 
     for script_path in scripts:
         script = Path(script_path)
@@ -112,15 +112,12 @@ def create_validation_scripts():
 
     return True
 
+
 def create_validation_directories():
     """Create necessary directories for validation"""
     print("\n📁 Creating validation directories...")
 
-    directories = [
-        "config",
-        "logs",
-        "reports"
-    ]
+    directories = ["config", "logs", "reports"]
 
     for dir_name in directories:
         dir_path = Path(dir_name)
@@ -128,6 +125,7 @@ def create_validation_directories():
         print(f"  ✅ {dir_name}/ directory ready")
 
     return True
+
 
 def test_validation_system():
     """Test the validation system"""
@@ -155,6 +153,7 @@ def test_validation_system():
     except Exception as e:
         print(f"  ❌ Validation system test failed: {e}")
         return False
+
 
 def create_usage_documentation():
     """Create usage documentation"""
@@ -305,11 +304,12 @@ python3 scripts/canonical_validator.py --file myfile.md --auto-fix
 **Support**: Aurora CloudBank Development Team
 """
 
-    with open("CANONICAL_VALIDATION_USAGE.md", 'w', encoding="utf-8") as f:
+    with open("CANONICAL_VALIDATION_USAGE.md", "w", encoding="utf-8") as f:
         f.write(usage_doc)
 
     print("  ✅ Usage documentation created")
     return True
+
 
 def main():
     """Main setup function"""
@@ -321,7 +321,7 @@ def main():
         ("Scripts", create_validation_scripts),
         ("Directories", create_validation_directories),
         ("Testing", test_validation_system),
-        ("Documentation", create_usage_documentation)
+        ("Documentation", create_usage_documentation),
     ]
 
     failed_steps = []
@@ -351,6 +351,7 @@ def main():
         print("- Blocks critical violations")
         print("- Auto-fixes minor issues")
         print("\n🛰️ Aurora CloudBank canonical compliance is now automated!")
+
 
 if __name__ == "__main__":
     main()

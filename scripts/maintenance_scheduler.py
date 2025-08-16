@@ -15,6 +15,7 @@ try:
 except ImportError:
     schedule = None
 
+
 class MaintenanceScheduler:
     """Manages scheduled repository maintenance tasks."""
 
@@ -563,6 +564,7 @@ class MaintenanceScheduler:
                     results[task_name] = self._run_maintenance_task(task_name)
             return results
 
+
 def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(
@@ -622,6 +624,7 @@ def main():
             scheduler.stop_scheduler()
     else:
         print("Use --help to see available options")
+
 
 if __name__ == "__main__":
     main()

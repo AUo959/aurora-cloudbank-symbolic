@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import argparse
@@ -8,13 +10,12 @@ Advanced memory optimization and compression techniques
 """
 
 
-from datetime import datetime
-from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
 import json
 import os
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 class MemoryOptimizer:
     """Advanced memory compression and optimization system"""
@@ -38,11 +39,7 @@ class MemoryOptimizer:
         # Analyze all files
         for root, dirs, files in os.walk(self.repo_path):
             # Skip hidden directories and common excludes
-            dirs[:] = [
-                d
-                for d in dirs
-                if not d.startswith(".") and d not in ["node_modules", "__pycache__"]
-            ]
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ["node_modules", "__pycache__"]]
 
             for file in files:
                 if file.startswith("."):
@@ -74,9 +71,7 @@ class MemoryOptimizer:
 
                     # Check compression opportunities
                     if self._is_compressible(file_path, ext):
-                        potential_savings = self._estimate_compression_savings(
-                            file_path, file_size
-                        )
+                        potential_savings = self._estimate_compression_savings(file_path, file_size)
                         if potential_savings > 1024:  # Only if we can save >1KB
                             analysis["compression_opportunities"].append(
                                 {
@@ -161,9 +156,7 @@ class MemoryOptimizer:
 
                         # Write back in compact format
                         with open(file_path, "w", encoding="utf-8") as f:
-                            json.dump(
-                                data, f, separators=(",", ":"), ensure_ascii=False
-                            )
+                            json.dump(data, f, separators=(",", ":"), ensure_ascii=False)
 
                         new_size = os.path.getsize(file_path)
                         space_saved = original_size - new_size
@@ -210,9 +203,7 @@ class MemoryOptimizer:
 
                             # Compress the file
                             with open(file_path, "rb", encoding="utf-8") as f_in:
-                                with gzip.open(
-                                    compressed_path, "wb", encoding="utf-8"
-                                ) as f_out:
+                                with gzip.open(compressed_path, "wb", encoding="utf-8") as f_out:
                                     f_out.writelines(f_in)
 
                             compressed_size = os.path.getsize(compressed_path)
@@ -269,7 +260,7 @@ class MemoryOptimizer:
 
                 for file_path in files:
                     try:
-                        _file_hash = self._calculate_file_hash(file_path)
+                        self._calculate_file_hash(file_path)
 
                         if file_hash not in hash_groups:
                             hash_groups[file_hash] = []
@@ -375,9 +366,7 @@ Generated: {datetime.datetime.now().isoformat()}
 Found {len(analysis['large_files'])} large files:
 """
 
-        for large_file in sorted(
-            analysis["large_files"], key=lambda x: x["size"], reverse=True
-        )[:5]:
+        for large_file in sorted(analysis["large_files"], key=lambda x: x["size"], reverse=True)[:5]:
             report += f"- `{large_file['path']}`: {large_file['size_mb']}MB\n"
 
         report += """
@@ -385,9 +374,7 @@ Found {len(analysis['large_files'])} large files:
 Found {len(analysis['compression_opportunities'])} files suitable for compression:
 """
 
-        total_savings = sum(
-            opp["estimated_savings"] for opp in analysis["compression_opportunities"]
-        )
+        total_savings = sum(opp["estimated_savings"] for opp in analysis["compression_opportunities"])
         report += f"- **Potential Space Savings**: {total_savings / 1024:.1f} KB\n"
 
         report += """
@@ -402,13 +389,11 @@ Found {len(duplicates)} sets of duplicate files:
                 savings = file_size * (len(files) - 1)
                 duplicate_savings += savings
 
-                report += (
-                    f"- {len(files)} identical files ({file_size/1024:.1f}KB each):\n"
-                )
+                report += f"- {len(files)} identical files ({file_size / 1024:.1f}KB each):\n"
                 for file_path in files[:3]:  # Show first 3
                     report += f"  - `{file_path}`\n"
                 if len(files) > 3:
-                    report += f"  - ... and {len(files)-3} more\n"
+                    report += f"  - ... and {len(files) - 3} more\n"
 
         report += f"\n**Total Duplicate Savings Potential**: {duplicate_savings / 1024:.1f} KB\n"
 
@@ -454,30 +439,19 @@ Found {len(duplicates)} sets of duplicate files:
 
             # Git optimization
             results["git_optimization"] = self.optimize_git_objects()
-            results["total_space_saved"] += results["git_optimization"].get(
-                "space_saved", 0
-            )
+            results["total_space_saved"] += results["git_optimization"].get("space_saved", 0)
 
         return results
+
 
 def main():
 
     parser = argparse.ArgumentParser(description="Aurora CloudBank Memory Optimizer")
-    parser.add_argument(
-        "--analyze", action="store_true", help="Analyze optimization opportunities"
-    )
-    parser.add_argument(
-        "--optimize", action="store_true", help="Run optimization suite"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", default=True, help="Dry run mode (default)"
-    )
-    parser.add_argument(
-        "--execute", action="store_true", help="Execute actual optimization"
-    )
-    parser.add_argument(
-        "--report", action="store_true", help="Generate optimization report"
-    )
+    parser.add_argument("--analyze", action="store_true", help="Analyze optimization opportunities")
+    parser.add_argument("--optimize", action="store_true", help="Run optimization suite")
+    parser.add_argument("--dry-run", action="store_true", default=True, help="Dry run mode (default)")
+    parser.add_argument("--execute", action="store_true", help="Execute actual optimization")
+    parser.add_argument("--report", action="store_true", help="Generate optimization report")
 
     args = parser.parse_args()
 
@@ -494,9 +468,7 @@ def main():
 
     if args.optimize:
         dry_run = not args.execute
-        print(
-            f"🔧 Running optimization suite {'(DRY RUN)' if dry_run else '(EXECUTING)'}"
-        )
+        print(f"🔧 Running optimization suite {'(DRY RUN)' if dry_run else '(EXECUTING)'}")
 
         results = optimizer.run_optimization_suite(dry_run=dry_run)
 
@@ -512,12 +484,11 @@ def main():
 
             if results["log_compression"]:
                 log_results = results["log_compression"]
-                print(
-                    f"📜 Log files: {log_results['compressed']} compressed, {log_results['space_saved']} bytes saved"
-                )
+                print(f"📜 Log files: {log_results['compressed']} compressed, {log_results['space_saved']} bytes saved")
 
         else:
             print("🔍 Analysis complete. Use --execute to run actual optimization.")
+
 
 if __name__ == "__main__":
     main()

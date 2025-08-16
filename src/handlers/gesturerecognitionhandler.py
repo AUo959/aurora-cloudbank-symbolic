@@ -2,11 +2,12 @@
 GestureRecognitionHandler - Aurora CloudBank Multi-Modal Interaction
 """
 
+
 class GestureRecognitionHandler:
     """Placeholder implementation for GestureRecognitionHandler"""
 
     def __init__(self):
-        self.status = 'active'
+        self.status = "active"
         self.capabilities = []
 
     async def initialize(self):

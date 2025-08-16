@@ -5,6 +5,7 @@ Placeholder implementation for symbolic validation
 
 from typing import Any, Dict
 
+
 class SymbolicValidator:
     """Symbolic validation for Sonnet 4 operations"""
 

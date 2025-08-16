@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import argparse
@@ -8,14 +10,14 @@ Continuous monitoring with alerts and automated remediation
 """
 
 
-from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
-from typing import Dict
-from typing import List
 import json
 import os
 import time
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List
+
 
 @dataclass
 class HealthMetrics:
@@ -31,6 +33,7 @@ class HealthMetrics:
     health_score: float
     issues: List[str]
     recommendations: List[str]
+
 
 class RepositoryHealthMonitor:
     """Comprehensive repository health monitoring system"""
@@ -140,9 +143,7 @@ class RepositoryHealthMonitor:
                 shell=False,
                 check=False,
             )
-            return (
-                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-            )
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
@@ -157,11 +158,7 @@ class RepositoryHealthMonitor:
                 check=False,
             )
             return len(
-                [
-                    line
-                    for line in result.stdout.strip().split("\n")
-                    if line.strip() and "origin/HEAD" not in line
-                ]
+                [line for line in result.stdout.strip().split("\n") if line.strip() and "origin/HEAD" not in line]
             )
         except subprocess.CalledProcessError:
             return 0
@@ -176,9 +173,7 @@ class RepositoryHealthMonitor:
                 shell=False,
                 check=False,
             )
-            return (
-                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-            )
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
@@ -192,9 +187,7 @@ class RepositoryHealthMonitor:
                 shell=False,
                 check=False,
             )
-            return (
-                len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
-            )
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
@@ -203,9 +196,7 @@ class RepositoryHealthMonitor:
         try:
             threshold_mb = self.thresholds["large_file_mb"]
             cmd = ["find", ".", "-type", "", "-size", f"+{threshold_mb}M"]
-            _ = subprocess.run(
-                cmd, capture_output=True, text=True, shell=False, check=False
-            )
+            _ = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
 
             large_files = []
             for line in result.stdout.strip().split("\n"):
@@ -249,25 +240,17 @@ class RepositoryHealthMonitor:
         # Repository size check
         if repo_size_mb > self.thresholds["repo_size_mb_critical"]:
             score -= 2.0
-            issues.append(
-                f"CRITICAL: Repository size {repo_size_mb}MB exceeds critical threshold"
-            )
-            recommendations.append(
-                "Immediate cleanup of large files and archives required"
-            )
+            issues.append(f"CRITICAL: Repository size {repo_size_mb}MB exceeds critical threshold")
+            recommendations.append("Immediate cleanup of large files and archives required")
         elif repo_size_mb > self.thresholds["repo_size_mb_warning"]:
             score -= 1.0
-            issues.append(
-                f"WARNING: Repository size {repo_size_mb}MB approaching limits"
-            )
+            issues.append(f"WARNING: Repository size {repo_size_mb}MB approaching limits")
             recommendations.append("Consider archiving old files and cleaning up")
 
         # File count check
         if file_count > self.thresholds["file_count_critical"]:
             score -= 1.5
-            issues.append(
-                f"CRITICAL: File count {file_count} exceeds critical threshold"
-            )
+            issues.append(f"CRITICAL: File count {file_count} exceeds critical threshold")
             recommendations.append("Remove cache files and temporary artifacts")
         elif file_count > self.thresholds["file_count_warning"]:
             score -= 0.8
@@ -333,11 +316,7 @@ class RepositoryHealthMonitor:
         cutoff_date = datetime.datetime.now() - datetime.timedelta(
             days=self.config.get("monitoring", {}).get("history_retention_days", 30)
         )
-        history = [
-            entry
-            for entry in history
-            if datetime.datetime.fromisoformat(entry["timestamp"]) > cutoff_date
-        ]
+        history = [entry for entry in history if datetime.datetime.fromisoformat(entry["timestamp"]) > cutoff_date]
 
         # Save history
         with open(history_path, "w", encoding="utf-8") as f:
@@ -430,9 +409,7 @@ class RepositoryHealthMonitor:
         if metrics.large_files:
             report_lines.extend(["## Large Files", ""])
             for file_info in metrics.large_files[:10]:
-                report_lines.append(
-                    f"- {file_info['path']} ({file_info['size_mb']:.1f}MB)"
-                )
+                report_lines.append(f"- {file_info['path']} ({file_info['size_mb']:.1f}MB)")
 
             if len(metrics.large_files) > 10:
                 report_lines.append(f"- ... and {len(metrics.large_files) - 10} more")
@@ -481,13 +458,12 @@ class RepositoryHealthMonitor:
 
         return metrics
 
+
 def main():
     """Main monitoring function"""
 
     parser = argparse.ArgumentParser(description="Repository health monitor")
-    parser.add_argument(
-        "--continuous", action="store_true", help="Run continuous monitoring"
-    )
+    parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
     parser.add_argument(
         "--interval",
         type=int,
@@ -515,6 +491,7 @@ def main():
     else:
         # Single run
         monitor.run_monitoring_cycle()
+
 
 if __name__ == "__main__":
     main()

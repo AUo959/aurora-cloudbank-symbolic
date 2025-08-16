@@ -9,6 +9,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
+
 def secure_run(cmd: str) -> tuple[str, str, int]:
     """Securely execute command without shell injection."""
     try:
@@ -17,6 +18,7 @@ def secure_run(cmd: str) -> tuple[str, str, int]:
         return result.stdout, result.stderr, result.returncode
     except (subprocess.TimeoutExpired, OSError) as e:
         return "", str(e), 1
+
 
 def main():
     """Generate final security verification report."""
@@ -34,7 +36,7 @@ def main():
     stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=True' {} \\;")
     if rc == 0 and stdout.strip():
         print("❌ CRITICAL: shell=True vulnerabilities still found:")
-        for file in stdout.strip().split('\n'):
+        for file in stdout.strip().split("\n"):
             print(f"   - {file}")
     else:
         print("✅ shell=True vulnerabilities: RESOLVED")
@@ -42,11 +44,11 @@ def main():
     # Check for eval/exec usage
     find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_eval_cmd)
-    eval_files = stdout.strip().split('\n') if stdout.strip() else []
+    eval_files = stdout.strip().split("\n") if stdout.strip() else []
 
     find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_exec_cmd)
-    exec_files = stdout.strip().split('\n') if stdout.strip() else []
+    exec_files = stdout.strip().split("\n") if stdout.strip() else []
 
     if eval_files or exec_files:
         print("⚠️  WARNING: Dynamic code execution found:")
@@ -65,7 +67,7 @@ def main():
         ".security/security_policy.json",
         ".security/secure_helpers.py",
         ".github/security-config.yml",
-        "SECURITY.md"
+        "SECURITY.md",
     ]
 
     for file in security_files:
@@ -111,6 +113,7 @@ def main():
     print("🔒 All critical vulnerabilities have been resolved")
     print("🛡️  Comprehensive security measures are in place")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     main()

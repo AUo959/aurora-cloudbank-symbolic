@@ -6,6 +6,7 @@ Quick fix for JavaScript syntax in Python files
 import os
 import re
 
+
 def fix_python_file(filepath):
     """Fix JavaScript syntax in Python files"""
     with open(filepath, "r") as f:
@@ -13,23 +14,24 @@ def fix_python_file(filepath):
 
     # Fix function declarations
     content = re.sub(
-        rr"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
+        rrr"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
     )
     content = re.sub(
-        rr"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
+        rrr"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
     )
 
     # Remove extra closing braces
-    content = re.sub(rr"    }\s*$", "", content, flags=re.MULTILINE)
+    content = re.sub(rrr"    }\s*$", "", content, flags=re.MULTILINE)
     content = re.sub(r"};$", "", content, flags=re.MULTILINE)
 
     # Remove class definitions with JavaScript syntax
-    content = re.sub(rr"class (\w+):\s*async de", r"class \1:\n    async de", content)
+    content = re.sub(rrrr"class (\w+):\s*async de", r"class \1:\n    async de", content)
 
     with open(filepath, "w") as f:
         f.write(content)
 
     print(f"Fixed: {filepath}")
+
 
 # Fix the problematic files
 files_to_fix = [

@@ -16,6 +16,7 @@ import difflib
 from dataclasses import dataclass
 from pathlib import Path
 
+
 @dataclass
 class ValidationResult:
     """Represents the result of a canonical validation check"""
@@ -25,6 +26,7 @@ class ValidationResult:
     message: str
     suggested_fix: Optional[str] = None
     auto_applied: bool = False
+
 
 @dataclass
 class CanonicalSpec:
@@ -77,6 +79,7 @@ class CanonicalSpec:
         "mesh_broadcast": r"\{\{@mesh ::: message\}\}",
         "activation_phrase": r"ORION_[A-Z_]+_RELAY_ACTIVATE//"
     }
+
 
 class CanonicalValidator:
     """Main validation engine for Aurora CloudBank canonical compliance"""
@@ -271,8 +274,8 @@ class CanonicalValidator:
 
         # Check for message syntax patterns
         msg_patterns = [
-            (rr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
-            (rr"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
+            (rrrr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
+            (rrr"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
         ]
 
         for pattern, msg_type in msg_patterns:

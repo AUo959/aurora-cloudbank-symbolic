@@ -60,9 +60,11 @@ PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
     },
 }
 
+
 def _word_boundary_search(text: str, keyword: str) -> bool:
     """True if keyword appears as a whole word (case-insensitive)."""
     return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
+
 
 def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
     """Return folder, priority, and reason based on weighted keyword matches."""
@@ -103,6 +105,7 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
         "reason": f"Matched weighted score {max_score} for '{primary_folder}'",
         "all_hits": total_scores,
     }
+
 
 # Example interactive use
 if __name__ == "__main__":

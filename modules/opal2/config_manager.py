@@ -7,6 +7,9 @@ Advanced configuration management with validation and hot-reloading
 import asyncio
 import json
 import logging
+
+# Configure logging
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -17,11 +20,9 @@ import yaml
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-# Configure logging
-from dataclasses import dataclass
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class ConfigFormat(Enum):
     """Configuration file format enumeration"""
@@ -29,6 +30,7 @@ class ConfigFormat(Enum):
     YAML = "yaml"
     JSON = "json"
     TOML = "toml"
+
 
 @dataclass
 class ConfigValidationRule:
@@ -43,6 +45,7 @@ class ConfigValidationRule:
     custom_validator: Optional[Callable] = None
     error_message: Optional[str] = None
 
+
 @dataclass
 class ConfigChangeEvent:
     """Configuration change event"""
@@ -53,6 +56,7 @@ class ConfigChangeEvent:
     old_values: Dict[str, Any]
     new_values: Dict[str, Any]
 
+
 class ConfigFileHandler(FileSystemEventHandler):
     """File system event handler for configuration changes"""
 
@@ -62,6 +66,7 @@ class ConfigFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory:
             self.config_manager._handle_file_change(event.src_path)
+
 
 class ConfigurationManager:
     """
@@ -95,9 +100,7 @@ class ConfigurationManager:
                 type_check=str,
                 allowed_values=["webgl", "canvas", "svg"],
             ),
-            ConfigValidationRule(
-                "renderer.quantum_enhancement", required=True, type_check=bool
-            ),
+            ConfigValidationRule("renderer.quantum_enhancement", required=True, type_check=bool),
             ConfigValidationRule(
                 "renderer.performance_mode",
                 required=True,
@@ -148,12 +151,8 @@ class ConfigurationManager:
             ConfigValidationRule("plugins.directories", required=True, type_check=list),
             ConfigValidationRule("plugins.blacklist", required=False, type_check=list),
             ConfigValidationRule("plugins.whitelist", required=False, type_check=list),
-            ConfigValidationRule(
-                "security.allow_dynamic_loading", required=True, type_check=bool
-            ),
-            ConfigValidationRule(
-                "security.require_signatures", required=True, type_check=bool
-            ),
+            ConfigValidationRule("security.allow_dynamic_loading", required=True, type_check=bool),
+            ConfigValidationRule("security.require_signatures", required=True, type_check=bool),
         ]
 
         # API Configuration Schema
@@ -170,9 +169,7 @@ class ConfigurationManager:
             ConfigValidationRule("server.debug", required=True, type_check=bool),
             ConfigValidationRule("cors.enabled", required=True, type_check=bool),
             ConfigValidationRule("cors.origins", required=False, type_check=list),
-            ConfigValidationRule(
-                "rate_limiting.enabled", required=True, type_check=bool
-            ),
+            ConfigValidationRule("rate_limiting.enabled", required=True, type_check=bool),
             ConfigValidationRule(
                 "rate_limiting.requests_per_minute",
                 required=False,
@@ -180,9 +177,7 @@ class ConfigurationManager:
                 min_value=1,
             ),
             ConfigValidationRule("websocket.enabled", required=True, type_check=bool),
-            ConfigValidationRule(
-                "websocket.max_connections", required=False, type_check=int, min_value=1
-            ),
+            ConfigValidationRule("websocket.max_connections", required=False, type_check=int, min_value=1),
         ]
 
     def _load_all_configurations(self):
@@ -241,17 +236,13 @@ class ConfigurationManager:
 
         for rule in rules:
             if not self._validate_single_rule(config_data, rule):
-                error_msg = (
-                    rule.error_message or f"Validation failed for key: {rule.key}"
-                )
+                error_msg = rule.error_message or f"Validation failed for key: {rule.key}"
                 logger.error(f"Config validation error in {config_name}: {error_msg}")
                 return False
 
         return True
 
-    def _validate_single_rule(
-        self, config_data: Dict[str, Any], rule: ConfigValidationRule
-    ) -> bool:
+    def _validate_single_rule(self, config_data: Dict[str, Any], rule: ConfigValidationRule) -> bool:
         """Validate a single configuration rule"""
         # Get value using dot notation
         value = self._get_nested_value(config_data, rule.key)
@@ -369,9 +360,7 @@ class ConfigurationManager:
 
         return False
 
-    def save_config(
-        self, config_name: str, format_type: ConfigFormat = ConfigFormat.YAML
-    ) -> bool:
+    def save_config(self, config_name: str, format_type: ConfigFormat = ConfigFormat.YAML) -> bool:
         """Save configuration to file"""
         if config_name not in self.configs:
             logger.error(f"Configuration not found: {config_name}")
@@ -389,9 +378,7 @@ class ConfigurationManager:
             # Save configuration
             with open(file_path, "w") as f:
                 if format_type == ConfigFormat.YAML:
-                    yaml.dump(
-                        self.configs[config_name], f, default_flow_style=False, indent=2
-                    )
+                    yaml.dump(self.configs[config_name], f, default_flow_style=False, indent=2)
                 elif format_type == ConfigFormat.JSON:
                     json.dump(self.configs[config_name], f, indent=2)
                 elif format_type == ConfigFormat.TOML:
@@ -411,9 +398,7 @@ class ConfigurationManager:
 
         self.change_callbacks[config_name].append(callback)
 
-    def _trigger_change_callbacks(
-        self, config_name: str, old_values: Dict[str, Any], new_values: Dict[str, Any]
-    ):
+    def _trigger_change_callbacks(self, config_name: str, old_values: Dict[str, Any], new_values: Dict[str, Any]):
         """Trigger change callbacks for configuration"""
         if config_name in self.change_callbacks:
             change_event = ConfigChangeEvent(
@@ -440,9 +425,7 @@ class ConfigurationManager:
 
         self.file_observer = Observer()
         event_handler = ConfigFileHandler(self)
-        self.file_observer.schedule(
-            event_handler, str(self.config_dir), recursive=False
-        )
+        self.file_observer.schedule(event_handler, str(self.config_dir), recursive=False)
         self.file_observer.start()
 
         self.hot_reload_enabled = True
@@ -483,18 +466,12 @@ class ConfigurationManager:
 
             if changed_keys:
                 # Trigger callbacks
-                old_values = {
-                    key: self._get_nested_value(old_config, key) for key in changed_keys
-                }
-                new_values = {
-                    key: self._get_nested_value(new_config, key) for key in changed_keys
-                }
+                old_values = {key: self._get_nested_value(old_config, key) for key in changed_keys}
+                new_values = {key: self._get_nested_value(new_config, key) for key in changed_keys}
 
                 self._trigger_change_callbacks(path.stem, old_values, new_values)
 
-    def _find_changed_keys(
-        self, old_config: Dict[str, Any], new_config: Dict[str, Any]
-    ) -> List[str]:
+    def _find_changed_keys(self, old_config: Dict[str, Any], new_config: Dict[str, Any]) -> List[str]:
         """Find keys that have changed between configurations"""
         changed_keys = []
 
@@ -506,9 +483,7 @@ class ConfigurationManager:
                     changed_keys.append(full_key)
                 elif key not in new_dict:
                     changed_keys.append(full_key)
-                elif isinstance(old_dict[key], dict) and isinstance(
-                    new_dict[key], dict
-                ):
+                elif isinstance(old_dict[key], dict) and isinstance(new_dict[key], dict):
                     compare_dicts(old_dict[key], new_dict[key], full_key)
                 elif old_dict[key] != new_dict[key]:
                     changed_keys.append(full_key)
@@ -597,9 +572,7 @@ class ConfigurationManager:
 
             with open(export_path, "w") as f:
                 if format_type == ConfigFormat.YAML:
-                    yaml.dump(
-                        self.configs[config_name], f, default_flow_style=False, indent=2
-                    )
+                    yaml.dump(self.configs[config_name], f, default_flow_style=False, indent=2)
                 elif format_type == ConfigFormat.JSON:
                     json.dump(self.configs[config_name], f, indent=2)
                 elif format_type == ConfigFormat.TOML:

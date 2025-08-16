@@ -10,6 +10,8 @@ Primary functions:
 - State snapshot and restore commands
 """
 
+from symbolic.memory_sealer import MemorySealingEngine
+from symbolic.anchor_tracker import SymbolicAnchorTracker
 import sys
 import argparse
 from pathlib import Path
@@ -18,8 +20,6 @@ from datetime import datetime
 # Add tools directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from symbolic.anchor_tracker import SymbolicAnchorTracker
-from symbolic.memory_sealer import MemorySealingEngine
 
 class AuroraDeveloperCLI:
     """Unified command interface for Aurora symbolic operations"""

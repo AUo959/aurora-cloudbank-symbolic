@@ -11,7 +11,7 @@ class AuroraSecurityUtils {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#x27;',
+      '\'': '&#x27;',
       '/': '&#x2F;',
     };
   }
@@ -266,15 +266,15 @@ class AuroraSecurityUtils {
    */
   createCSPMetaTag() {
     const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'", // Note: This should be made stricter in production
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https:",
-      "connect-src 'self' ws: wss:",
-      "font-src 'self'",
-      "object-src 'none'",
-      "media-src 'self'",
-      "frame-src 'none'",
+      'default-src \'self\'',
+      'script-src \'self\' \'unsafe-inline\'', // Note: This should be made stricter in production
+      'style-src \'self\' \'unsafe-inline\'',
+      'img-src \'self\' data: https:',
+      'connect-src \'self\' ws: wss:',
+      'font-src \'self\'',
+      'object-src \'none\'',
+      'media-src \'self\'',
+      'frame-src \'none\'',
     ].join('; ');
 
     return this.createSafeElement('meta', '', {

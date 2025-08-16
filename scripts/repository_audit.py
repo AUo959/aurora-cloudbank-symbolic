@@ -14,6 +14,7 @@ from pathlib import Path
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
+
 def analyze_repository_files():
     """Analyze all files in the repository."""
     project_root = Path("/workspaces/aurora-cloudbank-symbolic")
@@ -31,9 +32,7 @@ def analyze_repository_files():
 
     # Scan all files
     for file_path in project_root.rglob("*"):
-        if file_path.is_file() and not any(
-            part.startswith(".git") for part in file_path.parts
-        ):
+        if file_path.is_file() and not any(part.startswith(".git") for part in file_path.parts):
             analysis["total_files"] += 1
             size = file_path.stat().st_size
             analysis["total_size"] += size
@@ -58,22 +57,16 @@ def analyze_repository_files():
 
             # Collect markdown files
             if ext == ".md":
-                analysis["markdown_files"].append(
-                    str(file_path.relative_to(project_root))
-                )
+                analysis["markdown_files"].append(str(file_path.relative_to(project_root)))
 
             # Track potential duplicates by name
             name = file_path.name.lower()
             if name not in analysis["duplicate_names"]:
                 analysis["duplicate_names"][name] = []
-            analysis["duplicate_names"][name].append(
-                str(file_path.relative_to(project_root))
-            )
+            analysis["duplicate_names"][name].append(str(file_path.relative_to(project_root)))
 
     # Find actual duplicates
-    actual_duplicates = {
-        k: v for k, v in analysis["duplicate_names"].items() if len(v) > 1
-    }
+    actual_duplicates = {k: v for k, v in analysis["duplicate_names"].items() if len(v) > 1}
     analysis["duplicate_names"] = actual_duplicates
 
     # Identify potential cleanup candidates
@@ -93,11 +86,10 @@ def analyze_repository_files():
         if file_path.is_file():
             name_lower = file_path.name.lower()
             if any(pattern in name_lower for pattern in cleanup_patterns):
-                analysis["potential_cleanup"].append(
-                    str(file_path.relative_to(project_root))
-                )
+                analysis["potential_cleanup"].append(str(file_path.relative_to(project_root)))
 
     return analysis
+
 
 def analyze_zip_files():
     """Analyze all ZIP files in the repository."""
@@ -127,6 +119,7 @@ def analyze_zip_files():
 
     return zip_analysis
 
+
 def categorize_zip_file(filename: str) -> str:
     """Categorize ZIP file based on name patterns."""
     name_lower = filename.lower()
@@ -143,6 +136,7 @@ def categorize_zip_file(filename: str) -> str:
         return "documentation"
     else:
         return "other"
+
 
 def analyze_markdown_documentation():
     """Analyze markdown documentation structure."""
@@ -171,6 +165,7 @@ def analyze_markdown_documentation():
 
     return md_analysis
 
+
 def generate_recommendations(file_analysis, zip_analysis, md_analysis):
     """Generate optimization recommendations."""
     recommendations = {"critical": [], "important": [], "suggestions": []}
@@ -178,7 +173,7 @@ def generate_recommendations(file_analysis, zip_analysis, md_analysis):
     # Critical recommendations
     if file_analysis["total_size"] > 500 * 1024 * 1024:  # >500MB
         recommendations["critical"].append(
-            f"Repository size is {file_analysis['total_size'] / (1024*1024*1024):.2f}GB - consider archiving old files"
+            f"Repository size is {file_analysis['total_size'] / (1024 * 1024 * 1024):.2f}GB - consider archiving old files"
         )
 
     if len(file_analysis["large_files"]) > 5:
@@ -215,11 +210,10 @@ def generate_recommendations(file_analysis, zip_analysis, md_analysis):
         zip_categories[cat] = zip_categories.get(cat, 0) + 1
 
     if zip_categories.get("bundle", 0) > 3:
-        recommendations["suggestions"].append(
-            "Multiple bundle files detected - consider consolidating related bundles"
-        )
+        recommendations["suggestions"].append("Multiple bundle files detected - consider consolidating related bundles")
 
     return recommendations
+
 
 def main():
     """Main audit function."""
@@ -252,10 +246,8 @@ def main():
     print("\n📋 AUDIT SUMMARY")
     print("-" * 30)
     print(f"Total Files: {file_analysis['total_files']}")
-    print(f"Total Size: {file_analysis['total_size'] / (1024*1024):.2f} MB")
-    print(
-        f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_zip_size'] / (1024*1024):.2f} MB)"
-    )
+    print(f"Total Size: {file_analysis['total_size'] / (1024 * 1024):.2f} MB")
+    print(f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_zip_size'] / (1024 * 1024):.2f} MB)")
     print(f"Markdown Files: {md_analysis['total_md_files']}")
     print(f"Large Files: {len(file_analysis['large_files'])}")
     print(f"Potential Duplicates: {len(file_analysis['duplicate_names'])}")
@@ -275,9 +267,7 @@ def main():
     print("\n📦 ZIP FILE ANALYSIS")
     print("Top 10 largest ZIP files:")
     for i, zip_info in enumerate(zip_analysis["zip_details"][:10]):
-        print(
-            f"  {i+1}. {zip_info['name']} ({zip_info['size_mb']} MB) - {zip_info['category']}"
-        )
+        print(f"  {i + 1}. {zip_info['name']} ({zip_info['size_mb']} MB) - {zip_info['category']}")
 
     print("\n📝 MARKDOWN FILE CATEGORIES")
     print(f"  Status Reports: {len(md_analysis['status_reports'])}")
@@ -286,15 +276,14 @@ def main():
     print(f"  Other: {len(md_analysis['other'])}")
 
     # Save detailed report
-    report_path = Path(
-        "/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json"
-    )
+    report_path = Path("/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json")
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
     print(f"\n💾 Detailed report saved to: {report_path}")
 
     return report
+
 
 if __name__ == "__main__":
     main()

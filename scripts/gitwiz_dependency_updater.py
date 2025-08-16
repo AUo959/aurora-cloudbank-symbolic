@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
 
     import argparse
@@ -8,13 +10,12 @@ Comprehensive dependency management and auto-updating system.
 """
 
 
-from datetime import datetime
-from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
 import json
 import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 class DependencyAutoUpdater:
     """Advanced dependency auto-updater for GITWiz."""
@@ -85,9 +86,7 @@ class DependencyAutoUpdater:
 
                     print(f"📦 Found {len(outdated)} outdated Python packages")
                     for pkg in outdated[:5]:  # Show first 5
-                        print(
-                            f"  • {pkg['name']}: {pkg['version']} → {pkg['latest_version']}"
-                        )
+                        print(f"  • {pkg['name']}: {pkg['version']} → {pkg['latest_version']}")
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
@@ -143,9 +142,7 @@ class DependencyAutoUpdater:
             scan_result = self.scan_python_dependencies()
             if scan_result["outdated"]:
                 for pkg in scan_result["outdated"]:
-                    print(
-                        f"  Would update: {pkg['name']} {pkg['version']} → {pkg['latest_version']}"
-                    )
+                    print(f"  Would update: {pkg['name']} {pkg['version']} → {pkg['latest_version']}")
             update_result["success"] = True
             return update_result
 
@@ -188,9 +185,7 @@ class DependencyAutoUpdater:
             scan_result = self.scan_node_dependencies()
             if scan_result["outdated"]:
                 for pkg_name, info in scan_result["outdated"].items():
-                    print(
-                        f"  Would update: {pkg_name} {info['current']} → {info['latest']}"
-                    )
+                    print(f"  Would update: {pkg_name} {info['current']} → {info['latest']}")
             update_result["success"] = True
             return update_result
 
@@ -313,13 +308,10 @@ class DependencyAutoUpdater:
         workflow_result["node_update"] = self.update_node_dependencies(dry_run)
 
         # Step 5: Generate recommendations
-        workflow_result["recommendations"] = self._generate_recommendations(
-            workflow_result
-        )
+        workflow_result["recommendations"] = self._generate_recommendations(workflow_result)
 
         workflow_result["success"] = (
-            workflow_result["python_update"]["success"]
-            and workflow_result["node_update"]["success"]
+            workflow_result["python_update"]["success"] and workflow_result["node_update"]["success"]
         )
 
         workflow_result["end_time"] = datetime.utcnow().isoformat()
@@ -348,9 +340,7 @@ class DependencyAutoUpdater:
 
         # Security recommendations
         if workflow_result["security_audit"].get("critical_issues"):
-            recommendations.append(
-                "Address critical security vulnerabilities immediately"
-            )
+            recommendations.append("Address critical security vulnerabilities immediately")
 
         # General recommendations
         recommendations.extend(
@@ -365,18 +355,15 @@ class DependencyAutoUpdater:
 
         return recommendations
 
+
 def main():
     """Main CLI interface for dependency auto-updater."""
 
     parser = argparse.ArgumentParser(description="GITWiz Dependency Auto-Updater")
     parser.add_argument("--scan", action="store_true", help="Scan dependencies")
     parser.add_argument("--update", action="store_true", help="Update dependencies")
-    parser.add_argument(
-        "--security-audit", action="store_true", help="Run security audit"
-    )
-    parser.add_argument(
-        "--comprehensive", action="store_true", help="Run comprehensive workflow"
-    )
+    parser.add_argument("--security-audit", action="store_true", help="Run security audit")
+    parser.add_argument("--comprehensive", action="store_true", help="Run comprehensive workflow")
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
 
     args = parser.parse_args()
@@ -386,12 +373,8 @@ def main():
     if args.comprehensive:
         result = updater.execute_comprehensive_update(dry_run=args.dry_run)
         print("\n📊 Workflow Result Summary:")
-        print(
-            f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}"
-        )
-        print(
-            f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}"
-        )
+        print(f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}")
+        print(f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}")
         print(f"  Updates successful: {result['success']}")
 
     elif args.scan:
@@ -406,7 +389,7 @@ def main():
 
     elif args.security_audit:
         print("🔒 Running Security Audit...")
-        audit_result = updater.run_security_audit()
+        updater.run_security_audit()
 
     else:
         parser.print_help()
@@ -415,6 +398,7 @@ def main():
         print("  python3 gitwiz_dependency_updater.py --scan")
         print("  python3 gitwiz_dependency_updater.py --comprehensive --dry-run")
         print("  python3 gitwiz_dependency_updater.py --update --dry-run")
+
 
 if __name__ == "__main__":
     main()

@@ -36,6 +36,6 @@ timestamp_utc: "2025-08-16T15:28:04Z"
   - scripts/reliquary_index.py update
   - gitwiz_snapshot_report for audit trail
 
-Notes
+## Notes
 - Maintain "symbolic continuity" with anchor lineage references in all follow-up changes.
 - Keep audit docs succinct (one page) and indexed under docs/audit/.

@@ -17,7 +17,7 @@ sealed_sha256: "<to-be-filled-by-seal-pipeline>"
 timestamp_utc: "2025-08-16T15:28:04Z"
 ---
 
-Summary
+## Summary
 - Merged PR #79 (meta analysis) to document resolution strategy.
 - Plan: Close PR #76 (large lint sweep) due to syntax errors and risk; prioritize PR #75 (ChatGPT Agent Mode) for high-value integration and manageable scope.
 

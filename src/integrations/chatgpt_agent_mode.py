@@ -270,7 +270,7 @@ class ChatGPTAgentModeIntegration:
             # Use Aurora's geometric algebra module
             if operation == "mult":
                 # For now, return a structured result - in full implementation would use GA operations
-                result = f"({expr_a}) ∧ ({expr_b})"
+                result = f"({expr_a}) * ({expr_b})"  # Use * or · for geometric product, not ∧
             elif operation == "add":
                 result = f"({expr_a}) + ({expr_b})"
             elif operation == "sub":

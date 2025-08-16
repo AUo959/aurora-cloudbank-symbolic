@@ -248,7 +248,6 @@ class ChatGPTAgentModeIntegration:
     
     def _validate_parameters(self, parameters: Dict[str, Any], schema: Dict[str, Any]):
         """Basic parameter validation against JSON schema"""
-        required_params = schema.get("properties", {}).keys()
         for param in schema.get("required", []):
             if param not in parameters:
                 raise ValueError(f"Required parameter '{param}' missing")

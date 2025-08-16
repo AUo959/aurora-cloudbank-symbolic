@@ -233,7 +233,10 @@ class ChatGPTAgentModeIntegration:
             logging.error("Tool execution failed for tool '%s': %s", tool_name, str(e), exc_info=True)
             return response
             
+            return response
+            
         except Exception as e:
+            logging.error("Tool execution failed for tool '%s': %s", tool_name, str(e), exc_info=True)
             error_response = {
                 "success": False,
                 "error": "Tool execution failed due to an internal error.",

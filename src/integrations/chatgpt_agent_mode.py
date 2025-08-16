@@ -199,6 +199,7 @@ class ChatGPTAgentModeIntegration:
             self._validate_parameters(parameters, tool_def["parameters"])
             logging.error("Parameter validation failed for tool '%s': %s", tool_name, str(e), exc_info=True)
         except Exception as e:
+            logging.error("Parameter validation failed for tool '%s': %s", tool_name, str(e), exc_info=True)
             return {
                 "success": False,
                 "error": "Parameter validation failed. Please check your input and try again.",

@@ -25,7 +25,7 @@ timestamp_utc: "2025-08-16T15:28:04Z"
 - PR #76: Do not merge. Contains malformed regex literals (e.g., `rrrrr'...`), high blast radius (200+ files), and non-trivial conflicts. Recommend small, mechanical-only lint shards by module with CI checks and drift manifests.
 - PR #75: Proceed. Rebase onto main, resolve conflicts, add integration manifest, and ensure anchors/DLP tags are present. Run tests and snapshot after merge.
 
-Actions
+## Actions
 - Close #76 with an anchor/DLP rationale comment and open targeted lint-slice PRs (imports/order/whitespace only).
 - Rebase/undraft #75, add docs/CHATGPT_AGENT_MODE_MANIFEST.yaml, and request review.
 

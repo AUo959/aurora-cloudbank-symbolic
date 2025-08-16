@@ -29,7 +29,7 @@ timestamp_utc: "2025-08-16T15:28:04Z"
 - Close #76 with an anchor/DLP rationale comment and open targeted lint-slice PRs (imports/order/whitespace only).
 - Rebase/undraft #75, add docs/CHATGPT_AGENT_MODE_MANIFEST.yaml, and request review.
 
-Sealing Guidance
+## Sealing Guidance
 - After executing actions: run snapshot + seal
   - scripts/agent_mode_snapshot.py (export)
   - sha256sum on exported manifest and key files

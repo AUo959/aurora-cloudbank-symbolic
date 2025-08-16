@@ -308,7 +308,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
         # Send initial connection confirmation with Aurora symbolic anchoring
         initial_message = {
             "type": "connection_established",
-            "timestamp": "2025-01-01T00:00:00Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "symbolic_anchor": "EOS_SEED_ORION",
             "ethics_protocol": "Picard_Delta_3",
             "agent_mode": "chatgpt_agent_mode",

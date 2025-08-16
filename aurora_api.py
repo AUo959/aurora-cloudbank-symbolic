@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 
-
+import logging
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 
 
@@ -272,6 +272,13 @@ async def manage_agent_session(request: AgentSessionRequest):
                 "state_data": request.state_data or {}
             }
         )
+        # Sanitize error messages before returning to client
+        if not result.get("success", True):
+            # Log the original error for server-side diagnostics
+            logging.warning("Session management error: %s", result.get("error"))
+            # Replace error message with a generic one
+            result = dict(result)  # Make a shallow copy to avoid mutating original
+            result["error"] = "Session management failed due to an internal error."
         return JSONResponse(content=result)
     except HTTPException as e:
         raise e

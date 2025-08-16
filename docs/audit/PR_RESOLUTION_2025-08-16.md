@@ -21,7 +21,7 @@ timestamp_utc: "2025-08-16T15:28:04Z"
 - Merged PR #79 (meta analysis) to document resolution strategy.
 - Plan: Close PR #76 (large lint sweep) due to syntax errors and risk; prioritize PR #75 (ChatGPT Agent Mode) for high-value integration and manageable scope.
 
-Decisions
+## Decisions
 - PR #76: Do not merge. Contains malformed regex literals (e.g., `rrrrr'...`), high blast radius (200+ files), and non-trivial conflicts. Recommend small, mechanical-only lint shards by module with CI checks and drift manifests.
 - PR #75: Proceed. Rebase onto main, resolve conflicts, add integration manifest, and ensure anchors/DLP tags are present. Run tests and snapshot after merge.
 

@@ -4,9 +4,15 @@ name: Aurora Maintenance & Monitoring
   - cron: 0 2 * * 1
   workflow_dispatch: {}
 jobs:
+  approval-gate:
+    uses: ./.github/workflows/t1-approval-gate.yml
+    with:
+      reason: "Maintenance batch approval"
+
   dependency-audit:
     name: "\U0001F512 Dependency Security Audit"
     runs-on: ubuntu-latest
+    needs: approval-gate
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -21,6 +27,7 @@ jobs:
   cleanup-tasks:
     name: "\U0001F9F9 Repository Cleanup"
     runs-on: ubuntu-latest
+    needs: approval-gate
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

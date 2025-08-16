@@ -1,0 +1,31 @@
+name: T1 Sealed Approval Gate
+
+on:
+  workflow_call:
+    inputs:
+      reason:
+        description: Reason or workflow name for glyphcard
+        required: false
+        type: string
+
+jobs:
+  approve:
+    name: Single environment approval (T1/SRB)
+    # IMPORTANT: Configure this environment in repo settings with required reviewers.
+    environment:
+      name: ci-batch-approval
+      url: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Emit T1 seal and glyphcard
+        shell: bash
+        run: |
+          set -euo pipefail
+          TITLE="${{ inputs.reason || github.workflow }}"
+          DATA="${{ github.repository }}:${{ github.workflow }}:${{ github.run_id }}:${{ github.sha }}"
+          SEAL=$(printf "%s" "$DATA" | sha256sum | cut -d' ' -f1)
+          echo "anchor=T1 seed=EOS_SEED_ORION srb=SRB_BATCH_APPROVAL_V1"
+          echo "seal=$SEAL"
+          echo "glyphcard=Gate for $TITLE"

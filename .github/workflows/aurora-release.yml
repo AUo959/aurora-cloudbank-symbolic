@@ -10,9 +10,15 @@ name: Aurora Release Pipeline
         required: true
         default: v1.0.0
 jobs:
+  approval-gate:
+    uses: ./.github/workflows/t1-approval-gate.yml
+    with:
+      reason: "Release pipeline approval"
+
   create-release:
     name: "\U0001F4E6 Create Release"
     runs-on: ubuntu-latest
+    needs: approval-gate
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

@@ -122,7 +122,7 @@ class SecureHelpers:
 
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
 
-        sanitized = re.sub(r"on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(r"on\w+\s*=", '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 

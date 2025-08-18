@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Simple lint fixer for Opal2 files
 Removes trailing whitespace and fixes basic issues

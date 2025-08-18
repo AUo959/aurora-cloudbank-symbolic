@@ -1,6 +1,7 @@
 import asyncio
 
 import websockets
+import argparse
 
 
 async def relay(uri: str, channel: str, client_id: str) -> None:

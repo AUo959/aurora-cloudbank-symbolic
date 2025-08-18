@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import sys
 """
 Aurora CloudBank Repository Audit
 Comprehensive analysis and optimization recommendations

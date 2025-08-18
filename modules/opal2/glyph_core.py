@@ -1,4 +1,6 @@
 """Opal2 Glyph Core
+from pathlib import Path
+import time
 ===================
 
 This module provides glyph generation utilities that combine geometric algebra
@@ -111,7 +113,7 @@ class GlyphCore:
         """Test glyph generation functionality"""
         try:
             test_expression = {"symbol": "test"}
-            result = await self.generate_async(test_expression)
+            _ = await self.generate_async(test_expression)
             return {
                 "success": True,
                 "test_symbol": "test",

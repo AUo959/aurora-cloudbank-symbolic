@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
 """
 Aurora CloudBank Branch Configuration Manager
 =============================================
@@ -120,7 +124,7 @@ class AuroraBranchManager:
     def get_current_branch(self):
         """Get current git branch"""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "branch", "--show-current"], capture_output=True, text=True, cwd=self.repo_path
             )
             return result.stdout.strip() if result.returncode == 0 else "unknown"
@@ -135,7 +139,7 @@ class AuroraBranchManager:
 
         try:
             # Check if develop branch exists
-            result = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
+            _ = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
 
             if result.returncode == 0:
                 print("✅ develop branch already exists")
@@ -253,7 +257,7 @@ jobs:
 
         try:
             # Get all branches
-            result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
+            _ = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
 
             branches = result.stdout.strip().split("\n") if result.returncode == 0 else []
             current_branch = self.get_current_branch()

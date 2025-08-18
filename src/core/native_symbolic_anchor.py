@@ -1,4 +1,6 @@
 """
+import hashlib
+import time
 Native Symbolic CPU Anchor - Zero Dependencies
 Optimized quantum-symbolic hybrid processing core using native implementations.
 """
@@ -286,7 +288,7 @@ class NativeSymbolicCPUAnchor:
         circuit_name = f"quantum_state_{hash(str(data)) % 10000}"
         self.quantum_processor.create_quantum_circuit(circuit_name, operations)
 
-        result = self.quantum_processor.execute_quantum_symbolic_computation(circuit_name)
+        _ = self.quantum_processor.execute_quantum_symbolic_computation(circuit_name)
 
         return {
             "quantum_processed": True,

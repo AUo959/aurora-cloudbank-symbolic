@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 🔧 Aurora CloudBank GitWiz Critical Structure Fix
 Addresses fundamental structural issues in gitwiz_enhanced.py
@@ -22,7 +24,7 @@ def fix_gitwiz_structure():
         content = f.read()
 
     # Fix duplicate sys import
-    content = re.sub(rrr'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
+    content = re.sub(r'try:\s*import sys\s*sys\.path\.append', 'try:\n    sys.path.append', content)
 
     # Add missing class definitions at the beginning
     missing_classes = '''

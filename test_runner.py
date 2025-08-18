@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
+import time
 """
 Aurora CloudBank Test Runner
 Optimized test execution with performance and coverage reporting
@@ -66,7 +70,7 @@ class AuroraTestRunner:
             print(f"Starting: {test_name}")
             print("=" * 50)
 
-            result = test_func()
+            _ = test_func()
             results[test_name] = result.returncode == 0
 
             if result.returncode != 0:
@@ -104,15 +108,15 @@ def main():
         test_type = sys.argv[1].lower()
 
         if test_type == "native":
-            result = runner.run_native_tests()
+            _ = runner.run_native_tests()
         elif test_type == "unit":
-            result = runner.run_unit_tests()
+            _ = runner.run_unit_tests()
         elif test_type == "smoke":
-            result = runner.run_smoke_tests()
+            _ = runner.run_smoke_tests()
         elif test_type == "api":
-            result = runner.run_api_tests()
+            _ = runner.run_api_tests()
         elif test_type == "benchmark":
-            result = runner.run_performance_benchmark()
+            _ = runner.run_performance_benchmark()
         elif test_type == "all":
             success = runner.run_all_tests()
             sys.exit(0 if success else 1)
@@ -124,7 +128,7 @@ def main():
         sys.exit(result.returncode)
     else:
         # Default: run native tests
-        result = runner.run_native_tests()
+        _ = runner.run_native_tests()
         sys.exit(result.returncode)
 
 

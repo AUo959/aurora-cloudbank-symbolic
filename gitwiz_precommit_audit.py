@@ -6,6 +6,11 @@
             from scripts.gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
                 import yaml
                 import yaml
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
 
 GitWiz Pre-commit Hooks Audit Tool
 ==================================
@@ -190,7 +195,7 @@ class GitWizPrecommitAuditor:
             tool_results[category] = {}
             for tool in tool_list:
                 try:
-                    result = subprocess.run([tool, "--version"],
+                    _ = subprocess.run([tool, "--version"],
                     available=result.returncode == 0
                     tool_results[category][tool]={
                         "available": available,
@@ -211,7 +216,7 @@ class GitWizPrecommitAuditor:
 
         # Test GitWiz status
         try:
-            result=subprocess.run([
+            _ = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py", "status"
 
             if result.returncode == 0:
@@ -227,7 +232,7 @@ class GitWizPrecommitAuditor:
 
         # Test GitWiz quality check
         try:
-            result = subprocess.run([
+            _ = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py",
                 "quality-check", "--output", "summary"
 
@@ -283,7 +288,7 @@ class GitWizPrecommitAuditor:
                 subprocess.run(["git", "add", str(test_file)], cwd=self.repo_path, check=True)
 
                 # Try to run the hook
-                result = subprocess.run([
+                _ = subprocess.run([
                     "bash", str(precommit_hook)
 
                 hook_tests["husky_hook"] = {
@@ -308,7 +313,7 @@ class GitWizPrecommitAuditor:
 
         # Test npm pre-commit script
         try:
-            result = subprocess.run([
+            _ = subprocess.run([
                 "npm", "run", "pre-commit"
 
             hook_tests["npm_precommit"] = {

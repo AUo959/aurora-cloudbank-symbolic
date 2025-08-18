@@ -25,7 +25,7 @@ from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
-    title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced", 
+    title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
     description="Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
     version="1.0.0"
 )
@@ -44,14 +44,14 @@ def parse_multivector(expression: str, blades: dict):
         if token not in allowed_symbols and not token.isnumeric():
             raise ValueError(f"Invalid token in expression: {token}")
     # Construct the multivector using the blades dictionary
-    result = None
+    _ = None
 
     for token in tokens:
         if token in blades:
-            result = blades[token] if result is None else result + blades[token]
+            _ = blades[token] if result is None else result + blades[token]
 
         elif token.isnumeric():
-            result = float(token) if result is None else result + float(token)
+            _ = float(token) if result is None else result + float(token)
 
     return result
 
@@ -84,7 +84,7 @@ class AgentToolRequest(BaseModel):
 
 class AgentSessionRequest(BaseModel):
     action: str
-    session_id: Optional[str] = None 
+    session_id: Optional[str] = None
     state_data: Optional[Dict[str, Any]] = None
 
 
@@ -102,7 +102,7 @@ def geometric_product(req: MultivectorRequest):
 
         b = parse_multivector(req.b, ga.blades)
 
-        result = ga.mult(a, b)
+        _ = ga.mult(a, b)
 
         return {"result": str(result)}
 
@@ -125,7 +125,7 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
             }
 
         elif req and req.client_id:
-            result = await sonnet4_hub._enable_sonnet4_for_client(req.client_id)
+            _ = await sonnet4_hub._enable_sonnet4_for_client(req.client_id)
 
             return {
                 "status": "success" if result else "error",
@@ -183,7 +183,7 @@ def health_check():
 
 
 # ================================
-# ChatGPT Agent Mode Endpoints  
+# ChatGPT Agent Mode Endpoints
 # ================================
 
 @app.get("/agent/tools")
@@ -206,7 +206,7 @@ async def execute_agent_tool(request: AgentToolRequest):
     Supports all registered tools: symbolic_processing, geometric_algebra, session_management, system_status
     """
     try:
-        result = await chatgpt_agent_integration.execute_tool(
+        _ = await chatgpt_agent_integration.execute_tool(
             tool_name=request.tool_name,
             parameters=request.parameters,
             session_id=request.session_id
@@ -225,7 +225,7 @@ async def manage_agent_session(request: AgentSessionRequest):
     Actions: create, update, get, delete
     """
     try:
-        result = await chatgpt_agent_integration.execute_tool(
+        _ = await chatgpt_agent_integration.execute_tool(
             tool_name="session_management",
             parameters={
                 "action": request.action,
@@ -257,7 +257,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
     Supports streaming responses and persistent connections
     """
     await websocket.accept()
-    
+
     try:
         # Send initial connection confirmation with Aurora symbolic anchoring
         initial_message = {
@@ -269,15 +269,15 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "context_tag": "websocket_agent_stream"
         }
         await websocket.send_json(initial_message)
-        
+
         while True:
             # Wait for messages from client
             data = await websocket.receive_json()
-            
+
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 try:
-                    result = await chatgpt_agent_integration.execute_tool(
+                    _ = await chatgpt_agent_integration.execute_tool(
                         tool_name=data.get("tool_name"),
                         parameters=data.get("parameters", {}),
                         session_id=data.get("session_id")
@@ -297,11 +297,11 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
             else:
                 await websocket.send_json({
-                    "type": "error", 
+                    "type": "error",
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"]
                 })
-                
+
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
 
@@ -317,7 +317,7 @@ async def manage_agent_session(request: AgentSessionRequest):
     Actions: create, update, get, delete
     """
     try:
-        result = await chatgpt_agent_integration.execute_tool(
+        _ = await chatgpt_agent_integration.execute_tool(
             tool_name="session_management",
             parameters={
                 "action": request.action,
@@ -349,7 +349,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
     Supports streaming responses and persistent connections
     """
     await websocket.accept()
-    
+
     try:
         # Send initial connection confirmation with Aurora symbolic anchoring
         initial_message = {
@@ -361,15 +361,15 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "context_tag": "websocket_agent_stream"
         }
         await websocket.send_json(initial_message)
-        
+
         while True:
             # Wait for messages from client
             data = await websocket.receive_json()
-            
+
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 try:
-                    result = await chatgpt_agent_integration.execute_tool(
+                    _ = await chatgpt_agent_integration.execute_tool(
                         tool_name=data.get("tool_name"),
                         parameters=data.get("parameters", {}),
                         session_id=data.get("session_id")
@@ -389,11 +389,11 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
             else:
                 await websocket.send_json({
-                    "type": "error", 
+                    "type": "error",
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"]
                 })
-                
+
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
 

@@ -2,6 +2,11 @@
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
 
 GitWiz Lint & Cleanup Manager
 =============================
@@ -155,7 +160,7 @@ class LintCleanupManager:
 
         for tool, cmd in python_tools.items():
             try:
-                result = subprocess.run(
+                _ = subprocess.run(
                     cmd, capture_output=True, check=True, timeout=10
                 )
                 available[tool] = True
@@ -456,7 +461,7 @@ class LintCleanupManager:
                 batch_files = python_files[i: i + batch_size]
                 cmd = ["pylint", "--output-format=json"] + batch_files
 
-                result = subprocess.run(
+                _ = subprocess.run(
                     cmd,
                     capture_output=True,
                     text=True,
@@ -537,7 +542,7 @@ class LintCleanupManager:
                     "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s",
                 ] + batch_files
 
-                result = subprocess.run(
+                _ = subprocess.run(
                     cmd,
                     capture_output=True,
                     text=True,
@@ -594,7 +599,7 @@ class LintCleanupManager:
 
             cmd = ["bandit", "-", "json", "-r"] + targets
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -646,7 +651,7 @@ class LintCleanupManager:
                 return {"issues_found": 0, "message": "No markdown files found"}
 
             cmd = ["markdownlint", "--json"] + md_files
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -685,7 +690,7 @@ class LintCleanupManager:
                 }
 
             cmd = ["eslint", "--format", "json"] + js_files
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -783,11 +788,11 @@ class LintCleanupManager:
             if not dry_run:
                 cmd.append("--in-place")
             else:
-                cmd.append("--dif")
+                cmd.append("--di")
 
             cmd.append(str(self.project_root))
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -819,7 +824,7 @@ class LintCleanupManager:
 
             cmd.append(str(self.project_root))
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -851,7 +856,7 @@ class LintCleanupManager:
 
             cmd.extend(["--line-length", "88", str(self.project_root)])
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -910,7 +915,7 @@ class LintCleanupManager:
 
             cmd.extend(relevant_files)
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -938,7 +943,7 @@ class LintCleanupManager:
             if dry_run:
                 cmd.append("--dry-run")
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -953,7 +958,7 @@ class LintCleanupManager:
             for line in output_lines:
                 if "Fixed" in line or "Applied" in line:
                     # Try to extract number from line
-                    numbers = re.findall(rr"\d+", line)
+                    numbers = re.findall(rr"\\d+", line)
                     if numbers:
                         fixes_applied += int(numbers[0])
 

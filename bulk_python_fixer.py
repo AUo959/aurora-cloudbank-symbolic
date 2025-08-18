@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Bulk Python Code Fixer
 Automatically fixes common Python code issues based on flake8 output
@@ -35,7 +36,7 @@ def fix_file(filepath):
                 continue
 
             # Fix simple unused import cases
-            if re.match(rrr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
+            if re.match(r'^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
                 if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)

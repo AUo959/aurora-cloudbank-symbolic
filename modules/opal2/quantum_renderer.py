@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import json
+import time
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support
@@ -177,7 +180,7 @@ class QuantumRenderer:
             quantum_metrics = await self._calculate_quantum_metrics(context, enhanced_data)
 
             # Create result
-            result = RenderResult(
+            _ = RenderResult(
                 output=output,
                 format=renderer,
                 metadata={
@@ -730,7 +733,7 @@ class QuantumRenderer:
             "dimensions": 2,
         }
 
-        result = await self.render_async(
+        _ = await self.render_async(
             glyph_data=test_data,
             renderer="webgl",
             dimensions={"width": 400, "height": 400},

@@ -1,4 +1,9 @@
 """
+from pathlib import Path
+import json
+import subprocess
+import sys
+import tempfile
 Test suite for hash_seal_artifact.py
 Anchor: T3A_DECISION_PR77
 Seed: EOS_SEED_ORION
@@ -20,7 +25,7 @@ def test_hash_and_metadata_generation():
     sample.close()
 
     out_dir = tempfile.mkdtemp()
-    result = subprocess.run(
+    _ = subprocess.run(
         [sys.executable, SCRIPT, "--input", sample.name, "--out-dir", out_dir],
         capture_output=True,
         text=True,
@@ -39,7 +44,7 @@ def test_hash_and_metadata_generation():
         sample.close()
 
         out_dir = tempfile.mkdtemp()
-        result = subprocess.run(
+        _ = subprocess.run(
             [sys.executable, SCRIPT, "--input", sample.name, "--out-dir", out_dir],
             capture_output=True,
             text=True,

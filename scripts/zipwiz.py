@@ -2,6 +2,12 @@
 """
 
     import argparse
+from pathlib import Path
+import hashlib
+import json
+import shutil
+import tempfile
+import zipfile
 
 ZIPWiz - Advanced Archive Management Integration
 Part of the GITWiz Enhanced ecosystem
@@ -65,7 +71,7 @@ class ZIPWiz:
                 ".go",
                 ".rs",
             },
-            "config": {".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf"},
+            "config": {".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".con"},
             "data": {".csv", ".json", ".xml", ".sql", ".db", ".sqlite"},
             "images": {".png", ".jpg", ".jpeg", ".gi", ".bmp", ".svg", ".ico"},
             "archives": {".zip", ".tar", ".gz", ".7z", ".rar", ".bz2"},
@@ -426,7 +432,7 @@ def main():
             print(json.dumps(analysis, indent=2, default=str))
         elif args.extract:
             if args.optimize:
-                result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
+                _ = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
                 print(f"Optimization complete: {result}")
             else:
                 # Standard extraction

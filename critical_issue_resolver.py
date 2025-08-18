@@ -2,6 +2,8 @@
 """
 
 from dataclasses import asdict'''
+from pathlib import Path
+import sys
 
 🔧 Aurora CloudBank Critical Issue Resolver
 Fixes the most critical problems identified in error analysis.
@@ -52,7 +54,7 @@ def fix_critical_gitwiz_issues():
         )
 
         # Add missing methods at the end of the class
-        class_end_pattern = rrr'(\s+def __del__\(self\):.*?pass)'
+        class_end_pattern = r'(\s+def __del__\(self\):.*?pass)'
         if re.search(class_end_pattern, content, re.DOTALL):
             content = re.sub(
                 class_end_pattern,
@@ -85,8 +87,8 @@ def fix_security_file_issues():
             content = f.read()
 
         # Fix file encoding issues
-        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
-        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
 
         # Fix line length issues by breaking long lines
         lines = content.split('\n')

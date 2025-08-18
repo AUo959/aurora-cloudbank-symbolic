@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import sys
 """
 Aurora Developer CLI - Unified command interface for all symbolic operations
 Part of T71 Symbolic Infrastructure Genesis
@@ -195,7 +199,7 @@ class AuroraDeveloperCLI:
                     print("❌ --seal-id required for verification")
                     return 1
 
-                result = self.memory_sealer.verify_seal(args.seal_id)
+                _ = self.memory_sealer.verify_seal(args.seal_id)
 
                 if result["status"] == "valid":
                     print(f"✅ Seal {args.seal_id} is valid")
@@ -238,7 +242,7 @@ class AuroraDeveloperCLI:
         try:
             print(f"🔄 Restoring state: {args.anchor_or_seal_id}")
 
-            result = self.memory_sealer.restore_sealed_state(
+            _ = self.memory_sealer.restore_sealed_state(
                 args.anchor_or_seal_id,
                 args.target_path,
                 args.dry
@@ -463,7 +467,7 @@ Examples:
     manifest_parser.add_argument("--output", "-o", help="Output file path")
 
     # State comparison
-    diff_parser = subparsers.add_parser("dif", help="Compare anchor states")
+    diff_parser = subparsers.add_parser("di", help="Compare anchor states")
     diff_parser.add_argument("anchor1", help="First anchor to compare")
     diff_parser.add_argument("anchor2", help="Second anchor to compare")
 

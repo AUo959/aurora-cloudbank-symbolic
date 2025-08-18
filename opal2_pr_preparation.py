@@ -5,6 +5,9 @@ from fastapi import FastAPI
 """
 
 from modules.opal2.quantum_renderer import QuantumRenderer
+from datetime import datetime
+from pathlib import Path
+import json
 
 Opal2 Modular System - PR Preparation Script
 Comprehensive preparation for the Opal2 expansion pull request
@@ -111,7 +114,7 @@ class Opal2PRPreparation:
         try:
             # Run flake8 on Opal2 modules
             print("  Running flake8...")
-            result = subprocess.run(["flake8", str(self.opal2_dir)], capture_output=True, text=True)
+            _ = subprocess.run(["flake8", str(self.opal2_dir)], capture_output=True, text=True)
 
             if result.returncode == 0:
                 print("  ✅ flake8: No issues found")
@@ -120,7 +123,7 @@ class Opal2PRPreparation:
 
             # Run black check
             print("  Running black...")
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["black", "--check", str(self.opal2_dir)],
                 capture_output=True,
                 text=True,
@@ -144,7 +147,7 @@ class Opal2PRPreparation:
         """Run the test suite"""
         try:
             print("  Running pytest...")
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["pytest", str(self.tests_dir / "test_opal2_system.py"), "-v"],
                 capture_output=True,
                 text=True,
@@ -221,7 +224,7 @@ class Opal2PRPreparation:
         """Run integration tests"""
         try:
             print("  Running integration tests...")
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "pytest",
                     str(self.tests_dir / "test_opal2_system.py::TestIntegration"),
@@ -244,7 +247,7 @@ class Opal2PRPreparation:
         """Run performance tests"""
         try:
             print("  Running performance tests...")
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "pytest",
                     str(self.tests_dir / "test_opal2_system.py::TestPerformance"),
@@ -442,7 +445,7 @@ No migration required - This is a new system addition.
         """Create git branch for the PR"""
         try:
             # Check if branch exists
-            result = subprocess.run(["git", "branch", "--list", branch_name], capture_output=True, text=True)
+            _ = subprocess.run(["git", "branch", "--list", branch_name], capture_output=True, text=True)
 
             if branch_name not in result.stdout:
                 # Create new branch

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from fastapi import (
+import hashlib
     Depends,
     FastAPI,
     File,
@@ -193,7 +194,7 @@ def geometric_product(req: GeometricProductRequest):
     ga = GeometricAlgebra()
     a_mv = req.a * ga.blades["e1"]
     b_mv = req.b * ga.blades["e2"]
-    result = ga.mult(a_mv, b_mv)
+    _ = ga.mult(a_mv, b_mv)
     return {"result": ga.pretty(result)}
 
 
@@ -259,16 +260,16 @@ def vsa_operation(req: VSAOperationRequest):
     """
     if req.operation_type == "generate":
         vec = quantum_symbolic_vector(req.symbol, req.dimension)
-        result = vec.tolist()
+        _ = vec.tolist()
     elif req.operation_type == "bind":
         # Binding logic here
-        result = "Binding not implemented in demo"
+        _ = "Binding not implemented in demo"
     elif req.operation_type == "unbind":
         # Unbinding logic here
-        result = "Unbinding not implemented in demo"
+        _ = "Unbinding not implemented in demo"
     elif req.operation_type == "similarity":
         # Similarity logic here
-        result = "Similarity not implemented in demo"
+        _ = "Similarity not implemented in demo"
     else:
         raise HTTPException(status_code=400, detail="Invalid operation type")
 
@@ -342,7 +343,7 @@ def quantum_circuit(req: QuantumCircuitRequest):
     Response: {"symbol": str, "depth": int, "qubits": int, "result": Any}
     """
     # Placeholder for quantum circuit execution
-    result = {
+    _ = {
         "message": "Quantum circuit executed",
         "symbol": req.symbol,
         "depth": req.depth,
@@ -364,15 +365,15 @@ def geometric_algebra(req: GeometricAlgebraRequest):
     Response: {"operation": str, "result": Any}
     """
     ga = GeometricAlgebra()
-    result = None
+    _ = None
 
     if req.operation == "product":
         # Compute geometric product
         blades = [ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))]
-        result = ga.mult(*blades)
+        _ = ga.mult(*blades)
     elif req.operation == "add":
         # Compute geometric addition
-        result = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
+        _ = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
     elif req.operation == "commutator":
         # Compute commutator
         if len(req.vectors) != 2:
@@ -386,7 +387,7 @@ def geometric_algebra(req: GeometricAlgebraRequest):
             (ga.blades[f"e{i + 1}"] * v2[f"e{i + 1}"] for i in range(len(v2))),
             start=ga.zero,
         )
-        result = ga.commutator(blade1, blade2)
+        _ = ga.commutator(blade1, blade2)
     else:
         raise HTTPException(status_code=400, detail="Invalid operation")
 
@@ -540,7 +541,7 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
 
         if req.operation == "product":
             # Compute geometric product of all vectors
-            result = 1
+            _ = 1
             for vec_spec in req.vectors:
                 mv = 0
                 for blade, coeff in vec_spec.items():
@@ -548,7 +549,7 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
                         mv += coeff * ga.blades[blade]
                     else:
                         mv += coeff  # scalar part
-                result = ga.mult(result, mv)
+                _ = ga.mult(result, mv)
             results.append({"result": ga.pretty(result), "type": "geometric_product"})
 
         elif req.operation == "commutator":
@@ -610,7 +611,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
 
         # Run simulation
         backend = AerSimulator()
-        result = backend.run(qc, shots=1000).result()
+        _ = backend.run(qc, shots=1000).result()
         counts = result.get_counts()
 
         # Analyze results

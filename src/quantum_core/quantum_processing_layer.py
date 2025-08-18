@@ -51,7 +51,7 @@ class QuantumProcessingLayer:
         circuit.measure_all()
 
         job = self.simulator.run(circuit, shots=shots)
-        result = job.result()
+        _ = job.result()
         counts = result.get_counts()
 
         return {

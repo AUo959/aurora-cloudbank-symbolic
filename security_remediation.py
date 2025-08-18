@@ -12,6 +12,9 @@ from typing import List, Dict, Any, Optional, Union
 from pathlib import Path
 import shlex
 from .security.secure_helpers import secure
+import json
+import sys
+import time
 
 🔒 Aurora CloudBank Security Remediation Script
 Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
@@ -55,7 +58,7 @@ class SecurityRemediator:
         try:
             # Split command safely
             cmd_parts = shlex.split(cmd)
-            result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
+            _ = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
             return result.stdout.strip(), result.returncode == 0
         except (subprocess.TimeoutExpired, OSError, ValueError) as e:
             print(f"Command execution error: {e}")
@@ -79,7 +82,7 @@ class SecurityRemediator:
     try:
         # SECURITY: Using shell=False for safe subprocess execution
         cmd_list = cmd.split() if isinstance(cmd, str) else cmd
-        result = subprocess.run(cmd_list, shell=False, capture_output=True, text=True)
+        _ = subprocess.run(cmd_list, shell=False, capture_output=True, text=True)
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError):
         return "", False''',
@@ -88,7 +91,7 @@ class SecurityRemediator:
     try:
         # Use shlex.split for secure command execution
         cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
-        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
+        _ = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False''',
@@ -124,7 +127,7 @@ class SecurityRemediator:
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)
-        result = subprocess.run(cmd_parts, timeout=300)
+        _ = subprocess.run(cmd_parts, timeout=300)
         if result.returncode != 0:
             logger.error("Command failed: %s", cmd)
             sys.exit(result.returncode)
@@ -271,7 +274,7 @@ class SecureHelpers:
             else:
                 cmd_parts = cmd
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd_parts,
                 timeout=timeout,
                 cwd=cwd,
@@ -311,7 +314,7 @@ class SecureHelpers:
         # Remove potential script tags and javascript
         sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(rrrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(rrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -364,7 +367,7 @@ class SecureHelpers:
                 'len': len
 
         # Only allow safe characters and patterns
-        if not re.match(rrrr'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:
@@ -512,7 +515,7 @@ if secure.validate_file_path(file_path, allowed_dirs=['/safe/dir']):
 ### Safe Expression Evaluation
 ```python
 # ❌ UNSAFE (commented out for security)
-# result = eval(user_expression)  # nosec - commented example
+# _ = eval(user_expression)  # nosec - commented example
 
 # ✅ SECURE
 result = secure.secure_eval_alternative(user_expression)

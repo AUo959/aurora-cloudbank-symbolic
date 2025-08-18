@@ -2,6 +2,12 @@
 """
 
     import datetime
+from pathlib import Path
+import argparse
+import gzip
+import hashlib
+import os
+import shutil
 
 Aurora CloudBank - Memory Compression and Optimization System
 Advanced repository optimization with intelligent compression and deduplication

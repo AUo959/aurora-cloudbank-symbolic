@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import os
+import sys
 """
 Aurora L2 Integration Server
 Aurora CloudBank v3.5.1_macroready
@@ -155,7 +160,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                     raise HTTPException(status_code=500, detail=f"Aurora integration failed: {init_result['error']}")
 
             # Route command through Aurora Custom GPT bridge
-            result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
+            _ = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
 
             logger.info(f"Aurora command processed: {result['success']}")
 
@@ -195,7 +200,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         logger.info("Aurora Custom GPT initialization request")
 
         try:
-            result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
+            _ = await auroraCustomGptBridge.initializeCommandNodeIntegration()
 
             if result["success"]:
                 logger.info("Aurora Custom GPT integration initialized successfully")
@@ -240,7 +245,7 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
         if not activation_phrase:
             raise HTTPException(status_code=400, detail="Missing activation phrase")
 
-        result = await l2_bridge.activate_agent(agent_id, activation_phrase)
+        _ = await l2_bridge.activate_agent(agent_id, activation_phrase)
 
         if result["success"]:
             logger.info(f"Custom GPT {agent_id} connected successfully")
@@ -275,7 +280,7 @@ async def relay_message(agent_id: str, request_data: Dict[str, Any]):
         if not message:
             raise HTTPException(status_code=400, detail="Missing message content")
 
-        result = await l2_bridge.relay_message(agent_id, target, message, message_type)
+        _ = await l2_bridge.relay_message(agent_id, target, message, message_type)
 
         if result["success"]:
             logger.info(f"Message relayed successfully from {agent_id}")
@@ -320,7 +325,7 @@ async def get_agent_status(agent_id: str):
     try:
         logger.info(f"Agent status request for: {agent_id}")
 
-        result = l2_bridge.get_agent_status(agent_id)
+        _ = l2_bridge.get_agent_status(agent_id)
 
         if result.get("success", True):
             return JSONResponse(status_code=200, content=result)
@@ -367,7 +372,7 @@ async def disconnect_agent(agent_id: str):
     try:
         logger.info(f"Disconnect request for: {agent_id}")
 
-        result = await l2_bridge.disconnect_agent(agent_id)
+        _ = await l2_bridge.disconnect_agent(agent_id)
 
         if result["success"]:
             logger.info(f"Agent {agent_id} disconnected successfully")

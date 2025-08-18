@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import zipfile
 """
 Memory Sealing Engine - Automated SHA256 sealing with state recovery
 Part of T71 Symbolic Infrastructure Genesis
@@ -273,13 +281,13 @@ class MemorySealingEngine:
 
         try:
             if seal.seal_type == "file":
-                result = self._verify_file_seal(seal)
+                _ = self._verify_file_seal(seal)
             elif seal.seal_type == "directory":
-                result = self._verify_directory_seal(seal)
+                _ = self._verify_directory_seal(seal)
             elif seal.seal_type == "thread":
-                result = self._verify_thread_seal(seal)
+                _ = self._verify_thread_seal(seal)
             else:
-                result = {"valid": False, "error": f"Unknown seal type: {seal.seal_type}"}
+                _ = {"valid": False, "error": f"Unknown seal type: {seal.seal_type}"}
 
             verification_result["status"] = "valid" if result["valid"] else "invalid"
             verification_result["details"] = result
@@ -615,7 +623,7 @@ def main():
             print("❌ --seal-id required for verify command")
             return
 
-        result = engine.verify_seal(args.seal_id)
+        _ = engine.verify_seal(args.seal_id)
 
         if result["status"] == "valid":
             print(f"✅ Seal {args.seal_id} is valid")
@@ -629,7 +637,7 @@ def main():
             print("❌ --seal-id required for restore command")
             return
 
-        result = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)
+        _ = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)
 
         print(f"🔄 Restore result for {args.seal_id}: {result['status']}")
         for action in result["actions"]:

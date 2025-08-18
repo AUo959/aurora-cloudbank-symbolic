@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import argparse
+import subprocess
+import sys
 """
 Aurora CloudBank - Automated Branch Management System
 ====================================================
@@ -59,7 +63,7 @@ class BranchManager:
                 "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -122,7 +126,7 @@ class BranchManager:
         try:
             # Check if branch is merged into main
             cmd = ["git", "merge-base", "--is-ancestor", branch_name, "origin/main"]
-            result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
+            _ = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except (OSError, ValueError, RuntimeError):
             return False
@@ -215,7 +219,7 @@ class BranchManager:
                             "--delete",
                             branch_name.replace("origin/", ""),
                         ]
-                        result = subprocess.run(
+                        _ = subprocess.run(
                             cmd,
                             capture_output=True,
                             text=True,

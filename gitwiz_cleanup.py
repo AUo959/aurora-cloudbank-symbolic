@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import shutil
+import subprocess
+import sys
 """
 GITWiz Repository Cleanup & Health Maintenance
 Aurora CloudBank Symbolic Repository
@@ -41,7 +48,7 @@ class GITWizCleanup:
     def get_repo_size(self):
         """Get repository size in bytes."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["du", "-sb", str(self.repo_path)],
                 capture_output=True,
                 text=True,
@@ -116,7 +123,7 @@ class GITWizCleanup:
         """Analyze git branches."""
         print("🌿 Analyzing git branches...")
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "branch", "-a"],
                 capture_output=True,
                 text=True,

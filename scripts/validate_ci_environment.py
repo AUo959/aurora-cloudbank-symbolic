@@ -4,6 +4,10 @@ import subprocess
 """
 
     import argparse
+from pathlib import Path
+import json
+import shutil
+import sys
 
 CI Environment Validation Script
 ===============================
@@ -43,7 +47,7 @@ class CIEnvironmentValidator:
     def check_tool_availability(self, tool: str) -> Tuple[bool, str]:
         """Check if a tool is available and get version."""
         try:
-            result = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=10)
+            _ = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 version = result.stdout.strip().split("\n")[0]
                 return True, version
@@ -123,7 +127,7 @@ class CIEnvironmentValidator:
             return
 
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [sys.executable, str(gitwiz_script), "status"],
                 capture_output=True,
                 text=True,

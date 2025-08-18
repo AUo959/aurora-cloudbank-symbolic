@@ -9,6 +9,9 @@ from tools.integration.ci_helpers import CIHelpers
             import sys
             from symbolic.memory_sealer import MemorySealingEngine
     import argparse
+from datetime import datetime
+from pathlib import Path
+import json
 
 CI/CD Integration Helpers
 Part of T71 Symbolic Infrastructure Genesis
@@ -189,7 +192,7 @@ print('✅ Deployment manifest generated')
 
     def _check_python_lint(self) -> Dict[str, Any]:
         """Check Python code formatting and linting"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             # Run flake8
@@ -214,7 +217,7 @@ print('✅ Deployment manifest generated')
 
     def _check_anchor_integrity(self) -> Dict[str, Any]:
         """Validate symbolic anchor integrity"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             # Import and run anchor tracker
@@ -241,7 +244,7 @@ print('✅ Deployment manifest generated')
 
     def _check_memory_seals(self) -> Dict[str, Any]:
         """Validate memory seals integrity"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             sys.path.insert(0, str(self.repo_path / "tools"))
@@ -269,7 +272,7 @@ print('✅ Deployment manifest generated')
 
     def _check_test_coverage(self) -> Dict[str, Any]:
         """Check test coverage"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             # Run the T71 test suite
@@ -321,7 +324,7 @@ print('✅ Deployment manifest generated')
 
     def _check_git_status(self) -> Dict[str, Any]:
         """Check git repository status"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             process = subprocess.run(
@@ -346,7 +349,7 @@ print('✅ Deployment manifest generated')
 
     def _validate_symbolic_integrity(self) -> Dict[str, Any]:
         """Validate symbolic infrastructure integrity"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         # Check that all major components exist
         required_files = [
@@ -371,7 +374,7 @@ print('✅ Deployment manifest generated')
 
     def _validate_tools(self) -> Dict[str, Any]:
         """Validate tool functionality"""
-        result = {"status": "unknown", "issues": []}
+        _ = {"status": "unknown", "issues": []}
 
         try:
             # Run basic functionality test

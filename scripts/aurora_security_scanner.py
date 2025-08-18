@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
 """
 Aurora CloudBank Security Scanner
 Comprehensive security analysis and automated fixes
@@ -41,15 +46,15 @@ class AuroraSecurityScanner:
                 })
 
     def _check_js_content(self, file_path, content):
-        """Check JavaScript content for security issues""r"
+        """Check content for security issues"""
 
         # Check for dangerous patterns
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
-            'innerHTML': (rrr'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
-            'document.write': (rrr'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
-            'setTimeout_string': (rrr'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
-            'Function_constructor': (rrr'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
+            'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
+            'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
+            'setTimeout_string': (r'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
+            'Function_constructor': (r'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
             'dangerouslySetInnerHTML': (
                 r'dangerouslySetInnerHTML',
                 'HIGH',
@@ -92,20 +97,20 @@ class AuroraSecurityScanner:
                 })
 
     def _check_py_content(self, file_path, content):
-        """Check Python content for security issues""r"
+        """Check Python content for security issues"""
 
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
-            'exec': (rrr'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
-                rrrr'subprocess\.\w+.*shell\s*=\s*True',
+                rr'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
                 'subprocess with shell=True can enable command injection'
             ),
-            'os_system': (rrr'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
-            'sql_format': (rrr'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
-            'pickle_load': (rrr'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
-            'yaml_unsafe': (rrr'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
+            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
+            'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
+            'pickle_load': (r'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
+            'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
@@ -128,7 +133,7 @@ class AuroraSecurityScanner:
         # Check npm dependencies
         if os.path.exists('package.json'):
             try:
-                result = subprocess.run(['npm', 'audit', '--json'],
+                _ = subprocess.run(['npm', 'audit', '--json'],
                                         capture_output=True, text=True, timeout=30, shell=False, check=False)
                 if result.returncode != 0 and result.stdout:
                     audit_data = json.loads(result.stdout)
@@ -152,10 +157,10 @@ class AuroraSecurityScanner:
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (rrr'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
-            (rrr'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
-            (rrr'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
-            (rrr'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
+            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
+            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
+            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
+            (r'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
 
@@ -204,7 +209,7 @@ class AuroraSecurityScanner:
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
-                rrrr'(\w+)\.innerHTML\s*=\s*([^;]+);',
+                rr'(\w+)\.innerHTML\s*=\s*([^;]+);',
                 r'\1.textContent = \2; // SECURITY FIX: Changed from innerHTML',
                 content
             )

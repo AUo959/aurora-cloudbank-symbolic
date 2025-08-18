@@ -4,6 +4,15 @@
                     import shlex
             from .repository_health_monitor import RepositoryHealthMonitor
             from .automated_branch_cleanup import BranchCleanupManager
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import os
+import schedule
+import subprocess
+import threading
+import time
 
 Aurora CloudBank - Scheduled Repository Maintenance System
 Automated maintenance workflows with configurable schedules and safety checks.
@@ -164,7 +173,7 @@ class MaintenanceScheduler:
                 return {"status": "failed", "reason": "safety_checks_failed"}
 
             # Execute the task
-            result = self._execute_maintenance_task(task_name, task_config)
+            _ = self._execute_maintenance_task(task_name, task_config)
 
             duration = (datetime.datetime.now() - start_time).total_seconds()
             self._log(f"Completed maintenance task: {task_name} in {duration:.1f}s")
@@ -205,7 +214,7 @@ class MaintenanceScheduler:
             processes_to_check = ["python", "node", "npm", "jupyter", "code"]
 
             for proc_name in processes_to_check:
-                result = subprocess.run(
+                _ = subprocess.run(
                     ["pgrep", "-", proc_name],
                     capture_output=True,
                     cwd=self.repo_path,
@@ -235,7 +244,7 @@ class MaintenanceScheduler:
         """Verify branch merge status before cleanup."""
         try:
             # Check if working directory is clean
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,
@@ -313,7 +322,7 @@ class MaintenanceScheduler:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
                     cmd_parts = shlex.split(command) if isinstance(command, str) else command
-                    result = subprocess.run(
+                    _ = subprocess.run(
                         cmd_parts,
                         capture_output=True,
                         text=True,
@@ -337,7 +346,7 @@ class MaintenanceScheduler:
             # Import and run the health monitor
 
             monitor = RepositoryHealthMonitor(self.repo_path)
-            result = monitor.run_monitoring_cycle()
+            _ = monitor.run_monitoring_cycle()
 
             # Check if alerts require immediate action
             alerts = result.get("alerts", [])
@@ -364,7 +373,7 @@ class MaintenanceScheduler:
         """Basic health check without full monitoring system."""
         try:
             # Get repository size
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
@@ -375,7 +384,7 @@ class MaintenanceScheduler:
             size_mb = float(result.stdout.split()[0]) if result.returncode == 0 else 0
 
             # Count files
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
                 text=True,
@@ -422,7 +431,7 @@ class MaintenanceScheduler:
         """Optimize ZIP file storage."""
         try:
             # Find ZIP files
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-name", "*.zip", "-type", "f"],
                 capture_output=True,
                 text=True,
@@ -470,7 +479,7 @@ class MaintenanceScheduler:
 
             # Check Python dependencies
             if (self.repo_path / "requirements.txt").exists():
-                result = subprocess.run(
+                _ = subprocess.run(
                     ["pip", "list", "--outdated", "--format=json"],
                     capture_output=True,
                     text=True,
@@ -484,7 +493,7 @@ class MaintenanceScheduler:
 
             # Check Node.js dependencies
             if (self.repo_path / "package.json").exists():
-                result = subprocess.run(
+                _ = subprocess.run(
                     ["npm", "outdated", "--json"],
                     capture_output=True,
                     text=True,
@@ -601,7 +610,7 @@ def main():
 
     if args.run_now:
         print(f"🏃 Running maintenance task: {args.run_now}")
-        result = scheduler.run_immediate_maintenance(args.run_now)
+        _ = scheduler.run_immediate_maintenance(args.run_now)
         print(f"Result: {result}")
         return
 

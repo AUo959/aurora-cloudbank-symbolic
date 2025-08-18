@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import subprocess
 """
 Aurora CloudBank - Automated Branch Cleanup System
 Intelligently identifies and manages stale branches based on configurable rules.
@@ -18,7 +22,7 @@ class BranchCleanupManager:
         self.config = {
             "stale_days": 30,
             "force_delete_patterns": [
-                rr"^origin/alert-autofix-\d+$",  # Old security fixes
+                r"^origin/alert-autofix-\d+$",  # Old security fixes
                 r"^origin/.*-backup-.*$",  # Backup branches
             ],
             "review_patterns": [
@@ -44,7 +48,7 @@ class BranchCleanupManager:
                 "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
@@ -105,7 +109,7 @@ class BranchCleanupManager:
                 f"origin/{branch_short}",
                 "origin/main",
             ]
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
             )
             return result.returncode == 0
@@ -222,7 +226,7 @@ class BranchCleanupManager:
             # Remove 'origin/' prefix for deletion
             branch_short = branch_name.replace("origin/", "")
             cmd = ["git", "push", "origin", "--delete", branch_short]
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import os
+import shutil
 """
 CodeQL Scanning Issue Resolver
 ==============================

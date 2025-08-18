@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import subprocess
+import sys
 """
 Aurora CloudBank - Automated Branch Cleanup System
 Intelligently manages repository branches with safety checks and automation.
@@ -49,7 +54,7 @@ class BranchCleanupManager:
                 "--format=%(refname:short)|%(committerdate:iso)|%(authorname)|%(ahead-behind:HEAD)",
                 "refs/remotes/origin/",
             ]
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,

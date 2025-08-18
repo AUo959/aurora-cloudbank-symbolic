@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
+import schedule
 """
 Opal2 Modular System - Configuration Manager
 Advanced configuration management with validation and hot-reloading

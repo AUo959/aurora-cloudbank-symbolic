@@ -6,6 +6,8 @@ from fastapi import FastAPI
 
         import logging
     import uvicorn
+from datetime import datetime
+import json
 
 Opal2 Modular System - FastAPI Integration
 Enhanced quantum visualization API with modular renderer support

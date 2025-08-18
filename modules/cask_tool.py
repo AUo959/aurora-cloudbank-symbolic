@@ -2,6 +2,8 @@
 """Utilities for interacting with the CASK reference assets.
 
     import plotly.graph_objects as go
+import os
+import zipfile
 
 
 This module loads data from ``CASK_Assets.zip`` and provides helper

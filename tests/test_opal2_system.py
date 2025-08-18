@@ -1,4 +1,7 @@
 # !/usr/bin/env python3
+from pathlib import Path
+import shutil
+import tempfile
 """
 Opal2 Modular System - Test Suite (Simplified)
 Basic testing for Opal2 concepts without complex imports
@@ -85,7 +88,7 @@ class TestOpal2BasicConcepts:
             return {"status": "completed", "render_time": 0.1, "output": f"rendered_{data['id']}"}
 
         test_data = {"id": "test_123", "type": "glyph"}
-        result = await mock_render_async(test_data)
+        _ = await mock_render_async(test_data)
 
         assert result["status"] == "completed"
         assert result["render_time"] > 0

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import json
+import os
+import subprocess
+import sys
 """
 Aurora CloudBank System Validation Tests
 ========================================
@@ -24,7 +28,7 @@ def test_holographic_interface():
 
     # Test syntax
     try:
-        result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)
+        _ = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)
         if result.returncode == 0:
             print(f"✅ {orchestrator_path} - Valid Node.js syntax")
             return True
@@ -89,7 +93,7 @@ def test_git_repository_status():
 
     try:
         # Check if we're in a git repository
-        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
+        _ = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
 
         if result.returncode == 0:
             uncommitted = result.stdout.strip()

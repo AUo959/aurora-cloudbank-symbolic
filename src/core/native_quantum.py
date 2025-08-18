@@ -270,7 +270,7 @@ class NativeQuantumProcessingLayer:
             raise ValueError(f"Circuit {circuit_name} not found")
 
         circuit = self.quantum_circuits[circuit_name]
-        result = self.simulator.run(circuit, shots)
+        _ = self.simulator.run(circuit, shots)
         counts = result.get_counts()
 
         return {

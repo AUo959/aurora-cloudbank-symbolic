@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Quick fix for JavaScript syntax in Python files
 """
@@ -14,18 +15,18 @@ def fix_python_file(filepath):
 
     # Fix function declarations
     content = re.sub(
-        rrr"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
+        r"def (\w+)\([^)]*\) {", r"def \1(self, *args, **kwargs):", content
     )
     content = re.sub(
-        rrr"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
+        r"async def (\w+)\([^)]*\) {", r"async def \1(self, *args, **kwargs):", content
     )
 
     # Remove extra closing braces
-    content = re.sub(rrr"    }\s*$", "", content, flags=re.MULTILINE)
+    content = re.sub(r"    }\s*$", "", content, flags=re.MULTILINE)
     content = re.sub(r"};$", "", content, flags=re.MULTILINE)
 
     # Remove class definitions with JavaScript syntax
-    content = re.sub(rrrr"class (\w+):\s*async de", r"class \1:\n    async de", content)
+    content = re.sub(rr"class (\w+):\s*async de", r"class \1:\n    async de", content)
 
     with open(filepath, "w") as f:
         f.write(content)

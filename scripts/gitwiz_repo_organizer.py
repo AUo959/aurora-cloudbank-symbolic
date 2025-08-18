@@ -2,6 +2,10 @@
 """
 
     import argparse
+from pathlib import Path
+import hashlib
+import json
+import zipfile
 
 GITWiz Repository Organizer
 Advanced repository structure analysis and optimization engine
@@ -235,8 +239,8 @@ class RepositoryOrganizer:
                 (rr'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_keyr"),
                 (rr'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secretr"),
                 (rr'token\s*=\s*["\'][^"\']+["\']r', "hardcoded_token"),
-                (rrr"eval\s*\(", "eval_usage"),
-                (rrr"exec\s*\(", "exec_usage"),
+                (r"eval\s*\(", "eval_usage"),
+                (r"exec\s*\(", "exec_usage"),
             ]
 
             for pattern, issue_type in security_patterns:
@@ -483,9 +487,9 @@ def main():
         if args.plan:
             print("📋 Generating reorganization plan...")
             plan = organizer.generate_reorganization_plan(analysis)
-            result = {"analysis": analysis, "reorganization_plan": plan}
+            _ = {"analysis": analysis, "reorganization_plan": plan}
         else:
-            result = analysis
+            _ = analysis
 
         if args.output:
             with open(args.output, "w") as f:

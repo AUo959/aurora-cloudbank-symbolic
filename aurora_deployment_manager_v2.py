@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import sys
 """
 🎯 Aurora CloudBank Intelligent Deployment Manager
 Manages staged deployment of enhancements with safety checks.
@@ -33,7 +37,7 @@ class DeploymentManager:
     def _check_repository_state(self):
         """Check repository is in clean state."""
         try:
-            result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=False)
+            _ = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=False)
             clean = len(result.stdout.strip()) == 0
             print(f"   Repository state: {'✅ Clean' if clean else '⚠️ Has changes'}")
             return True  # Allow deployment with changes for now

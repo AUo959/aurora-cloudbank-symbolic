@@ -1,6 +1,7 @@
 """Opal2 Plugin System - Base Plugin Interface
 
         import os
+import time
 
 =============================================
 
@@ -137,7 +138,7 @@ class RendererPlugin(BasePlugin):
         """Process input data by rendering."""
         start_time = time.time()
         try:
-            result = self.render(input_data, options)
+            _ = self.render(input_data, options)
             self._update_metrics(time.time() - start_time, True)
             return result
         except Exception as e:
@@ -164,7 +165,7 @@ class ExporterPlugin(BasePlugin):
         start_time = time.time()
         try:
             format_type = options.get("format", "default")
-            result = self.export(input_data, format_type, options)
+            _ = self.export(input_data, format_type, options)
             self._update_metrics(time.time() - start_time, True)
             return result
         except Exception as e:
@@ -186,7 +187,7 @@ class FilterPlugin(BasePlugin):
         """Process input data by applying filter."""
         start_time = time.time()
         try:
-            result = self.apply_filter(input_data, options)
+            _ = self.apply_filter(input_data, options)
             self._update_metrics(time.time() - start_time, True)
             return result
         except Exception as e:
@@ -427,11 +428,11 @@ class PluginRegistry:
         options: Dict[str, Any] = None,
     ) -> Any:
     """Execute a chain of plugins in sequence."""
-        result = input_data
+        _ = input_data
         options = options or {}
 
         for plugin in plugin_chain:
-    result = plugin.process(result, options)
+    _ = plugin.process(result, options)
 
         return result
 

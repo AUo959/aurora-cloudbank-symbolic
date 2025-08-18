@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import argparse
+import subprocess
 """
 Aurora CloudBank Branch Management System
 Automated cleanup and monitoring for repository branches
@@ -48,7 +51,7 @@ class BranchManager:
             "refs/remotes/origin",
         ]
 
-        result = subprocess.run(
+        _ = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
@@ -107,7 +110,7 @@ class BranchManager:
             f"origin/{branch_name}",
             "origin/main",
         ]
-        result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
+        _ = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
         return result.returncode == 0
 
     def _categorize_branch(self, branch_name: str) -> str:

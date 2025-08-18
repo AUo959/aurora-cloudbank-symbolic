@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 🔐 Aurora CloudBank GPG Persistent Fix
 Resolves 403 author invalid errors by configuring GPG signing properly
@@ -20,15 +23,15 @@ class GPGPersistentFix:
 
         try:
             # Check user.name
-            result = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
+            _ = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
             user_name = result.stdout.strip() if result.returncode == 0 else None
 
             # Check user.email
-            result = subprocess.run(["git", "config", "user.email"], capture_output=True, text=True)
+            _ = subprocess.run(["git", "config", "user.email"], capture_output=True, text=True)
             user_email = result.stdout.strip() if result.returncode == 0 else None
 
             # Check GPG signing
-            result = subprocess.run(["git", "config", "commit.gpgsign"], capture_output=True, text=True)
+            _ = subprocess.run(["git", "config", "commit.gpgsign"], capture_output=True, text=True)
             gpg_sign = result.stdout.strip() if result.returncode == 0 else None
 
             print(f"📧 User Name: {user_name or 'NOT SET'}")

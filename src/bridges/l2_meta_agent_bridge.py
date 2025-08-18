@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import datetime
 """
 L2 Meta-Agent Bridge
 Aurora CloudBank v3.5.1_macroready
@@ -460,7 +461,7 @@ async def main():
     print("=" * 50)
 
     # Test activation
-    result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
+    _ = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
     print(f"ARCHY Activation: {result['success']}")
 
     if result["success"]:

@@ -4,6 +4,9 @@ import subprocess
 """
 
     import shlex
+import argparse
+import os
+import sys
 
 staff_node_ci_helper.py
 
@@ -24,7 +27,7 @@ def run_cmd(cmd: str) -> None:
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)
-        result = subprocess.run(cmd_parts, timeout=300, shell=False, check=False)
+        _ = subprocess.run(cmd_parts, timeout=300, shell=False, check=False)
         if result.returncode != 0:
             logger.error("Command failed: %s", cmd)
             sys.exit(result.returncode)

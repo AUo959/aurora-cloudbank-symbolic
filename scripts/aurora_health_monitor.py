@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import subprocess
+import sys
+import time
 """
 Aurora CloudBank - Repository Health Monitoring System
 =====================================================
@@ -101,7 +108,7 @@ class HealthMonitor:
 
         try:
             # Repository size
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
@@ -113,7 +120,7 @@ class HealthMonitor:
                 metrics["repository_size_mb"] = int(result.stdout.split()[0])
 
             # File count
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
                 text=True,
@@ -125,7 +132,7 @@ class HealthMonitor:
                 metrics["file_count"] = len(result.stdout.strip().split("\n"))
 
             # Branch count
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
                 text=True,
@@ -141,7 +148,7 @@ class HealthMonitor:
             metrics["zip_file_count"] = len(zip_files)
 
             # Python cache files
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-type", ""],
                 capture_output=True,
                 text=True,
@@ -154,7 +161,7 @@ class HealthMonitor:
                 metrics["pyc_file_count"] = len([f for f in pyc_files if f])
 
             # Temporary directories
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "find",
                     ".",
@@ -180,7 +187,7 @@ class HealthMonitor:
                 metrics["temp_dir_count"] = len([d for d in temp_dirs if d and not d.startswith("./.venv")])
 
             # Large files (>10MB)
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-type", "", "-size", "+10M"],
                 capture_output=True,
                 text=True,

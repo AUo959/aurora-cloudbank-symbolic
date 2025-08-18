@@ -1,4 +1,6 @@
 """
+import os
+import sys
 Test ChatGPT Agent Mode Integration for Aurora CloudBank
 
 Validates agent mode capabilities including tool discovery, execution,
@@ -64,7 +66,7 @@ class TestChatGPTAgentModeIntegration:
             "anchor_context": "test_context",
         }
 
-        result = await self.agent.execute_tool("symbolic_processing", parameters)
+        _ = await self.agent.execute_tool("symbolic_processing", parameters)
 
         assert result["success"] is True
         assert "result" in result
@@ -77,7 +79,7 @@ class TestChatGPTAgentModeIntegration:
         """Test geometric algebra tool execution"""
         parameters = {"expression_a": "e1 + e2", "expression_b": "e2 + e3", "operation": "mult"}
 
-        result = await self.agent.execute_tool("geometric_algebra", parameters)
+        _ = await self.agent.execute_tool("geometric_algebra", parameters)
 
         assert result["success"] is True
         assert "result" in result
@@ -152,7 +154,7 @@ class TestChatGPTAgentModeIntegration:
             assert "not found" in str(e)
 
         # Test invalid parameters
-        result = await self.agent.execute_tool("geometric_algebra", {"invalid": "params"})
+        _ = await self.agent.execute_tool("geometric_algebra", {"invalid": "params"})
         assert result["success"] is False
         assert "error" in result
         assert "recovery_suggestions" in result
@@ -245,7 +247,7 @@ if __name__ == "__main__":
         print(f"✅ Tool discovery: {len(tools_info['tools'])} tools available")
 
         # Test a simple tool execution
-        result = loop.run_until_complete(agent.execute_tool("system_status", {"detail_level": "basic"}))
+        _ = loop.run_until_complete(agent.execute_tool("system_status", {"detail_level": "basic"}))
         print(f"✅ Tool execution: {result['success']}")
 
         # Test session management

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import subprocess
 """
 Automated stale branch cleanup for Aurora CloudBank repository.
 Deletes merged feature branches, archives backup branches, and closes stale dependabot PRs.
@@ -8,7 +9,7 @@ import subprocess
 
 
 def get_merged_branches():
-    result = subprocess.run(
+    _ = subprocess.run(
         ["git", "branch", "-r", "--merged", "origin/main"],
         capture_output=True,
         text=True,

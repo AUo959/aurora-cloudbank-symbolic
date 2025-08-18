@@ -4,6 +4,10 @@ import subprocess
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import sys
 
 GITWiz Dependency Auto-Updater
 Comprehensive dependency management and auto-updating system.
@@ -148,7 +152,7 @@ class DependencyAutoUpdater:
 
         try:
             # Update all packages
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     sys.executable,
                     "-m",
@@ -191,7 +195,7 @@ class DependencyAutoUpdater:
 
         try:
             # Update packages
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["npm", "update"],
                 capture_output=True,
                 text=True,
@@ -222,7 +226,7 @@ class DependencyAutoUpdater:
 
         # Python security audit with pip-audit (if available)
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [sys.executable, "-m", "pip", "install", "pip-audit"],
                 capture_output=True,
                 text=True,
@@ -251,7 +255,7 @@ class DependencyAutoUpdater:
         package_json = self.project_root / "package.json"
         if package_json.exists():
             try:
-                result = subprocess.run(
+                _ = subprocess.run(
                     ["npm", "audit", "--json"],
                     capture_output=True,
                     text=True,
@@ -371,7 +375,7 @@ def main():
     updater = DependencyAutoUpdater()
 
     if args.comprehensive:
-        result = updater.execute_comprehensive_update(dry_run=args.dry_run)
+        _ = updater.execute_comprehensive_update(dry_run=args.dry_run)
         print("\n📊 Workflow Result Summary:")
         print(f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}")
         print(f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}")

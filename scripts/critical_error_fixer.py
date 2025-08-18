@@ -1,4 +1,8 @@
 # !/usr/bin/env python3
+from pathlib import Path
+from typing import List
+import subprocess
+import sys
 """
 Critical Error Fixer - Repair Broken Scripts
 ==========================================

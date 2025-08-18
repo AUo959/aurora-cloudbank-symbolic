@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
 """
 Opal2 Modular System - Plugin System
 Dynamic plugin loading and management for extensible rendering
@@ -254,7 +257,7 @@ class PluginSystem:
 
     def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginInterface]:
         """Get all plugins of a specific type"""
-        result = []
+        _ = []
         for name, info in self.plugin_info.items():
             if info.plugin_type == plugin_type and info.status == PluginStatus.LOADED:
                 plugin = self.plugins.get(name)

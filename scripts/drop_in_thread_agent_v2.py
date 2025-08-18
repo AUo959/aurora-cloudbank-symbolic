@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import argparse
+import json
 """Drop-In Thread Context Tagging Agent v2.0
 
 This script classifies thread content using the existing reflective autonomy
@@ -37,7 +39,7 @@ def tag_thread_context(content: str, include_directive: bool = True) -> dict:
 
     alias = ALIAS_MAP.get(base_result["primary_folder"], base_result["primary_folder"])
 
-    result = {
+    _ = {
         "alias": alias,
         "folder": base_result["primary_folder"],
         "priority": base_result["priority"],
@@ -63,7 +65,7 @@ def main() -> None:
     with open(args.input_file, "r", encoding="utf-8") as fh:
         content = fh.read()
 
-    result = tag_thread_context(content, include_directive=not args.no_directive)
+    _ = tag_thread_context(content, include_directive=not args.no_directive)
     print(json.dumps(result, indent=2))
 
 

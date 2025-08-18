@@ -2,6 +2,11 @@
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import hashlib
+import json
+import os
 
 Symbolic Anchor Tracker - Core symbolic anchor resolution and lineage mapping
 Part of T71 Symbolic Infrastructure Genesis

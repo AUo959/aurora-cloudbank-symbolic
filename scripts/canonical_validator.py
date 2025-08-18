@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import subprocess
 """
 Aurora CloudBank Symbolic - Canonical Validation Engine
 Auto-validates new work against ORION CORE canonical specification
@@ -274,8 +277,8 @@ class CanonicalValidator:
 
         # Check for message syntax patterns
         msg_patterns = [
-            (rrrr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
-            (rrr"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
+            (rr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
+            (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
         ]
 
         for pattern, msg_type in msg_patterns:

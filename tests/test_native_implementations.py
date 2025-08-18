@@ -1,6 +1,8 @@
 """
 
         import sys
+import os
+import time
 
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
@@ -9,6 +11,8 @@ Validates core symbolic simulation functionality without heavy dependencies
 # Add src to path for imports
 import math
 import os
+import pytest
+import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -193,7 +197,7 @@ class TestNativeQuantum:
         circuit = processor.create_quantum_circuit("test_circuit", operations)
         assert circuit.num_qubits == 3
 
-        result = processor.execute_quantum_symbolic_computation("test_circuit", 100)
+        _ = processor.execute_quantum_symbolic_computation("test_circuit", 100)
 
         assert "quantum_results" in result
         assert "symbolic_interpretation" in result
@@ -229,7 +233,7 @@ class TestNativeSymbolicAnchor:
             "symbolic_concepts": ["test", "anchor", "quantum"],
         }
 
-        result = anchor.anchor_quantum_symbolic_state(test_data)
+        _ = anchor.anchor_quantum_symbolic_state(test_data)
 
         assert "quantum_anchor" in result
         assert "symbolic_anchor" in result
@@ -352,7 +356,7 @@ class TestPerformanceOptimizations:
         operations = [{"type": "hadamard", "qubit": i} for i in range(6)]
 
         processor.create_quantum_circuit("perf_test", operations)
-        result = processor.execute_quantum_symbolic_computation("perf_test", 1000)
+        _ = processor.execute_quantum_symbolic_computation("perf_test", 1000)
 
         end_time = time.time()
         duration = end_time - start_time

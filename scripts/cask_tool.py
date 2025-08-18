@@ -3,6 +3,7 @@
 import argparse
 
 from modules.cask import (
+import os
     create_architecture_flowchart,
     create_project_gantt_chart,
     create_research_landscape_chart,

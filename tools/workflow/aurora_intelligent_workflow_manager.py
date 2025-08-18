@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import subprocess
+import sys
 """
 Aurora CloudBank Intelligent Workflow Manager
 Master orchestrator that integrates all workflow optimization systems
@@ -92,7 +98,7 @@ class IntelligentWorkflowManager:
     def run_preflight_checks(self) -> Dict:
         """Run pre-flight validation checks."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [sys.executable, str(self.failure_prevention_tool)], capture_output=True, text=True, timeout=120
             )
 
@@ -134,7 +140,7 @@ class IntelligentWorkflowManager:
     def run_workflow_optimization(self) -> Dict:
         """Run comprehensive workflow optimization."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [sys.executable, str(self.optimization_tool)], capture_output=True, text=True, timeout=180
             )
 
@@ -303,7 +309,7 @@ def main():
 
     if args.quick:
         print("🚁 Quick validation mode")
-        result = iwm.run_preflight_checks()
+        _ = iwm.run_preflight_checks()
         if result["execution_ready"]:
             print("✅ Quick validation passed - you're good to go!")
             sys.exit(0)

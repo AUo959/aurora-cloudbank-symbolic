@@ -2,6 +2,12 @@
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import hashlib
+import json
+import shutil
+import subprocess
 
 GitWiz Enhanced v2.0 - Intelligent Git Repository Management
 Created for Aurora CloudBank Symbolic - July 2025
@@ -128,7 +134,7 @@ class GitWizEnhanced:
         """Execute git command safely."""
         full_command = ["git", "-C", str(self.repo_path)] + command
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 full_command,
                 capture_output=True,
                 text=True,
@@ -353,7 +359,7 @@ class GitWizEnhanced:
         """Manage repository branches."""
         logger.info(f"Managing branches: {action}")
 
-        result = {
+        _ = {
             "action": action,
             "timestamp": datetime.now().isoformat(),
             "branches": {},
@@ -572,7 +578,7 @@ class GitWizEnhanced:
 
         # Check for committed credentials (basic)
         try:
-            result = self.run_git_command([
+            _ = self.run_git_command([
                 "log", "--all", "-S", "password", "--oneline"
             ], check=False)
             if result.stdout.strip():
@@ -803,11 +809,11 @@ def main():
             print(json.dumps(asdict(metrics), indent=2))
 
         elif args.action == "optimize":
-            result = gitwiz.optimize_repository(dry_run=args.dry_run)
+            _ = gitwiz.optimize_repository(dry_run=args.dry_run)
             print(json.dumps(result, indent=2))
 
         elif args.action == "branches":
-            result = gitwiz.manage_branches("analyze")
+            _ = gitwiz.manage_branches("analyze")
             print(json.dumps(result, indent=2))
 
         elif args.action == "report":

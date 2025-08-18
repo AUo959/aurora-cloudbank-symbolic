@@ -4,6 +4,9 @@ import subprocess
 """
 
     import shlex
+from datetime import datetime
+from pathlib import Path
+import json
 
 Aurora Integration Readiness Assessment
 Using enhanced GitWiz and Health Monitor tools to prepare for Aurora integration
@@ -19,7 +22,7 @@ def run_command(cmd):
     """Run shell command safely without shell injection."""
     try:
         cmd_parts = shlex.split(cmd)
-        result = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=30)
+        _ = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=30)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return f"Error: {e.stderr.strip()}"

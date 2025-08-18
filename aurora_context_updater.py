@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
 
 # !/usr/bin/env python3
 """
@@ -33,7 +37,7 @@ class AuroraContextUpdater:
     def get_git_status(self):
         """Get current git status"""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "log", "--oneline", "-1"], capture_output=True, text=True, cwd=self.project_root
             )
             return result.stdout.strip()

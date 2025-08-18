@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 Direct Sonnet 4 Enablement Script
 Enables Claude Sonnet 4 for all clients without requiring API to be running

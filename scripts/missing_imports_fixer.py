@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import subprocess
 """
 Missing Imports Fixer - Adds missing import statements to Python files
 Intelligently detects and adds commonly used imports that are missing
@@ -48,7 +50,7 @@ class ImportFixer:
     def get_undefined_names_from_flake8(self, file_path: str) -> Set[str]:
         """Get undefined names (F821 errors) from flake8 for a specific file."""
         try:
-            result = subprocess.run(["flake8", "--select=F821", file_path], capture_output=True, text=True, timeout=30)
+            _ = subprocess.run(["flake8", "--select=F821", file_path], capture_output=True, text=True, timeout=30)
 
             undefined_names = set()
             for line in result.stdout.split("\n"):

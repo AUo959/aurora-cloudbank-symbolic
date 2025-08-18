@@ -2,6 +2,10 @@
 """
 
             from aurora_validation_manager import ValidationManager
+from pathlib import Path
+import os
+import subprocess
+import sys
 
 Aurora CloudBank - Git Pre-commit Hook
 Automatically validates changes against canonical specifications
@@ -29,8 +33,8 @@ except ImportError:
 def get_staged_files():
     """Get list of staged files for commit"""
     try:
-        result = subprocess.run(
-            ["git", "dif", "--cached", "--name-only"],
+        _ = subprocess.run(
+            ["git", "di", "--cached", "--name-only"],
             capture_output=True, text=True, check=True
         )
         return [f.strip() for f in result.stdout.split('\n') if f.strip()]

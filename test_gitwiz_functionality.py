@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 Quick test script for GITWiz Enhanced functionality
 """
@@ -13,7 +16,7 @@ def test_command(cmd, description):
     print(f"\n🧪 Testing: {description}")
     print(f"Command: {' '.join(cmd)}")
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        _ = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         if result.returncode == 0:
             print(f"✅ SUCCESS: {description}")
             if result.stdout:

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import argparse
+import subprocess
 """
 Aurora CloudBank - Enhanced Automated Branch Cleanup System
 Intelligently manages repository branches with safety checks
@@ -48,7 +51,7 @@ class AutomatedBranchManager:
                 "--format=%(refname:short)|%(committerdate:iso)|%(objectname)",
                 "refs/remotes/origin",
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            _ = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             branches = []
             for line in result.stdout.strip().split("\n"):
@@ -108,7 +111,7 @@ class AutomatedBranchManager:
                 f"origin/{branch_name}",
                 "origin/main",
             ]
-            result = subprocess.run(cmd, capture_output=True, shell=False, check=False)
+            _ = subprocess.run(cmd, capture_output=True, shell=False, check=False)
             return result.returncode == 0
         except subprocess.CalledProcessError:
             return False

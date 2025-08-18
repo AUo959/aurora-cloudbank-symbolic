@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import shlex
+import subprocess
 """
 🔒 Aurora CloudBank Security Helpers
 
@@ -59,7 +62,7 @@ class SecureHelpers:
             else:
                 cmd_parts = cmd
 
-            result = subprocess.run(
+            _ = subprocess.run(
 
 
                 cmd_parts,
@@ -122,7 +125,7 @@ class SecureHelpers:
 
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
 
-        sanitized = re.sub(rrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(rrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -184,7 +187,7 @@ class SecureHelpers:
             }
 
         # Only allow safe characters and patterns
-        if not re.match(rrr'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:

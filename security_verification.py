@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import shlex
+import subprocess
 """
 🔒 Aurora CloudBank Security Verification & Final Report
 Post-remediation security verification and comprehensive audit report.
@@ -14,7 +18,7 @@ def secure_run(cmd: str) -> tuple[str, str, int]:
     """Securely execute command without shell injection."""
     try:
         cmd_parts = shlex.split(cmd)
-        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
+        _ = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
         return result.stdout, result.stderr, result.returncode
     except (subprocess.TimeoutExpired, OSError) as e:
         return "", str(e), 1

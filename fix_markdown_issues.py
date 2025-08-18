@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Automated Markdown Issue Fixer
 Fixes common Markdown formatting issues based on attached error list
@@ -32,11 +33,11 @@ def fix_markdown_file(filepath):
                     fixed_lines.append('')
 
             # MD032: Lists should be surrounded by blank lines
-            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(rrr'^\s*\d+\.\s', line):
+            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(r'^\s*\d+\.\s', line):
                 # Add blank line before list if needed
                 if i > 0 and fixed_lines and fixed_lines[-1].strip() != '' and not fixed_lines[-1].strip().startswith(('- ',
                                                                                                                        '* ',
-                                                                                                                       '+ ')) and not re.match(rrr'^\s*\d+\.\s',
+                                                                                                                       '+ ')) and not re.match(r'^\s*\d+\.\s',
                                                                                                                                                fixed_lines[-1]):
                     fixed_lines.append('')
                 fixed_lines.append(line)
@@ -80,7 +81,7 @@ def fix_markdown_file(filepath):
         fixed_content = re.sub(r'^(\*\*[^*]+\*\*)$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # MD026: Remove trailing punctuation from headers
-        fixed_content = re.sub(rrr'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
+        fixed_content = re.sub(r'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # Write back to file
         with open(filepath, 'w', encoding='utf-8') as f:

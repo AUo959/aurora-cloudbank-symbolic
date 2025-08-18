@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Quick fix for missing closing braces in Python files
 """

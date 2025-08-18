@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import argparse
+import shutil
+import subprocess
+import sys
 """GITWiz - Adaptive repo command node.
 
 This consolidated script merges prior prototypes into a single tool capable of
@@ -25,7 +30,7 @@ class GITWiz:
     def _run(self, cmd: list[str], check: bool = False) -> bool:
         """Run a command in the project root and echo output."""
         print(f"+ {' '.join(cmd)}")
-        result = subprocess.run(
+        _ = subprocess.run(
             cmd,
             cwd=self.project_root,
             text=True,

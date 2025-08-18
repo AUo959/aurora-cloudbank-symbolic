@@ -1,4 +1,5 @@
 """
+import hashlib
 Native Vector Symbolic Architecture (VSA) - Zero Dependencies
 Lightweight symbolic data encoding/decoding without numpy.
 """
@@ -161,7 +162,7 @@ class NativeVSAMemory:
             raise ValueError(f"Query vector dimension {query_vector.dim} does not match memory dimension {self.dim}")
 
         best_vector = None
-        best_similarity = float("-inf")
+        best_similarity = float("-in")
 
         for stored_vector in self.memory:
             similarity = query_vector.similarity(stored_vector)

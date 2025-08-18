@@ -5,6 +5,8 @@ import subprocess
 
             import time
     import argparse
+from datetime import datetime
+import os
 
 Aurora CloudBank Pre-commit Hook Optimizer
 Intelligent pre-commit hook configuration and optimization
@@ -253,7 +255,7 @@ class PreCommitOptimizer:
             # Run pre-commit on all files and measure time
 
             start_time = time.time()
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["pre-commit", "run", "--all-files"],
                 capture_output=True,
                 text=True,

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import subprocess
 """
 Comprehensive Linting Fix Script
 Automated fixes for Python code quality issues
@@ -199,7 +201,7 @@ def main():
     # Run final validation
     print("\n🔍 Running final validation...")
     try:
-        result = subprocess.run(
+        _ = subprocess.run(
             [
                 "python3",
                 "-m",

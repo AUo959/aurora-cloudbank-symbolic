@@ -2,6 +2,11 @@
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
 
 GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
@@ -709,7 +714,7 @@ def main():
     orchestrator = GITWizWorkflowOrchestrator()
 
     if args.full_optimization:
-        result = orchestrator.execute_full_optimization_workflow(dry_run=dry_run)
+        _ = orchestrator.execute_full_optimization_workflow(dry_run=dry_run)
 
         # Save detailed report
         report_file = Path("gitwiz_optimization_report.json")

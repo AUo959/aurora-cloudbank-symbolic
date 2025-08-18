@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import subprocess
+import time
 """
 Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring and alerting for repository health metrics.
@@ -55,7 +61,7 @@ class RepositoryHealthMonitor:
 
         try:
             # Repository size
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
@@ -67,7 +73,7 @@ class RepositoryHealthMonitor:
                 metrics["size_mb"] = int(result.stdout.split()[0])
 
             # File count
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
                 text=True,
@@ -79,7 +85,7 @@ class RepositoryHealthMonitor:
                 metrics["file_count"] = len(result.stdout.strip().split("\n"))
 
             # Branch count
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
                 text=True,
@@ -91,7 +97,7 @@ class RepositoryHealthMonitor:
                 metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
             # ZIP file count
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-name", "*.zip", "-type", ""],
                 capture_output=True,
                 text=True,
@@ -130,7 +136,7 @@ class RepositoryHealthMonitor:
             metrics["cache_files"] = pyc_count + cache_count
 
             # Large files (>10MB)
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["find", ".", "-type", "", "-size", "+10M"],
                 capture_output=True,
                 text=True,
@@ -142,7 +148,7 @@ class RepositoryHealthMonitor:
                 metrics["large_files"] = [f.strip() for f in result.stdout.strip().split("\n") if f.strip()]
 
             # Git status
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,

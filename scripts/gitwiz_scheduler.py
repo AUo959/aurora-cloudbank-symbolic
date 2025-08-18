@@ -4,6 +4,13 @@ import subprocess
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import schedule
+import sys
+import threading
+import time
 
 GitWiz Automated Maintenance Scheduler
 =====================================
@@ -153,7 +160,7 @@ class GitWizScheduler:
 
             logger.info(f"Executing: {' '.join(cmd)}")
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,

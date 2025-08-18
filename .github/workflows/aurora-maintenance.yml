@@ -1,4 +1,11 @@
 name: Aurora Maintenance & Monitoring
+
+permissions:
+  contents: read          # Read repository contents
+  actions: read          # Read workflow status
+  checks: write          # Write check results
+  security-events: write # Write security events
+
 'on':
   schedule:
   - cron: 0 2 * * 1

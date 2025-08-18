@@ -35,7 +35,7 @@ def fix_file(filepath):
                 continue
 
             # Fix simple unused import cases
-            if re.match(rrr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
+            if re.match(r"^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
                 if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)

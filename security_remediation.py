@@ -364,7 +364,7 @@ class SecureHelpers:
                 'len': len
 
         # Only allow safe characters and patterns
-        if not re.match(r"^[0-9+\-*/().\s]+$', expression):
+        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:

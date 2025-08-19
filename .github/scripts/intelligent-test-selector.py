@@ -210,7 +210,8 @@ def main():
     if args.check_skip_build:
         skip = selector.should_skip_build()
         if args.output_format == "github":
-            print(f"skip_build={str(skip).lower()}" + " >> $GITHUB_OUTPUT")
+            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+                gh_out.write(f"skip_build={str(skip).lower()}\n")
         else:
             print(json.dumps({"skip_build": skip}))
         return

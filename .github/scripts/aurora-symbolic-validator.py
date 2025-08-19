@@ -347,7 +347,21 @@ def main():
             print(f"dlp_status={dlp_status}" + " >> $GITHUB_OUTPUT")
             print(f"security_status={security_status}" + " >> $GITHUB_OUTPUT")
         else:
-            print(f"component_status={results.get('status', 'unknown')}" + " >> $GITHUB_OUTPUT")
+            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+                gh_out.write(f"aurora_validation_status={status}\n")
+            
+            # Set individual component outputs
+            anchor_status = results["aurora_ci_validation"]["symbolic_anchors"].get("status", "unknown")
+            dlp_status = results["aurora_ci_validation"]["dlp_tracking"].get("status", "unknown")
+            security_status = results["aurora_ci_validation"]["security_ethics"].get("status", "unknown")
+            
+            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+                gh_out.write(f"anchor_status={anchor_status}\n")
+                gh_out.write(f"dlp_status={dlp_status}\n")
+                gh_out.write(f"security_status={security_status}\n")
+        else:
+            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+                gh_out.write(f"component_status={results.get('status', 'unknown')}\n")
             github_output = os.environ.get("GITHUB_OUTPUT")
             if github_output:
                 with open(github_output, "a") as gh_out:

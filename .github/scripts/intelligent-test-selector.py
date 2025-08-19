@@ -174,7 +174,7 @@ class IntelligentTestSelector:
         
         # Skip build only for documentation-only changes
         doc_only_patterns = [
-            "*.md", "docs/", "README*", "CHANGELOG*", 
+            "*.md", "docs/", "README*", "CHANGELOG*",
             "LICENSE*", ".gitignore", ".github/ISSUE_TEMPLATE/",
             ".github/pull_request_template.md"
         ]

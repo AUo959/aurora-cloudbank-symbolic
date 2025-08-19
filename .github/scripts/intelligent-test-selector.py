@@ -227,7 +227,15 @@ def main():
         selected = selector.select_tests()
         for group, should_run in selected.items():
             safe_group = group.replace('-', '_')
-            print(f"run_{safe_group}={str(should_run).lower()}" + " >> $GITHUB_OUTPUT")
+        with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+            gh_out.write(f"matrix={matrix_json}\n")
+        
+        # Also output individual test group flags
+        selected = selector.select_tests()
+        for group, should_run in selected.items():
+            safe_group = group.replace('-', '_')
+            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
+                gh_out.write(f"run_{safe_group}={str(should_run).lower()}\n")
     else:
         print(json.dumps(matrix, indent=2))
 

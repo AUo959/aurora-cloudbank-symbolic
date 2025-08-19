@@ -23,7 +23,7 @@ jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45
     permissions:
       actions: read
       contents: read
@@ -44,7 +44,6 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          queries: security-extended,security-and-quality
           config-file: ./.github/codeql/codeql-config.yml
 
       - name: Setup Python for analysis

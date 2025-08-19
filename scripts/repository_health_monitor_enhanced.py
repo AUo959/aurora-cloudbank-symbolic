@@ -1,24 +1,18 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring with alerts and automated remediation
 """
 
-
+import argparse
 import json
 import os
+import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
-from dataclasses import asdict
-
 
 
 @dataclass
@@ -124,7 +118,7 @@ class RepositoryHealthMonitor:
     def _get_repo_size(self) -> float:
         """Get repository size in MB"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
@@ -138,8 +132,8 @@ class RepositoryHealthMonitor:
     def _get_file_count(self) -> int:
         """Get total file count"""
         try:
-            _ = subprocess.run(
-                ["find", ".", "-type", ""],
+            result = subprocess.run(
+                ["find", ".", "-type", "f"],
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -152,7 +146,7 @@ class RepositoryHealthMonitor:
     def _get_branch_count(self) -> int:
         """Get remote branch count"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
                 text=True,
@@ -168,8 +162,8 @@ class RepositoryHealthMonitor:
     def _get_zip_file_count(self) -> int:
         """Get ZIP file count"""
         try:
-            _ = subprocess.run(
-                ["find", ".", "-name", "*.zip", "-type", ""],
+            result = subprocess.run(
+                ["find", ".", "-name", "*.zip", "-type", "f"],
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -182,7 +176,7 @@ class RepositoryHealthMonitor:
     def _get_cache_file_count(self) -> int:
         """Get cache file count"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-o", "-name", "__pycache__"],
                 capture_output=True,
                 text=True,
@@ -197,8 +191,8 @@ class RepositoryHealthMonitor:
         """Find files larger than threshold"""
         try:
             threshold_mb = self.thresholds["large_file_mb"]
-            cmd = ["find", ".", "-type", "", "-size", f"+{threshold_mb}M"]
-            _ = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
+            cmd = ["find", ".", "-type", "f", "-size", f"+{threshold_mb}M"]
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
 
             large_files = []
             for line in result.stdout.strip().split("\n"):

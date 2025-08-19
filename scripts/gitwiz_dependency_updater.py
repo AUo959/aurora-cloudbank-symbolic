@@ -63,7 +63,7 @@ class DependencyAutoUpdater:
         if req_file.exists():
             try:
                 # Use pip list --outdated to check for updates
-                _ = subprocess.run(
+                result = subprocess.run(
                     [
                         sys.executable,
                         "-m",
@@ -108,7 +108,7 @@ class DependencyAutoUpdater:
         if package_json.exists():
             try:
                 # Use npm outdated to check for updates
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "outdated", "--json"],
                     capture_output=True,
                     text=True,

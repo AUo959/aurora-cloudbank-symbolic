@@ -19,6 +19,8 @@ name: Aurora Enhanced CI/CD with Symbolic Validation
 
 permissions:
   contents: read
+  actions: read
+  security-events: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

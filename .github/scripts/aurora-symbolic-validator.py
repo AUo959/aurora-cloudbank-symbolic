@@ -5,11 +5,12 @@ Integrates T1/SRB anchors, DLP tracking, and memory sealing into CI/CD
 """
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict
 
 
 class AuroraSymbolicWorkflowIntegration:
@@ -27,7 +28,7 @@ class AuroraSymbolicWorkflowIntegration:
         
         validation_results = {
             "t1_anchors": "unknown",
-            "srb_anchors": "unknown", 
+            "srb_anchors": "unknown",
             "symbolic_engine": "unknown",
             "anchor_protocols": [],
             "status": "unknown"
@@ -57,7 +58,7 @@ try:
 except Exception as e:
     print(f't1_anchors:error:{e}')
 
-# Test SRB anchor system  
+# Test SRB anchor system
 try:
     # Mock SRB anchor validation
     print('srb_anchors:operational')
@@ -66,10 +67,10 @@ try:
 except Exception as e:
     print(f'srb_anchors:error:{e}')
 """
-            
-            result = subprocess.run([sys.executable, "-c", test_code], 
-                                  capture_output=True, text=True, timeout=30)
-            
+            result = subprocess.run(
+                [sys.executable, "-c", test_code], capture_output=True, text=True, timeout=30
+            )
+
             # Parse validation results
             for line in result.stdout.strip().split('\n'):
                 if ':' in line:
@@ -84,9 +85,11 @@ except Exception as e:
                         validation_results["anchor_protocols"].append(value)
             
             # Determine overall status
-            if (validation_results["symbolic_engine"] == "operational" or
-                validation_results["t1_anchors"] == "operational" or 
-                validation_results["srb_anchors"] == "operational"):
+            if (
+                validation_results["symbolic_engine"] == "operational"
+                or validation_results["t1_anchors"] == "operational"
+                or validation_results["srb_anchors"] == "operational"
+            ):
                 validation_results["status"] = "operational"
             else:
                 validation_results["status"] = "degraded"
@@ -101,15 +104,15 @@ except Exception as e:
     def validate_dlp_tracking(self) -> Dict[str, str]:
         """Validate DLP tracking and memory sealing protocols"""
         print("📊 Validating DLP Tracking and Memory Sealing...")
-        
-        dlp_results = {
+
+        dlp_results: Dict[str, str | list] = {
             "dlp_tracker": "unknown",
             "memory_sealer": "unknown",
             "native_dlp": "unknown",
             "context_tags": [],
-            "status": "unknown"
+            "status": "unknown",
         }
-        
+
         try:
             # Test DLP tracking system
             dlp_test_code = """
@@ -149,10 +152,10 @@ except ImportError:
 except Exception as e:
     print(f'native_dlp:error:{e}')
 """
-            
-            result = subprocess.run([sys.executable, "-c", dlp_test_code],
-                                  capture_output=True, text=True, timeout=30)
-            
+            result = subprocess.run(
+                [sys.executable, "-c", dlp_test_code], capture_output=True, text=True, timeout=30
+            )
+
             # Parse DLP results
             for line in result.stdout.strip().split('\n'):
                 if ':' in line:
@@ -163,7 +166,9 @@ except Exception as e:
                         dlp_results["context_tags"].append(value)
             
             # Determine DLP status
-            if any(dlp_results[k] == "operational" for k in ["dlp_tracker", "memory_sealer", "native_dlp"]):
+            if any(
+                dlp_results[k] == "operational" for k in ["dlp_tracker", "memory_sealer", "native_dlp"]
+            ):
                 dlp_results["status"] = "operational"
             else:
                 dlp_results["status"] = "not_available"
@@ -181,7 +186,7 @@ except Exception as e:
         
         security_results = {
             "picard_delta_3": "unknown",
-            "aurora_security": "unknown", 
+            "aurora_security": "unknown",
             "enhanced_security": "unknown",
             "ethics_validation": "unknown",
             "status": "unknown"
@@ -197,7 +202,7 @@ sys.path.append('.')
 # Check for Picard_Delta_3 references
 try:
     import subprocess
-    result = subprocess.run(['grep', '-r', 'Picard_Delta_3', '.'], 
+    result = subprocess.run(['grep', '-r', 'Picard_Delta_3', '.'],
                           capture_output=True, text=True, timeout=10)
     if result.returncode == 0 and result.stdout.strip():
         print('picard_delta_3:found')
@@ -215,14 +220,14 @@ else:
 
 # Test enhanced security
 if os.path.exists('aurora_enhanced_security.py'):
-    print('enhanced_security:available') 
+    print('enhanced_security:available')
 else:
     print('enhanced_security:not_found')
 """
-            
-            result = subprocess.run([sys.executable, "-c", ethics_test_code],
-                                  capture_output=True, text=True, timeout=30)
-            
+            result = subprocess.run(
+                [sys.executable, "-c", ethics_test_code], capture_output=True, text=True, timeout=30
+            )
+
             # Parse security results
             for line in result.stdout.strip().split('\n'):
                 if ':' in line:
@@ -231,8 +236,10 @@ else:
                         security_results[key] = value
             
             # Determine security status
-            if (security_results["picard_delta_3"] == "found" or
-                security_results["aurora_security"] == "available"):
+            if (
+                security_results["picard_delta_3"] == "found"
+                or security_results["aurora_security"] == "available"
+            ):
                 security_results["status"] = "operational"
             else:
                 security_results["status"] = "partial"
@@ -262,7 +269,7 @@ else:
         # Determine overall validation status
         all_statuses = [
             anchor_results.get("status", "unknown"),
-            dlp_results.get("status", "unknown"), 
+            dlp_results.get("status", "unknown"),
             security_results.get("status", "unknown")
         ]
         
@@ -314,10 +321,18 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Aurora Symbolic Workflow Integration")
-    parser.add_argument("--output-format", choices=["json", "github"], default="github",
-                       help="Output format for CI/CD integration")
-    parser.add_argument("--component", choices=["anchors", "dlp", "security", "all"], default="all",
-                       help="Specific component to validate")
+    parser.add_argument(
+        "--output-format",
+        choices=["json", "github"],
+        default="github",
+        help="Output format for CI/CD integration",
+    )
+    parser.add_argument(
+        "--component",
+        choices=["anchors", "dlp", "security", "all"],
+        default="all",
+        help="Specific component to validate",
+    )
     
     args = parser.parse_args()
     
@@ -333,56 +348,38 @@ def main():
         results = integration.run_aurora_validation()
     
     if args.output_format == "github":
+        github_output = os.environ.get("GITHUB_OUTPUT")
+
+        def write_output(name: str, value: str) -> None:
+            line = f"{name}={value}\n"
+            if github_output:
+                try:
+                    with open(github_output, "a") as gh_out:
+                        gh_out.write(line)
+                except Exception as e:
+                    print(f"Failed to write to GITHUB_OUTPUT: {e}", file=sys.stderr)
+                    print(line, end="")
+            else:
+                # Fallback for local runs
+                print(line, end="")
+
         # Output for GitHub Actions
-        if "validation_status" in results.get("aurora_ci_validation", {}):
-            status = results["aurora_ci_validation"]["validation_status"]
-            print(f"aurora_validation_status={status}" + " >> $GITHUB_OUTPUT")
-            
-            # Set individual component outputs
-            anchor_status = results["aurora_ci_validation"]["symbolic_anchors"].get("status", "unknown")
-            dlp_status = results["aurora_ci_validation"]["dlp_tracking"].get("status", "unknown")
-            security_status = results["aurora_ci_validation"]["security_ethics"].get("status", "unknown")
-            
-            print(f"anchor_status={anchor_status}" + " >> $GITHUB_OUTPUT")
-            print(f"dlp_status={dlp_status}" + " >> $GITHUB_OUTPUT")
-            print(f"security_status={security_status}" + " >> $GITHUB_OUTPUT")
+        if isinstance(results, dict) and "aurora_ci_validation" in results:
+            status = results["aurora_ci_validation"].get("validation_status", "unknown")
+            write_output("aurora_validation_status", status)
+
+            anchor_status = results["aurora_ci_validation"].get("symbolic_anchors", {}).get("status", "unknown")
+            dlp_status = results["aurora_ci_validation"].get("dlp_tracking", {}).get("status", "unknown")
+            security_status = results["aurora_ci_validation"].get("security_ethics", {}).get("status", "unknown")
+
+            write_output("anchor_status", anchor_status)
+            write_output("dlp_status", dlp_status)
+            write_output("security_status", security_status)
         else:
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"aurora_validation_status={status}\n")
-            
-            # Set individual component outputs
-            anchor_status = results["aurora_ci_validation"]["symbolic_anchors"].get("status", "unknown")
-            dlp_status = results["aurora_ci_validation"]["dlp_tracking"].get("status", "unknown")
-            security_status = results["aurora_ci_validation"]["security_ethics"].get("status", "unknown")
-            
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"anchor_status={anchor_status}\n")
-                gh_out.write(f"dlp_status={dlp_status}\n")
-                gh_out.write(f"security_status={security_status}\n")
-        else:
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"component_status={results.get('status', 'unknown')}\n")
-            github_output = os.environ.get("GITHUB_OUTPUT")
-            if github_output:
-                with open(github_output, "a") as gh_out:
-                    gh_out.write(f"aurora_validation_status={status}\n")
-                # Set individual component outputs
-                anchor_status = results["aurora_ci_validation"]["symbolic_anchors"].get("status", "unknown")
-                dlp_status = results["aurora_ci_validation"]["dlp_tracking"].get("status", "unknown")
-                security_status = results["aurora_ci_validation"]["security_ethics"].get("status", "unknown")
-                with open(github_output, "a") as gh_out:
-                    gh_out.write(f"anchor_status={anchor_status}\n")
-                    gh_out.write(f"dlp_status={dlp_status}\n")
-                    gh_out.write(f"security_status={security_status}\n")
-            else:
-                print("GITHUB_OUTPUT environment variable not set.", file=sys.stderr)
-        else:
-            github_output = os.environ.get("GITHUB_OUTPUT")
-            if github_output:
-                with open(github_output, "a") as gh_out:
-                    gh_out.write(f"component_status={results.get('status', 'unknown')}\n")
-            else:
-                print("GITHUB_OUTPUT environment variable not set.", file=sys.stderr)
+            # Component-specific validation path
+            write_output("component_status", results.get("status", "unknown"))
+
+        # Also print JSON for logs
         print(json.dumps(results, indent=2))
 
 

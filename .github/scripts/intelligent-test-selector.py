@@ -7,7 +7,6 @@ Analyzes file changes and selects relevant tests for optimal CI/CD performance
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
 from typing import Dict, List, Set
 
@@ -140,7 +139,7 @@ class IntelligentTestSelector:
         for file in self.changed_files:
             if any(keyword in file.lower() for keyword in security_keywords):
                 selected_groups['security'] = True
-                print(f"  🛡️ Security tests enabled due to security-related changes")
+                print("  🛡️ Security tests enabled due to security-related changes")
                 break
         
         return selected_groups
@@ -198,10 +197,17 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Aurora Intelligent Test Selection")
-    parser.add_argument("--output-format", choices=["json", "github"], default="github",
-                       help="Output format for CI/CD integration")
-    parser.add_argument("--check-skip-build", action="store_true",
-                       help="Check if entire build can be skipped")
+    parser.add_argument(
+        "--output-format",
+        choices=["json", "github"],
+        default="github",
+        help="Output format for CI/CD integration",
+    )
+    parser.add_argument(
+        "--check-skip-build",
+        action="store_true",
+        help="Check if entire build can be skipped",
+    )
     
     args = parser.parse_args()
     
@@ -219,23 +225,20 @@ def main():
     matrix = selector.generate_matrix()
     
     if args.output_format == "github":
-        # Output for GitHub Actions matrix
+        # Output for GitHub Actions using $GITHUB_OUTPUT
         matrix_json = json.dumps(matrix)
-        print(f"matrix={matrix_json}" + " >> $GITHUB_OUTPUT")
-        
-        # Also output individual test group flags
-        selected = selector.select_tests()
-        for group, should_run in selected.items():
-            safe_group = group.replace('-', '_')
-        with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-            gh_out.write(f"matrix={matrix_json}\n")
-        
-        # Also output individual test group flags
-        selected = selector.select_tests()
-        for group, should_run in selected.items():
-            safe_group = group.replace('-', '_')
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"run_{safe_group}={str(should_run).lower()}\n")
+        github_output = os.environ.get("GITHUB_OUTPUT")
+        if github_output:
+            with open(github_output, "a") as gh_out:
+                gh_out.write(f"matrix={matrix_json}\n")
+                # Also output individual test group flags
+                selected = selector.select_tests()
+                for group, should_run in selected.items():
+                    safe_group = group.replace('-', '_')
+                    gh_out.write(f"run_{safe_group}={str(should_run).lower()}\n")
+        else:
+            # Fallback for local runs
+            print(json.dumps(matrix, indent=2))
     else:
         print(json.dumps(matrix, indent=2))
 

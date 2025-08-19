@@ -12,6 +12,7 @@ name: Aurora CloudBank CI/CD Pipeline
   workflow_dispatch: {}
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

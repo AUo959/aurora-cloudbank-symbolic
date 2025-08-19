@@ -51,9 +51,9 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Fix specific unused variables
     patterns = [
-        (rrr"(\s+)task_info = ", r"\1_task_info = "),
-        (rrr"(\s+)dirnames = ", r"\1_dirnames = "),
-        (rrr"(\s+)file_hash = ", r"\1_file_hash = "),
+        (r"(\s+)task_info = ", r"\1_task_info = "),
+        (r"(\s+)dirnames = ", r"\1_dirnames = "),
+        (r"(\s+)file_hash = ", r"\1_file_hash = "),
     ]
 
     for pattern, replacement in patterns:

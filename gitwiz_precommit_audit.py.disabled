@@ -191,17 +191,18 @@ class GitWizPrecommitAuditor:
             for tool in tool_list:
                 try:
                     result = subprocess.run([tool, "--version"],
-                    available=(result.returncode == 0)
-                    tool_results[category][tool]={
+                                          capture_output=True, text=True, timeout=5)
+                    available = (result.returncode == 0)
+                    tool_results[category][tool] = {
                         "available": available,
                         "version": result.stdout.strip() if available else None,
                         "error": result.stderr.strip() if result.stderr else None
                     }
-                    status="✅" if available else "❌"
-                    print("  {status} {tool} - {'Available' if available else 'Not available'}")
+                    status = "✅" if available else "❌"
+                    print(f"  {status} {tool} - {'Available' if available else 'Not available'}")
                 except (subprocess.TimeoutExpired, FileNotFoundError):
-                    tool_results[category][tool]={"available": False, "error": "Not found"}
-                    print("  ❌ {tool} - Not found")
+                    tool_results[category][tool] = {"available": False, "error": "Not found"}
+                    print(f"  ❌ {tool} - Not found")
 
         self.audit_results["lint_tools"]=tool_results
 
@@ -211,8 +212,9 @@ class GitWizPrecommitAuditor:
 
         # Test GitWiz status
         try:
-            result=subprocess.run([
+            result = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py", "status"
+            ], capture_output=True, text=True, timeout=30)
 
             if result.returncode == 0:
                 status_data = json.loads(result.stdout)
@@ -220,7 +222,7 @@ class GitWizPrecommitAuditor:
                 print("  ✅ GitWiz Status - Working")
             else:
                 tests["status"] = {"success": False, "error": result.stderr}
-                print("  ❌ GitWiz Status - Failed: {result.stderr}")
+                print(f"  ❌ GitWiz Status - Failed: {result.stderr}")
         except Exception as e:
             tests["status"] = {"success": False, "error": str(e)}
             print("  ❌ GitWiz Status - Exception: {e}")

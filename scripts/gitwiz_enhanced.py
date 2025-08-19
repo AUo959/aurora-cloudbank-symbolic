@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 GitWiz Enhanced v2.0 - Intelligent Git Repository Management
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
+import argparse
+import hashlib
+import json
+import logging
+import shutil
+import subprocess
+from dataclasses import dataclass, asdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Any, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -64,23 +71,24 @@ class FileAnalysis:
 class GitWizEnhanced:
     """Enhanced Git repository management and optimization tool."""
 
-    """Initialize GitWiz with repository path."""
-    self.repo_path = Path(repo_path).resolve()
-    self.git_dir = self.repo_path / ".git"
-    self.gitwiz_dir = self.repo_path / ".gitwiz"
+    def __init__(self, repo_path: str = "."):
+        """Initialize GitWiz with repository path."""
+        self.repo_path = Path(repo_path).resolve()
+        self.git_dir = self.repo_path / ".git"
+        self.gitwiz_dir = self.repo_path / ".gitwiz"
 
-    # Ensure .gitwiz directory exists
-    self.gitwiz_dir.mkdir(exist_ok=True)
+        # Ensure .gitwiz directory exists
+        self.gitwiz_dir.mkdir(exist_ok=True)
 
-     # Configuration
-     self.config = self._load_config()
-      self.thresholds = self.config.get("thresholds", {})
+        # Configuration
+        self.config = self._load_config()
+        self.thresholds = self.config.get("thresholds", {})
 
-       # Validate git repository
-       if not self.git_dir.exists():
-            raise ValueError("Not a git repository: {self.repo_path}")
+        # Validate git repository
+        if not self.git_dir.exists():
+            raise ValueError(f"Not a git repository: {self.repo_path}")
 
-        logger.info("GitWiz Enhanced initialized for: {self.repo_path}")
+        logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load GitWiz configuration."""

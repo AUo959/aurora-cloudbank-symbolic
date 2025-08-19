@@ -37,6 +37,12 @@ paths-ignore:
   - 'Aurora*.zip'
   - 'CASK_Assets.zip'
   - 'AuroraLite_*.zip'
+  - 'Quantum_*.zip'
+  - 'QUANTUM_*.zip'
+  - 'SRB_*.zip'
+  - 'Symbolic_*.zip'
+  - 'COMMAND_NODE_*.zip'
+  - '*.zip'
 
 # Disable problematic queries that might cause proxy issues
 disable-default-queries: false

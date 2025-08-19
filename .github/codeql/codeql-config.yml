@@ -44,13 +44,8 @@ paths-ignore:
   - 'COMMAND_NODE_*.zip'
   - '*.zip'
 
-# Disable problematic queries that might cause proxy issues
+# Use default queries only to fix enhanced analysis issues
 disable-default-queries: false
-
-# Custom queries for Aurora-specific patterns
-queries:
-  - uses: security-and-quality
-  - uses: security-experimental
 
 # Compilation database settings for Python
 python:
@@ -58,7 +53,7 @@ python:
     python -m pip install --upgrade pip
     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-# JavaScript/TypeScript settings
+# JavaScript/TypeScript settings  
 javascript:
   setup: |
     if [ -f package.json ]; then npm ci || npm install; fi

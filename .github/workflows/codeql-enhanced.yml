@@ -23,7 +23,7 @@ jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30  # Reduced timeout to avoid hanging
     permissions:
       actions: read
       contents: read
@@ -38,7 +38,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1  # Shallow clone for faster checkout
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -58,11 +58,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Autobuild
+      - name: Minimal autobuild
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          # Use a unique category to avoid SARIF run ID collisions with other CodeQL workflows
           category: "/enhanced/language:${{ matrix.language }}"
+          upload: true

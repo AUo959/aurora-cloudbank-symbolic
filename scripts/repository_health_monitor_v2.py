@@ -7,6 +7,27 @@ Repository Health Monitor v2.0 - Advanced Repository Health Monitoring
 Continuous monitoring, alerting, and automated maintenance for git repositories
 Created for Aurora CloudBank Symbolic - July 2025
 """
+from typing import Dict
+from typing import Optional
+from dataclasses import dataclass
+import time
+import datetime
+import json
+from typing import List
+from typing import Any
+import logging
+import subprocess
+from dataclasses import asdict
+import hashlib
+from pathlib import Path
+from typing import Callable
+import threading
+import psutil as ps
+import sched
+from datetime import timedelta
+from collections import defaultdict
+
+
 
 
 # Optional imports

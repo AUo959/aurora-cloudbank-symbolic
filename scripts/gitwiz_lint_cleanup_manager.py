@@ -12,6 +12,20 @@ Provides seamless, automated code quality management with persistent learning ca
 Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
+from pathlib import Path
+from typing import Optional
+from typing import Any
+import datetime
+import logging
+import json
+from typing import Dict
+import subprocess
+from dataclasses import asdict
+import re
+from dataclasses import dataclass
+from typing import List
+import sys
+
 
 
 # Configure logging

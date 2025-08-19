@@ -13,6 +13,11 @@ This hook runs before each commit and:
 3. Blocks commits with critical violations
 4. Provides clear feedback and remediation guidance
 """
+from pathlib import Path
+import subprocess
+import os
+import sys
+
 
 
 # Add the scripts directory to Python path

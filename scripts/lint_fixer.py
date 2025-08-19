@@ -9,6 +9,8 @@ Fixes common Python linting issues that automated tools miss.
 import re
 import sys
 from pathlib import Path
+from typing import Dict
+
 
 
 def fix_encoding_specifications(file_path: str) -> bool:

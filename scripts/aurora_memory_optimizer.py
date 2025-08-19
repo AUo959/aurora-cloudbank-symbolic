@@ -15,6 +15,10 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
+import hashlib
+import gzip
+
+
 
 
 class MemoryOptimizer:

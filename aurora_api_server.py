@@ -20,6 +20,10 @@ FastAPI-based REST API for Aurora CloudBank services
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
+from fastapi import HTTPException
+
 
 
 class QuantumVectorRequest(BaseModel):

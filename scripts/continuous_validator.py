@@ -13,6 +13,16 @@ This monitor:
 4. Alerts users to violations requiring attention
 5. Maintains continuous canonical compliance
 """
+from watchdog.observers import Observer
+from pathlib import Path
+import time
+import datetime
+import json
+import sys
+import threading
+from watchdog.events import FileSystemEventHandler
+import yaml
+
 
 
 # Add scripts directory to path

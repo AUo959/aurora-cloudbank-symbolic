@@ -6,6 +6,14 @@
 GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
 """
+from pathlib import Path
+import datetime
+from typing import Any
+import json
+from typing import Dict
+import subprocess
+import sys
+
 
 
 # Import the enhanced GitWiz with lint cleanup integration

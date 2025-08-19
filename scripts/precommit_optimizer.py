@@ -14,6 +14,8 @@ Intelligent pre-commit hook configuration and optimization
 import os
 from datetime import datetime
 from typing import Any, Dict, List
+import yaml
+
 
 
 class PreCommitOptimizer:

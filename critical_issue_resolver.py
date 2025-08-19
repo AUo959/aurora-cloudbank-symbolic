@@ -6,6 +6,10 @@ from dataclasses import asdict'''
 🔧 Aurora CloudBank Critical Issue Resolver
 Fixes the most critical problems identified in error analysis.
 """
+from pathlib import Path
+import sys
+import re
+
 
 
 def fix_critical_gitwiz_issues():

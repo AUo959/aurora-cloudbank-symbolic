@@ -15,6 +15,9 @@ import subprocess
 import difflib
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
+from typing import List
+
 
 
 @dataclass

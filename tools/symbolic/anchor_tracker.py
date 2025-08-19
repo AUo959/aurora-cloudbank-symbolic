@@ -12,6 +12,18 @@ Primary functions:
 - Drift detection with Thermax compliance monitoring
 - Export manifest generation with SHA256 sealing
 """
+from pathlib import Path
+from typing import Optional
+import datetime
+import json
+from typing import Dict
+from dataclasses import asdict
+import re
+from dataclasses import dataclass
+import os
+from typing import List
+import hashlib
+
 
 
 @dataclass

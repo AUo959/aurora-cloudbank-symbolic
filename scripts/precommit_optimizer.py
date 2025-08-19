@@ -1,17 +1,13 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-            import time
-    import argparse
-
 Aurora CloudBank Pre-commit Hook Optimizer
 Intelligent pre-commit hook configuration and optimization
 """
 
-
+import argparse
 import os
+import subprocess
+import time
 from datetime import datetime
 from typing import Any, Dict, List
 import yaml

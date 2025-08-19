@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 Repository Health Monitor v2.0 - Advanced Repository Health Monitoring
 Continuous monitoring, alerting, and automated maintenance for git repositories
 Created for Aurora CloudBank Symbolic - July 2025
 """
-from typing import Dict
-from typing import Optional
-from dataclasses import dataclass
-import time
+
+import argparse
 import datetime
 import json
+import time
+from dataclasses import dataclass
+from typing import Dict, Optional
 from typing import List
 from typing import Any
 import logging
@@ -418,7 +416,7 @@ class RepositoryHealthMonitor:
 
                     # Calculate hash for duplicates (only for files > 1KB)
                     if size > 1024:
-                        _file_hash = self._calculate_file_hash(file_path)
+                        file_hash = self._calculate_file_hash(file_path)
                         if file_hash:
                             file_hashes[file_hash].append(file_path)
 

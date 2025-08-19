@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
 """
-from pathlib import Path
+
+import argparse
 import datetime
-from typing import Any
 import json
-from typing import Dict
 import subprocess
 import sys
+from pathlib import Path
+from typing import Any, Dict
 
 
 
@@ -433,7 +431,7 @@ class GITWizWorkflowOrchestrator:
     def _run_repository_analysis(self) -> Dict[str, Any]:
         """Run actual repository analysis."""
         # This would call the enhanced GITWiz analysis
-        _ = subprocess.run(
+        result = subprocess.run(
             [sys.executable, "gitwiz_enhanced_demo.py"],
             capture_output=True,
             text=True,
@@ -456,7 +454,7 @@ class GITWizWorkflowOrchestrator:
 
     def _run_dependency_update(self) -> Dict[str, Any]:
         """Run actual dependency update."""
-        _ = subprocess.run(
+        result = subprocess.run(
             [sys.executable, "scripts/gitwiz_dependency_updater.py", "--comprehensive"],
             capture_output=True,
             text=True,
@@ -592,7 +590,7 @@ class GITWizWorkflowOrchestrator:
             # Run actual validation
             try:
                 # Check git status
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["git", "status", "--porcelain"],
                     capture_output=True,
                     text=True,

@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 """
-
-        import shlex
-    import shlex
-    import shlex
-import shlex
-import subprocess
-import re
-import html
-from typing import List, Dict, Any, Optional, Union
-from pathlib import Path
-import shlex
-from .security.secure_helpers import secure
-
-🔒 Aurora CloudBank Security Remediation Script
-Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
+Security Remediation Module
+Comprehensive security vulnerability detection and remediation
 """
 
+import html
+import re
+import shlex
+import subprocess
+from pathlib import Path
+from typing import List, Dict, Any, Optional, Union
+
+# Note: secure_helpers import is optional
+# from .security.secure_helpers import secure
+
+# 🔒 Aurora CloudBank Security Remediation Script
+# Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
 
 import json
 import sys

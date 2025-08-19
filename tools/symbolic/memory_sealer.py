@@ -15,6 +15,7 @@ import fnmatch
 import hashlib
 import json
 import os
+import shutil
 import zipfile
 from dataclasses import dataclass, asdict
 from datetime import datetime

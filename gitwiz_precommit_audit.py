@@ -191,7 +191,7 @@ class GitWizPrecommitAuditor:
             for tool in tool_list:
                 try:
                     result = subprocess.run([tool, "--version"],
-                    available=result.returncode == 0
+                    available=(result.returncode == 0)
                     tool_results[category][tool]={
                         "available": available,
                         "version": result.stdout.strip() if available else None,

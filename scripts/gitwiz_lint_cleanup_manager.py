@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 GitWiz Lint & Cleanup Manager
 =============================
 
@@ -12,6 +9,8 @@ Provides seamless, automated code quality management with persistent learning ca
 Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
+
+import argparse
 from pathlib import Path
 from typing import Optional
 from typing import Any

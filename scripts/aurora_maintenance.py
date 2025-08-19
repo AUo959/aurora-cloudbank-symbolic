@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-
-        import re
-
 Aurora CloudBank - Automated Maintenance System
 ==============================================
 
 Scheduled maintenance workflows for repository optimization and cleanup.
 """
+
+import re
 from pathlib import Path
 import datetime
 import schedule

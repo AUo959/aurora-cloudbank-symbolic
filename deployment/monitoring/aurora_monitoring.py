@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-
-        import random
-
 Aurora CloudBank Monitoring Dashboard
 Real-time system health and performance monitoring
 """
+
+import random
 
 
 import time

@@ -9,6 +9,7 @@ Validates core symbolic simulation functionality without heavy dependencies
 # Add src to path for imports
 import math
 import os
+import sys
 import time
 from src.quantum_core.quantum_processing_layer import NativeQuantumProcessingLayer
 from src.core.native_quantum import NativeQuantumCircuit

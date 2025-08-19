@@ -120,8 +120,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
         for system_name, status in self.initialized_systems.items():
             status_icon = "✅" if status else "❌"
-            report_content += "- {status_icon} **{system_name.replace('_',
-                                                                       ' ').title()}**: {self.integration_status[system_name]}\n"
+            report_content += f"- {status_icon} **{system_name.replace('_', ' ').title()}**: {self.integration_status[system_name]}\n"
 
         report_content += """
 ### Advanced Features Activated

@@ -46,7 +46,7 @@ class SymbolicAnchorTracker:
 
         # Symbolic anchor patterns
         self.anchor_patterns = {
-            "T_SERIES": rr"T(\d+)_([A-Z_]+)",
+            "T_SERIES": r"T(\d+)_([A-Z_]+)",
             "SRB": r"SRB_([A-Z_]+)",
             "ANCHOR_SEED": r"([A-Z_]+_ANCHOR_SEED|ANCHOR_SEED_[A-Z_]+)",
             "EXPORT_MANIFEST": r"([A-Z_]+_EXPORT_MANIFEST)",
@@ -142,7 +142,7 @@ class SymbolicAnchorTracker:
         return lineages
 
     def _find_ancestors(self, anchor_id: str) -> List[str]:
-        """Find ancestor anchors based on T-series numbering and references""r"
+        """Find ancestor anchors based on T-series numbering and references"""
         ancestors = []
 
         if anchor_id.startswith('T') and '_' in anchor_id:
@@ -343,11 +343,11 @@ def main():
             else:
                 print("❌ No lineage found for {args.anchor}")
         else:
-            print("Found lineages for {len(lineages)} anchors")
+            print(f"Found lineages for {len(lineages)} anchors")
             for anchor_id, lineage in sorted(lineages.items()):
-                print("  {anchor_id}: Gen {lineage.generation},
-                    {len(lineage.ancestors)} ancestors,
-                    {len(lineage.descendants)} descendants")
+                print(f"  {anchor_id}: Gen {lineage.generation}, "
+                      f"{len(lineage.ancestors)} ancestors, "
+                      f"{len(lineage.descendants)} descendants")
 
     elif args.command == "drift":
         print("🔍 Detecting symbolic drift...")

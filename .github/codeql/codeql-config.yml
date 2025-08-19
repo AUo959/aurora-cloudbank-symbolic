@@ -21,11 +21,22 @@ paths-ignore:
   - '**/vendor/**'
   - '**/third_party/**'
   - '**/*.zip'
+  - '**/*.tar'
+  - '**/*.tar.gz'
+  - '**/*.tgz'
+  - '**/*.7z'
+  - '**/*.rar'
+  - '**/*.jar'
   - '**/*.pdf'
   - '**/*.md'
   - '**/logs/**'
   - '**/temp/**'
   - '**/tmp/**'
+  # Skip large archived assets checked into repo root
+  - 'Aurora_*.zip'
+  - 'Aurora*.zip'
+  - 'CASK_Assets.zip'
+  - 'AuroraLite_*.zip'
 
 # Disable problematic queries that might cause proxy issues
 disable-default-queries: false

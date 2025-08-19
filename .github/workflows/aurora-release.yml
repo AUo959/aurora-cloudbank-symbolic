@@ -9,6 +9,9 @@ name: Aurora Release Pipeline
         description: Release version
         required: true
         default: v1.0.0
+permissions:
+  contents: write
+  actions: read
 jobs:
   approval-gate:
     uses: ./.github/workflows/t1-approval-gate.yml

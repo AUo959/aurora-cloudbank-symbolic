@@ -31,12 +31,15 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
+        config-file: ./.github/codeql/codeql-config.yml
 
     - name: Setup Python for analysis
       if: matrix.language == 'python'

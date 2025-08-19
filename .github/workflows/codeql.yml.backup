@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: '30 1 * * 0'  # Weekly on Sundays
 
+# Minimal least-privilege permissions for this workflow
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})

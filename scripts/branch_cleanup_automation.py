@@ -18,7 +18,7 @@ class BranchCleanupManager:
         self.config = {
             "stale_days": 30,
             "force_delete_patterns": [
-                rr"^origin/alert-autofix-\d+$",  # Old security fixes
+                r"^origin/alert-autofix-\d+$",  # Old security fixes
                 r"^origin/.*-backup-.*$",  # Backup branches
             ],
             "review_patterns": [

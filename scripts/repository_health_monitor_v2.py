@@ -687,12 +687,8 @@ class RepositoryHealthMonitor:
             if metrics_file.exists():
                 temp_file = metrics_file.with_suffix('.tmp')
 
-                with open(metrics_file,
-                          'r',
-                          encoding="utf-8") as infile,
-                open(temp_file,
-                     'w',
-                     encoding="utf-8") as outfile:
+                with open(metrics_file, 'r', encoding="utf-8") as infile, \
+                     open(temp_file, 'w', encoding="utf-8") as outfile:
                     for line in infile:
                         try:
                             data = json.loads(line.strip())

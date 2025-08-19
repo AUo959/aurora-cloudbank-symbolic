@@ -12,6 +12,7 @@ Automated maintenance workflows with configurable schedules and safety checks.
 
 # import schedule  # Optional dependency
 try:
+    import schedule
 except ImportError:
     schedule = None
 

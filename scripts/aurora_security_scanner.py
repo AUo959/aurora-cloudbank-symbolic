@@ -41,7 +41,7 @@ class AuroraSecurityScanner:
                 })
 
     def _check_js_content(self, file_path, content):
-        """Check JavaScript content for security issues""r"
+        """Check JavaScript content for security issues"""
 
         # Check for dangerous patterns
         dangerous_patterns = {
@@ -92,7 +92,7 @@ class AuroraSecurityScanner:
                 })
 
     def _check_py_content(self, file_path, content):
-        """Check Python content for security issues""r"
+        """Check Python content for security issues"""
 
         dangerous_patterns = {
             'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
@@ -196,7 +196,7 @@ class AuroraSecurityScanner:
                 print("  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
-        """Fix innerHTML usage by suggesting textContent""r"
+        """Fix innerHTML usage by suggesting textContent"""
         file_path = issue['file']
         try:
             with open(file_path, 'r', encoding='utf-8') as f:

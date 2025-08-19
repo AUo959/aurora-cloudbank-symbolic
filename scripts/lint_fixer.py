@@ -83,7 +83,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
     content = re.sub(
-        rrr"except\s*:", "except (OSError, ValueError, RuntimeError):", content
+        r"except\s*:", "except (OSError, ValueError, RuntimeError):", content
     )
 
     if content != original_content:

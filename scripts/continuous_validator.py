@@ -20,6 +20,7 @@ script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
 try:
+    from canonical_validator import CanonicalValidator
 except ImportError:
     print("❌ Error: Could not import canonical_validator")
     sys.exit(1)

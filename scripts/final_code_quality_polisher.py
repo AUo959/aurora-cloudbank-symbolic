@@ -31,7 +31,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing blank lines in {file_path}: {e}")
+            print("Error fixing blank lines in {file_path}: {e}")
 
         return False
 
@@ -58,7 +58,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing whitespace in {file_path}: {e}")
+            print("Error fixing whitespace in {file_path}: {e}")
 
         return False
 
@@ -97,7 +97,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing decorators in {file_path}: {e}")
+            print("Error fixing decorators in {file_path}: {e}")
 
         return False
 
@@ -110,7 +110,7 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace bare except Exception: with except Exception:
-            content = re.sub(rrr'except\s*:', 'except Exception:', content)
+            content = re.sub(r'except\s*:', 'except Exception:', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -118,7 +118,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing bare except in {file_path}: {e}")
+            print("Error fixing bare except in {file_path}: {e}")
 
         return False
 
@@ -131,10 +131,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Fix is True and is False comparisons
-            content = re.sub(rrr'==\s*True\b', 'is True', content)
-            content = re.sub(rrr'==\s*False\b', 'is False', content)
-            content = re.sub(rrr'!=\s*True\b', 'is not True', content)
-            content = re.sub(rrr'!=\s*False\b', 'is not False', content)
+            content = re.sub(r'==\s*True\b', 'is True', content)
+            content = re.sub(r'==\s*False\b', 'is False', content)
+            content = re.sub(r'!=\s*True\b', 'is not True', content)
+            content = re.sub(r'!=\s*False\b', 'is not False', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -142,7 +142,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing comparisons in {file_path}: {e}")
+            print("Error fixing comparisons in {file_path}: {e}")
 
         return False
 
@@ -155,10 +155,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace single-letter variable names in common patterns
-            content = re.sub(rrr'\bl\s*=', 'line =', content)
-            content = re.sub(rrr'for\s+l\s+in', 'for line in', content)
-            content = re.sub(rrr'\bI\s*=', 'idx =', content)
-            content = re.sub(rrr'for\s+I\s+in', 'for idx in', content)
+            content = re.sub(r'\bl\s*=', 'line =', content)
+            content = re.sub(r'for\s+l\s+in', 'for line in', content)
+            content = re.sub(r'\bI\s*=', 'idx =', content)
+            content = re.sub(r'for\s+I\s+in', 'for idx in', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -166,7 +166,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing variable names in {file_path}: {e}")
+            print("Error fixing variable names in {file_path}: {e}")
 
         return False
 
@@ -188,7 +188,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing escape sequences in {file_path}: {e}")
+            print("Error fixing escape sequences in {file_path}: {e}")
 
         return False
 
@@ -201,8 +201,8 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Remove semicolons at end of lines
-            content = re.sub(rrr';(\s*\n)', r'\1', content)
-            content = re.sub(rrr';(\s*)$', r'\1', content, flags=re.MULTILINE)
+            content = re.sub(r';(\s*\n)', r'\1', content)
+            content = re.sub(r';(\s*)$', r'\1', content, flags=re.MULTILINE)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -210,7 +210,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print(f"Error fixing semicolons in {file_path}: {e}")
+            print("Error fixing semicolons in {file_path}: {e}")
 
         return False
 
@@ -281,7 +281,7 @@ class FinalCodeQualityPolisher:
                     return True
 
         except Exception as e:
-            print(f"Error fixing imports in {file_path}: {e}")
+            print("Error fixing imports in {file_path}: {e}")
 
         return False
 
@@ -324,7 +324,7 @@ class FinalCodeQualityPolisher:
             if not any(skip in str(file_path) for skip in ['.git', 'node_modules', 'venv', '__pycache__']):
                 filtered_files.append(file_path)
 
-        print(f"Polishing {len(filtered_files)} Python files...")
+        print("Polishing {len(filtered_files)} Python files...")
 
         files_fixed = 0
         for file_path in filtered_files:
@@ -333,14 +333,14 @@ class FinalCodeQualityPolisher:
                 if fixes > 0:
                     self.fixes_applied += fixes
                     files_fixed += 1
-                    print(f"  ✓ Polished {file_path} ({fixes} fixes)")
+                    print("  ✓ Polished {file_path} ({fixes} fixes)")
 
             except Exception as e:
-                print(f"  ❌ Error polishing {file_path}: {e}")
+                print("  ❌ Error polishing {file_path}: {e}")
 
-        print(f"\n📊 Final Polish Summary:")
-        print(f"Files Fixed: {files_fixed}")
-        print(f"Total Fixes: {self.fixes_applied}")
+        print("\n📊 Final Polish Summary:")
+        print("Files Fixed: {files_fixed}")
+        print("Total Fixes: {self.fixes_applied}")
 
         # Final validation
         self.run_final_validation()
@@ -358,14 +358,14 @@ class FinalCodeQualityPolisher:
                 lines = result.stdout.strip().split('\n')
                 if lines and lines[-1].isdigit():
                     remaining = int(lines[-1])
-                    print(f"\n📈 Progress: {remaining} issues remaining")
+                    print("\n📈 Progress: {remaining} issues remaining")
                     if remaining < 100:
                         print("Excellent progress! Repository is nearly perfect.")
                     else:
                         print("Good progress made, continuing polish...")
 
         except Exception as e:
-            print(f"Could not run final validation: {e}")
+            print("Could not run final validation: {e}")
 
 def main():
     polisher = FinalCodeQualityPolisher()

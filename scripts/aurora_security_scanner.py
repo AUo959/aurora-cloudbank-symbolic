@@ -37,7 +37,7 @@ class AuroraSecurityScanner:
                     'file': str(file_path),
                     'type': 'FILE_READ_ERROR',
                     'severity': 'LOW',
-                    'message': f"Could not read file: {e}"
+                    'message': "Could not read file: {e}"
                 })
 
     def _check_js_content(self, file_path, content):
@@ -45,11 +45,11 @@ class AuroraSecurityScanner:
 
         # Check for dangerous patterns
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
-            'innerHTML': (rrr'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
-            'document.write': (rrr'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
-            'setTimeout_string': (rrr'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
-            'Function_constructor': (rrr'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
+            'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
+            'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
+            'setTimeout_string': (r'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
+            'Function_constructor': (r'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
             'dangerouslySetInnerHTML': (
                 r'dangerouslySetInnerHTML',
                 'HIGH',
@@ -88,24 +88,24 @@ class AuroraSecurityScanner:
                     'file': str(file_path),
                     'type': 'FILE_READ_ERROR',
                     'severity': 'LOW',
-                    'message': f"Could not read file: {e}"
+                    'message': "Could not read file: {e}"
                 })
 
     def _check_py_content(self, file_path, content):
         """Check Python content for security issues""r"
 
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
-            'exec': (rrr'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
-                rrrr'subprocess\.\w+.*shell\s*=\s*True',
+                r'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
                 'subprocess with shell=True can enable command injection'
             ),
-            'os_system': (rrr'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
-            'sql_format': (rrr'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
-            'pickle_load': (rrr'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
-            'yaml_unsafe': (rrr'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
+            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
+            'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
+            'pickle_load': (r'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
+            'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
@@ -139,12 +139,12 @@ class AuroraSecurityScanner:
                                 'file': 'package.json',
                                 'type': 'DEPENDENCY_VULNERABILITY',
                                 'severity': severity,
-                                'message': f"Vulnerable dependency: {vuln_name}",
+                                'message': "Vulnerable dependency: {vuln_name}",
                                 'package': vuln_name,
                                 'details': vuln_data
                             })
             except Exception as e:
-                print(f"Could not run npm audit: {e}")
+                print("Could not run npm audit: {e}")
 
     def check_configuration_security(self):
         """Check for security configuration issues"""
@@ -152,10 +152,10 @@ class AuroraSecurityScanner:
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (rrr'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
-            (rrr'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
-            (rrr'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
-            (rrr'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
+            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
+            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
+            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
+            (r'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
 
@@ -193,7 +193,7 @@ class AuroraSecurityScanner:
                 self._fix_innerHTML_usage(issue)
             elif issue['type'] == 'subprocess_shell':
                 # Skip subprocess_shell fixes for now - would need file-specific logic
-                print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
+                print("  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
         """Fix innerHTML usage by suggesting textContent""r"
@@ -204,7 +204,7 @@ class AuroraSecurityScanner:
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
-                rrrr'(\w+)\.innerHTML\s*=\s*([^;]+);',
+                r'(\w+)\.innerHTML\s*=\s*([^;]+);',
                 r'\1.textContent = \2; // SECURITY FIX: Changed from innerHTML',
                 content
             )
@@ -212,9 +212,9 @@ class AuroraSecurityScanner:
             if fixed_content != content:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(fixed_content)
-                self.fixes_applied.append(f"Fixed innerHTML usage in {file_path}")
+                self.fixes_applied.append("Fixed innerHTML usage in {file_path}")
         except Exception as e:
-            print(f"Could not fix innerHTML in {file_path}: {e}")
+            print("Could not fix innerHTML in {file_path}: {e}")
 
     def generate_security_report(self):
         """Generate comprehensive security report"""
@@ -234,22 +234,22 @@ class AuroraSecurityScanner:
             severity = issue['severity']
             severity_counts[severity] += 1
 
-            print(f"\n[{severity}] {issue['type']} in {issue['file']}")
+            print("\n[{severity}] {issue['type']} in {issue['file']}")
             if 'line' in issue:
-                print(f"  Line {issue['line']}: {issue.get('code', '')}")
-            print(f"  {issue['message']}")
+                print("  Line {issue['line']}: {issue.get('code', '')}")
+            print("  {issue['message']}")
 
         print("\n📊 SUMMARY:")
-        print(f"  CRITICAL: {severity_counts['CRITICAL']}")
-        print(f"  HIGH: {severity_counts['HIGH']}")
-        print(f"  MEDIUM: {severity_counts['MEDIUM']}")
-        print(f"  LOW: {severity_counts['LOW']}")
-        print(f"  TOTAL: {len(self.issues)}")
+        print("  CRITICAL: {severity_counts['CRITICAL']}")
+        print("  HIGH: {severity_counts['HIGH']}")
+        print("  MEDIUM: {severity_counts['MEDIUM']}")
+        print("  LOW: {severity_counts['LOW']}")
+        print("  TOTAL: {len(self.issues)}")
 
         if self.fixes_applied:
             print("\n✅ FIXES APPLIED:")
             for fix in self.fixes_applied:
-                print(f"  • {fix}")
+                print("  • {fix}")
 
         # Save detailed report
         date_cmd = ['date']
@@ -291,7 +291,7 @@ def main():
 
     # Exit with appropriate code
     if critical_high_count > 0:
-        print(f"\n⚠️ Found {critical_high_count} critical/high severity issues!")
+        print("\n⚠️ Found {critical_high_count} critical/high severity issues!")
         sys.exit(1)
     else:
         print("\n✅ No critical or high severity issues found!")

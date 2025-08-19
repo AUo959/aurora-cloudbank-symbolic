@@ -30,7 +30,7 @@ def fix_python_file(filepath):
     with open(filepath, "w") as f:
         f.write(content)
 
-    print(f"Fixed: {filepath}")
+    print("Fixed: {filepath}")
 
 
 # Fix the problematic files
@@ -44,6 +44,6 @@ for file_path in files_to_fix:
     if os.path.exists(file_path):
         fix_python_file(file_path)
     else:
-        print(f"File not found: {file_path}")
+        print("File not found: {file_path}")
 
 print("All files fixed!")

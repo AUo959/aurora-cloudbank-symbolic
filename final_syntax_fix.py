@@ -29,7 +29,7 @@ def fix_function_declarations(filepath):
     with open(filepath, "w") as f:
         f.write(content)
 
-    print(f"Fixed {filepath}")
+    print("Fixed {filepath}")
 
 
 # Fix the problematic files

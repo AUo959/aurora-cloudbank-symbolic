@@ -216,7 +216,7 @@ class PluginRegistry:
 
             # Check for conflicts
             if plugin.metadata.name in self.plugins:
-        raise ValueError(f"Plugin '{plugin.metadata.name}' already registered")
+        raise ValueError("Plugin '{plugin.metadata.name}' already registered")
 
             # Register plugin
             self.plugins[plugin.metadata.name] = plugin
@@ -280,7 +280,7 @@ class PluginRegistry:
             return self.register_plugin(plugin_instance)
 
         except Exception as e:
-        print(f"Failed to load plugin from {module_path}: {e}")
+        print("Failed to load plugin from {module_path}: {e}")
             return False
 
         def get_plugin_info(self, plugin_name: str) -> Optional[Dict[str, Any]]:
@@ -339,7 +339,7 @@ class PluginRegistry:
         # Check dependencies
         for dependency in plugin.metadata.dependencies:
         if dependency not in self.plugins:
-        print(f"Missing dependency: {dependency}")
+        print("Missing dependency: {dependency}")
                 return False
 
         return True
@@ -373,7 +373,7 @@ class PluginRegistry:
         for filename in os.listdir(directory_path):
         if filename.endswith(".py") and not filename.startswith("__"):
         module_name = filename[:-3]  # Remove .py extension
-                module_path = f"{directory_path.replace('/', '.')}.{module_name}"
+                module_path = "{directory_path.replace('/', '.')}.{module_name}"
 
                 try:
                     # Try to load plugin (assuming class name matches module name)
@@ -382,7 +382,7 @@ class PluginRegistry:
                     ):
                     loaded_count += 1
                     except Exception as e:
-                    print(f"Failed to load plugin {module_name}: {e}")
+                    print("Failed to load plugin {module_name}: {e}")
 
                     return loaded_count
 
@@ -392,10 +392,10 @@ class PluginRegistry:
     """Execute a plugin with input data."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-    raise ValueError(f"Plugin '{plugin_name}' not found")
+    raise ValueError("Plugin '{plugin_name}' not found")
 
         if plugin.status != PluginStatus.ACTIVE:
-    raise ValueError(f"Plugin '{plugin_name}' is not active")
+    raise ValueError("Plugin '{plugin_name}' is not active")
 
         return plugin.process(input_data, options or {})
 

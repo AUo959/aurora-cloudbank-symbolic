@@ -11,7 +11,7 @@ import glob
 
 def fix_file(filepath):
     """Fix common Python code issues in a file"""
-    print(f"🔧 Fixing {filepath}r")
+    print("🔧 Fixing {filepath}r")
 
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -35,7 +35,7 @@ def fix_file(filepath):
                 continue
 
             # Fix simple unused import cases
-            if re.match(rrr'^import \w+$', line) or re.match(r'^from .* import .*$', line):
+            if re.match(r'^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
                 if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)
@@ -66,10 +66,10 @@ def fix_file(filepath):
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
 
-        print(f"✅ Fixed {filepath}")
+        print("✅ Fixed {filepath}")
 
     except Exception as e:
-        print(f"❌ Error fixing {filepath}: {e}")
+        print("❌ Error fixing {filepath}: {e}")
 
 
 def main():
@@ -80,8 +80,8 @@ def main():
 
     for root in ['scripts/', 'modules/', '.']:
         for pattern in ['*.py']:
-            python_files.extend(glob.glob(f"{root}/**/{pattern}", recursive=True))
-            python_files.extend(glob.glob(f"{root}/{pattern}"))
+            python_files.extend(glob.glob("{root}/**/{pattern}", recursive=True))
+            python_files.extend(glob.glob("{root}/{pattern}"))
 
     # Also add specific files
     specific_files = [
@@ -96,7 +96,7 @@ def main():
     # Remove duplicates and filter existing files
     python_files = list(set([f for f in python_files if os.path.exists(f)]))
 
-    print(f"📁 Found {len(python_files)} Python files to fix")
+    print("📁 Found {len(python_files)} Python files to fix")
 
     for filepath in python_files:
         if 'node_modules' not in filepath and '.git' not in filepath:

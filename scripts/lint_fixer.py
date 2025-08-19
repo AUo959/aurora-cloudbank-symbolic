@@ -20,10 +20,10 @@ def fix_encoding_specifications(file_path: str) -> bool:
 
     # Fix open() calls without encoding
     patterns = [
-        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
+        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
     ]
 
     for pattern, replacement in patterns:
@@ -50,13 +50,13 @@ def fix_subprocess_calls(file_path: str) -> bool:
     def fix_subprocess_run(match):
         args = match.group(1)
         if "shell=" not in args and "check=" not in args:
-            return f"subprocess.run({args}, shell=False, check=False)"
+            return "subprocess.run({args}, shell=False, check=False)"
         return match.group(0)
 
     def fix_subprocess_call(match):
         args = match.group(1)
         if "shell=" not in args:
-            return f"subprocess.call({args}, shell=False)"
+            return "subprocess.call({args}, shell=False)"
         return match.group(0)
 
     patterns = [
@@ -150,8 +150,8 @@ def fix_unused_imports(file_path: str) -> bool:
     # Check which imports are actually used
     used_imports = set()
     for module in imports:
-        if module in content.replace(f"import {module}", "").replace(
-            f"from {module}", ""
+        if module in content.replace("import {module}", "").replace(
+            "from {module}", ""
         ):
             used_imports.add(module)
 
@@ -190,7 +190,7 @@ def process_file(file_path: str) -> Dict[str, bool]:
         # fixes['unused_imports'] = fix_unused_imports(file_path)  # Disabled for safety
 
     except (OSError, ValueError, RuntimeError) as e:
-        print(f"Error processing {file_path}: {e}")
+        print("Error processing {file_path}: {e}")
         return {}
 
     return fixes
@@ -200,7 +200,7 @@ def main():
     """Main function to process all Python files in scripts directory."""
     print("Starting lint fixer...")
     scripts_dir = Path("scripts")
-    print(f"Looking for scripts directory: {scripts_dir.absolute()}")
+    print("Looking for scripts directory: {scripts_dir.absolute()}")
 
     if not scripts_dir.exists():
         print("Scripts directory not found!")
@@ -210,7 +210,7 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-        print(f"Processing {py_file}...")
+        print("Processing {py_file}...")
         file_fixes = process_file(str(py_file))
 
         for fix_type, applied in file_fixes.items():
@@ -222,9 +222,9 @@ def main():
     print("\nFix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
+        print("{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print(f"\nProcessed {len(python_files)} Python files.")
+    print("\nProcessed {len(python_files)} Python files.")
     return 0
 
 

@@ -86,7 +86,7 @@ class MaintenanceScheduler:
                 with open(config_path, encoding="utf-8") as f:
                     return json.load(f)
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error loading config: {e}")
+                self.logger.error("Error loading config: {e}")
 
         # Default configuration
         default_config = {
@@ -186,13 +186,13 @@ class MaintenanceScheduler:
             }
 
             self.logger.info(
-                f"Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs"
+                "Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs"
             )
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in Python cache cleanup: {e}")
+            self.logger.error("Error in Python cache cleanup: {e}")
 
         return result
 
@@ -247,13 +247,13 @@ class MaintenanceScheduler:
 
             result["details"] = {"temp_files_removed": removed_count}
             self.logger.info(
-                f"Temporary file cleanup complete: {removed_count} files removed"
+                "Temporary file cleanup complete: {removed_count} files removed"
             )
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in temporary file cleanup: {e}")
+            self.logger.error("Error in temporary file cleanup: {e}")
 
         return result
 
@@ -309,12 +309,12 @@ class MaintenanceScheduler:
                 ),
             }
 
-            self.logger.info(f"Git optimization complete: .git size = {git_size_mb}MB")
+            self.logger.info("Git optimization complete: .git size = {git_size_mb}MB")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in git optimization: {e}")
+            self.logger.error("Error in git optimization: {e}")
 
         return result
 
@@ -383,7 +383,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in health check: {e}")
+            self.logger.error("Error in health check: {e}")
 
         return result
 
@@ -440,7 +440,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in branch cleanup: {e}")
+            self.logger.error("Error in branch cleanup: {e}")
 
         return result
 
@@ -496,7 +496,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in dependency check: {e}")
+            self.logger.error("Error in dependency check: {e}")
 
         return result
 
@@ -567,7 +567,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in security scan: {e}")
+            self.logger.error("Error in security scan: {e}")
 
         return result
 
@@ -597,7 +597,7 @@ class MaintenanceScheduler:
             return {"task": task_name, "status": "error", "error": "Task not found"}
 
         task = self.tasks[task_name]
-        self.logger.info(f"Running task: {task['description']}")
+        self.logger.info("Running task: {task['description']}")
 
         start_time = datetime.datetime.now()
         result = task["function"]()
@@ -623,7 +623,7 @@ class MaintenanceScheduler:
 
         # Save to daily file
         date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-        results_file = results_dir / f"maintenance_{date_str}.json"
+        results_file = results_dir / "maintenance_{date_str}.json"
 
         # Load existing results
         daily_results = []
@@ -664,7 +664,7 @@ class MaintenanceScheduler:
             elif ":" in schedule_str:  # Time format
                 schedule.every().day.at(schedule_str).do(self.run_task, task_name)
 
-        self.logger.info(f"Scheduled {len(schedule.jobs)} maintenance tasks")
+        self.logger.info("Scheduled {len(schedule.jobs)} maintenance tasks")
 
     def run_scheduler(self):
         """Run the maintenance scheduler."""
@@ -680,7 +680,7 @@ class MaintenanceScheduler:
                 self.logger.info("Scheduler stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error in scheduler: {e}")
+                self.logger.error("Error in scheduler: {e}")
                 time.sleep(60)
 
 
@@ -706,23 +706,23 @@ def main():
         print("Available maintenance tasks:")
         for task_name, task_info in scheduler.tasks.items():
             print(
-                f"  {task_name}: {task_info['description']} ({task_info['schedule']})"
+                "  {task_name}: {task_info['description']} ({task_info['schedule']})"
             )
         return 0
 
     elif args.run_task:
         if args.run_task not in scheduler.tasks:
-            print(f"Error: Task '{args.run_task}' not found")
+            print("Error: Task '{args.run_task}' not found")
             return 1
 
-        print(f"Running task: {args.run_task}")
+        print("Running task: {args.run_task}")
         result = scheduler.run_task(args.run_task)
 
-        print(f"Status: {result['status']}")
+        print("Status: {result['status']}")
         if result["status"] == "error":
-            print(f"Error: {result['error']}")
+            print("Error: {result['error']}")
         else:
-            print(f"Details: {result['details']}")
+            print("Details: {result['details']}")
 
         return 0 if result["status"] == "success" else 1
 
@@ -730,14 +730,14 @@ def main():
         print("Running all maintenance tasks for testing...")
 
         for task_name in scheduler.tasks.keys():
-            print(f"\n--- Running {task_name} ---")
+            print("\n--- Running {task_name} ---")
             result = scheduler.run_task(task_name)
-            print(f"Status: {result['status']}")
+            print("Status: {result['status']}")
 
             if result["status"] == "error":
-                print(f"Error: {result['error']}")
+                print("Error: {result['error']}")
             else:
-                print(f"Duration: {result['duration_seconds']:.1f}s")
+                print("Duration: {result['duration_seconds']:.1f}s")
 
         return 0
 

@@ -94,16 +94,16 @@ class CanonicalValidationHandler(FileSystemEventHandler):
                 return  # Skip validation, file was modified again
 
         try:
-            print(f"🔍 Validating: {Path(file_path).name}")
+            print("🔍 Validating: {Path(file_path).name}")
             results = self.validator.validate_file(file_path)
 
             if results:
                 self.process_validation_results(file_path, results)
             else:
-                print(f"  ✅ {Path(file_path).name} - No issues detected")
+                print("  ✅ {Path(file_path).name} - No issues detected")
 
         except Exception as e:
-            print(f"  ❌ Error validating {file_path}: {e}")
+            print("  ❌ Error validating {file_path}: {e}")
 
     def process_validation_results(self, file_path, results):
         """Process validation results and take appropriate actions"""
@@ -116,25 +116,25 @@ class CanonicalValidationHandler(FileSystemEventHandler):
 
         # Report auto-fixes
         if auto_fixes:
-            print(f"  🔧 {file_name} - {len(auto_fixes)} auto-fixes applied")
+            print("  🔧 {file_name} - {len(auto_fixes)} auto-fixes applied")
             for fix in auto_fixes[:2]:  # Show first 2
-                print(f"    ✅ {fix.message}")
+                print("    ✅ {fix.message}")
 
         # Report critical issues
         if critical:
-            print(f"  🚨 {file_name} - {len(critical)} CRITICAL issues!")
+            print("  🚨 {file_name} - {len(critical)} CRITICAL issues!")
             for issue in critical:
-                print(f"    ❗ {issue.message}")
-                print(f"      Fix: {issue.suggested_fix}")
+                print("    ❗ {issue.message}")
+                print("      Fix: {issue.suggested_fix}")
             self.alert_user(file_path, critical, "CRITICAL")
 
         # Report high priority issues
         elif high:
-            print(f"  🔴 {file_name} - {len(high)} high priority issues")
+            print("  🔴 {file_name} - {len(high)} high priority issues")
             for issue in high[:1]:  # Show first issue
-                print(f"    🔴 {issue.message}")
+                print("    🔴 {issue.message}")
             if len(high) > 1:
-                print(f"    ... and {len(high) - 1} more")
+                print("    ... and {len(high) - 1} more")
 
         # Log validation event
         self.log_validation_event(file_path, results)
@@ -142,19 +142,19 @@ class CanonicalValidationHandler(FileSystemEventHandler):
     def alert_user(self, file_path, critical_issues, severity):
         """Generate user alert for critical issues"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        alert_file = f"CANONICAL_ALERT_{severity}_{timestamp.replace(':', '-').replace(' ', '_')}.md"
+        alert_file = "CANONICAL_ALERT_{severity}_{timestamp.replace(':', '-').replace(' ', '_')}.md"
 
         with open(alert_file, 'w', encoding="utf-8") as f:
-            f.write(f"# Aurora CloudBank Canonical Alert - {severity}\n\n")
-            f.write(f"**Timestamp**: {timestamp}\n")
-            f.write(f"**File**: {file_path}\n")
-            f.write(f"**Issues Detected**: {len(critical_issues)}\n\n")
+            f.write("# Aurora CloudBank Canonical Alert - {severity}\n\n")
+            f.write("**Timestamp**: {timestamp}\n")
+            f.write("**File**: {file_path}\n")
+            f.write("**Issues Detected**: {len(critical_issues)}\n\n")
 
             for i, issue in enumerate(critical_issues, 1):
-                f.write(f"## Issue {i}: {issue.check_name}\n")
-                f.write(f"**Severity**: {issue.severity}\n")
-                f.write(f"**Message**: {issue.message}\n")
-                f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
+                f.write("## Issue {i}: {issue.check_name}\n")
+                f.write("**Severity**: {issue.severity}\n")
+                f.write("**Message**: {issue.message}\n")
+                f.write("**Suggested Fix**: {issue.suggested_fix}\n\n")
 
             f.write("## Immediate Actions Required\n")
             f.write("1. Stop current development work\n")
@@ -162,7 +162,7 @@ class CanonicalValidationHandler(FileSystemEventHandler):
             f.write("3. Re-validate file after fixes\n")
             f.write("4. Delete this alert file when resolved\n")
 
-        print(f"  📋 Alert generated: {alert_file}")
+        print("  📋 Alert generated: {alert_file}")
 
     def log_validation_event(self, file_path, results):
         """Log validation events for tracking"""
@@ -232,8 +232,8 @@ class ContinuousValidator:
 
         print("🛰️ Aurora CloudBank Continuous Canonical Validation")
         print("=" * 55)
-        print(f"📁 Monitoring workspace: {self.workspace_path.absolute()}")
-        print(f"⏱️ Debounce delay: {self.config.get('debounce_delay', 2000)}ms")
+        print("📁 Monitoring workspace: {self.workspace_path.absolute()}")
+        print("⏱️ Debounce delay: {self.config.get('debounce_delay', 2000)}ms")
         print("🔍 Watching for file changes...\n")
 
         # Create event handler
@@ -314,5 +314,5 @@ if __name__ == "__main__":
         print("\n👋 Goodbye!")
         sys.exit(0)
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print("❌ Error: {e}")
         sys.exit(1)

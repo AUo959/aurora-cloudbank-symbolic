@@ -34,7 +34,7 @@ class GITWizWorkflowOrchestrator:
         status_emoji = (
             "✅" if status == "success" else "❌" if status == "error" else "🔄"
         )
-        print(f"{status_emoji} {step}: {details}")
+        print("{status_emoji} {step}: {details}")
 
     def execute_full_optimization_workflow(
         self, dry_run: bool = True
@@ -52,8 +52,8 @@ class GITWizWorkflowOrchestrator:
 
         print("🚀 GITWIZ ENHANCED - FULL OPTIMIZATION WORKFLOW")
         print("=" * 70)
-        print(f"Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
-        print(f"Started: {self.start_time.isoformat()}")
+        print("Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
+        print("Started: {self.start_time.isoformat()}")
         print("=" * 70)
 
         # Stage 1: Repository Analysis
@@ -67,7 +67,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Repository Analysis",
                 "success",
-                f"Found {analysis_result.get('file_count', 0)} files",
+                "Found {analysis_result.get('file_count', 0)} files",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Repository Analysis", "error", str(e))
@@ -89,7 +89,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Dependency Management",
                 "success",
-                f"Processed {outdated_count} outdated packages",
+                "Processed {outdated_count} outdated packages",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Dependency Management", "error", str(e))
@@ -105,7 +105,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Archive Optimization",
                 "success",
-                f"Analyzed {archive_result.get('total_archives', 0)} ZIP files",
+                "Analyzed {archive_result.get('total_archives', 0)} ZIP files",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Archive Optimization", "error", str(e))
@@ -123,7 +123,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Documentation Organization",
                 "success",
-                f"Processed {doc_result.get('total_docs', 0)} documentation files",
+                "Processed {doc_result.get('total_docs', 0)} documentation files",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Documentation Organization", "error", str(e))
@@ -139,7 +139,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Security Hardening",
                 "success",
-                f"Applied {len(security_result.get('improvements', []))} security improvements",
+                "Applied {len(security_result.get('improvements', []))} security improvements",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Security Hardening", "error", str(e))
@@ -155,7 +155,7 @@ class GITWizWorkflowOrchestrator:
             self.log_step(
                 "Structure Optimization",
                 "success",
-                f"Applied {len(structure_result.get('optimizations', []))} structural improvements",
+                "Applied {len(structure_result.get('optimizations', []))} structural improvements",
             )
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Structure Optimization", "error", str(e))
@@ -208,12 +208,12 @@ class GITWizWorkflowOrchestrator:
         workflow_start = datetime.utcnow()
         logger_prefix = "🚀 ENHANCED QUALITY WORKFLOW"
 
-        print(f"{logger_prefix}")
+        print("{logger_prefix}")
         print("=" * 70)
         print(
-            f"Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}"
+            "Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}"
         )
-        print(f"Started: {workflow_start.isoformat()}")
+        print("Started: {workflow_start.isoformat()}")
         print("=" * 70)
 
         workflow_result = {
@@ -257,7 +257,7 @@ class GITWizWorkflowOrchestrator:
                 self.log_step(
                     "Comprehensive Lint Scan",
                     "success",
-                    f"Found {total_issues} issues across multiple tools",
+                    "Found {total_issues} issues across multiple tools",
                 )
             else:
                 # Fallback to basic analysis
@@ -286,7 +286,7 @@ class GITWizWorkflowOrchestrator:
                     self.log_step(
                         "Automated Fixing",
                         "success",
-                        f"Applied {total_fixes} automated fixes",
+                        "Applied {total_fixes} automated fixes",
                     )
                 else:
                     # Fallback to basic fixing
@@ -316,7 +316,7 @@ class GITWizWorkflowOrchestrator:
                 self.log_step(
                     "Priority Fixing",
                     "success",
-                    f"Applied {high_priority_fixes} high-priority fixes",
+                    "Applied {high_priority_fixes} high-priority fixes",
                 )
             except Exception as e:
                 self.log_step("Priority Fixing", "error", str(e))
@@ -365,7 +365,7 @@ class GITWizWorkflowOrchestrator:
                 self.log_step(
                     "Quality Assessment",
                     "success",
-                    f"Code quality score: {quality_score}/100",
+                    "Code quality score: {quality_score}/100",
                 )
             else:
                 basic_quality = {
@@ -400,12 +400,12 @@ class GITWizWorkflowOrchestrator:
         workflow_result["execution_time"] = execution_time
 
         print("\n" + "=" * 70)
-        print(f"✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
-        print(f"Success rate: {successful_stages}/{total_stages} stages")
+        print("✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
+        print("Success rate: {successful_stages}/{total_stages} stages")
         if workflow_result["recommendations"]:
             print("🎯 Key Recommendations:")
             for rec in workflow_result["recommendations"][:3]:
-                print(f"  • {rec}")
+                print("  • {rec}")
         print("=" * 70)
 
         return workflow_result
@@ -516,7 +516,7 @@ class GITWizWorkflowOrchestrator:
                         "action": "move_status_files",
                         "files": len(status_files),
                         "target": "docs/status/",
-                        "description": f"Move {len(status_files)} status files to organized directory",
+                        "description": "Move {len(status_files)} status files to organized directory",
                     }
                 )
 
@@ -620,10 +620,10 @@ class GITWizWorkflowOrchestrator:
         print("🎉 GITWIZ OPTIMIZATION WORKFLOW COMPLETE")
         print("=" * 70)
 
-        print(f"Duration: {workflow_result['duration_seconds']:.1f} seconds")
-        print(f"Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
+        print("Duration: {workflow_result['duration_seconds']:.1f} seconds")
+        print("Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
         print(
-            f"Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}"
+            "Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}"
         )
         print()
 
@@ -631,7 +631,7 @@ class GITWizWorkflowOrchestrator:
         print("-" * 40)
         for stage_name, stage_result in workflow_result["stages"].items():
             status = "❌ FAILED" if "error" in stage_result else "✅ SUCCESS"
-            print(f"{stage_name.title().replace('_', ' ')}: {status}")
+            print("{stage_name.title().replace('_', ' ')}: {status}")
 
         print()
         print("🎯 KEY ACHIEVEMENTS:")
@@ -640,24 +640,24 @@ class GITWizWorkflowOrchestrator:
         # Extract key metrics
         analysis = workflow_result["stages"].get("analysis", {})
         if "file_count" in analysis:
-            print(f"• Analyzed {analysis['file_count']} files")
+            print("• Analyzed {analysis['file_count']} files")
 
         archives = workflow_result["stages"].get("archives", {})
         if "total_archives" in archives:
-            print(f"• Processed {archives['total_archives']} ZIP archives")
+            print("• Processed {archives['total_archives']} ZIP archives")
 
         deps = workflow_result["stages"].get("dependencies", {})
         if "python_scan" in deps:
             outdated = len(deps["python_scan"].get("outdated", []))
-            print(f"• Found {outdated} outdated Python packages")
+            print("• Found {outdated} outdated Python packages")
 
         docs = workflow_result["stages"].get("documentation", {})
         if "total_docs" in docs:
-            print(f"• Organized {docs['total_docs']} documentation files")
+            print("• Organized {docs['total_docs']} documentation files")
 
         security = workflow_result["stages"].get("security", {})
         if "improvements" in security:
-            print(f"• Applied {len(security['improvements'])} security improvements")
+            print("• Applied {len(security['improvements'])} security improvements")
 
         print()
         if workflow_result["dry_run"]:
@@ -715,7 +715,7 @@ def main():
         report_file = Path("gitwiz_optimization_report.json")
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, default=str)
-        print(f"\n📄 Detailed report saved to: {report_file}")
+        print("\n📄 Detailed report saved to: {report_file}")
 
     elif args.security_audit:
         print("🔒 Security-focused workflow would run here")

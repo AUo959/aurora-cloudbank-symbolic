@@ -144,7 +144,7 @@ def process_file_final(file_path: str) -> dict:
         fixes["unused_imports"] = clean_unused_imports(file_path)
 
     except Exception as e:
-        print(f"Error processing {file_path}: {e}")
+        print("Error processing {file_path}: {e}")
         return {}
 
     return fixes
@@ -162,7 +162,7 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-        print(f"Processing {py_file}...")
+        print("Processing {py_file}...")
         file_fixes = process_file_final(str(py_file))
 
         for fix_type, applied in file_fixes.items():
@@ -174,9 +174,9 @@ def main():
     print("\nFinal Cleanup Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
+        print("{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print(f"\nProcessed {len(python_files)} Python files.")
+    print("\nProcessed {len(python_files)} Python files.")
     return 0
 
 

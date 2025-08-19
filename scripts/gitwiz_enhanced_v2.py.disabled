@@ -78,9 +78,9 @@ class GitWizEnhanced:
 
        # Validate git repository
        if not self.git_dir.exists():
-            raise ValueError(f"Not a git repository: {self.repo_path}")
+            raise ValueError("Not a git repository: {self.repo_path}")
 
-        logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
+        logger.info("GitWiz Enhanced initialized for: {self.repo_path}")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load GitWiz configuration."""
@@ -116,7 +116,7 @@ class GitWizEnhanced:
                 # Merge with defaults
                 default_config.update(user_config)
             except Exception as e:
-                logger.warning(f"Failed to load config: {e}. Using defaults.")
+                logger.warning("Failed to load config: {e}. Using defaults.")
 
         # Save current config
         with open(config_file, 'w', encoding="utf-8") as f:
@@ -136,8 +136,8 @@ class GitWizEnhanced:
             )
             return result
         except subprocess.CalledProcessError as e:
-            logger.error(f"Git command failed: {' '.join(full_command)}")
-            logger.error(f"Error: {e.stderr}")
+            logger.error("Git command failed: {' '.join(full_command)}")
+            logger.error("Error: {e.stderr}")
             raise
 
     def analyze_repository(self) -> RepositoryMetrics:
@@ -191,14 +191,14 @@ class GitWizEnhanced:
             metrics.stale_branches = self._count_stale_branches()
 
         except Exception as e:
-            logger.error(f"Error collecting git metrics: {e}")
-            metrics.issues_detected.append(f"Git metrics collection failed: {e}")
+            logger.error("Error collecting git metrics: {e}")
+            metrics.issues_detected.append("Git metrics collection failed: {e}")
 
         # Calculate scores
         metrics.optimization_score = self._calculate_optimization_score(metrics)
         metrics.security_score = self._calculate_security_score()
 
-        logger.info(f"Repository analysis complete: {metrics.total_files} files, {metrics.total_size_mb:.1f}MB")
+        logger.info("Repository analysis complete: {metrics.total_files} files, {metrics.total_size_mb:.1f}MB")
         return metrics
 
     def analyze_files(self) -> FileAnalysis:
@@ -250,7 +250,7 @@ class GitWizEnhanced:
                         file_hashes[file_hash] = [str(rel_path)]
 
             except (OSError, PermissionError) as e:
-                logger.warning(f"Could not analyze {file_path}: {e}")
+                logger.warning("Could not analyze {file_path}: {e}")
 
         # Find duplicates
         for file_hash, paths in file_hashes.items():
@@ -264,13 +264,13 @@ class GitWizEnhanced:
                     "potential_savings_mb": round((total_size * (len(paths) - 1)) / (1024 * 1024), 2)
                 })
 
-        logger.info(f"File analysis complete: {len(analysis.large_files)} large files, "
-                    f"{len(analysis.duplicate_candidates)} duplicate groups found")
+        logger.info("File analysis complete: {len(analysis.large_files)} large files, "
+                    "{len(analysis.duplicate_candidates)} duplicate groups found")
         return analysis
 
     def optimize_repository(self, dry_run: bool = True) -> Dict[str, Any]:
         """Optimize repository with various cleanup operations."""
-        logger.info(f"Starting repository optimization (dry_run={dry_run})...")
+        logger.info("Starting repository optimization (dry_run={dry_run})...")
 
         optimization_report = {
             "timestamp": datetime.now().isoformat(),
@@ -301,7 +301,7 @@ class GitWizEnhanced:
                         "status": "executed" if not dry_run else "simulated"
                     })
                 except Exception as e:
-                    error_msg = f"Git operation failed: {description} - {e}"
+                    error_msg = "Git operation failed: {description} - {e}"
                     optimization_report["errors"].append(error_msg)
                     logger.error(error_msg)
 
@@ -337,21 +337,21 @@ class GitWizEnhanced:
                 optimization_report["files_processed"] += len(file_analysis.temp_files)
 
         except Exception as e:
-            error_msg = f"Optimization failed: {e}"
+            error_msg = "Optimization failed: {e}"
             optimization_report["errors"].append(error_msg)
             logger.error(error_msg)
 
         # Save report
-        report_file = self.gitwiz_dir / f"optimization_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_file = self.gitwiz_dir / "optimization_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(optimization_report, f, indent=2)
 
-        logger.info(f"Optimization complete. Report saved to: {report_file}")
+        logger.info("Optimization complete. Report saved to: {report_file}")
         return optimization_report
 
     def manage_branches(self, action: str = "analyze") -> Dict[str, Any]:
         """Manage repository branches."""
-        logger.info(f"Managing branches: {action}")
+        logger.info("Managing branches: {action}")
 
         result = {
             "action": action,
@@ -398,12 +398,12 @@ class GitWizEnhanced:
                         result["recommendations"].append({
                             "type": "delete_stale_branch",
                             "branch": branch_name,
-                            "reason": f"No commits in {days_since_commit} days",
-                            "command": f"git branch -d {branch_name}"
+                            "reason": "No commits in {days_since_commit} days",
+                            "command": "git branch -d {branch_name}"
                         })
 
                 except Exception as e:
-                    logger.warning(f"Could not analyze branch {branch_name}: {e}")
+                    logger.warning("Could not analyze branch {branch_name}: {e}")
 
             # Execute actions if requested
             if action == "cleanup_stale" and result["recommendations"]:
@@ -411,13 +411,13 @@ class GitWizEnhanced:
                 for rec in result["recommendations"]:
                     if rec["type"] == "delete_stale_branch":
                         try:
-                            cleanup_result.append(f"Deleted stale branch: {rec['branch']}")
+                            cleanup_result.append("Deleted stale branch: {rec['branch']}")
                         except Exception as e:
-                            cleanup_result.append(f"Failed to delete {rec['branch']}: {e}")
+                            cleanup_result.append("Failed to delete {rec['branch']}: {e}")
                 result["cleanup_result"] = cleanup_result
 
         except Exception as e:
-            logger.error(f"Branch management failed: {e}")
+            logger.error("Branch management failed: {e}")
             result["error"] = str(e)
 
         return result
@@ -448,11 +448,11 @@ class GitWizEnhanced:
         }
 
         # Save report
-        report_file = self.gitwiz_dir / f"health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_file = self.gitwiz_dir / "health_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, 'w', encoding="utf-8") as f:
             json.dump(report, f, indent=2)
 
-        logger.info(f"Report generated: {report_file}")
+        logger.info("Report generated: {report_file}")
         return report
 
     # Helper methods
@@ -522,7 +522,7 @@ class GitWizEnhanced:
                     elif full_path.is_dir():
                         shutil.rmtree(full_path)
             except (OSError, PermissionError) as e:
-                logger.warning(f"Could not remove {file_path}: {e}")
+                logger.warning("Could not remove {file_path}: {e}")
 
     def _count_stale_branches(self) -> int:
         """Count stale branches."""
@@ -605,7 +605,7 @@ class GitWizEnhanced:
             recommendations.append({
                 "type": "large_files",
                 "priority": "high",
-                "description": f"Found {len(file_analysis.large_files)} large files",
+                "description": "Found {len(file_analysis.large_files)} large files",
                 "action": "Consider using Git LFS for large files",
                 "files": file_analysis.large_files[:5]  # Show first 5
             })
@@ -616,8 +616,8 @@ class GitWizEnhanced:
             recommendations.append({
                 "type": "duplicates",
                 "priority": "medium",
-                "description": f"Found {len(file_analysis.duplicate_candidates)} duplicate groups",
-                "action": f"Remove duplicates to save {total_savings:.1f}MB",
+                "description": "Found {len(file_analysis.duplicate_candidates)} duplicate groups",
+                "action": "Remove duplicates to save {total_savings:.1f}MB",
                 "potential_savings_mb": total_savings
             })
 
@@ -626,7 +626,7 @@ class GitWizEnhanced:
             recommendations.append({
                 "type": "cache_cleanup",
                 "priority": "low",
-                "description": f"Found {len(file_analysis.cache_files)} cache files",
+                "description": "Found {len(file_analysis.cache_files)} cache files",
                 "action": "Run cleanup to remove cache files"
             })
 
@@ -635,7 +635,7 @@ class GitWizEnhanced:
             recommendations.append({
                 "type": "stale_branches",
                 "priority": "medium",
-                "description": f"Found {metrics.stale_branches} stale branches",
+                "description": "Found {metrics.stale_branches} stale branches",
                 "action": "Consider removing unused branches"
             })
 
@@ -670,14 +670,14 @@ def main():
 
         elif args.action == "report":
             report = gitwiz.generate_report()
-            print(f"✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
-            print(f"📊 Health Status: {report['summary']['health_status']}")
-            print(f"🗂️  Files: {report['summary']['total_files']}")
-            print(f"💾 Size: {report['summary']['total_size_mb']:.1f}MB")
-            print(f"⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
+            print("✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
+            print("📊 Health Status: {report['summary']['health_status']}")
+            print("🗂️  Files: {report['summary']['total_files']}")
+            print("💾 Size: {report['summary']['total_size_mb']:.1f}MB")
+            print("⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
 
     except Exception as e:
-        logger.error(f"GitWiz operation failed: {e}")
+        logger.error("GitWiz operation failed: {e}")
         return 1
 
     return 0

@@ -91,7 +91,7 @@ class SymbolicAnchorTracker:
 
                         # Generate SHA256 hash of the anchor context
                         context_hash = hashlib.sha256(
-                            f"{anchor_id}:{file_path}:{line_num}:{context}".encode()
+                            "{anchor_id}:{file_path}:{line_num}:{context}".encode()
                         ).hexdigest()
 
                         anchor = SymbolicAnchor(
@@ -108,7 +108,7 @@ class SymbolicAnchorTracker:
                         self.anchors[anchor_id] = anchor
 
         except (IOError, UnicodeDecodeError) as e:
-            print(f"Warning: Could not read file {file_path}: {e}")
+            print("Warning: Could not read file {file_path}: {e}")
 
         return anchors
 
@@ -125,7 +125,7 @@ class SymbolicAnchorTracker:
             descendants = self._find_descendants(anchor_id)
             generation = self._calculate_generation(anchor_id, ancestors)
 
-            lineage_data = f"{anchor_id}:{':'.join(sorted(ancestors))}:{':'.join(sorted(descendants))}"
+            lineage_data = "{anchor_id}:{':'.join(sorted(ancestors))}:{':'.join(sorted(descendants))}"
             lineage_hash = hashlib.sha256(lineage_data.encode()).hexdigest()[:16]
 
             lineage = AnchorLineage(
@@ -147,12 +147,12 @@ class SymbolicAnchorTracker:
 
         if anchor_id.startswith('T') and '_' in anchor_id:
             # Extract T-series number
-            match = re.match(rr'T(\d+)', anchor_id)
+            match = re.match(r'T(\d+)', anchor_id)
             if match:
                 current_num = int(match.group(1))
                 # Find previous T-series anchors
                 for other_id in self.anchors:
-                    other_match = re.match(rr'T(\d+)', other_id)
+                    other_match = re.match(r'T(\d+)', other_id)
                     if other_match and int(other_match.group(1)) < current_num:
                         ancestors.append(other_id)
 
@@ -230,7 +230,7 @@ class SymbolicAnchorTracker:
         for anchor_id, lineage in self.lineages.items():
             for ancestor_id in lineage.ancestors:
                 if ancestor_id not in self.anchors:
-                    drift_issues["broken_lineages"].append(f"{anchor_id} -> {ancestor_id}")
+                    drift_issues["broken_lineages"].append("{anchor_id} -> {ancestor_id}")
 
         return drift_issues
 
@@ -241,7 +241,7 @@ class SymbolicAnchorTracker:
             lineage = self.lineages.get(anchor_id)
 
             if not anchor:
-                raise ValueError(f"Anchor {anchor_id} not found")
+                raise ValueError("Anchor {anchor_id} not found")
 
             manifest_data = {
                 "anchor_seed": anchor_id,
@@ -280,7 +280,7 @@ class SymbolicAnchorTracker:
         """Save manifest to file"""
         if output_path is None:
             timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
-            output_path = f"T71_ANCHOR_MANIFEST_{timestamp}.json"
+            output_path = "T71_ANCHOR_MANIFEST_{timestamp}.json"
 
         with open(output_path, 'w') as f:
             json.dump(manifest, f, indent=2)
@@ -303,12 +303,12 @@ def main():
     if args.command == "scan":
         print("🔍 Scanning repository for symbolic anchors...")
         anchors = tracker.scan_repository()
-        print(f"Found {sum(len(a) for a in anchors.values())} anchors in {len(anchors)} files")
+        print("Found {sum(len(a) for a in anchors.values())} anchors in {len(anchors)} files")
 
         for file_path, file_anchors in anchors.items():
-            print(f"\n📁 {file_path}:")
+            print("\n📁 {file_path}:")
             for anchor in file_anchors:
-                print(f"  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
+                print("  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
 
     elif args.command == "resolve":
         if not args.anchor:
@@ -319,13 +319,13 @@ def main():
         anchor = tracker.resolve_anchor(args.anchor)
 
         if anchor:
-            print(f"⚓ Resolved anchor: {anchor.anchor_id}")
-            print(f"  Type: {anchor.anchor_type}")
-            print(f"  Location: {anchor.file_path}:{anchor.line_number}")
-            print(f"  Context: {anchor.context}")
-            print(f"  Hash: {anchor.sha256_hash}")
+            print("⚓ Resolved anchor: {anchor.anchor_id}")
+            print("  Type: {anchor.anchor_type}")
+            print("  Location: {anchor.file_path}:{anchor.line_number}")
+            print("  Context: {anchor.context}")
+            print("  Hash: {anchor.sha256_hash}")
         else:
-            print(f"❌ Anchor {args.anchor} not found")
+            print("❌ Anchor {args.anchor} not found")
 
     elif args.command == "lineage":
         print("🔗 Building lineage map...")
@@ -335,17 +335,17 @@ def main():
         if args.anchor:
             lineage = lineages.get(args.anchor)
             if lineage:
-                print(f"📊 Lineage for {args.anchor}:")
-                print(f"  Generation: {lineage.generation}")
-                print(f"  Ancestors: {lineage.ancestors}")
-                print(f"  Descendants: {lineage.descendants}")
-                print(f"  Lineage Hash: {lineage.lineage_hash}")
+                print("📊 Lineage for {args.anchor}:")
+                print("  Generation: {lineage.generation}")
+                print("  Ancestors: {lineage.ancestors}")
+                print("  Descendants: {lineage.descendants}")
+                print("  Lineage Hash: {lineage.lineage_hash}")
             else:
-                print(f"❌ No lineage found for {args.anchor}")
+                print("❌ No lineage found for {args.anchor}")
         else:
-            print(f"Found lineages for {len(lineages)} anchors")
+            print("Found lineages for {len(lineages)} anchors")
             for anchor_id, lineage in sorted(lineages.items()):
-                print(f"  {anchor_id}: Gen {lineage.generation},
+                print("  {anchor_id}: Gen {lineage.generation},
                     {len(lineage.ancestors)} ancestors,
                     {len(lineage.descendants)} descendants")
 
@@ -357,9 +357,9 @@ def main():
 
         for issue_type, issues in drift_issues.items():
             if issues:
-                print(f"\n⚠️  {issue_type.replace('_', ' ').title()}:")
+                print("\n⚠️  {issue_type.replace('_', ' ').title()}:")
                 for issue in issues:
-                    print(f"  - {issue}")
+                    print("  - {issue}")
 
         if not any(drift_issues.values()):
             print("✅ No drift issues detected")
@@ -372,8 +372,8 @@ def main():
         manifest = tracker.generate_export_manifest(args.anchor)
         output_path = tracker.save_manifest(manifest, args.output)
 
-        print(f"✅ Manifest saved to: {output_path}")
-        print(f"Memory seal: {manifest['memory_seal']}")
+        print("✅ Manifest saved to: {output_path}")
+        print("Memory seal: {manifest['memory_seal']}")
 
 if __name__ == "__main__":
     main()

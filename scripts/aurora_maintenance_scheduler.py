@@ -1,18 +1,14 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank Maintenance Scheduler
 Automated maintenance workflows and scheduling system
 """
 
-
+import argparse
 import json
 import logging
 import os
+import subprocess
 import time
 from datetime import datetime
 from typing import List

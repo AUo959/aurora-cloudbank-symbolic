@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank - Continuous Canonical Validation Monitor
 Real-time monitoring and validation of file changes against canonical specifications
 
@@ -13,6 +10,8 @@ This monitor:
 4. Alerts users to violations requiring attention
 5. Maintains continuous canonical compliance
 """
+
+import argparse
 from watchdog.observers import Observer
 from pathlib import Path
 import time

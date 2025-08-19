@@ -1,16 +1,12 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-
 GITWiz Dependency Auto-Updater
 Comprehensive dependency management and auto-updating system.
 """
 
-
+import argparse
 import json
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path

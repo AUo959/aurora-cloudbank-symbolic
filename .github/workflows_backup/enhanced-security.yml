@@ -36,8 +36,9 @@ jobs:
         curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
         trivy fs --format sarif --output trivy-results.sarif . || true
     
+    # SRB-T1: Upgraded CodeQL Action to v3 due to deprecation notice (2025-08-19)
     - name: 📊 Upload Security Results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: bandit-results.sarif
         category: bandit

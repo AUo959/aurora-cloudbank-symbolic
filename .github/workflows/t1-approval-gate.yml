@@ -8,6 +8,10 @@ on:
         required: false
         type: string
 
+# Minimal least-privilege permissions for reusable workflow
+permissions:
+  contents: read
+
 jobs:
   approve:
     name: Single environment approval (T1/SRB)

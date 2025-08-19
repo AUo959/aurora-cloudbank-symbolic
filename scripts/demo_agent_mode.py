@@ -9,6 +9,7 @@ import asyncio
 import json
 import sys
 import os
+import traceback
 from datetime import datetime
 
 # Add project root to path
@@ -217,7 +218,6 @@ async def main():
         
     except Exception as e:
         print(f"❌ Demo failed: {str(e)}")
-        import traceback
         traceback.print_exc()
         return 1
     

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 ZIPWiz - Advanced Archive Management Integration
 Part of the GITWiz Enhanced ecosystem
 
@@ -12,6 +9,8 @@ capabilities with deep integration into repository stewardship workflows.
 Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
+
+import argparse
 
 
 import json

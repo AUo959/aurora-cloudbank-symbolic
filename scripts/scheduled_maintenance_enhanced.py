@@ -193,7 +193,7 @@ class ScheduledMaintenanceSystem:
 
         # Remove .pyc files
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-delete"],
                 capture_output=True,
                 text=True,
@@ -208,7 +208,7 @@ class ScheduledMaintenanceSystem:
 
         # Remove __pycache__ directories
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [
                     "find",
                     ".",
@@ -264,7 +264,7 @@ class ScheduledMaintenanceSystem:
         try:
             # Get branch information
             cmd = ["git", "branch", "-r"]
-            _ = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             branches = [
                 line.strip() for line in result.stdout.split("\n") if line.strip() and "origin/HEAD" not in line
@@ -329,7 +329,7 @@ class ScheduledMaintenanceSystem:
 
         # Get repository size
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,

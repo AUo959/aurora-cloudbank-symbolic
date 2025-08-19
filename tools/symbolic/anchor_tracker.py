@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 Symbolic Anchor Tracker - Core symbolic anchor resolution and lineage mapping
 Part of T71 Symbolic Infrastructure Genesis
 
@@ -12,6 +9,8 @@ Primary functions:
 - Drift detection with Thermax compliance monitoring
 - Export manifest generation with SHA256 sealing
 """
+
+import argparse
 from pathlib import Path
 from typing import Optional
 import datetime

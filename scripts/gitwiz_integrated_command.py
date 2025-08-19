@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-            import traceback
-
 GitWiz Integrated Command Interface
 ==================================
 
@@ -24,6 +21,7 @@ Built for consistency, clarity, and care.
 import json
 import logging
 import sys
+import traceback
 
 # Configure logging
 from datetime import datetime

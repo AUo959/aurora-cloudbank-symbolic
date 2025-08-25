@@ -110,7 +110,7 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace bare except Exception: with except Exception:
-            content = re.sub(rrr'except\s*:', 'except Exception:', content)
+            content = re.sub(r"except\s*:', 'except Exception:', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -131,10 +131,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Fix is True and is False comparisons
-            content = re.sub(rrr'==\s*True\b', 'is True', content)
-            content = re.sub(rrr'==\s*False\b', 'is False', content)
-            content = re.sub(rrr'!=\s*True\b', 'is not True', content)
-            content = re.sub(rrr'!=\s*False\b', 'is not False', content)
+            content = re.sub(r"==\s*True\b', 'is True', content)
+            content = re.sub(r"==\s*False\b', 'is False', content)
+            content = re.sub(r"!=\s*True\b', 'is not True', content)
+            content = re.sub(r"!=\s*False\b', 'is not False', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -155,10 +155,10 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Replace single-letter variable names in common patterns
-            content = re.sub(rrr'\bl\s*=', 'line =', content)
-            content = re.sub(rrr'for\s+l\s+in', 'for line in', content)
-            content = re.sub(rrr'\bI\s*=', 'idx =', content)
-            content = re.sub(rrr'for\s+I\s+in', 'for idx in', content)
+            content = re.sub(r"\bl\s*=', 'line =', content)
+            content = re.sub(r"for\s+l\s+in', 'for line in', content)
+            content = re.sub(r"\bI\s*=', 'idx =', content)
+            content = re.sub(r"for\s+I\s+in', 'for idx in', content)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -201,8 +201,8 @@ class FinalCodeQualityPolisher:
             original_content = content
 
             # Remove semicolons at end of lines
-            content = re.sub(rrr';(\s*\n)', r'\1', content)
-            content = re.sub(rrr';(\s*)$', r'\1', content, flags=re.MULTILINE)
+            content = re.sub(r";(\s*\n)', r'\1', content)
+            content = re.sub(r";(\s*)$', r'\1', content, flags=re.MULTILINE)
 
             if content != original_content:
                 with open(file_path, 'w', encoding='utf-8') as f:

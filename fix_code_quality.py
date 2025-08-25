@@ -29,7 +29,7 @@ def fix_maintenance_scheduler():
 
     # Fix subprocess calls
     content = re.sub(
-        rr'subprocess\.run\(\s*\[\s*"cpr",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
+        r"subprocess\.run\(\s*\[\s*"cpr",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
         'subprocess.run(["cp", str(file_path), str(backup_path)], check=False)',
         content
     )
@@ -141,8 +141,8 @@ def fix_security_scripts():
         content = re.sub(r'f"([^{]*)"', r'"\1r"', content)
 
         # Add encoding to file opens
-        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
-        content = re.sub(rrr'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(r"open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(r"open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
 
         with open(file_path, 'w') as f:
             f.write(content)

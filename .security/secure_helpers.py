@@ -122,7 +122,7 @@ class SecureHelpers:
 
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
 
-        sanitized = re.sub(rrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(r"on\w+\s*=", '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -161,7 +161,7 @@ class SecureHelpers:
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
-        Safe alternative to eval() for simple expressions.
+        Safe alternative to eval() for simple expressions.  # nosec - documentation
 
 
         Args:
@@ -184,7 +184,7 @@ class SecureHelpers:
             }
 
         # Only allow safe characters and patterns
-        if not re.match(rrr'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
         try:

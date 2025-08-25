@@ -166,12 +166,18 @@ class AuroraSecurityMiddleware {
 
     // Remove potential XSS and dangerous protocols
     const dangerousProtocol = 'java' + 'script:'; // Split to avoid security scanner detection
-    return input
+    let sanitized = input
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
       .replace(new RegExp(dangerousProtocol, 'gi'), 'blocked:')
       .replace(/vbscript:/gi, 'blocked:')
-      .replace(/data:text\/html/gi, 'blocked:')
-      .replace(/on\w+\s*=/gi, '');
+      .replace(/data:text\/html/gi, 'blocked:');
+    // Remove all event handler attributes (on*)
+    let prev;
+    do {
+      prev = sanitized;
+      sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+    } while (sanitized !== prev);
+    return sanitized;
   }
 
   /**

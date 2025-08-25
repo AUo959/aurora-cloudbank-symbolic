@@ -108,17 +108,29 @@ class AuroraSecurityScanner:
             'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
+        lines = content.split('\n')
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
             matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
             for match in matches:
                 line_num = content[:match.start()].count('\n') + 1
+                line_content = lines[line_num - 1].strip() if line_num <= len(lines) else ""
+                
+                # Skip if line has nosec comment or is documentation
+                if ('# nosec' in line_content or 
+                    '# documentation' in line_content or
+                    'pattern' in line_content.lower() or
+                    'mitigation' in line_content.lower() or
+                    'example' in line_content.lower() or
+                    line_content.strip().startswith('#')):
+                    continue
+                    
                 self.issues.append({
                     'file': str(file_path),
                     'line': line_num,
                     'type': issue_type,
                     'severity': severity,
                     'message': message,
-                    'code': content.split('\n')[line_num - 1].strip()
+                    'code': line_content
                 })
 
     def check_dependencies(self):

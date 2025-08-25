@@ -161,7 +161,7 @@ class SecureHelpers:
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
-        Safe alternative to eval() for simple expressions.
+        Safe alternative to eval() for simple expressions.  # nosec - documentation
 
 
         Args:

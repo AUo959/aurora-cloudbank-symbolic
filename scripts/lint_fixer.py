@@ -21,9 +21,9 @@ def fix_encoding_specifications(file_path: str) -> bool:
     # Fix open() calls without encoding
     patterns = [
         (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (rrr'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
+        (r"open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (r"open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
+        (r"open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
     ]
 
     for pattern, replacement in patterns:
@@ -83,7 +83,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
     content = re.sub(
-        rrr"except\s*:", "except (OSError, ValueError, RuntimeError):", content
+        r"except\s*:", "except (OSError, ValueError, RuntimeError):", content
     )
 
     if content != original_content:

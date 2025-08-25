@@ -23,13 +23,13 @@ def fix_js_style_syntax(file_path):
     original_content = content
 
     # Fix common JS/Java to Python conversions
-    content = re.sub(rrrr'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
-    content = re.sub(rrr'\)\s*\{', '):', content)  # ) { -> ):
+    content = re.sub(r"function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
+    content = re.sub(r"\)\s*\{', '):', content)  # ) { -> ):
     content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-    content = re.sub(rrr'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+    content = re.sub(r"^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
     content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-    content = re.sub(rrr'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
-    content = re.sub(rrr'\}\s*;', '}', content)  # }; -> }
+    content = re.sub(r"^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+    content = re.sub(r"\}\s*;', '}', content)  # }; -> }
 
     if content != original_content:
         with open(file_path, 'w', encoding='utf-8') as f:

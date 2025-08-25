@@ -1,4 +1,12 @@
 name: Aurora CloudBank CI/CD Pipeline
+
+permissions:
+  contents: read          # Read repository contents
+  actions: read          # Read workflow status
+  checks: write          # Write check results
+  pull-requests: write   # Comment on PRs
+  security-events: write # Write security events
+
 'on':
   push:
     branches:

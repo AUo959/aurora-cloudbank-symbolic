@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self';">
     <title>Aurora CloudBank - Collaboration Chamber</title>
     <style>
         * {
@@ -1222,22 +1223,41 @@ ${content}
             });
         });
 
+        // Security helper function
+        function sanitizeText(input) {
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML;
+        }
+
         // Enhanced message display
         function addMessage(sender, content, type) {
             const feed = document.getElementById('messageFeed');
             const messageDiv = document.createElement('div');
             messageDiv.className = `feed-message ${type}-message`;
             
-            // Enhanced content formatting
-            const formattedContent = content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Create message header
+            const messageHeader = document.createElement('div');
+            messageHeader.className = 'message-header';
             
-            messageDiv.innerHTML = `
-                <div class="message-header">
-                    <span class="message-sender">${sender}</span>
-                    <span class="message-timestamp">${new Date().toLocaleTimeString()}</span>
-                </div>
-                <div class="message-content">${formattedContent}</div>
-            `;
+            const senderSpan = document.createElement('span');
+            senderSpan.className = 'message-sender';
+            senderSpan.textContent = sanitizeText(sender);
+            
+            const timestampSpan = document.createElement('span');
+            timestampSpan.className = 'message-timestamp';
+            timestampSpan.textContent = new Date().toLocaleTimeString();
+            
+            messageHeader.appendChild(senderSpan);
+            messageHeader.appendChild(timestampSpan);
+            
+            // Create message content (simplified - no HTML formatting for security)
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = content.replace(/\*\*(.*?)\*\*/g, '$1'); // Remove markdown formatting
+            
+            messageDiv.appendChild(messageHeader);
+            messageDiv.appendChild(messageContent);
             
             feed.appendChild(messageDiv);
             feed.scrollTop = feed.scrollHeight;
@@ -1251,11 +1271,23 @@ ${content}
             const entryDiv = document.createElement('div');
             entryDiv.className = 'traceback-entry';
             
-            entryDiv.innerHTML = `
-                <div class="command-id">${id}</div>
-                <div>${description}</div>
-                <div class="command-path">${path}</div>
-            `;
+            // Create command ID element
+            const commandIdDiv = document.createElement('div');
+            commandIdDiv.className = 'command-id';
+            commandIdDiv.textContent = sanitizeText(id);
+            
+            // Create description element
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.textContent = sanitizeText(description);
+            
+            // Create path element
+            const pathDiv = document.createElement('div');
+            pathDiv.className = 'command-path';
+            pathDiv.textContent = sanitizeText(path);
+            
+            entryDiv.appendChild(commandIdDiv);
+            entryDiv.appendChild(descriptionDiv);
+            entryDiv.appendChild(pathDiv);
             
             traceback.insertBefore(entryDiv, traceback.firstChild);
             
@@ -1362,6 +1394,7 @@ ${content}
             }
         }, 10000);
     </script>
+    <script src="../../static/js/aurora-security.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>

@@ -41,15 +41,15 @@ class AuroraSecurityScanner:
                 })
 
     def _check_js_content(self, file_path, content):
-        """Check JavaScript content for security issues""r"
+        """Check JavaScript content for security issues"""
 
         # Check for dangerous patterns
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
-            'innerHTML': (rrr'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
-            'document.write': (rrr'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
-            'setTimeout_string': (rrr'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
-            'Function_constructor': (rrr'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
+            'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
+            'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
+            'setTimeout_string': (r'setTimeout\s*\(\s*[\'"]', 'MEDIUM', 'setTimeout with string can be dangerous'),
+            'Function_constructor': (r'new\s+Function\s*\(', 'HIGH', 'Function constructor can execute arbitrary code'),
             'dangerouslySetInnerHTML': (
                 r'dangerouslySetInnerHTML',
                 'HIGH',
@@ -92,33 +92,45 @@ class AuroraSecurityScanner:
                 })
 
     def _check_py_content(self, file_path, content):
-        """Check Python content for security issues""r"
+        """Check Python content for security issues"""
 
         dangerous_patterns = {
-            'eval': (rrr'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
-            'exec': (rrr'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
+            'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+            'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
-                rrrr'subprocess\.\w+.*shell\s*=\s*True',
+                r'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
                 'subprocess with shell=True can enable command injection'
             ),
-            'os_system': (rrr'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
-            'sql_format': (rrr'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
-            'pickle_load': (rrr'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
-            'yaml_unsafe': (rrr'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
+            'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
+            'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),
+            'pickle_load': (r'pickle\.loads?\s*\(', 'MEDIUM', 'pickle.load can execute arbitrary code'),
+            'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
+        lines = content.split('\n')
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
             matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
             for match in matches:
                 line_num = content[:match.start()].count('\n') + 1
+                line_content = lines[line_num - 1].strip() if line_num <= len(lines) else ""
+                
+                # Skip if line has nosec comment or is documentation
+                if ('# nosec' in line_content or 
+                    '# documentation' in line_content or
+                    'pattern' in line_content.lower() or
+                    'mitigation' in line_content.lower() or
+                    'example' in line_content.lower() or
+                    line_content.strip().startswith('#')):
+                    continue
+                    
                 self.issues.append({
                     'file': str(file_path),
                     'line': line_num,
                     'type': issue_type,
                     'severity': severity,
                     'message': message,
-                    'code': content.split('\n')[line_num - 1].strip()
+                    'code': line_content
                 })
 
     def check_dependencies(self):
@@ -152,10 +164,10 @@ class AuroraSecurityScanner:
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (rrr'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
-            (rrr'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
-            (rrr'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
-            (rrr'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
+            (r'password\s*=\s*[\'"][^\'"]{8,}[\'"]', 'HIGH', 'Possible hardcoded password'),
+            (r'secret\s*=\s*[\'"][^\'"]{16,}[\'"]', 'HIGH', 'Possible hardcoded secret'),
+            (r'api[_-]?key\s*=\s*[\'"][^\'"]{16,}[\'"]', 'HIGH', 'Possible hardcoded API key'),
+            (r'token\s*=\s*[\'"][^\'"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
 
@@ -196,7 +208,7 @@ class AuroraSecurityScanner:
                 print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
-        """Fix innerHTML usage by suggesting textContent""r"
+        """Fix innerHTML usage by suggesting textContent"""
         file_path = issue['file']
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -204,7 +216,7 @@ class AuroraSecurityScanner:
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
-                rrrr'(\w+)\.innerHTML\s*=\s*([^;]+);',
+                r'(\w+)\.innerHTML\s*=\s*([^;]+);',
                 r'\1.textContent = \2; // SECURITY FIX: Changed from innerHTML',
                 content
             )

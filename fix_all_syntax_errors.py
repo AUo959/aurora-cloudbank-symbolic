@@ -17,22 +17,22 @@ def fix_js_style_syntax(file_path):
     """Fix JavaScript/Java-style syntax mixed into Python files"""
     print(f"🔧 Fixing JS-style syntax in {file_path}r")
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
 
     # Fix common JS/Java to Python conversions
-    content = re.sub(r'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
-    content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
-    content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-    content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
-    content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-    content = re.sub(r'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
-    content = re.sub(r'\}\s*;', '}', content)  # }; -> }
+    content = re.sub(r"function\s+(\w+)\s*\(([^)]*)\)\s*\{", r"def \1(\2):", content)
+    content = re.sub(r"\)\s*\{", "):", content)  # ) { -> ):
+    content = re.sub(r";$", "", content, flags=re.MULTILINE)  # Remove trailing semicolons
+    content = re.sub(r"^\s*\}$", "", content, flags=re.MULTILINE)  # Remove standalone }
+    content = re.sub(r"\bthis\.", "self.", content)  # this. -> self.
+    content = re.sub(r"^(\s*)//(.*)$", r"\1#\2", content, flags=re.MULTILINE)  # // -> #
+    content = re.sub(r"\}\s*;", "}", content)  # }; -> }
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -42,7 +42,7 @@ def fix_duplicate_encoding(file_path):
     """Fix duplicate encoding parameters in file operations"""
     print(f"🔧 Fixing duplicate encoding in {file_path}")
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
@@ -51,7 +51,7 @@ def fix_duplicate_encoding(file_path):
     content = re.sub(r'(, encoding="utf-8"){2,}', r', encoding="utf-8"', content)
 
     if content != original_content:
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return True
     return False
@@ -60,11 +60,7 @@ def fix_duplicate_encoding(file_path):
 def check_syntax(file_path):
     """Check if a Python file has valid syntax"""
     try:
-        result = subprocess.run(
-            [sys.executable, '-m', 'py_compile', file_path],
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run([sys.executable, "-m", "py_compile", file_path], capture_output=True, text=True)
         return result.returncode == 0, result.stderr
     except Exception as e:
         return False, str(e)
@@ -76,12 +72,12 @@ def find_and_fix_python_files():
 
     # Find all Python files, excluding virtual environments
     python_files = []
-    for root, dirs, files in os.walk('.'):
+    for root, dirs, files in os.walk("."):
         # Skip virtual environments and node_modules
-        dirs[:] = [d for d in dirs if d not in ['.venv', 'venv', 'node_modules', '__pycache__']]
+        dirs[:] = [d for d in dirs if d not in [".venv", "venv", "node_modules", "__pycache__"]]
 
         for file in files:
-            if file.endswith('.py'):
+            if file.endswith(".py"):
                 python_files.append(os.path.join(root, file))
 
     print(f"📁 Found {len(python_files)} Python files to check")

@@ -24,10 +24,10 @@ from typing import List
 import hashlib
 
 
-
 @dataclass
 class SymbolicAnchor:
     """Represents a symbolic anchor found in the repository"""
+
     anchor_id: str
     anchor_type: str  # T-series, SRB, etc.
     file_path: str
@@ -40,6 +40,7 @@ class SymbolicAnchor:
 @dataclass
 class AnchorLineage:
     """Represents the lineage chain of a symbolic anchor"""
+
     anchor_id: str
     ancestors: List[str]
     descendants: List[str]
@@ -67,13 +68,13 @@ class SymbolicAnchorTracker:
     def scan_repository(self, extensions: List[str] = None) -> Dict[str, List[SymbolicAnchor]]:
         """Scan repository for symbolic anchors"""
         if extensions is None:
-            extensions = ['.py', '.js', '.md', '.json', '.yaml', '.yml', '.txt']
+            extensions = [".py", ".js", ".md", ".json", ".yaml", ".yml", ".txt"]
 
         found_anchors = {}
 
         for root, dirs, files in os.walk(self.repo_path):
             # Skip hidden directories and common ignore patterns
-            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules']]
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ["__pycache__", "node_modules"]]
 
             for file in files:
                 if any(file.endswith(ext) for ext in extensions):
@@ -90,7 +91,7 @@ class SymbolicAnchorTracker:
         anchors = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
 
             for line_num, line in enumerate(lines, 1):
@@ -112,7 +113,7 @@ class SymbolicAnchorTracker:
                             line_number=line_num,
                             context=context,
                             timestamp=datetime.now().isoformat(),
-                            sha256_hash=context_hash
+                            sha256_hash=context_hash,
                         )
 
                         anchors.append(anchor)
@@ -144,7 +145,7 @@ class SymbolicAnchorTracker:
                 ancestors=ancestors,
                 descendants=descendants,
                 generation=generation,
-                lineage_hash=lineage_hash
+                lineage_hash=lineage_hash,
             )
 
             lineages[anchor_id] = lineage
@@ -156,14 +157,14 @@ class SymbolicAnchorTracker:
         """Find ancestor anchors based on T-series numbering and references"""
         ancestors = []
 
-        if anchor_id.startswith('T') and '_' in anchor_id:
+        if anchor_id.startswith("T") and "_" in anchor_id:
             # Extract T-series number
-            match = re.match(r'T(\d+)', anchor_id)
+            match = re.match(r"T(\d+)", anchor_id)
             if match:
                 current_num = int(match.group(1))
                 # Find previous T-series anchors
                 for other_id in self.anchors:
-                    other_match = re.match(r'T(\d+)', other_id)
+                    other_match = re.match(r"T(\d+)", other_id)
                     if other_match and int(other_match.group(1)) < current_num:
                         ancestors.append(other_id)
 
@@ -220,7 +221,7 @@ class SymbolicAnchorTracker:
             "orphaned_anchors": [],
             "duplicate_anchors": [],
             "broken_lineages": [],
-            "thermax_violations": []
+            "thermax_violations": [],
         }
 
         # Find orphaned anchors (no ancestors or descendants)
@@ -263,7 +264,7 @@ class SymbolicAnchorTracker:
                 "anchor_details": asdict(anchor),
                 "lineage_details": asdict(lineage) if lineage else None,
                 "ethics_protocol": "Picard_Delta_3",
-                "dlp_classification": "Internal_Development_Tools"
+                "dlp_classification": "Internal_Development_Tools",
             }
         else:
             # Generate manifest for entire repository state
@@ -277,7 +278,7 @@ class SymbolicAnchorTracker:
                 "anchor_types": list(set(a.anchor_type for a in self.anchors.values())),
                 "lineages_mapped": len(self.lineages),
                 "ethics_protocol": "Picard_Delta_3",
-                "dlp_classification": "Internal_Development_Tools"
+                "dlp_classification": "Internal_Development_Tools",
             }
 
         # Add memory seal
@@ -293,10 +294,11 @@ class SymbolicAnchorTracker:
             timestamp = datetime.now().strftime("%Y%m%dT%H%M%SZ")
             output_path = "T71_ANCHOR_MANIFEST_{timestamp}.json"
 
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
         return output_path
+
 
 def main():
     """CLI interface for anchor tracking"""
@@ -356,9 +358,11 @@ def main():
         else:
             print(f"Found lineages for {len(lineages)} anchors")
             for anchor_id, lineage in sorted(lineages.items()):
-                print(f"  {anchor_id}: Gen {lineage.generation}, "
-                      f"{len(lineage.ancestors)} ancestors, "
-                      f"{len(lineage.descendants)} descendants")
+                print(
+                    f"  {anchor_id}: Gen {lineage.generation}, "
+                    f"{len(lineage.ancestors)} ancestors, "
+                    f"{len(lineage.descendants)} descendants"
+                )
 
     elif args.command == "drift":
         print("🔍 Detecting symbolic drift...")
@@ -385,6 +389,7 @@ def main():
 
         print("✅ Manifest saved to: {output_path}")
         print("Memory seal: {manifest['memory_seal']}")
+
 
 if __name__ == "__main__":
     main()

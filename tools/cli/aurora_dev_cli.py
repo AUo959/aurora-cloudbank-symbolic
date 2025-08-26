@@ -238,11 +238,7 @@ class AuroraDeveloperCLI:
         try:
             print("🔄 Restoring state: {args.anchor_or_seal_id}")
 
-            result = self.memory_sealer.restore_sealed_state(
-                args.anchor_or_seal_id,
-                args.target_path,
-                args.dry
-            )
+            result = self.memory_sealer.restore_sealed_state(args.anchor_or_seal_id, args.target_path, args.dry)
 
             if result["status"] == "dry_run_complete":
                 print("🔍 Dry run - would perform these actions:")
@@ -344,12 +340,16 @@ class AuroraDeveloperCLI:
 
             if lineage1 and lineage2:
                 print("\n🔗 Lineage Comparison:")
-                print(f"  {args.anchor1}: Gen {lineage1.generation}, "
-                      f"{len(lineage1.ancestors)} ancestors, "
-                      f"{len(lineage1.descendants)} descendants")
-                print(f"  {args.anchor2}: Gen {lineage2.generation}, "
-                      f"{len(lineage2.ancestors)} ancestors, "
-                      f"{len(lineage2.descendants)} descendants")
+                print(
+                    f"  {args.anchor1}: Gen {lineage1.generation}, "
+                    f"{len(lineage1.ancestors)} ancestors, "
+                    f"{len(lineage1.descendants)} descendants"
+                )
+                print(
+                    f"  {args.anchor2}: Gen {lineage2.generation}, "
+                    f"{len(lineage2.ancestors)} ancestors, "
+                    f"{len(lineage2.descendants)} descendants"
+                )
 
                 # Find common ancestors
                 common_ancestors = set(lineage1.ancestors) & set(lineage2.ancestors)
@@ -407,6 +407,7 @@ class AuroraDeveloperCLI:
             print("❌ Error getting status: {e}")
             return 1
 
+
 def create_parser():
     """Create argument parser for Aurora CLI"""
     parser = argparse.ArgumentParser(
@@ -421,7 +422,7 @@ Examples:
   aurora-cli manifest --target T71_INFRA   # Generate manifest for T71
   aurora-cli diff T70_DOC_REORG T71_INFRA  # Compare two anchors
   aurora-cli status                         # Show system status
-"""
+""",
     )
 
     parser.add_argument("--version", action="version", version="Aurora CLI 1.0.0")
@@ -472,6 +473,7 @@ Examples:
 
     return parser
 
+
 def main():
     """Main CLI entry point"""
     parser = create_parser()
@@ -499,6 +501,7 @@ def main():
     else:
         print("❌ Unknown command: {args.command}")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

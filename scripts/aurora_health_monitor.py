@@ -27,7 +27,7 @@ class HealthMonitor:
             repo_path: Path to git repository
         """
         self.repo_path = Path(repo_path)
-        
+
         # Health thresholds - defined before load_config
         self.thresholds = {
             "max_size_mb": 800,
@@ -38,7 +38,7 @@ class HealthMonitor:
             "max_temp_dirs": 5,
             "min_health_score": 7.0,
         }
-        
+
         self.config = self.load_config()
         self.setup_logging()
 

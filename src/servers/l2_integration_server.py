@@ -28,7 +28,6 @@ import uvicorn
 from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT
 
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:

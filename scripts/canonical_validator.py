@@ -19,10 +19,10 @@ from typing import Optional
 from typing import List
 
 
-
 @dataclass
 class ValidationResult:
     """Represents the result of a canonical validation check"""
+
     check_name: str
     status: str  # "PASS", "AUTO_FIXED", "ESCALATE"
     severity: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
@@ -34,6 +34,7 @@ class ValidationResult:
 @dataclass
 class CanonicalSpec:
     """Aurora CloudBank Canonical Specification"""
+
     # Core System Parameters
     anchor_seed: str = "EOS_SEED_ORION"
     continuity_seal: str = "Aurora_Continuity_Seal_v2.2.5"
@@ -52,7 +53,7 @@ class CanonicalSpec:
         "Chief Security Officer": "Julian Markov",
         "Bridge Operations": "Leena Porter",
         "Engineering": "Jiro Tanaka",
-        "Medical Officer": "Dr. Ren Feldman"
+        "Medical Officer": "Dr. Ren Feldman",
     }
 
     # API Endpoints (Standardized)
@@ -61,7 +62,7 @@ class CanonicalSpec:
         "OPPY": "/api/relay/oppy",
         "LIORA": "/api/relay/liora",
         "STARLING_AU": "/api/relay/starling",
-        "RIVERTHREAD_808": "/api/relay/riverthread"
+        "RIVERTHREAD_808": "/api/relay/riverthread",
     }
 
     # State Sync Files (Canonical Naming)
@@ -70,7 +71,7 @@ class CanonicalSpec:
         "OPPY": "OPPY_Sync_v0418.json",
         "LIORA": "LIORA_Sync_Manifest.json",
         "STARLING_AU": "STARLING_COMM_LINK_v1.txt",
-        "RIVERTHREAD_808": "RIVERTHREAD_Activation_Guide.md"
+        "RIVERTHREAD_808": "RIVERTHREAD_Activation_Guide.md",
     }
 
     # Layer Architecture Requirements
@@ -80,7 +81,7 @@ class CanonicalSpec:
     comm_syntax = {
         "direct_msg": r"\{\{@agent\.Name ::: message\}\}",
         "mesh_broadcast": r"\{\{@mesh ::: message\}\}",
-        "activation_phrase": r"ORION_[A-Z_]+_RELAY_ACTIVATE//"
+        "activation_phrase": r"ORION_[A-Z_]+_RELAY_ACTIVATE//",
     }
 
 
@@ -100,23 +101,27 @@ class CanonicalValidator:
         file_path_obj = Path(file_path)
 
         if not file_path_obj.exists():
-            return [ValidationResult(
-                "file_exists", "ESCALATE", "HIGH",
-                "File {file_path} does not exist",
-                "Check file path and ensure file is created"
-            )]
+            return [
+                ValidationResult(
+                    "file_exists",
+                    "ESCALATE",
+                    "HIGH",
+                    "File {file_path} does not exist",
+                    "Check file path and ensure file is created",
+                )
+            ]
 
-        with open(file_path_obj, 'r', encoding='utf-8') as f:
+        with open(file_path_obj, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Run validation checks based on file type
-        if file_path_obj.suffix in ['.md', '.txt']:
+        if file_path_obj.suffix in [".md", ".txt"]:
             results.extend(self._validate_documentation(content, file_path_obj))
-        elif file_path_obj.suffix in ['.js', '.ts']:
+        elif file_path_obj.suffix in [".js", ".ts"]:
             results.extend(self._validate_javascript(content, file_path_obj))
-        elif file_path_obj.suffix in ['.py']:
+        elif file_path_obj.suffix in [".py"]:
             results.extend(self._validate_python(content, file_path_obj))
-        elif file_path_obj.suffix in ['.json']:
+        elif file_path_obj.suffix in [".json"]:
             results.extend(self._validate_json(content, file_path_obj))
 
         # Common validations for all files
@@ -133,11 +138,15 @@ class CanonicalValidator:
 
         # Check anchor seed
         if "anchor_seed" in content and "EOS_SEED_ORION" not in content:
-            results.append(ValidationResult(
-                "anchor_seed_validation", "ESCALATE", "CRITICAL",
-                "Non-canonical anchor seed found in {file_path}",
-                "Replace with canonical EOS_SEED_ORION anchor seed"
-            ))
+            results.append(
+                ValidationResult(
+                    "anchor_seed_validation",
+                    "ESCALATE",
+                    "CRITICAL",
+                    "Non-canonical anchor seed found in {file_path}",
+                    "Replace with canonical EOS_SEED_ORION anchor seed",
+                )
+            )
 
         # Check ethics protocol with targeted pattern matching
         ethics_variants = [
@@ -145,7 +154,7 @@ class CanonicalValidator:
             "picard_delta_3",
             "picard-delta-3",
             "ethics protocol",
-            "ethics: picard delta 3"
+            "ethics: picard delta 3",
         ]
 
         for variant in ethics_variants:
@@ -153,25 +162,33 @@ class CanonicalValidator:
                 # Auto-fix ethics protocol format
                 pattern = re.compile(re.escape(variant), re.IGNORECASE)
                 if pattern.search(content):
-                    results.append(ValidationResult(
-                        "ethics_protocol_auto_fix", "AUTO_FIXED", "LOW",
-                        "Auto-corrected ethics protocol: {variant} → Picard_Delta_3",
-                        auto_applied=True
-                    ))
+                    results.append(
+                        ValidationResult(
+                            "ethics_protocol_auto_fix",
+                            "AUTO_FIXED",
+                            "LOW",
+                            "Auto-corrected ethics protocol: {variant} → Picard_Delta_3",
+                            auto_applied=True,
+                        )
+                    )
                     content = pattern.sub("Picard_Delta_3", content, count=1)
                     self._apply_auto_fix(file_path, content)
                     break
 
         # Check drift lock values
-        drift_pattern = r'drift_lock[\r\s]*:?[\"\'\s]*([0-9.]+)'
+        drift_pattern = r"drift_lock[\r\s]*:?[\"\'\s]*([0-9.]+)"
         drift_matches = re.findall(drift_pattern, content, re.IGNORECASE)
         for match in drift_matches:
             if float(match) != 0.000:
-                results.append(ValidationResult(
-                    "drift_lock_validation", "ESCALATE", "MEDIUM",
-                    f"Non-canonical drift lock value: {match}",
-                    "Set drift_lock to canonical value: 0.000"
-                ))
+                results.append(
+                    ValidationResult(
+                        "drift_lock_validation",
+                        "ESCALATE",
+                        "MEDIUM",
+                        f"Non-canonical drift lock value: {match}",
+                        "Set drift_lock to canonical value: 0.000",
+                    )
+                )
 
         return results
 
@@ -187,10 +204,10 @@ class CanonicalValidator:
 
             # Common variations to auto-fix
             auto_fix_patterns = [
-                name_lower,                                    # alex thorne
-                name_lower.replace(" ", "_"),                  # Alex Thorne
-                name_lower.replace("dr. ", "dr "),            # Dr. Amira Sato
-                name_lower.replace(".", ""),                   # Dr. Amira Sato
+                name_lower,  # alex thorne
+                name_lower.replace(" ", "_"),  # Alex Thorne
+                name_lower.replace("dr. ", "dr "),  # Dr. Amira Sato
+                name_lower.replace(".", ""),  # Dr. Amira Sato
             ]
 
             for pattern in auto_fix_patterns:
@@ -202,11 +219,15 @@ class CanonicalValidator:
                     if matches:
                         # Apply auto-fix
                         updated_content = pattern_regex.sub(canonical_name, updated_content, count=1)
-                        results.append(ValidationResult(
-                            "staff_name_auto_fix_{role.replace(' ', '_')}", "AUTO_FIXED", "LOW",
-                            "Auto-corrected {role}: {matches[0]} → {canonical_name}",
-                            auto_applied=True
-                        ))
+                        results.append(
+                            ValidationResult(
+                                "staff_name_auto_fix_{role.replace(' ', '_')}",
+                                "AUTO_FIXED",
+                                "LOW",
+                                "Auto-corrected {role}: {matches[0]} → {canonical_name}",
+                                auto_applied=True,
+                            )
+                        )
                         break
 
             # Also check with role pattern for structured content
@@ -221,17 +242,25 @@ class CanonicalValidator:
                     if similarity > 0.6:  # Lowered threshold for more aggressive auto-fixing
                         pattern_regex = re.compile(re.escape(match), re.IGNORECASE)
                         updated_content = pattern_regex.sub(canonical_name, updated_content, count=1)
-                        results.append(ValidationResult(
-                            "staff_role_auto_fix_{role.replace(' ', '_')}", "AUTO_FIXED", "LOW",
-                            "Auto-corrected {role}: {match} → {canonical_name}",
-                            auto_applied=True
-                        ))
+                        results.append(
+                            ValidationResult(
+                                "staff_role_auto_fix_{role.replace(' ', '_')}",
+                                "AUTO_FIXED",
+                                "LOW",
+                                "Auto-corrected {role}: {match} → {canonical_name}",
+                                auto_applied=True,
+                            )
+                        )
                     else:
-                        results.append(ValidationResult(
-                            "staff_name_validation_{role.replace(' ', '_r')}", "ESCALATE", "MEDIUM",
-                            "Non-canonical name for {role}: {match}",
-                            "Replace with canonical name: {canonical_name}"
-                        ))
+                        results.append(
+                            ValidationResult(
+                                "staff_name_validation_{role.replace(' ', '_r')}",
+                                "ESCALATE",
+                                "MEDIUM",
+                                "Non-canonical name for {role}: {match}",
+                                "Replace with canonical name: {canonical_name}",
+                            )
+                        )
 
         # Apply content updates if auto-fixes were made
         if updated_content != content:
@@ -255,19 +284,27 @@ class CanonicalValidator:
 
                 if current_endpoint != canonical_endpoint:
                     # Auto-fix case mismatches
-                    results.append(ValidationResult(
-                        "api_endpoint_case_fix_{agent_name}", "AUTO_FIXED", "LOW",
-                        "Auto-corrected endpoint case: {current_endpoint} → {canonical_endpoint}",
-                        auto_applied=True
-                    ))
+                    results.append(
+                        ValidationResult(
+                            "api_endpoint_case_fix_{agent_name}",
+                            "AUTO_FIXED",
+                            "LOW",
+                            "Auto-corrected endpoint case: {current_endpoint} → {canonical_endpoint}",
+                            auto_applied=True,
+                        )
+                    )
                     content = content.replace(current_endpoint, canonical_endpoint)
                     self._apply_auto_fix(file_path, content)
             else:
-                results.append(ValidationResult(
-                    "api_endpoint_unknown_{match}", "ESCALATE", "MEDIUM",
-                    "Unknown API endpoint: /api/relay/{match}",
-                    "Verify endpoint is required or use canonical relay endpoints"
-                ))
+                results.append(
+                    ValidationResult(
+                        "api_endpoint_unknown_{match}",
+                        "ESCALATE",
+                        "MEDIUM",
+                        "Unknown API endpoint: /api/relay/{match}",
+                        "Verify endpoint is required or use canonical relay endpoints",
+                    )
+                )
 
         return results
 
@@ -278,7 +315,7 @@ class CanonicalValidator:
         # Check for message syntax patterns
         msg_patterns = [
             (r"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
-            (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
+            (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast"),
         ]
 
         for pattern, msg_type in msg_patterns:
@@ -286,11 +323,15 @@ class CanonicalValidator:
             for match in matches:
                 # Validate format - this is a basic check
                 if msg_type == "direct_msg" and not re.match(self.canonical.comm_syntax["direct_msg"], match):
-                    results.append(ValidationResult(
-                        "comm_syntax_{msg_type}", "ESCALATE", "LOW",
-                        "Communication syntax may not be canonical: {match}",
-                        "Verify message format follows {{@agent.Name ::: message}} syntax"
-                    ))
+                    results.append(
+                        ValidationResult(
+                            "comm_syntax_{msg_type}",
+                            "ESCALATE",
+                            "LOW",
+                            "Communication syntax may not be canonical: {match}",
+                            "Verify message format follows {{@agent.Name ::: message}} syntax",
+                        )
+                    )
 
         return results
 
@@ -305,16 +346,20 @@ class CanonicalValidator:
                 "Canonical Staff Registry",
                 "Observatory Command Bridge",
                 "Live Communication Protocol",
-                "Symbolic Relay API Endpoints"
+                "Symbolic Relay API Endpoints",
             ]
 
             for section in required_sections:
                 if section not in content:
-                    results.append(ValidationResult(
-                        "missing_section_{section.replace(' ', '_')}", "ESCALATE", "MEDIUM",
-                        "Missing required canonical section: {section}",
-                        "Add {section} section to maintain canonical compliance"
-                    ))
+                    results.append(
+                        ValidationResult(
+                            "missing_section_{section.replace(' ', '_')}",
+                            "ESCALATE",
+                            "MEDIUM",
+                            "Missing required canonical section: {section}",
+                            "Add {section} section to maintain canonical compliance",
+                        )
+                    )
 
         return results
 
@@ -327,11 +372,15 @@ class CanonicalValidator:
             required_fields = ["anchor_seed", "continuity_seal", "ethics_protocol", "memory_doctrine"]
             for field in required_fields:
                 if field not in content:
-                    results.append(ValidationResult(
-                        "missing_orion_field_{field}", "ESCALATE", "MEDIUM",
-                        "Missing required ORION_CORE field: {field}",
-                        "Add {field} to ORION_CORE export"
-                    ))
+                    results.append(
+                        ValidationResult(
+                            "missing_orion_field_{field}",
+                            "ESCALATE",
+                            "MEDIUM",
+                            "Missing required ORION_CORE field: {field}",
+                            "Add {field} to ORION_CORE export",
+                        )
+                    )
 
         return results
 
@@ -341,11 +390,15 @@ class CanonicalValidator:
 
         # Check for proper import structure and anchor references
         if "anchor" in content.lower() and "EOS_SEED_ORION" not in content:
-            results.append(ValidationResult(
-                "python_anchor_reference", "ESCALATE", "MEDIUM",
-                "Python file references anchor but not canonical EOS_SEED_ORION",
-                "Ensure anchor references use canonical EOS_SEED_ORION"
-            ))
+            results.append(
+                ValidationResult(
+                    "python_anchor_reference",
+                    "ESCALATE",
+                    "MEDIUM",
+                    "Python file references anchor but not canonical EOS_SEED_ORION",
+                    "Ensure anchor references use canonical EOS_SEED_ORION",
+                )
+            )
 
         return results
 
@@ -360,27 +413,31 @@ class CanonicalValidator:
             if isinstance(data, dict):
                 for key, value in data.items():
                     if key == "anchor_seed" and value != self.canonical.anchor_seed:
-                        results.append(ValidationResult(
-                            "json_anchor_seed", "AUTO_FIXED", "LOW",
-                            "Auto-corrected JSON anchor_seed: {value} → {self.canonical.anchor_seed}",
-                            auto_applied=True
-                        ))
+                        results.append(
+                            ValidationResult(
+                                "json_anchor_seed",
+                                "AUTO_FIXED",
+                                "LOW",
+                                "Auto-corrected JSON anchor_seed: {value} → {self.canonical.anchor_seed}",
+                                auto_applied=True,
+                            )
+                        )
                         data[key] = self.canonical.anchor_seed
                         self._apply_json_fix(file_path, data)
 
         except json.JSONDecodeError:
-            results.append(ValidationResult(
-                "json_parse_error", "ESCALATE", "HIGH",
-                "Invalid JSON in {file_path}",
-                "Fix JSON syntax errors"
-            ))
+            results.append(
+                ValidationResult(
+                    "json_parse_error", "ESCALATE", "HIGH", "Invalid JSON in {file_path}", "Fix JSON syntax errors"
+                )
+            )
 
         return results
 
     def _apply_auto_fix(self, file_path: Path, corrected_content: str):
         """Apply automatic fix to file"""
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(corrected_content)
             self.auto_fixes_applied += 1
             print("✅ AUTO-FIX APPLIED: {file_path}")
@@ -390,7 +447,7 @@ class CanonicalValidator:
     def _apply_json_fix(self, file_path: Path, corrected_data: dict):
         """Apply automatic fix to JSON file"""
         try:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(corrected_data, f, indent=2)
             self.auto_fixes_applied += 1
             print("✅ AUTO-FIX APPLIED: {file_path}")
@@ -401,16 +458,35 @@ class CanonicalValidator:
         """Validate entire workspace against canonical specifications"""
         if file_patterns is None:
             file_patterns = [
-                "*.md", "*.txt", "*.js", "*.ts", "*.py", "*.json",
-                "src/**/*.js", "src/**/*.ts", "src/**/*.py",
-                "docs/**/*.md", "scripts/**/*.py", "scripts/**/*.sh"
+                "*.md",
+                "*.txt",
+                "*.js",
+                "*.ts",
+                "*.py",
+                "*.json",
+                "src/**/*.js",
+                "src/**/*.ts",
+                "src/**/*.py",
+                "docs/**/*.md",
+                "scripts/**/*.py",
+                "scripts/**/*.sh",
             ]
 
         # Load exclusion patterns from config
         exclude_patterns = [
-            "node_modules/**", ".git/**", "*.log", "*.tmp", ".env*", "build/**", "dist/**",
-            "*VALIDATION_REPORT*.md", "*ESCALATION_RESOLUTION*", "*AUTO_CORRECTION*",
-            "CANONICAL_VALIDATION_REPORT.md", "validation_*.md", "report_*.md"
+            "node_modules/**",
+            ".git/**",
+            "*.log",
+            "*.tmp",
+            ".env*",
+            "build/**",
+            "dist/**",
+            "*VALIDATION_REPORT*.md",
+            "*ESCALATION_RESOLUTION*",
+            "*AUTO_CORRECTION*",
+            "CANONICAL_VALIDATION_REPORT.md",
+            "validation_*.md",
+            "report_*.md",
         ]
 
         all_results = []
@@ -423,7 +499,7 @@ class CanonicalValidator:
                     should_exclude = False
 
                     for exclude_pattern in exclude_patterns:
-                        if file_path.match(exclude_pattern) or str(relative_path).find('VALIDATION_REPORT') != -1:
+                        if file_path.match(exclude_pattern) or str(relative_path).find("VALIDATION_REPORT") != -1:
                             should_exclude = True
                             break
 
@@ -522,9 +598,10 @@ class CanonicalValidator:
     def save_report(self, output_path: str = "CANONICAL_VALIDATION_REPORT.md"):
         """Save validation report to file"""
         report = self.generate_report()
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report)
         print("📊 Validation report saved to: {output_path}")
+
 
 def main():
     """Main execution function"""
@@ -553,6 +630,7 @@ def main():
         print("📊 See CANONICAL_VALIDATION_REPORT.md for details")
     else:
         print("\n✅ All canonical validations passed!")
+
 
 if __name__ == "__main__":
     main()

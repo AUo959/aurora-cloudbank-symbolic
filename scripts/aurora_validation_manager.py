@@ -13,9 +13,6 @@ Author: Aurora CloudBank Development Team
 """
 
 import argparse
-Version: 1.0.0
-Date: July 14, 2025
-"""
 
 
 import json
@@ -24,7 +21,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 import tempfile
-
 
 
 class ValidationManager:

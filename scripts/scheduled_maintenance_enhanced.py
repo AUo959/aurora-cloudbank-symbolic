@@ -15,7 +15,6 @@ from typing import Callable, Dict, Optional
 import schedule
 
 
-
 @dataclass
 class MaintenanceTask:
     """Maintenance task definition"""

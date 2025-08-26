@@ -20,7 +20,6 @@ from typing import List
 import time
 
 
-
 # import schedule  # Optional dependency
 try:
     import schedule
@@ -121,9 +120,7 @@ class MaintenanceScheduler:
 
         # Cache cleanup - daily
         if schedules["cache_cleanup"]["enabled"]:
-            schedule.every().day.at(schedules["cache_cleanup"]["time"]).do(
-                self._run_maintenance_task, "cache_cleanup"
-            )
+            schedule.every().day.at(schedules["cache_cleanup"]["time"]).do(self._run_maintenance_task, "cache_cleanup")
 
         # Health monitoring - hourly
         schedule.every().hour.do(self._run_maintenance_task, "health_monitoring")
@@ -132,25 +129,19 @@ class MaintenanceScheduler:
         day = schedules["branch_analysis"]["day"]
         time_str = schedules["branch_analysis"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(
-                self._run_maintenance_task, "branch_analysis"
-            )
+            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "branch_analysis")
 
         # ZIP optimization - weekly
         day = schedules["zip_optimization"]["day"]
         time_str = schedules["zip_optimization"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(
-                self._run_maintenance_task, "zip_optimization"
-            )
+            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "zip_optimization")
 
         # Dependency check - weekly
         day = schedules["dependency_check"]["day"]
         time_str = schedules["dependency_check"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(
-                self._run_maintenance_task, "dependency_audit"
-            )
+            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "dependency_audit")
 
         self._log("Maintenance schedules configured successfully")
 
@@ -168,9 +159,7 @@ class MaintenanceScheduler:
                 return {"status": "skipped", "reason": "disabled"}
 
             # Run safety checks
-            safety_passed = self._run_safety_checks(
-                task_config.get("safety_checks", [])
-            )
+            safety_passed = self._run_safety_checks(task_config.get("safety_checks", []))
             if not safety_passed:
                 self._log("Safety checks failed for {task_name}")
                 return {"status": "failed", "reason": "safety_checks_failed"}
@@ -262,12 +251,7 @@ class MaintenanceScheduler:
     def _backup_important_files(self) -> bool:
         """Create backup of important files before maintenance."""
         try:
-            backup_dir = (
-                self.repo_path
-                / ".gitwiz"
-                / "backups"
-                / datetime.date.today().isoformat()
-            )
+            backup_dir = self.repo_path / ".gitwiz" / "backups" / datetime.date.today().isoformat()
             backup_dir.mkdir(parents=True, exist_ok=True)
 
             # Backup critical files
@@ -330,7 +314,10 @@ class MaintenanceScheduler:
                         capture_output=True,
                         text=True,
                         cwd=self.repo_path,
-                        timeout=300, shell=False, check=False)
+                        timeout=300,
+                        shell=False,
+                        check=False,
+                    )
                     if result.returncode == 0:
                         cleaned_files += 1
 
@@ -395,9 +382,7 @@ class MaintenanceScheduler:
                 shell=False,
                 check=False,
             )
-            file_count = (
-                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
-            )
+            file_count = len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
 
             return {
                 "status": "success",
@@ -579,21 +564,11 @@ class MaintenanceScheduler:
 
 def main():
     """Main execution function."""
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Maintenance Scheduler"
-    )
-    parser.add_argument(
-        "--daemon", action="store_true", help="Run as daemon with scheduled maintenance"
-    )
-    parser.add_argument(
-        "--run-now", type=str, help="Run specific maintenance task immediately"
-    )
-    parser.add_argument(
-        "--run-all", action="store_true", help="Run all maintenance tasks immediately"
-    )
-    parser.add_argument(
-        "--status", action="store_true", help="Show maintenance status and schedules"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance Scheduler")
+    parser.add_argument("--daemon", action="store_true", help="Run as daemon with scheduled maintenance")
+    parser.add_argument("--run-now", type=str, help="Run specific maintenance task immediately")
+    parser.add_argument("--run-all", action="store_true", help="Run all maintenance tasks immediately")
+    parser.add_argument("--status", action="store_true", help="Show maintenance status and schedules")
 
     args = parser.parse_args()
 
@@ -606,9 +581,7 @@ def main():
         print("📋 Configured maintenance tasks:")
         for task_name, config in scheduler.config["maintenance_tasks"].items():
             status = "✅ Enabled" if config.get("enabled") else "❌ Disabled"
-            print(
-                "   {task_name}: {status} - {config.get('description', 'No description')}"
-            )
+            print("   {task_name}: {status} - {config.get('description', 'No description')}")
         return
 
     if args.run_now:

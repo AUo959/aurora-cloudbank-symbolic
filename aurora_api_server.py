@@ -21,7 +21,6 @@ from fastapi.responses import JSONResponse
 from fastapi import HTTPException
 
 
-
 class QuantumVectorRequest(BaseModel):
     dimension: int = 128
     quantum_state: str = "coherent"

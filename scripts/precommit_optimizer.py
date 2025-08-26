@@ -13,7 +13,6 @@ from typing import Any, Dict, List
 import yaml
 
 
-
 class PreCommitOptimizer:
     """Optimize pre-commit hooks for efficiency and effectiveness"""
 

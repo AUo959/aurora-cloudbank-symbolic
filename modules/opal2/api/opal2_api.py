@@ -33,7 +33,6 @@ from modules.opal2.quantum_renderer import QuantumRenderer
 from modules.opal2.plugin_system import PluginSystem
 
 
-
 app = FastAPI(
     title="Opal2 Modular Visualization System",
     description="Quantum-enhanced modular visualization with real-time rendering",

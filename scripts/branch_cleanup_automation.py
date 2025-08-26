@@ -13,7 +13,6 @@ from typing import Dict
 from typing import List
 
 
-
 class BranchCleanupManager:
 
     def __init__(self, repo_path: str = "."):
@@ -70,13 +69,8 @@ class BranchCleanupManager:
 
                     # Calculate days since last commit
                     try:
-                        commit_datetime = datetime.datetime.fromisoformat(
-                            commit_date.replace("Z", "+00:00")
-                        )
-                        days_old = (
-                            datetime.datetime.now(datetime.timezone.utc)
-                            - commit_datetime
-                        ).days
+                        commit_datetime = datetime.datetime.fromisoformat(commit_date.replace("Z", "+00:00"))
+                        days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_datetime).days
                     except BaseException:
                         days_old = 0
 
@@ -108,9 +102,7 @@ class BranchCleanupManager:
                 "origin/{branch_short}",
                 "origin/main",
             ]
-            result = subprocess.run(
-                cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
-            )
+            result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
             return result.returncode == 0
         except BaseException:
             return False
@@ -134,17 +126,12 @@ class BranchCleanupManager:
                 continue
 
             # Force delete patterns
-            if any(
-                re.match(pattern, name)
-                for pattern in self.config["force_delete_patterns"]
-            ):
+            if any(re.match(pattern, name) for pattern in self.config["force_delete_patterns"]):
                 categories["force_delete"].append(branch)
                 continue
 
             # Review patterns
-            if any(
-                re.match(pattern, name) for pattern in self.config["review_patterns"]
-            ):
+            if any(re.match(pattern, name) for pattern in self.config["review_patterns"]):
                 categories["review_needed"].append(branch)
                 continue
 
@@ -173,9 +160,7 @@ class BranchCleanupManager:
             if not branches:
                 continue
 
-            report.append(
-                "## {category.replace('_', ' ').title()} ({len(branches)} branches)"
-            )
+            report.append("## {category.replace('_', ' ').title()} ({len(branches)} branches)")
             report.append("")
 
             for branch in branches:
@@ -188,9 +173,7 @@ class BranchCleanupManager:
 
         return "\n".join(report)
 
-    def execute_cleanup(
-        self, categories: Dict[str, List[Dict]], force: bool = False
-    ) -> Dict[str, int]:
+    def execute_cleanup(self, categories: Dict[str, List[Dict]], force: bool = False) -> Dict[str, int]:
         """Execute the branch cleanup based on categories."""
         results = {"deleted": 0, "errors": 0, "skipped": 0}
 
@@ -267,18 +250,10 @@ class BranchCleanupManager:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Branch Cleanup Automation"
-    )
-    parser.add_argument(
-        "--execute", action="store_true", help="Execute cleanup (default: dry run)"
-    )
-    parser.add_argument(
-        "--stale-days", type=int, default=30, help="Days to consider branch stale"
-    )
-    parser.add_argument(
-        "--no-report", action="store_true", help="Skip saving report file"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Branch Cleanup Automation")
+    parser.add_argument("--execute", action="store_true", help="Execute cleanup (default: dry run)")
+    parser.add_argument("--stale-days", type=int, default=30, help="Days to consider branch stale")
+    parser.add_argument("--no-report", action="store_true", help="Skip saving report file")
 
     args = parser.parse_args()
 

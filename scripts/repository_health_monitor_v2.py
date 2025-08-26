@@ -26,8 +26,6 @@ from datetime import timedelta
 from collections import defaultdict
 
 
-
-
 # Optional imports
 try:
     HAS_PSUTIL = True
@@ -40,16 +38,14 @@ except ImportError:
     HAS_SCHEDULE = False
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('RepoHealthMonitor')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("RepoHealthMonitor")
 
 
 @dataclass
 class HealthMetrics:
     """Repository health metrics snapshot."""
+
     timestamp: str
     repository_size_mb: float = 0.0
     file_count: int = 0
@@ -76,6 +72,7 @@ class HealthMetrics:
 @dataclass
 class AlertRule:
     """Health monitoring alert rule."""
+
     name: str
     condition: Callable[[HealthMetrics], bool]
     severity: str  # 'info', 'warning', 'error', 'critical'
@@ -132,33 +129,33 @@ class RepositoryHealthMonitor:
                 "disk_usage_percent": 85,
                 "memory_usage_mb": 1000,
                 "cpu_usage_percent": 80,
-                "health_score_min": 0.7
+                "health_score_min": 0.7,
             },
             "monitoring": {
                 "enabled": True,
                 "interval_minutes": 30,
                 "history_retention_days": 30,
                 "auto_cleanup": True,
-                "cleanup_threshold_percent": 90
+                "cleanup_threshold_percent": 90,
             },
             "alerts": {
                 "enabled": True,
                 "console_output": True,
                 "log_file": True,
                 "webhook_url": None,
-                "email_notifications": False
+                "email_notifications": False,
             },
             "auto_actions": {
                 "cleanup_cache_files": True,
                 "cleanup_temp_files": True,
                 "prune_git_objects": False,
-                "archive_old_logs": True
-            }
+                "archive_old_logs": True,
+            },
         }
 
         if config_path.exists():
             try:
-                with open(config_path, 'r', encoding="utf-8") as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     user_config = json.load(f)
                 # Deep merge with defaults
                 self._deep_merge_config(default_config, user_config)
@@ -166,7 +163,7 @@ class RepositoryHealthMonitor:
                 logger.warning("Failed to load config from {config_path}: {e}")
 
         # Save current config
-        with open(config_path, 'w', encoding="utf-8") as f:
+        with open(config_path, "w", encoding="utf-8") as f:
             json.dump(default_config, f, indent=2)
 
         return default_config
@@ -187,64 +184,64 @@ class RepositoryHealthMonitor:
                 condition=lambda m: m.repository_size_mb > self.thresholds["repository_size_mb"],
                 severity="warning",
                 message="Repository size exceeded {self.thresholds['repository_size_mb']}MB",
-                cooldown_minutes=120
+                cooldown_minutes=120,
             ),
             AlertRule(
                 name="too_many_files",
                 condition=lambda m: m.file_count > self.thresholds["file_count"],
                 severity="warning",
                 message="File count exceeded {self.thresholds['file_count']}",
-                cooldown_minutes=240
+                cooldown_minutes=240,
             ),
             AlertRule(
                 name="git_size_large",
                 condition=lambda m: m.git_size_mb > self.thresholds["git_size_mb"],
                 severity="info",
                 message="Git directory size exceeded {self.thresholds['git_size_mb']}MB",
-                cooldown_minutes=180
+                cooldown_minutes=180,
             ),
             AlertRule(
                 name="too_many_branches",
                 condition=lambda m: m.branch_count > self.thresholds["branch_count"],
                 severity="info",
                 message="Branch count exceeded {self.thresholds['branch_count']}",
-                cooldown_minutes=360
+                cooldown_minutes=360,
             ),
             AlertRule(
                 name="stale_branches_detected",
                 condition=lambda m: m.stale_branches > self.thresholds["stale_branches"],
                 severity="info",
                 message="Too many stale branches: {self.thresholds['stale_branches']}+",
-                cooldown_minutes=720
+                cooldown_minutes=720,
             ),
             AlertRule(
                 name="high_disk_usage",
                 condition=lambda m: m.disk_usage_percent > self.thresholds["disk_usage_percent"],
                 severity="error",
                 message="Disk usage exceeded {self.thresholds['disk_usage_percent']}%",
-                cooldown_minutes=60
+                cooldown_minutes=60,
             ),
             AlertRule(
                 name="high_memory_usage",
                 condition=lambda m: m.memory_usage_mb > self.thresholds["memory_usage_mb"],
                 severity="warning",
                 message="Memory usage exceeded {self.thresholds['memory_usage_mb']}MB",
-                cooldown_minutes=30
+                cooldown_minutes=30,
             ),
             AlertRule(
                 name="low_health_score",
                 condition=lambda m: m.health_score < self.thresholds["health_score_min"],
                 severity="warning",
                 message="Health score below {self.thresholds['health_score_min']}",
-                cooldown_minutes=240
+                cooldown_minutes=240,
             ),
             AlertRule(
                 name="excessive_cache_files",
                 condition=lambda m: m.cache_files_count > self.thresholds["cache_files"],
                 severity="info",
                 message="Cache files exceeded {self.thresholds['cache_files']}",
-                cooldown_minutes=120
-            )
+                cooldown_minutes=120,
+            ),
         ]
         return rules
 
@@ -320,41 +317,47 @@ class RepositoryHealthMonitor:
     def _should_ignore_path(self, path: Path) -> bool:
         """Check if path should be ignored."""
         rel_path = str(path.relative_to(self.repo_path))
-        ignore_patterns = ['.git/', '__pycache__/', '.pytest_cache/', 'node_modules/']
+        ignore_patterns = [".git/", "__pycache__/", ".pytest_cache/", "node_modules/"]
         return any(pattern in rel_path for pattern in ignore_patterns)
 
     def _collect_git_metrics(self) -> Dict[str, Any]:
         """Collect git-specific metrics."""
-        metrics = {
-            "branch_count": 0,
-            "stale_branches": 0,
-            "recent_commits": 0,
-            "contributors": 0
-        }
+        metrics = {"branch_count": 0, "stale_branches": 0, "recent_commits": 0, "contributors": 0}
 
         try:
             # Branch count
             result = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "branch", "-a"],
-                capture_output=True, text=True, check=True
+                capture_output=True,
+                text=True,
+                check=True,
             )
-            metrics["branch_count"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
+            metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
             # Stale branches (no activity in 30 days)
             cutoff_date = datetime.now() - timedelta(days=30)
             stale_count = 0
 
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-re", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
-                capture_output=True, text=True, check=True
+                [
+                    "git",
+                    "-C",
+                    str(self.repo_path, shell=False, check=False),
+                    "for-each-re",
+                    "--format=%(refname:short) %(committerdate:iso8601)",
+                    "refs/heads/",
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
             )
 
-            for line in result.stdout.strip().split('\n'):
+            for line in result.stdout.strip().split("\n"):
                 if line.strip():
-                    parts = line.strip().split(' ', 1)
+                    parts = line.strip().split(" ", 1)
                     if len(parts) == 2:
                         try:
-                            commit_date = datetime.fromisoformat(parts[1].replace(' +', '+'))
+                            commit_date = datetime.fromisoformat(parts[1].replace(" +", "+"))
                             if commit_date.replace(tzinfo=None) < cutoff_date:
                                 stale_count += 1
                         except (ValueError, IndexError):
@@ -363,19 +366,31 @@ class RepositoryHealthMonitor:
             metrics["stale_branches"] = stale_count
 
             # Recent commits (last 7 days)
-            since_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+            since_date = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "rev-list", "--count", "--since={since_date}", "HEAD"],
-                capture_output=True, text=True, check=True
+                [
+                    "git",
+                    "-C",
+                    str(self.repo_path, shell=False, check=False),
+                    "rev-list",
+                    "--count",
+                    "--since={since_date}",
+                    "HEAD",
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             metrics["recent_commits"] = int(result.stdout.strip() or 0)
 
             # Contributors
             result = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "shortlog", "-sn", "--all"],
-                capture_output=True, text=True, check=True
+                capture_output=True,
+                text=True,
+                check=True,
             )
-            metrics["contributors"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
+            metrics["contributors"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
         except Exception as e:
             logger.warning("Error collecting git metrics: {e}")
@@ -384,12 +399,7 @@ class RepositoryHealthMonitor:
 
     def _analyze_files(self) -> Dict[str, int]:
         """Analyze files for various categories."""
-        analysis = {
-            "cache_files": 0,
-            "temp_files": 0,
-            "large_files": 0,
-            "duplicates": 0
-        }
+        analysis = {"cache_files": 0, "temp_files": 0, "large_files": 0, "duplicates": 0}
 
         file_hashes = defaultdict(list)
         large_file_threshold = 10 * 1024 * 1024  # 10MB
@@ -433,8 +443,8 @@ class RepositoryHealthMonitor:
 
     def _is_cache_file(self, file_path: Path) -> bool:
         """Check if file is a cache file."""
-        cache_patterns = ['.pyc', '.pyo', '.so', '.dylib', '.DS_Store', 'Thumbs.db']
-        cache_dirs = ['__pycache__', '.pytest_cache', 'node_modules', '.cache']
+        cache_patterns = [".pyc", ".pyo", ".so", ".dylib", ".DS_Store", "Thumbs.db"]
+        cache_dirs = ["__pycache__", ".pytest_cache", "node_modules", ".cache"]
 
         # Check file extension
         if any(str(file_path).endswith(pattern) for pattern in cache_patterns):
@@ -445,7 +455,7 @@ class RepositoryHealthMonitor:
 
     def _is_temp_file(self, file_path: Path) -> bool:
         """Check if file is a temporary file."""
-        temp_patterns = ['.tmp', '.temp', '.bak', '.swp', '~']
+        temp_patterns = [".tmp", ".temp", ".bak", ".swp", "~"]
         return any(str(file_path).endswith(pattern) for pattern in temp_patterns)
 
     def _calculate_file_hash(self, file_path: Path) -> Optional[str]:
@@ -461,11 +471,7 @@ class RepositoryHealthMonitor:
 
     def _collect_system_metrics(self) -> Dict[str, float]:
         """Collect system resource metrics."""
-        metrics = {
-            "disk_usage_percent": 0.0,
-            "memory_usage_mb": 0.0,
-            "cpu_usage_percent": 0.0
-        }
+        metrics = {"disk_usage_percent": 0.0, "memory_usage_mb": 0.0, "cpu_usage_percent": 0.0}
 
         if not HAS_PSUTIL:
             logger.warning("psutil not available, using basic system metrics")
@@ -536,8 +542,7 @@ class RepositoryHealthMonitor:
 
         for rule in self.alert_rules:
             # Check cooldown
-            if (rule.last_triggered and
-                    current_time - rule.last_triggered < timedelta(minutes=rule.cooldown_minutes)):
+            if rule.last_triggered and current_time - rule.last_triggered < timedelta(minutes=rule.cooldown_minutes):
                 continue
 
             # Check condition
@@ -594,7 +599,7 @@ class RepositoryHealthMonitor:
                     if log_file.is_file():
                         mod_time = datetime.fromtimestamp(log_file.stat().st_mtime)
                         if mod_time < cutoff_date:
-                            archive_path = log_file.with_suffix(log_file.suffix + '.archived')
+                            archive_path = log_file.with_suffix(log_file.suffix + ".archived")
                             log_file.rename(archive_path)
         except Exception as e:
             logger.error("Log archiving failed: {e}")
@@ -604,7 +609,8 @@ class RepositoryHealthMonitor:
         try:
             subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "gc", "--prune=now"],
-                capture_output=True, check=True
+                capture_output=True,
+                check=True,
             )
         except Exception as e:
             logger.error("Git pruning failed: {e}")
@@ -684,8 +690,8 @@ class RepositoryHealthMonitor:
         """Save metrics to file."""
         try:
             metrics_file = self.monitor_dir / "metrics_history.jsonl"
-            with open(metrics_file, 'a', encoding="utf-8") as f:
-                f.write(json.dumps(asdict(metrics)) + '\n')
+            with open(metrics_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(asdict(metrics)) + "\n")
         except Exception as e:
             logger.error("Failed to save metrics: {e}")
 
@@ -695,23 +701,22 @@ class RepositoryHealthMonitor:
         cutoff_date = datetime.now() - timedelta(days=retention_days)
 
         # Trim in-memory history
-        self.metrics_history = [
-            m for m in self.metrics_history
-            if datetime.fromisoformat(m.timestamp) > cutoff_date
-        ]
+        self.metrics_history = [m for m in self.metrics_history if datetime.fromisoformat(m.timestamp) > cutoff_date]
 
         # Trim file history
         try:
             metrics_file = self.monitor_dir / "metrics_history.jsonl"
             if metrics_file.exists():
-                temp_file = metrics_file.with_suffix('.tmp')
+                temp_file = metrics_file.with_suffix(".tmp")
 
-                with open(metrics_file, 'r', encoding="utf-8") as infile, \
-                     open(temp_file, 'w', encoding="utf-8") as outfile:
+                with (
+                    open(metrics_file, "r", encoding="utf-8") as infile,
+                    open(temp_file, "w", encoding="utf-8") as outfile,
+                ):
                     for line in infile:
                         try:
                             data = json.loads(line.strip())
-                            if datetime.fromisoformat(data['timestamp']) > cutoff_date:
+                            if datetime.fromisoformat(data["timestamp"]) > cutoff_date:
                                 outfile.write(line)
                         except (json.JSONDecodeError, KeyError):
                             continue
@@ -742,10 +747,10 @@ class RepositoryHealthMonitor:
                 {
                     "name": rule.name,
                     "severity": rule.severity,
-                    "last_triggered": rule.last_triggered.isoformat() if rule.last_triggered else None
+                    "last_triggered": rule.last_triggered.isoformat() if rule.last_triggered else None,
                 }
                 for rule in self.alert_rules
-            ]
+            ],
         }
 
         return report
@@ -759,8 +764,7 @@ class RepositoryHealthMonitor:
         now = datetime.now()
         day_ago = now - timedelta(hours=24)
 
-        recent_metrics = [m for m in self.metrics_history
-                          if datetime.fromisoformat(m.timestamp) > day_ago]
+        recent_metrics = [m for m in self.metrics_history if datetime.fromisoformat(m.timestamp) > day_ago]
 
         if len(recent_metrics) < 2:
             return {}
@@ -773,7 +777,7 @@ class RepositoryHealthMonitor:
             "file_count_trend": last.file_count - first.file_count,
             "health_score_trend": last.health_score - first.health_score,
             "branch_count_trend": last.branch_count - first.branch_count,
-            "cache_files_trend": last.cache_files_count - first.cache_files_count
+            "cache_files_trend": last.cache_files_count - first.cache_files_count,
         }
 
         return trends
@@ -796,36 +800,44 @@ class RepositoryHealthMonitor:
         recommendations = []
 
         if metrics.repository_size_mb > self.thresholds["repository_size_mb"]:
-            recommendations.append({
-                "type": "size_optimization",
-                "priority": "high",
-                "description": "Repository size is above threshold",
-                "action": "Consider archiving old files or using Git LFS for large files"
-            })
+            recommendations.append(
+                {
+                    "type": "size_optimization",
+                    "priority": "high",
+                    "description": "Repository size is above threshold",
+                    "action": "Consider archiving old files or using Git LFS for large files",
+                }
+            )
 
         if metrics.cache_files_count > self.thresholds["cache_files"]:
-            recommendations.append({
-                "type": "cleanup",
-                "priority": "medium",
-                "description": "Found {metrics.cache_files_count} cache files",
-                "action": "Run cache cleanup to free space"
-            })
+            recommendations.append(
+                {
+                    "type": "cleanup",
+                    "priority": "medium",
+                    "description": "Found {metrics.cache_files_count} cache files",
+                    "action": "Run cache cleanup to free space",
+                }
+            )
 
         if metrics.stale_branches > self.thresholds["stale_branches"]:
-            recommendations.append({
-                "type": "branch_management",
-                "priority": "low",
-                "description": "Found {metrics.stale_branches} stale branches",
-                "action": "Consider removing unused branches"
-            })
+            recommendations.append(
+                {
+                    "type": "branch_management",
+                    "priority": "low",
+                    "description": "Found {metrics.stale_branches} stale branches",
+                    "action": "Consider removing unused branches",
+                }
+            )
 
         if metrics.health_score < 0.7:
-            recommendations.append({
-                "type": "general_health",
-                "priority": "high",
-                "description": "Overall health score is below recommended threshold",
-                "action": "Review and address specific health issues"
-            })
+            recommendations.append(
+                {
+                    "type": "general_health",
+                    "priority": "high",
+                    "description": "Overall health score is below recommended threshold",
+                    "action": "Review and address specific health issues",
+                }
+            )
 
         return recommendations
 
@@ -835,8 +847,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Repository Health Monitor v2.0")
     parser.add_argument("--repo", default=".", help="Repository path")
-    parser.add_argument("--action", choices=["monitor", "report", "check"],
-                        default="check", help="Action to perform")
+    parser.add_argument("--action", choices=["monitor", "report", "check"], default="check", help="Action to perform")
     parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--daemon", action="store_true", help="Run as daemon")
 

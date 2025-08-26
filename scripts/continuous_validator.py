@@ -23,7 +23,6 @@ from watchdog.events import FileSystemEventHandler
 import yaml
 
 
-
 # Add scripts directory to path
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
@@ -44,7 +43,7 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         self.validation_queue = []
         self.processing_lock = threading.Lock()
         self.last_validation = {}
-        self.debounce_delay = config.get('debounce_delay', 2.0)
+        self.debounce_delay = config.get("debounce_delay", 2.0)
 
     def should_validate_file(self, file_path):
         """Check if file should be validated"""
@@ -55,12 +54,12 @@ class CanonicalValidationHandler(FileSystemEventHandler):
             return False
 
         # Check file extension
-        validatable_extensions = {'.md', '.txt', '.js', '.ts', '.py', '.json', '.yaml', '.yml'}
+        validatable_extensions = {".md", ".txt", ".js", ".ts", ".py", ".json", ".yaml", ".yml"}
         if path.suffix not in validatable_extensions:
             return False
 
         # Check exclude patterns
-        exclude_patterns = self.config.get('exclude_patterns', [])
+        exclude_patterns = self.config.get("exclude_patterns", [])
         for pattern in exclude_patterns:
             if path.match(pattern):
                 return False
@@ -154,7 +153,7 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         alert_file = "CANONICAL_ALERT_{severity}_{timestamp.replace(':', '-').replace(' ', '_')}.md"
 
-        with open(alert_file, 'w', encoding="utf-8") as f:
+        with open(alert_file, "w", encoding="utf-8") as f:
             f.write("# Aurora CloudBank Canonical Alert - {severity}\n\n")
             f.write("**Timestamp**: {timestamp}\n")
             f.write("**File**: {file_path}\n")
@@ -184,20 +183,16 @@ class CanonicalValidationHandler(FileSystemEventHandler):
             "escalations": len([r for r in results if r.status == "ESCALATE"]),
             "critical": len([r for r in results if r.status == "ESCALATE" and r.severity == "CRITICAL"]),
             "issues": [
-                {
-                    "check": r.check_name,
-                    "status": r.status,
-                    "severity": r.severity,
-                    "message": r.message
-                }
-                for r in results if r.status != "PASS"
-            ]
+                {"check": r.check_name, "status": r.status, "severity": r.severity, "message": r.message}
+                for r in results
+                if r.status != "PASS"
+            ],
         }
 
         # Append to validation log
         log_file = "canonical_validation.log"
-        with open(log_file, 'a', encoding="utf-8") as f:
-            f.write(json.dumps(log_entry) + '\n')
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(log_entry) + "\n")
 
 
 class ContinuousValidator:
@@ -215,28 +210,21 @@ class ContinuousValidator:
         config_file = self.workspace_path / "config" / "canonical_validation.yaml"
 
         if config_file.exists():
-            with open(config_file, 'r', encoding="utf-8") as f:
+            with open(config_file, "r", encoding="utf-8") as f:
                 config = yaml.safe_load(f)
-                return config.get('integration', {}).get('file_watcher', {})
+                return config.get("integration", {}).get("file_watcher", {})
 
         # Default configuration
         return {
-            'enabled': True,
-            'watch_patterns': ['*.md', '*.js', '*.py', '*.json'],
-            'debounce_delay': 2000,  # milliseconds
-            'exclude_patterns': [
-                'node_modules/**',
-                '.git/**',
-                '*.log',
-                '*.tmp',
-                'build/**',
-                'dist/**'
-            ]
+            "enabled": True,
+            "watch_patterns": ["*.md", "*.js", "*.py", "*.json"],
+            "debounce_delay": 2000,  # milliseconds
+            "exclude_patterns": ["node_modules/**", ".git/**", "*.log", "*.tmp", "build/**", "dist/**"],
         }
 
     def start(self):
         """Start continuous validation monitoring"""
-        if not self.config.get('enabled', True):
+        if not self.config.get("enabled", True):
             print("📴 Continuous validation is disabled in configuration")
             return
 
@@ -248,8 +236,7 @@ class ContinuousValidator:
 
         # Create event handler
         handler = CanonicalValidationHandler(
-            self.validator,
-            {**self.config, 'debounce_delay': self.config.get('debounce_delay', 2000) / 1000}
+            self.validator, {**self.config, "debounce_delay": self.config.get("debounce_delay", 2000) / 1000}
         )
 
         # Set up file system observer
@@ -292,17 +279,9 @@ class ContinuousValidator:
 def main():
     """Main execution function"""
 
-    parser = argparse.ArgumentParser(
-        description="Aurora CloudBank Continuous Canonical Validation Monitor"
-    )
-    parser.add_argument(
-        "--once", action="store_true",
-        help="Run validation once instead of continuous monitoring"
-    )
-    parser.add_argument(
-        "--workspace", default=".",
-        help="Workspace path to monitor (default: current directory)"
-    )
+    parser = argparse.ArgumentParser(description="Aurora CloudBank Continuous Canonical Validation Monitor")
+    parser.add_argument("--once", action="store_true", help="Run validation once instead of continuous monitoring")
+    parser.add_argument("--workspace", default=".", help="Workspace path to monitor (default: current directory)")
 
     args = parser.parse_args()
 

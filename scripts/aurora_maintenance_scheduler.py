@@ -16,7 +16,6 @@ import threading
 import schedule
 
 
-
 class MaintenanceScheduler:
     """Automated maintenance scheduling and execution system"""
 

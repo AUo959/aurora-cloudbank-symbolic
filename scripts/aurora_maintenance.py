@@ -19,7 +19,6 @@ import sys
 import time
 
 
-
 class MaintenanceScheduler:
     """Automated maintenance and cleanup scheduler."""
 
@@ -195,9 +194,7 @@ class MaintenanceScheduler:
                 "pycache_dirs_removed": pycache_count,
             }
 
-            self.logger.info(
-                "Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs"
-            )
+            self.logger.info("Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
@@ -248,17 +245,12 @@ class MaintenanceScheduler:
                 # Remove temp files (with confirmation for safety)
                 for temp_file in temp_files:
                     temp_path = self.repo_path / temp_file.lstrip("./")
-                    if (
-                        temp_path.exists()
-                        and temp_path.stat().st_size < 100 * 1024 * 1024
-                    ):  # Only remove files < 100MB
+                    if temp_path.exists() and temp_path.stat().st_size < 100 * 1024 * 1024:  # Only remove files < 100MB
                         temp_path.unlink()
                         removed_count += 1
 
             result["details"] = {"temp_files_removed": removed_count}
-            self.logger.info(
-                "Temporary file cleanup complete: {removed_count} files removed"
-            )
+            self.logger.info("Temporary file cleanup complete: {removed_count} files removed")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
@@ -307,16 +299,12 @@ class MaintenanceScheduler:
                 check=False,
             )
 
-            git_size_mb = (
-                int(du_result.stdout.split()[0]) if du_result.returncode == 0 else 0
-            )
+            git_size_mb = int(du_result.stdout.split()[0]) if du_result.returncode == 0 else 0
 
             result["details"] = {
                 "git_size_mb": git_size_mb,
                 "gc_output": gc_result.stdout if gc_result.stdout else "No output",
-                "prune_output": (
-                    prune_result.stdout if prune_result.stdout else "No output"
-                ),
+                "prune_output": (prune_result.stdout if prune_result.stdout else "No output"),
             }
 
             self.logger.info("Git optimization complete: .git size = {git_size_mb}MB")
@@ -372,16 +360,8 @@ class MaintenanceScheduler:
                     check=False,
                 )
 
-                repo_size = (
-                    int(size_result.stdout.split()[0])
-                    if size_result.returncode == 0
-                    else 0
-                )
-                file_count = (
-                    len(files_result.stdout.strip().split("\n"))
-                    if files_result.returncode == 0
-                    else 0
-                )
+                repo_size = int(size_result.stdout.split()[0]) if size_result.returncode == 0 else 0
+                file_count = len(files_result.stdout.strip().split("\n")) if files_result.returncode == 0 else 0
 
                 result["details"] = {
                     "repository_size_mb": repo_size,
@@ -436,13 +416,7 @@ class MaintenanceScheduler:
                     check=False,
                 )
 
-                branch_count = len(
-                    [
-                        line
-                        for line in branch_result.stdout.strip().split("\n")
-                        if line.strip()
-                    ]
-                )
+                branch_count = len([line for line in branch_result.stdout.strip().split("\n") if line.strip()])
                 result["details"] = {"branch_count": branch_count}
 
             self.logger.info("Branch cleanup analysis complete")
@@ -544,9 +518,7 @@ class MaintenanceScheduler:
                     if scan_result.stdout:
                         try:
                             vulnerabilities = json.loads(scan_result.stdout)
-                            result["details"]["python_vulnerabilities"] = len(
-                                vulnerabilities
-                            )
+                            result["details"]["python_vulnerabilities"] = len(vulnerabilities)
                         except json.JSONDecodeError:
                             result["details"]["python_vulnerabilities"] = 0
 
@@ -565,9 +537,7 @@ class MaintenanceScheduler:
                     try:
                         audit_data = json.loads(audit_result.stdout)
                         result["details"]["node_vulnerabilities"] = (
-                            audit_data.get("metadata", {})
-                            .get("vulnerabilities", {})
-                            .get("total", 0)
+                            audit_data.get("metadata", {}).get("vulnerabilities", {}).get("total", 0)
                         )
                     except json.JSONDecodeError:
                         result["details"]["node_vulnerabilities"] = 0
@@ -698,15 +668,9 @@ def main():
     """Main function for maintenance CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance System")
     parser.add_argument("--run-task", help="Run specific maintenance task")
-    parser.add_argument(
-        "--schedule", action="store_true", help="Start maintenance scheduler"
-    )
-    parser.add_argument(
-        "--list-tasks", action="store_true", help="List available tasks"
-    )
-    parser.add_argument(
-        "--test", action="store_true", help="Run all tasks once for testing"
-    )
+    parser.add_argument("--schedule", action="store_true", help="Start maintenance scheduler")
+    parser.add_argument("--list-tasks", action="store_true", help="List available tasks")
+    parser.add_argument("--test", action="store_true", help="Run all tasks once for testing")
 
     args = parser.parse_args()
 
@@ -715,9 +679,7 @@ def main():
     if args.list_tasks:
         print("Available maintenance tasks:")
         for task_name, task_info in scheduler.tasks.items():
-            print(
-                "  {task_name}: {task_info['description']} ({task_info['schedule']})"
-            )
+            print("  {task_name}: {task_info['description']} ({task_info['schedule']})")
         return 0
 
     elif args.run_task:

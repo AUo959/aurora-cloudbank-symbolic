@@ -19,7 +19,6 @@ import os
 import sys
 
 
-
 # Add the scripts directory to Python path
 script_dir = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(script_dir))
@@ -35,21 +34,15 @@ except ImportError:
 def get_staged_files():
     """Get list of staged files for commit"""
     try:
-        result = subprocess.run(
-            ["git", "di", "--cached", "--name-only"],
-            capture_output=True, text=True, check=True
-        )
-        return [f.strip() for f in result.stdout.split('\n') if f.strip()]
+        result = subprocess.run(["git", "di", "--cached", "--name-only"], capture_output=True, text=True, check=True)
+        return [f.strip() for f in result.stdout.split("\n") if f.strip()]
     except subprocess.CalledProcessError:
         return []
 
 
 def has_critical_violations(results):
     """Check if validation results contain critical violations"""
-    critical_escalations = [
-        r for r in results
-        if r.status == "ESCALATE" and r.severity == "CRITICAL"
-    ]
+    critical_escalations = [r for r in results if r.status == "ESCALATE" and r.severity == "CRITICAL"]
     return len(critical_escalations) > 0
 
 
@@ -97,11 +90,8 @@ def main():
         return 0
 
     # Filter for files we can validate
-    validatable_extensions = {'.md', '.txt', '.js', '.ts', '.py', '.json', '.yaml', '.yml'}
-    files_to_validate = [
-        f for f in staged_files
-        if Path(f).exists() and Path(f).suffix in validatable_extensions
-    ]
+    validatable_extensions = {".md", ".txt", ".js", ".ts", ".py", ".json", ".yaml", ".yml"}
+    files_to_validate = [f for f in staged_files if Path(f).exists() and Path(f).suffix in validatable_extensions]
 
     if not files_to_validate:
         print("✅ No validatable files in commit")
@@ -159,7 +149,7 @@ def main():
                 # Ensure directory exists
                 report_path.parent.mkdir(parents=True, exist_ok=True)
 
-                with open(report_path, 'w', encoding="utf-8") as f:
+                with open(report_path, "w", encoding="utf-8") as f:
                     f.write("# Pre-Commit Validation Issues\n\n")
                     f.write("Generated: {Path(__file__).name} at {Path().cwd()}\n")
                     f.write("Strategy: {manager.config['strategy']}\n\n")
@@ -179,7 +169,7 @@ def main():
         except ImportError:
             # Fallback to original behavior if manager not available
             report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
-            with open(report_path, 'w', encoding="utf-8") as f:
+            with open(report_path, "w", encoding="utf-8") as f:
                 f.write("# Pre-Commit Validation Issues\n\n")
                 for issue in escalations:
                     f.write("## {issue.check_name} ({issue.severity})\n")

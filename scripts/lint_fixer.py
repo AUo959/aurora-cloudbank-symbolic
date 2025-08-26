@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Dict
 
 
-
 def fix_encoding_specifications(file_path: str) -> bool:
     """Add encoding specification to file open statements."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -84,9 +83,7 @@ def fix_broad_exceptions(file_path: str) -> bool:
     original_content = content
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
-    content = re.sub(
-        r"except\s*:", "except (OSError, ValueError, RuntimeError):", content
-    )
+    content = re.sub(r"except\s*:", "except (OSError, ValueError, RuntimeError):", content)
 
     if content != original_content:
         with open(file_path, "w", encoding="utf-8") as f:
@@ -135,12 +132,7 @@ def fix_unused_imports(file_path: str) -> bool:
             import_lines.append(i)
             # Extract imported names
             if stripped.startswith("import "):
-                module = (
-                    stripped.replace("import ", "")
-                    .split(" as ")[0]
-                    .split(",")[0]
-                    .strip()
-                )
+                module = stripped.replace("import ", "").split(" as ")[0].split(",")[0].strip()
                 imports[module] = i
             elif stripped.startswith("from "):
                 if " import " in stripped:
@@ -152,17 +144,13 @@ def fix_unused_imports(file_path: str) -> bool:
     # Check which imports are actually used
     used_imports = set()
     for module in imports:
-        if module in content.replace("import {module}", "").replace(
-            "from {module}", ""
-        ):
+        if module in content.replace("import {module}", "").replace("from {module}", ""):
             used_imports.add(module)
 
     # Remove unused import lines (be conservative)
     lines_to_remove = []
     for module, line_num in imports.items():
-        if (
-            module not in used_imports and len(module) > 2
-        ):  # Don't remove single-letter imports
+        if module not in used_imports and len(module) > 2:  # Don't remove single-letter imports
             line_content = lines[line_num].strip()
             # Only remove if it's a single import, not multiple imports on one line
             if "," not in line_content and " as " not in line_content:

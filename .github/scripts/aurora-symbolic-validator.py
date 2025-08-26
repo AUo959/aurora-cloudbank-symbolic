@@ -15,25 +15,25 @@ from typing import Dict
 
 class AuroraSymbolicWorkflowIntegration:
     """Integrates Aurora symbolic systems with CI/CD workflows"""
-    
+
     def __init__(self):
         self.repo_root = Path.cwd()
         self.anchor_protocols = []
         self.dlp_tracking_active = False
         self.memory_seal_status = "unknown"
-        
+
     def validate_symbolic_anchors(self) -> Dict[str, str]:
         """Validate T1/SRB anchors and symbolic continuity"""
         print("🔮 Validating Aurora Symbolic Anchors...")
-        
+
         validation_results = {
             "t1_anchors": "unknown",
             "srb_anchors": "unknown",
             "symbolic_engine": "unknown",
             "anchor_protocols": [],
-            "status": "unknown"
+            "status": "unknown",
         }
-        
+
         try:
             # Test symbolic engine import
             test_code = """
@@ -67,14 +67,12 @@ try:
 except Exception as e:
     print(f'srb_anchors:error:{e}')
 """
-            result = subprocess.run(
-                [sys.executable, "-c", test_code], capture_output=True, text=True, timeout=30
-            )
+            result = subprocess.run([sys.executable, "-c", test_code], capture_output=True, text=True, timeout=30)
 
             # Parse validation results
-            for line in result.stdout.strip().split('\n'):
-                if ':' in line:
-                    key, value = line.split(':', 1)
+            for line in result.stdout.strip().split("\n"):
+                if ":" in line:
+                    key, value = line.split(":", 1)
                     if key == "symbolic_engine":
                         validation_results["symbolic_engine"] = value
                     elif key == "t1_anchors":
@@ -83,7 +81,7 @@ except Exception as e:
                         validation_results["srb_anchors"] = value
                     elif key == "anchor_protocol":
                         validation_results["anchor_protocols"].append(value)
-            
+
             # Determine overall status
             if (
                 validation_results["symbolic_engine"] == "operational"
@@ -93,14 +91,14 @@ except Exception as e:
                 validation_results["status"] = "operational"
             else:
                 validation_results["status"] = "degraded"
-                
+
         except subprocess.TimeoutExpired:
             validation_results["status"] = "timeout"
         except Exception as e:
             validation_results["status"] = f"error:{e}"
-        
+
         return validation_results
-    
+
     def validate_dlp_tracking(self) -> Dict[str, str]:
         """Validate DLP tracking and memory sealing protocols"""
         print("📊 Validating DLP Tracking and Memory Sealing...")
@@ -152,46 +150,42 @@ except ImportError:
 except Exception as e:
     print(f'native_dlp:error:{e}')
 """
-            result = subprocess.run(
-                [sys.executable, "-c", dlp_test_code], capture_output=True, text=True, timeout=30
-            )
+            result = subprocess.run([sys.executable, "-c", dlp_test_code], capture_output=True, text=True, timeout=30)
 
             # Parse DLP results
-            for line in result.stdout.strip().split('\n'):
-                if ':' in line:
-                    key, value = line.split(':', 1)
+            for line in result.stdout.strip().split("\n"):
+                if ":" in line:
+                    key, value = line.split(":", 1)
                     if key in ["dlp_tracker", "memory_sealer", "native_dlp"]:
                         dlp_results[key] = value
                     elif key == "context_tag":
                         dlp_results["context_tags"].append(value)
-            
+
             # Determine DLP status
-            if any(
-                dlp_results[k] == "operational" for k in ["dlp_tracker", "memory_sealer", "native_dlp"]
-            ):
+            if any(dlp_results[k] == "operational" for k in ["dlp_tracker", "memory_sealer", "native_dlp"]):
                 dlp_results["status"] = "operational"
             else:
                 dlp_results["status"] = "not_available"
-                
+
         except subprocess.TimeoutExpired:
             dlp_results["status"] = "timeout"
         except Exception as e:
             dlp_results["status"] = f"error:{e}"
-        
+
         return dlp_results
-    
+
     def validate_security_ethics(self) -> Dict[str, str]:
         """Validate Picard_Delta_3 ethics protocol and security systems"""
         print("🛡️ Validating Security and Ethics Protocols...")
-        
+
         security_results = {
             "picard_delta_3": "unknown",
             "aurora_security": "unknown",
             "enhanced_security": "unknown",
             "ethics_validation": "unknown",
-            "status": "unknown"
+            "status": "unknown",
         }
-        
+
         try:
             # Test Picard_Delta_3 ethics protocol
             ethics_test_code = """
@@ -229,28 +223,25 @@ else:
             )
 
             # Parse security results
-            for line in result.stdout.strip().split('\n'):
-                if ':' in line:
-                    key, value = line.split(':', 1)
+            for line in result.stdout.strip().split("\n"):
+                if ":" in line:
+                    key, value = line.split(":", 1)
                     if key in security_results:
                         security_results[key] = value
-            
+
             # Determine security status
-            if (
-                security_results["picard_delta_3"] == "found"
-                or security_results["aurora_security"] == "available"
-            ):
+            if security_results["picard_delta_3"] == "found" or security_results["aurora_security"] == "available":
                 security_results["status"] = "operational"
             else:
                 security_results["status"] = "partial"
-                
+
         except subprocess.TimeoutExpired:
             security_results["status"] = "timeout"
         except Exception as e:
             security_results["status"] = f"error:{e}"
-        
+
         return security_results
-    
+
     def generate_aurora_ci_manifest(self, anchor_results: Dict, dlp_results: Dict, security_results: Dict) -> Dict:
         """Generate Aurora CI manifest with symbolic validation results"""
         manifest = {
@@ -262,64 +253,64 @@ else:
                 "security_ethics": security_results,
                 "anchor_protocols": anchor_results.get("anchor_protocols", []),
                 "context_tags": dlp_results.get("context_tags", []),
-                "validation_status": "unknown"
+                "validation_status": "unknown",
             }
         }
-        
+
         # Determine overall validation status
         all_statuses = [
             anchor_results.get("status", "unknown"),
             dlp_results.get("status", "unknown"),
-            security_results.get("status", "unknown")
+            security_results.get("status", "unknown"),
         ]
-        
+
         if all(s == "operational" for s in all_statuses):
             manifest["aurora_ci_validation"]["validation_status"] = "fully_operational"
         elif any(s == "operational" for s in all_statuses):
             manifest["aurora_ci_validation"]["validation_status"] = "partially_operational"
         else:
             manifest["aurora_ci_validation"]["validation_status"] = "degraded"
-        
+
         return manifest
-    
+
     def run_aurora_validation(self) -> Dict:
         """Run complete Aurora symbolic validation for CI/CD"""
         print("🌟 Aurora CloudBank Symbolic Validation Starting...")
         print("=" * 60)
-        
+
         # Run all validation checks
         anchor_results = self.validate_symbolic_anchors()
         dlp_results = self.validate_dlp_tracking()
         security_results = self.validate_security_ethics()
-        
+
         # Generate CI manifest
         manifest = self.generate_aurora_ci_manifest(anchor_results, dlp_results, security_results)
-        
+
         # Save manifest
         manifest_path = self.repo_root / "aurora_ci_validation_manifest.json"
-        with open(manifest_path, 'w') as f:
+        with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
-        
+
         print(f"\n📄 Aurora CI manifest saved: {manifest_path}")
-        
+
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
         print(f"\n🌟 Aurora Validation Status: {validation_status.upper()}")
-        
+
         if validation_status == "fully_operational":
             print("✅ All Aurora symbolic systems operational")
         elif validation_status == "partially_operational":
             print("⚠️ Some Aurora systems operational, others degraded")
         else:
             print("🔧 Aurora systems require attention")
-        
+
         return manifest
 
 
 def main():
     """Main CLI interface"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Aurora Symbolic Workflow Integration")
     parser.add_argument(
         "--output-format",
@@ -333,11 +324,11 @@ def main():
         default="all",
         help="Specific component to validate",
     )
-    
+
     args = parser.parse_args()
-    
+
     integration = AuroraSymbolicWorkflowIntegration()
-    
+
     if args.component == "anchors":
         results = integration.validate_symbolic_anchors()
     elif args.component == "dlp":
@@ -346,7 +337,7 @@ def main():
         results = integration.validate_security_ethics()
     else:
         results = integration.run_aurora_validation()
-    
+
     if args.output_format == "github":
         github_output = os.environ.get("GITHUB_OUTPUT")
 

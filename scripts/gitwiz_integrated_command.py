@@ -33,7 +33,6 @@ from .gitwiz_enhanced import GitWizEnhanced as EnhancedGITWiz
 from .gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
 
 
-
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 

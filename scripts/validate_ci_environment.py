@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 
-
 class CIEnvironmentValidator:
     """Validates and optionally fixes CI environment setup."""
 

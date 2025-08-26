@@ -13,7 +13,6 @@ from typing import Any, Dict, Optional
 import yaml
 
 
-
 class AuroraWorkflowConfig:
     """Manages Aurora CloudBank workflow configurations"""
 

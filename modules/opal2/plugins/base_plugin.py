@@ -276,7 +276,7 @@ class PluginRegistry:
         """Load plugin from a Python module."""
         try:
             # Import module
-        module = importlib.import_module(module_path)
+            module = importlib.import_module(module_path)
 
             # Get plugin class
             plugin_class = getattr(module, plugin_class_name)
@@ -332,13 +332,13 @@ class PluginRegistry:
 
         if security_level == "safe":
             # Safe plugins have minimal restrictions
-        return True
+            return True
         elif security_level == "sandbox":
             # Sandbox plugins need additional validation
-        return self._validate_sandbox_plugin(plugin)
+            return self._validate_sandbox_plugin(plugin)
         elif security_level == "trusted":
             # Trusted plugins require signature verification
-        return self._validate_trusted_plugin(plugin)
+            return self._validate_trusted_plugin(plugin)
 
         return False
 
@@ -346,9 +346,8 @@ class PluginRegistry:
         """Validate plugin meets requirements."""
         # Check required methods
         for method_name in self.validation_rules["required_methods"]:
-        if not hasattr(plugin, method_name):
-
-            return False
+            if not hasattr(plugin, method_name):
+                return False
 
         # Check security
         if not self.validate_plugin_security(plugin):
@@ -357,8 +356,8 @@ class PluginRegistry:
 
         # Check dependencies
         for dependency in plugin.metadata.dependencies:
-        if dependency not in self.plugins:
-        print("Missing dependency: {dependency}")
+            if dependency not in self.plugins:
+                print("Missing dependency: {dependency}")
                 return False
 
         return True
@@ -373,8 +372,9 @@ class PluginRegistry:
         # Implement signature verification logic
         return True
 
-        class PluginManager:
-        """High-level plugin management interface."""
+
+class PluginManager:
+    """High-level plugin management interface."""
 
     def __init__(self):
         self.registry = PluginRegistry()

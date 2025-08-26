@@ -1,13 +1,133 @@
 {
-  "scan_timestamp": "Tue Aug 26 11:37:49 UTC 2025",
-  "total_issues": 129,
+  "scan_timestamp": "Tue Aug 26 15:23:44 UTC 2025",
+  "total_issues": 144,
   "severity_breakdown": {
     "CRITICAL": 0,
-    "HIGH": 0,
+    "HIGH": 15,
     "MEDIUM": 0,
     "LOW": 129
   },
   "issues": [
+    {
+      "file": "security_verification.py",
+      "line": 45,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "find_eval_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\\\;\"  # nosec - grep pattern"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 49,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "find_exec_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\"  # nosec - grep pattern"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 203,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 205,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 348,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions.  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 373,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 486,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 514,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# result = eval(user_expression)  # nosec - commented example"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 203,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 205,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 486,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 48,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 98,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 99,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "'exec': (r'\\bexec\\s*\\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 105,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern"
+    },
     {
       "file": "./T70_EXPORT_MANIFEST.json",
       "line": 22,

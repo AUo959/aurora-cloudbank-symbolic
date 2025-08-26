@@ -587,8 +587,8 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
     """
     try:
 
-        # Create circuit based on symbol hash
-        h = int(hashlib.md5(req.symbol.encode()).hexdigest(), 16) % (2**32)
+        # Create circuit based on symbol hash (using SHA256 for security)
+        h = int(hashlib.sha256(req.symbol.encode()).hexdigest(), 16) % (2**32)
         np.random.seed(h)
 
         qc = QuantumCircuit(req.qubits, req.qubits)
@@ -684,7 +684,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "aurora_gui_cloudhub_fastapi:app",
-        host="0.0.0.0",
+        host="127.0.0.1",  # Bind to localhost only for security
         port=8000,
         reload=True,
         log_level="info",

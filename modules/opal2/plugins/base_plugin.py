@@ -1,12 +1,16 @@
 """Opal2 Plugin System - Base Plugin Interface
 
-        import os
-
 =============================================
 
 Provides the foundation for the Opal2 modular plugin architecture.
 Supports hot-swappable rendering plugins with validation and security.
 """
+
+import os
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 
 class PluginType(Enum):
@@ -252,9 +256,9 @@ class PluginRegistry:
         try:
 
             plugin.cleanup()
-        except Exception:
-
-            pass  # Continue with unregistration even if cleanup fails
+        except Exception as e:
+            # Log cleanup failure but continue with unregistration
+            print(f"Warning: Plugin cleanup failed for {plugin_name}: {e}")
 
         # Remove from registry
         del self.plugins[plugin_name]
@@ -392,43 +396,38 @@ class PluginManager:
             return 0
 
         for filename in os.listdir(directory_path):
-        if filename.endswith(".py") and not filename.startswith("__"):
-        module_name = filename[:-3]  # Remove .py extension
-                module_path = "{directory_path.replace('/', '.')}.{module_name}"
+            if filename.endswith(".py") and not filename.startswith("__"):
+                module_name = filename[:-3]  # Remove .py extension
+                module_path = f"{directory_path.replace('/', '.')}.{module_name}"
 
                 try:
                     # Try to load plugin (assuming class name matches module name)
-        if self.registry.load_plugin_from_module(
-                       module_path, module_name.title()
+                    if self.registry.load_plugin_from_module(
+                        module_path, module_name.title()
                     ):
-                    loaded_count += 1
-                    except Exception as e:
+                        loaded_count += 1
+                except Exception as e:
+                    print(f"Failed to load plugin {module_name}: {e}")
 
-                        print("Failed to load plugin {module_name}: {e}")
+        return loaded_count
 
-                    return loaded_count
-
-                    def execute_plugin(
+    def execute_plugin(
         self, plugin_name: str, input_data: Any, options: Dict[str, Any] = None
     ) -> Any:
-    """Execute a plugin with input data."""
+        """Execute a plugin with input data."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-
-            raise ValueError("Plugin '{plugin_name}' not found")
+            raise ValueError(f"Plugin '{plugin_name}' not found")
 
         if plugin.status != PluginStatus.ACTIVE:
-
-
-            raise ValueError("Plugin '{plugin_name}' is not active")
+            raise ValueError(f"Plugin '{plugin_name}' is not active")
 
         return plugin.process(input_data, options or {})
 
     def configure_plugin(self, plugin_name: str, config: Dict[str, Any]) -> bool:
-    """Configure a plugin."""
+        """Configure a plugin."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-
             return False
 
         try:
@@ -441,33 +440,33 @@ class PluginManager:
             return False
 
     def get_plugin_chain(self, plugin_names: List[str]) -> List[BasePlugin]:
-    """Get a chain of plugins for processing pipeline."""
+        """Get a chain of plugins for processing pipeline."""
         chain = []
         for name in plugin_names:
-    plugin = self.registry.get_plugin(name)
+            plugin = self.registry.get_plugin(name)
             if plugin and plugin.status == PluginStatus.ACTIVE:
-    chain.append(plugin)
+                chain.append(plugin)
         return chain
 
-        def execute_plugin_chain(
-       self,
+    def execute_plugin_chain(
+        self,
         plugin_chain: List[BasePlugin],
         input_data: Any,
         options: Dict[str, Any] = None,
     ) -> Any:
-    """Execute a chain of plugins in sequence."""
+        """Execute a chain of plugins in sequence."""
         result = input_data
         options = options or {}
 
         for plugin in plugin_chain:
-    result = plugin.process(result, options)
+            result = plugin.process(result, options)
 
         return result
 
     def get_system_status(self) -> Dict[str, Any]:
-    """Get comprehensive system status."""
+        """Get comprehensive system status."""
         return {
-           "total_plugins": len(self.registry.plugins),
+            "total_plugins": len(self.registry.plugins),
             "active_plugins": len(
                 [
                     p

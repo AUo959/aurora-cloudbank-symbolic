@@ -5,11 +5,10 @@ Part of T71 Symbolic Infrastructure Genesis
 """
 
 import argparse
+import json
+import shutil
 import subprocess
 import sys
-
-
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
@@ -23,6 +22,23 @@ class CIHelpers:
         self.ci_dir = self.repo_path / ".aurora" / "ci"
         self.ci_dir.mkdir(parents=True, exist_ok=True)
         self.version = "1.0.0"
+
+    def _secure_subprocess_run(self, cmd: List[str], **kwargs) -> subprocess.CompletedProcess:
+        """Securely run subprocess with input validation and absolute paths"""
+        # Validate command exists and use absolute path
+        if cmd and cmd[0]:
+            executable_path = shutil.which(cmd[0])
+            if not executable_path:
+                raise FileNotFoundError(f"Executable '{cmd[0]}' not found in PATH")
+            cmd[0] = executable_path
+        
+        # Set secure defaults
+        kwargs.setdefault('capture_output', True)
+        kwargs.setdefault('text', True)
+        kwargs.setdefault('timeout', 60)  # Default timeout
+        kwargs.setdefault('cwd', self.repo_path)
+        
+        return subprocess.run(cmd, **kwargs)
 
     def run_pre_commit_checks(self) -> Dict[str, Any]:
         """Run comprehensive pre-commit validation"""
@@ -180,12 +196,10 @@ jobs:
         result = {"status": "unknown", "issues": []}
 
         try:
-            # Run flake8
-            process = subprocess.run(
+            # Run flake8 with secure subprocess
+            process = self._secure_subprocess_run(
                 ["flake8", "tools/", "--max-line-length=120", "--extend-ignore=E203,W503"],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path,
+                timeout=120
             )
 
             if process.returncode == 0:
@@ -260,9 +274,9 @@ jobs:
         result = {"status": "unknown", "issues": []}
 
         try:
-            # Run the T71 test suite
-            process = subprocess.run(
-                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
+            # Run the T71 test suite with secure subprocess
+            process = self._secure_subprocess_run(
+                ["python", "test_t71_tools.py"], timeout=180
             )
 
             if process.returncode == 0:
@@ -312,8 +326,8 @@ jobs:
         result = {"status": "unknown", "issues": []}
 
         try:
-            process = subprocess.run(
-                ["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo_path
+            process = self._secure_subprocess_run(
+                ["git", "status", "--porcelain"], timeout=30
             )
 
             if process.returncode == 0:
@@ -362,9 +376,9 @@ jobs:
         result = {"status": "unknown", "issues": []}
 
         try:
-            # Run basic functionality test
-            process = subprocess.run(
-                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
+            # Run basic functionality test with secure subprocess
+            process = self._secure_subprocess_run(
+                ["python", "test_t71_tools.py"], timeout=180
             )
 
             if process.returncode == 0:

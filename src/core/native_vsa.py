@@ -5,7 +5,7 @@ Lightweight symbolic data encoding/decoding without numpy.
 
 import hashlib
 import math
-import random
+import secrets
 from typing import Any, Dict, List, Literal
 
 
@@ -38,19 +38,19 @@ class NativeSymbolicVector:
         random.seed(seed)
 
         if self.vector_type == "bipolar":
-            return [random.choice([-1.0, 1.0]) for _ in range(self.dim)]
+            return [secrets.choice([-1.0, 1.0]) for _ in range(self.dim)]
         elif self.vector_type == "binary":
-            return [random.choice([0.0, 1.0]) for _ in range(self.dim)]
+            return [secrets.choice([0.0, 1.0]) for _ in range(self.dim)]
         elif self.vector_type == "real":
-            # Generate normal distribution using Box-Muller transform
+            # Generate normal distribution using Box-Muller transform with secure random
             vec = []
             for _ in range(self.dim // 2):
-                u1, u2 = random.random(), random.random()
+                u1, u2 = secrets.SystemRandom().random(), secrets.SystemRandom().random()
                 z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
                 z1 = math.sqrt(-2.0 * math.log(u1)) * math.sin(2.0 * math.pi * u2)
                 vec.extend([z0, z1])
             if self.dim % 2:  # If odd dimension, add one more
-                u1, u2 = random.random(), random.random()
+                u1, u2 = secrets.SystemRandom().random(), secrets.SystemRandom().random()
                 z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
                 vec.append(z0)
             return vec[: self.dim]

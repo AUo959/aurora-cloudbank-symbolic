@@ -1,7 +1,4 @@
 """
-
-        import sys
-
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
 """
@@ -9,9 +6,14 @@ Validates core symbolic simulation functionality without heavy dependencies
 # Add src to path for imports
 import math
 import os
+import sys
 import time
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+# Import native implementations
+from src.core.native_vsa import NativeSymbolicVector
 
 
 @pytest.mark.native

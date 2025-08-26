@@ -21,7 +21,17 @@ class AuroraWebLogger {
     }
 
     generateSessionId() {
-        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // Use cryptographically secure random values for session ID
+        let randomStr;
+        if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
+            const array = new Uint32Array(3);
+            window.crypto.getRandomValues(array);
+            randomStr = Array.from(array).map(num => num.toString(36)).join('');
+        } else {
+            // Fallback to Math.random if crypto is unavailable (not recommended)
+            randomStr = Math.random().toString(36).substr(2, 9);
+        }
+        return `${Date.now()}-${randomStr}`;
     }
 
     initializeWebFeatures() {

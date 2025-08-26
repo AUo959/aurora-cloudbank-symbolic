@@ -9,6 +9,7 @@ Anchor: T3A_DECISION_PR77
 Seed: EOS_SEED_ORION
 Ethics: Picard_Delta_3
 """
+
 import json
 import pathlib
 import subprocess
@@ -29,7 +30,7 @@ def test_hash_and_metadata_generation():
         [sys.executable, SCRIPT, "--input", sample.name, "--out-dir", out_dir],
         capture_output=True,
         text=True,
-        check=True
+        check=True,
     )
     digest = result.stdout.strip().splitlines()[-1]
     seals = list(pathlib.Path(out_dir).glob("*.sha256"))
@@ -48,7 +49,7 @@ def test_hash_and_metadata_generation():
             [sys.executable, SCRIPT, "--input", sample.name, "--out-dir", out_dir],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         digest = result.stdout.strip().splitlines()[-1]
         seals = list(pathlib.Path(out_dir).glob("*.sha256"))
@@ -60,4 +61,4 @@ def test_hash_and_metadata_generation():
         assert meta["sha256"] == digest
         assert meta["anchor"] == "T3A_DECISION_PR77"
     finally:
-    pathlib.Path(sample.name).unlink()
+        pathlib.Path(sample.name).unlink()

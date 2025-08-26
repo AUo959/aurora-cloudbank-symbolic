@@ -18,6 +18,9 @@ so Copilot or other agents can easily maintain the repo.
 
 import os
 import sys
+import argparse
+from logging import getLogger as get_logger
+
 
 logger = get_logger("staff_node_ci_helper")
 

@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """
+🚀 Aurora CloudBank Enhancement Sequence Executor
+Implements the next phase of optimal staging deployment.
+"""
 
 import json
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-
-🚀 Aurora CloudBank Enhancement Sequence Executor
-Implements the next phase of optimal staging deployment.
-"""
 
 
 class AuroraEnhancementExecutor:

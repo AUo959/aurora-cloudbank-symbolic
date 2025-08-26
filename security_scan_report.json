@@ -1,11 +1,11 @@
 {
-  "scan_timestamp": "Sun Jul 20 10:08:05 PM UTC 2025",
-  "total_issues": 145,
+  "scan_timestamp": "Tue Aug 26 15:23:44 UTC 2025",
+  "total_issues": 144,
   "severity_breakdown": {
     "CRITICAL": 0,
-    "HIGH": 17,
+    "HIGH": 15,
     "MEDIUM": 0,
-    "LOW": 128
+    "LOW": 129
   },
   "issues": [
     {
@@ -26,7 +26,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 202,
+      "line": 203,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -34,7 +34,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 204,
+      "line": 205,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -42,7 +42,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 357,
+      "line": 348,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -50,7 +50,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 383,
+      "line": 373,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -58,7 +58,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 497,
+      "line": 486,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -66,7 +66,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 527,
+      "line": 514,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -74,7 +74,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 202,
+      "line": 203,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -82,7 +82,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 204,
+      "line": 205,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -90,31 +90,15 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 497,
+      "line": 486,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
       "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
     },
     {
-      "file": ".security/secure_helpers.py",
-      "line": 118,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "Safe alternative to eval() for simple expressions."
-    },
-    {
-      "file": ".security/secure_helpers.py",
-      "line": 143,
-      "type": "eval",
-      "severity": "HIGH",
-      "message": "Use of eval() can execute arbitrary code",
-      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
-    },
-    {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 47,
+      "line": 48,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -122,7 +106,7 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 97,
+      "line": 98,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -130,7 +114,7 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 98,
+      "line": 99,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -138,19 +122,43 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 100,
+      "line": 105,
       "type": "os_system",
       "severity": "HIGH",
       "message": "os.system() can enable command injection",
       "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern"
     },
     {
-      "file": "./T71_FINAL_EXPORT_MANIFEST.json",
-      "line": 15,
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 22,
       "type": "HARDCODED_SECRET",
       "severity": "LOW",
       "message": "Possible hardcoded credential",
-      "code": "\"memory_seal\": \"c54bee06948c09058026425124873f0fca73745d9d5bceb923c411991f7415f4\""
+      "code": "\"README.md\": \"4c81e21ea54070aa9586f48e5243fb9b364b384e816fe43404c766e2bec29ccd\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 23,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"CONTRIBUTING.md\": \"08795c06fa07a4d77e79caa374fd2d2814d518a012fcdc0140eaf3461b9c1a24\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 24,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"CHANGELOG.md\": \"80fbb262358638ea3783e894077e827cf0f2b24edb054859bd716205dfa94f05\","
+    },
+    {
+      "file": "./T70_EXPORT_MANIFEST.json",
+      "line": 25,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"SECURITY.md\": \"73b074f1a03d9e9f509aba9b9c7b0ab720bdf2e2762053fd6cb8ae64311b781e\""
     },
     {
       "file": "./T71_MANIFEST_20250720T204244Z.json",
@@ -167,6 +175,14 @@
       "severity": "LOW",
       "message": "Possible hardcoded credential",
       "code": "\"memory_seal\": \"a12afa1a97a84cf7f3ebd957d900594ed707f3704db1bf599019c239de362a67\""
+    },
+    {
+      "file": "./T71_MANIFEST_20250720T221356Z.json",
+      "line": 16,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"2cc3bf6b3fc7333479ee5ae632b114e8c6c19a60161f662a59cd73d74013815e\""
     },
     {
       "file": "./T71_SUITE_MANIFEST.json",
@@ -209,460 +225,12 @@
       "code": "\"memory_seal\": \"0101728652f63248c41bb68e87ce8aec83a89273c3fc7663b768af49dd00c054\""
     },
     {
-      "file": "./T70_EXPORT_MANIFEST.json",
-      "line": 22,
+      "file": "./T71_FINAL_EXPORT_MANIFEST.json",
+      "line": 15,
       "type": "HARDCODED_SECRET",
       "severity": "LOW",
       "message": "Possible hardcoded credential",
-      "code": "\"README.md\": \"4c81e21ea54070aa9586f48e5243fb9b364b384e816fe43404c766e2bec29ccd\","
-    },
-    {
-      "file": "./T70_EXPORT_MANIFEST.json",
-      "line": 23,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"CONTRIBUTING.md\": \"08795c06fa07a4d77e79caa374fd2d2814d518a012fcdc0140eaf3461b9c1a24\","
-    },
-    {
-      "file": "./T70_EXPORT_MANIFEST.json",
-      "line": 24,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"CHANGELOG.md\": \"80fbb262358638ea3783e894077e827cf0f2b24edb054859bd716205dfa94f05\","
-    },
-    {
-      "file": "./T70_EXPORT_MANIFEST.json",
-      "line": 25,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"SECURITY.md\": \"73b074f1a03d9e9f509aba9b9c7b0ab720bdf2e2762053fd6cb8ae64311b781e\""
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 13,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 37,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"2abf6a42e9b5e843ff16dc3e47356eaaaf9a1f5e2748554c42cd113881052175\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 63,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 101,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"03cdb69eabe2ccadcc20abd6038b24bc1d33b0cc5a9a353d460b858f17a7d99d\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 108,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"bdbde2a3bca07e6272e110d2470a8ba2d37c378bdd3df21b17386a29a769e917\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 122,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 146,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"33cc7557e2ce364c0c8a1230bffc0c580199cd612d7ac449e25795e70ba7ab29\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 172,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"0c9b3da5aab8017141d860fdf9bf96fda95d7653525b66fb1ff5d528d0a6059b\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 210,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"8738f802e937d9be4960ef80786b14c101bcb462a2d3f8e4e441cb90a40de9fd\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 217,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"2bfc3c2deecf2d09ba87039c0c0cde84b2323ca68f894f6e2682eff5239a3b7f\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 231,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 255,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"ae6ce62318d3f91ff6c20e7d0b393d990af52d230ab206e252d0a108beba60b7\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 281,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 319,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"6c51c73920a0b76e08f2461e8233943842d78fbd8cec9d9597cbabcf01ba5de1\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 326,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"4ee227ebcb78690eab1eca91b286d21a90fef03ff8af8531fb7203edd1c5f02c\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 340,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 364,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e493396f2112139eea70242e53f18872a0208dea37eac2bed4afe06e32820919\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 390,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"509e51c149d94f0a5e9ab6970e404891428eb0273a21c03a2d7bde2f7a86bf87\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 428,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"979ade9fcc60056661ec70a78d403aea1ea7fe02571c934e840b36b0717db141\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 435,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"7ff397b13ce43f4f7703f165814835eecaef4482fda9578e3c1921cea4472590\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 449,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 473,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"ec609cfea1a8b5d60722cbd2c1493d3588508754eed044d61f47e11d67d2d405\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 499,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"7733f4b08d85d2790192ae24b0b9d74b00b5f36fe88e1b4bf26047c76b744794\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 537,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"78270393d8943150f3c05efaafc1585ead802ed9d3c90f4293748e6ff1493def\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 544,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"580295cd195e95ab75e12c9dc39ae560fb65afb17f4ba3fbcd49a7ab3b009332\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 558,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 582,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"0cb1e903ba5b002512cc48565d62bdd6ca3d77be97e1262ea533ef7a69ee4e20\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 608,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"b5a807150f2990605bdc063a93a89f2c9f5aa5b19823ccd0f8a6086cb0657e15\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 646,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"74da3746384ed85deda089bcb726efec59f8ad5556eeca9f35d5649abff73d0a\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 653,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"b833499efbd08070843a13ea938e45a312651687a75247aa6559ce93406b318b\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 667,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 691,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"1dd202dbcf7b8180790eb9d575671aa94f94ee412342fb9c6e5f2f994dfa00b5\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 717,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e10aaf7610f84bd2692ef3c3aaff804192a773a9cf09cc06c9f5335c25523df6\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 755,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e4e437950a80e8637450090a32f2d8f626256a957a024cb997cf446f4a44a906\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 762,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"b47e21a4a9a78e00721e8ca126886851e926f618e1fc1bdd2978908ccdc23d04\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 776,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 800,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"3281bbd9c89a1324e37a55f0870575758f8d8ba5c744454fdb8f2d6c57cacba3\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 826,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"28ec41db1bb80b1367a00f217674007f3b45a157c51a7f638861e00953986594\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 864,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"3dfc024f008d3bd159fb2be37bd4fde32e6cb326bf65e4c8bd0ec7d1129e038d\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 871,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"5fe1b728cd88dc7fe1f9a5e03b128646483416ed8b9c10f3a9dbde89e33fe718\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 885,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 909,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"fd6432f44dde8575543c0898eb2a7f1a74d285935ced6eaca27bc79d90491694\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 935,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"a501345b244ed670a01c866e3469aaedff4182b748f5dc8ae2ff704959d81b1e\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 973,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"84f8d2bedb80dd5a5c61ba46f2f312ce5348a3fecacfcf06e47d7955c0031f0d\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 980,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"bbee54da75cbb0128526e123e3bb64dec54cf8b570e5ac5701b2c13ed878bcc2\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 994,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1018,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"16f3843938be94d3369c1a9551f7ef31e6ec335bda497da8f415ba610ba67222\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1044,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"2adbe84cf816479dcc1c6235c90e3cb2a2715638163d2c3821110e43eba1be7c\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1082,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"bbd8f7bef0b3534e661d0b3e34be8b66fb38378d9fdc272b38d6402ca71507aa\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1089,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"integrity_hash\": \"3002f20b231d087d0140e659a515df80dcf150aaaff75cc459c99d9fe2730cda\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1103,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"1515128f0496ead29b7f236008e0b7211570cde0f3cc86325f8de21301a295d5\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1123,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"043cf4ec8c068b6c6e43d9c4614cb0fa83fbab880742840347eba9d475ac03e1\","
-    },
-    {
-      "file": "./exports/manifest_1752415456182.json",
-      "line": 1143,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
+      "code": "\"memory_seal\": \"c54bee06948c09058026425124873f0fca73745d9d5bceb923c411991f7415f4\""
     },
     {
       "file": "./exports/aurora_symbolic_export_1752415456.json",
@@ -1089,6 +657,430 @@
       "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
     },
     {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 13,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 37,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2abf6a42e9b5e843ff16dc3e47356eaaaf9a1f5e2748554c42cd113881052175\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 63,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 101,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"03cdb69eabe2ccadcc20abd6038b24bc1d33b0cc5a9a353d460b858f17a7d99d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 108,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bdbde2a3bca07e6272e110d2470a8ba2d37c378bdd3df21b17386a29a769e917\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 122,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 146,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"33cc7557e2ce364c0c8a1230bffc0c580199cd612d7ac449e25795e70ba7ab29\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 172,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0c9b3da5aab8017141d860fdf9bf96fda95d7653525b66fb1ff5d528d0a6059b\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 210,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"8738f802e937d9be4960ef80786b14c101bcb462a2d3f8e4e441cb90a40de9fd\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 217,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"2bfc3c2deecf2d09ba87039c0c0cde84b2323ca68f894f6e2682eff5239a3b7f\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 231,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 255,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ae6ce62318d3f91ff6c20e7d0b393d990af52d230ab206e252d0a108beba60b7\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 281,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"d94d69f5837c22c5288eab47cc265ee6202a3c613b4b44cd4f85cb0b67b7ec7a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 319,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"6c51c73920a0b76e08f2461e8233943842d78fbd8cec9d9597cbabcf01ba5de1\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 326,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"4ee227ebcb78690eab1eca91b286d21a90fef03ff8af8531fb7203edd1c5f02c\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 340,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 364,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e493396f2112139eea70242e53f18872a0208dea37eac2bed4afe06e32820919\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 390,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"509e51c149d94f0a5e9ab6970e404891428eb0273a21c03a2d7bde2f7a86bf87\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 428,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"979ade9fcc60056661ec70a78d403aea1ea7fe02571c934e840b36b0717db141\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 435,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"7ff397b13ce43f4f7703f165814835eecaef4482fda9578e3c1921cea4472590\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 449,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 473,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"ec609cfea1a8b5d60722cbd2c1493d3588508754eed044d61f47e11d67d2d405\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 499,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"7733f4b08d85d2790192ae24b0b9d74b00b5f36fe88e1b4bf26047c76b744794\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 537,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"78270393d8943150f3c05efaafc1585ead802ed9d3c90f4293748e6ff1493def\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 544,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"580295cd195e95ab75e12c9dc39ae560fb65afb17f4ba3fbcd49a7ab3b009332\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 558,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 582,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"0cb1e903ba5b002512cc48565d62bdd6ca3d77be97e1262ea533ef7a69ee4e20\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 608,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"b5a807150f2990605bdc063a93a89f2c9f5aa5b19823ccd0f8a6086cb0657e15\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 646,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"74da3746384ed85deda089bcb726efec59f8ad5556eeca9f35d5649abff73d0a\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 653,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b833499efbd08070843a13ea938e45a312651687a75247aa6559ce93406b318b\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 667,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 691,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1dd202dbcf7b8180790eb9d575671aa94f94ee412342fb9c6e5f2f994dfa00b5\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 717,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e10aaf7610f84bd2692ef3c3aaff804192a773a9cf09cc06c9f5335c25523df6\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 755,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e4e437950a80e8637450090a32f2d8f626256a957a024cb997cf446f4a44a906\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 762,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"b47e21a4a9a78e00721e8ca126886851e926f618e1fc1bdd2978908ccdc23d04\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 776,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 800,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3281bbd9c89a1324e37a55f0870575758f8d8ba5c744454fdb8f2d6c57cacba3\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 826,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"28ec41db1bb80b1367a00f217674007f3b45a157c51a7f638861e00953986594\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 864,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"3dfc024f008d3bd159fb2be37bd4fde32e6cb326bf65e4c8bd0ec7d1129e038d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 871,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"5fe1b728cd88dc7fe1f9a5e03b128646483416ed8b9c10f3a9dbde89e33fe718\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 885,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 909,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"fd6432f44dde8575543c0898eb2a7f1a74d285935ced6eaca27bc79d90491694\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 935,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"a501345b244ed670a01c866e3469aaedff4182b748f5dc8ae2ff704959d81b1e\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 973,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"84f8d2bedb80dd5a5c61ba46f2f312ce5348a3fecacfcf06e47d7955c0031f0d\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 980,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"bbee54da75cbb0128526e123e3bb64dec54cf8b570e5ac5701b2c13ed878bcc2\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 994,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1018,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"16f3843938be94d3369c1a9551f7ef31e6ec335bda497da8f415ba610ba67222\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1044,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"2adbe84cf816479dcc1c6235c90e3cb2a2715638163d2c3821110e43eba1be7c\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1082,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"bbd8f7bef0b3534e661d0b3e34be8b66fb38378d9fdc272b38d6402ca71507aa\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1089,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"integrity_hash\": \"3002f20b231d087d0140e659a515df80dcf150aaaff75cc459c99d9fe2730cda\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1103,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"1515128f0496ead29b7f236008e0b7211570cde0f3cc86325f8de21301a295d5\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1123,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"043cf4ec8c068b6c6e43d9c4614cb0fa83fbab880742840347eba9d475ac03e1\","
+    },
+    {
+      "file": "./exports/manifest_1752415456182.json",
+      "line": 1143,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
+    },
+    {
       "file": "./.aurora/seals/FILE_anchor_tracker_20250720T203625.json",
       "line": 6,
       "type": "HARDCODED_SECRET",
@@ -1105,6 +1097,54 @@
       "code": "\"metadata_hash\": \"c85f65a56a6ec3c565414b6369867a8d6c14c2ddb2502cd01c0f5546924a5a25\","
     },
     {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
       "file": "./.aurora/seals/FILE_test_t71_tools_20250720T214834.json",
       "line": 6,
       "type": "HARDCODED_SECRET",
@@ -1119,54 +1159,6 @@
       "severity": "LOW",
       "message": "Possible hardcoded credential",
       "code": "\"metadata_hash\": \"288b716bfcee91559149d64eed9b95a2fadb2187e36adf80cfe8ce7580b993e5\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
     }
   ],
   "fixes_applied": []

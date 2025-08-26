@@ -50,17 +50,17 @@ jobs:
 
       - name: Setup Python for analysis
         uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+        with:
+          python-version: '3.11'
 
-    - name: Run intelligent analysis
-      id: analysis
-      run: |
-        echo "🧠 Running smart build analysis..."
-        python3 .github/scripts/intelligent-test-selector.py --output-format github
+      - name: Run intelligent analysis
+        id: analysis
+        run: |
+          echo "🧠 Running smart build analysis..."
+          python3 .github/scripts/intelligent-test-selector.py --output-format github
 
-        # Also check if build can be skipped entirely
-        python3 .github/scripts/intelligent-test-selector.py --check-skip-build --output-format github
+          # Also check if build can be skipped entirely
+          python3 .github/scripts/intelligent-test-selector.py --check-skip-build --output-format github
 
   approval-gate:
     uses: ./.github/workflows/t1-approval-gate.yml

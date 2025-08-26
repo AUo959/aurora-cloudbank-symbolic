@@ -44,14 +44,14 @@ def parse_multivector(expression: str, blades: dict):
         if token not in allowed_symbols and not token.isnumeric():
             raise ValueError(f"Invalid token in expression: {token}")
     # Construct the multivector using the blades dictionary
-    _ = None
+    result = None
 
     for token in tokens:
         if token in blades:
-            _ = blades[token] if result is None else result + blades[token]
+            result = blades[token] if result is None else result + blades[token]
 
         elif token.isnumeric():
-            _ = float(token) if result is None else result + float(token)
+            result = float(token) if result is None else result + float(token)
 
     return result
 

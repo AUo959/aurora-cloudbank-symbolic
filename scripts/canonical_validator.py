@@ -163,7 +163,7 @@ class CanonicalValidator:
                     break
 
         # Check drift lock values
-        drift_pattern = r"drift_lock[\r"r'\s]*:?[\"'\s]*([0-9.]+)"
+        drift_pattern = r"drift_lock[\r\s]*:?[\"'\s]*([0-9.]+)"
         drift_matches = re.findall(drift_pattern, content, re.IGNORECASE)
         for match in drift_matches:
             if float(match) != 0.000:
@@ -210,7 +210,7 @@ class CanonicalValidator:
                         break
 
             # Also check with role pattern for structured content
-            role_pattern = rf"{re.escape(role)}[\r"r'\s]*:?[\"'\s]*([^\"',\n}}]+)"
+            role_pattern = rf"{re.escape(role)}[\r\s]*:?[\"'\s]*([^\"',\n}}]+)"
             matches = re.findall(role_pattern, updated_content, re.IGNORECASE)
 
             for match in matches:
@@ -277,7 +277,7 @@ class CanonicalValidator:
 
         # Check for message syntax patterns
         msg_patterns = [
-            (rr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
+            (r"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
             (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
         ]
 

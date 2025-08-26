@@ -589,7 +589,7 @@ class MaintenanceScheduler:
             Health score or 0.0 if not found
         """
 
-        match = re.search(rr"Health Score: ([\d.]+)/10", output)
+        match = re.search(r"Health Score: ([\d.]+)/10", output)
         return float(match.group(1)) if match else 0.0
 
     def run_task(self, task_name: str) -> Dict:

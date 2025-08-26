@@ -11,7 +11,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-
+import rateLimit from 'express-rate-limit';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
@@ -32,6 +32,15 @@ class AuroraWebServer {
         // Enable CORS for development
         this.app.use(cors());
         
+        // Rate limiting to prevent abuse/DoS
+        const limiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // limit each IP to 100 requests per windowMs
+            standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+            legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+        });
+        this.app.use(limiter);
+
         // Parse JSON bodies
         this.app.use(express.json({ limit: '10mb' }));
         

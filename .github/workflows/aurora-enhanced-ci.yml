@@ -31,7 +31,8 @@ concurrency:
 env:
   NODE_VERSION: '18'
   PYTHON_VERSION: '3.11'
-  AURORA_VALIDATION_LEVEL: ${{ github.event.inputs.force_full_validation == 'true' && 'full' || 'smart' }}
+  AURORA_VALIDATION_LEVEL: >-
+    ${{ github.event.inputs.force_full_validation == 'true' && 'full' || 'smart' }}
 
 jobs:
   # Smart analysis with Aurora awareness
@@ -44,7 +45,8 @@ jobs:
       test_matrix: ${{ steps.analysis.outputs.matrix }}
       run_aurora_core: ${{ steps.analysis.outputs.run_aurora_core }}
       run_security: ${{ steps.analysis.outputs.run_security }}
-      aurora_validation_needed: ${{ steps.aurora_check.outputs.validation_needed }}
+      aurora_validation_needed: >-
+        ${{ steps.aurora_check.outputs.validation_needed }}
 
     steps:
       - name: Checkout code
@@ -102,58 +104,74 @@ jobs:
       security_status: ${{ steps.symbolic_validation.outputs.security_status }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Python for Aurora validation
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: pip
+      - name: Setup Python for Aurora validation
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
 
-    - name: Install Aurora dependencies
-      run: |
-        pip install --user -r requirements.txt || pip install --user fastapi pytest numpy
+      - name: Install Aurora dependencies
+        run: |
+          pip install --user -r requirements.txt || \
+          pip install --user fastapi pytest numpy
 
-    - name: Run Aurora symbolic validation
-      id: symbolic_validation
-      run: |
-        echo "🔮 Running Aurora CloudBank Symbolic Validation..."
-        python3 .github/scripts/aurora-symbolic-validator.py --output-format github
+      - name: Run Aurora symbolic validation
+        id: symbolic_validation
+        run: |
+          echo "🔮 Running Aurora CloudBank Symbolic Validation..."
+          python3 .github/scripts/aurora-symbolic-validator.py \
+            --output-format github
 
-    - name: Validate T1/SRB anchors
-      run: |
-        echo "⚓ Validating T1/SRB Anchor Systems..."
-        python3 .github/scripts/aurora-symbolic-validator.py --component anchors --output-format json || echo "Anchor validation completed"
+      - name: Validate T1/SRB anchors
+        run: |
+          echo "⚓ Validating T1/SRB Anchor Systems..."
+          python3 .github/scripts/aurora-symbolic-validator.py \
+            --component anchors --output-format json || \
+            echo "Anchor validation completed"
 
-    - name: Validate DLP tracking
-      run: |
-        echo "📊 Validating DLP Tracking and Memory Sealing..."
-        python3 .github/scripts/aurora-symbolic-validator.py --component dlp --output-format json || echo "DLP validation completed"
+      - name: Validate DLP tracking
+        run: |
+          echo "📊 Validating DLP Tracking and Memory Sealing..."
+          python3 .github/scripts/aurora-symbolic-validator.py \
+            --component dlp --output-format json || \
+            echo "DLP validation completed"
 
-    - name: Validate security ethics (Picard_Delta_3)
-      run: |
-        echo "🛡️ Validating Security and Ethics Protocols..."
-        python3 .github/scripts/aurora-symbolic-validator.py --component security --output-format json || echo "Security validation completed"
+      - name: Validate security ethics (Picard_Delta_3)
+        run: |
+          echo "🛡️ Validating Security and Ethics Protocols..."
+          python3 .github/scripts/aurora-symbolic-validator.py \
+            --component security --output-format json || \
+            echo "Security validation completed"
 
-    - name: Upload Aurora validation manifest
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: aurora-validation-manifest
-        path: aurora_ci_validation_manifest.json
-        retention-days: 30
+      - name: Upload Aurora validation manifest
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aurora-validation-manifest
+          path: aurora_ci_validation_manifest.json
+          retention-days: 30
 
-    - name: Aurora validation summary
-      run: |
-        echo "# 🔮 Aurora Symbolic Validation Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## Validation Status: ${{ steps.symbolic_validation.outputs.aurora_validation_status }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Component Status:" >> $GITHUB_STEP_SUMMARY
-        echo "- **T1/SRB Anchors**: ${{ steps.symbolic_validation.outputs.anchor_status }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **DLP Tracking**: ${{ steps.symbolic_validation.outputs.dlp_status }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Security/Ethics**: ${{ steps.symbolic_validation.outputs.security_status }}" >> $GITHUB_STEP_SUMMARY
+      - name: Aurora validation summary
+        run: |
+          echo "# 🔮 Aurora Symbolic Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Validation Status: \
+          ${{ steps.symbolic_validation.outputs.aurora_validation_status }}" \
+          >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Component Status:" >> $GITHUB_STEP_SUMMARY
+          echo "- **T1/SRB Anchors**: \
+          ${{ steps.symbolic_validation.outputs.anchor_status }}" \
+          >> $GITHUB_STEP_SUMMARY
+          echo "- **DLP Tracking**: \
+          ${{ steps.symbolic_validation.outputs.dlp_status }}" \
+          >> $GITHUB_STEP_SUMMARY
+          echo "- **Security/Ethics**: \
+          ${{ steps.symbolic_validation.outputs.security_status }}" \
+          >> $GITHUB_STEP_SUMMARY
 
   # Enhanced quality checks with Aurora integration
   aurora-quality-checks:
@@ -164,10 +182,10 @@ jobs:
     if: needs.aurora-smart-analysis.outputs.skip_build != 'true'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
     # Enhanced caching with Aurora awareness
     - name: Cache dependencies with Aurora context

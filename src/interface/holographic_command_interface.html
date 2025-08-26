@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self';">
     <title>Aurora CloudBank - Holographic Command Interface</title>
     <style>
         * {
@@ -431,7 +432,21 @@
         </div>
     </div>
 
+    <script src="../../static/js/aurora-security.js"></script>
     <script>
+        // Security helper functions
+        function sanitizeHTML(input) {
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = input;
+            return tempDiv.innerHTML;
+        }
+
+        function createSafeElement(tag, content) {
+            const element = document.createElement(tag);
+            element.textContent = content;
+            return element;
+        }
+
         // Initialize holographic particles
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
@@ -456,10 +471,24 @@
                 const timestamp = new Date().toISOString().replace('T', ' ').substr(0, 19);
                 const entry = document.createElement('div');
                 entry.className = 'command-entry';
-                entry.innerHTML = `
-                    <span class="timestamp">[${timestamp}]</span><br>
-                    > ${command} → <span style="color: #00ff00;">PROCESSING</span>
-                `;
+                
+                // Create secure content without innerHTML
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = 'timestamp';
+                timestampSpan.textContent = `[${timestamp}]`;
+                
+                const br = document.createElement('br');
+                
+                const commandText = document.createTextNode(`> ${sanitizeHTML(command)} → `);
+                
+                const statusSpan = document.createElement('span');
+                statusSpan.style.color = '#00ff00';
+                statusSpan.textContent = 'PROCESSING';
+                
+                entry.appendChild(timestampSpan);
+                entry.appendChild(br);
+                entry.appendChild(commandText);
+                entry.appendChild(statusSpan);
                 
                 history.appendChild(entry);
                 history.scrollTop = history.scrollHeight;
@@ -467,10 +496,7 @@
                 
                 // Simulate command processing
                 setTimeout(() => {
-                    entry.innerHTML = `
-                        <span class="timestamp">[${timestamp}]</span><br>
-                        > ${command} → <span style="color: #00ff00;">SUCCESS</span>
-                    `;
+                    statusSpan.textContent = 'SUCCESS';
                 }, 1000);
             }
         }

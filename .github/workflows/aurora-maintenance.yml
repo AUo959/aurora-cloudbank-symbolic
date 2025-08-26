@@ -18,8 +18,10 @@ name: Aurora Maintenance & Monitoring
           - performance-check
 
 permissions:
-  contents: read
-  actions: read
+  contents: read          # Read repository contents
+  actions: read          # Read workflow status
+  checks: write          # Write check results
+  security-events: write # Write security events
 
 concurrency:
   group: maintenance-${{ github.ref }}

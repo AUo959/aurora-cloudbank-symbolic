@@ -14,8 +14,11 @@ name: Aurora CloudBank CI/CD Pipeline
   workflow_dispatch: {}
 
 permissions:
-  contents: read
-  actions: read
+  contents: read          # Read repository contents
+  actions: read          # Read workflow status
+  checks: write          # Write check results
+  pull-requests: write   # Comment on PRs
+  security-events: write # Write security events
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

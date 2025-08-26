@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self';">
     <title>🌟 Aurora Agent Constellation Dashboard</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
@@ -466,6 +467,20 @@
                 this.log('Dashboard initialized', 'info');
             }
 
+            // Security helper functions
+            sanitizeText(input) {
+                const div = document.createElement('div');
+                div.textContent = input;
+                return div.innerHTML;
+            }
+
+            createSafeElement(tag, textContent = '', className = '') {
+                const element = document.createElement(tag);
+                if (textContent) element.textContent = textContent;
+                if (className) element.className = className;
+                return element;
+            }
+
             log(message, type = 'info') {
                 const timestamp = new Date().toLocaleTimeString();
                 this.logs.push({ timestamp, message, type });
@@ -492,37 +507,96 @@
                 this.agents.forEach(agent => {
                     const state = this.agentStates.get(agent.id) || { status: 'disconnected' };
                     
-                    const card = document.createElement('div');
-                    card.className = `agent-card ${state.status}`;
-                    card.innerHTML = `
-                        <div class="agent-header">
-                            <span class="agent-status ${state.status}"></span>
-                            <span class="agent-name">${agent.id}</span>
-                        </div>
-                        
-                        <div class="agent-details">
-                            <p><strong>Role:</strong> ${agent.role}</p>
-                            <p><strong>Type:</strong> ${agent.type}</p>
-                            <p><strong>Status:</strong> ${state.status.toUpperCase()}</p>
-                            <p><strong>Description:</strong> ${agent.description}</p>
-                            ${state.connected ? `<p><strong>Connected:</strong> ${new Date(state.connected).toLocaleString()}</p>` : ''}
-                            ${state.lastHeartbeat ? `<p><strong>Last Heartbeat:</strong> ${new Date(state.lastHeartbeat).toLocaleTimeString()}</p>` : ''}
-                            ${state.driftLock !== undefined ? `<p><strong>Drift Lock:</strong> Δ${state.driftLock}</p>` : ''}
-                        </div>
-                        
-                        <div class="capabilities">
-                            <strong>Capabilities:</strong><br>
-                            ${agent.capabilities.map(cap => `<span class="capability-tag">${cap}</span>`).join('')}
-                        </div>
-                        
-                        <button class="activation-button ${state.status}" 
-                                onclick="dashboard.handleAgentAction('${agent.id}')"
-                                ${state.status === 'handshaking' ? 'disabled' : ''}>
-                            ${this.getButtonText(state.status)}
-                        </button>
-                        
-                        ${state.handshakeLog ? this.renderHandshakeLog(state.handshakeLog) : ''}
-                    `;
+                    const card = this.createSafeElement('div', '', `agent-card ${state.status}`);
+                    
+                    // Create agent header
+                    const header = this.createSafeElement('div', '', 'agent-header');
+                    const statusSpan = this.createSafeElement('span', '', `agent-status ${state.status}`);
+                    const nameSpan = this.createSafeElement('span', this.sanitizeText(agent.id), 'agent-name');
+                    header.appendChild(statusSpan);
+                    header.appendChild(nameSpan);
+                    
+                    // Create agent details
+                    const details = this.createSafeElement('div', '', 'agent-details');
+                    
+                    const roleP = this.createSafeElement('p');
+                    const roleBold = this.createSafeElement('strong', 'Role:');
+                    roleP.appendChild(roleBold);
+                    roleP.appendChild(document.createTextNode(` ${this.sanitizeText(agent.role)}`));
+                    
+                    const typeP = this.createSafeElement('p');
+                    const typeBold = this.createSafeElement('strong', 'Type:');
+                    typeP.appendChild(typeBold);
+                    typeP.appendChild(document.createTextNode(` ${this.sanitizeText(agent.type)}`));
+                    
+                    const statusP = this.createSafeElement('p');
+                    const statusBold = this.createSafeElement('strong', 'Status:');
+                    statusP.appendChild(statusBold);
+                    statusP.appendChild(document.createTextNode(` ${this.sanitizeText(state.status.toUpperCase())}`));
+                    
+                    const descP = this.createSafeElement('p');
+                    const descBold = this.createSafeElement('strong', 'Description:');
+                    descP.appendChild(descBold);
+                    descP.appendChild(document.createTextNode(` ${this.sanitizeText(agent.description)}`));
+                    
+                    details.appendChild(roleP);
+                    details.appendChild(typeP);
+                    details.appendChild(statusP);
+                    details.appendChild(descP);
+                    
+                    if (state.connected) {
+                        const connectedP = this.createSafeElement('p');
+                        const connectedBold = this.createSafeElement('strong', 'Connected:');
+                        connectedP.appendChild(connectedBold);
+                        connectedP.appendChild(document.createTextNode(` ${this.sanitizeText(new Date(state.connected).toLocaleString())}`));
+                        details.appendChild(connectedP);
+                    }
+                    
+                    if (state.lastHeartbeat) {
+                        const heartbeatP = this.createSafeElement('p');
+                        const heartbeatBold = this.createSafeElement('strong', 'Last Heartbeat:');
+                        heartbeatP.appendChild(heartbeatBold);
+                        heartbeatP.appendChild(document.createTextNode(` ${this.sanitizeText(new Date(state.lastHeartbeat).toLocaleTimeString())}`));
+                        details.appendChild(heartbeatP);
+                    }
+                    
+                    if (state.driftLock !== undefined) {
+                        const driftP = this.createSafeElement('p');
+                        const driftBold = this.createSafeElement('strong', 'Drift Lock:');
+                        driftP.appendChild(driftBold);
+                        driftP.appendChild(document.createTextNode(` Δ${this.sanitizeText(state.driftLock.toString())}`));
+                        details.appendChild(driftP);
+                    }
+                    
+                    // Create capabilities section
+                    const capabilities = this.createSafeElement('div', '', 'capabilities');
+                    const capTitle = this.createSafeElement('strong', 'Capabilities:');
+                    capabilities.appendChild(capTitle);
+                    capabilities.appendChild(document.createElement('br'));
+                    
+                    agent.capabilities.forEach(cap => {
+                        const capTag = this.createSafeElement('span', this.sanitizeText(cap), 'capability-tag');
+                        capabilities.appendChild(capTag);
+                    });
+                    
+                    // Create activation button
+                    const button = this.createSafeElement('button', '', `activation-button ${state.status}`);
+                    button.textContent = this.getButtonText(state.status);
+                    if (state.status === 'handshaking') button.disabled = true;
+                    button.onclick = () => this.handleAgentAction(agent.id);
+                    
+                    // Assemble the card
+                    card.appendChild(header);
+                    card.appendChild(details);
+                    card.appendChild(capabilities);
+                    card.appendChild(button);
+                    
+                    // Add handshake log if present
+                    if (state.handshakeLog) {
+                        const logElement = this.renderHandshakeLog(state.handshakeLog);
+                        card.appendChild(logElement);
+                    }
+                    
                     grid.appendChild(card);
                 });
             }
@@ -537,19 +611,31 @@
             }
 
             renderHandshakeLog(handshakeLog) {
-                if (!handshakeLog || handshakeLog.length === 0) return '';
+                if (!handshakeLog || handshakeLog.length === 0) return null;
                 
-                return `
-                    <div class="log-viewer">
-                        <strong>ZIPWIZ Handshake Log:</strong>
-                        ${handshakeLog.map(entry => `
-                            <div class="log-entry">
-                                <span class="timestamp">[${new Date(entry.timestamp).toLocaleTimeString()}]</span>
-                                ${entry.step}: ${entry.result.success ? '✅' : '❌'}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                const logViewer = this.createSafeElement('div', '', 'log-viewer');
+                const title = this.createSafeElement('strong', 'ZIPWIZ Handshake Log:');
+                logViewer.appendChild(title);
+                
+                handshakeLog.forEach(entry => {
+                    const logEntry = this.createSafeElement('div', '', 'log-entry');
+                    
+                    const timestamp = this.createSafeElement('span', 
+                        `[${new Date(entry.timestamp).toLocaleTimeString()}]`, 
+                        'timestamp'
+                    );
+                    
+                    const stepText = document.createTextNode(` ${this.sanitizeText(entry.step)}: `);
+                    const resultText = document.createTextNode(entry.result.success ? '✅' : '❌');
+                    
+                    logEntry.appendChild(timestamp);
+                    logEntry.appendChild(stepText);
+                    logEntry.appendChild(resultText);
+                    
+                    logViewer.appendChild(logEntry);
+                });
+                
+                return logViewer;
             }
 
             async handleAgentAction(agentId) {
@@ -709,5 +795,6 @@
         // Initialize dashboard when page loads
         const dashboard = new AgentConstellationDashboard();
     </script>
+    <script src="../../static/js/aurora-security.js"></script>
 </body>
 </html>

@@ -1,13 +1,11 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import shlex
-
 Aurora Integration Readiness Assessment
 Using enhanced GitWiz and Health Monitor tools to prepare for Aurora integration
 """
+
+import shlex
+import subprocess
 
 
 import json

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank - Validation Manager
 Elegant solution for handling validation file regeneration cycles
 
@@ -13,9 +10,9 @@ This module provides multiple strategies for handling the validation file update
 4. Memory-based validation - skip file writes during commit process
 
 Author: Aurora CloudBank Development Team
-Version: 1.0.0
-Date: July 14, 2025
 """
+
+import argparse
 
 
 import json
@@ -23,6 +20,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import List
+import tempfile
 
 
 class ValidationManager:

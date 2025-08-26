@@ -39,12 +39,12 @@ class AuroraProblemResolver:
             content = re.sub(r'"([^"]*)"', r"'\1'r", content)
 
             # Fix unused message parameters
-            content = re.sub(r"async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
+            content = re.sub(r'async\s+(\w+)\s*\(\s*message\s*\)', r'async \1(_message)', content)
 
             with open(mesh_agent_path, 'w') as f:
                 f.write(content)
 
-            print(f"✅ Fixed ESLint issues in {mesh_agent_path}")
+            print("✅ Fixed ESLint issues in {mesh_agent_path}")
             self.fixes_applied.append("mesh_agent.js ESLint compliance")
 
     def fix_python_syntax_errors(self):
@@ -67,7 +67,7 @@ class AuroraProblemResolver:
 
     def fix_python_file_syntax(self, file_path):
         """Fix syntax errors in a specific Python file"""
-        print(f"🔧 Fixing syntax in {file_path}...")
+        print("🔧 Fixing syntax in {file_path}...")
 
         try:
             with open(file_path, 'r') as f:
@@ -81,22 +81,22 @@ class AuroraProblemResolver:
             if content != original_content:
                 with open(file_path, 'w') as f:
                     f.write(content)
-                print(f"✅ Fixed syntax errors in {file_path}")
-                self.fixes_applied.append(f"Python syntax: {file_path}")
+                print("✅ Fixed syntax errors in {file_path}")
+                self.fixes_applied.append("Python syntax: {file_path}")
 
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
-            self.errors_found.append(f"{file_path}: {e}")
+            print("❌ Error fixing {file_path}: {e}")
+            self.errors_found.append("{file_path}: {e}")
 
     def apply_python_syntax_fixes(self, content):
         """Apply comprehensive Python syntax fixes""r"
         # Fix JavaScript-style syntax in Python
-        content = re.sub(r"\)\s*\{', '):', content)  # ) { -> ):
-        content = re.sub(r"class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
+        content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
+        content = re.sub(r'class\s+(\w+)\s*\{', r'class \1:', content)  # class Name { -> class Name:
         content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
-        content = re.sub(r"^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
+        content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
         content = re.sub(r'\bthis\.', 'self.', content)  # this. -> self.
-        content = re.sub(r"^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
+        content = re.sub(r'^(\s*)//(.*)$', r'\1#\2', content, flags=re.MULTILINE)  # // -> #
 
         # Fix unclosed braces by ensuring proper dictionary/list syntax
         lines = content.split('\n')
@@ -160,14 +160,14 @@ class AuroraProblemResolver:
                             f.write(fixed_content)
 
                         archived_files.append(str(rel_path))
-                        print(f"✅ Restored and fixed: {rel_path}")
+                        print("✅ Restored and fixed: {rel_path}")
 
                     except Exception as e:
-                        print(f"❌ Error restoring {rel_path}: {e}")
-                        self.errors_found.append(f"Archive restore {rel_path}: {e}")
+                        print("❌ Error restoring {rel_path}: {e}")
+                        self.errors_found.append("Archive restore {rel_path}: {e}")
 
         if archived_files:
-            self.fixes_applied.extend([f"Restored: {f}" for f in archived_files])
+            self.fixes_applied.extend(["Restored: {f}" for f in archived_files])
 
     def install_missing_dependencies(self):
         """Install missing Python dependencies"""
@@ -188,11 +188,11 @@ class AuroraProblemResolver:
                 'pip3', 'install'
             ] + missing_deps, check=True, capture_output=True)
 
-            print(f"✅ Installed missing dependencies: {', '.join(missing_deps)}")
+            print("✅ Installed missing dependencies: {', '.join(missing_deps)}")
             self.fixes_applied.append("Missing Python dependencies")
 
         except subprocess.CalledProcessError as e:
-            print(f"⚠️  Could not install all dependencies: {e}")
+            print("⚠️  Could not install all dependencies: {e}")
 
     def create_missing_imports(self):
         """Create placeholder files for missing imports"""
@@ -212,7 +212,7 @@ class AuroraProblemResolver:
         ]
 
         for handler in handler_classes:
-            handler_file = handlers_dir / f"{handler.lower()}.py"
+            handler_file = handlers_dir / "{handler.lower()}.py"
             if not handler_file.exists():
                 handler_content = '''"""
 
@@ -238,7 +238,7 @@ class {handler}:
                 with open(handler_file, 'w') as f:
                     f.write(handler_content)
 
-                print(f"✅ Created placeholder: {handler_file}")
+                print("✅ Created placeholder: {handler_file}")
 
         # Create __init__.py for the handlers module
         init_file = handlers_dir / "__init__.py"
@@ -247,7 +247,7 @@ class {handler}:
 Aurora CloudBank Multi - Modal Interaction Handlers
 """
 
-{chr(10).join([f"from .{handler.lower()} import {handler}" for handler in handler_classes])}
+{chr(10).join(["from .{handler.lower()} import {handler}" for handler in handler_classes])}
 
 __all__ = {handler_classes}
 '''
@@ -274,7 +274,7 @@ __all__ = {handler_classes}
             with open(bridge_file, 'w') as f:
                 f.write(content)
 
-            print(f"✅ Fixed type annotations in {bridge_file}")
+            print("✅ Fixed type annotations in {bridge_file}")
 
     def validate_fixes(self):
         """Validate that fixes were successful"""
@@ -322,32 +322,32 @@ __all__ = {handler_classes}
         success, py_errors, js_errors = self.validate_fixes()
 
         print("\n📊 Resolution Summary:")
-        print(f"   ✅ Fixes Applied: {len(self.fixes_applied)}")
-        print(f"   ❌ Errors Found: {len(self.errors_found)}")
-        print(f"   🐍 Python Files: {'✅ Clean' if not py_errors else f'❌ {len(py_errors)} errors'}")
-        print(f"   📜 JavaScript Files: {'✅ Clean' if not js_errors else f'❌ {len(js_errors)} errors'}")
+        print("   ✅ Fixes Applied: {len(self.fixes_applied)}")
+        print("   ❌ Errors Found: {len(self.errors_found)}")
+        print("   🐍 Python Files: {'✅ Clean' if not py_errors else f'❌ {len(py_errors)} errors'}")
+        print("   📜 JavaScript Files: {'✅ Clean' if not js_errors else f'❌ {len(js_errors)} errors'}")
 
         if self.fixes_applied:
             print("\n🔧 Fixes Applied:")
             for fix in self.fixes_applied:
-                print(f"   ✅ {fix}")
+                print("   ✅ {fix}")
 
         if self.errors_found:
             print("\n⚠️  Remaining Issues:")
             for error in self.errors_found:
-                print(f"   ❌ {error}")
+                print("   ❌ {error}")
 
         if py_errors:
             print("\n🐍 Python Syntax Errors:")
             for error in py_errors:
-                print(f"   ❌ {error}")
+                print("   ❌ {error}")
 
         if js_errors:
             print("\n📜 JavaScript Syntax Errors:")
             for error in js_errors:
-                print(f"   ❌ {error}")
+                print("   ❌ {error}")
 
-        print(f"\n🎯 Status: {'🎉 READY FOR AURORA INTEGRATION' if success else '🔧 NEEDS MORE WORK'}")
+        print("\n🎯 Status: {'🎉 READY FOR AURORA INTEGRATION' if success else '🔧 NEEDS MORE WORK'}")
 
         return success
 

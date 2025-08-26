@@ -1,25 +1,24 @@
-from pydantic import BaseModel
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-        import random
-        import random
-        import random
-        import numpy as np
-    import uvicorn
-
 🌐 Aurora CloudBank API Server
 FastAPI-based REST API for Aurora CloudBank services
 """
+
+import random
+import numpy as np
+import uvicorn
+from pydantic import BaseModel
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 # Pydantic models for API
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
+from fastapi import HTTPException
 
 
 class QuantumVectorRequest(BaseModel):

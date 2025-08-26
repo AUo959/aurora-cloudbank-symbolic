@@ -1,10 +1,5 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-
 CI Environment Validation Script
 ===============================
 
@@ -19,8 +14,10 @@ Usage:
 Author: Aurora/ORION Core
 """
 
-
+import argparse
 import json
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Tuple

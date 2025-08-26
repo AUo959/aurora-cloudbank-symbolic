@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 """
-
-        import re
-
 Aurora CloudBank - Automated Maintenance System
 ==============================================
 
 Scheduled maintenance workflows for repository optimization and cleanup.
 """
+
+import re
+from pathlib import Path
+import datetime
+import schedule
+import logging
+import json
+import argparse
+from typing import Dict
+import subprocess
+import sys
+import time
 
 
 class MaintenanceScheduler:
@@ -86,7 +95,7 @@ class MaintenanceScheduler:
                 with open(config_path, encoding="utf-8") as f:
                     return json.load(f)
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error loading config: {e}")
+                self.logger.error("Error loading config: {e}")
 
         # Default configuration
         default_config = {
@@ -185,14 +194,12 @@ class MaintenanceScheduler:
                 "pycache_dirs_removed": pycache_count,
             }
 
-            self.logger.info(
-                f"Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs"
-            )
+            self.logger.info("Python cache cleanup complete: {pyc_count} .pyc files, {pycache_count} __pycache__ dirs")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in Python cache cleanup: {e}")
+            self.logger.error("Error in Python cache cleanup: {e}")
 
         return result
 
@@ -238,22 +245,17 @@ class MaintenanceScheduler:
                 # Remove temp files (with confirmation for safety)
                 for temp_file in temp_files:
                     temp_path = self.repo_path / temp_file.lstrip("./")
-                    if (
-                        temp_path.exists()
-                        and temp_path.stat().st_size < 100 * 1024 * 1024
-                    ):  # Only remove files < 100MB
+                    if temp_path.exists() and temp_path.stat().st_size < 100 * 1024 * 1024:  # Only remove files < 100MB
                         temp_path.unlink()
                         removed_count += 1
 
             result["details"] = {"temp_files_removed": removed_count}
-            self.logger.info(
-                f"Temporary file cleanup complete: {removed_count} files removed"
-            )
+            self.logger.info("Temporary file cleanup complete: {removed_count} files removed")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in temporary file cleanup: {e}")
+            self.logger.error("Error in temporary file cleanup: {e}")
 
         return result
 
@@ -297,24 +299,20 @@ class MaintenanceScheduler:
                 check=False,
             )
 
-            git_size_mb = (
-                int(du_result.stdout.split()[0]) if du_result.returncode == 0 else 0
-            )
+            git_size_mb = int(du_result.stdout.split()[0]) if du_result.returncode == 0 else 0
 
             result["details"] = {
                 "git_size_mb": git_size_mb,
                 "gc_output": gc_result.stdout if gc_result.stdout else "No output",
-                "prune_output": (
-                    prune_result.stdout if prune_result.stdout else "No output"
-                ),
+                "prune_output": (prune_result.stdout if prune_result.stdout else "No output"),
             }
 
-            self.logger.info(f"Git optimization complete: .git size = {git_size_mb}MB")
+            self.logger.info("Git optimization complete: .git size = {git_size_mb}MB")
 
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in git optimization: {e}")
+            self.logger.error("Error in git optimization: {e}")
 
         return result
 
@@ -362,16 +360,8 @@ class MaintenanceScheduler:
                     check=False,
                 )
 
-                repo_size = (
-                    int(size_result.stdout.split()[0])
-                    if size_result.returncode == 0
-                    else 0
-                )
-                file_count = (
-                    len(files_result.stdout.strip().split("\n"))
-                    if files_result.returncode == 0
-                    else 0
-                )
+                repo_size = int(size_result.stdout.split()[0]) if size_result.returncode == 0 else 0
+                file_count = len(files_result.stdout.strip().split("\n")) if files_result.returncode == 0 else 0
 
                 result["details"] = {
                     "repository_size_mb": repo_size,
@@ -383,7 +373,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in health check: {e}")
+            self.logger.error("Error in health check: {e}")
 
         return result
 
@@ -426,13 +416,7 @@ class MaintenanceScheduler:
                     check=False,
                 )
 
-                branch_count = len(
-                    [
-                        line
-                        for line in branch_result.stdout.strip().split("\n")
-                        if line.strip()
-                    ]
-                )
+                branch_count = len([line for line in branch_result.stdout.strip().split("\n") if line.strip()])
                 result["details"] = {"branch_count": branch_count}
 
             self.logger.info("Branch cleanup analysis complete")
@@ -440,7 +424,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in branch cleanup: {e}")
+            self.logger.error("Error in branch cleanup: {e}")
 
         return result
 
@@ -496,7 +480,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in dependency check: {e}")
+            self.logger.error("Error in dependency check: {e}")
 
         return result
 
@@ -534,9 +518,7 @@ class MaintenanceScheduler:
                     if scan_result.stdout:
                         try:
                             vulnerabilities = json.loads(scan_result.stdout)
-                            result["details"]["python_vulnerabilities"] = len(
-                                vulnerabilities
-                            )
+                            result["details"]["python_vulnerabilities"] = len(vulnerabilities)
                         except json.JSONDecodeError:
                             result["details"]["python_vulnerabilities"] = 0
 
@@ -555,9 +537,7 @@ class MaintenanceScheduler:
                     try:
                         audit_data = json.loads(audit_result.stdout)
                         result["details"]["node_vulnerabilities"] = (
-                            audit_data.get("metadata", {})
-                            .get("vulnerabilities", {})
-                            .get("total", 0)
+                            audit_data.get("metadata", {}).get("vulnerabilities", {}).get("total", 0)
                         )
                     except json.JSONDecodeError:
                         result["details"]["node_vulnerabilities"] = 0
@@ -567,7 +547,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError) as e:
             result["status"] = "error"
             result["error"] = str(e)
-            self.logger.error(f"Error in security scan: {e}")
+            self.logger.error("Error in security scan: {e}")
 
         return result
 
@@ -581,7 +561,7 @@ class MaintenanceScheduler:
             Health score or 0.0 if not found
         """
 
-        match = re.search(rr"Health Score: ([\d.]+)/10", output)
+        match = re.search(r"Health Score: ([\d.]+)/10", output)
         return float(match.group(1)) if match else 0.0
 
     def run_task(self, task_name: str) -> Dict:
@@ -597,7 +577,7 @@ class MaintenanceScheduler:
             return {"task": task_name, "status": "error", "error": "Task not found"}
 
         task = self.tasks[task_name]
-        self.logger.info(f"Running task: {task['description']}")
+        self.logger.info("Running task: {task['description']}")
 
         start_time = datetime.datetime.now()
         result = task["function"]()
@@ -623,7 +603,7 @@ class MaintenanceScheduler:
 
         # Save to daily file
         date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-        results_file = results_dir / f"maintenance_{date_str}.json"
+        results_file = results_dir / "maintenance_{date_str}.json"
 
         # Load existing results
         daily_results = []
@@ -664,7 +644,7 @@ class MaintenanceScheduler:
             elif ":" in schedule_str:  # Time format
                 schedule.every().day.at(schedule_str).do(self.run_task, task_name)
 
-        self.logger.info(f"Scheduled {len(schedule.jobs)} maintenance tasks")
+        self.logger.info("Scheduled {len(schedule.jobs)} maintenance tasks")
 
     def run_scheduler(self):
         """Run the maintenance scheduler."""
@@ -680,7 +660,7 @@ class MaintenanceScheduler:
                 self.logger.info("Scheduler stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error in scheduler: {e}")
+                self.logger.error("Error in scheduler: {e}")
                 time.sleep(60)
 
 
@@ -688,15 +668,9 @@ def main():
     """Main function for maintenance CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance System")
     parser.add_argument("--run-task", help="Run specific maintenance task")
-    parser.add_argument(
-        "--schedule", action="store_true", help="Start maintenance scheduler"
-    )
-    parser.add_argument(
-        "--list-tasks", action="store_true", help="List available tasks"
-    )
-    parser.add_argument(
-        "--test", action="store_true", help="Run all tasks once for testing"
-    )
+    parser.add_argument("--schedule", action="store_true", help="Start maintenance scheduler")
+    parser.add_argument("--list-tasks", action="store_true", help="List available tasks")
+    parser.add_argument("--test", action="store_true", help="Run all tasks once for testing")
 
     args = parser.parse_args()
 
@@ -705,24 +679,22 @@ def main():
     if args.list_tasks:
         print("Available maintenance tasks:")
         for task_name, task_info in scheduler.tasks.items():
-            print(
-                f"  {task_name}: {task_info['description']} ({task_info['schedule']})"
-            )
+            print("  {task_name}: {task_info['description']} ({task_info['schedule']})")
         return 0
 
     elif args.run_task:
         if args.run_task not in scheduler.tasks:
-            print(f"Error: Task '{args.run_task}' not found")
+            print("Error: Task '{args.run_task}' not found")
             return 1
 
-        print(f"Running task: {args.run_task}")
+        print("Running task: {args.run_task}")
         result = scheduler.run_task(args.run_task)
 
-        print(f"Status: {result['status']}")
+        print("Status: {result['status']}")
         if result["status"] == "error":
-            print(f"Error: {result['error']}")
+            print("Error: {result['error']}")
         else:
-            print(f"Details: {result['details']}")
+            print("Details: {result['details']}")
 
         return 0 if result["status"] == "success" else 1
 
@@ -730,14 +702,14 @@ def main():
         print("Running all maintenance tasks for testing...")
 
         for task_name in scheduler.tasks.keys():
-            print(f"\n--- Running {task_name} ---")
+            print("\n--- Running {task_name} ---")
             result = scheduler.run_task(task_name)
-            print(f"Status: {result['status']}")
+            print("Status: {result['status']}")
 
             if result["status"] == "error":
-                print(f"Error: {result['error']}")
+                print("Error: {result['error']}")
             else:
-                print(f"Duration: {result['duration_seconds']:.1f}s")
+                print("Duration: {result['duration_seconds']:.1f}s")
 
         return 0
 

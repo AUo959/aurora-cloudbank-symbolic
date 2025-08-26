@@ -1,21 +1,18 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-
 Aurora CloudBank - Scheduled Maintenance System
 Automated repository maintenance with intelligent scheduling
 """
 
-
+import argparse
 import json
 import os
+import subprocess
 import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, Dict, Optional
+import schedule
 
 
 @dataclass
@@ -195,7 +192,7 @@ class ScheduledMaintenanceSystem:
 
         # Remove .pyc files
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-delete"],
                 capture_output=True,
                 text=True,
@@ -210,7 +207,7 @@ class ScheduledMaintenanceSystem:
 
         # Remove __pycache__ directories
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [
                     "find",
                     ".",
@@ -266,7 +263,7 @@ class ScheduledMaintenanceSystem:
         try:
             # Get branch information
             cmd = ["git", "branch", "-r"]
-            _ = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             branches = [
                 line.strip() for line in result.stdout.split("\n") if line.strip() and "origin/HEAD" not in line
@@ -331,7 +328,7 @@ class ScheduledMaintenanceSystem:
 
         # Get repository size
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,

@@ -112,7 +112,7 @@ def remove_empty_fstrings(file_path: str) -> bool:
     def replace_func_single(match):
         string_content = match.group(1)
         if "{" not in string_content and "}" not in string_content:
-            return f"'{string_content}'"
+            return "'{string_content}'"
         return match.group(0)
 
     content = re.sub(pattern, replace_func_single, content)
@@ -126,7 +126,7 @@ def remove_empty_fstrings(file_path: str) -> bool:
 
 def add_missing_type_annotations(file_path: str) -> bool:
     """Add missing type annotations for common patterns."""
-    with open(file_path, "r", encoding="utf-8r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
     original_content = content
@@ -134,11 +134,11 @@ def add_missing_type_annotations(file_path: str) -> bool:
     # Add return type annotations for simple functions
     patterns = [
         (
-            rr'def (\w+)\(self\):\s*"""([^"]*?)"""',
+            r'def (\w+)\(self\):\s*"""([^"]*?)"""',
             r'def \1(self) -> None:\n        """\2""r"',
         ),
         (
-            rr'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
+            r'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
             r'def \1(self, \2: str) -> None:\n        """\3"""',
         ),
     ]
@@ -165,7 +165,7 @@ def process_file_advanced(file_path: str) -> dict:
         # fixes['type_annotations'] = add_missing_type_annotations(file_path)  # Disabled as it's risky
 
     except (OSError, ValueError, RuntimeError) as e:
-        print(f"Error processing {file_path}: {e}")
+        print("Error processing {file_path}: {e}")
         return {}
 
     return fixes
@@ -183,7 +183,7 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-        print(f"Processing {py_file}...")
+        print("Processing {py_file}...")
         file_fixes = process_file_advanced(str(py_file))
 
         for fix_type, applied in file_fixes.items():
@@ -195,9 +195,9 @@ def main():
     print("\nAdvanced Fix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
+        print("{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print(f"\nProcessed {len(python_files)} Python files.")
+    print("\nProcessed {len(python_files)} Python files.")
     return 0
 
 

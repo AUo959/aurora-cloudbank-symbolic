@@ -10,7 +10,7 @@ import os
 
 def fix_markdown_file(filepath):
     """Fix common Markdown issues in a file"""
-    print(f"🔧 Fixing {filepath}r")
+    print("🔧 Fixing {filepath}r")
 
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -32,11 +32,11 @@ def fix_markdown_file(filepath):
                     fixed_lines.append('')
 
             # MD032: Lists should be surrounded by blank lines
-            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(r"^\s*\d+\.\s', line):
+            elif line.strip().startswith(('- ', '* ', '+ ')) or re.match(r'^\s*\d+\.\s', line):
                 # Add blank line before list if needed
                 if i > 0 and fixed_lines and fixed_lines[-1].strip() != '' and not fixed_lines[-1].strip().startswith(('- ',
                                                                                                                        '* ',
-                                                                                                                       '+ ')) and not re.match(r"^\s*\d+\.\s',
+                                                                                                                       '+ ')) and not re.match(r'^\s*\d+\.\s',
                                                                                                                                                fixed_lines[-1]):
                     fixed_lines.append('')
                 fixed_lines.append(line)
@@ -80,16 +80,16 @@ def fix_markdown_file(filepath):
         fixed_content = re.sub(r'^(\*\*[^*]+\*\*)$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # MD026: Remove trailing punctuation from headers
-        fixed_content = re.sub(r"^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
+        fixed_content = re.sub(r'^(#{1,6}\s+[^#]+)[.!?]+$', r'\1', fixed_content, flags=re.MULTILINE)
 
         # Write back to file
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
 
-        print(f"✅ Fixed {filepath}")
+        print("✅ Fixed {filepath}")
 
     except Exception as e:
-        print(f"❌ Error fixing {filepath}: {e}")
+        print("❌ Error fixing {filepath}: {e}")
 
 
 def main():
@@ -112,11 +112,11 @@ def main():
     ]
 
     for filename in problem_files:
-        filepath = f"/workspaces/aurora-cloudbank-symbolic/{filename}"
+        filepath = "/workspaces/aurora-cloudbank-symbolic/{filename}"
         if os.path.exists(filepath):
             fix_markdown_file(filepath)
         else:
-            print(f"⚠️  File not found: {filepath}")
+            print("⚠️  File not found: {filepath}")
 
     print("🎯 Markdown fixing complete!")
 

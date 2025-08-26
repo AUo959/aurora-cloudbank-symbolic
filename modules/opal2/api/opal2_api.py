@@ -18,6 +18,20 @@ Enhanced quantum visualization API with modular renderer support
 import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from fastapi.responses import HTMLResponse
+from fastapi import HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import Field
+import uuid
+from fastapi import WebSocketDisconnect
+from modules.symbolic_core import SymbolicCore
+from fastapi import WebSocket
+from modules.opal2.glyph_cache import GlyphCache
+from modules.opal2.glyph_core import GlyphCore
+from fastapi.staticfiles import StaticFiles
+from modules.opal2.quantum_renderer import QuantumRenderer
+from modules.opal2.plugin_system import PluginSystem
+
 
 app = FastAPI(
     title="Opal2 Modular Visualization System",

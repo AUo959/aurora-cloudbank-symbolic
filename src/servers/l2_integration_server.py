@@ -18,6 +18,15 @@ from typing import Any, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
+from fastapi import HTTPException
+from src.integrations.chatgpt_agent_mode import auroraCustomGptBridge
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT
+
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -471,7 +480,7 @@ def main():
     """Main entry point for the server"""
 
     parser = argparse.ArgumentParser(description="Aurora L2 Integration Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--host", default="127.0.0.1", help="Host to bind to (use 0.0.0.0 only if needed for external access)")
     parser.add_argument("--port", type=int, default=8000, help="Port to bind to")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
     parser.add_argument("--log-level", default="info", help="Log level")

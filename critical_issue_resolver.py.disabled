@@ -50,7 +50,7 @@ def fix_critical_gitwiz_issues():
     if 'def _analyze_all_zip_files(self):' not in content:
         content = content.replace(
             'class GitWizEnhanced:',
-            '''class GitWizEnhanced: '''
+            'class GitWizEnhanced:'
         )
 
         # Add missing methods at the end of the class

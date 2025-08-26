@@ -26,7 +26,7 @@ def fix_js_style_syntax(file_path):
     original_content = content
 
     # Fix common JS/Java to Python conversions
-    content = re.sub(rr'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
+    content = re.sub(r'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
     content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
     content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
     content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }

@@ -201,7 +201,7 @@ class AuroraSecurityScanner:
                 print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
-        """Fix innerHTML usage by suggesting textContent""r"
+        """Fix innerHTML usage by suggesting textContent"""
         file_path = issue['file']
         try:
             with open(file_path, 'r', encoding='utf-8') as f:

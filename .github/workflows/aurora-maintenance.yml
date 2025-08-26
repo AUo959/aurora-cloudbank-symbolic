@@ -53,36 +53,36 @@ jobs:
           python-version: '3.11'
           cache: pip
 
-    - name: Install assessment tools
-      run: |
-        pip install --user -r requirements.txt || pip install --user pytest flake8 black
+      - name: Install assessment tools
+        run: |
+          pip install --user -r requirements.txt || pip install --user pytest flake8 black
 
-    - name: Run system assessment
-      id: assessment
-      run: |
-        echo "🔍 Aurora CloudBank System Assessment"
+      - name: Run system assessment
+        id: assessment
+        run: |
+          echo "🔍 Aurora CloudBank System Assessment"
 
-        # Check repository health
-        REPO_SIZE=$(du -sh . | cut -f1)
-        echo "Repository size: $REPO_SIZE"
+          # Check repository health
+          REPO_SIZE=$(du -sh . | cut -f1)
+          echo "Repository size: $REPO_SIZE"
 
-        # Check for large files
-        LARGE_FILES=$(find . -size +10M -not -path "./.git/*" -not -path "./node_modules/*" | wc -l)
-        echo "Large files (>10MB): $LARGE_FILES"
+          # Check for large files
+          LARGE_FILES=$(find . -size +10M -not -path "./.git/*" -not -path "./node_modules/*" | wc -l)
+          echo "Large files (>10MB): $LARGE_FILES"
 
-        # Check branch status
-        STALE_BRANCHES=$(git branch -r --merged origin/main | grep -v "origin/main" | wc -l)
-        echo "Stale branches: $STALE_BRANCHES"
+          # Check branch status
+          STALE_BRANCHES=$(git branch -r --merged origin/main | grep -v "origin/main" | wc -l)
+          echo "Stale branches: $STALE_BRANCHES"
 
-        # Set outputs based on assessment
-        if [ "$LARGE_FILES" -gt 5 ] || [ "$STALE_BRANCHES" -gt 10 ]; then
-          echo "cleanup=true" >> $GITHUB_OUTPUT
-        else
-          echo "cleanup=false" >> $GITHUB_OUTPUT
-        fi
+          # Set outputs based on assessment
+          if [ "$LARGE_FILES" -gt 5 ] || [ "$STALE_BRANCHES" -gt 10 ]; then
+            echo "cleanup=true" >> $GITHUB_OUTPUT
+          else
+            echo "cleanup=false" >> $GITHUB_OUTPUT
+          fi
 
-        echo "security=true" >> $GITHUB_OUTPUT  # Always run security check
-        echo "optimization=true" >> $GITHUB_OUTPUT
+          echo "security=true" >> $GITHUB_OUTPUT  # Always run security check
+          echo "optimization=true" >> $GITHUB_OUTPUT
 
   security-maintenance:
     name: "🛡️ Security Maintenance"
@@ -92,37 +92,37 @@ jobs:
     timeout-minutes: 15
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: pip
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
 
-    - name: Install security tools
-      run: |
-        pip install --user bandit safety || echo "Security tools installation completed"
-        npm ci || npm install || echo "npm dependencies installed"
+      - name: Install security tools
+        run: |
+          pip install --user bandit safety || echo "Security tools installation completed"
+          npm ci || npm install || echo "npm dependencies installed"
 
-    - name: Run security audit
-      run: |
-        echo "🛡️ Running comprehensive security audit..."
+      - name: Run security audit
+        run: |
+          echo "🛡️ Running comprehensive security audit..."
 
-        # Python security scan
-        python3 scripts/aurora_security_scanner.py || echo "Aurora security scan completed"
+          # Python security scan
+          python3 scripts/aurora_security_scanner.py || echo "Aurora security scan completed"
 
-        # Node.js security audit
-        npm audit --audit-level=moderate || echo "npm audit completed"
+          # Node.js security audit
+          npm audit --audit-level=moderate || echo "npm audit completed"
 
-        echo "Security maintenance completed"
+          echo "Security maintenance completed"
 
   cleanup-maintenance:
     name: "🧹 Repository Cleanup"
@@ -132,29 +132,29 @@ jobs:
     timeout-minutes: 20
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Run cleanup automation
-      run: |
-        echo "🧹 Running repository cleanup..."
+      - name: Run cleanup automation
+        run: |
+          echo "🧹 Running repository cleanup..."
 
-        # Run branch cleanup automation
-        python3 scripts/branch_cleanup_automation.py --stale-days 45 || echo "Branch cleanup completed"
+          # Run branch cleanup automation
+          python3 scripts/branch_cleanup_automation.py --stale-days 45 || echo "Branch cleanup completed"
 
-        # Clean up temporary files
-        find . -name "*.tmp" -delete || echo "Temp file cleanup completed"
-        find . -name "*.log" -size +100M -delete || echo "Large log cleanup completed"
-        find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || echo "Python cache cleanup completed"
+          # Clean up temporary files
+          find . -name "*.tmp" -delete || echo "Temp file cleanup completed"
+          find . -name "*.log" -size +100M -delete || echo "Large log cleanup completed"
+          find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || echo "Python cache cleanup completed"
 
-        echo "Cleanup maintenance completed"
+          echo "Cleanup maintenance completed"
 
   aurora-system-check:
     name: "🌟 Aurora System Health Check"
@@ -164,41 +164,41 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: pip
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pip
 
-    - name: Install Aurora dependencies
-      run: |
-        pip install --user -r requirements.txt || pip install --user fastapi pytest
+      - name: Install Aurora dependencies
+        run: |
+          pip install --user -r requirements.txt || pip install --user fastapi pytest
 
-    - name: Aurora system validation
-      run: |
-        echo "🌟 Aurora CloudBank System Health Check"
+      - name: Aurora system validation
+        run: |
+          echo "🌟 Aurora CloudBank System Health Check"
 
-        # Validate Aurora CLI
-        python3 tools/cli/aurora_dev_cli.py status || echo "Aurora CLI check completed"
+          # Validate Aurora CLI
+          python3 tools/cli/aurora_dev_cli.py status || echo "Aurora CLI check completed"
 
-        # Test T71 infrastructure
-        python3 test_t71_tools.py || echo "T71 tools validation completed"
+          # Test T71 infrastructure
+          python3 test_t71_tools.py || echo "T71 tools validation completed"
 
-        # Smart-devops health check
-        ./smart-devops quick || echo "Smart-devops check completed"
+          # Smart-devops health check
+          ./smart-devops quick || echo "Smart-devops check completed"
 
-    - name: Generate maintenance summary
-      run: |
-        echo "# 🔧 Aurora Maintenance Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## Maintenance Completed: $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Tasks Performed:" >> $GITHUB_STEP_SUMMARY
-        echo "- 🛡️ **Security Maintenance**: Security audit and vulnerability checks" >> $GITHUB_STEP_SUMMARY
-        echo "- 🧹 **Repository Cleanup**: Branch cleanup and file optimization" >> $GITHUB_STEP_SUMMARY
-        echo "- 🌟 **Aurora System Check**: Core system validation and health monitoring" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### Next Maintenance: Scheduled for next Monday at 2:00 AM UTC" >> $GITHUB_STEP_SUMMARY
+      - name: Generate maintenance summary
+        run: |
+          echo "# 🔧 Aurora Maintenance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Maintenance Completed: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Tasks Performed:" >> $GITHUB_STEP_SUMMARY
+          echo "- 🛡️ **Security Maintenance**: Security audit and vulnerability checks" >> $GITHUB_STEP_SUMMARY
+          echo "- 🧹 **Repository Cleanup**: Branch cleanup and file optimization" >> $GITHUB_STEP_SUMMARY
+          echo "- 🌟 **Aurora System Check**: Core system validation and health monitoring" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Maintenance: Scheduled for next Monday at 2:00 AM UTC" >> $GITHUB_STEP_SUMMARY

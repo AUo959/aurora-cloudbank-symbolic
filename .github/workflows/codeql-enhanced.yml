@@ -1,10 +1,11 @@
+---
 name: "CodeQL Enhanced Analysis"
 
-on:
+"on":
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
     - cron: '18 13 * * 1'
   workflow_dispatch:

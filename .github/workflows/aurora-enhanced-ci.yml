@@ -1,14 +1,16 @@
+---
 name: Aurora Enhanced CI/CD with Symbolic Validation
-'on':
+
+"on":
   push:
     branches:
-    - main
-    - develop
-    - feature/*
+      - main
+      - develop
+      - feature/*
   pull_request:
     branches:
-    - main
-    - develop
+      - main
+      - develop
   workflow_dispatch:
     inputs:
       force_full_validation:
@@ -43,40 +45,40 @@ jobs:
       run_aurora_core: ${{ steps.analysis.outputs.run_aurora_core }}
       run_security: ${{ steps.analysis.outputs.run_security }}
       aurora_validation_needed: ${{ steps.aurora_check.outputs.validation_needed }}
-      
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Python for analysis
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+      - name: Setup Python for analysis
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
 
-    - name: Run intelligent analysis
-      id: analysis
-      run: |
-        echo "🧠 Running Aurora-aware smart analysis..."
-        python3 .github/scripts/intelligent-test-selector.py --output-format github
-        python3 .github/scripts/intelligent-test-selector.py --check-skip-build --output-format github
+      - name: Run intelligent analysis
+        id: analysis
+        run: |
+          echo "🧠 Running Aurora-aware smart analysis..."
+          python3 .github/scripts/intelligent-test-selector.py --output-format github
+          python3 .github/scripts/intelligent-test-selector.py --check-skip-build --output-format github
 
-    - name: Aurora validation check
-      id: aurora_check
-      run: |
-        echo "🔮 Checking Aurora symbolic validation requirements..."
-        
-        # Check if Aurora components changed
-        AURORA_CHANGES="false"
-        if [[ "${{ steps.analysis.outputs.run_aurora_core }}" == "true" ]] || \
-           [[ "${{ steps.analysis.outputs.run_security }}" == "true" ]] || \
-           [[ "${{ env.AURORA_VALIDATION_LEVEL }}" == "full" ]]; then
-          AURORA_CHANGES="true"
-        fi
-        
-        echo "validation_needed=$AURORA_CHANGES" >> $GITHUB_OUTPUT
-        echo "Aurora validation needed: $AURORA_CHANGES"
+      - name: Aurora validation check
+        id: aurora_check
+        run: |
+          echo "🔮 Checking Aurora symbolic validation requirements..."
+
+          # Check if Aurora components changed
+          AURORA_CHANGES="false"
+          if [[ "${{ steps.analysis.outputs.run_aurora_core }}" == "true" ]] || \
+             [[ "${{ steps.analysis.outputs.run_security }}" == "true" ]] || \
+             [[ "${{ env.AURORA_VALIDATION_LEVEL }}" == "full" ]]; then
+            AURORA_CHANGES="true"
+          fi
+
+          echo "validation_needed=$AURORA_CHANGES" >> $GITHUB_OUTPUT
+          echo "Aurora validation needed: $AURORA_CHANGES"
 
   # T1 Sealed Approval Gate with Aurora context
   aurora-approval-gate:
@@ -98,7 +100,7 @@ jobs:
       anchor_status: ${{ steps.symbolic_validation.outputs.anchor_status }}
       dlp_status: ${{ steps.symbolic_validation.outputs.dlp_status }}
       security_status: ${{ steps.symbolic_validation.outputs.security_status }}
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -160,7 +162,7 @@ jobs:
     timeout-minutes: 15
     needs: [aurora-smart-analysis, aurora-approval-gate]
     if: needs.aurora-smart-analysis.outputs.skip_build != 'true'
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -195,11 +197,11 @@ jobs:
       run: |
         # Install Node.js dependencies
         npm ci || npm install || echo "⚠️ npm install completed"
-        
+
         # Install Python dependencies with Aurora specifics
         python -m pip install --upgrade pip
         pip install -r requirements.txt || echo "⚠️ Requirements install completed"
-        
+
         # Install Aurora-specific optional deps if needed
         if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
           pip install -r requirements-optional.txt || echo "⚠️ Optional deps installed"
@@ -209,10 +211,10 @@ jobs:
     - name: Aurora enhanced pre-flight validation
       run: |
         echo "🚀 Aurora CloudBank Enhanced Pre-flight Validation"
-        
+
         # Run smart-devops with Aurora context
         ./smart-devops quick || echo "⚠️ Smart-devops check completed"
-        
+
         # Enhanced Aurora CLI validation
         if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
           python3 tools/cli/aurora_dev_cli.py status || echo "⚠️ Aurora CLI check completed"
@@ -222,18 +224,18 @@ jobs:
     - name: Aurora-aware code quality checks
       run: |
         echo "🔍 Running Aurora-aware code quality checks..."
-        
+
         # Standard linting
         npm run lint:check 2>/dev/null || echo "⚠️ ESLint completed"
         python3 -m flake8 . --exclude=venv_opal2,node_modules,.git --count || echo "⚠️ Flake8 completed"
-        
+
         # Aurora-specific code quality checks
         if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
           echo "🔮 Running Aurora-specific code quality checks..."
-          
+
           # Check for proper DLP tagging
           grep -r "context_tag" src/ || echo "⚠️ DLP context tag check completed"
-          
+
           # Check for anchor protocol usage
           grep -r "anchor_protocol" modules/ || echo "⚠️ Anchor protocol check completed"
         fi
@@ -242,18 +244,18 @@ jobs:
     - name: Aurora-enhanced security scan
       run: |
         echo "🛡️ Running Aurora-enhanced security scan..."
-        
+
         # Standard security scans
         python3 scripts/aurora_security_scanner.py || echo "⚠️ Aurora security scan completed"
         npm audit --audit-level=moderate || echo "⚠️ npm audit completed"
-        
+
         # Aurora-specific security validation
         if [[ "${{ needs.aurora-smart-analysis.outputs.run_security }}" == "true" ]]; then
           echo "🔐 Running Aurora-specific security validation..."
-          
+
           # Check for Picard_Delta_3 compliance
           grep -r "Picard_Delta_3" . --exclude-dir=.git || echo "⚠️ Ethics protocol check completed"
-          
+
           # Validate memory sealing references
           grep -r "memory_seal" tools/ || echo "⚠️ Memory sealing check completed"
         fi
@@ -268,7 +270,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.aurora-smart-analysis.outputs.test_matrix) }}
       fail-fast: false
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -302,18 +304,18 @@ jobs:
     - name: Run Aurora-enhanced tests
       run: |
         echo "🧪 Running Aurora-enhanced test group: ${{ matrix.test-group }}"
-        
+
         # Set Aurora context for tests
         export AURORA_TEST_MODE=true
         export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
-        
+
         case "${{ matrix.test-group }}" in
           "aurora-core")
             echo "🔮 Running Aurora core tests with symbolic validation..."
             python3 test_runner.py || echo "Aurora core tests completed"
             python3 test_t71_tools.py || echo "T71 tools tests completed"
             python3 test_basic_functionality.py || echo "Basic functionality tests completed"
-            
+
             # Additional Aurora symbolic tests if validation was successful
             if [[ "${{ needs.aurora-symbolic-validation.outputs.aurora_status }}" == "fully_operational" ]]; then
               echo "🌟 Running enhanced Aurora symbolic tests..."
@@ -323,7 +325,7 @@ jobs:
           "security")
             echo "🛡️ Running security tests with Aurora context..."
             python3 -m pytest tests/ -k "security" -v || echo "Security tests completed"
-            
+
             # Enhanced security tests if Picard_Delta_3 is operational
             if [[ "${{ needs.aurora-symbolic-validation.outputs.security_status }}" == "operational" ]]; then
               echo "🔐 Running enhanced security validation..."
@@ -360,7 +362,7 @@ jobs:
     - aurora-symbolic-validation
     if: github.ref == 'refs/heads/main' && needs.aurora-smart-analysis.outputs.skip_build != 'true'
     timeout-minutes: 25
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -368,18 +370,18 @@ jobs:
     - name: Aurora-enhanced build process
       run: |
         echo "🏗️ Aurora CloudBank Enhanced Build Process..."
-        
+
         # Set Aurora build context
         export AURORA_BUILD_MODE=production
         export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
-        
+
         # Standard build process
         npm run build || echo "⚠️ npm build completed"
-        
+
         # Aurora-specific build validation
         if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
           echo "🔮 Running Aurora-specific build validation..."
-          
+
           python3 -c "
           try:
               from tools.integration.ci_helpers import CIHelpers
@@ -394,7 +396,7 @@ jobs:
     - name: Generate Aurora deployment manifest
       run: |
         echo "📄 Generating Aurora deployment manifest..."
-        
+
         # Create enhanced deployment manifest with Aurora context
         cat > aurora_deployment_manifest.json << EOF
         {
@@ -414,17 +416,17 @@ jobs:
           }
         }
         EOF
-        
+
         echo "✅ Aurora deployment manifest generated"
 
     - name: Aurora-aware deployment
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       run: |
         echo "🚀 Aurora-aware deployment process..."
-        
+
         # Only deploy if Aurora validation passed or is unknown
         VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
-        
+
         if [[ "$VALIDATION_STATUS" == "fully_operational" ]] || [[ "$VALIDATION_STATUS" == "partially_operational" ]] || [[ "$VALIDATION_STATUS" == "unknown" ]]; then
           echo "✅ Aurora validation status acceptable for deployment: $VALIDATION_STATUS"
           echo "🌟 Deploying Aurora CloudBank with symbolic validation context..."
@@ -432,7 +434,7 @@ jobs:
           echo "⚠️ Aurora validation status requires attention: $VALIDATION_STATUS"
           echo "🔧 Deployment proceeding with enhanced monitoring..."
         fi
-        
+
         echo "✅ Aurora-enhanced deployment completed"
 
     - name: Create Aurora deployment artifact
@@ -452,7 +454,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: aurora-smart-analysis
     if: needs.aurora-smart-analysis.outputs.skip_build == 'true'
-    
+
     steps:
     - name: Aurora skip notification
       run: |

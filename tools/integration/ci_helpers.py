@@ -8,9 +8,6 @@ import argparse
 import subprocess
 import sys
 
-Automation helpers for continuous integration and deployment
-"""
-
 
 import json
 from datetime import datetime
@@ -162,15 +159,11 @@ jobs:
     - name: Test Search Index
       run: |
         node tools/indexing/reliquary_indexer.js index
-        node tools/indexing/reliquary_indexer.js search "T71"
+        node tools/indexing/reliquary_indexer.js search T71
 
     - name: Generate Deployment Manifest
       run: |
-        python -c "
-ci = CIHelpers()
-manifest = ci.generate_deployment_manifest()
-print('✅ Deployment manifest generated')
-        "
+        python -c 'from tools.integration.ci_helpers import CIHelpers; ci = CIHelpers(); manifest = ci.generate_deployment_manifest(); print('\''manifest generated'\'')'
 """
 
         workflow_path = self.repo_path / ".github" / "workflows" / "t71_validation.yml"

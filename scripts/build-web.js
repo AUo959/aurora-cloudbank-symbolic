@@ -197,8 +197,12 @@ self.addEventListener('fetch', event => {
 
     optimizeHtml(content) {
         // Remove comments and extra whitespace
+        let previous;
+        do {
+            previous = content;
+            content = content.replace(/<!--[\s\S]*?-->/g, '');
+        } while (content !== previous);
         return content
-            .replace(/<!--[\s\S]*?-->/g, '')
             .replace(/\s+/g, ' ')
             .replace(/>\s+</g, '><')
             .trim();

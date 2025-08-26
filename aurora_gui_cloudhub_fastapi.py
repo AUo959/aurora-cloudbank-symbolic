@@ -29,6 +29,15 @@ from modules.symbolic_core.quantum_vsa import (
     quantum_symbolic_vector,
 )
 
+try:
+    from qiskit import QuantumCircuit
+    from qiskit_aer import AerSimulator
+    QISKIT_AVAILABLE = True
+except ImportError:
+    QuantumCircuit = None
+    AerSimulator = None
+    QISKIT_AVAILABLE = False
+
 app = FastAPI(title="Aurora Quantum VSA Playground")
 
 # Add CORS middleware for frontend integration
@@ -88,11 +97,6 @@ class GeometricAlgebraRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """Serve the quantum VSA demo application"""
-
-    import hashlib
-    from qiskit import QuantumCircuit
-    from qiskit_aer import AerSimulator
-    import uvicorn
 
     return FileResponse("static/quantum-vsa-demo.html")
 
@@ -588,6 +592,8 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
     try:
 
         # Create circuit based on symbol hash (using SHA256 for security)
+        if not QISKIT_AVAILABLE:
+            return {"error": "Qiskit not available", "symbol": req.symbol}
         h = int(hashlib.sha256(req.symbol.encode()).hexdigest(), 16) % (2**32)
         np.random.seed(h)
 
@@ -611,6 +617,8 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
         qc.measure(range(req.qubits), range(req.qubits))
 
         # Run simulation
+        if not QISKIT_AVAILABLE:
+            return {"error": "Qiskit not available"}
         backend = AerSimulator()
         result = backend.run(qc, shots=1000).result()
         counts = result.get_counts()

@@ -71,7 +71,7 @@ class ZIPWiz:
                 ".go",
                 ".rs",
             },
-            "config": {".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".con"},
+            "config": {".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf"},
             "data": {".csv", ".json", ".xml", ".sql", ".db", ".sqlite"},
             "images": {".png", ".jpg", ".jpeg", ".gi", ".bmp", ".svg", ".ico"},
             "archives": {".zip", ".tar", ".gz", ".7z", ".rar", ".bz2"},

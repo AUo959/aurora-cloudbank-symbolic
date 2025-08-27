@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
-from pathlib import Path
-import argparse
-import sys
 """
 Aurora Developer CLI - Unified command interface for all symbolic operations
 Part of T71 Symbolic Infrastructure Genesis
@@ -14,12 +10,13 @@ Primary functions:
 - State snapshot and restore commands
 """
 
+import argparse
+import sys
+from datetime import datetime
+from pathlib import Path
+
 from symbolic.memory_sealer import MemorySealingEngine
 from symbolic.anchor_tracker import SymbolicAnchorTracker
-import sys
-import argparse
-from pathlib import Path
-from datetime import datetime
 
 # Add tools directory to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))

@@ -322,7 +322,7 @@ class RepositoryHealthMonitor:
 
         try:
             # Branch count
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "branch", "-a"],
                 capture_output=True, text=True, check=True
             )

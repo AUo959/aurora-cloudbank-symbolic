@@ -142,7 +142,7 @@ class RepositoryHealthMonitor:
         """Get total file count"""
         try:
             _ = subprocess.run(
-                ["find", ".", "-type", ""],
+                ["find", ".", "-type", "f"],
                 capture_output=True,
                 text=True,
                 shell=False,

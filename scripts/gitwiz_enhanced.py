@@ -78,15 +78,15 @@ class GitWizEnhanced:
     # Ensure .gitwiz directory exists
     self.gitwiz_dir.mkdir(exist_ok=True)
 
-     # Configuration
-     self.config = self._load_config()
-      self.thresholds = self.config.get("thresholds", {})
+    # Configuration
+    self.config = self._load_config()
+    self.thresholds = self.config.get("thresholds", {})
 
-       # Validate git repository
-       if not self.git_dir.exists():
-            raise ValueError(f"Not a git repository: {self.repo_path}")
+    # Validate git repository
+    if not self.git_dir.exists():
+        raise ValueError(f"Not a git repository: {self.repo_path}")
 
-        logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
+    logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
 
     def _load_config(self) -> Dict[str, Any]:
         """Load GitWiz configuration."""

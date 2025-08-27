@@ -15,6 +15,7 @@ Comprehensive automation for repository stewardship, optimization, and maintenan
 
 # Import the enhanced GitWiz with lint cleanup integration
 try:
+    from gitwiz_enhanced import EnhancedGITWiz
 except ImportError:
     EnhancedGITWiz = None
 

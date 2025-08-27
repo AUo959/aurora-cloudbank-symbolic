@@ -958,7 +958,7 @@ class LintCleanupManager:
             for line in output_lines:
                 if "Fixed" in line or "Applied" in line:
                     # Try to extract number from line
-                    numbers = re.findall(rr"\\d+", line)
+                    numbers = re.findall(r"\\d+", line)
                     if numbers:
                         fixes_applied += int(numbers[0])
 

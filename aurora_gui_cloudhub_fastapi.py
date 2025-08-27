@@ -7,7 +7,6 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from fastapi import (
-import hashlib
     Depends,
     FastAPI,
     File,

@@ -1,9 +1,9 @@
 """Command line utility to generate CASK reports and charts."""
 
 import argparse
+import os
 
 from modules.cask import (
-import os
     create_architecture_flowchart,
     create_project_gantt_chart,
     create_research_landscape_chart,

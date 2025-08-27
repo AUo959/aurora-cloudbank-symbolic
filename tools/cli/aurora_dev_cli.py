@@ -348,12 +348,12 @@ class AuroraDeveloperCLI:
 
             if lineage1 and lineage2:
                 print("\n🔗 Lineage Comparison:")
-                print(f"  {args.anchor1}: Gen {lineage1.generation},
-                    {len(lineage1.ancestors)} ancestors,
-                    {len(lineage1.descendants)} descendants")
-                print(f"  {args.anchor2}: Gen {lineage2.generation},
-                    {len(lineage2.ancestors)} ancestors,
-                    {len(lineage2.descendants)} descendants")
+                print(f"  {args.anchor1}: Gen {lineage1.generation}, "
+                      f"{len(lineage1.ancestors)} ancestors, "
+                      f"{len(lineage1.descendants)} descendants")
+                print(f"  {args.anchor2}: Gen {lineage2.generation}, "
+                      f"{len(lineage2.ancestors)} ancestors, "
+                      f"{len(lineage2.descendants)} descendants")
 
                 # Find common ancestors
                 common_ancestors = set(lineage1.ancestors) & set(lineage2.ancestors)

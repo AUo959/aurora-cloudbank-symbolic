@@ -51,7 +51,7 @@ class SymbolicAnchorTracker:
 
         # Symbolic anchor patterns
         self.anchor_patterns = {
-            "T_SERIES": rr"T(\d+)_([A-Z_]+)",
+            "T_SERIES": r"T(\d+)_([A-Z_]+)",
             "SRB": r"SRB_([A-Z_]+)",
             "ANCHOR_SEED": r"([A-Z_]+_ANCHOR_SEED|ANCHOR_SEED_[A-Z_]+)",
             "EXPORT_MANIFEST": r"([A-Z_]+_EXPORT_MANIFEST)",
@@ -147,17 +147,17 @@ class SymbolicAnchorTracker:
         return lineages
 
     def _find_ancestors(self, anchor_id: str) -> List[str]:
-        """Find ancestor anchors based on T-series numbering and references""r"
+        """Find ancestor anchors based on T-series numbering and references"""
         ancestors = []
 
         if anchor_id.startswith('T') and '_' in anchor_id:
             # Extract T-series number
-            match = re.match(rr'T(\d+)', anchor_id)
+            match = re.match(r'T(\d+)', anchor_id)
             if match:
                 current_num = int(match.group(1))
                 # Find previous T-series anchors
                 for other_id in self.anchors:
-                    other_match = re.match(rr'T(\d+)', other_id)
+                    other_match = re.match(r'T(\d+)', other_id)
                     if other_match and int(other_match.group(1)) < current_num:
                         ancestors.append(other_id)
 
@@ -294,7 +294,7 @@ class SymbolicAnchorTracker:
 
 def main():
     """CLI interface for anchor tracking"""
-
+    
     parser = argparse.ArgumentParser(description="Symbolic Anchor Tracker")
     parser.add_argument("command", choices=["scan", "resolve", "lineage", "drift", "manifest"])
     parser.add_argument("--anchor", "-a", help="Specific anchor ID")
@@ -350,9 +350,9 @@ def main():
         else:
             print(f"Found lineages for {len(lineages)} anchors")
             for anchor_id, lineage in sorted(lineages.items()):
-                print(f"  {anchor_id}: Gen {lineage.generation},
-                    {len(lineage.ancestors)} ancestors,
-                    {len(lineage.descendants)} descendants")
+                print(f"  {anchor_id}: Gen {lineage.generation}, "
+                      f"{len(lineage.ancestors)} ancestors, "
+                      f"{len(lineage.descendants)} descendants")
 
     elif args.command == "drift":
         print("🔍 Detecting symbolic drift...")

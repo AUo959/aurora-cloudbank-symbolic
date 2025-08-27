@@ -104,7 +104,7 @@ class FinalCodeQualityPolisher:
         return False
 
     def fix_bare_except(self, file_path: Path) -> bool:
-        """Fix E722 - bare except clauses""r"
+        """Fix E722 - bare except clauses"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -125,7 +125,7 @@ class FinalCodeQualityPolisher:
         return False
 
     def fix_comparison_to_true(self, file_path: Path) -> bool:
-        """Fix E712 - comparison to True / False""r"
+        """Fix E712 - comparison to True / False"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -149,7 +149,7 @@ class FinalCodeQualityPolisher:
         return False
 
     def fix_ambiguous_variable_names(self, file_path: Path) -> bool:
-        """Fix E741 - ambiguous variable names""r"
+        """Fix E741 - ambiguous variable names"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -195,7 +195,7 @@ class FinalCodeQualityPolisher:
         return False
 
     def fix_semicolons(self, file_path: Path) -> bool:
-        """Fix E703 - statement ends with semicolon""r"
+        """Fix E703 - statement ends with semicolon"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()

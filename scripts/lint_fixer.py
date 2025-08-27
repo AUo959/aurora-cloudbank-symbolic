@@ -23,10 +23,10 @@ def fix_encoding_specifications(file_path: str) -> bool:
 
     # Fix open() calls without encoding
     patterns = [
-        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8r")'),
-        (r'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (r'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8r")'),
-        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
+        (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
+        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
     ]
 
     for pattern, replacement in patterns:

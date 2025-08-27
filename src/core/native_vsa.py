@@ -163,7 +163,7 @@ class NativeVSAMemory:
             raise ValueError(f"Query vector dimension {query_vector.dim} does not match memory dimension {self.dim}")
 
         best_vector = None
-        best_similarity = float("-in")
+        best_similarity = float("-inf")
 
         for stored_vector in self.memory:
             similarity = query_vector.similarity(stored_vector)

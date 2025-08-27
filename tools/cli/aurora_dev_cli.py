@@ -493,7 +493,7 @@ def main():
         return cli.cmd_restore(args)
     elif args.command == "manifest":
         return cli.cmd_manifest(args)
-    elif args.command == "dif":
+    elif args.command == "diff":
         return cli.cmd_diff(args)
     elif args.command == "status":
         return cli.cmd_status(args)

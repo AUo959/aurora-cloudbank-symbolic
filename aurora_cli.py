@@ -9,11 +9,6 @@ import sys
 Interactive CLI for Aurora CloudBank operations
 """
 
-import argparse
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraCLI:
@@ -39,7 +34,7 @@ class AuroraCLI:
         """Run quantum processing demonstration"""
         print("🌀 Running Quantum Processing Demo...")
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [sys.executable, "aurora_quantum_processor.py"], capture_output=True, text=True, timeout=30
             )
 
@@ -55,7 +50,7 @@ class AuroraCLI:
         """Run consciousness simulation demonstration"""
         print("🧠 Running Consciousness Simulation Demo...")
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [sys.executable, "aurora_consciousness_engine.py"], capture_output=True, text=True, timeout=30
             )
 
@@ -71,7 +66,7 @@ class AuroraCLI:
         """Run adaptive learning demonstration"""
         print("🎯 Running Adaptive Learning Demo...")
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [sys.executable, "aurora_adaptive_learning.py"], capture_output=True, text=True, timeout=30
             )
 
@@ -87,7 +82,7 @@ class AuroraCLI:
         """Run comprehensive integration test"""
         print("🧪 Running Comprehensive Integration Test...")
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 [sys.executable, "aurora_master_integration.py"], capture_output=True, text=True, timeout=60
             )
 

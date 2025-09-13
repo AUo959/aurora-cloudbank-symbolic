@@ -239,7 +239,7 @@ class SecurityRemediator:
 
     def create_secure_helpers(self):
         """Create secure helper functions for common operations."""
-        secure_helpers_content = '''#!/usr/bin/env python3
+        secure_helpers_content = r'''#!/usr/bin/env python3
 """
 🔒 Aurora CloudBank Security Helpers
 Provides secure alternatives to common operations.

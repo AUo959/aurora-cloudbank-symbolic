@@ -1,167 +1,84 @@
-# Aurora CloudBank Symbolic System - AI Coding Instructions
+# Aurora CloudBank – Copilot Instructions (concise)
 
-This is Aurora CloudBank, a quantum-enhanced symbolic governance system with Vector Symbolic Architecture (VSA), cultural awareness simulation, and AI-powered processing. The architecture emphasizes symbolic anchor continuity, memory sealing, and ethical governance.
+Quantum-enhanced symbolic governance with Vector Symbolic Architecture (VSA), ethical anchors, and agent-mode APIs. This guide gives AI coding agents the minimum project-specific context to be productive fast.
 
-## 🏗️ Architecture Overview
+## Architecture at a glance
+- API: `aurora_api.py` (FastAPI) exposes geometric algebra and ChatGPT Agent Mode endpoints.
+- Symbolic engine: `src/aurora/core/symbolic_engine.py` (T1 temporal + SRB spatial anchors, chain notation `001//999//`).
+- Geometric algebra: `modules/symbolic_core/geometric_algebra.py` (uses `clifford` if available; mock fallback otherwise).
+- Data lineage: `src/core/native_dlp_export.py` (DLP tags, anchors, manifests).
+- Reflective autonomy bootstrap: `modules/reflective_autonomy/loom_restore_script.py` (used by `make run`).
 
-**Core Pattern**: Hybrid quantum-symbolic processing with temporal anchoring
-- **Symbolic Engine**: `src/aurora/core/symbolic_engine.py` - T1/SRB anchor management
-- **API Layer**: `aurora_api.py` - FastAPI with quantum/geometric algebra endpoints  
-- **Module System**: `modules/` - reflective_autonomy, symbolic_core, opal2, cask
-- **DLP System**: `src/core/native_dlp_export.py` - Data lineage and provenance tracking
+## Core patterns you must follow
+- DLP tagging is required for symbolic/quantum ops. Always include `context_tag` and anchor protocols.
+  ```python
+  from src.core.native_dlp_export import NativeDLPTracker
+  tracker = NativeDLPTracker()
+  tag_id = tracker.tag_symbolic_operation({"concepts": ["alpha"], "dimension": 512})
+  tag = tracker.tags[tag_id]
+  tag.add_anchor_protocol("EOS_SEED_ORION")
+  tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+  tag.metadata.update({"context_tag": "op_context", "dlp_level": "DLP_L1_OK", "symbolic_hash_validation": True})
+  ```
+- Geometric algebra must degrade gracefully: keep the mock path working when `clifford` isn’t installed.
+- Use chain notation helpers from `SymbolicEngine.execute_chain(start, end)`; export manifests via `export_manifest()`.
 
-**Key Architectural Concepts**:
-- **T1 Anchors**: Temporal state tracking (`self.t1.advance(data)`)
-- **SRB Anchors**: Spatial-Relational Boundary resolution (`self.srb.resolve(boundary)`)
-- **Memory Sealing**: SHA256 integrity protection with audit trails
-- **Chain Notation**: `001//999//` format for symbolic execution sequences
+## Developer workflow (verified commands)
+- Quick status dashboard: `python3 scripts/dev-status.py`
+- Run (reflective bootstrap): `make run` (calls `modules/reflective_autonomy/loom_restore_script.py`)
+- Fast dev launcher (menu): `./scripts/quick-start.sh`
+- Tests: `pytest tests/`
+- Lint: `flake8 .` (120-char line limit); format with `black` if present
+- Docker (API 8000, CLI sidecar): `docker-compose up --build`
 
-## 🔄 Development Workflows
+## API surface (key endpoints)
+- Geometric algebra:
+  - POST `/geometric/vector` (x,y,z) → GA vector
+  - POST `/geometric/mult` (a,b as expressions like `e1 e2`) → product via `GeometricAlgebra.mult`
+- Agent Mode (see `docs/CHATGPT_AGENT_MODE_INTEGRATION.md`):
+  - GET `/agent/tools` – tool registry (OpenAPI-like)
+  - POST `/agent/execute` – execute tool with validated params
+  - POST `/agent/session` – create/update/get/delete session
+  - GET `/sonnet4/status`, POST `/sonnet4/enable`
 
-**Quick Status Check**: `python3 scripts/dev-status.py`
-**Development Server**: `make run` or `python modules/reflective_autonomy/loom_restore_script.py`
-**Testing**: `python scripts/test_runner.py` or `pytest tests/`
-**Linting**: `flake8` with 120-char line limit, `black` formatting
-**Docker**: `docker-compose up --build` (includes health checks)
+### Copy-paste examples
+- Execute geometric algebra:
+  - POST `/agent/execute`
+  - Body:
+    ```json
+    {
+      "tool_name": "geometric_algebra",
+      "parameters": {
+        "expression_a": "e1 + 2",
+        "expression_b": "e2",
+        "operation": "mult"
+      }
+    }
+    ```
+- Create a session, then update it:
+  - POST `/agent/session` with `{ "action": "create", "state_data": {"context": "demo"} }`
+  - Then POST `/agent/session` with `{ "action": "update", "session_id": "<returned_id>", "state_data": {"step": 1} }`
 
-**Critical Debugging Workflows**:
-- `rollback_autoseal()` - Call after merges to ensure memory state sealing
-- `entropy_snap()` - On-demand entropy capture and symbolic drift assessment
-- `anchor://seal <name>` - CLI entrypoint for symbolic anchor sealing
-- `drift://scan <module>` - Module-specific symbolic drift scanning
-- `reflexivity_scan --explain` - State-tracing and debugging actions
-
-**Essential GitWiz Tools**:
-- `gitwiz_anchor_lint` - Anchor convention validation and linting
-- `gitwiz_snapshot_report` - Anchor sealing and rollback integration
-- `gitwiz_driftchart` - Branch volatility tracking and proactive monitoring
-- `scripts/gitwiz_*.py` - Complete automated repository management suite
-
-**Critical Scripts**:
-- `scripts/aurora_health_monitor.py` - System health validation
-- `scripts/infallible_codespace_init.py` - Environment bootstrapping  
-- `tools/symbolic/memory_sealer.py` - Cryptographic state sealing with audit trails
-
-## 📋 Project-Specific Patterns
-
-**Import Conventions**:
+## Conventions and imports
 ```python
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
-from src.core.native_dlp_export import NativeDLPTracker, NativeExportSystem
+from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub  # used by aurora_api.py
+from src.core.native_dlp_export import NativeDLPTracker
 ```
+- All reflex logs and cross-layer handoffs must set `context_tag` and `symbolic_hash_validation=True`.
+- Ethics protocol: `Picard_Delta_3`; anchor seed often `EOS_SEED_ORION`.
 
-**Symbolic Operation Pattern**:
-```python
-# Always use DLP tracking for symbolic operations with required context_tag
-dlp_tracker = NativeDLPTracker()
-tag_id = dlp_tracker.tag_symbolic_operation(symbolic_data)
-tag = dlp_tracker.tags[tag_id]
-tag.add_anchor_protocol("EOS_SEED_ORION")
-tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
-tag.metadata['context_tag'] = "required_for_continuity"  # REQUIRED for all reflex logs
+## Gotchas (repo-verified)
+- Docker healthcheck points to `/api/health`, but API exposes `/health`. Update compose or add `/api/health` if needed.
+- `aurora_api.py` imports `src.integrations.chatgpt_agent_mode.chatgpt_agent_integration`; if missing, implement a minimal stub exposing `discover_tools()` and `execute_tool()` to keep Agent Mode endpoints working.
+- GA input parsing is strict (`parse_multivector` only accepts blade keys and numerics). Keep inputs sanitized.
 
-# Standardized anchor conventions (canonized)
-tag.add_anchor_protocol("T1")  # Temporal anchor
-tag.add_anchor_protocol("SRB_TICK")  # Spatial-relational boundary
-tag.add_anchor_protocol("ANCHOR_LOCKED")  # State lock verification
-tag.metadata['state_tag'] = "symbolic_state_identifier"
-```
+## Security & memory sealing
+- Use `tools/symbolic/memory_sealer.py` to produce SHA256 seals and audit trails for files/dirs/threads.
+- Run repository health scans via `scripts/aurora_health_monitor.py`.
 
-**DLP Tagging Standards (Canonized)**:
-```python
-# Use standardized DLP classifications on all exports
-tag.metadata.update({
-    'dlp_level': 'DLP_L1_OK',      # or DLP_L2_LOCKED, DLP_RISK_P2
-    'symbolic_hash_validation': True,  # Required for cross-layer communication
-    'context_tag': 'operation_context'  # REQUIRED for all reflex logs
-})
-```
+## File pointers (start here)
+- API: `aurora_api.py` • Symbolic: `src/aurora/core/symbolic_engine.py` • DLP: `src/core/native_dlp_export.py`
+- Docs: `docs/CHATGPT_AGENT_MODE_INTEGRATION.md` • Dev tools: `scripts/dev-status.py`, `scripts/quick-start.sh`
 
-**API Endpoint Pattern** (FastAPI with geometric algebra):
-```python
-@app.post("/quantum/symbolic_vector")
-async def symbolic_vector(request: VectorRequest):
-    ga = GeometricAlgebra()
-    result = ga.mult(request.x, request.y)  # Geometric product
-    return {"result": ga.pretty(result)}
-```
-
-**Error Handling**: Use graceful degradation with mock implementations when dependencies unavailable (see `geometric_algebra.py`)
-
-## 🔧 Configuration & Dependencies
-
-**Python**: 3.11+ with FastAPI, NumPy, Qiskit, Clifford algebra
-**Node.js**: 18+ for command node services and crypto utilities
-**Line Length**: 120 characters (Black/Flake8 configured)
-**Testing**: pytest with asyncio support
-
-**Key Dependencies**:
-- `fastapi`, `uvicorn` - API server
-- `qiskit`, `qiskit-aer` - Quantum computing
-- `clifford` - Geometric algebra (optional with fallback)
-- `pandas`, `plotly` - Data analysis and visualization
-
-## 🚀 Integration Points
-
-**Quantum-Symbolic Bridge**: All quantum operations must maintain symbolic state continuity
-**CASK Integration**: Cultural awareness via `modules/cask/` and `CASK_Assets.zip`
-**Claude Sonnet 4**: Enhanced reasoning through `sonnet4_integration_hub.py`
-**Docker Services**: Multi-container with aurora-cloudbank (port 8000) and aurora-cli
-
-**Cross-Component Communication (Strict Schema Enforcement)**:
-```python
-# All Simbridge → CASK proxy calls require explicit validation
-def cask_proxy_call(payload):
-    # Declare symbolic anchor with typed schema
-    anchor = {
-        'symbolic_anchor': 'CASK_PROXY_BRIDGE',
-        'payload_structure': validate_typed_schema(payload),
-        'verification_logic': compute_symbolic_hash(payload)
-    }
-    return process_with_anchor_validation(anchor, payload)
-
-# Cross-layer handoff requirements (Simbridge, CASK, THREADCORE)
-def layer_handoff(source_layer, target_layer, data):
-    assert data.get('symbolic_hash_validation') == True
-    assert 'typed_schema' in data
-    return verified_handoff(source_layer, target_layer, data)
-```
-
-**Export Manifests**: All symbolic operations generate JSON manifests with:
-- `anchor_protocols` (e.g., "EOS_SEED_ORION", "Picard_Delta_3")
-- `t1_srb_anchors` for temporal/spatial tracking
-- SHA256 memory seals for integrity verification
-- `context_tag` (REQUIRED for continuity support)
-
-## ⚖️ Ethical & Security Patterns
-
-**Ethics Protocol**: "Picard_Delta_3" - embedded in all major operations
-**Memory Ethics**: Sensitive data wiping, anti-obfuscation mandate
-**Security Scanning**: `scripts/aurora_security_scanner.py` for vulnerability detection
-**Governance**: `modules/reflective_autonomy/` implements self-healing governance loop
-
-**Post-Merge Memory Sealing Protocol**:
-```python
-# Always call after merges and rollback scenarios
-def post_merge_workflow():
-    rollback_autoseal()  # Ensures memory state sealing
-    entropy_snap()       # Captures entropy and assesses symbolic drift
-    audit_trail_update() # Updates audit trails for traceability
-```
-
-**Reflexivity Requirements**:
-```python
-# All reflex logs MUST include context_tag for continuity
-reflex_log = {
-    'operation': 'symbolic_processing',
-    'context_tag': 'processing_context',  # REQUIRED
-    'audit_trail': generate_audit_trail(),
-    'memory_seal': compute_sha256_seal()
-}
-```
-
-**Critical Files for Security**:
-- `.security/secure_helpers.py` - Input sanitization and validation
-- `crypto_refactored.js` - Encryption with anchor manifest export
-- `scripts/security_audit.sh` - Automated security validation
+If anything above is unclear or incomplete (e.g., Agent Mode stub expectations, additional endpoints to document), tell me what you need and I’ll refine this guide.

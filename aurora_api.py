@@ -293,11 +293,9 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "context_tag": "websocket_agent_stream"
         }
         await websocket.send_json(initial_message)
-        
         while True:
             # Wait for messages from client
             data = await websocket.receive_json()
-            
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 try:
@@ -325,10 +323,9 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"],
                 })
-                
+
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
-
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")

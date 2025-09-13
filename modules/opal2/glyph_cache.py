@@ -39,7 +39,7 @@ class GlyphCache:
 
     def get(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Return glyph data for ``symbol`` if present."""
-        _ = self.cache.get(symbol)
+        result = self.cache.get(symbol)
         if result:
             self.stats["hits"] += 1
         else:

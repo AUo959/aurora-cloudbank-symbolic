@@ -51,8 +51,7 @@ class AuroraDeveloperCLI:
 """
         print(banner)
 
-    
-        def cmd_anchor(self, args) -> int:
+    def cmd_anchor(self, args) -> int:
         """Handle anchor tracking commands"""
         if args.anchor_cmd == "track":
             return self._anchor_track(args)

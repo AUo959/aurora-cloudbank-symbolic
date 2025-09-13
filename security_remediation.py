@@ -501,8 +501,7 @@ jobs:
         
         self.log_fix("Updated GitHub security configuration")
 
-    
-        def create_security_documentation(self):
+    def create_security_documentation(self):
         """Create comprehensive security documentation."""
         security_docs = """# 🔒 Aurora CloudBank Security Guide
 
@@ -608,7 +607,7 @@ result = secure.secure_eval_alternative(user_expression)
 **PGP Key:** Available in .security/pgp-public-key.asc
 
 ---
-*Last Updated: 2025-01-09*
+*Last Updated: January 2025*
 *Version: 1.0*
 """
 
@@ -618,8 +617,7 @@ result = secure.secure_eval_alternative(user_expression)
         
         self.log_fix("Created comprehensive security documentation")
 
-    
-        def run_remediation(self):
+    def run_remediation(self):
         """Run complete security remediation process."""
         print("🔒 AURORA CLOUDBANK SECURITY REMEDIATION")
         

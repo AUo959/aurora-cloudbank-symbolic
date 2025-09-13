@@ -41,8 +41,7 @@ class AuroraRealWorldIntegration:
         
         print(f"[{timestamp}] {prefix} {message}")
 
-    
-        def create_web_dashboard_interface(self):
+    def create_web_dashboard_interface(self):
         """Create web-based dashboard for Aurora CloudBank"""
         self.log_status("Creating web dashboard interface...", "INFO")
         dashboard_html = """<!DOCTYPE html>

@@ -26,7 +26,7 @@ class GlyphGenerator:
 
     def __init__(self, dim: int = 8, config_path: str | None = None):
         if config_path is None:
-        path = DEFAULT_CONFIG
+            path = DEFAULT_CONFIG
         else:
             path = Path(config_path)
         

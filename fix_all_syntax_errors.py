@@ -18,10 +18,9 @@ import sys
 
 def fix_js_style_syntax(file_path):
     """Fix JavaScript/Java-style syntax mixed into Python files"""
-    print(f"🔧 Fixing JS-style syntax in {file_path}r")
+    print(f"🔧 Fixing JS-style syntax in {file_path}")
 
-    
-        with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
         original_content = content
 

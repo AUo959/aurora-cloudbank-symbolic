@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class PluginType(Enum):
     """Plugin type enumeration"""
-        RENDERER = "renderer"
+    RENDERER = "renderer"
     PROCESSOR = "processor"
     FILTER = "filter"
     EXPORTER = "exporter"

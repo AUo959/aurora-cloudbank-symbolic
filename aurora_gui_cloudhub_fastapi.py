@@ -199,7 +199,7 @@ def geometric_product(req: GeometricProductRequest):
     ga = GeometricAlgebra()
     a_mv = req.a * ga.blades["e1"]
     b_mv = req.b * ga.blades["e2"]
-    _ = ga.mult(a_mv, b_mv)
+    result = ga.mult(a_mv, b_mv)
     return {"result": ga.pretty(result)}
 
 
@@ -265,7 +265,7 @@ def vsa_operation(req: VSAOperationRequest):
     """
     if req.operation_type == "generate":
         vec = quantum_symbolic_vector(req.symbol, req.dimension)
-        _ = vec.tolist()
+        result = vec.tolist()
     elif req.operation_type == "bind":
         # Binding logic here
         _ = "Binding not implemented in demo"
@@ -274,7 +274,7 @@ def vsa_operation(req: VSAOperationRequest):
         _ = "Unbinding not implemented in demo"
     elif req.operation_type == "similarity":
         # Similarity logic here
-        _ = "Similarity not implemented in demo"
+        result = "Similarity not implemented in demo"
     else:
         raise HTTPException(status_code=400, detail="Invalid operation type")
 
@@ -348,7 +348,7 @@ def quantum_circuit(req: QuantumCircuitRequest):
     Response: {"symbol": str, "depth": int, "qubits": int, "result": Any}
     """
     # Placeholder for quantum circuit execution
-    _ = {
+    result = {
         "message": "Quantum circuit executed",
         "symbol": req.symbol,
         "depth": req.depth,
@@ -392,7 +392,7 @@ def geometric_algebra(req: GeometricAlgebraRequest):
             (ga.blades[f"e{i + 1}"] * v2[f"e{i + 1}"] for i in range(len(v2))),
             start=ga.zero,
         )
-        _ = ga.commutator(blade1, blade2)
+        result = ga.commutator(blade1, blade2)
     else:
         raise HTTPException(status_code=400, detail="Invalid operation")
 
@@ -546,7 +546,7 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
 
         if req.operation == "product":
             # Compute geometric product of all vectors
-            _ = 1
+            result = 1
             for vec_spec in req.vectors:
                 mv = 0
                 for blade, coeff in vec_spec.items():
@@ -554,7 +554,7 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
                         mv += coeff * ga.blades[blade]
                     else:
                         mv += coeff  # scalar part
-                _ = ga.mult(result, mv)
+                result = ga.mult(result, mv)
             results.append({"result": ga.pretty(result), "type": "geometric_product"})
 
         elif req.operation == "commutator":

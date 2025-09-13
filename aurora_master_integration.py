@@ -37,17 +37,17 @@ class AuroraMasterInterface:
         for system_name, module_file in systems_to_init:
             try:
                 if Path(module_file).exists():
-                    print("✅ {system_name} module found")
-                    
-        self.initialized_systems[system_name] = True
+                    print(f"✅ {system_name} module found")
+                    self.initialized_systems[system_name] = True
                     self.integration_status[system_name] = "ready"
                 else:
                     print(f"⚠️ {system_name} module not found: {module_file}")
-                    
-        self.initialized_systems[system_name] = False
+                    self.initialized_systems[system_name] = False
                     self.integration_status[system_name] = "missing"
             except Exception as e:
                 print(f"❌ Error initializing {system_name}: {e}")
+                self.initialized_systems[system_name] = False
+                self.integration_status[system_name] = "error"
                 
         self.initialized_systems[system_name] = False
                 self.integration_status[system_name] = "error: {e}"

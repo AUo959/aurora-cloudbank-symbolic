@@ -8,10 +8,6 @@ import sys
 Manages staged deployment of enhancements with safety checks.
 """
 
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 
 class DeploymentManager:

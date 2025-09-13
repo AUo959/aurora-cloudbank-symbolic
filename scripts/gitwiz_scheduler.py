@@ -160,7 +160,7 @@ class GitWizScheduler:
 
             logger.info(f"Executing: {' '.join(cmd)}")
 
-            _ = subprocess.run(
+            result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,

@@ -162,9 +162,7 @@ class GITWizSimple:
     def _get_git_status(self) -> Dict[str, Any]:
         """Get git repository status."""
         try:
-            # Check if it's a git repo
-            _ = subprocess.run(
-                ["git", "rev-parse", "--git-dir"],
+            # Check if it's a git repo            result = subprocess.run(                ["git", "rev-parse", "--git-dir"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -175,10 +173,8 @@ class GITWizSimple:
                 return {"is_git_repo": False}
 
             # Get git status
-            _ = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,

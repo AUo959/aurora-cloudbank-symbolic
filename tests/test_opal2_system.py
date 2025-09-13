@@ -88,8 +88,8 @@ class TestOpal2BasicConcepts:
             return {"status": "completed", "render_time": 0.1, "output": f"rendered_{data['id']}"}
 
         test_data = {"id": "test_123", "type": "glyph"}
-        _ = await mock_render_async(test_data)
-
+        result = await mock_render_async(test_data)
+        
         assert result["status"] == "completed"
         assert result["render_time"] > 0
         assert "test_123" in result["output"]
@@ -104,11 +104,13 @@ class TestOpal2Integration:
         """Set up test environment"""
         self.temp_dir = tempfile.mkdtemp()
 
-    def teardown_method(self):
+    
+        def teardown_method(self):
         """Clean up test environment"""
         shutil.rmtree(self.temp_dir)
 
-    def test_opal2_config_management(self):
+    
+        def test_opal2_config_management(self):
         """Test configuration management concept"""
         config_file = Path(self.temp_dir) / "opal2_config.json"
 
@@ -119,9 +121,12 @@ class TestOpal2Integration:
         }
 
         # Write config (simulated)
+        
         config_file.write_text("mock_config")
 
+        
         assert config_file.exists()
+        
         assert config_data["renderer"]["default_engine"] == "webgl"
         assert config_data["cache"]["enabled"] is True
 
@@ -134,9 +139,11 @@ class TestOpal2Integration:
 
         assert len(plugin_registry) == 2
         assert all(plugin["type"] == "renderer" for plugin in plugin_registry.values())
+        
         assert all(plugin["enabled"] for plugin in plugin_registry.values())
 
-    def test_opal2_performance_monitoring(self):
+    
+        def test_opal2_performance_monitoring(self):
         """Test performance monitoring concept"""
         performance_metrics = {
             "webgl": {"average_render_time": 0.05, "total_renders": 100, "cache_hit_rate": 0.85},

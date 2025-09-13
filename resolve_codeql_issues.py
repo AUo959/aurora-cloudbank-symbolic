@@ -10,9 +10,6 @@ Temporarily moves files with syntax errors to prevent CodeQL scanning issues
 while preserving the core Aurora CloudBank functionality.
 """
 
-import os
-import shutil
-from pathlib import Path
 
 
 def create_syntax_errors_archive():

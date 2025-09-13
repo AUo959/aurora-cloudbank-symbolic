@@ -17,6 +17,7 @@ class AuroraBranchManager:
 
     def __init__(self):
         self.repo_path = Path.cwd()
+        
         self.config_file = self.repo_path / ".aurora" / "branch_config.json"
         self.config_file.parent.mkdir(exist_ok=True)
 
@@ -115,49 +116,55 @@ class AuroraBranchManager:
         with open(self.config_file, "w") as f:
             json.dump(self.default_config, f, indent=2)
 
+        
         print(f"✅ Configuration saved to: {self.config_file}")
 
-    def get_current_branch(self):
+    
+        def get_current_branch(self):
         """Get current git branch"""
         try:
-            _ = subprocess.run(
-                ["git", "branch", "--show-current"], capture_output=True, text=True, cwd=self.repo_path
+        result = subprocess.run(                ["git", "branch", "--show-current"], capture_output=True, text=True, cwd=self.repo_path
             )
-            return result.stdout.strip() if result.returncode == 0 else "unknown"
+            
+        return result.stdout.strip() if result.returncode == 0 else "unknown"
         except Exception:
             return "unknown"
 
     def create_develop_branch(self):
         """Create and configure develop branch"""
         print("🌱 Setting up develop branch...")
-
         current_branch = self.get_current_branch()
 
+        
         try:
             # Check if develop branch exists
-            _ = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
+        result = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
 
-            if result.returncode == 0:
+            
+        if result.returncode == 0:
                 print("✅ develop branch already exists")
-            else:
+            
+        else:
                 # Create develop branch from main
                 subprocess.run(["git", "checkout", "-b", "develop"], cwd=self.repo_path, check=True)
-                print("✅ Created develop branch from main")
+                
+        print("✅ Created develop branch from main")
 
                 # Switch back to original branch
                 if current_branch != "develop":
                     subprocess.run(["git", "checkout", current_branch], cwd=self.repo_path)
+        
         except subprocess.CalledProcessError as e:
             print(f"❌ Error creating develop branch: {e}")
 
-    def setup_branch_protection(self):
+    
+        def setup_branch_protection(self):
         """Set up branch protection rules (GitHub-specific)"""
         print("🛡️ Setting up branch protection...")
 
         # Create GitHub Actions workflow for branch protection
         workflows_dir = self.repo_path / ".github" / "workflows"
         workflows_dir.mkdir(parents=True, exist_ok=True)
-
         branch_protection_workflow = workflows_dir / "branch_protection.yml"
 
         workflow_content = """name: Aurora Branch Protection
@@ -225,12 +232,13 @@ jobs:
         with open(branch_protection_workflow, "w") as f:
             f.write(workflow_content)
 
+        
         print(f"✅ Branch protection workflow created: {branch_protection_workflow}")
 
-    def create_gitflow_aliases(self):
+    
+        def create_gitflow_aliases(self):
         """Create helpful Git aliases for Aurora CloudBank workflow"""
         print("⚡ Setting up Aurora GitFlow aliases...")
-
         aliases = {
             "aurora-feature": "!f() { git checkout develop && git pull && git checkout -b feature/aurora-$1; }; ",
             "aurora-hotfix": "!f() { git checkout main && git pull && git checkout -b hotfix/v$(date +%Y%m%d)-$1; }; ",
@@ -243,27 +251,29 @@ jobs:
         for alias, command in aliases.items():
             try:
                 subprocess.run(["git", "config", "--local", f"alias.{alias}", command], cwd=self.repo_path, check=True)
-                print(f"✅ Added alias: git {alias}")
-            except subprocess.CalledProcessError:
+                
+        print(f"✅ Added alias: git {alias}")
+            
+        except subprocess.CalledProcessError:
                 print(f"⚠️  Could not add alias: {alias}")
 
-    def generate_branch_status_report(self):
+    
+        def generate_branch_status_report(self):
         """Generate current branch status report"""
         print("📊 Generating branch status report...")
 
+        
         try:
             # Get all branches
-            _ = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
-
-            branches = result.stdout.strip().split("\n") if result.returncode == 0 else []
-            current_branch = self.get_current_branch()
+        result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
+        result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
+        current_branch = self.get_current_branch()
 
             # Get recent commits
             commits_result = subprocess.run(
                 ["git", "log", "--oneline", "-5"], capture_output=True, text=True, cwd=self.repo_path
             )
-
-            recent_commits = commits_result.stdout.strip().split("\n") if commits_result.returncode == 0 else []
+        recent_commits = commits_result.stdout.strip().split("\n") if commits_result.returncode == 0 else []
 
             # Create report
             report = {
@@ -277,24 +287,31 @@ jobs:
             }
 
             # Save report
-            report_file = self.repo_path / "AURORA_BRANCH_STATUS.json"
+        report_file = self.repo_path / "AURORA_BRANCH_STATUS.json"
             with open(report_file, "w") as f:
                 json.dump(report, f, indent=2)
 
-            print(f"✅ Branch status report saved: {report_file}")
+            
+        print(f"✅ Branch status report saved: {report_file}")
 
             # Display summary
             print("\n📋 Current Status:")
-            print(f"   🌿 Current Branch: {current_branch}")
-            print(f"   📊 Total Branches: {len(branches)}")
-            print(f"   🔄 Aurora Version: {self.default_config['version']}")
+            
+        print(f"   🌿 Current Branch: {current_branch}")
+            
+        print(f"   📊 Total Branches: {len(branches)}")
+            
+        print(f"   🔄 Aurora Version: {self.default_config['version']}")
 
+        
         except Exception as e:
             print(f"❌ Error generating report: {e}")
 
-    def setup_complete_branch_system(self):
+    
+        def setup_complete_branch_system(self):
         """Set up the complete Aurora CloudBank branch management system"""
         print("🚀 Setting up Aurora CloudBank Branch Management System")
+        
         print("=" * 60)
 
         # Step 1: Initialize configuration
@@ -312,16 +329,27 @@ jobs:
         # Step 5: Generate status report
         self.generate_branch_status_report()
 
+        
         print("\n" + "=" * 60)
+        
         print("🎉 Aurora CloudBank Branch Management Setup Complete!")
+        
         print("=" * 60)
+        
         print("\n📚 Available Commands:")
+        
         print("   git aurora-feature <name>    - Create new feature branch")
+        
         print("   git aurora-hotfix <name>     - Create new hotfix branch")
+        
         print("   git aurora-release <version> - Create new release branch")
+        
         print("   git aurora-status           - Show Aurora branches")
+        
         print("   git aurora-sync             - Sync main branches")
+        
         print("\n🔗 Integration Status:")
+        
         for integration, details in self.default_config["integrations"].items():
             print(f"   ✅ {integration}: {details['status']} ({details['version']})")
 

@@ -7,9 +7,6 @@ import sys
 Resolves 403 author invalid errors by configuring GPG signing properly
 """
 
-import subprocess
-import sys
-from pathlib import Path
 
 
 class GPGPersistentFix:
@@ -23,15 +20,15 @@ class GPGPersistentFix:
 
         try:
             # Check user.name
-            _ = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
+            result = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
             user_name = result.stdout.strip() if result.returncode == 0 else None
 
             # Check user.email
-            _ = subprocess.run(["git", "config", "user.email"], capture_output=True, text=True)
+            result = subprocess.run(["git", "config", "user.email"], capture_output=True, text=True)
             user_email = result.stdout.strip() if result.returncode == 0 else None
 
             # Check GPG signing
-            _ = subprocess.run(["git", "config", "commit.gpgsign"], capture_output=True, text=True)
+            result = subprocess.run(["git", "config", "commit.gpgsign"], capture_output=True, text=True)
             gpg_sign = result.stdout.strip() if result.returncode == 0 else None
 
             print(f"📧 User Name: {user_name or 'NOT SET'}")

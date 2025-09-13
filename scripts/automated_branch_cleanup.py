@@ -22,10 +22,12 @@ class BranchCleanupManager:
 
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
+        
         self.dry_run = True
         self.config = self._load_cleanup_config()
 
-    def _load_cleanup_config(self) -> Dict:
+    
+        def _load_cleanup_config(self) -> Dict:
         """Load branch cleanup configuration."""
         return {
             "stale_days_threshold": 30,
@@ -48,39 +50,40 @@ class BranchCleanupManager:
         """Analyze all remote branches and categorize for cleanup."""
         try:
             # Get all remote branches with metadata
-            cmd = [
+        cmd = [
                 "git",
                 "for-each-re",
                 "--format=%(refname:short)|%(committerdate:iso)|%(authorname)|%(ahead-behind:HEAD)",
                 "refs/remotes/origin/",
             ]
-            _ = subprocess.run(
-                cmd,
+        result = subprocess.run(                cmd,
                 capture_output=True,
-                text=True,
+        text=True,
                 cwd=self.repo_path,
-                shell=False,
+        shell=False,
                 check=False,
             )
 
-            if result.returncode != 0:
+            
+        if result.returncode != 0:
                 print(f"Error getting branch info: {result.stderr}")
-                return {}
+                
+        return {}
 
             branches = {"cleanup_candidates": [], "keep": [], "manual_review": []}
 
             for line in result.stdout.strip().split("\n"):
                 if not line:
                     continue
-
-                parts = line.split("|")
-                if len(parts) < 3:
+        parts = line.split("|")
+                
+        if len(parts) < 3:
                     continue
 
                 branch_name = parts[0].replace("origin/", "")
-                commit_date = parts[1]
+        commit_date = parts[1]
                 author = parts[2]
-                ahead_behind = parts[3] if len(parts) > 3 else "0\t0"
+        ahead_behind = parts[3] if len(parts) > 3 else "0\t0"
 
                 # Skip HEAD reference
                 if branch_name == "HEAD":
@@ -94,22 +97,25 @@ class BranchCleanupManager:
                     "ahead_behind": ahead_behind,
                     "age_days": self._calculate_age_days(commit_date),
                 }
+        category = self._categorize_branch(branch_info)
+                
+        branches[category].append(branch_info)
 
-                category = self._categorize_branch(branch_info)
-                branches[category].append(branch_info)
-
-            return branches
+            
+        return branches
 
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error analyzing branches: {e}")
-            return {}
+            
+        return {}
 
     def _calculate_age_days(self, commit_date: str) -> int:
         """Calculate branch age in days."""
         try:
             commit_dt = datetime.datetime.fromisoformat(commit_date.replace("Z", "+00:00"))
-            now = datetime.datetime.now(datetime.timezone.utc)
-            return (now - commit_dt).days
+        now = datetime.datetime.now(datetime.timezone.utc)
+            
+        return (now - commit_dt).days
         except (OSError, ValueError, RuntimeError):
             return 0
 
@@ -138,6 +144,7 @@ class BranchCleanupManager:
         if "*" in pattern:
             prefix = pattern.split("*")[0]
             return branch_name.startswith(prefix)
+        
         return branch_name == pattern
 
     def execute_cleanup(self, branches: Dict[str, List[Dict]], dry_run: bool = True) -> Dict:
@@ -156,27 +163,36 @@ class BranchCleanupManager:
         # Limit cleanup per run for safety
         if len(cleanup_candidates) > max_per_run:
             print(f"⚠️  Limiting cleanup to {max_per_run} branches per run for safety")
-            cleanup_candidates = cleanup_candidates[:max_per_run]
+        cleanup_candidates = cleanup_candidates[:max_per_run]
 
         for branch in cleanup_candidates:
             try:
-                action = self._determine_cleanup_action(branch)
+        action = self._determine_cleanup_action(branch)
 
-                if dry_run:
+                
+        if dry_run:
                     print(f"🔍 DRY RUN: Would {action} branch {branch['name']}")
-                    results["skipped"].append({"branch": branch["name"], "action": action})
-                else:
+                    
+        results["skipped"].append({"branch": branch["name"], "action": action})
+                
+        else:
                     success = self._execute_branch_action(branch, action)
-                    if success:
+                    
+        if success:
                         results[action].append(branch["name"])
-                        print(f"✅ {action.title()} branch: {branch['name']}")
-                    else:
+                        
+        print(f"✅ {action.title()} branch: {branch['name']}")
+                    
+        else:
                         results["errors"].append({"branch": branch["name"], "action": action})
 
-            except (OSError, ValueError, RuntimeError) as e:
+            
+        except (OSError, ValueError, RuntimeError) as e:
                 print(f"❌ Error processing {branch['name']}: {e}")
-                results["errors"].append({"branch": branch["name"], "error": str(e)})
+                
+        results["errors"].append({"branch": branch["name"], "error": str(e)})
 
+        
         return results
 
     def _determine_cleanup_action(self, branch: Dict) -> str:
@@ -205,12 +221,14 @@ class BranchCleanupManager:
                 tag_name = f"archive/{branch['name']}"
                 subprocess.run(
                     ["git", "tag", tag_name, branch_name],
-                    check=True,
+        check=True,
                     cwd=self.repo_path,
                 )
-                subprocess.run(["git", "push", "origin", tag_name], check=True, cwd=self.repo_path)
+                
+        subprocess.run(["git", "push", "origin", tag_name], check=True, cwd=self.repo_path)
 
-            elif action == "merged":
+            
+        elif action == "merged":
                 # This would require more complex logic to safely merge
                 # For now, just delete after manual verification
                 action = "deleted"
@@ -220,17 +238,20 @@ class BranchCleanupManager:
                 branch_short = branch["name"]
                 subprocess.run(
                     ["git", "push", "origin", "--delete", branch_short],
-                    check=True,
+        check=True,
                     cwd=self.repo_path,
                 )
-                return True
+                
+        return True
 
         except subprocess.CalledProcessError as e:
             print(f"Git command failed: {e}")
-            return False
+            
+        return False
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Unexpected error: {e}")
-            return False
+            
+        return False
 
         return True
 
@@ -265,14 +286,18 @@ class BranchCleanupManager:
             if branch_list:
                 report.extend([f"## {category.title().replace('_', ' ')}", ""])
 
-                for branch in branch_list[:10]:  # Limit output
+                
+        for branch in branch_list[:10]:  # Limit output
                     report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
 
-                if len(branch_list) > 10:
+                
+        if len(branch_list) > 10:
                     report.append(f"- ... and {len(branch_list) - 10} more")
 
-                report.append("")
+                
+        report.append("")
 
+        
         return "\n".join(report)
 
 
@@ -291,27 +316,30 @@ def main():
         help="Actually execute cleanup (overrides dry-run)",
     )
     parser.add_argument("--report-only", action="store_true", help="Generate analysis report only")
+        args = parser.parse_args()
+        cleanup_manager = BranchCleanupManager()
 
-    args = parser.parse_args()
-
-    cleanup_manager = BranchCleanupManager()
-
-    print("🌿 Aurora CloudBank - Branch Cleanup System")
+    
+        print("🌿 Aurora CloudBank - Branch Cleanup System")
     print("=" * 50)
 
     # Analyze branches
     print("🔍 Analyzing repository branches...")
     branches = cleanup_manager.analyze_branches()
 
-    if not branches:
+    
+        if not branches:
         print("❌ Failed to analyze branches")
+        
         sys.exit(1)
 
     # Generate report
     report = cleanup_manager.generate_cleanup_report(branches)
 
-    if args.report_only:
+    
+        if args.report_only:
         print(report)
+        
         return
 
     # Execute cleanup if requested
@@ -326,8 +354,10 @@ def main():
     report_path.write_text(final_report)
     print(f"📄 Report saved to: {report_path}")
 
-    if dry_run:
+    
+        if dry_run:
         print("\n🔍 DRY RUN MODE - No changes made")
+        
         print("Use --execute to perform actual cleanup")
 
 

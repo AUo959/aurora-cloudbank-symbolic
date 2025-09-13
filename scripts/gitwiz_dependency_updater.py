@@ -67,7 +67,7 @@ class DependencyAutoUpdater:
         if req_file.exists():
             try:
                 # Use pip list --outdated to check for updates
-                _ = subprocess.run(
+                result = subprocess.run(
                     [
                         sys.executable,
                         "-m",
@@ -112,7 +112,7 @@ class DependencyAutoUpdater:
         if package_json.exists():
             try:
                 # Use npm outdated to check for updates
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "outdated", "--json"],
                     capture_output=True,
                     text=True,
@@ -152,7 +152,7 @@ class DependencyAutoUpdater:
 
         try:
             # Update all packages
-            _ = subprocess.run(
+            result = subprocess.run(
                 [
                     sys.executable,
                     "-m",
@@ -194,9 +194,7 @@ class DependencyAutoUpdater:
             return update_result
 
         try:
-            # Update packages
-            _ = subprocess.run(
-                ["npm", "update"],
+            # Update packages            result = subprocess.run(                ["npm", "update"],
                 capture_output=True,
                 text=True,
                 cwd=self.project_root,
@@ -226,10 +224,8 @@ class DependencyAutoUpdater:
 
         # Python security audit with pip-audit (if available)
         try:
-            _ = subprocess.run(
-                [sys.executable, "-m", "pip", "install", "pip-audit"],
-                capture_output=True,
-                text=True,
+            result = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "pip-audit"],            result = subprocess.run(                text=True,
                 cwd=self.project_root,
                 shell=False,
                 check=False,
@@ -255,12 +251,10 @@ class DependencyAutoUpdater:
         package_json = self.project_root / "package.json"
         if package_json.exists():
             try:
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "audit", "--json"],
                     capture_output=True,
-                    text=True,
-                    cwd=self.project_root,
-                    shell=False,
+                    text=True,                result = subprocess.run(                    shell=False,
                     check=False,
                 )
 

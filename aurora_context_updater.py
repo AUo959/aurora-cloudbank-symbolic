@@ -10,10 +10,6 @@ Aurora CloudBank Context Updater
 Automatically updates custom instructions based on current repository state
 """
 
-import json
-import subprocess
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraContextUpdater:
@@ -37,7 +33,7 @@ class AuroraContextUpdater:
     def get_git_status(self):
         """Get current git status"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "log", "--oneline", "-1"], capture_output=True, text=True, cwd=self.project_root
             )
             return result.stdout.strip()

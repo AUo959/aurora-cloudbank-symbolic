@@ -4,7 +4,6 @@ import os
 Final Python syntax fixer
 """
 
-import os
 import re
 
 

@@ -18,7 +18,6 @@ Integration Notes:
 """
 
 import logging
-import os
 
 TELEMETRY_LOG = "logs/telemetry.log"
 

@@ -14,13 +14,6 @@ This script performs comprehensive repository cleanup and health maintenance
 using GITWiz intelligence and automation.
 """
 
-import argparse
-import json
-import shutil
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 
 class GITWizCleanup:

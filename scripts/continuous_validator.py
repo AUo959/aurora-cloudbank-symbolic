@@ -10,6 +10,7 @@ import sys
 import threading
 import time
 
+import yaml
 Aurora CloudBank - Continuous Canonical Validation Monitor
 Real-time monitoring and validation of file changes against canonical specifications
 

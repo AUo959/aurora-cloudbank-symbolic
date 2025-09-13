@@ -20,69 +20,73 @@ import sys
 def test_holographic_interface():
     """Test the holographic interface orchestrator"""
     print("🌟 Testing Holographic Interface Orchestrator...")
-
-    orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
+        orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
     if not os.path.exists(orchestrator_path):
         print(f"❌ {orchestrator_path} not found")
+        
         return False
 
     # Test syntax
     try:
-        _ = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)
+        result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)        
         if result.returncode == 0:
             print(f"✅ {orchestrator_path} - Valid Node.js syntax")
-            return True
+            
+        return True
         else:
             print(f"❌ {orchestrator_path} - Syntax error: {result.stderr}")
-            return False
+            
+        return False
     except Exception as e:
         print(f"⚠️  Could not test Node.js syntax: {e}")
+        
         return True  # Assume OK if Node.js not available
 
 
 def test_aurora_custom_gpt_bridge():
     """Test Aurora Custom GPT bridge connection"""
     print("🔗 Testing Aurora Custom GPT Bridge...")
-
-    bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
+        bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
     if os.path.exists(bridge_path):
         print(f"✅ {bridge_path} exists")
+        
         return True
     else:
         print(f"⚠️  {bridge_path} not found (may be in different location)")
+        
         return True  # Not critical for core tests
 
 
 def test_orion_core_config():
     """Test ORION Core configuration"""
     print("🛰️ Testing ORION Core Configuration...")
-
-    config_path = "src/config/orion_core_config.js"
+        config_path = "src/config/orion_core_config.js"
     if os.path.exists(config_path):
         print(f"✅ {config_path} exists")
+        
         return True
     else:
         print(f"⚠️  {config_path} not found")
+        
         return True  # Not critical
 
 
 def test_core_documentation():
     """Test that core documentation exists"""
     print("📚 Testing Core Documentation...")
-
-    docs = [
+        docs = [
         "AURORA_ERROR_RESOLUTION_SUCCESS.md",
         "AURORA_CLOUDBANK_FINAL_STATUS.md",
         "CANONICAL_INTEGRATION_COMPLETE.md",
     ]
-
-    all_exist = True
+        all_exist = True
     for doc in docs:
         if os.path.exists(doc):
             print(f"✅ {doc} exists")
+        
         else:
             print(f"❌ {doc} missing")
-            all_exist = False
+        all_exist = False
 
     return all_exist
 
@@ -91,25 +95,33 @@ def test_git_repository_status():
     """Test git repository status"""
     print("📦 Testing Git Repository Status...")
 
-    try:
+    
+        try:
         # Check if we're in a git repository
-        _ = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
 
+        
         if result.returncode == 0:
             uncommitted = result.stdout.strip()
-            if uncommitted:
+            
+        if uncommitted:
                 print("⚠️  Uncommitted changes found:")
-                for line in uncommitted.split("\n"):
+                
+        for line in uncommitted.split("\n"):
                     print(f"   {line}")
-            else:
+            
+        else:
                 print("✅ Repository is clean")
-            return True
+            
+        return True
         else:
             print("❌ Not in a git repository")
-            return False
+            
+        return False
 
     except Exception as e:
         print(f"❌ Git error: {e}")
+        
         return False
 
 
@@ -119,19 +131,19 @@ def test_system_integration():
 
     # Check for key files that indicate successful integration
     key_files = ["package.json", "requirements.txt", "src/orchestrators/holographic_interface_orchestrator.js"]
-
-    integration_score = 0
+        integration_score = 0
     for file_path in key_files:
         if os.path.exists(file_path):
             integration_score += 1
             print(f"✅ {file_path} exists")
+        
         else:
             print(f"❌ {file_path} missing")
-
-    success_rate = (integration_score / len(key_files)) * 100
+        success_rate = (integration_score / len(key_files)) * 100
     print(f"📊 Integration Score: {success_rate:.1f}%")
 
-    return success_rate >= 80
+    
+        return success_rate >= 80
 
 
 def generate_validation_report():
@@ -139,8 +151,7 @@ def generate_validation_report():
     print("\n" + "=" * 60)
     print("🌟 AURORA CLOUDBANK VALIDATION REPORT")
     print("=" * 60)
-
-    tests = [
+        tests = [
         ("Holographic Interface", test_holographic_interface),
         ("Aurora Custom GPT Bridge", test_aurora_custom_gpt_bridge),
         ("ORION Core Config", test_orion_core_config),
@@ -148,15 +159,17 @@ def generate_validation_report():
         ("Git Repository Status", test_git_repository_status),
         ("System Integration", test_system_integration),
     ]
-
-    results = {}
+        results = {}
     passed = 0
     total = len(tests)
 
-    for test_name, test_func in tests:
+    
+        for test_name, test_func in tests:
         print(f"\n📋 {test_name}")
+        
         print("-" * 40)
         success = test_func()
+        
         results[test_name] = success
         if success:
             passed += 1
@@ -167,7 +180,8 @@ def generate_validation_report():
     print(f"✅ Tests Passed: {passed}/{total}")
     print(f"📊 Success Rate: {(passed / total) * 100:.1f}%")
 
-    if passed == total:
+    
+        if passed == total:
         print("🎉 ALL TESTS PASSED - SYSTEM READY!")
         status = "READY"
     elif passed >= total * 0.8:
@@ -190,15 +204,17 @@ def generate_validation_report():
     with open("AURORA_VALIDATION_REPORT.json", "w") as f:
         json.dump(report, f, indent=2)
 
-    print("\n📄 Validation report saved to: AURORA_VALIDATION_REPORT.json")
+    
+        print("\n📄 Validation report saved to: AURORA_VALIDATION_REPORT.json")
 
-    return status == "READY" or status == "MOSTLY_READY"
+    
+        return status == "READY" or status == "MOSTLY_READY"
 
 
 if __name__ == "__main__":
     print("🚀 Starting Aurora CloudBank System Validation...")
     print()
+        success = generate_validation_report()
 
-    success = generate_validation_report()
-
-    sys.exit(0 if success else 1)
+    
+        sys.exit(0 if success else 1)

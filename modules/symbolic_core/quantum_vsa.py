@@ -25,9 +25,7 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
         if np.random.rand() > 0.5:
             qc.x(i)  # Flip some qubits based on hash
     qc.measure(range(dim), range(dim))
-    backend = AerSimulator()
-    _ = backend.run(qc, shots=1).result()
-    counts = list(result.get_counts().keys())[0]
+    backend = AerSimulator()    result = backend.run(qc, shots=1).result()    counts = list(result.get_counts().keys())[0]
     # Convert bitstring to -1/+1 vector
     vec = np.array([1 if b == "1" else -1 for b in counts[::-1]])
     return vec
@@ -37,6 +35,7 @@ class QuantumSymbolicVector(SymbolicVector):
 
     def __init__(self, symbol: str, dim: int = 8):
         vec = quantum_symbolic_vector(symbol, dim)
+        
         super().__init__(symbol=symbol, dim=dim, vector=vec.tolist(), vector_type="bipolar")
         # store numpy array for convenience
         self.vector = vec

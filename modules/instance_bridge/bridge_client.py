@@ -12,7 +12,6 @@ async def relay(uri: str, channel: str, client_id: str) -> None:
 
 
 def main() -> None:
-    import argparse
 
     parser = argparse.ArgumentParser(description="Aurora bridge client")
     parser.add_argument("uri", help="Bridge server URI, e.g. ws://localhost:8090")

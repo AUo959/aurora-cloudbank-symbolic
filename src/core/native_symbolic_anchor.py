@@ -287,9 +287,7 @@ class NativeSymbolicCPUAnchor:
 
         circuit_name = f"quantum_state_{hash(str(data)) % 10000}"
         self.quantum_processor.create_quantum_circuit(circuit_name, operations)
-
-        _ = self.quantum_processor.execute_quantum_symbolic_computation(circuit_name)
-
+        result = self.quantum_processor.execute_quantum_symbolic_computation(circuit_name)
         return {
             "quantum_processed": True,
             "coherence_maintained": True,

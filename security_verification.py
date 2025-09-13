@@ -18,7 +18,7 @@ def secure_run(cmd: str) -> tuple[str, str, int]:
     """Securely execute command without shell injection."""
     try:
         cmd_parts = shlex.split(cmd)
-        _ = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)        
         return result.stdout, result.stderr, result.returncode
     except (subprocess.TimeoutExpired, OSError) as e:
         return "", str(e), 1
@@ -40,6 +40,7 @@ def main():
     stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=True' {} \\;")
     if rc == 0 and stdout.strip():
         print("❌ CRITICAL: shell=True vulnerabilities still found:")
+        
         for file in stdout.strip().split("\n"):
             print(f"   - {file}")
     else:
@@ -49,20 +50,21 @@ def main():
     find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_eval_cmd)
     eval_files = stdout.strip().split("\n") if stdout.strip() else []
-
-    find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
+        find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_exec_cmd)
     exec_files = stdout.strip().split("\n") if stdout.strip() else []
 
     if eval_files or exec_files:
         print("⚠️  WARNING: Dynamic code execution found:")
+        
         for file in eval_files + exec_files:
             if file:
                 print(f"   - {file}")
     else:
         print("✅ Dynamic code execution: CLEAN")
 
-    print()
+    
+        print()
     print("🛡️  SECURITY INFRASTRUCTURE STATUS")
     print("-" * 40)
 
@@ -77,10 +79,12 @@ def main():
     for file in security_files:
         if Path(file).exists():
             print(f"✅ {file}")
+        
         else:
             print(f"❌ {file} MISSING")
 
-    print()
+    
+        print()
     print("📊 REMEDIATION SUMMARY")
     print("-" * 40)
     print("✅ Fixed: Shell injection vulnerabilities (5 files)")
@@ -92,7 +96,8 @@ def main():
     print("✅ Added: Timeout protections")
     print("✅ Added: Error handling improvements")
 
-    print()
+    
+        print()
     print("🎯 SECURITY COMPLIANCE STATUS")
     print("-" * 40)
     print("✅ OWASP Top 10: Compliant")
@@ -102,7 +107,8 @@ def main():
     print("✅ Dependency Scanning: Automated")
     print("✅ Security Monitoring: Enabled")
 
-    print()
+    
+        print()
     print("🚀 NEXT STEPS")
     print("-" * 40)
     print("1. Deploy security-hardened codebase")
@@ -111,7 +117,8 @@ def main():
     print("4. Train team on secure coding practices")
     print("5. Implement security incident response plan")
 
-    print()
+    
+        print()
     print("=" * 60)
     print("🎉 AURORA CLOUDBANK IS NOW SECURITY-HARDENED!")
     print("🔒 All critical vulnerabilities have been resolved")

@@ -12,9 +12,6 @@ Aurora Advanced Integration Module
 Advanced integration and orchestration capabilities
 """
 
-import json
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraAdvancedIntegration:
@@ -1000,7 +997,7 @@ async def main():
     print("=" * 70)
 
     integrator = AuroraAdvancedIntegration()
-    _ = await integrator.execute_phase3_integration()
+    result = await integrator.execute_phase3_integration()
 
     if result["status"] == "complete":
         print("\n🎉 PHASE 3 INTEGRATION COMPLETE!")

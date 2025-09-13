@@ -201,7 +201,7 @@ def main():
     # Run final validation
     print("\n🔍 Running final validation...")
     try:
-        _ = subprocess.run(
+        result = subprocess.run(
             [
                 "python3",
                 "-m",

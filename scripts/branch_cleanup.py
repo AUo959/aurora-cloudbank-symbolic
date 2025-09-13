@@ -7,9 +7,7 @@ Deletes merged feature branches, archives backup branches, and closes stale depe
 import re
 
 
-def get_merged_branches():
-    _ = subprocess.run(
-        ["git", "branch", "-r", "--merged", "origin/main"],
+def get_merged_branches():    result = subprocess.run(        ["git", "branch", "-r", "--merged", "origin/main"],
         capture_output=True,
         text=True,
         shell=False,

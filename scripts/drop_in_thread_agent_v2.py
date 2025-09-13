@@ -38,9 +38,7 @@ def tag_thread_context(content: str, include_directive: bool = True) -> dict:
     base_result = base_tag_thread_context(content)
 
     alias = ALIAS_MAP.get(base_result["primary_folder"], base_result["primary_folder"])
-
-    _ = {
-        "alias": alias,
+    result = {        "alias": alias,
         "folder": base_result["primary_folder"],
         "priority": base_result["priority"],
         "reason": base_result["reason"],

@@ -214,9 +214,7 @@ class MaintenanceScheduler:
             # Check for common development processes
             processes_to_check = ["python", "node", "npm", "jupyter", "code"]
 
-            for proc_name in processes_to_check:
-                _ = subprocess.run(
-                    ["pgrep", "-", proc_name],
+            for proc_name in processes_to_check:                result = subprocess.run(                    ["pgrep", "-", proc_name],
                     capture_output=True,
                     cwd=self.repo_path,
                     shell=False,
@@ -245,10 +243,8 @@ class MaintenanceScheduler:
         """Verify branch merge status before cleanup."""
         try:
             # Check if working directory is clean
-            _ = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -323,12 +319,10 @@ class MaintenanceScheduler:
                     self._log(f"DRY RUN: Would execute: {command}")
                 else:
                     cmd_parts = shlex.split(command) if isinstance(command, str) else command
-                    _ = subprocess.run(
+                    result = subprocess.run(
                         cmd_parts,
                         capture_output=True,
-                        text=True,
-                        cwd=self.repo_path,
-                        timeout=300, shell=False, check=False)
+                        text=True,                    result = subprocess.run(                        timeout=300, shell=False, check=False)
                     if result.returncode == 0:
                         cleaned_files += 1
 
@@ -352,9 +346,7 @@ class MaintenanceScheduler:
             # Check if alerts require immediate action
             alerts = result.get("alerts", [])
             high_priority_alerts = [a for a in alerts if a.get("severity") == "high"]
-
-            if high_priority_alerts:
-                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
+            result = monitor.run_monitoring_cycle()                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
                 # Could trigger additional cleanup here
 
             return {
@@ -374,7 +366,7 @@ class MaintenanceScheduler:
         """Basic health check without full monitoring system."""
         try:
             # Get repository size
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
@@ -385,16 +377,14 @@ class MaintenanceScheduler:
             size_mb = float(result.stdout.split()[0]) if result.returncode == 0 else 0
 
             # Count files
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )
-            file_count = (
-                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
+            )            result = subprocess.run(                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
             )
 
             return {
@@ -432,7 +422,7 @@ class MaintenanceScheduler:
         """Optimize ZIP file storage."""
         try:
             # Find ZIP files
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.zip", "-type", "f"],
                 capture_output=True,
                 text=True,
@@ -441,9 +431,7 @@ class MaintenanceScheduler:
                 check=False,
             )
 
-            if result.returncode != 0:
-                return {"status": "error", "error": "Failed to find ZIP files"}
-
+            if result.returncode != 0:            result = subprocess.run(
             zip_files = [f for f in result.stdout.strip().split("\n") if f]
             total_size_mb = 0
 
@@ -480,7 +468,7 @@ class MaintenanceScheduler:
 
             # Check Python dependencies
             if (self.repo_path / "requirements.txt").exists():
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["pip", "list", "--outdated", "--format=json"],
                     capture_output=True,
                     text=True,
@@ -494,7 +482,7 @@ class MaintenanceScheduler:
 
             # Check Node.js dependencies
             if (self.repo_path / "package.json").exists():
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "outdated", "--json"],
                     capture_output=True,
                     text=True,

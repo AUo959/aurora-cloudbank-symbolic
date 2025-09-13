@@ -173,9 +173,7 @@ class MaintenanceScheduler:
     def cleanup_cache_files(self) -> str:
         """Clean up Python cache files"""
         try:
-            # Find and count cache files
-            _ = subprocess.run(
-                ["find", ".", "-name", "*.pyc"],
+            # Find and count cache files            result = subprocess.run(                ["find", ".", "-name", "*.pyc"],
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -213,22 +211,18 @@ class MaintenanceScheduler:
         """Check current repository health"""
         try:
             # Get repository size
-            _ = subprocess.run(
-                ["du", "-sm", "."],
-                capture_output=True,
-                text=True,
+            result = subprocess.run(
+                ["du", "-sm", "."],            result = subprocess.run(                text=True,
                 shell=False,
                 check=False,
             )
             size_mb = float(result.stdout.split()[0])
 
             # Get file count
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
-                text=True,
-                shell=False,
-                check=False,
+                text=True,            result = subprocess.run(                check=False,
             )
             file_count = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
 
@@ -251,14 +245,12 @@ class MaintenanceScheduler:
             removed_count = 0
 
             for pattern in temp_patterns:
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["find", ".", "-name", pattern],
                     capture_output=True,
                     text=True,
                     shell=False,
-                    check=False,
-                )
-                temp_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
+                    check=False,                result = subprocess.run(                temp_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
                 if temp_files:
                     subprocess.run(["find", ".", "-name", pattern, "-delete"], check=True)
@@ -272,16 +264,14 @@ class MaintenanceScheduler:
         """Clean up stale branches"""
         try:
             # Use the branch manager script
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["python3", "scripts/branch_manager.py", "--cleanup", "--dry-run"],
                 capture_output=True,
                 text=True,
                 shell=False,
                 check=False,
             )
-
-            if result.returncode == 0:
-                return "Branch cleanup analysis completed"
+            result = subprocess.run(                return "Branch cleanup analysis completed"
             else:
                 return f"Branch cleanup failed: {result.stderr}"
         except (OSError, ValueError, RuntimeError) as e:
@@ -291,7 +281,7 @@ class MaintenanceScheduler:
         """Optimize ZIP files"""
         try:
             # Count current ZIP files
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.zip"],
                 capture_output=True,
                 text=True,
@@ -309,7 +299,7 @@ class MaintenanceScheduler:
         try:
             # This would run memory compression if script exists
             if os.path.exists("scripts/memory_compression_optimizer.py"):
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["python3", "scripts/memory_compression_optimizer.py", "--analyze"],
                     capture_output=True,
                     text=True,

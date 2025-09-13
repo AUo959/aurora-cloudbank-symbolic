@@ -22,7 +22,7 @@ def run_command(cmd):
     """Run shell command safely without shell injection."""
     try:
         cmd_parts = shlex.split(cmd)
-        _ = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=30)
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, check=True, timeout=30)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
         return f"Error: {e.stderr.strip()}"

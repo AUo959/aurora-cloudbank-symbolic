@@ -620,7 +620,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
         if not QISKIT_AVAILABLE:
             return {"error": "Qiskit not available"}
         backend = AerSimulator()
-        _ = backend.run(qc, shots=1000).result()
+        result = backend.run(qc, shots=1000).result()
         counts = result.get_counts()
 
         # Analyze results

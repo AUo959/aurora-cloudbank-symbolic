@@ -108,9 +108,7 @@ class HealthMonitor:
         }
 
         try:
-            # Repository size
-            _ = subprocess.run(
-                ["du", "-sm", "."],
+            # Repository size            result = subprocess.run(                ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -121,10 +119,8 @@ class HealthMonitor:
                 metrics["repository_size_mb"] = int(result.stdout.split()[0])
 
             # File count
-            _ = subprocess.run(
-                ["find", ".", "-type", ""],
-                capture_output=True,
-                text=True,
+            result = subprocess.run(
+                ["find", ".", "-type", ""],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -133,12 +129,10 @@ class HealthMonitor:
                 metrics["file_count"] = len(result.stdout.strip().split("\n"))
 
             # Branch count
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
-                text=True,
-                cwd=self.repo_path,
-                shell=False,
+                text=True,            result = subprocess.run(                shell=False,
                 check=False,
             )
             if result.returncode == 0:
@@ -149,20 +143,18 @@ class HealthMonitor:
             metrics["zip_file_count"] = len(zip_files)
 
             # Python cache files
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-type", ""],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                shell=False,
-                check=False,
-            )
+                shell=False,            result = subprocess.run(            )
             if result.returncode == 0:
                 pyc_files = result.stdout.strip().split("\n")
                 metrics["pyc_file_count"] = len([f for f in pyc_files if f])
 
             # Temporary directories
-            _ = subprocess.run(
+            result = subprocess.run(
                 [
                     "find",
                     ".",
@@ -188,16 +180,14 @@ class HealthMonitor:
                 metrics["temp_dir_count"] = len([d for d in temp_dirs if d and not d.startswith("./.venv")])
 
             # Large files (>10MB)
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["find", ".", "-type", "", "-size", "+10M"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )
-            if result.returncode == 0:
-                large_files = result.stdout.strip().split("\n")
+            )            result = subprocess.run(                large_files = result.stdout.strip().split("\n")
                 metrics["large_files"] = [f for f in large_files if f]
 
             # Calculate health score

@@ -460,9 +460,7 @@ async def main():
     print("🌟 Aurora L2 Meta-Agent Bridge - Example Usage")
     print("=" * 50)
 
-    # Test activation
-    _ = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
-    print(f"ARCHY Activation: {result['success']}")
+    # Test activation    result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")    print(f"ARCHY Activation: {result['success']}")
 
     if result["success"]:
         # Test message relay

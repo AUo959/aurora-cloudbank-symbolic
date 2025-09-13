@@ -3,6 +3,9 @@ name: Verify Aurora App Access
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest

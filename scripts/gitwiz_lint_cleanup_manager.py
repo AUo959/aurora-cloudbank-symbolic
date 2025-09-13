@@ -14,7 +14,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 from typing import Any
-import datetime
+import datetime as dt
 import logging
 import json
 from typing import Dict
@@ -24,9 +24,6 @@ import re
 from dataclasses import dataclass
 from typing import List
 import sys
-
-
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -142,8 +139,8 @@ class LintCleanupManager:
                 with open(config_path, "r", encoding="utf-8") as f:
                     config_data = json.load(f)
                 return LintCleanupConfig(**config_data)
-            except (json.JSONDecodeError, TypeError) as e:
-                logger.warning("Failed to load config: {e}. Using defaults.")
+            except (json.JSONDecodeError, TypeError):
+                logger.warning("Failed to load config, using defaults.")
 
         # Save default config
         config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -168,9 +165,7 @@ class LintCleanupManager:
 
         for tool, cmd in python_tools.items():
             try:
-                result = subprocess.run(
-                    cmd, capture_output=True, check=True, timeout=10
-                )
+                subprocess.run(cmd, capture_output=True, check=True, timeout=10)
                 available[tool] = True
             except (
                 subprocess.CalledProcessError,
@@ -222,7 +217,7 @@ class LintCleanupManager:
         Returns:
             Dictionary containing scan results and discovered issues
         """
-        scan_start = datetime.utcnow()
+        scan_start = dt.datetime.utcnow()
         logger.info("🔍 Starting comprehensive lint scan...")
 
         if target_paths is None:
@@ -268,11 +263,11 @@ class LintCleanupManager:
         scan_results["summary"] = self._generate_scan_summary()
         scan_results["recommendations"] = self._generate_recommendations()
 
-        execution_time = (datetime.utcnow() - scan_start).total_seconds()
+        execution_time = (dt.datetime.utcnow() - scan_start).total_seconds()
         scan_results["execution_time"] = execution_time
 
-        logger.info("✅ Lint scan completed in {execution_time:.2f}s")
-        logger.info("Found {len(self.discovered_issues)} total issues")
+        logger.info(f"✅ Lint scan completed in {execution_time:.2f}s")
+        logger.info(f"Found {len(self.discovered_issues)} total issues")
 
         return scan_results
 
@@ -286,8 +281,8 @@ class LintCleanupManager:
         Returns:
             Dictionary containing fix results and statistics
         """
-        workflow_start = datetime.utcnow()
-        logger.info("🔧 Starting automated fix workflow (dry_run={dry_run})...")
+        workflow_start = dt.datetime.utcnow()
+        logger.info(f"🔧 Starting automated fix workflow (dry_run={dry_run})...")
 
         workflow_results = {
             "start_time": workflow_start.isoformat(),
@@ -343,11 +338,11 @@ class LintCleanupManager:
             if isinstance(stage, dict)
         )
 
-        execution_time = (datetime.utcnow() - workflow_start).total_seconds()
+        execution_time = (dt.datetime.utcnow() - workflow_start).total_seconds()
         workflow_results["execution_time"] = execution_time
 
-        logger.info("✅ Automated fix workflow completed in {execution_time:.2f}s")
-        logger.info("Applied {workflow_results['total_fixes']} fixes total")
+        logger.info(f"✅ Automated fix workflow completed in {execution_time:.2f}s")
+        logger.info(f"Applied {workflow_results['total_fixes']} fixes total")
 
         return workflow_results
 
@@ -400,14 +395,13 @@ class LintCleanupManager:
 
         # Header
         report_sections.append("# GitWiz Lint & Cleanup Manager Integration Report")
-        report_sections.append("Generated: {datetime.utcnow().isoformat()}")
+        report_sections.append(f"Generated: {dt.datetime.utcnow().isoformat()}")
         report_sections.append("")
 
         # Tool availability
         report_sections.append("## Available Tools")
         for tool, available in self.available_tools.items():
-            status = "✅" if available else "❌"
-            report_sections.append("- {tool}: {status}")
+            report_sections.append(f"- {tool}: {'✅' if available else '❌'}")
         report_sections.append("")
 
         # Current issues summary
@@ -420,7 +414,7 @@ class LintCleanupManager:
                 )
 
             for severity, count in severity_counts.items():
-                report_sections.append("- {severity}: {count}")
+                report_sections.append(f"- {severity}: {count}")
             report_sections.append("")
 
         # Cleanup history
@@ -784,8 +778,8 @@ class LintCleanupManager:
                         }
                     )
 
-        except (OSError, UnicodeDecodeError) as e:
-            logger.warning("Could not analyze {file_path}: {e}")
+        except (OSError, UnicodeDecodeError):
+            logger.warning(f"Could not analyze {file_path}")
 
         return issues
 
@@ -796,7 +790,7 @@ class LintCleanupManager:
             if not dry_run:
                 cmd.append("--in-place")
             else:
-                cmd.append("--di")
+                cmd.append("--diff")
 
             cmd.append(str(self.project_root))
 
@@ -826,7 +820,7 @@ class LintCleanupManager:
         try:
             cmd = [sys.executable, "-m", "isort"]
             if dry_run:
-                cmd.extend(["--check-only", "--di"])
+                cmd.extend(["--check-only", "--diff"])
             else:
                 cmd.append("--apply")
 
@@ -858,7 +852,7 @@ class LintCleanupManager:
         try:
             cmd = [sys.executable, "-m", "black"]
             if dry_run:
-                cmd.extend(["--check", "--di"])
+                cmd.extend(["--check", "--diff"])
             else:
                 cmd.append("--safe")
 

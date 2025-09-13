@@ -6,7 +6,7 @@ Created for Aurora CloudBank Symbolic - July 2025
 """
 
 import argparse
-import datetime
+import datetime as dt
 import json
 import time
 from dataclasses import dataclass
@@ -21,12 +21,8 @@ from pathlib import Path
 from typing import Callable
 import threading
 import psutil as ps
-import sched
 from datetime import timedelta
 from collections import defaultdict
-
-
-
 
 # Optional imports
 try:
@@ -81,7 +77,7 @@ class AlertRule:
     severity: str  # 'info', 'warning', 'error', 'critical'
     message: str
     cooldown_minutes: int = 60
-    last_triggered: Optional[datetime] = None
+    last_triggered: Optional[dt.datetime] = None
 
 
 class RepositoryHealthMonitor:
@@ -108,9 +104,9 @@ class RepositoryHealthMonitor:
 
         # Validate git repository
         if not self.git_dir.exists():
-            raise ValueError("Not a git repository: {self.repo_path}")
+            raise ValueError(f"Not a git repository: {self.repo_path}")
 
-        logger.info("Repository Health Monitor initialized for: {self.repo_path}")
+        logger.info(f"Repository Health Monitor initialized for: {self.repo_path}")
 
     def _load_config(self, config_file: Optional[str] = None) -> Dict[str, Any]:
         """Load monitoring configuration."""
@@ -163,7 +159,7 @@ class RepositoryHealthMonitor:
                 # Deep merge with defaults
                 self._deep_merge_config(default_config, user_config)
             except Exception as e:
-                logger.warning("Failed to load config from {config_path}: {e}")
+                logger.warning(f"Failed to load config from {config_path}: {e}")
 
         # Save current config
         with open(config_path, 'w', encoding="utf-8") as f:
@@ -200,49 +196,49 @@ class RepositoryHealthMonitor:
                 name="git_size_large",
                 condition=lambda m: m.git_size_mb > self.thresholds["git_size_mb"],
                 severity="info",
-                message="Git directory size exceeded {self.thresholds['git_size_mb']}MB",
+                message=f"Git directory size exceeded {self.thresholds['git_size_mb']}MB",
                 cooldown_minutes=180
             ),
             AlertRule(
                 name="too_many_branches",
                 condition=lambda m: m.branch_count > self.thresholds["branch_count"],
                 severity="info",
-                message="Branch count exceeded {self.thresholds['branch_count']}",
+                message=f"Branch count exceeded {self.thresholds['branch_count']}",
                 cooldown_minutes=360
             ),
             AlertRule(
                 name="stale_branches_detected",
                 condition=lambda m: m.stale_branches > self.thresholds["stale_branches"],
                 severity="info",
-                message="Too many stale branches: {self.thresholds['stale_branches']}+",
+                message=f"Too many stale branches: {self.thresholds['stale_branches']}+",
                 cooldown_minutes=720
             ),
             AlertRule(
                 name="high_disk_usage",
                 condition=lambda m: m.disk_usage_percent > self.thresholds["disk_usage_percent"],
                 severity="error",
-                message="Disk usage exceeded {self.thresholds['disk_usage_percent']}%",
+                message=f"Disk usage exceeded {self.thresholds['disk_usage_percent']}%",
                 cooldown_minutes=60
             ),
             AlertRule(
                 name="high_memory_usage",
                 condition=lambda m: m.memory_usage_mb > self.thresholds["memory_usage_mb"],
                 severity="warning",
-                message="Memory usage exceeded {self.thresholds['memory_usage_mb']}MB",
+                message=f"Memory usage exceeded {self.thresholds['memory_usage_mb']}MB",
                 cooldown_minutes=30
             ),
             AlertRule(
                 name="low_health_score",
                 condition=lambda m: m.health_score < self.thresholds["health_score_min"],
                 severity="warning",
-                message="Health score below {self.thresholds['health_score_min']}",
+                message=f"Health score below {self.thresholds['health_score_min']}",
                 cooldown_minutes=240
             ),
             AlertRule(
                 name="excessive_cache_files",
                 condition=lambda m: m.cache_files_count > self.thresholds["cache_files"],
                 severity="info",
-                message="Cache files exceeded {self.thresholds['cache_files']}",
+                message=f"Cache files exceeded {self.thresholds['cache_files']}",
                 cooldown_minutes=120
             )
         ]
@@ -252,7 +248,7 @@ class RepositoryHealthMonitor:
         """Collect comprehensive health metrics."""
         logger.debug("Collecting health metrics...")
 
-        metrics = HealthMetrics(timestamp=datetime.now().isoformat())
+        metrics = HealthMetrics(timestamp=dt.datetime.now().isoformat())
 
         try:
             # Repository metrics
@@ -287,8 +283,8 @@ class RepositoryHealthMonitor:
             metrics.alerts = self._check_alerts(metrics)
 
         except Exception as e:
-            logger.error("Error collecting metrics: {e}")
-            metrics.alerts.append("Metrics collection error: {e}")
+            logger.error(f"Error collecting metrics: {e}")
+            metrics.alerts.append(f"Metrics collection error: {e}")
 
         return metrics
 
@@ -303,7 +299,7 @@ class RepositoryHealthMonitor:
                     except (OSError, PermissionError):
                         continue
         except Exception as e:
-            logger.warning("Error calculating size for {path}: {e}")
+            logger.warning(f"Error calculating size for {path}: {e}")
         return total_size
 
     def _count_files(self) -> int:
@@ -314,7 +310,7 @@ class RepositoryHealthMonitor:
                 if file_path.is_file() and not self._should_ignore_path(file_path):
                     count += 1
         except Exception as e:
-            logger.warning("Error counting files: {e}")
+            logger.warning(f"Error counting files: {e}")
         return count
 
     def _should_ignore_path(self, path: Path) -> bool:
@@ -335,17 +331,20 @@ class RepositoryHealthMonitor:
         try:
             # Branch count
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "branch", "-a"],
+                ["git", "-C", str(self.repo_path), "branch", "-a"],
                 capture_output=True, text=True, check=True
             )
             metrics["branch_count"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
 
             # Stale branches (no activity in 30 days)
-            cutoff_date = datetime.now() - timedelta(days=30)
+            cutoff_date = dt.datetime.now() - timedelta(days=30)
             stale_count = 0
 
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-re", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
+                [
+                    "git", "-C", str(self.repo_path), "for-each-ref",
+                    "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"
+                ],
                 capture_output=True, text=True, check=True
             )
 
@@ -354,7 +353,7 @@ class RepositoryHealthMonitor:
                     parts = line.strip().split(' ', 1)
                     if len(parts) == 2:
                         try:
-                            commit_date = datetime.fromisoformat(parts[1].replace(' +', '+'))
+                            commit_date = dt.datetime.fromisoformat(parts[1].replace(' +', '+'))
                             if commit_date.replace(tzinfo=None) < cutoff_date:
                                 stale_count += 1
                         except (ValueError, IndexError):
@@ -363,22 +362,22 @@ class RepositoryHealthMonitor:
             metrics["stale_branches"] = stale_count
 
             # Recent commits (last 7 days)
-            since_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+            since_date = (dt.datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "rev-list", "--count", "--since={since_date}", "HEAD"],
+                ["git", "-C", str(self.repo_path), "rev-list", "--count", f"--since={since_date}", "HEAD"],
                 capture_output=True, text=True, check=True
             )
             metrics["recent_commits"] = int(result.stdout.strip() or 0)
 
             # Contributors
             result = subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "shortlog", "-sn", "--all"],
+                ["git", "-C", str(self.repo_path), "shortlog", "-sn", "--all"],
                 capture_output=True, text=True, check=True
             )
             metrics["contributors"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
 
         except Exception as e:
-            logger.warning("Error collecting git metrics: {e}")
+            logger.warning(f"Error collecting git metrics: {e}")
 
         return metrics
 
@@ -427,7 +426,7 @@ class RepositoryHealthMonitor:
             analysis["duplicates"] = sum(1 for paths in file_hashes.values() if len(paths) > 1)
 
         except Exception as e:
-            logger.warning("Error analyzing files: {e}")
+            logger.warning(f"Error analyzing files: {e}")
 
         return analysis
 
@@ -452,7 +451,7 @@ class RepositoryHealthMonitor:
         """Calculate file hash for duplicate detection."""
         try:
             hash_md5 = hashlib.md5()
-            with open(file_path, "rb", encoding="utf-8") as f:
+            with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash_md5.update(chunk)
             return hash_md5.hexdigest()
@@ -484,7 +483,7 @@ class RepositoryHealthMonitor:
             metrics["cpu_usage_percent"] = ps.cpu_percent(interval=1)
 
         except Exception as e:
-            logger.warning("Error collecting system metrics: {e}")
+            logger.warning(f"Error collecting system metrics: {e}")
 
         return metrics
 
@@ -532,7 +531,7 @@ class RepositoryHealthMonitor:
     def _check_alerts(self, metrics: HealthMetrics) -> List[str]:
         """Check alert conditions and return triggered alerts."""
         triggered_alerts = []
-        current_time = datetime.now()
+        current_time = dt.datetime.now()
 
         for rule in self.alert_rules:
             # Check cooldown
@@ -542,12 +541,12 @@ class RepositoryHealthMonitor:
 
             # Check condition
             if rule.condition(metrics):
-                triggered_alerts.append("[{rule.severity.upper()}] {rule.message}")
+                triggered_alerts.append(f"[{rule.severity.upper()}] {rule.message}")
                 rule.last_triggered = current_time
 
                 # Log alert
                 if self.config["alerts"]["console_output"]:
-                    logger.warning("ALERT: {rule.message}")
+                    logger.warning(f"ALERT: {rule.message}")
 
                 # Execute auto-actions if applicable
                 self._handle_auto_actions(rule.name, metrics)
@@ -572,7 +571,7 @@ class RepositoryHealthMonitor:
                 logger.info("Auto-action: Pruned git objects")
 
         except Exception as e:
-            logger.error("Auto-action failed for {alert_name}: {e}")
+            logger.error(f"Auto-action failed for {alert_name}: {e}")
 
     def _cleanup_cache_files(self) -> None:
         """Clean up cache files."""
@@ -581,33 +580,33 @@ class RepositoryHealthMonitor:
                 if file_path.is_file() and self._is_cache_file(file_path):
                     file_path.unlink()
         except Exception as e:
-            logger.error("Cache cleanup failed: {e}")
+            logger.error(f"Cache cleanup failed: {e}")
 
     def _archive_old_logs(self) -> None:
         """Archive old log files."""
         try:
             log_patterns = ["*.log", "*.log.*"]
-            cutoff_date = datetime.now() - timedelta(days=7)
+            cutoff_date = dt.datetime.now() - timedelta(days=7)
 
             for pattern in log_patterns:
                 for log_file in self.repo_path.rglob(pattern):
                     if log_file.is_file():
-                        mod_time = datetime.fromtimestamp(log_file.stat().st_mtime)
+                        mod_time = dt.datetime.fromtimestamp(log_file.stat().st_mtime)
                         if mod_time < cutoff_date:
                             archive_path = log_file.with_suffix(log_file.suffix + '.archived')
                             log_file.rename(archive_path)
         except Exception as e:
-            logger.error("Log archiving failed: {e}")
+            logger.error(f"Log archiving failed: {e}")
 
     def _prune_git_objects(self) -> None:
         """Prune git objects."""
         try:
             subprocess.run(
-                ["git", "-C", str(self.repo_path, shell=False, check=False), "gc", "--prune=now"],
+                ["git", "-C", str(self.repo_path), "gc", "--prune=now"],
                 capture_output=True, check=True
             )
         except Exception as e:
-            logger.error("Git pruning failed: {e}")
+            logger.error(f"Git pruning failed: {e}")
 
     def start_monitoring(self) -> None:
         """Start continuous monitoring."""
@@ -615,16 +614,12 @@ class RepositoryHealthMonitor:
             logger.warning("Monitoring already started")
             return
 
-        if not HAS_SCHEDULE:
-            logger.error("Schedule module not available. Install with: pip install schedule")
-            return
-
         self.is_monitoring = True
         logger.info("Starting repository health monitoring...")
 
-        # Setup scheduled monitoring
-        interval_minutes = self.config["monitoring"]["interval_minutes"]
-        sched.every(interval_minutes).minutes.do(self._monitoring_cycle)
+        # Setup simple interval tracking (schedule module not guaranteed)
+        self._interval_minutes = self.config["monitoring"]["interval_minutes"]
+        self._next_run_ts = time.time()
 
         # Start monitoring thread
         self.monitor_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
@@ -641,23 +636,22 @@ class RepositoryHealthMonitor:
         logger.info("Stopping repository health monitoring...")
         self.is_monitoring = False
 
-        if HAS_SCHEDULE:
-            sched.clear()
+        # No scheduler to clear in this simplified loop
 
         if self.monitor_thread:
             self.monitor_thread.join(timeout=5)
 
     def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
-        if not HAS_SCHEDULE:
-            return
-
         while self.is_monitoring:
             try:
-                sched.run_pending()
-                time.sleep(60)  # Check every minute
+                now = time.time()
+                if now >= getattr(self, "_next_run_ts", 0):
+                    self._monitoring_cycle()
+                    self._next_run_ts = now + self._interval_minutes * 60
+                time.sleep(60)
             except Exception as e:
-                logger.error("Monitoring loop error: {e}")
+                logger.error(f"Monitoring loop error: {e}")
                 time.sleep(60)
 
     def _monitoring_cycle(self) -> None:
@@ -675,10 +669,10 @@ class RepositoryHealthMonitor:
             # Trim history
             self._trim_history()
 
-            logger.debug("Monitoring cycle complete. Health score: {metrics.health_score:.2f}")
+            logger.debug(f"Monitoring cycle complete. Health score: {metrics.health_score:.2f}")
 
         except Exception as e:
-            logger.error("Monitoring cycle failed: {e}")
+            logger.error(f"Monitoring cycle failed: {e}")
 
     def _save_metrics(self, metrics: HealthMetrics) -> None:
         """Save metrics to file."""
@@ -687,17 +681,17 @@ class RepositoryHealthMonitor:
             with open(metrics_file, 'a', encoding="utf-8") as f:
                 f.write(json.dumps(asdict(metrics)) + '\n')
         except Exception as e:
-            logger.error("Failed to save metrics: {e}")
+            logger.error(f"Failed to save metrics: {e}")
 
     def _trim_history(self) -> None:
         """Trim metrics history based on retention policy."""
         retention_days = self.config["monitoring"]["history_retention_days"]
-        cutoff_date = datetime.now() - timedelta(days=retention_days)
+        cutoff_date = dt.datetime.now() - timedelta(days=retention_days)
 
         # Trim in-memory history
         self.metrics_history = [
             m for m in self.metrics_history
-            if datetime.fromisoformat(m.timestamp) > cutoff_date
+            if dt.datetime.fromisoformat(m.timestamp) > cutoff_date
         ]
 
         # Trim file history
@@ -711,14 +705,14 @@ class RepositoryHealthMonitor:
                     for line in infile:
                         try:
                             data = json.loads(line.strip())
-                            if datetime.fromisoformat(data['timestamp']) > cutoff_date:
+                            if dt.datetime.fromisoformat(data['timestamp']) > cutoff_date:
                                 outfile.write(line)
                         except (json.JSONDecodeError, KeyError):
                             continue
 
                 temp_file.replace(metrics_file)
         except Exception as e:
-            logger.error("Failed to trim history: {e}")
+            logger.error(f"Failed to trim history: {e}")
 
     def get_health_report(self) -> Dict[str, Any]:
         """Generate comprehensive health report."""
@@ -730,7 +724,7 @@ class RepositoryHealthMonitor:
             trends = self._calculate_trends()
 
         report = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": dt.datetime.now().isoformat(),
             "repository_path": str(self.repo_path),
             "monitor_version": "2.0.0",
             "current_metrics": asdict(current_metrics),
@@ -756,11 +750,10 @@ class RepositoryHealthMonitor:
             return {}
 
         # Get metrics from 24 hours ago and now
-        now = datetime.now()
+        now = dt.datetime.now()
         day_ago = now - timedelta(hours=24)
 
-        recent_metrics = [m for m in self.metrics_history
-                          if datetime.fromisoformat(m.timestamp) > day_ago]
+        recent_metrics = [m for m in self.metrics_history if dt.datetime.fromisoformat(m.timestamp) > day_ago]
 
         if len(recent_metrics) < 2:
             return {}
@@ -863,18 +856,18 @@ def main():
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
             print("✅ Health Check Complete")
-            print("📊 Health Score: {metrics.health_score:.2f}")
-            print("📁 Files: {metrics.file_count}")
-            print("💾 Size: {metrics.repository_size_mb:.1f}MB")
-            print("🌿 Branches: {metrics.branch_count}")
+            print(f"📊 Health Score: {metrics.health_score:.2f}")
+            print(f"📁 Files: {metrics.file_count}")
+            print(f"💾 Size: {metrics.repository_size_mb:.1f}MB")
+            print(f"🌿 Branches: {metrics.branch_count}")
 
             if metrics.alerts:
-                print("🚨 Alerts: {len(metrics.alerts)}")
+                print(f"🚨 Alerts: {len(metrics.alerts)}")
                 for alert in metrics.alerts:
-                    print("  - {alert}")
+                    print(f"  - {alert}")
 
     except Exception as e:
-        logger.error("Health monitor operation failed: {e}")
+        logger.error(f"Health monitor operation failed: {e}")
         return 1
 
     return 0

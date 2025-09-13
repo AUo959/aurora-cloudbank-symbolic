@@ -10,15 +10,17 @@ Primary functions:
 - State snapshot and restore commands
 """
 
-from symbolic.memory_sealer import MemorySealingEngine
-from symbolic.anchor_tracker import SymbolicAnchorTracker
 import sys
 import argparse
 from pathlib import Path
 from datetime import datetime
 
-# Add tools directory to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add workspace root to Python path so 'tools' is importable
+WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(WORKSPACE_ROOT))
+
+from tools.symbolic.memory_sealer import MemorySealingEngine  # noqa: E402
+from tools.symbolic.anchor_tracker import SymbolicAnchorTracker  # noqa: E402
 
 
 class AuroraDeveloperCLI:
@@ -56,7 +58,7 @@ class AuroraDeveloperCLI:
         elif args.anchor_cmd == "seal":
             return self._anchor_seal(args)
         else:
-            print("❌ Unknown anchor command: {args.anchor_cmd}")
+            print(f"❌ Unknown anchor command: {args.anchor_cmd}")
             return 1
 
     def _anchor_track(self, args) -> int:
@@ -75,19 +77,19 @@ class AuroraDeveloperCLI:
                         matching_anchors[file_path] = matches
 
                 if matching_anchors:
-                    print("Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':")
+                    print(f"Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':")
                     for file_path, file_anchors in matching_anchors.items():
-                        print("\n📁 {file_path}:")
+                        print(f"\n📁 {file_path}:")
                         for anchor in file_anchors:
-                            print("  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
+                            print(f"  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
                 else:
-                    print("No anchors found matching pattern: {args.pattern}")
+                    print(f"No anchors found matching pattern: {args.pattern}")
             else:
                 # Track all anchors
                 found_anchors = self.anchor_tracker.scan_repository()
                 total_anchors = sum(len(a) for a in found_anchors.values())
 
-                print("Found {total_anchors} anchors in {len(found_anchors)} files:")
+                print(f"Found {total_anchors} anchors in {len(found_anchors)} files:")
 
                 # Group by anchor type
                 by_type = {}
@@ -98,16 +100,16 @@ class AuroraDeveloperCLI:
                         by_type[anchor.anchor_type].append(anchor)
 
                 for anchor_type, anchors in by_type.items():
-                    print("\n{anchor_type}: {len(anchors)} anchors")
+                    print(f"\n{anchor_type}: {len(anchors)} anchors")
                     for anchor in anchors[:5]:  # Show first 5
-                        print("  ⚓ {anchor.anchor_id} in {anchor.file_path}")
+                        print(f"  ⚓ {anchor.anchor_id} in {anchor.file_path}")
                     if len(anchors) > 5:
-                        print("    ... and {len(anchors) - 5} more")
+                        print(f"    ... and {len(anchors) - 5} more")
 
             return 0
 
         except Exception as e:
-            print("❌ Error tracking anchors: {e}")
+            print(f"❌ Error tracking anchors: {e}")
             return 1
 
     def _anchor_resolve(self, args) -> int:
@@ -116,7 +118,7 @@ class AuroraDeveloperCLI:
             print("❌ --anchor required for resolve command")
             return 1
 
-        print("🔍 Resolving anchor: {args.anchor_id}")
+        print(f"🔍 Resolving anchor: {args.anchor_id}")
 
         try:
             # First scan to populate anchors
@@ -127,12 +129,12 @@ class AuroraDeveloperCLI:
 
             if anchor:
                 print("\n⚓ Anchor Details:")
-                print("  ID: {anchor.anchor_id}")
-                print("  Type: {anchor.anchor_type}")
-                print("  Location: {anchor.file_path}:{anchor.line_number}")
-                print("  Context: {anchor.context}")
-                print("  Hash: {anchor.sha256_hash}")
-                print("  Timestamp: {anchor.timestamp}")
+                print(f"  ID: {anchor.anchor_id}")
+                print(f"  Type: {anchor.anchor_type}")
+                print(f"  Location: {anchor.file_path}:{anchor.line_number}")
+                print(f"  Context: {anchor.context}")
+                print(f"  Hash: {anchor.sha256_hash}")
+                print(f"  Timestamp: {anchor.timestamp}")
 
                 # Build lineage
                 lineages = self.anchor_tracker.build_lineage_map()
@@ -140,20 +142,20 @@ class AuroraDeveloperCLI:
 
                 if lineage:
                     print("\n🔗 Lineage Information:")
-                    print("  Generation: {lineage.generation}")
-                    print("  Ancestors: {lineage.ancestors if lineage.ancestors else 'None'}")
-                    print("  Descendants: {lineage.descendants if lineage.descendants else 'None'}")
-                    print("  Lineage Hash: {lineage.lineage_hash}")
+                    print(f"  Generation: {lineage.generation}")
+                    print(f"  Ancestors: {lineage.ancestors if lineage.ancestors else 'None'}")
+                    print(f"  Descendants: {lineage.descendants if lineage.descendants else 'None'}")
+                    print(f"  Lineage Hash: {lineage.lineage_hash}")
                 else:
                     print("  No lineage information available")
             else:
-                print("❌ Anchor {args.anchor_id} not found")
+                print(f"❌ Anchor {args.anchor_id} not found")
                 return 1
 
             return 0
 
         except Exception as e:
-            print("❌ Error resolving anchor: {e}")
+            print(f"❌ Error resolving anchor: {e}")
             return 1
 
     def _anchor_seal(self, args) -> int:
@@ -162,22 +164,22 @@ class AuroraDeveloperCLI:
             print("❌ --anchor required for seal command")
             return 1
 
-        print("🔐 Sealing anchor thread: {args.anchor_id}")
+        print(f"🔐 Sealing anchor thread: {args.anchor_id}")
 
         try:
-            description = "Thread seal for {args.anchor_id}"
+            description = f"Thread seal for {args.anchor_id}"
             seal = self.memory_sealer.seal_thread(args.anchor_id, description)
 
             print("✅ Thread sealed successfully:")
-            print("  Seal ID: {seal.seal_id}")
-            print("  Hash: {seal.sha256_hash}")
-            print("  Files: {seal.recovery_data.get('file_count', 'Unknown')}")
-            print("  Timestamp: {seal.timestamp}")
+            print(f"  Seal ID: {seal.seal_id}")
+            print(f"  Hash: {seal.sha256_hash}")
+            print(f"  Files: {seal.recovery_data.get('file_count', 'Unknown')}")
+            print(f"  Timestamp: {seal.timestamp}")
 
             return 0
 
         except Exception as e:
-            print("❌ Error sealing anchor thread: {e}")
+            print(f"❌ Error sealing anchor thread: {e}")
             return 1
 
     def cmd_seal(self, args) -> int:
@@ -198,35 +200,35 @@ class AuroraDeveloperCLI:
                 result = self.memory_sealer.verify_seal(args.seal_id)
 
                 if result["status"] == "valid":
-                    print("✅ Seal {args.seal_id} is valid")
+                    print(f"✅ Seal {args.seal_id} is valid")
                 else:
-                    print("❌ Seal {args.seal_id} is invalid:")
+                    print(f"❌ Seal {args.seal_id} is invalid:")
                     for issue in result["issues"]:
-                        print("   - {issue}")
+                        print(f"   - {issue}")
 
                 return 0 if result["status"] == "valid" else 1
             else:
                 # Create new seal
-                print("🔐 Sealing: {args.target}")
+                print(f"🔐 Sealing: {args.target}")
 
                 if target_path.is_file():
                     seal = self.memory_sealer.seal_file(target_path, args.seal_id)
-                    print("✅ File sealed: {seal.seal_id}")
+                    print(f"✅ File sealed: {seal.seal_id}")
                 elif target_path.is_dir():
                     seal = self.memory_sealer.seal_directory(target_path, args.seal_id)
-                    print("✅ Directory sealed: {seal.seal_id}")
+                    print(f"✅ Directory sealed: {seal.seal_id}")
                 else:
                     # Assume it's a thread anchor
-                    seal = self.memory_sealer.seal_thread(args.target, "Manual seal of {args.target}")
-                    print("✅ Thread sealed: {seal.seal_id}")
+                    seal = self.memory_sealer.seal_thread(args.target, f"Manual seal of {args.target}")
+                    print(f"✅ Thread sealed: {seal.seal_id}")
 
-                print("   Hash: {seal.sha256_hash}")
-                print("   Timestamp: {seal.timestamp}")
+                print(f"   Hash: {seal.sha256_hash}")
+                print(f"   Timestamp: {seal.timestamp}")
 
                 return 0
 
         except Exception as e:
-            print("❌ Error in seal operation: {e}")
+            print(f"❌ Error in seal operation: {e}")
             return 1
 
     def cmd_restore(self, args) -> int:
@@ -236,7 +238,7 @@ class AuroraDeveloperCLI:
             return 1
 
         try:
-            print("🔄 Restoring state: {args.anchor_or_seal_id}")
+            print(f"🔄 Restoring state: {args.anchor_or_seal_id}")
 
             result = self.memory_sealer.restore_sealed_state(
                 args.anchor_or_seal_id,
@@ -250,16 +252,16 @@ class AuroraDeveloperCLI:
                 print("✅ State restored successfully:")
             elif result["status"] == "error":
                 print("❌ Restore failed:")
-                print("   Error: {result.get('error', 'Unknown error')}")
+                print(f"   Error: {result.get('error', 'Unknown error')}")
                 return 1
 
             for action in result["actions"]:
-                print("   - {action}")
+                print(f"   - {action}")
 
             return 0
 
         except Exception as e:
-            print("❌ Error restoring state: {e}")
+            print(f"❌ Error restoring state: {e}")
             return 1
 
     def cmd_manifest(self, args) -> int:
@@ -274,32 +276,32 @@ class AuroraDeveloperCLI:
             if args.target:
                 # Generate manifest for specific anchor
                 manifest = self.anchor_tracker.generate_export_manifest(args.target)
-                print("✅ Manifest generated for anchor: {args.target}")
+                print(f"✅ Manifest generated for anchor: {args.target}")
             else:
                 # Generate repository-wide manifest
                 manifest = self.anchor_tracker.generate_export_manifest()
                 print("✅ Repository manifest generated")
 
             # Save manifest
-            output_path = args.output or "T71_MANIFEST_{datetime.now().strftime('%Y%m%dT%H%M%SZ')}.json"
-            saved_path = self.anchor_tracker.save_manifest(manifest, output_path)
+            output_path = args.output or f"T71_MANIFEST_{datetime.now().strftime('%Y%m%dT%H%M%SZ')}.json"
+            saved_path = self.anchor_tracker.save_manifest(manifest, output_path) or output_path
 
-            print("📄 Saved to: {saved_path}")
-            print("🔐 Memory seal: {manifest['memory_seal']}")
+            print(f"📄 Saved to: {saved_path}")
+            print(f"🔐 Memory seal: {manifest['memory_seal']}")
 
             # Display key information
             if "anchor_details" in manifest:
                 anchor = manifest["anchor_details"]
-                print("📍 Anchor: {anchor['anchor_id']} ({anchor['anchor_type']})")
-                print("📁 Location: {anchor['file_path']}:{anchor['line_number']}")
+                print(f"📍 Anchor: {anchor['anchor_id']} ({anchor['anchor_type']})")
+                print(f"📁 Location: {anchor['file_path']}:{anchor['line_number']}")
             else:
-                print("📊 Total anchors: {manifest.get('total_anchors', 0)}")
-                print("🔗 Lineages mapped: {manifest.get('lineages_mapped', 0)}")
+                print(f"📊 Total anchors: {manifest.get('total_anchors', 0)}")
+                print(f"🔗 Lineages mapped: {manifest.get('lineages_mapped', 0)}")
 
             return 0
 
         except Exception as e:
-            print("❌ Error generating manifest: {e}")
+            print(f"❌ Error generating manifest: {e}")
             return 1
 
     def cmd_diff(self, args) -> int:
@@ -309,7 +311,7 @@ class AuroraDeveloperCLI:
             return 1
 
         try:
-            print("📊 Comparing {args.anchor1} vs {args.anchor2}")
+            print(f"📊 Comparing {args.anchor1} vs {args.anchor2}")
 
             # Scan and resolve both anchors
             self.anchor_tracker.scan_repository()
@@ -319,24 +321,24 @@ class AuroraDeveloperCLI:
             anchor2 = self.anchor_tracker.resolve_anchor(args.anchor2)
 
             if not anchor1:
-                print("❌ Anchor not found: {args.anchor1}")
+                print(f"❌ Anchor not found: {args.anchor1}")
                 return 1
 
             if not anchor2:
-                print("❌ Anchor not found: {args.anchor2}")
+                print(f"❌ Anchor not found: {args.anchor2}")
                 return 1
 
             # Compare basic properties
             print("\n📍 Anchor Comparison:")
-            print("  {args.anchor1}:")
-            print("    Type: {anchor1.anchor_type}")
-            print("    Location: {anchor1.file_path}:{anchor1.line_number}")
-            print("    Hash: {anchor1.sha256_hash[:16]}...")
+            print(f"  {args.anchor1}:")
+            print(f"    Type: {anchor1.anchor_type}")
+            print(f"    Location: {anchor1.file_path}:{anchor1.line_number}")
+            print(f"    Hash: {anchor1.sha256_hash[:16]}...")
 
-            print("  {args.anchor2}:")
-            print("    Type: {anchor2.anchor_type}")
-            print("    Location: {anchor2.file_path}:{anchor2.line_number}")
-            print("    Hash: {anchor2.sha256_hash[:16]}...")
+            print(f"  {args.anchor2}:")
+            print(f"    Type: {anchor2.anchor_type}")
+            print(f"    Location: {anchor2.file_path}:{anchor2.line_number}")
+            print(f"    Hash: {anchor2.sha256_hash[:16]}...")
 
             # Compare lineages
             lineage1 = self.anchor_tracker.lineages.get(args.anchor1)
@@ -354,14 +356,14 @@ class AuroraDeveloperCLI:
                 # Find common ancestors
                 common_ancestors = set(lineage1.ancestors) & set(lineage2.ancestors)
                 if common_ancestors:
-                    print("  Common ancestors: {list(common_ancestors)}")
+                    print(f"  Common ancestors: {list(common_ancestors)}")
                 else:
                     print("  No common ancestors found")
 
             return 0
 
         except Exception as e:
-            print("❌ Error comparing anchors: {e}")
+            print(f"❌ Error comparing anchors: {e}")
             return 1
 
     def cmd_status(self, args) -> int:
@@ -374,11 +376,11 @@ class AuroraDeveloperCLI:
             anchors = self.anchor_tracker.scan_repository()
             total_anchors = sum(len(a) for a in anchors.values())
 
-            print("⚓ Anchors: {total_anchors} found in {len(anchors)} files")
+            print(f"⚓ Anchors: {total_anchors} found in {len(anchors)} files")
 
             # Build lineages
             lineages = self.anchor_tracker.build_lineage_map()
-            print("🔗 Lineages: {len(lineages)} mapped")
+            print(f"🔗 Lineages: {len(lineages)} mapped")
 
             # Check for drift
             drift_issues = self.anchor_tracker.detect_drift()
@@ -387,25 +389,26 @@ class AuroraDeveloperCLI:
             if drift_count == 0:
                 print("✅ Drift Status: No issues detected")
             else:
-                print("⚠️  Drift Status: {drift_count} issues detected")
+                print(f"⚠️  Drift Status: {drift_count} issues detected")
                 for issue_type, issues in drift_issues.items():
                     if issues:
-                        print("   {issue_type}: {len(issues)}")
+                        print(f"   {issue_type}: {len(issues)}")
 
             # Memory seals status
             seals_count = len(self.memory_sealer.seals)
-            print("🔐 Memory Seals: {seals_count} active")
+            print(f"🔐 Memory Seals: {seals_count} active")
 
             # Repository info
-            print("\n📁 Repository: {self.repo_path}")
-            print("🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print("🔢 CLI Version: {self.version}")
+            print(f"\n📁 Repository: {self.repo_path}")
+            print(f"🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"🔢 CLI Version: {self.version}")
 
             return 0
 
         except Exception as e:
-            print("❌ Error getting status: {e}")
+            print(f"❌ Error getting status: {e}")
             return 1
+
 
 def create_parser():
     """Create argument parser for Aurora CLI"""
@@ -463,14 +466,15 @@ Examples:
     manifest_parser.add_argument("--output", "-o", help="Output file path")
 
     # State comparison
-    diff_parser = subparsers.add_parser("di", help="Compare anchor states")
+    diff_parser = subparsers.add_parser("diff", help="Compare anchor states")
     diff_parser.add_argument("anchor1", help="First anchor to compare")
     diff_parser.add_argument("anchor2", help="Second anchor to compare")
 
     # System status
-    status_parser = subparsers.add_parser("status", help="Show system status")
+    subparsers.add_parser("status", help="Show system status")
 
     return parser
+
 
 def main():
     """Main CLI entry point"""
@@ -492,13 +496,14 @@ def main():
         return cli.cmd_restore(args)
     elif args.command == "manifest":
         return cli.cmd_manifest(args)
-    elif args.command == "di":
+    elif args.command == "diff":
         return cli.cmd_diff(args)
     elif args.command == "status":
         return cli.cmd_status(args)
     else:
-        print("❌ Unknown command: {args.command}")
+        print(f"❌ Unknown command: {args.command}")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

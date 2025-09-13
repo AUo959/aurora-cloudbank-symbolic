@@ -196,12 +196,8 @@ class ChatGPTAgentModeIntegration:
         Returns structured response instead of raising exceptions for better agent compatibility
         """
         if tool_name not in self.tools_registry:
-            return {
-                "success": False,
-                "error": f"Tool '{tool_name}' not found",
-                "available_tools": list(self.tools_registry.keys()),
-                "recovery_suggestions": ["Check available tools via /agent/tools endpoint"],
-            }
+            # Align behavior with tests: raise an exception for unknown tools
+            raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
 
         tool_def = self.tools_registry[tool_name]
 
@@ -253,7 +249,6 @@ class ChatGPTAgentModeIntegration:
 
     def _validate_parameters(self, parameters: Dict[str, Any], schema: Dict[str, Any]):
         """Basic parameter validation against JSON schema"""
-        required_params = schema.get("properties", {}).keys()
         for param in schema.get("required", []):
             if param not in parameters:
                 raise ValueError(f"Required parameter '{param}' missing")

@@ -48,7 +48,7 @@ class GITWizCleanup:
     def get_repo_size(self):
         """Get repository size in bytes."""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sb", str(self.repo_path)],
                 capture_output=True,
                 text=True,
@@ -123,7 +123,7 @@ class GITWizCleanup:
         """Analyze git branches."""
         print("🌿 Analyzing git branches...")
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["git", "branch", "-a"],
                 capture_output=True,
                 text=True,

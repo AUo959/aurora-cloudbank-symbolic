@@ -8,11 +8,8 @@ Aurora CloudBank - Automated Branch Cleanup System
 Intelligently identifies and manages stale branches based on configurable rules.
 """
 
-import argparse
 import datetime
 import re
-import subprocess
-from pathlib import Path
 
 
 class BranchCleanupManager:

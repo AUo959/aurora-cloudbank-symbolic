@@ -30,7 +30,7 @@ def run_cmd(cmd: str) -> None:
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)
-        _ = subprocess.run(cmd_parts, timeout=300, shell=False, check=False)
+        result = subprocess.run(cmd_parts, timeout=300, shell=False, check=False)
         if result.returncode != 0:
             logger.error("Command failed: %s", cmd)
             sys.exit(result.returncode)

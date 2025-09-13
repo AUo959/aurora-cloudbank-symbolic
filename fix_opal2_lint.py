@@ -5,7 +5,6 @@ Simple lint fixer for Opal2 files
 Removes trailing whitespace and fixes basic issues
 """
 
-import os
 
 
 def fix_file(file_path):

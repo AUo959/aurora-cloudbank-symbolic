@@ -733,7 +733,7 @@ class QuantumRenderer:
             "dimensions": 2,
         }
 
-        _ = await self.render_async(
+        result = await self.render_async(
             glyph_data=test_data,
             renderer="webgl",
             dimensions={"width": 400, "height": 400},

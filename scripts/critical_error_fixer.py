@@ -11,8 +11,6 @@ Fixes critical undefined variable errors caused by overly aggressive lint fixes.
 """
 
 import re
-import sys
-from pathlib import Path
 
 
 def fix_undefined_result_variables(file_path: str) -> bool:

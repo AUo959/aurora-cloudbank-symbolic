@@ -348,7 +348,7 @@ class AdvancedCodeQualityFixer:
     def run_final_validation(self) -> None:
         """Run flake8 to check remaining issues"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["python3", "-m", "flake8", "--statistics", "--count"], capture_output=True, text=True, timeout=60
             )
 
@@ -370,7 +370,7 @@ class AdvancedCodeQualityFixer:
 
         # Get current flake8 count
         try:
-            _ = subprocess.run(["python3", "-m", "flake8", "--count"], capture_output=True, text=True)
+            result = subprocess.run(["python3", "-m", "flake8", "--count"], capture_output=True, text=True)
             if result.stdout.strip().isdigit():
                 remaining = int(result.stdout.strip())
                 print(f"Remaining Issues: {remaining}")

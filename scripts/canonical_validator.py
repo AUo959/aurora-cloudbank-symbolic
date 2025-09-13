@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import json
-import subprocess
+# import subprocess
 """
 Aurora CloudBank Symbolic - Canonical Validation Engine
 Auto-validates new work against ORION CORE canonical specification
@@ -14,7 +14,7 @@ Date: July 13, 2025
 
 import json
 import re
-import subprocess
+# import subprocess
 import difflib
 from dataclasses import dataclass
 from pathlib import Path

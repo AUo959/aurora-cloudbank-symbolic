@@ -11,10 +11,6 @@ Implements advanced branch management and configuration for the Aurora CloudBank
 multi-agent system with proper GitFlow and feature branch strategies.
 """
 
-import json
-import subprocess
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraBranchManager:

@@ -7,9 +7,7 @@ Aurora CloudBank - Enhanced Automated Branch Cleanup System
 Intelligently manages repository branches with safety checks
 """
 
-import argparse
 import datetime
-import subprocess
 from dataclasses import dataclass
 from typing import Dict, List
 

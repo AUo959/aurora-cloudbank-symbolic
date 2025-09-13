@@ -56,7 +56,7 @@ async def demo_geometric_algebra(agent):
     for i, case in enumerate(test_cases, 1):
         print(f"\nTest {i}: {case['expression_a']} {case['operation']} {case['expression_b']}")
 
-        _ = await agent.execute_tool("geometric_algebra", case)
+        result = await agent.execute_tool("geometric_algebra", case)
         if result['success']:
             geo_result = result['result']['geometric_result']
             print(f"Result: {geo_result}")
@@ -127,7 +127,7 @@ async def demo_symbolic_processing(agent):
         print(f"\nOperation {i}: {op['operation']}")
         print(f"Input: {op['data']}")
 
-        _ = await agent.execute_tool("symbolic_processing", op)
+        result = await agent.execute_tool("symbolic_processing", op)
         if result['success']:
             processed = result['result']
             print(f"Status: ✅ {processed['symbolic_validation']}")
@@ -146,7 +146,7 @@ async def demo_system_status(agent):
     for level in status_levels:
         print(f"\nStatus level: {level}")
 
-        _ = await agent.execute_tool("system_status", {"detail_level": level})
+        result = await agent.execute_tool("system_status", {"detail_level": level})
         if result['success']:
             status = result['result']
             print(f"Agent Status: {status['agent_status']}")
@@ -169,14 +169,14 @@ async def demo_error_handling(agent):
     # Test invalid tool
     print("Testing invalid tool name...")
     try:
-        _ = await agent.execute_tool("non_existent_tool", {})
+        result = await agent.execute_tool("non_existent_tool", {})
         print(f"Result: {result['success']} (unexpected)")
     except Exception as e:
         print(f"Error handled: {str(e)[:50]}... ✅")
 
     # Test invalid parameters
     print("\nTesting invalid parameters...")
-    _ = await agent.execute_tool("geometric_algebra", {"invalid": "params"})
+    result = await agent.execute_tool("geometric_algebra", {"invalid": "params"})
     if not result['success']:
         print("Error handled gracefully ✅")
         suggestions = result.get('recovery_suggestions', [])

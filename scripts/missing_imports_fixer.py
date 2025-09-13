@@ -6,9 +6,7 @@ Missing Imports Fixer - Adds missing import statements to Python files
 Intelligently detects and adds commonly used imports that are missing
 """
 
-import os
 import re
-import subprocess
 from typing import Set
 
 

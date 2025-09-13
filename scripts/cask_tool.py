@@ -18,7 +18,6 @@ def main() -> None:
     parser.add_argument("--output-dir", default="docs/cask", help="Directory for generated files")
     args = parser.parse_args()
 
-    import os
 
     os.makedirs(args.output_dir, exist_ok=True)
 

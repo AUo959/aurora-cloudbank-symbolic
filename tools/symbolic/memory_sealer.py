@@ -282,13 +282,13 @@ class MemorySealingEngine:
 
         try:
             if seal.seal_type == "file":
-                _ = self._verify_file_seal(seal)
+                result = self._verify_file_seal(seal)
             elif seal.seal_type == "directory":
-                _ = self._verify_directory_seal(seal)
+                result = self._verify_directory_seal(seal)
             elif seal.seal_type == "thread":
-                _ = self._verify_thread_seal(seal)
+                result = self._verify_thread_seal(seal)
             else:
-                _ = {"valid": False, "error": f"Unknown seal type: {seal.seal_type}"}
+                result = {"valid": False, "error": f"Unknown seal type: {seal.seal_type}"}
 
             verification_result["status"] = "valid" if result["valid"] else "invalid"
             verification_result["details"] = result
@@ -624,7 +624,7 @@ def main():
             print("❌ --seal-id required for verify command")
             return
 
-        _ = engine.verify_seal(args.seal_id)
+        result = engine.verify_seal(args.seal_id)
 
         if result["status"] == "valid":
             print(f"✅ Seal {args.seal_id} is valid")
@@ -638,7 +638,7 @@ def main():
             print("❌ --seal-id required for restore command")
             return
 
-        _ = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)
+        result = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)
 
         print(f"🔄 Restore result for {args.seal_id}: {result['status']}")
         for action in result["actions"]:

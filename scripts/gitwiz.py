@@ -12,11 +12,6 @@ goal is to keep the repository stable while providing convenient automation for
 developers.
 """
 
-import argparse
-import shutil
-import subprocess
-import sys
-from pathlib import Path
 
 
 class GITWiz:

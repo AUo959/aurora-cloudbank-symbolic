@@ -34,7 +34,7 @@ except ImportError:
 def get_staged_files():
     """Get list of staged files for commit"""
     try:
-        _ = subprocess.run(
+        result = subprocess.run(
             ["git", "di", "--cached", "--name-only"],
             capture_output=True, text=True, check=True
         )

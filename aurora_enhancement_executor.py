@@ -24,7 +24,7 @@ class AuroraEnhancementExecutor:
 
         try:
             # Check PR #43 status
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["gh", "pr", "view", "43", "--json", "mergeable,mergeStateStatus,statusCheckRollup"],
                 capture_output=True,
                 text=True,
@@ -140,7 +140,7 @@ class DeploymentManager:
     def _check_repository_state(self):
         """Check repository is in clean state."""
         try:
-            _ = subprocess.run(["git", "status", "--porcelain"],
+            result = subprocess.run(["git", "status", "--porcelain"],
                                   capture_output=True, text=True, check=False)
             clean = len(result.stdout.strip()) == 0
             print(f"   Repository state: {'✅ Clean' if clean else '⚠️ Has changes'}")
@@ -302,7 +302,7 @@ if __name__ == "__main__":
 def main():
     """Main execution function."""
     executor = AuroraEnhancementExecutor()
-    _ = executor.execute_enhancement_sequence()
+    result = executor.execute_enhancement_sequence()
 
     sys.exit(0 if result["success"] else 1)
 

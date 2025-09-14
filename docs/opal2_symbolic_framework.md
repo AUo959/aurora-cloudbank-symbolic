@@ -13,7 +13,7 @@ Opal2 integrates tightly with the ORION constellation and enforces zero symbolic
 - Exposes diagnostics and control hooks so ORION can monitor modules and issue overrides.
 
 ## Context‑Aware Symbolic Query Optimizer
-- Translates natural‑language requests into concise symbolic plans using ontology mappings and contextual cues.
+- Translates natural-language requests into concise symbolic plans using ontology mappings and contextual cues.
 - Resolves ambiguity, plans multi‑module routes across L1/L2/L3, and flags steps requiring ethics review.
 - Outputs compressed execution plans that downstream agents can execute transparently.
 

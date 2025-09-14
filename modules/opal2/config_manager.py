@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
+import schedule
 """
 Opal2 Modular System - Configuration Manager
 Advanced configuration management with validation and hot-reloading
 """
 
 import asyncio
-import json
 import logging
 
 # Configure logging
 from dataclasses import dataclass
-from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import toml

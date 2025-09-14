@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 Sonnet 4 Status and Verification Script
 Verifies that Claude Sonnet 4 is properly enabled and configured

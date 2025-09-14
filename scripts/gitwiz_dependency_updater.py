@@ -1,12 +1,20 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
+
+    import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import sys
+
 GITWiz Dependency Auto-Updater
 Comprehensive dependency management and auto-updating system.
 """
 
-import argparse
+
 import json
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -186,9 +194,7 @@ class DependencyAutoUpdater:
             return update_result
 
         try:
-            # Update packages
-            result = subprocess.run(
-                ["npm", "update"],
+            # Update packages            result = subprocess.run(                ["npm", "update"],
                 capture_output=True,
                 text=True,
                 cwd=self.project_root,
@@ -219,9 +225,7 @@ class DependencyAutoUpdater:
         # Python security audit with pip-audit (if available)
         try:
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "install", "pip-audit"],
-                capture_output=True,
-                text=True,
+                [sys.executable, "-m", "pip", "install", "pip-audit"],            result = subprocess.run(                text=True,
                 cwd=self.project_root,
                 shell=False,
                 check=False,
@@ -250,9 +254,7 @@ class DependencyAutoUpdater:
                 result = subprocess.run(
                     ["npm", "audit", "--json"],
                     capture_output=True,
-                    text=True,
-                    cwd=self.project_root,
-                    shell=False,
+                    text=True,                result = subprocess.run(                    shell=False,
                     check=False,
                 )
 
@@ -367,7 +369,7 @@ def main():
     updater = DependencyAutoUpdater()
 
     if args.comprehensive:
-        result = updater.execute_comprehensive_update(dry_run=args.dry_run)
+        _ = updater.execute_comprehensive_update(dry_run=args.dry_run)
         print("\n📊 Workflow Result Summary:")
         print(f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}")
         print(f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}")

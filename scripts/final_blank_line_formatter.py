@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Final Blank Line Formatter - Fixes E302 and E305 blank line issues
 Professional code formatting for function and class definitions

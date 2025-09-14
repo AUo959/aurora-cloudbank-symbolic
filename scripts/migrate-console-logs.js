@@ -62,7 +62,9 @@ class ConsoleLogMigrator {
             }
 
             // Add Aurora logger import if needed
-            if (!content.includes('AuroraLogger') && !content.includes('systemLogger')) {
+            // Robustly check for any import/require of Aurora logger or systemLogger
+            const loggerImportRegex = /(?:import\s+(?:.*\bAuroraLogger\b.*|.*\bsystemLogger\b.*)\s+from\s+['"][^'"]*aurora[^'"]*['"])|(?:require\s*\(\s*['"][^'"]*aurora[^'"]*['"]\s*\))/i;
+            if (!loggerImportRegex.test(content)) {
                 const loggerImport = this.generateLoggerImport(filePath);
                 modifiedContent = loggerImport + '\n' + modifiedContent;
                 fileModified = true;

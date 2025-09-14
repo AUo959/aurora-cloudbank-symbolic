@@ -11,7 +11,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.sonnet4_integration_hub import (
@@ -27,7 +27,7 @@ from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 app = FastAPI(
     title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
     description="Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
-    version="1.0.0",
+    version="1.0.0"
 )
 
 
@@ -186,7 +186,6 @@ def health_check():
 # ChatGPT Agent Mode Endpoints
 # ================================
 
-
 @app.get("/agent/tools")
 async def get_agent_tools():
     """
@@ -208,7 +207,9 @@ async def execute_agent_tool(request: AgentToolRequest):
     """
     try:
         result = await chatgpt_agent_integration.execute_tool(
-            tool_name=request.tool_name, parameters=request.parameters, session_id=request.session_id
+            tool_name=request.tool_name,
+            parameters=request.parameters,
+            session_id=request.session_id
         )
         return JSONResponse(content=result)
     except HTTPException as e:
@@ -229,8 +230,8 @@ async def manage_agent_session(request: AgentSessionRequest):
             parameters={
                 "action": request.action,
                 "session_id": request.session_id,
-                "state_data": request.state_data or {},
-            },
+                "state_data": request.state_data or {}
+            }
         )
         return JSONResponse(content=result)
     except HTTPException as e:
@@ -265,7 +266,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "symbolic_anchor": "EOS_SEED_ORION",
             "ethics_protocol": "Picard_Delta_3",
             "agent_mode": "chatgpt_agent_mode",
-            "context_tag": "websocket_agent_stream",
+            "context_tag": "websocket_agent_stream"
         }
         await websocket.send_json(initial_message)
 
@@ -279,19 +280,27 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     result = await chatgpt_agent_integration.execute_tool(
                         tool_name=data.get("tool_name"),
                         parameters=data.get("parameters", {}),
-                        session_id=data.get("session_id"),
+                        session_id=data.get("session_id")
                     )
-                    await websocket.send_json(
-                        {"type": "tool_result", "result": result, "request_id": data.get("request_id")}
-                    )
+                    await websocket.send_json({
+                        "type": "tool_result",
+                        "result": result,
+                        "request_id": data.get("request_id")
+                    })
                 except Exception as e:
-                    await websocket.send_json({"type": "error", "error": str(e), "request_id": data.get("request_id")})
+                    await websocket.send_json({
+                        "type": "error",
+                        "error": str(e),
+                        "request_id": data.get("request_id")
+                    })
             elif data.get("type") == "ping":
                 await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
             else:
-                await websocket.send_json(
-                    {"type": "error", "error": "Unknown message type", "supported_types": ["tool_execution", "ping"]}
-                )
+                await websocket.send_json({
+                    "type": "error",
+                    "error": "Unknown message type",
+                    "supported_types": ["tool_execution", "ping"]
+                })
 
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
@@ -301,84 +310,6 @@ async def agent_websocket_endpoint(websocket: WebSocket):
 # @app.post("/quantum/vsa")
 
 
-@app.post("/agent/session")
-async def manage_agent_session(request: AgentSessionRequest):
-    """
-    Manage agent session state and context persistence
-    Actions: create, update, get, delete
-    """
-    try:
-        result = await chatgpt_agent_integration.execute_tool(
-            tool_name="session_management",
-            parameters={
-                "action": request.action,
-                "session_id": request.session_id,
-                "state_data": request.state_data or {},
-            },
-        )
-        return JSONResponse(content=result)
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Session management failed: {str(e)}")
-
-
-@app.get("/agent/status")
-async def get_agent_status():
-    """Get current agent system status and health information"""
-    try:
-        status = await chatgpt_agent_integration.get_agent_status()
-        return JSONResponse(content=status)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get agent status: {str(e)}")
-
-
-@app.websocket("/agent/stream")
-async def agent_websocket_endpoint(websocket: WebSocket):
-    """
-    WebSocket endpoint for real-time agent communication
-    Supports streaming responses and persistent connections
-    """
-    await websocket.accept()
-
-    try:
-        # Send initial connection confirmation with Aurora symbolic anchoring
-        initial_message = {
-            "type": "connection_established",
-            "timestamp": "2025-01-01T00:00:00Z",
-            "symbolic_anchor": "EOS_SEED_ORION",
-            "ethics_protocol": "Picard_Delta_3",
-            "agent_mode": "chatgpt_agent_mode",
-            "context_tag": "websocket_agent_stream",
-        }
-        await websocket.send_json(initial_message)
-
-        while True:
-            # Wait for messages from client
-            data = await websocket.receive_json()
-
-            # Process agent requests through WebSocket
-            if data.get("type") == "tool_execution":
-                try:
-                    result = await chatgpt_agent_integration.execute_tool(
-                        tool_name=data.get("tool_name"),
-                        parameters=data.get("parameters", {}),
-                        session_id=data.get("session_id"),
-                    )
-                    await websocket.send_json(
-                        {"type": "tool_result", "result": result, "request_id": data.get("request_id")}
-                    )
-                except Exception as e:
-                    await websocket.send_json({"type": "error", "error": str(e), "request_id": data.get("request_id")})
-            elif data.get("type") == "ping":
-                await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
-            else:
-                await websocket.send_json(
-                    {"type": "error", "error": "Unknown message type", "supported_types": ["tool_execution", "ping"]}
-                )
-
-    except Exception as e:
-        await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
 
 
 # Example quantum endpoint (stub)

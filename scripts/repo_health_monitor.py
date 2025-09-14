@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import json
+import subprocess
 """
 Repository Health Monitoring Script
 - Tracks repo size, file count, ZIP count, and branch count

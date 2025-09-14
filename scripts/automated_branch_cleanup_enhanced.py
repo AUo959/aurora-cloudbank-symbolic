@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import argparse
+import subprocess
 """
 Aurora CloudBank - Enhanced Automated Branch Cleanup System
 Intelligently manages repository branches with safety checks
 """
 
-import argparse
 import datetime
-import subprocess
 from dataclasses import dataclass
 from typing import Dict, List
 
@@ -42,66 +43,70 @@ class AutomatedBranchManager:
         """Get detailed information about all remote branches"""
         try:
             # Get branch info with commit dates
-            cmd = [
+        cmd = [
                 "git",
                 "for-each-re",
                 "--format=%(refname:short)|%(committerdate:iso)|%(objectname)",
                 "refs/remotes/origin",
             ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-
-            branches = []
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        branches = []
             for line in result.stdout.strip().split("\n"):
                 if not line or "origin/HEAD" in line:
                     continue
 
                 parts = line.split("|")
-                if len(parts) != 3:
+                
+        if len(parts) != 3:
                     continue
 
                 branch_name = parts[0].replace("origin/", "")
                 # Parse commit date - handle timezone by removing it
-                date_str = parts[1].split("+")[0].split("-")[0]  # Remove timezone
+        date_str = parts[1].split("+")[0].split("-")[0]  # Remove timezone
                 if "T" not in date_str:
                     date_str = parts[1].replace(" ", "T").split("+")[0]
                 try:
-                    commit_date = datetime.datetime.fromisoformat(date_str)
-                except ValueError:
+        commit_date = datetime.datetime.fromisoformat(date_str)
+                
+        except ValueError:
                     # Fallback to current time if parsing fails
                     commit_date = datetime.datetime.now()
-
-                commit_hash = parts[2]
+        commit_hash = parts[2]
 
                 # Calculate age
                 days_old = (datetime.datetime.now() - commit_date).days
 
                 # Check if merged
-                is_merged = self._is_branch_merged(branch_name)
+        is_merged = self._is_branch_merged(branch_name)
 
                 # Categorize branch
                 category = self._categorize_branch(branch_name)
 
-                branches.append(
+                
+        branches.append(
                     BranchInfo(
-                        name=branch_name,
+        name=branch_name,
                         last_commit_date=commit_date,
-                        commit_hash=commit_hash[:8],
+        commit_hash=commit_hash[:8],
                         is_merged=is_merged,
-                        days_old=days_old,
+        days_old=days_old,
                         category=category,
                     )
                 )
 
-            return sorted(branches, key=lambda x: x.last_commit_date, reverse=True)
+            
+        return sorted(branches, key=lambda x: x.last_commit_date, reverse=True)
 
+        
         except subprocess.CalledProcessError as e:
             print(f"Error getting branch info: {e}")
-            return []
+            
+        return []
 
     def _is_branch_merged(self, branch_name: str) -> bool:
         """Check if branch is merged into main"""
         try:
-            cmd = [
+        cmd = [
                 "git",
                 "merge-base",
                 "--is-ancestor",
@@ -109,7 +114,8 @@ class AutomatedBranchManager:
                 "origin/main",
             ]
             result = subprocess.run(cmd, capture_output=True, shell=False, check=False)
-            return result.returncode == 0
+            
+        return result.returncode == 0
         except subprocess.CalledProcessError:
             return False
 
@@ -117,6 +123,7 @@ class AutomatedBranchManager:
         """Categorize branch based on naming patterns"""
         name_lower = branch_name.lower()
 
+        
         if "codex" in name_lower:
             return "codex"
         elif "dependabot" in name_lower:
@@ -146,7 +153,8 @@ class AutomatedBranchManager:
             # Skip protected branches
             if branch.name in self.safe_branches:
                 cleanup_candidates["protected"].append(branch)
-                continue
+                
+        continue
 
             # Track category statistics
             if branch.category not in category_stats:
@@ -159,18 +167,22 @@ class AutomatedBranchManager:
             # Apply cleanup rules
             rules = self.cleanup_rules.get(branch.category, {"max_age_days": 60, "keep_recent": 2})
 
-            if branch.is_merged and branch.days_old > 7:
+            
+        if branch.is_merged and branch.days_old > 7:
                 # Merged branches older than a week can be safely deleted
                 cleanup_candidates["safe_to_delete"].append(branch)
-                category_stats[branch.category]["old"] += 1
+                
+        category_stats[branch.category]["old"] += 1
             elif branch.days_old > rules["max_age_days"] and not branch.is_merged:
                 # Old unmerged branches need review
                 cleanup_candidates["requires_review"].append(branch)
-                category_stats[branch.category]["old"] += 1
+                
+        category_stats[branch.category]["old"] += 1
             else:
                 # Keep recent or important branches
                 cleanup_candidates["protected"].append(branch)
 
+        
         return {
             "candidates": cleanup_candidates,
             "stats": category_stats,
@@ -183,30 +195,40 @@ class AutomatedBranchManager:
 
         if self.dry_run:
             print("🔍 DRY RUN MODE - No branches will be deleted")
-            for branch in safe_branches:
+            
+        for branch in safe_branches:
                 print(f"  Would delete: {branch.name} (merged {branch.days_old} days ago)")
-                results["deleted"].append(branch.name)
-            return results
+                
+        results["deleted"].append(branch.name)
+            
+        return results
 
         for branch in safe_branches:
             try:
                 # Double-check it's merged before deletion
                 if not self._is_branch_merged(branch.name):
                     print(f"⚠️  Skipping {branch.name} - not confirmed merged")
-                    results["skipped"].append(branch.name)
-                    continue
+                    
+        results["skipped"].append(branch.name)
+                    
+        continue
 
                 # Delete remote branch
-                cmd = ["git", "push", "origin", "--delete", branch.name]
+        cmd = ["git", "push", "origin", "--delete", branch.name]
                 subprocess.run(cmd, check=True, capture_output=True)
 
-                print(f"✅ Deleted branch: {branch.name}")
-                results["deleted"].append(branch.name)
+                
+        print(f"✅ Deleted branch: {branch.name}")
+                
+        results["deleted"].append(branch.name)
 
-            except subprocess.CalledProcessError as e:
+            
+        except subprocess.CalledProcessError as e:
                 print(f"❌ Failed to delete {branch.name}: {e}")
-                results["failed"].append(branch.name)
+                
+        results["failed"].append(branch.name)
 
+        
         return results
 
     def generate_report(self, analysis: Dict, cleanup_results: Dict = None) -> str:
@@ -225,6 +247,7 @@ class AutomatedBranchManager:
 
         report_lines.extend([f"**Total Branches Analyzed**: {total}", "", "### By Category:", ""])
 
+        
         for category, data in stats.items():
             report_lines.extend(
                 [
@@ -244,12 +267,15 @@ class AutomatedBranchManager:
             ]
         )
 
+        
         for branch in candidates["safe_to_delete"][:10]:  # Show first 10
             report_lines.append(f"- `{branch.name}` - {branch.category} - " f"merged {branch.days_old} days ago")
 
+        
         if len(candidates["safe_to_delete"]) > 10:
             report_lines.append(f"- ... and {len(candidates['safe_to_delete']) - 10} more")
 
+        
         report_lines.extend(
             [
                 "",
@@ -258,6 +284,7 @@ class AutomatedBranchManager:
             ]
         )
 
+        
         for branch in candidates["requires_review"][:5]:  # Show first 5
             report_lines.append(f"- `{branch.name}` - {branch.category} - " f"unmerged, {branch.days_old} days old")
 
@@ -275,6 +302,7 @@ class AutomatedBranchManager:
                 ]
             )
 
+        
         return "\n".join(report_lines)
 
 
@@ -288,26 +316,28 @@ def main():
         default=10,
         help="Maximum branches to delete in one run",
     )
+        args = parser.parse_args()
+        manager = AutomatedBranchManager(dry_run=not args.execute)
 
-    args = parser.parse_args()
-
-    manager = AutomatedBranchManager(dry_run=not args.execute)
-
-    print("🌿 Aurora CloudBank - Automated Branch Cleanup")
+    
+        print("🌿 Aurora CloudBank - Automated Branch Cleanup")
     print("=" * 50)
 
     # Get branch information
     print("📊 Analyzing branches...")
     branches = manager.get_branch_info()
 
-    if not branches:
+    
+        if not branches:
         print("❌ No branches found or error occurred")
+        
         return
 
     # Analyze cleanup candidates
     analysis = manager.analyze_cleanup_candidates(branches)
 
-    print(f"📈 Found {analysis['total_branches']} branches total")
+    
+        print(f"📈 Found {analysis['total_branches']} branches total")
     print(f"✅ Safe to delete: {len(analysis['candidates']['safe_to_delete'])}")
     print(f"⚠️  Requires review: {len(analysis['candidates']['requires_review'])}")
     print(f"🔒 Protected: {len(analysis['candidates']['protected'])}")
@@ -328,7 +358,8 @@ def main():
     with open(report_file, "w", encoding="utf-8") as f:
         f.write(report)
 
-    print(f"📄 Report saved to: {report_file}")
+    
+        print(f"📄 Report saved to: {report_file}")
 
 
 if __name__ == "__main__":

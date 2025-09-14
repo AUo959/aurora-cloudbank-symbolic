@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import os
+import subprocess
+import zipfile
 """
 GITWiz Simple - Basic Repository Management
 A simplified version without external dependencies for testing
@@ -155,9 +162,7 @@ class GITWizSimple:
     def _get_git_status(self) -> Dict[str, Any]:
         """Get git repository status."""
         try:
-            # Check if it's a git repo
-            result = subprocess.run(
-                ["git", "rev-parse", "--git-dir"],
+            # Check if it's a git repo            result = subprocess.run(                ["git", "rev-parse", "--git-dir"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -169,9 +174,7 @@ class GITWizSimple:
 
             # Get git status
             result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
+                ["git", "status", "--porcelain"],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import subprocess
+import sys
 """
 Final Cleanup Pass - Address Remaining Issues
 ============================================

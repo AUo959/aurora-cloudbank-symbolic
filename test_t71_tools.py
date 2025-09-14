@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """
+
+    from tools.symbolic.anchor_tracker import SymbolicAnchorTracker
+    from tools.symbolic.memory_sealer import MemorySealingEngine
+    from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
+    from tools.symbolic.manifest_generator import ManifestGenerator
+        import traceback
+from pathlib import Path
+import sys
+
 Basic test for T71 Symbolic Infrastructure tools
 """
 
-import sys
-import traceback
 
-from tools.symbolic.anchor_tracker import SymbolicAnchorTracker
-from tools.symbolic.memory_sealer import MemorySealingEngine
-from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
-from tools.symbolic.manifest_generator import ManifestGenerator
+import sys
 
 # Add tools to path
 from pathlib import Path

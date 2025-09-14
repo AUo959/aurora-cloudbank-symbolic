@@ -1,4 +1,6 @@
 """Opal2 WebGL Renderer Plugin
+import json
+import time
 =============================
 
 WebGL-based rendering plugin for high-performance browser-based visualization

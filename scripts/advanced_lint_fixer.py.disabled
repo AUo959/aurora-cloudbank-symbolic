@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 Advanced Lint Issue Fixer - Phase 2
 ====================================
@@ -45,8 +48,8 @@ def fix_unused_variables(file_path: str) -> bool:
 
     # Common unused variable patterns
     patterns = [
-        (rrr"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
-        (rrr"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
+        (r"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (r"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
     ]
 
     for pattern, replacement in patterns:

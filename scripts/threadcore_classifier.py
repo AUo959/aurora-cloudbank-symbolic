@@ -122,7 +122,7 @@ def main():
     with open(args.input_file, "r", encoding="utf-8") as f:
         content = f.read()
 
-    result = tag_thread_context(content)
+    _ = tag_thread_context(content)
     print(json.dumps(result, indent=2))
 
 

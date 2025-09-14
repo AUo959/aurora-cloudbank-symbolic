@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
 """
 GITWiz Enhanced Demo - Repository Optimization Report
 Demonstrates the enhanced capabilities without requiring all dependencies.
 """
 
-import json
-from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict
 
 

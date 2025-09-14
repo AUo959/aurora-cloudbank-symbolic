@@ -55,7 +55,8 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Python for analysis
-        uses: actions/setup-python@v4
+        # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -187,9 +188,9 @@ jobs:
         with:
           fetch-depth: 0
 
-    # Enhanced caching with Aurora awareness
-    - name: Cache dependencies with Aurora context
-      uses: actions/cache@v3
+      # Enhanced caching with Aurora awareness
+      - name: Cache dependencies with Aurora context
+        uses: actions/cache@v3
       with:
         path: |
           ~/.npm
@@ -199,44 +200,44 @@ jobs:
         restore-keys: |
           aurora-deps-${{ runner.os }}-
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-    - name: Setup Python with Aurora support
-      uses: actions/setup-python@v4
+      - name: Setup Python with Aurora support
+        uses: actions/setup-python@v4
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: pip
 
-    - name: Install dependencies with Aurora support
-      run: |
-        # Install Node.js dependencies
-        npm ci || npm install || echo "⚠️ npm install completed"
+      - name: Install dependencies with Aurora support
+        run: |
+          # Install Node.js dependencies
+          npm ci || npm install || echo "⚠️ npm install completed"
 
-        # Install Python dependencies with Aurora specifics
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt || echo "⚠️ Requirements install completed"
+          # Install Python dependencies with Aurora specifics
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || echo "⚠️ Requirements install completed"
 
-        # Install Aurora-specific optional deps if needed
-        if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
-          pip install -r requirements-optional.txt || echo "⚠️ Optional deps installed"
-        fi
+          # Install Aurora-specific optional deps if needed
+          if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
+            pip install -r requirements-optional.txt || echo "⚠️ Optional deps installed"
+          fi
 
-    # Aurora-enhanced pre-flight validation
-    - name: Aurora enhanced pre-flight validation
-      run: |
-        echo "🚀 Aurora CloudBank Enhanced Pre-flight Validation"
+      # Aurora-enhanced pre-flight validation
+      - name: Aurora enhanced pre-flight validation
+        run: |
+          echo "🚀 Aurora CloudBank Enhanced Pre-flight Validation"
 
-        # Run smart-devops with Aurora context
-        ./smart-devops quick || echo "⚠️ Smart-devops check completed"
+          # Run smart-devops with Aurora context
+          ./smart-devops quick || echo "⚠️ Smart-devops check completed"
 
-        # Enhanced Aurora CLI validation
-        if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
-          python3 tools/cli/aurora_dev_cli.py status || echo "⚠️ Aurora CLI check completed"
-        fi
+          # Enhanced Aurora CLI validation
+          if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
+            python3 tools/cli/aurora_dev_cli.py status || echo "⚠️ Aurora CLI check completed"
+          fi
 
     # Enhanced code quality with Aurora patterns
     - name: Aurora-aware code quality checks

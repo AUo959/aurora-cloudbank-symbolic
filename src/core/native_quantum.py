@@ -5,7 +5,7 @@ Lightweight quantum computation simulation without qiskit.
 
 import cmath
 import math
-import random
+import secrets  # Use cryptographically secure random instead of random
 from typing import Any, Dict, List
 
 
@@ -210,7 +210,8 @@ class NativeQuantumCircuit:
 
         for _ in range(shots):
             # Sample from probability distribution
-        rand_val = random.random()
+        # Use cryptographically secure random for quantum measurements
+        rand_val = secrets.SystemRandom().random()
         cumulative_prob = 0.0
 
             for i, prob in enumerate(probabilities):

@@ -1,16 +1,32 @@
 {
-  "scan_timestamp": "Tue Aug 26 15:23:44 UTC 2025",
-  "total_issues": 144,
+  "scan_timestamp": "Sun Sep 14 23:05:07 UTC 2025",
+  "total_issues": 146,
   "severity_breakdown": {
     "CRITICAL": 0,
-    "HIGH": 15,
+    "HIGH": 17,
     "MEDIUM": 0,
     "LOW": 129
   },
   "issues": [
     {
+      "file": "tests/web/test-web-components.js",
+      "line": 65,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "// Create a safe evaluation environment instead of using eval()"
+    },
+    {
+      "file": "tests/web/test-web-components.js",
+      "line": 140,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "// Create a safe evaluation environment instead of using eval()"
+    },
+    {
       "file": "security_verification.py",
-      "line": 45,
+      "line": 50,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -18,7 +34,7 @@
     },
     {
       "file": "security_verification.py",
-      "line": 49,
+      "line": 53,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -26,7 +42,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 203,
+      "line": 238,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -34,7 +50,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 205,
+      "line": 240,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -42,7 +58,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 348,
+      "line": 387,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -50,7 +66,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 373,
+      "line": 413,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -58,7 +74,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 486,
+      "line": 530,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -66,15 +82,15 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 514,
+      "line": 558,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
-      "code": "# result = eval(user_expression)  # nosec - commented example"
+      "code": "# _ = eval(user_expression)  # nosec - commented example"
     },
     {
       "file": "security_remediation.py",
-      "line": 203,
+      "line": 238,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -82,7 +98,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 205,
+      "line": 240,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -90,7 +106,7 @@
     },
     {
       "file": "security_remediation.py",
-      "line": 486,
+      "line": 530,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -98,7 +114,7 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 48,
+      "line": 53,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -106,7 +122,7 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 98,
+      "line": 103,
       "type": "eval",
       "severity": "HIGH",
       "message": "Use of eval() can execute arbitrary code",
@@ -114,7 +130,7 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 99,
+      "line": 104,
       "type": "exec",
       "severity": "HIGH",
       "message": "Use of exec() can execute arbitrary code",
@@ -122,11 +138,59 @@
     },
     {
       "file": "scripts/aurora_security_scanner.py",
-      "line": 105,
+      "line": 110,
       "type": "os_system",
       "severity": "HIGH",
       "message": "os.system() can enable command injection",
       "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern"
+    },
+    {
+      "file": "./T71_FINAL_EXPORT_MANIFEST.json",
+      "line": 15,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"c54bee06948c09058026425124873f0fca73745d9d5bceb923c411991f7415f4\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 13,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"24382a58888af556e9075b0882c8768cd12ded704d278f99dca468c1b93abfaa\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 18,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"c683e7e4baa7bb7e84ce60e8298f7310a154fcd9997a7ac36f05ca0b05fc6f39\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 23,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"c4b3699e5de249a2e0b016c74effcb5302b05ab2cdade62c21b52f262b76bd01\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 28,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"hash\": \"b47183e8bb04b60231b71577123fadaea37f9db463219d640a92c775f7c48252\""
+    },
+    {
+      "file": "./T71_SUITE_MANIFEST.json",
+      "line": 41,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"memory_seal\": \"0101728652f63248c41bb68e87ce8aec83a89273c3fc7663b768af49dd00c054\""
     },
     {
       "file": "./T70_EXPORT_MANIFEST.json",
@@ -183,54 +247,6 @@
       "severity": "LOW",
       "message": "Possible hardcoded credential",
       "code": "\"memory_seal\": \"2cc3bf6b3fc7333479ee5ae632b114e8c6c19a60161f662a59cd73d74013815e\""
-    },
-    {
-      "file": "./T71_SUITE_MANIFEST.json",
-      "line": 13,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"hash\": \"24382a58888af556e9075b0882c8768cd12ded704d278f99dca468c1b93abfaa\""
-    },
-    {
-      "file": "./T71_SUITE_MANIFEST.json",
-      "line": 18,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"hash\": \"c683e7e4baa7bb7e84ce60e8298f7310a154fcd9997a7ac36f05ca0b05fc6f39\""
-    },
-    {
-      "file": "./T71_SUITE_MANIFEST.json",
-      "line": 23,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"hash\": \"c4b3699e5de249a2e0b016c74effcb5302b05ab2cdade62c21b52f262b76bd01\""
-    },
-    {
-      "file": "./T71_SUITE_MANIFEST.json",
-      "line": 28,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"hash\": \"b47183e8bb04b60231b71577123fadaea37f9db463219d640a92c775f7c48252\""
-    },
-    {
-      "file": "./T71_SUITE_MANIFEST.json",
-      "line": 41,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"memory_seal\": \"0101728652f63248c41bb68e87ce8aec83a89273c3fc7663b768af49dd00c054\""
-    },
-    {
-      "file": "./T71_FINAL_EXPORT_MANIFEST.json",
-      "line": 15,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"memory_seal\": \"c54bee06948c09058026425124873f0fca73745d9d5bceb923c411991f7415f4\""
     },
     {
       "file": "./exports/aurora_symbolic_export_1752415456.json",
@@ -1081,6 +1097,22 @@
       "code": "\"data_hash\": \"75cfe496c91a37e6c91e33ff3c6a56df9cd7f16730709999e67bc71b7e4c5912\","
     },
     {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
       "file": "./.aurora/seals/FILE_anchor_tracker_20250720T203625.json",
       "line": 6,
       "type": "HARDCODED_SECRET",
@@ -1097,54 +1129,6 @@
       "code": "\"metadata_hash\": \"c85f65a56a6ec3c565414b6369867a8d6c14c2ddb2502cd01c0f5546924a5a25\","
     },
     {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204314.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
-      "line": 6,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
-    },
-    {
-      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
-      "line": 7,
-      "type": "HARDCODED_SECRET",
-      "severity": "LOW",
-      "message": "Possible hardcoded credential",
-      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
-    },
-    {
       "file": "./.aurora/seals/FILE_test_t71_tools_20250720T214834.json",
       "line": 6,
       "type": "HARDCODED_SECRET",
@@ -1159,6 +1143,38 @@
       "severity": "LOW",
       "message": "Possible hardcoded credential",
       "code": "\"metadata_hash\": \"288b716bfcee91559149d64eed9b95a2fadb2187e36adf80cfe8ce7580b993e5\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T204132.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 6,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256_hash\": \"47c2830bc260f4a4f47e23c83d1573891e0648b0799d2816dcac9f8be925db31\","
+    },
+    {
+      "file": "./.aurora/seals/FILE_test_t71_tools_20250720T203934.json",
+      "line": 7,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"metadata_hash\": \"84f45f4dac7a8138bd4e55afdcc720f65a75354da4099c5ff1129fbce68cfb5b\","
     }
   ],
   "fixes_applied": []

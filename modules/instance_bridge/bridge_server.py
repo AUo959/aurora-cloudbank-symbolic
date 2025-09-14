@@ -43,4 +43,5 @@ async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8090)
+    # SECURITY: Bind to localhost only for security (change to 0.0.0.0 only if external access needed)
+    uvicorn.run(app, host="127.0.0.1", port=8090)

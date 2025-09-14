@@ -3,7 +3,7 @@
 Opal2 integrates tightly with the ORION constellation and enforces zero symbolic drift (Δ = 0.000) through strict anchor synchronization and the Picard_Delta_3 ethics protocol. The framework is implemented in TypeScript with JSON/YAML configuration.
 
 ## Memory Compression & Storage Node
-- Compresses symbolic memories losslessly and stores them as anchor‑stamped capsules.
+- Compresses symbolic memories losslessly and stores them as anchor-stamped capsules.
 - Verifies each capsule against the EOS_SEED_ORION anchor and runs Picard_Delta_3 ethics checks.
 - Continuously audits for drift and heals discrepancies via PatchWeaver before exporting portable capsules.
 

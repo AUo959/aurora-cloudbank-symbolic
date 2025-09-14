@@ -193,10 +193,10 @@ jobs:
       - name: Cache dependencies with Aurora context
         uses: actions/cache@v3
         with:
-        path: |
-          ~/.npm
-          ~/.cache/pip
-          ~/.cache/aurora
+          path: |
+            ~/.npm
+            ~/.cache/pip
+            ~/.cache/aurora
         key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
         restore-keys: |
           aurora-deps-${{ runner.os }}-
@@ -244,42 +244,42 @@ jobs:
       # Enhanced code quality with Aurora patterns
       - name: Aurora-aware code quality checks
         run: |
-        echo "🔍 Running Aurora-aware code quality checks..."
+          echo "🔍 Running Aurora-aware code quality checks..."
 
-        # Standard linting
-        npm run lint:check 2>/dev/null || echo "⚠️ ESLint completed"
-        python3 -m flake8 . --exclude=venv_opal2,node_modules,.git --count || echo "⚠️ Flake8 completed"
+          # Standard linting
+          npm run lint:check 2>/dev/null || echo "⚠️ ESLint completed"
+          python3 -m flake8 . --exclude=venv_opal2,node_modules,.git --count || echo "⚠️ Flake8 completed"
 
-        # Aurora-specific code quality checks
-        if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
-          echo "🔮 Running Aurora-specific code quality checks..."
+          # Aurora-specific code quality checks
+          if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
+            echo "🔮 Running Aurora-specific code quality checks..."
 
-          # Check for proper DLP tagging
-          grep -r "context_tag" src/ || echo "⚠️ DLP context tag check completed"
+            # Check for proper DLP tagging
+            grep -r "context_tag" src/ || echo "⚠️ DLP context tag check completed"
 
-          # Check for anchor protocol usage
-          grep -r "anchor_protocol" modules/ || echo "⚠️ Anchor protocol check completed"
-        fi
+            # Check for anchor protocol usage
+            grep -r "anchor_protocol" modules/ || echo "⚠️ Anchor protocol check completed"
+          fi
 
       # Enhanced security scanning with Aurora context
       - name: Aurora-enhanced security scan
         run: |
-        echo "🛡️ Running Aurora-enhanced security scan..."
+          echo "🛡️ Running Aurora-enhanced security scan..."
 
-        # Standard security scans
-        python3 scripts/aurora_security_scanner.py || echo "⚠️ Aurora security scan completed"
-        npm audit --audit-level=moderate || echo "⚠️ npm audit completed"
+          # Standard security scans
+          python3 scripts/aurora_security_scanner.py || echo "⚠️ Aurora security scan completed"
+          npm audit --audit-level=moderate || echo "⚠️ npm audit completed"
 
-        # Aurora-specific security validation
-        if [[ "${{ needs.aurora-smart-analysis.outputs.run_security }}" == "true" ]]; then
-          echo "🔐 Running Aurora-specific security validation..."
+          # Aurora-specific security validation
+          if [[ "${{ needs.aurora-smart-analysis.outputs.run_security }}" == "true" ]]; then
+            echo "🔐 Running Aurora-specific security validation..."
 
-          # Check for Picard_Delta_3 compliance
-          grep -r "Picard_Delta_3" . --exclude-dir=.git || echo "⚠️ Ethics protocol check completed"
+            # Check for Picard_Delta_3 compliance
+            grep -r "Picard_Delta_3" . --exclude-dir=.git || echo "⚠️ Ethics protocol check completed"
 
-          # Validate memory sealing references
-          grep -r "memory_seal" tools/ || echo "⚠️ Memory sealing check completed"
-        fi
+            # Validate memory sealing references
+            grep -r "memory_seal" tools/ || echo "⚠️ Memory sealing check completed"
+          fi
 
   # Smart test suite with Aurora validation
   aurora-smart-tests:

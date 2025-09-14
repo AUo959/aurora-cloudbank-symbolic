@@ -1,4 +1,7 @@
 """
+from pathlib import Path
+import sys
+import time
 Performance Comparison: Heavy Dependencies vs Native Implementation
 Demonstrates the performance improvements achieved by eliminating heavy dependencies
 """

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import os
 """
 Final Python syntax fixer
 """
 
-import os
 import re
 
 
@@ -13,8 +13,12 @@ def fix_function_declarations(filepath):
         content = f.read()
 
     # Fix async def with incorrect syntax
-    content = re.sub(r"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content)
-    content = re.sub(r"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content)
+    content = re.sub(
+        r"async def (\w+)\(self, \*args, \*\*kwargs\):", r"async def \1(self):", content
+    )
+    content = re.sub(
+        r"def (\w+)\(self, \*args, \*\*kwargs\):", r"def \1(self):", content
+    )
 
     # Remove trailing semicolons in Python
     content = re.sub(r";$", "", content, flags=re.MULTILINE)
@@ -25,7 +29,7 @@ def fix_function_declarations(filepath):
     with open(filepath, "w") as f:
         f.write(content)
 
-    print("Fixed {filepath}")
+    print(f"Fixed {filepath}")
 
 
 # Fix the problematic files

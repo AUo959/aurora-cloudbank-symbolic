@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import json
+import time
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support
 """
 
 import asyncio
-import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -177,7 +178,7 @@ class QuantumRenderer:
             quantum_metrics = await self._calculate_quantum_metrics(context, enhanced_data)
 
             # Create result
-            result = RenderResult(
+            _ = RenderResult(
                 output=output,
                 format=renderer,
                 metadata={

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 """
 Aurora CloudBank Whitespace Cleaner
 Removes trailing whitespace and fixes blank line formatting issues

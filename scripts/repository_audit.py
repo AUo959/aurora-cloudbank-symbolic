@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import sys
 """
 Aurora CloudBank Repository Audit
 Comprehensive analysis and optimization recommendations
@@ -7,9 +10,6 @@ Uses enhanced GITWiz and ZIPWiz to audit the repository state
 and provide intelligent recommendations for optimization.
 """
 
-import json
-import sys
-from pathlib import Path
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))

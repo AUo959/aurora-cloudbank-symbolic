@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 """
-Security Remediation Module
-Comprehensive security vulnerability detection and remediation
-"""
 
-import html
-import re
+        import shlex
+    import shlex
+    import shlex
 import shlex
 import subprocess
-from pathlib import Path
+import re
+import html
 from typing import List, Dict, Any, Optional, Union
+from pathlib import Path
+import shlex
+from .security.secure_helpers import secure
+import json
+import sys
+import time
 
-# Note: secure_helpers import is optional
-# from .security.secure_helpers import secure
+🔒 Aurora CloudBank Security Remediation Script
+Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
+"""
 
-# 🔒 Aurora CloudBank Security Remediation Script
-# Fixes all security vulnerabilities found in PR #43 and performs comprehensive security hardening.
 
 import json
 import sys
@@ -33,42 +37,49 @@ class SecurityRemediator:
     def log_security_issue(self, message: str):
         """Log a security issue."""
         print(f"❌ SECURITY ISSUE: {message}")
+        
         self.issues_found += 1
 
     def log_fix(self, message: str):
         """Log a successful fix."""
         print(f"🔧 FIXED: {message}")
+        
         self.issues_fixed += 1
 
     def log_warning(self, message: str):
         """Log a warning."""
         print(f"⚠️  WARNING: {message}")
+        
         self.warnings += 1
 
     def log_info(self, message: str):
         """Log informational message."""
         print(f"ℹ️  {message}")
 
-    def secure_subprocess_run(self, cmd: str) -> Tuple[str, bool]:
+    
+        def secure_subprocess_run(self, cmd: str) -> Tuple[str, bool]:
         """Securely run a subprocess command without shell=True."""
         try:
             # Split command safely
-            cmd_parts = shlex.split(cmd)
-            result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
-            return result.stdout.strip(), result.returncode == 0
+        cmd_parts = shlex.split(cmd)
+        result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)            
+        return result.stdout.strip(), result.returncode == 0
         except (subprocess.TimeoutExpired, OSError, ValueError) as e:
             print(f"Command execution error: {e}")
-            return "", False
+            
+        return "", False
 
     def fix_dev_status_py(self):
         """Fix security vulnerabilities in dev-status.py."""
         file_path = Path("scripts/dev-status.py")
+        
         if not file_path.exists():
             return
 
         with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        content = f.read()
 
+        
         self.log_security_issue("Unsafe shell=True usage in dev-status.py")
 
         # Fix the vulnerable function
@@ -79,8 +90,8 @@ class SecurityRemediator:
         # SECURITY: Using shell=False for safe subprocess execution
         cmd_list = cmd.split() if isinstance(cmd, str) else cmd
         result = subprocess.run(cmd_list, shell=False, capture_output=True, text=True)
-        return result.stdout.strip(), result.returncode == 0
-    except (OSError, ValueError, RuntimeError):
+        
+        return result.stdout.strip(), result.returncode == 0        result = subprocess.run(cmd_list, shell=False, capture_output=True, text=True)        
         return "", False''',
             '''def run_command(cmd):
     """Run command and return output, handling errors gracefully."""
@@ -88,25 +99,31 @@ class SecurityRemediator:
         # Use shlex.split for secure command execution
         cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
         result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30)
+        
         return result.stdout.strip(), result.returncode == 0
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired):
         return "", False''',
         )
 
+        
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
+        
         self.log_fix("Fixed shell injection vulnerability in dev-status.py")
 
-    def fix_staff_node_ci_helper_py(self):
+    
+        def fix_staff_node_ci_helper_py(self):
         """Fix security vulnerabilities in staff_node_ci_helper.py."""
         file_path = Path("scripts/staff_node_ci_helper.py")
+        
         if not file_path.exists():
             return
 
         with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        content = f.read()
 
+        
         self.log_security_issue("Unsafe shell=True usage in staff_node_ci_helper.py")
 
         # Fix the vulnerable function
@@ -114,41 +131,49 @@ class SecurityRemediator:
             '''def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
     logger.info("Running: %s", cmd)
-    _ = subprocess.run(cmd_parts, timeout=300)  # Use parsed command without shell
+    result = subprocess.run(cmd_parts, timeout=300)  # Use parsed command without shell
     if result.returncode != 0:
         logger.error("Command failed: %s", cmd)
-        sys.exit(result.returncode)''',
-            '''def run_cmd(cmd: str) -> None:
-    """Run a shell command and exit on failure."""
+        
+        sys.exit(result.returncode)''',    result = subprocess.run(cmd_parts, timeout=300)  # Use parsed command without shell    """Run a shell command and exit on failure."""
     logger.info("Running: %s", cmd)
     try:
         cmd_parts = shlex.split(cmd)
         result = subprocess.run(cmd_parts, timeout=300)
+        
         if result.returncode != 0:
             logger.error("Command failed: %s", cmd)
-            sys.exit(result.returncode)
+            
+        sys.exit(result.returncode)
     except subprocess.TimeoutExpired:
         logger.error("Command timed out: %s", cmd)
+        
         sys.exit(1)
     except Exception as e:
         logger.error("Command execution error: %s", e)
+        
         sys.exit(1)''',
         )
 
+        
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
+        
         self.log_fix("Fixed shell injection vulnerability in staff_node_ci_helper.py")
 
-    def fix_infallible_codespace_init_py(self):
+    
+        def fix_infallible_codespace_init_py(self):
         """Fix security vulnerabilities in infallible_codespace_init.py."""
         file_path = Path("scripts/infallible_codespace_init.py")
+        
         if not file_path.exists():
             return
 
         with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        content = f.read()
 
+        
         self.log_security_issue("Unsafe shell=True usage in infallible_codespace_init.py")
 
         # Fix the vulnerable function
@@ -156,36 +181,46 @@ class SecurityRemediator:
             """def run_step(step_name, commands):
     for i, cmd in enumerate(commands, 1):
         print(f"\\n[{step_name}] Attempt {i}: {cmd}")
+        
         try:
             subprocess.run(cmd_parts, check=True, timeout=300)  # Use parsed command without shell
             print(f"[{step_name}] Success on attempt {i}")
-            return True
+            
+        return True
         except subprocess.CalledProcessError as e:
             print(f"[{step_name}] Failed attempt {i}: {e}")
-            time.sleep(2)
+            
+        time.sleep(2)
     print(f"[{step_name}] All attempts failed\\n")
     return False""",
             """def run_step(step_name, commands):
     for i, cmd in enumerate(commands, 1):
         print(f"\\n[{step_name}] Attempt {i}: {cmd}")
+        
         try:
-            cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
+        cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
             subprocess.run(cmd_parts, check=True, timeout=300)
-            print(f"[{step_name}] Success on attempt {i}")
-            return True
+            
+        print(f"[{step_name}] Success on attempt {i}")
+            
+        return True
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             print(f"[{step_name}] Failed attempt {i}: {e}")
-            time.sleep(2)
+            
+        time.sleep(2)
     print(f"[{step_name}] All attempts failed\\n")
     return False""",
         )
 
+        
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
+        
         self.log_fix("Fixed shell injection vulnerability in infallible_codespace_init.py")
 
-    def create_security_policy(self):
+    
+        def create_security_policy(self):
         """Create comprehensive security policy file."""
         security_policy = {
             "security_policy": {
@@ -231,9 +266,11 @@ class SecurityRemediator:
         with open(".security/security_policy.json", "w", encoding="utf-8") as f:
             json.dump(security_policy, f, indent=2)
 
+        
         self.log_fix("Created comprehensive security policy")
 
-    def create_secure_helpers(self):
+    
+        def create_secure_helpers(self):
         """Create secure helper functions for common operations."""
         secure_helpers_content = r'''#!/usr/bin/env python3
 """
@@ -257,7 +294,8 @@ class SecureHelpers:
 
         Args:
             cmd: Command to execute (string or list)
-            timeout: Command timeout in seconds
+            
+        timeout: Command timeout in seconds
             cwd: Working directory
             capture_output: Whether to capture stdout/stderr
 
@@ -266,20 +304,19 @@ class SecureHelpers:
         """
         try:
             if isinstance(cmd, str):
-                cmd_parts = shlex.split(cmd)
-            else:
+        cmd_parts = shlex.split(cmd)
+            
+        else:
                 cmd_parts = cmd
-
-            result = subprocess.run(
+        result = subprocess.run(
                 cmd_parts,
                 timeout=timeout,
-                cwd=cwd,
+        cwd=cwd,
                 capture_output=capture_output,
-                text=True,
-                check=False
-            )
+        text=True,            result = subprocess.run(            )
 
-            return result.stdout, result.stderr, result.returncode
+            
+        return result.stdout, result.stderr, result.returncode
 
         except subprocess.TimeoutExpired:
             return "", "Command timed out", 124
@@ -310,8 +347,9 @@ class SecureHelpers:
         # Remove potential script tags and javascript
         sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(r"on\w+\s*=", '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
+        
         return sanitized.strip()
 
     @staticmethod
@@ -337,7 +375,8 @@ class SecureHelpers:
             if allowed_dirs:
                 return any(str(path).startswith(allowed_dir) for allowed_dir in allowed_dirs)
 
-            return True
+            
+        return True
 
         except (OSError, ValueError):
             return False
@@ -363,12 +402,13 @@ class SecureHelpers:
                 'len': len
 
         # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
+        if not re.match(rr'^[0-9+\-*/().\s]+$', expression):
             raise ValueError("Expression contains unsafe characters")
 
+        
         try:
             # Use compile with restricted mode
-            code = compile(expression, '<string>', 'eval')
+        code = compile(expression, '<string>', 'eval')
             # Using restricted eval in secure context
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
         except Exception as e:
@@ -379,16 +419,19 @@ secure = SecureHelpers()
 '''
 
         Path(".security").mkdir(exist_ok=True)
+        
         with open(".security/secure_helpers.py", "w", encoding="utf-8") as f:
             f.write(secure_helpers_content)
 
+        
         self.log_fix("Created secure helper functions")
 
-    def update_github_security_config(self):
+    
+        def update_github_security_config(self):
         """Update GitHub security configuration."""
         github_dir = Path(".github")
+        
         github_dir.mkdir(exist_ok=True)
-
         security_config = """# GitHub Security Configuration
 # Automated security scanning and vulnerability management
 
@@ -455,6 +498,7 @@ jobs:
         with open(".github/security-config.yml", "w", encoding="utf-8") as f:
             f.write(security_config)
 
+        
         self.log_fix("Updated GitHub security configuration")
 
     def create_security_documentation(self):
@@ -511,7 +555,7 @@ if secure.validate_file_path(file_path, allowed_dirs=['/safe/dir']):
 ### Safe Expression Evaluation
 ```python
 # ❌ UNSAFE (commented out for security)
-# result = eval(user_expression)  # nosec - commented example
+# _ = eval(user_expression)  # nosec - commented example
 
 # ✅ SECURE
 result = secure.secure_eval_alternative(user_expression)
@@ -563,20 +607,24 @@ result = secure.secure_eval_alternative(user_expression)
 **PGP Key:** Available in .security/pgp-public-key.asc
 
 ---
-*Last Updated: 2025-01-09*
+*Last Updated: January 2025*
 *Version: 1.0*
 """
 
         with open("SECURITY.md", "w", encoding="utf-8") as f:
             f.write(security_docs)
 
+        
         self.log_fix("Created comprehensive security documentation")
 
     def run_remediation(self):
         """Run complete security remediation process."""
         print("🔒 AURORA CLOUDBANK SECURITY REMEDIATION")
+        
         print("=" * 50)
+        
         print("🎯 Fixing Security Vulnerabilities in PR #43")
+        
         print()
 
         # Create security directory
@@ -584,29 +632,42 @@ result = secure.secure_eval_alternative(user_expression)
 
         # Fix vulnerable files
         self.fix_dev_status_py()
+        
         self.fix_staff_node_ci_helper_py()
+        
         self.fix_infallible_codespace_init_py()
 
         # Create security infrastructure
         self.create_security_policy()
+        
         self.create_secure_helpers()
+        
         self.update_github_security_config()
+        
         self.create_security_documentation()
 
         # Summary
         print("\n" + "=" * 50)
+        
         print("🔒 SECURITY REMEDIATION SUMMARY")
+        
         print("=" * 50)
+        
         print(f"📊 Issues Found: {self.issues_found}")
+        
         print(f"🔧 Issues Fixed: {self.issues_fixed}")
+        
         print(f"⚠️  Warnings: {self.warnings}")
 
+        
         if self.issues_fixed >= self.issues_found:
             print("✅ ALL SECURITY VULNERABILITIES RESOLVED")
-            return True
+            
+        return True
         else:
             print("❌ SOME ISSUES REMAIN")
-            return False
+            
+        return False
 
 
 def main():
@@ -614,12 +675,16 @@ def main():
     remediator = SecurityRemediator()
     success = remediator.run_remediation()
 
-    if success:
+    
+        if success:
         print("\n🎉 Aurora CloudBank is now SECURE!")
+        
         print("🛡️  All vulnerabilities have been patched")
+        
         sys.exit(0)
     else:
         print("\n⚠️  Some security issues need manual attention")
+        
         sys.exit(1)
 
 

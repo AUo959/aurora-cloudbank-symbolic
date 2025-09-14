@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
     <title>Aurora CloudBank - Web Environment Demo</title>
     <style>
         * {
@@ -282,6 +283,8 @@
         </div>
     </div>
     
+    <!-- Include Aurora Security Script -->
+    <script src="static/js/aurora-security.js"></script>
     <script>
         // Aurora Web Logger Demo (Inline for demonstration)
         class DemoLogger {
@@ -319,11 +322,24 @@
                     'DEBUG': '#888888'
                 }[logEntry.level] || '#ffffff';
                 
-                logLine.innerHTML = `
-                    <span style="color: ${levelColor}; font-weight: bold;">[${logEntry.level}]</span>
-                    <span style="color: #aaa;">${logEntry.timestamp.substring(11, 19)}</span>
-                    <span style="color: #ffffff;">${logEntry.message}</span>
-                `;
+                // Use textContent instead of innerHTML to prevent XSS
+                const levelSpan = document.createElement('span');
+                levelSpan.style.color = levelColor;
+                levelSpan.style.fontWeight = 'bold';
+                levelSpan.textContent = `[${logEntry.level}]`;
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.style.color = '#aaa';
+                timeSpan.textContent = logEntry.timestamp.substring(11, 19);
+                
+                const messageSpan = document.createElement('span');
+                messageSpan.style.color = '#ffffff';
+                messageSpan.textContent = ` ${logEntry.message}`;
+                
+                logLine.appendChild(levelSpan);
+                logLine.appendChild(document.createTextNode(' '));
+                logLine.appendChild(timeSpan);
+                logLine.appendChild(messageSpan);
                 
                 output.appendChild(logLine);
                 output.scrollTop = output.scrollHeight;
@@ -371,7 +387,7 @@
         }
         
         function clearLogs() {
-            document.getElementById('logOutput').innerHTML = 'Logs cleared. Ready for new testing...';
+            document.getElementById('logOutput').textContent = 'Logs cleared. Ready for new testing...';
             demoLogger.info('Log output cleared successfully');
         }
         

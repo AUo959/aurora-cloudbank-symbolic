@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+# import subprocess
 """
 Aurora CloudBank Symbolic - Canonical Validation Engine
 Auto-validates new work against ORION CORE canonical specification
@@ -11,7 +14,7 @@ Date: July 13, 2025
 
 import json
 import re
-import subprocess
+# import subprocess
 import difflib
 from dataclasses import dataclass
 from pathlib import Path
@@ -160,7 +163,7 @@ class CanonicalValidator:
                     break
 
         # Check drift lock values
-        drift_pattern = r"drift_lock[\r"r'\s]*:?[\"'\s]*([0-9.]+)"
+        drift_pattern = r"drift_lock[\r\s]*:?[\"'\s]*([0-9.]+)"
         drift_matches = re.findall(drift_pattern, content, re.IGNORECASE)
         for match in drift_matches:
             if float(match) != 0.000:
@@ -207,7 +210,7 @@ class CanonicalValidator:
                         break
 
             # Also check with role pattern for structured content
-            role_pattern = rf"{re.escape(role)}[\r"r'\s]*:?[\"'\s]*([^\"',\n}}]+)"
+            role_pattern = rf"{re.escape(role)}[\r\s]*:?[\"'\s]*([^\"',\n}}]+)"
             matches = re.findall(role_pattern, updated_content, re.IGNORECASE)
 
             for match in matches:
@@ -274,8 +277,8 @@ class CanonicalValidator:
 
         # Check for message syntax patterns
         msg_patterns = [
-            (rrrr"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
-            (rrr"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
+            (r"\{\{@\w+\s*:::\s*[^}]+\}\}", "direct_msg"),
+            (r"\{\{@mesh\s*:::\s*[^}]+\}\}", "mesh_broadcast")
         ]
 
         for pattern, msg_type in msg_patterns:

@@ -2,6 +2,13 @@
 """
 
     import argparse
+from datetime import datetime
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+import threading
+import time
 
 Repository Health Monitor v2.0 - Advanced Repository Health Monitoring
 Continuous monitoring, alerting, and automated maintenance for git repositories
@@ -325,7 +332,7 @@ class RepositoryHealthMonitor:
             cutoff_date = datetime.now() - timedelta(days=30)
             stale_count = 0
 
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "for-each-re", "--format=%(refname:short) %(committerdate:iso8601)", "refs/heads/"],
                 capture_output=True, text=True, check=True
             )
@@ -345,14 +352,14 @@ class RepositoryHealthMonitor:
 
             # Recent commits (last 7 days)
             since_date = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "rev-list", "--count", f"--since={since_date}", "HEAD"],
                 capture_output=True, text=True, check=True
             )
             metrics["recent_commits"] = int(result.stdout.strip() or 0)
 
             # Contributors
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["git", "-C", str(self.repo_path, shell=False, check=False), "shortlog", "-sn", "--all"],
                 capture_output=True, text=True, check=True
             )
@@ -432,11 +439,12 @@ class RepositoryHealthMonitor:
     def _calculate_file_hash(self, file_path: Path) -> Optional[str]:
         """Calculate file hash for duplicate detection."""
         try:
-            hash_md5 = hashlib.md5()
-            with open(file_path, "rb", encoding="utf-8") as f:
+            # SECURITY: Use SHA256 instead of MD5 for cryptographic integrity
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
-                    hash_md5.update(chunk)
-            return hash_md5.hexdigest()
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
         except (OSError, PermissionError):
             return None
 
@@ -687,12 +695,8 @@ class RepositoryHealthMonitor:
             if metrics_file.exists():
                 temp_file = metrics_file.with_suffix('.tmp')
 
-                with open(metrics_file,
-                          'r',
-                          encoding="utf-8") as infile,
-                open(temp_file,
-                     'w',
-                     encoding="utf-8") as outfile:
+                with (open(metrics_file, 'r', encoding="utf-8") as infile,
+                      open(temp_file, 'w', encoding="utf-8") as outfile):
                     for line in infile:
                         try:
                             data = json.loads(line.strip())

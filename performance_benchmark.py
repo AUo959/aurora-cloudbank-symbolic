@@ -1,4 +1,7 @@
 """
+from pathlib import Path
+import sys
+import time
 Performance Comparison: Heavy Dependencies vs Native Implementation
 Demonstrates the performance improvements achieved by eliminating heavy dependencies
 """
@@ -10,6 +13,8 @@ from pathlib import Path
 
 from src.core.native_quantum import NativeQuantumProcessingLayer
 from src.core.native_symbolic_anchor import NativeSymbolicCPUAnchor
+from src.core.native_vsa import NativeSymbolicVector
+
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent))

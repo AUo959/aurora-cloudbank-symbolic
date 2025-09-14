@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import subprocess
+import sys
 """
 ⌨️ Aurora CloudBank Command Line Interface
 Interactive CLI for Aurora CloudBank operations
 """
 
-import argparse
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraCLI:

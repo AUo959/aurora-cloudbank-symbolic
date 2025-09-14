@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import os
+import subprocess
+import sys
 """
 Aurora CloudBank Security Scanner
 Comprehensive security analysis and automated fixes
@@ -41,7 +46,7 @@ class AuroraSecurityScanner:
                 })
 
     def _check_js_content(self, file_path, content):
-        """Check JavaScript content for security issues"""
+        """Check content for security issues"""
 
         # Check for dangerous patterns
         dangerous_patterns = {
@@ -108,29 +113,17 @@ class AuroraSecurityScanner:
             'yaml_unsafe': (r'yaml\.load\s*\((?!.*Loader=)', 'MEDIUM', 'yaml.load without safe loader can execute code')
         }
 
-        lines = content.split('\n')
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
             matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
             for match in matches:
                 line_num = content[:match.start()].count('\n') + 1
-                line_content = lines[line_num - 1].strip() if line_num <= len(lines) else ""
-                
-                # Skip if line has nosec comment or is documentation
-                if ('# nosec' in line_content or 
-                    '# documentation' in line_content or
-                    'pattern' in line_content.lower() or
-                    'mitigation' in line_content.lower() or
-                    'example' in line_content.lower() or
-                    line_content.strip().startswith('#')):
-                    continue
-                    
                 self.issues.append({
                     'file': str(file_path),
                     'line': line_num,
                     'type': issue_type,
                     'severity': severity,
                     'message': message,
-                    'code': line_content
+                    'code': content.split('\n')[line_num - 1].strip()
                 })
 
     def check_dependencies(self):
@@ -140,7 +133,7 @@ class AuroraSecurityScanner:
         # Check npm dependencies
         if os.path.exists('package.json'):
             try:
-                result = subprocess.run(['npm', 'audit', '--json'],
+                _ = subprocess.run(['npm', 'audit', '--json'],
                                         capture_output=True, text=True, timeout=30, shell=False, check=False)
                 if result.returncode != 0 and result.stdout:
                     audit_data = json.loads(result.stdout)
@@ -164,10 +157,10 @@ class AuroraSecurityScanner:
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (r'password\s*=\s*[\'"][^\'"]{8,}[\'"]', 'HIGH', 'Possible hardcoded password'),
-            (r'secret\s*=\s*[\'"][^\'"]{16,}[\'"]', 'HIGH', 'Possible hardcoded secret'),
-            (r'api[_-]?key\s*=\s*[\'"][^\'"]{16,}[\'"]', 'HIGH', 'Possible hardcoded API key'),
-            (r'token\s*=\s*[\'"][^\'"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
+            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'"]', 'HIGH', 'Possible hardcoded password'),
+            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded secret'),
+            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded API key'),
+            (r'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
 

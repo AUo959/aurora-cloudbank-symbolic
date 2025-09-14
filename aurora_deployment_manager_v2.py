@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import sys
 """
 🎯 Aurora CloudBank Intelligent Deployment Manager
 Manages staged deployment of enhancements with safety checks.
 """
 
-import subprocess
-import sys
-from datetime import datetime
-from pathlib import Path
 
 
 class DeploymentManager:

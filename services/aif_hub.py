@@ -1,6 +1,8 @@
 import os
+import secrets
 from typing import List
 
+import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 from modules.telemetry_logger import get_logger
@@ -8,7 +10,15 @@ from modules.telemetry_logger import get_logger
 app = FastAPI(title="Aurora Interlink Fabric Hub")
 logger = get_logger("aif_hub")
 
-AIF_TOKEN = os.environ.get("AIF_TOKEN", "change-me")
+# SECURITY: Generate secure random token if none provided via environment
+AIF_TOKEN = os.environ.get("AIF_TOKEN")
+if not AIF_TOKEN or AIF_TOKEN == "change-me":
+    # Generate cryptographically secure random token
+    AIF_TOKEN = secrets.token_urlsafe(32)
+    logger.warning("No secure AIF_TOKEN provided. Generated random token for this session.")
+    logger.info(f"Generated AIF_TOKEN: {AIF_TOKEN}")
+    print(f"⚠️  WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
+    print("   Set AIF_TOKEN environment variable for production use.")
 
 
 class ConnectionManager:
@@ -65,5 +75,5 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 
 
 if __name__ == "__main__":
-
-    uvicorn.run(app, host="0.0.0.0", port=8090)
+    # SECURITY: Bind to localhost only for security (change to 0.0.0.0 only if external access needed)
+    uvicorn.run(app, host="127.0.0.1", port=8090)

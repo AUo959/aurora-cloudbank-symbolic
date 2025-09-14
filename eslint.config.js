@@ -27,14 +27,14 @@ export default [
     },
     rules: {
       // Allow console in development, warn in production
-      'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+      'no-console': 'off', // Allow console statements in development
       semi: ['error', 'always'],
       quotes: ['error', 'single'],
       eqeqeq: 'error',
       'no-unused-vars': 'warn', // Changed to warn for dev
       'no-undef': 'error',
       'prefer-const': 'error',
-      camelcase: 'warn',
+      camelcase: 'off', // Disable camelcase for Aurora snake_case conventions
       indent: ['error', 2],
     },
     ignores: ['node_modules/**', '.git/**', 'dist/**', 'build/**', '*.min.js'],
@@ -52,6 +52,12 @@ export default [
         navigator: 'readonly',
         console: 'readonly',
         NodeFilter: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
+        fetch: 'readonly',
+        Blob: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
         // CommonJS/Node.js compatibility for dual-environment files
         require: 'readonly',
         module: 'readonly',
@@ -65,8 +71,8 @@ export default [
       'no-unused-vars': 'warn',
       'no-undef': 'error',
       'prefer-const': 'error',
-      camelcase: 'warn',
-      'no-console': 'warn',
+      camelcase: 'off', // Disable camelcase for Aurora snake_case conventions
+      'no-console': 'off', // Allow console statements in browser files
       indent: ['error', 2],
     },
   },

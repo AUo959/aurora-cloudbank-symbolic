@@ -6,6 +6,8 @@
     from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
     from tools.symbolic.manifest_generator import ManifestGenerator
         import traceback
+from pathlib import Path
+import sys
 
 Basic test for T71 Symbolic Infrastructure tools
 """

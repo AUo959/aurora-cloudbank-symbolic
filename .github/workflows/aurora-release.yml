@@ -1,4 +1,11 @@
 name: Aurora Release Pipeline
+
+permissions:
+  contents: write         # Write releases and tags
+  actions: read          # Read workflow status
+  checks: write          # Write check results
+  security-events: write # Write security events
+
 'on':
   push:
     tags:
@@ -9,6 +16,9 @@ name: Aurora Release Pipeline
         description: Release version
         required: true
         default: v1.0.0
+permissions:
+  contents: write
+  actions: read
 jobs:
   approval-gate:
     uses: ./.github/workflows/t1-approval-gate.yml

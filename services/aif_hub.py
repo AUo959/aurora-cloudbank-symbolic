@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+import uvicorn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 from modules.telemetry_logger import get_logger

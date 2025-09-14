@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import os
+import shutil
+import zipfile
 """
 Memory Sealing Engine - Automated SHA256 sealing with state recovery
 Part of T71 Symbolic Infrastructure Genesis
@@ -15,6 +23,7 @@ import fnmatch
 import hashlib
 import json
 import os
+import shutil
 import zipfile
 from dataclasses import dataclass, asdict
 from datetime import datetime

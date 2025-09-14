@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import json
 """
 🎯 Aurora Adaptive Learning System
 
@@ -6,8 +8,6 @@
 Advanced pattern recognition and adaptive learning framework
 """
 
-import json
-from datetime import datetime
 from typing import Any, Dict, List
 
 import numpy as np

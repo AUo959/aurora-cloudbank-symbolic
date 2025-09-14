@@ -19,9 +19,12 @@ async function fetchPubMed(query) {
     return [{ source: 'PubMed', title: `PubMed result for ${query}`, summary: 'offline stub' }];
   }
   const apiKey = process.env.NCBI_API_KEY || '';
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}&api_key=${apiKey}`;
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'api-key': apiKey }
+    });
     const text = await res.text();
     return [{ source: 'PubMed', title: query, summary: text.slice(0,100) }];
   } catch (e) {

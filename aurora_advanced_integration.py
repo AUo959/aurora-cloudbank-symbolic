@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import time
+import secrets
 
 # !/usr/bin/env python3
 """
@@ -125,8 +126,8 @@ class QuantumVectorProcessor:
         return QuantumVector(
             vector=vector,
             quantum_state=quantum_state,
-            symbolic_layer=np.random.choice([1, 2, 3]),
-            consciousness_depth=np.random.rand(),
+            symbolic_layer=secrets.choice([1, 2, 3]),
+            consciousness_depth=secrets.SystemRandom().random(),
             entanglement_map={"created": True, "dimension": dimension}
         )
 
@@ -287,10 +288,10 @@ class ConsciousnessSimulationEngine:
             # Generate dream-like stimulus
             dream_stimulus = {
                 "complexity": random.uniform(0.1, 0.9),
-                "processing_load": random.uniform(0.0, 0.5),
-                "emotional_impact": random.uniform(-0.3, 0.3),
-                "quantum_input": random.uniform(0.2, 0.8),
-                "depth_increase": random.choice([0, 1]),
+                "processing_load": secrets.SystemRandom().uniform(0.0, 0.5),
+                "emotional_impact": secrets.SystemRandom().uniform(-0.3, 0.3),
+                "quantum_input": secrets.SystemRandom().uniform(0.2, 0.8),
+                "depth_increase": secrets.choice([0, 1]),
                 "new_threads": [f"dream_thread_{len(dream_states)}"]
             }
 

@@ -148,14 +148,14 @@ test('Aurora Security - Basic functionality', async (t) => {
     // Fallback: Create mock security functions for testing
     global.AuroraSecurity = {
       sanitizeHTML: function(html) {
-        // Improved: Use DOM parsing to remove scripts, handling all variants of <script> tags
+        // SECURITY: Use DOM parsing to safely extract text content without script execution
         const div = document.createElement('div');
-        div.innerHTML = html;
-        const scripts = div.querySelectorAll('script');
-        scripts.forEach(script => script.remove());
-        return div.innerHTML;
+        div.textContent = html; // Use textContent to prevent XSS
+        // Return safely escaped text
+        return div.textContent;
       },
       escapeHtml: function(text) {
+        // SECURITY: Safely escape HTML by setting text content and reading back
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;

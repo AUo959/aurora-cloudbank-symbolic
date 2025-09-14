@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import subprocess
+import time
 """
 Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring and alerting for repository health metrics.
 """
 
-import argparse
 import datetime
-import json
-import subprocess
-import time
-from pathlib import Path
 from typing import Dict, List, Optional
 
 
@@ -54,9 +55,7 @@ class RepositoryHealthMonitor:
         }
 
         try:
-            # Repository size
-            result = subprocess.run(
-                ["du", "-sm", "."],
+            # Repository size            result = subprocess.run(                ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -68,9 +67,7 @@ class RepositoryHealthMonitor:
 
             # File count
             result = subprocess.run(
-                ["find", ".", "-type", ""],
-                capture_output=True,
-                text=True,
+                ["find", ".", "-type", ""],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -82,9 +79,7 @@ class RepositoryHealthMonitor:
             result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
-                text=True,
-                cwd=self.repo_path,
-                shell=False,
+                text=True,            result = subprocess.run(                shell=False,
                 check=False,
             )
             if result.returncode == 0:
@@ -96,9 +91,7 @@ class RepositoryHealthMonitor:
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                shell=False,
-                check=False,
-            )
+                shell=False,            result = subprocess.run(            )
             if result.returncode == 0:
                 zip_files = result.stdout.strip().split("\n")
                 metrics["zip_count"] = len([f for f in zip_files if f])
@@ -137,9 +130,7 @@ class RepositoryHealthMonitor:
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )
-            if result.returncode == 0:
-                metrics["large_files"] = [f.strip() for f in result.stdout.strip().split("\n") if f.strip()]
+            )            result = subprocess.run(                metrics["large_files"] = [f.strip() for f in result.stdout.strip().split("\n") if f.strip()]
 
             # Git status
             result = subprocess.run(

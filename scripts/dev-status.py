@@ -1,15 +1,14 @@
+#!/usr/bin/env python3
+from pathlib import Path
+import shlex
 import subprocess
-
-# !/usr/bin/env python3
 """
-
-        import shlex
-
 Aurora Development Status Dashboard
 Quick overview of repository health and development readiness
 """
 
-
+import shlex
+import subprocess
 from pathlib import Path
 
 

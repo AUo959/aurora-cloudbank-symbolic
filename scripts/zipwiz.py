@@ -2,6 +2,12 @@
 """
 
     import argparse
+from pathlib import Path
+import hashlib
+import json
+import shutil
+import tempfile
+import zipfile
 
 ZIPWiz - Advanced Archive Management Integration
 Part of the GITWiz Enhanced ecosystem
@@ -426,7 +432,7 @@ def main():
             print(json.dumps(analysis, indent=2, default=str))
         elif args.extract:
             if args.optimize:
-                result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
+                _ = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
                 print(f"Optimization complete: {result}")
             else:
                 # Standard extraction

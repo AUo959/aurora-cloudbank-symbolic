@@ -13,6 +13,7 @@ class QuantumProcessingLayer:
     def __init__(self, num_qubits=8):
         self.num_qubits = num_qubits
         self.simulator = AerSimulator()
+        
         self.quantum_circuits = {}
 
     def create_quantum_circuit(self, circuit_name, operations):
@@ -25,6 +26,7 @@ class QuantumProcessingLayer:
         for op in operations:
             self.apply_quantum_operation(circuit, op)
 
+        
         self.quantum_circuits[circuit_name] = circuit
         return circuit
 
@@ -33,27 +35,32 @@ class QuantumProcessingLayer:
         op_type = operation.get("type")
         qubit = operation.get("qubit", 0)
 
+        
         if op_type == "hadamard":
             circuit.h(qubit)
+        
         elif op_type == "cnot":
             target = operation.get("target", 1)
-            circuit.cx(qubit, target)
+            
+        circuit.cx(qubit, target)
+        
         elif op_type == "rotation":
             angle = operation.get("angle", np.pi / 4)
-            circuit.ry(angle, qubit)
+            
+        circuit.ry(angle, qubit)
 
-    def execute_quantum_symbolic_computation(self, circuit_name, shots=1024):
+    
+        def execute_quantum_symbolic_computation(self, circuit_name, shots=1024):
         """Execute quantum computation for symbolic processing"""
         if circuit_name not in self.quantum_circuits:
             raise ValueError(f"Circuit {circuit_name} not found")
-
         circuit = self.quantum_circuits[circuit_name]
         circuit.measure_all()
-
         job = self.simulator.run(circuit, shots=shots)
         result = job.result()
         counts = result.get_counts()
 
+        
         return {
             "quantum_results": counts,
             "symbolic_interpretation": self.interpret_quantum_results(counts),
@@ -73,6 +80,7 @@ class QuantumProcessingLayer:
         total = sum(counts.values())
         probabilities = [count / total for count in counts.values()]
         entropy = -sum(p * np.log2(p) for p in probabilities if p > 0)
+        
         return entropy
 
     def extract_symbolic_patterns(self, counts):

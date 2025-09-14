@@ -1,23 +1,34 @@
-name: "CodeQL Security Analysis"
+---
+name: "CodeQL Enhanced Analysis"
 
-on:
+"on":
   push:
-    branches: [ main, dev ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ main ]
+    branches: ["main"]
   schedule:
-    - cron: '30 1 * * 0'  # Weekly on Sundays
+    - cron: '18 13 * * 1'
+  workflow_dispatch:
+
+# Minimal least-privilege permissions for this workflow
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
-    name: Analyze (${{ matrix.language }})
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 30  # Reduced timeout to avoid hanging
     permissions:
-      security-events: write
-      packages: read
       actions: read
       contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -29,70 +40,76 @@ jobs:
           build-mode: none
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Shallow clone for faster checkout
 
-    - name: Pre-analysis cleanup
-      run: |
-        # Ensure clean environment for CodeQL analysis
-        mkdir -p /home/runner/work/_temp
-        touch /home/runner/work/_temp/proxy.log
-        echo "Environment prepared for CodeQL analysis"
+      - name: Pre-analysis cleanup
+        run: |
+          # Ensure clean environment for CodeQL analysis
+          mkdir -p /home/runner/work/_temp
+          touch /home/runner/work/_temp/proxy.log
+          echo "Environment prepared for CodeQL analysis"
 
-    # SRB-T1: Upgraded CodeQL Action to v3 due to deprecation notice (2025-08-19)
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
-        queries: +security-and-quality
-        # Enhance CodeQL configuration
-        config: |
-          name: "Aurora CodeQL Config"
-          disable-default-path-filters: false
-          paths-ignore:
-            - "**/*.md"
-            - "**/*.txt"
-            - "**/docs/**"
-            - "**/assets/**"
+      # SRB-T1: Upgraded CodeQL Action to v3 due to deprecation notice (2025-08-19)
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: +security-and-quality
+          # Enhanced CodeQL configuration with path filtering
+          config: |
+            name: "Aurora CodeQL Config"
+            disable-default-path-filters: false
+            paths-ignore:
+              - "**/*.md"
+              - "**/*.txt"
+              - "**/docs/**"
+              - "**/assets/**"
+              - "**/venv_opal2/**"
+              - "**/node_modules/**"
+              - "**/.git/**"
 
-    - name: Setup Node.js (for JavaScript analysis)
-      if: matrix.language == 'javascript-typescript'
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js (for JavaScript analysis)
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Install Node.js dependencies
-      if: matrix.language == 'javascript-typescript' && hashFiles('package.json') != ''
-      run: npm ci || npm install
+      - name: Install Node.js dependencies
+        if: matrix.language == 'javascript-typescript' && hashFiles('package.json') != ''
+        run: npm ci || npm install
 
-    - name: Setup Python (for Python analysis)
-      if: matrix.language == 'python'
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
+      # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+      - name: Setup Python (for Python analysis)
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-    - name: Install Python dependencies
-      if: matrix.language == 'python' && hashFiles('requirements.txt') != ''
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - name: Install Python dependencies
+        if: matrix.language == 'python' && hashFiles('requirements.txt') != ''
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-    # SRB-T1: Upgraded CodeQL Action to v3 due to deprecation notice (2025-08-19)
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:${{ matrix.language }}"
-        upload: true
+      # SRB-T1: Upgraded CodeQL Action to v3 due to deprecation notice (2025-08-19)
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/enhanced/language:${{ matrix.language }}"
+          upload: true
 
-    - name: Cleanup temporary files
-      if: always()
-      run: |
-        # Clean up any temporary files that might cause issues
-        sudo rm -rf /tmp/codeql-* || true
-        # Create proxy.log if it doesn't exist to prevent warnings
-        mkdir -p /home/runner/work/_temp || true
-        touch /home/runner/work/_temp/proxy.log || true
-        echo "Cleanup completed successfully"
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          # Clean up any temporary files that might cause issues
+          sudo rm -rf /tmp/codeql-* || true
+          # Create proxy.log if it doesn't exist to prevent warnings
+          mkdir -p /home/runner/work/_temp || true
+          touch /home/runner/work/_temp/proxy.log || true
+          echo "Cleanup completed successfully"

@@ -4,6 +4,15 @@
                     import shlex
             from .repository_health_monitor import RepositoryHealthMonitor
             from .automated_branch_cleanup import BranchCleanupManager
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import os
+import schedule
+import subprocess
+import threading
+import time
 
 Aurora CloudBank - Scheduled Repository Maintenance System
 Automated maintenance workflows with configurable schedules and safety checks.
@@ -12,6 +21,7 @@ Automated maintenance workflows with configurable schedules and safety checks.
 
 # import schedule  # Optional dependency
 try:
+    import schedule  # Optional dependency
 except ImportError:
     schedule = None
 
@@ -164,7 +174,7 @@ class MaintenanceScheduler:
                 return {"status": "failed", "reason": "safety_checks_failed"}
 
             # Execute the task
-            result = self._execute_maintenance_task(task_name, task_config)
+            _ = self._execute_maintenance_task(task_name, task_config)
 
             duration = (datetime.datetime.now() - start_time).total_seconds()
             self._log(f"Completed maintenance task: {task_name} in {duration:.1f}s")
@@ -204,9 +214,7 @@ class MaintenanceScheduler:
             # Check for common development processes
             processes_to_check = ["python", "node", "npm", "jupyter", "code"]
 
-            for proc_name in processes_to_check:
-                result = subprocess.run(
-                    ["pgrep", "-", proc_name],
+            for proc_name in processes_to_check:                result = subprocess.run(                    ["pgrep", "-", proc_name],
                     capture_output=True,
                     cwd=self.repo_path,
                     shell=False,
@@ -236,9 +244,7 @@ class MaintenanceScheduler:
         try:
             # Check if working directory is clean
             result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
+                ["git", "status", "--porcelain"],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -316,9 +322,7 @@ class MaintenanceScheduler:
                     result = subprocess.run(
                         cmd_parts,
                         capture_output=True,
-                        text=True,
-                        cwd=self.repo_path,
-                        timeout=300, shell=False, check=False)
+                        text=True,                    result = subprocess.run(                        timeout=300, shell=False, check=False)
                     if result.returncode == 0:
                         cleaned_files += 1
 
@@ -337,14 +341,12 @@ class MaintenanceScheduler:
             # Import and run the health monitor
 
             monitor = RepositoryHealthMonitor(self.repo_path)
-            result = monitor.run_monitoring_cycle()
+            _ = monitor.run_monitoring_cycle()
 
             # Check if alerts require immediate action
             alerts = result.get("alerts", [])
             high_priority_alerts = [a for a in alerts if a.get("severity") == "high"]
-
-            if high_priority_alerts:
-                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
+            result = monitor.run_monitoring_cycle()                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
                 # Could trigger additional cleanup here
 
             return {
@@ -382,9 +384,7 @@ class MaintenanceScheduler:
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )
-            file_count = (
-                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
+            )            result = subprocess.run(                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
             )
 
             return {
@@ -431,9 +431,7 @@ class MaintenanceScheduler:
                 check=False,
             )
 
-            if result.returncode != 0:
-                return {"status": "error", "error": "Failed to find ZIP files"}
-
+            if result.returncode != 0:            result = subprocess.run(
             zip_files = [f for f in result.stdout.strip().split("\n") if f]
             total_size_mb = 0
 
@@ -601,7 +599,7 @@ def main():
 
     if args.run_now:
         print(f"🏃 Running maintenance task: {args.run_now}")
-        result = scheduler.run_immediate_maintenance(args.run_now)
+        _ = scheduler.run_immediate_maintenance(args.run_now)
         print(f"Result: {result}")
         return
 

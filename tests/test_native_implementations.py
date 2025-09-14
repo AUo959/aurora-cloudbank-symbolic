@@ -1,6 +1,8 @@
 """
 
         import sys
+import os
+import time
 
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
@@ -9,6 +11,8 @@ Validates core symbolic simulation functionality without heavy dependencies
 # Add src to path for imports
 import math
 import os
+import pytest
+import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

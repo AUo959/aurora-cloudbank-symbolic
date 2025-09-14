@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 Quick test script for GITWiz Enhanced functionality
 """
@@ -12,15 +15,17 @@ def test_command(cmd, description):
     """Test a command and report results."""
     print(f"\n🧪 Testing: {description}")
     print(f"Command: {' '.join(cmd)}")
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    try:        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)        
         if result.returncode == 0:
             print(f"✅ SUCCESS: {description}")
-            if result.stdout:
+            
+        if result.stdout:
                 print(f"Output: {result.stdout[:200]}{'...' if len(result.stdout) > 200 else ''}")
+        
         else:
             print(f"❌ FAILED: {description}")
-            if result.stderr:
+            
+        if result.stderr:
                 print(f"Error: {result.stderr[:200]}{'...' if len(result.stderr) > 200 else ''}")
     except subprocess.TimeoutExpired:
         print(f"⏰ TIMEOUT: {description}")
@@ -52,6 +57,7 @@ def main():
             [sys.executable, "scripts/gitwiz_dependency_updater.py", "--help"],
             "Dependency Updater Help",
         )
+        
         test_command(
             [sys.executable, "scripts/gitwiz_dependency_updater.py", "--scan"],
             "Dependency Scanner",
@@ -81,7 +87,8 @@ def main():
             "HDE++ Recommendation",
         )
 
-    print("\n" + "=" * 60)
+    
+        print("\n" + "=" * 60)
     print("🎯 Test Suite Complete!")
     print("If all tests show ✅ SUCCESS, GITWiz Enhanced is fully operational!")
 

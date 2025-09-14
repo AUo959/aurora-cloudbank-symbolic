@@ -2,6 +2,8 @@
 """Utilities for interacting with the CASK reference assets.
 
     import plotly.graph_objects as go
+import os
+import zipfile
 
 
 This module loads data from ``CASK_Assets.zip`` and provides helper
@@ -12,6 +14,10 @@ quick visualization.
 
 
 import os
+import pandas as pd
+from io import StringIO
+import zipfile
+
 
 ASSET_ZIP = "CASK_Assets.zip"
 RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles

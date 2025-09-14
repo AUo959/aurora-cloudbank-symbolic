@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import json
+import os
+import sys
 """
 Aurora CloudBank ChatGPT Agent Mode Startup Validator
 
@@ -28,29 +32,29 @@ def print_banner():
 async def validate_agent_integration():
     """Validate ChatGPT agent mode integration"""
     print("🔍 Validating ChatGPT Agent Mode Integration...")
-    
+
     try:
         # Import and test agent integration
         from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
-        
+
         agent = ChatGPTAgentModeIntegration()
         print(f"✅ Agent integration initialized: {agent.agent_status}")
-        
+
         # Test tool discovery
         tools_info = await agent.discover_tools()
         print(f"✅ Tool discovery: {len(tools_info['tools'])} tools available")
-        
+
         # List available tools
         for tool_name, tool_info in tools_info['tools'].items():
             print(f"   🛠️  {tool_name}: {tool_info['description']}")
-        
+
         # Test system status
         status_result = await agent.execute_tool("system_status", {"detail_level": "basic"})
         if status_result['success']:
             print("✅ System status check: HEALTHY")
         else:
             print("⚠️  System status check: Issues detected")
-        
+
         # Test session management
         session_result = await agent.execute_tool("session_management", {"action": "create"})
         if session_result['success']:
@@ -58,7 +62,7 @@ async def validate_agent_integration():
             print(f"✅ Session management: Working (test session: {session_id[:8]}...)")
         else:
             print("⚠️  Session management: Issues detected")
-        
+
         # Test symbolic processing
         symbolic_result = await agent.execute_tool("symbolic_processing", {
             "operation": "startup_validation",
@@ -68,20 +72,20 @@ async def validate_agent_integration():
             print("✅ Symbolic processing: Working")
         else:
             print("⚠️  Symbolic processing: Issues detected")
-        
+
         # Test geometric algebra
         geo_result = await agent.execute_tool("geometric_algebra", {
             "expression_a": "e1",
-            "expression_b": "e2", 
+            "expression_b": "e2",
             "operation": "mult"
         })
         if geo_result['success']:
             print("✅ Geometric algebra: Working")
         else:
             print("⚠️  Geometric algebra: Issues detected")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Agent integration failed: {str(e)}")
         return False
@@ -89,27 +93,27 @@ async def validate_agent_integration():
 def validate_api_endpoints():
     """Validate API endpoint definitions"""
     print("\n🔍 Validating API Endpoint Configuration...")
-    
+
     try:
         # Check if agent mode configuration exists
         config_path = 'src/integrations/chatgpt_agent_mode_config.json'
         if os.path.exists(config_path):
             with open(config_path, 'r') as f:
                 config = json.load(f)
-            
+
             endpoints = config.get('integration_endpoints', {})
             print(f"✅ Configuration loaded: {len(endpoints)} endpoints defined")
-            
+
             for endpoint, info in endpoints.items():
                 method = info.get('method', 'GET')
                 desc = info.get('description', 'No description')
                 print(f"   🌐 {method} {endpoint}: {desc}")
-            
+
             return True
         else:
             print("⚠️  Agent mode configuration not found")
             return False
-            
+
     except Exception as e:
         print(f"❌ API validation failed: {str(e)}")
         return False
@@ -117,7 +121,7 @@ def validate_api_endpoints():
 def check_aurora_dependencies():
     """Check Aurora system dependencies"""
     print("\n🔍 Checking Aurora System Dependencies...")
-    
+
     # Check for key Aurora components
     dependencies = [
         ('src/integrations/chatgpt_agent_mode.py', 'Agent Mode Integration'),
@@ -126,7 +130,7 @@ def check_aurora_dependencies():
         ('modules/symbolic_core/', 'Symbolic Core Modules'),
         ('src/integrations/aurora_custom_gpt_bridge.js', 'Custom GPT Bridge'),
     ]
-    
+
     all_good = True
     for path, name in dependencies:
         if os.path.exists(path):
@@ -134,7 +138,7 @@ def check_aurora_dependencies():
         else:
             print(f"⚠️  {name}: Not found at {path}")
             all_good = False
-    
+
     return all_good
 
 def print_integration_summary():
@@ -169,21 +173,21 @@ def print_integration_summary():
 async def main():
     """Main validation routine"""
     print_banner()
-    
+
     # Run validation steps
     dependencies_ok = check_aurora_dependencies()
     api_config_ok = validate_api_endpoints()
     agent_integration_ok = await validate_agent_integration()
-    
-    print(f"\n📊 Validation Results:")
+
+    print("\n📊 Validation Results:")
     print(f"   Dependencies: {'✅ PASS' if dependencies_ok else '❌ FAIL'}")
     print(f"   API Configuration: {'✅ PASS' if api_config_ok else '❌ FAIL'}")
     print(f"   Agent Integration: {'✅ PASS' if agent_integration_ok else '❌ FAIL'}")
-    
+
     overall_status = dependencies_ok and api_config_ok and agent_integration_ok
-    
+
     if overall_status:
-        print(f"\n🎉 Overall Status: ✅ READY FOR CHATGPT AGENT MODE")
+        print("\n🎉 Overall Status: ✅ READY FOR CHATGPT AGENT MODE")
         print_integration_summary()
         return 0
     else:

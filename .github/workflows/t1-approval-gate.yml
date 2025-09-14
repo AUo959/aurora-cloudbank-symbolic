@@ -1,12 +1,17 @@
+---
 name: T1 Sealed Approval Gate
 
-on:
+"on":
   workflow_call:
     inputs:
       reason:
         description: Reason or workflow name for glyphcard
         required: false
         type: string
+
+# Minimal least-privilege permissions for reusable workflow
+permissions:
+  contents: read
 
 jobs:
   approve:

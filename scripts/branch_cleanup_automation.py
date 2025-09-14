@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import subprocess
 """
 Aurora CloudBank - Automated Branch Cleanup System
 Intelligently identifies and manages stale branches based on configurable rules.
 """
 
-import argparse
 import datetime
 import re
-import subprocess
-from pathlib import Path
 
 
 class BranchCleanupManager:
 
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path)
+        
         self.config = {
             "stale_days": 30,
             "force_delete_patterns": [
-                rr"^origin/alert-autofix-\d+$",  # Old security fixes
+                r"^origin/alert-autofix-\d+$",  # Old security fixes
                 r"^origin/.*-backup-.*$",  # Backup branches
             ],
             "review_patterns": [
@@ -38,39 +40,39 @@ class BranchCleanupManager:
         """Get detailed information about all remote branches."""
         try:
             # Get branch info with dates
-            cmd = [
+        cmd = [
                 "git",
                 "for-each-re",
                 "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
-            result = subprocess.run(
+        result = subprocess.run(
                 cmd,
                 capture_output=True,
-                text=True,
+        text=True,
                 cwd=self.repo_path,
-                shell=False,
+        shell=False,
                 check=False,
             )
-
-            branches = []
+        branches = []
             for line in result.stdout.strip().split("\n"):
                 if not line:
                     continue
 
                 parts = line.split("|", 3)
-                if len(parts) >= 3:
+                
+        if len(parts) >= 3:
                     branch_name = parts[0]
-                    commit_date = parts[1]
+        commit_date = parts[1]
                     author = parts[2] if len(parts) > 2 else "Unknown"
-                    subject = parts[3] if len(parts) > 3 else "No subject"
+        subject = parts[3] if len(parts) > 3 else "No subject"
 
                     # Calculate days since last commit
                     try:
                         commit_datetime = datetime.datetime.fromisoformat(
                             commit_date.replace("Z", "+00:00")
                         )
-                        days_old = (
+        days_old = (
                             datetime.datetime.now(datetime.timezone.utc)
                             - commit_datetime
                         ).days
@@ -88,27 +90,29 @@ class BranchCleanupManager:
                         }
                     )
 
-            return branches
+            
+        return branches
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error getting branch info: {e}")
-            return []
+            
+        return []
 
     def is_branch_merged(self, branch_name: str) -> bool:
         """Check if a branch has been merged into main."""
         try:
             # Remove 'origin/' prefix for merge check
-            branch_short = branch_name.replace("origin/", "")
-            cmd = [
+        branch_short = branch_name.replace("origin/", "")
+        cmd = [
                 "git",
                 "merge-base",
                 "--is-ancestor",
                 f"origin/{branch_short}",
                 "origin/main",
             ]
-            result = subprocess.run(
-                cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
+        result = subprocess.run(                cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False
             )
-            return result.returncode == 0
+            
+        return result.returncode == 0
         except BaseException:
             return False
 
@@ -123,49 +127,59 @@ class BranchCleanupManager:
         }
 
         for branch in branches:
-            name = branch["name"]
+        name = branch["name"]
 
             # Protected branches
             if name in self.config["protected_branches"]:
                 categories["protected"].append(branch)
-                continue
+                
+        continue
 
             # Force delete patterns
             if any(
                 re.match(pattern, name)
-                for pattern in self.config["force_delete_patterns"]
+                
+        for pattern in self.config["force_delete_patterns"]
             ):
                 categories["force_delete"].append(branch)
-                continue
+                
+        continue
 
             # Review patterns
             if any(
                 re.match(pattern, name) for pattern in self.config["review_patterns"]
             ):
                 categories["review_needed"].append(branch)
-                continue
+                
+        continue
 
             # Stale and merged branches
             if branch["days_old"] > self.config["stale_days"] and branch["is_merged"]:
                 categories["stale_merged"].append(branch)
-                continue
+                
+        continue
 
             # Recent active branches
             categories["recent_active"].append(branch)
 
+        
         return categories
 
     def generate_cleanup_report(self, categories: Dict[str, List[Dict]]) -> str:
         """Generate a detailed cleanup report."""
         report = []
         report.append("# Aurora CloudBank - Branch Cleanup Report")
+        
         report.append(f"**Generated:** {datetime.datetime.now().isoformat()}")
+        
         report.append("")
-
         total_branches = sum(len(branches) for branches in categories.values())
+        
         report.append(f"**Total Branches Analyzed:** {total_branches}")
+        
         report.append("")
 
+        
         for category, branches in categories.items():
             if not branches:
                 continue
@@ -173,19 +187,28 @@ class BranchCleanupManager:
             report.append(
                 f"## {category.replace('_', ' ').title()} ({len(branches)} branches)"
             )
-            report.append("")
+            
+        report.append("")
 
-            for branch in branches:
+            
+        for branch in branches:
                 report.append(f"- **{branch['name']}**")
-                report.append(f"  - Last commit: {branch['days_old']} days ago")
-                report.append(f"  - Author: {branch['author']}")
-                report.append(f"  - Subject: {branch['subject'][:80]}...")
-                report.append(f"  - Merged: {'Yes' if branch['is_merged'] else 'No'}")
-                report.append("")
+                
+        report.append(f"  - Last commit: {branch['days_old']} days ago")
+                
+        report.append(f"  - Author: {branch['author']}")
+                
+        report.append(f"  - Subject: {branch['subject'][:80]}...")
+                
+        report.append(f"  - Merged: {'Yes' if branch['is_merged'] else 'No'}")
+                
+        report.append("")
 
+        
         return "\n".join(report)
 
-    def execute_cleanup(
+    
+        def execute_cleanup(
         self, categories: Dict[str, List[Dict]], force: bool = False
     ) -> Dict[str, int]:
         """Execute the branch cleanup based on categories."""
@@ -193,15 +216,18 @@ class BranchCleanupManager:
 
         if self.config["dry_run"] and not force:
             print("🔍 DRY RUN MODE - No branches will be deleted")
-            print("Use --execute to perform actual cleanup")
-            return results
+            
+        print("Use --execute to perform actual cleanup")
+            
+        return results
 
         # Delete force_delete branches
         for branch in categories["force_delete"]:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
                 print(f"✅ Deleted: {branch['name']}")
-            else:
+            
+        else:
                 results["errors"] += 1
                 print(f"❌ Failed to delete: {branch['name']}")
 
@@ -210,10 +236,12 @@ class BranchCleanupManager:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
                 print(f"✅ Deleted stale merged: {branch['name']}")
-            else:
+            
+        else:
                 results["errors"] += 1
                 print(f"❌ Failed to delete: {branch['name']}")
 
+        
         return results
 
     def delete_branch(self, branch_name: str) -> bool:
@@ -221,45 +249,51 @@ class BranchCleanupManager:
         try:
             # Remove 'origin/' prefix for deletion
             branch_short = branch_name.replace("origin/", "")
-            cmd = ["git", "push", "origin", "--delete", branch_short]
+        cmd = ["git", "push", "origin", "--delete", branch_short]
             result = subprocess.run(
                 cmd,
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path,
+        result = subprocess.run(                text=True,
+        cwd=self.repo_path,
                 shell=False,
-                check=False,
+        check=False,
             )
-            return result.returncode == 0
+            
+        return result.returncode == 0
         except (OSError, ValueError, RuntimeError) as e:
             print(f"Error deleting branch {branch_name}: {e}")
-            return False
+            
+        return False
 
     def run_analysis(self, save_report: bool = True) -> Dict:
         """Run complete branch analysis and generate reports."""
         print("🔍 Analyzing repository branches...")
-
         branches = self.get_branch_info()
+        
         if not branches:
             print("❌ No branches found or error occurred")
-            return {}
+            
+        return {}
 
         categories = self.categorize_branches(branches)
 
         # Generate report
         report = self.generate_cleanup_report(categories)
 
+        
         if save_report:
             report_path = self.repo_path / "BRANCH_CLEANUP_REPORT.md"
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)
-            print(f"📄 Report saved to: {report_path}")
+            
+        print(f"📄 Report saved to: {report_path}")
 
         # Print summary
         print("\n📊 Branch Analysis Summary:")
+        
         for category, branches in categories.items():
             print(f"  {category.replace('_', ' ').title()}: {len(branches)} branches")
 
+        
         return {"branches": branches, "categories": categories, "report": report}
 
 
@@ -276,24 +310,27 @@ def main():
     parser.add_argument(
         "--no-report", action="store_true", help="Skip saving report file"
     )
-
-    args = parser.parse_args()
-
-    manager = BranchCleanupManager()
+        args = parser.parse_args()
+        manager = BranchCleanupManager()
     manager.config["dry_run"] = not args.execute
     manager.config["stale_days"] = args.stale_days
 
     # Run analysis
     results = manager.run_analysis(save_report=not args.no_report)
 
-    if results:
+    
+        if results:
         # Execute cleanup if requested
         if args.execute:
-            cleanup_results = manager.execute_cleanup(results["categories"], force=True)
-            print("\n🎯 Cleanup Results:")
-            print(f"  Deleted: {cleanup_results['deleted']} branches")
-            print(f"  Errors: {cleanup_results['errors']} branches")
-            print(f"  Skipped: {cleanup_results['skipped']} branches")
+        cleanup_results = manager.execute_cleanup(results["categories"], force=True)
+            
+        print("\n🎯 Cleanup Results:")
+            
+        print(f"  Deleted: {cleanup_results['deleted']} branches")
+            
+        print(f"  Errors: {cleanup_results['errors']} branches")
+            
+        print(f"  Skipped: {cleanup_results['skipped']} branches")
 
 
 if __name__ == "__main__":

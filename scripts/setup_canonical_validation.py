@@ -4,6 +4,9 @@ import subprocess
 """
 
         from canonical_validator import CanonicalValidator
+from pathlib import Path
+import os
+import sys
 
 Aurora CloudBank Canonical Validation System - Setup Script
 Installs and configures the canonical validation mechanism

@@ -211,8 +211,8 @@ jobs:
         # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
         uses: actions/setup-python@v5
         with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: pip
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
 
       - name: Install dependencies with Aurora support
         run: |
@@ -293,181 +293,181 @@ jobs:
       fail-fast: false
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Restore Aurora dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.npm
-          ~/.cache/pip
-          ~/.cache/aurora
+      - name: Restore Aurora dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/pip
+            ~/.cache/aurora
         key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
 
-    - name: Setup test environment
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: npm
+      - name: Setup test environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
-    - name: Setup Python test environment
-      # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: pip
+      - name: Setup Python test environment
+        # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
 
-    - name: Install test dependencies
-      run: |
-        npm ci || npm install || echo "Node deps installed"
-        pip install -r requirements.txt || pip install pytest flake8 || echo "Python deps installed"
+      - name: Install test dependencies
+        run: |
+          npm ci || npm install || echo "Node deps installed"
+          pip install -r requirements.txt || pip install pytest flake8 || echo "Python deps installed"
 
-    - name: Run Aurora-enhanced tests
-      run: |
-        echo "🧪 Running Aurora-enhanced test group: ${{ matrix.test-group }}"
+      - name: Run Aurora-enhanced tests
+        run: |
+          echo "🧪 Running Aurora-enhanced test group: ${{ matrix.test-group }}"
 
-        # Set Aurora context for tests
-        export AURORA_TEST_MODE=true
-        export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
+          # Set Aurora context for tests
+          export AURORA_TEST_MODE=true
+          export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
 
-        case "${{ matrix.test-group }}" in
-          "aurora-core")
-            echo "🔮 Running Aurora core tests with symbolic validation..."
-            python3 test_runner.py || echo "Aurora core tests completed"
-            python3 test_t71_tools.py || echo "T71 tools tests completed"
-            python3 test_basic_functionality.py || echo "Basic functionality tests completed"
+          case "${{ matrix.test-group }}" in
+            "aurora-core")
+              echo "🔮 Running Aurora core tests with symbolic validation..."
+              python3 test_runner.py || echo "Aurora core tests completed"
+              python3 test_t71_tools.py || echo "T71 tools tests completed"
+              python3 test_basic_functionality.py || echo "Basic functionality tests completed"
 
-            # Additional Aurora symbolic tests if validation was successful
-            if [[ "${{ needs.aurora-symbolic-validation.outputs.aurora_status }}" == "fully_operational" ]]; then
-              echo "🌟 Running enhanced Aurora symbolic tests..."
-              python3 -m pytest tests/ -k "aurora" -v || echo "Aurora symbolic tests completed"
-            fi
-            ;;
-          "security")
-            echo "🛡️ Running security tests with Aurora context..."
-            python3 -m pytest tests/ -k "security" -v || echo "Security tests completed"
+              # Additional Aurora symbolic tests if validation was successful
+              if [[ "${{ needs.aurora-symbolic-validation.outputs.aurora_status }}" == "fully_operational" ]]; then
+                echo "🌟 Running enhanced Aurora symbolic tests..."
+                python3 -m pytest tests/ -k "aurora" -v || echo "Aurora symbolic tests completed"
+              fi
+              ;;
+            "security")
+              echo "🛡️ Running security tests with Aurora context..."
+              python3 -m pytest tests/ -k "security" -v || echo "Security tests completed"
 
-            # Enhanced security tests if Picard_Delta_3 is operational
-            if [[ "${{ needs.aurora-symbolic-validation.outputs.security_status }}" == "operational" ]]; then
-              echo "🔐 Running enhanced security validation..."
-              python3 aurora_enhanced_security.py || echo "Enhanced security tests completed"
-            fi
-            ;;
-          *)
-            # Standard test execution for other groups
-            echo "Running standard tests for ${{ matrix.test-group }}..."
-            python3 -m pytest tests/ -m "${{ matrix.test-group }}" -v || echo "${{ matrix.test-group }} tests completed"
-            ;;
-        esac
+              # Enhanced security tests if Picard_Delta_3 is operational
+              if [[ "${{ needs.aurora-symbolic-validation.outputs.security_status }}" == "operational" ]]; then
+                echo "🔐 Running enhanced security validation..."
+                python3 aurora_enhanced_security.py || echo "Enhanced security tests completed"
+              fi
+              ;;
+            *)
+              # Standard test execution for other groups
+              echo "Running standard tests for ${{ matrix.test-group }}..."
+              python3 -m pytest tests/ -m "${{ matrix.test-group }}" -v || echo "${{ matrix.test-group }} tests completed"
+              ;;
+          esac
 
-    - name: Upload Aurora test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: aurora-test-results-${{ matrix.test-group }}
-        path: |
-          test-results.xml
-          coverage.xml
-          .coverage
-          aurora_test_*.json
-        retention-days: 7
+      - name: Upload Aurora test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aurora-test-results-${{ matrix.test-group }}
+          path: |
+            test-results.xml
+            coverage.xml
+            .coverage
+            aurora_test_*.json
+          retention-days: 7
 
   # Aurora-enhanced build and deployment
   aurora-build-deploy:
     name: "🚀 Aurora Enhanced Build & Deploy"
     runs-on: ubuntu-latest
     needs:
-    - aurora-smart-analysis
-    - aurora-quality-checks
-    - aurora-smart-tests
-    - aurora-symbolic-validation
+      - aurora-smart-analysis
+      - aurora-quality-checks
+      - aurora-smart-tests
+      - aurora-symbolic-validation
     if: github.ref == 'refs/heads/main' && needs.aurora-smart-analysis.outputs.skip_build != 'true'
     timeout-minutes: 25
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Aurora-enhanced build process
-      run: |
-        echo "🏗️ Aurora CloudBank Enhanced Build Process..."
+      - name: Aurora-enhanced build process
+        run: |
+          echo "🏗️ Aurora CloudBank Enhanced Build Process..."
 
-        # Set Aurora build context
-        export AURORA_BUILD_MODE=production
-        export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
+          # Set Aurora build context
+          export AURORA_BUILD_MODE=production
+          export AURORA_VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
 
-        # Standard build process
-        npm run build || echo "⚠️ npm build completed"
+          # Standard build process
+          npm run build || echo "⚠️ npm build completed"
 
-        # Aurora-specific build validation
-        if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
-          echo "🔮 Running Aurora-specific build validation..."
+          # Aurora-specific build validation
+          if [[ "${{ needs.aurora-smart-analysis.outputs.run_aurora_core }}" == "true" ]]; then
+            echo "🔮 Running Aurora-specific build validation..."
 
-          python3 -c "
-          try:
-              from tools.integration.ci_helpers import CIHelpers
-              ci = CIHelpers()
-              validation = ci.validate_repository_state()
-              print(f'✅ Repository validation: {validation[\"status\"]}')
-          except Exception as e:
-              print(f'⚠️ Validation: {e}')
-          "
-        fi
+            python3 -c "
+            try:
+                from tools.integration.ci_helpers import CIHelpers
+                ci = CIHelpers()
+                validation = ci.validate_repository_state()
+                print(f'✅ Repository validation: {validation[\"status\"]}')
+            except Exception as e:
+                print(f'⚠️ Validation: {e}')
+            "
+          fi
 
-    - name: Generate Aurora deployment manifest
-      run: |
-        echo "📄 Generating Aurora deployment manifest..."
+      - name: Generate Aurora deployment manifest
+        run: |
+          echo "📄 Generating Aurora deployment manifest..."
 
-        # Create enhanced deployment manifest with Aurora context
-        cat > aurora_deployment_manifest.json << EOF
-        {
-          "deployment": {
-            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-            "commit": "${{ github.sha }}",
-            "branch": "${{ github.ref_name }}",
-            "aurora_validation": "${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}",
-            "symbolic_anchors": "${{ needs.aurora-symbolic-validation.outputs.anchor_status || 'unknown' }}",
-            "dlp_tracking": "${{ needs.aurora-symbolic-validation.outputs.dlp_status || 'unknown' }}",
-            "security_ethics": "${{ needs.aurora-symbolic-validation.outputs.security_status || 'unknown' }}",
-            "build_optimizations": {
-              "intelligent_testing": true,
-              "aurora_symbolic_validation": true,
-              "performance_optimized": true
+          # Create enhanced deployment manifest with Aurora context
+          cat > aurora_deployment_manifest.json << EOF
+          {
+            "deployment": {
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "commit": "${{ github.sha }}",
+              "branch": "${{ github.ref_name }}",
+              "aurora_validation": "${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}",
+              "symbolic_anchors": "${{ needs.aurora-symbolic-validation.outputs.anchor_status || 'unknown' }}",
+              "dlp_tracking": "${{ needs.aurora-symbolic-validation.outputs.dlp_status || 'unknown' }}",
+              "security_ethics": "${{ needs.aurora-symbolic-validation.outputs.security_status || 'unknown' }}",
+              "build_optimizations": {
+                "intelligent_testing": true,
+                "aurora_symbolic_validation": true,
+                "performance_optimized": true
+              }
             }
           }
-        }
-        EOF
+          EOF
 
-        echo "✅ Aurora deployment manifest generated"
+          echo "✅ Aurora deployment manifest generated"
 
-    - name: Aurora-aware deployment
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: |
-        echo "🚀 Aurora-aware deployment process..."
+      - name: Aurora-aware deployment
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          echo "🚀 Aurora-aware deployment process..."
 
-        # Only deploy if Aurora validation passed or is unknown
-        VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
+          # Only deploy if Aurora validation passed or is unknown
+          VALIDATION_STATUS="${{ needs.aurora-symbolic-validation.outputs.aurora_status || 'unknown' }}"
 
-        if [[ "$VALIDATION_STATUS" == "fully_operational" ]] || [[ "$VALIDATION_STATUS" == "partially_operational" ]] || [[ "$VALIDATION_STATUS" == "unknown" ]]; then
-          echo "✅ Aurora validation status acceptable for deployment: $VALIDATION_STATUS"
-          echo "🌟 Deploying Aurora CloudBank with symbolic validation context..."
-        else
-          echo "⚠️ Aurora validation status requires attention: $VALIDATION_STATUS"
-          echo "🔧 Deployment proceeding with enhanced monitoring..."
-        fi
+          if [[ "$VALIDATION_STATUS" == "fully_operational" ]] || [[ "$VALIDATION_STATUS" == "partially_operational" ]] || [[ "$VALIDATION_STATUS" == "unknown" ]]; then
+            echo "✅ Aurora validation status acceptable for deployment: $VALIDATION_STATUS"
+            echo "🌟 Deploying Aurora CloudBank with symbolic validation context..."
+          else
+            echo "⚠️ Aurora validation status requires attention: $VALIDATION_STATUS"
+            echo "🔧 Deployment proceeding with enhanced monitoring..."
+          fi
 
-        echo "✅ Aurora-enhanced deployment completed"
+          echo "✅ Aurora-enhanced deployment completed"
 
-    - name: Create Aurora deployment artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: aurora-enhanced-deployment-${{ github.sha }}
-        path: |
-          dist/
-          build/
-          aurora_deployment_manifest.json
-          aurora_ci_validation_manifest.json
+      - name: Create Aurora deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurora-enhanced-deployment-${{ github.sha }}
+          path: |
+            dist/
+            build/
+            aurora_deployment_manifest.json
+            aurora_ci_validation_manifest.json
         retention-days: 30
 
   # Skip notification with Aurora context
@@ -478,12 +478,12 @@ jobs:
     if: needs.aurora-smart-analysis.outputs.skip_build == 'true'
 
     steps:
-    - name: Aurora skip notification
-      run: |
-        echo "# 📚 Aurora Build Skipped - Documentation Only Changes" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "This Aurora CloudBank build was intelligently skipped because only documentation files were changed." >> $GITHUB_STEP_SUMMARY
-        echo "No code changes detected that require symbolic validation, testing, or deployment." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Aurora systems remain operational** 🌟" >> $GITHUB_STEP_SUMMARY
-        echo "**Time saved**: ~15-20 minutes ⏱️" >> $GITHUB_STEP_SUMMARY
+      - name: Aurora skip notification
+        run: |
+          echo "# 📚 Aurora Build Skipped - Documentation Only Changes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This Aurora CloudBank build was intelligently skipped because only documentation files were changed." >> $GITHUB_STEP_SUMMARY
+          echo "No code changes detected that require symbolic validation, testing, or deployment." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Aurora systems remain operational** 🌟" >> $GITHUB_STEP_SUMMARY
+          echo "**Time saved**: ~15-20 minutes ⏱️" >> $GITHUB_STEP_SUMMARY

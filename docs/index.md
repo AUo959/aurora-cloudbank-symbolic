@@ -6,3 +6,4 @@ Welcome to the Aurora Reflective Autonomy System documentation. Use this index t
 - [Combined Visualization Package](combined_visualization_package.md)
 - [Visualization Stack and Integration Plan](visualization_stack.md)
 - [Enterprise Visualization Package](enterprise_visualization_package.md)
+- [Probabilistic Query Nexus](Probabilistic_Query_Nexus.md)

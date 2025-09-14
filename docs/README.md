@@ -20,3 +20,6 @@ Architecture diagrams, system maps, and user/developer guides for the Aurora Ref
 ---
 
 For architecture diagrams, see `architecture.md`.
+- [Perplexity Quantum News Expansion Plan](Perplexity_Quantum_News_Expansion_Plan.md)
+- [Probabilistic Query Nexus](Probabilistic_Query_Nexus.md)
+

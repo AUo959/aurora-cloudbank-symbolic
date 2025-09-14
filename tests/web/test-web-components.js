@@ -148,7 +148,13 @@ test('Aurora Security - Basic functionality', async (t) => {
     // Fallback: Create mock security functions for testing
     global.AuroraSecurity = {
       sanitizeHTML: function(html) {
-        return html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        // Fix: Repeat replacement until no more <script> tags remain
+        let previous;
+        do {
+          previous = html;
+          html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+        } while (html !== previous);
+        return html;
       },
       escapeHtml: function(text) {
         const div = document.createElement('div');

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import subprocess
+import sys
 """
 🌟 Aurora CloudBank Master Integration Interface
 Unified interface for all Phase 3 advanced features
@@ -24,7 +28,6 @@ class AuroraMasterInterface:
     async def initialize_all_systems(self) -> Dict[str, bool]:
         """Initialize all integrated systems"""
         print("🚀 Initializing Aurora CloudBank Advanced Systems...")
-
         systems_to_init = [
             ("quantum_processor", "aurora_quantum_processor.py"),
             ("consciousness_engine", "aurora_consciousness_engine.py"),
@@ -34,16 +37,19 @@ class AuroraMasterInterface:
         for system_name, module_file in systems_to_init:
             try:
                 if Path(module_file).exists():
-                    print("✅ {system_name} module found")
+                    print(f"✅ {system_name} module found")
                     self.initialized_systems[system_name] = True
                     self.integration_status[system_name] = "ready"
                 else:
-                    print("⚠️ {system_name} module not found: {module_file}")
+                    print(f"⚠️ {system_name} module not found: {module_file}")
                     self.initialized_systems[system_name] = False
                     self.integration_status[system_name] = "missing"
             except Exception as e:
-                print("❌ Error initializing {system_name}: {e}")
+                print(f"❌ Error initializing {system_name}: {e}")
                 self.initialized_systems[system_name] = False
+                self.integration_status[system_name] = "error"
+                
+        self.initialized_systems[system_name] = False
                 self.integration_status[system_name] = "error: {e}"
 
         return self.initialized_systems
@@ -51,42 +57,48 @@ class AuroraMasterInterface:
     async def run_integrated_demo(self) -> Dict[str, Any]:
         """Run demonstration of integrated systems"""
         print("\n🎭 Running Aurora CloudBank Integrated Demo...")
-
         demo_results = {}
 
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-                result = subprocess.run(
-                    [sys.executable, "aurora_quantum_processor.py"], capture_output=True, text=True, timeout=30
+        result = subprocess.run(
+                    [sys.executable, "aurora_quantum_processor.py"], 
+                    capture_output=True, text=True, timeout=30
                 )
 
-                if result.returncode == 0:
+                
+        if result.returncode == 0:
                     print("✅ Quantum processing test passed")
-                    demo_results["quantum_processing"] = "success"
+                    
+        demo_results["quantum_processing"] = "success"
                 else:
-                    print("⚠️ Quantum processing test issues: {result.stderr}")
-                    demo_results["quantum_processing"] = "warning"
+                    print(f"⚠️ Quantum processing test issues: {result.stderr}")
+                    
+        demo_results["quantum_processing"] = "warning"
             except Exception as e:
-                print("❌ Quantum processing test failed: {e}")
-                demo_results["quantum_processing"] = "failed"
+                print(f"❌ Quantum processing test failed: {e}")
+                
+        demo_results["quantum_processing"] = "failed"
 
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):
             try:
                 result = subprocess.run(
                     [sys.executable, "aurora_consciousness_engine.py"], capture_output=True, text=True, timeout=30
-                )
-
+        result = subprocess.run(
                 if result.returncode == 0:
                     print("✅ Consciousness simulation test passed")
-                    demo_results["consciousness_simulation"] = "success"
+                    
+        demo_results["consciousness_simulation"] = "success"
                 else:
-                    print("⚠️ Consciousness simulation test issues: {result.stderr}")
-                    demo_results["consciousness_simulation"] = "warning"
+                    print(f"⚠️ Consciousness simulation test issues: {result.stderr}")
+                    
+        demo_results["consciousness_simulation"] = "warning"
             except Exception as e:
-                print("❌ Consciousness simulation test failed: {e}")
-                demo_results["consciousness_simulation"] = "failed"
+                print(f"❌ Consciousness simulation test failed: {e}")
+                
+        demo_results["consciousness_simulation"] = "failed"
 
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
@@ -94,16 +106,17 @@ class AuroraMasterInterface:
                 result = subprocess.run(
                     [sys.executable, "aurora_adaptive_learning.py"], capture_output=True, text=True, timeout=30
                 )
-
-                if result.returncode == 0:
-                    print("✅ Adaptive learning test passed")
-                    demo_results["adaptive_learning"] = "success"
+        result = subprocess.run(                    print("✅ Adaptive learning test passed")
+                    
+        demo_results["adaptive_learning"] = "success"
                 else:
-                    print("⚠️ Adaptive learning test issues: {result.stderr}")
-                    demo_results["adaptive_learning"] = "warning"
+                    print(f"⚠️ Adaptive learning test issues: {result.stderr}")
+                    
+        demo_results["adaptive_learning"] = "warning"
             except Exception as e:
-                print("❌ Adaptive learning test failed: {e}")
-                demo_results["adaptive_learning"] = "failed"
+                print(f"❌ Adaptive learning test failed: {e}")
+                
+        demo_results["adaptive_learning"] = "failed"
 
         return demo_results
 
@@ -121,11 +134,12 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
         for system_name, status in self.initialized_systems.items():
-            status_icon = "✅" if status else "❌"
+        status_icon = "✅" if status else "❌"
             report_content += (
                 f"- {status_icon} **{system_name.replace('_', ' ').title()}**: {self.integration_status[system_name]}\n"
             )
 
+        
         report_content += """
 ### Advanced Features Activated
 - 🌀 Quantum-Aware Vector Processing
@@ -179,6 +193,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report_content)
 
+        
         return report_file
 
     async def run_comprehensive_test_suite(self) -> Dict[str, Any]:
@@ -193,14 +208,14 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
         # Generate status report
         status_report = self.generate_integration_status_report()
-
         comprehensive_results = {
             "initialization": init_results,
             "demo_results": demo_results,
             "status_report": status_report,
             "test_timestamp": datetime.now().isoformat(),
             "overall_success": all(init_results.values())
-            and all(result in ["success", "warning"] for result in demo_results.values()),
+            
+        and all(result in ["success", "warning"] for result in demo_results.values()),
         }
 
         return comprehensive_results
@@ -210,23 +225,26 @@ async def main():
     """Main function for Aurora Master Interface"""
     print("🌟 Aurora CloudBank Master Integration Interface")
     print("=" * 60)
-
-    interface = AuroraMasterInterface()
+        interface = AuroraMasterInterface()
 
     # Run comprehensive test suite
     results = await interface.run_comprehensive_test_suite()
 
-    print("\n📊 Test Suite Results:")
-    print("Overall Success: {'✅ PASSED' if results['overall_success'] else '❌ FAILED'}")
-    print("Status Report: {results['status_report']}")
+    
+        print("\n📊 Test Suite Results:")
+    print(f"Overall Success: {'✅ PASSED' if results['overall_success'] else '❌ FAILED'}")
+    print(f"Status Report: {results['status_report']}")
 
-    if results["overall_success"]:
+    
+        if results["overall_success"]:
         print("\n🎉 Phase 3 Advanced Integration COMPLETE!")
+        
         print("🚀 Ready for Phase 4: Real-World Application Integration")
     else:
         print("\n⚠️ Some systems need attention before proceeding to Phase 4")
 
-    return results
+    
+        return results
 
 
 if __name__ == "__main__":

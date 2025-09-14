@@ -268,10 +268,10 @@ def vsa_operation(req: VSAOperationRequest):
         result = vec.tolist()
     elif req.operation_type == "bind":
         # Binding logic here
-        result = "Binding not implemented in demo"
+        _ = "Binding not implemented in demo"
     elif req.operation_type == "unbind":
         # Unbinding logic here
-        result = "Unbinding not implemented in demo"
+        _ = "Unbinding not implemented in demo"
     elif req.operation_type == "similarity":
         # Similarity logic here
         result = "Similarity not implemented in demo"
@@ -370,15 +370,15 @@ def geometric_algebra(req: GeometricAlgebraRequest):
     Response: {"operation": str, "result": Any}
     """
     ga = GeometricAlgebra()
-    result = None
+    _ = None
 
     if req.operation == "product":
         # Compute geometric product
         blades = [ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))]
-        result = ga.mult(*blades)
+        _ = ga.mult(*blades)
     elif req.operation == "add":
         # Compute geometric addition
-        result = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
+        _ = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
     elif req.operation == "commutator":
         # Compute commutator
         if len(req.vectors) != 2:

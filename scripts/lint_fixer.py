@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 Comprehensive Python Lint Issue Fixer
 =====================================
@@ -9,7 +12,6 @@ Fixes common Python linting issues that automated tools miss.
 import re
 import sys
 from pathlib import Path
-from typing import Dict
 
 
 def fix_encoding_specifications(file_path: str) -> bool:
@@ -24,7 +26,7 @@ def fix_encoding_specifications(file_path: str) -> bool:
         (r"open\(([^)]+)\)", r'open(\1, encoding="utf-8")'),
         (r'open\(([^,]+),\s*([\'"]r[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
         (r'open\(([^,]+),\s*([\'"]w[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
-        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")r'),
+        (r'open\(([^,]+),\s*([\'"]a[\'"])\)', r'open(\1, \2, encoding="utf-8")'),
     ]
 
     for pattern, replacement in patterns:
@@ -51,13 +53,13 @@ def fix_subprocess_calls(file_path: str) -> bool:
     def fix_subprocess_run(match):
         args = match.group(1)
         if "shell=" not in args and "check=" not in args:
-            return "subprocess.run({args}, shell=False, check=False)"
+            return f"subprocess.run({args}, shell=False, check=False)"
         return match.group(0)
 
     def fix_subprocess_call(match):
         args = match.group(1)
         if "shell=" not in args:
-            return "subprocess.call({args}, shell=False)"
+            return f"subprocess.call({args}, shell=False)"
         return match.group(0)
 
     patterns = [
@@ -83,7 +85,9 @@ def fix_broad_exceptions(file_path: str) -> bool:
     original_content = content
 
     # Replace bare except (OSError, ValueError, RuntimeError): with except (OSError, ValueError, RuntimeError):
-    content = re.sub(r"except\s*:", "except (OSError, ValueError, RuntimeError):", content)
+    content = re.sub(
+        r"except\s*:", "except (OSError, ValueError, RuntimeError):", content
+    )
 
     if content != original_content:
         with open(file_path, "w", encoding="utf-8") as f:
@@ -132,7 +136,12 @@ def fix_unused_imports(file_path: str) -> bool:
             import_lines.append(i)
             # Extract imported names
             if stripped.startswith("import "):
-                module = stripped.replace("import ", "").split(" as ")[0].split(",")[0].strip()
+                module = (
+                    stripped.replace("import ", "")
+                    .split(" as ")[0]
+                    .split(",")[0]
+                    .strip()
+                )
                 imports[module] = i
             elif stripped.startswith("from "):
                 if " import " in stripped:
@@ -144,13 +153,17 @@ def fix_unused_imports(file_path: str) -> bool:
     # Check which imports are actually used
     used_imports = set()
     for module in imports:
-        if module in content.replace("import {module}", "").replace("from {module}", ""):
+        if module in content.replace(f"import {module}", "").replace(
+            f"from {module}", ""
+        ):
             used_imports.add(module)
 
     # Remove unused import lines (be conservative)
     lines_to_remove = []
     for module, line_num in imports.items():
-        if module not in used_imports and len(module) > 2:  # Don't remove single-letter imports
+        if (
+            module not in used_imports and len(module) > 2
+        ):  # Don't remove single-letter imports
             line_content = lines[line_num].strip()
             # Only remove if it's a single import, not multiple imports on one line
             if "," not in line_content and " as " not in line_content:
@@ -180,7 +193,7 @@ def process_file(file_path: str) -> Dict[str, bool]:
         # fixes['unused_imports'] = fix_unused_imports(file_path)  # Disabled for safety
 
     except (OSError, ValueError, RuntimeError) as e:
-        print("Error processing {file_path}: {e}")
+        print(f"Error processing {file_path}: {e}")
         return {}
 
     return fixes
@@ -190,7 +203,7 @@ def main():
     """Main function to process all Python files in scripts directory."""
     print("Starting lint fixer...")
     scripts_dir = Path("scripts")
-    print("Looking for scripts directory: {scripts_dir.absolute()}")
+    print(f"Looking for scripts directory: {scripts_dir.absolute()}")
 
     if not scripts_dir.exists():
         print("Scripts directory not found!")
@@ -200,7 +213,7 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-        print("Processing {py_file}...")
+        print(f"Processing {py_file}...")
         file_fixes = process_file(str(py_file))
 
         for fix_type, applied in file_fixes.items():
@@ -212,9 +225,9 @@ def main():
     print("\nFix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print("{fix_type.replace('_', ' ').title()}: {count} files")
+        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print("\nProcessed {len(python_files)} Python files.")
+    print(f"\nProcessed {len(python_files)} Python files.")
     return 0
 
 

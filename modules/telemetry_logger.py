@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 telemetry_logger.py
 
@@ -17,7 +18,6 @@ Integration Notes:
 """
 
 import logging
-import os
 
 TELEMETRY_LOG = "logs/telemetry.log"
 

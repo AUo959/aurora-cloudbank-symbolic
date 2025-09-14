@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import subprocess
 """
 Comprehensive Linting Fix Script
 Automated fixes for Python code quality issues

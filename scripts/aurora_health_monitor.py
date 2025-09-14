@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import subprocess
+import sys
+import time
 """
 Aurora CloudBank - Repository Health Monitoring System
 =====================================================
@@ -101,9 +108,7 @@ class HealthMonitor:
         }
 
         try:
-            # Repository size
-            result = subprocess.run(
-                ["du", "-sm", "."],
+            # Repository size            result = subprocess.run(                ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -115,9 +120,7 @@ class HealthMonitor:
 
             # File count
             result = subprocess.run(
-                ["find", ".", "-type", ""],
-                capture_output=True,
-                text=True,
+                ["find", ".", "-type", ""],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -129,9 +132,7 @@ class HealthMonitor:
             result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
-                text=True,
-                cwd=self.repo_path,
-                shell=False,
+                text=True,            result = subprocess.run(                shell=False,
                 check=False,
             )
             if result.returncode == 0:
@@ -147,9 +148,7 @@ class HealthMonitor:
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                shell=False,
-                check=False,
-            )
+                shell=False,            result = subprocess.run(            )
             if result.returncode == 0:
                 pyc_files = result.stdout.strip().split("\n")
                 metrics["pyc_file_count"] = len([f for f in pyc_files if f])
@@ -188,9 +187,7 @@ class HealthMonitor:
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )
-            if result.returncode == 0:
-                large_files = result.stdout.strip().split("\n")
+            )            result = subprocess.run(                large_files = result.stdout.strip().split("\n")
                 metrics["large_files"] = [f for f in large_files if f]
 
             # Calculate health score

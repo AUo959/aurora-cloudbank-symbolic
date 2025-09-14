@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 """
 Automated Markdown Issue Fixer
 Fixes common Markdown formatting issues based on attached error list

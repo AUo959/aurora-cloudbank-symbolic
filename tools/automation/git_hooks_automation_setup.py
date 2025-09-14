@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import os
+import shutil
 """
 Aurora Git Hooks Automation Setup
 Intelligent Git hooks for quality assurance and workflow optimization

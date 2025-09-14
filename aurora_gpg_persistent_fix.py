@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import subprocess
+import sys
 """
 🔐 Aurora CloudBank GPG Persistent Fix
 Resolves 403 author invalid errors by configuring GPG signing properly
 """
 
-import subprocess
-import sys
-from pathlib import Path
 
 
 class GPGPersistentFix:

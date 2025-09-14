@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 Opal2 System Integration Test
 Test all components working together

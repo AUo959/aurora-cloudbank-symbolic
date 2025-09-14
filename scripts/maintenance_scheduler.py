@@ -4,25 +4,24 @@
                     import shlex
             from .repository_health_monitor import RepositoryHealthMonitor
             from .automated_branch_cleanup import BranchCleanupManager
+from datetime import datetime
+from pathlib import Path
+import argparse
+import json
+import os
+import schedule
+import subprocess
+import threading
+import time
 
 Aurora CloudBank - Scheduled Repository Maintenance System
 Automated maintenance workflows with configurable schedules and safety checks.
 """
-from pathlib import Path
-import datetime
-import argparse
-import json
-from typing import Dict
-import subprocess
-import threading
-import os
-from typing import List
-import time
 
 
 # import schedule  # Optional dependency
 try:
-    import schedule
+    import schedule  # Optional dependency
 except ImportError:
     schedule = None
 
@@ -120,7 +119,9 @@ class MaintenanceScheduler:
 
         # Cache cleanup - daily
         if schedules["cache_cleanup"]["enabled"]:
-            schedule.every().day.at(schedules["cache_cleanup"]["time"]).do(self._run_maintenance_task, "cache_cleanup")
+            schedule.every().day.at(schedules["cache_cleanup"]["time"]).do(
+                self._run_maintenance_task, "cache_cleanup"
+            )
 
         # Health monitoring - hourly
         schedule.every().hour.do(self._run_maintenance_task, "health_monitoring")
@@ -129,51 +130,59 @@ class MaintenanceScheduler:
         day = schedules["branch_analysis"]["day"]
         time_str = schedules["branch_analysis"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "branch_analysis")
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "branch_analysis"
+            )
 
         # ZIP optimization - weekly
         day = schedules["zip_optimization"]["day"]
         time_str = schedules["zip_optimization"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "zip_optimization")
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "zip_optimization"
+            )
 
         # Dependency check - weekly
         day = schedules["dependency_check"]["day"]
         time_str = schedules["dependency_check"]["time"]
         if schedule:
-            getattr(schedule.every(), day).at(time_str).do(self._run_maintenance_task, "dependency_audit")
+            getattr(schedule.every(), day).at(time_str).do(
+                self._run_maintenance_task, "dependency_audit"
+            )
 
         self._log("Maintenance schedules configured successfully")
 
     def _run_maintenance_task(self, task_name: str) -> Dict:
         """Execute a maintenance task with safety checks."""
         start_time = datetime.datetime.now()
-        self._log("Starting maintenance task: {task_name}")
+        self._log(f"Starting maintenance task: {task_name}")
 
         try:
             # Get task configuration
             task_config = self.config["maintenance_tasks"].get(task_name, {})
 
             if not task_config.get("enabled", False):
-                self._log("Task {task_name} is disabled, skipping")
+                self._log(f"Task {task_name} is disabled, skipping")
                 return {"status": "skipped", "reason": "disabled"}
 
             # Run safety checks
-            safety_passed = self._run_safety_checks(task_config.get("safety_checks", []))
+            safety_passed = self._run_safety_checks(
+                task_config.get("safety_checks", [])
+            )
             if not safety_passed:
-                self._log("Safety checks failed for {task_name}")
+                self._log(f"Safety checks failed for {task_name}")
                 return {"status": "failed", "reason": "safety_checks_failed"}
 
             # Execute the task
-            result = self._execute_maintenance_task(task_name, task_config)
+            _ = self._execute_maintenance_task(task_name, task_config)
 
             duration = (datetime.datetime.now() - start_time).total_seconds()
-            self._log("Completed maintenance task: {task_name} in {duration:.1f}s")
+            self._log(f"Completed maintenance task: {task_name} in {duration:.1f}s")
 
             return result
 
         except (OSError, ValueError, RuntimeError) as e:
-            self._log("Error in maintenance task {task_name}: {e}")
+            self._log(f"Error in maintenance task {task_name}: {e}")
             return {"status": "error", "error": str(e)}
 
     def _run_safety_checks(self, checks: List[str]) -> bool:
@@ -194,7 +203,7 @@ class MaintenanceScheduler:
                         return False
 
             except (OSError, ValueError, RuntimeError) as e:
-                self._log("Safety check {check} failed: {e}")
+                self._log(f"Safety check {check} failed: {e}")
                 return False
 
         return True
@@ -205,9 +214,7 @@ class MaintenanceScheduler:
             # Check for common development processes
             processes_to_check = ["python", "node", "npm", "jupyter", "code"]
 
-            for proc_name in processes_to_check:
-                result = subprocess.run(
-                    ["pgrep", "-", proc_name],
+            for proc_name in processes_to_check:                result = subprocess.run(                    ["pgrep", "-", proc_name],
                     capture_output=True,
                     cwd=self.repo_path,
                     shell=False,
@@ -237,9 +244,7 @@ class MaintenanceScheduler:
         try:
             # Check if working directory is clean
             result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True,
-                text=True,
+                ["git", "status", "--porcelain"],            result = subprocess.run(                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -251,7 +256,12 @@ class MaintenanceScheduler:
     def _backup_important_files(self) -> bool:
         """Create backup of important files before maintenance."""
         try:
-            backup_dir = self.repo_path / ".gitwiz" / "backups" / datetime.date.today().isoformat()
+            backup_dir = (
+                self.repo_path
+                / ".gitwiz"
+                / "backups"
+                / datetime.date.today().isoformat()
+            )
             backup_dir.mkdir(parents=True, exist_ok=True)
 
             # Backup critical files
@@ -278,7 +288,7 @@ class MaintenanceScheduler:
             return True
 
         except (OSError, ValueError, RuntimeError) as e:
-            self._log("Backup failed: {e}")
+            self._log(f"Backup failed: {e}")
             return False
 
     def _execute_maintenance_task(self, task_name: str, task_config: Dict) -> Dict:
@@ -306,25 +316,20 @@ class MaintenanceScheduler:
 
             for command in commands:
                 if self.config["safety_settings"]["dry_run_mode"]:
-                    self._log("DRY RUN: Would execute: {command}")
+                    self._log(f"DRY RUN: Would execute: {command}")
                 else:
                     cmd_parts = shlex.split(command) if isinstance(command, str) else command
                     result = subprocess.run(
                         cmd_parts,
                         capture_output=True,
-                        text=True,
-                        cwd=self.repo_path,
-                        timeout=300,
-                        shell=False,
-                        check=False,
-                    )
+                        text=True,                    result = subprocess.run(                        timeout=300, shell=False, check=False)
                     if result.returncode == 0:
                         cleaned_files += 1
 
             return {
                 "status": "success",
                 "cleaned_files": cleaned_files,
-                "message": "Cleaned {cleaned_files} cache patterns",
+                "message": f"Cleaned {cleaned_files} cache patterns",
             }
 
         except (OSError, ValueError, RuntimeError) as e:
@@ -336,14 +341,12 @@ class MaintenanceScheduler:
             # Import and run the health monitor
 
             monitor = RepositoryHealthMonitor(self.repo_path)
-            result = monitor.run_monitoring_cycle()
+            _ = monitor.run_monitoring_cycle()
 
             # Check if alerts require immediate action
             alerts = result.get("alerts", [])
             high_priority_alerts = [a for a in alerts if a.get("severity") == "high"]
-
-            if high_priority_alerts:
-                self._log("High priority alerts detected: {len(high_priority_alerts)}")
+            result = monitor.run_monitoring_cycle()                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
                 # Could trigger additional cleanup here
 
             return {
@@ -381,8 +384,8 @@ class MaintenanceScheduler:
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
+            )            result = subprocess.run(                len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
             )
-            file_count = len(result.stdout.strip().split("\n")) if result.returncode == 0 else 0
 
             return {
                 "status": "success",
@@ -420,7 +423,7 @@ class MaintenanceScheduler:
         try:
             # Find ZIP files
             result = subprocess.run(
-                ["find", ".", "-name", "*.zip", "-type", ""],
+                ["find", ".", "-name", "*.zip", "-type", "f"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -428,9 +431,7 @@ class MaintenanceScheduler:
                 check=False,
             )
 
-            if result.returncode != 0:
-                return {"status": "error", "error": "Failed to find ZIP files"}
-
+            if result.returncode != 0:            result = subprocess.run(
             zip_files = [f for f in result.stdout.strip().split("\n") if f]
             total_size_mb = 0
 
@@ -509,7 +510,7 @@ class MaintenanceScheduler:
     def _log(self, message: str):
         """Log maintenance activity."""
         timestamp = datetime.datetime.now().isoformat()
-        log_entry = "[{timestamp}] {message}\n"
+        log_entry = f"[{timestamp}] {message}\n"
 
         try:
             os.makedirs(self.log_file.parent, exist_ok=True)
@@ -518,7 +519,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError):
             pass  # Don't fail maintenance due to logging issues
 
-        print("🔧 {message}")
+        print(f"🔧 {message}")
 
     def start_scheduler(self):
         """Start the maintenance scheduler."""
@@ -564,11 +565,21 @@ class MaintenanceScheduler:
 
 def main():
     """Main execution function."""
-    parser = argparse.ArgumentParser(description="Aurora CloudBank Maintenance Scheduler")
-    parser.add_argument("--daemon", action="store_true", help="Run as daemon with scheduled maintenance")
-    parser.add_argument("--run-now", type=str, help="Run specific maintenance task immediately")
-    parser.add_argument("--run-all", action="store_true", help="Run all maintenance tasks immediately")
-    parser.add_argument("--status", action="store_true", help="Show maintenance status and schedules")
+    parser = argparse.ArgumentParser(
+        description="Aurora CloudBank Maintenance Scheduler"
+    )
+    parser.add_argument(
+        "--daemon", action="store_true", help="Run as daemon with scheduled maintenance"
+    )
+    parser.add_argument(
+        "--run-now", type=str, help="Run specific maintenance task immediately"
+    )
+    parser.add_argument(
+        "--run-all", action="store_true", help="Run all maintenance tasks immediately"
+    )
+    parser.add_argument(
+        "--status", action="store_true", help="Show maintenance status and schedules"
+    )
 
     args = parser.parse_args()
 
@@ -581,20 +592,22 @@ def main():
         print("📋 Configured maintenance tasks:")
         for task_name, config in scheduler.config["maintenance_tasks"].items():
             status = "✅ Enabled" if config.get("enabled") else "❌ Disabled"
-            print("   {task_name}: {status} - {config.get('description', 'No description')}")
+            print(
+                f"   {task_name}: {status} - {config.get('description', 'No description')}"
+            )
         return
 
     if args.run_now:
-        print("🏃 Running maintenance task: {args.run_now}")
-        result = scheduler.run_immediate_maintenance(args.run_now)
-        print("Result: {result}")
+        print(f"🏃 Running maintenance task: {args.run_now}")
+        _ = scheduler.run_immediate_maintenance(args.run_now)
+        print(f"Result: {result}")
         return
 
     if args.run_all:
         print("🏃 Running all maintenance tasks...")
         results = scheduler.run_immediate_maintenance()
         for task_name, result in results.items():
-            print("   {task_name}: {result.get('status', 'unknown')}")
+            print(f"   {task_name}: {result.get('status', 'unknown')}")
         return
 
     if args.daemon:

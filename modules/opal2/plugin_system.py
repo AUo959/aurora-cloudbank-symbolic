@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import json
 """
 Opal2 Modular System - Plugin System
 Dynamic plugin loading and management for extensible rendering
@@ -22,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 class PluginType(Enum):
     """Plugin type enumeration"""
-
     RENDERER = "renderer"
     PROCESSOR = "processor"
     FILTER = "filter"
@@ -33,8 +35,7 @@ class PluginType(Enum):
 
 class PluginStatus(Enum):
     """Plugin status enumeration"""
-
-    LOADED = "loaded"
+        LOADED = "loaded"
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"
@@ -78,7 +79,8 @@ class PluginInterface:
         """Get plugin information"""
         raise NotImplementedError("Plugins must implement get_info()")
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    
+        def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate plugin configuration"""
         return True
 
@@ -90,7 +92,8 @@ class RendererPlugin(PluginInterface):
         """Render data with given context"""
         raise NotImplementedError("Renderer plugins must implement render()")
 
-    def get_supported_formats(self) -> List[str]:
+    
+        def get_supported_formats(self) -> List[str]:
         """Get supported output formats"""
         return ["generic"]
 
@@ -133,15 +136,19 @@ class PluginSystem:
         # Load built-in plugins
         self._load_builtin_plugins()
 
-    def _initialize_plugin_dirs(self):
+    
+        def _initialize_plugin_dirs(self):
         """Initialize plugin directories"""
         for plugin_dir in self.plugin_dirs:
             plugin_path = Path(plugin_dir)
-            if not plugin_path.exists():
+            
+        if not plugin_path.exists():
                 plugin_path.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Created plugin directory: {plugin_path}")
+                
+        logger.info(f"Created plugin directory: {plugin_path}")
 
-    def _load_builtin_plugins(self):
+    
+        def _load_builtin_plugins(self):
         """Load built-in plugins"""
         # WebGL Renderer Plugin
         self.register_plugin("webgl_renderer", WebGLRendererPlugin())
@@ -158,9 +165,11 @@ class PluginSystem:
         # Geometric Algebra Processor Plugin
         self.register_plugin("geometric_algebra_processor", GeometricAlgebraProcessorPlugin())
 
+        
         logger.info(f"Loaded {len(self.plugins)} built-in plugins")
 
-    def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
+    
+        def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
         """Register a plugin instance"""
         try:
             # Validate plugin
@@ -169,13 +178,15 @@ class PluginSystem:
 
             # Get plugin info
             plugin_info = plugin.get_info()
-            plugin_info.name = name
+            
+        plugin_info.name = name
 
             # Set configuration
             if config:
                 if not plugin.validate_config(config):
                     raise ValueError(f"Invalid configuration for plugin {name}")
-                plugin.config = config
+                
+        plugin.config = config
                 self.plugin_configs[name] = config
 
             # Initialize plugin
@@ -188,32 +199,39 @@ class PluginSystem:
                 # Update dependency graph
                 self._update_dependency_graph(name, plugin_info.dependencies)
 
-                logger.info(f"Successfully registered plugin: {name}")
-            else:
+                
+        logger.info(f"Successfully registered plugin: {name}")
+            
+        else:
                 plugin_info.status = PluginStatus.FAILED
                 plugin_info.error_message = "Plugin initialization failed"
                 logger.error(f"Failed to initialize plugin: {name}")
 
+        
         except Exception as e:
             logger.error(f"Failed to register plugin {name}: {str(e)}")
-            if name in self.plugin_info:
+            
+        if name in self.plugin_info:
                 self.plugin_info[name].status = PluginStatus.FAILED
                 self.plugin_info[name].error_message = str(e)
 
-    def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
+    
+        def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
         """Load a plugin from a Python file"""
         try:
             file_path = Path(file_path)
-            if not file_path.exists():
+            
+        if not file_path.exists():
                 raise FileNotFoundError(f"Plugin file not found: {file_path}")
 
             # Load module
-            spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+        spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
+        module = importlib.util.module_from_spec(spec)
+            
+        spec.loader.exec_module(module)
 
             # Find plugin classes
-            plugin_classes = []
+        plugin_classes = []
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj) and issubclass(obj, PluginInterface) and obj != PluginInterface:
                     plugin_classes.append(obj)
@@ -221,70 +239,84 @@ class PluginSystem:
             # Register found plugins
             for plugin_class in plugin_classes:
                 plugin_instance = plugin_class(config)
-                plugin_name = plugin_class.__name__.lower().replace("plugin", "")
-                self.register_plugin(plugin_name, plugin_instance, config)
+        plugin_name = plugin_class.__name__.lower().replace("plugin", "")
+                
+        self.register_plugin(plugin_name, plugin_instance, config)
 
-            logger.info(f"Loaded {len(plugin_classes)} plugins from {file_path}")
+            
+        logger.info(f"Loaded {len(plugin_classes)} plugins from {file_path}")
 
+        
         except Exception as e:
             logger.error(f"Failed to load plugin from {file_path}: {str(e)}")
 
-    def load_plugins_from_directory(self, directory: str):
+    
+        def load_plugins_from_directory(self, directory: str):
         """Load all plugins from a directory"""
         directory_path = Path(directory)
+        
         if not directory_path.exists():
             logger.warning(f"Plugin directory not found: {directory}")
-            return
+            
+        return
 
         # Find all Python files
         python_files = list(directory_path.glob("*.py"))
 
+        
         for python_file in python_files:
             if python_file.name.startswith("__"):
                 continue
 
             try:
                 self.load_plugin_from_file(str(python_file))
-            except Exception as e:
+            
+        except Exception as e:
                 logger.error(f"Failed to load plugin from {python_file}: {str(e)}")
 
-    def get_plugin(self, name: str) -> Optional[PluginInterface]:
+    
+        def get_plugin(self, name: str) -> Optional[PluginInterface]:
         """Get a plugin by name"""
         return self.plugins.get(name)
 
-    def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginInterface]:
-        """Get all plugins of a specific type"""
-        result = []
-        for name, info in self.plugin_info.items():
+    
+        def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginInterface]:
+        """Get all plugins of a specific type"""        result = []        for name, info in self.plugin_info.items():
             if info.plugin_type == plugin_type and info.status == PluginStatus.LOADED:
                 plugin = self.plugins.get(name)
-                if plugin:
+                
+        if plugin:
                     result.append(plugin)
+        
         return result
 
     def list_plugins(self) -> Dict[str, PluginInfo]:
         """List all registered plugins"""
         return self.plugin_info.copy()
 
-    def unload_plugin(self, name: str) -> bool:
+    
+        def unload_plugin(self, name: str) -> bool:
         """Unload a plugin"""
         if name not in self.plugins:
             return False
 
         try:
-            plugin = self.plugins[name]
+        plugin = self.plugins[name]
             plugin.shutdown()
 
-            del self.plugins[name]
+            
+        del self.plugins[name]
             if name in self.plugin_info:
                 self.plugin_info[name].status = PluginStatus.DISABLED
 
             logger.info(f"Unloaded plugin: {name}")
-            return True
+            
+        return True
 
         except Exception as e:
             logger.error(f"Failed to unload plugin {name}: {str(e)}")
-            return False
+            
+        return False
 
     def reload_plugin(self, name: str) -> bool:
         """Reload a plugin"""
@@ -317,9 +349,9 @@ class PluginSystem:
         for dep in dependencies:
             if dep not in self.plugins:
                 return False
-
-            dep_info = self.plugin_info.get(dep)
-            if not dep_info or dep_info.status != PluginStatus.LOADED:
+        dep_info = self.plugin_info.get(dep)
+            
+        if not dep_info or dep_info.status != PluginStatus.LOADED:
                 return False
 
         return True
@@ -337,7 +369,8 @@ class PluginSystem:
         # Count by type
         for plugin_type in PluginType:
             count = len([p for p in self.plugin_info.values() if p.plugin_type == plugin_type])
-            stats["plugin_types"][plugin_type.value] = count
+            
+        stats["plugin_types"][plugin_type.value] = count
 
         return stats
 
@@ -351,14 +384,15 @@ class WebGLRendererPlugin(RendererPlugin):
     def get_info(self) -> PluginInfo:
         return PluginInfo(
             name="webgl_renderer",
-            version="1.0.0",
+        version="1.0.0",
             author="Aurora Team",
-            description="WebGL-based quantum visualization renderer",
+        description="WebGL-based quantum visualization renderer",
             plugin_type=PluginType.RENDERER,
-            capabilities=["3d_rendering", "quantum_effects", "real_time"],
+        capabilities=["3d_rendering", "quantum_effects", "real_time"],
         )
 
-    async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
+    
+        async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using WebGL"""
         # Implementation would generate WebGL code
         return json.dumps(
@@ -372,7 +406,8 @@ class WebGLRendererPlugin(RendererPlugin):
             }
         )
 
-    def _generate_vertex_shader(self) -> str:
+    
+        def _generate_vertex_shader(self) -> str:
         return """
         attribute vec3 position
         uniform mat4 modelViewMatrix
@@ -387,7 +422,7 @@ class WebGLRendererPlugin(RendererPlugin):
         precision mediump float
         uniform vec3 color
         void main() {
-            gl_FragColor = vec4(color, 1.0)
+        gl_FragColor = vec4(color, 1.0)
         }
         """
 
@@ -401,14 +436,15 @@ class CanvasRendererPlugin(RendererPlugin):
     def get_info(self) -> PluginInfo:
         return PluginInfo(
             name="canvas_renderer",
-            version="1.0.0",
+        version="1.0.0",
             author="Aurora Team",
-            description="Canvas 2D quantum visualization renderer",
+        description="Canvas 2D quantum visualization renderer",
             plugin_type=PluginType.RENDERER,
-            capabilities=["2d_rendering", "quantum_effects", "interactive"],
+        capabilities=["2d_rendering", "quantum_effects", "interactive"],
         )
 
-    async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
+    
+        async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using Canvas 2D"""
         commands = []
 
@@ -417,15 +453,20 @@ class CanvasRendererPlugin(RendererPlugin):
 
         # Render vertices
         vertices = data.get("vertices", [])
+        
         if vertices:
             commands.append("ctx.beginPath();")
-            for i, vertex in enumerate(vertices):
+            
+        for i, vertex in enumerate(vertices):
                 if i == 0:
                     commands.append(f"ctx.moveTo({vertex[0]}, {vertex[1]});")
-                else:
+                
+        else:
                     commands.append(f"ctx.lineTo({vertex[0]}, {vertex[1]});")
-            commands.append("ctx.stroke();")
+            
+        commands.append("ctx.stroke();")
 
+        
         return "\n".join(commands)
 
 
@@ -435,36 +476,40 @@ class SVGRendererPlugin(RendererPlugin):
     def get_info(self) -> PluginInfo:
         return PluginInfo(
             name="svg_renderer",
-            version="1.0.0",
+        version="1.0.0",
             author="Aurora Team",
-            description="SVG-based quantum visualization renderer",
+        description="SVG-based quantum visualization renderer",
             plugin_type=PluginType.RENDERER,
-            capabilities=["vector_graphics", "scalable", "quantum_effects"],
+        capabilities=["vector_graphics", "scalable", "quantum_effects"],
         )
 
-    async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
+    
+        async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using SVG"""
         width = context.get("width", 800)
         height = context.get("height", 600)
-
         svg_parts = []
         svg_parts.append(f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">')
 
         # Render vertices as path
         vertices = data.get("vertices", [])
+        
         if vertices:
             path_data = []
             for i, vertex in enumerate(vertices):
                 if i == 0:
                     path_data.append(f"M {vertex[0]} {vertex[1]}")
-                else:
+                
+        else:
                     path_data.append(f"L {vertex[0]} {vertex[1]}")
+        path_string = " ".join(path_data)
+            
+        svg_parts.append(f'<path d="{path_string}" stroke="blue" stroke-width="2" fill="none" />')
 
-            path_string = " ".join(path_data)
-            svg_parts.append(f'<path d="{path_string}" stroke="blue" stroke-width="2" fill="none" />')
-
+        
         svg_parts.append("</svg>")
 
+        
         return "\n".join(svg_parts)
 
 
@@ -473,15 +518,16 @@ class QuantumFieldRendererPlugin(RendererPlugin):
 
     def get_info(self) -> PluginInfo:
         return PluginInfo(
-            name="quantum_field_renderer",
+        name="quantum_field_renderer",
             version="1.0.0",
-            author="Aurora Team",
+        author="Aurora Team",
             description="Quantum field visualization renderer",
-            plugin_type=PluginType.RENDERER,
+        plugin_type=PluginType.RENDERER,
             capabilities=["quantum_field", "field_visualization", "particle_effects"],
         )
 
-    async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+    
+        async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Render quantum field"""
         width = context.get("width", 800)
         height = context.get("height", 600)
@@ -493,9 +539,10 @@ class QuantumFieldRendererPlugin(RendererPlugin):
         for i in range(0, width, grid_size):
             for j in range(0, height, grid_size):
                 # Calculate field value
-                field_value = self._calculate_field_value(i, j, data)
+        field_value = self._calculate_field_value(i, j, data)
 
-                field_points.append(
+                
+        field_points.append(
                     {
                         "x": i,
                         "y": j,
@@ -504,6 +551,7 @@ class QuantumFieldRendererPlugin(RendererPlugin):
                     }
                 )
 
+        
         return {
             "type": "quantum_field",
             "field_points": field_points,
@@ -522,18 +570,19 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
     def get_info(self) -> PluginInfo:
         return PluginInfo(
             name="geometric_algebra_processor",
-            version="1.0.0",
+        version="1.0.0",
             author="Aurora Team",
-            description="Geometric algebra data processor",
+        description="Geometric algebra data processor",
             plugin_type=PluginType.PROCESSOR,
-            capabilities=[
+        capabilities=[
                 "geometric_algebra",
                 "multivector_operations",
                 "clifford_algebra",
             ],
         )
 
-    async def process(self, data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
+    
+        async def process(self, data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
         """Process data using geometric algebra"""
         # This would integrate with the GeometricAlgebra class
         processed_data = data.copy()
@@ -564,9 +613,10 @@ class PluginFactory:
             "quantum_field_renderer": QuantumFieldRendererPlugin,
             "geometric_algebra_processor": GeometricAlgebraProcessorPlugin,
         }
-
         plugin_class = plugin_classes.get(plugin_type)
+        
         if plugin_class:
             return plugin_class(config)
 
+        
         return None

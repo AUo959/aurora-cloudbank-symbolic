@@ -7,8 +7,8 @@ Welcome to the Aurora Reflective Autonomy System documentation. Use this index t
 - [Combined Visualization Package](combined_visualization_package.md)
 - [Visualization Stack and Integration Plan](visualization_stack.md)
 - [Enterprise Visualization Package](enterprise_visualization_package.md)
-
-## Operational Documentation
+\n- [Probabilistic Query Nexus](Probabilistic_Query_Nexus.md)
+\n## Operational Documentation
 - [Operational Documentation Overview](operational/README.md) - Status reports, deployment guides, and historical documentation
 - [Current Status](operational/status/current-status.md) - Live project status and health
 - [Deployment Guide](operational/guides/deployment-guide.md) - Complete deployment instructions

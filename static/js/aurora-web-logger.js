@@ -29,7 +29,7 @@ class AuroraWebLogger {
             randomStr = Array.from(array).map(num => num.toString(36)).join('');
         } else {
             // Fallback to Math.random if crypto is unavailable (not recommended)
-            randomStr = Math.random().toString(36).substr(2, 9);
+            randomStr = Math.random().toString(36).substring(2, 11);
         }
         return `${Date.now()}-${randomStr}`;
     }

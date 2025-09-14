@@ -1,5 +1,17 @@
-#!/usr/bin/env python3
+import subprocess
+
+# !/usr/bin/env python3
 """
+
+    import argparse
+from datetime import datetime
+from pathlib import Path
+import json
+import schedule
+import sys
+import threading
+import time
+
 GitWiz Automated Maintenance Scheduler
 =====================================
 
@@ -17,10 +29,9 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
-import argparse
+
 import json
 import logging
-import subprocess
 import sys
 import time
 
@@ -28,9 +39,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
-import threading
-import schedule
-
 
 logging.basicConfig(
     level=logging.INFO,

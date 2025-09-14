@@ -1,4 +1,5 @@
 """
+import hashlib
 Vector Symbolic Architecture (VSA) utility for symbolic data encoding/decoding.
 """
 

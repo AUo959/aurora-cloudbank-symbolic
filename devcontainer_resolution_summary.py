@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 DevContainer Conflict Resolution Summary
 Final status after resolving devcontainer merge conflicts
 """
 
-import sys
-from pathlib import Path
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))

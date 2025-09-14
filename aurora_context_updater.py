@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
 
 # !/usr/bin/env python3
 """
@@ -6,10 +10,6 @@ Aurora CloudBank Context Updater
 Automatically updates custom instructions based on current repository state
 """
 
-import json
-import subprocess
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraContextUpdater:

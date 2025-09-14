@@ -1,4 +1,10 @@
 import asyncio
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
+import time
 
 # !/usr/bin/env python3
 """
@@ -6,9 +12,6 @@ Aurora Advanced Integration Module
 Advanced integration and orchestration capabilities
 """
 
-import json
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraAdvancedIntegration:
@@ -703,7 +706,7 @@ class AuroraMasterInterface:
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_quantum_processor.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -720,7 +723,7 @@ class AuroraMasterInterface:
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_consciousness_engine.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -737,7 +740,7 @@ class AuroraMasterInterface:
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_adaptive_learning.py"
                 ], capture_output=True, text=True, timeout=30)
 

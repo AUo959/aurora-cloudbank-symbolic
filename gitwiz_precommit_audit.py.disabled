@@ -6,6 +6,11 @@
             from scripts.gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
                 import yaml
                 import yaml
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
 
 GitWiz Pre-commit Hooks Audit Tool
 ==================================
@@ -89,7 +94,7 @@ class GitWizPrecommitAuditor:
             print("  ✅ GitWiz Enhanced - Available")
         except Exception as e:
             components["enhanced_gitwiz"] = {"available": False, "error": str(e)}
-            print("  ❌ GitWiz Enhanced - Failed: {e}")
+            print(f"  ❌ GitWiz Enhanced - Failed: {e}")
 
         # Test Lint Cleanup Manager
         try:
@@ -101,7 +106,7 @@ class GitWizPrecommitAuditor:
             print("  ✅ Lint Cleanup Manager - Available")
         except Exception as e:
             components["lint_manager"] = {"available": False, "error": str(e)}
-            print("  ❌ Lint Cleanup Manager - Failed: {e}")
+            print(f"  ❌ Lint Cleanup Manager - Failed: {e}")
 
         # Test Workflow Orchestrator
         try:
@@ -110,7 +115,7 @@ class GitWizPrecommitAuditor:
             print("  ✅ Workflow Orchestrator - Available")
         except Exception as e:
             components["orchestrator"] = {"available": False, "error": str(e)}
-            print("  ❌ Workflow Orchestrator - Failed: {e}")
+            print(f"  ❌ Workflow Orchestrator - Failed: {e}")
 
         self.audit_results["components"] = components
 
@@ -130,10 +135,10 @@ class GitWizPrecommitAuditor:
                     "hooks": sum(len(repo.get("hooks", [])) for repo in config_data.get("repos", [])),
                     "config": config_data
                 }
-                print("  ✅ .pre-commit-config.yaml - {configs['pre_commit_config']['hooks']} hooks configured")
+                print(f"  ✅ .pre-commit-config.yaml - {configs['pre_commit_config']['hooks']} hooks configured")
             except Exception as e:
                 configs["pre_commit_config"] = {"exists": True, "error": str(e)}
-                print("  ❌ .pre-commit-config.yaml - Parse error: {e}")
+                print(f"  ❌ .pre-commit-config.yaml - Parse error: {e}")
         else:
             configs["pre_commit_config"] = {"exists": False}
             print("  ⚠️ .pre-commit-config.yaml - Not found")
@@ -152,7 +157,7 @@ class GitWizPrecommitAuditor:
         if husky_dir.exists():
             hooks = list(husky_dir.glob("*"))
             configs["husky"] = {"exists": True, "hooks": [h.name for h in hooks]}
-            print("  ✅ Husky - {len(hooks)} hooks found")
+            print(f"  ✅ Husky - {len(hooks)} hooks found")
         else:
             configs["husky"] = {"exists": False}
             print("  ⚠️ Husky - Not found")
@@ -168,7 +173,7 @@ class GitWizPrecommitAuditor:
                 "pre_commit_script": "pre-commit" in scripts,
                 "scripts": scripts
             }
-            print("  ✅ package.json - {'pre-commit' in scripts and '✓' or '✗'} pre-commit script")
+            print(f"  ✅ package.json - {'pre-commit' in scripts and '✓' or '✗'} pre-commit script")
         else:
             configs["package_json"] = {"exists": False}
             print("  ⚠️ package.json - Not found")
@@ -191,8 +196,8 @@ class GitWizPrecommitAuditor:
             for tool in tool_list:
                 try:
                     result = subprocess.run([tool, "--version"],
-                                          capture_output=True, text=True, timeout=5)
-                    available = (result.returncode == 0)
+                        capture_output=True, text=True, timeout=10)
+                    available = result.returncode == 0
                     tool_results[category][tool] = {
                         "available": available,
                         "version": result.stdout.strip() if available else None,
@@ -201,7 +206,7 @@ class GitWizPrecommitAuditor:
                     status = "✅" if available else "❌"
                     print(f"  {status} {tool} - {'Available' if available else 'Not available'}")
                 except (subprocess.TimeoutExpired, FileNotFoundError):
-                    tool_results[category][tool] = {"available": False, "error": "Not found"}
+                    tool_results[category][tool]={"available": False, "error": "Not found"}
                     print(f"  ❌ {tool} - Not found")
 
         self.audit_results["lint_tools"]=tool_results
@@ -212,9 +217,8 @@ class GitWizPrecommitAuditor:
 
         # Test GitWiz status
         try:
-            result = subprocess.run([
+            _ = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py", "status"
-            ], capture_output=True, text=True, timeout=30)
 
             if result.returncode == 0:
                 status_data = json.loads(result.stdout)
@@ -225,11 +229,11 @@ class GitWizPrecommitAuditor:
                 print(f"  ❌ GitWiz Status - Failed: {result.stderr}")
         except Exception as e:
             tests["status"] = {"success": False, "error": str(e)}
-            print("  ❌ GitWiz Status - Exception: {e}")
+            print(f"  ❌ GitWiz Status - Exception: {e}")
 
         # Test GitWiz quality check
         try:
-            result = subprocess.run([
+            _ = subprocess.run([
                 sys.executable, "scripts/gitwiz_integrated_command.py",
                 "quality-check", "--output", "summary"
 
@@ -239,10 +243,10 @@ class GitWizPrecommitAuditor:
                 print("  ✅ GitWiz Quality Check - Working")
             else:
                 tests["quality_check"] = {"success": False, "error": result.stderr}
-                print("  ❌ GitWiz Quality Check - Failed: {result.stderr}")
+                print(f"  ❌ GitWiz Quality Check - Failed: {result.stderr}")
         except Exception as e:
             tests["quality_check"] = {"success": False, "error": str(e)}
-            print("  ❌ GitWiz Quality Check - Exception: {e}")
+            print(f"  ❌ GitWiz Quality Check - Exception: {e}")
 
         self.audit_results["functionality_tests"] = tests
 
@@ -261,10 +265,10 @@ class GitWizPrecommitAuditor:
                     "triggers": workflow_data.get("on", {}),
                     "config": workflow_data
                 }
-                print("  ✅ GitHub Workflow - {len(workflow_data.get('jobs', {}))} jobs configured")
+                print(f"  ✅ GitHub Workflow - {len(workflow_data.get('jobs', {}))} jobs configured")
             except Exception as e:
                 self.audit_results["github_workflow"] = {"exists": True, "error": str(e)}
-                print("  ❌ GitHub Workflow - Parse error: {e}")
+                print(f"  ❌ GitHub Workflow - Parse error: {e}")
         else:
             self.audit_results["github_workflow"] = {"exists": False}
             print("  ⚠️ GitHub Workflow - Not found")
@@ -285,7 +289,7 @@ class GitWizPrecommitAuditor:
                 subprocess.run(["git", "add", str(test_file)], cwd=self.repo_path, check=True)
 
                 # Try to run the hook
-                result = subprocess.run([
+                _ = subprocess.run([
                     "bash", str(precommit_hook)
 
                 hook_tests["husky_hook"] = {
@@ -299,18 +303,18 @@ class GitWizPrecommitAuditor:
                 test_file.unlink(missing_ok=True)
 
                 status = "✅" if result.returncode == 0 else "❌"
-                print("  {status} Husky Hook Test - {'Passed' if result.returncode == 0 else 'Failed'}")
+                print(f"  {status} Husky Hook Test - {'Passed' if result.returncode == 0 else 'Failed'}")
 
             except Exception as e:
                 hook_tests["husky_hook"] = {"success": False, "error": str(e)}
-                print("  ❌ Husky Hook Test - Exception: {e}")
+                print(f"  ❌ Husky Hook Test - Exception: {e}")
         else:
             hook_tests["husky_hook"] = {"success": False, "error": "Hook not found"}
             print("  ⚠️ Husky Hook - Not found")
 
         # Test npm pre-commit script
         try:
-            result = subprocess.run([
+            _ = subprocess.run([
                 "npm", "run", "pre-commit"
 
             hook_tests["npm_precommit"] = {
@@ -320,11 +324,11 @@ class GitWizPrecommitAuditor:
             }
 
             status = "✅" if result.returncode == 0 else "❌"
-            print("  {status} NPM Pre-commit - {'Passed' if result.returncode == 0 else 'Failed'}")
+            print(f"  {status} NPM Pre-commit - {'Passed' if result.returncode == 0 else 'Failed'}")
 
         except Exception as e:
             hook_tests["npm_precommit"] = {"success": False, "error": str(e)}
-            print("  ❌ NPM Pre-commit - Exception: {e}")
+            print(f"  ❌ NPM Pre-commit - Exception: {e}")
 
         self.audit_results["hook_tests"] = hook_tests
 
@@ -358,10 +362,10 @@ class GitWizPrecommitAuditor:
             issues.append({
                 "severity": "MEDIUM",
                 "category": "Lint Tools",
-                "description": "Missing lint tools: {', '.join(unavailable_tools)}",
+                "description": f"Missing lint tools: {', '.join(unavailable_tools)}",
                 "impact": "Reduced code quality checking capabilities"
             })
-            recommendations.append("Install missing lint tools: {', '.join(unavailable_tools)}")
+            recommendations.append(f"Install missing lint tools: {', '.join(unavailable_tools)}")
 
         # Configuration Issues
         configs = self.audit_results.get("configurations", {})
@@ -401,21 +405,21 @@ class GitWizPrecommitAuditor:
 
         # Print summary
         print("\n📊 Audit Summary:")
-        print("  Issues found: {len(issues)}")
-        print("  Recommendations: {len(recommendations)}")
+        print(f"  Issues found: {len(issues)}")
+        print(f"  Recommendations: {len(recommendations)}")
 
         # Print critical issues
         critical_issues = [i for i in issues if i["severity"] == "HIGH"]
         if critical_issues:
-            print("\n🚨 Critical Issues ({len(critical_issues)}):")
+            print(f"\n🚨 Critical Issues ({len(critical_issues)}):")
             for issue in critical_issues:
-                print("  ❗ {issue['description']}")
+                print(f"  ❗ {issue['description']}")
 
         # Print top recommendations
         if recommendations:
             print("\n💡 Key Recommendations:")
             for i, rec in enumerate(recommendations[:5], 1):
-                print("  {i}. {rec}")
+                print(f"  {i}. {rec}")
 
 def main():
     """Run the comprehensive GitWiz pre-commit audit."""
@@ -427,17 +431,17 @@ def main():
     with open(report_path, "w") as f:
         json.dump(results, f, indent=2)
 
-    print("\n📄 Full audit report saved to: {report_path}")
+    print(f"\n📄 Full audit report saved to: {report_path}")
 
     # Return appropriate exit code
     issues = results.get("issues", [])
     critical_issues = [i for i in issues if i["severity"] == "HIGH"]
 
     if critical_issues:
-        print("\n🚨 Audit completed with {len(critical_issues)} critical issues!")
+        print(f"\n🚨 Audit completed with {len(critical_issues)} critical issues!")
         return 1
     elif issues:
-        print("\n⚠️ Audit completed with {len(issues)} non-critical issues.")
+        print(f"\n⚠️ Audit completed with {len(issues)} non-critical issues.")
         return 0
     else:
         print("\n✅ Audit completed successfully - no issues found!")

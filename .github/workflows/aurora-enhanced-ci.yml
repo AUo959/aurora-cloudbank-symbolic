@@ -109,7 +109,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Python for Aurora validation
-        uses: actions/setup-python@v4
+        # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
@@ -191,7 +192,7 @@ jobs:
       # Enhanced caching with Aurora awareness
       - name: Cache dependencies with Aurora context
         uses: actions/cache@v3
-      with:
+        with:
         path: |
           ~/.npm
           ~/.cache/pip
@@ -207,8 +208,9 @@ jobs:
           cache: npm
 
       - name: Setup Python with Aurora support
-        uses: actions/setup-python@v4
-      with:
+        # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+        uses: actions/setup-python@v5
+        with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: pip
 
@@ -239,9 +241,9 @@ jobs:
             python3 tools/cli/aurora_dev_cli.py status || echo "⚠️ Aurora CLI check completed"
           fi
 
-    # Enhanced code quality with Aurora patterns
-    - name: Aurora-aware code quality checks
-      run: |
+      # Enhanced code quality with Aurora patterns
+      - name: Aurora-aware code quality checks
+        run: |
         echo "🔍 Running Aurora-aware code quality checks..."
 
         # Standard linting
@@ -259,9 +261,9 @@ jobs:
           grep -r "anchor_protocol" modules/ || echo "⚠️ Anchor protocol check completed"
         fi
 
-    # Enhanced security scanning with Aurora context
-    - name: Aurora-enhanced security scan
-      run: |
+      # Enhanced security scanning with Aurora context
+      - name: Aurora-enhanced security scan
+        run: |
         echo "🛡️ Running Aurora-enhanced security scan..."
 
         # Standard security scans
@@ -310,7 +312,8 @@ jobs:
         cache: npm
 
     - name: Setup Python test environment
-      uses: actions/setup-python@v4
+      # SRB-T1: Upgraded setup-python@v4 to @v5 due to deprecation notice (2025-08-19)
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
         cache: pip

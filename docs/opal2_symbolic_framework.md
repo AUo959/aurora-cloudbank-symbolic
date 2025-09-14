@@ -9,7 +9,7 @@ Opal2 integrates tightly with the ORION constellation and enforces zero symbolic
 
 ## Mini Chassis (Modular Shell)
 - Loads modules from a registry and performs signature, anchor, and ethics handshakes.
-- Provides a simulated backplane that arbitrates power and data while filtering inter‑module messages for drift and ethics violations.
+- Provides a simulated backplane that arbitrates power and data while filtering inter-module messages for drift and ethics violations.
 - Exposes diagnostics and control hooks so ORION can monitor modules and issue overrides.
 
 ## Context‑Aware Symbolic Query Optimizer

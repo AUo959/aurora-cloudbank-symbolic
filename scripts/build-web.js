@@ -79,10 +79,14 @@ class AuroraWebBuilder {
     }
 
     async processJavaScriptFiles() {
-        // Process main application files
-        const jsFiles = [
-            'static/js/aurora-security.js'
-        ];
+        // Dynamically discover all JavaScript files in static/js/
+        const jsDir = path.join(projectRoot, 'static', 'js');
+        let jsFiles = [];
+        if (fs.existsSync(jsDir)) {
+            jsFiles = fs.readdirSync(jsDir)
+                .filter(file => file.endsWith('.js'))
+                .map(file => path.join('static', 'js', file));
+        }
         
         for (const file of jsFiles) {
             const filePath = path.join(projectRoot, file);

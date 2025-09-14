@@ -4,6 +4,9 @@ import subprocess
 """
 
     import shlex
+import argparse
+import os
+import sys
 
 staff_node_ci_helper.py
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import os
+import sys
 """
 Aurora CloudBank ChatGPT Agent Mode Demo
 
@@ -9,21 +12,18 @@ import asyncio
 import json
 import sys
 import os
-import traceback
 from datetime import datetime
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath('.'))
 
 from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
-
 
 def print_demo_header():
     """Print demo header"""
     print("🎮 Aurora CloudBank ChatGPT Agent Mode Demo")
     print("=" * 50)
     print()
-
 
 async def demo_tool_discovery(agent):
     """Demonstrate tool discovery"""
@@ -33,7 +33,7 @@ async def demo_tool_discovery(agent):
     tools_info = await agent.discover_tools()
     print(f"Available tools: {len(tools_info['tools'])}")
 
-    for tool_name, tool_def in tools_info["tools"].items():
+    for tool_name, tool_def in tools_info['tools'].items():
         print(f"\n🛠️  {tool_name}")
         print(f"   Description: {tool_def['description']}")
         print(f"   Parameters: {list(tool_def['parameters']['properties'].keys())}")
@@ -41,7 +41,6 @@ async def demo_tool_discovery(agent):
     print(f"\nSymbolic Anchors: {tools_info['symbolic_anchors']['anchor_seed']}")
     print(f"Ethics Protocol: {tools_info['symbolic_anchors']['ethics_protocol']}")
     print()
-
 
 async def demo_geometric_algebra(agent):
     """Demonstrate geometric algebra capabilities"""
@@ -51,20 +50,19 @@ async def demo_geometric_algebra(agent):
     test_cases = [
         {"expression_a": "e1", "expression_b": "e2", "operation": "mult"},
         {"expression_a": "e1 + e2", "expression_b": "e3", "operation": "add"},
-        {"expression_a": "2*e1", "expression_b": "e1*e2", "operation": "mult"},
+        {"expression_a": "2*e1", "expression_b": "e1*e2", "operation": "mult"}
     ]
 
     for i, case in enumerate(test_cases, 1):
         print(f"\nTest {i}: {case['expression_a']} {case['operation']} {case['expression_b']}")
 
         result = await agent.execute_tool("geometric_algebra", case)
-        if result["success"]:
-            geo_result = result["result"]["geometric_result"]
+        if result['success']:
+            geo_result = result['result']['geometric_result']
             print(f"Result: {geo_result}")
         else:
             print(f"Error: {result['error']}")
     print()
-
 
 async def demo_session_management(agent):
     """Demonstrate session management"""
@@ -73,42 +71,46 @@ async def demo_session_management(agent):
 
     # Create session
     print("Creating new session...")
-    create_result = await agent.execute_tool(
-        "session_management",
-        {"action": "create", "state_data": {"demo": "session", "timestamp": datetime.now().isoformat()}},
-    )
+    create_result = await agent.execute_tool("session_management", {
+        "action": "create",
+        "state_data": {"demo": "session", "timestamp": datetime.now().isoformat()}
+    })
 
-    if create_result["success"]:
-        session_id = create_result["result"]["session_id"]
+    if create_result['success']:
+        session_id = create_result['result']['session_id']
         print(f"✅ Session created: {session_id[:8]}...")
 
         # Update session
         print("Updating session state...")
-        update_result = await agent.execute_tool(
-            "session_management",
-            {"action": "update", "session_id": session_id, "state_data": {"demo": "updated", "counter": 42}},
-        )
+        update_result = await agent.execute_tool("session_management", {
+            "action": "update",
+            "session_id": session_id,
+            "state_data": {"demo": "updated", "counter": 42}
+        })
 
-        if update_result["success"]:
+        if update_result['success']:
             print("✅ Session updated")
 
             # Get session
             print("Retrieving session state...")
-            get_result = await agent.execute_tool("session_management", {"action": "get", "session_id": session_id})
+            get_result = await agent.execute_tool("session_management", {
+                "action": "get",
+                "session_id": session_id
+            })
 
-            if get_result["success"]:
-                state = get_result["result"]["state"]["state"]
+            if get_result['success']:
+                state = get_result['result']['state']['state']
                 print(f"✅ Session state: {state}")
 
                 # Clean up - delete session
-                delete_result = await agent.execute_tool(
-                    "session_management", {"action": "delete", "session_id": session_id}
-                )
+                delete_result = await agent.execute_tool("session_management", {
+                    "action": "delete",
+                    "session_id": session_id
+                })
 
-                if delete_result["success"]:
+                if delete_result['success']:
                     print("✅ Session deleted")
     print()
-
 
 async def demo_symbolic_processing(agent):
     """Demonstrate symbolic processing"""
@@ -118,7 +120,7 @@ async def demo_symbolic_processing(agent):
     operations = [
         {"operation": "quantum_state_preparation", "data": {"qubits": 3, "state": "superposition"}},
         {"operation": "symbolic_differentiation", "data": {"expression": "x^2 + 2*x + 1", "variable": "x"}},
-        {"operation": "vector_encoding", "data": {"symbols": ["alpha", "beta", "gamma"], "dimension": 1024}},
+        {"operation": "vector_encoding", "data": {"symbols": ["alpha", "beta", "gamma"], "dimension": 1024}}
     ]
 
     for i, op in enumerate(operations, 1):
@@ -126,14 +128,13 @@ async def demo_symbolic_processing(agent):
         print(f"Input: {op['data']}")
 
         result = await agent.execute_tool("symbolic_processing", op)
-        if result["success"]:
-            processed = result["result"]
+        if result['success']:
+            processed = result['result']
             print(f"Status: ✅ {processed['symbolic_validation']}")
             print(f"Context: {processed['anchor_context']}")
         else:
             print(f"Error: {result['error']}")
     print()
-
 
 async def demo_system_status(agent):
     """Demonstrate system status reporting"""
@@ -146,8 +147,8 @@ async def demo_system_status(agent):
         print(f"\nStatus level: {level}")
 
         result = await agent.execute_tool("system_status", {"detail_level": level})
-        if result["success"]:
-            status = result["result"]
+        if result['success']:
+            status = result['result']
             print(f"Agent Status: {status['agent_status']}")
             print(f"Active Sessions: {status['active_sessions']}")
             print(f"Available Tools: {len(status['available_tools'])}")
@@ -159,7 +160,6 @@ async def demo_system_status(agent):
             if level == "full":
                 print(f"Tool Registry: {len(status.get('tool_registry', {}))}")
     print()
-
 
 async def demo_error_handling(agent):
     """Demonstrate error handling and recovery"""
@@ -177,16 +177,15 @@ async def demo_error_handling(agent):
     # Test invalid parameters
     print("\nTesting invalid parameters...")
     result = await agent.execute_tool("geometric_algebra", {"invalid": "params"})
-    if not result["success"]:
+    if not result['success']:
         print("Error handled gracefully ✅")
-        suggestions = result.get("recovery_suggestions", [])
+        suggestions = result.get('recovery_suggestions', [])
         print(f"Recovery suggestions: {len(suggestions)}")
         for suggestion in suggestions[:2]:  # Show first 2 suggestions
             print(f"  • {suggestion}")
     else:
         print("Unexpected success")
     print()
-
 
 async def main():
     """Main demo routine"""
@@ -221,11 +220,11 @@ async def main():
 
     except Exception as e:
         print(f"❌ Demo failed: {str(e)}")
+        import traceback
         traceback.print_exc()
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     try:

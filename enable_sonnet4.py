@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 Direct Sonnet 4 Enablement Script
 Enables Claude Sonnet 4 for all clients without requiring API to be running
@@ -6,8 +8,6 @@ Enables Claude Sonnet 4 for all clients without requiring API to be running
 
 import asyncio
 import logging
-import sys
-from pathlib import Path
 
 from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
 

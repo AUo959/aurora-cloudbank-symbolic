@@ -1,4 +1,5 @@
 """
+import hashlib
 Native Vector Symbolic Architecture (VSA) - Zero Dependencies
 Lightweight symbolic data encoding/decoding without numpy.
 """

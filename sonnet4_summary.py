@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import sys
 """
 Final Sonnet 4 Enablement Summary
 Provides a complete status summary after enablement

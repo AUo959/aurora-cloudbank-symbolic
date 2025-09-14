@@ -1,4 +1,5 @@
 """Opal2 Quantum Rendering Engine
+import time
 =================================
 
 Advanced quantum-enhanced rendering engine for the Opal2 modular system.

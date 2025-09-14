@@ -2,6 +2,8 @@
 """
 
         from fastapi import FastAPI
+from pathlib import Path
+import sys
 
 Simple Opal2 API Test
 Test the FastAPI application

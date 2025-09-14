@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
+import os
 """
 Bulk Python Code Fixer
 Automatically fixes common Python code issues based on flake8 output
 """
 
-import os
 import re
 import glob
 
 
 def fix_file(filepath):
     """Fix common Python code issues in a file"""
-    print("🔧 Fixing {filepath}r")
+    print(f"🔧 Fixing {filepath}r")
 
     try:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
 
         # Remove unused imports (simple ones)
-        lines = content.split("\n")
+        lines = content.split('\n')
         fixed_lines = []
         i = 0
 
@@ -29,19 +29,23 @@ def fix_file(filepath):
             line = line.rstrip()
 
             # Skip blank lines with whitespace (W293)
-            if line == "":
-                fixed_lines.append("")
+            if line == '':
+                fixed_lines.append('')
                 i += 1
                 continue
 
             # Fix simple unused import cases
-            if re.match(r"^import \w+$", line) or re.match(r"^from .* import .*$", line):
+            if re.match(r'^import \w+$', line) or re.match(r'^from .* import .*$', line):
                 # Keep important imports like os, sys, etc.
-                if any(important in line for important in ["os", "sys", "json", "yaml", "subprocess"]):
+                if any(important in line for important in ['os', 'sys', 'json', 'yaml', 'subprocess']):
                     fixed_lines.append(line)
-                elif "typing" in line and any(
-                    word in line for word in ["List", "Dict", "Optional", "Set", "Tuple", "Union", "Any"]
-                ):
+                elif 'typing' in line and any(word in line for word in ['List',
+                                                                        'Dict',
+                                                                        'Optional',
+                                                                        'Set',
+                                                                        'Tuple',
+                                                                        'Union',
+                                                                        'Any']):
                     # Remove unused typing imports for now
                     pass
                 else:
@@ -52,20 +56,20 @@ def fix_file(filepath):
             i += 1
 
         # Join back together
-        fixed_content = "\n".join(fixed_lines)
+        fixed_content = '\n'.join(fixed_lines)
 
         # Fix f-string issues (F541)
         fixed_content = re.sub(r'"([^"{}]*)"', r'"\1"', fixed_content)
         fixed_content = re.sub(r"'([^'{}]*)'", r"'\1'", fixed_content)
 
         # Write back
-        with open(filepath, "w", encoding="utf-8") as f:
+        with open(filepath, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
 
-        print("✅ Fixed {filepath}")
+        print(f"✅ Fixed {filepath}")
 
     except Exception as e:
-        print("❌ Error fixing {filepath}: {e}")
+        print(f"❌ Error fixing {filepath}: {e}")
 
 
 def main():
@@ -74,13 +78,16 @@ def main():
     # Find all Python files
     python_files = []
 
-    for root in ["scripts/", "modules/", "."]:
-        for pattern in ["*.py"]:
-            python_files.extend(glob.glob("{root}/**/{pattern}", recursive=True))
-            python_files.extend(glob.glob("{root}/{pattern}"))
+    for root in ['scripts/', 'modules/', '.']:
+        for pattern in ['*.py']:
+            python_files.extend(glob.glob(f"{root}/**/{pattern}", recursive=True))
+            python_files.extend(glob.glob(f"{root}/{pattern}"))
 
     # Also add specific files
-    specific_files = ["aurora_workflow_config.py", "fix_markdown_issues.py"]
+    specific_files = [
+        'aurora_workflow_config.py',
+        'fix_markdown_issues.py'
+    ]
 
     for file in specific_files:
         if os.path.exists(file):
@@ -89,10 +96,10 @@ def main():
     # Remove duplicates and filter existing files
     python_files = list(set([f for f in python_files if os.path.exists(f)]))
 
-    print("📁 Found {len(python_files)} Python files to fix")
+    print(f"📁 Found {len(python_files)} Python files to fix")
 
     for filepath in python_files:
-        if "node_modules" not in filepath and ".git" not in filepath:
+        if 'node_modules' not in filepath and '.git' not in filepath:
             fix_file(filepath)
 
     print("🎯 Python fixing complete!")

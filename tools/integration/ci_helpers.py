@@ -194,9 +194,9 @@ print('✅ Deployment manifest generated')
         return str(workflow_path)
 
     
-        def _check_python_lint(self) -> Dict[str, Any]:
+    def _check_python_lint(self) -> Dict[str, Any]:
         """Check Python code formatting and linting"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         try:
             # Run flake8

@@ -76,12 +76,15 @@ class AuroraDeveloperCLI:
             if args.pattern:
                 # Search for specific pattern
                 found_anchors = self.anchor_tracker.scan_repository()
-        matching_anchors = {}
+                matching_anchors = {}
 
                 for file_path, file_anchors in found_anchors.items():
                     matches = [a for a in file_anchors if args.pattern.lower() in a.anchor_id.lower()]
                     if matches:
                         matching_anchors[file_path] = matches
+        except Exception as e:
+            print(f"Error: {e}")
+            return {"status": "error"}
 
                 if matching_anchors:
                     print(f"Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':")

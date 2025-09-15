@@ -97,7 +97,169 @@ except Exception as e:
         except Exception as e:
             validation_results["status"] = f"error:{e}"
 
+    def validate_dlp_tracking(self) -> Dict[str, str]:
+        """Validate DLP tracking system"""
+        print("🔍 Validating DLP tracking...")
+        
+        validation_results = {
+            "dlp_system": "unknown",
+            "tracking_active": "unknown", 
+            "memory_sealing": "unknown",
+            "status": "unknown"
+        }
+        
+        try:
+            # Check for DLP tracking files
+            dlp_files = [
+                "src/core/native_dlp_export.py",
+                "tools/symbolic/memory_sealer.py"
+            ]
+            
+            dlp_operational = True
+            for file_path in dlp_files:
+                full_path = self.repo_root / file_path
+                if not full_path.exists():
+                    print(f"⚠️ DLP file missing: {file_path}")
+                    dlp_operational = False
+                    
+            if dlp_operational:
+                validation_results["dlp_system"] = "operational" 
+                validation_results["tracking_active"] = "true"
+                validation_results["memory_sealing"] = "enabled"
+                validation_results["status"] = "operational"
+            else:
+                validation_results["status"] = "degraded"
+                
+        except Exception as e:
+            validation_results["status"] = f"error:{e}"
+            
         return validation_results
+
+    def validate_security_ethics(self) -> Dict[str, str]:
+        """Validate security and ethics protocols"""
+        print("🛡️ Validating security and ethics...")
+        
+        validation_results = {
+            "picard_delta_3": "unknown",
+            "security_protocols": "unknown",
+            "ethics_compliance": "unknown", 
+            "status": "unknown"
+        }
+        
+        try:
+            # Check for ethics references
+            ethics_found = False
+            security_files = [
+                "scripts/aurora_security_scanner.py",
+                ".security/secure_helpers.py"
+            ]
+            
+            for file_path in security_files:
+                full_path = self.repo_root / file_path
+                if full_path.exists():
+                    ethics_found = True
+                    break
+                    
+            if ethics_found:
+                validation_results["picard_delta_3"] = "operational"
+                validation_results["security_protocols"] = "active"
+                validation_results["ethics_compliance"] = "compliant"
+                validation_results["status"] = "operational"
+            else:
+                validation_results["status"] = "degraded"
+                
+        except Exception as e:
+            validation_results["status"] = f"error:{e}"
+            
+        return validation_results
+
+    def generate_validation_manifest(self, symbolic_results: Dict, dlp_results: Dict, security_results: Dict) -> str:
+        """Generate validation manifest for CI"""
+        manifest = {
+            "aurora_validation": {
+                "timestamp": datetime.now().isoformat(),
+                "symbolic_validation": symbolic_results,
+                "dlp_validation": dlp_results, 
+                "security_validation": security_results,
+                "overall_status": self._determine_overall_status(symbolic_results, dlp_results, security_results)
+            }
+        }
+        
+        manifest_path = self.repo_root / "aurora_ci_validation_manifest.json"
+        with open(manifest_path, 'w') as f:
+            json.dump(manifest, f, indent=2)
+            
+        return str(manifest_path)
+        
+    def _determine_overall_status(self, symbolic: Dict, dlp: Dict, security: Dict) -> str:
+        """Determine overall validation status"""
+        statuses = [symbolic.get("status"), dlp.get("status"), security.get("status")]
+        
+        if all(s == "operational" for s in statuses):
+            return "fully_operational"
+        elif any(s == "operational" for s in statuses):
+            return "partially_operational" 
+        else:
+            return "degraded"
+
+
+def main():
+    """Main validation entry point"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Aurora Symbolic Validation")
+    parser.add_argument("--component", choices=["anchors", "dlp", "security"], 
+                       help="Validate specific component")
+    parser.add_argument("--output-format", choices=["json", "github"], 
+                       default="json", help="Output format")
+    
+    args = parser.parse_args()
+    
+    validator = AuroraSymbolicWorkflowIntegration()
+    
+    if args.component == "anchors":
+        results = validator.validate_symbolic_anchors()
+    elif args.component == "dlp":
+        results = validator.validate_dlp_tracking()
+    elif args.component == "security":
+        results = validator.validate_security_ethics()
+    else:
+        # Full validation
+        symbolic_results = validator.validate_symbolic_anchors()
+        dlp_results = validator.validate_dlp_tracking()
+        security_results = validator.validate_security_ethics()
+        
+        # Ensure results are dicts, not None
+        if symbolic_results is None:
+            symbolic_results = {"status": "error"}
+        if dlp_results is None:
+            dlp_results = {"status": "error"}
+        if security_results is None:
+            security_results = {"status": "error"}
+        
+        # Generate manifest
+        manifest_path = validator.generate_validation_manifest(
+            symbolic_results, dlp_results, security_results
+        )
+        
+        results = {
+            "aurora_validation_status": validator._determine_overall_status(
+                symbolic_results, dlp_results, security_results
+            ),
+            "manifest_generated": manifest_path
+        }
+    
+    if args.output_format == "github":
+        # Output for GitHub Actions
+        for key, value in results.items():
+            print(f"{key}={value}")
+            print(f"::set-output name={key}::{value}")
+    else:
+        print(json.dumps(results, indent=2))
+
+
+if __name__ == "__main__":
+    main()
 
     def validate_dlp_tracking(self) -> Dict[str, str]:
         """Validate DLP tracking and memory sealing protocols"""

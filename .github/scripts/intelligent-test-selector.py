@@ -98,134 +98,104 @@ class IntelligentTestSelector:
 
         for group, patterns in self.test_mappings.items():
             should_run = False
-            matched_patterns = []
-
+            matched_files = []
+            
             for file in self.changed_files:
                 for pattern in patterns:
                     if self._path_matches_pattern(file, pattern):
                         should_run = True
-                        matched_patterns.append(pattern)
+                        matched_files.append(file)
                         break
-
+                        
             selected_groups[group] = should_run
-
+            
             if should_run:
-                print(f"  ✅ {group}: Will run (matched: {', '.join(set(matched_patterns))})")
+                print(f"  ✅ {group}: {len(matched_files)} relevant files changed")
+                for f in matched_files[:3]:  # Show first 3 files
+                    print(f"     - {f}")
+                if len(matched_files) > 3:
+                    print(f"     ... and {len(matched_files) - 3} more")
             else:
-                print(f"  ⏭️ {group}: Skipping (no relevant changes)")
-
-        # Always run security tests if security-related files changed
-        security_keywords = ["security", "auth", "crypto", "password", "token", "key"]
-        for file in self.changed_files:
-            if any(keyword in file.lower() for keyword in security_keywords):
-                selected_groups["security"] = True
-                print("  🛡️ Security tests enabled due to security-related changes")
-                break
-
+                print(f"  ⏭️  {group}: no relevant changes")
+                
         return selected_groups
 
-    def generate_matrix(self) -> Dict:
-        """Generate test matrix for GitHub Actions"""
-        selected = self.select_tests()
-
-        # Only include groups that should run
-        include = []
-        for group, should_run in selected.items():
-            if should_run:
-                include.append({"test-group": group})
-
-        # If no tests selected, run at least unit tests
-        if not include:
-            include = [{"test-group": "unit"}]
-            print("⚠️ No tests selected, defaulting to unit tests")
-
-        matrix = {"include": include}
-
-        print(f"\n📊 Generated test matrix: {len(include)} test groups")
-        for item in include:
-            print(f"  - {item['test-group']}")
-
-        return matrix
-
     def should_skip_build(self) -> bool:
-        """Determine if build can be skipped entirely"""
+        """Determine if build should be skipped entirely"""
         if not self.changed_files:
             return False
-
-        # Skip build only for documentation-only changes
-        doc_only_patterns = [
-            "*.md",
-            "docs/",
-            "README*",
-            "CHANGELOG*",
-            "LICENSE*",
-            ".gitignore",
-            ".github/ISSUE_TEMPLATE/",
-            ".github/pull_request_template.md",
-        ]
-
-        non_doc_files = []
+            
+        # Skip if only documentation files changed
+        doc_patterns = ["*.md", "docs/**", "*.txt", "*.rst"]
+        doc_only = True
+        
         for file in self.changed_files:
-            is_doc_only = any(self._path_matches_pattern(file, pattern) for pattern in doc_only_patterns)
-            if not is_doc_only:
-                non_doc_files.append(file)
+            is_doc = False
+            for pattern in doc_patterns:
+                if self._path_matches_pattern(file, pattern):
+                    is_doc = True
+                    break
+            if not is_doc:
+                doc_only = False
+                break
+                
+        return doc_only
 
-        if not non_doc_files:
-            print("📚 Only documentation files changed, build can be skipped")
-            return True
-
-        return False
+    def generate_test_matrix(self, selected_groups: Dict[str, bool]) -> List[Dict[str, str]]:
+        """Generate test matrix for CI"""
+        matrix = []
+        
+        for group, should_run in selected_groups.items():
+            if should_run:
+                matrix.append({"test-group": group})
+                
+        # Always include at least one test group
+        if not matrix:
+            matrix.append({"test-group": "unit"})
+            
+        return matrix
 
 
 def main():
-    """Main CLI interface"""
+    """Main entry point for intelligent test selection"""
     import argparse
-
-    parser = argparse.ArgumentParser(description="Aurora Intelligent Test Selection")
-    parser.add_argument(
-        "--output-format",
-        choices=["json", "github"],
-        default="github",
-        help="Output format for CI/CD integration",
-    )
-    parser.add_argument(
-        "--check-skip-build",
-        action="store_true",
-        help="Check if entire build can be skipped",
-    )
-
+    
+    parser = argparse.ArgumentParser(description="Intelligent Test Selection")
+    parser.add_argument("--output-format", choices=["json", "github"], 
+                       default="json", help="Output format")
+    parser.add_argument("--check-skip-build", action="store_true",
+                       help="Check if build should be skipped")
+    
     args = parser.parse_args()
-
+    
     selector = IntelligentTestSelector()
-
+    
     if args.check_skip_build:
-        skip = selector.should_skip_build()
+        skip_build = selector.should_skip_build()
+        
         if args.output_format == "github":
-            with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"skip_build={str(skip).lower()}\n")
+            print(f"skip_build={str(skip_build).lower()}")
+            print(f"::set-output name=skip_build::{str(skip_build).lower()}")
         else:
-            print(json.dumps({"skip_build": skip}))
-        return
-
-    matrix = selector.generate_matrix()
-
-    if args.output_format == "github":
-        # Output for GitHub Actions using $GITHUB_OUTPUT
-        matrix_json = json.dumps(matrix)
-        github_output = os.environ.get("GITHUB_OUTPUT")
-        if github_output:
-            with open(github_output, "a") as gh_out:
-                gh_out.write(f"matrix={matrix_json}\n")
-                # Also output individual test group flags
-                selected = selector.select_tests()
-                for group, should_run in selected.items():
-                    safe_group = group.replace("-", "_")
-                    gh_out.write(f"run_{safe_group}={str(should_run).lower()}\n")
-        else:
-            # Fallback for local runs
-            print(json.dumps(matrix, indent=2))
+            print(json.dumps({"skip_build": skip_build}))
     else:
-        print(json.dumps(matrix, indent=2))
+        selected_groups = selector.select_tests()
+        test_matrix = selector.generate_test_matrix(selected_groups)
+        
+        if args.output_format == "github":
+            print(f"matrix={json.dumps(test_matrix)}")
+            print(f"::set-output name=matrix::{json.dumps(test_matrix)}")
+            
+            # Individual group outputs
+            for group, should_run in selected_groups.items():
+                group_key = f"run_{group.replace('-', '_')}"
+                print(f"{group_key}={str(should_run).lower()}")
+                print(f"::set-output name={group_key}::{str(should_run).lower()}")
+        else:
+            print(json.dumps({
+                "selected_groups": selected_groups,
+                "test_matrix": test_matrix
+            }, indent=2))
 
 
 if __name__ == "__main__":

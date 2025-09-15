@@ -35,7 +35,8 @@ class EntropyTracker:
         return {
             "trend": trend,
             "current": self.current_entropy,
-            "samples": len(self.history)
+            "samples": len(self.history),
+            "stability": "high" if trend == "stable" else "low"
         }
 
 
@@ -58,6 +59,21 @@ class MemorySealer:
         self.sealed = True
         self.hash = state_hash
         return state_hash
+        
+    def unseal_state(self, state_name: str) -> Dict[str, Any]:
+        """Unseal and retrieve a sealed state"""
+        if state_name in self.sealed_states:
+            return self.sealed_states[state_name]["data"]
+        return {}
+        
+    def verify_integrity(self, state_name: str) -> bool:
+        """Verify the integrity of a sealed state"""
+        if state_name not in self.sealed_states:
+            return False
+        
+        sealed_state = self.sealed_states[state_name]
+        current_hash = hashlib.sha256(str(sealed_state["data"]).encode()).hexdigest()
+        return current_hash == sealed_state["hash"]
 
 
 class NativeSymbolicVector:
@@ -313,8 +329,8 @@ class NativeQuantumCircuit:
                         state_index = i
                         break
                         
-                # Convert state to binary string
-                state_str = format(state_index, f'0{self.num_qubits}b')
+                # Convert state to binary string (correct bit ordering)
+                state_str = format(state_index, f'0{self.num_qubits}b')[::-1]  # Reverse for correct qubit ordering
                 counts[state_str] = counts.get(state_str, 0) + 1
             
             return counts
@@ -528,6 +544,18 @@ class NativeSymbolicCPUAnchor:
             0.0 <= self.entropy_level <= 1.0
         )
     
+    def perform_continuity_check(self) -> Dict[str, Any]:
+        """Perform comprehensive continuity check"""
+        continuity_ok = self.check_continuity()
+        return {
+            "continuity_maintained": continuity_ok,
+            "t1_status": self.t1_state,
+            "srb_status": self.srb_state,
+            "entropy_level": self.entropy_level,
+            "memory_sealed": self.memory_sealed,
+            "continuity_status": "operational" if continuity_ok else "degraded"
+        }
+    
     def get_anchor_status(self) -> Dict[str, Any]:
         """Get comprehensive anchor status"""
         return {
@@ -539,8 +567,13 @@ class NativeSymbolicCPUAnchor:
             "anchor_protocols": self.anchor_protocols,
             "continuity_check": self.check_continuity(),
             "status": "operational" if self.check_continuity() else "degraded",
+            "system_status": "operational" if self.check_continuity() else "degraded",
             "processing_modes": ["quantum", "symbolic", "hybrid"],
             "memory_vectors": self.symbolic_memory.size(),
             "quantum_qubits": self.num_qubits,
-            "symbolic_dimension": self.symbolic_dim
+            "symbolic_dimension": self.symbolic_dim,
+            "entropy_tracking": {
+                "current": self.entropy_tracker.current_entropy,
+                "samples": len(self.entropy_tracker.history)
+            }
         }

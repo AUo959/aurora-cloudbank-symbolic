@@ -1,4 +1,4 @@
--name: Aurora Enhanced CI/CD with Symbolic Validation
+name: Aurora Enhanced CI/CD with Symbolic Validation
 
 on:
   push:

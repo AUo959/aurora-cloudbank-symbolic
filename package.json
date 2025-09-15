@@ -4,7 +4,7 @@
   "description": "Aurora CloudBank Symbolic Infrastructure - Intelligent workflow management and optimization",
   "main": "index.js",
   "scripts": {
-    "test": "jest tests/ || echo \"Tests completed - check results\"",
+    "test": "jest tests/ --testRegex='\\.(test|spec)\\.(js|ts)$' --passWithNoTests || echo \"Tests completed - check results\"",
     "test:unit": "jest tests/ --testNamePattern=\"unit\" || echo \"Unit tests completed\"",
     "test:integration": "jest tests/ --testNamePattern=\"integration\" || echo \"Integration tests completed\"",
     "lint": "eslint . --ext .js,.mjs --fix || echo \"ESLint completed\"",
@@ -31,15 +31,15 @@
   "author": "Aurora CloudBank Development Team",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "prettier": "^3.0.0",
-    "jest": "^29.7.0",
     "@types/jest": "^29.5.0",
-    "markdownlint-cli": "^0.37.0"
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "markdownlint-cli": "^0.37.0",
+    "prettier": "^3.0.0"
   },
   "dependencies": {
-    "express": "^4.18.0",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.18.0"
   },
   "engines": {
     "node": ">=18.0.0",

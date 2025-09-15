@@ -2,7 +2,7 @@
   "name": "aurora-cloudbank-symbolic",
   "version": "0.1.0",
   "scripts": {
-    "test": "AES_KEY_256_HEX=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef node tests/test_crypto.js && node tests/test_pas.js && node tests/test_signal_prioritizer.js && node tests/test_pqn_router.js",
+    "test": "AES_KEY_256_HEX=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef node tests/test_crypto.js && node tests/test_pas.js && node tests/test_signal_prioritizer.js && node tests/test_pqn_router.js && node tests/test_ethics_layer.js",
     "start-command-node": "node src/core/command_node.js",
     "start-api-bridge": "node src/bridge/api_bridge_server.js",
     "start-drift-sync": "node src/system/lattice_sync.js",

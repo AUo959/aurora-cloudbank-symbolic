@@ -373,7 +373,7 @@ class AuroraRealWorldIntegration:
         self.log_status("Web dashboard interface created", "SUCCESS")
 
     
-        def create_api_server(self):
+    def create_api_server(self):
         """Create FastAPI server for Aurora CloudBank services"""
         self.log_status("Creating API server interface...", "INFO")
         api_server_code = '''#!/usr/bin/env python3
@@ -618,7 +618,7 @@ if __name__ == "__main__":
         self.log_status("API server interface created", "SUCCESS")
 
     
-        def create_command_line_interface(self):
+    def create_command_line_interface(self):
         """Create command-line interface for Aurora CloudBank"""
         self.log_status("Creating command-line interface...", "INFO")
         cli_code = '''#!/usr/bin/env python3
@@ -914,7 +914,7 @@ if __name__ == "__main__":
         self.log_status("Command-line interface created", "SUCCESS")
 
     
-        def create_docker_deployment(self):
+    def create_docker_deployment(self):
         """Create Docker deployment configuration"""
         self.log_status("Creating Docker deployment configuration...", "INFO")
         dockerfile_content = """# Aurora CloudBank Docker Container

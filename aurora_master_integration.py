@@ -50,7 +50,7 @@ class AuroraMasterInterface:
                 self.integration_status[system_name] = "error"
                 
         self.initialized_systems[system_name] = False
-                self.integration_status[system_name] = "error: {e}"
+        self.integration_status[system_name] = "error: {e}"
 
         return self.initialized_systems
 
@@ -62,24 +62,20 @@ class AuroraMasterInterface:
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-        result = subprocess.run(
+                result = subprocess.run(
                     [sys.executable, "aurora_quantum_processor.py"], 
                     capture_output=True, text=True, timeout=30
                 )
 
-                
-        if result.returncode == 0:
+                if result.returncode == 0:
                     print("✅ Quantum processing test passed")
-                    
-        demo_results["quantum_processing"] = "success"
+                    demo_results["quantum_processing"] = "success"
                 else:
                     print(f"⚠️ Quantum processing test issues: {result.stderr}")
-                    
-        demo_results["quantum_processing"] = "warning"
+                    demo_results["quantum_processing"] = "warning"
             except Exception as e:
                 print(f"❌ Quantum processing test failed: {e}")
-                
-        demo_results["quantum_processing"] = "failed"
+                demo_results["quantum_processing"] = "failed"
 
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):

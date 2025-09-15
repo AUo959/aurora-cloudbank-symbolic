@@ -1,9 +1,6 @@
 # Optional Enhanced Dependencies
 # These provide enhanced functionality but have fallbacks in code
 
-# Geometric Algebra (optional - graceful fallback exists)
-clifford>=1.4.0
-
 # Enhanced Security Scanning
 bandit[toml]>=1.7.5
 safety>=2.3.0

@@ -1,3 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aurora-cloudbank-symbolic"
+version = "1.0.0"
+description = "Aurora CloudBank Symbolic Infrastructure - Quantum-enhanced symbolic governance system"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Aurora CloudBank Development Team", email = "dev@aurora-cloudbank.dev"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.11"
+dynamic = ["dependencies", "optional-dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies.dev = {file = ["requirements-optional.txt"]}
+
 [tool.black]
 line-length = 120
 target-version = ['py311']

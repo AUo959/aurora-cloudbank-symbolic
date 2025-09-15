@@ -1,0 +1,28 @@
+{
+  "anchor_seed": "EOS_SEED_ORION",
+  "build": {
+    "commit": "27a4a1b64aedb41256bc2af6ce683ae5e64e2b18",
+    "repo": "AUo959/aurora-cloudbank-symbolic"
+  },
+  "dlp": {
+    "level": "DLP_L1_OK",
+    "notes": "Pytest session export; non-confidential.",
+    "symbolic_hash_validation": true
+  },
+  "ethics_protocol": "Picard_Delta_3",
+  "notes": "Session-level entropy seal for traceability and drift checks.",
+  "session": {
+    "elapsed_seconds": 0.031019,
+    "entropy_seed_hint": "969436b0...71a91e6b",
+    "entropy_seed_sha256": "e8df9ec5ea079bb73959c6a8ea2fbdaf37f5ff4e9c400f3a20a4d15ac6cbc2a1",
+    "node": "runnervmf4ws1",
+    "pid": 3596,
+    "started_at": "2025-09-15T04:17:17.364264+00:00"
+  },
+  "tags": [
+    "T1",
+    "SRB_TICK",
+    "ANCHOR_LOCKED"
+  ],
+  "version": "pytest.entropy.v1"
+}

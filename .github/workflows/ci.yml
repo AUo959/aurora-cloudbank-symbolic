@@ -1,0 +1,93 @@
+name: aurora-cloudbank CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # Dev tooling for quality gates
+          pip install flake8 black isort pytest pytest-asyncio coverage
+
+      - name: Lint (flake8)
+        run: flake8 .
+
+      - name: Format check (black)
+        run: black --check .
+
+      - name: Import order check (isort)
+        run: isort --profile black --check-only .
+
+      - name: Run tests (pytest)
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          mkdir -p artifacts/test-results artifacts/coverage
+          pytest -ra -v -m "not slow and not network" \
+            --junitxml=artifacts/test-results/junit.xml \
+            --cov=. --cov-report=xml:artifacts/coverage/coverage.xml
+
+      - name: Generate symbolic manifest (T1/SRB anchors, hash seals)
+        run: |
+          mkdir -p artifacts/manifest
+          JUNIT_PATH="artifacts/test-results/junit.xml"
+          COVERAGE_PATH="artifacts/coverage/coverage.xml"
+          JUNIT_SHA=$( [ -f "$JUNIT_PATH" ] && sha256sum "$JUNIT_PATH" | awk '{print $1}' || echo "absent" )
+          COVERAGE_SHA=$( [ -f "$COVERAGE_PATH" ] && sha256sum "$COVERAGE_PATH" | awk '{print $1}' || echo "absent" )
+          cat > artifacts/manifest/symbolic-manifest.json << 'JSON'
+          {
+            "anchor_seed": "EOS_SEED_ORION",
+            "tags": ["T1", "SRB_TICK", "ANCHOR_LOCKED"],
+            "dlp": {
+              "level": "DLP_L1_OK",
+              "symbolic_hash_validation": true,
+              "notes": "CI export of test artifacts; no confidential payloads."
+            },
+            "build": {
+              "repo": "${{ github.repository }}",
+              "commit": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "workflow": "${{ github.workflow }}",
+              "run_id": "${{ github.run_id }}",
+              "ts_utc": "${{ github.run_attempt }}"
+            },
+            "artifacts": {
+              "junit_xml_sha256": "__JUNIT_SHA__",
+              "coverage_xml_sha256": "__COVERAGE_SHA__"
+            },
+            "version": "ci.v1",
+            "ethics_protocol": "Picard_Delta_3",
+            "notes": "Automated manifest for traceability and audit continuity."
+          }
+          JSON
+          sed -i "s/__JUNIT_SHA__/$JUNIT_SHA/g" artifacts/manifest/symbolic-manifest.json
+          sed -i "s/__COVERAGE_SHA__/$COVERAGE_SHA/g" artifacts/manifest/symbolic-manifest.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurora-ci-artifacts
+          path: |
+            artifacts/test-results/junit.xml
+            artifacts/coverage/coverage.xml
+            artifacts/manifest/symbolic-manifest.json
+          if-no-files-found: warn

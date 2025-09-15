@@ -1,0 +1,24 @@
+{
+  "anchor_seed": "EOS_SEED_ORION",
+  "tags": ["T1", "SRB_TICK", "ANCHOR_LOCKED"],
+  "dlp": {
+    "level": "DLP_L1_OK",
+    "symbolic_hash_validation": true,
+    "notes": "CI export of test artifacts; no confidential payloads."
+  },
+  "build": {
+    "repo": "AUo959/aurora-cloudbank-symbolic",
+    "commit": "27a4a1b64aedb41256bc2af6ce683ae5e64e2b18",
+    "ref": "refs/heads/copilot/fix-a0e4b50e-4788-4cef-a45c-2a9d8d377148",
+    "workflow": "manual-test",
+    "run_id": "local-test",
+    "ts_utc": "1"
+  },
+  "artifacts": {
+    "junit_xml_sha256": "f5f9a3ed985d216877c9240a854978b65770dba84c029341bc6b46d42cdd6101",
+    "coverage_xml_sha256": "301e62bd486f4459a539f74a6110e606a798333c284b82d75f3c88323f67088e"
+  },
+  "version": "ci.v1",
+  "ethics_protocol": "Picard_Delta_3",
+  "notes": "Automated manifest for traceability and audit continuity."
+}

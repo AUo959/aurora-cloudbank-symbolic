@@ -69,6 +69,7 @@ keyring/
 *.tar.gz
 *.7z
 *.rar
+*.pdf
 .venv/
 
 # GITWiz Auto-generated cleanup patterns

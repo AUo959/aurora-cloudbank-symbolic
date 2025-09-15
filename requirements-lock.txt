@@ -64,7 +64,7 @@ requests==2.31.0
 rich==13.7.1
 s3transfer==0.10.1
 service-identity==24.1.0
-setuptools==68.1.2
+setuptools==80.9.0
 six==1.16.0
 sos==4.8.2
 ssh-import-id==5.11

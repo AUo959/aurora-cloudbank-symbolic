@@ -6,6 +6,7 @@ Advanced quantum-aware vector operations for symbolic processing
 
 from dataclasses import dataclass
 from typing import Any, Dict, List
+import secrets
 
 import numpy as np
 
@@ -51,8 +52,8 @@ class QuantumVectorProcessor:
         return QuantumVector(
             vector=vector,
             quantum_state=quantum_state,
-            symbolic_layer=np.random.choice([1, 2, 3]),
-            consciousness_depth=np.random.rand(),
+            symbolic_layer=secrets.choice([1, 2, 3]),
+            consciousness_depth=secrets.SystemRandom().random(),
             entanglement_map={"created": True, "dimension": dimension},
         )
 

@@ -439,11 +439,12 @@ class RepositoryHealthMonitor:
     def _calculate_file_hash(self, file_path: Path) -> Optional[str]:
         """Calculate file hash for duplicate detection."""
         try:
-            hash_md5 = hashlib.md5()
-            with open(file_path, "rb", encoding="utf-8") as f:
+            # SECURITY: Use SHA256 instead of MD5 for cryptographic integrity
+            hash_sha256 = hashlib.sha256()
+            with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
-                    hash_md5.update(chunk)
-            return hash_md5.hexdigest()
+                    hash_sha256.update(chunk)
+            return hash_sha256.hexdigest()
         except (OSError, PermissionError):
             return None
 

@@ -7,6 +7,22 @@
 const fs = require('fs');
 const path = require('path');
 
+// Import Aurora logging system
+let AuroraLogger;
+try {
+  AuroraLogger = require('./src/utils/aurora_logger.js');
+} catch (error) {
+  // Fallback if Aurora logger not available
+  AuroraLogger = class {
+    constructor() {}
+    info(msg, meta = {}) { console.log(`[INFO] ${msg}`, meta); }
+    warn(msg, meta = {}) { console.warn(`[WARN] ${msg}`, meta); }
+    error(msg, meta = {}) { console.error(`[ERROR] ${msg}`, meta); }
+  };
+}
+
+const systemLogger = new AuroraLogger('SYSTEM_STATUS');
+
 class AuroraStatusChecker {
   constructor() {
     this.projectRoot = '/workspaces/aurora-cloudbank-symbolic';
@@ -35,23 +51,25 @@ class AuroraStatusChecker {
   }
 
   checkPhaseCompletion() {
-    console.log('\n🔍 CHECKING PHASE COMPLETION STATUS');
-    console.log('=' * 50);
+    systemLogger.info('Checking phase completion status');
 
     let allPhasesComplete = true;
 
     for (const phase of this.requiredPhases) {
       const phasePath = path.join(this.projectRoot, phase);
       const exists = fs.existsSync(phasePath);
-      console.log(
-        `  ${exists ? '✅' : '❌'} ${phase}: ${exists ? 'COMPLETE' : 'MISSING'}`
-      );
+      systemLogger.info(`Phase ${phase}: ${exists ? 'COMPLETE' : 'MISSING'}`, { 
+        phase, 
+        exists, 
+        path: phasePath 
+      });
       if (!exists) allPhasesComplete = false;
     }
 
-    console.log(
-      `\n🎯 Overall Phase Status: ${allPhasesComplete ? '✅ ALL PHASES COMPLETE' : '❌ INCOMPLETE'}`
-    );
+    systemLogger.info(`Overall Phase Status: ${allPhasesComplete ? 'ALL PHASES COMPLETE' : 'INCOMPLETE'}`, {
+      allPhasesComplete,
+      totalPhases: this.requiredPhases.length
+    });
     return allPhasesComplete;
   }
 

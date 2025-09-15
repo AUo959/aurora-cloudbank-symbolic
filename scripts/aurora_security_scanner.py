@@ -103,7 +103,7 @@ class AuroraSecurityScanner:
             'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
             'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
-                rr'subprocess\.\w+.*shell\s*=\s*True',
+                r'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
                 'subprocess with shell=True can enable command injection'
             ),
@@ -157,9 +157,9 @@ class AuroraSecurityScanner:
 
         # Check for hardcoded secrets
         secret_patterns = [
-            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'r"]', 'HIGH', 'Possible hardcoded password'),
-            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded secret'),
-            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'r"]', 'HIGH', 'Possible hardcoded API key'),
+            (r'password\s*=\s*[\'"][^\'\"]{8,}[\'"]', 'HIGH', 'Possible hardcoded password'),
+            (r'secret\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded secret'),
+            (r'api[_-]?key\s*=\s*[\'"][^\'\"]{16,}[\'"]', 'HIGH', 'Possible hardcoded API key'),
             (r'token\s*=\s*[\'"][^\'\"]{20,}[\'"]', 'MEDIUM', 'Possible hardcoded token'),
             (r'[\'"][A-Za-z0-9]{32,}[\'"]', 'LOW', 'Possible hardcoded credential')
         ]
@@ -209,7 +209,7 @@ class AuroraSecurityScanner:
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
-                rr'(\w+)\.innerHTML\s*=\s*([^;]+);',
+                r'(\w+)\.innerHTML\s*=\s*([^;]+);',
                 r'\1.textContent = \2; // SECURITY FIX: Changed from innerHTML',
                 content
             )

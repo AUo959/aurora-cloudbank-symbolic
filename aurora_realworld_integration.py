@@ -1033,7 +1033,7 @@ jinja2==3.1.2
         self.log_status("Docker deployment configuration created", "SUCCESS")
 
     
-        def create_startup_script(self):
+    def create_startup_script(self):
         """Create comprehensive startup script"""
         self.log_status("Creating startup script...", "INFO")
         startup_script = """#!/bin/bash

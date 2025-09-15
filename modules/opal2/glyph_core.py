@@ -39,7 +39,7 @@ class GlyphGenerator:
         self.ga = GeometricAlgebra()
 
     
-        def generate(self, symbol: str) -> Dict[str, object]:
+    def generate(self, symbol: str) -> Dict[str, object]:
         """Generate a glyph representation for ``symbol``.
 
         Returns a dictionary with the quantum symbolic vector and a textual

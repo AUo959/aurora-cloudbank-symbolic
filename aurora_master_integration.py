@@ -81,38 +81,35 @@ class AuroraMasterInterface:
         if self.initialized_systems.get("consciousness_engine"):
             try:
                 result = subprocess.run(
-                    [sys.executable, "aurora_consciousness_engine.py"], capture_output=True, text=True, timeout=30
-        result = subprocess.run(
+                    [sys.executable, "aurora_consciousness_engine.py"], 
+                    capture_output=True, text=True, timeout=30
+                )
                 if result.returncode == 0:
                     print("✅ Consciousness simulation test passed")
-                    
-        demo_results["consciousness_simulation"] = "success"
+                    demo_results["consciousness_simulation"] = "success"
                 else:
                     print(f"⚠️ Consciousness simulation test issues: {result.stderr}")
-                    
-        demo_results["consciousness_simulation"] = "warning"
+                    demo_results["consciousness_simulation"] = "warning"
             except Exception as e:
                 print(f"❌ Consciousness simulation test failed: {e}")
-                
-        demo_results["consciousness_simulation"] = "failed"
+                demo_results["consciousness_simulation"] = "failed"
 
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
             try:
                 result = subprocess.run(
-                    [sys.executable, "aurora_adaptive_learning.py"], capture_output=True, text=True, timeout=30
+                    [sys.executable, "aurora_adaptive_learning.py"], 
+                    capture_output=True, text=True, timeout=30
                 )
-        result = subprocess.run(                    print("✅ Adaptive learning test passed")
-                    
-        demo_results["adaptive_learning"] = "success"
+                if result.returncode == 0:
+                    print("✅ Adaptive learning test passed")
+                    demo_results["adaptive_learning"] = "success"
                 else:
                     print(f"⚠️ Adaptive learning test issues: {result.stderr}")
-                    
-        demo_results["adaptive_learning"] = "warning"
+                    demo_results["adaptive_learning"] = "warning"
             except Exception as e:
                 print(f"❌ Adaptive learning test failed: {e}")
-                
-        demo_results["adaptive_learning"] = "failed"
+                demo_results["adaptive_learning"] = "failed"
 
         return demo_results
 

@@ -1,4 +1,4 @@
-const fetch = (...args) => globalThis.fetch(...args);
+const fetch = globalThis.fetch || ((...args) => import('node-fetch').then(({ default: f }) => f(...args)));
 
 async function fetchArxiv(query) {
   if (process.env.PQN_OFFLINE_TEST) {

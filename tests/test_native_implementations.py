@@ -1,9 +1,4 @@
 """
-
-        import sys
-import os
-import time
-
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
 """
@@ -16,6 +11,15 @@ import sys
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+# Import native implementations
+from src.aurora.native import (
+    NativeSymbolicVector,
+    NativeVSAMemory,
+    NativeQuantumCircuit,
+    NativeQuantumProcessingLayer,
+    NativeSymbolicCPUAnchor,
+)
 
 
 @pytest.mark.native

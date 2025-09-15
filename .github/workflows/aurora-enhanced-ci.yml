@@ -1,31 +1,31 @@
----
-name: Aurora Enhanced CI/CD with Symbolic Validation
+-name: Aurora Enhanced CI/CD with Symbolic Validation
 
-"on":
-push:
-  branches:
-    - main
-    - develop
-    - feature/*
-pull_request:
-  branches:
-    - main
-    - develop
-workflow_dispatch:
-  inputs:
-    force_full_validation:
-      description: 'Force full Aurora symbolic validation'
-      required: false
-      default: false
-      type: boolean
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - feature/*
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      force_full_validation:
+        description: 'Force full Aurora symbolic validation'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
-contents: read
-actions: read
-security-events: write
+  contents: read
+  actions: read
+  security-events: write
 
 concurrency:
-group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 cancel-in-progress: true
 
 env:

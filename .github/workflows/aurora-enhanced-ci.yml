@@ -22,7 +22,7 @@ permissions:
   contents: read
   actions: read
   security-events: write
-
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 cancel-in-progress: true

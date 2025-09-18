@@ -127,7 +127,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
         for system_name, status in self.initialized_systems.items():
-        status_icon = "✅" if status else "❌"
+            status_icon = "✅" if status else "❌"
             report_content += (
                 f"- {status_icon} **{system_name.replace('_', ' ').title()}**: {self.integration_status[system_name]}\n"
             )
@@ -218,26 +218,22 @@ async def main():
     """Main function for Aurora Master Interface"""
     print("🌟 Aurora CloudBank Master Integration Interface")
     print("=" * 60)
-        interface = AuroraMasterInterface()
+    interface = AuroraMasterInterface()
 
     # Run comprehensive test suite
     results = await interface.run_comprehensive_test_suite()
 
-    
-        print("\n📊 Test Suite Results:")
+    print("\n📊 Test Suite Results:")
     print(f"Overall Success: {'✅ PASSED' if results['overall_success'] else '❌ FAILED'}")
     print(f"Status Report: {results['status_report']}")
 
-    
-        if results["overall_success"]:
+    if results["overall_success"]:
         print("\n🎉 Phase 3 Advanced Integration COMPLETE!")
-        
         print("🚀 Ready for Phase 4: Real-World Application Integration")
     else:
         print("\n⚠️ Some systems need attention before proceeding to Phase 4")
 
-    
-        return results
+    return results
 
 
 if __name__ == "__main__":

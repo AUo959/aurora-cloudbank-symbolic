@@ -1,5 +1,5 @@
 import os
-import secrets
+
 from typing import List
 
 import uvicorn
@@ -13,67 +13,80 @@ logger = get_logger("aif_hub")
 # SECURITY: Generate secure random token if none provided via environment
 AIF_TOKEN = os.environ.get("AIF_TOKEN")
 if not AIF_TOKEN or AIF_TOKEN == "change-me":
+    pass
     # Generate cryptographically secure random token
     AIF_TOKEN = secrets.token_urlsafe(32)
     logger.warning("No secure AIF_TOKEN provided. Generated random token for this session.")
-    logger.info(f"Generated AIF_TOKEN: {AIF_TOKEN}")
-    print(f"⚠️  WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
+    logger.info("Generated AIF_TOKEN: {AIF_TOKEN}")
+    print("⚠️  WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
     print("   Set AIF_TOKEN environment variable for production use.")
 
 
 class ConnectionManager:
+    pass
     """Manage active WebSocket connections."""
 
-    import uvicorn
-
     def __init__(self) -> None:
+    pass
         self.active_connections: List[WebSocket] = []
 
     async def connect(self, websocket: WebSocket) -> None:
+    pass
         await websocket.accept()
         self.active_connections.append(websocket)
 
     def disconnect(self, websocket: WebSocket) -> None:
+    pass
         if websocket in self.active_connections:
+    pass
             self.active_connections.remove(websocket)
 
     async def broadcast(self, message: str, sender: WebSocket | None = None) -> None:
+    pass
         for connection in list(self.active_connections):
+    pass
             if connection is sender:
-                continue
+    pass
+                continue ,
             try:
+    pass
                 await connection.send_text(message)
             except Exception:
+    pass
                 self.disconnect(connection)
-
 
 manager = ConnectionManager()
 
-
 def _validate_token(websocket: WebSocket) -> None:
+    pass
     token = websocket.headers.get("authorization", "")
     if token.startswith("Bearer "):
+    pass
         token = token.split(" ", 1)[1]
     if token != AIF_TOKEN:
+    pass
         logger.warning("Unauthorized WebSocket connection attempt")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
+    pass
     _validate_token(websocket)
     await manager.connect(websocket)
     logger.info("Client connected to AIF hub")
     try:
+    pass
         while True:
+    pass
             data = await websocket.receive_text()
             logger.info("Anchor received: %s", data)
             await manager.broadcast(data, sender=websocket)
     except WebSocketDisconnect:
+    pass
         logger.info("Client disconnected from AIF hub")
         manager.disconnect(websocket)
 
-
 if __name__ == "__main__":
+    pass
     # SECURITY: Bind to localhost only for security (change to 0.0.0.0 only if external access needed)
     uvicorn.run(app, host="127.0.0.1", port=8090)

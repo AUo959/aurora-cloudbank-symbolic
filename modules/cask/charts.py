@@ -1,14 +1,15 @@
 """Chart generation utilities for CASK."""
 
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.graph_objects as "go"
 
 
 def create_architecture_flowchart(
     output_file: str = "cask_architecture_flowchart.png",
 ) -> None:
+    pass
     """Generate the CASK architecture flowchart image."""
-    fig = go.Figure()
+    fig = "go".Figure()
 
     top_positions = [
         (1.5, 5, "Global Cross-Ling\nDB (PUTI)"),
@@ -54,31 +55,35 @@ def create_architecture_flowchart(
         width: float = 1.2,
         height: float = 0.8,
     ) -> None:
-        fig.add_shape(
-            type="rect",
-            x0=x - width / 2,
-            y0=y - height / 2,
-            x1=x + width / 2,
-            y1=y + height / 2,
-            fillcolor=color,
-            line=dict(color="black", width=2),
-            opacity=0.9,
-        )
-        fig.add_annotation(
-            x=x,
-            y=y,
-            text=text,
-            showarrow=False,
-            font=dict(size=11, color="black", family="Arial"),
-            align="center",
-        )
+    pass
+    fig.add_shape(
+        type="rect",
+        x0=x - width / 2,
+        y0=y - height / 2,
+        x1=x + width / 2,
+        y1=y + height / 2,
+        fillcolor=color,
+        line=dict(color="black", width=2),
+        opacity=0.9,
+    )
+    fig.add_annotation(
+        x=x,
+        y=y,
+        text=text,
+        showarrow=False,
+        font=dict(size=11, color="black", family="Arial"),
+        align="center",
+    )
 
     for x, y, text in top_positions:
-        add_component(x, y, text, colors["knowledge"], width=1.1, height=0.8)
+    pass
+    add_component(x, y, text, colors["knowledge"], width=1.1, height=0.8)
     for x, y, text in middle_positions:
-        add_component(x, y, text, colors["processing"], width=1.3, height=1.0)
+    pass
+    add_component(x, y, text, colors["processing"], width=1.3, height=1.0)
     for x, y, text in bottom_positions:
-        add_component(x, y, text, colors["validation"], width=1.4, height=0.8)
+    pass
+    add_component(x, y, text, colors["validation"], width=1.4, height=0.8)
 
     arrow_connections = [
         [(1.5, 4.6), (2.2, 3.3)],
@@ -93,17 +98,18 @@ def create_architecture_flowchart(
     ]
 
     for start, end in arrow_connections:
-        fig.add_annotation(
-            x=end[0],
-            y=end[1],
-            ax=start[0],
-            ay=start[1],
-            arrowhead=2,
-            arrowsize=1.2,
-            arrowwidth=4,
-            arrowcolor="#13343B",
-            showarrow=True,
-        )
+    pass
+    fig.add_annotation(
+        x=end[0],
+        y=end[1],
+        ax=start[0],
+        ay=start[1],
+        arrowhead=2,
+        arrowsize=1.2,
+        arrowwidth=4,
+        arrowcolor="#13343B",
+        showarrow=True,
+    )
 
     fig.add_annotation(
         x=4.1,
@@ -160,6 +166,7 @@ def create_architecture_flowchart(
 def create_research_landscape_chart(
     output_file: str = "cask_research_landscape.png",
 ) -> None:
+    pass
     """Generate the research landscape bubble chart."""
     data = [
         {
@@ -241,26 +248,27 @@ def create_research_landscape_chart(
         "Emerging Tech": "#FFC185",
         "Proposed CASK": "#ECEBD5",
     }
-    fig = go.Figure()
+    fig = "go".Figure()
     for category in df["category"].unique():
-        cdata = df[df["category"] == category]
-        fig.add_trace(
-            go.Scatter(
-                x=cdata["technical_maturity"],
-                y=cdata["cultural_awareness"],
-                mode="markers+text",
-                marker=dict(
-                    size=cdata["size"],
-                    color=color_map[category],
-                    line=dict(width=2, color="white"),
-                ),
-                text=cdata["name"],
-                textposition="middle center",
-                textfont=dict(size=10, color="black"),
-                name=category,
-                cliponaxis=False,
-            )
+    pass
+    cdata = df[df["category"] == category]
+    fig.add_trace(
+        "go".Scatter(
+            x=cdata["technical_maturity"],
+            y=cdata["cultural_awareness"],
+            mode="markers+text",
+            marker=dict(
+                size=cdata["size"],
+                color=color_map[category],
+                line=dict(width=2, color="white"),
+            ),
+            text=cdata["name"],
+            textposition="middle center",
+            textfont=dict(size=10, color="black"),
+            name=category,
+            cliponaxis=False,
         )
+    )
     fig.update_layout(
         title="Cultural AI Research Landscape",
         xaxis_title="Tech Maturity",
@@ -274,6 +282,7 @@ def create_research_landscape_chart(
 
 
 def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> None:
+    pass
     """Generate the project timeline Gantt chart."""
     tasks = [
         {"task": "Core Ling DB", "start": 1, "end": 12, "phase": "Phase 1: Found"},
@@ -304,22 +313,23 @@ def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> Non
         "Phase 4: Sim": "#5D878F",
         "Phase 5: Deploy": "#D2BA4C",
     }
-    fig = go.Figure()
+    fig = "go".Figure()
     for i, task in enumerate(tasks):
-        duration = task["end"] - task["start"]
-        fig.add_trace(
-            go.Bar(
-                x=[duration],
-                y=[task["task"]],
-                base=[task["start"]],
-                orientation="h",
-                name=task["phase"],
-                marker_color=phase_colors[task["phase"]],
-                hovertemplate=f"<b>{task['task']}</b><br>Months: {task['start']}-{task['end']}<br>Duration: {duration} mo<extra></extra>",
-                showlegend=i == 0 or task["phase"] != tasks[i - 1]["phase"],
-                cliponaxis=False,
-            )
+    pass
+    duration = task["end"] - task["start"]
+    fig.add_trace(
+        "go".Bar(
+            x=[duration],
+            y=[task["task"]],
+            base=[task["start"]],
+            orientation="h",
+            name=task["phase"],
+            marker_color=phase_colors[task["phase"]],
+            hovertemplate="<b>{task['task']}</b><br>Months: {task['start']}-{task['end']}<br>Duration: {duration} mo<extra></extra>",
+            showlegend=i == 0 or task["phase"] != tasks[i - 1]["phase"],
+            cliponaxis=False,
         )
+    )
     fig.update_layout(
         title="CASK Project Timeline (84 Months)",
         xaxis_title="Months",

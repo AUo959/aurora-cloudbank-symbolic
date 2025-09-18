@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
+
 from datetime import datetime
-from pathlib import Path
-import argparse
-import json
-import subprocess
-import sys
-import time
+
 """
 Aurora CloudBank - Repository Health Monitoring System
 =====================================================
@@ -13,24 +9,21 @@ Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring of repository health metrics with alerting and reporting.
 """
 
-import argparse
 import datetime
-import json
 import logging
-import subprocess
-import sys
-import time
-from pathlib import Path
 from typing import Any, Dict, List
 
 
 class HealthMonitor:
+    pass
     """Repository health monitoring and alerting system."""
 
     def __init__(self, repo_path: str = "."):
+    pass
         """Initialize health monitor.
 
         Args:
+    pass
             repo_path: Path to git repository
         """
         self.repo_path = Path(repo_path)
@@ -50,15 +43,20 @@ class HealthMonitor:
         self.setup_logging()
 
     def load_config(self) -> Dict:
+    pass
         """Load monitoring configuration."""
         config_path = self.repo_path / ".gitwiz" / "health_config.json"
 
         if config_path.exists():
+    pass
             try:
+    pass
                 with open(config_path, encoding="utf-8") as f:
+    pass
                     return json.load(f)
             except (OSError, ValueError, RuntimeError) as e:
-                print(f"Error loading config: {e}")
+    pass
+                print("Error loading config: {e}")
 
         # Default configuration
         return {
@@ -74,9 +72,10 @@ class HealthMonitor:
         }
 
     def setup_logging(self):
+    pass
         """Set up logging configuration."""
         log_dir = self.repo_path / ".gitwiz" / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
+        pass  # Exception logged
 
         log_file = log_dir / "health_monitor.log"
 
@@ -89,9 +88,11 @@ class HealthMonitor:
         self.logger = logging.getLogger(__name__)
 
     def collect_metrics(self) -> Dict[str, Any]:
+    pass
         """Collect current repository health metrics.
 
         Returns:
+    pass
             Dictionary of health metrics
         """
         metrics = {
@@ -108,14 +109,16 @@ class HealthMonitor:
         }
 
         try:
+    pass
             # Repository size            result = subprocess.run(                ["du", "-sm", "."],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path,
-                shell=False,
-                check=False,
+                capture_output = True,
+                text = True,
+                cwd = self.repo_path,
+                shell = False,
+                check = False,
             )
             if result.returncode == 0:
+    pass
                 metrics["repository_size_mb"] = int(result.stdout.split()[0])
 
             # File count
@@ -126,6 +129,7 @@ class HealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
+    pass
                 metrics["file_count"] = len(result.stdout.strip().split("\n"))
 
             # Branch count
@@ -136,6 +140,7 @@ class HealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
+    pass
                 metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
 
             # ZIP file count
@@ -150,6 +155,7 @@ class HealthMonitor:
                 cwd=self.repo_path,
                 shell=False,            result = subprocess.run(            )
             if result.returncode == 0:
+    pass
                 pyc_files = result.stdout.strip().split("\n")
                 metrics["pyc_file_count"] = len([f for f in pyc_files if f])
 
@@ -176,6 +182,7 @@ class HealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
+    pass
                 temp_dirs = result.stdout.strip().split("\n")
                 metrics["temp_dir_count"] = len([d for d in temp_dirs if d and not d.startswith("./.venv")])
 
@@ -197,24 +204,28 @@ class HealthMonitor:
             metrics["issues"] = self.check_issues(metrics)
 
         except (OSError, ValueError, RuntimeError) as e:
-            self.logger.error(f"Error collecting metrics: {e}")
+    pass
+            self.logger.error("Error collecting metrics: {e}")
             metrics["error"] = str(e)
 
         return metrics
 
     def calculate_health_score(self, metrics: Dict) -> float:
+    pass
         """Calculate overall health score (0-10).
 
         Args:
-            metrics: Current metrics dictionary
-
+    pass
+            metrics: Current metrics dictionary,
         Returns:
+    pass
             Health score between 0 and 10
         """
         score = 10.0
 
         # Size penalty
         if metrics["repository_size_mb"] > self.thresholds["max_size_mb"]:
+    pass
             score -= min(
                 2.0,
                 (metrics["repository_size_mb"] - self.thresholds["max_size_mb"]) / 100,
@@ -222,69 +233,85 @@ class HealthMonitor:
 
         # File count penalty
         if metrics["file_count"] > self.thresholds["max_files"]:
+    pass
             score -= min(2.0, (metrics["file_count"] - self.thresholds["max_files"]) / 5000)
 
         # Branch penalty
         if metrics["branch_count"] > self.thresholds["max_branches"]:
+    pass
             score -= min(1.5, (metrics["branch_count"] - self.thresholds["max_branches"]) / 10)
 
         # ZIP file penalty
         if metrics["zip_file_count"] > self.thresholds["max_zip_files"]:
+    pass
             score -= min(1.0, (metrics["zip_file_count"] - self.thresholds["max_zip_files"]) / 5)
 
         # Python cache penalty
         if metrics["pyc_file_count"] > self.thresholds["max_pyc_files"]:
+    pass
             score -= min(2.0, metrics["pyc_file_count"] / 1000)
 
         # Temporary directories penalty
         if metrics["temp_dir_count"] > self.thresholds["max_temp_dirs"]:
+    pass
             score -= min(1.0, (metrics["temp_dir_count"] - self.thresholds["max_temp_dirs"]) / 5)
 
         # Large files penalty
         if len(metrics["large_files"]) > 3:
+    pass
             score -= min(0.5, len(metrics["large_files"]) / 10)
 
         return max(0.0, round(score, 1))
 
     def check_issues(self, metrics: Dict) -> List[str]:
+    pass
         """Check for specific issues based on metrics.
 
         Args:
-            metrics: Current metrics dictionary
-
+    pass
+            metrics: Current metrics dictionary,
         Returns:
+    pass
             List of issue descriptions
         """
         issues = []
 
         if metrics["repository_size_mb"] > self.thresholds["max_size_mb"]:
+    pass
             issues.append(
-                f"Repository size ({metrics['repository_size_mb']}MB) exceeds threshold ({self.thresholds['max_size_mb']}MB)"
+                "Repository size ({metrics['repository_size_mb']}MB) exceeds threshold ({self.thresholds['max_size_mb']}MB)"
             )
 
         if metrics["file_count"] > self.thresholds["max_files"]:
-            issues.append(f"File count ({metrics['file_count']}) exceeds threshold ({self.thresholds['max_files']})")
+    pass
+            issues.append("File count ({metrics['file_count']}) exceeds threshold ({self.thresholds['max_files']})")
 
         if metrics["branch_count"] > self.thresholds["max_branches"]:
+    pass
             issues.append(
-                f"Branch count ({metrics['branch_count']}) exceeds threshold ({self.thresholds['max_branches']})"
+                "Branch count ({metrics['branch_count']}) exceeds threshold ({self.thresholds['max_branches']})"
             )
 
         if metrics["pyc_file_count"] > self.thresholds["max_pyc_files"]:
-            issues.append(f"Python cache files detected ({metrics['pyc_file_count']})")
+    pass
+            issues.append("Python cache files detected ({metrics['pyc_file_count']})")
 
         if metrics["temp_dir_count"] > self.thresholds["max_temp_dirs"]:
-            issues.append(f"Too many temporary directories ({metrics['temp_dir_count']})")
+    pass
+            issues.append("Too many temporary directories ({metrics['temp_dir_count']})")
 
         if len(metrics["large_files"]) > 3:
-            issues.append(f"Multiple large files detected ({len(metrics['large_files'])})")
+    pass
+            issues.append("Multiple large files detected ({len(metrics['large_files'])})")
 
         return issues
 
     def save_metrics(self, metrics: Dict):
+    pass
         """Save metrics to historical data.
 
         Args:
+    pass
             metrics: Metrics dictionary to save
         """
         metrics_dir = self.repo_path / ".gitwiz" / "metrics"
@@ -292,182 +319,221 @@ class HealthMonitor:
 
         # Save to daily file
         date_str = datetime.datetime.now().strftime("%Y-%m-%d")
-        metrics_file = metrics_dir / f"health_{date_str}.json"
+        metrics_file = metrics_dir / "health_{date_str}.json"
 
         # Load existing metrics for the day
         daily_metrics = []
         if metrics_file.exists():
+    pass
             try:
+    pass
                 with open(metrics_file, encoding="utf-8") as f:
+    pass
                     daily_metrics = json.load(f)
             except (OSError, ValueError, RuntimeError):
+    pass
                 pass
 
         daily_metrics.append(metrics)
 
         # Save updated metrics
         with open(metrics_file, "w", encoding="utf-8") as f:
+    pass
             json.dump(daily_metrics, f, indent=2)
 
         # Clean old metrics
         self.cleanup_old_metrics(metrics_dir)
 
     def cleanup_old_metrics(self, metrics_dir: Path):
+    pass
         """Clean up old metric files.
 
         Args:
+    pass
             metrics_dir: Directory containing metric files
         """
         cutoff_date = datetime.datetime.now() - datetime.timedelta(days=self.config["metrics_retention_days"])
 
         for file_path in metrics_dir.glob("health_*.json"):
+    pass
             try:
+    pass
                 file_date_str = file_path.stem.replace("health_", "")
                 file_date = datetime.datetime.strptime(file_date_str, "%Y-%m-%d")
 
                 if file_date < cutoff_date:
+    pass
                     file_path.unlink()
-                    self.logger.info(f"Cleaned up old metrics file: {file_path}")
+                    self.logger.info("Cleaned up old metrics file: {file_path}")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.warning(f"Error cleaning metrics file {file_path}: {e}")
+    pass
+                self.logger.warning("Error cleaning metrics file {file_path}: {e}")
 
     def send_alert(self, metrics: Dict):
+    pass
         """Send alert if health issues are detected.
 
         Args:
+    pass
             metrics: Current metrics dictionary
         """
         if not metrics["issues"] and metrics["health_score"] >= self.thresholds["min_health_score"]:
+    pass
             return
 
         alert_message = self.format_alert_message(metrics)
 
         # Log alert
-        self.logger.warning(f"Health alert: {alert_message}")
+        self.logger.warning("Health alert: {alert_message}")
 
         # File notification
         if self.config["notifications"]["file"]:
+    pass
             try:
+    pass
                 with open(self.config["notifications"]["file"], "a", encoding="utf-8") as f:
-                    f.write(f"{datetime.datetime.now().isoformat()}: {alert_message}\n")
+    pass
+                    f.write("{datetime.datetime.now().isoformat()}: {alert_message}\n")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error writing alert to file: {e}")
+    pass
+                self.logger.error("Error writing alert to file: {e}")
 
     def format_alert_message(self, metrics: Dict) -> str:
+    pass
         """Format alert message.
 
         Args:
-            metrics: Current metrics dictionary
-
+    pass
+            metrics: Current metrics dictionary,
         Returns:
+    pass
             Formatted alert message
         """
         message_parts = [
-            f"Repository Health Alert - Score: {metrics['health_score']}/10",
-            f"Size: {metrics['repository_size_mb']}MB",
-            f"Files: {metrics['file_count']}",
-            f"Branches: {metrics['branch_count']}",
+            "Repository Health Alert - Score: {metrics['health_score']}/10",
+            "Size: {metrics['repository_size_mb']}MB",
+            "Files: {metrics['file_count']}",
+            "Branches: {metrics['branch_count']}",
         ]
 
         if metrics["issues"]:
+    pass
             message_parts.append("Issues:")
-            message_parts.extend([f"  - {issue}" for issue in metrics["issues"]])
+            message_parts.extend(["  - {issue}" for issue in metrics["issues"]])
 
         return " | ".join(message_parts)
 
     def generate_health_report(self, days: int = 7) -> str:
+    pass
         """Generate health report from historical data.
 
         Args:
-            days: Number of days to include in report
-
+    pass
+            days: Number of days to include in report,
         Returns:
+    pass
             Formatted health report
         """
         metrics_dir = self.repo_path / ".gitwiz" / "metrics"
 
         if not metrics_dir.exists():
+    pass
             return "No historical metrics available"
 
         # Collect metrics from last N days
         historical_metrics = []
         for i in range(days):
+    pass
             date = datetime.datetime.now() - datetime.timedelta(days=i)
             date_str = date.strftime("%Y-%m-%d")
-            metrics_file = metrics_dir / f"health_{date_str}.json"
+            metrics_file = metrics_dir / "health_{date_str}.json"
 
             if metrics_file.exists():
+    pass
                 try:
+    pass
                     with open(metrics_file, encoding="utf-8") as f:
+    pass
                         daily_metrics = json.load(f)
                         historical_metrics.extend(daily_metrics)
                 except (OSError, ValueError, RuntimeError):
+    pass
                     continue
 
         if not historical_metrics:
+    pass
             return "No historical metrics found"
 
         # Generate report
         report = []
         report.append("# Aurora CloudBank - Health Monitoring Report")
-        report.append(f"**Period:** Last {days} days")
-        report.append(f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        report.append("**Period:** Last {days} days")
+        report.append("**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         report.append("")
 
         # Latest metrics
         latest = historical_metrics[-1] if historical_metrics else {}
         report.append("## Current Status")
         report.append("")
-        report.append(f"- **Health Score:** {latest.get('health_score', 'N/A')}/10")
-        report.append(f"- **Repository Size:** {latest.get('repository_size_mb', 'N/A')}MB")
-        report.append(f"- **File Count:** {latest.get('file_count', 'N/A')}")
-        report.append(f"- **Branch Count:** {latest.get('branch_count', 'N/A')}")
-        report.append(f"- **ZIP Files:** {latest.get('zip_file_count', 'N/A')}")
+        report.append("- **Health Score:** {latest.get('health_score', 'N/A')}/10")
+        report.append("- **Repository Size:** {latest.get('repository_size_mb', 'N/A')}MB")
+        report.append("- **File Count:** {latest.get('file_count', 'N/A')}")
+        report.append("- **Branch Count:** {latest.get('branch_count', 'N/A')}")
+        report.append("- **ZIP Files:** {latest.get('zip_file_count', 'N/A')}")
         report.append("")
 
         # Issues
         if latest.get("issues"):
+    pass
             report.append("## Current Issues")
             report.append("")
             for issue in latest["issues"]:
-                report.append(f"- ⚠️ {issue}")
+    pass
+                report.append("- ⚠️ {issue}")
             report.append("")
 
         # Trends
         if len(historical_metrics) > 1:
+    pass
             report.append("## Trends")
             report.append("")
 
             # Health score trend
             scores = [m.get("health_score", 0) for m in historical_metrics[-7:]]
             if scores:
+    pass
                 avg_score = sum(scores) / len(scores)
                 trend = (
                     "📈 Improving"
                     if scores[-1] > scores[0]
                     else "📉 Declining" if scores[-1] < scores[0] else "➡️ Stable"
                 )
-                report.append(f"- **Health Score:** {trend} (7-day avg: {avg_score:.1f})")
+                report.append("- **Health Score:** {trend} (7-day avg: {avg_score:.1f})")
 
             # Size trend
             sizes = [m.get("repository_size_mb", 0) for m in historical_metrics[-7:]]
             if sizes:
+    pass
                 size_change = sizes[-1] - sizes[0]
                 trend = "📈 Growing" if size_change > 10 else "📉 Shrinking" if size_change < -10 else "➡️ Stable"
-                report.append(f"- **Repository Size:** {trend} ({size_change:+.0f}MB over 7 days)")
+                report.append("- **Repository Size:** {trend} ({size_change:+.0f}MB over 7 days)")
 
         return "\n".join(report)
 
     def run_monitoring_loop(self, interval_minutes: int = 60):
+    pass
         """Run continuous monitoring loop.
 
         Args:
+    pass
             interval_minutes: Minutes between health checks
         """
-        self.logger.info(f"Starting health monitoring (interval: {interval_minutes} minutes)")
+        self.logger.info("Starting health monitoring (interval: {interval_minutes} minutes)")
 
         while True:
+    pass
             try:
+    pass
                 # Collect metrics
                 metrics = self.collect_metrics()
 
@@ -479,24 +545,26 @@ class HealthMonitor:
 
                 # Log status
                 self.logger.info(
-                    f"Health check complete - Score: {metrics['health_score']}/10, "
-                    f"Size: {metrics['repository_size_mb']}MB, "
-                    f"Files: {metrics['file_count']}, "
-                    f"Issues: {len(metrics['issues'])}"
+                    "Health check complete - Score: {metrics['health_score']}/10, "
+                    "Size: {metrics['repository_size_mb']}MB, "
+                    "Files: {metrics['file_count']}, "
+                    "Issues: {len(metrics['issues'])}"
                 )
 
                 # Wait for next check
                 time.sleep(interval_minutes * 60)
 
             except KeyboardInterrupt:
+    pass
                 self.logger.info("Monitoring stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error in monitoring loop: {e}")
+    pass
+                self.logger.error("Error in monitoring loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
-
 def main():
+    pass
     """Main function for health monitoring CLI."""
     parser = argparse.ArgumentParser(description="Aurora CloudBank Health Monitoring")
     parser.add_argument("--check", action="store_true", help="Run single health check")
@@ -511,44 +579,54 @@ def main():
     monitor = HealthMonitor()
 
     if args.check:
+    pass
         print("🔍 Running health check...")
         metrics = monitor.collect_metrics()
 
-        print(f"📊 Health Score: {metrics['health_score']}/10")
-        print(f"💾 Repository Size: {metrics['repository_size_mb']}MB")
-        print(f"📁 File Count: {metrics['file_count']}")
-        print(f"🌿 Branch Count: {metrics['branch_count']}")
-        print(f"📦 ZIP Files: {metrics['zip_file_count']}")
+        print("📊 Health Score: {metrics['health_score']}/10")
+        print("💾 Repository Size: {metrics['repository_size_mb']}MB")
+        print("📁 File Count: {metrics['file_count']}")
+        print("🌿 Branch Count: {metrics['branch_count']}")
+        print("📦 ZIP Files: {metrics['zip_file_count']}")
 
         if metrics["issues"]:
+    pass
             print("\n⚠️ Issues:")
             for issue in metrics["issues"]:
-                print(f"  - {issue}")
+    pass
+                print("  - {issue}")
         else:
+    pass
             print("\n✅ No issues detected")
 
         monitor.save_metrics(metrics)
 
     elif args.report:
+    pass
         print("📄 Generating health report...")
         report = monitor.generate_health_report(args.days)
 
         if args.output:
+    pass
             with open(args.output, "w", encoding="utf-8") as f:
+    pass
                 f.write(report)
-            print(f"📄 Report saved to {args.output}")
+            print("📄 Report saved to {args.output}")
         else:
+    pass
             print(report)
 
     elif args.monitor:
+    pass
         monitor.run_monitoring_loop(args.interval)
 
     else:
+    pass
         parser.print_help()
         return 1
 
     return 0
 
-
 if __name__ == "__main__":
+    pass
     sys.exit(main())

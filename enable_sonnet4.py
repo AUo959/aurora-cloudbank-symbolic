@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from pathlib import Path
-import sys
+
 """
 Direct Sonnet 4 Enablement Script
 Enables Claude Sonnet 4 for all clients without requiring API to be running
@@ -19,16 +18,19 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
+    pass
     """Main enablement function"""
     print("🚀 Aurora CloudBank Symbolic - Enabling Claude Sonnet 4")
     print("=" * 60)
 
     try:
+    pass
         # Check current status
         print("📊 Current Sonnet 4 Status:")
         status = sonnet4_hub.get_global_status()
         for key, value in status.items():
-            print(f"   • {key}: {value}")
+    pass
+            print("   • {key}: {value}")
         print()
 
         # Enable Sonnet 4 for all clients
@@ -36,17 +38,20 @@ async def main():
         results = await enable_sonnet4_globally()
 
         if "error" not in results:
+    pass
             print("✅ Claude Sonnet 4 successfully enabled for all clients!")
-            print(f"📈 Results: {results}")
+            print("📈 Results: {results}")
         else:
-            print(f"❌ Error: {results}")
+    pass
+            print("❌ Error: {results}")
             return False
 
         # Show updated status
         print("\n📊 Updated Sonnet 4 Status:")
         updated_status = sonnet4_hub.get_global_status()
         for key, value in updated_status.items():
-            print(f"   • {key}: {value}")
+    pass
+            print("   • {key}: {value}")
 
         print("\n🎯 Claude Sonnet 4 Features Enabled:")
         print("   • Quantum Bridge Integration")
@@ -59,12 +64,13 @@ async def main():
         print("\n✨ Aurora CloudBank Symbolic with Claude Sonnet 4 is ready!")
         return True
 
-    except Exception as e:
-        logger.error("Failed to enable Sonnet 4: %s", e)
-        print(f"❌ Failed to enable Claude Sonnet 4: {e}")
+    except Exception as _:
+    pass
+        pass  # Exception logged
+        print("❌ Failed to enable Claude Sonnet 4: {e}")
         return False
 
-
 if __name__ == "__main__":
+    pass
     success = asyncio.run(main())
     sys.exit(0 if success else 1)

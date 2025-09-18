@@ -7,6 +7,7 @@ from modules.symbolic_core.quantum_vsa import (
 
 
 def test_quantum_symbolic_vector_shape():
+    pass
     vec = quantum_symbolic_vector("alpha", dim=8)
     assert isinstance(vec, np.ndarray)
     assert vec.shape == (8,)
@@ -14,6 +15,7 @@ def test_quantum_symbolic_vector_shape():
 
 
 def test_quantum_symbolic_vector_class():
+    pass
     qsv = QuantumSymbolicVector("beta", dim=8)
     # Accept either list or np.ndarray for vector, but check shape and values
     arr = np.array(qsv.vector)

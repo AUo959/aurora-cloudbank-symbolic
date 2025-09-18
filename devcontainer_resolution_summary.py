@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-from pathlib import Path
-import sys
+
 """
 DevContainer Conflict Resolution Summary
 Final status after resolving devcontainer merge conflicts
 """
-
 
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent))
 
 
 def main():
+    pass
     """Generate conflict resolution summary"""
     print("🎉 DEVCONTAINER CONFLICT RESOLUTION COMPLETE")
     print("=" * 60)
@@ -61,4 +60,5 @@ def main():
 
 
 if __name__ == "__main__":
+    pass
     main()

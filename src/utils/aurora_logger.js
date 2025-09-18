@@ -72,11 +72,11 @@ class AuroraLogger {
       fs.appendFileSync(logFile, logLine);
     } catch (error) {
       // Fallback - minimal error handling to prevent logging loops
-      /* eslint-disable no-console */
+       
       if (this.enableConsole) {
         console.error(`[AURORA_LOGGER] File logging failed: ${error.message}`);
       }
-      /* eslint-enable no-console */
+       
     }
   }
 
@@ -111,11 +111,11 @@ class AuroraLogger {
 
     // Write to console if enabled (ESLint exception for logging utility)
     if (this.enableConsole) {
-      /* eslint-disable no-console */
+       
       const consoleMethod = level === 'ERROR' ? console.error :
         level === 'WARN' ? console.warn : console.log;
       consoleMethod(formatted.console);
-      /* eslint-enable no-console */
+       
     }
 
     // Write to file

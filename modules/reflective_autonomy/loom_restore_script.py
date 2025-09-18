@@ -7,6 +7,9 @@
 # (Executed externally; not inside GPT sandbox)
 
 # Example shell commands:
+from reflective_autonomy_loop import ReflectiveAutonomyLoop
+import yaml
+pass
 #
 # git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git
 # cd aurora-cloudbank-symbolic/modules/reflective_autonomy
@@ -15,16 +18,15 @@
 # STEP 2 — Rehydrate Code Modules
 # ====================================
 # In GPT runtime or symbolic agent environment:
-
+pass
 # Load Governance Capsule Descriptor (for symbolic agents)
-import yaml
-from reflective_autonomy_loop import ReflectiveAutonomyLoop
 
 # ====================================
 # STEP 3 — Reinitialize Reflective State
 
 governance_path = "loom_governance_system.yaml"
 with open(governance_path, "r") as f:
+    pass
     governance_config = yaml.safe_load(f)
 
 print("[LOOM RESTORE] Governance Capsule Loaded")

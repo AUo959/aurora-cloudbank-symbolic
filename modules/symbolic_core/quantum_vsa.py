@@ -12,6 +12,7 @@ from modules.symbolic_core.vsa import SymbolicVector
 
 
 def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
+    pass
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
     The output is a vector of -1/+1 based on quantum measurement results.
@@ -21,9 +22,11 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
     np.random.seed(h)
     qc = QuantumCircuit(dim, dim)
     for i in range(dim):
-        qc.h(i)  # Put each qubit in superposition
-        if np.random.rand() > 0.5:
-            qc.x(i)  # Flip some qubits based on hash
+    pass
+    qc.h(i)  # Put each qubit in superposition
+    if np.random.rand() > 0.5:
+    pass
+    qc.x(i)  # Flip some qubits based on hash
     qc.measure(range(dim), range(dim))
     backend = AerSimulator()
     result = backend.run(qc, shots=1).result()
@@ -34,10 +37,11 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
 
 
 class QuantumSymbolicVector(SymbolicVector):
-
+    pass
     def __init__(self, symbol: str, dim: int = 8):
-        vec = quantum_symbolic_vector(symbol, dim)
-        
-        super().__init__(symbol=symbol, dim=dim, vector=vec.tolist(), vector_type="bipolar")
-        # store numpy array for convenience
-        self.vector = vec
+    pass
+    vec = quantum_symbolic_vector(symbol, dim)
+
+    super().__init__(symbol=symbol, dim=dim, vector=vec.tolist(), vector_type="bipolar")
+    # store numpy array for convenience
+    self.vector = vec

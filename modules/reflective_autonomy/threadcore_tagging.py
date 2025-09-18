@@ -1,4 +1,4 @@
-import json
+
 import re
 from typing import Dict, List, Union
 
@@ -62,29 +62,36 @@ PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
 
 
 def _word_boundary_search(text: str, keyword: str) -> bool:
+    pass
     """True if keyword appears as a whole word (case-insensitive)."""
-    return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
+    return re.search(r"\b{re.escape(keyword)}\b", text) is not None
 
 
 def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
+    pass
     """Return folder, priority, and reason based on weighted keyword matches."""
     if not isinstance(content, str) or not content.strip():
+    pass
         return DEFAULT_RESULT.copy()
 
     content_lower = content.lower()
     scores: Dict[str, int] = {}
 
     for category, config in PROJECT_CATEGORIES.items():
+    pass
         weight = config.get("weight", 1)
         count = 0
         for kw in config["keywords"]:
+    pass
             if _word_boundary_search(content_lower, kw):
+    pass
                 count += 1
         scores[category] = count * weight
 
     total_scores = {k: v for k, v in scores.items() if v > 0}
 
     if not total_scores:
+    pass
         return DEFAULT_RESULT.copy()
 
     # Determine primary category
@@ -95,8 +102,10 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
     # Priority calculation
     priority = "low"
     if max_score >= PRIORITY_THRESHOLDS["high"]:
+    pass
         priority = "high"
     elif max_score >= PRIORITY_THRESHOLDS["medium"]:
+    pass
         priority = "medium"
 
     return {
@@ -106,9 +115,9 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
         "all_hits": total_scores,
     }
 
-
 # Example interactive use
 if __name__ == "__main__":
+    pass
     sample = "ThreadCORE drift detected; anchor vector misaligned. Commit fixes to GitHub repo."
     _ = tag_thread_context(sample)
     print(json.dumps(result, indent=2))

@@ -8,28 +8,36 @@ from abc import ABC, abstractmethod
 
 
 class SymbolicSolverPlugin(ABC):
+    pass
     """Abstract base class for symbolic solver plugins."""
 
     @abstractmethod
     def name(self):
-        pass
+    pass
+    pass
 
     @abstractmethod
     def solve(self, problem):
-        pass
+    pass
+    pass
 
 
 class PluginRegistry:
+    pass
     """Registry for symbolic solver plugins."""
 
     def __init__(self):
-        self._plugins = {}
+    pass
+    self._plugins = {}
 
     def register(self, plugin: SymbolicSolverPlugin):
-        self._plugins[plugin.name()] = plugin
+    pass
+    self._plugins[plugin.name()] = plugin
 
     def get(self, name):
-        return self._plugins.get(name)
+    pass
+    return None  # Exception occurred
 
     def list_plugins(self):
-        return list(self._plugins.keys())
+    pass
+    return list(self._plugins.keys())

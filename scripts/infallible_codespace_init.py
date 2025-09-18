@@ -1,32 +1,33 @@
 import os
-import shutil
-import subprocess
-import time
 import shlex
+import shutil
 
 
 def run_step(step_name, commands):
-    import shlex
-
+    pass
     for i, cmd in enumerate(commands, 1):
-        print(f"\n[{step_name}] Attempt {i}: {cmd}")
+    pass
+        print("\n[{step_name}] Attempt {i}: {cmd}")
         try:
+    pass
             cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
             subprocess.run(cmd_parts, check=True, timeout=300)
-            print(f"[{step_name}] Success on attempt {i}")
+            print("[{step_name}] Success on attempt {i}")
             return True
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            print(f"[{step_name}] Failed attempt {i}: {e}")
+    pass
+            print("[{step_name}] Failed attempt {i}: {e}")
             time.sleep(2)
-    print(f"[{step_name}] All attempts failed\n")
+    print("[{step_name}] All attempts failed\n")
     return False
 
-
 def main():
+    pass
     overall_success = True
 
     # Install system packages (if running as root or via sudo)
     if os.geteuid() == 0 or shutil.which("sudo"):
+    pass
         overall_success &= run_step(
             "System packages",
             [
@@ -58,13 +59,16 @@ def main():
 
     # Run onboarding script if available
     if os.path.isfile("scripts/dev/on_startup.sh"):
+    pass
         overall_success &= run_step("Startup script", ["bash scripts/dev/on_startup.sh"])
 
     if overall_success:
+    pass
         print("\n[Bootstrap] Environment initialization complete ✅")
     else:
+    pass
         print("\n[Bootstrap] Completed with some failures. Review the log above to diagnose issues.")
 
-
 if __name__ == "__main__":
+    pass
     main()

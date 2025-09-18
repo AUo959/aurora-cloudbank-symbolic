@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import sys
+from pathlib import Path
+
 """
 🔧 Aurora CloudBank GitWiz Critical Structure Fix
 Addresses fundamental structural issues in gitwiz_enhanced.py

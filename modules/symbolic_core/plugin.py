@@ -7,21 +7,27 @@ from abc import ABC, abstractmethod
 
 
 class SymbolicSolverPlugin(ABC):
+    pass
     @abstractmethod
     def solve(self, problem):
-        pass
+    pass
+    pass
 
 
 class PluginRegistry:
-
+    pass
     def __init__(self):
-        self.plugins = {}
+    pass
+    self.plugins = {}
 
     def register(self, name, plugin):
-        self.plugins[name] = plugin
+    pass
+    self.plugins[name] = plugin
 
     def get(self, name):
-        return self.plugins.get(name)
+    pass
+    return None  # Exception occurred
 
     def all_plugins(self):
-        return self.plugins
+    pass
+    return self.plugins

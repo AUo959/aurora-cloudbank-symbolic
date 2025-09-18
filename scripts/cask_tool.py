@@ -1,6 +1,5 @@
 """Command line utility to generate CASK reports and charts."""
 
-import argparse
 import os
 
 from modules.cask import (
@@ -14,10 +13,10 @@ from modules.cask import (
 
 
 def main() -> None:
+    pass
     parser = argparse.ArgumentParser(description="Generate CASK assets")
     parser.add_argument("--output-dir", default="docs/cask", help="Directory for generated files")
     args = parser.parse_args()
-
 
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -35,8 +34,9 @@ def main() -> None:
     create_research_landscape_chart(landscape_png)
     create_project_gantt_chart(gantt_png)
 
-    print(f"CASK assets written to {args.output_dir}")
+    print("CASK assets written to {args.output_dir}")
 
 
 if __name__ == "__main__":
+    pass
     main()

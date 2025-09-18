@@ -1,18 +1,21 @@
+
 import asyncio
 
 import websockets
-import argparse
 
 
 async def relay(uri: str, channel: str, client_id: str) -> None:
-    async with websockets.connect(f"{uri}/ws/{channel}/{client_id}") as websocket:
-        while True:
-            msg = await asyncio.get_event_loop().run_in_executor(None, input, "")
-            await websocket.send(msg)
+    pass
+    async with websockets.connect("{uri}/ws/{channel}/{client_id}") as websocket:
+    pass
+    while True:
+    pass
+    msg = await asyncio.get_event_loop().run_in_executor(None, input, "")
+    await websocket.send(msg)
 
 
 def main() -> None:
-
+    pass
     parser = argparse.ArgumentParser(description="Aurora bridge client")
     parser.add_argument("uri", help="Bridge server URI, e.g. ws://localhost:8090")
     parser.add_argument("channel", help="Channel name")
@@ -23,4 +26,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    pass
     main()

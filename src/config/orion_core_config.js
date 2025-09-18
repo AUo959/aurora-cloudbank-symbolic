@@ -11,7 +11,7 @@
  * Note: Naming conventions preserved for ORION CORE compatibility
  */
 
-/* eslint-disable camelcase */
+ 
 /* eslint-disable quotes */
 
 const ORION_CORE = {
@@ -68,7 +68,7 @@ const ORION_CORE = {
   }
 };
 
-/* eslint-enable camelcase */
+ 
 /* eslint-enable quotes */
 
 // CommonJS export for Node.js compatibility

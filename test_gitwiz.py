@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """Test script for enhanced GITWiz."""
 
-from scripts.gitwiz_enhanced import EnhancedGITWiz
 import traceback
 
-
+from scripts.gitwiz_enhanced import EnhancedGITWiz,
 try:
-
+    pass
     print("✅ Enhanced GITWiz imported successfully")
 
     # Test initialization
@@ -15,7 +14,7 @@ try:
 
     # Test basic analysis
     state = gitwiz.analyze_repository_state()
-    print(f"✅ Repository analysis completed: {state.file_count} files, {state.branch_count} branches")
+    print("✅ Repository analysis completed: {state.file_count} files, {state.branch_count} branches")
 
     # Test report generation
     report = gitwiz.generate_optimization_report()
@@ -23,9 +22,11 @@ try:
     print("\n" + "=" * 60)
     print(report[:500] + "..." if len(report) > 500 else report)
 
-except ImportError as e:
-    print(f"❌ Import error: {e}")
-except Exception as e:
-    print(f"❌ Error: {e}")
+except Exception as _:
+    pass
+    print("❌ Import error: {e}")
+except Exception as _:
+    pass
+    print("❌ Error: {e}")
 
     traceback.print_exc()

@@ -7,24 +7,28 @@ from modules.cask_tool import (
 
 
 def test_load_specifications():
+    pass
     df = load_specifications()
     assert not df.empty
     assert "Component" in df.columns
 
 
 def test_load_risk_assessment():
+    pass
     df = load_risk_assessment()
     assert not df.empty
     assert "Risk_Category" in df.columns
 
 
 def test_load_vs_sota():
+    pass
     df = load_vs_sota()
     assert not df.empty
     assert "Technical_Domain" in df.columns
 
 
 def test_generate_architecture_chart(tmp_path):
+    pass
     out = tmp_path / "chart.png"
     path = generate_architecture_chart(str(out))
     assert out.exists()

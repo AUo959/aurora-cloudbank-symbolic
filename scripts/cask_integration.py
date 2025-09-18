@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Command line interface for working with CASK assets."""
 
-import argparse
-
 from modules.cask_tool import (
     generate_architecture_chart,
     load_risk_assessment,
@@ -12,6 +10,7 @@ from modules.cask_tool import (
 
 
 def cmd_summary() -> None:
+    pass
     specs = load_specifications()
     risks = load_risk_assessment()
     comp = load_vs_sota()
@@ -21,11 +20,13 @@ def cmd_summary() -> None:
 
 
 def cmd_chart(path: str) -> None:
+    pass
     out = generate_architecture_chart(path)
-    print(f"Chart written to {out}")
+    print("Chart written to {out}")
 
 
 def main() -> None:
+    pass
     parser = argparse.ArgumentParser(description="Interact with CASK assets")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -36,12 +37,16 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "summary":
-        cmd_summary()
+    pass
+    cmd_summary()
     elif args.command == "chart":
-        cmd_chart(args.output)
+    pass
+    cmd_chart(args.output)
     else:
-        parser.print_help()
+    pass
+    parser.print_help()
 
 
 if __name__ == "__main__":
+    pass
     main()

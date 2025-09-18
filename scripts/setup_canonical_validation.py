@@ -1,18 +1,17 @@
-import subprocess
 
 # !/usr/bin/env python3
 """
 
         from canonical_validator import CanonicalValidator
-from pathlib import Path
+
 import os
-import sys
 
 Aurora CloudBank Canonical Validation System - Setup Script
 Installs and configures the canonical validation mechanism
 
 This script:
-1. Sets up Git hooks for automatic validation
+    pass
+    1. Sets up Git hooks for automatic validation
 2. Installs required dependencies
 3. Configures validation rules
 4. Tests the validation system
@@ -20,12 +19,8 @@ This script:
 """
 
 
-import os
-import sys
-from pathlib import Path
-
-
 def print_header():
+    pass
     """Print setup header"""
     print("🛰️ Aurora CloudBank Canonical Validation System Setup")
     print("=" * 60)
@@ -34,6 +29,7 @@ def print_header():
 
 
 def check_dependencies():
+    pass
     """Check and install required dependencies"""
     print("📦 Checking dependencies...")
 
@@ -45,31 +41,38 @@ def check_dependencies():
     missing_packages = []
 
     for package in required_packages:
+    pass
         try:
+    pass
             __import__(package.replace("-", "_"))
-            print(f"  ✅ {package}")
+            print("  ✅ {package}")
         except ImportError:
+    pass
             missing_packages.append(package)
-            print(f"  ❌ {package} (missing)")
+            print("  ❌ {package} (missing)")
 
     if missing_packages:
-        print(f"\n📥 Installing missing packages: {', '.join(missing_packages)}")
+    pass
+        print("\n📥 Installing missing packages: {', '.join(missing_packages)}")
         try:
+    pass
             subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
             print("✅ Dependencies installed successfully")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to install dependencies: {e}")
+    pass
+            print("❌ Failed to install dependencies: {e}")
             return False
 
     return True
 
-
 def setup_git_hooks():
+    pass
     """Set up Git hooks for validation"""
     print("\n🔗 Setting up Git hooks...")
 
     git_dir = Path(".git")
     if not git_dir.exists():
+    pass
         print("  ⚠️ Not a Git repository - skipping Git hooks setup")
         return True
 
@@ -84,7 +87,9 @@ python3 scripts/git_pre_commit_hook.py
 """
 
     try:
+    pass
         with open(pre_commit_hook, "w", encoding="utf-8") as f:
+    pass
             f.write(hook_content)
 
         # Make executable
@@ -92,49 +97,55 @@ python3 scripts/git_pre_commit_hook.py
         print("  ✅ Pre-commit hook installed")
 
         return True
-    except Exception as e:
-        print(f"  ❌ Failed to setup Git hooks: {e}")
+    except Exception as _:
+    pass
+        print("  ❌ Failed to setup Git hooks: {e}")
         return False
 
-
 def create_validation_scripts():
+    pass
     """Ensure validation scripts are executable"""
     print("\n🔧 Configuring validation scripts...")
 
     scripts = ["scripts/canonical_validator.py", "scripts/git_pre_commit_hook.py", "scripts/continuous_validator.py"]
 
     for script_path in scripts:
+    pass
         script = Path(script_path)
         if script.exists():
+    pass
             # Make executable
             os.chmod(script, 0o755)
-            print(f"  ✅ {script.name} configured")
+            print("  ✅ {script.name} configured")
         else:
-            print(f"  ❌ {script.name} not found")
+    pass
+            print("  ❌ {script.name} not found")
             return False
 
     return True
 
-
 def create_validation_directories():
+    pass
     """Create necessary directories for validation"""
     print("\n📁 Creating validation directories...")
 
     directories = ["config", "logs", "reports"]
 
     for dir_name in directories:
+    pass
         dir_path = Path(dir_name)
         dir_path.mkdir(exist_ok=True)
-        print(f"  ✅ {dir_name}/ directory ready")
+        print("  ✅ {dir_name}/ directory ready")
 
     return True
 
-
 def test_validation_system():
+    pass
     """Test the validation system"""
     print("\n🧪 Testing validation system...")
 
     try:
+    pass
         # Import and test validator
         sys.path.insert(0, "scripts")
 
@@ -144,21 +155,24 @@ def test_validation_system():
         # Test configuration loading
         config_file = Path("config/canonical_validation.yaml")
         if config_file.exists():
+    pass
             print("  ✅ Configuration file found")
         else:
+    pass
             print("  ⚠️ Configuration file not found - using defaults")
 
         # Run quick validation test
         test_results = validator.validate_file("GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt")
-        print(f"  ✅ Test validation completed ({len(test_results)} checks)")
+        print("  ✅ Test validation completed ({len(test_results)} checks)")
 
         return True
-    except Exception as e:
-        print(f"  ❌ Validation system test failed: {e}")
+    except Exception as _:
+    pass
+        print("  ❌ Validation system test failed: {e}")
         return False
 
-
 def create_usage_documentation():
+    pass
     """Create usage documentation"""
     print("\n📚 Creating usage documentation...")
 
@@ -308,13 +322,14 @@ python3 scripts/canonical_validator.py --file myfile.md --auto-fix
 """
 
     with open("CANONICAL_VALIDATION_USAGE.md", "w", encoding="utf-8") as f:
+    pass
         f.write(usage_doc)
 
     print("  ✅ Usage documentation created")
     return True
 
-
 def main():
+    pass
     """Main setup function"""
     print_header()
 
@@ -330,19 +345,25 @@ def main():
     failed_steps = []
 
     for step_name, step_function in setup_steps:
+    pass
         try:
+    pass
             if not step_function():
+    pass
                 failed_steps.append(step_name)
-        except Exception as e:
-            print(f"❌ {step_name} setup failed: {e}")
+        except Exception as _:
+    pass
+            print("❌ {step_name} setup failed: {e}")
             failed_steps.append(step_name)
 
     print("\n" + "=" * 60)
 
     if failed_steps:
-        print(f"⚠️ Setup completed with issues in: {', '.join(failed_steps)}")
+    pass
+        print("⚠️ Setup completed with issues in: {', '.join(failed_steps)}")
         print("Please review the errors above and re-run setup if needed.")
     else:
+    pass
         print("✅ Aurora CloudBank Canonical Validation System setup complete!")
         print("\n🎯 Next Steps:")
         print("1. Review configuration: config/canonical_validation.yaml")
@@ -355,6 +376,6 @@ def main():
         print("- Auto-fixes minor issues")
         print("\n🛰️ Aurora CloudBank canonical compliance is now automated!")
 
-
 if __name__ == "__main__":
+    pass
     main()

@@ -10,15 +10,18 @@ from modules.symbolic_core.symbolic_solver_plugin import (
 
 
 class DummyPlugin(SymbolicSolverPlugin):
-
+    pass
     def name(self):
-        return "dummy"
+    pass
+    return "dummy"
 
     def solve(self, problem):
-        return f"solved: {problem}"
+    pass
+    return "solved: {problem}"
 
 
 def test_plugin_registry():
+    pass
     registry = PluginRegistry()
     plugin = DummyPlugin()
     registry.register(plugin)

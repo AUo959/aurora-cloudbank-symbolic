@@ -24,11 +24,7 @@ try:
 except ImportError:
     # Allow commit if validator isn't present in this branch context.
     print("⚠️ Warning: canonical_validator not available; skipping canonical validation.")
-    def main():
-        return 0
-    if __name__ == "__main__":
-        sys.exit(main())
-    raise SystemExit(0)
+    sys.exit(0)
 
 
 def get_staged_files():

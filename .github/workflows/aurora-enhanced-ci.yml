@@ -321,7 +321,7 @@ jobs:
       - name: Install test dependencies
         run: |
           npm ci || npm install || echo "Node deps installed"
-          pip install -r requirements.txt || pip install pytest flake8 || echo "Python deps installed"
+          pip install -r requirements.txt || pip install pytest pytest-asyncio flake8 || echo "Python deps installed"
 
       - name: Run Aurora-enhanced tests
         run: |

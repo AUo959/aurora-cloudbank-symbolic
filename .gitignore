@@ -139,6 +139,9 @@ bower_components
 # Optional REPL history
 .node_repl_history
 
+# Local validation reports (not for version control)
+PRE_COMMIT_VALIDATION_ISSUES.md
+
 # Output of 'npm pack'
 *.tgz
 

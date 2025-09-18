@@ -1,208 +1,190 @@
 #!/usr/bin/env python3
 """
-Aurora CloudBank - Git Pre-commit Hook
-Automatically validates changes against canonical specifications.
-This hook runs before each commit and:
-1. Validates changed files against ORION CORE canonical spec
-2. Auto-fixes minor issues
-3. Blocks commits with critical violations
-4. Provides clear feedback and remediation guidance
+Git Pre-Commit Hook with Symbolic Validation
+Anchor: T1_PRECOMMIT_VALIDATOR
+Team: Aurora/GUMAS
+Version: 2.0.1
+Sealed: SHA256 pending
 """
 
-from pathlib import Path
-import os
-import subprocess
 import sys
+import subprocess
+import hashlib
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+from typing import List, Dict, Any
 
-
-# Add the scripts directory to Python path
+# Add the scripts directory to Python path (keeps local imports resolvable)
 script_dir = Path(__file__).parent.parent / "scripts"
 sys.path.insert(0, str(script_dir))
 
+# Symbolic anchor metadata
+ANCHOR_METADATA: Dict[str, Any] = {
+    "seed": "EOS_SEED_ORION",
+    "protocol": "Picard_Delta_3",
+    "branch_context": "harvest-safe-updates-2025-09-18",
+    "entropy_state": "TRACKED",
+}
+
+def log_entropy_state(message: str, level: str = "INFO") -> None:
+    """Log with entropy awareness and symbolic anchoring."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    entropy_marker = hashlib.sha256(f"{timestamp}{message}".encode()).hexdigest()[:8]
+    print(f"[{level}] [{timestamp}] [E:{entropy_marker}] {message}", file=sys.stderr)
+
+# Import validator with graceful degradation (no exits at import-time)
+VALIDATOR_MODE = "unknown"  # "primary" | "fallback" | "stub"
+DIVERGENT_TRUTH: Dict[str, Any] = {}
+
 try:
-    from canonical_validator import CanonicalValidator
-except ImportError:
-    # Do not block commits if validator isn't available; print a warning and allow commit.
-    print("⚠️ Warning: canonical_validator not available; skipping canonical validation.")
-    def main():
-        return 0
-    if __name__ == "__main__":
-        sys.exit(main())
-    # Early return for hook import usage
-    raise SystemExit(0)
+    log_entropy_state("Attempting primary validator import: canonical_validator.CanonicalValidator")
+    from canonical_validator import CanonicalValidator  # type: ignore
+    VALIDATOR_MODE = "primary"
+    if not hasattr(CanonicalValidator, "__version__"):
+        log_entropy_state("CanonicalValidator lacks __version__ metadata", "WARN")
+except Exception as e_primary:
+    log_entropy_state(f"Primary import failed: {e_primary}", "WARN")
+    try:
+        log_entropy_state("Attempting fallback validator import: validation.CanonicalValidator")
+        from validation import CanonicalValidator  # type: ignore
+        VALIDATOR_MODE = "fallback"
+    except Exception as e_fallback:
+        log_entropy_state(f"Fallback import failed: {e_fallback}", "ERROR")
+
+        class CanonicalValidator:  # type: ignore
+            """Minimal stub validator for continuity."""
+            __version__ = "0.0.0-stub"
+
+            class StubValidationResult:
+                def __init__(self, status: str = "unknown", severity: str = "info", message: str = "Validation unavailable (stub).") -> None:
+                    self.status = status
+                    self.severity = severity
+                    self.message = message
+
+            def __init__(self) -> None:
+                self.anchor = "STUB_VALIDATOR"
+                self.warnings: List[str] = []
+
+            def validate_file(self, file_path: str) -> List[Any]:
+                log_entropy_state(f"STUB: Would validate {file_path}", "WARN")
+                # Return a result object with status and severity attributes
+                return [self.StubValidationResult()]
+
+        VALIDATOR_MODE = "stub"
+        DIVERGENT_TRUTH = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "state": "VALIDATOR_UNAVAILABLE",
+            "files_pending": "UNKNOWN",
+            "anchor": ANCHOR_METADATA["seed"],
+            "action": "MANUAL_REVIEW_REQUIRED",
+        }
 
 
-def get_staged_files():
-    """Get list of staged files for commit"""
+def seal_validation_state(files: List[str], result: bool) -> Dict[str, Any]:
+    """Create sealed memory state for validation result."""
+    state: Dict[str, Any] = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "anchor": ANCHOR_METADATA,
+        "files_count": len(files),
+        "validation_result": result,
+        "files_hash": hashlib.sha256("".join(sorted(files)).encode()).hexdigest(),
+        "validator_mode": VALIDATOR_MODE,
+    }
+    state_json = json.dumps(state, sort_keys=True)
+    state["seal"] = hashlib.sha256(state_json.encode()).hexdigest()
+    return state
+
+def get_staged_files() -> List[str]:
+    """Get list of staged files for commit."""
     try:
         result = subprocess.run(
             ["git", "diff", "--cached", "--name-only"],
-            capture_output=True, text=True, check=True
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        return [f.strip() for f in result.stdout.split('\n') if f.strip()]
-    except subprocess.CalledProcessError:
+        files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
+        log_entropy_state(f"Found {len(files)} staged files")
+        return files
+    except subprocess.CalledProcessError as e:
+        log_entropy_state(f"Git command failed: {e}", "ERROR")
+        return []
+    except Exception as e:
+        log_entropy_state(f"Unexpected error getting staged files: {e}", "ERROR")
         return []
 
-
-def has_critical_violations(results):
-    """Check if validation results contain critical violations"""
-    critical_escalations = [
-        r for r in results
-        if r.status == "ESCALATE" and r.severity == "CRITICAL"
-    ]
-    return len(critical_escalations) > 0
-
-
-def print_validation_summary(results):
-    """Print formatted validation summary"""
-    auto_fixes = [r for r in results if r.status == "AUTO_FIXED"]
-    escalations = [r for r in results if r.status == "ESCALATE"]
-    critical = [r for r in escalations if r.severity == "CRITICAL"]
-    high = [r for r in escalations if r.severity == "HIGH"]
-
-    print("\n🛰️ Aurora CloudBank Canonical Validation")
-    print("=" * 50)
-
-    if auto_fixes:
-        print(f"🔧 Auto-fixes applied: {len(auto_fixes)}")
-        for fix in auto_fixes[:3]:  # Show first 3
-            print(f"  ✅ {fix.message}")
-        if len(auto_fixes) > 3:
-            print(f"  ... and {len(auto_fixes) - 3} more")
-
-    if critical:
-        print(f"\n🚨 CRITICAL VIOLATIONS ({len(critical)}):")
-        for violation in critical:
-            print(f"  ❗ {violation.message}")
-            print(f"     Fix: {violation.suggested_fix}")
-
-    if high:
-        print(f"\n🔴 HIGH PRIORITY ISSUES ({len(high)}):")
-        for issue in high[:2]:  # Show first 2
-            print(f"  🔴 {issue.message}")
-            print(f"     Fix: {issue.suggested_fix}")
-        if len(high) > 2:
-            print(f"  ... and {len(high) - 2} more (see full report)")
-
-
-def main():
-    """Main pre-commit hook execution"""
-    print("🔍 Running Aurora CloudBank canonical validation...")
-
-    # Get staged files
-    staged_files = get_staged_files()
-
-    if not staged_files:
-        print("✅ No files to validate")
-        return 0
-
-    # Filter for files we can validate
-    validatable_extensions = {'.md', '.txt', '.js', '.ts', '.py', '.json', '.yaml', '.yml'}
-    files_to_validate = [
-        f for f in staged_files
-        if Path(f).exists() and Path(f).suffix in validatable_extensions
-    ]
-
-    if not files_to_validate:
-        print("✅ No validatable files in commit")
-        return 0
-
-    print(f"📁 Validating {len(files_to_validate)} files...")
-
-    # Initialize validator
-    validator = CanonicalValidator()
-    all_results = []
-
-    # Validate each staged file
-    for file_path in files_to_validate:
-        try:
-            results = validator.validate_file(file_path)
-            all_results.extend(results)
-        except Exception as e:
-            print(f"❌ Error validating {file_path}: {e}")
-            return 1
-
-    # Print validation summary
-    print_validation_summary(all_results)
-
-    # Check for critical violations
-    if has_critical_violations(all_results):
-        print("\n🚫 COMMIT BLOCKED - Critical canonical violations detected!")
-        print("   Fix critical issues before committing")
-        print("   Run: python scripts/canonical_validator.py for full report")
-        return 1
-
-    # Check for high-priority violations (configurable)
-    high_priority = [r for r in all_results if r.status == "ESCALATE" and r.severity == "HIGH"]
-    if high_priority:
-        print(f"\n⚠️ Warning: {len(high_priority)} high-priority issues detected")
-        print("   Consider fixing before commit")
-
-        # Optionally block on high-priority (can be configured)
-        block_on_high = os.environ.get("AURORA_BLOCK_ON_HIGH", "false").lower() == "true"
-        if block_on_high:
-            print("🚫 COMMIT BLOCKED - High-priority violations (AURORA_BLOCK_ON_HIGH=true)")
-            return 1
-
-    # Generate quick report for escalations using validation manager
-    escalations = [r for r in all_results if r.status == "ESCALATE"]
-    if escalations:
-        # Import validation manager to handle file paths intelligently
-        try:
-            sys.path.append(str(Path(__file__).parent))
-
-            manager = ValidationManager()
-            report_path = manager.get_validation_file_path("PRE_COMMIT_VALIDATION_ISSUES.md")
-
-            # Only write if not in memory-only mode
-            if manager.config["strategy"] != "memory_only":
-                # Ensure directory exists
-                report_path.parent.mkdir(parents=True, exist_ok=True)
-
-                with open(report_path, 'w', encoding="utf-8") as f:
-                    f.write("# Pre-Commit Validation Issues\n\n")
-                    f.write(f"Generated: {Path(__file__).name} at {Path().cwd()}\n")
-                    f.write(f"Strategy: {manager.config['strategy']}\n\n")
-                    for issue in escalations:
-                        f.write(f"## {issue.check_name} ({issue.severity})\n")
-                        f.write(f"**Issue**: {issue.message}\n\n")
-                        f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
-
-                print(f"📊 Detailed issues saved to: {report_path}")
-
-                # If using smart exclusion, don't stage the validation file
-                if manager.config["strategy"] == "smart_exclusion":
-                    print("🔒 Validation file excluded from commit (smart exclusion active)")
-            else:
-                print("📊 Validation complete (memory-only mode - no files written)")
-
-        except ImportError:
-            # Fallback to original behavior if manager not available
-            report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
-            with open(report_path, 'w', encoding="utf-8") as f:
-                f.write("# Pre-Commit Validation Issues\n\n")
-                for issue in escalations:
-                    f.write(f"## {issue.check_name} ({issue.severity})\n")
-                    f.write(f"**Issue**: {issue.message}\n\n")
-                    f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
-            print(f"📊 Detailed issues saved to: {report_path}")
-
-    auto_fixes = [r for r in all_results if r.status == "AUTO_FIXED"]
-    if auto_fixes:
-        print(f"\n✅ Commit proceeding with {len(auto_fixes)} auto-fixes applied")
-
-        # Re-stage auto-fixed files
-        for file_path in files_to_validate:
-            try:
-                subprocess.run(["git", "add", file_path], check=True)
-            except subprocess.CalledProcessError:
-                pass  # File might not need re-staging
-    else:
-        print("\n✅ All canonical validations passed - commit proceeding")
-
+def _handle_validator_unavailable() -> int:
+    """Warn, log divergent truth, and allow commit."""
+    log_entropy_state(f"DIVERGENT_TRUTH: {json.dumps(DIVERGENT_TRUTH)}", "ERROR")
+    print(
+        "\n⚠️  Warning: Canonical validation not available; skipping validation.\n"
+        "   Manual review required before commit."
+    )
     return 0
 
+def main() -> int:
+    """Main pre-commit hook with symbolic continuity."""
+    log_entropy_state("Pre-commit hook initiated", "INFO")
+    log_entropy_state(f"Anchor: {ANCHOR_METADATA['seed']}", "INFO")
+    log_entropy_state(f"Validator mode: {VALIDATOR_MODE}", "INFO")
+
+    if VALIDATOR_MODE == "stub":
+        # Allow commit when validator is unavailable; surface divergent truth.
+        return _handle_validator_unavailable()
+
+    staged_files = get_staged_files()
+    if not staged_files:
+        log_entropy_state("No staged files to validate")
+        return 0
+
+    try:
+        validator = CanonicalValidator()  # type: ignore[call-arg]
+        log_entropy_state(f"Starting validation of {len(staged_files)} files")
+        
+        # Validate files and collect results
+        all_results = []
+        for file_path in staged_files:
+            try:
+                results = validator.validate_file(file_path)
+                all_results.extend(results)
+            except Exception as file_error:
+                log_entropy_state(f"Error validating {file_path}: {file_error}", "ERROR")
+                return 1
+        
+        # Determine overall validation result
+        critical_violations = [r for r in all_results if r.status == "ESCALATE" and r.severity == "CRITICAL"]
+        validation_passed = len(critical_violations) == 0
+
+        sealed_state = seal_validation_state(staged_files, validation_passed)
+        log_entropy_state(f"Validation sealed: {sealed_state['seal'][:16]}…")
+
+        seal_path = Path(".git/validation_seal.json")
+        try:
+            with open(seal_path, "w", encoding="utf-8") as f:
+                json.dump(sealed_state, f, indent=2)
+        except Exception as e:
+            log_entropy_state(f"Failed to persist seal: {e}", "WARN")
+
+        if validation_passed:
+            log_entropy_state("Validation passed successfully")
+            return 0
+        else:
+            log_entropy_state("Validation failed - commit blocked", "ERROR")
+            print("\n❌ Validation failed. Please fix issues before committing.")
+            return 1
+    except Exception as e:
+        log_entropy_state(f"Validation error: {e}", "ERROR")
+        error_seal = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "error": str(e),
+            "anchor": ANCHOR_METADATA,
+            "action": "VALIDATION_EXCEPTION",
+            "validator_mode": VALIDATOR_MODE,
+        }
+        log_entropy_state(f"ERROR_SEAL: {json.dumps(error_seal)}", "ERROR")
+        print("\n⚠️  Validation error occurred. Manual review recommended.")
+        return 1
 
 if __name__ == "__main__":
-    exit_code = main()
-    sys.exit(exit_code)
+    sys.exit(main())

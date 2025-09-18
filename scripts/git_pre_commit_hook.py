@@ -56,13 +56,20 @@ except Exception as e_primary:
             """Minimal stub validator for continuity."""
             __version__ = "0.0.0-stub"
 
+            class StubValidationResult:
+                def __init__(self, status: str = "unknown", severity: str = "info", message: str = "Validation unavailable (stub).") -> None:
+                    self.status = status
+                    self.severity = severity
+                    self.message = message
+
             def __init__(self) -> None:
                 self.anchor = "STUB_VALIDATOR"
                 self.warnings: List[str] = []
 
             def validate_file(self, file_path: str) -> List[Any]:
                 log_entropy_state(f"STUB: Would validate {file_path}", "WARN")
-                return []  # Return empty results list
+                # Return a result object with status and severity attributes
+                return [self.StubValidationResult()]
 
         VALIDATOR_MODE = "stub"
         DIVERGENT_TRUTH = {

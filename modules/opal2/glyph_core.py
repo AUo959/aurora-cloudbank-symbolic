@@ -1,7 +1,5 @@
 """Opal2 Glyph Core
-from pathlib import Path
-import time
-===================
+====================
 
 This module provides glyph generation utilities that combine geometric algebra
 and quantum symbolic vectors. It acts as a lightweight "graphics card" for the
@@ -38,8 +36,7 @@ class GlyphGenerator:
         self.dim = dim
         self.ga = GeometricAlgebra()
 
-    
-        def generate(self, symbol: str) -> Dict[str, object]:
+    def generate(self, symbol: str) -> Dict[str, object]:
         """Generate a glyph representation for ``symbol``.
 
         Returns a dictionary with the quantum symbolic vector and a textual
@@ -51,16 +48,17 @@ class GlyphGenerator:
         mv = 0
         blades = [self.ga.blades["e1"], self.ga.blades["e2"], self.ga.blades["e3"]]
         for idx, ch in enumerate(symbol):
-        blade = blades[idx % 3]
+            blade = blades[idx % 3]
             mv = mv + (1 + (ord(ch) % 3)) * blade
         mv = self.ga.mult(mv, blades[0])
 
-        
+        # Provide a consistent return shape used by tests and callers
         return {
             "symbol": symbol,
-            "quantum_vector": qvec,  # Include the full qvec object for backward compatibility
-            "vector": qvec.vector,  # Retain the vector attribute for new functionality
+            "quantum_vector": qvec,           # full object for backward compatibility
+            "vector": qvec.vector,             # numeric vector
             "multivector": str(mv),
+            "glyph_data": {"length": len(symbol)},  # lightweight metadata
         }
 
 
@@ -83,7 +81,7 @@ class GlyphCore:
         """Async glyph generation with quantum enhancement"""
         try:
             # Extract symbol from expression
-        symbol = expression.get("symbol", str(expression))
+            symbol = expression.get("symbol", str(expression))
 
             # Generate base glyph
             base_glyph = await asyncio.to_thread(self.generator.generate, symbol)
@@ -97,9 +95,8 @@ class GlyphCore:
                 base_glyph["quantum_enhanced"] = True
                 enhancement_factor = 1.5
                 if style_params:
-        enhancement_factor = style_params.get("enhancement_factor", 1.5)
-                
-        base_glyph["enhancement_factor"] = enhancement_factor
+                    enhancement_factor = style_params.get("enhancement_factor", 1.5)
+                base_glyph["enhancement_factor"] = enhancement_factor
 
             # Add metadata
             base_glyph.update(
@@ -110,20 +107,18 @@ class GlyphCore:
                 }
             )
 
-            
-        return base_glyph
+            return base_glyph
 
         except Exception as e:
             self.logger.error(f"Error generating glyph: {e}")
-            
-        raise
+            raise
 
     async def test_generation(self) -> Dict[str, Any]:
         """Test glyph generation functionality"""
         try:
             test_expression = {"symbol": "test"}
-        result = await self.generate_async(test_expression)            
-        return {
+            result = await self.generate_async(test_expression)
+            return {
                 "success": True,
                 "test_symbol": "test",
                 "generated_keys": list(result.keys()),

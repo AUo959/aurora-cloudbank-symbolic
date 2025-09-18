@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import json
+from typing import List, Optional
 # import subprocess
 """
 Aurora CloudBank Symbolic - Canonical Validation Engine

@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
 """Utilities for interacting with the CASK reference assets.
 
-    import plotly.graph_objects as go
-import os
-import zipfile
-
-
 This module loads data from ``CASK_Assets.zip`` and provides helper
 functions to parse the included CSV files as pandas ``DataFrame``
 objects. It can also generate a simplified architecture chart for
 quick visualization.
 """
 
-
-import os
-import pandas as pd
 from io import StringIO
+import os
 import zipfile
+
+import pandas as pd
+try:  # optional dependency; tests should not hard-require kaleido
+    import plotly.graph_objects as go
+except Exception as _e:  # graceful fallback if plotly unavailable
+    go = None
 
 
 ASSET_ZIP = "CASK_Assets.zip"
@@ -52,6 +51,12 @@ def load_vs_sota() -> pd.DataFrame:
 
 def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
     """Generate a simple architecture diagram and return the output path."""
+    if go is None:
+        # Fallback to a noop artifact when Plotly isn't available
+        html_output = output.replace(".png", ".html")
+        with open(html_output, "w", encoding="utf-8") as f:
+            f.write("<html><body><h3>CASK Architecture (plotly not available)</h3></body></html>")
+        return html_output
 
     fig = go.Figure()
     colors = {
@@ -91,10 +96,15 @@ def generate_architecture_chart(output: str = "cask_architecture.png") -> str:
         title="CASK Architecture (simplified)",
     )
     try:
+        # First try: direct image write (requires kaleido or orca)
         fig.write_image(output)
     except Exception:
-        # Fallback to HTML if image writing fails
-        html_output = output.replace(".png", ".html")
-        fig.write_html(html_output)
-        return html_output
+        # Fallback 1: try to write via kaleido if available implicitly
+        try:
+            fig.write_image(output, engine="kaleido")
+        except Exception:
+            # Fallback 2: write interactive HTML instead
+            html_output = output.replace(".png", ".html")
+            fig.write_html(html_output)
+            return html_output
     return output

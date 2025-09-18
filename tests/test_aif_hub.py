@@ -17,12 +17,15 @@ def test_websocket_broadcast():
     pass
     with client.websocket_connect("/ws", headers={"Authorization": "Bearer test-token"}) as ws1:
     pass
+    pass
     with client.websocket_connect("/ws", headers={"Authorization": "Bearer test-token"}) as ws2:
+    pass
     pass
     ws1.send_text("anchor")
     data = ws2.receive_text()
     assert data == "anchor"
     except Exception as _:
+    pass
     pass
     # If there's a compatibility issue, skip the test for now
     pytest.skip("WebSocket test skipped due to compatibility issue: {e}")

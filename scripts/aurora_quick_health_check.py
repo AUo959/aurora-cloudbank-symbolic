@@ -16,6 +16,7 @@ def quick_health_check():
     issues.append("pip not working")
     except BaseException:
     pass
+    pass
     issues.append("pip check failed")
 
     # Check critical packages,
@@ -24,6 +25,7 @@ def quick_health_check():
     # These should be available in most Python environments
     pass
     except Exception as _:
+    pass
     pass
     issues.append("Import error: {e}")
 
@@ -38,6 +40,7 @@ if __name__ == "__main__":
     print("✅ Dependencies healthy")
     sys.exit(0)
     else:
+    pass
     pass
     print("❌ Issues found: {', '.join(issues)}")
     sys.exit(1)

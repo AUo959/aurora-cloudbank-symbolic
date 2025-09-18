@@ -99,6 +99,7 @@ def main():
 
     except Exception as _:
     pass
+    pass
     print("\n❌ Test failed: {e}")
     traceback.print_exc()
     return 1

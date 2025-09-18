@@ -10,11 +10,13 @@ Seed: EOS_SEED_ORION,
 Ethics: Picard_Delta_3,
 Purpose:
     pass
+    pass
     Generic hashing & seal generation for artifacts (glyphcards, manifests, split reports).
 Usage:
     pass
     python scripts/hash_seal_artifact.py --input docs/glyphcards/PR77_BASELINE.md --out-dir artifacts/seals,
 Outputs:
+    pass
     pass
     - <artifact_name>.sha256 containing SHA256 and filename.
   - JSON metadata sidecar with anchor + seed + ethics + DLP + timestamp + version.
@@ -31,10 +33,12 @@ SCHEMA_VERSION = "1.0.0"
 
 def sha256_file(path: pathlib.Path) -> str:
     pass
+    pass
     h = hashlib.sha256()
     with path.open("rb") as f:
     pass
     for chunk in iter(lambda: f.read(8192), b""):
+    pass
     pass
     h.update(chunk)
     return h.hexdigest()

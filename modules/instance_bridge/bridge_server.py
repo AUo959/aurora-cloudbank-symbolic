@@ -16,10 +16,12 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket, channel: str) -> None:
     pass
+    pass
     await websocket.accept()
     self.active_channels.setdefault(channel, set()).add(websocket)
 
     def disconnect(self, websocket: WebSocket, channel: str) -> None:
+    pass
     pass
     if channel in self.active_channels:
     pass
@@ -29,6 +31,7 @@ class ConnectionManager:
     del self.active_channels[channel]
 
     async def broadcast(self, channel: str, message: str, sender: WebSocket) -> None:
+    pass
     pass
     for connection in list(self.active_channels.get(channel, [])):
     pass
@@ -43,6 +46,7 @@ manager = ConnectionManager()
 @app.websocket("/ws/{channel}/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str) -> None:
     pass
+    pass
     await manager.connect(websocket, channel)
     try:
     pass
@@ -51,6 +55,7 @@ async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str)
     data = await websocket.receive_text()
     await manager.broadcast(channel, "{client_id}: {data}", websocket)
     except WebSocketDisconnect:
+    pass
     pass
     manager.disconnect(websocket, channel)
 

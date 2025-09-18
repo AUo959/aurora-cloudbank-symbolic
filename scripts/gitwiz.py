@@ -17,11 +17,13 @@ class GITWiz:
 
     def __init__(self, root: Path | None = None) -> None:
     pass
+    pass
         self.project_root = root or Path(__file__).resolve().parent.parent
 
     # ------------------------------------------------------------------ utils
 
     def _run(self, cmd: list[str], check: bool = False) -> bool:
+    pass
     pass
         """Run a command in the project root and echo output."""
         print("+ {' '.join(cmd)}")
@@ -30,19 +32,16 @@ class GITWiz:
                                             text=True,
                                             capture_output=True,
                                             shell=False,
-                                            check=False,
+                                            check=False
                                             )
 
         if result.stdout:
-    pass
             print(result.stdout)
 
         if result.stderr:
-    pass
             print(result.stderr)
 
         if check and result.returncode != 0:
-    pass
             raise RuntimeError("Command failed: {' '.join(cmd)}")
 
         return result.returncode == 0
@@ -50,14 +49,11 @@ class GITWiz:
     # ----------------------------------------------------------------- actions
 
     def status(self) -> bool:
-    pass
         return self._run(["git", "status"])
 
         def lint_python(self) -> bool:
-    pass
         """Run flake8 if available."""
         if shutil.which("flake8"):
-    pass
             return self._run(["flake8"])
 
         print("flake8 not found; skipping Python lint")
@@ -65,23 +61,18 @@ class GITWiz:
         return True
 
     def lint_js(self) -> bool:
-    pass
         if (self.project_root / "package.json").exists():
-    pass
             return self._run(["npm", "run", "lint"])
 
         return True
 
     def test(self) -> bool:
-    pass
         if (self.project_root / "tests").exists():
-    pass
             return self._run(["pytest", "-q"])
 
         return True
 
     def precheck(self) -> bool:
-    pass
         """Run repository status, lint and tests."""
         all_passed = True
         all_passed &= self.status()
@@ -95,26 +86,24 @@ class GITWiz:
         return all_passed
 
     def fix(self) -> bool:
-    pass
         """Apply automatic formatting and lint fixes."""
         self._run(["black", "."])
 
         self._run(["isort", "."])
 
         if (self.project_root / "package.json").exists():
-    pass
             self._run(["npx", "eslint", "src", "--fix"])
 
         return True
 
     def commit(self, message: str) -> bool:
     pass
+    pass
         self._run(["git", "add", "."], check=True)
 
         return self._run(["git", "commit", "-m", message])
 
         def deploy(self) -> bool:
-    pass
         """Run precheck, commit results and prepare for push."""
         self.precheck()
 
@@ -124,17 +113,18 @@ class GITWiz:
 
     def push(self, branch: str = "main") -> bool:
     pass
+    pass
         """Push the current branch to origin."""
         return self._run(["git", "push", "origin", branch])
 
     # ------------------------------------------------------------- branch utils
 
     def branch_list(self) -> bool:
-    pass
         """List local and remote branches."""
         return self._run(["git", "branch", "-a"])
 
         def branch_create(self, name: str, base: str = "main") -> bool:
+    pass
     pass
         """Create a new branch from the given base."""
         self._run(["git", "checkout", base], check=True)
@@ -143,15 +133,18 @@ class GITWiz:
 
         def branch_checkout(self, name: str) -> bool:
     pass
+    pass
         """Switch to the specified branch."""
         return self._run(["git", "checkout", name])
 
         def branch_delete(self, name: str) -> bool:
     pass
+    pass
         """Delete the specified branch locally."""
         return self._run(["git", "branch", "-d", name])
 
         def branch_merge(self, source: str, target: str = "main") -> bool:
+    pass
     pass
         """Merge source branch into target."""
         self.branch_checkout(target)
@@ -162,15 +155,13 @@ class GITWiz:
 
     def create_pr(self, title: str | None = None, body: str | None = None) -> bool:
     pass
+    pass
         """Create a pull request using GitHub CLI if available."""
         if shutil.which("gh"):
-    pass
         cmd = ["gh", "pr", "create"]
            if title:
-    pass
                 cmd += ["--title", title]
             if body:
-    pass
                 cmd += ["--body", body]
             cmd.append("--fill")
 
@@ -212,65 +203,80 @@ def main() -> None:
 
         match args.cmd:
     pass
+    pass
         case "status":
+    pass
     pass
             wiz.status()
 
         case "precheck":
     pass
+    pass
             wiz.precheck()
 
         case "fix":
+    pass
     pass
             wiz.fix()
 
         case "deploy":
     pass
+    pass
             wiz.deploy()
 
         case "push":
+    pass
     pass
             wiz.push(args.branch)
 
         case "branch":
     pass
+    pass
             match args.branch_cmd:
     pass
+    pass
                 case "list":
+    pass
     pass
                     wiz.branch_list()
 
         case "create":
     pass
+    pass
             wiz.branch_create(args.name, args.base)
 
         case "checkout":
+    pass
     pass
             wiz.branch_checkout(args.name)
 
         case "delete":
     pass
+    pass
             wiz.branch_delete(args.name)
 
         case "merge":
+    pass
     pass
             wiz.branch_merge(args.source, args.target)
 
         case _:
     pass
+    pass
             branch_p.print_help()
 
         case "pr":
+    pass
     pass
             wiz.create_pr(args.title, args.body)
 
         case _:
     pass
+    pass
             parser.print_help()
 
 if __name__ == "__main__":  # pragma: no cover - script entry point,
     try:
-    pass
         main()
     except RuntimeError as exc:  # Basic error handling to stop on failed cmd
         print(exc)

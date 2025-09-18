@@ -21,9 +21,11 @@ class BranchManager:
 
     def __init__(self, repo_path: str = "."):
     pass
+    pass
         """Initialize branch manager.
 
         Args:
+    pass
     pass
             repo_path: Path to git repository
         """
@@ -49,15 +51,14 @@ class BranchManager:
         }
 
     def get_branch_info(self) -> List[Dict]:
-    pass
         """Get detailed branch information including dates and merge status.
 
         Returns:
     pass
+    pass
             List of branch info dictionaries
         """
         try:
-    pass
             # Get all remote branches with dates
         cmd = [
                 "git",
@@ -70,33 +71,29 @@ class BranchManager:
         text=True,
                 cwd=self.repo_path,
         shell=False,
-                check=False,
+                check=False
             )
 
         if result.returncode != 0:
-    pass
                 print("Error getting branch info: {result.stderr}")
 
         return []
 
             branches = []
             for line in result.stdout.strip().split("\n"):
-    pass
                 if not line:
-    pass
                     continue
         parts = line.split("|", 3)
 
         if len(parts) >= 4:
-    pass
                     branch_name, date_str, author, subject = parts
 
                     # Parse date,
                     try:
-    pass
         commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
                     except ValueError:
+    pass
     pass
         days_old = 0
 
@@ -120,136 +117,125 @@ class BranchManager:
 
         except (OSError, ValueError, RuntimeError) as e:
     pass
+    pass
             print("Error analyzing branches: {e}")
 
         return []
 
     def is_branch_merged(self, branch_name: str) -> bool:
     pass
+    pass
         """Check if a branch has been merged into main.
 
         Args:
-    pass
             branch_name: Name of the branch to check,
         Returns:
+    pass
     pass
             True if branch is merged
         """
         try:
-    pass
             # Check if branch is merged into main
         cmd = ["git", "merge-base", "--is-ancestor", branch_name, "origin/main"]
             result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)
 
         return result.returncode == 0
         except (OSError, ValueError, RuntimeError):
-    pass
             return False
 
     def categorize_branch(self, branch_name: str) -> str:
+    pass
     pass
         """Categorize branch based on naming patterns.
 
         Args:
     pass
+    pass
             branch_name: Name of the branch,
         Returns:
+    pass
     pass
             Category string
         """
         # Check keep patterns first
         for pattern in self.patterns["keep"]:
-    pass
             if re.match(pattern, branch_name):
-    pass
                 return "protected"
 
         # Check stale patterns
         for pattern in self.patterns["stale"]:
-    pass
             if re.match(pattern, branch_name):
-    pass
                 if "codex" in pattern:
-    pass
                     return "codex-feature"
                 elif "dependabot" in pattern:
-    pass
                     return "dependency-update"
                 elif "alert-autofix" in pattern:
-    pass
                     return "security-fix"
                 elif "backup" in pattern:
-    pass
                     return "backup"
 
         return "other"
 
     def recommend_action(self, branch_name: str, days_old: int, is_merged: bool) -> str:
     pass
+    pass
         """Recommend action for a branch.
 
         Args:
-    pass
             branch_name: Name of the branch,
             days_old: Age of branch in days,
             is_merged: Whether branch is merged,
         Returns:
+    pass
     pass
             Recommended action
         """
         category = self.categorize_branch(branch_name)
 
         if category == "protected":
-    pass
             return "keep"
 
         if is_merged and days_old > 7:
-    pass
             return "delete"
 
         if category in ["codex-feature", "security-fix"] and days_old > 30:
-    pass
             return "archive"
 
         if category == "dependency-update" and days_old > 14:
-    pass
             return "review"
 
         if category == "backup" and days_old > 60:
-    pass
             return "archive"
 
         if days_old > 90:
-    pass
             return "review"
 
         return "keep"
 
     def execute_cleanup(self, branches: List[Dict], confirm: bool = False) -> Dict:
     pass
+    pass
         """Execute branch cleanup actions.
 
         Args:
     pass
+    pass
             branches: List of branch info dictionaries,
             confirm: Whether to actually execute deletions,
         Returns:
+    pass
     pass
             Summary of actions taken
         """
         # summary = ...  # Unused variable
 
         for branch in branches:
-    pass
             action = branch["action"]
         branch_name = branch["name"]
 
             if action == "delete" and branch["is_merged"]:
-    pass
                 if confirm and not self.dry_run:
-    pass
                     try:
-    pass
                         # Delete remote branch
                         cmd = [
                             "git",
@@ -263,53 +249,55 @@ class BranchManager:
         text=True,
                             cwd=self.repo_path,
         shell=False,
-                            check=False,
+                            check=False
                         )
 
         if result.returncode == 0:
-    pass
                             summary["deleted"].append(branch_name)
 
         else:
+    pass
     pass
                             summary["errors"].append("Failed to delete {branch_name}: {result.stderr}")
 
         except (OSError, ValueError, RuntimeError) as e:
     pass
+    pass
                         summary["errors"].append("Error deleting {branch_name}: {e}")
 
         else:
     pass
+    pass
                     summary["deleted"].append("[DRY-RUN] {branch_name}")
 
         elif action == "archive":
-    pass
                 # Create tag for archive
                 tag_name="archive/{branch_name.replace('origin/', '').replace('/', '-')}"
                 if confirm and not self.dry_run:
-    pass
                     try:
-    pass
         cmd=["git", "tag", tag_name, branch_name]
                         subprocess.run(
                             cmd,
                             capture_output=True,
         cwd=self.repo_path,
                             shell=False,
-        check=False,
+        check=False
                         )
 
         summary["archived"].append("{branch_name} -> {tag_name}")
 
         except (OSError, ValueError, RuntimeError) as e:
     pass
+    pass
                         summary["errors"].append("Error archiving {branch_name}: {e}")
 
         else:
     pass
+    pass
                     summary["archived"].append("[DRY-RUN] {branch_name} -> {tag_name}")
 
         else:
+    pass
     pass
                 summary["kept"].append(branch_name)
 
@@ -317,12 +305,15 @@ class BranchManager:
 
     def generate_report(self, branches: List[Dict]) -> str:
     pass
+    pass
         """Generate branch cleanup report.
 
         Args:
     pass
+    pass
             branches: List of branch info dictionaries,
         Returns:
+    pass
     pass
             Formatted report string
         """
@@ -339,7 +330,6 @@ class BranchManager:
         by_category={}
 
         for branch in branches:
-    pass
             action=branch["action"]
         category=branch["category"]
             by_action[action]=by_action.get(action, 0) + 1
@@ -356,7 +346,6 @@ class BranchManager:
         report.append("### By Action:")
 
         for action, count in sorted(by_action.items()):
-    pass
             report.append("- **{action.title()}**: {count} branches")
 
         report.append("")
@@ -364,7 +353,6 @@ class BranchManager:
         report.append("### By Category:")
 
         for category, count in sorted(by_category.items()):
-    pass
             report.append("- **{category.replace('-', ' ').title()}**: {count} branches")
 
         report.append("")
@@ -375,10 +363,8 @@ class BranchManager:
 
         # Group by action
         for action in ["delete", "archive", "review", "keep"]:
-    pass
             action_branches=[b for b in branches if b["action"] == action]
             if not action_branches:
-    pass
                 continue
 
             report.append("### {action.title()} ({len(action_branches)} branches)")
@@ -386,7 +372,6 @@ class BranchManager:
         report.append("")
 
         for branch in action_branches:
-    pass
                 merged_status="✅ Merged" if branch["is_merged"] else "❌ Not merged"
                 report.append("- **{branch['name']}**")
 
@@ -411,7 +396,7 @@ def main():
     parser.add_argument(
         "--confirm",
         action="store_true",
-        help="Actually execute deletions (not dry-run)",
+        help="Actually execute deletions (not dry-run)"
     )
     parser.add_argument("--stale-days", type=int, default=30, help="Days to consider branch stale")
     parser.add_argument("--output", help="Output file for report")
@@ -421,12 +406,10 @@ def main():
     manager.dry_run=not args.confirm
 
     if args.analyze or args.cleanup:
-    pass
         print("🔍 Analyzing branches...")
         branches=manager.get_branch_info()
 
         if not branches:
-    pass
             print("❌ No branches found or error occurred")
 
         return 1
@@ -435,19 +418,17 @@ def main():
         report=manager.generate_report(branches)
 
         if args.output:
-    pass
             with open(args.output, "w", encoding="utf-8") as f:
-    pass
                 f.write(report)
 
         print("📄 Report saved to {args.output}")
 
         else:
     pass
+    pass
             print(report)
 
         if args.cleanup:
-    pass
             print("\n🧹 Executing cleanup...")
         # summary = ...  # Unused variable
 
@@ -462,14 +443,13 @@ def main():
         print("  - Errors: {len(summary['errors'])} issues")
 
         if summary["errors"]:
-    pass
                 print("\n❌ Errors:")
 
         for error in summary["errors"]:
-    pass
                     print("  - {error}")
 
         else:
+    pass
     pass
         parser.print_help()
 

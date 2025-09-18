@@ -24,12 +24,10 @@ async def main():
     print("=" * 60)
 
     try:
-    pass
         # Check current status
         print("📊 Current Sonnet 4 Status:")
         status = sonnet4_hub.get_global_status()
         for key, value in status.items():
-    pass
             print("   • {key}: {value}")
         print()
 
@@ -38,10 +36,10 @@ async def main():
         results = await enable_sonnet4_globally()
 
         if "error" not in results:
-    pass
             print("✅ Claude Sonnet 4 successfully enabled for all clients!")
             print("📈 Results: {results}")
         else:
+    pass
     pass
             print("❌ Error: {results}")
             return False
@@ -50,7 +48,6 @@ async def main():
         print("\n📊 Updated Sonnet 4 Status:")
         updated_status = sonnet4_hub.get_global_status()
         for key, value in updated_status.items():
-    pass
             print("   • {key}: {value}")
 
         print("\n🎯 Claude Sonnet 4 Features Enabled:")
@@ -65,7 +62,6 @@ async def main():
         return True
 
     except Exception as _:
-    pass
         pass  # Exception logged
         print("❌ Failed to enable Claude Sonnet 4: {e}")
         return False

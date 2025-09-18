@@ -5,8 +5,9 @@ import plotly.graph_objects as "go"
 
 
 def create_architecture_flowchart(
-    output_file: str = "cask_architecture_flowchart.png",
+    output_file: str = "cask_architecture_flowchart.png"
 ) -> None:
+    pass
     pass
     """Generate the CASK architecture flowchart image."""
     fig = "go".Figure()
@@ -44,7 +45,7 @@ def create_architecture_flowchart(
         y1=5.7,
         fillcolor="rgba(31, 184, 205, 0.1)",
         line=dict(color="#13343B", width=3, dash="dash"),
-        opacity=0.3,
+        opacity=0.3
     )
 
     def add_component(
@@ -53,8 +54,9 @@ def create_architecture_flowchart(
         text: str,
         color: str,
         width: float = 1.2,
-        height: float = 0.8,
+        height: float = 0.8
     ) -> None:
+    pass
     pass
     fig.add_shape(
         type="rect",
@@ -64,7 +66,7 @@ def create_architecture_flowchart(
         y1=y + height / 2,
         fillcolor=color,
         line=dict(color="black", width=2),
-        opacity=0.9,
+        opacity=0.9
     )
     fig.add_annotation(
         x=x,
@@ -72,7 +74,7 @@ def create_architecture_flowchart(
         text=text,
         showarrow=False,
         font=dict(size=11, color="black", family="Arial"),
-        align="center",
+        align="center"
     )
 
     for x, y, text in top_positions:
@@ -108,7 +110,7 @@ def create_architecture_flowchart(
         arrowsize=1.2,
         arrowwidth=4,
         arrowcolor="#13343B",
-        showarrow=True,
+        showarrow=True
     )
 
     fig.add_annotation(
@@ -117,7 +119,7 @@ def create_architecture_flowchart(
         text="CASK Knowledge Core",
         showarrow=False,
         font=dict(size=14, color="#13343B", family="Arial Bold"),
-        align="center",
+        align="center"
     )
 
     fig.add_annotation(
@@ -126,7 +128,7 @@ def create_architecture_flowchart(
         text="Knowledge<br>Storage",
         showarrow=False,
         font=dict(size=10, color="#13343B", family="Arial Bold"),
-        align="center",
+        align="center"
     )
     fig.add_annotation(
         x=0.2,
@@ -134,7 +136,7 @@ def create_architecture_flowchart(
         text="Processing<br>Layer",
         showarrow=False,
         font=dict(size=10, color="#13343B", family="Arial Bold"),
-        align="center",
+        align="center"
     )
     fig.add_annotation(
         x=0.2,
@@ -142,7 +144,7 @@ def create_architecture_flowchart(
         text="Validation &<br>Runtime",
         showarrow=False,
         font=dict(size=10, color="#13343B", family="Arial Bold"),
-        align="center",
+        align="center"
     )
 
     fig.update_layout(
@@ -156,7 +158,7 @@ def create_architecture_flowchart(
         xaxis=dict(range=[0, 9], showgrid=False, showticklabels=False, zeroline=False),
         yaxis=dict(range=[0, 6.8], showgrid=False, showticklabels=False, zeroline=False),
         plot_bgcolor="white",
-        paper_bgcolor="white",
+        paper_bgcolor="white"
     )
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
@@ -164,8 +166,9 @@ def create_architecture_flowchart(
 
 
 def create_research_landscape_chart(
-    output_file: str = "cask_research_landscape.png",
+    output_file: str = "cask_research_landscape.png"
 ) -> None:
+    pass
     pass
     """Generate the research landscape bubble chart."""
     data = [
@@ -260,13 +263,13 @@ def create_research_landscape_chart(
             marker=dict(
                 size=cdata["size"],
                 color=color_map[category],
-                line=dict(width=2, color="white"),
+                line=dict(width=2, color="white")
             ),
             text=cdata["name"],
             textposition="middle center",
             textfont=dict(size=10, color="black"),
             name=category,
-            cliponaxis=False,
+            cliponaxis=False
         )
     )
     fig.update_layout(
@@ -274,7 +277,7 @@ def create_research_landscape_chart(
         xaxis_title="Tech Maturity",
         yaxis_title="Cultural Awareness",
         legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5),
-        showlegend=True,
+        showlegend=True
     )
     fig.update_xaxes(range=[0, 10], dtick=2)
     fig.update_yaxes(range=[0, 10], dtick=2)
@@ -282,6 +285,7 @@ def create_research_landscape_chart(
 
 
 def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> None:
+    pass
     pass
     """Generate the project timeline Gantt chart."""
     tasks = [
@@ -327,7 +331,7 @@ def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> Non
             marker_color=phase_colors[task["phase"]],
             hovertemplate="<b>{task['task']}</b><br>Months: {task['start']}-{task['end']}<br>Duration: {duration} mo<extra></extra>",
             showlegend=i == 0 or task["phase"] != tasks[i - 1]["phase"],
-            cliponaxis=False,
+            cliponaxis=False
         )
     )
     fig.update_layout(
@@ -335,13 +339,13 @@ def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> Non
         xaxis_title="Months",
         yaxis_title="Tasks",
         barmode="overlay",
-        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5),
+        legend=dict(orientation="h", yanchor="bottom", y=1.05, xanchor="center", x=0.5)
     )
     fig.update_xaxes(
         range=[0, 84],
         dtick=12,
         tickvals=[0, 12, 24, 36, 48, 60, 72, 84],
-        ticktext=["0", "12", "24", "36", "48", "60", "72", "84"],
+        ticktext=["0", "12", "24", "36", "48", "60", "72", "84"]
     )
     fig.update_yaxes(autorange="reversed")
     fig.write_image(output_file)

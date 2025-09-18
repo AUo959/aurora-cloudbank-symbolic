@@ -32,17 +32,17 @@ async def test_opal2_integration():
     # Test 1: Glyph Core
     print("\n🧬 Testing Glyph Core...")
     try:
-    pass
         test_expression = {"symbol": "test_symbol"}
         glyph_result = await glyph_core.generate_async(
             expression=test_expression,
             style_params={"color": "blue", "size": 100},
-            quantum_enhancement=True,
+            quantum_enhancement=True
         )
         print("✅ Glyph generated: {len(glyph_result)} properties")
         print("   - Type: {glyph_result.get('type')}")
         print("   - Quantum Enhanced: {glyph_result.get('quantum_enhanced')}")
     except Exception as _:
+    pass
     pass
         print("❌ Glyph Core test failed: {e}")
         return False
@@ -50,22 +50,22 @@ async def test_opal2_integration():
     # Test 2: Cache System
     print("\n💾 Testing Cache System...")
     try:
-    pass
         # Store and retrieve
         await glyph_cache.set_async("test_key", glyph_result)
         cached_result = await glyph_cache.get_async("test_key")
 
         if cached_result:
-    pass
             print("✅ Cache store/retrieve successful")
             stats = await glyph_cache.get_stats()
             print("   - Cache size: {stats['cache_size']}")
             print("   - Hit rate: {stats['hit_rate']:.1f}%")
         else:
     pass
+    pass
             print("❌ Cache retrieve failed")
             return False
     except Exception as _:
+    pass
     pass
         print("❌ Cache test failed: {e}")
         return False
@@ -73,17 +73,17 @@ async def test_opal2_integration():
     # Test 3: Quantum Renderer
     print("\n⚛️ Testing Quantum Renderer...")
     try:
-    pass
         render_result = await quantum_renderer.test_render()
         if render_result.get("success"):
-    pass
             print("✅ Quantum Renderer test successful")
             print("   - Render modes: {render_result.get('render_modes', 0)}")
         else:
     pass
+    pass
             print("❌ Quantum Renderer test failed: {render_result.get('error')}")
             return False
     except Exception as _:
+    pass
     pass
         print("❌ Quantum Renderer test failed: {e}")
         return False
@@ -91,7 +91,6 @@ async def test_opal2_integration():
     # Test 4: Plugin System
     print("\n🔌 Testing Plugin System...")
     try:
-    pass
         plugins = plugin_system.list_plugins()
         print("✅ Plugin system operational")
         print("   - Available plugins: {len(plugins)}")
@@ -99,13 +98,13 @@ async def test_opal2_integration():
             print("   - {plugin.get('name', 'unknown')}: {plugin.get('type', 'unknown')}")
     except Exception as _:
     pass
+    pass
         print("❌ Plugin System test failed: {e}")
         return False
 
     # Test 5: Full Integration
     print("\n🔗 Testing Full Integration...")
     try:
-    pass
         # Generate, cache, and render
         expression = {"symbol": "integration_test"}
         glyph_data = await glyph_core.generate_async(expression)
@@ -126,6 +125,7 @@ async def test_opal2_integration():
         print("   - Render context prepared")
 
     except Exception as _:
+    pass
     pass
         print("❌ Full integration test failed: {e}")
         return False

@@ -12,9 +12,7 @@ def clean_file(file_path):
     pass
     """Clean whitespace issues in a single file"""
     try:
-    pass
         with open(file_path, "r", encoding="utf-8") as f:
-    pass
             content = f.read()
 
         original_content = content
@@ -26,20 +24,18 @@ def clean_file(file_path):
 
         # Ensure file ends with single newline (if not empty)
         if content and not content.endswith("\n"):
-    pass
             content += "\n"
 
         # Remove excessive blank lines (more than 2 consecutive)
         content = re.sub(r"\n\n\n+", "\n\n", content)
 
         if content != original_content:
-    pass
             with open(file_path, "w", encoding="utf-8") as f:
-    pass
                 f.write(content)
             return True
         return False
     except Exception as _:
+    pass
     pass
         print("Error processing {file_path}: {e}")
         return False
@@ -56,20 +52,16 @@ def main():
     total_files = 0
 
     for ext in extensions:
-    pass
         print("\nCleaning {ext} files...")
         files = list(Path(".").rglob("*{ext}"))
 
         for file_path in files:
-    pass
             # Skip certain directories
             if any(skip in str(file_path) for skip in [".git", "node_modules", "venv", "__pycache__"]):
-    pass
                 continue
 
             total_files += 1
             if clean_file(file_path):
-    pass
                 files_cleaned += 1
                 print("  ✓ Cleaned {file_path}")
 

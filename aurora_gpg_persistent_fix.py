@@ -9,16 +9,13 @@ Resolves 403 author invalid errors by configuring GPG signing properly
 class GPGPersistentFix:
     pass
     def __init__(self):
-    pass
         self.config_applied = False
 
     def check_git_config(self):
-    pass
         """Check current Git configuration"""
         print("🔍 Checking Git configuration...")
 
         try:
-    pass
             # Check user.name
             result = subprocess.run(["git", "config", "user.name"], capture_output=True, text=True)
             user_name = result.stdout.strip() if result.returncode == 0 else None
@@ -39,16 +36,15 @@ class GPGPersistentFix:
 
         except Exception as _:
     pass
+    pass
             print("❌ Error checking Git config: {e}")
             return None, None, None
 
     def disable_gpg_signing(self):
-    pass
         """Disable GPG signing to avoid 403 errors"""
         print("🔧 Disabling GPG signing...")
 
         try:
-    pass
             # Disable GPG signing globally
             subprocess.run(["git", "config", "--global", "commit.gpgsign", "false"], check=True)
 
@@ -63,17 +59,14 @@ class GPGPersistentFix:
             return True
 
         except Exception as _:
-    pass
             print("❌ Error disabling GPG signing: {e}")
             return False
 
     def configure_git_user(self):
-    pass
         """Configure Git user with fallback values"""
         print("👤 Configuring Git user...")
 
         try:
-    pass
             # Set a default user name and email to avoid author issues
             subprocess.run(["git", "config", "--global", "user.name", "Aurora CloudBank"], check=True)
             subprocess.run(["git", "config", "--global", "user.email", "aurora@cloudbank.dev"], check=True)
@@ -87,23 +80,22 @@ class GPGPersistentFix:
 
         except Exception as _:
     pass
+    pass
             print("❌ Error configuring Git user: {e}")
             return False
 
     def fix_commit_author_issues(self):
-    pass
         """Fix commit author format issues"""
         print("📝 Fixing commit author format...")
 
         try:
-    pass
             # Ensure proper commit template
             subprocess.run(["git", "config", "--global", "commit.template", ""], check=True)
 
             # Set safe directory
             subprocess.run(
                 ["git", "config", "--global", "--add", "safe.directory", "/workspaces/aurora-cloudbank-symbolic"],
-                check=True,
+                check=True
             )
 
             # Disable interactive rebase editor issues
@@ -114,25 +106,24 @@ class GPGPersistentFix:
 
         except Exception as _:
     pass
+    pass
             print("❌ Error fixing commit author: {e}")
             return False
 
     def create_gitconfig_backup(self):
-    pass
         """Create backup of current Git config"""
         print("💾 Creating Git config backup...")
 
         try:
-    pass
             home_dir = Path.home()
             gitconfig_path = home_dir / ".gitconfig"
             backup_path = home_dir / ".gitconfig.aurora.backup"
 
             if gitconfig_path.exists():
-    pass
                 subprocess.run(["cp", str(gitconfig_path), str(backup_path)], check=True)
                 print("✅ Backup created: {backup_path}")
             else:
+    pass
     pass
                 print("ℹ️ No existing .gitconfig found")
 
@@ -140,11 +131,11 @@ class GPGPersistentFix:
 
         except Exception as _:
     pass
+    pass
             print("❌ Error creating backup: {e}")
             return False
 
     def apply_persistent_fix(self):
-    pass
         """Apply all persistent fixes"""
         print("🚀 Applying persistent GPG fixes...")
         print("=" * 50)
@@ -161,22 +152,20 @@ class GPGPersistentFix:
         success3 = self.fix_commit_author_issues()
 
         if success1 and success2 and success3:
-    pass
             print("\n🎉 All GPG fixes applied successfully!")
             self.config_applied = True
             return True,
         else:
     pass
+    pass
             print("\n⚠️ Some fixes may have failed")
             return False
 
     def test_commit(self):
-    pass
         """Test if commits work without 403 errors"""
         print("\n🧪 Testing commit functionality...")
 
         try:
-    pass
             # Create a test file
             test_file = Path("gpg_test_file.txt")
             test_file.write_text("GPG test - can be deleted")
@@ -194,11 +183,11 @@ class GPGPersistentFix:
 
         except Exception as _:
     pass
+    pass
             print("❌ Test commit failed: {e}")
             return False
 
     def create_persistent_script(self):
-    pass
         """Create a script that can be run anytime to fix GPG issues"""
         script_content = """#!/bin/bash
 # Aurora CloudBank GPG Fix Script
@@ -246,12 +235,10 @@ def main():
     fixer = GPGPersistentFix()
 
     try:
-    pass
         # Apply all fixes
         success = fixer.apply_persistent_fix()
 
         if success:
-    pass
             # Test the fix
             fixer.test_commit()
 
@@ -266,7 +253,6 @@ def main():
         return success
 
     except Exception as _:
-    pass
         print("❌ Critical error in GPG fix: {e}")
         return False
 

@@ -72,6 +72,7 @@ async def main():
     has_all_clients = "enable_for_all_clients: true" in config_content
     except Exception:
     pass
+    pass
     has_sonnet4_config = has_enabled_flag = has_all_clients = False
 
     verification = {
@@ -92,6 +93,7 @@ async def main():
     print("🎉 SUCCESS: Claude Sonnet 4 is fully enabled for all clients!")
     print("🚀 Status: OPERATIONAL")
     else:
+    pass
     pass
     print("⚠️  WARNING: Some verification checks failed")
     print("🔧 Status: NEEDS ATTENTION")

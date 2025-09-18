@@ -11,9 +11,7 @@ def fix_file(file_path):
     pass
     """Fix basic lint issues in a file"""
     try:
-    pass
         with open(file_path, "r", encoding="utf-8") as f:
-    pass
             content = f.read()
 
         # Remove trailing whitespace
@@ -26,18 +24,17 @@ def fix_file(file_path):
         # Join back and ensure single newline at end
         fixed_content = "\n".join(fixed_lines)
         if fixed_content and not fixed_content.endswith("\n"):
-    pass
             fixed_content += "\n"
 
         # Write back
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.write(fixed_content)
 
         print("✅ Fixed {file_path}")
         return True
 
     except Exception as _:
+    pass
     pass
         print("❌ Error fixing {file_path}: {e}")
         return False
@@ -56,11 +53,10 @@ def main():
     print("🧹 Fixing basic lint issues in Opal2 files...")
 
     for file_path in opal2_files:
-    pass
         if os.path.exists(file_path):
-    pass
             fix_file(file_path)
         else:
+    pass
     pass
             print("⚠️  File not found: {file_path}")
 

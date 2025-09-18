@@ -20,6 +20,7 @@ try:
     from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration, chatgpt_agent_integration
 except ImportError:
     pass
+    pass
     print("⚠️  Could not import agent mode integration - modules may need to be available")
     ChatGPTAgentModeIntegration = None
     chatgpt_agent_integration = None
@@ -30,12 +31,10 @@ class TestChatGPTAgentModeIntegration:
     """Test suite for ChatGPT Agent Mode integration"""
 
     def setup_method(self):
-    pass
         """Set up test instance"""
         self.agent = ChatGPTAgentModeIntegration()
 
         def test_initialization(self):
-    pass
         """Test agent mode initialization with Aurora symbolic anchors"""
         assert self.agent.agent_status == "ready"
         assert self.agent.anchor_seed == "EOS_SEED_ORION"
@@ -44,7 +43,6 @@ class TestChatGPTAgentModeIntegration:
         assert len(self.agent.tools_registry) > 0
 
     async def test_tool_discovery(self):
-    pass
         """Test agent tool discovery endpoint"""
         tools_info = await self.agent.discover_tools()
 
@@ -57,13 +55,11 @@ class TestChatGPTAgentModeIntegration:
         # Verify required tools are registered
         required_tools = ["symbolic_processing", "geometric_algebra", "session_management", "system_status"]
         for tool in required_tools:
-    pass
             assert tool in tools_info["tools"]
             assert "description" in tools_info["tools"][tool]
             assert "parameters" in tools_info["tools"][tool]
 
     async def test_symbolic_processing_tool(self):
-    pass
         """Test symbolic processing tool execution"""
         parameters = {
             "operation": "test_symbolic_operation",
@@ -80,7 +76,6 @@ class TestChatGPTAgentModeIntegration:
         assert result["execution_context"]["context_tag"].startswith("agent_tool_execution_")
 
         async def test_geometric_algebra_tool(self):
-    pass
         """Test geometric algebra tool execution"""
         parameters = {"expression_a": "e1 + e2", "expression_b": "e2 + e3", "operation": "mult"}
         _ = await self.agent.execute_tool("geometric_algebra", parameters)
@@ -91,7 +86,6 @@ class TestChatGPTAgentModeIntegration:
         assert result["symbolic_hash_validation"] is True
 
     async def test_session_management_tool(self):
-    pass
         """Test session management capabilities"""
         # Create session
         create_params = {"action": "create", "state_data": {"test_state": "initial"}}
@@ -123,7 +117,6 @@ class TestChatGPTAgentModeIntegration:
         assert delete_result["result"]["action"] == "deleted"
 
     async def test_system_status_tool(self):
-    pass
         """Test system status tool with different detail levels"""
         # Basic status
         basic_params = {"detail_level": "basic"}
@@ -151,15 +144,14 @@ class TestChatGPTAgentModeIntegration:
         assert "tool_registry" in full_result["result"]
 
     async def test_invalid_tool_execution(self):
-    pass
         """Test error handling for invalid tool requests"""
         # Test non-existent tool,
         try:
-    pass
             await self.agent.execute_tool("non_existent_tool", {})
 
         assert False, "Should have raised HTTPException"
         except Exception as _:
+    pass
     pass
             assert "not found" in str(e)
 
@@ -171,7 +163,6 @@ class TestChatGPTAgentModeIntegration:
         assert "recovery_suggestions" in result
 
     async def test_agent_status(self):
-    pass
         """Test comprehensive agent status reporting"""
         status = await self.agent.get_agent_status()
 
@@ -184,7 +175,6 @@ class TestChatGPTAgentModeIntegration:
         assert status["context_tag"] == "agent_status_report"
 
     def test_memory_seal_computation(self):
-    pass
         """Test memory seal computation for integrity verification"""
         seal1 = self.agent._compute_memory_seal()
         seal2 = self.agent._compute_memory_seal()
@@ -194,7 +184,6 @@ class TestChatGPTAgentModeIntegration:
         assert len(seal1) == 16  # 16-character hex string
 
     async def test_error_recovery_suggestions(self):
-    pass
         """Test recovery suggestion generation"""
         test_error = ValueError("test error")
         suggestions = self.agent._get_recovery_suggestions("geometric_algebra", test_error)
@@ -206,28 +195,27 @@ class TestChatGPTAgentModeIntegration:
         assert any("session" in s.lower() for s in session_suggestions)
 
         def test_parameter_validation(self):
-    pass
         """Test parameter validation against tool schemas"""
         schema = {"properties": {"required_param": {"type": "string"}}, "required": ["required_param"]}
 
         # Valid parameters should pass
         valid_params = {"required_param": "test_value"}
         try:
-    pass
             self.agent._validate_parameters(valid_params, schema)
 
         except Exception:
+    pass
     pass
             assert False, "Valid parameters should not raise exception"
 
         # Invalid parameters should fail
         invalid_params = {"wrong_param": "test_value"}
         try:
-    pass
             self.agent._validate_parameters(invalid_params, schema)
 
         assert False, "Invalid parameters should raise exception"
         except Exception as _:
+    pass
     pass
             assert "Required parameter" in str(e)
 
@@ -253,7 +241,6 @@ if __name__ == "__main__":
     print("🧪 Testing ChatGPT Agent Mode Integration...")
 
     if ChatGPTAgentModeIntegration is None:
-    pass
         print("⚠️  Skipping tests - agent mode integration not available")
 
         sys.exit(0)
@@ -265,7 +252,6 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
 
     try:
-    pass
         tools_info = loop.run_until_complete(agent.discover_tools())
 
         print("✅ Tool discovery: {len(tools_info['tools'])} tools available")
@@ -299,11 +285,13 @@ if __name__ == "__main__":
 
         except Exception as _:
     pass
+    pass
         pass  # Exception handled}")
 
         import traceback
 
         traceback.print_exc()
     finally:
+    pass
     pass
         loop.close()

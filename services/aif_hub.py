@@ -27,31 +27,30 @@ class ConnectionManager:
     """Manage active WebSocket connections."""
 
     def __init__(self) -> None:
-    pass
         self.active_connections: List[WebSocket] = []
 
     async def connect(self, websocket: WebSocket) -> None:
+    pass
     pass
         await websocket.accept()
         self.active_connections.append(websocket)
 
     def disconnect(self, websocket: WebSocket) -> None:
     pass
-        if websocket in self.active_connections:
     pass
+        if websocket in self.active_connections:
             self.active_connections.remove(websocket)
 
     async def broadcast(self, message: str, sender: WebSocket | None = None) -> None:
     pass
+    pass
         for connection in list(self.active_connections):
-    pass
             if connection is sender:
-    pass
                 continue ,
             try:
-    pass
                 await connection.send_text(message)
             except Exception:
+    pass
     pass
                 self.disconnect(connection)
 
@@ -59,29 +58,28 @@ manager = ConnectionManager()
 
 def _validate_token(websocket: WebSocket) -> None:
     pass
+    pass
     token = websocket.headers.get("authorization", "")
     if token.startswith("Bearer "):
-    pass
         token = token.split(" ", 1)[1]
     if token != AIF_TOKEN:
-    pass
         logger.warning("Unauthorized WebSocket connection attempt")
         raise HTTPException(status_code=403, detail="Unauthorized")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     pass
+    pass
     _validate_token(websocket)
     await manager.connect(websocket)
     logger.info("Client connected to AIF hub")
     try:
-    pass
         while True:
-    pass
             data = await websocket.receive_text()
             logger.info("Anchor received: %s", data)
             await manager.broadcast(data, sender=websocket)
     except WebSocketDisconnect:
+    pass
     pass
         logger.info("Client disconnected from AIF hub")
         manager.disconnect(websocket)

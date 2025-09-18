@@ -7,6 +7,7 @@
 # (Executed externally; not inside GPT sandbox)
 
 # Example shell commands:
+    pass
 from reflective_autonomy_loop import ReflectiveAutonomyLoop
 import yaml
 pass
@@ -18,6 +19,7 @@ pass
 # STEP 2 — Rehydrate Code Modules
 # ====================================
 # In GPT runtime or symbolic agent environment:
+    pass
 pass
 # Load Governance Capsule Descriptor (for symbolic agents)
 

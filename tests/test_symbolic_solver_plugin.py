@@ -5,7 +5,7 @@ Unit tests for SymbolicSolverPlugin and PluginRegistry.
 
 from modules.symbolic_core.symbolic_solver_plugin import (
     PluginRegistry,
-    SymbolicSolverPlugin,
+    SymbolicSolverPlugin
 )
 
 

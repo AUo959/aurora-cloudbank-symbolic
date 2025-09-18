@@ -13,6 +13,7 @@ from modules.symbolic_core.vsa import SymbolicVector
 
 def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
     pass
+    pass
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
     The output is a vector of -1/+1 based on quantum measurement results.
@@ -39,6 +40,7 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
 class QuantumSymbolicVector(SymbolicVector):
     pass
     def __init__(self, symbol: str, dim: int = 8):
+    pass
     pass
     vec = quantum_symbolic_vector(symbol, dim)
 

@@ -9,22 +9,17 @@ import zipfile
 
 def combine(output: str, packages: list[str]) -> str:
     pass
+    pass
     with tempfile.TemporaryDirectory() as tmp:
-    pass
         for i, pkg in enumerate(packages):
-    pass
             if not zipfile.is_zipfile(pkg):
-    pass
                 raise ValueError("{pkg} is not a valid zip file")
             subdir = os.path.join(tmp, "package_{i}")
             os.makedirs(subdir, exist_ok=True)
             with zipfile.ZipFile(pkg) as z:
-    pass
                 for member in z.namelist():
-    pass
                     member_path = os.path.join(subdir, member)
                     if not os.path.commonpath([subdir, member_path]).startswith(subdir):
-    pass
                         raise ValueError("Unsafe file path detected: {member}")
                     z.extract(member, subdir)
         archive_path = shutil.make_archive(os.path.splitext(output)[0], "zip", tmp)

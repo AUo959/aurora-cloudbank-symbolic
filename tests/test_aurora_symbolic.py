@@ -1,6 +1,7 @@
 """Tests for Aurora Cloudbank Symbolic Engine"""
 
 # Add src to path
+import sys
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 

@@ -8,7 +8,7 @@ from modules.cask import (
     create_research_landscape_chart,
     generate_risk_assessment,
     generate_technical_specifications,
-    generate_vs_sota_comparison,
+    generate_vs_sota_comparison
 )
 
 

@@ -6,16 +6,13 @@ import shutil
 def run_step(step_name, commands):
     pass
     for i, cmd in enumerate(commands, 1):
-    pass
         print("\n[{step_name}] Attempt {i}: {cmd}")
         try:
-    pass
             cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
             subprocess.run(cmd_parts, check=True, timeout=300)
             print("[{step_name}] Success on attempt {i}")
             return True
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-    pass
             print("[{step_name}] Failed attempt {i}: {e}")
             time.sleep(2)
     print("[{step_name}] All attempts failed\n")
@@ -27,14 +24,13 @@ def main():
 
     # Install system packages (if running as root or via sudo)
     if os.geteuid() == 0 or shutil.which("sudo"):
-    pass
         overall_success &= run_step(
             "System packages",
             [
                 "sudo apt-get update && sudo apt-get install -y python3 python3-pip",
                 "sudo apt-get update --fix-missing && sudo apt-get install -y python3 python3-pip",
                 "sudo apt-get install -y python3 python3-pip || true",
-            ],
+            ]
         )
 
     # Install Python dependencies
@@ -44,7 +40,7 @@ def main():
             "pip install -r requirements.txt",
             "pip install -r requirements.txt --no-cache-dir",
             "pip install -r requirements.txt || true",
-        ],
+        ]
     )
 
     # Install Node dependencies
@@ -54,18 +50,17 @@ def main():
             "npm install",
             "npm install --legacy-peer-deps",
             "npm ci || true",
-        ],
+        ]
     )
 
     # Run onboarding script if available
     if os.path.isfile("scripts/dev/on_startup.sh"):
-    pass
         overall_success &= run_step("Startup script", ["bash scripts/dev/on_startup.sh"])
 
     if overall_success:
-    pass
         print("\n[Bootstrap] Environment initialization complete ✅")
     else:
+    pass
     pass
         print("\n[Bootstrap] Completed with some failures. Review the log above to diagnose issues.")
 

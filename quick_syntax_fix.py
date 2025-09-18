@@ -8,46 +8,36 @@ def quick_fix_file(file_path):
     pass
     """Apply quick fixes to a file."""
     try:
-    pass
         with open(file_path, "r", encoding="utf-8") as f:
-    pass
             lines = f.readlines()
 
         fixed_lines = []
         for i, line in enumerate(lines):
-    pass
             # Fix common syntax issues
             fixed_line = line
 
             # Fix unterminated strings
             if fixed_line.strip().endswith("'") and fixed_line.count("'") % 2 == 1:
-    pass
                 # If odd number of quotes, likely unterminated
                 if not fixed_line.strip().endswith("',"):
-    pass
                     fixed_line = fixed_line.rstrip() + "\n"
 
             # Fix missing commas in regex patterns
             if "from typing import Any'" in fixed_line:
-    pass
                 fixed_line = fixed_line.replace("from typing import Any'", "from typing import Any,")
 
             # Fix invalid regex patterns
             if "re.sub(rrrr'" in fixed_line:
-    pass
                 fixed_line = fixed_line.replace("re.sub(rrrr'", "re.sub(r'")
 
             if "re.sub(rrr'" in fixed_line:
-    pass
                 fixed_line = fixed_line.replace("re.sub(rrr'", "re.sub(r'")
 
             if "re.sub(rr'" in fixed_line:
-    pass
                 fixed_line = fixed_line.replace("re.sub(rr'", "re.sub(r'")
 
             # Fix syntax around line 194 pattern
             if "available=result.returncode" in fixed_line:
-    pass
                 fixed_line = fixed_line.replace(
                     "available=result.returncode == 0", "available=(result.returncode == 0)"
                 )
@@ -56,13 +46,13 @@ def quick_fix_file(file_path):
 
         # Write back
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.writelines(fixed_lines)
 
         print("✅ Quick-fixed {file_path}")
         return True
 
     except Exception as _:
+    pass
     pass
         print("❌ Error fixing {file_path}: {e}")
         return False
@@ -84,23 +74,19 @@ def main():
 
     fixes_applied = 0
     for file_path in problematic_files:
-    pass
         if Path(file_path).exists():
-    pass
             if quick_fix_file(file_path):
-    pass
                 fixes_applied += 1
 
     print("\n✅ Applied quick fixes to {fixes_applied} files")
 
     # Also remove the problematic critical_issue_resolver.py if it still has issues
     if Path("critical_issue_resolver.py").exists():
-    pass
         try:
-    pass
             Path("critical_issue_resolver.py").unlink()
             print("🗑️ Removed problematic critical_issue_resolver.py")
         except Exception as _:
+    pass
     pass
             print("❌ Could not remove critical_issue_resolver.py: {e}")
 

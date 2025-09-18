@@ -35,7 +35,6 @@ async def validate_agent_integration():
     print("🔍 Validating ChatGPT Agent Mode Integration...")
 
     try:
-    pass
         # Import and test agent integration
         from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
 
@@ -48,37 +47,36 @@ async def validate_agent_integration():
 
         # List available tools
         for tool_name, tool_info in tools_info["tools"].items():
-    pass
             print("   🛠️  {tool_name}: {tool_info['description']}")
 
         # Test system status
         status_result = await agent.execute_tool("system_status", {"detail_level": "basic"})
         if status_result["success"]:
-    pass
             print("✅ System status check: HEALTHY")
         else:
+    pass
     pass
             print("⚠️  System status check: Issues detected")
 
         # Test session management
         session_result = await agent.execute_tool("session_management", {"action": "create"})
         if session_result["success"]:
-    pass
             session_id = session_result["result"]["session_id"]
             print("✅ Session management: Working (test session: {session_id[:8]}...)")
         else:
+    pass
     pass
             print("⚠️  Session management: Issues detected")
 
         # Test symbolic processing
         symbolic_result = await agent.execute_tool(
             "symbolic_processing",
-            {"operation": "startup_validation", "data": {"timestamp": datetime.now().isoformat()}},
+            {"operation": "startup_validation", "data": {"timestamp": datetime.now().isoformat()}}
         )
         if symbolic_result["success"]:
-    pass
             print("✅ Symbolic processing: Working")
         else:
+    pass
     pass
             print("⚠️  Symbolic processing: Issues detected")
 
@@ -87,15 +85,16 @@ async def validate_agent_integration():
             "geometric_algebra", {"expression_a": "e1", "expression_b": "e2", "operation": "mult"}
         )
         if geo_result["success"]:
-    pass
             print("✅ Geometric algebra: Working")
         else:
+    pass
     pass
             print("⚠️  Geometric algebra: Issues detected")
 
         return True
 
     except Exception as _:
+    pass
     pass
         pass  # Exception handled}")
         return False
@@ -106,20 +105,16 @@ def validate_api_endpoints():
     print("\n🔍 Validating API Endpoint Configuration...")
 
     try:
-    pass
         # Check if agent mode configuration exists
         config_path = "src/integrations/chatgpt_agent_mode_config.json"
         if os.path.exists(config_path):
-    pass
             with open(config_path, "r") as f:
-    pass
                 config = json.load(f)
 
             endpoints = config.get("integration_endpoints", {})
             print("✅ Configuration loaded: {len(endpoints)} endpoints defined")
 
             for endpoint, info in endpoints.items():
-    pass
                 method = info.get("method", "GET")
                 desc = info.get("description", "No description")
                 print("   🌐 {method} {endpoint}: {desc}")
@@ -127,10 +122,12 @@ def validate_api_endpoints():
             return True,
         else:
     pass
+    pass
             print("⚠️  Agent mode configuration not found")
             return False
 
     except Exception as _:
+    pass
     pass
         pass  # Exception handled}")
         return False
@@ -151,11 +148,10 @@ def check_aurora_dependencies():
 
     all_good = True
     for path, name in dependencies:
-    pass
         if os.path.exists(path):
-    pass
             print("✅ {name}: Available")
         else:
+    pass
     pass
             print("⚠️  {name}: Not found at {path}")
             all_good = False
@@ -211,11 +207,11 @@ async def main():
     overall_status = dependencies_ok and api_config_ok and agent_integration_ok
 
     if overall_status:
-    pass
         print("\n🎉 Overall Status: ✅ READY FOR CHATGPT AGENT MODE")
         print_integration_summary()
         return 0,
     else:
+    pass
     pass
         print("\n⚠️  Overall Status: ❌ REQUIRES ATTENTION")
         print("\n🔧 Please address the issues above before proceeding with ChatGPT agent integration.")
@@ -224,7 +220,6 @@ async def main():
 if __name__ == "__main__":
     pass
     try:
-    pass
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         exit_code = loop.run_until_complete(main())
@@ -232,9 +227,11 @@ if __name__ == "__main__":
         sys.exit(exit_code)
     except KeyboardInterrupt:
     pass
+    pass
         print("\n🛑 Validation interrupted by user")
         sys.exit(1)
     except Exception as _:
+    pass
     pass
         pass  # Exception handled}")
         import traceback

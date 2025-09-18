@@ -13,29 +13,24 @@ import re
 class AuroraSecurityScanner:
     pass
     def __init__(self):
-    pass
         self.issues = []
         self.fixes_applied = []
         self.severity_levels = {"LOW": 0, "MEDIUM": 1, "HIGH": 2, "CRITICAL": 3}
 
     def scan_javascript_security(self):
-    pass
         """Scan JavaScript files for security issues"""
         print("🔍 Scanning JavaScript files...")
 
         js_files = list(Path(".").rglob("*.js"))
         for file_path in js_files:
-    pass
             if "node_modules" in str(file_path) or ".git" in str(file_path):
-    pass
                 continue ,
             try:
-    pass
                 with open(file_path, "r", encoding="utf-8") as f:
-    pass
                     content = f.read()
                     self._check_js_content(file_path, content)
             except Exception as _:
+    pass
     pass
                 self.issues.append(
                     {
@@ -47,7 +42,6 @@ class AuroraSecurityScanner:
                 )
 
     def _check_js_content(self, file_path, content):
-    pass
         """Check content for security issues"""
 
         # Check for dangerous patterns
@@ -60,15 +54,13 @@ class AuroraSecurityScanner:
             "dangerouslySetInnerHTML": (
                 r"dangerouslySetInnerHTML",
                 "HIGH",
-                "React dangerouslySetInnerHTML without sanitization",
+                "React dangerouslySetInnerHTML without sanitization"
             ),
         }
 
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
-    pass
             matches = re.finditer(pattern, content, re.IGNORECASE)
             for match in matches:
-    pass
                 line_num = content[: match.start()].count("\n") + 1
                 self.issues.append(
                     {
@@ -82,23 +74,19 @@ class AuroraSecurityScanner:
                 )
 
     def scan_python_security(self):
-    pass
         """Scan Python files for security issues"""
         print("🔍 Scanning Python files...")
 
         py_files = list(Path(".").rglob("*.py"))
         for file_path in py_files:
-    pass
             if "venv" in str(file_path) or ".git" in str(file_path):
-    pass
                 continue,
             try:
-    pass
                 with open(file_path, "r", encoding="utf-8") as f:
-    pass
                     content = f.read()
                     self._check_py_content(file_path, content)
             except Exception as _:
+    pass
     pass
                 self.issues.append(
                     {
@@ -110,7 +98,6 @@ class AuroraSecurityScanner:
                 )
 
     def _check_py_content(self, file_path, content):
-    pass
         """Check Python content for security issues"""
 
         dangerous_patterns = {
@@ -119,7 +106,7 @@ class AuroraSecurityScanner:
             "subprocess_shell": (
                 r"subprocess\.\w+.*shell\s*=\s*True",
                 "HIGH",
-                "subprocess with shell=True can enable command injection",
+                "subprocess with shell=True can enable command injection"
             ),
             "os_system": (r"os\.system\s*\(", "HIGH", "os.system() can enable command injection"),  # nosec - pattern
             "sql_format": (r"\.format\s*\(.*SELECT", "HIGH", "String formatting in SQL can lead to injection"),
@@ -127,15 +114,13 @@ class AuroraSecurityScanner:
             "yaml_unsafe": (
                 r"yaml\.load\s*\((?!.*Loader=)",
                 "MEDIUM",
-                "yaml.load without safe loader can execute code",
+                "yaml.load without safe loader can execute code"
             ),
         }
 
         for issue_type, (pattern, severity, message) in dangerous_patterns.items():
-    pass
             matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
             for match in matches:
-    pass
                 line_num = content[: match.start()].count("\n") + 1
                 self.issues.append(
                     {
@@ -149,25 +134,19 @@ class AuroraSecurityScanner:
                 )
 
     def check_dependencies(self):
-    pass
         """Check for vulnerable dependencies"""
         print("🔍 Checking dependencies...")
 
         # Check npm dependencies
         if os.path.exists("package.json"):
-    pass
             try:
-    pass
                 _ = subprocess.run(
                     ["npm", "audit", "--json"], capture_output=True, text=True, timeout=30, shell=False, check=False
                 )
                 if result.returncode != 0 and result.stdout:
-    pass
                     audit_data = json.loads(result.stdout)
                     if "vulnerabilities" in audit_data:
-    pass
                         for vuln_name, vuln_data in audit_data["vulnerabilities"].items():
-    pass
                             severity = vuln_data.get("severity", "UNKNOWN").upper()
                             self.issues.append(
                                 {
@@ -181,10 +160,10 @@ class AuroraSecurityScanner:
                             )
             except Exception as _:
     pass
+    pass
                 print("Could not run npm audit: {e}")
 
     def check_configuration_security(self):
-    pass
         """Check for security configuration issues"""
         print("🔍 Checking configuration security...r")
 
@@ -198,26 +177,18 @@ class AuroraSecurityScanner:
         ]
 
         for root, dirs, files in os.walk("."):
-    pass
             if ".git" in root or "node_modules" in root or "venv" in root:
-    pass
                 continue
 
             for file in files:
-    pass
                 if file.endswith((".js", ".py", ".json", ".yml", ".yaml", ".env")):
-    pass
                     file_path = os.path.join(root, file)
                     try:
-    pass
                         with open(file_path, "r", encoding="utf-8") as f:
-    pass
                             content = f.read()
                             for pattern, severity, message in secret_patterns:
-    pass
                                 matches = re.finditer(pattern, content, re.IGNORECASE)
                                 for match in matches:
-    pass
                                     line_num = content[: match.start()].count("\n") + 1
                                     self.issues.append(
                                         {
@@ -231,52 +202,44 @@ class AuroraSecurityScanner:
                                     )
                     except Exception:
     pass
+    pass
                         continue
 
     def apply_automated_fixes(self):
-    pass
         """Apply automated fixes for certain issues"""
         print("🔧 Applying automated fixes...")
 
         for issue in self.issues:
-    pass
             if issue["type"] == "innerHTML" and issue["severity"] == "MEDIUM":
-    pass
                 self._fix_innerHTML_usage(issue)
             elif issue["type"] == "subprocess_shell":
-    pass
                 # Skip subprocess_shell fixes for now - would need file-specific logic
                 print("  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
-    pass
         """Fix innerHTML usage by suggesting textContent"""
         file_path = issue["file"]
         try:
-    pass
             with open(file_path, "r", encoding="utf-8") as f:
-    pass
                 content = f.read()
 
             # Simple fix: suggest textContent instead of innerHTML
             fixed_content = re.sub(
                 r"(\w+)\.innerHTML\s*=\s*([^;]+);",
                 r"\1.textContent = \2; // SECURITY FIX: Changed from innerHTML",
-                content,
+                content
             )
 
             if fixed_content != content:
-    pass
                 with open(file_path, "w", encoding="utf-8") as f:
-    pass
                     f.write(fixed_content)
                 self.fixes_applied.append("Fixed innerHTML usage in {file_path}")
         except Exception as _:
     pass
+    pass
             print("Could not fix innerHTML in {file_path}: {e}")
 
     def generate_security_report(self):
-    pass
         """Generate comprehensive security report"""
         print("\n🛡️ SECURITY SCAN RESULTS")
         print("=" * 50)
@@ -287,13 +250,11 @@ class AuroraSecurityScanner:
         severity_counts = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
 
         for issue in sorted_issues:
-    pass
             severity = issue["severity"]
             severity_counts[severity] += 1
 
             print("\n[{severity}] {issue['type']} in {issue['file']}")
             if "line" in issue:
-    pass
                 print("  Line {issue['line']}: {issue.get('code', '')}")
             print("  {issue['message']}")
 
@@ -305,10 +266,8 @@ class AuroraSecurityScanner:
         print("  TOTAL: {len(self.issues)}")
 
         if self.fixes_applied:
-    pass
             print("\n✅ FIXES APPLIED:")
             for fix in self.fixes_applied:
-    pass
                 print("  • {fix}")
 
         # Save detailed report
@@ -323,7 +282,6 @@ class AuroraSecurityScanner:
         }
 
         with open("security_scan_report.json", "w") as f:
-    pass
             json.dump(report, f, indent=2)
 
         print("\n📋 Detailed report saved to: security_scan_report.json")
@@ -351,10 +309,10 @@ def main():
 
     # Exit with appropriate code
     if critical_high_count > 0:
-    pass
         print("\n⚠️ Found {critical_high_count} critical/high severity issues!")
         sys.exit(1)
     else:
+    pass
     pass
         print("\n✅ No critical or high severity issues found!")
         sys.exit(0)

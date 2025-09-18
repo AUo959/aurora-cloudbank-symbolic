@@ -15,6 +15,7 @@ development and CI environments.
 
 Usage:
     pass
+    pass
     python validate_ci_environment.py
     python validate_ci_environment.py --fix-missing,
 Author: Aurora/ORION Core
@@ -28,7 +29,6 @@ class CIEnvironmentValidator:
     """Validates and optionally fixes CI environment setup."""
 
     def __init__(self):
-    pass
         self.required_python_tools = ["flake8", "black", "isort", "pylint", "bandit", "autopep8"]
         self.required_node_tools = ["eslint", "prettier", "markdownlint"]
         self.results = {
@@ -41,26 +41,24 @@ class CIEnvironmentValidator:
 
     def check_tool_availability(self, tool: str) -> Tuple[bool, str]:
     pass
+    pass
         """Check if a tool is available and get version."""
         try:
-    pass
         result = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=10)
         if result.returncode == 0:
-    pass
                 version = result.stdout.strip().split("\n")[0]
                 return True, version
             return False, "Exit code: {result.returncode}"
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
     pass
+    pass
             return False, "Not found or timeout"
 
     def validate_python_tools(self) -> None:
-    pass
         """Validate Python lint tools."""
         print("🐍 Validating Python tools...")
 
         for tool in self.required_python_tools:
-    pass
             available, info = self.check_tool_availability(tool)
 
         self.results["python_tools"][tool] = {
@@ -72,11 +70,9 @@ class CIEnvironmentValidator:
             print("  {status} {tool}: {info}")
 
         if not available:
-    pass
                 self.results["missing_tools"].append("python:{tool}")
 
         def validate_node_tools(self) -> None:
-    pass
         """Validate Node.js lint tools."""
         print("\n📦 Validating Node.js tools...")
 
@@ -84,18 +80,15 @@ class CIEnvironmentValidator:
         npm_available, npm_info = self.check_tool_availability("npm")
 
         if not npm_available:
-    pass
             print("  ❌ npm not available - skipping Node.js tools")
 
         for tool in self.required_node_tools:
-    pass
                 self.results["node_tools"][tool] = {"available": False, "version": None, "error": "npm not available"}
             return
 
         print("  ✅ npm: {npm_info}")
 
         for tool in self.required_node_tools:
-    pass
             available, info = self.check_tool_availability(tool)
 
         self.results["node_tools"][tool] = {
@@ -107,14 +100,11 @@ class CIEnvironmentValidator:
             print("  {status} {tool}: {info}")
 
         if not available:
-    pass
                 self.results["missing_tools"].append("node:{tool}")
 
         def generate_recommendations(self) -> None:
-    pass
         """Generate recommendations for fixing issues."""
         if not self.results["missing_tools"]:
-    pass
             self.results["recommendations"].append("✅ All required tools are available")
 
         self.results["overall_status"] = "success"
@@ -126,60 +116,50 @@ class CIEnvironmentValidator:
         node_missing = [t.split(":")[1] for t in self.results["missing_tools"] if t.startswith("node:")]
 
         if python_missing:
-    pass
             tools_str = " ".join(python_missing)
 
         self.results["recommendations"].append("Install missing Python tools: pip install {tools_str}")
 
         if node_missing:
-    pass
         tools_str = " ".join(node_missing)
 
         self.results["recommendations"].append("Install missing Node.js tools: npm install -g {tools_str}")
 
         def test_gitwiz_integration(self) -> None:
-    pass
         """Test GitWiz integration if available."""
         print("\n🔧 Testing GitWiz integration...")
         gitwiz_script = Path("scripts/gitwiz_integrated_command.py")
 
         if not gitwiz_script.exists():
-    pass
             print("  ❌ GitWiz integrated command not found")
 
         self.results["gitwiz_status"] = "not_found"
             return,
         try:
-    pass
             result = subprocess.run(
                 [sys.executable, str(gitwiz_script), "status"],
         result = subprocess.run(                text=True,
         timeout=30,
-                cwd=gitwiz_script.parent.parent,
+                cwd=gitwiz_script.parent.parent
             )
 
         if result.returncode == 0:
-    pass
                 print("  ✅ GitWiz status check successful")
 
         self.results["gitwiz_status"] = "working"
 
                 # Try to parse the JSON output,
                 try:
-    pass
                     # Find the JSON output in the stdout
                     lines = result.stdout.strip().split("\n")
         json_line = None
                     for line in lines:
-    pass
                         if line.strip().startswith("{"):
-    pass
                             json_line = line.strip()
 
         break
 
                     if json_line:
-    pass
         gitwiz_data = json.loads(json_line)
         capabilities = gitwiz_data.get("capabilities", {}).get("lint_tools", {})
         working_tools = sum(1 for tool, status in capabilities.items() if status)
@@ -189,16 +169,17 @@ class CIEnvironmentValidator:
 
         self.results["gitwiz_tools_detected"] = "{working_tools}/{total_tools}"
                     else:
-    pass
                         print("  ⚠️  No JSON output found in GitWiz response")
 
         self.results["gitwiz_tools_detected"] = "unknown"
                 except (json.JSONDecodeError, IndexError, KeyError) as e:
     pass
+    pass
                     print("  ⚠️  GitWiz output parsing failed: {e}")
 
         self.results["gitwiz_tools_detected"] = "parse_error"
             else:
+    pass
     pass
                 print("  ❌ GitWiz status check failed (exit code: {result.returncode})")
 
@@ -207,17 +188,18 @@ class CIEnvironmentValidator:
         self.results["gitwiz_status"] = "failed"
         except subprocess.TimeoutExpired:
     pass
+    pass
             print("  ❌ GitWiz status check timed out")
 
         self.results["gitwiz_status"] = "timeout"
         except Exception as _:
+    pass
     pass
             print("  ❌ GitWiz test error: {e}")
 
         self.results["gitwiz_status"] = "error"
 
     def validate(self) -> Dict:
-    pass
         """Run complete validation."""
         print("🔍 CI Environment Validation Starting...\n")
 
@@ -234,20 +216,16 @@ class CIEnvironmentValidator:
         print("📊 Overall Status: {self.results['overall_status'].upper()}")
 
         if self.results["recommendations"]:
-    pass
             print("\n💡 Recommendations:")
 
         for rec in self.results["recommendations"]:
-    pass
                 print("  {rec}")
 
         return self.results
 
     def fix_missing_tools(self) -> None:
-    pass
         """Attempt to install missing tools."""
         if not self.results["missing_tools"]:
-    pass
             print("✅ No missing tools to install")
 
         return
@@ -257,30 +235,28 @@ class CIEnvironmentValidator:
         node_missing = [t.split(":")[1] for t in self.results["missing_tools"] if t.startswith("node:")]
 
         if python_missing:
-    pass
             print("Installing Python tools: {' '.join(python_missing)}")
 
         try:
-    pass
                 subprocess.run([sys.executable, "-m", "pip", "install"] + python_missing, check=True)
 
         print("✅ Python tools installed successfully")
 
         except subprocess.CalledProcessError as e:
     pass
+    pass
                 print("❌ Failed to install Python tools: {e}")
 
         if node_missing and shutil.which("npm"):
-    pass
             print("Installing Node.js tools: {' '.join(node_missing)}")
 
         try:
-    pass
                 subprocess.run(["npm", "install", "-g"] + node_missing, check=True)
 
         print("✅ Node.js tools installed successfully")
 
         except subprocess.CalledProcessError as e:
+    pass
     pass
                 print("❌ Failed to install Node.js tools: {e}")
 
@@ -295,7 +271,6 @@ def main():
     results = validator.validate()
 
         if args.fix_missing and results["missing_tools"]:
-    pass
         print("\n" + "=" * 60)
 
         validator.fix_missing_tools()
@@ -305,7 +280,6 @@ def main():
         results = validator.validate()
 
         if args.output == "json":
-    pass
         print("\n" + json.dumps(results, indent=2))
 
     # Exit with appropriate code

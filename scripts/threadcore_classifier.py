@@ -72,33 +72,30 @@ PROJECT_CATEGORIES: Dict[str, Dict[str, Union[int, List[str]]]] = {
 
 def _word_boundary_search(text: str, keyword: str) -> bool:
     pass
+    pass
     return re.search(r"\b{re.escape(keyword)}\b", text) is not None
 
 
 def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
     pass
-    if not isinstance(content, str) or not content.strip():
     pass
+    if not isinstance(content, str) or not content.strip():
         return DEFAULT_RESULT.copy()
 
     content_lower = content.lower()
     scores: Dict[str, int] = {}
 
     for category, config in PROJECT_CATEGORIES.items():
-    pass
         weight = config.get("weight", 1)
         count = 0
         for kw in config["keywords"]:
-    pass
             if _word_boundary_search(content_lower, kw):
-    pass
                 count += 1
         scores[category] = count * weight
 
     total_scores = {k: v for k, v in scores.items() if v > 0}
 
     if not total_scores:
-    pass
         return DEFAULT_RESULT.copy()
 
     max_score = max(total_scores.values())
@@ -107,10 +104,8 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
 
     priority = "low"
     if max_score >= PRIORITY_THRESHOLDS["high"]:
-    pass
         priority = "high"
     elif max_score >= PRIORITY_THRESHOLDS["medium"]:
-    pass
         priority = "medium"
 
     return {
@@ -127,7 +122,6 @@ def main():
     args = parser.parse_args()
 
     with open(args.input_file, "r", encoding="utf-8") as f:
-    pass
         content = f.read()
 
     _ = tag_thread_context(content)

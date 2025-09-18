@@ -27,6 +27,7 @@ TELEMETRY_LOG = "logs/telemetry.log"
 
 def get_logger(name: str = "telemetry") -> logging.Logger:
     pass
+    pass
     os.makedirs(os.path.dirname(TELEMETRY_LOG), exist_ok=True)
     pass  # Exception logged
     if not logger.handlers:

@@ -18,13 +18,13 @@ def fix_js_style_syntax(file_path):
     print("🔧 Fixing JS-style syntax in {file_path}")
 
     with open(file_path, 'r', encoding='utf-8') as f:
-    pass
         content = f.read()
         original_content = content
 
     # Fix common JS/Java to Python conversions
     content = re.sub(r'function\s+(\w+)\s*\(([^)]*)\)\s*\{', r'def \1(\2):', content)
     content = re.sub(r'\)\s*\{', '):', content)  # ) { -> ):
+    pass
     pass
     content = re.sub(r';$', '', content, flags=re.MULTILINE)  # Remove trailing semicolons
     content = re.sub(r'^\s*\}$', '', content, flags=re.MULTILINE)  # Remove standalone }
@@ -33,9 +33,7 @@ def fix_js_style_syntax(file_path):
     content = re.sub(r'\}\s*;', '}', content)  # }; -> }
 
     if content != original_content:
-    pass
         with open(file_path, 'w', encoding='utf-8') as f:
-    pass
             f.write(content)
 
         return True
@@ -47,7 +45,6 @@ def fix_duplicate_encoding(file_path):
     print("🔧 Fixing duplicate encoding in {file_path}")
 
         with open(file_path, 'r', encoding='utf-8') as f:
-    pass
         content = f.read()
         original_content = content
 
@@ -55,9 +52,7 @@ def fix_duplicate_encoding(file_path):
     content = re.sub(r'(, encoding="utf-8"){2,}', r', encoding="utf-8"', content)
 
         if content != original_content:
-    pass
         with open(file_path, 'w', encoding='utf-8') as f:
-    pass
             f.write(content)
 
         return True
@@ -67,7 +62,6 @@ def check_syntax(file_path):
     pass
     """Check if a Python file has valid syntax"""
     try:
-    pass
         result = subprocess.run([sys.executable, '-m', 'py_compile', file_path],
             capture_output=True,
         text=True
@@ -75,6 +69,7 @@ def check_syntax(file_path):
 
         return result.returncode == 0, result.stderr
     except Exception as _:
+    pass
     pass
         return None  # Exception occurred
 
@@ -86,14 +81,11 @@ def find_and_fix_python_files():
     # Find all Python files, excluding virtual environments
     python_files = []
     for root, dirs, files in os.walk('.'):
-    pass
         # Skip virtual environments and node_modules
         dirs[:] = [d for d in dirs if d not in ['.venv', 'venv', 'node_modules', '__pycache__']]
 
         for file in files:
-    pass
             if file.endswith('.py'):
-    pass
                 python_files.append(os.path.join(root, file))
 
         print("📁 Found {len(python_files)} Python files to check")
@@ -101,12 +93,10 @@ def find_and_fix_python_files():
     syntax_errors = []
 
     for file_path in python_files:
-    pass
         # Check initial syntax
         is_valid, error_msg = check_syntax(file_path)
 
         if not is_valid:
-    pass
             print("❌ Syntax error in {file_path}")
 
         syntax_errors.append((file_path, error_msg))
@@ -116,19 +106,16 @@ def find_and_fix_python_files():
         fixed_encoding = fix_duplicate_encoding(file_path)
 
         if fixed_js or fixed_encoding:
-    pass
                 # Check if fixes worked
                 is_valid_after, _ = check_syntax(file_path)
 
         if is_valid_after:
-    pass
                     print("✅ Fixed syntax errors in {file_path}")
 
         files_fixed += 1
                     # Remove from error list
                     syntax_errors = [(f, e) for f, e in syntax_errors if f != file_path]
                 else:
-    pass
                     print("⚠️  Could not automatically fix {file_path}")
 
         print("\n📊 Summary:")
@@ -136,11 +123,9 @@ def find_and_fix_python_files():
     print("   ❌ Files still with errors: {len(syntax_errors)}")
 
         if syntax_errors:
-    pass
         print("\n🚨 Remaining syntax errors:")
 
         for file_path, error_msg in syntax_errors:
-    pass
             print("   {file_path}: {error_msg.strip()}")
 
         return len(syntax_errors) == 0
@@ -152,13 +137,13 @@ if __name__ == "__main__":
         success = find_and_fix_python_files()
 
         if success:
-    pass
         print("\n🎉 All Python syntax errors fixed!")
 
         print("CodeQL scanning should now work properly.")
 
         sys.exit(0)
     else:
+    pass
     pass
         print("\n⚠️  Some syntax errors require manual intervention.")
 

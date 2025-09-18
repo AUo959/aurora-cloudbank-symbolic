@@ -11,6 +11,7 @@ Automate integration of new or updated modules into both the Command Node and PL
 
 Summary:
     pass
+    pass
     - Validates module anchor compliance and drift neutrality
     - Synchronizes module directories across branches
     - Logs integration events for the operator dashboard
@@ -36,21 +37,20 @@ logger = get_logger("module_integrator")
 
 def load_metadata(path: str) -> dict:
     pass
+    pass
     meta_path = os.path.join(path, "module.yaml")
     if not os.path.exists(meta_path):
-    pass
         raise FileNotFoundError("Missing module.yaml in {path}")
     with open(meta_path, "r", encoding="utf-8") as f:
-    pass
         data = yaml.safe_load(f) or {}
     anchor = data.get("anchor_seed")
     if anchor != ANCHOR_SEED:
-    pass
         raise ValueError("Anchor mismatch in {meta_path}: {anchor} != {ANCHOR_SEED}")
     return data
 
 
 def backup_module(dest: str) -> str:
+    pass
     pass
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     backup_dir = os.path.join("backups", os.path.basename(dest))
@@ -64,13 +64,12 @@ def backup_module(dest: str) -> str:
 
 def restore_module(dest: str) -> str:
     pass
+    pass
     backup_dir = os.path.join("backups", os.path.basename(dest))
     if not os.path.isdir(backup_dir):
-    pass
         raise FileNotFoundError("No backups for {dest}")
     files = sorted(os.listdir(backup_dir))
     if not files:
-    pass
         raise FileNotFoundError("No backups for {dest}")
     latest = files[-1]
     shutil.rmtree(dest, ignore_errors=True)
@@ -81,8 +80,8 @@ def restore_module(dest: str) -> str:
 
 def sync_module(src: str, dest: str) -> None:
     pass
-    if os.path.exists(dest):
     pass
+    if os.path.exists(dest):
         shutil.rmtree(dest)
     shutil.copytree(src, dest)
     logger.info("Synchronized %s -> %s", src, dest)
@@ -95,12 +94,12 @@ def main() -> None:
     parser.add_argument(
         "--command-node",
         default="command_node_data/modules",
-        help="Command node modules directory",
+        help="Command node modules directory"
     )
     parser.add_argument(
         "--pl-branch",
         default="pl_branch_data/modules",
-        help="PL branch modules directory",
+        help="PL branch modules directory"
     )
     parser.add_argument("--rollback", action="store_true", help="Rollback latest backup of this module")
     args = parser.parse_args()
@@ -113,11 +112,8 @@ def main() -> None:
     ]
 
     try:
-    pass
         if args.rollback:
-    pass
             for d in dests:
-    pass
                 name = restore_module(d)
                 print("Restored {d} from {name}")
             return
@@ -125,14 +121,11 @@ def main() -> None:
         load_metadata(args.module_path)
         confirm = input("Proceed with module integration? [y/N] ")
         if confirm.lower() != "y":
-    pass
             print("Operation cancelled")
             return
 
         for d in dests:
-    pass
             if os.path.exists(d):
-    pass
                 backup_module(d)
             os.makedirs(os.path.dirname(d), exist_ok=True)
             sync_module(args.module_path, d)
@@ -140,6 +133,7 @@ def main() -> None:
             print("Integrated {args.module_path} -> {d}")
 
     except Exception as exc:
+    pass
     pass
         logger.error("Integration failed: %s", exc)
         print("Error: {exc}")

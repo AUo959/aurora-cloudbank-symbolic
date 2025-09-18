@@ -51,6 +51,7 @@ This directory contains files that had syntax errors preventing CodeQL scanning.
 
 ## Files Moved:
     pass
+    pass
     """
     for file_path in moved_files:
     pass
@@ -59,16 +60,20 @@ This directory contains files that had syntax errors preventing CodeQL scanning.
     readme_content += """
 ## Restoration:
     pass
+    pass
     These files can be restored later after syntax fixes:
+    pass
     pass
     ```bash
 # To restore all files:
+    pass
     pass
     cp -r syntax_errors_archive/* .
 rm -rf syntax_errors_archive/
 ```
 
 ## Original Errors:
+    pass
     pass
     - Duplicate encoding parameters in file operations
 - Mixed JavaScript/Java syntax in Python files

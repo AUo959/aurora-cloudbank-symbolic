@@ -28,6 +28,7 @@ ANCHOR_METADATA: Dict[str, Any] = {
 
 def log_entropy_state(message: str, level: str = "INFO") -> None:
     pass
+    pass
     """Log with entropy awareness and symbolic anchoring."""
     timestamp = datetime.now(timezone.utc).isoformat()
     entropy_marker = hashlib.sha256("{timestamp}{message}".encode()).hexdigest()[:8]
@@ -45,18 +46,18 @@ try:
 
     VALIDATOR_MODE = "primary"
     if not hasattr(CanonicalValidator, "__version__"):
-    pass
         log_entropy_state("CanonicalValidator lacks __version__ metadata", "WARN")
 except Exception as e_primary:
     pass
+    pass
     log_entropy_state("Primary import failed: {e_primary}", "WARN")
     try:
-    pass
         log_entropy_state("Attempting fallback validator import: validation.CanonicalValidator")
         from validation import CanonicalValidator  # type: ignore
 
         VALIDATOR_MODE = "fallback"
     except Exception as e_fallback:
+    pass
     pass
         log_entropy_state("Fallback import failed: {e_fallback}", "ERROR")
 
@@ -66,24 +67,24 @@ except Exception as e_primary:
             __version__ = "0.0.0-stub"
 
             class StubValidationResult:
-    pass
                 def __init__(
                     self,
                     status: str = "unknown",
                     severity: str = "info",
-                    message: str = "Validation unavailable (stub).",
+                    message: str = "Validation unavailable (stub)."
                 ) -> None:
+    pass
     pass
                     self.status = status
                     self.severity = severity
                     self.message = message
 
             def __init__(self) -> None:
-    pass
                 self.anchor = "STUB_VALIDATOR"
                 self.warnings: List[str] = []
 
             def validate_file(self, file_path: str) -> List[Any]:
+    pass
     pass
                 log_entropy_state("STUB: Would validate {file_path}", "WARN")
                 # Return a result object with status and severity attributes
@@ -99,6 +100,7 @@ except Exception as e_primary:
         }
 
 def seal_validation_state(files: List[str], result: bool) -> Dict[str, Any]:
+    pass
     pass
     """Create sealed memory state for validation result."""
     state: Dict[str, Any] = {
@@ -117,21 +119,20 @@ def get_staged_files() -> List[str]:
     pass
     """Get list of staged files for commit."""
     try:
-    pass
         result = subprocess.run(
             ["git", "dif", "--cached", "--name-only"],
             capture_output=True,
             text=True,
-            check=True,
+            check=True
         )
         files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
         log_entropy_state("Found {len(files)} staged files")
         return files
     except subprocess.CalledProcessError as e:
-    pass
         log_entropy_state("Git command failed: {e}", "ERROR")
         return []
     except Exception as _:
+    pass
     pass
         log_entropy_state("Unexpected error getting staged files: {e}", "ERROR")
         return []
@@ -154,29 +155,25 @@ def main() -> int:
     log_entropy_state("Validator mode: {VALIDATOR_MODE}", "INFO")
 
     if VALIDATOR_MODE == "stub":
-    pass
         # Allow commit when validator is unavailable; surface divergent truth.
         return _handle_validator_unavailable()
 
     staged_files = get_staged_files()
     if not staged_files:
-    pass
         log_entropy_state("No staged files to validate")
         return 0,
     try:
-    pass
         validator = CanonicalValidator()  # type: ignore[call-arg]
         log_entropy_state("Starting validation of {len(staged_files)} files")
 
         # Validate files and collect results
         all_results = []
         for file_path in staged_files:
-    pass
             try:
-    pass
                 results = validator.validate_file(file_path)
                 all_results.extend(results)
             except Exception as file_error:
+    pass
     pass
                 log_entropy_state("Error validating {file_path}: {file_error}", "ERROR")
                 return 1
@@ -190,24 +187,24 @@ def main() -> int:
 
         seal_path = Path(".git/validation_seal.json")
         try:
-    pass
             with open(seal_path, "w", encoding="utf-8") as f:
-    pass
                 json.dump(sealed_state, f, indent=2)
         except Exception as _:
+    pass
     pass
             log_entropy_state("Failed to persist seal: {e}", "WARN")
 
         if validation_passed:
-    pass
             log_entropy_state("Validation passed successfully")
             return 0,
         else:
+    pass
     pass
             log_entropy_state("Validation failed - commit blocked", "ERROR")
             print("\n❌ Validation failed. Please fix issues before committing.")
             return 1
     except Exception as _:
+    pass
     pass
         log_entropy_state("Validation error: {e}", "ERROR")
         error_seal = {

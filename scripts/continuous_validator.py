@@ -14,6 +14,7 @@ Real-time monitoring and validation of file changes against canonical specificat
 
 This monitor:
     pass
+    pass
     1. Watches for file changes in the workspace
 2. Automatically validates changes against ORION CORE canonical spec
 3. Applies auto-fixes when safe
@@ -30,6 +31,7 @@ try:
     from canonical_validator import CanonicalValidator
 except ImportError:
     pass
+    pass
     print("❌ Error: Could not import canonical_validator")
     sys.exit(1)
 
@@ -39,7 +41,6 @@ class CanonicalValidationHandler(FileSystemEventHandler):
     """File system event handler for canonical validation"""
 
     def __init__(self, validator, config):
-    pass
         self.validator = validator
         self.config = config
         self.validation_queue = []
@@ -48,60 +49,47 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         self.debounce_delay = config.get("debounce_delay", 2.0)
 
     def should_validate_file(self, file_path):
-    pass
         """Check if file should be validated"""
         path = Path(file_path)
 
         # Check if file exists and is a file
         if not path.exists() or not path.is_file():
-    pass
             return False
 
         # Check file extension
         validatable_extensions = {".md", ".txt", ".js", ".ts", ".py", ".json", ".yaml", ".yml"}
         if path.suffix not in validatable_extensions:
-    pass
             return False
 
         # Check exclude patterns
         exclude_patterns = self.config.get("exclude_patterns", [])
         for pattern in exclude_patterns:
-    pass
             if path.match(pattern):
-    pass
                 return False
 
         return True
 
     def on_modified(self, event):
-    pass
         """Handle file modification events"""
         if event.is_directory:
-    pass
             return
 
         file_path = event.src_path
         if self.should_validate_file(file_path):
-    pass
             self.schedule_validation(file_path)
 
     def on_created(self, event):
-    pass
         """Handle file creation events"""
         if event.is_directory:
-    pass
             return
 
         file_path = event.src_path
         if self.should_validate_file(file_path):
-    pass
             self.schedule_validation(file_path)
 
     def schedule_validation(self, file_path):
-    pass
         """Schedule validation with debouncing"""
         with self.processing_lock:
-    pass
             # Update last modification time
             self.last_validation[file_path] = time.time()
 
@@ -110,33 +98,29 @@ class CanonicalValidationHandler(FileSystemEventHandler):
             timer.start()
 
     def validate_file(self, file_path):
-    pass
         """Validate a specific file"""
         with self.processing_lock:
-    pass
             # Check if file was modified again during debounce period
             last_mod = self.last_validation.get(file_path, 0)
             if time.time() - last_mod < self.debounce_delay:
-    pass
                 return  # Skip validation, file was modified again,
         try:
-    pass
             print("🔍 Validating: {Path(file_path).name}")
             results = self.validator.validate_file(file_path)
 
             if results:
-    pass
                 self.process_validation_results(file_path, results)
             else:
+    pass
     pass
                 print("  ✅ {Path(file_path).name} - No issues detected")
 
         except Exception as _:
     pass
+    pass
             print("  ❌ Error validating {file_path}: {e}")
 
     def process_validation_results(self, file_path, results):
-    pass
         """Process validation results and take appropriate actions"""
         auto_fixes = [r for r in results if r.status == "AUTO_FIXED"]
         escalations = [r for r in results if r.status == "ESCALATE"]
@@ -147,49 +131,41 @@ class CanonicalValidationHandler(FileSystemEventHandler):
 
         # Report auto-fixes
         if auto_fixes:
-    pass
             print("  🔧 {file_name} - {len(auto_fixes)} auto-fixes applied")
             for fix in auto_fixes[:2]:  # Show first 2
                 print("    ✅ {fix.message}")
 
         # Report critical issues
         if critical:
-    pass
             print("  🚨 {file_name} - {len(critical)} CRITICAL issues!")
             for issue in critical:
-    pass
                 print("    ❗ {issue.message}")
                 print("      Fix: {issue.suggested_fix}")
             self.alert_user(file_path, critical, "CRITICAL")
 
         # Report high priority issues
         elif high:
-    pass
             print("  🔴 {file_name} - {len(high)} high priority issues")
             for issue in high[:1]:  # Show first issue
                 print("    🔴 {issue.message}")
             if len(high) > 1:
-    pass
                 print("    ... and {len(high) - 1} more")
 
         # Log validation event
         self.log_validation_event(file_path, results)
 
     def alert_user(self, file_path, critical_issues, severity):
-    pass
         """Generate user alert for critical issues"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         alert_file = "CANONICAL_ALERT_{severity}_{timestamp.replace(':', '-').replace(' ', '_')}.md"
 
         with open(alert_file, "w", encoding="utf-8") as f:
-    pass
             f.write("# Aurora CloudBank Canonical Alert - {severity}\n\n")
             f.write("**Timestamp**: {timestamp}\n")
             f.write("**File**: {file_path}\n")
             f.write("**Issues Detected**: {len(critical_issues)}\n\n")
 
             for i, issue in enumerate(critical_issues, 1):
-    pass
                 f.write("## Issue {i}: {issue.check_name}\n")
                 f.write("**Severity**: {issue.severity}\n")
                 f.write("**Message**: {issue.message}\n")
@@ -204,7 +180,6 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         print("  📋 Alert generated: {alert_file}")
 
     def log_validation_event(self, file_path, results):
-    pass
         """Log validation events for tracking"""
         log_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -223,7 +198,6 @@ class CanonicalValidationHandler(FileSystemEventHandler):
         # Append to validation log
         log_file = "canonical_validation.log"
         with open(log_file, "a", encoding="utf-8") as f:
-    pass
             f.write(json.dumps(log_entry) + "\n")
 
 class ContinuousValidator:
@@ -231,7 +205,6 @@ class ContinuousValidator:
     """Main continuous validation system"""
 
     def __init__(self, workspace_path="."):
-    pass
         self.workspace_path = Path(workspace_path)
         self.validator = CanonicalValidator(workspace_path)
         self.config = self.load_config()
@@ -239,14 +212,11 @@ class ContinuousValidator:
         self.running = False
 
     def load_config(self):
-    pass
         """Load validation configuration"""
         config_file = self.workspace_path / "config" / "canonical_validation.yaml"
 
         if config_file.exists():
-    pass
             with open(config_file, "r", encoding="utf-8") as f:
-    pass
                 config = yaml.safe_load(f)
                 return config.get("integration", {}).get("file_watcher", {})
 
@@ -259,10 +229,8 @@ class ContinuousValidator:
         }
 
     def start(self):
-    pass
         """Start continuous validation monitoring"""
         if not self.config.get("enabled", True):
-    pass
             print("📴 Continuous validation is disabled in configuration")
             return
 
@@ -285,19 +253,16 @@ class ContinuousValidator:
         self.observer.start()
         self.running = True,
         try:
-    pass
             while self.running:
-    pass
                 time.sleep(1)
         except KeyboardInterrupt:
+    pass
     pass
             self.stop()
 
     def stop(self):
-    pass
         """Stop continuous validation monitoring"""
         if self.observer:
-    pass
             print("\n🛑 Stopping continuous validation monitor...")
             self.observer.stop()
             self.observer.join()
@@ -305,7 +270,6 @@ class ContinuousValidator:
             print("✅ Monitor stopped")
 
     def validate_workspace_once(self):
-    pass
         """Run one-time validation of entire workspace"""
         print("🔍 Running one-time workspace validation...")
         results = self.validator.validate_workspace()
@@ -332,10 +296,10 @@ def main():
     monitor = ContinuousValidator(args.workspace)
 
     if args.once:
-    pass
         # Run one-time validation
         monitor.validate_workspace_once()
     else:
+    pass
     pass
         # Start continuous monitoring
         monitor.start()
@@ -343,13 +307,14 @@ def main():
 if __name__ == "__main__":
     pass
     try:
-    pass
         main()
     except KeyboardInterrupt:
+    pass
     pass
         print("\n👋 Goodbye!")
         sys.exit(0)
     except Exception as _:
+    pass
     pass
         print("❌ Error: {e}")
         sys.exit(1)

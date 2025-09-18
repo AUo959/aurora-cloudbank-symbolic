@@ -13,7 +13,6 @@ from typing import Set
 class ImportFixer:
     pass
     def __init__(self):
-    pass
         # Common imports mapping undefined names to their modules
         self.common_imports = {
             "Dict": "from typing import Dict",
@@ -49,73 +48,64 @@ class ImportFixer:
 
     def get_undefined_names_from_flake8(self, file_path: str) -> Set[str]:
     pass
+    pass
         """Get undefined names (F821 errors) from flake8 for a specific file."""
         try:
-    pass
         result = subprocess.run(["flake8", "--select=F821", file_path], capture_output=True, text=True, timeout=30)
         undefined_names = set()
 
         for line in result.stdout.split("\n"):
-    pass
                 if "F821" in line and "undefined name" in line:
-    pass
                     # Extract the undefined name from the error message
                     match = re.search(r"undefined name '([^']+)'", line)
 
         if match:
-    pass
                         undefined_names.add(match.group(1))
 
         return undefined_names
         except (subprocess.TimeoutExpired, subprocess.SubprocessError):
     pass
+    pass
             return set()
 
         def get_existing_imports(self, content: str) -> Set[str]:
+    pass
     pass
         """Extract existing imports from file content."""
         existing_imports = set()
 
         for line in content.split("\n"):
-    pass
             line = line.strip()
 
         if line.startswith("import ") or line.startswith("from "):
-    pass
                 existing_imports.add(line)
 
         return existing_imports
 
     def add_missing_imports(self, file_path: str) -> bool:
     pass
+    pass
         """Add missing imports to a Python file."""
         try:
-    pass
             # Get undefined names from flake8
         undefined_names = self.get_undefined_names_from_flake8(file_path)
 
         if not undefined_names:
-    pass
                 return False
 
             with open(file_path, "r", encoding="utf-8") as f:
-    pass
         content = f.read()
         existing_imports = self.get_existing_imports(content)
 
             # Determine which imports we need to add
         imports_to_add = []
             for name in undefined_names:
-    pass
                 if name in self.common_imports:
-    pass
                     import_statement = self.common_imports[name]
                     if import_statement not in existing_imports:
-    pass
                         imports_to_add.append(import_statement)
 
         if not imports_to_add:
-    pass
                 return False
 
             # Find where to insert imports (after existing imports or at top)
@@ -124,76 +114,62 @@ class ImportFixer:
 
             # Skip shebang and encoding lines
             for i, line in enumerate(lines):
-    pass
                 if line.startswith("#") and ("!" in line or "coding" in line or "encoding" in line):
-    pass
         insert_index = i + 1
                 elif line.strip().startswith('"""') or line.strip().startswith("'''"):
-    pass
                     # Skip docstrings
                     quote = line.strip()[:3]
                     for j in range(i + 1, len(lines)):
-    pass
                         if quote in lines[j]:
-    pass
         insert_index = j + 1
                             break
                     break
                 elif line.strip() and not line.startswith("#"):
-    pass
                     break
 
             # Find the end of existing imports
             for i in range(insert_index, len(lines)):
-    pass
                 line = lines[i].strip()
 
         if line and not (line.startswith("import ") or line.startswith("from ") or line.startswith("#")):
-    pass
         insert_index = i
                     break
 
             # Insert new imports
             for import_stmt in sorted(set(imports_to_add)):
-    pass
                 lines.insert(insert_index, import_stmt)
 
         insert_index += 1
 
             # Add a blank line after imports if needed
             if imports_to_add and insert_index < len(lines) and lines[insert_index].strip():
-    pass
                 lines.insert(insert_index, "")
 
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
                 f.write("\n".join(lines))
 
         return True
 
         except Exception as _:
     pass
+    pass
             print("Error processing {file_path}: {e}")
 
         return False
 
     def process_all_files(self) -> None:
-    pass
         """Process all Python files in the repository."""
         python_files = []
 
         # Find all Python files
         for root, dirs, files in os.walk("."):
-    pass
             # Skip common directories we don't want to process
             dirs[:] = [
                 d for d in dirs if not d.startswith(".") and d not in ["__pycache__", "node_modules", "venv", "env"]
             ]
 
             for file in files:
-    pass
                 if file.endswith(".py"):
-    pass
                     file_path = os.path.join(root, file)
 
         python_files.append(file_path)
@@ -202,15 +178,13 @@ class ImportFixer:
         files_fixed = 0
 
         for file_path in python_files:
-    pass
             try:
-    pass
                 if self.add_missing_imports(file_path):
-    pass
                     files_fixed += 1
                     print("✓ Fixed imports in {file_path}")
 
         except Exception as _:
+    pass
     pass
                 print("✗ Error processing {file_path}: {e}")
 

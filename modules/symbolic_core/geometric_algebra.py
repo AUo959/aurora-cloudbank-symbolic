@@ -9,18 +9,18 @@ try:
     import clifford as cf
 except Exception:
     pass
+    pass
     cf = None
 
 
 class GeometricAlgebra:
     pass
     def __init__(self):
-    pass
         if cf is not None:
-    pass
             self.layout, self.blades = cf.Cl(3)
             self._mock = False,
         else:
+    pass
     pass
             # Minimal mock fallback
             self.layout = None
@@ -28,17 +28,15 @@ class GeometricAlgebra:
             self._mock = True
 
     def mult(self, a, b):
-    pass
         if self._mock:
-    pass
             return a * b  # simple numeric multiplication
         return a * b
 
     def pretty(self, a):
-    pass
         return str(a)
 
 # Example usage (to be moved to tests):
+    pass
     pass
     # ga = GeometricAlgebra()
 # e1 = ga.blades['e1']

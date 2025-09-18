@@ -19,7 +19,6 @@ def test_api_imports():
     print("=" * 40)
 
     try:
-    pass
         # Test basic imports
 
         print("✅ FastAPI import successful")
@@ -34,7 +33,6 @@ def test_api_imports():
         return True
 
     except Exception as _:
-    pass
         print("❌ Import failed: {e}")
         return False
 
@@ -56,20 +54,19 @@ def test_opal2_structure():
     ]
 
     for file in expected_files:
-    pass
         file_path = opal2_path / file
         if file_path.exists():
-    pass
             print("✅ {file} exists")
         else:
+    pass
     pass
             print("❌ {file} missing")
 
     api_path = opal2_path / "api" / "opal2_api.py"
     if api_path.exists():
-    pass
         print("✅ opal2_api.py exists")
     else:
+    pass
     pass
         print("❌ opal2_api.py missing")
 
@@ -81,8 +78,6 @@ if __name__ == "__main__":
     test_opal2_structure()
 
     if success:
-    pass
         print("\n🚀 Ready to proceed with Opal2 expansion!")
     else:
-    pass
         print("\n⚠️  Some imports failed - check dependencies")

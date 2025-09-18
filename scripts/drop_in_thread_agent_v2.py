@@ -8,7 +8,7 @@ an alias (same as the folder) and optionally a live context directive.
 """
 
 from modules.reflective_autonomy.threadcore_tagging import (
-    PROJECT_CATEGORIES,
+    PROJECT_CATEGORIES
 )
 from modules.reflective_autonomy.threadcore_tagging import tag_thread_context as base_tag_thread_context
 
@@ -30,6 +30,7 @@ ALIAS_MAP.setdefault("Unsorted", "Unsorted")
 
 
 def tag_thread_context(content: str, include_directive: bool = True) -> dict:
+    pass
     pass
     """Classify thread content and return tagging info with alias."""
     base_result = base_tag_thread_context(content)
@@ -56,7 +57,7 @@ def main() -> None:
     parser.add_argument(
         "--no-directive",
         action="store_true",
-        help="Omit the live context directive from output",
+        help="Omit the live context directive from output"
     )
     args = parser.parse_args()
 

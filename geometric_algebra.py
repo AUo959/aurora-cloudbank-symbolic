@@ -3,7 +3,6 @@ geometric_algebra.py
 Basic geometric algebra utilities using the `clifford` library.
 """
 
-import numpy as np
 from clifford import Cl
 
 # Initialize 3D Euclidean geometric algebra (can be parameterized)

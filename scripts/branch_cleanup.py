@@ -11,7 +11,7 @@ def get_merged_branches(): result = subprocess.run(["git", "branch", "-r", "--me
                                                    capture_output=True,
                                                    text=True,
                                                    shell=False,
-                                                   check=False,
+                                                   check=False
                                                    )
 
 
@@ -26,7 +26,6 @@ def delete_remote_branch(branch):
     remote = branch.split("/")[0]
     name = "/".join(branch.split("/")[1:])
     if name == "main":
-    pass
         return
     subprocess.run(["git", "push", remote, ":{name}"], shell=False, check=False)
 
@@ -44,13 +43,10 @@ def main():
     feature_pattern = re.compile(r"codex/|feature/|alert-autofix|dependabot/")
     backup_pattern = re.compile(r"backup")
     for branch in merged:
-    pass
         if feature_pattern.search(branch):
-    pass
             print("Deleting merged feature branch: {branch}")
             delete_remote_branch(branch)
         elif backup_pattern.search(branch):
-    pass
             print("Archiving backup branch: {branch}")
             archive_branch(branch)
 

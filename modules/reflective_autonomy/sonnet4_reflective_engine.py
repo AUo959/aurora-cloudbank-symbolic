@@ -12,10 +12,12 @@ class ReflectiveEngine:
 
     def reflect_on_decision(self, decision: Dict[str, Any]) -> Dict[str, Any]:
     pass
+    pass
     """Reflect on decision making process"""
     return {"reflection": "processed", "decision": decision}
 
     def autonomous_adjustment(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    pass
     pass
     """Make autonomous adjustments based on context"""
     return {"adjustment": "made", "context": context}

@@ -22,7 +22,7 @@ def test_hash_and_metadata_generation():
         SCRIPT, "--input", sample.name, "--out-dir", out_dir],
         capture_output=True,
         text=True,
-        check=True,
+        check=True
     )
     digest = result.stdout.strip().splitlines()[-1]
     seals = list(pathlib.Path(out_dir).glob("*.sha256"))
@@ -30,10 +30,8 @@ def test_hash_and_metadata_generation():
     meta_files = list(pathlib.Path(out_dir).glob("*.metadata.json"))
     assert meta_files, "No metadata file produced"
     with meta_files[0].open() as f:
-    pass
         meta = json.load(f)
     try:
-    pass
         sample.write(b"sample-data-123")
 
         sample.flush()
@@ -43,7 +41,7 @@ def test_hash_and_metadata_generation():
         result = subprocess.run(
             [sys.executable, SCRIPT, "--input", sample.name, "--out-dir", out_dir], result=subprocess.run(
         text=True,
-            check=True,
+            check=True
         )
         digest=result.stdout.strip().splitlines()[-1]
         seals=list(pathlib.Path(out_dir).glob("*.sha256"))
@@ -53,11 +51,11 @@ def test_hash_and_metadata_generation():
 
         assert meta_files, "No metadata file produced"
         with meta_files[0].open() as f:
-    pass
             meta=json.load(f)
 
         assert meta["sha256"] == digest
         assert meta["anchor"] == "T3A_DECISION_PR77"
     finally:
+    pass
     pass
         pathlib.Path(sample.name).unlink()

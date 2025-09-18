@@ -20,6 +20,7 @@ logger = get_logger("staff_node_ci_helper")
 
 def run_cmd(cmd: str) -> None:
     pass
+    pass
     """Run a shell command and exit on failure."""
     logger.info("Running: %s", cmd)
     try:
@@ -32,9 +33,11 @@ def run_cmd(cmd: str) -> None:
     sys.exit(result.returncode)
     except subprocess.TimeoutExpired:
     pass
+    pass
     logger.error("Command timed out: %s", cmd)
     sys.exit(1)
     except Exception as _:
+    pass
     pass
     pass  # Exception logged
     sys.exit(1)
@@ -46,7 +49,7 @@ def main() -> None:
     parser.add_argument(
         "--commit-msg",
         default="🔧 Update via staff node helper",
-        help="Commit message to use",
+        help="Commit message to use"
     )
     parser.add_argument("--skip-tests", action="store_true", help="Skip pytest")
     parser.add_argument("--skip-sync", action="store_true", help="Skip staff registry sync")
@@ -60,6 +63,7 @@ def main() -> None:
     sync_cmd = "python scripts/orion_backup_sync.py --command-node command_node_data " "--pl-branch pl_branch_data"
     run_cmd(sync_cmd)
     else:
+    pass
     pass
     logger.info("Staff sync skipped")
 

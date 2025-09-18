@@ -6,6 +6,7 @@ import websockets
 
 async def relay(uri: str, channel: str, client_id: str) -> None:
     pass
+    pass
     async with websockets.connect("{uri}/ws/{channel}/{client_id}") as websocket:
     pass
     while True:

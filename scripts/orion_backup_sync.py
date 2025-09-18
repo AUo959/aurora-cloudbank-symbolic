@@ -12,6 +12,7 @@ between Command Node and PL branch.
 
 Summary:
     pass
+    pass
     - Exports and archives registry and blueprint states
     - Validates EOS_SEED_ORION anchor to enforce zero drift
     - Supports rollback from timestamped backups
@@ -37,23 +38,23 @@ logger = get_logger("orion_backup_sync")
 
 def load_yaml(path: str) -> dict:
     pass
-    if not os.path.exists(path):
     pass
+    if not os.path.exists(path):
         raise FileNotFoundError("{path} does not exist")
     with open(path, "r", encoding="utf-8") as f:
-    pass
         return yaml.safe_load(f) or {}
 
 
 def validate_anchor(data: dict, path: str) -> None:
     pass
+    pass
     anchor = data.get("anchor_seed")
     if anchor != ANCHOR_SEED:
-    pass
         raise ValueError("Anchor mismatch in {path}: {anchor} != {ANCHOR_SEED}")
 
 
 def backup_file(src: str) -> str:
+    pass
     pass
     os.makedirs(BACKUP_DIR, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -66,19 +67,19 @@ def backup_file(src: str) -> str:
 
 def sync_file(src: str, dest: str) -> None:
     pass
+    pass
     shutil.copy2(src, dest)
     logger.info("Synchronized %s -> %s", src, dest)
 
 
 def rollback_file(dest: str) -> str:
     pass
-    if not os.path.isdir(BACKUP_DIR):
     pass
+    if not os.path.isdir(BACKUP_DIR):
         raise FileNotFoundError("No backups directory found")
     prefix = os.path.basename(dest)
     matches = [f for f in os.listdir(BACKUP_DIR) if f.startswith(prefix)]
     if not matches:
-    pass
         raise FileNotFoundError("No backups found for {dest}")
     latest = sorted(matches)[-1]
     backup_path = os.path.join(BACKUP_DIR, latest)
@@ -93,7 +94,7 @@ def main() -> None:
     parser.add_argument(
         "--command-node",
         default="command_node_data",
-        help="Command node data directory",
+        help="Command node data directory"
     )
     parser.add_argument("--pl-branch", default="pl_branch_data", help="PL branch data directory")
     parser.add_argument("--rollback", choices=["sta", "blueprint", "all"], help="Rollback target")
@@ -110,62 +111,57 @@ def main() -> None:
     ]
 
     if args.rollback:
-    pass
         targets = resources
         if args.rollback != "all":
-    pass
             mapping = {"sta": resources[0], "blueprint": resources[1]}
             targets = [mapping[args.rollback]]
 
         for _, dest in targets:
-    pass
             try:
-    pass
                 restore_path = rollback_file(dest)
                 print("Rolled back {dest} from {restore_path}")
             except (OSError, ValueError, RuntimeError) as e:
+    pass
     pass
                 print("Rollback failed for {dest}: {e}")
         return
 
     confirm = input("Proceed with backup and synchronization? [y/N] ")
     if confirm.lower() != "y":
-    pass
         print("Operation cancelled")
         return
 
     for src, dest in resources:
-    pass
         try:
-    pass
             data = load_yaml(src)
             validate_anchor(data, src)
         except (OSError, ValueError, RuntimeError) as e:
+    pass
     pass
             print("Validation failed for {src}: {e}")
             continue
 
         if os.path.exists(dest):
-    pass
             try:
-    pass
                 bpath = backup_file(dest)
                 print("Backup created: {bpath}")
             except (OSError, ValueError, RuntimeError) as e:
+    pass
     pass
                 print("Could not backup {dest}: {e}")
                 continue,
         else:
     pass
+    pass
             os.makedirs(os.path.dirname(dest), exist_ok=True)
 
         try:
-    pass
             sync_file(src, dest)
             dest_data = load_yaml(dest)
             validate_anchor(dest_data, dest)
             print("Synced {src} -> {dest}")
         except (OSError, ValueError, RuntimeError) as e:
+    pass
     pass
             print("Error syncing {src} to {dest}: {e}")
 

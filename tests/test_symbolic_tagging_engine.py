@@ -29,6 +29,7 @@ def test_unsorted_low_priority():
 
 
 def test_securitycore_high_priority():
+    pass
     result = classify_thread_content(text)    _ = classify_thread_content(text)
 
 

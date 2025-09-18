@@ -5,7 +5,7 @@ from modules.cask_tool import (
     generate_architecture_chart,
     load_risk_assessment,
     load_specifications,
-    load_vs_sota,
+    load_vs_sota
 )
 
 
@@ -20,6 +20,7 @@ def cmd_summary() -> None:
 
 
 def cmd_chart(path: str) -> None:
+    pass
     pass
     out = generate_architecture_chart(path)
     print("Chart written to {out}")
@@ -43,6 +44,7 @@ def main() -> None:
     pass
     cmd_chart(args.output)
     else:
+    pass
     pass
     parser.print_help()
 

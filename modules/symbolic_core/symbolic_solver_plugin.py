@@ -14,8 +14,6 @@ class SymbolicSolverPlugin(ABC):
     @abstractmethod
     def name(self):
     pass
-    pass
-
     @abstractmethod
     def solve(self, problem):
     pass
@@ -31,6 +29,7 @@ class PluginRegistry:
     self._plugins = {}
 
     def register(self, plugin: SymbolicSolverPlugin):
+    pass
     pass
     self._plugins[plugin.name()] = plugin
 

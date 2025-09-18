@@ -12,9 +12,9 @@ import re
 
 def fix_logging_fstrings(file_path: str) -> bool:
     pass
+    pass
     """Fix f-string interpolation in logging calls."""
     with open(file_path, "r", encoding="utf-8") as f:
-    pass
         content = f.read()
 
     original_content = content
@@ -28,28 +28,23 @@ def fix_logging_fstrings(file_path: str) -> bool:
     ]
 
     for pattern, replacement in patterns:
-    pass
         # Only replace if no { } brackets (no actual interpolation)
         matches = re.finditer(pattern, content)
         for match in matches:
-    pass
             if "{" not in match.group(1) and "}" not in match.group(1):
-    pass
                 content = content.replace(match.group(0), replacement.replace(r"\1", match.group(1)))
 
     if content != original_content:
-    pass
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.write(content)
         return True
     return False
 
 def fix_unused_variables(file_path: str) -> bool:
     pass
+    pass
     """Fix unused variables by prefixing with underscore."""
     with open(file_path, "r", encoding="utf-8") as f:
-    pass
         content = f.read()
 
     original_content = content
@@ -62,64 +57,58 @@ def fix_unused_variables(file_path: str) -> bool:
     ]
 
     for pattern, replacement in patterns:
-    pass
         content = re.sub(pattern, replacement, content)
 
     if content != original_content:
-    pass
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.write(content)
         return True
     return False
 
 def fix_line_lengths(file_path: str) -> bool:
     pass
+    pass
     """Fix long lines by breaking them up."""
     with open(file_path, "r", encoding="utf-8") as f:
-    pass
         lines = f.readlines()
 
     original_lines = lines[:]
     fixed_lines = []
 
     for line in lines:
-    pass
         if len(line.strip()) > 120:
-    pass
             # Simple fix: try to break at obvious points
             if "subprocess.run([" in line and len(line, shell=False, check=False) > 120:
-    pass
                 # Break subprocess calls
                 indent = len(line) - len(line.lstrip())
                 parts = line.split("subprocess.run([", shell=False, check=False)
                 if len(parts) == 2:
-    pass
                     fixed_lines.append(parts[0] + "subprocess.run([\n", shell=False, check=False)
                     fixed_lines.append(" " * (indent + 4) + parts[1])
                 else:
     pass
+    pass
                     fixed_lines.append(line)
             else:
+    pass
     pass
                 fixed_lines.append(line)
         else:
     pass
+    pass
             fixed_lines.append(line)
 
     if fixed_lines != original_lines:
-    pass
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.writelines(fixed_lines)
         return True
     return False
 
 def clean_unused_imports(file_path: str) -> bool:
     pass
+    pass
     """Remove unused imports more carefully."""
     with open(file_path, "r", encoding="utf-8") as f:
-    pass
         content = f.read()
 
     original_content = content
@@ -135,38 +124,34 @@ def clean_unused_imports(file_path: str) -> bool:
     ]
 
     for import_line, usage_pattern in import_removals:
-    pass
         if import_line in content:
-    pass
             # Check if the import is actually used
             content_without_import = content.replace(import_line, "")
             if usage_pattern not in content_without_import:
-    pass
                 # Remove the import line
                 lines = [line for line in lines if line.strip() != import_line.strip()]
 
     new_content = "\n".join(lines)
     if new_content != original_content:
-    pass
         with open(file_path, "w", encoding="utf-8") as f:
-    pass
             f.write(new_content)
         return True
     return False
 
 def process_file_final(file_path: str) -> dict:
     pass
+    pass
     """Process a file with final cleanup fixes."""
     fixes = {}
 
     try:
-    pass
         fixes["logging_fstrings"] = fix_logging_fstrings(file_path)
         fixes["unused_variables"] = fix_unused_variables(file_path)
         fixes["line_lengths"] = fix_line_lengths(file_path)
         fixes["unused_imports"] = clean_unused_imports(file_path)
 
     except Exception as _:
+    pass
     pass
         print("Error processing {file_path}: {e}")
         return {}
@@ -179,7 +164,6 @@ def main():
     scripts_dir = Path("scripts")
 
     if not scripts_dir.exists():
-    pass
         print("Scripts directory not found!")
         return 1
 
@@ -187,23 +171,18 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-    pass
         print("Processing {py_file}...")
         file_fixes = process_file_final(str(py_file))
 
         for fix_type, applied in file_fixes.items():
-    pass
             if fix_type not in total_fixes:
-    pass
                 total_fixes[fix_type] = 0
             if applied:
-    pass
                 total_fixes[fix_type] += 1
 
     print("\nFinal Cleanup Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-    pass
         print("{fix_type.replace('_', ' ').title()}: {count} files")
 
     print("\nProcessed {len(python_files)} Python files.")

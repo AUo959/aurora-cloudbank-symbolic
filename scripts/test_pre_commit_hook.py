@@ -54,6 +54,7 @@ class TestPreCommitHook(unittest.TestCase):
     # Re-exec the module source in an isolated namespace with imports failing
     with patch.dict("sys.modules", {"canonical_validator": None, "validation": None}):
     pass
+    pass
     src = Path(__file__).parent / "git_pre_commit_hook.py"
     code = src.read_text(encoding="utf-8")
     ns = {"__name__": "__test__", "__file__": str(src)}

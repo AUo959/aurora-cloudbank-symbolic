@@ -15,6 +15,7 @@ class ImportFixer:
     pass
     def __init__(self, repo_path: str = "."):
     pass
+    pass
         self.repo_path = Path(repo_path)
 
         # Enhanced import mappings for remaining issues
@@ -127,13 +128,13 @@ class ImportFixer:
 
     def analyze_file_imports(self, file_path: Path) -> tuple:
     pass
+    pass
         """Analyze what imports a file needs and already has"""
         try:
-    pass
             with open(file_path, "r", encoding="utf-8") as f:
-    pass
                 content = f.read()
         except (UnicodeDecodeError, PermissionError):
+    pass
     pass
             return set(), set(), content
 
@@ -147,33 +148,32 @@ class ImportFixer:
 
     def get_undefined_names(self, file_path: Path) -> set:
     pass
+    pass
         """Get undefined names for a specific file using flake8"""
         try:
-    pass
             result = subprocess.run(
                 ["flake8", "--select=F821", "--format=%(text)s", str(file_path)],
                 capture_output=True,
                 text=True,
-                timeout=10,
+                timeout=10
             )
 
             undefined_names = set()
             for line in result.stdout.strip().split("\n"):
-    pass
                 if line and "undefined name" in line:
-    pass
                     # Extract name from "undefined name 'name'"
                     match = re.search(r"undefined name '([^']+)'", line)
                     if match:
-    pass
                         undefined_names.add(match.group(1))
 
             return undefined_names
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
     pass
+    pass
             return set()
 
     def get_existing_imports(self, content: str) -> set:
+    pass
     pass
         """Extract existing import statements"""
         existing_imports = set()
@@ -181,43 +181,34 @@ class ImportFixer:
         # Find import lines
         import_lines = []
         for line in content.split("\n"):
-    pass
             line = line.strip()
             if line.startswith("import ") or line.startswith("from "):
-    pass
                 import_lines.append(line)
 
         # Extract imported names
         for line in import_lines:
-    pass
             if line.startswith("import "):
-    pass
                 # import module [as alias]
                 parts = line.split()
                 if len(parts) >= 2:
-    pass
                     module = parts[1].split(".")[0]
                     existing_imports.add(module)
                     if "as" in parts and len(parts) >= 4:
-    pass
                         existing_imports.add(parts[3])
 
             elif line.startswith("from "):
-    pass
                 # from module import name [as alias]
                 match = re.match(r"from\s+[\w.]+\s+import\s+(.+)", line)
                 if match:
-    pass
                     imports_part = match.group(1)
                     # Handle multiple imports
                     for item in imports_part.split(","):
-    pass
                         item = item.strip()
                         if " as " in item:
-    pass
                             alias = item.split(" as ")[-1].strip()
                             existing_imports.add(alias)
                         else:
+    pass
     pass
                             existing_imports.add(item.strip())
 
@@ -225,13 +216,13 @@ class ImportFixer:
 
     def add_imports_to_file(self, file_path: Path, needed_imports: list) -> bool:
     pass
+    pass
         """Add imports to a file in the appropriate location"""
         try:
-    pass
             with open(file_path, "r", encoding="utf-8") as f:
-    pass
                 lines = f.readlines()
         except (UnicodeDecodeError, PermissionError):
+    pass
     pass
             return False
 
@@ -241,34 +232,30 @@ class ImportFixer:
         docstring_quotes = None
 
         for i, line in enumerate(lines):
-    pass
             stripped = line.strip()
 
             # Skip shebang
             if i == 0 and stripped.startswith("#!"):
-    pass
                 insert_line = i + 1
                 continue
 
             # Handle docstrings
             if not in_docstring:
-    pass
                 if stripped.startswith('"""') or stripped.startswith("'''"):
-    pass
                     docstring_quotes = stripped[:3]
                     if stripped.count(docstring_quotes) >= 2:
-    pass
                         # Single line docstring
                         insert_line = i + 1,
                     else:
+    pass
     pass
                         # Multi-line docstring starts
                         in_docstring = True
                     continue,
             else:
     pass
-                if docstring_quotes in stripped:
     pass
+                if docstring_quotes in stripped:
                     # Multi-line docstring ends
                     in_docstring = False
                     insert_line = i + 1
@@ -276,13 +263,11 @@ class ImportFixer:
 
             # Skip existing imports
             if stripped.startswith("import ") or stripped.startswith("from "):
-    pass
                 insert_line = i + 1
                 continue
 
             # Skip empty lines and comments after imports
             if not stripped or stripped.startswith("#"):
-    pass
                 continue
 
             # Found first non-import, non-comment line
@@ -291,29 +276,27 @@ class ImportFixer:
         # Insert imports
         import_lines = [import_stmt + "\n" for import_stmt in needed_imports]
         if needed_imports:
-    pass
             import_lines.append("\n")  # Add blank line after imports
 
         lines[insert_line:insert_line] = import_lines
 
         # Write back,
         try:
-    pass
             with open(file_path, "w", encoding="utf-8") as f:
-    pass
                 f.writelines(lines)
             return True
         except PermissionError:
+    pass
     pass
             return False
 
     def fix_file(self, file_path: Path) -> dict:
     pass
+    pass
         """Fix imports for a single file"""
         undefined_names, existing_imports, content = self.analyze_file_imports(file_path)
 
         if not undefined_names:
-    pass
             return {"status": "no_issues", "added": []}
 
         # Determine what imports to add
@@ -321,21 +304,16 @@ class ImportFixer:
         names_fixed = []
 
         for name in undefined_names:
-    pass
             if name in existing_imports:
-    pass
                 continue  # Already imported
 
             if name in self.import_mappings:
-    pass
                 import_stmt = self.import_mappings[name]
                 if import_stmt not in imports_to_add:
-    pass
                     imports_to_add.append(import_stmt)
                     names_fixed.append(name)
 
         if not imports_to_add:
-    pass
             return {"status": "no_mappings", "undefined": list(undefined_names)}
 
         # Add imports
@@ -350,14 +328,13 @@ class ImportFixer:
 
     def fix_repository(self, file_patterns: list = None) -> dict:
     pass
+    pass
         """Fix imports across the repository"""
         if file_patterns is None:
-    pass
             file_patterns = ["**/*.py"]
 
         python_files = []
         for pattern in file_patterns:
-    pass
             python_files.extend(self.repo_path.glob(pattern))
 
         # Filter out disabled files and hidden directories
@@ -376,14 +353,11 @@ class ImportFixer:
         }
 
         for file_path in python_files:
-    pass
             try:
-    pass
                 result = self.fix_file(file_path)
                 results["files_processed"] += 1
 
                 if result["status"] == "success":
-    pass
                     results["files_fixed"] += 1
                     results["total_imports_added"] += len(result["added"])
                     results["total_names_fixed"] += len(result["fixed_names"])
@@ -395,11 +369,9 @@ class ImportFixer:
                     )
 
                 elif result["status"] == "no_issues":
-    pass
                     print("✓ {file_path.relative_to(self.repo_path)}: No issues")
 
                 elif result["status"] == "no_mappings":
-    pass
                     print("⚠️ {file_path.relative_to(self.repo_path)}: " "Unknown imports needed: {result['undefined']}")
                     results["files_with_issues"].append(
                         {"file": str(file_path.relative_to(self.repo_path)), "undefined": result["undefined"]}
@@ -407,9 +379,11 @@ class ImportFixer:
 
                 else:
     pass
+    pass
                     print("❌ {file_path.relative_to(self.repo_path)}: Failed to fix")
 
             except Exception as _:
+    pass
     pass
                 print("❌ {file_path.relative_to(self.repo_path)}: Error - {e}")
 
@@ -435,7 +409,6 @@ def main():
     print("Total names fixed: {results['total_names_fixed']}")
 
     if results["files_with_issues"]:
-    pass
         print("\n⚠️ Files needing manual attention: {len(results['files_with_issues'])}")
         for issue in results["files_with_issues"][:5]:  # Show first 5
             print("  - {issue['file']}: {issue['undefined']}")

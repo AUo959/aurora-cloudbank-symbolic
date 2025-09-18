@@ -30,7 +30,6 @@ try:
     pass
     # Import Aurora Custom GPT bridge for explicit integration,
     try:
-    pass
         sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "integrations"))
         AURORA_CUSTOM_GPT_AVAILABLE = True
         auroraCustomGptBridge = auroraCustomGptBridge  # Ensure variable is bound
@@ -38,22 +37,21 @@ try:
         print("🌟 Aurora Custom GPT bridge integration available")
     except Exception as _:
     pass
+    pass
         AURORA_CUSTOM_GPT_AVAILABLE = False
         auroraCustomGptBridge = None
         AURORA_CUSTOM_GPT = None
         print("⚠️ Aurora Custom GPT bridge not available: {e}")
 except ImportError:
     pass
+    pass
     # Fallback for testing
 
     class MockBridge:
-    pass
         async def activate_agent(self, agent_id, phrase):
-    pass
             return {"success": True, "agent_id": agent_id}
 
         def get_constellation_status(self):
-    pass
             return {"constellation": "L2_META_AGENTS", "totalAgents": 0}
 
     l2_bridge = MockBridge()
@@ -68,7 +66,7 @@ app = FastAPI(
     description="L2 Custom GPT bridge with ZIPWIZ handshake protocol",
     version="3.5.1_macroready",
     docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    redoc_url="/api/redoc"
 )
 
 # Add CORS middleware
@@ -77,7 +75,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
 # Server state
@@ -92,6 +90,7 @@ server_state = {
 
 @app.middleware("http")
 async def track_requests(request: Request, call_next):
+    pass
     pass
     server_state["requests_count"] += 1
     response = await call_next(request)
@@ -108,13 +107,12 @@ async def dashboard():
     pass
     """Serve the main agent constellation dashboard"""
     try:
-    pass
         dashboard_path = Path(__file__).parent.parent / "dashboard" / "agent_constellation.html"
         if dashboard_path.exists():
-    pass
             return HTMLResponse(content=dashboard_path.read_text())
 
         else:
+    pass
     pass
             return HTMLResponse(
         content="""
@@ -128,9 +126,10 @@ async def dashboard():
                     </body>
                 </html>
                 """,
-        status_code=200,
+        status_code=200
             )
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -156,23 +155,21 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
     @app.post("/api/aurora/command")
     async def aurora_custom_gpt_command(request_data: dict):
     pass
+    pass
         """Receive command from Aurora Custom GPT and route to command node"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT command request")
 
         try:
-    pass
             command = request_data.get("command", {})
         context = request_data.get("context", {})
 
             # Initialize Aurora Custom GPT integration if not already done
             if not auroraCustomGptBridge.integrationActive:
-    pass
                 logger.info("Initializing Aurora Custom GPT integration")
         init_result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
 
         if not init_result["success"]:
-    pass
                     raise HTTPException(status_code=500, detail="Aurora integration failed: {init_result['error']}")
 
             # Route command through Aurora Custom GPT bridge
@@ -181,13 +178,14 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         logger.info("Aurora command processed: {result['success']}")
 
         if result["success"]:
-    pass
                 return result,
             else:
+    pass
     pass
                 raise HTTPException(status_code=400, detail=result["error"])
 
         except Exception as _:
+    pass
     pass
             pass  # Exception logged}")
 
@@ -195,13 +193,11 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
 
     @app.get("/api/aurora/status")
     async def aurora_custom_gpt_status():
-    pass
         """Get Aurora Custom GPT integration status"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT status request")
 
         try:
-    pass
             integration_status = auroraCustomGptBridge.getIntegrationStatus()
         constellation_status = await auroraCustomGptBridge.getConstellationStatus()
 
@@ -213,19 +209,18 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             }
         except Exception as _:
     pass
+    pass
             pass  # Exception logged}")
 
         raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/aurora/initialize")
     async def initialize_aurora_integration():
-    pass
         """Initialize Aurora Custom GPT integration"""
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT initialization request")
 
         try:
-    pass
             _ = await auroraCustomGptBridge.initializeCommandNodeIntegration()
         result = await auroraCustomGptBridge.initializeCommandNodeIntegration()
         logger.info("Aurora Custom GPT integration initialized successfully")
@@ -237,9 +232,11 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 }
             else:
     pass
+    pass
                 raise HTTPException(status_code=500, detail="Integration failed: {result['error']}")
 
         except Exception as _:
+    pass
     pass
             pass  # Exception logged}")
 
@@ -247,9 +244,9 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
 
 else:
     pass
+    pass
     @app.get("/api/aurora/status")
     async def aurora_unavailable():
-    pass
         """Aurora Custom GPT integration not available"""
         server_state["requests_count"] += 1
         return {
@@ -264,31 +261,30 @@ else:
 @app.post("/api/bridge/gpt/connect/{agent_id}")
 async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     pass
+    pass
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
-    pass
         logger.info("Connection request for agent: {agent_id}")
         activation_phrase = request_data.get("activationPhrase")
 
         request_data.get("capabilities", [])
 
         if not activation_phrase:
-    pass
             raise HTTPException(status_code=400, detail="Missing activation phrase")
         _ = await l2_bridge.activate_agent(agent_id, activation_phrase)
 
         if result["success"]:
-    pass
             logger.info("Custom GPT {agent_id} connected successfully")
         result = await l2_bridge.activate_agent(agent_id, activation_phrase)
         status_code=200,
                 content={
                     **result,
                     "server_info": {"version": server_state["version"], "timestamp": datetime.now().isoformat()},
-                },
+                }
             )
 
         else:
+    pass
     pass
             logger.warning("Custom GPT {agent_id} connection failed: {result.get('error')}")
 
@@ -296,8 +292,10 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
 
         except HTTPException:
     pass
+    pass
         raise
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -306,34 +304,35 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
 @app.post("/api/bridge/gpt/message/{agent_id}")
 async def relay_message(agent_id: str, request_data: Dict[str, Any]):
     pass
+    pass
     """Relay message from Custom GPT agent"""
     try:
-    pass
         logger.info("Message relay request from: {agent_id}")
         message = request_data.get("message")
         target = request_data.get("target", "Aurora")
         message_type = request_data.get("type", "direct")
 
         if not message:
-    pass
             raise HTTPException(status_code=400, detail="Missing message content")
         _ = await l2_bridge.relay_message(agent_id, target, message, message_type)
 
         if result["success"]:
-    pass
             logger.info("Message relayed successfully from {agent_id}")
 
         return JSONResponse(status_code=200, content=result)
 
         else:
     pass
+    pass
         result = await l2_bridge.relay_message(agent_id, target, message, message_type)
         raise HTTPException(status_code=400, detail=result.get("error", "Message relay failed"))
 
         except HTTPException:
     pass
+    pass
         raise
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -344,7 +343,6 @@ async def get_constellation_status():
     pass
     """Get status of the entire agent constellation"""
     try:
-    pass
         logger.info("Constellation status request")
         status = l2_bridge.get_constellation_status()
 
@@ -360,6 +358,7 @@ async def get_constellation_status():
 
         except Exception as _:
     pass
+    pass
         pass  # Exception logged}")
 
         raise HTTPException(status_code=500, detail="Status retrieval failed: {str(e)}")
@@ -367,24 +366,26 @@ async def get_constellation_status():
 @app.get("/api/bridge/gpt/status/{agent_id}")
 async def get_agent_status(agent_id: str):
     pass
+    pass
     """Get detailed status of a specific agent"""
     try:
-    pass
         logger.info("Agent status request for: {agent_id}")
         _ = l2_bridge.get_agent_status(agent_id)
 
         if result.get("success", True):
-    pass
             return JSONResponse(status_code=200, content=result)
 
         else:
+    pass
     pass
             raise HTTPException(status_code=404, detail=result.get("error", "Agent {agent_id} not found"))
 
         except HTTPException:
     pass
+    pass
         raise
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -393,12 +394,11 @@ async def get_agent_status(agent_id: str):
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
 async def update_heartbeat(agent_id: str):
     pass
+    pass
     """Update agent heartbeat timestamp"""
     try:
-    pass
         # Update heartbeat in bridge
         if hasattr(l2_bridge, "agents") and agent_id in l2_bridge.agents:
-    pass
             l2_bridge.agents[agent_id].last_heartbeat = datetime.now()
 
         return JSONResponse(
@@ -408,17 +408,20 @@ async def update_heartbeat(agent_id: str):
                     "agent_id": agent_id,
                     "heartbeat": datetime.now().isoformat(),
                     "status": l2_bridge.agents[agent_id].status,
-                },
+                }
             )
 
         else:
+    pass
     pass
             raise HTTPException(status_code=404, detail="Agent not found")
 
         except HTTPException:
     pass
+    pass
         raise
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -427,26 +430,28 @@ async def update_heartbeat(agent_id: str):
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
 async def disconnect_agent(agent_id: str):
     pass
+    pass
     """Disconnect an agent from the constellation"""
     try:
-    pass
         logger.info("Disconnect request for: {agent_id}")
         _ = await l2_bridge.disconnect_agent(agent_id)
 
         if result["success"]:
-    pass
             logger.info("Agent {agent_id} disconnected successfully")
 
         return JSONResponse(status_code=200, content=result)
 
         else:
     pass
+    pass
             raise HTTPException(status_code=400, detail=result.get("error", "Disconnect failed"))
 
         except HTTPException:
     pass
+    pass
         raise
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -459,12 +464,9 @@ async def list_agents():
     pass
     """List all available agents"""
     try:
-    pass
         if hasattr(l2_bridge, "agents"):
-    pass
         agents = []
             for agent_id, agent in l2_bridge.agents.items():
-    pass
                 agents.append(
                     {
                         "agent_id": agent_id,
@@ -480,8 +482,10 @@ async def list_agents():
         return {"agents": agents, "total": len(agents)}
         else:
     pass
+    pass
             return {"agents": [], "total": 0}
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -492,9 +496,7 @@ async def get_orion_core_info():
     pass
     """Get ORION Core configuration information"""
     try:
-    pass
         if hasattr(l2_bridge, "orion_core_config"):
-    pass
             return {
                 "orion_core": l2_bridge.orion_core_config,
                 "handshake_sequence": l2_bridge.handshake_sequence,
@@ -502,6 +504,7 @@ async def get_orion_core_info():
                 "server_version": server_state["version"],
             }
         else:
+    pass
     pass
             return {
                 "orion_core": {
@@ -511,6 +514,7 @@ async def get_orion_core_info():
                 }
             }
     except Exception as _:
+    pass
     pass
         pass  # Exception logged}")
 
@@ -538,14 +542,12 @@ async def shutdown_event():
 
     # Cleanup any resources here
     if hasattr(l2_bridge, "agents"):
-    pass
         for agent_id in l2_bridge.agents:
-    pass
             try:
-    pass
                 await l2_bridge.disconnect_agent(agent_id)
 
         except Exception as _:
+    pass
     pass
                 pass  # Exception logged}")
 

@@ -12,10 +12,12 @@ class SymbolicValidator:
 
     def validate_symbolic_expression(self, expression: str) -> bool:
     pass
+    pass
     """Validate symbolic expression"""
     return True
 
     def validate_symbolic_transformation(self, data: Dict[str, Any]) -> bool:
+    pass
     pass
     """Validate symbolic transformation"""
     return True

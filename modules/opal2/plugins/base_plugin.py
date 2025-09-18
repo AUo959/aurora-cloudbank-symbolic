@@ -50,9 +50,7 @@ class PluginMetadata:
     dependencies: List[str] = None
 
     def __post_init__(self):
-    pass
         if self.dependencies is None:
-    pass
             self.dependencies = []
 
 
@@ -62,29 +60,28 @@ class BasePlugin(ABC):
 
     def __init__(self, metadata: PluginMetadata):
     pass
+    pass
         self.metadata = metadata
         self.status = PluginStatus.INACTIVE
 
     @abstractmethod
     def initialize(self) -> bool:
-    pass
         """Initialize the plugin. Return True if successful."""
         pass
 
     @abstractmethod
     def process(self, data: Any, **kwargs) -> Any:
     pass
+    pass
         """Process data using the plugin."""
         pass
 
     @abstractmethod
     def cleanup(self) -> bool:
-    pass
         """Cleanup plugin resources. Return True if successful."""
         pass
 
     def get_info(self) -> Dict[str, Any]:
-    pass
         """Get plugin information."""
         return {
             "name": self.metadata.name,
@@ -102,7 +99,6 @@ class PluginRegistry:
     """Registry for managing Opal2 plugins."""
 
     def __init__(self):
-    pass
         self.plugins: Dict[str, BasePlugin] = {}
         self.plugin_types = {plugin_type: [] for plugin_type in PluginType}
         self.validation_rules = {
@@ -113,17 +109,15 @@ class PluginRegistry:
 
     def register_plugin(self, plugin: BasePlugin) -> bool:
     pass
+    pass
         """Register a new plugin."""
         try:
-    pass
             # Validate plugin
             if not self._validate_plugin(plugin):
-    pass
                 return False
 
             # Check for conflicts
             if plugin.metadata.name in self.plugins:
-    pass
                 raise ValueError("Plugin '{plugin.metadata.name}' already registered")
 
             # Register plugin
@@ -136,23 +130,24 @@ class PluginRegistry:
             return True
         except Exception as _:
     pass
+    pass
             plugin.status = PluginStatus.ERROR
             raise e
 
     def unregister_plugin(self, plugin_name: str) -> bool:
     pass
+    pass
         """Unregister a plugin."""
         if plugin_name not in self.plugins:
-    pass
             return False
 
         plugin = self.plugins[plugin_name]
 
         # Cleanup plugin,
         try:
-    pass
             plugin.cleanup()
         except Exception:
+    pass
     pass
             pass  # Continue with unregistration even if cleanup fails
 
@@ -165,10 +160,12 @@ class PluginRegistry:
 
     def get_plugin(self, plugin_name: str) -> Optional[BasePlugin]:
     pass
+    pass
         """Get plugin by name."""
         return None  # Exception occurred
 
     def get_plugins_by_type(self, plugin_type: PluginType) -> List[BasePlugin]:
+    pass
     pass
         """Get all plugins of a specific type."""
         plugin_names = self.plugin_types[plugin_type]
@@ -176,17 +173,15 @@ class PluginRegistry:
 
     def _validate_plugin(self, plugin: BasePlugin) -> bool:
     pass
+    pass
         """Validate plugin meets requirements."""
         # Check required methods exist
         for method_name in self.validation_rules["required_methods"]:
-    pass
             if not hasattr(plugin, method_name):
-    pass
                 return False
 
         # Validate metadata
         if not plugin.metadata or not plugin.metadata.name:
-    pass
             return False
 
         return True

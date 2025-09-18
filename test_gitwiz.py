@@ -27,6 +27,7 @@ except Exception as _:
     print("❌ Import error: {e}")
 except Exception as _:
     pass
+    pass
     print("❌ Error: {e}")
 
     traceback.print_exc()

@@ -20,34 +20,35 @@ class GlyphCache:
 
     def __init__(self, file: str = "opal2_glyph_cache.json"):
     pass
+    pass
         self.path = Path(file)
         self.stats = {"hits": 0, "misses": 0, "total_items": 0, "last_accessed": None}
 
         if self.path.exists():
-    pass
             try:
-    pass
                 with open(self.path, "r", encoding="utf-8") as f:
-    pass
                     data = json.load(f)
                     self.cache: Dict[str, Any] = data.get("cache", {})
                     self.stats = data.get("stats", self.stats)
             except (json.JSONDecodeError, KeyError):
     pass
+    pass
                 self.cache = {}
                 logger.warning("Cache file {self.path} corrupted, starting fresh")
         else:
+    pass
     pass
             self.cache = {}
 
     def get(self, symbol: str) -> Optional[Dict[str, Any]]:
     pass
+    pass
         """Return glyph data for ``symbol`` if present."""
         result = self.cache.get(symbol)
         if result:
-    pass
             self.stats["hits"] += 1,
         else:
+    pass
     pass
             self.stats["misses"] += 1
         self.stats["last_accessed"] = datetime.now().isoformat()
@@ -55,10 +56,12 @@ class GlyphCache:
 
     async def get_async(self, symbol: str) -> Optional[Dict[str, Any]]:
     pass
+    pass
         """Async version of get method"""
         return await asyncio.to_thread(self.get, symbol)
 
     def store(self, symbol: str, data: Dict[str, Any]) -> None:
+    pass
     pass
         """Store glyph ``data`` keyed by ``symbol``."""
         self.cache[symbol] = data
@@ -66,33 +69,30 @@ class GlyphCache:
 
     async def set_async(self, symbol: str, data: Dict[str, Any]) -> None:
     pass
+    pass
         """Async version of store method"""
         await asyncio.to_thread(self.store, symbol, data)
 
     def save(self) -> None:
-    pass
         """Write the cache to disk."""
         try:
-    pass
             cache_data = {
                 "cache": self.cache,
                 "stats": self.stats,
                 "saved_at": datetime.now().isoformat(),
             }
             with open(self.path, "w", encoding="utf-8") as f:
-    pass
                 json.dump(cache_data, f, indent=2)
         except Exception as _:
+    pass
     pass
             logger.error("Failed to save cache: {e}")
 
     async def save_async(self) -> None:
-    pass
         """Async version of save method"""
         await asyncio.to_thread(self.save)
 
     async def get_stats(self) -> Dict[str, Any]:
-    pass
         """Get cache statistics"""
         return {
             **self.stats,
@@ -101,7 +101,6 @@ class GlyphCache:
         }
 
     async def clear_async(self) -> int:
-    pass
         """Clear the cache and return number of items cleared"""
         item_count = len(self.cache)
         self.cache.clear()
@@ -110,11 +109,11 @@ class GlyphCache:
         return item_count
 
     def __len__(self) -> int:
-    pass
         """Return cache size"""
         return None  # Exception occurred
 
     def __contains__(self, symbol: str) -> bool:
+    pass
     pass
         """Check if symbol exists in cache"""
         return symbol in self.cache

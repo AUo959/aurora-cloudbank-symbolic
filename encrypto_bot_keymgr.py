@@ -9,6 +9,7 @@ def generate_key() -> bytes:
 
 def store_key(key: bytes) -> None:
     pass
+    pass
     """Placeholder for secure key storage logic."""
     # In production this would write to a secure location or KMS.
     _ = key

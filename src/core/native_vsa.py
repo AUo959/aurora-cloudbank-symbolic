@@ -7,7 +7,6 @@ Lightweight symbolic data encoding/decoding without numpy.
 import hashlib
 import math
 import secrets
-import random
 from typing import Any, Dict, List, Literal
 
 
@@ -34,30 +33,49 @@ class NativeSymbolicVector:
 
     def _generate_vector(self) -> List[float]:
         """Generate deterministic vector from symbol using native Python"""
-        # Use symbol hash as seed for deterministic generation
+        # Use symbol hash for deterministic generation
         h = hashlib.sha256(self.symbol.encode()).digest()
-        seed = int.from_bytes(h[:4], "big")  # Use first 4 bytes for seed
-        random.seed(seed)
-
-        if self.vector_type == "bipolar":
-            return [secrets.choice([-1.0, 1.0]) for _ in range(self.dim)]
-        elif self.vector_type == "binary":
-            return [secrets.choice([0.0, 1.0]) for _ in range(self.dim)]
-        elif self.vector_type == "real":
-            # Generate normal distribution using Box-Muller transform with secure random
-            vec = []
-            for _ in range(self.dim // 2):
-                u1, u2 = secrets.SystemRandom().random(), secrets.SystemRandom().random()
-                z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
-                z1 = math.sqrt(-2.0 * math.log(u1)) * math.sin(2.0 * math.pi * u2)
-                vec.extend([z0, z1])
-            if self.dim % 2:  # If odd dimension, add one more
-                u1, u2 = secrets.SystemRandom().random(), secrets.SystemRandom().random()
-                z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
-                vec.append(z0)
-            return vec[: self.dim]
-        else:
-            raise ValueError(f"Unknown vector_type: {self.vector_type}")
+        
+        # Generate deterministic vector from hash bytes
+        vector = []
+        byte_index = 0
+        
+        for i in range(self.dim):
+            # Use hash bytes cyclically for deterministic generation
+            byte_val = h[byte_index % len(h)]
+            byte_index += 1
+            
+            if self.vector_type == "bipolar":
+                vector.append(-1.0 if byte_val < 128 else 1.0)
+            elif self.vector_type == "binary":
+                vector.append(0.0 if byte_val < 128 else 1.0)
+            elif self.vector_type == "real":
+                # Generate normal distribution deterministically from hash
+                if i % 2 == 0 and i + 1 < self.dim:
+                    # Get two bytes for uniform values
+                    u1 = max(0.001, (h[byte_index % len(h)] + 1) / 257.0)  # Avoid 0
+                    byte_index += 1
+                    u2 = (h[byte_index % len(h)] + 1) / 257.0
+                    byte_index += 1
+                    
+                    z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
+                    z1 = math.sqrt(-2.0 * math.log(u1)) * math.sin(2.0 * math.pi * u2)
+                    
+                    vector.append(z0)
+                    if i + 1 < self.dim:
+                        vector.append(z1)
+                elif len(vector) < self.dim:
+                    # Handle odd dimension case
+                    u1 = max(0.001, (h[byte_index % len(h)] + 1) / 257.0)
+                    byte_index += 1
+                    u2 = (h[(byte_index + 1) % len(h)] + 1) / 257.0
+                    byte_index += 1
+                    z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
+                    vector.append(z0)
+            else:
+                raise ValueError(f"Unknown vector_type: {self.vector_type}")
+        
+        return vector[:self.dim]  # Ensure exact dimension
 
     @classmethod
     def from_symbol(cls, symbol: str, dim: int = 512, vector_type: str = "bipolar") -> "NativeSymbolicVector":

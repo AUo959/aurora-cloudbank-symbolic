@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Quantum VSA Playground</title>
     <script src="static/js/aurora-security.js"></script>
+    <script src="static/js/aurora-web-logger.js"></script>
     <style>
         * {
             margin: 0;
@@ -348,7 +349,7 @@
             try {
                 ws = new WebSocket(`ws://${window.location.host}/api/ws/collaboration`);
                 ws.onopen = () => {
-                    console.log('🔗 WebSocket connected to collaboration hub');
+                    bridgeLogger.info('WebSocket connected to collaboration hub');
                     const collaborationFeed = document.getElementById('collaboration-feed');
                     const connectionMsg = AuroraSecurity.createSafeElement('p', '🌟 Connected to Aurora VSA collaboration network!', {
                         style: 'color: #4ade80;'
@@ -370,26 +371,26 @@
                             collaborationFeed.appendChild(welcomeMsg);
                         } else if (data.type === 'vsa_update') {
                             const updateMsg = AuroraSecurity.createSafeElement('p');
-                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
-                            const operation_text = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
-                            updateMsg.appendChild(timestamp_span);
-                            updateMsg.appendChild(operation_text);
+                            const timestampSpan = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
+                            const operationText = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
+                            updateMsg.appendChild(timestampSpan);
+                            updateMsg.appendChild(operationText);
                             collaborationFeed.appendChild(updateMsg);
                         } else {
                             const genericMsg = AuroraSecurity.createSafeElement('p');
-                            const timestamp_span = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
-                            const content_text = document.createTextNode(` ${JSON.stringify(data)}`);
-                            genericMsg.appendChild(timestamp_span);
-                            genericMsg.appendChild(content_text);
+                            const timestampSpan = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
+                            const contentText = document.createTextNode(` ${JSON.stringify(data)}`);
+                            genericMsg.appendChild(timestampSpan);
+                            genericMsg.appendChild(contentText);
                             collaborationFeed.appendChild(genericMsg);
                         }
                         collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
                     } catch (error) {
-                        console.error('Error processing WebSocket message:', error);
+                        webLogger.error('Error processing WebSocket message', { error: error.message });
                     }
                 };
             } catch (error) {
-                console.log('WebSocket not available, continuing with HTTP only');
+                webLogger.warn('WebSocket not available, continuing with HTTP only', { error: error.message });
             }
         }
 
@@ -407,7 +408,11 @@
                 }
                 return await response.json();
             } catch (error) {
-                console.error('API call failed:', error);
+                webLogger.error('API call failed', { 
+                    endpoint, 
+                    method, 
+                    error: error.message 
+                });
                 return { error: error.message };
             }
         }
@@ -704,7 +709,14 @@
                 // Fallback to local display
                 const collaborationFeed = document.getElementById('collaboration-feed');
                 const timestamp = new Date().toLocaleTimeString();
-                const tempEl = AuroraSecurity.createSafeElement('div', '<p><strong>[${timestamp}] You:</strong> ' + message + '</p>'); collaborationFeed.appendChild(tempEl);
+                const tempEl = AuroraSecurity.createSafeElement('div');
+                const msgP = AuroraSecurity.createSafeElement('p');
+                const timestampStrong = AuroraSecurity.createSafeElement('strong', `[${timestamp}] You:`);
+                const messageText = document.createTextNode(` ${message}`);
+                msgP.appendChild(timestampStrong);
+                msgP.appendChild(messageText);
+                tempEl.appendChild(msgP);
+                collaborationFeed.appendChild(tempEl);
                 document.getElementById('message-input').value = '';
             }
         }
@@ -777,12 +789,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeWebSocket();
             updateMetrics();
-            console.log('🌟 Aurora Quantum VSA Demo initialized!');
+            webLogger.info('Aurora Quantum VSA Demo initialized');
 
             // Load initial vector list
             apiCall('/api/vsa/list').then(result => {
                 if (result && result.count > 0) {
-                    console.log(`Found ${result.count} existing VSA vectors`);
+                    quantumLogger.info(`Found ${result.count} existing VSA vectors`);
                 }
             });
         });

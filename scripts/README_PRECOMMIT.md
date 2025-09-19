@@ -38,24 +38,60 @@ chmod +x .git/hooks/pre-commit
     "branch_context": "harvest-safe-updates-2025-09-18",
     "entropy_state": "TRACKED"
   },
-  "files_count": 5,
+  "files_count": 3,
   "validation_result": true,
-  "files_hash": "abc123...",
-  "seal": "sha256_hash_of_state"
+  "files_hash": "sha256...",
+  "validator_mode": "primary",
+  "seal": "sha256..."
 }
 ```
 
+## Validator Modes
+
+### Primary Mode
+- Import: `canonical_validator.CanonicalValidator`
+- Full validation capability
+- Memory sealing enabled
+
+### Fallback Mode  
+- Import: `validation.CanonicalValidator`
+- Limited validation capability
+- Memory sealing enabled
+
+### Stub Mode
+- No validator available
+- Logs DIVERGENT_TRUTH
+- Allows commit with warnings
+- Conservative behavior
+
 ## Testing
 ```bash
+# Run all tests
 python scripts/test_pre_commit_hook.py
+
+# Run specific test
+python -m unittest scripts.test_pre_commit_hook.TestPreCommitHook.test_entropy_logging
 ```
 
 ## Troubleshooting
-- Check logs for `DIVERGENT_TRUTH` markers when validator is unavailable.
-- Verify validator availability: `python -c "from canonical_validator import CanonicalValidator"`.
-- If validation crashes, see `ERROR_SEAL` entries in stderr and `.git/validation_seal.json`.
+
+### Validator Import Failures
+- Check if `canonical_validator.py` exists in scripts/
+- Verify Python path includes scripts directory
+- Review entropy logs for specific import errors
+
+### Memory Seal Issues
+- Ensure `.git/` directory is writable
+- Check `validation_seal.json` for integrity
+- Review seal hash consistency
+
+### Performance Concerns
+- Entropy logging adds minimal overhead (~5ms per operation)
+- Memory sealing involves file I/O (~10-50ms)
+- Total pre-commit overhead: typically <200ms
 
 ## Next Steps
-- Integrate with CI to surface seals as artifacts.
-- Add dashboard for validation analytics and drift detection.
-- Consider chain-of-seals verification across commits.
+- Integration with CI/CD pipelines
+- Enhanced validator capabilities
+- Distributed validation state sync
+- Real-time entropy monitoring dashboard

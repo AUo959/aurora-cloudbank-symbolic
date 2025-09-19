@@ -3,21 +3,21 @@
 
 const { loadDiagnostics, saveDiagnostics } = require('./diagnostics');
 
-function verifyEthics() {
+async function verifyEthics() {
   const protocol = 'Picard_Delta_3';
-  const diag = loadDiagnostics();
+  const diag = await loadDiagnostics();
   diag.ethicsChecks = (diag.ethicsChecks || 0) + 1;
-  saveDiagnostics(diag);
+  await saveDiagnostics(diag);
   console.log(`verifyEthics: protocol ${protocol} check ${diag.ethicsChecks}`);
   return true;
 }
 
-function validatePayload(payload) {
+async function validatePayload(payload) {
   const protocol = 'Picard_Delta_3';
   console.log(`Validating payload under protocol ${protocol}:`, payload);
-  const diag = loadDiagnostics();
+  const diag = await loadDiagnostics();
   diag.ethicsChecks = (diag.ethicsChecks || 0) + 1;
-  saveDiagnostics(diag);
+  await saveDiagnostics(diag);
   return true;
 }
 

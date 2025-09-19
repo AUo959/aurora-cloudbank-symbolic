@@ -8,7 +8,7 @@ async function parseKeywords(query) {
 }
 
 async function handleQuery(query, opts = {}) {
-  verifyEthics();
+  await verifyEthics();
   const keywords = await parseKeywords(query);
   const [papers, news, aiResponses] = await Promise.all([
     harvester.fetchArxiv(keywords.join(' ')),

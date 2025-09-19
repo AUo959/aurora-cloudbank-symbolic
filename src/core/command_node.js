@@ -11,19 +11,19 @@ const { runPASCycle, initializePAS } = require('./parasym_activation');
 initializePAS();
 
 module.exports = {
-  executeCommand(command) {
+  async executeCommand(command) {
     if (!ethicsCheck(command)) throw new Error('Ethics violation detected');
-    const diag = loadDiagnostics();
+    const diag = await loadDiagnostics();
     diag.commandCount = (diag.commandCount || 0) + 1;
     diag.lastCommandAt = Date.now();
     diag.load = diag.commandCount - (diag.processedCount || 0);
-    saveDiagnostics(diag);
+    await saveDiagnostics(diag);
 
     const anchor = anchorResolve(command.context || "AUTO");
-    routeGlyph(command.name);
-    compressBundle("ORION_CORE");
+    await routeGlyph(command.name);
+    await compressBundle("ORION_CORE");
 
-    runPASCycle();
+    await runPASCycle();
     return `Command ${command.name} executed with anchor ${anchor}`;
   }
 };

@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const { loadDiagnostics, saveDiagnostics } = require('./diagnostics');
 
@@ -27,19 +27,21 @@ function throttleIncoming(diag) {
   diag.load = Math.max(0, diag.load - 1);
 }
 
-function runPASCycle() {
-  const diag = loadDiagnostics();
+async function runPASCycle() {
+  const diag = await loadDiagnostics();
   if (diag.symbolicDrift > DRIFT_THRESHOLD) alignAnchors(diag);
   if (Date.now() - diag.lastAnchorSync > MAX_ANCHOR_INTERVAL) propagateAnchor(diag);
   if (diag.ethicsFlags && diag.ethicsFlags.length > 0) handleEthicsAlert(diag.ethicsFlags, diag);
   if (diag.load > LOAD_THRESHOLD) throttleIncoming(diag);
-  saveDiagnostics(diag);
-  fs.appendFileSync(path.join(__dirname, '..', '..', 'live_threads', 'pas.log'),
+  await saveDiagnostics(diag);
+  await fs.appendFile(path.join(__dirname, '..', '..', 'live_threads', 'pas.log'),
     `${new Date().toISOString()} PAS cycle executed\n`);
 }
 
 function initializePAS(interval = 5000) {
-  setInterval(runPASCycle, interval);
+  setInterval(() => {
+    runPASCycle().catch(err => console.error('PAS cycle error', err));
+  }, interval);
   console.log('PAS initialized with interval', interval);
 }
 

@@ -4,11 +4,11 @@
 const { loadDiagnostics, saveDiagnostics } = require('./diagnostics');
 
 module.exports = {
-  routeGlyph: (glyph) => {
+  routeGlyph: async (glyph) => {
     console.log('Routing glyph:', glyph);
-    const diag = loadDiagnostics();
+    const diag = await loadDiagnostics();
     diag.glyphCount = (diag.glyphCount || 0) + 1;
-    saveDiagnostics(diag);
+    await saveDiagnostics(diag);
     return `Glyph ${glyph} routed.`;
   }
 };

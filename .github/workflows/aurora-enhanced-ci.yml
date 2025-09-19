@@ -197,9 +197,9 @@ jobs:
             ~/.npm
             ~/.cache/pip
             ~/.cache/aurora
-        key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
-        restore-keys: |
-          aurora-deps-${{ runner.os }}-
+          key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
+          restore-keys: |
+            aurora-deps-${{ runner.os }}-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -303,7 +303,7 @@ jobs:
             ~/.npm
             ~/.cache/pip
             ~/.cache/aurora
-        key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
+          key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
 
       - name: Setup test environment
         uses: actions/setup-node@v4

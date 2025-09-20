@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import shutil
 """
 archive_large_files.py: Move large .zip files to an 'archive/' folder for storage/cleanup.
 """

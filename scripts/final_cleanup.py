@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import json
+import subprocess
+import sys
 """
 Final Cleanup Pass - Address Remaining Issues
 ============================================
@@ -31,9 +35,7 @@ def fix_logging_fstrings(file_path: str) -> bool:
         matches = re.finditer(pattern, content)
         for match in matches:
             if "{" not in match.group(1) and "}" not in match.group(1):
-                content = content.replace(
-                    match.group(0), replacement.replace(r"\1", match.group(1))
-                )
+                content = content.replace(match.group(0), replacement.replace(r"\1", match.group(1)))
 
     if content != original_content:
         with open(file_path, "w", encoding="utf-8") as f:
@@ -82,9 +84,7 @@ def fix_line_lengths(file_path: str) -> bool:
                 indent = len(line) - len(line.lstrip())
                 parts = line.split("subprocess.run([", shell=False, check=False)
                 if len(parts) == 2:
-                    fixed_lines.append(
-                        parts[0] + "subprocess.run([\n", shell=False, check=False
-                    )
+                    fixed_lines.append(parts[0] + "subprocess.run([\n", shell=False, check=False)
                     fixed_lines.append(" " * (indent + 4) + parts[1])
                 else:
                     fixed_lines.append(line)

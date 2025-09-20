@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+from datetime import datetime
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import sys
 """
 T3A_DECISION_PR77
 Seed: EOS_SEED_ORION
@@ -66,10 +72,10 @@ def main():
         "artifact": str(artifact),
         "artifact_size_bytes": artifact.stat().st_size,
         "sha256": digest,
-        "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "schema_version": SCHEMA_VERSION,
         "label": args.label,
-        "tool": "hash_seal_artifact.py"
+        "tool": "hash_seal_artifact.py",
     }
     meta_path = out_dir / (artifact.name + ".metadata.json")
     with meta_path.open("w") as f:

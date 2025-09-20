@@ -1,6 +1,7 @@
+---
 name: T1 Sealed Approval Gate
 
-on:
+"on":
   workflow_call:
     inputs:
       reason:

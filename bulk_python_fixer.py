@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+import os
 """
 Bulk Python Code Fixer
 Automatically fixes common Python code issues based on flake8 output
 """
 
-import os
 import re
 import glob
 

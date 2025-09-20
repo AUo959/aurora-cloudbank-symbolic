@@ -11,17 +11,14 @@ Primary functions:
 """
 
 import argparse
-from pathlib import Path
-from typing import Optional
-from datetime import datetime
-import json
-from typing import Dict
-from dataclasses import asdict
-import re
-from dataclasses import dataclass
-import os
-from typing import List
 import hashlib
+import json
+import os
+import re
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -300,7 +297,7 @@ class SymbolicAnchorTracker:
 
 def main():
     """CLI interface for anchor tracking"""
-
+    
     parser = argparse.ArgumentParser(description="Symbolic Anchor Tracker")
     parser.add_argument("command", choices=["scan", "resolve", "lineage", "drift", "manifest"])
     parser.add_argument("--anchor", "-a", help="Specific anchor ID")

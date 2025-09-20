@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import os
 """
 Final Python syntax fixer
 """
 
-import os
 import re
 
 

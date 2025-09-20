@@ -1,5 +1,7 @@
 import logging
 import uuid
+import hashlib
+import uvicorn
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -26,6 +28,15 @@ from modules.symbolic_core.quantum_vsa import (
     QuantumSymbolicVector,
     quantum_symbolic_vector,
 )
+
+try:
+    from qiskit import QuantumCircuit
+    from qiskit_aer import AerSimulator
+    QISKIT_AVAILABLE = True
+except ImportError:
+    QuantumCircuit = None
+    AerSimulator = None
+    QISKIT_AVAILABLE = False
 
 app = FastAPI(title="Aurora Quantum VSA Playground")
 
@@ -86,11 +97,6 @@ class GeometricAlgebraRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index():
     """Serve the quantum VSA demo application"""
-
-    import hashlib
-    from qiskit import QuantumCircuit
-    from qiskit_aer import AerSimulator
-    import uvicorn
 
     return FileResponse("static/quantum-vsa-demo.html")
 
@@ -262,10 +268,10 @@ def vsa_operation(req: VSAOperationRequest):
         result = vec.tolist()
     elif req.operation_type == "bind":
         # Binding logic here
-        result = "Binding not implemented in demo"
+        _ = "Binding not implemented in demo"
     elif req.operation_type == "unbind":
         # Unbinding logic here
-        result = "Unbinding not implemented in demo"
+        _ = "Unbinding not implemented in demo"
     elif req.operation_type == "similarity":
         # Similarity logic here
         result = "Similarity not implemented in demo"
@@ -364,15 +370,15 @@ def geometric_algebra(req: GeometricAlgebraRequest):
     Response: {"operation": str, "result": Any}
     """
     ga = GeometricAlgebra()
-    result = None
+    _ = None
 
     if req.operation == "product":
         # Compute geometric product
         blades = [ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))]
-        result = ga.mult(*blades)
+        _ = ga.mult(*blades)
     elif req.operation == "add":
         # Compute geometric addition
-        result = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
+        _ = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
     elif req.operation == "commutator":
         # Compute commutator
         if len(req.vectors) != 2:
@@ -585,8 +591,10 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
     """
     try:
 
-        # Create circuit based on symbol hash
-        h = int(hashlib.md5(req.symbol.encode()).hexdigest(), 16) % (2**32)
+        # Create circuit based on symbol hash (using SHA256 for security)
+        if not QISKIT_AVAILABLE:
+            return {"error": "Qiskit not available", "symbol": req.symbol}
+        h = int(hashlib.sha256(req.symbol.encode()).hexdigest(), 16) % (2**32)
         np.random.seed(h)
 
         qc = QuantumCircuit(req.qubits, req.qubits)
@@ -609,6 +617,8 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
         qc.measure(range(req.qubits), range(req.qubits))
 
         # Run simulation
+        if not QISKIT_AVAILABLE:
+            return {"error": "Qiskit not available"}
         backend = AerSimulator()
         result = backend.run(qc, shots=1000).result()
         counts = result.get_counts()
@@ -682,7 +692,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "aurora_gui_cloudhub_fastapi:app",
-        host="0.0.0.0",
+        host="127.0.0.1",  # Bind to localhost only for security
         port=8000,
         reload=True,
         log_level="info",

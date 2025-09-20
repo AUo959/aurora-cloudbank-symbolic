@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import json
+import time
 """
 🧠 Aurora Consciousness Simulation Engine
 Advanced consciousness modeling and simulation framework
 """
 
-import json
 import random
-import time
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 

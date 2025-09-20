@@ -1,4 +1,8 @@
 """
+from datetime import datetime
+import hashlib
+import json
+import os
 ChatGPT Agent Mode Integration for Aurora CloudBank
 
 This module implements advanced integration capabilities for ChatGPT's new agent mode,
@@ -223,7 +227,7 @@ class ChatGPTAgentModeIntegration:
         }
 
         try:
-            result = await tool_def["handler"](parameters, execution_context)
+            _ = await tool_def["handler"](parameters, execution_context)
 
             # Add Aurora symbolic metadata to response
             response = {
@@ -280,11 +284,11 @@ class ChatGPTAgentModeIntegration:
             # Use Aurora's geometric algebra module
             if operation == "mult":
                 # For now, return a structured result - in full implementation would use GA operations
-                result = f"({expr_a}) ∧ ({expr_b})"
+                _ = f"({expr_a}) ∧ ({expr_b})"
             elif operation == "add":
-                result = f"({expr_a}) + ({expr_b})"
+                _ = f"({expr_a}) + ({expr_b})"
             elif operation == "sub":
-                result = f"({expr_a}) - ({expr_b})"
+                _ = f"({expr_a}) - ({expr_b})"
             else:
                 raise ValueError(f"Unsupported geometric algebra operation: {operation}")
 

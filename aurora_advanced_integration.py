@@ -1,4 +1,11 @@
 import asyncio
+from datetime import datetime
+from pathlib import Path
+import json
+import subprocess
+import sys
+import time
+import secrets
 
 # !/usr/bin/env python3
 """
@@ -6,9 +13,6 @@ Aurora Advanced Integration Module
 Advanced integration and orchestration capabilities
 """
 
-import json
-from datetime import datetime
-from pathlib import Path
 
 
 class AuroraAdvancedIntegration:
@@ -122,8 +126,8 @@ class QuantumVectorProcessor:
         return QuantumVector(
             vector=vector,
             quantum_state=quantum_state,
-            symbolic_layer=np.random.choice([1, 2, 3]),
-            consciousness_depth=np.random.rand(),
+            symbolic_layer=secrets.choice([1, 2, 3]),
+            consciousness_depth=secrets.SystemRandom().random(),
             entanglement_map={"created": True, "dimension": dimension}
         )
 
@@ -284,10 +288,10 @@ class ConsciousnessSimulationEngine:
             # Generate dream-like stimulus
             dream_stimulus = {
                 "complexity": random.uniform(0.1, 0.9),
-                "processing_load": random.uniform(0.0, 0.5),
-                "emotional_impact": random.uniform(-0.3, 0.3),
-                "quantum_input": random.uniform(0.2, 0.8),
-                "depth_increase": random.choice([0, 1]),
+                "processing_load": secrets.SystemRandom().uniform(0.0, 0.5),
+                "emotional_impact": secrets.SystemRandom().uniform(-0.3, 0.3),
+                "quantum_input": secrets.SystemRandom().uniform(0.2, 0.8),
+                "depth_increase": secrets.choice([0, 1]),
                 "new_threads": [f"dream_thread_{len(dream_states)}"]
             }
 
@@ -703,7 +707,7 @@ class AuroraMasterInterface:
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_quantum_processor.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -720,7 +724,7 @@ class AuroraMasterInterface:
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_consciousness_engine.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -737,7 +741,7 @@ class AuroraMasterInterface:
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
             try:
-                result = subprocess.run([
+                _ = subprocess.run([
                     sys.executable, "aurora_adaptive_learning.py"
                 ], capture_output=True, text=True, timeout=30)
 

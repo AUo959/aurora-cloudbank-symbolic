@@ -32,9 +32,8 @@ class NativeQuantumState:
         total_prob = sum(abs(amp) ** 2 for amp in self.amplitudes)
         
         if total_prob > 0:
-        norm_factor = math.sqrt(total_prob)
-            
-        self.amplitudes = [amp / norm_factor for amp in self.amplitudes]
+            norm_factor = math.sqrt(total_prob)
+            self.amplitudes = [amp / norm_factor for amp in self.amplitudes]
 
     def apply_single_qubit_gate(self, qubit: int, gate_matrix: List[List[complex]]):
         """Apply single qubit gate to specified qubit"""

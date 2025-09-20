@@ -23,7 +23,7 @@ permissions:
   contents: read
   actions: read
   security-events: write
-
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -189,17 +189,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Enhanced caching with Aurora awareness
-      - name: Cache dependencies with Aurora context
+      # Enhanced caching with Aurora awareness (Aurora-specific only)
+      - name: Cache Aurora context
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.npm
-            ~/.cache/pip
-            ~/.cache/aurora
-        key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
-        restore-keys: |
-          aurora-deps-${{ runner.os }}-
+          path: ~/.cache/aurora
+          key: aurora-context-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
+          restore-keys: |
+            aurora-context-${{ runner.os }}-
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -296,14 +293,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Aurora dependencies
+      - name: Cache Aurora test context
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.npm
-            ~/.cache/pip
-            ~/.cache/aurora
-        key: aurora-deps-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
+          path: ~/.cache/aurora
+          key: aurora-test-${{ runner.os }}-${{ hashFiles('package-lock.json', 'requirements.txt') }}
+          restore-keys: |
+            aurora-test-${{ runner.os }}-
 
       - name: Setup test environment
         uses: actions/setup-node@v4
@@ -321,7 +317,7 @@ jobs:
       - name: Install test dependencies
         run: |
           npm ci || npm install || echo "Node deps installed"
-          pip install -r requirements.txt || pip install pytest flake8 || echo "Python deps installed"
+          pip install -r requirements.txt || pip install pytest pytest-asyncio flake8 || echo "Python deps installed"
 
       - name: Run Aurora-enhanced tests
         run: |

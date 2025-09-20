@@ -233,11 +233,21 @@ async def manage_agent_session(request: AgentSessionRequest):
                 "state_data": request.state_data or {}
             }
         )
+        if not result.get("success", False):
+            # Optionally: log result["error"] and other fields here, e.g., using logging module.
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": "Session management failed.",
+                    "recovery_suggestions": result.get("recovery_suggestions", []),
+                },
+            )
         return JSONResponse(content=result)
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Session management failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Session management failed.")
 
 
 @app.get("/agent/status")

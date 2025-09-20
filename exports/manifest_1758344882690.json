@@ -1,0 +1,1266 @@
+{
+  "manifest_name": "comprehensive_aurora_export",
+  "manifest_id": "manifest_1758344882690",
+  "creation_timestamp": 1758344882.6905456,
+  "creation_datetime": "2025-09-20T05:08:02.690551",
+  "total_tags": 43,
+  "aurora_version": "3.5.2-optimized",
+  "zero_dependencies": true,
+  "tags": [
+    {
+      "tag_id": "dlp_000001_1758344882644",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6448305,
+      "datetime": "2025-09-20T05:08:02.644830",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000002_1758344882644",
+      "operation": "symbolic_operation",
+      "data_hash": "2abf6a42e9b5e843ff16dc3e47356eaaaf9a1f5e2748554c42cd113881052175",
+      "timestamp": 1758344882.6449075,
+      "datetime": "2025-09-20T05:08:02.644907",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_0"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_0"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000003_1758344882644",
+      "operation": "hybrid_operation",
+      "data_hash": "71b22d64d050a6dc443a63e2a79cc96c4fdb1e421fdc5103754bd6c1a70c8018",
+      "timestamp": 1758344882.6449187,
+      "datetime": "2025-09-20T05:08:02.644919",
+      "dependencies": [
+        "dlp_000001_1758344882644",
+        "dlp_000002_1758344882644"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000001_1758344882644",
+        "symbolic_component": "dlp_000002_1758344882644",
+        "efficiency": 0.501079213500172,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9978415729996559,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49892078649982796
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000004_1758344882644",
+      "operation": "memory_seal",
+      "data_hash": "e994e374f490546400629999acc006fb3e1a962e0688d81099cf63568fd8e91c",
+      "timestamp": 1758344882.6449409,
+      "datetime": "2025-09-20T05:08:02.644941",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882644",
+        "integrity_hash": "67fe840e7b4da7c33bfa065e769c219834049b5decf553ceeac63474ec834b1c",
+        "seal_timestamp": 1758344882.644937
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000005_1758344882649",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6498303,
+      "datetime": "2025-09-20T05:08:02.649830",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000006_1758344882649",
+      "operation": "symbolic_operation",
+      "data_hash": "33cc7557e2ce364c0c8a1230bffc0c580199cd612d7ac449e25795e70ba7ab29",
+      "timestamp": 1758344882.6499083,
+      "datetime": "2025-09-20T05:08:02.649908",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_1"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_1"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000007_1758344882649",
+      "operation": "hybrid_operation",
+      "data_hash": "71b22d64d050a6dc443a63e2a79cc96c4fdb1e421fdc5103754bd6c1a70c8018",
+      "timestamp": 1758344882.6499186,
+      "datetime": "2025-09-20T05:08:02.649919",
+      "dependencies": [
+        "dlp_000005_1758344882649",
+        "dlp_000006_1758344882649"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000005_1758344882649",
+        "symbolic_component": "dlp_000006_1758344882649",
+        "efficiency": 0.501079213500172,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9978415729996559,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49892078649982796
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000008_1758344882649",
+      "operation": "memory_seal",
+      "data_hash": "6ba4d1f3b40278fe02998af9a94621653b8217be09e99fb6e3fe8744cf1d02cd",
+      "timestamp": 1758344882.6499379,
+      "datetime": "2025-09-20T05:08:02.649938",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882649",
+        "integrity_hash": "ec6e941e92bdb8367ea0ef939096fdabddf43fc42aa3232051d0b1a21b5a05b5",
+        "seal_timestamp": 1758344882.6499343
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000009_1758344882654",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6546166,
+      "datetime": "2025-09-20T05:08:02.654617",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000010_1758344882654",
+      "operation": "symbolic_operation",
+      "data_hash": "ae6ce62318d3f91ff6c20e7d0b393d990af52d230ab206e252d0a108beba60b7",
+      "timestamp": 1758344882.6546836,
+      "datetime": "2025-09-20T05:08:02.654684",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_2"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_2"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000011_1758344882654",
+      "operation": "hybrid_operation",
+      "data_hash": "e226be3a718a2e9e0edd62c3509fa7994a603178f1d35c01ba9c4340be107d30",
+      "timestamp": 1758344882.654693,
+      "datetime": "2025-09-20T05:08:02.654693",
+      "dependencies": [
+        "dlp_000010_1758344882654",
+        "dlp_000009_1758344882654"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000009_1758344882654",
+        "symbolic_component": "dlp_000010_1758344882654",
+        "efficiency": 0.5009304823280631,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9981390353438737,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49906951767193686
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000012_1758344882654",
+      "operation": "memory_seal",
+      "data_hash": "2e92332554681167ae3e09ec21ca4f8f87da1de17fa77aa85be64b4282f81b87",
+      "timestamp": 1758344882.6547117,
+      "datetime": "2025-09-20T05:08:02.654712",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882654",
+        "integrity_hash": "b02e6282d126001ba7dd2f2026fd22dd03e9614d6fa058cb9f6707b3fa1a5801",
+        "seal_timestamp": 1758344882.6547081
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000013_1758344882659",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6595466,
+      "datetime": "2025-09-20T05:08:02.659547",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000014_1758344882659",
+      "operation": "symbolic_operation",
+      "data_hash": "e493396f2112139eea70242e53f18872a0208dea37eac2bed4afe06e32820919",
+      "timestamp": 1758344882.659613,
+      "datetime": "2025-09-20T05:08:02.659613",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_3"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_3"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000015_1758344882659",
+      "operation": "hybrid_operation",
+      "data_hash": "2db40547ac1ad44e9637e8f0685bc28e3cb6fb362bc080161865667f0809df02",
+      "timestamp": 1758344882.659622,
+      "datetime": "2025-09-20T05:08:02.659622",
+      "dependencies": [
+        "dlp_000014_1758344882659",
+        "dlp_000013_1758344882659"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000013_1758344882659",
+        "symbolic_component": "dlp_000014_1758344882659",
+        "efficiency": 0.5003096130709318,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9993807738581364,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4996903869290682
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000016_1758344882659",
+      "operation": "memory_seal",
+      "data_hash": "a1c934500ac03eff56021a26bffa65ae9d81baef66fe72d6296b1dd0ab2b840f",
+      "timestamp": 1758344882.65964,
+      "datetime": "2025-09-20T05:08:02.659640",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882659",
+        "integrity_hash": "27b96b551eaed24abeefa38b01c90d7d5fce7464d9a94f848b4c89f18585c9b4",
+        "seal_timestamp": 1758344882.6596367
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000017_1758344882664",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.664268,
+      "datetime": "2025-09-20T05:08:02.664268",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000018_1758344882664",
+      "operation": "symbolic_operation",
+      "data_hash": "ec609cfea1a8b5d60722cbd2c1493d3588508754eed044d61f47e11d67d2d405",
+      "timestamp": 1758344882.6643326,
+      "datetime": "2025-09-20T05:08:02.664333",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_4"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_4"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000019_1758344882664",
+      "operation": "hybrid_operation",
+      "data_hash": "28ec41db1bb80b1367a00f217674007f3b45a157c51a7f638861e00953986594",
+      "timestamp": 1758344882.6643414,
+      "datetime": "2025-09-20T05:08:02.664341",
+      "dependencies": [
+        "dlp_000018_1758344882664",
+        "dlp_000017_1758344882664"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000017_1758344882664",
+        "symbolic_component": "dlp_000018_1758344882664",
+        "efficiency": 0.5006069250288843,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9987861499422315,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49939307497111574
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000020_1758344882664",
+      "operation": "memory_seal",
+      "data_hash": "38d9a494a10a78feb457e48fb843d8a526f35b21785d53bc07767a2a365dca40",
+      "timestamp": 1758344882.66436,
+      "datetime": "2025-09-20T05:08:02.664360",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882664",
+        "integrity_hash": "bd0a630f8024fa56a74d90ddf10ac5180708eb27e82bbc43145bb3da30586dd6",
+        "seal_timestamp": 1758344882.6643565
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000021_1758344882669",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.669141,
+      "datetime": "2025-09-20T05:08:02.669141",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000022_1758344882669",
+      "operation": "symbolic_operation",
+      "data_hash": "0cb1e903ba5b002512cc48565d62bdd6ca3d77be97e1262ea533ef7a69ee4e20",
+      "timestamp": 1758344882.6692064,
+      "datetime": "2025-09-20T05:08:02.669206",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_5"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_5"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000023_1758344882669",
+      "operation": "hybrid_operation",
+      "data_hash": "e10aaf7610f84bd2692ef3c3aaff804192a773a9cf09cc06c9f5335c25523df6",
+      "timestamp": 1758344882.6692157,
+      "datetime": "2025-09-20T05:08:02.669216",
+      "dependencies": [
+        "dlp_000022_1758344882669",
+        "dlp_000021_1758344882669"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000021_1758344882669",
+        "symbolic_component": "dlp_000022_1758344882669",
+        "efficiency": 0.5001375948695153,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9997248102609695,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49986240513048474
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000024_1758344882669",
+      "operation": "memory_seal",
+      "data_hash": "70d134c761aabc9e9cfa576361598cf1e9f134218a126364593b5cc2bec344ad",
+      "timestamp": 1758344882.6692352,
+      "datetime": "2025-09-20T05:08:02.669235",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882669",
+        "integrity_hash": "e345b9a404a642d91dbdb4a3ac856b1f17bb157cedc88e28eb96e679f40bb275",
+        "seal_timestamp": 1758344882.669232
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000025_1758344882673",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.673982,
+      "datetime": "2025-09-20T05:08:02.673982",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000026_1758344882674",
+      "operation": "symbolic_operation",
+      "data_hash": "1dd202dbcf7b8180790eb9d575671aa94f94ee412342fb9c6e5f2f994dfa00b5",
+      "timestamp": 1758344882.6740496,
+      "datetime": "2025-09-20T05:08:02.674050",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_6"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_6"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000027_1758344882674",
+      "operation": "hybrid_operation",
+      "data_hash": "e226be3a718a2e9e0edd62c3509fa7994a603178f1d35c01ba9c4340be107d30",
+      "timestamp": 1758344882.67406,
+      "datetime": "2025-09-20T05:08:02.674060",
+      "dependencies": [
+        "dlp_000025_1758344882673",
+        "dlp_000026_1758344882674"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000025_1758344882673",
+        "symbolic_component": "dlp_000026_1758344882674",
+        "efficiency": 0.5009304823280631,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9981390353438737,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49906951767193686
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000028_1758344882674",
+      "operation": "memory_seal",
+      "data_hash": "17c2d3df227c74b273965faa076ce7191341767072befb1312767131356431e0",
+      "timestamp": 1758344882.6740806,
+      "datetime": "2025-09-20T05:08:02.674081",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882674",
+        "integrity_hash": "13d91c45ae8f25c62f7ccc733d92ede79dd18723a8056a067f7547fb13945f6c",
+        "seal_timestamp": 1758344882.6740766
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000029_1758344882679",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.679073,
+      "datetime": "2025-09-20T05:08:02.679073",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000030_1758344882679",
+      "operation": "symbolic_operation",
+      "data_hash": "3281bbd9c89a1324e37a55f0870575758f8d8ba5c744454fdb8f2d6c57cacba3",
+      "timestamp": 1758344882.6791394,
+      "datetime": "2025-09-20T05:08:02.679139",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_7"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_7"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000031_1758344882679",
+      "operation": "hybrid_operation",
+      "data_hash": "847c20eb0a2d1466d51525f56c3fefa39040f4571985ecf7a5de161544e0d74e",
+      "timestamp": 1758344882.67915,
+      "datetime": "2025-09-20T05:08:02.679150",
+      "dependencies": [
+        "dlp_000029_1758344882679",
+        "dlp_000030_1758344882679"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000029_1758344882679",
+        "symbolic_component": "dlp_000030_1758344882679",
+        "efficiency": 0.5006661218908268,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9986677562183464,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4993338781091732
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000032_1758344882679",
+      "operation": "memory_seal",
+      "data_hash": "7529ea237129e8a77e17f067546283e28f3ac8e23cc8d3ef15ccb6cf91c129c1",
+      "timestamp": 1758344882.6791713,
+      "datetime": "2025-09-20T05:08:02.679171",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882679",
+        "integrity_hash": "807552add68bd5d27daf0e734c673f38d56ad2cef3220060afd163da3a781860",
+        "seal_timestamp": 1758344882.6791675
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000033_1758344882684",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6840734,
+      "datetime": "2025-09-20T05:08:02.684073",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000034_1758344882684",
+      "operation": "symbolic_operation",
+      "data_hash": "fd6432f44dde8575543c0898eb2a7f1a74d285935ced6eaca27bc79d90491694",
+      "timestamp": 1758344882.6841428,
+      "datetime": "2025-09-20T05:08:02.684143",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_8"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_8"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000035_1758344882684",
+      "operation": "hybrid_operation",
+      "data_hash": "a501345b244ed670a01c866e3469aaedff4182b748f5dc8ae2ff704959d81b1e",
+      "timestamp": 1758344882.684153,
+      "datetime": "2025-09-20T05:08:02.684153",
+      "dependencies": [
+        "dlp_000034_1758344882684",
+        "dlp_000033_1758344882684"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000033_1758344882684",
+        "symbolic_component": "dlp_000034_1758344882684",
+        "efficiency": 0.5000343970769114,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.999931205846177,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4999656029230885
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000036_1758344882684",
+      "operation": "memory_seal",
+      "data_hash": "88386a8877f999ef13c3c0d60430b17fc847d30e9eea9969fa2a66a008ec9049",
+      "timestamp": 1758344882.684175,
+      "datetime": "2025-09-20T05:08:02.684175",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882684",
+        "integrity_hash": "65de3d8c4de390c13d3f2a726b388ecc48b79336f960637d18345a209878b7f3",
+        "seal_timestamp": 1758344882.6841712
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000037_1758344882688",
+      "operation": "quantum_operation",
+      "data_hash": "e5b14f6a33ec26b5abb490ce5708d8d3bc41b3df87310680eb3630b4915be470",
+      "timestamp": 1758344882.6889222,
+      "datetime": "2025-09-20T05:08:02.688922",
+      "dependencies": [],
+      "metadata": {
+        "quantum_type": "native_simulation",
+        "num_qubits": 8,
+        "operations": [
+          {
+            "type": "hadamard",
+            "qubit": 0
+          }
+        ],
+        "measurement_shots": 1024
+      },
+      "anchor_protocols": [
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000038_1758344882688",
+      "operation": "symbolic_operation",
+      "data_hash": "16f3843938be94d3369c1a9551f7ef31e6ec335bda497da8f415ba610ba67222",
+      "timestamp": 1758344882.6889882,
+      "datetime": "2025-09-20T05:08:02.688988",
+      "dependencies": [],
+      "metadata": {
+        "symbolic_type": "native_vsa",
+        "dimension": 512,
+        "vector_type": "bipolar",
+        "concepts": [
+          "export_test_9"
+        ]
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "vsa_encoding": [
+          "export_test_9"
+        ]
+      }
+    },
+    {
+      "tag_id": "dlp_000039_1758344882688",
+      "operation": "hybrid_operation",
+      "data_hash": "6f28e8abc74b30f28449eaa123be6f93c6be7e0433599cd5b87afbaa3f229a86",
+      "timestamp": 1758344882.6889982,
+      "datetime": "2025-09-20T05:08:02.688998",
+      "dependencies": [
+        "dlp_000038_1758344882688",
+        "dlp_000037_1758344882688"
+      ],
+      "metadata": {
+        "hybrid_type": "quantum_symbolic_fusion",
+        "quantum_component": "dlp_000037_1758344882688",
+        "symbolic_component": "dlp_000038_1758344882688",
+        "efficiency": 0.5000013758620816,
+        "coherence": 1.0
+      },
+      "anchor_protocols": [
+        "EOS_SEED_ORION",
+        "Picard_Delta_3",
+        "QUANTUM_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR",
+        "T1_SPATIAL_ANCHOR",
+        "T1_CAUSAL_ANCHOR",
+        "SRB_REALITY_BRIDGE",
+        "SRB_QUANTUM_BRIDGE",
+        "SRB_SYMBOLIC_BRIDGE"
+      ],
+      "symbolic_patterns": {
+        "hybrid_fusion": {
+          "quantum_entropy": 0.9999972482758367,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49999862413791835
+        }
+      }
+    },
+    {
+      "tag_id": "dlp_000040_1758344882689",
+      "operation": "memory_seal",
+      "data_hash": "8a2ff869f8c3158c53b8c2773c3cdda565081e6e045d9d338a94475795f4c8d1",
+      "timestamp": 1758344882.6890173,
+      "datetime": "2025-09-20T05:08:02.689017",
+      "dependencies": [],
+      "metadata": {
+        "seal_type": "native_memory_seal",
+        "state_id": "anchor_state_1758344882689",
+        "integrity_hash": "3ac0dfb513e9fdd6ba4d2cbe6cad95ae124513b125aa523c68867acc475727df",
+        "seal_timestamp": 1758344882.6890137
+      },
+      "anchor_protocols": [
+        "CONTINUITY_PRESERVATION"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000041_1758344882689",
+      "operation": "export_operation",
+      "data_hash": "3560c6a315bd610acf176599200a8e36109209be2f0bb1e1a09c813b9cc77f40",
+      "timestamp": 1758344882.689319,
+      "datetime": "2025-09-20T05:08:02.689319",
+      "dependencies": [],
+      "metadata": {
+        "export_format": "json",
+        "export_type": "symbolic_state",
+        "zero_dependencies": true
+      },
+      "anchor_protocols": [
+        "EXPORT_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000042_1758344882689",
+      "operation": "export_operation",
+      "data_hash": "4cd742d3a4da078995e2cd6d7ed98347e4234ce9e330db588efd7f81123670bd",
+      "timestamp": 1758344882.6897876,
+      "datetime": "2025-09-20T05:08:02.689788",
+      "dependencies": [],
+      "metadata": {
+        "export_format": "aurora_symbolic",
+        "export_type": "symbolic_state",
+        "zero_dependencies": true
+      },
+      "anchor_protocols": [
+        "EXPORT_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "dlp_000043_1758344882690",
+      "operation": "export_operation",
+      "data_hash": "5ec0b39e0a4c6c0627882e12816d716b45016eb7af97e60f85939756e3b84616",
+      "timestamp": 1758344882.690261,
+      "datetime": "2025-09-20T05:08:02.690261",
+      "dependencies": [],
+      "metadata": {
+        "export_format": "gumas_compatible",
+        "export_type": "symbolic_state",
+        "zero_dependencies": true
+      },
+      "anchor_protocols": [
+        "EXPORT_SYMBOLIC_BRIDGE"
+      ],
+      "t1_srb_anchors": [
+        "T1_TEMPORAL_ANCHOR"
+      ],
+      "symbolic_patterns": {}
+    }
+  ],
+  "aurora_metadata": {
+    "anchor_protocols": [
+      "QUANTUM_SYMBOLIC_BRIDGE",
+      "CONTINUITY_PRESERVATION",
+      "EOS_SEED_ORION",
+      "EXPORT_SYMBOLIC_BRIDGE",
+      "Picard_Delta_3"
+    ],
+    "t1_srb_anchors": [
+      "SRB_QUANTUM_BRIDGE",
+      "T1_TEMPORAL_ANCHOR",
+      "T1_SPATIAL_ANCHOR",
+      "SRB_REALITY_BRIDGE",
+      "SRB_SYMBOLIC_BRIDGE",
+      "T1_CAUSAL_ANCHOR"
+    ],
+    "symbolic_patterns": {
+      "vsa_encoding": [
+        [
+          "export_test_0"
+        ],
+        [
+          "export_test_1"
+        ],
+        [
+          "export_test_2"
+        ],
+        [
+          "export_test_3"
+        ],
+        [
+          "export_test_4"
+        ],
+        [
+          "export_test_5"
+        ],
+        [
+          "export_test_6"
+        ],
+        [
+          "export_test_7"
+        ],
+        [
+          "export_test_8"
+        ],
+        [
+          "export_test_9"
+        ]
+      ],
+      "hybrid_fusion": [
+        {
+          "quantum_entropy": 0.9978415729996559,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49892078649982796
+        },
+        {
+          "quantum_entropy": 0.9978415729996559,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49892078649982796
+        },
+        {
+          "quantum_entropy": 0.9981390353438737,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49906951767193686
+        },
+        {
+          "quantum_entropy": 0.9993807738581364,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4996903869290682
+        },
+        {
+          "quantum_entropy": 0.9987861499422315,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49939307497111574
+        },
+        {
+          "quantum_entropy": 0.9997248102609695,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49986240513048474
+        },
+        {
+          "quantum_entropy": 0.9981390353438737,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49906951767193686
+        },
+        {
+          "quantum_entropy": 0.9986677562183464,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4993338781091732
+        },
+        {
+          "quantum_entropy": 0.999931205846177,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.4999656029230885
+        },
+        {
+          "quantum_entropy": 0.9999972482758367,
+          "symbolic_entropy": 0.0,
+          "combined_entropy": 0.49999862413791835
+        }
+      ]
+    },
+    "continuity_preserved": true,
+    "performance_optimized": true
+  }
+}

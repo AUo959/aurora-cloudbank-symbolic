@@ -233,15 +233,31 @@ async def manage_agent_session(request: AgentSessionRequest):
                 "state_data": request.state_data or {}
             }
         )
+        def sanitize_recovery_suggestions(suggestions):
+            sanitized = []
+            for s in suggestions:
+                if not isinstance(s, str):
+                    continue
+                s = s.strip()
+                # Remove lines that look like stack traces or file paths
+                if any(x in s for x in ["Traceback", "File ", ".py", "/", "\\"]):
+                    continue
+                # Optionally, truncate to 200 chars
+                if len(s) > 200:
+                    s = s[:200] + "..."
+                sanitized.append(s)
+            return sanitized
         if not result.get("success", False):
             # Optionally: log result["error"] and other fields here, e.g., using logging module.
+            recovery_suggestions = result.get("recovery_suggestions", [])
+            safe_recovery_suggestions = sanitize_recovery_suggestions(recovery_suggestions)
             return JSONResponse(
                 status_code=400,
                 content={
                     "success": False,
                     "error": "Session management failed.",
                     # Optionally log: result.get("error") server-side here.
-                    "recovery_suggestions": result.get("recovery_suggestions", []),
+                    "recovery_suggestions": safe_recovery_suggestions,
                 },
             )
         return JSONResponse(content=result)

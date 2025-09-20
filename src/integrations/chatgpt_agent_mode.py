@@ -9,14 +9,12 @@ This module implements advanced integration capabilities for ChatGPT's new agent
 building upon Aurora's existing symbolic governance and quantum-enhanced processing.
 """
 
-import asyncio
 import hashlib
 import json
 import os
-import sys
 import uuid
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Handle missing dependencies gracefully
 try:
@@ -227,7 +225,7 @@ class ChatGPTAgentModeIntegration:
         }
 
         try:
-            _ = await tool_def["handler"](parameters, execution_context)
+            result = await tool_def["handler"](parameters, execution_context)
 
             # Add Aurora symbolic metadata to response
             response = {
@@ -284,16 +282,16 @@ class ChatGPTAgentModeIntegration:
             # Use Aurora's geometric algebra module
             if operation == "mult":
                 # For now, return a structured result - in full implementation would use GA operations
-                _ = f"({expr_a}) ∧ ({expr_b})"
+                computed = f"({expr_a}) ∧ ({expr_b})"
             elif operation == "add":
-                _ = f"({expr_a}) + ({expr_b})"
+                computed = f"({expr_a}) + ({expr_b})"
             elif operation == "sub":
-                _ = f"({expr_a}) - ({expr_b})"
+                computed = f"({expr_a}) - ({expr_b})"
             else:
                 raise ValueError(f"Unsupported geometric algebra operation: {operation}")
 
             return {
-                "geometric_result": result,
+                "geometric_result": computed,
                 "operation": operation,
                 "expressions": {"a": expr_a, "b": expr_b},
                 "symbolic_validation": True,

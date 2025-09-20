@@ -5,6 +5,7 @@
 
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const sanitizeHtml = require('sanitize-html');
 
 class AuroraSecurityMiddleware {
   constructor(app) {
@@ -163,21 +164,13 @@ class AuroraSecurityMiddleware {
    */
   sanitizeInput(input) {
     if (typeof input !== 'string') return input;
-
-    // Remove potential XSS and dangerous protocols
-    const dangerousProtocol = 'java' + 'script:'; // Split to avoid security scanner detection
-    let sanitized = input
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(new RegExp(dangerousProtocol, 'gi'), 'blocked:')
-      .replace(/vbscript:/gi, 'blocked:')
-      .replace(/data:text\/html/gi, 'blocked:');
-    // Remove all event handler attributes (on*)
-    let prev;
-    do {
-      prev = sanitized;
-      sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-    } while (sanitized !== prev);
-    return sanitized;
+    // Use sanitize-html to remove all HTML tags and dangerous protocols
+    return sanitizeHtml(input, {
+      allowedTags: [],
+      allowedAttributes: {},
+      // Disallow all protocols that could be dangerous. Remove href/src attributes.
+      allowedSchemes: [],
+    });
   }
 
   /**

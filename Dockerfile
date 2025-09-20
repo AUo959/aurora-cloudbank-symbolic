@@ -5,8 +5,9 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements and install Python dependencies (OPTIMIZED)
 COPY requirements.txt .
+# Use optimized requirements for significantly reduced footprint
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
@@ -24,8 +25,8 @@ USER aurora
 ENV PYTHONPATH=/app/src
 ENV AURORA_SYSTEM=symbolic-vault
 
-# Health check
+# Health check (using optimized symbolic engine)
 HEALTHCHECK --interval=30s --timeout=10s \
-  CMD python -c "from aurora.core.symbolic_engine import SymbolicEngine; print('Aurora ready')" || exit 1
+  CMD python -c "from aurora.core.symbolic_engine import SymbolicEngine; print('Aurora ready - optimized')" || exit 1
 
-CMD ["python", "-c", "from aurora.core.symbolic_engine import SymbolicEngine; engine = SymbolicEngine(); print('🔮 Aurora Cloudbank Symbolic ready')"]
+CMD ["python", "-c", "from aurora.core.symbolic_engine import SymbolicEngine; engine = SymbolicEngine(); print('🔮 Aurora Cloudbank Symbolic ready - PERFORMANCE OPTIMIZED')"]

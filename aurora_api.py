@@ -240,6 +240,7 @@ async def manage_agent_session(request: AgentSessionRequest):
                 content={
                     "success": False,
                     "error": "Session management failed.",
+                    # Optionally log: result.get("error") server-side here.
                     "recovery_suggestions": result.get("recovery_suggestions", []),
                 },
             )

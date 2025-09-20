@@ -12,6 +12,12 @@ from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
+import sys
+import os
+
+# Add security helpers to path
+sys.path.append(os.path.join(os.path.dirname(__file__), '.security'))
+from secure_helpers import secure
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.sonnet4_integration_hub import (
@@ -90,24 +96,53 @@ class AgentSessionRequest(BaseModel):
 
 @app.post("/geometric/vector")
 def create_vector(req: VectorRequest):
-    v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
-
-    return {"vector": str(v)}
+    try:
+        # Validate request with symbolic anchoring
+        validation = secure.validate_with_symbolic_anchor(req.dict(), "api_request")
+        if not validation["valid"]:
+            return JSONResponse(
+                status_code=400,
+                content=secure.create_secure_api_response(
+                    error=ValueError("Invalid vector request"),
+                    status="validation_failed"
+                )
+            )
+        
+        v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
+        return secure.create_secure_api_response(data={"vector": str(v)})
+        
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.post("/geometric/mult")
 def geometric_product(req: MultivectorRequest):
     try:
+        # Validate request with symbolic anchoring
+        validation = secure.validate_with_symbolic_anchor(req.dict(), "api_request")
+        if not validation["valid"]:
+            return JSONResponse(
+                status_code=400,
+                content=secure.create_secure_api_response(
+                    error=ValueError("Invalid request structure"),
+                    status="validation_failed"
+                )
+            )
+        
         a = parse_multivector(req.a, ga.blades)
-
         b = parse_multivector(req.b, ga.blades)
-
         result = ga.mult(a, b)
-
-        return {"result": str(result)}
+        
+        return secure.create_secure_api_response(data={"result": str(result)})
 
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return JSONResponse(
+            status_code=400,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.post("/sonnet4/enable")
@@ -116,37 +151,34 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None):
     try:
         if req and req.enable_all:
             results = await enable_sonnet4_globally()
-
-            return {
-                "status": "success",
+            return secure.create_secure_api_response(data={
                 "message": "Claude Sonnet 4 enabled for all clients",
                 "results": results,
                 "global_status": sonnet4_hub.get_global_status(),
-            }
+            })
 
         elif req and req.client_id:
             result = await sonnet4_hub._enable_sonnet4_for_client(req.client_id)
-
-            return {
-                "status": "success" if result else "error",
+            return secure.create_secure_api_response(data={
                 "client_id": req.client_id,
                 "enabled": result,
                 "client_status": sonnet4_hub.get_client_status(req.client_id),
-            }
+            })
 
         else:
             # Default: enable for all clients
             results = await enable_sonnet4_globally()
-
-            return {
-                "status": "success",
+            return secure.create_secure_api_response(data={
                 "message": "Claude Sonnet 4 enabled for all clients (default action)",
                 "results": results,
                 "global_status": sonnet4_hub.get_global_status(),
-            }
+            })
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.get("/sonnet4/status")
@@ -194,9 +226,12 @@ async def get_agent_tools():
     """
     try:
         tools_info = await chatgpt_agent_integration.discover_tools()
-        return JSONResponse(content=tools_info)
+        return JSONResponse(content=secure.create_secure_api_response(data=tools_info))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to discover tools: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.post("/agent/execute")
@@ -206,16 +241,34 @@ async def execute_agent_tool(request: AgentToolRequest):
     Supports all registered tools: symbolic_processing, geometric_algebra, session_management, system_status
     """
     try:
+        # Validate request with symbolic anchoring
+        validation = secure.validate_with_symbolic_anchor(request.dict(), "api_request")
+        if not validation["valid"]:
+            return JSONResponse(
+                status_code=400,
+                content=secure.create_secure_api_response(
+                    error=ValueError("Invalid agent tool request"),
+                    status="validation_failed"
+                )
+            )
+        
         result = await chatgpt_agent_integration.execute_tool(
             tool_name=request.tool_name,
             parameters=request.parameters,
             session_id=request.session_id
         )
-        return JSONResponse(content=result)
+        return JSONResponse(content=secure.create_secure_api_response(data=result))
+        
     except HTTPException as e:
-        raise e
+        return JSONResponse(
+            status_code=e.status_code,
+            content=secure.create_secure_api_response(error=e)
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.post("/agent/session")
@@ -225,6 +278,17 @@ async def manage_agent_session(request: AgentSessionRequest):
     Actions: create, update, get, delete
     """
     try:
+        # Validate request with symbolic anchoring
+        validation = secure.validate_with_symbolic_anchor(request.dict(), "api_request")
+        if not validation["valid"]:
+            return JSONResponse(
+                status_code=400,
+                content=secure.create_secure_api_response(
+                    error=ValueError("Invalid session management request"),
+                    status="validation_failed"
+                )
+            )
+        
         result = await chatgpt_agent_integration.execute_tool(
             tool_name="session_management",
             parameters={
@@ -233,11 +297,18 @@ async def manage_agent_session(request: AgentSessionRequest):
                 "state_data": request.state_data or {}
             }
         )
-        return JSONResponse(content=result)
+        return JSONResponse(content=secure.create_secure_api_response(data=result))
+        
     except HTTPException as e:
-        raise e
+        return JSONResponse(
+            status_code=e.status_code,
+            content=secure.create_secure_api_response(error=e)
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Session management failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.get("/agent/status")
@@ -245,9 +316,12 @@ async def get_agent_status():
     """Get current agent system status and health information"""
     try:
         status = await chatgpt_agent_integration.get_agent_status()
-        return JSONResponse(content=status)
+        return JSONResponse(content=secure.create_secure_api_response(data=status))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get agent status: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content=secure.create_secure_api_response(error=e)
+        )
 
 
 @app.websocket("/agent/stream")

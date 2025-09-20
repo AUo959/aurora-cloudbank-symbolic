@@ -53,11 +53,7 @@ router.get('/status', async (req, res) => {
       error: error.message
     });
 
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: Date.now()
-    });
+    res.status(500).json(createSecureErrorResponse(error, 500, true));
   }
 });
 
@@ -292,11 +288,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       agentId: req.params.agentId
     });
 
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: Date.now()
-    });
+    res.status(500).json(createSecureErrorResponse(error, 500, true));
   }
 });
 
@@ -327,11 +319,7 @@ router.get('/config', (req, res) => {
       error: error.message
     });
 
-    res.status(500).json({
-      success: false,
-      error: error.message,
-      timestamp: Date.now()
-    });
+    res.status(500).json(createSecureErrorResponse(error, 500, true));
   }
 });
 

@@ -110,5 +110,5 @@ def tag_thread_context(content: str) -> Dict[str, Union[str, Dict[str, int]]]:
 # Example interactive use
 if __name__ == "__main__":
     sample = "ThreadCORE drift detected; anchor vector misaligned. Commit fixes to GitHub repo."
-    _ = tag_thread_context(sample)
+    result = tag_thread_context(sample)
     print(json.dumps(result, indent=2))

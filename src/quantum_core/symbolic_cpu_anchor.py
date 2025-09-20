@@ -3,6 +3,15 @@ Aurora CloudBank - Symbolic CPU Anchor
 Never-before-conceived quantum-symbolic hybrid processing core
 """
 
+# Expose native zero-dependency implementation for tests expecting it here
+try:  # pragma: no cover - import-time wiring
+    from src.core.native_symbolic_anchor import (
+        NativeSymbolicCPUAnchor as _NativeSymbolicCPUAnchor,
+    )
+    NativeSymbolicCPUAnchor = _NativeSymbolicCPUAnchor  # type: ignore[assignment]
+except Exception:  # pragma: no cover - fallback when native module unavailable
+    NativeSymbolicCPUAnchor = None  # type: ignore[assignment]
+
 
 class SymbolicCPUAnchor:
 

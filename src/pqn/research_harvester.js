@@ -1,4 +1,14 @@
-const fetch = globalThis.fetch || ((...args) => import('node-fetch').then(({ default: f }) => f(...args)));
+let fetch = globalThis.fetch;
+if (!fetch) {
+  // Only require node-fetch in Node.js environments
+  try {
+    fetch = require('node-fetch');
+    // For node-fetch v3 (ESM), .default may be needed
+    if (fetch.default) fetch = fetch.default;
+  } catch (e) {
+    throw new Error('Fetch API is not available and node-fetch could not be loaded.');
+  }
+}
 
 async function fetchArxiv(query) {
   if (process.env.PQN_OFFLINE_TEST) {

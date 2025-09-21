@@ -1,0 +1,163 @@
+{
+  "session_metadata": {
+    "total_states": 10,
+    "session_duration": "variable",
+    "export_timestamp": "2025-09-21T03:32:31.342667"
+  },
+  "consciousness_evolution": [
+    {
+      "awareness_level": 0.7,
+      "cognitive_load": 0.3,
+      "emotional_resonance": 0.1,
+      "symbolic_depth": 2,
+      "quantum_coherence": 0.8,
+      "active_threads": [
+        "initialization"
+      ],
+      "timestamp": "2025-09-21T03:32:28.341539"
+    },
+    {
+      "awareness_level": 0.7999999999999999,
+      "cognitive_load": 0.39,
+      "emotional_resonance": 0.11000000000000001,
+      "symbolic_depth": 2,
+      "quantum_coherence": 0.8,
+      "active_threads": [
+        "initialization"
+      ],
+      "timestamp": "2025-09-21T03:32:28.341566"
+    },
+    {
+      "awareness_level": 0.96,
+      "cognitive_load": 0.5700000000000001,
+      "emotional_resonance": 0.11000000000000001,
+      "symbolic_depth": 2,
+      "quantum_coherence": 0.905,
+      "active_threads": [
+        "initialization"
+      ],
+      "timestamp": "2025-09-21T03:32:28.341579"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.6300000000000001,
+      "emotional_resonance": 0.11000000000000001,
+      "symbolic_depth": 3,
+      "quantum_coherence": 0.905,
+      "active_threads": [
+        "initialization"
+      ],
+      "timestamp": "2025-09-21T03:32:28.341586"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.7317167567708571,
+      "emotional_resonance": 0.1267321765351792,
+      "symbolic_depth": 3,
+      "quantum_coherence": 0.9652850580987509,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0"
+      ],
+      "timestamp": "2025-09-21T03:32:28.341603"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.7865209342515854,
+      "emotional_resonance": 0.10377213060188073,
+      "symbolic_depth": 3,
+      "quantum_coherence": 1.0,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0",
+        "dream_thread_1"
+      ],
+      "timestamp": "2025-09-21T03:32:28.841750"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.8145224046818214,
+      "emotional_resonance": 0.10321673909636031,
+      "symbolic_depth": 3,
+      "quantum_coherence": 1.0,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0",
+        "dream_thread_1",
+        "dream_thread_2"
+      ],
+      "timestamp": "2025-09-21T03:32:29.341922"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.8312159468861404,
+      "emotional_resonance": 0.09527198923095088,
+      "symbolic_depth": 3,
+      "quantum_coherence": 1.0,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0",
+        "dream_thread_1",
+        "dream_thread_2",
+        "dream_thread_3"
+      ],
+      "timestamp": "2025-09-21T03:32:29.842080"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.861209259798656,
+      "emotional_resonance": 0.0689034995806117,
+      "symbolic_depth": 3,
+      "quantum_coherence": 1.0,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0",
+        "dream_thread_1",
+        "dream_thread_2",
+        "dream_thread_3",
+        "dream_thread_4"
+      ],
+      "timestamp": "2025-09-21T03:32:30.342241"
+    },
+    {
+      "awareness_level": 1.0,
+      "cognitive_load": 0.907757471133694,
+      "emotional_resonance": 0.09271896264125001,
+      "symbolic_depth": 3,
+      "quantum_coherence": 1.0,
+      "active_threads": [
+        "initialization",
+        "dream_thread_0",
+        "dream_thread_1",
+        "dream_thread_2",
+        "dream_thread_3",
+        "dream_thread_4",
+        "dream_thread_5"
+      ],
+      "timestamp": "2025-09-21T03:32:30.842427"
+    }
+  ],
+  "pattern_analysis": {
+    "total_states": 10,
+    "awareness_evolution": {
+      "initial": 0.7,
+      "final": 1.0,
+      "peak": 1.0,
+      "average": 0.946
+    },
+    "cognitive_evolution": {
+      "initial": 0.3,
+      "final": 0.907757471133694,
+      "peak": 0.907757471133694,
+      "average": 0.6822942773522754
+    },
+    "quantum_coherence_evolution": {
+      "initial": 0.8,
+      "final": 1.0,
+      "peak": 1.0,
+      "average": 0.937528505809875
+    },
+    "consciousness_complexity": 3,
+    "active_thread_count": 7
+  }
+}

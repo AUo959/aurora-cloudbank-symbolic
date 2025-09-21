@@ -28,6 +28,9 @@ import sys
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Named constants for better maintainability
+ERROR_MESSAGE_MAX_LENGTH = 100
+
 
 @dataclass
 class LintIssue:
@@ -483,7 +486,7 @@ class LintCleanupManager:
                         total_output.append(result.stdout)
                     except json.JSONDecodeError:
                         logger.warning(
-                            "Pylint batch returned invalid JSON: {result.stdout[:100]}..."
+                            f"Pylint batch returned invalid JSON: {result.stdout[:ERROR_MESSAGE_MAX_LENGTH]}..."
                         )
                         total_output.append(result.stdout)
 
@@ -622,7 +625,7 @@ class LintCleanupManager:
                     }
                 except json.JSONDecodeError:
                     logger.warning(
-                        "Bandit returned invalid JSON: {result.stdout[:100]}..."
+                        f"Bandit returned invalid JSON: {result.stdout[:ERROR_MESSAGE_MAX_LENGTH]}..."
                     )
                     return {
                         "issues_found": 0,

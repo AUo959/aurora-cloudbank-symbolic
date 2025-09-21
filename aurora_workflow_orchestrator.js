@@ -21,6 +21,9 @@ const EventEmitter = require('events');
 // Import Aurora components
 const AuroraCommandNode = require('./aurora_command_router');
 
+// Named constants for better maintainability  
+const LOG_ENTRIES_MAX_COUNT = 100;
+
 class AuroraWorkflowOrchestrator extends EventEmitter {
   constructor() {
     super();
@@ -408,7 +411,7 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
       phases: this.metrics.phases,
       services: this.metrics.services,
       system: this.metrics.system,
-      logs: this.logs.slice(-100), // Last 100 log entries
+      logs: this.logs.slice(-LOG_ENTRIES_MAX_COUNT), // Last 100 log entries
       timestamp: new Date().toISOString()
     };
 

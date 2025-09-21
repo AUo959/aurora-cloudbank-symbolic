@@ -7,6 +7,9 @@ const validator = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+// Named constants for better maintainability
+const EMAIL_MAX_LENGTH = 100;
+
 class AuroraSecurityConfig {
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET || this.generateSecureSecret();
@@ -34,8 +37,8 @@ class AuroraSecurityConfig {
           .isEmail()
           .normalizeEmail()
           .trim()
-          .isLength({ max: 100 })
-          .withMessage('Valid email required (max 100 characters)')
+          .isLength({ max: EMAIL_MAX_LENGTH })
+          .withMessage(`Valid email required (max ${EMAIL_MAX_LENGTH} characters)`)
       ],
 
       // Password validation

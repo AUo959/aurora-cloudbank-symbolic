@@ -65,3 +65,8 @@ lint-stage1-opal2:
 	# Stage 1 whitespace/formatting fixes for modules/opal2, then lint tools as a canary
 	python3 scripts/whitespace_fix_stage1.py modules/opal2
 	flake8 modules/opal2 --max-line-length=120 --extend-ignore=E203,W503 || true
+
+.PHONY: pr-triage
+pr-triage:
+	# Summarize open PRs; set GITHUB_TOKEN to increase rate limits
+	python3 scripts/pr_triage_snapshot.py

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
 import json
-import time
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support

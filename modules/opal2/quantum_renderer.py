@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
 import json
-import time
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support
@@ -38,8 +37,6 @@ class QuantumState(Enum):
 
 
 @dataclass
-
-
 class RenderContext:
     """Render context containing all rendering parameters"""
 
@@ -63,8 +60,6 @@ class RenderContext:
 
 
 @dataclass
-
-
 class RenderResult:
     """Render result containing output and metadata"""
 
@@ -182,7 +177,7 @@ class QuantumRenderer:
             quantum_metrics = await self._calculate_quantum_metrics(context, enhanced_data)
 
             # Create result
-            _ = RenderResult(
+            result = RenderResult(
                 output=output,
                 format=renderer,
                 metadata={

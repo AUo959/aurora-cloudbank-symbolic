@@ -22,6 +22,12 @@ test:
 run:
 	python modules/reflective_autonomy/loom_restore_script.py
 
+.PHONY: check
+check:
+	# Fast stability check: scoped lint + full tests
+	$(MAKE) lint-tools
+	pytest -q
+
 .PHONY: branch-status
 branch-status:
 	# Generate a branch status report relative to main

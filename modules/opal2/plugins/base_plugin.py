@@ -411,7 +411,7 @@ class PluginManager:
                     ):
                         loaded_count += 1
                 except Exception as e:
-                    print("Failed to load plugin {module_name}: {e}")
+                    print(f"Failed to load plugin {module_name}: {e}")
 
         return loaded_count
 

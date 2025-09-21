@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* global document, window, localStorage, fetch */
 /**
  * Aurora CloudBank Web Interface Tests
  * Basic tests for web components and API endpoints

@@ -26,6 +26,7 @@ class RenderMode(Enum):
     INTERACTIVE = "interactive"
     REALTIME = "realtime"
 
+
 class QuantumState(Enum):
     """Quantum enhancement state"""
 
@@ -35,6 +36,7 @@ class QuantumState(Enum):
     SUPERPOSITION = "superposition"
 
 @dataclass
+
 
 class RenderContext:
     """Render context containing all rendering parameters"""
@@ -59,6 +61,7 @@ class RenderContext:
 
 @dataclass
 
+
 class RenderResult:
     """Render result containing output and metadata"""
 
@@ -79,6 +82,7 @@ class RenderResult:
             "quantum_metrics": self.quantum_metrics,
             "cache_key": self.cache_key,
         }
+
 
 class QuantumRenderer:
     """
@@ -192,6 +196,7 @@ class QuantumRenderer:
             # Update performance metrics
             self._update_performance_metrics(renderer, render_time)
 
+            result = None  # Default result
             return result
 
         finally:

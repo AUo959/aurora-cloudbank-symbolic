@@ -24,6 +24,7 @@ from watchdog.observers import Observer
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class ConfigFormat(Enum):
     """Configuration file format enumeration"""
 
@@ -32,6 +33,7 @@ class ConfigFormat(Enum):
     TOML = "toml"
 
 @dataclass
+
 
 class ConfigValidationRule:
     """Configuration validation rule"""
@@ -47,6 +49,7 @@ class ConfigValidationRule:
 
 @dataclass
 
+
 class ConfigChangeEvent:
     """Configuration change event"""
 
@@ -55,6 +58,7 @@ class ConfigChangeEvent:
     changed_keys: List[str]
     old_values: Dict[str, Any]
     new_values: Dict[str, Any]
+
 
 class ConfigFileHandler(FileSystemEventHandler):
     """File system event handler for configuration changes"""
@@ -65,6 +69,7 @@ class ConfigFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory:
             self.config_manager._handle_file_change(event.src_path)
+
 
 class ConfigurationManager:
     """
@@ -553,6 +558,7 @@ class ConfigurationManager:
         for config_name, config_data in self.configs.items():
             results[config_name] = self._validate_config(config_name, config_data)
 
+        result = None  # Default result
         return results
 
     def export_config(

@@ -155,6 +155,7 @@ def create_architecture_flowchart(
     fig.update_yaxes(visible=False)
     fig.write_image(output_file, width=1200, height=800, scale=2)
 
+
 def create_research_landscape_chart(
     output_file: str = "cask_research_landscape.png",
 ) -> None:
@@ -269,6 +270,7 @@ def create_research_landscape_chart(
     fig.update_xaxes(range=[0, 10], dtick=2)
     fig.update_yaxes(range=[0, 10], dtick=2)
     fig.write_image(output_file)
+
 
 def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> None:
     """Generate the project timeline Gantt chart."""

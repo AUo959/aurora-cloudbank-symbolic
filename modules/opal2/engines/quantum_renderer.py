@@ -26,6 +26,7 @@ class RenderingMode(Enum):
 
 @dataclass
 
+
 class RenderingConfig:
     """Configuration for quantum rendering operations."""
 
@@ -46,6 +47,7 @@ class RenderingConfig:
     max_render_time_ms: int = 16  # 60fps target
     memory_limit_mb: int = 100
     cache_enabled: bool = True
+
 
 class QuantumRenderer:
     """High-performance quantum rendering engine."""

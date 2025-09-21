@@ -46,6 +46,7 @@ symbolic_core = SymbolicCore()
 # Active WebSocket connections
 active_connections: List[WebSocket] = []
 
+
 class RenderRequest(BaseModel):
     """Request model for quantum rendering"""
 
@@ -55,12 +56,14 @@ class RenderRequest(BaseModel):
     quantum_params: Optional[Dict[str, float]] = Field(default=None, description="Quantum enhancement parameters")
     cache_key: Optional[str] = Field(default=None, description="Cache key for optimization")
 
+
 class GlyphGenerationRequest(BaseModel):
     """Request model for glyph generation"""
 
     symbolic_expression: str = Field(..., description="Symbolic expression to render")
     style_params: Dict[str, Any] = Field(default={}, description="Style parameters")
     quantum_enhancement: bool = Field(default=True, description="Enable quantum enhancement")
+
 
 class WebSocketMessage(BaseModel):
     """WebSocket message model"""
@@ -70,6 +73,8 @@ class WebSocketMessage(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.now)
 
 @app.get("/")
+
+
 async def root():
     """Root endpoint with system status"""
     return {
@@ -86,6 +91,8 @@ async def root():
     }
 
 @app.get("/health")
+
+
 async def health_check():
     """System health check endpoint"""
     try:
@@ -113,6 +120,8 @@ async def health_check():
         )
 
 @app.post("/render")
+
+
 async def render_glyph(request: RenderRequest):
     """Render a glyph with specified parameters"""
     try:
@@ -172,6 +181,8 @@ async def render_glyph(request: RenderRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate")
+
+
 async def generate_glyph(request: GlyphGenerationRequest):
     """Generate a new glyph from symbolic expression"""
     try:
@@ -202,24 +213,32 @@ async def generate_glyph(request: GlyphGenerationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/plugins")
+
+
 async def list_plugins():
     """List available renderer plugins"""
     plugins = plugin_system.list_plugins()
     return {"plugins": plugins, "count": len(plugins)}
 
 @app.get("/cache/stats")
+
+
 async def cache_stats():
     """Get cache statistics"""
     stats = await glyph_cache.get_stats()
     return stats
 
 @app.delete("/cache/clear")
+
+
 async def clear_cache():
     """Clear the glyph cache"""
     cleared_count = await glyph_cache.clear_async()
     return {"success": True, "cleared_items": cleared_count}
 
 @app.websocket("/ws")
+
+
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time updates"""
     await websocket.accept()
@@ -249,6 +268,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         active_connections.remove(websocket)
 
+
 async def notify_clients(message: Dict[str, Any]):
     """Notify all connected WebSocket clients"""
     if active_connections:
@@ -270,6 +290,7 @@ async def test_glyph_core():
     except Exception as e:
         return {"healthy": False, "error": str(e)}
 
+
 async def test_quantum_renderer():
     """Test quantum renderer functionality"""
     try:
@@ -278,6 +299,7 @@ async def test_quantum_renderer():
     except Exception as e:
         return {"healthy": False, "error": str(e)}
 
+
 async def test_plugin_system():
     """Test plugin system functionality"""
     try:
@@ -285,6 +307,7 @@ async def test_plugin_system():
         return {"healthy": True, "plugin_count": plugin_count}
     except Exception as e:
         return {"healthy": False, "error": str(e)}
+
 
 async def test_cache_system():
     """Test cache system functionality"""
@@ -298,6 +321,8 @@ async def test_cache_system():
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/demo", response_class=HTMLResponse)
+
+
 async def demo_interface():
     """Demo web interface for Opal2 system"""
     return """

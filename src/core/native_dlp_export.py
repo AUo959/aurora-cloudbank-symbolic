@@ -80,6 +80,7 @@ class NativeDLPTag:
         tag.symbolic_patterns = data.get("symbolic_patterns", {})
         return tag
 
+
 class NativeDLPTracker:
     """Native DLP tracking system for Aurora symbolic operations"""
 
@@ -341,6 +342,7 @@ class NativeDLPTracker:
             "zero_dependencies": True,
             "aurora_optimized": True,
         }
+
 
 class NativeExportSystem:
     """Native export system for Aurora symbolic operations"""

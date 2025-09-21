@@ -88,6 +88,8 @@ server_state = {
 # Middleware to track requests
 
 @app.middleware("http")
+
+
 async def track_requests(request: Request, call_next):
     server_state["requests_count"] += 1
     response = await call_next(request)
@@ -99,6 +101,8 @@ if dashboard_dir.exists():
     app.mount("/static", StaticFiles(directory=str(dashboard_dir)), name="static")
 
 @app.get("/", response_class=HTMLResponse)
+
+
 async def dashboard():
     """Serve the main agent constellation dashboard"""
     try:
@@ -125,6 +129,8 @@ async def dashboard():
         return HTMLResponse(f"<h1>Dashboard Error: {str(e)}</h1>", status_code=500)
 
 @app.get("/health")
+
+
 async def health_check():
     """Health check endpoint"""
     uptime = (datetime.now() - server_state["start_time"]).total_seconds()
@@ -230,6 +236,8 @@ else:
 # L2 Meta-Agent Bridge Endpoints
 
 @app.post("/api/bridge/gpt/connect/{agent_id}")
+
+
 async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
@@ -263,6 +271,8 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.post("/api/bridge/gpt/message/{agent_id}")
+
+
 async def relay_message(agent_id: str, request_data: Dict[str, Any]):
     """Relay message from Custom GPT agent"""
     try:
@@ -291,6 +301,8 @@ async def relay_message(agent_id: str, request_data: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/api/bridge/constellation/status")
+
+
 async def get_constellation_status():
     """Get status of the entire agent constellation"""
     try:
@@ -313,6 +325,8 @@ async def get_constellation_status():
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
 @app.get("/api/bridge/gpt/status/{agent_id}")
+
+
 async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
     try:
@@ -332,6 +346,8 @@ async def get_agent_status(agent_id: str):
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
+
+
 async def update_heartbeat(agent_id: str):
     """Update agent heartbeat timestamp"""
     try:
@@ -358,6 +374,8 @@ async def update_heartbeat(agent_id: str):
         raise HTTPException(status_code=500, detail=f"Heartbeat update failed: {str(e)}")
 
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
+
+
 async def disconnect_agent(agent_id: str):
     """Disconnect an agent from the constellation"""
     try:
@@ -380,6 +398,8 @@ async def disconnect_agent(agent_id: str):
 # Additional API endpoints
 
 @app.get("/api/agents")
+
+
 async def list_agents():
     """List all available agents"""
     try:
@@ -405,6 +425,8 @@ async def list_agents():
         raise HTTPException(status_code=500, detail=f"Agent listing failed: {str(e)}")
 
 @app.get("/api/orion-core")
+
+
 async def get_orion_core_info():
     """Get ORION Core configuration information"""
     try:
@@ -430,6 +452,8 @@ async def get_orion_core_info():
 # Server lifecycle events
 
 @app.on_event("startup")
+
+
 async def startup_event():
     """Server startup event"""
     logger.info("🌟 Aurora L2 Integration Server starting up")
@@ -441,6 +465,8 @@ async def startup_event():
     # Initialize any background tasks here
 
 @app.on_event("shutdown")
+
+
 async def shutdown_event():
     """Server shutdown event"""
     logger.info("Aurora L2 Integration Server shutting down")

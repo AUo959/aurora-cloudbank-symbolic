@@ -1,0 +1,70 @@
+{
+  "scan_timestamp": "2025-09-21T01:08:40.835019",
+  "areas": {
+    "modules/opal2": {
+      "name": "modules/opal2",
+      "total_files": 10,
+      "stage1_issues": 18,
+      "stage2_issues": 0,
+      "stage3_issues": 4,
+      "stage4_issues": 1,
+      "stage1_complete": false,
+      "stage2_complete": true,
+      "stage3_complete": false,
+      "stage4_complete": false,
+      "last_updated": "2025-09-21T01:08:38.286265"
+    },
+    "modules/cask": {
+      "name": "modules/cask",
+      "total_files": 3,
+      "stage1_issues": 2,
+      "stage2_issues": 0,
+      "stage3_issues": 0,
+      "stage4_issues": 1,
+      "stage1_complete": false,
+      "stage2_complete": true,
+      "stage3_complete": true,
+      "stage4_complete": false,
+      "last_updated": "2025-09-21T01:08:38.880687"
+    },
+    "src/core": {
+      "name": "src/core",
+      "total_files": 4,
+      "stage1_issues": 4,
+      "stage2_issues": 0,
+      "stage3_issues": 0,
+      "stage4_issues": 0,
+      "stage1_complete": false,
+      "stage2_complete": true,
+      "stage3_complete": true,
+      "stage4_complete": true,
+      "last_updated": "2025-09-21T01:08:39.615025"
+    },
+    "src/bridges": {
+      "name": "src/bridges",
+      "total_files": 1,
+      "stage1_issues": 2,
+      "stage2_issues": 0,
+      "stage3_issues": 1,
+      "stage4_issues": 2,
+      "stage1_complete": false,
+      "stage2_complete": true,
+      "stage3_complete": false,
+      "stage4_complete": false,
+      "last_updated": "2025-09-21T01:08:40.213718"
+    },
+    "src/servers": {
+      "name": "src/servers",
+      "total_files": 1,
+      "stage1_issues": 14,
+      "stage2_issues": 0,
+      "stage3_issues": 0,
+      "stage4_issues": 2,
+      "stage1_complete": false,
+      "stage2_complete": true,
+      "stage3_complete": true,
+      "stage4_complete": false,
+      "last_updated": "2025-09-21T01:08:40.835001"
+    }
+  }
+}

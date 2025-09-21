@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 
+
 class CustomGptAgent:
     """Custom GPT Agent configuration and state"""
 
@@ -38,6 +39,7 @@ class CustomGptAgent:
     def __post_init__(self):
         if self.handshake_log is None:
             self.handshake_log = []
+
 
 class L2MetaAgentBridge:
     """Bridge connector for L2 Custom GPT meta-agents"""

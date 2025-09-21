@@ -140,6 +140,7 @@ class NativeSymbolicVector:
     def __repr__(self):
         return f"NativeSymbolicVector(symbol={self.symbol!r}, dim={self.dim}, type={self.vector_type})"
 
+
 class NativeVSAMemory:
     """Native VSA associative memory system"""
 
@@ -200,10 +201,12 @@ class NativeVSAMemory:
         """Get number of stored vectors"""
         return len(self.memory)
 
+
 def encode_symbol(symbol: str, dim: int = 512, vector_type: str = "bipolar") -> List[float]:
     """Utility function to encode symbol as vector"""
     vector = NativeSymbolicVector.from_symbol(symbol, dim, vector_type)
     return vector.vector
+
 
 def calculate_similarity(vec1: List[float], vec2: List[float]) -> float:
     """Calculate similarity between two raw vectors"""
@@ -213,12 +216,14 @@ def calculate_similarity(vec1: List[float], vec2: List[float]) -> float:
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
     return dot_product / len(vec1)
 
+
 def bind_vectors(vec1: List[float], vec2: List[float]) -> List[float]:
     """Bind two raw vectors (elementwise multiplication)"""
     if len(vec1) != len(vec2):
         raise ValueError("Vector dimensions must match")
 
     return [a * b for a, b in zip(vec1, vec2)]
+
 
 def superpose_vectors(vec1: List[float], vec2: List[float]) -> List[float]:
     """Superpose two raw vectors (elementwise addition with sign normalization)"""

@@ -71,6 +71,19 @@ keyring/
 *.rar
 .venv/
 
+# Local Python virtual environments
+venv*/
+venv_*/
+venv_opal2/
+
+# Node dependencies (should not be tracked)
+node_modules/
+services/**/node_modules/
+
+# Runtime caches and local artifacts
+pqn_query_cache.json
+live_threads/*.json
+
 # GITWiz Auto-generated cleanup patterns
 # Python cache
 *.pyc

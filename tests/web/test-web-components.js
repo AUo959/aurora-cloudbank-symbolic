@@ -24,7 +24,7 @@ global.window = {
 };
 
 global.document = {
-  getElementById: (id) => ({ 
+  getElementById: (id) => ({
     value: 'test-value',
     textContent: '',
     appendChild: () => {},
@@ -68,7 +68,7 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
   // Load Aurora Web Logger
   const loggerPath = path.join(projectRoot, 'static/js/aurora-web-logger.js');
   const loggerCode = fs.readFileSync(loggerPath, 'utf8');
-    
+
   // Execute in secure test environment using dynamic import
   // Create a safe evaluation environment instead of using eval()
   try {
@@ -100,10 +100,10 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
       };
     }
   }
-    
+
   await t.test('Logger initialization', () => {
     assert.ok(global.AuroraWebLogger, 'AuroraWebLogger class should be available');
-        
+
     const logger = new global.AuroraWebLogger('TEST_COMPONENT');
     assert.strictEqual(logger.component, 'TEST_COMPONENT');
     assert.strictEqual(logger.logLevel, 'INFO');
@@ -112,7 +112,7 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
 
   await t.test('Logging methods', () => {
     const logger = new global.AuroraWebLogger('TEST_COMPONENT');
-        
+
     // Test each logging method
     assert.doesNotThrow(() => logger.info('Test info message'));
     assert.doesNotThrow(() => logger.warn('Test warning message'));
@@ -122,7 +122,7 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
 
   await t.test('Aurora-specific methods', () => {
     const logger = new global.AuroraWebLogger('TEST_COMPONENT');
-        
+
     assert.doesNotThrow(() => logger.drift('Drift detected', 0.03));
     assert.doesNotThrow(() => logger.ethics('Ethics validation'));
     assert.doesNotThrow(() => logger.anchor('Anchor established'));
@@ -148,7 +148,7 @@ test('Aurora Security - Basic functionality', async (t) => {
   // Load Aurora Security
   const securityPath = path.join(projectRoot, 'static/js/aurora-security.js');
   const securityCode = fs.readFileSync(securityPath, 'utf8');
-    
+
   // Execute in secure test environment using dynamic import
   // Create a safe evaluation environment instead of using eval()
   try {
@@ -182,7 +182,7 @@ test('Aurora Security - Basic functionality', async (t) => {
       }
     };
   }
-    
+
   await t.test('HTML sanitization', () => {
     assert.ok(global.AuroraSecurity, 'AuroraSecurity should be available');
 
@@ -209,7 +209,7 @@ test('HTML file validation', async (t) => {
   await t.test('index.html exists and is valid', () => {
     const indexPath = path.join(projectRoot, 'index.html');
     assert.ok(fs.existsSync(indexPath), 'index.html should exist');
-        
+
     const content = fs.readFileSync(indexPath, 'utf8');
     assert.ok(content.includes('<!DOCTYPE html>'), 'Should have DOCTYPE');
     assert.ok(content.includes('Aurora'), 'Should contain Aurora branding');
@@ -220,7 +220,7 @@ test('HTML file validation', async (t) => {
   await t.test('aurora_dashboard.html exists and is valid', () => {
     const dashboardPath = path.join(projectRoot, 'aurora_dashboard.html');
     assert.ok(fs.existsSync(dashboardPath), 'aurora_dashboard.html should exist');
-        
+
     const content = fs.readFileSync(dashboardPath, 'utf8');
     assert.ok(content.includes('<!DOCTYPE html>'), 'Should have DOCTYPE');
     assert.ok(content.includes('Aurora'), 'Should contain Aurora branding');
@@ -241,11 +241,11 @@ test('Build system validation', async (t) => {
   await t.test('Package.json has proper web scripts', () => {
     const packagePath = path.join(projectRoot, 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-        
+
     assert.ok(packageJson.scripts.build, 'Should have build script');
     assert.ok(packageJson.scripts.start, 'Should have start script');
     assert.ok(packageJson.scripts.lint, 'Should have lint script');
-  assert.ok(packageJson.type === 'commonjs', 'Should be CommonJS');
+    assert.ok(packageJson.type === 'commonjs', 'Should be CommonJS');
   });
 });
 
@@ -253,7 +253,7 @@ test('Static assets validation', async (t) => {
   await t.test('Static directory structure', () => {
     const staticPath = path.join(projectRoot, 'static');
     assert.ok(fs.existsSync(staticPath), 'Static directory should exist');
-        
+
     const jsPath = path.join(staticPath, 'js');
     assert.ok(fs.existsSync(jsPath), 'Static js directory should exist');
   });
@@ -263,7 +263,7 @@ test('Static assets validation', async (t) => {
       'static/js/aurora-security.js',
       'static/js/aurora-web-logger.js'
     ];
-        
+
     for (const file of requiredFiles) {
       const filePath = path.join(projectRoot, file);
       assert.ok(fs.existsSync(filePath), `${file} should exist`);

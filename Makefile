@@ -31,3 +31,20 @@ branch-status:
 sync:
 	# Fetch latest refs and prune stale branches
 	git fetch --all --prune
+
+.PHONY: branch-plan
+branch-plan:
+	# Generate a Markdown plan for branch cleanup
+	bash ./scripts/branch_cleanup_plan.sh > BRANCH_CLEANUP_PLAN.md
+
+.PHONY: branch-cleanup-dry
+branch-cleanup-dry:
+	# Preview deletion of obvious obsolete branches (no changes pushed)
+	DRY_RUN=1 bash ./scripts/branch_cleanup_exec.sh 'copilot/fix-*' || true
+	DRY_RUN=1 bash ./scripts/branch_cleanup_exec.sh 'dependabot/*' || true
+
+.PHONY: branch-cleanup-apply
+branch-cleanup-apply:
+	# Apply deletion of obvious obsolete branches (requires confirmation)
+	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'copilot/fix-*'
+	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'dependabot/*'

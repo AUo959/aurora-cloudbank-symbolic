@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+
+
 class CustomGptAgent:
     """Custom GPT Agent configuration and state"""
 

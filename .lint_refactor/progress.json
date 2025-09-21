@@ -1,0 +1,122 @@
+{
+  "areas": {
+    "modules/opal2": {
+      "area_name": "modules/opal2",
+      "owner": "AUo959",
+      "notes": "Complex; many E999/F821/line-length",
+      "stage_status": {
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false,
+        "5": false
+      },
+      "total_issues": {
+        "W293": 5,
+        "E303": 1,
+        "E302": 0,
+        "F401": 2,
+        "F811": 0,
+        "F821": 3,
+        "E999": 2,
+        "E501": 1
+      },
+      "last_updated": "2025-09-21T01:42:03.717988"
+    },
+    "modules/cask": {
+      "area_name": "modules/cask",
+      "owner": "AUo959",
+      "notes": "Line length; chart module long lines",
+      "stage_status": {
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false,
+        "5": false
+      },
+      "total_issues": {
+        "W293": 0,
+        "E303": 0,
+        "E302": 0,
+        "F401": 0,
+        "F811": 0,
+        "F821": 0,
+        "E999": 0,
+        "E501": 1
+      },
+      "last_updated": "2025-09-21T01:42:03.873933"
+    },
+    "src/core": {
+      "area_name": "src/core",
+      "owner": "AUo959",
+      "notes": "Whitespace/imports first",
+      "stage_status": {
+        "1": true,
+        "2": false,
+        "3": false,
+        "4": false,
+        "5": false
+      },
+      "total_issues": {
+        "W293": 0,
+        "E303": 0,
+        "E302": 0,
+        "F401": 1,
+        "F811": 0,
+        "F821": 0,
+        "E999": 0,
+        "E501": 0
+      },
+      "last_updated": "2025-09-21T01:43:45.332312"
+    },
+    "src/bridges": {
+      "area_name": "src/bridges",
+      "owner": "AUo959",
+      "notes": "Undefined names/line-lengths present",
+      "stage_status": {
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false,
+        "5": false
+      },
+      "total_issues": {
+        "W293": 0,
+        "E303": 0,
+        "E302": 0,
+        "F401": 0,
+        "F811": 1,
+        "F821": 1,
+        "E999": 0,
+        "E501": 2
+      },
+      "last_updated": "2025-09-21T01:42:04.233141"
+    },
+    "src/servers": {
+      "area_name": "src/servers",
+      "owner": "AUo959",
+      "notes": "Long lines and extra blanks",
+      "stage_status": {
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false,
+        "5": false
+      },
+      "total_issues": {
+        "W293": 0,
+        "E303": 1,
+        "E302": 0,
+        "F401": 0,
+        "F811": 0,
+        "F821": 0,
+        "E999": 0,
+        "E501": 2
+      },
+      "last_updated": "2025-09-21T01:42:04.415700"
+    }
+  },
+  "started_at": "2025-09-21T01:42:03.457564",
+  "last_updated": "2025-09-21T01:43:45.332369",
+  "overall_completion": 4.0
+}

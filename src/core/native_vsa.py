@@ -35,16 +35,16 @@ class NativeSymbolicVector:
         """Generate deterministic vector from symbol using native Python"""
         # Use symbol hash for deterministic generation
         h = hashlib.sha256(self.symbol.encode()).digest()
-        
+
         # Generate deterministic vector from hash bytes
         vector = []
         byte_index = 0
-        
+
         for i in range(self.dim):
             # Use hash bytes cyclically for deterministic generation
             byte_val = h[byte_index % len(h)]
             byte_index += 1
-            
+
             if self.vector_type == "bipolar":
                 vector.append(-1.0 if byte_val < 128 else 1.0)
             elif self.vector_type == "binary":
@@ -57,10 +57,10 @@ class NativeSymbolicVector:
                     byte_index += 1
                     u2 = (h[byte_index % len(h)] + 1) / 257.0
                     byte_index += 1
-                    
+
                     z0 = math.sqrt(-2.0 * math.log(u1)) * math.cos(2.0 * math.pi * u2)
                     z1 = math.sqrt(-2.0 * math.log(u1)) * math.sin(2.0 * math.pi * u2)
-                    
+
                     vector.append(z0)
                     if i + 1 < self.dim:
                         vector.append(z1)
@@ -74,7 +74,7 @@ class NativeSymbolicVector:
                     vector.append(z0)
             else:
                 raise ValueError(f"Unknown vector_type: {self.vector_type}")
-        
+
         return vector[:self.dim]  # Ensure exact dimension
 
     @classmethod

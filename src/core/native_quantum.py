@@ -105,7 +105,7 @@ class NativeQuantumGates:
     def hadamard() -> List[List[complex]]:
         """Hadamard gate matrix"""
         inv_sqrt2 = 1.0 / math.sqrt(2)
-        
+
         return [[inv_sqrt2 + 0.0j, inv_sqrt2 + 0.0j], [inv_sqrt2 + 0.0j, -inv_sqrt2 + 0.0j]]
 
     @staticmethod
@@ -113,7 +113,7 @@ class NativeQuantumGates:
         """Y-rotation gate matrix"""
         cos_half = math.cos(angle / 2)
         sin_half = math.sin(angle / 2)
-        
+
         return [[cos_half + 0.0j, -sin_half + 0.0j], [sin_half + 0.0j, cos_half + 0.0j]]
 
     @staticmethod
@@ -121,7 +121,7 @@ class NativeQuantumGates:
         """Z-rotation gate matrix"""
         exp_neg = cmath.exp(-1j * angle / 2)
         exp_pos = cmath.exp(1j * angle / 2)
-        
+
         return [[exp_neg, 0.0 + 0.0j], [0.0 + 0.0j, exp_pos]]
 
     @staticmethod
@@ -141,7 +141,7 @@ class NativeQuantumCircuit:
     def __init__(self, num_qubits: int):
         self.num_qubits = num_qubits
         self.state = NativeQuantumState(num_qubits)
-        
+
         self.operations = []
 
     def h(self, qubit: int):
@@ -214,7 +214,7 @@ class NativeQuantumSimulator:
     def run(self, circuit: NativeQuantumCircuit, shots: int = 1024) -> "NativeQuantumResult":
         """Run quantum circuit simulation"""
         counts = circuit.measure_all(shots)
-        
+
         return NativeQuantumResult(counts, circuit.operations)
 
 
@@ -236,7 +236,7 @@ class NativeQuantumProcessingLayer:
     def __init__(self, num_qubits: int = 8):
         self.num_qubits = num_qubits
         self.simulator = NativeQuantumSimulator()
-        
+
         self.quantum_circuits = {}
 
     def create_quantum_circuit(self, circuit_name: str, operations: List[Dict[str, Any]]) -> NativeQuantumCircuit:
@@ -298,13 +298,13 @@ class NativeQuantumProcessingLayer:
     def _calculate_entropy(self, counts: Dict[str, int]) -> float:
         """Calculate quantum entropy for symbolic analysis"""
         total = sum(counts.values())
-        
+
         if total == 0:
             return 0.0
 
         probabilities = [count / total for count in counts.values()]
         entropy = -sum(p * math.log2(p) for p in probabilities if p > 0)
-        
+
         return entropy
 
     def _extract_symbolic_patterns(self, counts: Dict[str, int]) -> Dict[str, Any]:

@@ -20,15 +20,15 @@ Track lint refactors in legacy code areas (src/ and modules/). CI lint is scoped
 
 ## Areas and owners
 
-- modules/opal2 (owner: TBD)
-- modules/cask (owner: TBD)
-- src/core (owner: TBD)
-- src/bridges (owner: TBD)
-- src/servers (owner: TBD)
+- modules/opal2 (owner: AUo959)
+- modules/cask (owner: AUo959)
+- src/core (owner: AUo959)
+- src/bridges (owner: AUo959)
+- src/servers (owner: AUo959)
 
 ## Tracking checklist
 
-- [ ] Agree owners for areas above
+- [x] Agree owners for areas above
 - [ ] Stage 1 complete for modules/opal2
 - [ ] Stage 1 complete for modules/cask
 - [ ] Stage 1 complete for src/core
@@ -39,8 +39,16 @@ Track lint refactors in legacy code areas (src/ and modules/). CI lint is scoped
 - [ ] Stage 2 complete for src/core
 - [ ] Stage 2 complete for src/bridges
 - [ ] Stage 2 complete for src/servers
-- [ ] Stage 3
-- [ ] Stage 4
+- [ ] Stage 3 complete for modules/opal2
+- [ ] Stage 3 complete for modules/cask
+- [ ] Stage 3 complete for src/core
+- [ ] Stage 3 complete for src/bridges
+- [ ] Stage 3 complete for src/servers
+- [ ] Stage 4 complete for modules/opal2
+- [ ] Stage 4 complete for modules/cask
+- [ ] Stage 4 complete for src/core
+- [ ] Stage 4 complete for src/bridges
+- [ ] Stage 4 complete for src/servers
 - [ ] Stage 5 - Expand CI lint to include cleaned areas
 
 ## Notes
@@ -48,3 +56,21 @@ Track lint refactors in legacy code areas (src/ and modules/). CI lint is scoped
 - Keep PRs small and focused per area/stage.
 - Prefer mechanical fixes first, no behavior changes.
 - Use pre-commit locally to enforce ongoing quality.
+
+## Usage
+
+Use the lint refactor tracker script:
+
+```bash
+# Analyze current state
+python3 scripts/lint_refactor_tracker.py analyze
+
+# Generate progress report
+python3 scripts/lint_refactor_tracker.py report
+
+# Mark stage complete
+python3 scripts/lint_refactor_tracker.py complete --area modules/opal2 --stage 1
+
+# Generate updated checklist
+python3 scripts/lint_refactor_tracker.py checklist
+```

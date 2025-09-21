@@ -2,12 +2,14 @@
 """
 
 from dataclasses import asdict'''
-from pathlib import Path
-import sys
 
 🔧 Aurora CloudBank Critical Issue Resolver
 Fixes the most critical problems identified in error analysis.
 """
+from pathlib import Path
+import sys
+import re
+
 
 
 def fix_critical_gitwiz_issues():
@@ -24,7 +26,7 @@ def fix_critical_gitwiz_issues():
 
     # Fix undefined variables around line 1008-1014
     content = re.sub(
-        rr'if "resultr" in locals\(\) and result\.stdout:\s*\n\s*print\(result\.stdout\)\s*\n\s*if result\.stderr:\s*\n\s*print\(result\.stderr\)',
+        r'if "resultr" in locals\(\) and result\.stdout:\s*\n\s*print\(result\.stdout\)\s*\n\s*if result\.stderr:\s*\n\s*print\(result\.stderr\)',
         '''if "result" in locals() and hasattr(result, 'stdout') and result.stdout:
             print(result.stdout)
         if "result" in locals() and hasattr(result, 'stderr') and result.stderr:
@@ -43,7 +45,7 @@ def fix_critical_gitwiz_issues():
     if 'from dataclasses import asdict' not in content:
         content = content.replace(
             'import json',
-            '''import json
+            'import json\nfrom dataclasses import asdict'
         )
 
     # Fix attribute access issues - add missing methods as stubs
@@ -87,8 +89,8 @@ def fix_security_file_issues():
             content = f.read()
 
         # Fix file encoding issues
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\r'r"](?!\s*,)', r'open(\1, "w", encoding="utf-8r"', content)
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\r'r"](?!\s*,)', r'open(\1, "r", encoding="utf-8"', content)
+        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\'"](?!\s*,)', r'open(\1, "w", encoding="utf-8")', content)
+        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\'"](?!\s*,)', r'open(\1, "r", encoding="utf-8")', content)
 
         # Fix line length issues by breaking long lines
         lines = content.split('\n')

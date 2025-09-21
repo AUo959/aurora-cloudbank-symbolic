@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-from pathlib import Path
-import hashlib
-import json
-import shutil
-import tempfile
-import zipfile
-
 ZIPWiz - Advanced Archive Management Integration
 Part of the GITWiz Enhanced ecosystem
 
@@ -19,12 +10,20 @@ Author: Aurora/ORION Core
 Built for consistency, clarity, and care.
 """
 
+import argparse
+
 
 import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List
+import shutil
+import tempfile
+import hashlib
+import zipfile
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -432,7 +431,7 @@ def main():
             print(json.dumps(analysis, indent=2, default=str))
         elif args.extract:
             if args.optimize:
-                _ = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
+                result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
                 print(f"Optimization complete: {result}")
             else:
                 # Standard extraction

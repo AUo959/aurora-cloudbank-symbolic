@@ -5,8 +5,12 @@ This module demonstrates how to generate symbolic vectors using quantum circuits
 """
 
 import numpy as np
-from qiskit import QuantumCircuit
-from qiskit_aer import AerSimulator
+try:
+    from qiskit import QuantumCircuit
+    from qiskit_aer import AerSimulator
+except Exception:  # pragma: no cover - allow tests without qiskit
+    QuantumCircuit = None
+    AerSimulator = None
 
 from modules.symbolic_core.vsa import SymbolicVector
 
@@ -19,13 +23,19 @@ def quantum_symbolic_vector(symbol: str, dim: int = 8) -> np.ndarray:
     # For demo, use small dim (e.g., 8 qubits)
     h = hash(symbol) % (2**32)
     np.random.seed(h)
+    if QuantumCircuit is None or AerSimulator is None:
+        # Fallback: deterministic pseudo-random vector
+        return np.where(np.random.rand(dim) > 0.5, 1, -1)
+
     qc = QuantumCircuit(dim, dim)
     for i in range(dim):
         qc.h(i)  # Put each qubit in superposition
         if np.random.rand() > 0.5:
             qc.x(i)  # Flip some qubits based on hash
     qc.measure(range(dim), range(dim))
-    backend = AerSimulator()    result = backend.run(qc, shots=1).result()    counts = list(result.get_counts().keys())[0]
+    backend = AerSimulator()
+    result = backend.run(qc, shots=1).result()
+    counts = list(result.get_counts().keys())[0]
     # Convert bitstring to -1/+1 vector
     vec = np.array([1 if b == "1" else -1 for b in counts[::-1]])
     return vec

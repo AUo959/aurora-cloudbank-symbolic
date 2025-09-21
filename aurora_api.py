@@ -56,6 +56,23 @@ def parse_multivector(expression: str, blades: dict):
     return result
 
 
+def _sanitize_tools_info(info: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove non-serializable entries (e.g., callable handlers) from tools payload."""
+    if not isinstance(info, dict):
+        return {"tools": {}, "error": "invalid_tools_info"}
+    sanitized = dict(info)
+    tools = sanitized.get("tools")
+    if isinstance(tools, dict):
+        clean_tools = {}
+        for name, tool in tools.items():
+            if isinstance(tool, dict):
+                clean_tools[name] = {k: v for k, v in tool.items() if k != "handler"}
+            else:
+                clean_tools[name] = tool
+        sanitized["tools"] = clean_tools
+    return sanitized
+
+
 class VectorRequest(BaseModel):
     x: float
 
@@ -182,6 +199,12 @@ def health_check():
     }
 
 
+# Compatibility alias for Docker healthcheck (docker-compose points to /api/health)
+@app.get("/api/health")
+def health_check_api():
+    return health_check()
+
+
 # ================================
 # ChatGPT Agent Mode Endpoints
 # ================================
@@ -194,6 +217,7 @@ async def get_agent_tools():
     """
     try:
         tools_info = await chatgpt_agent_integration.discover_tools()
+        tools_info = _sanitize_tools_info(tools_info)
         return JSONResponse(content=tools_info)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to discover tools: {str(e)}")
@@ -269,11 +293,9 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "context_tag": "websocket_agent_stream"
         }
         await websocket.send_json(initial_message)
-
         while True:
             # Wait for messages from client
             data = await websocket.receive_json()
-
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 try:
@@ -291,7 +313,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "error",
                         "error": str(e),
-                        "request_id": data.get("request_id")
+                        "request_id": data.get("request_id"),
                     })
             elif data.get("type") == "ping":
                 await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
@@ -299,18 +321,11 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({
                     "type": "error",
                     "error": "Unknown message type",
-                    "supported_types": ["tool_execution", "ping"]
+                    "supported_types": ["tool_execution", "ping"],
                 })
 
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
-
-
-# Example quantum endpoint (stub)
-# @app.post("/quantum/vsa")
-
-
-
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")

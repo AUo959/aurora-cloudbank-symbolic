@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
+from pydantic import BaseModel
+from fastapi import FastAPI
+
+# !/usr/bin/env python3
 """
+
+        import logging
+    import uvicorn
+
 Opal2 Modular System - FastAPI Integration
 Enhanced quantum visualization API with modular renderer support
 """
-
-from pydantic import BaseModel
-from fastapi import FastAPI
-import logging
-import uvicorn
-from datetime import datetime
-import json
 
 
 # Using native Python math instead of numpy for better performance
@@ -31,6 +31,7 @@ from modules.opal2.glyph_core import GlyphCore
 from fastapi.staticfiles import StaticFiles
 from modules.opal2.quantum_renderer import QuantumRenderer
 from modules.opal2.plugin_system import PluginSystem
+
 
 
 app = FastAPI(

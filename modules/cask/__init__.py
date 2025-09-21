@@ -1,17 +1,16 @@
-"""CASK Integration Module."""
+"""CASK Integration Module.
 
-# Placeholder imports - update when modules are implemented
-# from .analysis import (
-# )
-# from .charts import (
-# )
+Expose analysis utilities for tests and downstream consumers.
+"""
+
+from .analysis import (
+    generate_technical_specifications,
+    generate_vs_sota_comparison,
+    generate_risk_assessment,
+)
 
 __all__ = [
-    # Placeholder for future CASK module exports
-    # "generate_technical_specifications",
-    # "generate_vs_sota_comparison",
-    # "generate_risk_assessment",
-    # "create_architecture_flowchart",
-    # "create_research_landscape_chart",
-    # "create_project_gantt_chart",
+    "generate_technical_specifications",
+    "generate_vs_sota_comparison",
+    "generate_risk_assessment",
 ]

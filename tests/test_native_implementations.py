@@ -1,8 +1,6 @@
 """
 
         import sys
-import os
-import time
 
 Test suite for native zero-dependency implementations
 Validates core symbolic simulation functionality without heavy dependencies
@@ -11,9 +9,15 @@ Validates core symbolic simulation functionality without heavy dependencies
 # Add src to path for imports
 import math
 import os
-import pytest
 import sys
 import time
+from src.quantum_core.quantum_processing_layer import NativeQuantumProcessingLayer
+from src.core.native_quantum import NativeQuantumCircuit
+from src.core.native_vsa import NativeSymbolicVector
+from src.quantum_core.symbolic_cpu_anchor import NativeSymbolicCPUAnchor
+import pytest
+from src.core.native_vsa import NativeVSAMemory
+
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

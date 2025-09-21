@@ -15,10 +15,16 @@ import hashlib
 import json
 import os
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
+
+# DLP tagging per Aurora project conventions
+try:
+    from src.core.native_dlp_export import NativeDLPTracker
+except Exception:  # Graceful fallback if import path changes
+    NativeDLPTracker = None  # type: ignore
 
 
 @dataclass
@@ -50,6 +56,10 @@ class SymbolicAnchorTracker:
         self.repo_path = Path(repo_path).resolve()
         self.anchors: Dict[str, SymbolicAnchor] = {}
         self.lineages: Dict[str, AnchorLineage] = {}
+        self.anchor_to_dlp: Dict[str, str] = {}
+
+        # Initialize DLP tracker if available
+        self.dlp_tracker = NativeDLPTracker() if NativeDLPTracker is not None else None
 
         # Symbolic anchor patterns
         self.anchor_patterns = {
@@ -114,6 +124,34 @@ class SymbolicAnchorTracker:
                         anchors.append(anchor)
                         self.anchors[anchor_id] = anchor
 
+                        # DLP tag for discovered anchor (if DLP tracker available)
+                        if self.dlp_tracker is not None:
+                            try:
+                                symbolic_data = {
+                                    "concepts": [anchor_id],
+                                    "dimension": 512,
+                                    "vector_type": "symbolic_anchor",
+                                    "file_path": str(file_path.relative_to(self.repo_path)),
+                                    "line_number": line_num,
+                                    "anchor_type": pattern_type,
+                                }
+                                tag_id = self.dlp_tracker.tag_symbolic_operation(symbolic_data)
+                                tag = self.dlp_tracker.tags[tag_id]
+                                tag.add_anchor_protocol("EOS_SEED_ORION")
+                                tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+                                tag.metadata.update(
+                                    {
+                                        "context_tag": "anchor_scan",
+                                        "dlp_level": "DLP_L1_OK",
+                                        "symbolic_hash_validation": True,
+                                        "anchor_sha256": context_hash,
+                                    }
+                                )
+                                self.anchor_to_dlp[anchor_id] = tag_id
+                            except Exception:
+                                # Keep scanning even if DLP tagging fails
+                                pass
+
         except (IOError, UnicodeDecodeError) as e:
             print(f"Warning: Could not read file {file_path}: {e}")
 
@@ -146,6 +184,28 @@ class SymbolicAnchorTracker:
             lineages[anchor_id] = lineage
 
         self.lineages = lineages
+
+        # Create a DLP tag summarizing the lineage build, if available
+        if self.dlp_tracker is not None:
+            try:
+                lineage_summary = {
+                    "total_anchors": len(self.anchors),
+                    "total_lineages": len(self.lineages),
+                    "timestamp": datetime.now().isoformat(),
+                }
+                tag_id = self.dlp_tracker.create_tag("anchor_lineage_map", lineage_summary)
+                tag = self.dlp_tracker.tags[tag_id]
+                tag.add_anchor_protocol("EOS_SEED_ORION")
+                tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+                tag.metadata.update(
+                    {
+                        "context_tag": "anchor_lineage",
+                        "dlp_level": "DLP_L1_OK",
+                        "symbolic_hash_validation": True,
+                    }
+                )
+            except Exception:
+                pass
         return lineages
 
     def _find_ancestors(self, anchor_id: str) -> List[str]:
@@ -261,6 +321,10 @@ class SymbolicAnchorTracker:
                 "ethics_protocol": "Picard_Delta_3",
                 "dlp_classification": "Internal_Development_Tools"
             }
+            # Attach DLP linkage when available
+            if self.dlp_tracker is not None:
+                dlp_tag_id = self.anchor_to_dlp.get(anchor_id)
+                manifest_data["dlp_tag_id"] = dlp_tag_id
         else:
             # Generate manifest for entire repository state
             manifest_data = {
@@ -275,6 +339,22 @@ class SymbolicAnchorTracker:
                 "ethics_protocol": "Picard_Delta_3",
                 "dlp_classification": "Internal_Development_Tools"
             }
+
+        # If DLP tracker is present, include a compact DLP export summary
+        if self.dlp_tracker is not None:
+            try:
+                dlp_manifest = self.dlp_tracker.create_export_manifest(
+                    "anchor_tracker_export", tag_ids=list(self.dlp_tracker.tags.keys())
+                )
+                manifest_data["dlp_export_summary"] = {
+                    "manifest_id": dlp_manifest.get("manifest_id"),
+                    "total_tags": dlp_manifest.get("total_tags"),
+                    "anchor_protocols": dlp_manifest.get("aurora_metadata", {}).get("anchor_protocols", []),
+                    "t1_srb_anchors": dlp_manifest.get("aurora_metadata", {}).get("t1_srb_anchors", []),
+                }
+            except Exception:
+                # Non-fatal if DLP export fails
+                pass
 
         # Add memory seal
         manifest_str = json.dumps(manifest_data, sort_keys=True)
@@ -294,6 +374,7 @@ class SymbolicAnchorTracker:
 
         return output_path
 
+
 def main():
     """CLI interface for anchor tracking"""
     
@@ -302,6 +383,16 @@ def main():
     parser.add_argument("--anchor", "-a", help="Specific anchor ID")
     parser.add_argument("--output", "-o", help="Output file path")
     parser.add_argument("--path", "-p", default=".", help="Repository path")
+    parser.add_argument("--json", action="store_true", help="Emit JSON instead of human-friendly output")
+    parser.add_argument(
+        "--ext",
+        action="append",
+        help="File extensions to scan (repeatable). Example: --ext .py --ext .md",
+    )
+    parser.add_argument(
+        "--dlp-manifest-out",
+        help="When used with 'manifest', also export a DLP manifest (if available) to this path",
+    )
 
     args = parser.parse_args()
 
@@ -309,13 +400,23 @@ def main():
 
     if args.command == "scan":
         print("🔍 Scanning repository for symbolic anchors...")
-        anchors = tracker.scan_repository()
-        print(f"Found {sum(len(a) for a in anchors.values())} anchors in {len(anchors)} files")
-
-        for file_path, file_anchors in anchors.items():
-            print(f"\n📁 {file_path}:")
-            for anchor in file_anchors:
-                print(f"  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
+        exts = args.ext if args.ext else None
+        anchors = tracker.scan_repository(extensions=exts)
+        if args.json:
+            payload = {
+                "total_files": len(anchors),
+                "total_anchors": sum(len(a) for a in anchors.values()),
+                "files": {
+                    fp: [asdict(a) for a in file_anchors] for fp, file_anchors in anchors.items()
+                },
+            }
+            print(json.dumps(payload, indent=2))
+        else:
+            print(f"Found {sum(len(a) for a in anchors.values())} anchors in {len(anchors)} files")
+            for file_path, file_anchors in anchors.items():
+                print(f"\n📁 {file_path}:")
+                for anchor in file_anchors:
+                    print(f"  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
 
     elif args.command == "resolve":
         if not args.anchor:
@@ -326,11 +427,14 @@ def main():
         anchor = tracker.resolve_anchor(args.anchor)
 
         if anchor:
-            print(f"⚓ Resolved anchor: {anchor.anchor_id}")
-            print(f"  Type: {anchor.anchor_type}")
-            print(f"  Location: {anchor.file_path}:{anchor.line_number}")
-            print(f"  Context: {anchor.context}")
-            print(f"  Hash: {anchor.sha256_hash}")
+            if args.json:
+                print(json.dumps(asdict(anchor), indent=2))
+            else:
+                print(f"⚓ Resolved anchor: {anchor.anchor_id}")
+                print(f"  Type: {anchor.anchor_type}")
+                print(f"  Location: {anchor.file_path}:{anchor.line_number}")
+                print(f"  Context: {anchor.context}")
+                print(f"  Hash: {anchor.sha256_hash}")
         else:
             print(f"❌ Anchor {args.anchor} not found")
 
@@ -342,34 +446,46 @@ def main():
         if args.anchor:
             lineage = lineages.get(args.anchor)
             if lineage:
-                print(f"📊 Lineage for {args.anchor}:")
-                print(f"  Generation: {lineage.generation}")
-                print(f"  Ancestors: {lineage.ancestors}")
-                print(f"  Descendants: {lineage.descendants}")
-                print(f"  Lineage Hash: {lineage.lineage_hash}")
+                if args.json:
+                    print(json.dumps(asdict(lineage), indent=2))
+                else:
+                    print(f"📊 Lineage for {args.anchor}:")
+                    print(f"  Generation: {lineage.generation}")
+                    print(f"  Ancestors: {lineage.ancestors}")
+                    print(f"  Descendants: {lineage.descendants}")
+                    print(f"  Lineage Hash: {lineage.lineage_hash}")
             else:
                 print(f"❌ No lineage found for {args.anchor}")
         else:
-            print(f"Found lineages for {len(lineages)} anchors")
-            for anchor_id, lineage in sorted(lineages.items()):
-                print(f"  {anchor_id}: Gen {lineage.generation}, "
-                      f"{len(lineage.ancestors)} ancestors, "
-                      f"{len(lineage.descendants)} descendants")
+            if args.json:
+                payload = {aid: asdict(lin) for aid, lin in lineages.items()}
+                print(json.dumps(payload, indent=2))
+            else:
+                print(f"Found lineages for {len(lineages)} anchors")
+                for anchor_id, lineage in sorted(lineages.items()):
+                    ancestors_count = len(lineage.ancestors)
+                    descendants_count = len(lineage.descendants)
+                    msg = (
+                        f"  {anchor_id}: Gen {lineage.generation}, {ancestors_count} ancestors, "
+                        f"{descendants_count} descendants"
+                    )
+                    print(msg)
 
     elif args.command == "drift":
         print("🔍 Detecting symbolic drift...")
         tracker.scan_repository()
         tracker.build_lineage_map()
         drift_issues = tracker.detect_drift()
-
-        for issue_type, issues in drift_issues.items():
-            if issues:
-                print(f"\n⚠️  {issue_type.replace('_', ' ').title()}:")
-                for issue in issues:
-                    print(f"  - {issue}")
-
-        if not any(drift_issues.values()):
-            print("✅ No drift issues detected")
+        if args.json:
+            print(json.dumps(drift_issues, indent=2))
+        else:
+            for issue_type, issues in drift_issues.items():
+                if issues:
+                    print(f"\n⚠️  {issue_type.replace('_', ' ').title()}:")
+                    for issue in issues:
+                        print(f"  - {issue}")
+            if not any(drift_issues.values()):
+                print("✅ No drift issues detected")
 
     elif args.command == "manifest":
         print("📄 Generating export manifest...")
@@ -379,8 +495,24 @@ def main():
         manifest = tracker.generate_export_manifest(args.anchor)
         output_path = tracker.save_manifest(manifest, args.output)
 
-        print(f"✅ Manifest saved to: {output_path}")
-        print(f"Memory seal: {manifest['memory_seal']}")
+        # Optional: also export a DLP manifest if requested and available
+        if args.dlp_manifest_out and getattr(tracker, "dlp_tracker", None) is not None:
+            try:
+                dlp_manifest = tracker.dlp_tracker.create_export_manifest(
+                    "anchor_tracker_export", tag_ids=list(tracker.dlp_tracker.tags.keys())
+                )
+                with open(args.dlp_manifest_out, "w") as f:
+                    json.dump(dlp_manifest, f, indent=2)
+                print(f"🧬 DLP manifest saved to: {args.dlp_manifest_out}")
+            except Exception as e:
+                print(f"⚠️  Failed to export DLP manifest: {e}")
+
+        if args.json:
+            print(json.dumps({"manifest_path": output_path, "manifest": manifest}, indent=2))
+        else:
+            print(f"✅ Manifest saved to: {output_path}")
+            print(f"Memory seal: {manifest['memory_seal']}")
+
 
 if __name__ == "__main__":
     main()

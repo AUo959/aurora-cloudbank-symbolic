@@ -1,7 +1,4 @@
 \
-from pathlib import Path
-import subprocess
-import sys
 #!/usr/bin/env python3
 """
 🔧 Aurora CloudBank Quick Code Quality Fix
@@ -32,7 +29,7 @@ def fix_maintenance_scheduler():
 
     # Fix subprocess calls
     content = re.sub(
-        rr'subprocess\.run\(\s*\[\s*"cpr",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
+        r'subprocess\.run\(\s*\[\s*"cpr",\s*str\(file_path, shell=False, check=False\),\s*str\(backup_path\)\s*\],\s*\)',
         'subprocess.run(["cp", str(file_path), str(backup_path)], check=False)',
         content
     )
@@ -64,8 +61,17 @@ def fix_gitwiz_enhanced():
 
     # Fix imports - remove unused ones
     content = re.sub(r'^from collections import defaultdict\n', '', content, flags=re.MULTILINE)
-    content = re.sub(r'from typing import Any,\s*Dict,\s*List,\s*Optional,\s*Set,\s*Tuple,\s*Union',
-        'from typing import Any, Dict, List, Optional, Set, Tuple, Union', content, flags=re.MULTILINE)
+    content = re.sub(r'from typing import Any',        Dict,
+        List,
+        Optional,
+        Set,
+        Tuple,
+        Union',
+        'from typing import Any,
+        Dict,
+        List,
+        Optional',
+        content)
     content = re.sub(r'^import pkg_resources\n',
         '# import pkg_resources  # Optional dependency\n',
         content,
@@ -121,7 +127,7 @@ def fix_security_scripts():
         if not file_path.exists():
             continue
 
-        print(f"🔧 Fixing {filename}...")
+        print("🔧 Fixing {filename}...")
 
         with open(file_path, 'r') as f:
             content = f.read()
@@ -131,16 +137,16 @@ def fix_security_scripts():
         content = re.sub(r'\\t', '\\\\t', content)
 
         # Fix f-string without interpolation
-        content = re.sub(r'f"([^{]*)"', r'"\1r"', content)
+        content = re.sub(r'"([^{]*)"', r'"\1r"', content)
 
         # Add encoding to file opens
-        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8r"', content)
+        content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]w[\'"]', r'open(\1, "w", encoding="utf-8"', content)
         content = re.sub(r'open\(([^,)]+)\s*,\s*[\'"]r[\'"]', r'open(\1, "r", encoding="utf-8"', content)
 
         with open(file_path, 'w') as f:
             f.write(content)
 
-        print(f"✅ Fixed {filename}")
+        print("✅ Fixed {filename}")
 
 def main():
     """Main fix function"""
@@ -159,7 +165,7 @@ def main():
         return True
 
     except Exception as e:
-        print(f"❌ Error during fixes: {e}")
+        print("❌ Error during fixes: {e}")
         return False
 
 if __name__ == "__main__":

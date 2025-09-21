@@ -37,9 +37,11 @@ async function fetchNews(query) {
     return [{ source: 'News', title: `News result for ${query}`, summary: 'offline stub' }];
   }
   const apiKey = process.env.NEWS_API_KEY || '';
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&apiKey=${apiKey}`;
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { 'X-Api-Key': apiKey }
+    });
     const json = await res.json();
     return (json.articles || []).map(a => ({ source: 'News', title: a.title, summary: a.description }));
   } catch (e) {

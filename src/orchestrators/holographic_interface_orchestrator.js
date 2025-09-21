@@ -15,6 +15,9 @@ const AuroraCustomGptBridge = require('../integrations/aurora_custom_gpt_bridge.
 // Import mesh agent system
 const { CollaborationMeshAgent } = require('../core/mesh_agent.js');
 
+// Named constants for better maintainability
+const COMMAND_HISTORY_MAX_LENGTH = 100;
+
 class HolographicInterfaceOrchestrator {
   constructor(port = 8080) {
     this.port = port;
@@ -454,7 +457,7 @@ class HolographicInterfaceOrchestrator {
     this.commandHistory.push(commandEntry);
 
     // Keep only last 100 commands
-    if (this.commandHistory.length > 100) {
+    if (this.commandHistory.length > COMMAND_HISTORY_MAX_LENGTH) {
       this.commandHistory.shift();
     }
 

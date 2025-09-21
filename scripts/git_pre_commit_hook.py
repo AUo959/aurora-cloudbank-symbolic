@@ -36,7 +36,7 @@ def get_staged_files():
     """Get list of staged files for commit"""
     try:
         result = subprocess.run(
-            ["git", "di", "--cached", "--name-only"],
+            ["git", "diff", "--cached", "--name-only"],
             capture_output=True, text=True, check=True
         )
         return [f.strip() for f in result.stdout.split('\n') if f.strip()]
@@ -64,25 +64,25 @@ def print_validation_summary(results):
     print("=" * 50)
 
     if auto_fixes:
-        print("🔧 Auto-fixes applied: {len(auto_fixes)}")
+        print(f"🔧 Auto-fixes applied: {len(auto_fixes)}")
         for fix in auto_fixes[:3]:  # Show first 3
-            print("  ✅ {fix.message}")
+            print(f"  ✅ {fix.message}")
         if len(auto_fixes) > 3:
-            print("  ... and {len(auto_fixes) - 3} more")
+            print(f"  ... and {len(auto_fixes) - 3} more")
 
     if critical:
-        print("\n🚨 CRITICAL VIOLATIONS ({len(critical)}):")
+        print(f"\n🚨 CRITICAL VIOLATIONS ({len(critical)}):")
         for violation in critical:
-            print("  ❗ {violation.message}")
-            print("     Fix: {violation.suggested_fix}")
+            print(f"  ❗ {violation.message}")
+            print(f"     Fix: {violation.suggested_fix}")
 
     if high:
-        print("\n🔴 HIGH PRIORITY ISSUES ({len(high)}):")
+        print(f"\n🔴 HIGH PRIORITY ISSUES ({len(high)}):")
         for issue in high[:2]:  # Show first 2
-            print("  🔴 {issue.message}")
-            print("     Fix: {issue.suggested_fix}")
+            print(f"  🔴 {issue.message}")
+            print(f"     Fix: {issue.suggested_fix}")
         if len(high) > 2:
-            print("  ... and {len(high) - 2} more (see full report)")
+            print(f"  ... and {len(high) - 2} more (see full report)")
 
 
 def main():
@@ -98,16 +98,32 @@ def main():
 
     # Filter for files we can validate
     validatable_extensions = {'.md', '.txt', '.js', '.ts', '.py', '.json', '.yaml', '.yml'}
+    
+    # First, filter out non-existent files (deleted files)
+    existing_files = []
+    deleted_files = []
+    for f in staged_files:
+        file_path = Path(f)
+        if file_path.exists():
+            existing_files.append(f)
+        else:
+            deleted_files.append(f)
+    
+    # Then filter for validatable extensions
     files_to_validate = [
-        f for f in staged_files
-        if Path(f).exists() and Path(f).suffix in validatable_extensions
+        f for f in existing_files
+        if Path(f).suffix in validatable_extensions
     ]
-
+    
+    # Report what we're doing
+    if deleted_files:
+        print(f"📝 Skipping {len(deleted_files)} deleted files: {', '.join(deleted_files[:3])}{' ...' if len(deleted_files) > 3 else ''}")
+    
     if not files_to_validate:
         print("✅ No validatable files in commit")
         return 0
 
-    print("📁 Validating {len(files_to_validate)} files...")
+    print(f"📁 Validating {len(files_to_validate)} files...")
 
     # Initialize validator
     validator = CanonicalValidator()
@@ -116,10 +132,21 @@ def main():
     # Validate each staged file
     for file_path in files_to_validate:
         try:
+            # Double-check file exists before validation (defensive programming)
+            if not Path(file_path).exists():
+                print(f"⚠️ Warning: File {file_path} was deleted between staging and validation - skipping")
+                continue
+                
             results = validator.validate_file(file_path)
             all_results.extend(results)
+        except FileNotFoundError:
+            print(f"⚠️ Warning: File {file_path} not found during validation - skipping")
+            continue
+        except PermissionError:
+            print(f"⚠️ Warning: Permission denied reading {file_path} - skipping")
+            continue
         except Exception as e:
-            print("❌ Error validating {file_path}: {e}")
+            print(f"❌ Error validating {file_path}: {e}")
             return 1
 
     # Print validation summary
@@ -135,7 +162,7 @@ def main():
     # Check for high-priority violations (configurable)
     high_priority = [r for r in all_results if r.status == "ESCALATE" and r.severity == "HIGH"]
     if high_priority:
-        print("\n⚠️ Warning: {len(high_priority)} high-priority issues detected")
+        print(f"\n⚠️ Warning: {len(high_priority)} high-priority issues detected")
         print("   Consider fixing before commit")
 
         # Optionally block on high-priority (can be configured)
@@ -161,14 +188,14 @@ def main():
 
                 with open(report_path, 'w', encoding="utf-8") as f:
                     f.write("# Pre-Commit Validation Issues\n\n")
-                    f.write("Generated: {Path(__file__).name} at {Path().cwd()}\n")
-                    f.write("Strategy: {manager.config['strategy']}\n\n")
+                    f.write(f"Generated: {Path(__file__).name} at {Path().cwd()}\n")
+                    f.write(f"Strategy: {manager.config['strategy']}\n\n")
                     for issue in escalations:
-                        f.write("## {issue.check_name} ({issue.severity})\n")
-                        f.write("**Issue**: {issue.message}\n\n")
-                        f.write("**Suggested Fix**: {issue.suggested_fix}\n\n")
+                        f.write(f"## {issue.check_name} ({issue.severity})\n")
+                        f.write(f"**Issue**: {issue.message}\n\n")
+                        f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
 
-                print("📊 Detailed issues saved to: {report_path}")
+                print(f"📊 Detailed issues saved to: {report_path}")
 
                 # If using smart exclusion, don't stage the validation file
                 if manager.config["strategy"] == "smart_exclusion":
@@ -182,14 +209,14 @@ def main():
             with open(report_path, 'w', encoding="utf-8") as f:
                 f.write("# Pre-Commit Validation Issues\n\n")
                 for issue in escalations:
-                    f.write("## {issue.check_name} ({issue.severity})\n")
-                    f.write("**Issue**: {issue.message}\n\n")
-                    f.write("**Suggested Fix**: {issue.suggested_fix}\n\n")
-            print("📊 Detailed issues saved to: {report_path}")
+                    f.write(f"## {issue.check_name} ({issue.severity})\n")
+                    f.write(f"**Issue**: {issue.message}\n\n")
+                    f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
+            print(f"📊 Detailed issues saved to: {report_path}")
 
     auto_fixes = [r for r in all_results if r.status == "AUTO_FIXED"]
     if auto_fixes:
-        print("\n✅ Commit proceeding with {len(auto_fixes)} auto-fixes applied")
+        print(f"\n✅ Commit proceeding with {len(auto_fixes)} auto-fixes applied")
 
         # Re-stage auto-fixed files
         for file_path in files_to_validate:

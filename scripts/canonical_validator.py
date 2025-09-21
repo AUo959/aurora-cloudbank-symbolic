@@ -102,7 +102,7 @@ class CanonicalValidator:
         if not file_path_obj.exists():
             return [ValidationResult(
                 "file_exists", "ESCALATE", "HIGH",
-                "File {file_path} does not exist",
+                f"File {file_path} does not exist",
                 "Check file path and ensure file is created"
             )]
 

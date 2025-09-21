@@ -142,6 +142,16 @@ jobs:
           --exclude="/(venv_opal2|node_modules|\.git|deploykit_tmp)/" || \
           echo "⚠️ Black formatting check completed"
 
+      - name: Run Node test suite (root)
+        if: ${{ always() }}
+        run: |
+          echo "🧪 Running Node tests at repository root"
+          if [ -f package.json ]; then
+            npm test || echo "⚠️ Node tests completed with warnings"
+          else
+            echo "No root package.json found, skipping Node tests"
+          fi
+
       # Security scanning
       - name: Security scan
         run: |

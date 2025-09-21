@@ -177,7 +177,7 @@ class QuantumRenderer:
             quantum_metrics = await self._calculate_quantum_metrics(context, enhanced_data)
 
             # Create result
-            _ = RenderResult(
+            result = RenderResult(
                 output=output,
                 format=renderer,
                 metadata={

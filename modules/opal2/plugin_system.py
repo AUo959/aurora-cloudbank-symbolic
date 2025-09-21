@@ -35,7 +35,7 @@ class PluginType(Enum):
 
 class PluginStatus(Enum):
     """Plugin status enumeration"""
-        LOADED = "loaded"
+    LOADED = "loaded"
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"

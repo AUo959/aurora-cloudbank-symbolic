@@ -276,7 +276,7 @@ class PluginRegistry:
         """Load plugin from a Python module."""
         try:
             # Import module
-        module = importlib.import_module(module_path)
+            module = importlib.import_module(module_path)
 
             # Get plugin class
             plugin_class = getattr(module, plugin_class_name)

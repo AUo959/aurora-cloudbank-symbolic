@@ -32,16 +32,16 @@ fi
 echo "Candidates:" 1>&2
 echo "$MATCHES" | sed 's/^/  - /' 1>&2
 
-read -r -p "Proceed to delete these remote branches on origin? (y/N) " ans
-if [[ ! "$ans" =~ ^[Yy]$ ]]; then
-  echo "Aborted." 1>&2
-  exit 1
-fi
-
 if [[ "${DRY}" != "0" ]]; then
   echo "DRY RUN: Would delete the following on origin:" 1>&2
   echo "$MATCHES" | sed 's/^/  origin\//'
   exit 0
+fi
+
+read -r -p "Proceed to delete these remote branches on origin? (y/N) " ans
+if [[ ! "$ans" =~ ^[Yy]$ ]]; then
+  echo "Aborted." 1>&2
+  exit 1
 fi
 
 while read -r BR; do

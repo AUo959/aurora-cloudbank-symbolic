@@ -29,12 +29,12 @@ class GlyphGenerator:
             path = DEFAULT_CONFIG
         else:
             path = Path(config_path)
-        
+
         if path.exists():
             with open(path, "r", encoding="utf-8") as f:
                 cfg: Dict[str, Any] = yaml.safe_load(f) or {}
             dim = cfg.get("opal2", {}).get("graphics_card", {}).get("default_dim", dim)
-        
+
         self.dim = dim
         self.ga = GeometricAlgebra()
 
@@ -67,9 +67,9 @@ class GlyphCore:
 
     def __init__(self, dim: int = 8, config_path: str | None = None):
         self.logger = logging.getLogger(__name__)
-        
+
         self.generator = GlyphGenerator(dim=dim, config_path=config_path)
-        
+
         self.dim = dim
 
     async def generate_async(
@@ -111,7 +111,7 @@ class GlyphCore:
 
         except Exception as e:
             self.logger.error(f"Error generating glyph: {e}")
-            
+
             raise
 
     async def test_generation(self) -> Dict[str, Any]:

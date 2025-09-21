@@ -37,6 +37,11 @@ branch-plan:
 	# Generate a Markdown plan for branch cleanup
 	bash ./scripts/branch_cleanup_plan.sh > BRANCH_CLEANUP_PLAN.md
 
+.PHONY: pr-priority
+pr-priority:
+	# Generate prioritized PR action list from cleanup plan
+	python3 scripts/pr_cleanup_priority_from_plan.py
+
 .PHONY: branch-cleanup-dry
 branch-cleanup-dry:
 	# Preview deletion of obvious obsolete branches (no changes pushed)
@@ -48,3 +53,9 @@ branch-cleanup-apply:
 	# Apply deletion of obvious obsolete branches (requires confirmation)
 	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'copilot/fix-*'
 	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'dependabot/*'
+
+.PHONY: lint-stage1-opal2
+lint-stage1-opal2:
+	# Stage 1 whitespace/formatting fixes for modules/opal2, then lint tools as a canary
+	python3 scripts/whitespace_fix_stage1.py modules/opal2
+	flake8 modules/opal2 --max-line-length=120 --extend-ignore=E203,W503 || true

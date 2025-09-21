@@ -113,11 +113,13 @@ async def dashboard():
                 content="""
                 <html>
                     <head><title>Aurora Dashboard</title></head>
-                    <body style="background: #1a1a2e; color: white; font-family: monospace; padding: 50px; text-align: center;">
+                    <body style="background: #1a1a2e; color: white; font-family: monospace; "
+                          "padding: 50px; text-align: center;">
                         <h1>🌟 Aurora L2 Integration Server</h1>
                         <p>Server is running but dashboard files not found.</p>
                         <p>API Documentation: <a href="/api/docs" style="color: #64b5f6;">/api/docs</a></p>
-                        <p>Constellation Status: <a href="/api/bridge/constellation/status" style="color: #64b5f6;">/api/bridge/constellation/status</a></p>
+                        <p>Constellation Status: <a href="/api/bridge/constellation/status" 
+                           style="color: #64b5f6;">/api/bridge/constellation/status</a></p>
                     </body>
                 </html>
                 """,

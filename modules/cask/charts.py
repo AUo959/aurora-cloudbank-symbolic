@@ -315,7 +315,10 @@ def create_project_gantt_chart(output_file: str = "cask_gantt_chart.png") -> Non
                 orientation="h",
                 name=task["phase"],
                 marker_color=phase_colors[task["phase"]],
-                hovertemplate=f"<b>{task['task']}</b><br>Months: {task['start']}-{task['end']}<br>Duration: {duration} mo<extra></extra>",
+                hovertemplate=(
+                    f"<b>{task['task']}</b><br>Months: {task['start']}-{task['end']}<br>"
+                    f"Duration: {duration} mo<extra></extra>"
+                ),
                 showlegend=i == 0 or task["phase"] != tasks[i - 1]["phase"],
                 cliponaxis=False,
             )

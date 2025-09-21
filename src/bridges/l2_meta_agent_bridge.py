@@ -206,7 +206,8 @@ class L2MetaAgentBridge:
             drift_value = drift_result.get("drift", 1.0)
             if not drift_result.get("success") or drift_value > self.orion_core_config["drift_threshold"]:
                 return self._handshake_failure(
-                    f"Drift validation failed: Δ{drift_value} exceeds threshold {self.orion_core_config['drift_threshold']}",
+                    f"Drift validation failed: Δ{drift_value} exceeds threshold "
+                    f"{self.orion_core_config['drift_threshold']}",
                     drift_result,
                     handshake_log,
                 )

@@ -68,65 +68,53 @@ class AuroraDeveloperCLI:
             print("🔍 Tracking symbolic anchors...")
 
         try:
-            if args.pattern:
-                # Search for specific pattern
-                exts = args.ext if getattr(args, "ext", None) else None
-                found_anchors = self.anchor_tracker.scan_repository(extensions=exts)
-                matching_anchors = {}
+            # Unified track flow with built-in filtering in tracker
+            exts = args.ext if getattr(args, "ext", None) else None
+            since_dt = None
+            if getattr(args, "since", None):
+                try:
+                    since_dt = datetime.fromisoformat(args.since)
+                except ValueError:
+                    try:
+                        since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                    except ValueError:
+                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+            found_anchors = self.anchor_tracker.scan_repository(
+                extensions=exts, since=since_dt, pattern=getattr(args, "pattern", None)
+            )
+            total_anchors = sum(len(a) for a in found_anchors.values())
 
-                for file_path, file_anchors in found_anchors.items():
-                    matches = [a for a in file_anchors if args.pattern.lower() in a.anchor_id.lower()]
-                    if matches:
-                        matching_anchors[file_path] = matches
-
-                if args.json:
-                    payload = {
-                        "pattern": args.pattern,
-                        "total_files": len(matching_anchors),
-                        "total_anchors": sum(len(a) for a in matching_anchors.values()),
-                        "files": {fp: [a.__dict__ for a in anns] for fp, anns in matching_anchors.items()},
-                    }
-                    print(json.dumps(payload, separators=(",", ":")))
-                elif matching_anchors:
-                    print(
-                        f"Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':"
-                    )
-                    for file_path, file_anchors in matching_anchors.items():
-                        print(f"\n📁 {file_path}:")
-                        for anchor in file_anchors:
-                            print(f"  ⚓ {anchor.anchor_id} ({anchor.anchor_type}) - Line {anchor.line_number}")
-                else:
-                    print(f"No anchors found matching pattern: {args.pattern}")
+            if args.json:
+                payload = {
+                    "pattern": getattr(args, "pattern", None),
+                    "since": getattr(args, "since", None),
+                    "total_files": len(found_anchors),
+                    "total_anchors": total_anchors,
+                    "files": {fp: [a.__dict__ for a in anns] for fp, anns in found_anchors.items()},
+                }
+                print(json.dumps(payload, separators=(",", ":")))
             else:
-                # Track all anchors
-                exts = args.ext if getattr(args, "ext", None) else None
-                found_anchors = self.anchor_tracker.scan_repository(extensions=exts)
-                total_anchors = sum(len(a) for a in found_anchors.values())
-
-                if args.json:
-                    payload = {
-                        "total_files": len(found_anchors),
-                        "total_anchors": total_anchors,
-                        "files": {fp: [a.__dict__ for a in anns] for fp, anns in found_anchors.items()},
-                    }
-                    print(json.dumps(payload, separators=(",", ":")))
+                if args.pattern:
+                    print(
+                        f"Found {total_anchors} anchors matching '{args.pattern}' in {len(found_anchors)} files:"
+                    )
                 else:
                     print(f"Found {total_anchors} anchors in {len(found_anchors)} files:")
 
-                    # Group by anchor type
-                    by_type = {}
-                    for file_anchors in found_anchors.values():
-                        for anchor in file_anchors:
-                            if anchor.anchor_type not in by_type:
-                                by_type[anchor.anchor_type] = []
-                            by_type[anchor.anchor_type].append(anchor)
+                # Group by anchor type
+                by_type = {}
+                for file_anchors in found_anchors.values():
+                    for anchor in file_anchors:
+                        if anchor.anchor_type not in by_type:
+                            by_type[anchor.anchor_type] = []
+                        by_type[anchor.anchor_type].append(anchor)
 
-                    for anchor_type, anchors in by_type.items():
-                        print(f"\n{anchor_type}: {len(anchors)} anchors")
-                        for anchor in anchors[:5]:  # Show first 5
-                            print(f"  ⚓ {anchor.anchor_id} in {anchor.file_path}")
-                        if len(anchors) > 5:
-                            print(f"    ... and {len(anchors) - 5} more")
+                for anchor_type, anchors in by_type.items():
+                    print(f"\n{anchor_type}: {len(anchors)} anchors")
+                    for anchor in anchors[:5]:  # Show first 5
+                        print(f"  ⚓ {anchor.anchor_id} in {anchor.file_path}")
+                    if len(anchors) > 5:
+                        print(f"    ... and {len(anchors) - 5} more")
 
             return 0
 
@@ -144,8 +132,17 @@ class AuroraDeveloperCLI:
             print(f"🔍 Resolving anchor: {args.anchor_id}")
 
         try:
-            # First scan to populate anchors
-            self.anchor_tracker.scan_repository()
+            # First scan to populate anchors (respect optional --since)
+            since_dt = None
+            if getattr(args, "since", None):
+                try:
+                    since_dt = datetime.fromisoformat(args.since)
+                except ValueError:
+                    try:
+                        since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                    except ValueError:
+                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+            self.anchor_tracker.scan_repository(since=since_dt)
 
             # Resolve the specific anchor
             anchor = self.anchor_tracker.resolve_anchor(args.anchor_id)
@@ -301,7 +298,16 @@ class AuroraDeveloperCLI:
                 print("📄 Generating manifest...")
 
             # Scan repository first
-            self.anchor_tracker.scan_repository()
+            since_dt = None
+            if getattr(args, "since", None):
+                try:
+                    since_dt = datetime.fromisoformat(args.since)
+                except ValueError:
+                    try:
+                        since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                    except ValueError:
+                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+            self.anchor_tracker.scan_repository(since=since_dt, pattern=getattr(args, "pattern", None))
             self.anchor_tracker.build_lineage_map()
 
             if args.target:
@@ -422,40 +428,67 @@ class AuroraDeveloperCLI:
 
     def cmd_status(self, args) -> int:
         """Show system status"""
-        print("📊 Aurora Symbolic Infrastructure Status")
-        print("=" * 50)
+        if not getattr(args, "json", False):
+            print("📊 Aurora Symbolic Infrastructure Status")
+            print("=" * 50)
 
         try:
             # Scan repository
-            anchors = self.anchor_tracker.scan_repository()
+            exts = args.ext if getattr(args, "ext", None) else None
+            since_dt = None
+            if getattr(args, "since", None):
+                try:
+                    since_dt = datetime.fromisoformat(args.since)
+                except ValueError:
+                    try:
+                        since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                    except ValueError:
+                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+            anchors = self.anchor_tracker.scan_repository(
+                extensions=exts,
+                since=since_dt,
+                pattern=getattr(args, "pattern", None),
+            )
             total_anchors = sum(len(a) for a in anchors.values())
-
-            print(f"⚓ Anchors: {total_anchors} found in {len(anchors)} files")
+            if not getattr(args, "json", False):
+                print(f"⚓ Anchors: {total_anchors} found in {len(anchors)} files")
 
             # Build lineages
             lineages = self.anchor_tracker.build_lineage_map()
-            print(f"🔗 Lineages: {len(lineages)} mapped")
+            if not getattr(args, "json", False):
+                print(f"🔗 Lineages: {len(lineages)} mapped")
 
             # Check for drift
             drift_issues = self.anchor_tracker.detect_drift()
             drift_count = sum(len(issues) for issues in drift_issues.values())
-
-            if drift_count == 0:
-                print("✅ Drift Status: No issues detected")
+            if getattr(args, "json", False):
+                payload = {
+                    "total_files": len(anchors),
+                    "total_anchors": total_anchors,
+                    "lineages_mapped": len(lineages),
+                    "drift": {k: len(v) for k, v in drift_issues.items()},
+                    "repo": str(self.repo_path),
+                    "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "version": self.version,
+                }
+                print(json.dumps(payload, separators=(",", ":")))
             else:
-                print(f"⚠️  Drift Status: {drift_count} issues detected")
-                for issue_type, issues in drift_issues.items():
-                    if issues:
-                        print(f"   {issue_type}: {len(issues)}")
+                if drift_count == 0:
+                    print("✅ Drift Status: No issues detected")
+                else:
+                    print(f"⚠️  Drift Status: {drift_count} issues detected")
+                    for issue_type, issues in drift_issues.items():
+                        if issues:
+                            print(f"   {issue_type}: {len(issues)}")
 
-            # Memory seals status
-            seals_count = len(self.memory_sealer.seals)
-            print(f"🔐 Memory Seals: {seals_count} active")
+                # Memory seals status
+                seals_count = len(self.memory_sealer.seals)
+                print(f"🔐 Memory Seals: {seals_count} active")
 
-            # Repository info
-            print(f"\n📁 Repository: {self.repo_path}")
-            print(f"🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"🔢 CLI Version: {self.version}")
+                # Repository info
+                print(f"\n📁 Repository: {self.repo_path}")
+                print(f"🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                print(f"🔢 CLI Version: {self.version}")
 
             return 0
 
@@ -471,13 +504,17 @@ def create_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  aurora-cli anchor track T70               # Track T70-related anchors
-  aurora-cli anchor resolve T70_DOC_REORG  # Resolve specific anchor
-  aurora-cli seal tools/symbolic --verify  # Seal and verify directory
-  aurora-cli restore T70_SEAL_123 --dry    # Dry run restore
-  aurora-cli manifest --target T71_INFRA   # Generate manifest for T71
-  aurora-cli diff T70_DOC_REORG T71_INFRA  # Compare two anchors
-  aurora-cli status                         # Show system status
+    aurora-cli anchor track T70                       # Track T70-related anchors
+    aurora-cli anchor track --ext .md --json          # Track anchors in markdown, JSON output
+    aurora-cli anchor track --pattern INFRA --since 2025-09-01
+    aurora-cli anchor resolve T70_DOC_REORG           # Resolve specific anchor
+    aurora-cli seal tools/symbolic --verify           # Seal and verify directory
+    aurora-cli restore T70_SEAL_123 --dry             # Dry run restore
+    aurora-cli manifest --target T71_INFRA            # Generate manifest for T71
+    aurora-cli manifest --json --since 2025-09-01T00:00:00
+    aurora-cli diff T70_DOC_REORG T71_INFRA           # Compare two anchors
+    aurora-cli status                                 # Show system status
+    aurora-cli status --json --since 2025-09-15       # Machine-readable status since a date
 """
     )
 
@@ -499,11 +536,16 @@ Examples:
         action="append",
         help="File extensions to scan (repeatable). Example: --ext .py --ext .md",
     )
+    track_parser.add_argument("--since", help="Only include files modified on/after this time (ISO 8601 or YYYY-MM-DD)")
 
     # anchor resolve
     resolve_parser = anchor_subparsers.add_parser("resolve", help="Resolve anchor lineage")
     resolve_parser.add_argument("anchor_id", help="Anchor ID to resolve")
     resolve_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
+    resolve_parser.add_argument(
+        "--since",
+        help="Only include files modified on/after this time (ISO 8601 or YYYY-MM-DD)",
+    )
 
     # anchor seal
     seal_anchor_parser = anchor_subparsers.add_parser("seal", help="Seal anchor thread")
@@ -530,6 +572,11 @@ Examples:
         "--dlp-manifest-out",
         help="Also export a DLP manifest (if available) to this path",
     )
+    manifest_parser.add_argument("--pattern", help="Filter anchors by substring across ID and context")
+    manifest_parser.add_argument(
+        "--since",
+        help="Only include files modified on/after this time (ISO 8601 or YYYY-MM-DD)",
+    )
 
     # State comparison
     diff_parser = subparsers.add_parser("diff", help="Compare anchor states")
@@ -537,7 +584,18 @@ Examples:
     diff_parser.add_argument("anchor2", help="Second anchor to compare")
 
     # System status
-    subparsers.add_parser("status", help="Show system status")
+    status_parser = subparsers.add_parser("status", help="Show system status")
+    status_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
+    status_parser.add_argument(
+        "--ext",
+        action="append",
+        help="File extensions to scan (repeatable). Example: --ext .py --ext .md",
+    )
+    status_parser.add_argument("--pattern", help="Filter anchors by substring across ID and context")
+    status_parser.add_argument(
+        "--since",
+        help="Only include files modified on/after this time (ISO 8601 or YYYY-MM-DD)",
+    )
 
     return parser
 

@@ -70,8 +70,18 @@ class SymbolicAnchorTracker:
             "MEMORY_SEAL": r"(MEMORY_SEAL_[A-Z_0-9]+)",
         }
 
-    def scan_repository(self, extensions: List[str] = None) -> Dict[str, List[SymbolicAnchor]]:
-        """Scan repository for symbolic anchors"""
+    def scan_repository(
+        self,
+        extensions: List[str] = None,
+        since: Optional[datetime] = None,
+        pattern: Optional[str] = None,
+    ) -> Dict[str, List[SymbolicAnchor]]:
+        """Scan repository for symbolic anchors
+
+        - extensions: file extensions to include
+        - since: only scan files modified at or after this datetime
+        - pattern: filter anchors to those whose ID or context contains this substring (case-insensitive)
+        """
         if extensions is None:
             extensions = ['.py', '.js', '.md', '.json', '.yaml', '.yml', '.txt']
 
@@ -84,7 +94,26 @@ class SymbolicAnchorTracker:
             for file in files:
                 if any(file.endswith(ext) for ext in extensions):
                     file_path = Path(root) / file
+
+                    # Since filter (by file modification time)
+                    if since is not None:
+                        try:
+                            mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
+                            if mtime < since:
+                                continue
+                        except Exception:
+                            # If stat fails, skip since filtering for this file
+                            pass
+
                     anchors = self._scan_file(file_path)
+
+                    # Pattern filter: apply to anchor_id and context
+                    if pattern:
+                        p = pattern.lower()
+                        anchors = [
+                            a for a in anchors if (p in a.anchor_id.lower() or p in a.context.lower())
+                        ]
+
                     if anchors:
                         rel_path = str(file_path.relative_to(self.repo_path))
                         found_anchors[rel_path] = anchors
@@ -377,7 +406,7 @@ class SymbolicAnchorTracker:
 
 def main():
     """CLI interface for anchor tracking"""
-    
+
     parser = argparse.ArgumentParser(description="Symbolic Anchor Tracker")
     parser.add_argument("command", choices=["scan", "resolve", "lineage", "drift", "manifest"])
     parser.add_argument("--anchor", "-a", help="Specific anchor ID")
@@ -388,6 +417,14 @@ def main():
         "--ext",
         action="append",
         help="File extensions to scan (repeatable). Example: --ext .py --ext .md",
+    )
+    parser.add_argument(
+        "--pattern",
+        help="Filter anchors by substring (case-insensitive) across ID and context",
+    )
+    parser.add_argument(
+        "--since",
+        help="Only include files modified on/after this time (ISO 8601 or YYYY-MM-DD)",
     )
     parser.add_argument(
         "--dlp-manifest-out",
@@ -401,7 +438,16 @@ def main():
     if args.command == "scan":
         print("🔍 Scanning repository for symbolic anchors...")
         exts = args.ext if args.ext else None
-        anchors = tracker.scan_repository(extensions=exts)
+        since_dt = None
+        if args.since:
+            try:
+                since_dt = datetime.fromisoformat(args.since)
+            except ValueError:
+                try:
+                    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                except ValueError:
+                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+        anchors = tracker.scan_repository(extensions=exts, since=since_dt, pattern=args.pattern)
         if args.json:
             payload = {
                 "total_files": len(anchors),
@@ -423,7 +469,17 @@ def main():
             print("❌ --anchor required for resolve command")
             return
 
-        tracker.scan_repository()  # Populate anchors first
+        # Populate anchors first (respect optional --since)
+        since_dt = None
+        if args.since:
+            try:
+                since_dt = datetime.fromisoformat(args.since)
+            except ValueError:
+                try:
+                    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                except ValueError:
+                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+        tracker.scan_repository(since=since_dt)
         anchor = tracker.resolve_anchor(args.anchor)
 
         if anchor:
@@ -440,7 +496,16 @@ def main():
 
     elif args.command == "lineage":
         print("🔗 Building lineage map...")
-        tracker.scan_repository()
+        since_dt = None
+        if args.since:
+            try:
+                since_dt = datetime.fromisoformat(args.since)
+            except ValueError:
+                try:
+                    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                except ValueError:
+                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+        tracker.scan_repository(since=since_dt, pattern=args.pattern)
         lineages = tracker.build_lineage_map()
 
         if args.anchor:
@@ -473,7 +538,16 @@ def main():
 
     elif args.command == "drift":
         print("🔍 Detecting symbolic drift...")
-        tracker.scan_repository()
+        since_dt = None
+        if args.since:
+            try:
+                since_dt = datetime.fromisoformat(args.since)
+            except ValueError:
+                try:
+                    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                except ValueError:
+                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+        tracker.scan_repository(since=since_dt, pattern=args.pattern)
         tracker.build_lineage_map()
         drift_issues = tracker.detect_drift()
         if args.json:
@@ -489,7 +563,16 @@ def main():
 
     elif args.command == "manifest":
         print("📄 Generating export manifest...")
-        tracker.scan_repository()
+        since_dt = None
+        if args.since:
+            try:
+                since_dt = datetime.fromisoformat(args.since)
+            except ValueError:
+                try:
+                    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
+                except ValueError:
+                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+        tracker.scan_repository(since=since_dt, pattern=args.pattern)
         tracker.build_lineage_map()
 
         manifest = tracker.generate_export_manifest(args.anchor)

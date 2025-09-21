@@ -75,8 +75,9 @@ lineages = tracker.build_lineage_map()
 **CLI Usage**:
 ```bash
 python tools/symbolic/anchor_tracker.py scan
-python tools/symbolic/anchor_tracker.py resolve T71_INFRA
-python tools/symbolic/anchor_tracker.py manifest
+python tools/symbolic/anchor_tracker.py scan --ext .py --ext .md --json
+python tools/symbolic/anchor_tracker.py resolve T71_INFRA --json
+python tools/symbolic/anchor_tracker.py manifest --output T71_ANCHOR_MANIFEST.json --dlp-manifest-out DLP_MANIFEST.json
 ```
 
 ### 2. Memory Sealing Engine

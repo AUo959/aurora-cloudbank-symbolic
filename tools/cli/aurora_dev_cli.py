@@ -11,6 +11,7 @@ Primary functions:
 """
 
 import sys
+import json
 import argparse
 from pathlib import Path
 from datetime import datetime
@@ -63,12 +64,14 @@ class AuroraDeveloperCLI:
 
     def _anchor_track(self, args) -> int:
         """Track symbolic anchors across repository"""
-        print("🔍 Tracking symbolic anchors...")
+        if not getattr(args, "json", False):
+            print("🔍 Tracking symbolic anchors...")
 
         try:
             if args.pattern:
                 # Search for specific pattern
-                found_anchors = self.anchor_tracker.scan_repository()
+                exts = args.ext if getattr(args, "ext", None) else None
+                found_anchors = self.anchor_tracker.scan_repository(extensions=exts)
                 matching_anchors = {}
 
                 for file_path, file_anchors in found_anchors.items():
@@ -76,8 +79,18 @@ class AuroraDeveloperCLI:
                     if matches:
                         matching_anchors[file_path] = matches
 
-                if matching_anchors:
-                    print(f"Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':")
+                if args.json:
+                    payload = {
+                        "pattern": args.pattern,
+                        "total_files": len(matching_anchors),
+                        "total_anchors": sum(len(a) for a in matching_anchors.values()),
+                        "files": {fp: [a.__dict__ for a in anns] for fp, anns in matching_anchors.items()},
+                    }
+                    print(json.dumps(payload, separators=(",", ":")))
+                elif matching_anchors:
+                    print(
+                        f"Found {sum(len(a) for a in matching_anchors.values())} anchors matching '{args.pattern}':"
+                    )
                     for file_path, file_anchors in matching_anchors.items():
                         print(f"\n📁 {file_path}:")
                         for anchor in file_anchors:
@@ -86,25 +99,34 @@ class AuroraDeveloperCLI:
                     print(f"No anchors found matching pattern: {args.pattern}")
             else:
                 # Track all anchors
-                found_anchors = self.anchor_tracker.scan_repository()
+                exts = args.ext if getattr(args, "ext", None) else None
+                found_anchors = self.anchor_tracker.scan_repository(extensions=exts)
                 total_anchors = sum(len(a) for a in found_anchors.values())
 
-                print(f"Found {total_anchors} anchors in {len(found_anchors)} files:")
+                if args.json:
+                    payload = {
+                        "total_files": len(found_anchors),
+                        "total_anchors": total_anchors,
+                        "files": {fp: [a.__dict__ for a in anns] for fp, anns in found_anchors.items()},
+                    }
+                    print(json.dumps(payload, separators=(",", ":")))
+                else:
+                    print(f"Found {total_anchors} anchors in {len(found_anchors)} files:")
 
-                # Group by anchor type
-                by_type = {}
-                for file_anchors in found_anchors.values():
-                    for anchor in file_anchors:
-                        if anchor.anchor_type not in by_type:
-                            by_type[anchor.anchor_type] = []
-                        by_type[anchor.anchor_type].append(anchor)
+                    # Group by anchor type
+                    by_type = {}
+                    for file_anchors in found_anchors.values():
+                        for anchor in file_anchors:
+                            if anchor.anchor_type not in by_type:
+                                by_type[anchor.anchor_type] = []
+                            by_type[anchor.anchor_type].append(anchor)
 
-                for anchor_type, anchors in by_type.items():
-                    print(f"\n{anchor_type}: {len(anchors)} anchors")
-                    for anchor in anchors[:5]:  # Show first 5
-                        print(f"  ⚓ {anchor.anchor_id} in {anchor.file_path}")
-                    if len(anchors) > 5:
-                        print(f"    ... and {len(anchors) - 5} more")
+                    for anchor_type, anchors in by_type.items():
+                        print(f"\n{anchor_type}: {len(anchors)} anchors")
+                        for anchor in anchors[:5]:  # Show first 5
+                            print(f"  ⚓ {anchor.anchor_id} in {anchor.file_path}")
+                        if len(anchors) > 5:
+                            print(f"    ... and {len(anchors) - 5} more")
 
             return 0
 
@@ -118,7 +140,8 @@ class AuroraDeveloperCLI:
             print("❌ --anchor required for resolve command")
             return 1
 
-        print(f"🔍 Resolving anchor: {args.anchor_id}")
+        if not getattr(args, "json", False):
+            print(f"🔍 Resolving anchor: {args.anchor_id}")
 
         try:
             # First scan to populate anchors
@@ -128,26 +151,33 @@ class AuroraDeveloperCLI:
             anchor = self.anchor_tracker.resolve_anchor(args.anchor_id)
 
             if anchor:
-                print("\n⚓ Anchor Details:")
-                print(f"  ID: {anchor.anchor_id}")
-                print(f"  Type: {anchor.anchor_type}")
-                print(f"  Location: {anchor.file_path}:{anchor.line_number}")
-                print(f"  Context: {anchor.context}")
-                print(f"  Hash: {anchor.sha256_hash}")
-                print(f"  Timestamp: {anchor.timestamp}")
-
                 # Build lineage
                 lineages = self.anchor_tracker.build_lineage_map()
                 lineage = lineages.get(args.anchor_id)
 
-                if lineage:
-                    print("\n🔗 Lineage Information:")
-                    print(f"  Generation: {lineage.generation}")
-                    print(f"  Ancestors: {lineage.ancestors if lineage.ancestors else 'None'}")
-                    print(f"  Descendants: {lineage.descendants if lineage.descendants else 'None'}")
-                    print(f"  Lineage Hash: {lineage.lineage_hash}")
+                if getattr(args, "json", False):
+                    payload = {
+                        "anchor": anchor.__dict__,
+                        "lineage": lineage.__dict__ if lineage else None,
+                    }
+                    print(json.dumps(payload, separators=(",", ":")))
                 else:
-                    print("  No lineage information available")
+                    print("\n⚓ Anchor Details:")
+                    print(f"  ID: {anchor.anchor_id}")
+                    print(f"  Type: {anchor.anchor_type}")
+                    print(f"  Location: {anchor.file_path}:{anchor.line_number}")
+                    print(f"  Context: {anchor.context}")
+                    print(f"  Hash: {anchor.sha256_hash}")
+                    print(f"  Timestamp: {anchor.timestamp}")
+
+                    if lineage:
+                        print("\n🔗 Lineage Information:")
+                        print(f"  Generation: {lineage.generation}")
+                        print(f"  Ancestors: {lineage.ancestors if lineage.ancestors else 'None'}")
+                        print(f"  Descendants: {lineage.descendants if lineage.descendants else 'None'}")
+                        print(f"  Lineage Hash: {lineage.lineage_hash}")
+                    else:
+                        print("  No lineage information available")
             else:
                 print(f"❌ Anchor {args.anchor_id} not found")
                 return 1
@@ -267,7 +297,8 @@ class AuroraDeveloperCLI:
     def cmd_manifest(self, args) -> int:
         """Generate export manifest"""
         try:
-            print("📄 Generating manifest...")
+            if not getattr(args, "json", False):
+                print("📄 Generating manifest...")
 
             # Scan repository first
             self.anchor_tracker.scan_repository()
@@ -276,25 +307,48 @@ class AuroraDeveloperCLI:
             if args.target:
                 # Generate manifest for specific anchor
                 manifest = self.anchor_tracker.generate_export_manifest(args.target)
-                print(f"✅ Manifest generated for anchor: {args.target}")
+                if not getattr(args, "json", False):
+                    print(f"✅ Manifest generated for anchor: {args.target}")
             else:
                 # Generate repository-wide manifest
                 manifest = self.anchor_tracker.generate_export_manifest()
-                print("✅ Repository manifest generated")
+                if not getattr(args, "json", False):
+                    print("✅ Repository manifest generated")
 
             # Save manifest
             output_path = args.output or f"T71_MANIFEST_{datetime.now().strftime('%Y%m%dT%H%M%SZ')}.json"
             saved_path = self.anchor_tracker.save_manifest(manifest, output_path) or output_path
 
-            print(f"📄 Saved to: {saved_path}")
-            print(f"🔐 Memory seal: {manifest['memory_seal']}")
+            # Optional: also export DLP manifest
+            dlp_saved = None
+            if getattr(args, "dlp_manifest_out", None) and getattr(self.anchor_tracker, "dlp_tracker", None):
+                try:
+                    dlp_manifest = self.anchor_tracker.dlp_tracker.create_export_manifest(
+                        "anchor_tracker_export", tag_ids=list(self.anchor_tracker.dlp_tracker.tags.keys())
+                    )
+                    dlp_path = Path(args.dlp_manifest_out)
+                    dlp_path.write_text(json.dumps(dlp_manifest, indent=2), encoding="utf-8")
+                    dlp_saved = str(dlp_path)
+                except Exception as e:
+                    print(f"⚠️  Failed to export DLP manifest: {e}")
+
+            if getattr(args, "json", False):
+                print(
+                    json.dumps(
+                        {"manifest_path": saved_path, "dlp_manifest_path": dlp_saved, "manifest": manifest},
+                        separators=(",", ":"),
+                    )
+                )
+            else:
+                print(f"📄 Saved to: {saved_path}")
+                print(f"🔐 Memory seal: {manifest['memory_seal']}")
 
             # Display key information
-            if "anchor_details" in manifest:
+            if not getattr(args, "json", False) and "anchor_details" in manifest:
                 anchor = manifest["anchor_details"]
                 print(f"📍 Anchor: {anchor['anchor_id']} ({anchor['anchor_type']})")
                 print(f"📁 Location: {anchor['file_path']}:{anchor['line_number']}")
-            else:
+            elif not getattr(args, "json", False):
                 print(f"📊 Total anchors: {manifest.get('total_anchors', 0)}")
                 print(f"🔗 Lineages mapped: {manifest.get('lineages_mapped', 0)}")
 
@@ -439,10 +493,17 @@ Examples:
     # anchor track
     track_parser = anchor_subparsers.add_parser("track", help="Track symbolic anchors")
     track_parser.add_argument("pattern", nargs="?", help="Pattern to search for")
+    track_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
+    track_parser.add_argument(
+        "--ext",
+        action="append",
+        help="File extensions to scan (repeatable). Example: --ext .py --ext .md",
+    )
 
     # anchor resolve
     resolve_parser = anchor_subparsers.add_parser("resolve", help="Resolve anchor lineage")
     resolve_parser.add_argument("anchor_id", help="Anchor ID to resolve")
+    resolve_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
 
     # anchor seal
     seal_anchor_parser = anchor_subparsers.add_parser("seal", help="Seal anchor thread")
@@ -464,6 +525,11 @@ Examples:
     manifest_parser = subparsers.add_parser("manifest", help="Generate export manifest")
     manifest_parser.add_argument("--target", "-t", help="Specific anchor target")
     manifest_parser.add_argument("--output", "-o", help="Output file path")
+    manifest_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
+    manifest_parser.add_argument(
+        "--dlp-manifest-out",
+        help="Also export a DLP manifest (if available) to this path",
+    )
 
     # State comparison
     diff_parser = subparsers.add_parser("diff", help="Compare anchor states")

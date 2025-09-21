@@ -421,7 +421,7 @@ class PluginManager:
         """Execute a plugin with input data."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-            raise ValueError("Plugin '{plugin_name}' not found")
+            raise ValueError(f"Plugin '{plugin_name}' not found")
 
         if plugin.status != PluginStatus.ACTIVE:
 

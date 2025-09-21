@@ -4,7 +4,7 @@ async function fetchArxiv(query) {
   if (process.env.PQN_OFFLINE_TEST) {
     return [{ source: 'arXiv', title: `Arxiv result for ${query}`, summary: 'offline stub' }];
   }
-  const url = `http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=5`;
+  const url = `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=5`;
   try {
     const res = await fetch(url);
     const text = await res.text();

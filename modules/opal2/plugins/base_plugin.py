@@ -1,12 +1,18 @@
 """Opal2 Plugin System - Base Plugin Interface
 
-        import os
-
 =============================================
 
 Provides the foundation for the Opal2 modular plugin architecture.
 Supports hot-swappable rendering plugins with validation and security.
 """
+
+import os
+import importlib
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional
+import time
 
 
 class PluginType(Enum):
@@ -278,7 +284,7 @@ class PluginRegistry:
         """Load plugin from a Python module."""
         try:
             # Import module
-        module = importlib.import_module(module_path)
+            module = importlib.import_module(module_path)
 
             # Get plugin class
             plugin_class = getattr(module, plugin_class_name)
@@ -334,13 +340,13 @@ class PluginRegistry:
 
         if security_level == "safe":
             # Safe plugins have minimal restrictions
-        return True
+            return True
         elif security_level == "sandbox":
             # Sandbox plugins need additional validation
-        return self._validate_sandbox_plugin(plugin)
+            return self._validate_sandbox_plugin(plugin)
         elif security_level == "trusted":
             # Trusted plugins require signature verification
-        return self._validate_trusted_plugin(plugin)
+            return self._validate_trusted_plugin(plugin)
 
         return False
 
@@ -348,9 +354,8 @@ class PluginRegistry:
         """Validate plugin meets requirements."""
         # Check required methods
         for method_name in self.validation_rules["required_methods"]:
-        if not hasattr(plugin, method_name):
-
-            return False
+            if not hasattr(plugin, method_name):
+                return False
 
         # Check security
         if not self.validate_plugin_security(plugin):
@@ -359,8 +364,8 @@ class PluginRegistry:
 
         # Check dependencies
         for dependency in plugin.metadata.dependencies:
-        if dependency not in self.plugins:
-        print("Missing dependency: {dependency}")
+            if dependency not in self.plugins:
+                print("Missing dependency: {dependency}")
                 return False
 
         return True
@@ -375,8 +380,9 @@ class PluginRegistry:
         # Implement signature verification logic
         return True
 
-        class PluginManager:
-        """High-level plugin management interface."""
+
+class PluginManager:
+    """High-level plugin management interface."""
 
     def __init__(self):
         self.registry = PluginRegistry()
@@ -394,29 +400,27 @@ class PluginRegistry:
             return 0
 
         for filename in os.listdir(directory_path):
-        if filename.endswith(".py") and not filename.startswith("__"):
-        module_name = filename[:-3]  # Remove .py extension
+            if filename.endswith(".py") and not filename.startswith("__"):
+                module_name = filename[:-3]  # Remove .py extension
                 module_path = "{directory_path.replace('/', '.')}.{module_name}"
 
                 try:
                     # Try to load plugin (assuming class name matches module name)
-        if self.registry.load_plugin_from_module(
-                       module_path, module_name.title()
+                    if self.registry.load_plugin_from_module(
+                        module_path, module_name.title()
                     ):
-                    loaded_count += 1
-                    except Exception as e:
+                        loaded_count += 1
+                except Exception as e:
+                    print("Failed to load plugin {module_name}: {e}")
 
-                        print("Failed to load plugin {module_name}: {e}")
+        return loaded_count
 
-                    return loaded_count
-
-                    def execute_plugin(
+    def execute_plugin(
         self, plugin_name: str, input_data: Any, options: Dict[str, Any] = None
     ) -> Any:
-    """Execute a plugin with input data."""
+        """Execute a plugin with input data."""
         plugin = self.registry.get_plugin(plugin_name)
         if not plugin:
-
             raise ValueError("Plugin '{plugin_name}' not found")
 
         if plugin.status != PluginStatus.ACTIVE:

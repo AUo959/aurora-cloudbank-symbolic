@@ -35,7 +35,7 @@ class PluginType(Enum):
 
 class PluginStatus(Enum):
     """Plugin status enumeration"""
-        LOADED = "loaded"
+    LOADED = "loaded"
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"
@@ -80,7 +80,7 @@ class PluginInterface:
         raise NotImplementedError("Plugins must implement get_info()")
 
     
-        def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate plugin configuration"""
         return True
 
@@ -93,7 +93,7 @@ class RendererPlugin(PluginInterface):
         raise NotImplementedError("Renderer plugins must implement render()")
 
     
-        def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> List[str]:
         """Get supported output formats"""
         return ["generic"]
 
@@ -137,18 +137,18 @@ class PluginSystem:
         self._load_builtin_plugins()
 
     
-        def _initialize_plugin_dirs(self):
+    def _initialize_plugin_dirs(self):
         """Initialize plugin directories"""
         for plugin_dir in self.plugin_dirs:
             plugin_path = Path(plugin_dir)
             
-        if not plugin_path.exists():
+            if not plugin_path.exists():
                 plugin_path.mkdir(parents=True, exist_ok=True)
                 
         logger.info(f"Created plugin directory: {plugin_path}")
 
     
-        def _load_builtin_plugins(self):
+    def _load_builtin_plugins(self):
         """Load built-in plugins"""
         # WebGL Renderer Plugin
         self.register_plugin("webgl_renderer", WebGLRendererPlugin())
@@ -169,7 +169,7 @@ class PluginSystem:
         logger.info(f"Loaded {len(self.plugins)} built-in plugins")
 
     
-        def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
+    def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
         """Register a plugin instance"""
         try:
             # Validate plugin
@@ -179,14 +179,14 @@ class PluginSystem:
             # Get plugin info
             plugin_info = plugin.get_info()
             
-        plugin_info.name = name
+            plugin_info.name = name
 
             # Set configuration
             if config:
                 if not plugin.validate_config(config):
                     raise ValueError(f"Invalid configuration for plugin {name}")
                 
-        plugin.config = config
+                plugin.config = config
                 self.plugin_configs[name] = config
 
             # Initialize plugin
@@ -199,29 +199,29 @@ class PluginSystem:
                 # Update dependency graph
                 self._update_dependency_graph(name, plugin_info.dependencies)
 
-                
-        logger.info(f"Successfully registered plugin: {name}")
-            
-        else:
+                logger.info(f"Successfully registered plugin: {name}")
+                return True
+            else:
                 plugin_info.status = PluginStatus.FAILED
                 plugin_info.error_message = "Plugin initialization failed"
                 logger.error(f"Failed to initialize plugin: {name}")
+                return False
 
-        
         except Exception as e:
             logger.error(f"Failed to register plugin {name}: {str(e)}")
             
-        if name in self.plugin_info:
+            if name in self.plugin_info:
                 self.plugin_info[name].status = PluginStatus.FAILED
                 self.plugin_info[name].error_message = str(e)
+            return False
 
     
-        def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
+    def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
         """Load a plugin from a Python file"""
         try:
             file_path = Path(file_path)
             
-        if not file_path.exists():
+            if not file_path.exists():
                 raise FileNotFoundError(f"Plugin file not found: {file_path}")
 
             # Load module

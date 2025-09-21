@@ -16,7 +16,6 @@ import numpy as np
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
-
 class RenderingMode(Enum):
     """Rendering modes for different use cases."""
 
@@ -25,9 +24,7 @@ class RenderingMode(Enum):
     GEOMETRIC_ALGEBRA = "geometric_algebra"
     HYBRID = "hybrid"
 
-
 @dataclass
-
 
 class RenderingConfig:
     """Configuration for quantum rendering operations."""
@@ -49,7 +46,6 @@ class RenderingConfig:
     max_render_time_ms: int = 16  # 60fps target
     memory_limit_mb: int = 100
     cache_enabled: bool = True
-
 
 class QuantumRenderer:
     """High-performance quantum rendering engine."""

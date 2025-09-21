@@ -17,7 +17,6 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-
 class GlyphCache:
     """Cache glyphs to a JSON file for reuse."""
 

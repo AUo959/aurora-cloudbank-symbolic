@@ -2,7 +2,7 @@
 from datetime import datetime
 from pathlib import Path
 import json
-import schedule
+
 """
 Opal2 Modular System - Configuration Manager
 Advanced configuration management with validation and hot-reloading
@@ -24,7 +24,6 @@ from watchdog.observers import Observer
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class ConfigFormat(Enum):
     """Configuration file format enumeration"""
 
@@ -32,9 +31,7 @@ class ConfigFormat(Enum):
     JSON = "json"
     TOML = "toml"
 
-
 @dataclass
-
 
 class ConfigValidationRule:
     """Configuration validation rule"""
@@ -48,9 +45,7 @@ class ConfigValidationRule:
     custom_validator: Optional[Callable] = None
     error_message: Optional[str] = None
 
-
 @dataclass
-
 
 class ConfigChangeEvent:
     """Configuration change event"""
@@ -61,7 +56,6 @@ class ConfigChangeEvent:
     old_values: Dict[str, Any]
     new_values: Dict[str, Any]
 
-
 class ConfigFileHandler(FileSystemEventHandler):
     """File system event handler for configuration changes"""
 
@@ -71,7 +65,6 @@ class ConfigFileHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if not event.is_directory:
             self.config_manager._handle_file_change(event.src_path)
-
 
 class ConfigurationManager:
     """

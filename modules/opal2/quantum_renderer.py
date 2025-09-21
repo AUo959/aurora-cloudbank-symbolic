@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from datetime import datetime
 import json
-import time
+
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support
@@ -18,7 +18,6 @@ import numpy as np
 from ...symbolic.geometric_algebra import GeometricAlgebra
 from ...symbolic.quantum_symbolic_vector import QuantumSymbolicVector
 
-
 class RenderMode(Enum):
     """Rendering mode enumeration"""
 
@@ -26,7 +25,6 @@ class RenderMode(Enum):
     ANIMATED = "animated"
     INTERACTIVE = "interactive"
     REALTIME = "realtime"
-
 
 class QuantumState(Enum):
     """Quantum enhancement state"""
@@ -36,9 +34,7 @@ class QuantumState(Enum):
     ENHANCED = "enhanced"
     SUPERPOSITION = "superposition"
 
-
 @dataclass
-
 
 class RenderContext:
     """Render context containing all rendering parameters"""
@@ -61,9 +57,7 @@ class RenderContext:
                 "decoherence_rate": 0.1,
             }
 
-
 @dataclass
-
 
 class RenderResult:
     """Render result containing output and metadata"""
@@ -85,7 +79,6 @@ class RenderResult:
             "quantum_metrics": self.quantum_metrics,
             "cache_key": self.cache_key,
         }
-
 
 class QuantumRenderer:
     """

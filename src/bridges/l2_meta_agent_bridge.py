@@ -12,15 +12,13 @@ import logging
 
 # Configure logging
 from dataclasses import dataclass
-from datetime import datetime
+
 from typing import Any, Dict, List, Optional
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-
 @dataclass
-
 
 class CustomGptAgent:
     """Custom GPT Agent configuration and state"""
@@ -40,7 +38,6 @@ class CustomGptAgent:
     def __post_init__(self):
         if self.handshake_log is None:
             self.handshake_log = []
-
 
 class L2MetaAgentBridge:
     """Bridge connector for L2 Custom GPT meta-agents"""
@@ -449,12 +446,10 @@ class L2MetaAgentBridge:
 
         return status
 
-
 # Global bridge instance
 l2_bridge = L2MetaAgentBridge()
 
 # Example usage and testing
-
 
 async def main():
     """Example usage of the L2 Meta-Agent Bridge"""
@@ -472,7 +467,6 @@ async def main():
         # Get constellation status
         status = l2_bridge.get_constellation_status()
         print(f"Active Agents: {status['connected_agents']}/{status['total_agents']}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

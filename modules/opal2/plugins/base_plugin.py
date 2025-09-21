@@ -8,7 +8,6 @@ Provides the foundation for the Opal2 modular plugin architecture.
 Supports hot-swappable rendering plugins with validation and security.
 """
 
-
 class PluginType(Enum):
     """Types of plugins supported by the Opal2 system."""
 
@@ -19,7 +18,6 @@ class PluginType(Enum):
     EFFECT = "effect"
     SHADER = "shader"
 
-
 class PluginStatus(Enum):
     """Plugin operational status."""
 
@@ -29,9 +27,7 @@ class PluginStatus(Enum):
     LOADING = "loading"
     VALIDATING = "validating"
 
-
 @dataclass
-
 
 class PluginMetadata:
     """Metadata for plugin description and validation."""
@@ -61,7 +57,6 @@ class PluginMetadata:
             "security_level": self.security_level,
             "api_version": self.api_version,
         }
-
 
 class BasePlugin(ABC):
 
@@ -119,7 +114,6 @@ class BasePlugin(ABC):
         if not success:
             self.performance_metrics["error_count"] += 1
 
-
 class RendererPlugin(BasePlugin):
 
     """Base class for rendering plugins."""
@@ -152,7 +146,6 @@ class RendererPlugin(BasePlugin):
         """Clear rendering cache."""
         self.render_cache.clear()
 
-
 class ExporterPlugin(BasePlugin):
 
     """Base class for export plugins."""
@@ -177,7 +170,6 @@ class ExporterPlugin(BasePlugin):
             self._update_metrics(time.time() - start_time, False)
             raise e
 
-
 class FilterPlugin(BasePlugin):
 
     """Base class for filter/effect plugins."""
@@ -200,7 +192,6 @@ class FilterPlugin(BasePlugin):
 
             self._update_metrics(time.time() - start_time, False)
             raise e
-
 
 class PluginRegistry:
     """Registry for managing Opal2 plugins."""
@@ -278,14 +269,13 @@ class PluginRegistry:
         """Load plugin from a Python module."""
         try:
             # Import module
-        module = importlib.import_module(module_path)
+            module = importlib.import_module(module_path)
 
             # Get plugin class
             plugin_class = getattr(module, plugin_class_name)
 
             # Validate plugin class
             if not issubclass(plugin_class, BasePlugin):
-
                 raise ValueError("Plugin class must inherit from BasePlugin")
 
             # Create plugin instance
@@ -296,7 +286,6 @@ class PluginRegistry:
             return self.register_plugin(plugin_instance)
 
         except Exception as e:
-
 
             print("Failed to load plugin from {module_path}: {e}")
             return False
@@ -390,7 +379,6 @@ class PluginRegistry:
 
         if not os.path.exists(directory_path):
 
-
             return 0
 
         for filename in os.listdir(directory_path):
@@ -421,7 +409,6 @@ class PluginRegistry:
 
         if plugin.status != PluginStatus.ACTIVE:
 
-
             raise ValueError("Plugin '{plugin_name}' is not active")
 
         return plugin.process(input_data, options or {})
@@ -434,7 +421,6 @@ class PluginRegistry:
             return False
 
         try:
-
 
             plugin.config.update(config)
             return plugin.initialize(plugin.config)

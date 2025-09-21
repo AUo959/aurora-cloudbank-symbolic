@@ -22,7 +22,6 @@ from typing import Any, Dict, List, Optional
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class PluginType(Enum):
     """Plugin type enumeration"""
     RENDERER = "renderer"
@@ -32,17 +31,14 @@ class PluginType(Enum):
     IMPORTER = "importer"
     ANALYZER = "analyzer"
 
-
 class PluginStatus(Enum):
     """Plugin status enumeration"""
-        LOADED = "loaded"
+    LOADED = "loaded"
     FAILED = "failed"
     DISABLED = "disabled"
     PENDING = "pending"
 
-
 @dataclass
-
 
 class PluginInfo:
     """Plugin information container"""
@@ -58,7 +54,6 @@ class PluginInfo:
     status: PluginStatus = PluginStatus.PENDING
     load_time: Optional[datetime] = None
     error_message: Optional[str] = None
-
 
 class PluginInterface:
     """Base interface for all plugins"""
@@ -81,11 +76,9 @@ class PluginInterface:
         """Get plugin information"""
         raise NotImplementedError("Plugins must implement get_info()")
 
-
-        def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: Dict[str, Any]) -> bool:
         """Validate plugin configuration"""
         return True
-
 
 class RendererPlugin(PluginInterface):
     """Base class for renderer plugins"""
@@ -94,15 +87,13 @@ class RendererPlugin(PluginInterface):
         """Render data with given context"""
         raise NotImplementedError("Renderer plugins must implement render()")
 
-
-        def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> List[str]:
         """Get supported output formats"""
         return ["generic"]
 
     def get_required_data_keys(self) -> List[str]:
         """Get required data keys for rendering"""
         return []
-
 
 class ProcessorPlugin(PluginInterface):
     """Base class for processor plugins"""
@@ -111,14 +102,12 @@ class ProcessorPlugin(PluginInterface):
         """Process data with given parameters"""
         raise NotImplementedError("Processor plugins must implement process()")
 
-
 class FilterPlugin(PluginInterface):
     """Base class for filter plugins"""
 
     async def apply_filter(self, data: Dict[str, Any], filter_params: Dict[str, Any]) -> Dict[str, Any]:
         """Apply filter to data"""
         raise NotImplementedError("Filter plugins must implement apply_filter()")
-
 
 class PluginSystem:
     """
@@ -138,19 +127,17 @@ class PluginSystem:
         # Load built-in plugins
         self._load_builtin_plugins()
 
-
-        def _initialize_plugin_dirs(self):
+    def _initialize_plugin_dirs(self):
         """Initialize plugin directories"""
         for plugin_dir in self.plugin_dirs:
             plugin_path = Path(plugin_dir)
 
-        if not plugin_path.exists():
+            if not plugin_path.exists():
                 plugin_path.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"Created plugin directory: {plugin_path}")
 
-
-        def _load_builtin_plugins(self):
+    def _load_builtin_plugins(self):
         """Load built-in plugins"""
         # WebGL Renderer Plugin
         self.register_plugin("webgl_renderer", WebGLRendererPlugin())
@@ -167,11 +154,9 @@ class PluginSystem:
         # Geometric Algebra Processor Plugin
         self.register_plugin("geometric_algebra_processor", GeometricAlgebraProcessorPlugin())
 
-
         logger.info(f"Loaded {len(self.plugins)} built-in plugins")
 
-
-        def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
+    def register_plugin(self, name: str, plugin: PluginInterface, config: Dict[str, Any] = None):
         """Register a plugin instance"""
         try:
             # Validate plugin
@@ -180,15 +165,13 @@ class PluginSystem:
 
             # Get plugin info
             plugin_info = plugin.get_info()
-
-        plugin_info.name = name
+            plugin_info.name = name
 
             # Set configuration
             if config:
                 if not plugin.validate_config(config):
                     raise ValueError(f"Invalid configuration for plugin {name}")
-
-        plugin.config = config
+                plugin.config = config
                 self.plugin_configs[name] = config
 
             # Initialize plugin
@@ -201,14 +184,12 @@ class PluginSystem:
                 # Update dependency graph
                 self._update_dependency_graph(name, plugin_info.dependencies)
 
-
         logger.info(f"Successfully registered plugin: {name}")
 
         else:
                 plugin_info.status = PluginStatus.FAILED
                 plugin_info.error_message = "Plugin initialization failed"
                 logger.error(f"Failed to initialize plugin: {name}")
-
 
         except Exception as e:
             logger.error(f"Failed to register plugin {name}: {str(e)}")
@@ -217,8 +198,7 @@ class PluginSystem:
                 self.plugin_info[name].status = PluginStatus.FAILED
                 self.plugin_info[name].error_message = str(e)
 
-
-        def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
+    def load_plugin_from_file(self, file_path: str, config: Dict[str, Any] = None):
         """Load a plugin from a Python file"""
         try:
             file_path = Path(file_path)
@@ -245,15 +225,12 @@ class PluginSystem:
 
         self.register_plugin(plugin_name, plugin_instance, config)
 
-
         logger.info(f"Loaded {len(plugin_classes)} plugins from {file_path}")
-
 
         except Exception as e:
             logger.error(f"Failed to load plugin from {file_path}: {str(e)}")
 
-
-        def load_plugins_from_directory(self, directory: str):
+    def load_plugins_from_directory(self, directory: str):
         """Load all plugins from a directory"""
         directory_path = Path(directory)
 
@@ -265,7 +242,6 @@ class PluginSystem:
         # Find all Python files
         python_files = list(directory_path.glob("*.py"))
 
-
         for python_file in python_files:
             if python_file.name.startswith("__"):
                 continue
@@ -276,13 +252,11 @@ class PluginSystem:
         except Exception as e:
                 logger.error(f"Failed to load plugin from {python_file}: {str(e)}")
 
-
-        def get_plugin(self, name: str) -> Optional[PluginInterface]:
+    def get_plugin(self, name: str) -> Optional[PluginInterface]:
         """Get a plugin by name"""
         return self.plugins.get(name)
 
-
-        def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginInterface]:
+    def get_plugins_by_type(self, plugin_type: PluginType) -> List[PluginInterface]:
         """Get all plugins of a specific type"""        result = []        for name, info in self.plugin_info.items():
             if info.plugin_type == plugin_type and info.status == PluginStatus.LOADED:
                 plugin = self.plugins.get(name)
@@ -296,8 +270,7 @@ class PluginSystem:
         """List all registered plugins"""
         return self.plugin_info.copy()
 
-
-        def unload_plugin(self, name: str) -> bool:
+    def unload_plugin(self, name: str) -> bool:
         """Unload a plugin"""
         if name not in self.plugins:
             return False
@@ -305,7 +278,6 @@ class PluginSystem:
         try:
         plugin = self.plugins[name]
             plugin.shutdown()
-
 
         del self.plugins[name]
             if name in self.plugin_info:
@@ -376,9 +348,7 @@ class PluginSystem:
 
         return stats
 
-
 # Built-in Plugin Implementations
-
 
 class WebGLRendererPlugin(RendererPlugin):
     """WebGL renderer plugin"""
@@ -392,7 +362,6 @@ class WebGLRendererPlugin(RendererPlugin):
             plugin_type=PluginType.RENDERER,
         capabilities=["3d_rendering", "quantum_effects", "real_time"],
         )
-
 
         async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using WebGL"""
@@ -408,8 +377,7 @@ class WebGLRendererPlugin(RendererPlugin):
             }
         )
 
-
-        def _generate_vertex_shader(self) -> str:
+    def _generate_vertex_shader(self) -> str:
         return """
         attribute vec3 position
         uniform mat4 modelViewMatrix
@@ -431,7 +399,6 @@ class WebGLRendererPlugin(RendererPlugin):
     def _generate_uniforms(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         return {"color": [0.3, 0.6, 0.9], "time": 0.0}
 
-
 class CanvasRendererPlugin(RendererPlugin):
     """Canvas 2D renderer plugin"""
 
@@ -444,7 +411,6 @@ class CanvasRendererPlugin(RendererPlugin):
             plugin_type=PluginType.RENDERER,
         capabilities=["2d_rendering", "quantum_effects", "interactive"],
         )
-
 
         async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using Canvas 2D"""
@@ -468,9 +434,7 @@ class CanvasRendererPlugin(RendererPlugin):
 
         commands.append("ctx.stroke();")
 
-
         return "\n".join(commands)
-
 
 class SVGRendererPlugin(RendererPlugin):
     """SVG renderer plugin"""
@@ -484,7 +448,6 @@ class SVGRendererPlugin(RendererPlugin):
             plugin_type=PluginType.RENDERER,
         capabilities=["vector_graphics", "scalable", "quantum_effects"],
         )
-
 
         async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         """Render using SVG"""
@@ -508,12 +471,9 @@ class SVGRendererPlugin(RendererPlugin):
 
         svg_parts.append(f'<path d="{path_string}" stroke="blue" stroke-width="2" fill="none" />')
 
-
         svg_parts.append("</svg>")
 
-
         return "\n".join(svg_parts)
-
 
 class QuantumFieldRendererPlugin(RendererPlugin):
     """Quantum field renderer plugin"""
@@ -527,7 +487,6 @@ class QuantumFieldRendererPlugin(RendererPlugin):
         plugin_type=PluginType.RENDERER,
             capabilities=["quantum_field", "field_visualization", "particle_effects"],
         )
-
 
         async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Render quantum field"""
@@ -543,7 +502,6 @@ class QuantumFieldRendererPlugin(RendererPlugin):
                 # Calculate field value
         field_value = self._calculate_field_value(i, j, data)
 
-
         field_points.append(
                     {
                         "x": i,
@@ -552,7 +510,6 @@ class QuantumFieldRendererPlugin(RendererPlugin):
                         "intensity": abs(field_value),
                     }
                 )
-
 
         return {
             "type": "quantum_field",
@@ -564,7 +521,6 @@ class QuantumFieldRendererPlugin(RendererPlugin):
         """Calculate quantum field value at point"""
         # Simplified quantum field calculation
         return complex(0.5 * (x + y) / 1000, 0.3 * (x - y) / 1000)
-
 
 class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
     """Geometric algebra processor plugin"""
@@ -583,7 +539,6 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
             ],
         )
 
-
         async def process(self, data: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
         """Process data using geometric algebra"""
         # This would integrate with the GeometricAlgebra class
@@ -598,9 +553,7 @@ class GeometricAlgebraProcessorPlugin(ProcessorPlugin):
 
         return processed_data
 
-
 # Plugin Factory
-
 
 class PluginFactory:
     """Factory for creating plugins"""
@@ -619,6 +572,5 @@ class PluginFactory:
 
         if plugin_class:
             return plugin_class(config)
-
 
         return None

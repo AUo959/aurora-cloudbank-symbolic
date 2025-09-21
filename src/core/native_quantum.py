@@ -8,7 +8,6 @@ import math
 import secrets  # Use cryptographically secure random instead of random
 from typing import Any, Dict, List
 
-
 class NativeQuantumState:
     """Native implementation of quantum state representation"""
 
@@ -77,7 +76,6 @@ class NativeQuantumState:
 
         self.amplitudes = new_amplitudes
 
-
 class NativeQuantumGates:
     """Native implementation of common quantum gates"""
 
@@ -133,7 +131,6 @@ class NativeQuantumGates:
             [0.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j, 1.0 + 0.0j],  # |10⟩ -> |11⟩
             [0.0 + 0.0j, 0.0 + 0.0j, 1.0 + 0.0j, 0.0 + 0.0j],  # |11⟩ -> |10⟩
         ]
-
 
 class NativeQuantumCircuit:
     """Native quantum circuit implementation"""
@@ -204,7 +201,6 @@ class NativeQuantumCircuit:
 
         return counts
 
-
 class NativeQuantumSimulator:
     """Native quantum simulator - lightweight replacement for AerSimulator"""
 
@@ -217,7 +213,6 @@ class NativeQuantumSimulator:
 
         return NativeQuantumResult(counts, circuit.operations)
 
-
 class NativeQuantumResult:
     """Native quantum result object"""
 
@@ -228,7 +223,6 @@ class NativeQuantumResult:
     def get_counts(self) -> Dict[str, int]:
         """Get measurement counts"""
         return self._counts
-
 
 class NativeQuantumProcessingLayer:
     """Native quantum processing layer - zero dependencies replacement"""

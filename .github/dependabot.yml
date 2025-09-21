@@ -19,3 +19,14 @@ updates:
       prefix: 'deps'
     labels:
       - 'dependencies'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'deps'
+    labels:
+      - 'dependencies'
+      - 'ci'

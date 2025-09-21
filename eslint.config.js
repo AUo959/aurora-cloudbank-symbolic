@@ -1,7 +1,7 @@
-// Aurora CloudBank - ESLint Configuration (v9+ format)
-// Migration from .eslintrc.json to eslint.config.js
+// Aurora CloudBank - ESLint Configuration (flat config, CommonJS)
+// Converted to CommonJS to align with package.json "type": "commonjs"
 
-export default [
+module.exports = [
   // Node.js files configuration
   {
     files: ['src/**/*.js', 'scripts/**/*.js', 'tests/**/*.js', '*.js'],

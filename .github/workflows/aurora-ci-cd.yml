@@ -164,6 +164,26 @@ jobs:
             npm audit --audit-level=moderate || \
             echo "⚠️ npm audit completed with warnings"
           fi
+
+      - name: Dependency audit (npm + pip)
+        if: always()
+        run: |
+          echo "🔎 Running dependency audits (npm + pip)"
+          if [ -f package.json ]; then
+            npm audit --json > npm-audit.json || true
+          fi
+          python3 -m pip install pip-audit || true
+          pip-audit -f json -o pip-audit.json || true
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audits-${{ github.sha }}
+          path: |
+            npm-audit.json
+            pip-audit.json
+          retention-days: 7
   test-suite:
     name: "🧪 Test Suite"
     runs-on: ubuntu-latest

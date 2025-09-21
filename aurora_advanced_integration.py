@@ -707,7 +707,7 @@ class AuroraMasterInterface:
         # Test quantum processing if available
         if self.initialized_systems.get("quantum_processor"):
             try:
-                _ = subprocess.run([
+                result = subprocess.run([
                     sys.executable, "aurora_quantum_processor.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -724,7 +724,7 @@ class AuroraMasterInterface:
         # Test consciousness simulation if available
         if self.initialized_systems.get("consciousness_engine"):
             try:
-                _ = subprocess.run([
+                result = subprocess.run([
                     sys.executable, "aurora_consciousness_engine.py"
                 ], capture_output=True, text=True, timeout=30)
 
@@ -741,7 +741,7 @@ class AuroraMasterInterface:
         # Test adaptive learning if available
         if self.initialized_systems.get("adaptive_learning"):
             try:
-                _ = subprocess.run([
+                result = subprocess.run([
                     sys.executable, "aurora_adaptive_learning.py"
                 ], capture_output=True, text=True, timeout=30)
 

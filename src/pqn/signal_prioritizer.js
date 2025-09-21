@@ -1,5 +1,6 @@
+// Use the number of tags as the base score, as items with more tags may be more relevant or connected.
 function baseScore(item) {
-  return item.title ? item.title.length : 0;
+  return item.tags && Array.isArray(item.tags) ? item.tags.length : 0;
 }
 
 function rank(items, quantumFlag = false) {

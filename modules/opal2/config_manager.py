@@ -34,6 +34,8 @@ class ConfigFormat(Enum):
 
 
 @dataclass
+
+
 class ConfigValidationRule:
     """Configuration validation rule"""
 
@@ -48,6 +50,8 @@ class ConfigValidationRule:
 
 
 @dataclass
+
+
 class ConfigChangeEvent:
     """Configuration change event"""
 

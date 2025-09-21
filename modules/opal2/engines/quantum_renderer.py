@@ -27,6 +27,8 @@ class RenderingMode(Enum):
 
 
 @dataclass
+
+
 class RenderingConfig:
     """Configuration for quantum rendering operations."""
 

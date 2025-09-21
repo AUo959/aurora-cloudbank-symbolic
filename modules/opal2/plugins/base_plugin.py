@@ -31,6 +31,8 @@ class PluginStatus(Enum):
 
 
 @dataclass
+
+
 class PluginMetadata:
     """Metadata for plugin description and validation."""
 

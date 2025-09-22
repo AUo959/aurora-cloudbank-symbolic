@@ -62,7 +62,7 @@ pytz==2024.1
 PyYAML==6.0.2
 requests==2.31.0
 rich==13.7.1
-s3transfer==0.10.1
+s3transfer==0.14.0
 service-identity==24.1.0
 setuptools==68.1.2
 six==1.16.0

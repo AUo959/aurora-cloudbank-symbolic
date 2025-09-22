@@ -59,7 +59,7 @@ python-dateutil==2.8.2
 python-debian==0.1.49+ubuntu2
 python-magic==0.4.27
 pytz==2024.1
-PyYAML==6.0.1
+PyYAML==6.0.2
 requests==2.31.0
 rich==13.7.1
 s3transfer==0.10.1

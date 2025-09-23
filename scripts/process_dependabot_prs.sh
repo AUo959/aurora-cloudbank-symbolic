@@ -54,6 +54,7 @@ get_head_sha() {
 
 get_ci_overall_state() {
   local sha=$1
+  local allow_re="${ALLOWED_FAILURE_REGEX:-}"
   # Prefer Checks API (GitHub Actions) if present; fall back to legacy Status API
   local checks
   checks=$(api GET "/commits/$sha/check-runs" 2>/dev/null || true)
@@ -68,9 +69,15 @@ get_ci_overall_state() {
       return 0
     fi
     # Any completed with failure/cancelled/timed_out/action_required -> failure
-    local failed
-    failed=$(echo "$checks" | jq -r '[.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required"))] | length' 2>/dev/null || echo 0)
-    if (( failed > 0 )); then
+    local failed_count
+    if [[ -n "$allow_re" ]]; then
+      # Count only failures whose name DOES NOT match the allowed regex
+      failed_count=$(echo "$checks" | jq -r '.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required")) | .name' \
+        | grep -Ev "$allow_re" | wc -l | tr -d ' ')
+    else
+      failed_count=$(echo "$checks" | jq -r '[.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required"))] | length' 2>/dev/null || echo 0)
+    fi
+    if (( failed_count > 0 )); then
       echo failure
       return 0
     fi

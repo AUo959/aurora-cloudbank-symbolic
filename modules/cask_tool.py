@@ -14,7 +14,7 @@ import zipfile
 import pandas as pd
 try:  # optional dependency; tests should not hard-require kaleido
     import plotly.graph_objects as go
-except ImportError as _e:  # graceful fallback if plotly unavailable
+except ImportError:  # graceful fallback if plotly unavailable
     go = None
 
 

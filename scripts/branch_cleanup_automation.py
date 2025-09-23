@@ -43,7 +43,7 @@ class BranchCleanupManager:
             # Get branch info with dates
             cmd = [
                 "git",
-                "for-each-re",
+                "for-each-ref",
                 "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
@@ -93,7 +93,7 @@ class BranchCleanupManager:
 
             return branches
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error getting branch info: {e}")
+            print(f"Error getting branch info: {e}")
             return []
 
     def is_branch_merged(self, branch_name: str) -> bool:
@@ -105,7 +105,7 @@ class BranchCleanupManager:
                 "git",
                 "merge-base",
                 "--is-ancestor",
-                "origin/{branch_short}",
+                f"origin/{branch_short}",
                 "origin/main",
             ]
             result = subprocess.run(
@@ -162,11 +162,11 @@ class BranchCleanupManager:
         """Generate a detailed cleanup report."""
         report = []
         report.append("# Aurora CloudBank - Branch Cleanup Report")
-        report.append("**Generated:** {datetime.datetime.now().isoformat()}")
+        report.append(f"**Generated:** {datetime.datetime.now().isoformat()}")
         report.append("")
 
         total_branches = sum(len(branches) for branches in categories.values())
-        report.append("**Total Branches Analyzed:** {total_branches}")
+        report.append(f"**Total Branches Analyzed:** {total_branches}")
         report.append("")
 
         for category, branches in categories.items():
@@ -174,16 +174,18 @@ class BranchCleanupManager:
                 continue
 
             report.append(
-                "## {category.replace('_', ' ').title()} ({len(branches)} branches)"
+                f"## {category.replace('_', ' ').title()} ({len(branches)} branches)"
             )
             report.append("")
 
             for branch in branches:
-                report.append("- **{branch['name']}**")
-                report.append("  - Last commit: {branch['days_old']} days ago")
-                report.append("  - Author: {branch['author']}")
-                report.append("  - Subject: {branch['subject'][:80]}...")
-                report.append("  - Merged: {'Yes' if branch['is_merged'] else 'No'}")
+                report.append(f"- **{branch['name']}**")
+                report.append(f"  - Last commit: {branch['days_old']} days ago")
+                report.append(f"  - Author: {branch['author']}")
+                report.append(f"  - Subject: {branch['subject'][:80]}...")
+                report.append(
+                    f"  - Merged: {'Yes' if branch['is_merged'] else 'No'}"
+                )
                 report.append("")
 
         return "\n".join(report)
@@ -203,19 +205,19 @@ class BranchCleanupManager:
         for branch in categories["force_delete"]:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
-                print("✅ Deleted: {branch['name']}")
+                print(f"✅ Deleted: {branch['name']}")
             else:
                 results["errors"] += 1
-                print("❌ Failed to delete: {branch['name']}")
+                print(f"❌ Failed to delete: {branch['name']}")
 
         # Delete stale merged branches
         for branch in categories["stale_merged"]:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
-                print("✅ Deleted stale merged: {branch['name']}")
+                print(f"✅ Deleted stale merged: {branch['name']}")
             else:
                 results["errors"] += 1
-                print("❌ Failed to delete: {branch['name']}")
+                print(f"❌ Failed to delete: {branch['name']}")
 
         return results
 
@@ -235,7 +237,7 @@ class BranchCleanupManager:
             )
             return result.returncode == 0
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error deleting branch {branch_name}: {e}")
+            print(f"Error deleting branch {branch_name}: {e}")
             return False
 
     def run_analysis(self, save_report: bool = True) -> Dict:
@@ -256,12 +258,14 @@ class BranchCleanupManager:
             report_path = self.repo_path / "BRANCH_CLEANUP_REPORT.md"
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)
-            print("📄 Report saved to: {report_path}")
+            print(f"📄 Report saved to: {report_path}")
 
         # Print summary
         print("\n📊 Branch Analysis Summary:")
         for category, branches in categories.items():
-            print("  {category.replace('_', ' ').title()}: {len(branches)} branches")
+            print(
+                f"  {category.replace('_', ' ').title()}: {len(branches)} branches"
+            )
 
         return {"branches": branches, "categories": categories, "report": report}
 
@@ -292,11 +296,13 @@ def main():
     if results:
         # Execute cleanup if requested
         if args.execute:
-            cleanup_results = manager.execute_cleanup(results["categories"], force=True)
+            cleanup_results = manager.execute_cleanup(
+                results["categories"], force=True
+            )
             print("\n🎯 Cleanup Results:")
-            print("  Deleted: {cleanup_results['deleted']} branches")
-            print("  Errors: {cleanup_results['errors']} branches")
-            print("  Skipped: {cleanup_results['skipped']} branches")
+            print(f"  Deleted: {cleanup_results['deleted']} branches")
+            print(f"  Errors: {cleanup_results['errors']} branches")
+            print(f"  Skipped: {cleanup_results['skipped']} branches")
 
 
 if __name__ == "__main__":

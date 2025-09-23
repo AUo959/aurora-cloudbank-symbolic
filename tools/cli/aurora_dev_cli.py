@@ -22,6 +22,7 @@ sys.path.insert(0, str(WORKSPACE_ROOT))
 
 from tools.symbolic.memory_sealer import MemorySealingEngine  # noqa: E402
 from tools.symbolic.anchor_tracker import SymbolicAnchorTracker  # noqa: E402
+from tools.symbolic.arc_chain_processor import ArcChainProcessor  # noqa: E402
 
 
 class AuroraDeveloperCLI:
@@ -62,6 +63,17 @@ class AuroraDeveloperCLI:
             print(f"❌ Unknown anchor command: {args.anchor_cmd}")
             return 1
 
+    def cmd_arc(self, args) -> int:
+        """Handle ARC chain export operations."""
+        if not args.arc_cmd:
+            print("❌ ARC command required (e.g., 'analyze')")
+            return 1
+        if args.arc_cmd == "analyze":
+            return self._arc_analyze(args)
+
+        print(f"❌ Unknown ARC command: {args.arc_cmd}")
+        return 1
+
     def _anchor_track(self, args) -> int:
         """Track symbolic anchors across repository"""
         if not getattr(args, "json", False):
@@ -95,9 +107,7 @@ class AuroraDeveloperCLI:
                 print(json.dumps(payload, separators=(",", ":")))
             else:
                 if args.pattern:
-                    print(
-                        f"Found {total_anchors} anchors matching '{args.pattern}' in {len(found_anchors)} files:"
-                    )
+                    print(f"Found {total_anchors} anchors matching '{args.pattern}' in {len(found_anchors)} files:")
                 else:
                     print(f"Found {total_anchors} anchors in {len(found_anchors)} files:")
 
@@ -209,6 +219,85 @@ class AuroraDeveloperCLI:
             print(f"❌ Error sealing anchor thread: {e}")
             return 1
 
+    def _arc_analyze(self, args) -> int:
+        """Analyze an ARC chain export payload."""
+        if not args.payload:
+            print("❌ ARC payload path required")
+            return 1
+
+        try:
+            processor = ArcChainProcessor.from_file(args.payload)
+            summary = processor.build_summary()
+        except Exception as exc:
+            print(f"❌ Error analyzing ARC chain: {exc}")
+            return 1
+
+        if args.enhanced_out:
+            try:
+                Path(args.enhanced_out).write_text(
+                    json.dumps(processor.export_enhanced_payload(), indent=2),
+                    encoding="utf-8",
+                )
+                if not args.json:
+                    print(f"🗂️ Enhanced payload saved to: {args.enhanced_out}")
+            except Exception as exc:
+                print(f"⚠️  Failed to write enhanced payload: {exc}")
+
+        if args.json:
+            print(json.dumps(summary, separators=(",", ":")))
+            return 0
+
+        print("🧭 ARC Chain Summary")
+        print("=" * 40)
+        print(f"Schema: {summary.get('schema')}")
+        print(f"Thread: {summary.get('thread_id')}")
+        print(f"Events: {summary.get('total_events')} ({len(summary.get('event_types', {}))} types)")
+
+        timeline = summary.get("timeline", {})
+        print(f"Timeline: {timeline.get('start', 'unknown')} → {timeline.get('end', 'unknown')}")
+
+        participants = summary.get("participants", [])
+        if participants:
+            print(f"Participants ({len(participants)}): {', '.join(participants)}")
+
+        targets = summary.get("propagation_targets", [])
+        if targets:
+            print(f"Propagation targets: {', '.join(targets)}")
+
+        drift = summary.get("drift_metrics", {})
+        print(
+            "Drift Δ: max={max_delta:.3f}, min={min_delta:.3f}, |max|={max_abs:.3f}".format(
+                max_delta=drift.get("max_delta", 0.0),
+                min_delta=drift.get("min_delta", 0.0),
+                max_abs=drift.get("max_abs_delta", 0.0),
+            )
+        )
+        if drift.get("requires_attention"):
+            print("⚠️  Drift requires attention (≥1.0% detected)")
+
+        closure = summary.get("closure", {})
+        if closure.get("sealed"):
+            print(f"Closure: sealed by {closure.get('sealed_by')} at {closure.get('timestamp')}")
+            if closure.get("archive_ready"):
+                print("Archive ready: ✅")
+        else:
+            print("Closure: not sealed")
+
+        if summary.get("validation_passed"):
+            print("Validation: ✅")
+        else:
+            print("Validation: ⚠️  Checks pending")
+
+        anomalies = summary.get("anomalies", [])
+        if anomalies:
+            print("Anomalies detected:")
+            for item in anomalies:
+                print(f"  - {item}")
+        else:
+            print("Anomalies: none")
+
+        return 0
+
     def cmd_seal(self, args) -> int:
         """Handle memory sealing commands"""
         if not args.target:
@@ -267,11 +356,7 @@ class AuroraDeveloperCLI:
         try:
             print(f"🔄 Restoring state: {args.anchor_or_seal_id}")
 
-            result = self.memory_sealer.restore_sealed_state(
-                args.anchor_or_seal_id,
-                args.target_path,
-                args.dry
-            )
+            result = self.memory_sealer.restore_sealed_state(args.anchor_or_seal_id, args.target_path, args.dry)
 
             if result["status"] == "dry_run_complete":
                 print("🔍 Dry run - would perform these actions:")
@@ -406,12 +491,16 @@ class AuroraDeveloperCLI:
 
             if lineage1 and lineage2:
                 print("\n🔗 Lineage Comparison:")
-                print(f"  {args.anchor1}: Gen {lineage1.generation}, "
-                      f"{len(lineage1.ancestors)} ancestors, "
-                      f"{len(lineage1.descendants)} descendants")
-                print(f"  {args.anchor2}: Gen {lineage2.generation}, "
-                      f"{len(lineage2.ancestors)} ancestors, "
-                      f"{len(lineage2.descendants)} descendants")
+                print(
+                    f"  {args.anchor1}: Gen {lineage1.generation}, "
+                    f"{len(lineage1.ancestors)} ancestors, "
+                    f"{len(lineage1.descendants)} descendants"
+                )
+                print(
+                    f"  {args.anchor2}: Gen {lineage2.generation}, "
+                    f"{len(lineage2.ancestors)} ancestors, "
+                    f"{len(lineage2.descendants)} descendants"
+                )
 
                 # Find common ancestors
                 common_ancestors = set(lineage1.ancestors) & set(lineage2.ancestors)
@@ -468,7 +557,7 @@ class AuroraDeveloperCLI:
                     "lineages_mapped": len(lineages),
                     "drift": {k: len(v) for k, v in drift_issues.items()},
                     "repo": str(self.repo_path),
-                    "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "version": self.version,
                 }
                 print(json.dumps(payload, separators=(",", ":")))
@@ -508,6 +597,7 @@ Examples:
     aurora-cli anchor track --ext .md --json          # Track anchors in markdown, JSON output
     aurora-cli anchor track --pattern INFRA --since 2025-09-01
     aurora-cli anchor resolve T70_DOC_REORG           # Resolve specific anchor
+    aurora-cli arc analyze exports/arc.json --json    # Analyze ARC chain export
     aurora-cli seal tools/symbolic --verify           # Seal and verify directory
     aurora-cli restore T70_SEAL_123 --dry             # Dry run restore
     aurora-cli manifest --target T71_INFRA            # Generate manifest for T71
@@ -515,7 +605,7 @@ Examples:
     aurora-cli diff T70_DOC_REORG T71_INFRA           # Compare two anchors
     aurora-cli status                                 # Show system status
     aurora-cli status --json --since 2025-09-15       # Machine-readable status since a date
-"""
+""",
     )
 
     parser.add_argument("--version", action="version", version="Aurora CLI 1.0.0")
@@ -526,6 +616,18 @@ Examples:
     # Anchor tracking commands
     anchor_parser = subparsers.add_parser("anchor", help="Anchor tracking operations")
     anchor_subparsers = anchor_parser.add_subparsers(dest="anchor_cmd")
+
+    # ARC chain commands
+    arc_parser = subparsers.add_parser("arc", help="ARC chain export analysis")
+    arc_subparsers = arc_parser.add_subparsers(dest="arc_cmd")
+
+    analyze_parser = arc_subparsers.add_parser("analyze", help="Analyze ARC chain export")
+    analyze_parser.add_argument("payload", help="Path to ARC chain export JSON")
+    analyze_parser.add_argument("--json", action="store_true", help="Emit JSON output for machine parsing")
+    analyze_parser.add_argument(
+        "--enhanced-out",
+        help="Write enhanced payload (original + summary) to this file",
+    )
 
     # anchor track
     track_parser = anchor_subparsers.add_parser("track", help="Track symbolic anchors")
@@ -614,6 +716,8 @@ def main():
     # Route commands to appropriate handlers
     if args.command == "anchor":
         return cli.cmd_anchor(args)
+    elif args.command == "arc":
+        return cli.cmd_arc(args)
     elif args.command == "seal":
         return cli.cmd_seal(args)
     elif args.command == "restore":

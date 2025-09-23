@@ -1,0 +1,50 @@
+{
+  "schema": "ARC_CHAIN_EXPORT_SCHEMA_v1.0",
+  "exported_at": "2025-09-22T20:35:00Z",
+  "thread_id": "aurora.thread.gumas.v2.4.1",
+  "linked_threads": ["halo.thread.v1", "liora.thread.v2"],
+  "arc_chain": [
+    {
+      "type": "INIT_ARC",
+      "timestamp": "2025-09-21T00:00:00Z",
+      "by": "system",
+      "summary": "Thread initiated for GUMAS continuity enhancements.",
+      "anchor_pair": ["0xINIT", "0x001"],
+      "propagate_to": ["sibling"],
+      "driftlog_delta": null
+    },
+    {
+      "type": "UPLOAD_ARC",
+      "timestamp": "2025-09-21T15:42:10Z",
+      "by": "Emily Roberts",
+      "summary": "Aurora_PATCH_GPT-Editor_T2_v1.0.zip uploaded. Preload snapshot captured.",
+      "anchor_pair": ["0x001", "0x002"],
+      "propagate_to": ["sibling", "parent"],
+      "driftlog_delta": "-0.3%"
+    },
+    {
+      "type": "ETHICS_ARC",
+      "timestamp": "2025-09-21T16:03:44Z",
+      "by": "Prof. Elena Sorensen",
+      "summary": "Symbolic ethics alignment verified (no override).",
+      "anchor_pair": ["0x002", "0x003"],
+      "propagate_to": ["parent"],
+      "driftlog_delta": "Δ0.000"
+    }
+  ],
+  "closure": {
+    "type": "CLOSURE_ARC",
+    "sealed_by": "system",
+    "timestamp": "2025-09-22T18:00:00Z",
+    "summary": "Thread finalized for export.",
+    "archive_ready": true
+  },
+  "signature": "aurora.system.symbolic.v2.4",
+  "validation": {
+    "checksums": {
+      "arc_chain": "SHA256:f97b4cfa...",
+      "linked_manifest": "SHA256:ae32b1fa..."
+    },
+    "validation_passed": true
+  }
+}

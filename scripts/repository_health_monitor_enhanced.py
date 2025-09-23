@@ -1,24 +1,15 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-    import argparse
-from datetime import datetime
-from pathlib import Path
-import json
-import os
-import time
-
 Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring with alerts and automated remediation
 """
 
-
+import argparse
 import json
 import os
+import subprocess
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
@@ -45,11 +36,8 @@ class RepositoryHealthMonitor:
 
     def __init__(self, config_path: str = "config/health_monitor.json"):
         self.config = self._load_config(config_path)
-        
         self.thresholds = self.config.get("thresholds", self._default_thresholds())
-        
         self.alerts = self.config.get("alerts", {})
-        
         self.history_file = "logs/health_history.json"
 
     def _load_config(self, config_path: str) -> Dict:
@@ -57,12 +45,10 @@ class RepositoryHealthMonitor:
         try:
             with open(config_path, "r", encoding="utf-8") as f:
                 return json.load(f)
-        
         except FileNotFoundError:
             return self._default_config()
 
-    
-        def _default_config(self) -> Dict:
+    def _default_config(self) -> Dict:
         """Default monitoring configuration"""
         return {
             "thresholds": self._default_thresholds(),
@@ -116,33 +102,30 @@ class RepositoryHealthMonitor:
             large_files,
         )
 
-        
         return HealthMetrics(
-        timestamp=datetime.datetime.now().isoformat(),
+            timestamp=datetime.datetime.now().isoformat(),
             repo_size_mb=repo_size_mb,
-        file_count=file_count,
+            file_count=file_count,
             branch_count=branch_count,
-        zip_file_count=zip_file_count,
+            zip_file_count=zip_file_count,
             cache_files=cache_files,
-        large_files=large_files,
+            large_files=large_files,
             health_score=health_score,
-        issues=issues,
+            issues=issues,
             recommendations=recommendations,
         )
 
-    
-        def _get_repo_size(self) -> float:
+    def _get_repo_size(self) -> float:
         """Get repository size in MB"""
         try:
-        result = subprocess.run(                ["du", "-sm", "."],
+            result = subprocess.run(
+                ["du", "-sm", "."],
                 capture_output=True,
-        text=True,
+                text=True,
                 shell=False,
-        check=False,
+                check=False,
             )
-            
-        return float(result.stdout.split()[0])
-        
+            return float(result.stdout.split()[0])
         except (subprocess.CalledProcessError, ValueError):
             return 0.0
 
@@ -151,29 +134,28 @@ class RepositoryHealthMonitor:
         try:
             result = subprocess.run(
                 ["find", ".", "-type", "f"],
-        result = subprocess.run(                text=True,
-        shell=False,
+                capture_output=True,
+                text=True,
+                shell=False,
                 check=False,
             )
-            
-        return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
     def _get_branch_count(self) -> int:
         """Get remote branch count"""
         try:
-        result = subprocess.run(
+            result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
-        text=True,            result = subprocess.run(
-        check=False,
+                text=True,
+                shell=False,
+                check=False,
             )
-            
-        return len(
+            return len(
                 [line for line in result.stdout.strip().split("\n") if line.strip() and "origin/HEAD" not in line]
             )
-        
         except subprocess.CalledProcessError:
             return 0
 
@@ -181,12 +163,13 @@ class RepositoryHealthMonitor:
         """Get ZIP file count"""
         try:
             result = subprocess.run(
-                ["find", ".", "-name", "*.zip", "-type", ""],
-        capture_output=True,
+                ["find", ".", "-name", "*.zip", "-type", "f"],
+                capture_output=True,
                 text=True,
-        shell=False,
+                shell=False,
                 check=False,
-        result = subprocess.run(            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+            )
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
@@ -195,46 +178,44 @@ class RepositoryHealthMonitor:
         try:
             result = subprocess.run(
                 ["find", ".", "-name", "*.pyc", "-o", "-name", "__pycache__"],
-        capture_output=True,
+                capture_output=True,
                 text=True,
-        shell=False,
+                shell=False,
                 check=False,
             )
-            
-        return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+            return len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
         except subprocess.CalledProcessError:
             return 0
 
     def _find_large_files(self) -> List[Dict]:
         """Find files larger than threshold"""
         try:
-        threshold_mb = self.thresholds["large_file_mb"]
-            cmd = ["find", ".", "-type", "", "-size", f"+{threshold_mb}M"]
-        result = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
-        large_files = []
+            threshold_mb = self.thresholds["large_file_mb"]
+            cmd = ["find", ".", "-type", "f", "-size", f"+{threshold_mb}M"]
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
+
+            large_files = []
             for line in result.stdout.strip().split("\n"):
                 if not line.strip():
                     continue
 
-                try:            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
-        stat_result = subprocess.run(
+                try:
+                    # Get file size
+                    stat_result = subprocess.run(
                         ["du", "-m", line],
                         capture_output=True,
-        text=True,
+                        text=True,
                         shell=False,
-        check=False,
+                        check=False,
                     )
-        size_mb = float(stat_result.stdout.split()[0])
+                    size_mb = float(stat_result.stdout.split()[0])
 
-                    
-        large_files.append({"path": line, "size_mb": size_mb})
-                
-        except (subprocess.CalledProcessError, ValueError):
+                    large_files.append({"path": line, "size_mb": size_mb})
+                except (subprocess.CalledProcessError, ValueError):
                     continue
 
             return sorted(large_files, key=lambda x: x["size_mb"], reverse=True)
 
-        
         except subprocess.CalledProcessError:
             return []
 
@@ -256,82 +237,63 @@ class RepositoryHealthMonitor:
         if repo_size_mb > self.thresholds["repo_size_mb_critical"]:
             score -= 2.0
             issues.append(f"CRITICAL: Repository size {repo_size_mb}MB exceeds critical threshold")
-            
-        recommendations.append("Immediate cleanup of large files and archives required")
-        
+            recommendations.append("Immediate cleanup of large files and archives required")
         elif repo_size_mb > self.thresholds["repo_size_mb_warning"]:
             score -= 1.0
             issues.append(f"WARNING: Repository size {repo_size_mb}MB approaching limits")
-            
-        recommendations.append("Consider archiving old files and cleaning up")
+            recommendations.append("Consider archiving old files and cleaning up")
 
         # File count check
         if file_count > self.thresholds["file_count_critical"]:
             score -= 1.5
             issues.append(f"CRITICAL: File count {file_count} exceeds critical threshold")
-            
-        recommendations.append("Remove cache files and temporary artifacts")
-        
+            recommendations.append("Remove cache files and temporary artifacts")
         elif file_count > self.thresholds["file_count_warning"]:
             score -= 0.8
             issues.append(f"WARNING: File count {file_count} is high")
-            
-        recommendations.append("Review and clean unnecessary files")
+            recommendations.append("Review and clean unnecessary files")
 
         # Branch count check
         if branch_count > self.thresholds["branch_count_critical"]:
             score -= 1.2
             issues.append(f"CRITICAL: Branch count {branch_count} is too high")
-            
-        recommendations.append("Immediate branch cleanup required")
-        
+            recommendations.append("Immediate branch cleanup required")
         elif branch_count > self.thresholds["branch_count_warning"]:
             score -= 0.6
             issues.append(f"WARNING: Branch count {branch_count} needs attention")
-            
-        recommendations.append("Schedule branch cleanup")
+            recommendations.append("Schedule branch cleanup")
 
         # ZIP file check
         if zip_count > self.thresholds["zip_file_critical"]:
             score -= 1.0
             issues.append(f"CRITICAL: Too many ZIP files ({zip_count})")
-            
-        recommendations.append("Archive old ZIP files externally")
-        
+            recommendations.append("Archive old ZIP files externally")
         elif zip_count > self.thresholds["zip_file_warning"]:
             score -= 0.5
             issues.append(f"WARNING: Many ZIP files ({zip_count})")
-            
-        recommendations.append("Review and consolidate ZIP files")
+            recommendations.append("Review and consolidate ZIP files")
 
         # Cache files check
         if cache_files > self.thresholds["cache_files_critical"]:
             score -= 1.5
             issues.append(f"CRITICAL: Excessive cache files ({cache_files})")
-            
-        recommendations.append("Clean all cache files immediately")
-        
+            recommendations.append("Clean all cache files immediately")
         elif cache_files > self.thresholds["cache_files_warning"]:
             score -= 0.8
             issues.append(f"WARNING: Cache files present ({cache_files})")
-            
-        recommendations.append("Regular cache cleanup needed")
+            recommendations.append("Regular cache cleanup needed")
 
         # Large files check
         if large_files:
             score -= min(1.0, len(large_files) * 0.2)
-            
-        issues.append(f"Large files detected: {len(large_files)} files")
-            
-        recommendations.append("Review and archive large files")
+            issues.append(f"Large files detected: {len(large_files)} files")
+            recommendations.append("Review and archive large files")
 
-        
         return max(0.0, score), issues, recommendations
 
     def save_metrics(self, metrics: HealthMetrics):
         """Save metrics to history file"""
         history_path = Path(self.history_file)
-        
         history_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Load existing history
@@ -339,9 +301,8 @@ class RepositoryHealthMonitor:
         if history_path.exists():
             try:
                 with open(history_path, "r", encoding="utf-8") as f:
-        history = json.load(f)
-            
-        except (json.JSONDecodeError, FileNotFoundError):
+                    history = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
                 history = []
 
         # Add new metrics
@@ -357,14 +318,12 @@ class RepositoryHealthMonitor:
         with open(history_path, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2)
 
-    
-        def check_alerts(self, metrics: HealthMetrics):
+    def check_alerts(self, metrics: HealthMetrics):
         """Check if alerts should be triggered"""
         if metrics.health_score < 7.0:
             self._send_alert(metrics)
 
-    
-        def _send_alert(self, metrics: HealthMetrics):
+    def _send_alert(self, metrics: HealthMetrics):
         """Send health alert"""
         alert_message = self._format_alert_message(metrics)
 
@@ -376,13 +335,10 @@ class RepositoryHealthMonitor:
         if self.alerts.get("webhook_url"):
             self._send_webhook_alert(alert_message)
 
-        
         print(f"🚨 HEALTH ALERT TRIGGERED - Score: {metrics.health_score:.1f}/10")
-        
         print(alert_message)
 
-    
-        def _format_alert_message(self, metrics: HealthMetrics) -> str:
+    def _format_alert_message(self, metrics: HealthMetrics) -> str:
         """Format alert message"""
         lines = [
             "🚨 REPOSITORY HEALTH ALERT",
@@ -395,7 +351,6 @@ class RepositoryHealthMonitor:
         for issue in metrics.issues:
             lines.append(f"- {issue}")
 
-        
         lines.extend(
             [
                 "",
@@ -403,11 +358,9 @@ class RepositoryHealthMonitor:
             ]
         )
 
-        
         for rec in metrics.recommendations:
             lines.append(f"- {rec}")
 
-        
         lines.extend(
             [
                 "",
@@ -420,23 +373,19 @@ class RepositoryHealthMonitor:
             ]
         )
 
-        
         return "\n".join(lines)
 
-    
-        def _send_email_alert(self, message: str):
+    def _send_email_alert(self, message: str):
         """Send email alert"""
         # Implementation would depend on SMTP configuration
         print("📧 Email alert would be sent here")
 
-    
-        def _send_webhook_alert(self, message: str):
+    def _send_webhook_alert(self, message: str):
         """Send webhook alert"""
         # Implementation would depend on webhook service
         print("🔗 Webhook alert would be sent here")
 
-    
-        def generate_health_report(self, metrics: HealthMetrics) -> str:
+    def generate_health_report(self, metrics: HealthMetrics) -> str:
         """Generate comprehensive health report"""
         report_lines = [
             "# Repository Health Report",
@@ -455,38 +404,28 @@ class RepositoryHealthMonitor:
 
         if metrics.large_files:
             report_lines.extend(["## Large Files", ""])
-            
-        for file_info in metrics.large_files[:10]:
+            for file_info in metrics.large_files[:10]:
                 report_lines.append(f"- {file_info['path']} ({file_info['size_mb']:.1f}MB)")
 
-            
-        if len(metrics.large_files) > 10:
+            if len(metrics.large_files) > 10:
                 report_lines.append(f"- ... and {len(metrics.large_files) - 10} more")
 
-            
-        report_lines.append("")
+            report_lines.append("")
 
-        
         if metrics.issues:
             report_lines.extend(["## Issues Detected", ""])
-            
-        for issue in metrics.issues:
+            for issue in metrics.issues:
                 report_lines.append(f"- {issue}")
-            
-        report_lines.append("")
+            report_lines.append("")
 
-        
         if metrics.recommendations:
             report_lines.extend(["## Recommendations", ""])
-            
-        for rec in metrics.recommendations:
+            for rec in metrics.recommendations:
                 report_lines.append(f"- {rec}")
 
-        
         return "\n".join(report_lines)
 
-    
-        def run_monitoring_cycle(self):
+    def run_monitoring_cycle(self):
         """Run a single monitoring cycle"""
         print(f"🔍 Starting health check at {datetime.datetime.now()}")
 
@@ -507,22 +446,19 @@ class RepositoryHealthMonitor:
         report_file = f"logs/health_report_{timestamp}.md"
 
         os.makedirs(os.path.dirname(report_file), exist_ok=True)
-        
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        
         print(f"📊 Health Score: {metrics.health_score:.1f}/10")
-        
         print(f"📄 Report saved to: {report_file}")
 
-        
         return metrics
 
 
 def main():
     """Main monitoring function"""
-        parser = argparse.ArgumentParser(description="Repository health monitor")
+
+    parser = argparse.ArgumentParser(description="Repository health monitor")
     parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
     parser.add_argument(
         "--interval",
@@ -530,29 +466,24 @@ def main():
         default=60,
         help="Check interval in minutes (default: 60)",
     )
-        args = parser.parse_args()
-        monitor = RepositoryHealthMonitor()
 
-    
-        if args.continuous:
+    args = parser.parse_args()
+
+    monitor = RepositoryHealthMonitor()
+
+    if args.continuous:
         print("🔄 Starting continuous monitoring...")
-        
         while True:
             try:
                 monitor.run_monitoring_cycle()
-                
-        print(f"💤 Sleeping for {args.interval} minutes...")
-                
-        time.sleep(args.interval * 60)
-            
-        except KeyboardInterrupt:
+                print(f"💤 Sleeping for {args.interval} minutes...")
+                time.sleep(args.interval * 60)
+            except KeyboardInterrupt:
                 print("\n👋 Monitoring stopped by user")
-                
-        break
+                break
             except (OSError, ValueError, RuntimeError) as e:
                 print(f"❌ Error in monitoring cycle: {e}")
-                
-        time.sleep(60)  # Wait 1 minute before retrying
+                time.sleep(60)  # Wait 1 minute before retrying
     else:
         # Single run
         monitor.run_monitoring_cycle()

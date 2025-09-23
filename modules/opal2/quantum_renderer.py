@@ -38,6 +38,8 @@ class QuantumState(Enum):
 
 
 @dataclass
+
+
 class RenderContext:
     """Render context containing all rendering parameters"""
 
@@ -61,6 +63,8 @@ class RenderContext:
 
 
 @dataclass
+
+
 class RenderResult:
     """Render result containing output and metadata"""
 

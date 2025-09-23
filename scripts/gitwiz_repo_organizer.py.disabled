@@ -2,10 +2,6 @@
 """
 
     import argparse
-from pathlib import Path
-import hashlib
-import json
-import zipfile
 
 GITWiz Repository Organizer
 Advanced repository structure analysis and optimization engine
@@ -123,7 +119,7 @@ class RepositoryOrganizer:
                     analysis["security_issues"].extend(security_issues)
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error analyzing file {file_path}: {e}")
+            logger.warning("Error analyzing file {file_path}: {e}")
 
     def _analyze_zip_file(self, zip_path: Path) -> Dict[str, Any]:
         """Analyze ZIP file contents."""
@@ -160,7 +156,7 @@ class RepositoryOrganizer:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error analyzing ZIP {zip_path}: {e}")
+            logger.warning("Error analyzing ZIP {zip_path}: {e}")
             info["error"] = str(e)
 
         return info
@@ -223,7 +219,7 @@ class RepositoryOrganizer:
                 self.duplicate_files[content_hash] = file_path
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.debug(f"Error checking duplicates for {file_path}: {e}")
+            logger.debug("Error checking duplicates for {file_path}: {e}")
 
     def _scan_file_security(self, file_path: Path) -> List[Dict[str, Any]]:
         """Scan file for potential security issues."""
@@ -235,12 +231,12 @@ class RepositoryOrganizer:
 
             # Security patterns to check
             security_patterns = [
-                (rr'password\s*=\s*["\'][^"\']+["\']', "hardcoded_passwordr"),
-                (rr'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_keyr"),
-                (rr'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secretr"),
-                (rr'token\s*=\s*["\'][^"\']+["\']r', "hardcoded_token"),
-                (r"eval\s*\(", "eval_usage"),
-                (r"exec\s*\(", "exec_usage"),
+                (r'password\s*=\s*["\'][^"\']+["\']', "hardcoded_passwordr"),
+                (r'api_key\s*=\s*["\'][^"\']+["\']', "hardcoded_api_keyr"),
+                (r'secret\s*=\s*["\'][^"\']+["\']', "hardcoded_secretr"),
+                (r'token\s*=\s*["\'][^"\']+["\']r', "hardcoded_token"),
+                (rrr"eval\s*\(", "eval_usage"),
+                (rrr"exec\s*\(", "exec_usage"),
             ]
 
             for pattern, issue_type in security_patterns:
@@ -260,7 +256,7 @@ class RepositoryOrganizer:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.debug(f"Error scanning security for {file_path}: {e}")
+            logger.debug("Error scanning security for {file_path}: {e}")
 
         return issues
 
@@ -274,7 +270,7 @@ class RepositoryOrganizer:
                 {
                     "type": "archive_consolidation",
                     "priority": "high",
-                    "description": f"Consider consolidating {len(analysis['zip_archives'])} ZIP files",
+                    "description": "Consider consolidating {len(analysis['zip_archives'])} ZIP files",
                     "action": "Review and merge related archives",
                     "impact": "Reduce file count and improve organization",
                 }
@@ -287,7 +283,7 @@ class RepositoryOrganizer:
                 {
                     "type": "documentation_organization",
                     "priority": "medium",
-                    "description": f"Many documentation files ({len(doc_files)}) could be organized",
+                    "description": "Many documentation files ({len(doc_files)}) could be organized",
                     "action": "Create docs/ directory and categorize files",
                     "impact": "Improve repository navigation",
                 }
@@ -300,9 +296,9 @@ class RepositoryOrganizer:
                 {
                     "type": "duplicate_cleanup",
                     "priority": "medium",
-                    "description": f"Remove {len(analysis['duplicate_files'])} duplicate files",
+                    "description": "Remove {len(analysis['duplicate_files'])} duplicate files",
                     "action": "Delete duplicate files",
-                    "impact": f"Save {total_duplicate_size / (1024 * 1024):.1f}MB of space",
+                    "impact": "Save {total_duplicate_size / (1024 * 1024):.1f}MB of space",
                 }
             )
 
@@ -312,7 +308,7 @@ class RepositoryOrganizer:
                 {
                     "type": "large_file_optimization",
                     "priority": "low",
-                    "description": f"Review {len(analysis['large_files'])} large files",
+                    "description": "Review {len(analysis['large_files'])} large files",
                     "action": "Consider Git LFS or external storage",
                     "impact": "Improve repository performance",
                 }
@@ -328,7 +324,7 @@ class RepositoryOrganizer:
                     {
                         "type": "security_fixes",
                         "priority": "critical",
-                        "description": f"Fix {len(high_severity)} high-severity security issues",
+                        "description": "Fix {len(high_severity)} high-severity security issues",
                         "action": "Remove hardcoded credentials and sensitive data",
                         "impact": "Critical security improvement",
                     }
@@ -487,14 +483,14 @@ def main():
         if args.plan:
             print("📋 Generating reorganization plan...")
             plan = organizer.generate_reorganization_plan(analysis)
-            _ = {"analysis": analysis, "reorganization_plan": plan}
+            result = {"analysis": analysis, "reorganization_plan": plan}
         else:
-            _ = analysis
+            result = analysis
 
         if args.output:
             with open(args.output, "w") as f:
                 json.dump(result, f, indent=2, default=str)
-            print(f"✅ Results saved to {args.output}")
+            print("✅ Results saved to {args.output}")
         else:
             print(json.dumps(result, indent=2, default=str))
 

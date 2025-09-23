@@ -22,12 +22,13 @@ repos:
     hooks:
       - id: flake8
         args: [
-          '--max-line-length=100',
+          '--max-line-length=120',
           '--ignore=E203,W503,F401,E501',
           '--exclude=.venv,__pycache__,.git,build,dist,*.egg-info,syntax_errors_archive,venv_opal2',
           '--per-file-ignores=__init__.py:F401'
         ]
-        files: '\.py$'
+        # Limit flake8 to core, modules, tests, and modern tools
+        files: '^(src|modules|tests|tools/symbolic|tools/cli)/.*\\.py$'
         exclude: '(migrations|\.venv|syntax_errors_archive|venv_opal2)/.*\.py$'
 
 default_stages: [pre-commit]

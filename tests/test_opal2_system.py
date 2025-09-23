@@ -7,10 +7,6 @@ Opal2 Modular System - Test Suite (Simplified)
 Basic testing for Opal2 concepts without complex imports
 """
 
-import shutil
-import tempfile
-from pathlib import Path
-
 import pytest
 
 
@@ -104,13 +100,11 @@ class TestOpal2Integration:
         """Set up test environment"""
         self.temp_dir = tempfile.mkdtemp()
 
-    
-        def teardown_method(self):
+    def teardown_method(self):
         """Clean up test environment"""
         shutil.rmtree(self.temp_dir)
 
-    
-        def test_opal2_config_management(self):
+    def test_opal2_config_management(self):
         """Test configuration management concept"""
         config_file = Path(self.temp_dir) / "opal2_config.json"
 
@@ -121,12 +115,9 @@ class TestOpal2Integration:
         }
 
         # Write config (simulated)
-        
         config_file.write_text("mock_config")
 
-        
         assert config_file.exists()
-        
         assert config_data["renderer"]["default_engine"] == "webgl"
         assert config_data["cache"]["enabled"] is True
 
@@ -139,11 +130,9 @@ class TestOpal2Integration:
 
         assert len(plugin_registry) == 2
         assert all(plugin["type"] == "renderer" for plugin in plugin_registry.values())
-        
         assert all(plugin["enabled"] for plugin in plugin_registry.values())
 
-    
-        def test_opal2_performance_monitoring(self):
+    def test_opal2_performance_monitoring(self):
         """Test performance monitoring concept"""
         performance_metrics = {
             "webgl": {"average_render_time": 0.05, "total_renders": 100, "cache_hit_rate": 0.85},

@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """
-
-    import argparse
-from datetime import datetime
-from pathlib import Path
-import json
-import subprocess
-import sys
-
 GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
 """
 
+import argparse
+import datetime
+import json
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Dict
+
+
 
 # Import the enhanced GitWiz with lint cleanup integration
 try:
-    from gitwiz_enhanced import EnhancedGITWiz
+    from gitwiz_enhanced import GitWizEnhanced as EnhancedGITWiz
 except ImportError:
     EnhancedGITWiz = None
 
@@ -25,9 +26,7 @@ class GITWizWorkflowOrchestrator:
 
     def __init__(self, project_root: Path = None):
         self.project_root = project_root or Path.cwd()
-        
         self.start_time = datetime.utcnow()
-        
         self.workflow_log = []
 
     def log_step(self, step: str, status: str, details: str = ""):
@@ -42,11 +41,9 @@ class GITWizWorkflowOrchestrator:
         status_emoji = (
             "✅" if status == "success" else "❌" if status == "error" else "🔄"
         )
-        
-        print(f"{status_emoji} {step}: {details}")
+        print("{status_emoji} {step}: {details}")
 
-    
-        def execute_full_optimization_workflow(
+    def execute_full_optimization_workflow(
         self, dry_run: bool = True
     ) -> Dict[str, Any]:
         """Execute the complete optimization workflow."""
@@ -61,84 +58,65 @@ class GITWizWorkflowOrchestrator:
         }
 
         print("🚀 GITWIZ ENHANCED - FULL OPTIMIZATION WORKFLOW")
-        
         print("=" * 70)
-        
-        print(f"Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
-        
-        print(f"Started: {self.start_time.isoformat()}")
-        
+        print("Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
+        print("Started: {self.start_time.isoformat()}")
         print("=" * 70)
 
         # Stage 1: Repository Analysis
         self.log_step("Repository Analysis", "running", "Analyzing current state...")
-        
         try:
             if dry_run:
                 analysis_result = self._mock_repository_analysis()
-            
-        else:
-        analysis_result = self._run_repository_analysis()
-            
-        workflow_result["stages"]["analysis"] = analysis_result
+            else:
+                analysis_result = self._run_repository_analysis()
+            workflow_result["stages"]["analysis"] = analysis_result
             self.log_step(
                 "Repository Analysis",
                 "success",
-                f"Found {analysis_result.get('file_count', 0)} files",
+                "Found {analysis_result.get('file_count', 0)} files",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Repository Analysis", "error", str(e))
-            
-        workflow_result["stages"]["analysis"] = {"error": str(e)}
+            workflow_result["stages"]["analysis"] = {"error": str(e)}
 
         # Stage 2: Dependency Management
         self.log_step(
             "Dependency Management", "running", "Scanning and updating dependencies..."
         )
-        
         try:
             if dry_run:
                 dep_result = self._mock_dependency_update()
-            
-        else:
-        dep_result = self._run_dependency_update()
-            
-        workflow_result["stages"]["dependencies"] = dep_result
+            else:
+                dep_result = self._run_dependency_update()
+            workflow_result["stages"]["dependencies"] = dep_result
             outdated_count = len(
                 dep_result.get("python_scan", {}).get("outdated", [])
             ) + len(dep_result.get("node_scan", {}).get("outdated", []))
-            
-        self.log_step(
+            self.log_step(
                 "Dependency Management",
                 "success",
-                f"Processed {outdated_count} outdated packages",
+                "Processed {outdated_count} outdated packages",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Dependency Management", "error", str(e))
-            
-        workflow_result["stages"]["dependencies"] = {"error": str(e)}
+            workflow_result["stages"]["dependencies"] = {"error": str(e)}
 
         # Stage 3: Archive Optimization
         self.log_step(
             "Archive Optimization", "running", "Analyzing and optimizing ZIP files..."
         )
-        
         try:
             archive_result = self._optimize_archives(dry_run)
-            
-        workflow_result["stages"]["archives"] = archive_result
+            workflow_result["stages"]["archives"] = archive_result
             self.log_step(
                 "Archive Optimization",
                 "success",
-                f"Analyzed {archive_result.get('total_archives', 0)} ZIP files",
+                "Analyzed {archive_result.get('total_archives', 0)} ZIP files",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Archive Optimization", "error", str(e))
-            
-        workflow_result["stages"]["archives"] = {"error": str(e)}
+            workflow_result["stages"]["archives"] = {"error": str(e)}
 
         # Stage 4: Documentation Organization
         self.log_step(
@@ -146,100 +124,79 @@ class GITWizWorkflowOrchestrator:
             "running",
             "Organizing documentation structure...",
         )
-        
         try:
             doc_result = self._organize_documentation(dry_run)
-            
-        workflow_result["stages"]["documentation"] = doc_result
+            workflow_result["stages"]["documentation"] = doc_result
             self.log_step(
                 "Documentation Organization",
                 "success",
-                f"Processed {doc_result.get('total_docs', 0)} documentation files",
+                "Processed {doc_result.get('total_docs', 0)} documentation files",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Documentation Organization", "error", str(e))
-            
-        workflow_result["stages"]["documentation"] = {"error": str(e)}
+            workflow_result["stages"]["documentation"] = {"error": str(e)}
 
         # Stage 5: Security Hardening
         self.log_step(
             "Security Hardening", "running", "Applying security improvements..."
         )
-        
         try:
             security_result = self._apply_security_hardening(dry_run)
-            
-        workflow_result["stages"]["security"] = security_result
+            workflow_result["stages"]["security"] = security_result
             self.log_step(
                 "Security Hardening",
                 "success",
-                f"Applied {len(security_result.get('improvements', []))} security improvements",
+                "Applied {len(security_result.get('improvements', []))} security improvements",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Security Hardening", "error", str(e))
-            
-        workflow_result["stages"]["security"] = {"error": str(e)}
+            workflow_result["stages"]["security"] = {"error": str(e)}
 
         # Stage 6: Repository Structure Optimization
         self.log_step(
             "Structure Optimization", "running", "Optimizing repository structure..."
         )
-        
         try:
             structure_result = self._optimize_repository_structure(dry_run)
-            
-        workflow_result["stages"]["structure"] = structure_result
+            workflow_result["stages"]["structure"] = structure_result
             self.log_step(
                 "Structure Optimization",
                 "success",
-                f"Applied {len(structure_result.get('optimizations', []))} structural improvements",
+                "Applied {len(structure_result.get('optimizations', []))} structural improvements",
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Structure Optimization", "error", str(e))
-            
-        workflow_result["stages"]["structure"] = {"error": str(e)}
+            workflow_result["stages"]["structure"] = {"error": str(e)}
 
         # Stage 7: Final Validation
         self.log_step("Final Validation", "running", "Validating all changes...")
-        
         try:
             validation_result = self._validate_changes(dry_run)
-            
-        workflow_result["stages"]["validation"] = validation_result
+            workflow_result["stages"]["validation"] = validation_result
             self.log_step(
                 "Final Validation", "success", "All changes validated successfully"
             )
-        
         except (OSError, ValueError, RuntimeError) as e:
             self.log_step("Final Validation", "error", str(e))
-            
-        workflow_result["stages"]["validation"] = {"error": str(e)}
+            workflow_result["stages"]["validation"] = {"error": str(e)}
 
         # Calculate overall success
         successful_stages = sum(
             1 for stage in workflow_result["stages"].values() if "error" not in stage
         )
         total_stages = len(workflow_result["stages"])
-        
         workflow_result["overall_success"] = successful_stages == total_stages
 
         # Generate final report
         end_time = datetime.utcnow()
-        
         workflow_result["end_time"] = end_time.isoformat()
-        
         workflow_result["duration_seconds"] = (
             end_time - self.start_time
         ).total_seconds()
-        
         workflow_result["log"] = self.workflow_log
 
         self._print_final_report(workflow_result)
 
-        
         return workflow_result
 
     def execute_enhanced_quality_workflow(
@@ -258,17 +215,14 @@ class GITWizWorkflowOrchestrator:
         workflow_start = datetime.utcnow()
         logger_prefix = "🚀 ENHANCED QUALITY WORKFLOW"
 
-        print(f"{logger_prefix}")
-        
+        print("{logger_prefix}")
         print("=" * 70)
-        
         print(
-            f"Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}"
+            "Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}"
         )
-        
-        print(f"Started: {workflow_start.isoformat()}")
-        
+        print("Started: {workflow_start.isoformat()}")
         print("=" * 70)
+
         workflow_result = {
             "workflow_name": "enhanced_quality_workflow",
             "start_time": workflow_start.isoformat(),
@@ -285,131 +239,106 @@ class GITWizWorkflowOrchestrator:
         if EnhancedGITWiz:
             try:
                 enhanced_gitwiz = EnhancedGITWiz(self.project_root)
-                
-        self.log_step(
+                self.log_step(
                     "Enhanced GitWiz Initialization",
                     "success",
                     "GitWiz Enhanced loaded successfully",
                 )
-            
-        except Exception as e:
+            except Exception as e:
                 self.log_step("Enhanced GitWiz Initialization", "error", str(e))
 
         # Stage 1: Comprehensive Lint Scan
         self.log_step(
             "Comprehensive Lint Scan", "running", "Scanning for code quality issues..."
         )
-        
         try:
             if enhanced_gitwiz and enhanced_gitwiz.lint_cleanup_manager:
-        lint_scan_results = (
+                lint_scan_results = (
                     enhanced_gitwiz.lint_cleanup_manager.comprehensive_lint_scan()
                 )
-                
-        workflow_result["stages"]["lint_scan"] = lint_scan_results
+                workflow_result["stages"]["lint_scan"] = lint_scan_results
 
                 total_issues = lint_scan_results.get("summary", {}).get(
                     "total_issues", 0
                 )
-                
-        self.log_step(
+                self.log_step(
                     "Comprehensive Lint Scan",
                     "success",
-                    f"Found {total_issues} issues across multiple tools",
+                    "Found {total_issues} issues across multiple tools",
                 )
-            
-        else:
+            else:
                 # Fallback to basic analysis
-        basic_results = self._run_basic_lint_scan()
-                
-        workflow_result["stages"]["lint_scan"] = basic_results
+                basic_results = self._run_basic_lint_scan()
+                workflow_result["stages"]["lint_scan"] = basic_results
                 self.log_step(
                     "Comprehensive Lint Scan", "success", "Basic lint scan completed"
                 )
-        
         except Exception as e:
             self.log_step("Comprehensive Lint Scan", "error", str(e))
-            
-        workflow_result["stages"]["lint_scan"] = {"error": str(e)}
+            workflow_result["stages"]["lint_scan"] = {"error": str(e)}
 
         # Stage 2: Automated Fixing (if not dry run)
-        
         if not dry_run:
             self.log_step("Automated Fixing", "running", "Applying automated fixes...")
-            
-        try:
+            try:
                 if enhanced_gitwiz and enhanced_gitwiz.lint_cleanup_manager:
                     fix_results = (
                         enhanced_gitwiz.lint_cleanup_manager.automated_fix_workflow(
-        dry_run=False
+                            dry_run=False
                         )
                     )
-                    
-        workflow_result["stages"]["automated_fixing"] = fix_results
+                    workflow_result["stages"]["automated_fixing"] = fix_results
 
                     total_fixes = fix_results.get("total_fixes", 0)
-                    
-        self.log_step(
+                    self.log_step(
                         "Automated Fixing",
                         "success",
-                        f"Applied {total_fixes} automated fixes",
+                        "Applied {total_fixes} automated fixes",
                     )
-                
-        else:
+                else:
                     # Fallback to basic fixing
-        basic_fix_results = self._run_basic_automated_fixes()
-                    
-        workflow_result["stages"]["automated_fixing"] = basic_fix_results
+                    basic_fix_results = self._run_basic_automated_fixes()
+                    workflow_result["stages"]["automated_fixing"] = basic_fix_results
                     self.log_step(
                         "Automated Fixing", "success", "Basic automated fixes completed"
                     )
-            
-        except Exception as e:
+            except Exception as e:
                 self.log_step("Automated Fixing", "error", str(e))
-                
-        workflow_result["stages"]["automated_fixing"] = {"error": str(e)}
+                workflow_result["stages"]["automated_fixing"] = {"error": str(e)}
 
         # Stage 3: Intelligent Priority Fixing (if aggressive)
-        
         if aggressive and enhanced_gitwiz and enhanced_gitwiz.lint_cleanup_manager:
             self.log_step(
                 "Priority Fixing", "running", "Applying intelligent priority fixes..."
             )
-            
-        try:
+            try:
                 priority_results = (
                     enhanced_gitwiz.lint_cleanup_manager.intelligent_priority_fixing()
                 )
-                
-        workflow_result["stages"]["priority_fixing"] = priority_results
+                workflow_result["stages"]["priority_fixing"] = priority_results
 
                 high_priority_fixes = priority_results.get(
                     "high_priority_fixes", {}
                 ).get("fixes_successful", 0)
-                
-        self.log_step(
+                self.log_step(
                     "Priority Fixing",
                     "success",
-                    f"Applied {high_priority_fixes} high-priority fixes",
+                    "Applied {high_priority_fixes} high-priority fixes",
                 )
-            
-        except Exception as e:
+            except Exception as e:
                 self.log_step("Priority Fixing", "error", str(e))
-                
-        workflow_result["stages"]["priority_fixing"] = {"error": str(e)}
+                workflow_result["stages"]["priority_fixing"] = {"error": str(e)}
 
         # Stage 4: Repository Optimization
         self.log_step(
             "Repository Optimization", "running", "Optimizing repository structure..."
         )
-        
         try:
             if enhanced_gitwiz:
                 optimization_results = enhanced_gitwiz.intelligent_maintenance_workflow(
-        aggressive=aggressive
+                    aggressive=aggressive
                 )
-                
-        workflow_result["stages"][
+                workflow_result["stages"][
                     "repository_optimization"
                 ] = optimization_results
                 self.log_step(
@@ -417,8 +346,7 @@ class GITWizWorkflowOrchestrator:
                     "success",
                     "Intelligent maintenance completed",
                 )
-            
-        else:
+            else:
                 # Fallback optimization
                 basic_optimization = {"message": "Basic optimization completed"}
                 workflow_result["stages"][
@@ -427,33 +355,27 @@ class GITWizWorkflowOrchestrator:
                 self.log_step(
                     "Repository Optimization", "success", "Basic optimization completed"
                 )
-        
         except Exception as e:
             self.log_step("Repository Optimization", "error", str(e))
-            
-        workflow_result["stages"]["repository_optimization"] = {"error": str(e)}
+            workflow_result["stages"]["repository_optimization"] = {"error": str(e)}
 
         # Stage 5: Quality Assessment
         self.log_step(
             "Quality Assessment", "running", "Assessing final code quality..."
         )
-        
         try:
             if enhanced_gitwiz:
                 quality_results = enhanced_gitwiz.comprehensive_code_quality_check()
-                
-        workflow_result["stages"]["quality_assessment"] = quality_results
+                workflow_result["stages"]["quality_assessment"] = quality_results
 
                 quality_score = quality_results.get("quality_score", 0)
-                
-        self.log_step(
+                self.log_step(
                     "Quality Assessment",
                     "success",
-                    f"Code quality score: {quality_score}/100",
+                    "Code quality score: {quality_score}/100",
                 )
-            
-        else:
-        basic_quality = {
+            else:
+                basic_quality = {
                     "quality_score": 85,
                     "message": "Basic quality assessment",
                 }
@@ -463,46 +385,36 @@ class GITWizWorkflowOrchestrator:
                     "success",
                     "Basic quality assessment completed",
                 )
-        
         except Exception as e:
             self.log_step("Quality Assessment", "error", str(e))
-            
-        workflow_result["stages"]["quality_assessment"] = {"error": str(e)}
+            workflow_result["stages"]["quality_assessment"] = {"error": str(e)}
 
         # Calculate overall success and improvements
         successful_stages = sum(
             1
             for stage in workflow_result["stages"].values()
-            
-        if isinstance(stage, dict) and "error" not in stage
+            if isinstance(stage, dict) and "error" not in stage
         )
         total_stages = len(workflow_result["stages"])
-        
         workflow_result["overall_success"] = successful_stages == total_stages
 
         # Generate recommendations
         workflow_result["recommendations"] = self._generate_enhanced_recommendations(
             workflow_result
         )
+
         execution_time = (datetime.utcnow() - workflow_start).total_seconds()
-        
         workflow_result["execution_time"] = execution_time
 
         print("\n" + "=" * 70)
-        
-        print(f"✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
-        
-        print(f"Success rate: {successful_stages}/{total_stages} stages")
-        
+        print("✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
+        print("Success rate: {successful_stages}/{total_stages} stages")
         if workflow_result["recommendations"]:
             print("🎯 Key Recommendations:")
-            
-        for rec in workflow_result["recommendations"][:3]:
-                print(f"  • {rec}")
-        
+            for rec in workflow_result["recommendations"][:3]:
+                print("  • {rec}")
         print("=" * 70)
 
-        
         return workflow_result
 
     def _mock_repository_analysis(self) -> Dict[str, Any]:
@@ -521,11 +433,11 @@ class GITWizWorkflowOrchestrator:
         # This would call the enhanced GITWiz analysis
         result = subprocess.run(
             [sys.executable, "gitwiz_enhanced_demo.py"],
-        capture_output=True,
+            capture_output=True,
             text=True,
-        cwd=self.project_root,
+            cwd=self.project_root,
             shell=False,
-        check=False,
+            check=False,
         )
 
         # Parse the output or return basic info
@@ -541,20 +453,22 @@ class GITWizWorkflowOrchestrator:
         }
 
     def _run_dependency_update(self) -> Dict[str, Any]:
-        """Run actual dependency update."""        result = subprocess.run(            [sys.executable, "scripts/gitwiz_dependency_updater.py", "--comprehensive"],
-        capture_output=True,
+        """Run actual dependency update."""
+        result = subprocess.run(
+            [sys.executable, "scripts/gitwiz_dependency_updater.py", "--comprehensive"],
+            capture_output=True,
             text=True,
-        cwd=self.project_root,
+            cwd=self.project_root,
             shell=False,
-        check=False,
+            check=False,
         )
 
-        
         return {"dependency_update_completed": True, "returncode": result.returncode}
 
     def _optimize_archives(self, dry_run: bool) -> Dict[str, Any]:
         """Optimize ZIP archives."""
         zip_files = list(self.project_root.rglob("*.zip"))
+
         optimization_result = {
             "total_archives": len(zip_files),
             "optimizations": [],
@@ -572,7 +486,6 @@ class GITWizWorkflowOrchestrator:
                         "potential_savings": "15-25%",
                     }
                 )
-        
         else:
             # Actual optimization would go here
             pass
@@ -586,6 +499,7 @@ class GITWizWorkflowOrchestrator:
             + list(self.project_root.rglob("*.txt"))
             + list(self.project_root.rglob("*.rst"))
         )
+
         org_result = {
             "total_docs": len(doc_files),
             "reorganizations": [],
@@ -599,8 +513,7 @@ class GITWizWorkflowOrchestrator:
                 for f in doc_files
                 if any(
                     word in f.name.lower()
-                    
-        for word in ["status", "complete", "ready", "report"]
+                    for word in ["status", "complete", "ready", "report"]
                 )
             ]
 
@@ -610,11 +523,10 @@ class GITWizWorkflowOrchestrator:
                         "action": "move_status_files",
                         "files": len(status_files),
                         "target": "docs/status/",
-                        "description": f"Move {len(status_files)} status files to organized directory",
+                        "description": "Move {len(status_files)} status files to organized directory",
                     }
                 )
 
-        
         return org_result
 
     def _apply_security_hardening(self, dry_run: bool) -> Dict[str, Any]:
@@ -639,7 +551,6 @@ class GITWizWorkflowOrchestrator:
                     {"action": improvement, "status": "planned"}
                 )
 
-        
         return security_result
 
     def _optimize_repository_structure(self, dry_run: bool) -> Dict[str, Any]:
@@ -664,7 +575,6 @@ class GITWizWorkflowOrchestrator:
                     {"action": optimization, "status": "planned"}
                 )
 
-        
         return structure_result
 
     def _validate_changes(self, dry_run: bool) -> Dict[str, Any]:
@@ -682,13 +592,13 @@ class GITWizWorkflowOrchestrator:
                 # Check git status
                 result = subprocess.run(
                     ["git", "status", "--porcelain"],
-        result = subprocess.run(                    text=True,
-        cwd=self.project_root,
+                    capture_output=True,
+                    text=True,
+                    cwd=self.project_root,
                     shell=False,
-        check=False,
+                    check=False,
                 )
-                
-        validation_result["git_status_clean"] = len(result.stdout.strip()) == 0
+                validation_result["git_status_clean"] = len(result.stdout.strip()) == 0
 
                 # Run basic linting if available
                 if (self.project_root / "scripts" / "gitwiz_enhanced.py").exists():
@@ -699,109 +609,80 @@ class GITWizWorkflowOrchestrator:
                             "py_compile",
                             "scripts/gitwiz_enhanced.py",
                         ],
-        capture_output=True,
+                        capture_output=True,
                         cwd=self.project_root,
-        shell=False,
+                        shell=False,
                         check=False,
                     )
-                    
-        validation_result["linting_passed"] = lint_result.returncode == 0
+                    validation_result["linting_passed"] = lint_result.returncode == 0
 
             except (OSError, ValueError, RuntimeError) as e:
                 validation_result["validation_error"] = str(e)
 
-        
         return validation_result
 
     def _print_final_report(self, workflow_result: Dict[str, Any]):
         """Print comprehensive final report."""
         print("\n" + "=" * 70)
-        
         print("🎉 GITWIZ OPTIMIZATION WORKFLOW COMPLETE")
-        
         print("=" * 70)
 
-        
-        print(f"Duration: {workflow_result['duration_seconds']:.1f} seconds")
-        
-        print(f"Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
-        
+        print("Duration: {workflow_result['duration_seconds']:.1f} seconds")
+        print("Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
         print(
-            f"Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}"
+            "Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}"
         )
-        
         print()
 
-        
         print("📊 STAGE SUMMARY:")
-        
         print("-" * 40)
-        
         for stage_name, stage_result in workflow_result["stages"].items():
             status = "❌ FAILED" if "error" in stage_result else "✅ SUCCESS"
-            print(f"{stage_name.title().replace('_', ' ')}: {status}")
+            print("{stage_name.title().replace('_', ' ')}: {status}")
 
-        
         print()
-        
         print("🎯 KEY ACHIEVEMENTS:")
-        
         print("-" * 40)
 
         # Extract key metrics
         analysis = workflow_result["stages"].get("analysis", {})
-        
         if "file_count" in analysis:
-            print(f"• Analyzed {analysis['file_count']} files")
+            print("• Analyzed {analysis['file_count']} files")
+
         archives = workflow_result["stages"].get("archives", {})
-        
         if "total_archives" in archives:
-            print(f"• Processed {archives['total_archives']} ZIP archives")
+            print("• Processed {archives['total_archives']} ZIP archives")
+
         deps = workflow_result["stages"].get("dependencies", {})
-        
         if "python_scan" in deps:
             outdated = len(deps["python_scan"].get("outdated", []))
-            
-        print(f"• Found {outdated} outdated Python packages")
-        docs = workflow_result["stages"].get("documentation", {})
-        
-        if "total_docs" in docs:
-            print(f"• Organized {docs['total_docs']} documentation files")
-        security = workflow_result["stages"].get("security", {})
-        
-        if "improvements" in security:
-            print(f"• Applied {len(security['improvements'])} security improvements")
+            print("• Found {outdated} outdated Python packages")
 
-        
+        docs = workflow_result["stages"].get("documentation", {})
+        if "total_docs" in docs:
+            print("• Organized {docs['total_docs']} documentation files")
+
+        security = workflow_result["stages"].get("security", {})
+        if "improvements" in security:
+            print("• Applied {len(security['improvements'])} security improvements")
+
         print()
-        
         if workflow_result["dry_run"]:
             print("🔄 NEXT STEPS (to apply changes):")
-            
-        print("-" * 40)
-            
-        print("1. Review the analysis results above")
-            
-        print("2. Run without --dry-run flag to apply changes:")
-            
-        print(
+            print("-" * 40)
+            print("1. Review the analysis results above")
+            print("2. Run without --dry-run flag to apply changes:")
+            print(
                 "   python3 scripts/gitwiz_workflow_orchestrator.py --full-optimization"
             )
-            
-        print("3. Test the changes thoroughly")
-            
-        print("4. Commit and push the optimizations")
-        
+            print("3. Test the changes thoroughly")
+            print("4. Commit and push the optimizations")
         else:
             print("✅ OPTIMIZATION COMPLETE!")
-            
-        print("-" * 40)
-            
-        print("All optimizations have been applied successfully.")
-            
-        print("Consider running tests and committing the changes.")
+            print("-" * 40)
+            print("All optimizations have been applied successfully.")
+            print("Consider running tests and committing the changes.")
 
-        
         print("\n" + "=" * 70)
 
 
@@ -826,50 +707,40 @@ def main():
     parser.add_argument(
         "--live", action="store_true", help="Live execution mode (overrides dry-run)"
     )
-        args = parser.parse_args()
+
+    args = parser.parse_args()
 
     # Override dry-run if live is specified
     dry_run = args.dry_run and not args.live
-        orchestrator = GITWizWorkflowOrchestrator()
 
-    
-        if args.full_optimization:
-        _ = orchestrator.execute_full_optimization_workflow(dry_run=dry_run)
+    orchestrator = GITWizWorkflowOrchestrator()
+
+    if args.full_optimization:
+        result = orchestrator.execute_full_optimization_workflow(dry_run=dry_run)
 
         # Save detailed report
         report_file = Path("gitwiz_optimization_report.json")
-        
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, default=str)
-        
-        print(f"\n📄 Detailed report saved to: {report_file}")
+        print("\n📄 Detailed report saved to: {report_file}")
 
-    
-        elif args.security_audit:
+    elif args.security_audit:
         print("🔒 Security-focused workflow would run here")
 
-    
-        elif args.maintenance:
+    elif args.maintenance:
         print("🔧 Maintenance workflow would run here")
 
-    
-        else:
+    else:
         parser.print_help()
-        
         print("\n🚀 GITWiz Workflow Orchestrator")
-        
         print("Comprehensive automation for repository optimization")
-        
         print("\nUsage examples:")
-        
         print(
             "  python3 scripts/gitwiz_workflow_orchestrator.py --full-optimization --dry-run"
         )
-        
         print(
             "  python3 scripts/gitwiz_workflow_orchestrator.py --full-optimization --live"
         )
-        
         print("  python3 scripts/gitwiz_workflow_orchestrator.py --security-audit")
 
 

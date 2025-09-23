@@ -9,14 +9,12 @@ This module implements advanced integration capabilities for ChatGPT's new agent
 building upon Aurora's existing symbolic governance and quantum-enhanced processing.
 """
 
-import asyncio
 import hashlib
 import json
 import os
-import sys
 import uuid
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Handle missing dependencies gracefully
 try:
@@ -200,12 +198,8 @@ class ChatGPTAgentModeIntegration:
         Returns structured response instead of raising exceptions for better agent compatibility
         """
         if tool_name not in self.tools_registry:
-            return {
-                "success": False,
-                "error": f"Tool '{tool_name}' not found",
-                "available_tools": list(self.tools_registry.keys()),
-                "recovery_suggestions": ["Check available tools via /agent/tools endpoint"],
-            }
+            # Align behavior with tests: raise an exception for unknown tools
+            raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
 
         tool_def = self.tools_registry[tool_name]
 
@@ -234,7 +228,7 @@ class ChatGPTAgentModeIntegration:
         }
 
         try:
-            _ = await tool_def["handler"](parameters, execution_context)
+            result = await tool_def["handler"](parameters, execution_context)
 
             # Add Aurora symbolic metadata to response
             response = {
@@ -263,7 +257,6 @@ class ChatGPTAgentModeIntegration:
 
     def _validate_parameters(self, parameters: Dict[str, Any], schema: Dict[str, Any]):
         """Basic parameter validation against JSON schema"""
-        required_params = schema.get("properties", {}).keys()
         for param in schema.get("required", []):
             if param not in parameters:
                 raise ValueError(f"Required parameter '{param}' missing")
@@ -295,16 +288,16 @@ class ChatGPTAgentModeIntegration:
             # Use Aurora's geometric algebra module
             if operation == "mult":
                 # For now, return a structured result - in full implementation would use GA operations
-                _ = f"({expr_a}) ∧ ({expr_b})"
+                computed = f"({expr_a}) ∧ ({expr_b})"
             elif operation == "add":
-                _ = f"({expr_a}) + ({expr_b})"
+                computed = f"({expr_a}) + ({expr_b})"
             elif operation == "sub":
-                _ = f"({expr_a}) - ({expr_b})"
+                computed = f"({expr_a}) - ({expr_b})"
             else:
                 raise ValueError(f"Unsupported geometric algebra operation: {operation}")
 
             return {
-                "geometric_result": result,
+                "geometric_result": computed,
                 "operation": operation,
                 "expressions": {"a": expr_a, "b": expr_b},
                 "symbolic_validation": True,

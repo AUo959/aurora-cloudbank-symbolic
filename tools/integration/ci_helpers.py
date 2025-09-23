@@ -1,20 +1,12 @@
-import subprocess
-
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
-
-from tools.integration.ci_helpers import CIHelpers
-            import sys
-            from symbolic.anchor_tracker import SymbolicAnchorTracker
-            import sys
-            from symbolic.memory_sealer import MemorySealingEngine
-    import argparse
-from datetime import datetime
-from pathlib import Path
-import json
-
 CI/CD Integration Helpers
 Part of T71 Symbolic Infrastructure Genesis
+"""
+
+import argparse
+import subprocess
+import sys
 
 Automation helpers for continuous integration and deployment
 """
@@ -31,15 +23,14 @@ class CIHelpers:
 
     def __init__(self, repo_path: str = "."):
         self.repo_path = Path(repo_path).resolve()
-        
         self.ci_dir = self.repo_path / ".aurora" / "ci"
         self.ci_dir.mkdir(parents=True, exist_ok=True)
-        
         self.version = "1.0.0"
 
     def run_pre_commit_checks(self) -> Dict[str, Any]:
         """Run comprehensive pre-commit validation"""
         print("🔍 Running pre-commit checks...")
+
         results = {
             "timestamp": datetime.now().isoformat(),
             "checks": {},
@@ -61,7 +52,6 @@ class CIHelpers:
 
         # Determine overall status
         all_passed = all(check["status"] == "passed" for check in results["checks"].values())
-        
         results["overall_status"] = "passed" if all_passed else "failed"
 
         return results
@@ -69,6 +59,7 @@ class CIHelpers:
     def generate_deployment_manifest(self) -> Dict[str, Any]:
         """Generate deployment manifest for CI/CD"""
         print("📦 Generating deployment manifest...")
+
         manifest = {
             "anchor_seed": "T71_DEPLOYMENT_MANIFEST",
             "timestamp": datetime.now().isoformat(),
@@ -90,6 +81,7 @@ class CIHelpers:
     def validate_repository_state(self) -> Dict[str, Any]:
         """Validate repository state for deployment readiness"""
         print("🔍 Validating repository state...")
+
         validation = {
             "timestamp": datetime.now().isoformat(),
             "anchor_seed": "T71_REPO_VALIDATION",
@@ -113,7 +105,6 @@ class CIHelpers:
             if check_result["status"] != "passed":
                 issues.extend(check_result.get("issues", [f"{check_name} failed"]))
 
-        
         validation["issues"] = issues
         validation["status"] = "passed" if not issues else "failed"
 
@@ -181,34 +172,30 @@ manifest = ci.generate_deployment_manifest()
 print('✅ Deployment manifest generated')
         "
 """
+
         workflow_path = self.repo_path / ".github" / "workflows" / "t71_validation.yml"
         workflow_path.parent.mkdir(parents=True, exist_ok=True)
 
-        
         with open(workflow_path, "w") as f:
             f.write(workflow_content.strip())
 
-        
         print(f"📄 GitHub Actions workflow created: {workflow_path}")
-        
         return str(workflow_path)
 
-    
-        def _check_python_lint(self) -> Dict[str, Any]:
+    def _check_python_lint(self) -> Dict[str, Any]:
         """Check Python code formatting and linting"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         try:
             # Run flake8
             process = subprocess.run(
                 ["flake8", "tools/", "--max-line-length=120", "--extend-ignore=E203,W503"],
-        capture_output=True,
+                capture_output=True,
                 text=True,
-        cwd=self.repo_path,
+                cwd=self.repo_path,
             )
 
-            
-        if process.returncode == 0:
+            if process.returncode == 0:
                 result["status"] = "passed"
             else:
                 result["status"] = "failed"
@@ -222,21 +209,20 @@ print('✅ Deployment manifest generated')
 
     def _check_anchor_integrity(self) -> Dict[str, Any]:
         """Validate symbolic anchor integrity"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         try:
             # Import and run anchor tracker
             sys.path.insert(0, str(self.repo_path / "tools"))
-        tracker = SymbolicAnchorTracker(str(self.repo_path))
-            
-        tracker.scan_repository()
-            
-        tracker.build_lineage_map()
-        drift_issues = tracker.detect_drift()
-        total_issues = sum(len(issues) for issues in drift_issues.values())
 
-            
-        if total_issues == 0:
+            tracker = SymbolicAnchorTracker(str(self.repo_path))
+            tracker.scan_repository()
+            tracker.build_lineage_map()
+            drift_issues = tracker.detect_drift()
+
+            total_issues = sum(len(issues) for issues in drift_issues.values())
+
+            if total_issues == 0:
                 result["status"] = "passed"
             else:
                 result["status"] = "warning"  # Not a failure, but worth noting
@@ -250,22 +236,21 @@ print('✅ Deployment manifest generated')
 
     def _check_memory_seals(self) -> Dict[str, Any]:
         """Validate memory seals integrity"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         try:
             sys.path.insert(0, str(self.repo_path / "tools"))
-        sealer = MemorySealingEngine(str(self.repo_path))
+
+            sealer = MemorySealingEngine(str(self.repo_path))
 
             # Verify all existing seals
             failed_seals = []
             for seal_id in sealer.seals:
-        verification = sealer.verify_seal(seal_id)
-                
-        if verification["status"] != "valid":
+                verification = sealer.verify_seal(seal_id)
+                if verification["status"] != "valid":
                     failed_seals.append(seal_id)
 
-            
-        if not failed_seals:
+            if not failed_seals:
                 result["status"] = "passed"
             else:
                 result["status"] = "failed"
@@ -278,15 +263,16 @@ print('✅ Deployment manifest generated')
         return result
 
     def _check_test_coverage(self) -> Dict[str, Any]:
-        """Check test coverage"""        result = {"status": "unknown", "issues": []}
+        """Check test coverage"""
+        result = {"status": "unknown", "issues": []}
+
         try:
             # Run the T71 test suite
-        process = subprocess.run(
+            process = subprocess.run(
                 ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
             )
 
-            
-        if process.returncode == 0:
+            if process.returncode == 0:
                 result["status"] = "passed"
                 result["coverage"] = "100%"  # Based on our test results
             else:
@@ -308,8 +294,7 @@ print('✅ Deployment manifest generated')
             for py_file in tools_dir.rglob("*.py"):
                 if not py_file.name.startswith("__"):
                     rel_path = str(py_file.relative_to(self.repo_path))
-                    
-        components[rel_path] = {
+                    components[rel_path] = {
                         "type": "python_module",
                         "size": py_file.stat().st_size,
                         "modified": datetime.fromtimestamp(py_file.stat().st_mtime).isoformat(),
@@ -317,8 +302,7 @@ print('✅ Deployment manifest generated')
 
             for js_file in tools_dir.rglob("*.js"):
                 rel_path = str(js_file.relative_to(self.repo_path))
-                
-        components[rel_path] = {
+                components[rel_path] = {
                     "type": "javascript_module",
                     "size": js_file.stat().st_size,
                     "modified": datetime.fromtimestamp(js_file.stat().st_mtime).isoformat(),
@@ -332,13 +316,14 @@ print('✅ Deployment manifest generated')
 
     def _check_git_status(self) -> Dict[str, Any]:
         """Check git repository status"""
-        _ = {"status": "unknown", "issues": []}
-        result = {"status": "unknown", "issues": []}            process = subprocess.run(
+        result = {"status": "unknown", "issues": []}
+
+        try:
+            process = subprocess.run(
                 ["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.repo_path
             )
 
-            
-        if process.returncode == 0:
+            if process.returncode == 0:
                 if process.stdout.strip():
                     result["status"] = "warning"
                     result["issues"] = ["Uncommitted changes present"]
@@ -356,7 +341,7 @@ print('✅ Deployment manifest generated')
 
     def _validate_symbolic_integrity(self) -> Dict[str, Any]:
         """Validate symbolic infrastructure integrity"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         # Check that all major components exist
         required_files = [
@@ -371,7 +356,6 @@ print('✅ Deployment manifest generated')
             if not (self.repo_path / file_path).exists():
                 missing_files.append(file_path)
 
-        
         if not missing_files:
             result["status"] = "passed"
         else:
@@ -382,15 +366,15 @@ print('✅ Deployment manifest generated')
 
     def _validate_tools(self) -> Dict[str, Any]:
         """Validate tool functionality"""
-        _ = {"status": "unknown", "issues": []}
+        result = {"status": "unknown", "issues": []}
 
         try:
             # Run basic functionality test
-        result = {"status": "unknown", "issues": []}                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
+            process = subprocess.run(
+                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
             )
 
-            
-        if process.returncode == 0:
+            if process.returncode == 0:
                 result["status"] = "passed"
             else:
                 result["status"] = "failed"
@@ -409,65 +393,55 @@ def main():
     parser = argparse.ArgumentParser(description="CI/CD Integration Helpers")
     parser.add_argument("command", choices=["check", "manifest", "validate", "workflow"])
     parser.add_argument("--output", "-o", help="Output file path")
-        args = parser.parse_args()
-        ci = CIHelpers()
 
-    
-        if args.command == "check":
+    args = parser.parse_args()
+
+    ci = CIHelpers()
+
+    if args.command == "check":
         print("🔍 Running pre-commit checks...")
         results = ci.run_pre_commit_checks()
 
-        
         print(f"\n📊 Pre-commit Check Results: {results['overall_status']}")
 
-        
         for check_name, check_result in results["checks"].items():
-        status_icon = (
+            status_icon = (
                 "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
             )
-            
-        print(f"{status_icon} {check_name}: {check_result['status']}")
+            print(f"{status_icon} {check_name}: {check_result['status']}")
 
-            
-        if check_result.get("issues"):
+            if check_result.get("issues"):
                 for issue in check_result["issues"]:
                     print(f"    - {issue}")
 
-    
-        elif args.command == "manifest":
+    elif args.command == "manifest":
         manifest = ci.generate_deployment_manifest()
+
         output_path = args.output or "T71_DEPLOYMENT_MANIFEST.json"
         with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        
         print(f"📦 Deployment manifest saved: {output_path}")
 
-    
-        elif args.command == "validate":
+    elif args.command == "validate":
         validation = ci.validate_repository_state()
+
         status_icon = "✅" if validation["status"] == "passed" else "❌"
         print(f"{status_icon} Repository Validation: {validation['status']}")
 
-        
         for check_name, check_result in validation["validations"].items():
             check_icon = (
                 "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
             )
-            
-        print(f"  {check_icon} {check_name}: {check_result['status']}")
+            print(f"  {check_icon} {check_name}: {check_result['status']}")
 
-        
         if validation["issues"]:
             print("\n⚠️  Issues found:")
-            
-        for issue in validation["issues"]:
+            for issue in validation["issues"]:
                 print(f"    - {issue}")
 
-    
-        elif args.command == "workflow":
+    elif args.command == "workflow":
         workflow_path = ci.create_github_actions_workflow()
-        
         print(f"📄 GitHub Actions workflow created: {workflow_path}")
 
 

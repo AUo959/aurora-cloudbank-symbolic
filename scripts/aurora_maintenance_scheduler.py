@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
-import argparse
-import json
-import os
-import schedule
-import subprocess
-import threading
-import time
 """
 Aurora CloudBank Maintenance Scheduler
 Automated maintenance workflows and scheduling system
@@ -16,12 +8,13 @@ import argparse
 import json
 import logging
 import os
-import schedule
 import subprocess
-import threading
 import time
 from datetime import datetime
 from typing import List
+import threading
+import schedule
+
 
 
 class MaintenanceScheduler:
@@ -116,7 +109,7 @@ class MaintenanceScheduler:
         for task_name, task_func in tasks:
             try:
                 self.logger.info(f"Executing: {task_name}")
-                _ = task_func()
+                result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
                 self.logger.error(f"Failed {task_name}: {e}")
@@ -139,7 +132,7 @@ class MaintenanceScheduler:
         for task_name, task_func in tasks:
             try:
                 self.logger.info(f"Executing: {task_name}")
-                _ = task_func()
+                result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
                 self.logger.error(f"Failed {task_name}: {e}")
@@ -162,7 +155,7 @@ class MaintenanceScheduler:
         for task_name, task_func in tasks:
             try:
                 self.logger.info(f"Executing: {task_name}")
-                _ = task_func()
+                result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
                 self.logger.error(f"Failed {task_name}: {e}")
@@ -173,7 +166,9 @@ class MaintenanceScheduler:
     def cleanup_cache_files(self) -> str:
         """Clean up Python cache files"""
         try:
-            # Find and count cache files            result = subprocess.run(                ["find", ".", "-name", "*.pyc"],
+            # Find and count cache files
+            result = subprocess.run(
+                ["find", ".", "-name", "*.pyc"],
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -212,7 +207,9 @@ class MaintenanceScheduler:
         try:
             # Get repository size
             result = subprocess.run(
-                ["du", "-sm", "."],            result = subprocess.run(                text=True,
+                ["du", "-sm", "."],
+                capture_output=True,
+                text=True,
                 shell=False,
                 check=False,
             )
@@ -222,7 +219,9 @@ class MaintenanceScheduler:
             result = subprocess.run(
                 ["find", ".", "-type", ""],
                 capture_output=True,
-                text=True,            result = subprocess.run(                check=False,
+                text=True,
+                shell=False,
+                check=False,
             )
             file_count = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
 
@@ -250,7 +249,9 @@ class MaintenanceScheduler:
                     capture_output=True,
                     text=True,
                     shell=False,
-                    check=False,                result = subprocess.run(                temp_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
+                    check=False,
+                )
+                temp_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
 
                 if temp_files:
                     subprocess.run(["find", ".", "-name", pattern, "-delete"], check=True)
@@ -271,7 +272,9 @@ class MaintenanceScheduler:
                 shell=False,
                 check=False,
             )
-            result = subprocess.run(                return "Branch cleanup analysis completed"
+
+            if result.returncode == 0:
+                return "Branch cleanup analysis completed"
             else:
                 return f"Branch cleanup failed: {result.stderr}"
         except (OSError, ValueError, RuntimeError) as e:

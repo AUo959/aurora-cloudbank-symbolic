@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 """
-
-            import traceback
-from datetime import datetime
-from pathlib import Path
-import argparse
-import json
-import sys
-
 GitWiz Integrated Command Interface
 ==================================
 
@@ -29,11 +21,18 @@ Built for consistency, clarity, and care.
 import json
 import logging
 import sys
+import traceback
 
 # Configure logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+import argparse
+from .gitwiz_lint_cleanup_manager import LintCleanupManager
+from .gitwiz_enhanced import GitWizEnhanced as EnhancedGITWiz
+from .gitwiz_workflow_orchestrator import GITWizWorkflowOrchestrator
+
+
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)

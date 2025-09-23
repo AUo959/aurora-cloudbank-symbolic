@@ -107,6 +107,8 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+/node
+/npm
 
 # Runtime data
 pids

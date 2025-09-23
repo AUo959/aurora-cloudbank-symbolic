@@ -164,7 +164,7 @@ class HealthMonitor:
 
             # Python cache files (*.pyc)
             result = subprocess.run(
-                ["bash", "-lc", "find . -type f -name '*.pyc' -not -path './.git/*' | wc -l"],
+                ["bash", "-lc", "find . -type f -name '*.pyc' -not -path './.git/*' -not -path './.venv/*' -not -path './backups/*' | wc -l"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -179,7 +179,7 @@ class HealthMonitor:
                 [
                     "bash",
                     "-lc",
-                    "find . -type d \( -name '*tmp*' -o -name '*temp*' -o -name '*backup*' \) -not -path './.venv*' -not -path './.git/*' | wc -l",
+                    "find . -type d \( -name '*tmp*' -o -name '*temp*' -o -name '*backup*' \) -not -path './.venv/*' -not -path './backups/*' -not -path './.git/*' | wc -l",
                 ],
                 capture_output=True,
                 text=True,
@@ -195,7 +195,7 @@ class HealthMonitor:
                 [
                     "bash",
                     "-lc",
-                    "find . -type f -size +10M -not -path './.git/*' -printf '%p\n'",
+                    "find . -type f -size +10M -not -path './.git/*' -not -path './.venv/*' -not -path './backups/*' -printf '%p\n'",
                 ],
                 capture_output=True,
                 text=True,

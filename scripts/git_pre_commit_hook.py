@@ -11,7 +11,7 @@ This hook runs before each commit and:
 
 from pathlib import Path
 import os
-import subprocess
+# import subprocess
 import sys
 
 

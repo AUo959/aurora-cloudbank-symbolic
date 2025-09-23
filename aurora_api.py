@@ -18,19 +18,37 @@ ga = GeometricAlgebra()
 
 
 def parse_multivector(expression: str, blades: dict):
-    """Safely parse a multivector expression."""
+    """Safely parse a multivector expression.
+
+    The expression should contain whitespace-separated tokens where each token is
+    either a blade label (e.g., ``e1``) or a numeric scalar. Scalars may include
+    negative values and decimals.
+    """
+
     allowed_symbols = set(blades.keys())
-    tokens = expression.split()
+    tokens = [t.strip() for t in expression.split()]
     for token in tokens:
-        if token not in allowed_symbols and not token.isnumeric():
+        if not token:
+            raise ValueError("Empty token in expression")
+        try:
+            float(token)
+            is_number = True
+        except ValueError:
+            is_number = False
+        if token not in allowed_symbols and not is_number:
             raise ValueError(f"Invalid token in expression: {token}")
+
     # Construct the multivector using the blades dictionary
     result = None
     for token in tokens:
         if token in blades:
             result = blades[token] if result is None else result + blades[token]
-        elif token.isnumeric():
-            result = float(token) if result is None else result + float(token)
+        else:
+            try:
+                number = float(token)
+            except ValueError:
+                raise ValueError(f"Invalid numeric token in expression: {token}")
+            result = number if result is None else result + number
     return result
 
 class VectorRequest(BaseModel):
@@ -57,6 +75,11 @@ def create_vector(req: VectorRequest):
 
 @app.post("/geometric/mult")
 def geometric_product(req: MultivectorRequest):
+    """Compute the geometric product of two multivector expressions.
+
+    Each expression is a whitespace-separated list of blade labels (e.g., ``e1``)
+    and/or numeric scalars. Scalars may be negative or decimal values.
+    """
     try:
         a = parse_multivector(req.a, ga.blades)
         b = parse_multivector(req.b, ga.blades)

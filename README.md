@@ -218,9 +218,18 @@ Additionally, use `python scripts/cask_tool.py` to generate CASK reports and cha
 ## MCP-Driven API Endpoints
 
 - `/geometric/product` — Clifford algebra geometric product
+- `/geometric/mult` — Geometric product of two multivector expressions
 - `/quantum/symbolic_vector` — Quantum-inspired symbolic vector generation
 - `/mcp_bridge` — MCP Bridge Core configuration (JSON)
 - `/mcp_bridge/route_command` — Symbolic command routing (MCP-governed, with security/anchor validation)
+
+### Multivector Expression Format
+
+Endpoints like `/geometric/mult` expect each multivector to be provided as a
+whitespace-separated string of tokens. Every token must be either a blade label
+such as `e1`, `e2`, etc., or a numeric scalar. Scalars may include decimals and
+negative values. For example, the expression `"-1.5 e1 e2"` represents the
+multivector `-1.5 + e1 + e2`.
 
 ## Architecture Diagram
 

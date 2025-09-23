@@ -71,9 +71,9 @@ get_ci_overall_state() {
     # Any completed with failure/cancelled/timed_out/action_required -> failure
     local failed_count
     if [[ -n "$allow_re" ]]; then
-      # Count only failures whose name DOES NOT match the allowed regex
+      # Count only failures whose name DOES NOT match the allowed regex; allow 0 matches without failing
       failed_count=$(echo "$checks" | jq -r '.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required")) | .name' \
-        | grep -Ev "$allow_re" | wc -l | tr -d ' ')
+        | { grep -Ev "$allow_re" || true; } | wc -l | tr -d ' ')
     else
       failed_count=$(echo "$checks" | jq -r '[.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required"))] | length' 2>/dev/null || echo 0)
     fi

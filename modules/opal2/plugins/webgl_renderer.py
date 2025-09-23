@@ -23,8 +23,6 @@ class WebGLRendererPlugin(RendererPlugin):
             description="High-performance WebGL renderer for quantum circuits and symbolic vectors",
             plugin_type=PluginType.RENDERER,
             supported_formats=["webgl", "html", "interactive"],
-            performance_tier="high",
-            security_level="safe",
         )
         super().__init__(metadata)
 
@@ -665,7 +663,9 @@ class WebGLRendererPlugin(RendererPlugin):
                     break
 
                 case 'curve':
-                    const curve = new THREE.CubicBezierCurve3(...objData.control_points.map(p => new THREE.Vector3(...p)))
+                    const curve = new THREE.CubicBezierCurve3(
+                        ...objData.control_points.map(p => new THREE.Vector3(...p))
+                    )
                     geometry = new THREE.TubeGeometry(curve, 20, 0.01, 8, false)
                     material = createMaterial(objData.material)
                     mesh = new THREE.Mesh(geometry, material)

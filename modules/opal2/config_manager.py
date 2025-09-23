@@ -2,7 +2,6 @@
 from datetime import datetime
 from pathlib import Path
 import json
-import schedule
 """
 Opal2 Modular System - Configuration Manager
 Advanced configuration management with validation and hot-reloading
@@ -34,8 +33,6 @@ class ConfigFormat(Enum):
 
 
 @dataclass
-
-
 class ConfigValidationRule:
     """Configuration validation rule"""
 
@@ -50,8 +47,6 @@ class ConfigValidationRule:
 
 
 @dataclass
-
-
 class ConfigChangeEvent:
     """Configuration change event"""
 

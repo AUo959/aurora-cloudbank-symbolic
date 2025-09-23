@@ -28,7 +28,7 @@ The Aurora CloudBank repository is in **GOOD OVERALL HEALTH** with strong founda
 - **JavaScript Files:** Core files syntactically correct
   - `src/core/command_node.js` ✅
   - `src/core/ethics_layer.js` ✅
-  - `crypto.js` ✅
+  - `crypto_refactored.js` ✅
 - **Configuration Files:** All valid
   - `package.json` ✅
   - `requirements.txt` ✅

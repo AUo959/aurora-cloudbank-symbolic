@@ -1,10 +1,20 @@
-const fetch = globalThis.fetch || ((...args) => import('node-fetch').then(({ default: f }) => f(...args)));
+let fetch = globalThis.fetch;
+if (!fetch) {
+  // Only require node-fetch in Node.js environments
+  try {
+    fetch = require('node-fetch');
+    // For node-fetch v3 (ESM), .default may be needed
+    if (fetch.default) fetch = fetch.default;
+  } catch (e) {
+    throw new Error('Fetch API is not available and node-fetch could not be loaded.');
+  }
+}
 
 async function fetchArxiv(query) {
   if (process.env.PQN_OFFLINE_TEST) {
     return [{ source: 'arXiv', title: `Arxiv result for ${query}`, summary: 'offline stub' }];
   }
-  const url = `http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=5`;
+  const url = `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=5`;
   try {
     const res = await fetch(url);
     const text = await res.text();
@@ -19,12 +29,12 @@ async function fetchPubMed(query) {
     return [{ source: 'PubMed', title: `PubMed result for ${query}`, summary: 'offline stub' }];
   }
   const apiKey = process.env.NCBI_API_KEY || '';
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}`;
+  let url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(query)}`;
+  if (apiKey) {
+    url += `&api_key=${encodeURIComponent(apiKey)}`;
+  }
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'api-key': apiKey }
-    });
+    const res = await fetch(url);
     const text = await res.text();
     return [{ source: 'PubMed', title: query, summary: text.slice(0,100) }];
   } catch (e) {
@@ -37,9 +47,11 @@ async function fetchNews(query) {
     return [{ source: 'News', title: `News result for ${query}`, summary: 'offline stub' }];
   }
   const apiKey = process.env.NEWS_API_KEY || '';
-  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&apiKey=${apiKey}`;
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { 'X-Api-Key': apiKey }
+    });
     const json = await res.json();
     return (json.articles || []).map(a => ({ source: 'News', title: a.title, summary: a.description }));
   } catch (e) {

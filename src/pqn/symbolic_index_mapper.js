@@ -4,7 +4,7 @@ function extractKeywords(text) {
 
 function mapToIndex(items) {
   return items.map(item => {
-    const text = (item.title || '') + ' ' + (item.summary || '');
+    const text = [item.title, item.summary].filter(Boolean).join(' ');
     const tags = extractKeywords(text);
     return { ...item, tags };
   });

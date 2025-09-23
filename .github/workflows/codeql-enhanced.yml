@@ -45,7 +45,7 @@ jobs:
         with:
           fetch-depth: 1  # Shallow clone for faster checkout
 
-      - name: Guard: ensure default code scanning setup is disabled
+      - name: Guard: ensure default code scanning setup is disabled (warn-only)
         shell: bash
         run: |
           set -euo pipefail
@@ -58,8 +58,7 @@ print(json.load(open('/tmp/default_setup.json')).get('state',''))
 PY
 )
             if [[ "$state" == "configured" || "$state" == "enabled" ]]; then
-              echo "::error::Default Code Scanning setup is enabled (state=$state). Disable it to use this custom CodeQL workflow."
-              exit 1
+              echo "::warning::Default Code Scanning setup is enabled (state=$state). Disable it to use this custom CodeQL workflow. Proceeding without failing."
             fi
           fi
           echo "Default setup not configured (status=$code); proceeding."

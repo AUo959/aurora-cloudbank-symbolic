@@ -92,7 +92,7 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/enhanced/language:${{ matrix.language }}"
-          upload: true
+          upload: false
 
       - name: Cleanup temporary files
         if: always()

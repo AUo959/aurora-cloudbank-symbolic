@@ -108,17 +108,22 @@ class HealthMonitor:
         }
 
         try:
-            # Repository size (MB)
+            # Repository size (MB), excluding local-only heavy dirs
+            # Excludes: .git, .venv, backups, node_modules, .gitwiz/metrics
             result = subprocess.run(
-                ["du", "-sm", "."],
+                [
+                    "bash",
+                    "-lc",
+                    "find . -type f -not -path './.git/*' -not -path './.venv/*' -not -path './backups/*' -not -path './node_modules/*' -not -path './.gitwiz/metrics/*' -printf '%s\n' | awk '{s+=\$1} END {printf \"%d\", s/1024/1024}'",
+                ],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
             )
-            if result.returncode == 0 and result.stdout.strip():
-                metrics["repository_size_mb"] = int(result.stdout.split()[0])
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["repository_size_mb"] = int(result.stdout.strip())
 
             # File count (exclude .git)
             result = subprocess.run(

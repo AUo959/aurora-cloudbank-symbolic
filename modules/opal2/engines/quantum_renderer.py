@@ -1,6 +1,6 @@
-"""Opal2 Quantum Rendering Engine
-import time
-=================================
+"""
+Opal2 Quantum Rendering Engine
+==============================
 
 Advanced quantum-enhanced rendering engine for the Opal2 modular system.
 Provides high-performance quantum circuit visualization and symbolic rendering.
@@ -27,8 +27,6 @@ class RenderingMode(Enum):
 
 
 @dataclass
-
-
 class RenderingConfig:
     """Configuration for quantum rendering operations."""
 
@@ -289,9 +287,9 @@ class QuantumRenderer:
         # Estimate memory usage (simplified)
         self.performance_metrics["memory_usage"] = len(self.render_cache) * 10  # Rough estimate
 
-    def _hsl_to_rgb(self, h: float, s: float, l: float) -> Tuple[int, int, int]:
+    def _hsl_to_rgb(self, hue_deg: float, sat_pct: float, light_pct: float) -> Tuple[int, int, int]:
         """Convert HSL to RGB color values."""
-        h, s, _line = h / 360, s / 100, l / 100
+        h, s, light = hue_deg / 360, sat_pct / 100, light_pct / 100
 
         def hue_to_rgb(p, q, t):
             if t < 0:
@@ -307,10 +305,10 @@ class QuantumRenderer:
             return p
 
         if s == 0:
-            r = g = b = l
+            r = g = b = light
         else:
-            q = l * (1 + s) if l < 0.5 else l + s - l * s
-            p = 2 * l - q
+            q = light * (1 + s) if light < 0.5 else light + s - light * s
+            p = 2 * light - q
             r = hue_to_rgb(p, q, h + 1 / 3)
             g = hue_to_rgb(p, q, h)
             b = hue_to_rgb(p, q, h - 1 / 3)

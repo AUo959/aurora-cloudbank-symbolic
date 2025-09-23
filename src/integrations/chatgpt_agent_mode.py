@@ -207,11 +207,14 @@ class ChatGPTAgentModeIntegration:
         try:
             self._validate_parameters(parameters, tool_def["parameters"])
         except Exception as e:
+            # Optionally log exception server-side here
             return {
                 "success": False,
-                "error": f"Parameter validation failed: {str(e)}",
+                "error": "Parameter validation failed.",
                 "tool_schema": tool_def["parameters"],
-                "recovery_suggestions": self._get_recovery_suggestions(tool_name, e),
+                "recovery_suggestions": [
+                    "Ensure all required parameters are provided and formatted correctly."
+                ],
             }
 
         # Execute tool with DLP tracking and symbolic anchoring
@@ -237,14 +240,17 @@ class ChatGPTAgentModeIntegration:
                 "memory_seal": self._compute_memory_seal(),
             }
 
+            # Optionally log exception server-side here
             return response
 
         except Exception as e:
             error_response = {
                 "success": False,
-                "error": str(e),
+                "error": "Tool execution failed.",
                 "execution_context": execution_context,
-                "recovery_suggestions": self._get_recovery_suggestions(tool_name, e),
+                "recovery_suggestions": [
+                    "Try again or check if your input parameters are correct."
+                ],
                 "dlp_level": "DLP_L1_OK",
             }
             return error_response

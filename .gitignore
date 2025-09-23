@@ -202,3 +202,6 @@ aurora_deployment_manifest.json
 # Local backups of deleted branches (git bundle archives)
 backups/
 *.bundle
+
+# Health monitor metrics
+.gitwiz/metrics/

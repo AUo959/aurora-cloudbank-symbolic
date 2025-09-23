@@ -108,66 +108,89 @@ class HealthMonitor:
         }
 
         try:
-            # Repository size            result = subprocess.run(                ["du", "-sm", "."],
+            # Repository size (MB)
+            result = subprocess.run(
+                ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
             )
-            if result.returncode == 0:
+            if result.returncode == 0 and result.stdout.strip():
                 metrics["repository_size_mb"] = int(result.stdout.split()[0])
 
-            # File count
+            # File count (exclude .git)
             result = subprocess.run(
-                ["find", ".", "-type", ""],            result = subprocess.run(                text=True,
+                ["bash", "-lc", "find . -type f -not -path './.git/*' | wc -l"],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["file_count"] = int(result.stdout.strip())
+
+            # Branch count (remote)
+            result = subprocess.run(
+                ["git", "for-each-ref", "--format=%(refname:short)", "refs/remotes/origin"],
+                capture_output=True,
+                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
             )
             if result.returncode == 0:
-                metrics["file_count"] = len(result.stdout.strip().split("\n"))
+                branches = [b for b in result.stdout.strip().split("\n") if b and not b.endswith("/HEAD")]
+                metrics["branch_count"] = len(branches)
 
-            # Branch count
+            # ZIP file count (any depth)
             result = subprocess.run(
-                ["git", "branch", "-r"],
-                capture_output=True,
-                text=True,            result = subprocess.run(                shell=False,
-                check=False,
-            )
-            if result.returncode == 0:
-                metrics["branch_count"] = len([line for line in result.stdout.strip().split("\n") if line.strip()])
-
-            # ZIP file count
-            zip_files = list(self.repo_path.glob("*.zip"))
-            metrics["zip_file_count"] = len(zip_files)
-
-            # Python cache files
-            result = subprocess.run(
-                ["find", ".", "-name", "*.pyc", "-type", ""],
+                ["bash", "-lc", "find . -type f -name '*.zip' -not -path './.git/*' | wc -l"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                shell=False,            result = subprocess.run(            )
-            if result.returncode == 0:
-                pyc_files = result.stdout.strip().split("\n")
-                metrics["pyc_file_count"] = len([f for f in pyc_files if f])
+                shell=False,
+                check=False,
+            )
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["zip_file_count"] = int(result.stdout.strip())
+
+            # Python cache files (*.pyc)
+            result = subprocess.run(
+                ["bash", "-lc", "find . -type f -name '*.pyc' -not -path './.git/*' | wc -l"],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["pyc_file_count"] = int(result.stdout.strip())
 
             # Temporary directories
             result = subprocess.run(
                 [
-                    "find",
-                    ".",
-                    "-name",
-                    "*tmp*",
-                    "-o",
-                    "-name",
-                    "*temp*",
-                    "-o",
-                    "-name",
-                    "*backup*",
-                    "-type",
-                    "d",
+                    "bash",
+                    "-lc",
+                    "find . -type d \( -name '*tmp*' -o -name '*temp*' -o -name '*backup*' \) -not -path './.venv*' -not -path './.git/*' | wc -l",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
+                check=False,
+            )
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["temp_dir_count"] = int(result.stdout.strip())
+
+            # Large files (>10MB)
+            result = subprocess.run(
+                [
+                    "bash",
+                    "-lc",
+                    "find . -type f -size +10M -not -path './.git/*' -printf '%p\n'",
                 ],
                 capture_output=True,
                 text=True,
@@ -176,24 +199,11 @@ class HealthMonitor:
                 check=False,
             )
             if result.returncode == 0:
-                temp_dirs = result.stdout.strip().split("\n")
-                metrics["temp_dir_count"] = len([d for d in temp_dirs if d and not d.startswith("./.venv")])
+                large_files = [f for f in result.stdout.strip().split("\n") if f]
+                metrics["large_files"] = large_files
 
-            # Large files (>10MB)
-            result = subprocess.run(
-                ["find", ".", "-type", "", "-size", "+10M"],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_path,
-                shell=False,
-                check=False,
-            )            result = subprocess.run(                large_files = result.stdout.strip().split("\n")
-                metrics["large_files"] = [f for f in large_files if f]
-
-            # Calculate health score
+            # Calculate health score and issues
             metrics["health_score"] = self.calculate_health_score(metrics)
-
-            # Check for issues
             metrics["issues"] = self.check_issues(metrics)
 
         except (OSError, ValueError, RuntimeError) as e:

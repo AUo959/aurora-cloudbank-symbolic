@@ -58,12 +58,24 @@ get_ci_overall_state() {
   # Prefer Checks API (GitHub Actions) if present; fall back to legacy Status API
   local checks
   checks=$(api GET "/commits/$sha/check-runs" 2>/dev/null || true)
-  local total
-  total=$(echo "$checks" | jq -r '.total_count // 0' 2>/dev/null || echo 0)
+  # Build a map of latest check-run per name (by started_at, fallback created_at), then operate on that set
+  local latest_map latest_list total
+  latest_map=$(echo "$checks" | jq -r '
+    ( .check_runs // [] )
+    | reduce .[] as $r ({};
+        .[$r.name] = (
+          if .[$r.name] then
+            ( if (($r.started_at // $r.created_at) > (.[$r.name].started_at // .[$r.name].created_at)) then $r else .[$r.name] end )
+          else $r end
+        )
+      )
+  ' 2>/dev/null)
+  latest_list=$(echo "$latest_map" | jq -r 'values' 2>/dev/null)
+  total=$(echo "$latest_list" | jq -r 'length // 0' 2>/dev/null || echo 0)
   if [[ "$total" != "0" ]]; then
     # Any in_progress/queued -> pending
     local inprog
-    inprog=$(echo "$checks" | jq -r '[.check_runs[] | select(.status=="in_progress" or .status=="queued")] | length' 2>/dev/null || echo 0)
+    inprog=$(echo "$latest_list" | jq -r '[ .[] | select(.status=="in_progress" or .status=="queued") ] | length' 2>/dev/null || echo 0)
     if (( inprog > 0 )); then
       echo pending
       return 0
@@ -72,10 +84,10 @@ get_ci_overall_state() {
     local failed_count
     if [[ -n "$allow_re" ]]; then
       # Count only failures whose name DOES NOT match the allowed regex; allow 0 matches without failing
-      failed_count=$(echo "$checks" | jq -r '.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required")) | .name' \
+      failed_count=$(echo "$latest_list" | jq -r '.[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required")) | .name' \
         | { grep -Ev "$allow_re" || true; } | wc -l | tr -d ' ')
     else
-      failed_count=$(echo "$checks" | jq -r '[.check_runs[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required"))] | length' 2>/dev/null || echo 0)
+      failed_count=$(echo "$latest_list" | jq -r '[ .[] | select(.status=="completed" and (.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out" or .conclusion=="action_required")) ] | length' 2>/dev/null || echo 0)
     fi
     if (( failed_count > 0 )); then
       echo failure

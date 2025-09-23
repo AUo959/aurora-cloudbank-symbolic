@@ -15,6 +15,10 @@ const AuroraCustomGptBridge = require('../integrations/aurora_custom_gpt_bridge.
 // Import mesh agent system
 const { CollaborationMeshAgent } = require('../core/mesh_agent.js');
 
+// Constants for magic numbers
+const MAX_COMMAND_HISTORY = 100;
+const MAX_LIVE_FEED_MESSAGES = 1000;
+
 class HolographicInterfaceOrchestrator {
   constructor(port = 8080) {
     this.port = port;
@@ -453,8 +457,8 @@ class HolographicInterfaceOrchestrator {
 
     this.commandHistory.push(commandEntry);
 
-    // Keep only last 100 commands
-    if (this.commandHistory.length > 100) {
+    // Keep only last MAX_COMMAND_HISTORY commands
+    if (this.commandHistory.length > MAX_COMMAND_HISTORY) {
       this.commandHistory.shift();
     }
 
@@ -625,9 +629,9 @@ class HolographicInterfaceOrchestrator {
 
       this.liveFeed.push(message);
 
-      // Keep only last 1000 messages
-      if (this.liveFeed.length > 1000) {
-        this.liveFeed = this.liveFeed.slice(-1000);
+      // Keep only last MAX_LIVE_FEED_MESSAGES messages
+      if (this.liveFeed.length > MAX_LIVE_FEED_MESSAGES) {
+        this.liveFeed = this.liveFeed.slice(-MAX_LIVE_FEED_MESSAGES);
       }
 
       // Broadcast to all connected clients

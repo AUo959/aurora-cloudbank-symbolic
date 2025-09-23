@@ -109,7 +109,7 @@ PY
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/enhanced/language:${{ matrix.language }}"
+          category: "/language:${{ matrix.language }}"
           upload: true
 
       - name: Cleanup temporary files

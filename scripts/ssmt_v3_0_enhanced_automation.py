@@ -35,11 +35,11 @@ class SSMTv3EnhancedAutomation:
         # Ensure backup directory exists
         self.backup_dir.mkdir(exist_ok=True)
         
-        logger.info(f"🚀 SSMT v3.0 Enhanced Automation initialized (Session: {self.session_id})")
+        logger.info("🚀 SSMT v3.0 Enhanced Automation initialized (Session: %s)", str(self.session_id)[:100])
 
     def check_branch_freshness(self, branch_name: str) -> Dict[str, Any]:
         """Check if branch is fresh enough for safe automation"""
-        logger.info(f"📅 Checking branch freshness: {branch_name}")
+        logger.info("📅 Checking branch freshness: %s", str(branch_name)[:100])
         
         try:
             # Get branch last commit date
@@ -75,14 +75,14 @@ class SSMTv3EnhancedAutomation:
             }
             
             if is_fresh:
-                logger.info(f"✅ Branch is fresh: {age_days} days old")
+                logger.info("✅ Branch is fresh: %s days old", str(age_days)[:100])
             else:
-                logger.warning(f"⚠️ Branch is stale: {age_days} days old (max: {self.max_branch_age_days})")
+                logger.warning("⚠️ Branch is stale: %s days old (max: %s)", str(age_days)[:100], str(self.max_branch_age_days)[:100])
             
             return freshness_info
             
         except (subprocess.CalledProcessError, ValueError) as e:
-            logger.error(f"❌ Failed to check branch freshness: {e}")
+            logger.error("❌ Failed to check branch freshness: %s", str(e)[:100])
             return {
                 "branch": branch_name,
                 "error": str(e),
@@ -92,7 +92,7 @@ class SSMTv3EnhancedAutomation:
 
     def simulate_merge(self, branch_name: str) -> Dict[str, Any]:
         """Simulate merge in temporary branch to detect conflicts"""
-        logger.info(f"🧪 Simulating merge for: {branch_name}")
+        logger.info("🧪 Simulating merge for: %s", str(branch_name)[:100])
         
         temp_branch = f"ssmt_test_{self.session_id}_{branch_name.replace('/', '_')}"
         
@@ -130,9 +130,9 @@ class SSMTv3EnhancedAutomation:
                     if line.strip()
                 ])
                 
-                logger.info(f"✅ Merge simulation successful: {simulation_result['staged_changes']} changes")
+                logger.info("✅ Merge simulation successful: %s changes", str(simulation_result['staged_changes'])[:100])
             else:
-                logger.warning(f"⚠️ Merge simulation detected conflicts")
+                logger.warning("⚠️ Merge simulation detected conflicts")
             
             # Reset merge (abort without committing)
             subprocess.run(
@@ -141,7 +141,7 @@ class SSMTv3EnhancedAutomation:
             )
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Merge simulation failed: {e}")
+            logger.error("❌ Merge simulation failed: %s", str(e)[:100])
             simulation_result = {
                 "branch": branch_name,
                 "temp_branch": temp_branch,
@@ -167,7 +167,7 @@ class SSMTv3EnhancedAutomation:
 
     def enhanced_branch_validation(self, branch_name: str) -> Dict[str, Any]:
         """Enhanced branch validation with freshness and merge simulation"""
-        logger.info(f"🔍 Enhanced validation for: {branch_name}")
+        logger.info("🔍 Enhanced validation for: %s", str(branch_name)[:100])
         
         # Basic safety validation
         try:
@@ -237,14 +237,14 @@ class SSMTv3EnhancedAutomation:
             }
             
             if is_safe:
-                logger.info(f"✅ Enhanced validation passed: {branch_name} (score: {base_safety})")
+                logger.info("✅ Enhanced validation passed: %s (score: %s)", str(branch_name)[:100], str(base_safety)[:100])
             else:
-                logger.warning(f"⚠️ Enhanced validation failed: {branch_name} (score: {base_safety})")
+                logger.warning("⚠️ Enhanced validation failed: %s (score: %s)", str(branch_name)[:100], str(base_safety)[:100])
                 
             return validation
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Enhanced validation failed: {e}")
+            logger.error("❌ Enhanced validation failed: %s", str(e)[:100])
             return {
                 "branch": branch_name,
                 "validation_passed": False,
@@ -254,7 +254,7 @@ class SSMTv3EnhancedAutomation:
 
     def defensive_branch_cleanup(self, branch_name: str) -> Dict[str, Any]:
         """Defensive branch cleanup with existence checking"""
-        logger.info(f"🗑️ Defensive cleanup for: {branch_name}")
+        logger.info("🗑️ Defensive cleanup for: %s", str(branch_name)[:100])
         
         try:
             # Check if branch exists on remote
@@ -278,7 +278,7 @@ class SSMTv3EnhancedAutomation:
                 }
             else:
                 # Branch doesn't exist, no cleanup needed
-                logger.info(f"ℹ️ Branch {branch_name} already removed, skipping cleanup")
+                logger.info("ℹ️ Branch %s already removed, skipping cleanup", str(branch_name)[:100])
                 return {
                     "branch": branch_name,
                     "cleanup_performed": False,
@@ -287,7 +287,7 @@ class SSMTv3EnhancedAutomation:
                 }
                 
         except subprocess.CalledProcessError as e:
-            logger.warning(f"⚠️ Branch cleanup failed (non-critical): {e}")
+            logger.warning("⚠️ Branch cleanup failed (non-critical): %s", str(e)[:100])
             return {
                 "branch": branch_name,
                 "cleanup_performed": False,
@@ -297,7 +297,7 @@ class SSMTv3EnhancedAutomation:
 
     def find_fresh_easy_wins(self, max_results: int = 10) -> List[str]:
         """Find fresh dependabot branches for automation"""
-        logger.info(f"🔎 Finding fresh easy wins (max: {max_results})")
+        logger.info("🔎 Finding fresh easy wins (max: %s)", str(max_results)[:100])
         
         try:
             # Get all dependabot branches
@@ -326,11 +326,11 @@ class SSMTv3EnhancedAutomation:
             # Return just branch names, limited by max_results
             result_branches = [branch for branch, _ in fresh_branches[:max_results]]
             
-            logger.info(f"📋 Found {len(result_branches)} fresh easy win candidates")
+            logger.info("📋 Found %s fresh easy win candidates", str(len(result_branches))[:100])
             return result_branches
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Failed to find fresh easy wins: {e}")
+            logger.error("❌ Failed to find fresh easy wins: %s", str(e)[:100])
             return []
 
 def main():

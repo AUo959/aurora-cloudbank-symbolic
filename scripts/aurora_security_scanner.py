@@ -100,7 +100,7 @@ class AuroraSecurityScanner:
             'subprocess_shell': (
                 r'subprocess\.\w+.*shell\s*=\s*True',
                 'HIGH',
-                'subprocess with shell=True can enable command injection'
+                'subprocess with shell=False can enable command injection'
             ),
             'os_system': (r'os\.system\s*\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern
             'sql_format': (r'\.format\s*\(.*SELECT', 'HIGH', 'String formatting in SQL can lead to injection'),

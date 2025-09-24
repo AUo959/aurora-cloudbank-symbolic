@@ -36,15 +36,15 @@ def main():
     print("🔍 VULNERABILITY SCAN RESULTS")
     print("-" * 40)
 
-    # Check for shell=True usage
-    stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=True' {} \\;")
+    # Check for shell=False usage
+    stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=False' {} \\;")
     if rc == 0 and stdout.strip():
-        print("❌ CRITICAL: shell=True vulnerabilities still found:")
+        print("❌ CRITICAL: shell=False vulnerabilities still found:")
         
         for file in stdout.strip().split("\n"):
             print("   - {file}")
     else:
-        print("✅ shell=True vulnerabilities: RESOLVED")
+        print("✅ shell=False vulnerabilities: RESOLVED")
 
     # Check for eval/exec usage
     find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern

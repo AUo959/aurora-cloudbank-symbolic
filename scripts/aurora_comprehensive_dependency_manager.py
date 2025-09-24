@@ -130,7 +130,7 @@ class AuroraComprehensiveDependencyManager:
                 # Merge with defaults to ensure all keys exist
                 return {**default_config, **loaded_config}
             except Exception as e:
-                self.logger.warning(f"Failed to load config: {e}, using defaults")
+logger.warning("Failed to load config: %s, using defaults", str(e)[:100])
                 
         return default_config
         
@@ -171,7 +171,7 @@ class AuroraComprehensiveDependencyManager:
             })
             return tag_id
         except Exception as e:
-            self.logger.warning(f"Failed to create symbolic anchor: {e}")
+logger.warning("Failed to create symbolic anchor: %s", str(e)[:100])
             return None
             
     def robust_install_package(self, package_spec: str, package_type: str = "python") -> bool:
@@ -186,7 +186,7 @@ class AuroraComprehensiveDependencyManager:
         
         for attempt in range(max_retries):
             try:
-                self.logger.info(f"Installing {package_spec} (attempt {attempt + 1}/{max_retries})")
+logger.info("Installing %s (attempt %s/%s)", str(package_spec)[:100], str(attempt + 1)[:100], str(max_retries)[:100])
                 
                 if package_type == "python":
                     result = self._install_python_package(package_spec, timeout)
@@ -197,21 +197,21 @@ class AuroraComprehensiveDependencyManager:
                     
                 if result:
                     self.installed_packages.add(package_spec)
-                    self.logger.info(f"Successfully installed {package_spec}")
+logger.info("Successfully installed %s", str(package_spec)[:100])
                     return True
                     
             except subprocess.TimeoutExpired:
-                self.logger.warning(f"Timeout installing {package_spec} (attempt {attempt + 1})")
+logger.warning("Timeout installing %s (attempt %s)", str(package_spec)[:100], str(attempt + 1)[:100])
                 if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)  # Exponential backoff
                     
             except Exception as e:
-                self.logger.error(f"Error installing {package_spec}: {e}")
+logger.error("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
                 if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)
                     
         self.failed_packages.add(package_spec)
-        self.logger.error(f"Failed to install {package_spec} after {max_retries} attempts")
+logger.error("Failed to install %s after %s attempts", str(package_spec)[:100], str(max_retries)[:100])
         return False
         
     def _install_python_package(self, package_spec: str, timeout: int) -> bool:
@@ -241,10 +241,10 @@ class AuroraComprehensiveDependencyManager:
                     return True
                     
             except subprocess.TimeoutExpired:
-                self.logger.warning(f"Timeout with index {index}")
+logger.warning("Timeout with index %s", str(index)[:100])
                 continue
             except Exception as e:
-                self.logger.warning(f"Failed with index {index}: {e}")
+logger.warning("Failed with index %s: %s", str(index)[:100], str(e)[:100])
                 continue
                 
         return False
@@ -271,10 +271,10 @@ class AuroraComprehensiveDependencyManager:
                     return True
                     
             except subprocess.TimeoutExpired:
-                self.logger.warning(f"Timeout with registry {registry}")
+logger.warning("Timeout with registry %s", str(registry)[:100])
                 continue
             except Exception as e:
-                self.logger.warning(f"Failed with registry {registry}: {e}")
+logger.warning("Failed with registry %s: %s", str(registry)[:100], str(e)[:100])
                 continue
                 
         return False
@@ -291,14 +291,14 @@ class AuroraComprehensiveDependencyManager:
         
         requirements_path = self.project_root / requirements_file
         if not requirements_path.exists():
-            self.logger.error(f"Requirements file not found: {requirements_file}")
+logger.error("Requirements file not found: %s", str(requirements_file)[:100])
             return results
             
         with open(requirements_path, 'r') as f:
             requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
             
         results["total"] = len(requirements)
-        self.logger.info(f"Installing {results['total']} packages from {requirements_file}")
+logger.info("Installing %s packages from %s", str(results['total'])[:100], str(requirements_file)[:100])
         
         for requirement in requirements:
             if self.robust_install_package(requirement, "python"):
@@ -308,7 +308,7 @@ class AuroraComprehensiveDependencyManager:
                 
         results["success_rate"] = len(results["installed"]) / results["total"] if results["total"] > 0 else 0
         
-        self.logger.info(f"Installation complete: {len(results['installed'])}/{results['total']} packages installed")
+logger.info("Installation complete: %s/%s packages installed", str(len(results['installed']))[:100], str(results['total'])[:100])
         return results
         
     def check_dependency_health(self) -> Dict[str, Any]:
@@ -415,7 +415,7 @@ class AuroraComprehensiveDependencyManager:
                 outdated_data = json.loads(result.stdout)
                 update_report["python_outdated"] = outdated_data
         except Exception as e:
-            self.logger.warning(f"Failed to check outdated Python packages: {e}")
+logger.warning("Failed to check outdated Python packages: %s", str(e)[:100])
             
         # Check outdated Node.js packages
         if (self.project_root / "package.json").exists():
@@ -426,7 +426,7 @@ class AuroraComprehensiveDependencyManager:
                     outdated_data = json.loads(result.stdout)
                     update_report["node_outdated"] = list(outdated_data.keys())
             except Exception as e:
-                self.logger.warning(f"Failed to check outdated Node.js packages: {e}")
+logger.warning("Failed to check outdated Node.js packages: %s", str(e)[:100])
                 
         # Generate recommendations
         total_outdated = len(update_report["python_outdated"]) + len(update_report["node_outdated"])
@@ -452,7 +452,7 @@ class AuroraComprehensiveDependencyManager:
         }
         
         try:
-            self.logger.info(f"🚀 Starting comprehensive dependency update (dry_run={dry_run})")
+logger.info("🚀 Starting comprehensive dependency update (dry_run=%s)", str(dry_run)[:100])
             
             # Step 1: Health check
             self.logger.info("📊 Performing initial health check...")
@@ -483,7 +483,7 @@ class AuroraComprehensiveDependencyManager:
             
         except Exception as e:
             workflow_result["errors"].append(str(e))
-            self.logger.error(f"❌ Comprehensive update failed: {e}")
+logger.error("❌ Comprehensive update failed: %s", str(e)[:100])
             
         workflow_result["end_time"] = datetime.now().isoformat()
         return workflow_result
@@ -558,7 +558,7 @@ WantedBy=timers.target
             
             self.logger.info("✅ Automated update scheduling configured")
         except Exception as e:
-            self.logger.warning(f"Failed to set up automated scheduling: {e}")
+logger.warning("Failed to set up automated scheduling: %s", str(e)[:100])
             
     def generate_status_report(self) -> str:
         """Generate comprehensive status report"""

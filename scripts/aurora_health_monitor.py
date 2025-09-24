@@ -197,7 +197,7 @@ class HealthMonitor:
             metrics["issues"] = self.check_issues(metrics)
 
         except (OSError, ValueError, RuntimeError) as e:
-            self.logger.error(f"Error collecting metrics: {e}")
+logger.error("Error collecting metrics: %s", str(e)[:100])
             metrics["error"] = str(e)
 
         return metrics
@@ -327,9 +327,9 @@ class HealthMonitor:
 
                 if file_date < cutoff_date:
                     file_path.unlink()
-                    self.logger.info(f"Cleaned up old metrics file: {file_path}")
+logger.info("Cleaned up old metrics file: %s", str(file_path)[:100])
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.warning(f"Error cleaning metrics file {file_path}: {e}")
+logger.warning("Error cleaning metrics file %s: %s", str(file_path)[:100], str(e)[:100])
 
     def send_alert(self, metrics: Dict):
         """Send alert if health issues are detected.
@@ -343,7 +343,7 @@ class HealthMonitor:
         alert_message = self.format_alert_message(metrics)
 
         # Log alert
-        self.logger.warning(f"Health alert: {alert_message}")
+logger.warning("Health alert: %s", str(alert_message)[:100])
 
         # File notification
         if self.config["notifications"]["file"]:
@@ -351,7 +351,7 @@ class HealthMonitor:
                 with open(self.config["notifications"]["file"], "a", encoding="utf-8") as f:
                     f.write(f"{datetime.datetime.now().isoformat()}: {alert_message}\n")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error writing alert to file: {e}")
+logger.error("Error writing alert to file: %s", str(e)[:100])
 
     def format_alert_message(self, metrics: Dict) -> str:
         """Format alert message.
@@ -464,7 +464,7 @@ class HealthMonitor:
         Args:
             interval_minutes: Minutes between health checks
         """
-        self.logger.info(f"Starting health monitoring (interval: {interval_minutes} minutes)")
+logger.info("Starting health monitoring (interval: %s minutes)", str(interval_minutes)[:100])
 
         while True:
             try:
@@ -492,7 +492,7 @@ class HealthMonitor:
                 self.logger.info("Monitoring stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Error in monitoring loop: {e}")
+logger.error("Error in monitoring loop: %s", str(e)[:100])
                 time.sleep(60)  # Wait 1 minute before retrying
 
 

@@ -33,7 +33,7 @@ class GlyphCache:
                     self.stats = data.get("stats", self.stats)
             except (json.JSONDecodeError, KeyError):
                 self.cache = {}
-                logger.warning(f"Cache file {self.path} corrupted, starting fresh")
+                logger.warning("Cache file %s corrupted, starting fresh", str(self.path)[:100])
         else:
             self.cache = {}
 
@@ -71,7 +71,7 @@ class GlyphCache:
             with open(self.path, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, indent=2)
         except Exception as e:
-            logger.error(f"Failed to save cache: {e}")
+            logger.error("Failed to save cache: %s", str(e)[:100])
 
     async def save_async(self) -> None:
         """Async version of save method"""

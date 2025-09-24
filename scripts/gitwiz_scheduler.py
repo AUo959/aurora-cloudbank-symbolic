@@ -110,7 +110,7 @@ class GitWizScheduler:
                     # Merge with defaults
                     return {**default_config, **loaded_config}
             except Exception as e:
-                logger.warning(f"Failed to load config, using defaults: {e}")
+                logger.warning("Failed to load config, using defaults: %s", str(e)[:100])
 
         # Save default config
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -150,7 +150,7 @@ class GitWizScheduler:
                 str(self.project_root / "scripts" / "gitwiz_integrated_command.py"),
             ] + command.split()
 
-            logger.info(f"Executing: {' '.join(cmd)}")
+            logger.info("Executing: %s", str(' '.join(cmd))[:100])
 
             result = subprocess.run(
                 cmd,
@@ -165,7 +165,7 @@ class GitWizScheduler:
             execution_time = (datetime.utcnow() - start_time).total_seconds()
 
             if result.returncode == 0:
-                logger.info(f"Command completed successfully in {execution_time:.2f}s")
+                logger.info("Command completed successfully in %ss", str(execution_time:.2f)[:100])
                 return {
                     "success": True,
                     "output": result.stdout,
@@ -173,7 +173,7 @@ class GitWizScheduler:
                     "command": command,
                 }
             else:
-                logger.error(f"Command failed with code {result.returncode}: {result.stderr}")
+                logger.error("Command failed with code %s: %s", str(result.returncode)[:100], str(result.stderr)[:100])
                 return {
                     "success": False,
                     "error": result.stderr,
@@ -182,7 +182,7 @@ class GitWizScheduler:
                 }
 
         except subprocess.TimeoutExpired:
-            logger.error(f"Command timed out: {command}")
+            logger.error("Command timed out: %s", str(command)[:100])
             return {
                 "success": False,
                 "error": "Command timed out",
@@ -190,7 +190,7 @@ class GitWizScheduler:
                 "command": command,
             }
         except Exception as e:
-            logger.error(f"Command execution failed: {e}")
+            logger.error("Command execution failed: %s", str(e)[:100])
             return {
                 "success": False,
                 "error": str(e),
@@ -200,7 +200,7 @@ class GitWizScheduler:
 
     def _run_scheduled_job(self, job_name: str, job_config: Dict[str, Any]):
         """Execute a scheduled maintenance job."""
-        logger.info(f"🔄 Starting scheduled job: {job_name}")
+        logger.info("🔄 Starting scheduled job: %s", str(job_name)[:100])
         job_start = datetime.utcnow()
 
         job_results = {
@@ -218,7 +218,7 @@ class GitWizScheduler:
             if not cmd_result["success"]:
                 job_results["overall_success"] = False
                 if job_config.get("fail_on_errors", False):
-                    logger.error(f"Job {job_name} failed on command: {command}")
+                    logger.error("Job %s failed on command: %s", str(job_name)[:100], str(command)[:100])
                     break
 
         # Update statistics
@@ -248,7 +248,7 @@ class GitWizScheduler:
             self._send_notification(f"Job {job_name} completed with issues", job_results)
 
         self._save_status()
-        logger.info(f"✅ Job {job_name} completed in {execution_time:.2f}s")
+        logger.info("✅ Job %s completed in %ss", str(job_name)[:100], str(execution_time:.2f)[:100])
 
     def _generate_job_report(self, job_results: Dict[str, Any]):
         """Generate a detailed report for a job."""
@@ -263,7 +263,7 @@ class GitWizScheduler:
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(job_results, f, indent=2)
 
-        logger.info(f"📊 Job report saved: {report_path}")
+        logger.info("📊 Job report saved: %s", str(report_path)[:100])
 
     def _send_notification(self, message: str, details: Dict[str, Any]):
         """Send notification about job status."""
@@ -275,7 +275,7 @@ class GitWizScheduler:
 
         # Log notification
         if "log" in self.config["notifications"]["methods"]:
-            logger.warning(f"NOTIFICATION: {message}")
+            logger.warning("NOTIFICATION: %s", str(message)[:100])
 
         # File notification
         if "file" in self.config["notifications"]["methods"]:
@@ -312,7 +312,7 @@ class GitWizScheduler:
             if "time" in job_config:
                 # Daily schedule
                 schedule.every().day.at(job_config["time"]).do(self._run_scheduled_job, job_name, job_config)
-                logger.info(f"📅 Scheduled daily job '{job_name}' at {job_config['time']}")
+                logger.info("📅 Scheduled daily job '%s' at %s", str(job_name)[:100], str(job_config['time'])[:100])
 
             elif "day" in job_config and "time" in job_config:
                 # Weekly schedule
@@ -334,7 +334,7 @@ class GitWizScheduler:
                 elif day == "sunday":
                     schedule.every().sunday.at(time).do(self._run_scheduled_job, job_name, job_config)
 
-                logger.info(f"📅 Scheduled weekly job '{job_name}' on {day} at {time}")
+                logger.info("📅 Scheduled weekly job '%s' on %s at %s", str(job_name)[:100], str(day)[:100], str(time)[:100])
 
     def start(self):
         """Start the scheduler in background mode."""
@@ -352,7 +352,7 @@ class GitWizScheduler:
                     schedule.run_pending()
                     time.sleep(60)  # Check every minute
                 except Exception as e:
-                    logger.error(f"Scheduler error: {e}")
+                    logger.error("Scheduler error: %s", str(e)[:100])
                     time.sleep(60)
 
         # Start in background thread
@@ -373,7 +373,7 @@ class GitWizScheduler:
     def run_job_now(self, job_name: str):
         """Run a specific job immediately."""
         if job_name not in self.config["schedules"]:
-            logger.error(f"Job '{job_name}' not found in configuration")
+            logger.error("Job '%s' not found in configuration", str(job_name)[:100])
             return False
 
         job_config = self.config["schedules"][job_name]

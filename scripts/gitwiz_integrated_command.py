@@ -42,21 +42,21 @@ try:
 
     ENHANCED_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Enhanced GitWiz not available: {e}")
+    logger.warning("Enhanced GitWiz not available: %s", str(e)[:100])
     ENHANCED_AVAILABLE = False
 
 try:
 
     LINT_MANAGER_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Lint Cleanup Manager not available: {e}")
+    logger.warning("Lint Cleanup Manager not available: %s", str(e)[:100])
     LINT_MANAGER_AVAILABLE = False
 
 try:
 
     ORCHESTRATOR_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"Workflow Orchestrator not available: {e}")
+    logger.warning("Workflow Orchestrator not available: %s", str(e)[:100])
     ORCHESTRATOR_AVAILABLE = False
 
 
@@ -88,7 +88,7 @@ class GitWizIntegratedCommand:
                 logger.info("✅ Workflow Orchestrator initialized")
 
         except Exception as e:
-            logger.error(f"Component initialization error: {e}")
+            logger.error("Component initialization error: %s", str(e)[:100])
 
     def quality_check(
         self, auto_fix: bool = False, dry_run: bool = True, output_format: str = "json"
@@ -128,7 +128,7 @@ class GitWizIntegratedCommand:
                 results["components_used"].append("enhanced_gitwiz")
                 logger.info("✅ Enhanced GitWiz quality check completed")
             except Exception as e:
-                logger.error(f"Enhanced GitWiz quality check failed: {e}")
+                logger.error("Enhanced GitWiz quality check failed: %s", str(e)[:100])
                 results["results"]["enhanced_gitwiz"] = {"error": str(e)}
 
         # Use Lint Manager directly if Enhanced GitWiz not available
@@ -146,7 +146,7 @@ class GitWizIntegratedCommand:
                 results["components_used"].append("lint_manager")
                 logger.info("✅ Direct lint manager quality check completed")
             except Exception as e:
-                logger.error(f"Lint manager quality check failed: {e}")
+                logger.error("Lint manager quality check failed: %s", str(e)[:100])
                 results["results"]["lint_manager"] = {"error": str(e)}
 
         # Generate summary
@@ -156,7 +156,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info(f"✅ Quality check completed in {execution_time:.2f}s")
+        logger.info("✅ Quality check completed in %ss", str(execution_time:.2f)[:100])
 
         # Format output
         if output_format == "markdown":
@@ -198,7 +198,7 @@ class GitWizIntegratedCommand:
                 results["components_used"].append("enhanced_gitwiz")
                 logger.info("✅ Enhanced GitWiz maintenance completed")
             except Exception as e:
-                logger.error(f"Enhanced GitWiz maintenance failed: {e}")
+                logger.error("Enhanced GitWiz maintenance failed: %s", str(e)[:100])
                 results["stages"]["enhanced_maintenance"] = {"error": str(e)}
 
         # Use Workflow Orchestrator if available
@@ -217,7 +217,7 @@ class GitWizIntegratedCommand:
                 results["components_used"].append("orchestrator")
                 logger.info("✅ Workflow orchestrator maintenance completed")
             except Exception as e:
-                logger.error(f"Workflow orchestrator maintenance failed: {e}")
+                logger.error("Workflow orchestrator maintenance failed: %s", str(e)[:100])
                 results["stages"]["orchestrator"] = {"error": str(e)}
 
         # Fallback to lint manager maintenance
@@ -228,7 +228,7 @@ class GitWizIntegratedCommand:
                 results["components_used"].append("lint_manager")
                 logger.info("✅ Lint manager maintenance completed")
             except Exception as e:
-                logger.error(f"Lint manager maintenance failed: {e}")
+                logger.error("Lint manager maintenance failed: %s", str(e)[:100])
                 results["stages"]["lint_maintenance"] = {"error": str(e)}
 
         # Generate summary
@@ -237,7 +237,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info(f"✅ Maintenance workflow completed in {execution_time:.2f}s")
+        logger.info("✅ Maintenance workflow completed in %ss", str(execution_time:.2f)[:100])
 
         return results
 
@@ -279,7 +279,7 @@ class GitWizIntegratedCommand:
 
                 logger.info("✅ Lint scan completed")
             except Exception as e:
-                logger.error(f"Lint scan failed: {e}")
+                logger.error("Lint scan failed: %s", str(e)[:100])
                 results["scan_results"] = {"error": str(e)}
         else:
             results["scan_results"] = {"error": "Lint manager not available"}
@@ -290,7 +290,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info(f"✅ Lint scan completed in {execution_time:.2f}s")
+        logger.info("✅ Lint scan completed in %ss", str(execution_time:.2f)[:100])
 
         return results
 
@@ -311,7 +311,7 @@ class GitWizIntegratedCommand:
         Returns:
             Dictionary containing workflow results
         """
-        logger.info(f"🚀 Starting {workflow_type} workflow...")
+        logger.info("🚀 Starting %s workflow...", str(workflow_type)[:100])
         start_time = datetime.utcnow()
 
         results = {
@@ -335,7 +335,7 @@ class GitWizIntegratedCommand:
                 results["workflow_results"] = workflow_results
                 logger.info("✅ Enhanced workflow completed")
             except Exception as e:
-                logger.error(f"Enhanced workflow failed: {e}")
+                logger.error("Enhanced workflow failed: %s", str(e)[:100])
                 results["workflow_results"] = {"error": str(e)}
 
         elif workflow_type == "optimization" and self.enhanced_gitwiz:
@@ -344,7 +344,7 @@ class GitWizIntegratedCommand:
                 results["workflow_results"] = optimization_results
                 logger.info("✅ Optimization workflow completed")
             except Exception as e:
-                logger.error(f"Optimization workflow failed: {e}")
+                logger.error("Optimization workflow failed: %s", str(e)[:100])
                 results["workflow_results"] = {"error": str(e)}
 
         else:
@@ -355,7 +355,7 @@ class GitWizIntegratedCommand:
                     results["workflow_results"] = standard_results
                     logger.info("✅ Standard workflow completed")
                 except Exception as e:
-                    logger.error(f"Standard workflow failed: {e}")
+                    logger.error("Standard workflow failed: %s", str(e)[:100])
                     results["workflow_results"] = {"error": str(e)}
             else:
                 results["workflow_results"] = {"error": "No workflow components available"}
@@ -366,7 +366,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info(f"✅ {workflow_type} workflow completed in {execution_time:.2f}s")
+        logger.info("✅ %s workflow completed in %ss", str(workflow_type)[:100], str(execution_time:.2f)[:100])
 
         return results
 
@@ -652,7 +652,7 @@ Examples:
     try:
         cmd_interface = GitWizIntegratedCommand(args.project_root)
     except Exception as e:
-        logger.error(f"Failed to initialize GitWiz: {e}")
+        logger.error("Failed to initialize GitWiz: %s", str(e)[:100])
         sys.exit(1)
 
     # Execute command
@@ -696,7 +696,7 @@ Examples:
         logger.info("Operation cancelled by user")
         sys.exit(130)
     except Exception as e:
-        logger.error(f"Command execution failed: {e}")
+        logger.error("Command execution failed: %s", str(e)[:100])
         if args.verbose:
 
             traceback.print_exc()

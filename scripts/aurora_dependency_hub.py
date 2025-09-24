@@ -112,7 +112,7 @@ class AuroraDependencyHub:
                     loaded_config = json.load(f)
                 return {**default_config, **loaded_config}
             except Exception as e:
-                self.logger.warning(f"Failed to load config: {e}")
+logger.warning("Failed to load config: %s", str(e)[:100])
                 
         return default_config
         
@@ -125,7 +125,7 @@ class AuroraDependencyHub:
         """Install Python package with robust error handling"""
         package_name = package_spec.split('>=')[0].split('==')[0].split('[')[0]
         
-        self.logger.info(f"Installing Python package: {package_spec}")
+logger.info("Installing Python package: %s", str(package_spec)[:100])
         
         max_retries = self.config["installation_strategy"]["max_retries"]
         timeout = self.config["installation_strategy"]["timeout_per_package"]
@@ -168,14 +168,14 @@ class AuroraDependencyHub:
                     
                     if result.returncode == 0:
                         self.installation_state["python_packages"]["installed"].append(package_spec)
-                        self.logger.info(f"✅ Successfully installed: {package_spec}")
+logger.info("✅ Successfully installed: %s", str(package_spec)[:100])
                         return True
                         
                 except subprocess.TimeoutExpired:
-                    self.logger.warning(f"Timeout installing {package_spec} with {index} (attempt {attempt + 1})")
+logger.warning("Timeout installing %s with %s (attempt %s)", str(package_spec)[:100], str(index)[:100], str(attempt + 1)[:100])
                     continue
                 except Exception as e:
-                    self.logger.warning(f"Error installing {package_spec}: {e}")
+logger.warning("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
                     continue
                     
             # Wait before retry
@@ -185,15 +185,15 @@ class AuroraDependencyHub:
         self.installation_state["python_packages"]["failed"].append(package_spec)
         
         if is_critical:
-            self.logger.error(f"❌ CRITICAL: Failed to install {package_spec}")
+logger.error("❌ CRITICAL: Failed to install %s", str(package_spec)[:100])
         else:
-            self.logger.warning(f"⚠️  Failed to install optional package: {package_spec}")
+logger.warning("⚠️  Failed to install optional package: %s", str(package_spec)[:100])
             
         return False
         
     def install_node_package_robust(self, package_spec: str) -> bool:
         """Install Node.js package with robust error handling"""
-        self.logger.info(f"Installing Node.js package: {package_spec}")
+logger.info("Installing Node.js package: %s", str(package_spec)[:100])
         
         registries = [
             "https://registry.npmjs.org/",
@@ -214,15 +214,15 @@ class AuroraDependencyHub:
                 
                 if result.returncode == 0:
                     self.installation_state["node_packages"]["installed"].append(package_spec)
-                    self.logger.info(f"✅ Successfully installed Node.js package: {package_spec}")
+logger.info("✅ Successfully installed Node.js package: %s", str(package_spec)[:100])
                     return True
                     
             except Exception as e:
-                self.logger.warning(f"Failed to install {package_spec} with {registry}: {e}")
+logger.warning("Failed to install %s with %s: %s", str(package_spec)[:100], str(registry)[:100], str(e)[:100])
                 continue
                 
         self.installation_state["node_packages"]["failed"].append(package_spec)
-        self.logger.warning(f"⚠️  Failed to install Node.js package: {package_spec}")
+logger.warning("⚠️  Failed to install Node.js package: %s", str(package_spec)[:100])
         return False
         
     def install_all_dependencies(self) -> Dict[str, Any]:
@@ -242,7 +242,7 @@ class AuroraDependencyHub:
         critical_packages = self.config["critical_python_packages"]
         results["critical_python"]["total"] = len(critical_packages)
         
-        self.logger.info(f"📦 Installing {len(critical_packages)} critical Python packages...")
+logger.info("📦 Installing %s critical Python packages...", str(len(critical_packages))[:100])
         for package in critical_packages:
             if self.install_python_package_robust(package, is_critical=True):
                 results["critical_python"]["installed"] += 1
@@ -253,7 +253,7 @@ class AuroraDependencyHub:
         dev_packages = self.config["development_python_packages"]
         results["development_python"]["total"] = len(dev_packages)
         
-        self.logger.info(f"🛠️  Installing {len(dev_packages)} development Python packages...")
+logger.info("🛠️  Installing %s development Python packages...", str(len(dev_packages))[:100])
         for package in dev_packages:
             if self.install_python_package_robust(package, is_critical=False):
                 results["development_python"]["installed"] += 1
@@ -264,7 +264,7 @@ class AuroraDependencyHub:
         optional_packages = self.config["optional_python_packages"]
         results["optional_python"]["total"] = len(optional_packages)
         
-        self.logger.info(f"🔬 Installing {len(optional_packages)} optional Python packages...")
+logger.info("🔬 Installing %s optional Python packages...", str(len(optional_packages))[:100])
         for package in optional_packages:
             if self.install_python_package_robust(package, is_critical=False):
                 results["optional_python"]["installed"] += 1
@@ -276,7 +276,7 @@ class AuroraDependencyHub:
         results["node_packages"]["total"] = len(node_packages)
         
         if node_packages and (self.project_root / "package.json").exists():
-            self.logger.info(f"📦 Installing {len(node_packages)} Node.js packages...")
+logger.info("📦 Installing %s Node.js packages...", str(len(node_packages))[:100])
             for package in node_packages:
                 if self.install_node_package_robust(package):
                     results["node_packages"]["installed"] += 1
@@ -291,7 +291,7 @@ class AuroraDependencyHub:
         
         results["end_time"] = datetime.now().isoformat()
         
-        self.logger.info(f"🏁 Installation complete. Success rate: {critical_success_rate:.1%}")
+logger.info("🏁 Installation complete. Success rate: %s", str(critical_success_rate:.1%)[:100])
         return results
         
     def setup_automated_systems(self):
@@ -317,7 +317,7 @@ class AuroraDependencyHub:
             else:
                 self.logger.warning("⚠️  Persistence script not found")
         except Exception as e:
-            self.logger.warning(f"Persistence setup failed: {e}")
+logger.warning("Persistence setup failed: %s", str(e)[:100])
             
         # 2. Set up automated scheduler
         try:
@@ -335,7 +335,7 @@ class AuroraDependencyHub:
             else:
                 self.logger.warning("⚠️  Scheduler script not found")
         except Exception as e:
-            self.logger.warning(f"Scheduler setup failed: {e}")
+logger.warning("Scheduler setup failed: %s", str(e)[:100])
             
         # 3. Create startup script
         try:
@@ -343,7 +343,7 @@ class AuroraDependencyHub:
             self.logger.info("✅ Startup script created")
             success_count += 1
         except Exception as e:
-            self.logger.warning(f"Startup script creation failed: {e}")
+logger.warning("Startup script creation failed: %s", str(e)[:100])
             
         # 4. Set up health monitoring
         try:
@@ -351,9 +351,9 @@ class AuroraDependencyHub:
             self.logger.info("✅ Health monitoring configured")
             success_count += 1
         except Exception as e:
-            self.logger.warning(f"Health monitoring setup failed: {e}")
+logger.warning("Health monitoring setup failed: %s", str(e)[:100])
             
-        self.logger.info(f"🎯 Automated systems setup: {success_count}/{total_systems} successful")
+logger.info("🎯 Automated systems setup: %s/%s successful", str(success_count)[:100], str(total_systems)[:100])
         return success_count == total_systems
         
     def _create_startup_script(self):

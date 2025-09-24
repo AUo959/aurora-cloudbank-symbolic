@@ -34,7 +34,7 @@ class SSMTv3BranchPruner:
             "automation_queue": []
         }
         
-        logger.info(f"🌳 SSMT v3.0 Branch Pruning Engine initialized (Session: {self.session_id})")
+        logger.info("🌳 SSMT v3.0 Branch Pruning Engine initialized (Session: %s)", str(self.session_id)[:100])
 
     def analyze_repository_health(self) -> Dict[str, Any]:
         """Comprehensive repository health analysis for pruning strategy"""
@@ -117,16 +117,16 @@ class SSMTv3BranchPruner:
             
             self.pruning_report["branch_analysis"] = health_analysis
             
-            logger.info(f"📊 Repository health analysis complete:")
-            logger.info(f"   🔄 Unmerged branches: {len(unmerged_branches)}")
-            logger.info(f"   ✅ Merged branches: {len(merged_branches)}")
-            logger.info(f"   🤖 Immediate automation: {len(health_analysis['pruning_potential']['immediate_automation'])}")
-            logger.info(f"   🗑️ Safe deletion candidates: {len(health_analysis['pruning_potential']['safe_deletion'])}")
+            logger.info("📊 Repository health analysis complete:")
+            logger.info("   🔄 Unmerged branches: %s", str(len(unmerged_branches))[:100])
+            logger.info("   ✅ Merged branches: %s", str(len(merged_branches))[:100])
+            logger.info("   🤖 Immediate automation: %s", str(len(health_analysis['pruning_potential']['immediate_automation']))[:100])
+            logger.info("   🗑️ Safe deletion candidates: %s", str(len(health_analysis['pruning_potential']['safe_deletion']))[:100])
             
             return health_analysis
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Repository health analysis failed: {e}")
+            logger.error("❌ Repository health analysis failed: %s", str(e)[:100])
             return {"error": str(e)}
 
     def analyze_branch_for_pruning(self, branch_name: str) -> Dict[str, Any]:
@@ -295,16 +295,16 @@ class SSMTv3BranchPruner:
         
         self.pruning_report["pruning_plan"] = pruning_plan
         
-        logger.info(f"✅ Pruning plan generated:")
-        logger.info(f"   🤖 Phase 1 - Automate: {len(pruning_plan['action_phases']['phase_1_immediate_automation']['branches'])} branches")
-        logger.info(f"   🗑️ Phase 2 - Delete: {len(pruning_plan['action_phases']['phase_2_safe_deletion']['branches'])} branches")
-        logger.info(f"   👁️ Phase 3 - Review: {len(pruning_plan['action_phases']['phase_3_manual_review']['branches'])} branches")
+        logger.info("✅ Pruning plan generated:")
+        logger.info("   🤖 Phase 1 - Automate: %s branches", str(len(pruning_plan['action_phases']['phase_1_immediate_automation']['branches']))[:100])
+        logger.info("   🗑️ Phase 2 - Delete: %s branches", str(len(pruning_plan['action_phases']['phase_2_safe_deletion']['branches']))[:100])
+        logger.info("   👁️ Phase 3 - Review: %s branches", str(len(pruning_plan['action_phases']['phase_3_manual_review']['branches']))[:100])
         
         return pruning_plan
 
     def execute_pruning_phase_1(self, dry_run: bool = True) -> Dict[str, Any]:
         """Execute Phase 1: Immediate automation of high-confidence branches"""
-        logger.info(f"🚀 Executing Phase 1 pruning - Immediate automation (dry_run={dry_run})")
+        logger.info("🚀 Executing Phase 1 pruning - Immediate automation (dry_run=%s)", str(dry_run)[:100])
         
         pruning_plan = self.generate_pruning_plan()
         if "error" in pruning_plan:
@@ -329,7 +329,7 @@ class SSMTv3BranchPruner:
             }
         else:
             # Execute actual automation (delegated to existing automation system)
-            logger.info(f"⚡ Would execute automation on {len(automation_branches)} branches")
+            logger.info("⚡ Would execute automation on %s branches", str(len(automation_branches))[:100])
             return {
                 "phase": "phase_1_immediate_automation",
                 "status": "delegated_to_automation_system",

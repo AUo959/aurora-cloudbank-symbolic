@@ -262,7 +262,7 @@ class MemoryItem:
             return tag_id
             
         except Exception as e:
-            logger.warning(f"DLP tracking failed for memory {self.id}: {e}")
+            logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:100], str(e)[:100])
             return None
 
 
@@ -699,7 +699,7 @@ class HierarchicalMemoryManager:
         state = self.export_state()
         with open(filepath, 'w') as f:
             json.dump(state, f, indent=2, default=str)
-        logger.info(f"Aurora CloudBank memory system saved to {filepath}")
+        logger.info("Aurora CloudBank memory system saved to %s", str(filepath)[:100])
     
     def batch_process_lifecycle(self) -> Dict[str, Dict[str, int]]:
         """Process memory lifecycle operations in batch"""

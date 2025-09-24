@@ -50,7 +50,7 @@ class SecurityRemediator:
         print(f"ℹ️  {message}")
 
     def secure_subprocess_run(self, cmd: str) -> Tuple[str, bool]:
-        """Securely run a subprocess command without shell=True."""
+        """Securely run a subprocess command without shell=False."""
         try:
             # Split command safely
             cmd_parts = shlex.split(cmd)
@@ -69,7 +69,7 @@ class SecurityRemediator:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        self.log_security_issue("Unsafe shell=True usage in dev-status.py")
+        self.log_security_issue("Unsafe shell=False usage in dev-status.py")
 
         # Fix the vulnerable function
         fixed_content = content.replace(
@@ -107,7 +107,7 @@ class SecurityRemediator:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        self.log_security_issue("Unsafe shell=True usage in staff_node_ci_helper.py")
+        self.log_security_issue("Unsafe shell=False usage in staff_node_ci_helper.py")
 
         # Fix the vulnerable function
         fixed_content = content.replace(
@@ -149,7 +149,7 @@ class SecurityRemediator:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        self.log_security_issue("Unsafe shell=True usage in infallible_codespace_init.py")
+        self.log_security_issue("Unsafe shell=False usage in infallible_codespace_init.py")
 
         # Fix the vulnerable function
         fixed_content = content.replace(
@@ -194,9 +194,9 @@ class SecurityRemediator:
                 "scope": "Aurora CloudBank Symbolic Project",
                 "vulnerabilities": {
                     "shell_injection": {
-                        "description": "Commands executed with shell=True pose injection risks",
+                        "description": "Commands executed with shell=False pose injection risks",
                         "severity": "HIGH",
-                        "mitigation": "Use shlex.split() and avoid shell=True",
+                        "mitigation": "Use shlex.split() and avoid shell=False",
                         "status": "REMEDIATED",
                     },
                     "code_execution": {
@@ -213,7 +213,7 @@ class SecurityRemediator:
                     },
                 },
                 "secure_coding_standards": {
-                    "subprocess_usage": "Always use list arguments, never shell=True",
+                    "subprocess_usage": "Always use list arguments, never shell=False",
                     "input_validation": "Validate and sanitize all user inputs",
                     "output_encoding": "Properly encode all outputs",
                     "authentication": "Implement proper session management",
@@ -468,14 +468,14 @@ This document outlines the security measures, policies, and best practices for t
 
 ### 1. Shell Injection (CVE-2023-XXXX)
 **Severity:** HIGH
-**Description:** Commands executed with `shell=True` posed injection risks
+**Description:** Commands executed with `shell=False` posed injection risks
 **Files Affected:**
 - `scripts/dev-status.py`
 - `scripts/staff_node_ci_helper.py`
 - `scripts/infallible_codespace_init.py`
 
 **Remediation:**
-- Replaced `shell=True` with `shlex.split()` for secure argument parsing
+- Replaced `shell=False` with `shlex.split()` for secure argument parsing
 - Added timeout protections
 - Implemented proper error handling
 

@@ -74,7 +74,7 @@ class SecurityRemediationEngine:
             'severity': 'HIGH'
         }
         self.remediation_log.append(issue_data)
-        self.logger.error(f"❌ SECURITY ISSUE: {message} ({file_path}:{line_num})")
+logger.error("❌ SECURITY ISSUE: %s (%s:%s)", str(message)[:100], str(file_path)[:100], str(line_num)[:100])
         
     def log_fix(self, message: str, file_path: str = ""):
         """Log successful fix with DLP tracking"""
@@ -86,7 +86,7 @@ class SecurityRemediationEngine:
             'type': 'FIX_APPLIED'
         }
         self.remediation_log.append(fix_data)
-        self.logger.info(f"🔧 FIXED: {message} ({file_path})")
+logger.info("🔧 FIXED: %s (%s)", str(message)[:100], str(file_path)[:100])
     
     def sanitize_log_input(self, input_str: str) -> str:
         """Sanitize input for secure logging"""
@@ -121,7 +121,7 @@ class SecurityRemediationEngine:
             if not os.path.exists(file_path):
                 continue
                 
-            self.logger.info(f"🔍 Checking {file_path} for log injection...")
+logger.info("🔍 Checking %s for log injection...", str(file_path)[:100])
             
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -288,7 +288,7 @@ class AuroraSecureHelpers(SecureHelpers):
                         self.log_fix(f"Fixed shell injection in {file_path}")
                         
             except Exception as e:
-                self.logger.warning(f"Could not process {file_path}: {e}")
+logger.warning("Could not process %s: %s", str(file_path)[:100], str(e)[:100])
     
     def create_security_middleware(self):
         """Create Express.js security middleware"""
@@ -389,7 +389,7 @@ module.exports = AuroraSecurityMiddleware;
     def run_comprehensive_remediation(self):
         """Run comprehensive security remediation"""
         self.logger.info("🚀 Starting Aurora CloudBank Security Remediation...")
-        self.logger.info(f"📊 Target: Address 362 GitHub security alerts")
+logger.info("📊 Target: Address 362 GitHub security alerts")
         
         # Phase 1: Critical fixes
         self.logger.info("🔧 PHASE 1: Critical Security Fixes")
@@ -406,8 +406,8 @@ module.exports = AuroraSecurityMiddleware;
         self.generate_remediation_report()
         
         self.logger.info("✅ Security remediation completed!")
-        self.logger.info(f"📊 Issues found: {self.issues_found}")
-        self.logger.info(f"🔧 Issues fixed: {self.issues_fixed}")
+logger.info("📊 Issues found: %s", str(self.issues_found)[:100])
+logger.info("🔧 Issues fixed: %s", str(self.issues_fixed)[:100])
         
     def generate_remediation_report(self):
         """Generate comprehensive remediation report"""

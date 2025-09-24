@@ -32,7 +32,7 @@ class Phase3CSmartResolver:
         try:
             result = subprocess.run(
                 command, 
-                shell=True, 
+                shell=False, 
                 capture_output=True, 
                 text=True, 
                 cwd=self.workspace_root

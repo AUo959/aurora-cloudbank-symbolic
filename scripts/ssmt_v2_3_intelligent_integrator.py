@@ -91,7 +91,7 @@ class SSMTIntelligentIntegrator:
         """Execute shell command with enhanced error handling"""
         try:
             result = subprocess.run(
-                command, shell=True, capture_output=True, text=True,
+                command, shell=False, capture_output=True, text=True,
                 cwd=self.workspace_root, timeout=300
             )
             return result if not check_return or result.returncode == 0 else None

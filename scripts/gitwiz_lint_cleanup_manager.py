@@ -266,8 +266,8 @@ class LintCleanupManager:
         execution_time = (dt.datetime.utcnow() - scan_start).total_seconds()
         scan_results["execution_time"] = execution_time
 
-        logger.info(f"✅ Lint scan completed in {execution_time:.2f}s")
-        logger.info(f"Found {len(self.discovered_issues)} total issues")
+        logger.info("✅ Lint scan completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("Found %s total issues", str(len(self.discovered_issues))[:100])
 
         return scan_results
 
@@ -282,7 +282,7 @@ class LintCleanupManager:
             Dictionary containing fix results and statistics
         """
         workflow_start = dt.datetime.utcnow()
-        logger.info(f"🔧 Starting automated fix workflow (dry_run={dry_run})...")
+        logger.info("🔧 Starting automated fix workflow (dry_run=%s)...", str(dry_run)[:100])
 
         workflow_results = {
             "start_time": workflow_start.isoformat(),
@@ -341,8 +341,8 @@ class LintCleanupManager:
         execution_time = (dt.datetime.utcnow() - workflow_start).total_seconds()
         workflow_results["execution_time"] = execution_time
 
-        logger.info(f"✅ Automated fix workflow completed in {execution_time:.2f}s")
-        logger.info(f"Applied {workflow_results['total_fixes']} fixes total")
+        logger.info("✅ Automated fix workflow completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("Applied %s fixes total", str(workflow_results['total_fixes'])[:100])
 
         return workflow_results
 
@@ -779,7 +779,7 @@ class LintCleanupManager:
                     )
 
         except (OSError, UnicodeDecodeError):
-            logger.warning(f"Could not analyze {file_path}")
+            logger.warning("Could not analyze %s", str(file_path)[:100])
 
         return issues
 

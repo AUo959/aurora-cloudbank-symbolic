@@ -251,7 +251,7 @@ class GITWizSimple:
                         continue
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error getting file stats: {e}")
+            logger.warning("Error getting file stats: %s", str(e)[:100])
 
         return stats
 
@@ -287,7 +287,7 @@ class GITWizSimple:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error getting stored issues: {e}")
+            logger.warning("Error getting stored issues: %s", str(e)[:100])
 
         return issues
 
@@ -347,7 +347,7 @@ class GITWizSimple:
                             analysis["issues_found"].append(asdict(issue))
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning(f"Error analyzing {md_file}: {e}")
+                logger.warning("Error analyzing %s: %s", str(md_file)[:100], str(e)[:100])
 
     def _analyze_zip_files(self, analysis: Dict[str, Any]):
         """Analyze ZIP files in the repository."""
@@ -379,7 +379,7 @@ class GITWizSimple:
                         )
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning(f"Error analyzing ZIP file {zip_file}: {e}")
+                logger.warning("Error analyzing ZIP file %s: %s", str(zip_file)[:100], str(e)[:100])
 
     def _check_common_repo_issues(self, analysis: Dict[str, Any]):
         """Check for common repository structure issues."""

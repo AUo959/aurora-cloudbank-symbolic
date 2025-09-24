@@ -48,7 +48,7 @@ class Sonnet4IntegrationHub:
             with open(self.config_path, "r") as f:
                 return yaml.safe_load(f)
         except Exception as e:
-            logger.error(f"Failed to load config: {e}")
+            logger.error("Failed to load config: %s", str(e)[:100])
             return {}
 
     def _parse_sonnet4_config(self) -> Sonnet4Config:
@@ -85,14 +85,14 @@ class Sonnet4IntegrationHub:
             try:
                 results[client_id] = await self._enable_sonnet4_for_client(client_id)
             except Exception as e:
-                logger.error(f"Failed to enable Sonnet 4 for client {client_id}: {e}")
+                logger.error("Failed to enable Sonnet 4 for client %s: %s", str(client_id)[:100], str(e)[:100])
                 results[client_id] = False
 
         # Set global flag for new clients
         self.sonnet4_config.enable_for_all_clients = True
         await self._update_config()
 
-        logger.info(f"Sonnet 4 enabled for {len(results)} clients")
+        logger.info("Sonnet 4 enabled for %s clients", str(len(results))[:100])
         return results
 
     async def _enable_sonnet4_for_client(self, client_id: str) -> bool:
@@ -120,14 +120,14 @@ class Sonnet4IntegrationHub:
 
             return True
         except Exception as e:
-            logger.error(f"Failed to enable Sonnet 4 for client {client_id}: {e}")
+            logger.error("Failed to enable Sonnet 4 for client %s: %s", str(client_id)[:100], str(e)[:100])
             return False
 
     def _create_fallback_handler(self, client_id: str):
         """Create fallback handler for GPT-4o compatibility"""
 
         async def fallback_handler(request, error):
-            logger.warning(f"Falling back to {self.sonnet4_config.fallback_model} for client {client_id}: {error}")
+            logger.warning("Falling back to %s for client %s: %s", str(self.sonnet4_config.fallback_model)[:100], str(client_id)[:100], str(error)[:100])
             # Implement fallback logic here
             return await self._handle_fallback_request(request, client_id)
 
@@ -136,7 +136,7 @@ class Sonnet4IntegrationHub:
     async def _handle_fallback_request(self, request, client_id: str):
         """Handle fallback requests to GPT-4o"""
         # Preserve original 4o logic while using Sonnet 4 enhancements where possible
-        logger.info(f"Processing fallback request for client {client_id}")
+        logger.info("Processing fallback request for client %s", str(client_id)[:100])
         # Implementation would go here
         return {
             "status": "fallback_processed",
@@ -183,7 +183,7 @@ class Sonnet4IntegrationHub:
                 yaml.dump(self.config, f, default_flow_style=False)
 
         except Exception as e:
-            logger.error(f"Failed to update config: {e}")
+            logger.error("Failed to update config: %s", str(e)[:100])
 
     def get_client_status(self, client_id: str) -> Dict[str, Any]:
         """Get Sonnet 4 status for a specific client"""

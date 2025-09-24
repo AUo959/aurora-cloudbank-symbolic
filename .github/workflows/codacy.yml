@@ -52,6 +52,7 @@ jobs:
           gh-code-scanning-compat: true
           # Force 0 exit code to allow SARIF file generation
           # This will handover control about PR rejection to the GitHub side
+          # Use INT32_MAX (2147483647) to effectively disable the issue limit ("unlimited").
           max-allowed-issues: 2147483647
 
       # Upload the SARIF file generated in the previous step

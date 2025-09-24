@@ -6,7 +6,6 @@ Lightweight symbolic data encoding/decoding without numpy.
 
 import hashlib
 import math
-import secrets
 from typing import Any, Dict, List, Literal
 
 

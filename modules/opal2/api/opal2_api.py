@@ -1,9 +1,11 @@
+import logging
+import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI
 import logging
 import uvicorn
 
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Opal2 Modular System - FastAPI Integration
 Enhanced quantum visualization API with modular renderer support

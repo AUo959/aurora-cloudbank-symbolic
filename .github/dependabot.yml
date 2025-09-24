@@ -1,21 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: 'pip'
-    directory: '/'
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: 'deps'
+      prefix: "deps"
     labels:
-      - 'dependencies'
-      - 'python'
-  - package-ecosystem: 'npm'
-    directory: '/'
+      - "dependencies"
+      - "python"
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: 'weekly'
+      interval: "weekly"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: 'deps'
+      prefix: "deps"
     labels:
-      - 'dependencies'
+      - "dependencies"

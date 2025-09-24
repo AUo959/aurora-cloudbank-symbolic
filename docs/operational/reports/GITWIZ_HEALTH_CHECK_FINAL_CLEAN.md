@@ -26,12 +26,12 @@
 
 ### ZIP File Audit
 
-**26 ZIP files identified consuming 23.5MB total**
+### ZIP files identified (23.5MB total)
 
 **Immediate Attention Needed:**
 
 - `SRB_SHADOWFAX_Stillness_v1.0 2.zip` (8.5MB) - **DUPLICATE**
-- `SRB_SHADOWFAX_Stillness_v1.0.zip` (7.2MB) - **ORIGINAL**
+- `releases/SRB_SHADOWFAX_Stillness_v1.0.zip` (7.2MB) - **ORIGINAL (moved)**
 - `Aurora_EdSim_MLTM_Export_20250408T1731Z 2.zip` (7.2MB) - **LARGE EXPORT**
 
 **Recommendation:** Remove duplicate ZIP files to free additional 8.5MB
@@ -86,20 +86,20 @@
 
 ### This Week
 
-3. **Dependency audit**
+1. **Dependency audit**
 
    - Review requirements.txt merge conflicts
    - Standardize dependency management
    - Update outdated packages
 
-4. **Archive old exports**
+2. **Archive old exports**
 
    - Move large ZIP files to external storage
    - Keep only essential deployment packages
 
 ### Ongoing Maintenance
 
-5. **Set up automated cleanup**
+1. **Set up automated cleanup**
 
    - Weekly Python cache cleanup
    - Monthly branch pruning

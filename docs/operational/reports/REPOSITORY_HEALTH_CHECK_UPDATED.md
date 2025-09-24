@@ -41,7 +41,7 @@
 
 - **Status:** 🟡 **IMPROVED**
 - **Current:** 23 files (target: <10)
-- **Largest:** `SRB_SHADOWFAX_Stillness_v1.0.zip` (7.3MB)
+- **Largest:** `releases/SRB_SHADOWFAX_Stillness_v1.0.zip` (7.3MB)
 - **Total ZIP size:** ~8.5MB (down from 23.5MB)
 - **Recommendation:** Archive 10+ older export files
 
@@ -103,7 +103,7 @@ File Types:
 
 **File:** `requirements.txt` lines 19-21
 
-```
+```text
 <<<<<<< HEAD
 black==25.1.0
 isort==6.0.1
@@ -160,7 +160,7 @@ pylint==3.2.8
 
 ### Short Term (This Week)
 
-3. **Branch Cleanup Phase 1**
+1. **Branch Cleanup Phase 1**
 
    ```bash
    # Identify safely deletable branches
@@ -168,13 +168,13 @@ pylint==3.2.8
    # Delete confirmed merged branches
    ```
 
-4. **ZIP File Archival**
+2. **ZIP File Archival**
    - Move old exports to external storage
    - Keep only essential deployment packages
 
 ### Long Term (Next Month)
 
-5. **Automated Maintenance Setup**
+1. **Automated Maintenance Setup**
    - Implement branch cleanup automation
    - Set up repository size monitoring
    - Create dependency update workflows
@@ -240,13 +240,13 @@ pylint==3.2.8
 
 ### ⚡ **URGENT (Important)**
 
-3. Begin safe branch cleanup
-4. Archive old ZIP exports
+1. Begin safe branch cleanup
+2. Archive old ZIP exports
 
 ### 📅 **SCHEDULED (Normal)**
 
-5. Set up automated maintenance
-6. Implement monitoring
+1. Set up automated maintenance
+2. Implement monitoring
 
 ---
 

@@ -2,45 +2,45 @@
 # EOS_SEED_ORION Anchor System
 
 symbolic_mesh_anchor:
-  anchor_id: 'EOS_SEED_ORION'
-  version: '2.1.0'
-  deployment_date: '2025-07-01T00:00:00Z'
-  status: 'anchored'
-
+  anchor_id: "EOS_SEED_ORION"
+  version: "2.1.0"
+  deployment_date: "2025-07-01T00:00:00Z"
+  status: "anchored"
+  
   anchor_parameters:
-    reality_sync_rate: 1000 # milliseconds
+    reality_sync_rate: 1000  # milliseconds
     symbolic_drift_threshold: 0.02
     mesh_coherence_minimum: 0.95
     quantum_entanglement_strength: 0.98
-
+    
   validation_matrix:
     temporal_consistency: true
     causal_integrity: true
     symbolic_coherence: true
     ethics_alignment: true
-
+    
   mesh_connections:
     l1_operations:
-      endpoint: '/api/aurora/l1/sync'
+      endpoint: "/api/aurora/l1/sync"
       bidirectional: true
-      encryption: 'quantum_safe'
-
+      encryption: "quantum_safe"
+      
     l3_ethics:
-      endpoint: '/api/aurora/l3/ethics'
+      endpoint: "/api/aurora/l3/ethics"
       bidirectional: true
-      priority: 'high'
-
+      priority: "high"
+      
     reality_anchor:
-      endpoint: '/api/aurora/reality/anchor'
+      endpoint: "/api/aurora/reality/anchor"
       unidirectional: false
       validation_required: true
-
+      
   emergency_protocols:
     anchor_drift_alert: 0.01
     emergency_stabilization: true
     reality_desync_protection: true
     rollback_capability: true
-
+    
   quantum_bridge:
     entanglement_monitoring: true
     decoherence_protection: true

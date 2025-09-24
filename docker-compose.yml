@@ -1,40 +1,15 @@
 version: '3.8'
-
 services:
-  aurora-cloudbank:
-    build: .
-    container_name: aurora-cloudbank
+  aurora_gui:
+    build:
+      context: ..
+      dockerfile: Dockerfile_aurora_gui_cloudhub
+    volumes:
+      - ../memory:/app/symbols/memory
+      - ../aurora.seed.json:/app/symbols/aurora.seed.json
+  command_node:
+    build:
+      context: ./services/command_node
     ports:
-      - "8000:8000"
-    environment:
-      - AURORA_VERSION=3.5.1
-      - AURORA_PHASE=4
-      - PYTHONPATH=/app
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./exports:/app/exports
+      - "3001:3001"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  aurora-cli:
-    build: .
-    container_name: aurora-cli
-    environment:
-      - AURORA_VERSION=3.5.1
-      - AURORA_PHASE=4
-    volumes:
-      - ./data:/app/data
-      - ./exports:/app/exports
-    command: python aurora_cli.py --interactive
-    stdin_open: true
-    tty: true
-
-networks:
-  default:
-    name: aurora-network

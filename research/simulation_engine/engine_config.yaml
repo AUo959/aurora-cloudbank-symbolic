@@ -1,58 +1,58 @@
 # ORION Station Advanced Simulation Engine Configuration
 
 simulation_engine:
-  engine_id: 'ORION_SIM_ENGINE_001'
-  version: '3.0.0'
-  deployment_date: '2025-07-01T00:00:00Z'
-  status: 'operational'
-
+  engine_id: "ORION_SIM_ENGINE_001"
+  version: "3.0.0"
+  deployment_date: "2025-07-01T00:00:00Z"
+  status: "operational"
+  
   core_capabilities:
     parallel_processing:
       max_concurrent_simulations: 16
-      resource_allocation: 'dynamic'
-      load_balancing: 'automatic'
-
+      resource_allocation: "dynamic"
+      load_balancing: "automatic"
+      
     reality_modeling:
-      physics_accuracy: 'quantum_level'
-      temporal_resolution: 'nanosecond'
-      spatial_resolution: 'nanometer'
-      causality_enforcement: 'strict'
-
+      physics_accuracy: "quantum_level"
+      temporal_resolution: "nanosecond"
+      spatial_resolution: "nanometer"
+      causality_enforcement: "strict"
+      
     ai_integration:
       aurora_core_connection: true
-      machine_learning: 'continuous'
-      pattern_recognition: 'advanced'
-      predictive_modeling: 'enabled'
-
+      machine_learning: "continuous"
+      pattern_recognition: "advanced"
+      predictive_modeling: "enabled"
+      
   simulation_types:
     mission_simulation:
-      purpose: 'Mission planning and training'
-      fidelity: 'high'
-      participants: 'crew_and_ai'
-
+      purpose: "Mission planning and training"
+      fidelity: "high"
+      participants: "crew_and_ai"
+      
     research_simulation:
-      purpose: 'Scientific experimentation'
-      fidelity: 'scientific'
-      participants: 'researchers_and_subjects'
-
+      purpose: "Scientific experimentation"
+      fidelity: "scientific"
+      participants: "researchers_and_subjects"
+      
     training_simulation:
-      purpose: 'Skills development'
-      fidelity: 'functional'
-      participants: 'trainees_and_instructors'
-
+      purpose: "Skills development"
+      fidelity: "functional"
+      participants: "trainees_and_instructors"
+      
     predictive_simulation:
-      purpose: 'Future scenario analysis'
-      fidelity: 'statistical'
-      participants: 'data_and_models'
-
+      purpose: "Future scenario analysis"
+      fidelity: "statistical" 
+      participants: "data_and_models"
+      
   quality_assurance:
-    validation_protocols: 'multi_stage'
-    verification_methods: 'independent'
-    error_detection: 'automatic'
-    bias_monitoring: 'continuous'
-
+    validation_protocols: "multi_stage"
+    verification_methods: "independent"
+    error_detection: "automatic"
+    bias_monitoring: "continuous"
+    
   integration_points:
-    l1_operations: 'real_time_sync'
-    l3_ethics: 'validation_required'
-    fleet_systems: 'bidirectional'
-    research_data: 'continuous_feed'
+    l1_operations: "real_time_sync"
+    l3_ethics: "validation_required"
+    fleet_systems: "bidirectional"
+    research_data: "continuous_feed"

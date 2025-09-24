@@ -24,7 +24,7 @@ Top File Types:
 Total ZIP Files: 26
 Total ZIP Size: 23.5 MB
 Sample ZIP Files:
-  • SRB_SHADOWFAX_Stillness_v1.0.zip
+   • releases/SRB_SHADOWFAX_Stillness_v1.0.zip
   • Symbolic_Paging_Toolkit_v1.4.zip
   • Symbolic_Paging_Toolkit_v1.2.zip
   • symbolic_phase4_gui_link_bundle_FINAL.zip

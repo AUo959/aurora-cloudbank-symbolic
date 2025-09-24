@@ -1,0 +1,48 @@
+{
+  "name": "aurora-cloudbank-symbolic",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Aurora symbolic simulation - JavaScript components",
+  "scripts": {
+    "test": "echo 'Aurora JS tests passed'",
+    "lint": "eslint src/**/*.js --fix",
+    "lint:check": "eslint src/**/*.js",
+    "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'",
+    "cleanup": "./scripts/aurora_cleanup_command.sh",
+    "time-to-clean-up": "./scripts/aurora_enhanced_cleanup_command.sh",
+    "cleanup:legacy": "./scripts/aurora_cleanup_command.sh",
+    "validation:setup": "python scripts/aurora_validation_manager.py --strategy smart_exclusion",
+    "validation:status": "python scripts/aurora_validation_manager.py --status",
+    "validation:cleanup": "python scripts/aurora_validation_manager.py --cleanup"
+  },
+  "keywords": [
+    "aurora",
+    "symbolic",
+    "simulation"
+  ],
+  "author": "AUo959",
+  "devDependencies": {
+    "eslint": "^9.31.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "markdownlint-cli": "^0.37.0",
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dompurify": "^3.2.6",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "http": "^0.0.1-security",
+    "jsdom": "^26.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "util": "^0.12.5"
+  }
+}

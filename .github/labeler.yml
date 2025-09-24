@@ -1,0 +1,19 @@
+ci:
+  - .github/workflows/**
+
+opal2:
+  - modules/opal2/**
+
+scripts:
+  - scripts/**
+
+tools:
+  - tools/**
+
+docs:
+  - docs/**
+
+config:
+  - pyproject.toml
+  - setup.cfg
+  - Makefile

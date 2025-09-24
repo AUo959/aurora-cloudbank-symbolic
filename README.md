@@ -67,16 +67,13 @@ The Aurora CloudBank documentation follows a structured organization system for 
 - **[SECURITY.md](SECURITY.md)** - Security policy and reporting
 
 ### Operational Documentation (`docs/operational/`)
-
 - **[Status Reports](docs/operational/status/)** - Current system status and branch reports
 - **[Completion Reports](docs/operational/completed/)** - Historical completion documentation
 - **[Guides & Procedures](docs/operational/guides/)** - Deployment and operational procedures
-  - [CLI Anchor Tracking & Manifests](docs/operational/guides/CLI_ANCHOR_TRACKING.md) — usage of --since/--pattern and JSON
 - **[Analysis & Reports](docs/operational/reports/)** - System analysis and diagnostic reports
 - **[Archived Documentation](docs/operational/archived/)** - Legacy and historical documentation
 
 ### Technical Documentation (`docs/`)
-
 - **[Documentation Index](docs/index.md)** - Architecture guides and visualization packages
 - **[Operational README](docs/operational/README.md)** - Operational documentation overview
 - **[Organization Summary](docs/operational/ORGANIZATION_SUMMARY.md)** - Complete audit trail of documentation organization

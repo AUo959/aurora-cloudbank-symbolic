@@ -2,11 +2,11 @@
 # Enterprise Fleet Deployment Package
 
 skill_tracking_system:
-  system_id: 'STS_ORION_001'
-  tracking_scope: 'comprehensive'
+  system_id: "STS_ORION_001"
+  tracking_scope: "comprehensive"
   real_time_updates: true
   ai_recommendations: true
-
+  
   skill_categories:
     technical_skills:
       - navigation_systems
@@ -15,7 +15,7 @@ skill_tracking_system:
       - life_support_systems
       - data_analysis
       - ai_interaction
-
+      
     operational_skills:
       - mission_planning
       - emergency_response
@@ -23,7 +23,7 @@ skill_tracking_system:
       - resource_management
       - safety_protocols
       - quality_assurance
-
+      
     leadership_skills:
       - team_leadership
       - decision_making
@@ -31,7 +31,7 @@ skill_tracking_system:
       - strategic_thinking
       - mentoring
       - crisis_management
-
+      
     interpersonal_skills:
       - communication
       - collaboration
@@ -39,7 +39,7 @@ skill_tracking_system:
       - negotiation
       - empathy
       - adaptability
-
+      
     specialized_skills:
       - research_methods
       - ethics_analysis
@@ -47,15 +47,15 @@ skill_tracking_system:
       - quantum_systems
       - ai_ethics
       - space_psychology
-
+      
   skill_assessment:
     proficiency_levels:
-      1: 'Novice'
-      2: 'Advanced Beginner'
-      3: 'Competent'
-      4: 'Proficient'
-      5: 'Expert'
-
+      1: "Novice"
+      2: "Advanced Beginner" 
+      3: "Competent"
+      4: "Proficient"
+      5: "Expert"
+      
     assessment_methods:
       - self_assessment
       - peer_evaluation
@@ -63,25 +63,25 @@ skill_tracking_system:
       - performance_metrics
       - formal_testing
       - portfolio_review
-
+      
     validation_requirements:
-      technical_skills: ['hands_on_demo', 'peer_verification']
-      leadership_skills: ['360_feedback', 'outcome_tracking']
-      interpersonal_skills: ['peer_feedback', 'observation']
-
+      technical_skills: ["hands_on_demo", "peer_verification"]
+      leadership_skills: ["360_feedback", "outcome_tracking"]
+      interpersonal_skills: ["peer_feedback", "observation"]
+      
   development_planning:
     gap_analysis: true
     learning_pathways: true
     mentorship_matching: true
     training_recommendations: true
     progress_tracking: true
-
+    
   skill_utilization:
     optimal_assignments: true
     cross_training_opportunities: true
     succession_planning: true
     knowledge_transfer: true
-
+    
   integration:
     mission_assignment_system: true
     performance_management: true

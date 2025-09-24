@@ -1,0 +1,270 @@
+{
+  "ssmt_version": "2.2-ArchSonar",
+  "start_time": "2025-09-24T04:35:40.808365",
+  "architectural_analysis": [],
+  "enhanced_branch_assessments": [
+    {
+      "branch": "feature/digital-ghost-dlp-sonar",
+      "start_time": "2025-09-24T04:35:40.808424",
+      "architectural_metrics": {
+        "analysis_count": 1,
+        "average_quality_score": 100.0,
+        "total_violations": 0,
+        "ssmt_compliance_ratio": 1.0,
+        "overall_quality_score": 110.0
+      },
+      "entropy_assessment": {
+        "total_files": 197,
+        "critical_files_affected": 4,
+        "risk_factors": [
+          "Critical architecture files affected: 4",
+          "High file change count: 197"
+        ],
+        "risk_level": "high"
+      },
+      "pattern_compliance": {
+        "compliant_files": 3,
+        "non_compliant_files": 0,
+        "compliance_ratio": 1.0,
+        "pattern_violations": []
+      },
+      "integration_recommendations": [
+        "\ud83d\udfe1 Moderate quality - consider filtered SSMT integration",
+        "\ud83d\udee1\ufe0f Critical files affected - create compatibility layer"
+      ],
+      "python_files_changed": 197,
+      "file_analyses": [
+        {
+          "file": "aurora_api.py",
+          "metrics": {},
+          "violations": [],
+          "quality_score": 100,
+          "ast_parsed": true,
+          "complexity_indicators": {
+            "functions": 10,
+            "classes": 7,
+            "imports": 9,
+            "nested_depth": 0,
+            "long_functions": 0
+          },
+          "ssmt_compliance": "not_applicable"
+        }
+      ],
+      "end_time": "2025-09-24T04:35:40.912291"
+    },
+    {
+      "branch": "codex/implement-opal2-core-and-regex-generation-engine",
+      "start_time": "2025-09-24T04:35:40.912308",
+      "architectural_metrics": {
+        "analysis_count": 1,
+        "average_quality_score": 100.0,
+        "total_violations": 0,
+        "ssmt_compliance_ratio": 1.0,
+        "overall_quality_score": 110.0
+      },
+      "entropy_assessment": {
+        "total_files": 250,
+        "critical_files_affected": 4,
+        "risk_factors": [
+          "Critical architecture files affected: 4",
+          "High file change count: 250"
+        ],
+        "risk_level": "high"
+      },
+      "pattern_compliance": {
+        "compliant_files": 0,
+        "non_compliant_files": 0,
+        "compliance_ratio": 0,
+        "pattern_violations": []
+      },
+      "integration_recommendations": [
+        "\ud83d\udd34 High risk - use SSMT value extraction only",
+        "\ud83d\udee1\ufe0f Critical files affected - create compatibility layer"
+      ],
+      "python_files_changed": 250,
+      "file_analyses": [
+        {
+          "file": "aurora_api.py",
+          "metrics": {},
+          "violations": [],
+          "quality_score": 100,
+          "ast_parsed": true,
+          "complexity_indicators": {
+            "functions": 6,
+            "classes": 3,
+            "imports": 4,
+            "nested_depth": 0,
+            "long_functions": 0
+          },
+          "ssmt_compliance": "not_applicable"
+        }
+      ],
+      "end_time": "2025-09-24T04:35:41.049609"
+    },
+    {
+      "branch": "dependabot/npm_and_yarn/dotenv-17.0.1",
+      "start_time": "2025-09-24T04:35:41.049664",
+      "architectural_metrics": {
+        "analysis_count": 1,
+        "average_quality_score": 100.0,
+        "total_violations": 0,
+        "ssmt_compliance_ratio": 1.0,
+        "overall_quality_score": 110.0
+      },
+      "entropy_assessment": {
+        "total_files": 233,
+        "critical_files_affected": 4,
+        "risk_factors": [
+          "Critical architecture files affected: 4",
+          "High file change count: 233"
+        ],
+        "risk_level": "high"
+      },
+      "pattern_compliance": {
+        "compliant_files": 1,
+        "non_compliant_files": 0,
+        "compliance_ratio": 1.0,
+        "pattern_violations": []
+      },
+      "integration_recommendations": [
+        "\ud83d\udfe1 Moderate quality - consider filtered SSMT integration",
+        "\ud83d\udee1\ufe0f Critical files affected - create compatibility layer"
+      ],
+      "python_files_changed": 233,
+      "file_analyses": [
+        {
+          "file": "aurora_api.py",
+          "metrics": {},
+          "violations": [],
+          "quality_score": 100,
+          "ast_parsed": true,
+          "complexity_indicators": {
+            "functions": 6,
+            "classes": 3,
+            "imports": 4,
+            "nested_depth": 0,
+            "long_functions": 0
+          },
+          "ssmt_compliance": "not_applicable"
+        }
+      ],
+      "end_time": "2025-09-24T04:35:41.176035"
+    },
+    {
+      "branch": "codex/enhance-arc-and-open-pr",
+      "start_time": "2025-09-24T04:35:41.176057",
+      "architectural_metrics": {
+        "analysis_count": 1,
+        "average_quality_score": 100.0,
+        "total_violations": 0,
+        "ssmt_compliance_ratio": 1.0,
+        "overall_quality_score": 110.0
+      },
+      "entropy_assessment": {
+        "total_files": 31,
+        "critical_files_affected": 2,
+        "risk_factors": [
+          "Critical architecture files affected: 2"
+        ],
+        "risk_level": "medium"
+      },
+      "pattern_compliance": {
+        "compliant_files": 4,
+        "non_compliant_files": 0,
+        "compliance_ratio": 1.0,
+        "pattern_violations": []
+      },
+      "integration_recommendations": [
+        "\ud83d\udfe1 Moderate quality - consider filtered SSMT integration",
+        "\ud83d\udee1\ufe0f Critical files affected - create compatibility layer"
+      ],
+      "python_files_changed": 31,
+      "file_analyses": [
+        {
+          "file": "modules/opal2/plugin_system.py",
+          "metrics": {},
+          "violations": [],
+          "quality_score": 100,
+          "ast_parsed": true,
+          "complexity_indicators": {
+            "functions": 16,
+            "classes": 10,
+            "imports": 6,
+            "nested_depth": 0,
+            "long_functions": 0
+          },
+          "ssmt_compliance": "not_applicable"
+        }
+      ],
+      "end_time": "2025-09-24T04:35:41.206433"
+    },
+    {
+      "branch": "copilot/fix-0036cd47-826f-4065-81c3-8391d7236154",
+      "start_time": "2025-09-24T04:35:41.206451",
+      "architectural_metrics": {
+        "analysis_count": 1,
+        "average_quality_score": 100.0,
+        "total_violations": 0,
+        "ssmt_compliance_ratio": 1.0,
+        "overall_quality_score": 110.0
+      },
+      "entropy_assessment": {
+        "total_files": 107,
+        "critical_files_affected": 3,
+        "risk_factors": [
+          "Critical architecture files affected: 3",
+          "High file change count: 107"
+        ],
+        "risk_level": "high"
+      },
+      "pattern_compliance": {
+        "compliant_files": 5,
+        "non_compliant_files": 0,
+        "compliance_ratio": 1.0,
+        "pattern_violations": []
+      },
+      "integration_recommendations": [
+        "\ud83d\udfe1 Moderate quality - consider filtered SSMT integration",
+        "\ud83d\udee1\ufe0f Critical files affected - create compatibility layer"
+      ],
+      "python_files_changed": 107,
+      "file_analyses": [
+        {
+          "file": "aurora_api.py",
+          "metrics": {},
+          "violations": [],
+          "quality_score": 100,
+          "ast_parsed": true,
+          "complexity_indicators": {
+            "functions": 6,
+            "classes": 5,
+            "imports": 7,
+            "nested_depth": 0,
+            "long_functions": 0
+          },
+          "ssmt_compliance": "not_applicable"
+        }
+      ],
+      "end_time": "2025-09-24T04:35:41.242359"
+    }
+  ],
+  "status": "completed",
+  "overall_assessment": {
+    "total_branches": 5,
+    "quality_distribution": {
+      "high": 5,
+      "medium": 0,
+      "low": 0
+    },
+    "risk_distribution": {
+      "low": 0,
+      "medium": 1,
+      "high": 4
+    },
+    "integration_strategy_recommendations": [
+      "Consider full SSMT integration for 5 high-quality branches",
+      "Use value extraction only for 4 high-risk branches"
+    ]
+  },
+  "end_time": "2025-09-24T04:35:41.242405"
+}

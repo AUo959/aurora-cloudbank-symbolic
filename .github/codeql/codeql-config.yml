@@ -1,51 +1,39 @@
-name: 'Aurora CloudBank CodeQL Config'
+name: "Aurora CloudBank CodeQL Config"
 
 # Paths to include in analysis
 paths:
-  - 'modules/'
-  - 'scripts/'
-  - 'aurora_api.py'
-  - '*.py'
-  - '*.js'
-  - '*.ts'
+  - "modules/"
+  - "scripts/"
+  - "aurora_api.py"
+  - "*.py"
+  - "*.js"
+  - "*.ts"
 
 # Paths to exclude from analysis
 paths-ignore:
-  - '**/node_modules/**'
-  - '**/dist/**'
-  - '**/build/**'
-  - '**/__pycache__/**'
-  - '**/.*/**'
-  - '**/*.min.js'
-  - '**/*.bundle.js'
-  - '**/vendor/**'
-  - '**/third_party/**'
-  - '**/*.zip'
-  - '**/*.tar'
-  - '**/*.tar.gz'
-  - '**/*.tgz'
-  - '**/*.7z'
-  - '**/*.rar'
-  - '**/*.jar'
-  - '**/*.pdf'
-  - '**/*.md'
-  - '**/logs/**'
-  - '**/temp/**'
-  - '**/tmp/**'
-  # Skip large archived assets checked into repo root
-  - 'Aurora_*.zip'
-  - 'Aurora*.zip'
-  - 'CASK_Assets.zip'
-  - 'AuroraLite_*.zip'
-  - 'Quantum_*.zip'
-  - 'QUANTUM_*.zip'
-  - 'SRB_*.zip'
-  - 'Symbolic_*.zip'
-  - 'COMMAND_NODE_*.zip'
-  - '*.zip'
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/__pycache__/**"
+  - "**/.*/**"
+  - "**/*.min.js"
+  - "**/*.bundle.js"
+  - "**/vendor/**"
+  - "**/third_party/**"
+  - "**/*.zip"
+  - "**/*.pdf"
+  - "**/*.md"
+  - "**/logs/**"
+  - "**/temp/**"
+  - "**/tmp/**"
 
-# Use default queries only to fix enhanced analysis issues
+# Disable problematic queries that might cause proxy issues
 disable-default-queries: false
+
+# Custom queries for Aurora-specific patterns
+queries:
+  - uses: security-and-quality
+  - uses: security-experimental
 
 # Compilation database settings for Python
 python:
@@ -53,7 +41,7 @@ python:
     python -m pip install --upgrade pip
     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-# JavaScript/TypeScript settings  
+# JavaScript/TypeScript settings
 javascript:
   setup: |
     if [ -f package.json ]; then npm ci || npm install; fi

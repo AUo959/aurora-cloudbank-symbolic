@@ -1,60 +1,58 @@
 # ORION Station Predictive Analytics Configuration
 
 predictive_analytics:
-  engine_id: 'ORION_PREDICT_001'
-  version: '2.0.0'
-  deployment_date: '2025-07-01T00:00:00Z'
-  status: 'analyzing'
-
+  engine_id: "ORION_PREDICT_001"
+  version: "2.0.0"
+  deployment_date: "2025-07-01T00:00:00Z"
+  status: "analyzing"
+  
   prediction_models:
     system_failure_prediction:
-      algorithm: 'machine_learning_ensemble'
-      data_sources:
-        ['system_logs', 'performance_metrics', 'maintenance_records']
-      prediction_horizon: '7_days'
-      accuracy_target: '95%'
-      update_frequency: 'hourly'
-
+      algorithm: "machine_learning_ensemble"
+      data_sources: ["system_logs", "performance_metrics", "maintenance_records"]
+      prediction_horizon: "7_days"
+      accuracy_target: "95%"
+      update_frequency: "hourly"
+      
     crew_performance_optimization:
-      algorithm: 'behavioral_analysis_ai'
-      data_sources: ['performance_data', 'wellness_metrics', 'training_records']
-      prediction_horizon: '30_days'
-      accuracy_target: '88%'
-      update_frequency: 'daily'
-
+      algorithm: "behavioral_analysis_ai"
+      data_sources: ["performance_data", "wellness_metrics", "training_records"]
+      prediction_horizon: "30_days"
+      accuracy_target: "88%"
+      update_frequency: "daily"
+      
     mission_success_probability:
-      algorithm: 'multi_factor_analysis'
-      data_sources:
-        ['historical_missions', 'crew_skills', 'environmental_factors']
-      prediction_horizon: 'mission_duration'
-      accuracy_target: '92%'
-      update_frequency: 'pre_mission'
-
+      algorithm: "multi_factor_analysis"
+      data_sources: ["historical_missions", "crew_skills", "environmental_factors"]
+      prediction_horizon: "mission_duration"
+      accuracy_target: "92%"
+      update_frequency: "pre_mission"
+      
     resource_demand_forecasting:
-      algorithm: 'time_series_analysis'
-      data_sources: ['usage_patterns', 'seasonal_factors', 'growth_projections']
-      prediction_horizon: '90_days'
-      accuracy_target: '85%'
-      update_frequency: 'weekly'
-
+      algorithm: "time_series_analysis"
+      data_sources: ["usage_patterns", "seasonal_factors", "growth_projections"]
+      prediction_horizon: "90_days"
+      accuracy_target: "85%"
+      update_frequency: "weekly"
+      
   machine_learning_pipeline:
     data_preprocessing:
-      cleaning: 'automated'
-      normalization: 'adaptive'
-      feature_engineering: 'ai_assisted'
-
+      cleaning: "automated"
+      normalization: "adaptive"
+      feature_engineering: "ai_assisted"
+      
     model_training:
-      cross_validation: 'k_fold'
-      hyperparameter_tuning: 'bayesian_optimization'
-      ensemble_methods: 'enabled'
-
+      cross_validation: "k_fold"
+      hyperparameter_tuning: "bayesian_optimization"
+      ensemble_methods: "enabled"
+      
     model_deployment:
-      a_b_testing: 'standard'
-      gradual_rollout: 'enabled'
-      performance_monitoring: 'continuous'
-
+      a_b_testing: "standard"
+      gradual_rollout: "enabled"
+      performance_monitoring: "continuous"
+      
   ethics_and_privacy:
-    data_anonymization: 'mandatory'
-    consent_management: 'explicit'
-    algorithmic_fairness: 'validated'
-    explainable_ai: 'required'
+    data_anonymization: "mandatory"
+    consent_management: "explicit"
+    algorithmic_fairness: "validated"
+    explainable_ai: "required"

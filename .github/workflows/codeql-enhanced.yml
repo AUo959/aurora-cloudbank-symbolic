@@ -59,8 +59,18 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
           queries: +security-and-quality
-          # Use external config file to avoid conflicts
-          config-file: ./.github/codeql/codeql-config.yml
+          # Enhanced CodeQL configuration with path filtering
+          config: |
+            name: "Aurora CodeQL Config"
+            disable-default-path-filters: false
+            paths-ignore:
+              - "**/*.md"
+              - "**/*.txt"
+              - "**/docs/**"
+              - "**/assets/**"
+              - "**/venv_opal2/**"
+              - "**/node_modules/**"
+              - "**/.git/**"
 
       - name: Setup Node.js (for JavaScript analysis)
         if: matrix.language == 'javascript-typescript'

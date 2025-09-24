@@ -1,61 +1,91 @@
-# GitHub Security Configuration
-# Automated security scanning and vulnerability management
+# Aurora CloudBank Security Configuration
+# This file defines security policies and configurations
 
-name: Security Configuration
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+# Content Security Policy for all HTML files
+csp:
+  default-src: "'self'"
+  script-src: "'self' 'unsafe-inline'"
+  style-src: "'self' 'unsafe-inline'"
+  img-src: "'self' data: https:"
+  connect-src: "'self' ws: wss:"
+  font-src: "'self'"
+  object-src: "'none'"
+  media-src: "'self'"
+  frame-src: "'none'"
+  base-uri: "'self'"
+  form-action: "'self'"
 
-permissions:
-  contents: read
-  security-events: write
-  actions: read
+# Security headers to be applied
+security_headers:
+  - "X-Content-Type-Options: nosniff"
+  - "X-Frame-Options: DENY"
+  - "X-XSS-Protection: 1; mode=block"
+  - "Referrer-Policy: strict-origin-when-cross-origin"
+  - "Permissions-Policy: camera=(), microphone=(), geolocation=()"
 
-jobs:
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          
-      - name: Install security tools
-        run: |
-          pip install bandit safety semgrep
-          
-      - name: Run Bandit security scan
-        run: |
-          bandit -r . -f json -o bandit-report.json
-          
-      - name: Run Safety vulnerability check
-        run: |
-          safety check --json --output safety-report.json
-          
-      - name: Run Semgrep security analysis
-        run: |
-          semgrep --config=auto --json --output=semgrep-report.json .
-          
-      - name: Upload security reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-reports
-          path: |
-            bandit-report.json
-            safety-report.json
-            semgrep-report.json
-            
-  dependency-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run dependency vulnerability scan
-        uses: pypa/gh-action-pip-audit@v1.0.8
-        with:
-          inputs: requirements.txt
+# Input validation rules
+input_validation:
+  max_string_length: 1000
+  allowed_html_tags:
+    - "p"
+    - "span"
+    - "strong"
+    - "em"
+    - "br"
+  blocked_patterns:
+    - "<script"
+    - "javascript:"
+    - "data:text/html"
+    - "on\\w+\\s*="
+
+# WebSocket security
+websocket:
+  max_message_size: 8192
+  rate_limit: 100  # messages per minute
+  allowed_origins:
+    - "localhost"
+    - "127.0.0.1"
+    - "*.github.io"  # For GitHub Pages
+
+# File upload restrictions (if applicable)
+file_upload:
+  max_size: 10485760  # 10MB
+  allowed_types:
+    - ".txt"
+    - ".json"
+    - ".py"
+    - ".js"
+    - ".html"
+    - ".css"
+  blocked_extensions:
+    - ".exe"
+    - ".bat"
+    - ".sh"
+    - ".php"
+    - ".asp"
+
+# Database security (if applicable)
+database:
+  use_prepared_statements: true
+  encrypt_sensitive_data: true
+  audit_queries: true
+
+# API security
+api:
+  rate_limit: 1000  # requests per hour
+  require_authentication: false  # Set to true for production
+  cors_origins:
+    - "localhost"
+    - "127.0.0.1"
+    - "*.github.io"
+
+# Logging and monitoring
+logging:
+  log_security_events: true
+  log_failed_requests: true
+  retention_days: 90
+  sensitive_fields:
+    - "password"
+    - "token"
+    - "secret"
+    - "key"

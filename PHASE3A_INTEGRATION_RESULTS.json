@@ -1,0 +1,84 @@
+{
+  "phase": "3A",
+  "start_time": "2025-09-24T03:56:13.668914",
+  "integrations": [
+    {
+      "branch": "copilot/fix-140",
+      "start_time": "2025-09-24T03:56:26.590730",
+      "status": "skipped_unsafe",
+      "candidate": {
+        "branch": "copilot/fix-140",
+        "type": "copilot_fix",
+        "priority": "high",
+        "risk": "low",
+        "description": "GitHub workflow and configuration cleanup"
+      },
+      "safety_analysis": {
+        "branch": "copilot/fix-140",
+        "conflicts": true,
+        "file_count": 109,
+        "test_impact": true,
+        "core_files": [
+          "src/core/native_vsa.py",
+          "tests/test_entropy_calculation_fix.py",
+          "tests/test_pqn_entropy_integration.cjs",
+          "tests/test_signal_prioritizer_entropy.cjs"
+        ],
+        "safe_to_integrate": false
+      }
+    },
+    {
+      "branch": "copilot/fix-123",
+      "start_time": "2025-09-24T03:56:26.605647",
+      "status": "skipped_unsafe",
+      "candidate": {
+        "branch": "copilot/fix-123",
+        "type": "copilot_fix",
+        "priority": "high",
+        "risk": "medium",
+        "description": "Configuration and workflow enhancements"
+      },
+      "safety_analysis": {
+        "branch": "copilot/fix-123",
+        "conflicts": true,
+        "file_count": 117,
+        "test_impact": true,
+        "core_files": [
+          "src/core/native_vsa.py",
+          "tests/test_entropy_calculation_fix.py",
+          "tests/test_pqn_entropy_integration.cjs",
+          "tests/test_signal_prioritizer_entropy.cjs"
+        ],
+        "safe_to_integrate": false
+      }
+    },
+    {
+      "branch": "dependabot/npm_and_yarn/concurrently-9.2.1",
+      "start_time": "2025-09-24T03:56:26.619596",
+      "status": "skipped_unsafe",
+      "candidate": {
+        "branch": "dependabot/npm_and_yarn/concurrently-9.2.1",
+        "type": "dependency",
+        "priority": "medium",
+        "risk": "low",
+        "description": "NPM dependency update for concurrently package"
+      },
+      "safety_analysis": {
+        "branch": "dependabot/npm_and_yarn/concurrently-9.2.1",
+        "conflicts": true,
+        "file_count": 95,
+        "test_impact": true,
+        "core_files": [
+          "src/core/native_vsa.py",
+          "tests/test_entropy_calculation_fix.py",
+          "tests/test_pqn_entropy_integration.cjs",
+          "tests/test_signal_prioritizer_entropy.cjs"
+        ],
+        "safe_to_integrate": false
+      }
+    }
+  ],
+  "status": "completed",
+  "end_time": "2025-09-24T03:56:26.634945",
+  "successful_count": 0
+}

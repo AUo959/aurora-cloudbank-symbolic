@@ -19,7 +19,7 @@
   },
   {
     "pr": 147,
-    "mergeable": "unstable",
+    "mergeable": "unknown",
     "draft": false,
     "ci": "pending",
     "head_sha": "830424cb9e8cbca3a6ea78ad1022ed286cd39f64",
@@ -37,7 +37,7 @@
   },
   {
     "pr": 149,
-    "mergeable": "unstable",
+    "mergeable": "unknown",
     "draft": false,
     "ci": "pending",
     "head_sha": "587485452fc51b45de9a128ca6f68ff6823bc137",
@@ -55,7 +55,7 @@
   },
   {
     "pr": 148,
-    "mergeable": "unstable",
+    "mergeable": "unknown",
     "draft": false,
     "ci": "pending",
     "head_sha": "5bd03ea3376c90ff44331a44d196be5108bea28b",
@@ -73,7 +73,7 @@
   },
   {
     "pr": 152,
-    "mergeable": "unstable",
+    "mergeable": "unknown",
     "draft": false,
     "ci": "pending",
     "head_sha": "14c835bcfc0ce711aa5a6be18d3cea7fe04be35b",
@@ -91,7 +91,7 @@
   },
   {
     "pr": 151,
-    "mergeable": "unstable",
+    "mergeable": "unknown",
     "draft": false,
     "ci": "pending",
     "head_sha": "15bfa7d858ed4878746695115295c852ee40f650",

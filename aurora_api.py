@@ -22,6 +22,16 @@ from modules.symbolic_core.sonnet4_integration_hub import (
 # Import ChatGPT Agent Mode integration
 from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 
+# Import AuMemManager API integration
+try:
+    from modules.aumemmanager.api_integration import router as aumemmanager_router
+    AUMEMMANAGER_AVAILABLE = True
+    AUMEMMANAGER_ROUTER = aumemmanager_router
+except ImportError:
+    print("AuMemManager not available - some memory features disabled")
+    AUMEMMANAGER_AVAILABLE = False
+    AUMEMMANAGER_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -30,6 +40,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Include AuMemManager API routes if available
+if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
+    try:
+        app.include_router(AUMEMMANAGER_ROUTER)
+        print("✅ AuMemManager API routes integrated successfully")
+    except Exception as e:
+        print(f"❌ Failed to integrate AuMemManager API routes: {e}")
+        AUMEMMANAGER_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

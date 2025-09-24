@@ -1,0 +1,349 @@
+{
+  "active_tier": {
+    "79b49a8a-8c18-491c-a234-9df011b76613": {
+      "id": "79b49a8a-8c18-491c-a234-9df011b76613",
+      "content": "Agent Alpha completed reconnaissance mission in Sector 7",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Agent_Alpha",
+      "importance": 8.5,
+      "timestamp": 1758321308.1123087,
+      "last_access": 1758321308.1171618,
+      "access_count": 2,
+      "tags": [
+        "mission",
+        "reconnaissance",
+        "sector_7"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.9985524156683677,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": {
+        "vector_id": "qv_79b49a8a-8c18-491c-a234-9df011b76613",
+        "magnitude": 1.2,
+        "phase": 0.5,
+        "entanglement_links": [
+          "qv_c51a27dd-06b8-4cf3-8609-a09a7691cebc"
+        ],
+        "superposition_states": [
+          {
+            "state_id": "coherent",
+            "probability": 0.7,
+            "stability": 0.9
+          },
+          {
+            "state_id": "decoherent",
+            "probability": 0.3,
+            "stability": 0.4
+          }
+        ],
+        "coherence_time": 1.01505
+      },
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "829cdce0-4f4f-4db7-8040-8417b9ef6351": {
+      "id": "829cdce0-4f4f-4db7-8040-8417b9ef6351",
+      "content": "Alliance signed peace treaty with Rebel Coalition",
+      "memory_type": "MemoryType.FACTION",
+      "owner": "Alliance",
+      "importance": 9.8,
+      "timestamp": 1758321308.1139188,
+      "last_access": 1758321308.1171572,
+      "access_count": 1,
+      "tags": [
+        "treaty",
+        "peace",
+        "coalition"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.998421833457425,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "c51a27dd-06b8-4cf3-8609-a09a7691cebc": {
+      "id": "c51a27dd-06b8-4cf3-8609-a09a7691cebc",
+      "content": {
+        "symbolic_anchor": "\u03a9-7",
+        "vector_state": [
+          0.8,
+          0.6
+        ],
+        "entanglement_target": "system_core"
+      },
+      "memory_type": "MemoryType.QUANTUM_SYMBOLIC",
+      "owner": "System_Core",
+      "importance": 9.5,
+      "timestamp": 1758321308.1151762,
+      "last_access": 1758321308.1173584,
+      "access_count": 4,
+      "tags": [
+        "anchor",
+        "quantum",
+        "core"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.998946464729612,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": {
+        "vector_id": "qv_c51a27dd-06b8-4cf3-8609-a09a7691cebc",
+        "magnitude": 2.0,
+        "phase": 1.57,
+        "entanglement_links": [
+          "qv_79b49a8a-8c18-491c-a234-9df011b76613"
+        ],
+        "superposition_states": [
+          {
+            "state_id": "coherent",
+            "probability": 0.7,
+            "stability": 0.9
+          },
+          {
+            "state_id": "decoherent",
+            "probability": 0.3,
+            "stability": 0.4
+          }
+        ],
+        "coherence_time": 1.0303265025
+      },
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "6114c9ea-fd1d-45a5-9e43-85e203aaaad1": {
+      "id": "6114c9ea-fd1d-45a5-9e43-85e203aaaad1",
+      "content": {
+        "trajectory": "spiral_ascent",
+        "altitude": 10000,
+        "velocity": 250
+      },
+      "memory_type": "MemoryType.FLIGHT_CONTROL",
+      "owner": "Flight_Control",
+      "importance": 7.0,
+      "timestamp": 1758321308.1159256,
+      "last_access": 1758321308.1159258,
+      "access_count": 0,
+      "tags": [
+        "flight",
+        "trajectory",
+        "ascent"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.9963963671608147,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    }
+  },
+  "compressed_tier": {
+    "b98e900f-996a-4001-8007-1571684c5ac2": {
+      "id": "b98e900f-996a-4001-8007-1571684c5ac2",
+      "content": "Routine maintenance log entry 0",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Maintenance_Bot",
+      "importance": 2.0,
+      "timestamp": 1758321308.117727,
+      "last_access": 1758321308.1177273,
+      "access_count": 0,
+      "tags": [
+        "maintenance",
+        "routine"
+      ],
+      "status": "MemoryStatus.COMPRESSED",
+      "strength": 1.0,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 0.6,
+      "original_size": 31,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "cd79b6ae-24cd-4368-a319-310d1e1f3eff": {
+      "id": "cd79b6ae-24cd-4368-a319-310d1e1f3eff",
+      "content": "Routine maintenance log entry 1",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Maintenance_Bot",
+      "importance": 2.5,
+      "timestamp": 1758321308.118515,
+      "last_access": 1758321308.1185153,
+      "access_count": 0,
+      "tags": [
+        "maintenance",
+        "routine"
+      ],
+      "status": "MemoryStatus.COMPRESSED",
+      "strength": 1.0,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 0.6,
+      "original_size": 31,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "09b56baf-560b-4475-80c4-4bcf4ed6cfd6": {
+      "id": "09b56baf-560b-4475-80c4-4bcf4ed6cfd6",
+      "content": "Routine maintenance log entry 2",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Maintenance_Bot",
+      "importance": 3.0,
+      "timestamp": 1758321308.1193452,
+      "last_access": 1758321308.1193454,
+      "access_count": 0,
+      "tags": [
+        "maintenance",
+        "routine"
+      ],
+      "status": "MemoryStatus.COMPRESSED",
+      "strength": 1.0,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 0.6,
+      "original_size": 31,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "c6e1d1e8-aaf8-4e01-b4c2-b1b91964686f": {
+      "id": "c6e1d1e8-aaf8-4e01-b4c2-b1b91964686f",
+      "content": "Routine maintenance log entry 3",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Maintenance_Bot",
+      "importance": 3.5,
+      "timestamp": 1758321308.1203344,
+      "last_access": 1758321308.1203346,
+      "access_count": 0,
+      "tags": [
+        "maintenance",
+        "routine"
+      ],
+      "status": "MemoryStatus.COMPRESSED",
+      "strength": 1.0,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 0.6,
+      "original_size": 31,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    },
+    "532693cf-9357-4c4c-9dd7-abc5ecb7987d": {
+      "id": "532693cf-9357-4c4c-9dd7-abc5ecb7987d",
+      "content": "Routine maintenance log entry 4",
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Maintenance_Bot",
+      "importance": 4.0,
+      "timestamp": 1758321308.1213691,
+      "last_access": 1758321308.1213694,
+      "access_count": 0,
+      "tags": [
+        "maintenance",
+        "routine"
+      ],
+      "status": "MemoryStatus.COMPRESSED",
+      "strength": 1.0,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [],
+      "entangled_memories": [],
+      "compression_ratio": 0.6,
+      "original_size": 31,
+      "flight_trajectory": null,
+      "control_parameters": {}
+    }
+  },
+  "archived_tier": {},
+  "attention_weights": {
+    "relevance": 0.33333333333333337,
+    "importance": 0.33333333333333337,
+    "recency": 0.33333333333333337,
+    "quantum_coherence": 0.0
+  },
+  "metrics": {
+    "total_memories": 9,
+    "active_memories": 4,
+    "compressed_memories": 5,
+    "archived_memories": 0,
+    "retrieval_count": 2,
+    "compression_count": 5,
+    "last_cleanup": 1758321308.1122117,
+    "quantum_vectors": 2,
+    "entangled_pairs": 1
+  },
+  "quantum_vectors": {
+    "qv_79b49a8a-8c18-491c-a234-9df011b76613": {
+      "vector_id": "qv_79b49a8a-8c18-491c-a234-9df011b76613",
+      "magnitude": 1.2,
+      "phase": 0.5,
+      "entanglement_links": [
+        "qv_c51a27dd-06b8-4cf3-8609-a09a7691cebc"
+      ],
+      "superposition_states": [
+        {
+          "state_id": "coherent",
+          "probability": 0.7,
+          "stability": 0.9
+        },
+        {
+          "state_id": "decoherent",
+          "probability": 0.3,
+          "stability": 0.4
+        }
+      ],
+      "coherence_time": 1.01505
+    },
+    "qv_c51a27dd-06b8-4cf3-8609-a09a7691cebc": {
+      "vector_id": "qv_c51a27dd-06b8-4cf3-8609-a09a7691cebc",
+      "magnitude": 2.0,
+      "phase": 1.57,
+      "entanglement_links": [
+        "qv_79b49a8a-8c18-491c-a234-9df011b76613"
+      ],
+      "superposition_states": [
+        {
+          "state_id": "coherent",
+          "probability": 0.7,
+          "stability": 0.9
+        },
+        {
+          "state_id": "decoherent",
+          "probability": 0.3,
+          "stability": 0.4
+        }
+      ],
+      "coherence_time": 1.0303265025
+    }
+  },
+  "export_timestamp": 1758321308.1234481
+}

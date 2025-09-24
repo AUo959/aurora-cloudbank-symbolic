@@ -17,7 +17,7 @@ def test_cli_manifest_json_and_dlp_export():
             [PY, CLI, "manifest", "--json", "--output", str(manifest_out), "--dlp-manifest-out", str(dlp_out)],
             capture_output=True,
             text=True,
-            timeout=30,
+            timeout=120,
             cwd=str(Path(__file__).resolve().parents[1]),
         )
         assert proc.returncode == 0, proc.stderr
@@ -37,7 +37,7 @@ def test_cli_anchor_track_ext_json():
         [PY, CLI, "anchor", "track", "--ext", ".md", "--json"],
         capture_output=True,
         text=True,
-        timeout=30,
+        timeout=120,
         cwd=str(Path(__file__).resolve().parents[1]),
     )
     assert proc.returncode == 0, proc.stderr

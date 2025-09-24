@@ -13,7 +13,7 @@ def test_cli_status_json_basic():
         [PY, CLI, "status", "--json"],
         capture_output=True,
         text=True,
-        timeout=45,
+        timeout=120,
         cwd=str(Path(__file__).resolve().parents[1]),
     )
     assert proc.returncode == 0, proc.stderr

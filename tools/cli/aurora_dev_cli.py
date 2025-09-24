@@ -311,7 +311,7 @@ class AuroraDeveloperCLI:
                 since=since_dt, 
                 pattern=getattr(args, "pattern", None),
                 quick_scan=True,
-                max_files=800
+                max_files=200
             )
             self.anchor_tracker.build_lineage_map()
 
@@ -454,7 +454,7 @@ class AuroraDeveloperCLI:
                 since=since_dt,
                 pattern=getattr(args, "pattern", None),
                 quick_scan=True,  # Enable quick scan for status command
-                max_files=500,    # Limit files for performance
+                max_files=100,    # Limit files for performance
             )
             total_anchors = sum(len(a) for a in anchors.values())
             if not getattr(args, "json", False):

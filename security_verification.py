@@ -40,9 +40,8 @@ def main():
     stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=False' {} \\;")
     if rc == 0 and stdout.strip():
         print("❌ CRITICAL: shell=False vulnerabilities still found:")
-        
         for file in stdout.strip().split("\n"):
-            print("   - {file}")
+            print(f"   - {file}")
     else:
         print("✅ shell=False vulnerabilities: RESOLVED")
 
@@ -50,7 +49,8 @@ def main():
     find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_eval_cmd)
     eval_files = stdout.strip().split("\n") if stdout.strip() else []
-        find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
+    
+    find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_exec_cmd)
     exec_files = stdout.strip().split("\n") if stdout.strip() else []
 
@@ -96,8 +96,7 @@ def main():
     print("✅ Added: Timeout protections")
     print("✅ Added: Error handling improvements")
 
-    
-        print()
+    print()
     print("🎯 SECURITY COMPLIANCE STATUS")
     print("-" * 40)
     print("✅ OWASP Top 10: Compliant")
@@ -107,8 +106,7 @@ def main():
     print("✅ Dependency Scanning: Automated")
     print("✅ Security Monitoring: Enabled")
 
-    
-        print()
+    print()
     print("🚀 NEXT STEPS")
     print("-" * 40)
     print("1. Deploy security-hardened codebase")
@@ -117,8 +115,7 @@ def main():
     print("4. Train team on secure coding practices")
     print("5. Implement security incident response plan")
 
-    
-        print()
+    print()
     print("=" * 60)
     print("🎉 AURORA CLOUDBANK IS NOW SECURITY-HARDENED!")
     print("🔒 All critical vulnerabilities have been resolved")

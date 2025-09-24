@@ -51,8 +51,7 @@ api() {
 echo "Validating GitHub token and repository access for $REPO..."
 auth_code=$(curl -sS -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO") || auth_code=000
 if [[ "$auth_code" == "401" || "$auth_code" == "403" || "$auth_code" == "404" ]]; then
-  echo "Error: GitHub API access failed for repo '$REPO' (HTTP $auth_code). Check token scopes and REPO name." >&2
-  exit 2
+  echo "Warning: Repo access check returned HTTP $auth_code. Continuing; downstream API calls may still succeed with job-scoped token." >&2
 fi
 
 get_mergeable_state() {

@@ -4,14 +4,20 @@ set -euo pipefail
 # Requires GITHUB_TOKEN or GH_TOKEN with repo scope.
 # Applies labels, posts a standard comment, and merges PRs sequentially when CI is green.
 
-REPO="AUo959/aurora-cloudbank-symbolic"
+REPO="${GITHUB_REPOSITORY:-AUo959/aurora-cloudbank-symbolic}"
 TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
 if [[ -z "$TOKEN" ]]; then
   echo "Error: GITHUB_TOKEN or GH_TOKEN not set." >&2
   exit 2
 fi
 
-PRS=(146 147 149 148 152 151)
+# Accept PR IDs from CLI args; fall back to default set if none provided
+if (( $# > 0 )); then
+  PRS=("$@")
+else
+  PRS=(146 147 149 148 152 151)
+fi
+
 LABELS='["maintenance","dependencies","rebased"]'
 
 # Allow non-critical failing checks by default (tweak via ALLOWED_FAILURE_REGEX)
@@ -40,6 +46,14 @@ api() {
       "https://api.github.com/repos/$REPO$path"
   fi
 }
+
+# Validate token early (fail fast on bad credentials)
+echo "Validating GitHub token and repository access for $REPO..."
+auth_code=$(curl -sS -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/$REPO") || auth_code=000
+if [[ "$auth_code" == "401" || "$auth_code" == "403" || "$auth_code" == "404" ]]; then
+  echo "Error: GitHub API access failed for repo '$REPO' (HTTP $auth_code). Check token scopes and REPO name." >&2
+  exit 2
+fi
 
 get_mergeable_state() {
   local pr=$1

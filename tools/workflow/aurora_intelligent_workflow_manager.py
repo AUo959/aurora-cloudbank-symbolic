@@ -109,20 +109,22 @@ class IntelligentWorkflowManager:
 
     def run_preflight_checks(self) -> Dict:
         """Run pre-flight validation checks."""
-        try:            result = subprocess.run(                [sys.executable, str(self.failure_prevention_tool)], capture_output=True, text=True, timeout=120
+        try:
+            result = subprocess.run(
+                [sys.executable, str(self.failure_prevention_tool)], 
+                capture_output=True, text=True, timeout=120
             )
 
             # Parse the output for key metrics
-        output_lines = result.stdout.split("\n")
-        time_saved = 0
-        execution_ready = result.returncode == 0
+            output_lines = result.stdout.split("\n")
+            time_saved = 0
+            execution_ready = result.returncode == 0
 
             for line in output_lines:
                 if "Estimated Time Saved:" in line:
                     try:
                         time_saved = int(line.split(":")[1].strip().split()[0])
-                    
-        except (ValueError, IndexError):
+                    except (ValueError, IndexError):
                         pass
 
             return {

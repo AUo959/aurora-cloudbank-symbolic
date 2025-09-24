@@ -6,21 +6,13 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from fastapi import (
+from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 
 # CSRF Protection Security
 security = HTTPBearer()
 
-    Depends,
-    FastAPI,
-    File,
-    HTTPException,
-    UploadFile,
-    WebSocket,
-    WebSocketDisconnect,
-)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -197,9 +189,8 @@ class QuantumSymbolicVectorRequest(BaseModel):
 
 
 @app.post(
-@app.post(
     "/geometric/product",
-    summary="Geometric Product",
+    summary="Geometric Product", 
     response_description="Result of geometric product",
 )
 def geometric_product(req: GeometricProductRequest):
@@ -215,7 +206,6 @@ def geometric_product(req: GeometricProductRequest):
     return {"result": ga.pretty(result)}
 
 
-@app.post(
 @app.post(
     "/quantum/symbolic_vector",
     summary="Quantum Symbolic Vector",
@@ -245,7 +235,6 @@ def get_mcp_bridge():
 
 
 @app.post(
-@app.post(
     "/mcp_bridge/route_command",
     summary="Symbolic Command Routing via MCP Bridge",
     response_description="Routed command result",
@@ -266,7 +255,6 @@ def mcp_route_command(
     return router.route(command)
 
 
-@app.post(
 @app.post(
     "/vsa/operation",
     summary="VSA Operation",
@@ -297,7 +285,6 @@ def vsa_operation(req: VSAOperationRequest):
 
 
 @app.post(
-@app.post(
     "/vsa/bind",
     summary="VSA Bind",
     response_description="Result of VSA bind operation",
@@ -326,7 +313,6 @@ def vsa_bind(req: VSABindRequest):
 
 
 @app.post(
-@app.post(
     "/vsa/similarity",
     summary="VSA Similarity",
     response_description="Similarity score between two symbolic vectors",
@@ -354,7 +340,6 @@ def vsa_similarity(req: VSASimilarityRequest):
 
 
 @app.post(
-@app.post(
     "/quantum/circuit",
     summary="Quantum Circuit",
     response_description="Result of quantum circuit operation",
@@ -376,7 +361,6 @@ def quantum_circuit(req: QuantumCircuitRequest):
     return result
 
 
-@app.post(
 @app.post(
     "/geometric/algebra",
     summary="Geometric Algebra Operation",
@@ -422,7 +406,6 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 
 
 @app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector")
-@app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector")
 def generate_vsa_vector(req: VSAOperationRequest):
     """
     Generate a quantum symbolic vector for a given symbol.
@@ -443,7 +426,6 @@ def generate_vsa_vector(req: VSAOperationRequest):
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
 
 
-@app.post("/api/vsa/bind", summary="Bind two VSA vectors")
 @app.post("/api/vsa/bind", summary="Bind two VSA vectors")
 def bind_vsa_vectors(req: VSABindRequest):
     """
@@ -489,7 +471,6 @@ def bind_vsa_vectors(req: VSABindRequest):
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
 
 
-@app.post("/api/vsa/similarity", summary="Calculate VSA similarity")
 @app.post("/api/vsa/similarity", summary="Calculate VSA similarity")
 def calculate_vsa_similarity(req: VSASimilarityRequest):
     """
@@ -558,7 +539,6 @@ def clear_vsa_store():
 
 
 @app.post("/api/geometric/advanced", summary="Advanced Geometric Algebra Operations")
-@app.post("/api/geometric/advanced", summary="Advanced Geometric Algebra Operations")
 def advanced_geometric_operations(req: GeometricAlgebraRequest):
     """
     Perform advanced geometric algebra operations on multiple vectors.
@@ -607,7 +587,6 @@ def advanced_geometric_operations(req: GeometricAlgebraRequest):
         raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
 
 
-@app.post("/api/quantum/circuit", summary="Generate Quantum Circuit")
 @app.post("/api/quantum/circuit", summary="Generate Quantum Circuit")
 def generate_quantum_circuit(req: QuantumCircuitRequest):
     """

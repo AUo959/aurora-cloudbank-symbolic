@@ -1200,8 +1200,7 @@ echo "🎉 Aurora CloudBank services stopped"
         
         self.log_status("Startup script created", "SUCCESS")
 
-    
-        def generate_phase4_completion_report(self) -> str:
+    def generate_phase4_completion_report(self) -> str:
         """Generate Phase 4 completion report"""
         self.log_status("Generating Phase 4 completion report...", "INFO")
         report_content = """# Aurora CloudBank Phase 4 Completion Report
@@ -1321,52 +1320,40 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             self.create_startup_script()
 
             # Step 6: Generate completion report
-        report_file = self.generate_phase4_completion_report()
+            report_file = self.generate_phase4_completion_report()
 
-            
-        self.log_status("Phase 4 Real-World Application Integration COMPLETE!", "SUCCESS")
-            
-        self.log_status("Completion report: {report_file}", "INFO")
+            self.log_status("Phase 4 Real-World Application Integration COMPLETE!", "SUCCESS")
+            self.log_status(f"Completion report: {report_file}", "INFO")
 
-            
-        return {"status": "complete", "applications_created": self.applications_created, "report_file": report_file}
+            return {"status": "complete", "applications_created": self.applications_created, "report_file": report_file}
 
         except Exception as e:
-            self.log_status("Phase 4 integration error: {e}", "ERROR")
-            
-        return {"status": "error", "error": str(e)}
+            self.log_status(f"Phase 4 integration error: {e}", "ERROR")
+            return {"status": "error", "error": str(e)}
 
 
 async def main():
     """Main execution function"""
     print("🌍 Aurora CloudBank Phase 4: Real-World Application Integration")
     print("=" * 75)
-        integrator = AuroraRealWorldIntegration()
-    _ = await integrator.execute_phase4_integration()
-
     
-        if result["status"] == "complete":
+    integrator = AuroraRealWorldIntegration()
+    result = await integrator.execute_phase4_integration()
+
+    if result["status"] == "complete":
         print("\n🎉 PHASE 4 REAL-WORLD INTEGRATION COMPLETE!")
-        
-        print("✨ Applications created: {len(result['applications_created'])}")
-        
-        print("📊 Report generated: {result['report_file']}")
-        
+        print(f"✨ Applications created: {len(result['applications_created'])}")
+        print(f"📊 Report generated: {result['report_file']}")
         print("🌐 Web Dashboard: aurora_dashboard.html")
-        
-        print("🔗 API Server: aurora_api_server.py")    result = await integrator.execute_phase4_integration()        
+        print("🔗 API Server: aurora_api_server.py")
         print("🐳 Docker Ready: docker-compose.yml")
-        
         print("🚀 Startup Script: start_aurora.sh")
-        
         print("\n🌟 Aurora CloudBank is now ready for production deployment!")
-        
         print("💡 Run './start_aurora.sh' to launch all services")
     else:
-        print("\n❌ Phase 4 integration failed: {result.get('error', 'Unknown error')}")
+        print(f"\n❌ Phase 4 integration failed: {result.get('error', 'Unknown error')}")
 
-    
-        return result
+    return result
 
 
 if __name__ == "__main__":

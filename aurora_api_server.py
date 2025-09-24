@@ -8,7 +8,7 @@ import random
 import numpy as np
 import uvicorn
 from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -17,11 +17,6 @@ from slowapi.errors import RateLimitExceeded
 limiter = Limiter(key_func=get_remote_address)
 
 # Rate limiting decorators
-@limiter.limit("100/minute")  # General endpoints
-@limiter.limit("10/minute")   # Auth endpoints  
-@limiter.limit("5/minute")    # Admin endpoints
-
-
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 

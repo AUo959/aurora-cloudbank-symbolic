@@ -116,17 +116,18 @@ class AuroraBranchManager:
         with open(self.config_file, "w") as f:
             json.dump(self.default_config, f, indent=2)
 
-        
         print("✅ Configuration saved to: {self.config_file}")
 
-    
-        def get_current_branch(self):
+    def get_current_branch(self):
         """Get current git branch"""
         try:
-        result = subprocess.run(                ["git", "branch", "--show-current"], capture_output=True, text=True, cwd=self.repo_path
+            result = subprocess.run(
+                ["git", "branch", "--show-current"], 
+                capture_output=True, 
+                text=True, 
+                cwd=self.repo_path
             )
-            
-        return result.stdout.strip() if result.returncode == 0 else "unknown"
+            return result.stdout.strip() if result.returncode == 0 else "unknown"
         except Exception:
             return "unknown"
 
@@ -135,30 +136,25 @@ class AuroraBranchManager:
         print("🌱 Setting up develop branch...")
         current_branch = self.get_current_branch()
 
-        
         try:
             # Check if develop branch exists
-        result = subprocess.run(["git", "show-re", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
+            result = subprocess.run(["git", "show-ref", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
 
-            
-        if result.returncode == 0:
+            if result.returncode == 0:
                 print("✅ develop branch already exists")
-            
-        else:
+            else:
                 # Create develop branch from main
                 subprocess.run(["git", "checkout", "-b", "develop"], cwd=self.repo_path, check=True)
-                
-        print("✅ Created develop branch from main")
+                print("✅ Created develop branch from main")
 
                 # Switch back to original branch
                 if current_branch != "develop":
                     subprocess.run(["git", "checkout", current_branch], cwd=self.repo_path)
         
         except subprocess.CalledProcessError as e:
-            print("❌ Error creating develop branch: {e}")
+            print(f"❌ Error creating develop branch: {e}")
 
-    
-        def setup_branch_protection(self):
+    def setup_branch_protection(self):
         """Set up branch protection rules (GitHub-specific)"""
         print("🛡️ Setting up branch protection...")
 
@@ -236,7 +232,7 @@ jobs:
         print("✅ Branch protection workflow created: {branch_protection_workflow}")
 
     
-        def create_gitflow_aliases(self):
+    def create_gitflow_aliases(self):
         """Create helpful Git aliases for Aurora CloudBank workflow"""
         print("⚡ Setting up Aurora GitFlow aliases...")
         aliases = {
@@ -250,30 +246,26 @@ jobs:
 
         for alias, command in aliases.items():
             try:
-                subprocess.run(["git", "config", "--local", "alias.{alias}", command], cwd=self.repo_path, check=True)
-                
-        print("✅ Added alias: git {alias}")
-            
-        except subprocess.CalledProcessError:
-                print("⚠️  Could not add alias: {alias}")
+                subprocess.run(["git", "config", "--local", f"alias.{alias}", command], cwd=self.repo_path, check=True)
+                print(f"✅ Added alias: git {alias}")
+            except subprocess.CalledProcessError:
+                print(f"⚠️  Could not add alias: {alias}")
 
-    
-        def generate_branch_status_report(self):
+    def generate_branch_status_report(self):
         """Generate current branch status report"""
         print("📊 Generating branch status report...")
 
-        
         try:
             # Get all branches
-        result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
-        result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
-        current_branch = self.get_current_branch()
+            result = subprocess.run(["git", "branch", "-a"], capture_output=True, text=True, cwd=self.repo_path)
+            branches = result.stdout.strip().split("\n") if result.returncode == 0 else []
+            current_branch = self.get_current_branch()
 
             # Get recent commits
             commits_result = subprocess.run(
                 ["git", "log", "--oneline", "-5"], capture_output=True, text=True, cwd=self.repo_path
             )
-        recent_commits = commits_result.stdout.strip().split("\n") if commits_result.returncode == 0 else []
+            recent_commits = commits_result.stdout.strip().split("\n") if commits_result.returncode == 0 else []
 
             # Create report
             report = {
@@ -287,31 +279,24 @@ jobs:
             }
 
             # Save report
-        report_file = self.repo_path / "AURORA_BRANCH_STATUS.json"
+            report_file = self.repo_path / "AURORA_BRANCH_STATUS.json"
             with open(report_file, "w") as f:
                 json.dump(report, f, indent=2)
 
-            
-        print("✅ Branch status report saved: {report_file}")
+            print(f"✅ Branch status report saved: {report_file}")
 
             # Display summary
             print("\n📋 Current Status:")
-            
-        print("   🌿 Current Branch: {current_branch}")
-            
-        print("   📊 Total Branches: {len(branches)}")
-            
-        print("   🔄 Aurora Version: {self.default_config['version']}")
+            print(f"   🌿 Current Branch: {current_branch}")
+            print(f"   📊 Total Branches: {len(branches)}")
+            print(f"   🔄 Aurora Version: {self.default_config['version']}")
 
-        
         except Exception as e:
-            print("❌ Error generating report: {e}")
+            print(f"❌ Error generating report: {e}")
 
-    
-        def setup_complete_branch_system(self):
+    def setup_complete_branch_system(self):
         """Set up the complete Aurora CloudBank branch management system"""
         print("🚀 Setting up Aurora CloudBank Branch Management System")
-        
         print("=" * 60)
 
         # Step 1: Initialize configuration

@@ -36,12 +36,7 @@ from slowapi.errors import RateLimitExceeded
 
 limiter = Limiter(key_func=get_remote_address)
 
-# Rate limiting decorators
-@limiter.limit("100/minute")  # General endpoints
-@limiter.limit("10/minute")   # Auth endpoints  
-@limiter.limit("5/minute")    # Admin endpoints
-
-, HTTPException, WebSocket
+from fastapi import HTTPException, WebSocket
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 

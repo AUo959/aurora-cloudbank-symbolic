@@ -11,7 +11,9 @@ def test_basic_imports():
         'aurora_api.py',
         'aurora_api_server.py', 
         'setup_aurora_branches.py',
-        'security_verification.py'
+        'security_verification.py',
+        'aurora_realworld_integration.py',
+        'aurora_gui_cloudhub_fastapi.py'
     ]
     
     passed = 0

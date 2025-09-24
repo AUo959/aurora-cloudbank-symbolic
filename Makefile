@@ -48,6 +48,27 @@ pr-priority:
 	# Generate prioritized PR action list from cleanup plan
 	python3 scripts/pr_cleanup_priority_from_plan.py
 
+# SSMT v3.0 Maintenance Automation
+.PHONY: health-check
+health-check:
+	# Quick repository health status check
+	python3 scripts/quick_health_check.py
+
+.PHONY: maintenance-scan
+maintenance-scan:
+	# Full repository maintenance analysis
+	python3 scripts/ssmt_v3_0_maintenance_pipeline.py
+
+.PHONY: maintenance-manual
+maintenance-manual:
+	# Manual trigger of weekly maintenance
+	python3 scripts/weekly_automation_scheduler.py --manual
+
+.PHONY: maintenance-status
+maintenance-status:
+	# Check automation schedule and status
+	python3 scripts/weekly_automation_scheduler.py
+
 .PHONY: branch-cleanup-dry
 branch-cleanup-dry:
 	# Preview deletion of obvious obsolete branches (no changes pushed)

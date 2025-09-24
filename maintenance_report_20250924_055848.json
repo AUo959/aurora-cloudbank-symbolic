@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-09-24T05:58:48.623953",
+  "repository_health": {
+    "branch_count": 26,
+    "target_count": 30,
+    "health_status": "EXCELLENT",
+    "health_score": 100
+  },
+  "branch_distribution": {
+    "dependencies": 3,
+    "copilot_fixes": 3,
+    "codex_features": 15,
+    "other_features": 4
+  },
+  "maintenance_actions": {
+    "stale_candidates": 0,
+    "auto_processed": 3,
+    "manual_review_needed": 0
+  },
+  "recommendations": []
+}

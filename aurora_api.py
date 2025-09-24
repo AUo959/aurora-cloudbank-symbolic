@@ -1,6 +1,6 @@
 
 from functools import wraps
-from typing import Optional
+from typing import Optional, List
 import secrets
 import hmac
 
@@ -28,15 +28,13 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, WebSocket, Depends
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 limiter = Limiter(key_func=get_remote_address)
-
-from fastapi import HTTPException, WebSocket
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 

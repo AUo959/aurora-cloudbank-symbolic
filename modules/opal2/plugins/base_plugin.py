@@ -194,7 +194,6 @@ class PluginRegistry:
         return self.plugins.get(plugin_name)
 
     def get_plugins_by_type(self, plugin_type: PluginType) -> List[BasePlugin]:
-        return [self.plugins[n] for n in self.by_type[plugin_type]]
 
     def list_plugins(self) -> List[Dict[str, Any]]:
         return [

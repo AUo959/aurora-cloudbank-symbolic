@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
 """
 L2 Meta-Agent Bridge
 Aurora CloudBank v3.5.1_macroready
@@ -209,7 +208,8 @@ class L2MetaAgentBridge:
             drift_value = drift_result.get("drift", 1.0)
             if not drift_result.get("success") or drift_value > self.orion_core_config["drift_threshold"]:
                 return self._handshake_failure(
-                    f"Drift validation failed: Δ{drift_value} exceeds threshold {self.orion_core_config['drift_threshold']}",
+                    f"Drift validation failed: Δ{drift_value} exceeds threshold "
+                    f"{self.orion_core_config['drift_threshold']}",
                     drift_result,
                     handshake_log,
                 )
@@ -462,7 +462,10 @@ async def main():
     print("🌟 Aurora L2 Meta-Agent Bridge - Example Usage")
     print("=" * 50)
 
-    # Test activation    result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")    print(f"ARCHY Activation: {result['success']}")
+    # Test activation
+    l2_bridge = L2MetaAgentBridge()
+    result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
+    print(f"ARCHY Activation: {result['success']}")
 
     if result["success"]:
         # Test message relay

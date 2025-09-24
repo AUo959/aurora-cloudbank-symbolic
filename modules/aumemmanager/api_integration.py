@@ -86,7 +86,7 @@ async def create_memory(request: MemoryCreateRequest):
         try:
             memory_type = MemoryType(request.memory_type.lower())
         except ValueError:
-            raise HTTPException(status_code=400, f"Invalid memory type: {request.memory_type}")
+            raise HTTPException(status_code=400, detail=f"Invalid memory type: {request.memory_type}")
         
         memory_id = memory_manager.add_memory(
             content=request.content,
@@ -118,7 +118,7 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
             try:
                 memory_type = MemoryType(request.memory_type.lower())
             except ValueError:
-                raise HTTPException(status_code=400, f"Invalid memory type: {request.memory_type}")
+                raise HTTPException(status_code=400, detail=f"Invalid memory type: {request.memory_type}")
         
         memories = memory_manager.retrieve_memories(
             query=request.query,

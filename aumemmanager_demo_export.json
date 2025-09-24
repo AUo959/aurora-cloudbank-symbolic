@@ -1,0 +1,481 @@
+{
+  "active_tier": {
+    "c3cdf17d-f55b-4f34-beb8-75b1b834db1c": {
+      "id": "c3cdf17d-f55b-4f34-beb8-75b1b834db1c",
+      "content": {
+        "mission": "Agent Alpha reconnaissance in Sector 7",
+        "status": "completed",
+        "findings": [
+          "enemy_patrol_route",
+          "resource_cache",
+          "communication_relay"
+        ],
+        "coordinates": [
+          127.5,
+          -45.3,
+          2100
+        ]
+      },
+      "memory_type": "MemoryType.AGENT",
+      "owner": "Agent_Alpha",
+      "importance": 8.5,
+      "timestamp": 1758700127.594658,
+      "last_access": 1758700127.5954788,
+      "access_count": 2,
+      "tags": [
+        "mission",
+        "reconnaissance",
+        "sector_7",
+        "strategic"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.997541458621431,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": {
+        "vector_id": "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c",
+        "magnitude": 1.2,
+        "phase": 0.5,
+        "entanglement_links": [
+          "qv_5fa7b150-9496-4db3-8476-4eb84729afca",
+          "qv_3c504a4a-fe33-4fa0-9644-6a7c0c2518a3"
+        ],
+        "superposition_states": [
+          {
+            "state_id": "coherent",
+            "probability": 0.7,
+            "stability": 0.9,
+            "aurora_aligned": true
+          },
+          {
+            "state_id": "decoherent",
+            "probability": 0.3,
+            "stability": 0.4,
+            "aurora_aligned": false
+          }
+        ],
+        "coherence_time": 1.3956983210348188,
+        "symbolic_anchors": [
+          "T1_ANCHOR",
+          "EOS_SEED_ORION"
+        ],
+        "t1_temporal_state": {
+          "anchor_timestamp": 1758700127.5945463,
+          "anchor_protocols": [
+            "T1_ANCHOR",
+            "EOS_SEED_ORION"
+          ],
+          "temporal_coherence": 1.0
+        },
+        "srb_boundary_data": null,
+        "dlp_classification": "DLP_L1_OK"
+      },
+      "symbolic_anchors": [
+        "T1_ANCHOR",
+        "EOS_SEED_ORION"
+      ],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {},
+      "dlp_tag_id": "dlp_000001_1758700127594",
+      "aurora_hash_seal": null,
+      "context_tag": "aumemmanager_memory",
+      "cask_cultural_score": 0.7
+    },
+    "5fa7b150-9496-4db3-8476-4eb84729afca": {
+      "id": "5fa7b150-9496-4db3-8476-4eb84729afca",
+      "content": {
+        "symbolic_anchor": "PICARD_DELTA_3_ETHICS",
+        "vector_state": [
+          0.8,
+          0.6,
+          0.4,
+          0.2
+        ],
+        "entanglement_target": "system_core",
+        "temporal_coherence": 0.95,
+        "srb_boundary_data": {
+          "spatial_bounds": [
+            100,
+            200,
+            150
+          ],
+          "relational_links": [
+            "agent_alpha",
+            "faction_alliance"
+          ]
+        }
+      },
+      "memory_type": "MemoryType.AURORA_SYMBOLIC",
+      "owner": "Aurora_Core",
+      "importance": 9.5,
+      "timestamp": 1758700127.5948339,
+      "last_access": 1758700127.5957334,
+      "access_count": 6,
+      "tags": [
+        "ethics",
+        "symbolic_anchor",
+        "quantum_core",
+        "governance"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.9985113670493917,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": {
+        "vector_id": "qv_5fa7b150-9496-4db3-8476-4eb84729afca",
+        "magnitude": 2.0,
+        "phase": 1.57,
+        "entanglement_links": [
+          "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c"
+        ],
+        "superposition_states": [
+          {
+            "state_id": "coherent",
+            "probability": 0.7,
+            "stability": 0.9,
+            "aurora_aligned": true
+          },
+          {
+            "state_id": "decoherent",
+            "probability": 0.3,
+            "stability": 0.4,
+            "aurora_aligned": false
+          }
+        ],
+        "coherence_time": 2.1285554724853104,
+        "symbolic_anchors": [
+          "PICARD_DELTA_3",
+          "T1_ANCHOR",
+          "SRB_BOUNDARY"
+        ],
+        "t1_temporal_state": {
+          "anchor_timestamp": 1758700127.5947945,
+          "anchor_protocols": [
+            "PICARD_DELTA_3",
+            "T1_ANCHOR",
+            "SRB_BOUNDARY"
+          ],
+          "temporal_coherence": 1.0
+        },
+        "srb_boundary_data": null,
+        "dlp_classification": "DLP_L1_OK"
+      },
+      "symbolic_anchors": [
+        "PICARD_DELTA_3",
+        "T1_ANCHOR",
+        "SRB_BOUNDARY"
+      ],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {},
+      "dlp_tag_id": "dlp_000001_1758700127594",
+      "aurora_hash_seal": null,
+      "context_tag": "aumemmanager_memory",
+      "cask_cultural_score": 0.9
+    },
+    "02ccdd72-6a29-425e-929e-ac56b41aa741": {
+      "id": "02ccdd72-6a29-425e-929e-ac56b41aa741",
+      "content": {
+        "cultural_context": "Multi-cultural alliance formation protocols",
+        "sensitivity_factors": {
+          "communication_style": "collaborative",
+          "decision_making": "consensus-based",
+          "conflict_resolution": "mediation-first"
+        },
+        "stakeholder_groups": [
+          "human_colonies",
+          "ai_entities",
+          "hybrid_communities"
+        ]
+      },
+      "memory_type": "MemoryType.CASK_CULTURAL",
+      "owner": "CASK_System",
+      "importance": 7.8,
+      "timestamp": 1758700127.5949342,
+      "last_access": 1758700127.5957289,
+      "access_count": 2,
+      "tags": [
+        "cultural",
+        "alliance",
+        "protocols",
+        "sensitivity"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.997283339745903,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": null,
+      "symbolic_anchors": [
+        "CASK_CULTURAL_BRIDGE"
+      ],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {},
+      "dlp_tag_id": "dlp_000001_1758700127594",
+      "aurora_hash_seal": null,
+      "context_tag": "aumemmanager_memory",
+      "cask_cultural_score": 0.95
+    },
+    "3c504a4a-fe33-4fa0-9644-6a7c0c2518a3": {
+      "id": "3c504a4a-fe33-4fa0-9644-6a7c0c2518a3",
+      "content": {
+        "trajectory_plan": "spiral_ascent_with_phase_lock",
+        "flight_parameters": {
+          "altitude": 10000,
+          "velocity": 250,
+          "phase_alignment": true,
+          "quantum_coherence_target": 0.85
+        },
+        "navigation_waypoints": [
+          {
+            "time": 0.0,
+            "mag": 1.0,
+            "phase": 0.0
+          },
+          {
+            "time": 0.5,
+            "mag": 1.5,
+            "phase": 1.57
+          },
+          {
+            "time": 1.0,
+            "mag": 2.0,
+            "phase": 3.14
+          }
+        ]
+      },
+      "memory_type": "MemoryType.FLIGHT_CONTROL",
+      "owner": "Quantum_Navigator",
+      "importance": 8.0,
+      "timestamp": 1758700127.5950654,
+      "last_access": 1758700127.5950656,
+      "access_count": 0,
+      "tags": [
+        "flight",
+        "trajectory",
+        "quantum",
+        "navigation"
+      ],
+      "status": "MemoryStatus.ACTIVE",
+      "strength": 0.9940253617194196,
+      "half_life": 86400.0,
+      "decay_rate": 0.0001,
+      "quantum_vector": {
+        "vector_id": "qv_3c504a4a-fe33-4fa0-9644-6a7c0c2518a3",
+        "magnitude": 1.8,
+        "phase": 0.78,
+        "entanglement_links": [
+          "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c"
+        ],
+        "superposition_states": [
+          {
+            "state_id": "coherent",
+            "probability": 0.7,
+            "stability": 0.9,
+            "aurora_aligned": true
+          },
+          {
+            "state_id": "decoherent",
+            "probability": 0.3,
+            "stability": 0.4,
+            "aurora_aligned": false
+          }
+        ],
+        "coherence_time": 1.025,
+        "symbolic_anchors": [
+          "QUANTUM_FLIGHT_CONTROL"
+        ],
+        "t1_temporal_state": {
+          "anchor_timestamp": 1758700127.5950289,
+          "anchor_protocols": [
+            "QUANTUM_FLIGHT_CONTROL"
+          ],
+          "temporal_coherence": 1.0
+        },
+        "srb_boundary_data": null,
+        "dlp_classification": "DLP_L1_OK"
+      },
+      "symbolic_anchors": [
+        "QUANTUM_FLIGHT_CONTROL"
+      ],
+      "entangled_memories": [],
+      "compression_ratio": 1.0,
+      "original_size": 0,
+      "flight_trajectory": null,
+      "control_parameters": {},
+      "dlp_tag_id": "dlp_000001_1758700127595",
+      "aurora_hash_seal": null,
+      "context_tag": "aumemmanager_memory",
+      "cask_cultural_score": 0.2
+    }
+  },
+  "compressed_tier": {},
+  "archived_tier": {},
+  "attention_weights": {
+    "relevance": 0.25,
+    "importance": 0.25,
+    "recency": 0.25,
+    "quantum_coherence": 0.15,
+    "cultural_relevance": 0.05,
+    "aurora_symbolic": 0.05
+  },
+  "metrics": {
+    "total_memories": 4,
+    "active_memories": 4,
+    "compressed_memories": 0,
+    "archived_memories": 0,
+    "retrieval_count": 3,
+    "compression_count": 0,
+    "last_cleanup": 1758700127.5945024,
+    "dlp_tracked_memories": 4,
+    "aurora_anchored_memories": 4,
+    "quantum_vectors": 3,
+    "entangled_pairs": 2,
+    "aurora_anchor_coverage": 6,
+    "average_cultural_score": 0.6875,
+    "quantum_network_density": 0.6666666666666666
+  },
+  "quantum_vectors": {
+    "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c": {
+      "vector_id": "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c",
+      "magnitude": 1.2,
+      "phase": 0.5,
+      "entanglement_links": [
+        "qv_5fa7b150-9496-4db3-8476-4eb84729afca",
+        "qv_3c504a4a-fe33-4fa0-9644-6a7c0c2518a3"
+      ],
+      "superposition_states": [
+        {
+          "state_id": "coherent",
+          "probability": 0.7,
+          "stability": 0.9,
+          "aurora_aligned": true
+        },
+        {
+          "state_id": "decoherent",
+          "probability": 0.3,
+          "stability": 0.4,
+          "aurora_aligned": false
+        }
+      ],
+      "coherence_time": 1.3956983210348188,
+      "symbolic_anchors": [
+        "T1_ANCHOR",
+        "EOS_SEED_ORION"
+      ],
+      "t1_temporal_state": {
+        "anchor_timestamp": 1758700127.5945463,
+        "anchor_protocols": [
+          "T1_ANCHOR",
+          "EOS_SEED_ORION"
+        ],
+        "temporal_coherence": 1.0
+      },
+      "srb_boundary_data": null,
+      "dlp_classification": "DLP_L1_OK"
+    },
+    "qv_5fa7b150-9496-4db3-8476-4eb84729afca": {
+      "vector_id": "qv_5fa7b150-9496-4db3-8476-4eb84729afca",
+      "magnitude": 2.0,
+      "phase": 1.57,
+      "entanglement_links": [
+        "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c"
+      ],
+      "superposition_states": [
+        {
+          "state_id": "coherent",
+          "probability": 0.7,
+          "stability": 0.9,
+          "aurora_aligned": true
+        },
+        {
+          "state_id": "decoherent",
+          "probability": 0.3,
+          "stability": 0.4,
+          "aurora_aligned": false
+        }
+      ],
+      "coherence_time": 2.1285554724853104,
+      "symbolic_anchors": [
+        "PICARD_DELTA_3",
+        "T1_ANCHOR",
+        "SRB_BOUNDARY"
+      ],
+      "t1_temporal_state": {
+        "anchor_timestamp": 1758700127.5947945,
+        "anchor_protocols": [
+          "PICARD_DELTA_3",
+          "T1_ANCHOR",
+          "SRB_BOUNDARY"
+        ],
+        "temporal_coherence": 1.0
+      },
+      "srb_boundary_data": null,
+      "dlp_classification": "DLP_L1_OK"
+    },
+    "qv_3c504a4a-fe33-4fa0-9644-6a7c0c2518a3": {
+      "vector_id": "qv_3c504a4a-fe33-4fa0-9644-6a7c0c2518a3",
+      "magnitude": 1.8,
+      "phase": 0.78,
+      "entanglement_links": [
+        "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c"
+      ],
+      "superposition_states": [
+        {
+          "state_id": "coherent",
+          "probability": 0.7,
+          "stability": 0.9,
+          "aurora_aligned": true
+        },
+        {
+          "state_id": "decoherent",
+          "probability": 0.3,
+          "stability": 0.4,
+          "aurora_aligned": false
+        }
+      ],
+      "coherence_time": 1.025,
+      "symbolic_anchors": [
+        "QUANTUM_FLIGHT_CONTROL"
+      ],
+      "t1_temporal_state": {
+        "anchor_timestamp": 1758700127.5950289,
+        "anchor_protocols": [
+          "QUANTUM_FLIGHT_CONTROL"
+        ],
+        "temporal_coherence": 1.0
+      },
+      "srb_boundary_data": null,
+      "dlp_classification": "DLP_L1_OK"
+    }
+  },
+  "quantum_network_analysis": {
+    "total_vectors": 3,
+    "total_entanglements": 2,
+    "average_entanglement_degree": 1.3333333333333333,
+    "most_connected_vector": "qv_c3cdf17d-f55b-4f34-beb8-75b1b834db1c",
+    "aurora_anchor_coverage": {
+      "T1_ANCHOR": 2,
+      "EOS_SEED_ORION": 1,
+      "PICARD_DELTA_3": 1,
+      "SRB_BOUNDARY": 1,
+      "QUANTUM_FLIGHT_CONTROL": 1
+    },
+    "coherence_distribution": {
+      "mean": 1.5164179311733765,
+      "std": 0.45854013885887407,
+      "min": 1.025,
+      "max": 2.1285554724853104
+    },
+    "network_density": 0.6666666666666666
+  },
+  "export_timestamp": 1758700127.6036742,
+  "aurora_integration_version": "1.0.0"
+}

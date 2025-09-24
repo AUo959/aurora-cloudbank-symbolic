@@ -33,7 +33,7 @@ class FinalBranchCleanup:
             # Extract branch name without origin/ prefix
             clean_branch = branch_name.replace("origin/", "")
             
-            print(f"🗑️  Deleting branch: {clean_branch}")
+            print("🗑️  Deleting branch: %s", clean_branch)
             result = subprocess.run(
                 ["git", "push", "origin", "--delete", clean_branch],
                 capture_output=True,
@@ -42,12 +42,12 @@ class FinalBranchCleanup:
             )
             
             self.deleted_branches.append(clean_branch)
-            print(f"✅ Successfully deleted: {clean_branch}")
+            print("✅ Successfully deleted: %s", clean_branch)
             return True
             
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else "Unknown error"
-            print(f"❌ Failed to delete {clean_branch}: {error_msg}")
+            print("❌ Failed to delete {clean_branch}: %s", error_msg)
             self.failed_branches.append({
                 "branch": clean_branch,
                 "error": error_msg
@@ -56,7 +56,7 @@ class FinalBranchCleanup:
     
     def run_cleanup(self):
         """Execute the final branch cleanup"""
-        print(f"🚀 Starting final branch cleanup - {len(self.branches_to_delete)} branches")
+        print("🚀 Starting final branch cleanup - %s branches", len(self.branches_to_delete))
         print("=" * 60)
         
         for branch in self.branches_to_delete:
@@ -86,25 +86,26 @@ class FinalBranchCleanup:
         print("\n" + "=" * 60)
         print("🎯 ZERO PR STRATEGY - COMPLETION REPORT")
         print("=" * 60)
-        print(f"✅ Successfully deleted: {len(self.deleted_branches)} branches")
-        print(f"❌ Failed deletions: {len(self.failed_branches)} branches")
+        print("✅ Successfully deleted: %s branches", len(self.deleted_branches))
+        print("❌ Failed deletions: %s branches", len(self.failed_branches))
         
         if self.deleted_branches:
             print(f"\n🗑️  Deleted branches:")
             for branch in self.deleted_branches:
-                print(f"   - {branch}")
+                print("   - %s", branch)
         
         if self.failed_branches:
             print(f"\n⚠️  Failed branches:")
             for failure in self.failed_branches:
-                print(f"   - {failure['branch']}: {failure['error']}")
+                print("   - %s: {failure[", failure['branch'])
         
         print(f"\n📊 Report saved: ZERO_PR_COMPLETION_REPORT.json")
         
         if len(self.failed_branches) == 0:
             print("\n🎉 SUCCESS: ZERO OPEN PRS ACHIEVED!")
         else:
-            print(f"\n⚠️  {len(self.failed_branches)} branches require manual review")
+            print("
+⚠️  %s branches require manual review", len(self.failed_branches))
 
 if __name__ == "__main__":
     cleanup = FinalBranchCleanup()

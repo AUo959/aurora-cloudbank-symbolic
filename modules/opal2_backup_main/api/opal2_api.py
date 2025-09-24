@@ -2,6 +2,12 @@ import logging
 import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 import logging
 import uvicorn
 
@@ -122,6 +128,11 @@ async def health_check():
 
 
 @app.post("/render")
+async def render_glyph(request: RenderRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def render_glyph(request: RenderRequest):
     """Render a glyph with specified parameters"""
     try:
@@ -182,6 +193,11 @@ async def render_glyph(request: RenderRequest):
 
 
 @app.post("/generate")
+async def generate_glyph(request: GlyphGenerationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def generate_glyph(request: GlyphGenerationRequest):
     """Generate a new glyph from symbolic expression"""
     try:

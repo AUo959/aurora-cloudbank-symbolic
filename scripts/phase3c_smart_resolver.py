@@ -32,22 +32,22 @@ class Phase3CSmartResolver:
         try:
             result = subprocess.run(
                 command, 
-                shell=True, 
+                shell=False, 
                 capture_output=True, 
                 text=True, 
                 cwd=self.workspace_root
             )
             
             if check_return and result.returncode != 0:
-                print(f"❌ Command failed: {command}")
+                print("❌ Command failed: %s", command)
                 if result.stderr:
-                    print(f"Error: {result.stderr}")
+                    print("Error: %s", result.stderr)
                 return None
                 
             return result
         except Exception as e:
-            print(f"❌ Exception running command: {command}")
-            print(f"Error: {e}")
+            print("❌ Exception running command: %s", command)
+            print("Error: %s", e)
             return None
 
     def backup_current_state(self):
@@ -61,12 +61,12 @@ class Phase3CSmartResolver:
             shutil.rmtree(backup_dir)
         
         shutil.copytree(opal2_dir, backup_dir)
-        print(f"✅ Backup created: {backup_dir}")
+        print("✅ Backup created: %s", backup_dir)
         return backup_dir
 
     def extract_valuable_changes(self, branch_name):
         """Extract valuable non-conflicting changes from branch"""
-        print(f"🔍 Extracting valuable changes from {branch_name}...")
+        print("🔍 Extracting valuable changes from %s...", branch_name)
         
         # Get all changes from the branch
         diff_result = self.run_command(f"git diff main..origin/{branch_name} --name-status")
@@ -97,12 +97,12 @@ class Phase3CSmartResolver:
                     "type": "workflow_improvement"
                 })
         
-        print(f"📋 Found {len(valuable_changes)} valuable non-conflicting changes")
+        print("📋 Found %s valuable non-conflicting changes", len(valuable_changes))
         return valuable_changes
 
     def apply_selective_merge(self, branch_name, valuable_changes):
         """Apply only the valuable non-conflicting changes"""
-        print(f"🔧 Applying selective merge from {branch_name}...")
+        print("🔧 Applying selective merge from %s...", branch_name)
         
         if not valuable_changes:
             print("ℹ️  No valuable changes to apply")
@@ -120,13 +120,13 @@ class Phase3CSmartResolver:
             
             try:
                 if status == 'A':  # Added file
-                    print(f"  + Adding: {file_path}")
+                    print("  + Adding: %s", file_path)
                     self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
                     self.run_command(f"git add {file_path}")
                     applied_files.append(file_path)
                     
                 elif status == 'M':  # Modified file  
-                    print(f"  ~ Modifying: {file_path}")
+                    print("  ~ Modifying: %s", file_path)
                     # For modified files, we'll prefer the branch version for non-core files
                     if not any(core in file_path for core in ['src/core/', 'modules/opal2/']):
                         self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
@@ -134,13 +134,13 @@ class Phase3CSmartResolver:
                         applied_files.append(file_path)
                         
                 elif status == 'D':  # Deleted file
-                    print(f"  - Deleting: {file_path}")
+                    print("  - Deleting: %s", file_path)
                     if Path(self.workspace_root / file_path).exists():
                         self.run_command(f"git rm {file_path}", False)
                         applied_files.append(file_path)
                         
             except Exception as e:
-                print(f"⚠️  Failed to apply {file_path}: {e}")
+                print("⚠️  Failed to apply {file_path}: %s", e)
                 continue
         
         if applied_files:
@@ -148,7 +148,7 @@ class Phase3CSmartResolver:
             commit_result = self.run_command(f"git commit -m '{commit_msg}'")
             
             if commit_result:
-                print(f"✅ Applied {len(applied_files)} changes successfully")
+                print("✅ Applied %s changes successfully", len(applied_files))
                 return work_branch
         else:
             print("ℹ️  No changes successfully applied")
@@ -160,7 +160,7 @@ class Phase3CSmartResolver:
 
     def preserve_opal2_enhancements(self, branch_name):
         """Extract and preserve valuable Opal2 enhancements without conflicts"""
-        print(f"🧬 Analyzing Opal2 enhancements in {branch_name}...")
+        print("🧬 Analyzing Opal2 enhancements in %s...", branch_name)
         
         # Compare the actual functionality differences
         main_plugin_result = self.run_command("wc -l modules/opal2/plugin_system.py")
@@ -169,8 +169,8 @@ class Phase3CSmartResolver:
         branch_diff = self.run_command(f"git show origin/{branch_name}:modules/opal2/plugin_system.py | wc -l", False)
         branch_lines = int(branch_diff.stdout.strip()) if branch_diff and branch_diff.stdout.strip().isdigit() else 0
         
-        print(f"📊 Main plugin_system.py: {main_lines} lines")
-        print(f"📊 Branch plugin_system.py: {branch_lines} lines")
+        print("📊 Main plugin_system.py: %s lines", main_lines)
+        print("📊 Branch plugin_system.py: %s lines", branch_lines)
         
         if branch_lines > main_lines + 50:
             print("🔍 Branch has significant enhancements - creating compatibility layer")
@@ -218,14 +218,15 @@ __all__ = ["EnhancedPluginManager"]
 '''
             
             enhancement_file.write_text(enhancement_content)
-            print(f"✅ Created enhancement layer: {enhancement_file}")
+            print("✅ Created enhancement layer: %s", enhancement_file)
             return str(enhancement_file)
         
         return None
 
     def smart_resolve_branch(self, branch_name):
         """Smart resolution strategy for a single branch"""
-        print(f"\n🎯 SMART RESOLUTION: {branch_name}")
+        print("
+🎯 SMART RESOLUTION: %s", branch_name)
         
         resolution_record = {
             "branch": branch_name,
@@ -259,7 +260,7 @@ __all__ = ["EnhancedPluginManager"]
                     if merge_result:
                         resolution_record["status"] = "success"
                         resolution_record["merged_to_main"] = True
-                        print(f"✅ Smart resolution successful for {branch_name}")
+                        print("✅ Smart resolution successful for %s", branch_name)
                     else:
                         resolution_record["status"] = "main_merge_failed"
                 else:
@@ -285,7 +286,7 @@ __all__ = ["EnhancedPluginManager"]
         except Exception as e:
             resolution_record["status"] = "error"
             resolution_record["error"] = str(e)
-            print(f"❌ Smart resolution error: {e}")
+            print("❌ Smart resolution error: %s", e)
             
         resolution_record["end_time"] = datetime.now().isoformat()
         return resolution_record
@@ -306,7 +307,8 @@ __all__ = ["EnhancedPluginManager"]
         successful_resolutions = 0
         
         for branch_name in target_branches:
-            print(f"\n{'='*60}")
+            print("
+%s", '='*60)
             resolution_result = self.smart_resolve_branch(branch_name)
             self.results["smart_resolutions"].append(resolution_result)
             
@@ -315,8 +317,8 @@ __all__ = ["EnhancedPluginManager"]
             
         # Final validation
         print(f"\n🎯 PHASE 3C SUMMARY:")
-        print(f"   Attempted: {len(target_branches)}")
-        print(f"   Successful: {successful_resolutions}")
+        print("   Attempted: %s", len(target_branches))
+        print("   Successful: %s", successful_resolutions)
         
         if successful_resolutions > 0:
             print("🧪 Final system validation...")
@@ -341,7 +343,7 @@ __all__ = ["EnhancedPluginManager"]
         
         if successful_resolutions > 0:
             print("\n🚀 Phase 3C completed with smart resolutions!")
-            print(f"💾 Backup available at: {backup_dir}")
+            print("💾 Backup available at: %s", backup_dir)
             return True
         else:
             print("\n⚠️  Phase 3C completed - manual review may be needed")

@@ -15,7 +15,7 @@ try:
 
     # Test basic analysis
     state = gitwiz.analyze_repository_state()
-    print(f"✅ Repository analysis completed: {state.file_count} files, {state.branch_count} branches")
+    print("✅ Repository analysis completed: {state.file_count} files, %s branches", state.branch_count)
 
     # Test report generation
     report = gitwiz.generate_optimization_report()
@@ -24,8 +24,8 @@ try:
     print(report[:500] + "..." if len(report) > 500 else report)
 
 except ImportError as e:
-    print(f"❌ Import error: {e}")
+    print("❌ Import error: %s", e)
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print("❌ Error: %s", e)
 
     traceback.print_exc()

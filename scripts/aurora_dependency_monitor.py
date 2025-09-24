@@ -300,7 +300,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         
     def run_continuous_monitoring(self, interval_minutes: int = 60):
         """Run continuous monitoring loop"""
-        print(f"🔄 Starting continuous dependency monitoring (every {interval_minutes} minutes)")
+        print("🔄 Starting continuous dependency monitoring (every %s minutes)", interval_minutes)
         
         import time
         
@@ -309,8 +309,8 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 validation = self.validate_all_systems()
                 
                 if validation['overall_health'] in ['critical', 'partial']:
-                    print(f"⚠️  {datetime.now().strftime('%H:%M:%S')} - Dependency issues detected!")
-                    print(f"   Status: {validation['overall_health']}")
+                    print("⚠️  %s - Dependency issues detected!", datetime.now().strftime('%H:%M:%S'))
+                    print("   Status: %s", validation['overall_health'])
                     
                     # Try automatic recovery
                     print("🔧 Attempting automatic recovery...")
@@ -323,7 +323,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                         print("❌ Automatic recovery failed")
                         
                 else:
-                    print(f"✅ {datetime.now().strftime('%H:%M:%S')} - All systems healthy")
+                    print("✅ %s - All systems healthy", datetime.now().strftime('%H:%M:%S'))
                     
                 time.sleep(interval_minutes * 60)
                 
@@ -331,7 +331,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 print("\n🛑 Monitoring stopped by user")
                 break
             except Exception as e:
-                print(f"❌ Monitoring error: {e}")
+                print("❌ Monitoring error: %s", e)
                 time.sleep(300)  # Wait 5 minutes before retrying
 
 def main():
@@ -352,7 +352,7 @@ def main():
         
     elif args.validate:
         validation = monitor.validate_all_systems()
-        print(f"Validation Status: {validation['overall_health']}")
+        print("Validation Status: %s", validation['overall_health'])
         
         if validation['overall_health'] in ['critical', 'partial']:
             sys.exit(1)

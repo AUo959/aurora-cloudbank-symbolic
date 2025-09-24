@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def analyze_dependabot_branch(branch_name: str, repo_path: str = ".") -> Dict[str, Any]:
     """Analyze a dependabot branch as an easy win candidate"""
-    logger.info(f"🔍 Analyzing dependabot branch: {branch_name}")
+    logger.info("🔍 Analyzing dependabot branch: %s", str(branch_name)[:100])
     
     try:
         # Get changed files
@@ -67,7 +67,7 @@ def analyze_dependabot_branch(branch_name: str, repo_path: str = ".") -> Dict[st
         return analysis
         
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Failed to analyze {branch_name}: {e}")
+        logger.error("❌ Failed to analyze %s: %s", str(branch_name)[:100], str(e)[:100])
         return {"branch": branch_name, "error": str(e), "automation_eligible": False}
 
 def demonstrate_easy_wins(repo_path: str = ".") -> Dict[str, Any]:
@@ -88,7 +88,7 @@ def demonstrate_easy_wins(repo_path: str = ".") -> Dict[str, Any]:
                 branch = line.replace('origin/', '').strip()
                 branches.append(branch)
         
-        logger.info(f"Found {len(branches)} dependabot branches")
+        logger.info("Found %s dependabot branches", str(len(branches))[:100])
         
         # Analyze first few branches as examples
         analyses = []
@@ -126,12 +126,12 @@ def demonstrate_easy_wins(repo_path: str = ".") -> Dict[str, Any]:
         return demo_results
         
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Failed to demonstrate easy wins: {e}")
+        logger.error("❌ Failed to demonstrate easy wins: %s", str(e)[:100])
         return {"error": str(e)}
 
 def execute_safe_demo_merge(branch_name: str, repo_path: str = ".", dry_run: bool = True) -> Dict[str, Any]:
     """Execute a safe demo merge of an easy win branch"""
-    logger.info(f"🔧 Executing safe demo merge: {branch_name} (dry_run={dry_run})")
+    logger.info("🔧 Executing safe demo merge: %s (dry_run=%s)", str(branch_name)[:100], str(dry_run)[:100])
     
     if dry_run:
         # Simulate the merge process

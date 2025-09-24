@@ -146,7 +146,7 @@ def process_file_critical(file_path: str) -> dict:
         fixes["unused_imports"] = remove_unused_imports(file_path)
 
     except Exception as e:
-        print(f"Error processing {file_path}: {e}")
+        print("Error processing {file_path}: %s", e)
         return {}
 
     return fixes
@@ -179,7 +179,7 @@ def main():
     for filename in problem_files:
         file_path = scripts_dir / filename
         if file_path.exists():
-            print(f"Processing {file_path}...")
+            print("Processing %s...", file_path)
             file_fixes = process_file_critical(str(file_path))
 
             for fix_type, applied in file_fixes.items():
@@ -191,9 +191,10 @@ def main():
     print("\nCritical Fix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
+        print("%s: {count} files", fix_type.replace('_', ' ').title())
 
-    print(f"\nProcessed {len(problem_files)} critical Python files.")
+    print("
+Processed %s critical Python files.", len(problem_files))
     return 0
 
 

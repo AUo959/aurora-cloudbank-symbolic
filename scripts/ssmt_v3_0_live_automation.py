@@ -32,7 +32,7 @@ class SSMTv3LiveAutomation:
         # Ensure backup directory exists
         self.backup_dir.mkdir(exist_ok=True)
         
-        logger.info(f"🚀 SSMT v3.0 Live Automation initialized (Session: {self.session_id})")
+        logger.info("🚀 SSMT v3.0 Live Automation initialized (Session: %s)", str(self.session_id)[:100])
 
     def create_safety_backup(self) -> Dict[str, Any]:
         """Create comprehensive safety backup before automation"""
@@ -65,16 +65,16 @@ class SSMTv3LiveAutomation:
             with open(backup_file, 'w') as f:
                 json.dump(backup_info, f, indent=2)
             
-            logger.info(f"✅ Safety backup created: {backup_file}")
+            logger.info("✅ Safety backup created: %s", str(backup_file)[:100])
             return backup_info
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Failed to create safety backup: {e}")
+            logger.error("❌ Failed to create safety backup: %s", str(e)[:100])
             raise
 
     def validate_branch_safety(self, branch_name: str) -> Dict[str, Any]:
         """Validate branch safety before automation"""
-        logger.info(f"🔍 Validating branch safety: {branch_name}")
+        logger.info("🔍 Validating branch safety: %s", str(branch_name)[:100])
         
         try:
             # Check if branch exists
@@ -110,14 +110,14 @@ class SSMTv3LiveAutomation:
             }
             
             if is_safe:
-                logger.info(f"✅ Branch validation passed: {branch_name}")
+                logger.info("✅ Branch validation passed: %s", str(branch_name)[:100])
             else:
-                logger.warning(f"⚠️ Branch validation failed: {branch_name}")
+                logger.warning("⚠️ Branch validation failed: %s", str(branch_name)[:100])
                 
             return validation
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Branch validation failed: {e}")
+            logger.error("❌ Branch validation failed: %s", str(e)[:100])
             return {
                 "branch": branch_name,
                 "validation_passed": False,
@@ -127,7 +127,7 @@ class SSMTv3LiveAutomation:
 
     def execute_safe_merge(self, branch_name: str, backup_info: Dict[str, Any]) -> Dict[str, Any]:
         """Execute safe merge with comprehensive error handling"""
-        logger.info(f"🔧 Executing safe merge: {branch_name}")
+        logger.info("🔧 Executing safe merge: %s", str(branch_name)[:100])
         
         merge_result = {
             "branch": branch_name,
@@ -155,7 +155,7 @@ class SSMTv3LiveAutomation:
             merge_result["steps_completed"].append("pull_main")
             
             # Step 4: Execute merge
-            logger.info(f"🔗 Merging {branch_name}...")
+            logger.info("🔗 Merging %s...", str(branch_name)[:100])
             merge_cmd = subprocess.run(
                 ["git", "merge", "--no-ff", f"origin/{branch_name}", "-m", f"🤖 SSMT v3.0 Auto-merge: {branch_name}"],
                 cwd=self.repo_path, capture_output=True, text=True
@@ -171,22 +171,22 @@ class SSMTv3LiveAutomation:
                 merge_result["steps_completed"].append("push_completed")
                 
                 # Step 6: Delete merged branch
-                logger.info(f"🗑️ Cleaning up merged branch...")
+                logger.info("🗑️ Cleaning up merged branch...")
                 subprocess.run(["git", "push", "origin", "--delete", branch_name], cwd=self.repo_path, check=True)
                 merge_result["steps_completed"].append("branch_cleanup")
                 
                 merge_result["success"] = True
                 merge_result["completed_at"] = datetime.now().isoformat()
-                logger.info(f"🎉 Successfully automated merge of {branch_name}")
+                logger.info("🎉 Successfully automated merge of %s", str(branch_name)[:100])
                 
             else:
                 # Merge failed - execute rollback
-                logger.error(f"❌ Merge failed: {merge_cmd.stderr}")
+                logger.error("❌ Merge failed: %s", str(merge_cmd.stderr)[:100])
                 merge_result["error"] = merge_cmd.stderr
                 merge_result["rollback_performed"] = self.execute_emergency_rollback(backup_info)
                 
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Merge execution failed: {e}")
+            logger.error("❌ Merge execution failed: %s", str(e)[:100])
             merge_result["error"] = str(e)
             merge_result["rollback_performed"] = self.execute_emergency_rollback(backup_info)
             
@@ -213,12 +213,12 @@ class SSMTv3LiveAutomation:
             return True
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Emergency rollback failed: {e}")
+            logger.error("❌ Emergency rollback failed: %s", str(e)[:100])
             return False
 
     def execute_automation_batch(self, branches: List[str]) -> Dict[str, Any]:
         """Execute automation on a batch of verified easy win branches"""
-        logger.info(f"🚀 Starting automation batch: {len(branches)} branches")
+        logger.info("🚀 Starting automation batch: %s branches", str(len(branches))[:100])
         
         # Create safety backup
         backup_info = self.create_safety_backup()
@@ -237,7 +237,7 @@ class SSMTv3LiveAutomation:
         }
         
         for branch in branches:
-            logger.info(f"\n🔄 Processing branch {batch_results['summary']['successful'] + batch_results['summary']['failed'] + 1}/{len(branches)}: {branch}")
+            logger.info("\n🔄 Processing branch %s/%s: %s", str(batch_results['summary']['successful'] + batch_results['summary']['failed'] + 1)[:100], str(len(branches))[:100], str(branch)[:100])
             
             # Validate branch safety
             validation = self.validate_branch_safety(branch)
@@ -271,7 +271,7 @@ class SSMTv3LiveAutomation:
         with open(results_file, 'w') as f:
             json.dump(batch_results, f, indent=2)
         
-        logger.info(f"📊 Batch automation completed: {batch_results['summary']}")
+        logger.info("📊 Batch automation completed: %s", str(batch_results['summary'])[:100])
         return batch_results
 
 def main():
@@ -306,7 +306,7 @@ def main():
             print("❌ No branches specified. Use --easy-wins or --branches")
             sys.exit(1)
         
-        print(f"🚀 Executing live automation on {len(branches)} branches...")
+        print("🚀 Executing live automation on %s branches...", len(branches))
         print("⚠️  This will make real changes to the repository!")
         
         confirmation = input("Type 'EXECUTE' to proceed: ")

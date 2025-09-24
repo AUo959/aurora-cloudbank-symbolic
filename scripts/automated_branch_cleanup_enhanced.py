@@ -99,7 +99,7 @@ class AutomatedBranchManager:
 
         
         except subprocess.CalledProcessError as e:
-            print(f"Error getting branch info: {e}")
+            print("Error getting branch info: %s", e)
             
         return []
 
@@ -197,7 +197,7 @@ class AutomatedBranchManager:
             print("🔍 DRY RUN MODE - No branches will be deleted")
             
         for branch in safe_branches:
-                print(f"  Would delete: {branch.name} (merged {branch.days_old} days ago)")
+                print("  Would delete: {branch.name} (merged %s days ago)", branch.days_old)
                 
         results["deleted"].append(branch.name)
             
@@ -207,7 +207,7 @@ class AutomatedBranchManager:
             try:
                 # Double-check it's merged before deletion
                 if not self._is_branch_merged(branch.name):
-                    print(f"⚠️  Skipping {branch.name} - not confirmed merged")
+                    print("⚠️  Skipping %s - not confirmed merged", branch.name)
                     
         results["skipped"].append(branch.name)
                     
@@ -218,13 +218,13 @@ class AutomatedBranchManager:
                 subprocess.run(cmd, check=True, capture_output=True)
 
                 
-        print(f"✅ Deleted branch: {branch.name}")
+        print("✅ Deleted branch: %s", branch.name)
                 
         results["deleted"].append(branch.name)
 
             
         except subprocess.CalledProcessError as e:
-                print(f"❌ Failed to delete {branch.name}: {e}")
+                print("❌ Failed to delete {branch.name}: %s", e)
                 
         results["failed"].append(branch.name)
 
@@ -337,10 +337,10 @@ def main():
     analysis = manager.analyze_cleanup_candidates(branches)
 
     
-        print(f"📈 Found {analysis['total_branches']} branches total")
-    print(f"✅ Safe to delete: {len(analysis['candidates']['safe_to_delete'])}")
-    print(f"⚠️  Requires review: {len(analysis['candidates']['requires_review'])}")
-    print(f"🔒 Protected: {len(analysis['candidates']['protected'])}")
+        print("📈 Found %s branches total", analysis['total_branches'])
+    print("✅ Safe to delete: %s", len(analysis['candidates']['safe_to_delete']))
+    print("⚠️  Requires review: %s", len(analysis['candidates']['requires_review']))
+    print("🔒 Protected: %s", len(analysis['candidates']['protected']))
 
     # Execute cleanup if requested
     cleanup_results = None
@@ -359,7 +359,7 @@ def main():
         f.write(report)
 
     
-        print(f"📄 Report saved to: {report_file}")
+        print("📄 Report saved to: %s", report_file)
 
 
 if __name__ == "__main__":

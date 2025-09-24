@@ -293,7 +293,7 @@ class PreCommitOptimizer:
             return True
 
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Failed to apply config: {e}")
+            print("Failed to apply config: %s", e)
             return False
 
     def generate_optimization_report(self) -> str:
@@ -409,23 +409,23 @@ def main():
     if args.analyze or args.report:
         analysis = optimizer.analyze_current_config()
         print("Pre-commit analysis:")
-        print(f"  Config exists: {analysis['config_exists']}")
-        print(f"  Total hooks: {analysis['hooks_count']}")
+        print("  Config exists: %s", analysis['config_exists'])
+        print("  Total hooks: %s", analysis['hooks_count'])
 
         if analysis["issues"]:
-            print(f"  Issues found: {len(analysis['issues'])}")
+            print("  Issues found: %s", len(analysis['issues']))
             for issue in analysis["issues"]:
-                print(f"    - {issue}")
+                print("    - %s", issue)
 
     if args.benchmark:
         print("🔧 Benchmarking pre-commit hooks...")
         benchmarks = optimizer.benchmark_hooks()
 
         if "total_time" in benchmarks:
-            print(f"⏱️ Total execution time: {benchmarks['total_time']:.2f} seconds")
-            print(f"✅ Success: {benchmarks['success']}")
+            print("⏱️ Total execution time: %s seconds", benchmarks['total_time']:.2f)
+            print("✅ Success: %s", benchmarks['success'])
         elif "error" in benchmarks:
-            print(f"❌ Benchmark failed: {benchmarks['error']}")
+            print("❌ Benchmark failed: %s", benchmarks['error'])
 
     if args.report:
         report = optimizer.generate_optimization_report()
@@ -437,7 +437,7 @@ def main():
 
     if args.optimize:
         config_type = "conditional" if args.conditional else "optimized"
-        print(f"🔧 Applying {config_type} pre-commit configuration...")
+        print("🔧 Applying %s pre-commit configuration...", config_type)
 
         success = optimizer.apply_optimized_config(config_type)
 

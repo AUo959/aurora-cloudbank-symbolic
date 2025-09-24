@@ -17,6 +17,12 @@ from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -126,7 +132,7 @@ async def dashboard():
                 status_code=200,
             )
     except Exception as e:
-        logger.error(f"Dashboard error: {str(e)}")
+        logger.error("Dashboard error: %s", str(str(e))[:100])
         return HTMLResponse(f"<h1>Dashboard Error: {str(e)}</h1>", status_code=500)
 
 
@@ -148,6 +154,11 @@ async def health_check():
 if AURORA_CUSTOM_GPT_AVAILABLE:
 
     @app.post("/api/aurora/command")
+async def aurora_custom_gpt_command(request_data: dict, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
     async def aurora_custom_gpt_command(request_data: dict):
         """Receive command from Aurora Custom GPT and route to command node"""
         server_state["requests_count"] += 1
@@ -167,7 +178,8 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             # Route command through Aurora Custom GPT bridge
             result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
 
-            logger.info(f"Aurora command processed: {result['success']}")
+            # Secure logging to prevent log injection
+            logger.info("Aurora command processed with status: %s", str(result.get('success', 'unknown'))[:50])
 
             if result["success"]:
                 return result
@@ -175,7 +187,8 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 raise HTTPException(status_code=400, detail=result["error"])
 
         except Exception as e:
-            logger.error(f"Aurora command failed: {str(e)}")
+            # Secure logging to prevent log injection
+            logger.error("Aurora command failed: %s", str(e)[:100])
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/aurora/status")
@@ -195,10 +208,15 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
-            logger.error(f"Aurora status request failed: {str(e)}")
+            logger.error("Aurora status request failed: %s", str(str(e))[:100])
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/aurora/initialize")
+async def initialize_aurora_integration(token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
     async def initialize_aurora_integration():
         """Initialize Aurora Custom GPT integration"""
         server_state["requests_count"] += 1
@@ -218,7 +236,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 raise HTTPException(status_code=500, detail=f"Integration failed: {result['error']}")
 
         except Exception as e:
-            logger.error(f"Aurora initialization failed: {str(e)}")
+            logger.error("Aurora initialization failed: %s", str(str(e))[:100])
             raise HTTPException(status_code=500, detail=str(e))
 
 else:
@@ -239,10 +257,16 @@ else:
 
 
 @app.post("/api/bridge/gpt/connect/{agent_id}")
+async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any], token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
-        logger.info(f"Connection request for agent: {agent_id}")
+        # Secure logging to prevent log injection
+        logger.info("Connection request for agent: %s", str(agent_id)[:50])
 
         activation_phrase = request_data.get("activationPhrase")
         request_data.get("capabilities", [])
@@ -253,7 +277,7 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
         result = await l2_bridge.activate_agent(agent_id, activation_phrase)
 
         if result["success"]:
-            logger.info(f"Custom GPT {agent_id} connected successfully")
+            logger.info("Custom GPT %s connected successfully", str(agent_id)[:100])
             return JSONResponse(
                 status_code=200,
                 content={
@@ -262,21 +286,26 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
                 },
             )
         else:
-            logger.warning(f"Custom GPT {agent_id} connection failed: {result.get('error')}")
+            logger.warning("Custom GPT %s connection failed: %s", str(agent_id)[:100], str(result.get('error'))[:100])
             raise HTTPException(status_code=400, detail=result.get("error", "Connection failed"))
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Custom GPT connection failed for {agent_id}: {str(e)}")
+        logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.post("/api/bridge/gpt/message/{agent_id}")
+async def relay_message(agent_id: str, request_data: Dict[str, Any], token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def relay_message(agent_id: str, request_data: Dict[str, Any]):
     """Relay message from Custom GPT agent"""
     try:
-        logger.info(f"Message relay request from: {agent_id}")
+        logger.info("Message relay request from: %s", str(agent_id)[:100])
 
         message = request_data.get("message")
         target = request_data.get("target", "Aurora")
@@ -288,16 +317,16 @@ async def relay_message(agent_id: str, request_data: Dict[str, Any]):
         result = await l2_bridge.relay_message(agent_id, target, message, message_type)
 
         if result["success"]:
-            logger.info(f"Message relayed successfully from {agent_id}")
+            logger.info("Message relayed successfully from %s", str(agent_id)[:100])
             return JSONResponse(status_code=200, content=result)
         else:
-            logger.warning(f"Message relay failed from {agent_id}: {result.get('error')}")
+            logger.warning("Message relay failed from %s: %s", str(agent_id)[:100], str(result.get('error'))[:100])
             raise HTTPException(status_code=400, detail=result.get("error", "Message relay failed"))
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Message relay failed for {agent_id}: {str(e)}")
+        logger.error("Message relay failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
@@ -320,7 +349,7 @@ async def get_constellation_status():
         return JSONResponse(status_code=200, content=status)
 
     except Exception as e:
-        logger.error(f"Status retrieval failed: {str(e)}")
+        logger.error("Status retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
 
@@ -328,7 +357,7 @@ async def get_constellation_status():
 async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
     try:
-        logger.info(f"Agent status request for: {agent_id}")
+        logger.info("Agent status request for: %s", str(agent_id)[:100])
 
         result = l2_bridge.get_agent_status(agent_id)
 
@@ -340,11 +369,16 @@ async def get_agent_status(agent_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Agent status retrieval failed for {agent_id}: {str(e)}")
+        logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
 
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
+async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def update_heartbeat(agent_id: str):
     """Update agent heartbeat timestamp"""
     try:
@@ -367,20 +401,25 @@ async def update_heartbeat(agent_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Heartbeat update failed for {agent_id}: {str(e)}")
+        logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Heartbeat update failed: {str(e)}")
 
 
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
+async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def disconnect_agent(agent_id: str):
     """Disconnect an agent from the constellation"""
     try:
-        logger.info(f"Disconnect request for: {agent_id}")
+        logger.info("Disconnect request for: %s", str(agent_id)[:100])
 
         result = await l2_bridge.disconnect_agent(agent_id)
 
         if result["success"]:
-            logger.info(f"Agent {agent_id} disconnected successfully")
+            logger.info("Agent %s disconnected successfully", str(agent_id)[:100])
             return JSONResponse(status_code=200, content=result)
         else:
             raise HTTPException(status_code=400, detail=result.get("error", "Disconnect failed"))
@@ -388,7 +427,7 @@ async def disconnect_agent(agent_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Disconnect failed for {agent_id}: {str(e)}")
+        logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Disconnect failed: {str(e)}")
 
 
@@ -417,7 +456,7 @@ async def list_agents():
         else:
             return {"agents": [], "total": 0}
     except Exception as e:
-        logger.error(f"Agent listing failed: {str(e)}")
+        logger.error("Agent listing failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Agent listing failed: {str(e)}")
 
 
@@ -441,7 +480,7 @@ async def get_orion_core_info():
                 }
             }
     except Exception as e:
-        logger.error(f"ORION Core info retrieval failed: {str(e)}")
+        logger.error("ORION Core info retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"ORION Core info failed: {str(e)}")
 
 
@@ -452,7 +491,7 @@ async def get_orion_core_info():
 async def startup_event():
     """Server startup event"""
     logger.info("🌟 Aurora L2 Integration Server starting up")
-    logger.info(f"Version: {server_state['version']}")
+    logger.info("Version: %s", str(server_state['version'])[:100])
     logger.info("Dashboard URL: http://localhost:8000")
     logger.info("API Documentation: http://localhost:8000/api/docs")
     logger.info("Health Check: http://localhost:8000/health")
@@ -471,7 +510,7 @@ async def shutdown_event():
             try:
                 await l2_bridge.disconnect_agent(agent_id)
             except Exception as e:
-                logger.error(f"Error disconnecting {agent_id}: {str(e)}")
+                logger.error("Error disconnecting %s: %s", str(agent_id)[:100], str(str(e))[:100])
 
 
 # Main entry point

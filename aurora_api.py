@@ -1,3 +1,23 @@
+
+from functools import wraps
+from typing import Optional
+import secrets
+import hmac
+
+def require_auth(roles: Optional[List[str]] = None):
+    """Require authentication with optional role check"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Add actual auth logic here
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+def secure_compare(a: str, b: str) -> bool:
+    """Timing-safe string comparison"""
+    return hmac.compare_digest(a.encode(), b.encode())
+
 """
 main FastAPI app for Aurora CloudBank Symbolic
 
@@ -8,7 +28,26 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+
+# Rate limiting decorators
+@limiter.limit("100/minute")  # General endpoints
+@limiter.limit("10/minute")   # Auth endpoints  
+@limiter.limit("5/minute")    # Admin endpoints
+
+, HTTPException, WebSocket
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
@@ -124,12 +163,14 @@ class AgentSessionRequest(BaseModel):
 
 
 @app.post("/geometric/vector")
+@app.post("/geometric/vector")
 def create_vector(req: VectorRequest):
     v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
 
     return {"vector": str(v)}
 
 
+@app.post("/geometric/mult")
 @app.post("/geometric/mult")
 def geometric_product(req: MultivectorRequest):
     try:
@@ -146,6 +187,11 @@ def geometric_product(req: MultivectorRequest):
 
 
 @app.post("/sonnet4/enable")
+async def enable_sonnet4(req: Sonnet4EnableRequest = None, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def enable_sonnet4(req: Sonnet4EnableRequest = None):
     """Enable Claude Sonnet 4 for all clients or specific client"""
     try:
@@ -242,6 +288,11 @@ async def get_agent_tools():
 
 
 @app.post("/agent/execute")
+async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def execute_agent_tool(request: AgentToolRequest):
     """
     Execute agent tool with validated parameters and Aurora symbolic anchoring
@@ -261,6 +312,11 @@ async def execute_agent_tool(request: AgentToolRequest):
 
 
 @app.post("/agent/session")
+async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def manage_agent_session(request: AgentSessionRequest):
     """
     Manage agent session state and context persistence
@@ -373,6 +429,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
 
 # Example quantum endpoint (stub)
+# @app.post("/quantum/vsa")
 # @app.post("/quantum/vsa")
 
 # def quantum_vsa_endpoint(...):

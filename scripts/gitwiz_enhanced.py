@@ -88,7 +88,7 @@ class GitWizEnhanced:
         if not self.git_dir.exists():
             raise ValueError(f"Not a git repository: {self.repo_path}")
 
-        logger.info(f"GitWiz Enhanced initialized for: {self.repo_path}")
+        logger.info("GitWiz Enhanced initialized for: %s", str(self.repo_path)[:100])
 
     def _load_config(self) -> Dict[str, Any]:
         """Load GitWiz configuration."""

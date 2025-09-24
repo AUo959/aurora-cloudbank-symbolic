@@ -19,10 +19,10 @@ VALIDATED_BRANCHES = [
 def execute_enhanced_automation():
     """Execute enhanced automation with our validated branches"""
     print("🚀 SSMT v3.0 Enhanced Automation - Production Execution")
-    print(f"📋 Processing {len(VALIDATED_BRANCHES)} validated branches:")
+    print("📋 Processing %s validated branches:", len(VALIDATED_BRANCHES))
     
     for i, branch in enumerate(VALIDATED_BRANCHES, 1):
-        print(f"  {i}. {branch} (Safety Score: 130/100)")
+        print("  {i}. %s (Safety Score: 130/100)", branch)
     
     print("\n⚠️  This will execute REAL merges on validated branches!")
     print("✅ All branches passed: freshness check, merge simulation, safety validation")
@@ -35,7 +35,8 @@ def execute_enhanced_automation():
     # Convert to space-separated string for command
     branches_str = " ".join(VALIDATED_BRANCHES)
     
-    print(f"\n🔧 Executing enhanced automation on {len(VALIDATED_BRANCHES)} branches...")
+    print("
+🔧 Executing enhanced automation on %s branches...", len(VALIDATED_BRANCHES))
     
     # Execute the live automation script with our validated branches
     cmd = [
@@ -50,7 +51,7 @@ def execute_enhanced_automation():
         print("✅ Enhanced automation completed successfully!")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Enhanced automation failed: {e}")
+        print("❌ Enhanced automation failed: %s", e)
         return False
 
 if __name__ == "__main__":

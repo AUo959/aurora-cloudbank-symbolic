@@ -4,6 +4,12 @@ FastAPI endpoints for hierarchical memory management with quantum-symbolic capab
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import time

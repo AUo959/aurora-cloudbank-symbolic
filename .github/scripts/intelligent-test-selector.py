@@ -110,11 +110,11 @@ class IntelligentTestSelector:
             if result.returncode == 0:
                 return set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
             else:
-                print(f"⚠️ Git diff failed: {result.stderr}")
+                print("⚠️ Git diff failed: %s", result.stderr)
                 return set()
                 
         except Exception as e:
-            print(f"⚠️ Error getting changed files: {e}")
+            print("⚠️ Error getting changed files: %s", e)
             return set()
     
     def _path_matches_pattern(self, file_path: str, pattern: str) -> bool:
@@ -139,11 +139,11 @@ class IntelligentTestSelector:
             if result.returncode == 0:
                 return set(result.stdout.strip().split("\n")) if result.stdout.strip() else set()
             else:
-                print(f"⚠️ Git diff failed: {result.stderr}")
+                print("⚠️ Git diff failed: %s", result.stderr)
                 return set()
 
         except Exception as e:
-            print(f"⚠️ Error getting changed files: {e}")
+            print("⚠️ Error getting changed files: %s", e)
             return set()
 
     def _path_matches_pattern(self, file_path: str, pattern: str) -> bool:
@@ -171,9 +171,9 @@ class IntelligentTestSelector:
         
         selected_groups = {}
         
-        print(f"📁 Analyzing {len(self.changed_files)} changed files:")
+        print("📁 Analyzing %s changed files:", len(self.changed_files))
         for file in sorted(self.changed_files):
-            print(f"  - {file}")
+            print("  - %s", file)
         
         print("\n🧪 Test selection analysis:")
         
@@ -185,9 +185,9 @@ class IntelligentTestSelector:
 
         selected_groups = {}
 
-        print(f"📁 Analyzing {len(self.changed_files)} changed files:")
+        print("📁 Analyzing %s changed files:", len(self.changed_files))
         for file in sorted(self.changed_files):
-            print(f"  - {file}")
+            print("  - %s", file)
 
         print("\n🧪 Test selection analysis:")
 
@@ -212,9 +212,9 @@ class IntelligentTestSelector:
 
 >>>>>>> origin/main
             if should_run:
-                print(f"  ✅ {group}: Will run (matched: {', '.join(set(matched_patterns))})")
+                print("  ✅ {group}: Will run (matched: %s)", ', '.join(set(matched_patterns)))
             else:
-                print(f"  ⏭️ {group}: Skipping (no relevant changes)")
+                print("  ⏭️ %s: Skipping (no relevant changes)", group)
 <<<<<<< HEAD
         
         # Always run security tests if security-related files changed
@@ -266,9 +266,10 @@ class IntelligentTestSelector:
         
         matrix = {"include": include}
         
-        print(f"\n📊 Generated test matrix: {len(include)} test groups")
+        print("
+📊 Generated test matrix: %s test groups", len(include))
         for item in include:
-            print(f"  - {item['test-group']}")
+            print("  - %s", item['test-group'])
         
         return matrix
     
@@ -276,9 +277,10 @@ class IntelligentTestSelector:
 
         matrix = {"include": include}
 
-        print(f"\n📊 Generated test matrix: {len(include)} test groups")
+        print("
+📊 Generated test matrix: %s test groups", len(include))
         for item in include:
-            print(f"  - {item['test-group']}")
+            print("  - %s", item['test-group'])
 
         return matrix
 

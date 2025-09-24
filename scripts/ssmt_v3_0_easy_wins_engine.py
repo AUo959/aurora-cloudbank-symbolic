@@ -117,11 +117,11 @@ class SSMTv3EasyWinsEngine:
                 
                 easy_win_candidates["analysis_details"][branch] = analysis
                 
-            logger.info(f"✅ Scan complete: {len(easy_win_candidates['auto_merge_ready'])} auto-merge ready")
+            logger.info("✅ Scan complete: %s auto-merge ready", str(len(easy_win_candidates['auto_merge_ready']))[:100])
             return easy_win_candidates
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Failed to scan branches: {e}")
+            logger.error("❌ Failed to scan branches: %s", str(e)[:100])
             raise
     
     def analyze_branch_for_easy_wins(self, branch_name: str) -> Dict[str, Any]:
@@ -164,7 +164,7 @@ class SSMTv3EasyWinsEngine:
             return analysis
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Failed to analyze branch {branch_name}: {e}")
+            logger.error("❌ Failed to analyze branch %s: %s", str(branch_name)[:100], str(e)[:100])
             raise
     
     def _categorize_changed_files(self, changed_files: List[str]) -> Dict[str, List[str]]:
@@ -309,7 +309,7 @@ class SSMTv3EasyWinsEngine:
     
     def execute_easy_win_automation(self, branch_name: str, dry_run: bool = True) -> Dict[str, Any]:
         """Execute easy win automation for a specific branch"""
-        logger.info(f"🚀 Executing easy win automation: {branch_name} (dry_run={dry_run})")
+        logger.info("🚀 Executing easy win automation: %s (dry_run=%s)", str(branch_name)[:100], str(dry_run)[:100])
         
         start_time = datetime.now()
         
@@ -367,7 +367,7 @@ class SSMTv3EasyWinsEngine:
             }
             
         except Exception as e:
-            logger.error(f"❌ Easy win automation failed for {branch_name}: {e}")
+            logger.error("❌ Easy win automation failed for %s: %s", str(branch_name)[:100], str(e)[:100])
             raise
     
     def _execute_immediate_merge(self, branch_name: str, dry_run: bool) -> Dict[str, Any]:
@@ -546,7 +546,7 @@ class SSMTv3EasyWinsEngine:
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        logger.info(f"📊 Easy wins report generated: {report_file}")
+        logger.info("📊 Easy wins report generated: %s", str(report_file)[:100])
         return report
     
     def _generate_easy_win_recommendations(self, opportunities: Dict[str, List[str]]) -> List[str]:

@@ -80,7 +80,7 @@ class WeeklyAutomationScheduler:
     def run_scheduled_maintenance(self):
         """Execute scheduled maintenance tasks"""
         print("🕒 SSMT v3.0 Weekly Automated Maintenance")
-        print(f"📅 Scheduled run at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("📅 Scheduled run at: %s", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         print()
         
         # Update schedule
@@ -106,10 +106,10 @@ class WeeklyAutomationScheduler:
                 return result.returncode == 0
                 
             except Exception as e:
-                print(f"❌ Failed to run maintenance pipeline: {e}")
+                print("❌ Failed to run maintenance pipeline: %s", e)
                 return False
         else:
-            print(f"❌ Maintenance pipeline not found: {maintenance_script}")
+            print("❌ Maintenance pipeline not found: %s", maintenance_script)
             return False
     
     def manual_maintenance_trigger(self):
@@ -146,7 +146,7 @@ def quick_health_check():
                        if b.strip() and not b.startswith('origin/HEAD') and b.strip() != 'origin']
             branch_count = len(branches)
             
-            print(f"   🌳 Current branches: {branch_count}")
+            print("   🌳 Current branches: %s", branch_count)
             
             if branch_count <= 30:
                 print("   💚 Status: EXCELLENT (maintaining gains!)")
@@ -157,13 +157,13 @@ def quick_health_check():
             else:
                 print("   🔴 Status: CRITICAL (requires immediate action)")
             
-            print(f"   📅 Check time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print("   📅 Check time: %s", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             
         else:
             print("   ❌ Could not retrieve branch information")
             
     except Exception as e:
-        print(f"   💥 Error: {e}")
+        print("   💥 Error: %s", e)
 
 if __name__ == "__main__":
     quick_health_check()
@@ -253,7 +253,8 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--manual":
         # Manual trigger
         success = scheduler.manual_maintenance_trigger()
-        print(f"\n{'✅ Manual maintenance completed successfully!' if success else '❌ Manual maintenance encountered issues.'}")
+        print("
+%s", '✅ Manual maintenance completed successfully!' if success else '❌ Manual maintenance encountered issues.')
     
     elif len(sys.argv) > 1 and sys.argv[1] == "--setup":
         # Setup monitoring files
@@ -264,18 +265,19 @@ def main():
         # Scheduled run
         print("⏰ Scheduled maintenance time reached!")
         success = scheduler.run_scheduled_maintenance()
-        print(f"\n{'✅ Scheduled maintenance completed!' if success else '❌ Scheduled maintenance had issues.'}")
+        print("
+%s", '✅ Scheduled maintenance completed!' if success else '❌ Scheduled maintenance had issues.')
     
     else:
         # Status check
         next_run = datetime.fromisoformat(scheduler.schedule["next_run"]) if scheduler.schedule["next_run"] else None
         print("📅 SSMT v3.0 Weekly Automation Status")
-        print(f"   🔧 Automation enabled: {scheduler.schedule['enabled']}")
-        print(f"   ⏰ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S') if next_run else 'Not scheduled'}")
+        print("   🔧 Automation enabled: %s", scheduler.schedule['enabled'])
+        print("   ⏰ Next scheduled run: %s", next_run.strftime('%Y-%m-%d %H:%M:%S') if next_run else 'Not scheduled')
         
         if scheduler.schedule["last_run"]:
             last_run = datetime.fromisoformat(scheduler.schedule["last_run"])
-            print(f"   📅 Last run: {last_run.strftime('%Y-%m-%d %H:%M:%S')}")
+            print("   📅 Last run: %s", last_run.strftime('%Y-%m-%d %H:%M:%S'))
         
         print(f"\n💡 Run with --manual for immediate maintenance")
         print(f"💡 Run with --setup to create monitoring dashboard")

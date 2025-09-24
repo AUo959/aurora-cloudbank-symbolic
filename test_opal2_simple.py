@@ -38,7 +38,7 @@ def test_api_imports():
         return True
 
     except Exception as e:
-        print(f"❌ Import failed: {e}")
+        print("❌ Import failed: %s", e)
         return False
 
 
@@ -60,9 +60,9 @@ def test_opal2_structure():
     for file in expected_files:
         file_path = opal2_path / file
         if file_path.exists():
-            print(f"✅ {file} exists")
+            print("✅ %s exists", file)
         else:
-            print(f"❌ {file} missing")
+            print("❌ %s missing", file)
 
     api_path = opal2_path / "api" / "opal2_api.py"
     if api_path.exists():

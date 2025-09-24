@@ -94,7 +94,8 @@ def main():
         return 0
 
     except Exception as e:
-        print(f"\n❌ Test failed: {e}")
+        print("
+❌ Test failed: %s", e)
         traceback.print_exc()
         return 1
 

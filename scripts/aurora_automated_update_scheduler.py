@@ -102,7 +102,7 @@ class AuroraAutomatedUpdateScheduler:
                     loaded_config = json.load(f)
                 return {**default_config, **loaded_config}
             except Exception as e:
-                self.logger.warning(f"Failed to load config: {e}")
+logger.warning("Failed to load config: %s", str(e)[:100])
                 
         return default_config
         
@@ -125,7 +125,7 @@ class AuroraAutomatedUpdateScheduler:
             self.persistence_manager = DependencyPersistenceManager(self.project_root)
             
         except ImportError as e:
-            self.logger.warning(f"Could not import dependency managers: {e}")
+logger.warning("Could not import dependency managers: %s", str(e)[:100])
             
     def schedule_all_tasks(self):
         """Schedule all automated tasks"""
@@ -158,7 +158,7 @@ class AuroraAutomatedUpdateScheduler:
                 health = self.dependency_manager.check_dependency_health()
                 
                 if health["overall_health"] in ["critical", "degraded"]:
-                    self.logger.warning(f"Health check failed: {health['overall_health']}")
+logger.warning("Health check failed: %s", str(health['overall_health'])[:100])
                     self._trigger_emergency_response()
                 else:
                     self.logger.info("✅ Daily health check passed")
@@ -169,7 +169,7 @@ class AuroraAutomatedUpdateScheduler:
                     self.persistence_manager.save_snapshot(snapshot)
                     
         except Exception as e:
-            self.logger.error(f"Health check failed: {e}")
+logger.error("Health check failed: %s", str(e)[:100])
             self._send_notification("Health Check Failed", str(e))
             
     def _run_security_update(self):
@@ -182,7 +182,7 @@ class AuroraAutomatedUpdateScheduler:
                 security_report = self.dependency_manager._check_security_vulnerabilities()
                 
                 if security_report["vulnerabilities"] > 0:
-                    self.logger.warning(f"Found {security_report['vulnerabilities']} vulnerabilities")
+logger.warning("Found %s vulnerabilities", str(security_report['vulnerabilities'])[:100])
                     
                     # Create GitWiz branch if enabled
                     if self.config["gitwiz_integration"]["enabled"]:
@@ -199,7 +199,7 @@ class AuroraAutomatedUpdateScheduler:
                     self.logger.info("✅ No security vulnerabilities found")
                     
         except Exception as e:
-            self.logger.error(f"Security update failed: {e}")
+logger.error("Security update failed: %s", str(e)[:100])
             self._send_notification("Security Update Failed", str(e))
             
     def _run_full_update(self):
@@ -212,7 +212,7 @@ class AuroraAutomatedUpdateScheduler:
                 if self.persistence_manager:
                     snapshot = self.persistence_manager.create_dependency_snapshot()
                     backup_file = self.persistence_manager.save_snapshot(snapshot)
-                    self.logger.info(f"Backup created: {backup_file}")
+logger.info("Backup created: %s", str(backup_file)[:100])
                     
                 # Create GitWiz branch if enabled
                 if self.config["gitwiz_integration"]["enabled"]:
@@ -241,7 +241,7 @@ class AuroraAutomatedUpdateScheduler:
                     self._send_notification("Monthly Update Failed", "See logs for details")
                     
         except Exception as e:
-            self.logger.error(f"Full update failed: {e}")
+logger.error("Full update failed: %s", str(e)[:100])
             self._send_notification("Full Update Failed", str(e))
             
     def _trigger_emergency_response(self):
@@ -265,7 +265,7 @@ class AuroraAutomatedUpdateScheduler:
                     self._send_notification("Emergency Response Failed", "Manual intervention required")
                     
         except Exception as e:
-            self.logger.error(f"Emergency response failed: {e}")
+logger.error("Emergency response failed: %s", str(e)[:100])
             
     def _create_update_branch(self, branch_name: str):
         """Create Git branch for updates"""
@@ -276,10 +276,10 @@ class AuroraAutomatedUpdateScheduler:
             subprocess.run(["git", "checkout", "-b", full_branch_name], 
                          cwd=self.project_root, check=True, capture_output=True)
             
-            self.logger.info(f"Created update branch: {full_branch_name}")
+logger.info("Created update branch: %s", str(full_branch_name)[:100])
             
         except subprocess.CalledProcessError as e:
-            self.logger.warning(f"Failed to create branch: {e}")
+logger.warning("Failed to create branch: %s", str(e)[:100])
             
     def _commit_updates(self, message: str):
         """Commit dependency updates"""
@@ -288,10 +288,10 @@ class AuroraAutomatedUpdateScheduler:
             subprocess.run(["git", "commit", "-m", message], 
                          cwd=self.project_root, check=True, capture_output=True)
             
-            self.logger.info(f"Committed updates: {message}")
+logger.info("Committed updates: %s", str(message)[:100])
             
         except subprocess.CalledProcessError as e:
-            self.logger.warning(f"Failed to commit updates: {e}")
+logger.warning("Failed to commit updates: %s", str(e)[:100])
             
     def _run_validation_tests(self) -> bool:
         """Run validation tests after updates"""
@@ -304,11 +304,11 @@ class AuroraAutomatedUpdateScheduler:
                 self.logger.info("✅ Validation tests passed")
                 return True
             else:
-                self.logger.warning(f"❌ Validation tests failed: {result.stderr}")
+logger.warning("❌ Validation tests failed: %s", str(result.stderr)[:100])
                 return False
                 
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            self.logger.warning(f"Could not run validation tests: {e}")
+logger.warning("Could not run validation tests: %s", str(e)[:100])
             # If we can't run tests, assume it's ok
             return True
             
@@ -321,7 +321,7 @@ class AuroraAutomatedUpdateScheduler:
                 else:
                     self.logger.error("❌ Rollback failed")
         except Exception as e:
-            self.logger.error(f"Rollback failed: {e}")
+logger.error("Rollback failed: %s", str(e)[:100])
             
     def _send_notification(self, title: str, message: str):
         """Send notification about update status"""
@@ -336,7 +336,7 @@ class AuroraAutomatedUpdateScheduler:
         
         # Log notification
         if "log" in self.config["notification"]["methods"]:
-            self.logger.info(f"NOTIFICATION: {title} - {message}")
+logger.info("NOTIFICATION: %s - %s", str(title)[:100], str(message)[:100])
             
         # Save to file
         if "file" in self.config["notification"]["methods"]:
@@ -372,7 +372,7 @@ class AuroraAutomatedUpdateScheduler:
                 self.logger.info("Scheduler stopped by user")
                 break
             except Exception as e:
-                self.logger.error(f"Scheduler error: {e}")
+logger.error("Scheduler error: %s", str(e)[:100])
                 time.sleep(300)  # Wait 5 minutes before retrying
                 
     def run_once(self, task_name: str):
@@ -385,10 +385,10 @@ class AuroraAutomatedUpdateScheduler:
         }
         
         if task_name in task_map:
-            self.logger.info(f"Running task: {task_name}")
+logger.info("Running task: %s", str(task_name)[:100])
             task_map[task_name]()
         else:
-            self.logger.error(f"Unknown task: {task_name}")
+logger.error("Unknown task: %s", str(task_name)[:100])
             
     def generate_scheduler_status(self) -> str:
         """Generate scheduler status report"""

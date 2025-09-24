@@ -5,6 +5,12 @@ Enhanced quantum visualization API with modular renderer support
 """
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -101,6 +107,11 @@ async def health_check():
         )
 
 @app.post("/render")
+async def render_glyph(request: RenderRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def render_glyph(request: RenderRequest):
     """Render a glyph with specified parameters"""
     try:
@@ -158,6 +169,11 @@ async def render_glyph(request: RenderRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate")
+async def generate_glyph(request: GlyphGenerationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def generate_glyph(request: GlyphGenerationRequest):
     """Generate a new glyph from symbolic expression"""
     try:

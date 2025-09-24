@@ -87,7 +87,7 @@ class QuantumFlightController:
         self.active_vectors[vector_id] = qv
         self.metrics['vectors_created'] += 1
         
-        logger.info(f"Created quantum vector {vector_id} with magnitude {magnitude}, phase {phase}")
+        logger.info("Created quantum vector %s with magnitude %s, phase %s", str(vector_id)[:100], str(magnitude)[:100], str(phase)[:100])
         return qv
     
     def entangle_vectors(self, vector1_id: str, vector2_id: str, 
@@ -115,7 +115,7 @@ class QuantumFlightController:
             self.active_vectors[vector1_id].coherence_time *= (1 + coherence_boost)
             self.active_vectors[vector2_id].coherence_time *= (1 + coherence_boost)
             
-            logger.info(f"Enhanced entanglement strength due to shared Aurora anchors: {shared_anchors}")
+            logger.info("Enhanced entanglement strength due to shared Aurora anchors: %s", str(shared_anchors)[:100])
         
         self.metrics['entanglements_created'] += 1
         return True
@@ -332,7 +332,7 @@ class QuantumFlightController:
         if vector_id in self.symbolic_trajectory_cache:
             del self.symbolic_trajectory_cache[vector_id]
         
-        logger.info(f"Removed decoherent quantum vector {vector_id}")
+        logger.info("Removed decoherent quantum vector %s", str(vector_id)[:100])
 
 # Import time for temporal state management
 import time

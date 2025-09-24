@@ -113,22 +113,22 @@ class L2MetaAgentBridge:
             "version": "v3.5.1_macroready",
         }
 
-        logger.info(f"L2 Meta-Agent Bridge initialized with {len(self.agents)} agents")
+        logger.info("L2 Meta-Agent Bridge initialized with %s agents", str(len(self.agents))[:100])
 
     async def activate_agent(self, agent_id: str, activation_phrase: str) -> Dict[str, Any]:
         """Activate a Custom GPT agent with full ZIPWIZ handshake"""
 
         if agent_id not in self.agents:
-            logger.error(f"Unknown agent: {agent_id}")
+            logger.error("Unknown agent: %s", str(agent_id)[:100])
             return {"success": False, "error": f"Unknown agent: {agent_id}"}
 
         if activation_phrase != self.activation_phrases.get(agent_id):
-            logger.error(f"Invalid activation phrase for {agent_id}")
+            logger.error("Invalid activation phrase for %s", str(agent_id)[:100])
             return {"success": False, "error": "Invalid activation phrase"}
 
         agent = self.agents[agent_id]
 
-        logger.info(f"Starting activation sequence for {agent_id}")
+        logger.info("Starting activation sequence for %s", str(agent_id)[:100])
 
         try:
             # Perform ZIPWIZ handshake sequence
@@ -141,7 +141,7 @@ class L2MetaAgentBridge:
                 agent.handshake_log = handshake_result.get("log", [])
                 agent.drift_lock = handshake_result.get("drift_lock", 0.000)
 
-                logger.info(f"Agent {agent_id} successfully activated")
+                logger.info("Agent %s successfully activated", str(agent_id)[:100])
 
                 return {
                     "success": True,
@@ -152,11 +152,11 @@ class L2MetaAgentBridge:
                     "description": agent.description,
                 }
             else:
-                logger.error(f"Handshake failed for {agent_id}: {handshake_result.get('error')}")
+                logger.error("Handshake failed for %s: %s", str(agent_id)[:100], str(handshake_result.get('error'))[:100])
                 return {"success": False, "error": "Handshake failed", "details": handshake_result}
 
         except Exception as e:
-            logger.error(f"Agent activation failed for {agent_id}: {str(e)}")
+            logger.error("Agent activation failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
             return {"success": False, "error": str(e)}
 
     async def _perform_zipwiz_handshake(self, agent: CustomGptAgent) -> Dict[str, Any]:
@@ -165,11 +165,11 @@ class L2MetaAgentBridge:
         handshake_log = []
         start_time = datetime.now()
 
-        logger.info(f"Starting ZIPWIZ handshake for {agent.agent_id}")
+        logger.info("Starting ZIPWIZ handshake for %s", str(agent.agent_id)[:100])
 
         try:
             # ZIPWIZ_BEACON
-            logger.info(f"{agent.agent_id}: Sending ZIPWIZ beacon")
+            logger.info("%s: Sending ZIPWIZ beacon", str(agent.agent_id)[:100])
             beacon_result = await self._send_zipwiz_beacon(agent)
             handshake_log.append(
                 {"step": "ZIPWIZ_BEACON", "result": beacon_result, "timestamp": datetime.now().isoformat()}
@@ -179,7 +179,7 @@ class L2MetaAgentBridge:
                 return self._handshake_failure("ZIPWIZ beacon failed", beacon_result, handshake_log)
 
             # ANCHOR_SYNC
-            logger.info(f"{agent.agent_id}: Synchronizing ORION anchor")
+            logger.info("%s: Synchronizing ORION anchor", str(agent.agent_id)[:100])
             anchor_result = await self._sync_orion_anchor(agent)
             handshake_log.append(
                 {"step": "ANCHOR_SYNC", "result": anchor_result, "timestamp": datetime.now().isoformat()}
@@ -189,7 +189,7 @@ class L2MetaAgentBridge:
                 return self._handshake_failure("Anchor sync failed", anchor_result, handshake_log)
 
             # ETHICS_AUDIT
-            logger.info(f"{agent.agent_id}: Performing ethics audit")
+            logger.info("%s: Performing ethics audit", str(agent.agent_id)[:100])
             ethics_result = await self._perform_ethics_audit(agent)
             handshake_log.append(
                 {"step": "ETHICS_AUDIT", "result": ethics_result, "timestamp": datetime.now().isoformat()}
@@ -199,7 +199,7 @@ class L2MetaAgentBridge:
                 return self._handshake_failure("Ethics audit failed", ethics_result, handshake_log)
 
             # DRIFT_VALIDATION
-            logger.info(f"{agent.agent_id}: Validating drift lock")
+            logger.info("%s: Validating drift lock", str(agent.agent_id)[:100])
             drift_result = await self._validate_drift_lock(agent)
             handshake_log.append(
                 {"step": "DRIFT_VALIDATION", "result": drift_result, "timestamp": datetime.now().isoformat()}
@@ -215,7 +215,7 @@ class L2MetaAgentBridge:
                 )
 
             duration = (datetime.now() - start_time).total_seconds()
-            logger.info(f"ZIPWIZ handshake completed successfully for {agent.agent_id} in {duration:.2f}s")
+            logger.info("ZIPWIZ handshake completed successfully for %s in %ss", str(agent.agent_id)[:100], str(duration:.2f)[:100])
 
             return {
                 "success": True,
@@ -228,7 +228,7 @@ class L2MetaAgentBridge:
             }
 
         except Exception as e:
-            logger.error(f"ZIPWIZ handshake exception for {agent.agent_id}: {str(e)}")
+            logger.error("ZIPWIZ handshake exception for %s: %s", str(agent.agent_id)[:100], str(str(e))[:100])
             return {"success": False, "error": str(e), "log": handshake_log}
 
     def _handshake_failure(self, error_message: str, details: Dict, log: List) -> Dict:
@@ -241,7 +241,7 @@ class L2MetaAgentBridge:
             # Simulate beacon transmission and acknowledgment
             await asyncio.sleep(0.1)  # Network delay simulation
 
-            logger.info(f"ZIPWIZ beacon acknowledged for {agent.agent_id}")
+            logger.info("ZIPWIZ beacon acknowledged for %s", str(agent.agent_id)[:100])
 
             return {
                 "success": True,
@@ -258,7 +258,7 @@ class L2MetaAgentBridge:
         try:
             await asyncio.sleep(0.15)  # Anchor sync delay
 
-            logger.info(f"ORION anchor synchronized for {agent.agent_id}")
+            logger.info("ORION anchor synchronized for %s", str(agent.agent_id)[:100])
 
             return {
                 "success": True,
@@ -276,7 +276,7 @@ class L2MetaAgentBridge:
         try:
             await asyncio.sleep(0.2)  # Ethics audit processing time
 
-            logger.info(f"Ethics audit completed for {agent.agent_id}")
+            logger.info("Ethics audit completed for %s", str(agent.agent_id)[:100])
 
             return {
                 "success": True,
@@ -304,7 +304,7 @@ class L2MetaAgentBridge:
             drift = 0.000
             threshold = self.orion_core_config["drift_threshold"]
 
-            logger.info(f"Drift validation completed for {agent.agent_id}: Δ{drift}")
+            logger.info("Drift validation completed for %s: Δ%s", str(agent.agent_id)[:100], str(drift)[:100])
 
             return {
                 "success": True,
@@ -386,7 +386,7 @@ class L2MetaAgentBridge:
 
         message_id = f"msg_{int(datetime.now().timestamp() * 1000)}"
 
-        logger.info(f"Message relay from {from_agent} to {target_agents} (type: {message_type})")
+        logger.info("Message relay from %s to %s (type: %s)", str(from_agent)[:100], str(target_agents)[:100], str(message_type)[:100])
 
         # In production, this would relay to actual target agents
         return {
@@ -410,7 +410,7 @@ class L2MetaAgentBridge:
         agent.last_heartbeat = None
         agent.handshake_log = []
 
-        logger.info(f"Agent {agent_id} disconnected")
+        logger.info("Agent %s disconnected", str(agent_id)[:100])
 
         return {
             "success": True,

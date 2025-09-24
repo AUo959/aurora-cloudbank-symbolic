@@ -24,7 +24,10 @@
     "security:audit": "npm audit --audit-level=moderate",
     "aurora:status": "python3 tools/cli/aurora_dev_cli.py status || echo \"Aurora status check\"",
     "aurora:test": "python3 test_runner.py || echo \"Aurora test suite completed\"",
-    "clean": "rm -rf logs/*.log dist/* build/*"
+    "clean": "rm -rf logs/*.log dist/* build/*",
+    "security-audit": "npm audit --audit-level moderate",
+    "security-fix": "npm audit fix",
+    "security-check": "npm audit --parseable | awk -F\\t '{print $2}' | sort -u"
   },
   "keywords": [
     "aurora",
@@ -49,7 +52,9 @@
     "jest": "^29.7.0",
     "markdownlint-cli": "^0.37.0",
     "prettier": "^3.0.0",
-    "terser": "^5.19.0"
+    "terser": "^5.19.0",
+    "audit-ci": "^6.6.1",
+    "eslint-plugin-security": "^1.7.1"
   },
   "dependencies": {
     "babel-jest": "^30.1.2",

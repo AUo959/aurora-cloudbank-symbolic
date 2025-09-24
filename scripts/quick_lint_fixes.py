@@ -38,7 +38,7 @@ def fix_unused_js_vars():
             for pattern, replacement in patterns:
                 content = re.sub(pattern, replacement, content)
             filepath.write_text(content)
-            print(f"✅ Fixed unused variables in {file}")
+            print("✅ Fixed unused variables in %s", file)
 
 def run_quick_linting():
     """Run quick linting and report status"""
@@ -62,7 +62,7 @@ def run_quick_linting():
     error_count = result.stdout.count('error')
     warning_count = result.stdout.count('warning')
     
-    print(f"📊 JavaScript: {error_count} errors, {warning_count} warnings")
+    print("📊 JavaScript: {error_count} errors, %s warnings", warning_count)
 
 def generate_improvement_report():
     """Generate a comprehensive improvement report"""

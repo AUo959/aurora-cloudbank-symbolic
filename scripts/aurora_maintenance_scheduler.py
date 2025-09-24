@@ -108,11 +108,11 @@ class MaintenanceScheduler:
         results = []
         for task_name, task_func in tasks:
             try:
-                self.logger.info(f"Executing: {task_name}")
+logger.info("Executing: %s", str(task_name)[:100])
                 result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Failed {task_name}: {e}")
+logger.error("Failed %s: %s", str(task_name)[:100], str(e)[:100])
                 results.append(f"❌ {task_name}: {e}")
 
         self.log_maintenance_results("Daily Cleanup", results)
@@ -131,11 +131,11 @@ class MaintenanceScheduler:
         results = []
         for task_name, task_func in tasks:
             try:
-                self.logger.info(f"Executing: {task_name}")
+logger.info("Executing: %s", str(task_name)[:100])
                 result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Failed {task_name}: {e}")
+logger.error("Failed %s: %s", str(task_name)[:100], str(e)[:100])
                 results.append(f"❌ {task_name}: {e}")
 
         self.log_maintenance_results("Weekly Optimization", results)
@@ -154,11 +154,11 @@ class MaintenanceScheduler:
         results = []
         for task_name, task_func in tasks:
             try:
-                self.logger.info(f"Executing: {task_name}")
+logger.info("Executing: %s", str(task_name)[:100])
                 result = task_func()
                 results.append(f"✅ {task_name}: {result}")
             except (OSError, ValueError, RuntimeError) as e:
-                self.logger.error(f"Failed {task_name}: {e}")
+logger.error("Failed %s: %s", str(task_name)[:100], str(e)[:100])
                 results.append(f"❌ {task_name}: {e}")
 
         self.log_maintenance_results("Monthly Audit", results)
@@ -398,7 +398,7 @@ class MaintenanceScheduler:
         with open(log_file, "w", encoding="utf-8") as f:
             json.dump(log_data, f, indent=2)
 
-        self.logger.info(f"Logged {maintenance_type} results to {log_file}")
+logger.info("Logged %s results to %s", str(maintenance_type)[:100], str(log_file)[:100])
 
     def start_scheduler(self):
         """Start the maintenance scheduler"""

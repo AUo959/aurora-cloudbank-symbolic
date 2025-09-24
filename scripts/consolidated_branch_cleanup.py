@@ -25,10 +25,10 @@ class ConsolidatedBranchCleanup:
             with open(analysis_file, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"❌ Analysis file not found: {analysis_file}")
+            print("❌ Analysis file not found: %s", analysis_file)
             return {}
         except json.JSONDecodeError:
-            print(f"❌ Invalid JSON in analysis file: {analysis_file}")
+            print("❌ Invalid JSON in analysis file: %s", analysis_file)
             return {}
 
     def delete_merged_branches(self, branches: List[Dict]) -> Dict:
@@ -39,7 +39,8 @@ class ConsolidatedBranchCleanup:
             'skipped': 0
         }
 
-        print(f"\n🗑️  Deleting {len(branches)} merged branches...")
+        print("
+🗑️  Deleting %s merged branches...", len(branches))
         
         for branch in branches:
             branch_name = branch['name']
@@ -51,7 +52,7 @@ class ConsolidatedBranchCleanup:
                 
             try:
                 if self.dry_run:
-                    print(f"   [DRY RUN] Would delete: {branch_name}")
+                    print("   [DRY RUN] Would delete: %s", branch_name)
                     results['deleted'] += 1
                 else:
                     # Delete remote branch
@@ -64,14 +65,14 @@ class ConsolidatedBranchCleanup:
                     )
                     
                     if result.returncode == 0:
-                        print(f"   ✅ Deleted: {branch_name}")
+                        print("   ✅ Deleted: %s", branch_name)
                         results['deleted'] += 1
                     else:
-                        print(f"   ❌ Failed to delete {branch_name}: {result.stderr}")
+                        print("   ❌ Failed to delete {branch_name}: %s", result.stderr)
                         results['errors'] += 1
                         
             except Exception as e:
-                print(f"   ❌ Error deleting {branch_name}: {e}")
+                print("   ❌ Error deleting {branch_name}: %s", e)
                 results['errors'] += 1
 
         return results
@@ -83,7 +84,8 @@ class ConsolidatedBranchCleanup:
             'errors': 0
         }
 
-        print(f"\n📦 Creating archive tags for {len(branches)} branches...")
+        print("
+📦 Creating archive tags for %s branches...", len(branches))
         
         for branch in branches:
             branch_name = branch['name']
@@ -91,7 +93,7 @@ class ConsolidatedBranchCleanup:
             
             try:
                 if self.dry_run:
-                    print(f"   [DRY RUN] Would create tag: {tag_name}")
+                    print("   [DRY RUN] Would create tag: %s", tag_name)
                     results['archived'] += 1
                 else:
                     # Create tag
@@ -114,17 +116,17 @@ class ConsolidatedBranchCleanup:
                         )
                         
                         if push_result.returncode == 0:
-                            print(f"   ✅ Archived: {branch_name} -> {tag_name}")
+                            print("   ✅ Archived: {branch_name} -> %s", tag_name)
                             results['archived'] += 1
                         else:
-                            print(f"   ❌ Failed to push tag {tag_name}: {push_result.stderr}")
+                            print("   ❌ Failed to push tag {tag_name}: %s", push_result.stderr)
                             results['errors'] += 1
                     else:
-                        print(f"   ❌ Failed to create tag {tag_name}: {result.stderr}")
+                        print("   ❌ Failed to create tag {tag_name}: %s", result.stderr)
                         results['errors'] += 1
                         
             except Exception as e:
-                print(f"   ❌ Error archiving {branch_name}: {e}")
+                print("   ❌ Error archiving {branch_name}: %s", e)
                 results['errors'] += 1
 
         return results
@@ -222,7 +224,8 @@ class ConsolidatedBranchCleanup:
         
         # Step 3: Generate PR recommendations
         if analysis['pull_requests_needed']:
-            print(f"\n{self.generate_pr_recommendations(analysis['pull_requests_needed'])}")
+            print("
+%s", self.generate_pr_recommendations(analysis['pull_requests_needed']))
         
         # Step 4: Generate summary
         print(self.generate_consolidation_summary(analysis, results))
@@ -258,7 +261,8 @@ def main():
     
     # Exit with appropriate code
     if results['errors'] > 0:
-        print(f"\n⚠️  Completed with {results['errors']} errors")
+        print("
+⚠️  Completed with %s errors", results['errors'])
         sys.exit(1)
     else:
         print(f"\n✅ Consolidation completed successfully!")

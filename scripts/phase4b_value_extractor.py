@@ -278,9 +278,10 @@ class SSMTValueExtractor:
         branch_name = target["branch"]
         focus_areas = target["extraction_focus"]
         
-        print(f"\n🔍 VALUE EXTRACTION: {branch_name}")
-        print(f"   Focus: {', '.join(focus_areas)}")
-        print(f"   Description: {target['description']}")
+        print("
+🔍 VALUE EXTRACTION: %s", branch_name)
+        print("   Focus: %s", ', '.join(focus_areas))
+        print("   Description: %s", target['description'])
         
         extraction_result = {
             "branch": branch_name,
@@ -295,22 +296,22 @@ class SSMTValueExtractor:
             if "documentation" in focus_areas:
                 doc_extraction = self.extract_documentation(branch_name)
                 extraction_result["extractions"].append(doc_extraction)
-                print(f"📋 Documentation: {doc_extraction.get('content_summary', 'No content')}")
+                print("📋 Documentation: %s", doc_extraction.get('content_summary', 'No content'))
             
             if "new_workflows" in focus_areas:
                 workflow_extraction = self.extract_workflows(branch_name)
                 extraction_result["extractions"].append(workflow_extraction)
-                print(f"⚙️ Workflows: {len(workflow_extraction.get('workflows_extracted', []))} extracted")
+                print("⚙️ Workflows: %s extracted", len(workflow_extraction.get('workflows_extracted', [])))
             
             if "scripts" in focus_areas:
                 script_extraction = self.extract_scripts(branch_name)
                 extraction_result["extractions"].append(script_extraction)
-                print(f"🔧 Scripts: {script_extraction.get('enhancement_count', 0)} enhancements")
+                print("🔧 Scripts: %s enhancements", script_extraction.get('enhancement_count', 0))
             
             if "configs" in focus_areas or "package_updates" in focus_areas:
                 config_extraction = self.extract_configurations(branch_name)
                 extraction_result["extractions"].append(config_extraction)
-                print(f"⚙️ Configs: {len(config_extraction.get('configs_extracted', []))} files")
+                print("⚙️ Configs: %s files", len(config_extraction.get('configs_extracted', [])))
             
             # Create value summary
             summary = self.create_value_summary(branch_name, extraction_result["extractions"])
@@ -319,12 +320,12 @@ class SSMTValueExtractor:
             extraction_result["status"] = "completed"
             extraction_result["end_time"] = datetime.now().isoformat()
             
-            print(f"✅ Extraction complete: {summary['extraction_count']} operations")
+            print("✅ Extraction complete: %s operations", summary['extraction_count'])
             
         except Exception as e:
             extraction_result["status"] = "error"
             extraction_result["error"] = str(e)
-            print(f"❌ Extraction error: {e}")
+            print("❌ Extraction error: %s", e)
         
         return extraction_result
 
@@ -369,8 +370,8 @@ class SSMTValueExtractor:
         """Execute Phase 4B Value Extraction"""
         print("🎯 AURORA CLOUDBANK - PHASE 4B: SSMT VALUE EXTRACTION & REFINEMENT")
         print("=" * 70)
-        print(f"🧠 SSMT Value Extractor v{self.results['ssmt_version']}")
-        print(f"🔍 Extraction targets: {len(self.extraction_targets)} complex branches")
+        print("🧠 SSMT Value Extractor v%s", self.results['ssmt_version'])
+        print("🔍 Extraction targets: %s complex branches", len(self.extraction_targets))
         
         self.results["status"] = "running"
         
@@ -389,10 +390,10 @@ class SSMTValueExtractor:
         successful_branches = sum(1 for e in self.results["extractions"] if e.get("status") == "completed")
         
         print(f"\n🎯 PHASE 4B SUMMARY:")
-        print(f"   Branches processed: {len(self.extraction_targets)}")
-        print(f"   Successful extractions: {successful_branches}")
-        print(f"   Total extraction operations: {total_extractions}")
-        print(f"   SSMT pattern refinements: {len(pattern_refinements.get('analysis_improvements', []))}")
+        print("   Branches processed: %s", len(self.extraction_targets))
+        print("   Successful extractions: %s", successful_branches)
+        print("   Total extraction operations: %s", total_extractions)
+        print("   SSMT pattern refinements: %s", len(pattern_refinements.get('analysis_improvements', [])))
         
         # Save results
         self.results["status"] = "completed"

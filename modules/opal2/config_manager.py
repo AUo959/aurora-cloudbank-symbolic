@@ -204,7 +204,7 @@ class ConfigurationManager:
             elif file_path.suffix == ".toml":
                 format_type = ConfigFormat.TOML
             else:
-                logger.warning(f"Unsupported config file format: {file_path}")
+                logger.warning("Unsupported config file format: %s", str(file_path)[:100])
                 return
 
             # Load configuration
@@ -219,17 +219,17 @@ class ConfigurationManager:
             # Validate configuration
             if self._validate_config(config_name, config_data):
                 self.configs[config_name] = config_data
-                logger.info(f"Loaded configuration: {config_name}")
+                logger.info("Loaded configuration: %s", str(config_name)[:100])
             else:
-                logger.error(f"Validation failed for configuration: {config_name}")
+                logger.error("Validation failed for configuration: %s", str(config_name)[:100])
 
         except Exception as e:
-            logger.error(f"Failed to load config file {file_path}: {str(e)}")
+            logger.error("Failed to load config file %s: %s", str(file_path)[:100], str(str(e))[:100])
 
     def _validate_config(self, config_name: str, config_data: Dict[str, Any]) -> bool:
         """Validate configuration data against schema"""
         if config_name not in self.validation_rules:
-            logger.warning(f"No validation rules found for config: {config_name}")
+            logger.warning("No validation rules found for config: %s", str(config_name)[:100])
             return True
 
         rules = self.validation_rules[config_name]
@@ -237,7 +237,7 @@ class ConfigurationManager:
         for rule in rules:
             if not self._validate_single_rule(config_data, rule):
                 error_msg = rule.error_message or f"Validation failed for key: {rule.key}"
-                logger.error(f"Config validation error in {config_name}: {error_msg}")
+                logger.error("Config validation error in %s: %s", str(config_name)[:100], str(error_msg)[:100])
                 return False
 
         return True
@@ -363,7 +363,7 @@ class ConfigurationManager:
     def save_config(self, config_name: str, format_type: ConfigFormat = ConfigFormat.YAML) -> bool:
         """Save configuration to file"""
         if config_name not in self.configs:
-            logger.error(f"Configuration not found: {config_name}")
+            logger.error("Configuration not found: %s", str(config_name)[:100])
             return False
 
         try:
@@ -384,11 +384,11 @@ class ConfigurationManager:
                 elif format_type == ConfigFormat.TOML:
                     toml.dump(self.configs[config_name], f)
 
-            logger.info(f"Saved configuration: {config_name} to {file_path}")
+            logger.info("Saved configuration: %s to %s", str(config_name)[:100], str(file_path)[:100])
             return True
 
         except Exception as e:
-            logger.error(f"Failed to save config {config_name}: {str(e)}")
+            logger.error("Failed to save config %s: %s", str(config_name)[:100], str(str(e))[:100])
             return False
 
     def register_change_callback(self, config_name: str, callback: Callable):
@@ -416,7 +416,7 @@ class ConfigurationManager:
                     else:
                         callback(change_event)
                 except Exception as e:
-                    logger.error(f"Error in change callback: {str(e)}")
+                    logger.error("Error in change callback: %s", str(str(e))[:100])
 
     def enable_hot_reload(self):
         """Enable hot-reloading of configuration files"""
@@ -454,7 +454,7 @@ class ConfigurationManager:
             ".json",
             ".toml",
         ]:
-            logger.info(f"Configuration file changed: {path}")
+            logger.info("Configuration file changed: %s", str(path)[:100])
 
             # Reload the configuration
             old_config = self.configs.get(path.stem, {}).copy()
@@ -581,7 +581,7 @@ class ConfigurationManager:
             return True
 
         except Exception as e:
-            logger.error(f"Failed to export config {config_name}: {str(e)}")
+            logger.error("Failed to export config %s: %s", str(config_name)[:100], str(str(e))[:100])
             return False
 
     def import_config(self, config_name: str, import_path: str) -> bool:
@@ -599,7 +599,7 @@ class ConfigurationManager:
             return config_name in self.configs
 
         except Exception as e:
-            logger.error(f"Failed to import config {config_name}: {str(e)}")
+            logger.error("Failed to import config %s: %s", str(config_name)[:100], str(str(e))[:100])
             return False
 
     def __del__(self):

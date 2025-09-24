@@ -106,7 +106,8 @@ class SSMTArchitecturalSonar:
         }
         
         try:
-            print(f"\n🔍 ARCHITECTURAL SONAR: {branch_name}")
+            print("
+🔍 ARCHITECTURAL SONAR: %s", branch_name)
             
             # Get branch files for analysis
             diff_result = self.run_command(f"git diff --name-only main..origin/{branch_name}", False)
@@ -123,7 +124,7 @@ class SSMTArchitecturalSonar:
                 if any(critical in file_path for critical in self.ssmt_patterns["critical_architecture_files"]):
                     file_analysis = self.analyze_file_architecture(branch_name, file_path)
                     file_analyses.append(file_analysis)
-                    print(f"   📊 {file_path}: {file_analysis.get('quality_score', 'N/A')}")
+                    print("   📊 {file_path}: %s", file_analysis.get('quality_score', 'N/A'))
             
             analysis["file_analyses"] = file_analyses
             analysis["architectural_metrics"] = self.compute_branch_architectural_metrics(file_analyses)
@@ -133,12 +134,12 @@ class SSMTArchitecturalSonar:
             # Generate integration recommendations
             analysis["integration_recommendations"] = self.generate_integration_recommendations(analysis)
             
-            print(f"   🎯 Quality Score: {analysis['architectural_metrics'].get('overall_quality_score', 'N/A')}")
-            print(f"   🏗️ Architecture Risk: {analysis['entropy_assessment'].get('risk_level', 'unknown')}")
+            print("   🎯 Quality Score: %s", analysis['architectural_metrics'].get('overall_quality_score', 'N/A'))
+            print("   🏗️ Architecture Risk: %s", analysis['entropy_assessment'].get('risk_level', 'unknown'))
             
         except Exception as e:
             analysis["error"] = str(e)
-            print(f"   ❌ Analysis error: {e}")
+            print("   ❌ Analysis error: %s", e)
         
         analysis["end_time"] = datetime.now().isoformat()
         return analysis
@@ -350,8 +351,8 @@ class SSMTArchitecturalSonar:
         """Execute SSMT v2.2 with Architectural Sonar Integration"""
         print("🚀 AURORA CLOUDBANK - SSMT v2.2: ARCHITECTURAL SONAR INTEGRATION")
         print("=" * 70)
-        print(f"🧠 SSMT Architectural Sonar v{self.results['ssmt_version']}")
-        print(f"🎯 Analysis targets: {len(self.analysis_targets)} branches")
+        print("🧠 SSMT Architectural Sonar v%s", self.results['ssmt_version'])
+        print("🎯 Analysis targets: %s branches", len(self.analysis_targets))
         
         self.results["status"] = "running"
         
@@ -376,15 +377,15 @@ class SSMTArchitecturalSonar:
                           if assessment.get("architectural_metrics", {}).get("overall_quality_score", 0) > 70)
         
         print(f"\n🎯 SSMT v2.2 ARCHITECTURAL ANALYSIS COMPLETE:")
-        print(f"   Branches analyzed: {total_branches}")
-        print(f"   High-quality branches: {high_quality}")
-        print(f"   Analysis success rate: {(len([a for a in self.results['enhanced_branch_assessments'] if 'error' not in a]) / total_branches * 100):.1f}%")
+        print("   Branches analyzed: %s", total_branches)
+        print("   High-quality branches: %s", high_quality)
+        print("   Analysis success rate: %s%", (len([a for a in self.results['enhanced_branch_assessments'] if 'error' not in a]) / total_branches * 100):.1f)
         
         print(f"\n📄 Detailed results saved to: SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json")
         
         if high_quality > 0:
             print(f"\n🚀 SSMT v2.2 Architectural Analysis completed successfully!")
-            print(f"💡 {high_quality} branches ready for enhanced SSMT integration!")
+            print("💡 %s branches ready for enhanced SSMT integration!", high_quality)
             return True
         else:
             print(f"\n⚠️ Analysis complete - all branches require specialized handling")

@@ -80,7 +80,7 @@ class ZIPWiz:
 
     def analyze_archive(self, archive_path: Path) -> ArchiveAnalysis:
         """Perform comprehensive analysis of a ZIP archive."""
-        logger.info(f"Analyzing archive: {archive_path}")
+        logger.info("Analyzing archive: %s", str(archive_path)[:100])
 
         # Check cache first
         cache_key = f"{archive_path}_{archive_path.stat().st_mtime}"
@@ -138,7 +138,7 @@ class ZIPWiz:
                             file_hashes[content_hash] = []
                         file_hashes[content_hash].append(info.filename)
                     except (OSError, ValueError, RuntimeError) as e:
-                        logger.warning(f"Could not read {info.filename}: {e}")
+                        logger.warning("Could not read %s: %s", str(info.filename)[:100], str(e)[:100])
 
                 analysis.structure_depth = max_depth
 
@@ -156,7 +156,7 @@ class ZIPWiz:
                 analysis.recommendations = self._generate_recommendations(analysis)
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.error(f"Error analyzing {archive_path}: {e}")
+            logger.error("Error analyzing %s: %s", str(archive_path)[:100], str(e)[:100])
             analysis.potential_issues.append(f"Analysis error: {e}")
 
         # Cache the analysis
@@ -215,7 +215,7 @@ class ZIPWiz:
 
     def extract_with_optimization(self, archive_path: Path, target_dir: Path) -> Dict[str, Any]:
         """Extract archive with intelligent optimization and organization."""
-        logger.info(f"Extracting and optimizing: {archive_path}")
+        logger.info("Extracting and optimizing: %s", str(archive_path)[:100])
 
         analysis = self.analyze_archive(archive_path)
         extract_dir = self.temp_dir / f"extract_{archive_path.stem}"
@@ -258,7 +258,7 @@ class ZIPWiz:
                                 nested_path.unlink()  # Remove original nested archive
                                 optimization_log["nested_archives_processed"] += 1
                         except (OSError, ValueError, RuntimeError) as e:
-                            logger.warning(f"Could not extract nested archive {nested_archive}: {e}")
+                            logger.warning("Could not extract nested archive %s: %s", str(nested_archive)[:100], str(e)[:100])
 
                 # Intelligent reorganization
                 self._reorganize_by_type(extract_dir, optimization_log)
@@ -269,7 +269,7 @@ class ZIPWiz:
                 shutil.move(str(extract_dir), str(target_dir))
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.error(f"Error extracting {archive_path}: {e}")
+            logger.error("Error extracting %s: %s", str(archive_path)[:100], str(e)[:100])
             optimization_log["error"] = str(e)
 
         return optimization_log
@@ -299,7 +299,7 @@ class ZIPWiz:
                     file_path.rename(new_path)
                     optimization_log["files_reorganized"] += 1
                 except (OSError, ValueError, RuntimeError) as e:
-                    logger.warning(f"Could not move {file_path}: {e}")
+                    logger.warning("Could not move %s: %s", str(file_path)[:100], str(e)[:100])
 
     def _get_file_category(self, extension: str) -> str:
         """Determine the category of a file based on its extension."""
@@ -312,7 +312,7 @@ class ZIPWiz:
         self, source_dir: Path, output_path: Path, compression_level: int = 6
     ) -> Dict[str, Any]:
         """Create an optimized ZIP archive from a directory."""
-        logger.info(f"Creating optimized archive: {output_path}")
+        logger.info("Creating optimized archive: %s", str(output_path)[:100])
 
         stats = {
             "files_added": 0,
@@ -357,7 +357,7 @@ class ZIPWiz:
                 stats["compression_ratio"] = stats["compressed_size"] / stats["total_size"]
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.error(f"Error creating archive: {e}")
+            logger.error("Error creating archive: %s", str(e)[:100])
             stats["error"] = str(e)
 
         return stats
@@ -432,12 +432,12 @@ def main():
         elif args.extract:
             if args.optimize:
                 result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
-                print(f"Optimization complete: {result}")
+                print("Optimization complete: %s", result)
             else:
                 # Standard extraction
                 with zipfile.ZipFile(args.archive, "r") as zf:
                     zf.extractall(args.extract)
-                print(f"Extracted to {args.extract}")
+                print("Extracted to %s", args.extract)
         else:
             parser.print_help()
 

@@ -24,7 +24,7 @@ class GITWiz:
 
     def _run(self, cmd: list[str], check: bool = False) -> bool:
         """Run a command in the project root and echo output."""
-        print(f"+ {' '.join(cmd)}")
+        print("+ %s", ' '.join(cmd))
         result = subprocess.run(            cmd,
             cwd=self.project_root,
         text=True,

@@ -102,7 +102,7 @@ class BlankLineFormatter:
             return False
 
         except Exception as e:
-            print(f"Error processing {file_path}: {e}")
+            print("Error processing {file_path}: %s", e)
             return False
 
     def process_files(self, file_paths: list) -> None:
@@ -112,11 +112,11 @@ class BlankLineFormatter:
         for file_path in file_paths:
             if os.path.exists(file_path) and self.fix_blank_lines_in_file(file_path):
                 files_fixed += 1
-                print(f"✓ Fixed blank lines in {file_path}")
+                print("✓ Fixed blank lines in %s", file_path)
 
         print("\n=== Blank Line Formatting Complete ===")
-        print(f"Files Fixed: {files_fixed}")
-        print(f"Files Processed: {len(file_paths)}")
+        print("Files Fixed: %s", files_fixed)
+        print("Files Processed: %s", len(file_paths))
 
 
 def main():

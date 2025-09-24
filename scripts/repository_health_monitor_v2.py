@@ -106,7 +106,7 @@ class RepositoryHealthMonitor:
         if not self.git_dir.exists():
             raise ValueError(f"Not a git repository: {self.repo_path}")
 
-        logger.info(f"Repository Health Monitor initialized for: {self.repo_path}")
+        logger.info("Repository Health Monitor initialized for: %s", str(self.repo_path)[:100])
 
     def _load_config(self, config_file: Optional[str] = None) -> Dict[str, Any]:
         """Load monitoring configuration."""
@@ -159,7 +159,7 @@ class RepositoryHealthMonitor:
                 # Deep merge with defaults
                 self._deep_merge_config(default_config, user_config)
             except Exception as e:
-                logger.warning(f"Failed to load config from {config_path}: {e}")
+                logger.warning("Failed to load config from %s: %s", str(config_path)[:100], str(e)[:100])
 
         # Save current config
         with open(config_path, 'w', encoding="utf-8") as f:
@@ -283,7 +283,7 @@ class RepositoryHealthMonitor:
             metrics.alerts = self._check_alerts(metrics)
 
         except Exception as e:
-            logger.error(f"Error collecting metrics: {e}")
+            logger.error("Error collecting metrics: %s", str(e)[:100])
             metrics.alerts.append(f"Metrics collection error: {e}")
 
         return metrics
@@ -299,7 +299,7 @@ class RepositoryHealthMonitor:
                     except (OSError, PermissionError):
                         continue
         except Exception as e:
-            logger.warning(f"Error calculating size for {path}: {e}")
+            logger.warning("Error calculating size for %s: %s", str(path)[:100], str(e)[:100])
         return total_size
 
     def _count_files(self) -> int:
@@ -310,7 +310,7 @@ class RepositoryHealthMonitor:
                 if file_path.is_file() and not self._should_ignore_path(file_path):
                     count += 1
         except Exception as e:
-            logger.warning(f"Error counting files: {e}")
+            logger.warning("Error counting files: %s", str(e)[:100])
         return count
 
     def _should_ignore_path(self, path: Path) -> bool:
@@ -377,7 +377,7 @@ class RepositoryHealthMonitor:
             metrics["contributors"] = len([line for line in result.stdout.strip().split('\n') if line.strip()])
 
         except Exception as e:
-            logger.warning(f"Error collecting git metrics: {e}")
+            logger.warning("Error collecting git metrics: %s", str(e)[:100])
 
         return metrics
 
@@ -426,7 +426,7 @@ class RepositoryHealthMonitor:
             analysis["duplicates"] = sum(1 for paths in file_hashes.values() if len(paths) > 1)
 
         except Exception as e:
-            logger.warning(f"Error analyzing files: {e}")
+            logger.warning("Error analyzing files: %s", str(e)[:100])
 
         return analysis
 
@@ -483,7 +483,7 @@ class RepositoryHealthMonitor:
             metrics["cpu_usage_percent"] = ps.cpu_percent(interval=1)
 
         except Exception as e:
-            logger.warning(f"Error collecting system metrics: {e}")
+            logger.warning("Error collecting system metrics: %s", str(e)[:100])
 
         return metrics
 
@@ -546,7 +546,7 @@ class RepositoryHealthMonitor:
 
                 # Log alert
                 if self.config["alerts"]["console_output"]:
-                    logger.warning(f"ALERT: {rule.message}")
+                    logger.warning("ALERT: %s", str(rule.message)[:100])
 
                 # Execute auto-actions if applicable
                 self._handle_auto_actions(rule.name, metrics)
@@ -571,7 +571,7 @@ class RepositoryHealthMonitor:
                 logger.info("Auto-action: Pruned git objects")
 
         except Exception as e:
-            logger.error(f"Auto-action failed for {alert_name}: {e}")
+            logger.error("Auto-action failed for %s: %s", str(alert_name)[:100], str(e)[:100])
 
     def _cleanup_cache_files(self) -> None:
         """Clean up cache files."""
@@ -580,7 +580,7 @@ class RepositoryHealthMonitor:
                 if file_path.is_file() and self._is_cache_file(file_path):
                     file_path.unlink()
         except Exception as e:
-            logger.error(f"Cache cleanup failed: {e}")
+            logger.error("Cache cleanup failed: %s", str(e)[:100])
 
     def _archive_old_logs(self) -> None:
         """Archive old log files."""
@@ -596,7 +596,7 @@ class RepositoryHealthMonitor:
                             archive_path = log_file.with_suffix(log_file.suffix + '.archived')
                             log_file.rename(archive_path)
         except Exception as e:
-            logger.error(f"Log archiving failed: {e}")
+            logger.error("Log archiving failed: %s", str(e)[:100])
 
     def _prune_git_objects(self) -> None:
         """Prune git objects."""
@@ -606,7 +606,7 @@ class RepositoryHealthMonitor:
                 capture_output=True, check=True
             )
         except Exception as e:
-            logger.error(f"Git pruning failed: {e}")
+            logger.error("Git pruning failed: %s", str(e)[:100])
 
     def start_monitoring(self) -> None:
         """Start continuous monitoring."""
@@ -651,7 +651,7 @@ class RepositoryHealthMonitor:
                     self._next_run_ts = now + self._interval_minutes * 60
                 time.sleep(60)
             except Exception as e:
-                logger.error(f"Monitoring loop error: {e}")
+                logger.error("Monitoring loop error: %s", str(e)[:100])
                 time.sleep(60)
 
     def _monitoring_cycle(self) -> None:
@@ -669,10 +669,10 @@ class RepositoryHealthMonitor:
             # Trim history
             self._trim_history()
 
-            logger.debug(f"Monitoring cycle complete. Health score: {metrics.health_score:.2f}")
+            logger.debug("Monitoring cycle complete. Health score: %s", str(metrics.health_score:.2f)[:100])
 
         except Exception as e:
-            logger.error(f"Monitoring cycle failed: {e}")
+            logger.error("Monitoring cycle failed: %s", str(e)[:100])
 
     def _save_metrics(self, metrics: HealthMetrics) -> None:
         """Save metrics to file."""
@@ -681,7 +681,7 @@ class RepositoryHealthMonitor:
             with open(metrics_file, 'a', encoding="utf-8") as f:
                 f.write(json.dumps(asdict(metrics)) + '\n')
         except Exception as e:
-            logger.error(f"Failed to save metrics: {e}")
+            logger.error("Failed to save metrics: %s", str(e)[:100])
 
     def _trim_history(self) -> None:
         """Trim metrics history based on retention policy."""
@@ -712,7 +712,7 @@ class RepositoryHealthMonitor:
 
                 temp_file.replace(metrics_file)
         except Exception as e:
-            logger.error(f"Failed to trim history: {e}")
+            logger.error("Failed to trim history: %s", str(e)[:100])
 
     def get_health_report(self) -> Dict[str, Any]:
         """Generate comprehensive health report."""
@@ -856,18 +856,18 @@ def main():
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
             print("✅ Health Check Complete")
-            print(f"📊 Health Score: {metrics.health_score:.2f}")
-            print(f"📁 Files: {metrics.file_count}")
-            print(f"💾 Size: {metrics.repository_size_mb:.1f}MB")
-            print(f"🌿 Branches: {metrics.branch_count}")
+            print("📊 Health Score: %s", metrics.health_score:.2f)
+            print("📁 Files: %s", metrics.file_count)
+            print("💾 Size: %sMB", metrics.repository_size_mb:.1f)
+            print("🌿 Branches: %s", metrics.branch_count)
 
             if metrics.alerts:
-                print(f"🚨 Alerts: {len(metrics.alerts)}")
+                print("🚨 Alerts: %s", len(metrics.alerts))
                 for alert in metrics.alerts:
-                    print(f"  - {alert}")
+                    print("  - %s", alert)
 
     except Exception as e:
-        logger.error(f"Health monitor operation failed: {e}")
+        logger.error("Health monitor operation failed: %s", str(e)[:100])
         return 1
 
     return 0

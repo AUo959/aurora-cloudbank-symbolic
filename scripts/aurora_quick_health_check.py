@@ -34,5 +34,5 @@ if __name__ == "__main__":
         print("✅ Dependencies healthy")
         sys.exit(0)
     else:
-        print(f"❌ Issues found: {', '.join(issues)}")
+        print("❌ Issues found: %s", ', '.join(issues))
         sys.exit(1)

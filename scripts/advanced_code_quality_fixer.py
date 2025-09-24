@@ -94,7 +94,7 @@ class AdvancedCodeQualityFixer:
                 return True
 
         except Exception as e:
-            print(f"Error fixing blank lines in {file_path}: {e}")
+            print("Error fixing blank lines in {file_path}: %s", e)
 
         return False
 
@@ -169,7 +169,7 @@ class AdvancedCodeQualityFixer:
                     return True
 
         except Exception as e:
-            print(f"Error removing unused imports in {file_path}: {e}")
+            print("Error removing unused imports in {file_path}: %s", e)
 
         return False
 
@@ -202,7 +202,7 @@ class AdvancedCodeQualityFixer:
                 return True
 
         except Exception as e:
-            print(f"Error fixing f-strings in {file_path}: {e}")
+            print("Error fixing f-strings in {file_path}: %s", e)
 
         return False
 
@@ -248,7 +248,7 @@ class AdvancedCodeQualityFixer:
                 return True
 
         except Exception as e:
-            print(f"Error fixing line length in {file_path}: {e}")
+            print("Error fixing line length in {file_path}: %s", e)
 
         return False
 
@@ -287,7 +287,7 @@ class AdvancedCodeQualityFixer:
                 return True
 
         except Exception as e:
-            print(f"Error fixing indentation in {file_path}: {e}")
+            print("Error fixing indentation in {file_path}: %s", e)
 
         return False
 
@@ -318,7 +318,7 @@ class AdvancedCodeQualityFixer:
             if not any(skip in str(file_path) for skip in [".git", "node_modules", "venv", "__pycache__"]):
                 filtered_files.append(file_path)
 
-        print(f"Processing {len(filtered_files)} Python files...")
+        print("Processing %s Python files...", len(filtered_files))
 
         for file_path in filtered_files:
             try:
@@ -326,17 +326,17 @@ class AdvancedCodeQualityFixer:
 
                 if any(results.values()):
                     self.fixes_applied += sum(results.values())
-                    print(f"  ✓ Fixed {file_path}")
+                    print("  ✓ Fixed %s", file_path)
 
                     # Log specific fixes
                     for fix_type, applied in results.items():
                         if applied:
-                            print(f"    - {fix_type}")
+                            print("    - %s", fix_type)
 
                 self.files_processed += 1
 
             except Exception as e:
-                print(f"  ❌ Error processing {file_path}: {e}")
+                print("  ❌ Error processing {file_path}: %s", e)
 
         # Run final validation
         print("\n🔍 Running final validation...")
@@ -359,23 +359,23 @@ class AdvancedCodeQualityFixer:
                 print(result.stdout[-1000:])  # Last 1000 chars to avoid spam
 
         except Exception as e:
-            print(f"Could not run validation: {e}")
+            print("Could not run validation: %s", e)
 
     def generate_quality_report(self) -> None:
         """Generate code quality improvement report"""
         print("\n📊 CODE QUALITY IMPROVEMENT SUMMARY")
         print("=" * 50)
-        print(f"Files Processed: {self.files_processed}")
-        print(f"Total Fixes Applied: {self.fixes_applied}")
+        print("Files Processed: %s", self.files_processed)
+        print("Total Fixes Applied: %s", self.fixes_applied)
 
         # Get current flake8 count
         try:
             result = subprocess.run(["python3", "-m", "flake8", "--count"], capture_output=True, text=True)
             if result.stdout.strip().isdigit():
                 remaining = int(result.stdout.strip())
-                print(f"Remaining Issues: {remaining}")
+                print("Remaining Issues: %s", remaining)
                 improvement = ((1165 - remaining) / 1165) * 100
-                print(f"Improvement: {improvement:.1f}%")
+                print("Improvement: %s%", improvement:.1f)
         except Exception:
             pass
 

@@ -74,7 +74,7 @@ class SSMTv3AutomatedSafety:
                 with open(results_file, 'r') as f:
                     return json.load(f)
         except Exception as e:
-            logger.warning(f"Could not load v2.3 results: {e}")
+            logger.warning("Could not load v2.3 results: %s", str(e)[:100])
         return None
     
     def create_safety_backup(self, backup_name: str) -> Path:
@@ -98,16 +98,16 @@ class SSMTv3AutomatedSafety:
                 if src_file.exists():
                     shutil.copy2(src_file, backup_path / file)
             
-            logger.info(f"✅ Safety backup created: {backup_path}")
+            logger.info("✅ Safety backup created: %s", str(backup_path)[:100])
             return backup_path
             
         except Exception as e:
-            logger.error(f"❌ Failed to create safety backup: {e}")
+            logger.error("❌ Failed to create safety backup: %s", str(e)[:100])
             raise
     
     def analyze_branch_safety(self, branch_name: str) -> Dict[str, Any]:
         """Analyze branch for safety classification and automation eligibility"""
-        logger.info(f"🔍 Analyzing branch safety: {branch_name}")
+        logger.info("🔍 Analyzing branch safety: %s", str(branch_name)[:100])
         
         try:
             # Get branch diff stats
@@ -142,14 +142,14 @@ class SSMTv3AutomatedSafety:
                 "timestamp": datetime.now().isoformat()
             }
             
-            logger.info(f"📊 Safety analysis complete: {analysis['safety_level']} risk, Score: {analysis['safety_score']}")
+            logger.info("📊 Safety analysis complete: %s risk, Score: %s", str(analysis['safety_level'])[:100], str(analysis['safety_score'])[:100])
             return analysis
             
         except subprocess.CalledProcessError as e:
-            logger.error(f"❌ Git command failed: {e}")
+            logger.error("❌ Git command failed: %s", str(e)[:100])
             raise
         except Exception as e:
-            logger.error(f"❌ Safety analysis failed: {e}")
+            logger.error("❌ Safety analysis failed: %s", str(e)[:100])
             raise
     
     def _classify_branch_safety(self, changed_files: List[str]) -> Dict[str, Any]:
@@ -226,7 +226,7 @@ class SSMTv3AutomatedSafety:
     
     def execute_safe_merge(self, branch_name: str, dry_run: bool = False) -> Dict[str, Any]:
         """Execute a safe merge with full automation and safety checks"""
-        logger.info(f"🚀 Starting safe merge: {branch_name} (dry_run={dry_run})")
+        logger.info("🚀 Starting safe merge: %s (dry_run=%s)", str(branch_name)[:100], str(dry_run)[:100])
         
         merge_id = f"ssmt_v3_{branch_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
@@ -271,11 +271,11 @@ class SSMTv3AutomatedSafety:
             # Save results
             self._save_merge_results(results)
             
-            logger.info(f"✅ Safe merge completed: {merge_id}")
+            logger.info("✅ Safe merge completed: %s", str(merge_id)[:100])
             return results
             
         except Exception as e:
-            logger.error(f"❌ Safe merge failed: {e}")
+            logger.error("❌ Safe merge failed: %s", str(e)[:100])
             
             # Auto-rollback on failure
             if not dry_run and self.safety_config["auto_rollback_on_failure"]:
@@ -391,7 +391,7 @@ class SSMTv3AutomatedSafety:
     
     def _execute_automated_merge(self, branch_name: str) -> Dict[str, Any]:
         """Execute fully automated merge for safe branches"""
-        logger.info(f"🤖 Executing automated merge: {branch_name}")
+        logger.info("🤖 Executing automated merge: %s", str(branch_name)[:100])
         
         try:
             # Fast-forward merge if possible
@@ -431,7 +431,7 @@ class SSMTv3AutomatedSafety:
     
     def _execute_validated_merge(self, branch_name: str) -> Dict[str, Any]:
         """Execute merge with additional validation steps"""
-        logger.info(f"🔍 Executing validated merge: {branch_name}")
+        logger.info("🔍 Executing validated merge: %s", str(branch_name)[:100])
         
         # Additional pre-merge checks for validated merge
         additional_validations = {
@@ -514,7 +514,7 @@ class SSMTv3AutomatedSafety:
     
     def _execute_emergency_rollback(self, merge_id: str):
         """Execute emergency rollback on failure"""
-        logger.warning(f"🚨 Executing emergency rollback: {merge_id}")
+        logger.warning("🚨 Executing emergency rollback: %s", str(merge_id)[:100])
         
         try:
             # Reset to previous HEAD
@@ -524,7 +524,7 @@ class SSMTv3AutomatedSafety:
             )
             logger.info("✅ Emergency rollback completed")
         except Exception as e:
-            logger.error(f"❌ Emergency rollback failed: {e}")
+            logger.error("❌ Emergency rollback failed: %s", str(e)[:100])
     
     def _save_merge_results(self, results: Dict[str, Any]):
         """Save merge results to file"""
@@ -561,7 +561,7 @@ class SSMTv3AutomatedSafety:
                 with open(file, 'r') as f:
                     all_results.append(json.load(f))
             except Exception as e:
-                logger.warning(f"Could not load {file}: {e}")
+                logger.warning("Could not load %s: %s", str(file)[:100], str(e)[:100])
         
         # Calculate statistics
         total_merges = len(all_results)
@@ -595,7 +595,7 @@ class SSMTv3AutomatedSafety:
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        logger.info(f"📊 Safety report generated: {report_file}")
+        logger.info("📊 Safety report generated: %s", str(report_file)[:100])
         return report
     
     def _calculate_easy_wins(self) -> List[str]:

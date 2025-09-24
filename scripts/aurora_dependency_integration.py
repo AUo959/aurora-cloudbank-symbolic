@@ -71,7 +71,7 @@ class AuroraDependencyIntegration:
                     loaded_config = json.load(f)
                 return {**default_config, **loaded_config}
             except Exception as e:
-                self.logger.warning(f"Failed to load config: {e}")
+logger.warning("Failed to load config: %s", str(e)[:100])
                 
         return default_config
         
@@ -87,7 +87,7 @@ class AuroraDependencyIntegration:
             "pyproject_toml": (self.project_root / "pyproject.toml").exists()
         }
         
-        self.logger.info(f"Detected existing systems: {sum(systems.values())}/{len(systems)}")
+logger.info("Detected existing systems: %s/%s", str(sum(systems.values()))[:100], str(len(systems))[:100])
         return systems
         
     def create_unified_dependency_strategy(self):
@@ -134,7 +134,7 @@ class AuroraDependencyIntegration:
         with open(strategy_file, 'w') as f:
             json.dump(strategy, f, indent=2)
             
-        self.logger.info(f"✅ Strategy created: {strategy_file}")
+logger.info("✅ Strategy created: %s", str(strategy_file)[:100])
         return strategy
         
     def execute_immediate_phase(self) -> Dict[str, Any]:
@@ -155,9 +155,9 @@ class AuroraDependencyIntegration:
                 with open(requirements_file, 'r') as f:
                     requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
                 phase_results["requirements_validation"] = len(requirements) > 0
-                self.logger.info(f"✅ Found {len(requirements)} requirements in requirements.txt")
+logger.info("✅ Found %s requirements in requirements.txt", str(len(requirements))[:100])
             except Exception as e:
-                self.logger.warning(f"Failed to read requirements.txt: {e}")
+logger.warning("Failed to read requirements.txt: %s", str(e)[:100])
         else:
             self.logger.warning("⚠️  requirements.txt not found")
             
@@ -178,12 +178,12 @@ class AuroraDependencyIntegration:
                 phase_results["python_inventory"]["critical_missing"] = missing_critical
                 
                 if missing_critical:
-                    self.logger.warning(f"⚠️  Missing critical packages: {missing_critical}")
+logger.warning("⚠️  Missing critical packages: %s", str(missing_critical)[:100])
                 else:
                     self.logger.info("✅ All critical Python packages are installed")
                     
         except Exception as e:
-            self.logger.warning(f"Failed Python inventory: {e}")
+logger.warning("Failed Python inventory: %s", str(e)[:100])
             
         # Node.js package inventory
         package_json = self.project_root / "package.json"
@@ -195,11 +195,11 @@ class AuroraDependencyIntegration:
                     lines = [line for line in result.stdout.split('\n') if '├──' in line or '└──' in line]
                     phase_results["node_inventory"]["count"] = len(lines)
                     phase_results["node_inventory"]["status"] = "healthy"
-                    self.logger.info(f"✅ Found {len(lines)} Node.js packages")
+logger.info("✅ Found %s Node.js packages", str(len(lines))[:100])
                 else:
                     phase_results["node_inventory"]["status"] = "degraded"
             except Exception as e:
-                self.logger.warning(f"Failed Node.js inventory: {e}")
+logger.warning("Failed Node.js inventory: %s", str(e)[:100])
                 phase_results["node_inventory"]["status"] = "error"
         else:
             phase_results["node_inventory"]["status"] = "not_applicable"
@@ -219,16 +219,16 @@ class AuroraDependencyIntegration:
                 json.dump(snapshot_data, f, indent=2)
                 
             phase_results["snapshot_created"] = True
-            self.logger.info(f"✅ Snapshot created: {snapshot_file}")
+logger.info("✅ Snapshot created: %s", str(snapshot_file)[:100])
             
         except Exception as e:
-            self.logger.warning(f"Failed to create snapshot: {e}")
+logger.warning("Failed to create snapshot: %s", str(e)[:100])
             
         return phase_results
         
     def execute_installation_phase(self, max_time_minutes: int = 5) -> Dict[str, Any]:
         """Execute installation phase with time constraints"""
-        self.logger.info(f"⬆️ Phase 2: Installation (max {max_time_minutes} minutes)...")
+logger.info("⬆️ Phase 2: Installation (max %s minutes)...", str(max_time_minutes)[:100])
         
         installation_results = {
             "approach": "time_constrained",
@@ -257,7 +257,7 @@ class AuroraDependencyIntegration:
             installation_results["critical_attempted"].append(package)
             
             try:
-                self.logger.info(f"Installing critical package: {package}")
+logger.info("Installing critical package: %s", str(package)[:100])
                 result = subprocess.run([
                     sys.executable, "-m", "pip", "install", "--user", 
                     "--timeout", "30", package
@@ -265,14 +265,14 @@ class AuroraDependencyIntegration:
                 
                 if result.returncode == 0:
                     installation_results["critical_successful"].append(package)
-                    self.logger.info(f"✅ Installed: {package}")
+logger.info("✅ Installed: %s", str(package)[:100])
                 else:
-                    self.logger.warning(f"⚠️  Failed to install: {package}")
+logger.warning("⚠️  Failed to install: %s", str(package)[:100])
                     
             except subprocess.TimeoutExpired:
-                self.logger.warning(f"⏰ Timeout installing: {package}")
+logger.warning("⏰ Timeout installing: %s", str(package)[:100])
             except Exception as e:
-                self.logger.warning(f"Error installing {package}: {e}")
+logger.warning("Error installing %s: %s", str(package)[:100], str(e)[:100])
                 
         # If time remaining, try development packages
         if time.time() - start_time < timeout_seconds * 0.8:
@@ -293,10 +293,10 @@ class AuroraDependencyIntegration:
                     
                     if result.returncode == 0:
                         installation_results["dev_successful"].append(package)
-                        self.logger.info(f"✅ Installed dev package: {package}")
+logger.info("✅ Installed dev package: %s", str(package)[:100])
                         
                 except Exception as e:
-                    self.logger.warning(f"Dev package {package} failed: {e}")
+logger.warning("Dev package %s failed: %s", str(package)[:100], str(e)[:100])
                     
         # If we couldn't install much, trigger fallback
         if len(installation_results["critical_successful"]) == 0:
@@ -353,10 +353,10 @@ echo "🚀 Basic dependency validation complete"
             startup_script.chmod(0o755)
             
             persistence_results["startup_script_created"] = True
-            self.logger.info(f"✅ Startup script created: {startup_script}")
+logger.info("✅ Startup script created: %s", str(startup_script)[:100])
             
         except Exception as e:
-            self.logger.warning(f"Failed to create startup script: {e}")
+logger.warning("Failed to create startup script: %s", str(e)[:100])
             
         # Create simple health check
         try:
@@ -396,7 +396,7 @@ if __name__ == "__main__":
         print("✅ Dependencies healthy")
         sys.exit(0)
     else:
-        print(f"❌ Issues found: {{', '.join(issues)}}")
+        print("❌ Issues found: {%s}", ', '.join(issues))
         sys.exit(1)
 '''
             
@@ -406,10 +406,10 @@ if __name__ == "__main__":
             health_check_script.chmod(0o755)
             
             persistence_results["health_check_scheduled"] = True
-            self.logger.info(f"✅ Health check script created: {health_check_script}")
+logger.info("✅ Health check script created: %s", str(health_check_script)[:100])
             
         except Exception as e:
-            self.logger.warning(f"Failed to create health check: {e}")
+logger.warning("Failed to create health check: %s", str(e)[:100])
             
         persistence_results["integration_complete"] = (
             persistence_results["startup_script_created"] and 
@@ -442,7 +442,7 @@ if __name__ == "__main__":
                     self.logger.info("✅ GitWiz dependency updater integrated")
                     
             except Exception as e:
-                self.logger.warning(f"GitWiz integration failed: {e}")
+logger.warning("GitWiz integration failed: %s", str(e)[:100])
                 
         # Create minimal automation wrapper
         try:
@@ -494,10 +494,10 @@ if __name__ == "__main__":
             automation_file.chmod(0o755)
             
             automation_results["new_automation_created"] = True
-            self.logger.info(f"✅ Minimal automation created: {automation_file}")
+logger.info("✅ Minimal automation created: %s", str(automation_file)[:100])
             
         except Exception as e:
-            self.logger.warning(f"Failed to create automation: {e}")
+logger.warning("Failed to create automation: %s", str(e)[:100])
             
         automation_results["monitoring_active"] = (
             automation_results["existing_systems_integrated"] > 0 or 
@@ -552,7 +552,7 @@ if __name__ == "__main__":
                 self.logger.warning("⚠️  Setup completed with some limitations")
                 
         except Exception as e:
-            self.logger.error(f"Setup failed: {e}")
+logger.error("Setup failed: %s", str(e)[:100])
             setup_results["error"] = str(e)
             
         setup_results["end_time"] = datetime.now().isoformat()
@@ -624,20 +624,20 @@ def main():
     elif args.phase:
         if args.phase == "immediate":
             results = integration.execute_immediate_phase()
-            print(f"Phase 1 Results: {json.dumps(results, indent=2)}")
+            print("Phase 1 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "installation": 
             results = integration.execute_installation_phase()
-            print(f"Phase 2 Results: {json.dumps(results, indent=2)}")
+            print("Phase 2 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "persistence":
             results = integration.execute_persistence_phase()
-            print(f"Phase 3 Results: {json.dumps(results, indent=2)}")
+            print("Phase 3 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "automation":
             results = integration.execute_automation_phase()
-            print(f"Phase 4 Results: {json.dumps(results, indent=2)}")
+            print("Phase 4 Results: %s", json.dumps(results, indent=2))
             
     elif args.status:
-        print(f"Existing Systems Detected: {integration.existing_systems}")
-        print(f"Integration Config: {integration.config}")
+        print("Existing Systems Detected: %s", integration.existing_systems)
+        print("Integration Config: %s", integration.config)
         
     else:
         print("Aurora CloudBank Dependency Management Integration")

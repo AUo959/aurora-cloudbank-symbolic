@@ -145,7 +145,7 @@ class RepositoryHealthMonitor:
                 metrics["git_status"] = "dirty" if result.stdout.strip() else "clean"
 
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Error collecting metrics: {e}")
+            print("Error collecting metrics: %s", e)
 
         return metrics
 
@@ -164,7 +164,7 @@ class RepositoryHealthMonitor:
 
             return history
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Error loading history: {e}")
+            print("Error loading history: %s", e)
             return []
 
     def save_history(self, history: List[Dict]):
@@ -173,7 +173,7 @@ class RepositoryHealthMonitor:
             with open(self.history_file, "w", encoding="utf-8") as f:
                 json.dump(history, f, indent=2)
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Error saving history: {e}")
+            print("Error saving history: %s", e)
 
     def analyze_trends(self, history: List[Dict]) -> Dict:
         """Analyze trends from historical data."""
@@ -358,20 +358,20 @@ class RepositoryHealthMonitor:
             report_path = self.repo_path / "REPOSITORY_HEALTH_MONITOR.md"
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)
-            print(f"📄 Health report saved to: {report_path}")
+            print("📄 Health report saved to: %s", report_path)
 
         # Print summary
         print("\n📊 Health Check Summary:")
-        print(f"  Repository Size: {metrics['size_mb']}MB")
-        print(f"  File Count: {metrics['file_count']:,}")
-        print(f"  Active Branches: {metrics['branch_count']}")
-        print(f"  Alerts: {len(alerts)}")
+        print("  Repository Size: %sMB", metrics['size_mb'])
+        print("  File Count: %s", metrics['file_count']:,)
+        print("  Active Branches: %s", metrics['branch_count'])
+        print("  Alerts: %s", len(alerts))
 
         if alerts:
             print("\n🚨 Active Alerts:")
             for alert in alerts:
                 severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert["severity"], "")
-                print(f"  {severity_emoji} {alert['message']}")
+                print("  {severity_emoji} %s", alert['message'])
 
         return {
             "metrics": metrics,
@@ -383,12 +383,12 @@ class RepositoryHealthMonitor:
     def monitor_continuously(self, interval: Optional[int] = None):
         """Run continuous monitoring."""
         interval = interval or self.config["monitoring_interval"]
-        print(f"🔄 Starting continuous monitoring (interval: {interval}s)")
+        print("🔄 Starting continuous monitoring (interval: %ss)", interval)
 
         try:
             while True:
                 self.run_health_check()
-                print(f"💤 Sleeping for {interval} seconds...")
+                print("💤 Sleeping for %s seconds...", interval)
                 time.sleep(interval)
         except KeyboardInterrupt:
             print("\n🛑 Monitoring stopped by user")

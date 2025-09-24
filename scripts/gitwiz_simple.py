@@ -251,7 +251,7 @@ class GITWizSimple:
                         continue
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error getting file stats: {e}")
+            logger.warning("Error getting file stats: %s", str(e)[:100])
 
         return stats
 
@@ -287,7 +287,7 @@ class GITWizSimple:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning(f"Error getting stored issues: {e}")
+            logger.warning("Error getting stored issues: %s", str(e)[:100])
 
         return issues
 
@@ -347,7 +347,7 @@ class GITWizSimple:
                             analysis["issues_found"].append(asdict(issue))
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning(f"Error analyzing {md_file}: {e}")
+                logger.warning("Error analyzing %s: %s", str(md_file)[:100], str(e)[:100])
 
     def _analyze_zip_files(self, analysis: Dict[str, Any]):
         """Analyze ZIP files in the repository."""
@@ -379,7 +379,7 @@ class GITWizSimple:
                         )
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning(f"Error analyzing ZIP file {zip_file}: {e}")
+                logger.warning("Error analyzing ZIP file %s: %s", str(zip_file)[:100], str(e)[:100])
 
     def _check_common_repo_issues(self, analysis: Dict[str, Any]):
         """Check for common repository structure issues."""
@@ -436,43 +436,43 @@ def main():
         if args.detailed:
             print(json.dumps(status, indent=2))
         else:
-            print(f"Repository: {status['repo_path']}")
-            print(f"Git repo: {status['git_status'].get('is_git_repo', False)}")
+            print("Repository: %s", status['repo_path'])
+            print("Git repo: %s", status['git_status'].get('is_git_repo', False))
             if status["git_status"].get("is_git_repo"):
-                print(f"Current branch: {status['git_status'].get('current_branch', 'unknown')}")
-                print(f"Total changes: {status['git_status'].get('total_changes', 0)}")
-            print(f"Total files: {status['file_stats']['total_files']}")
-            print(f"Total size: {status['file_stats']['total_size'] / (1024 * 1024):.1f} MB")
-            print(f"Stored issues: {len(status['issues'])}")
+                print("Current branch: %s", status['git_status'].get('current_branch', 'unknown'))
+                print("Total changes: %s", status['git_status'].get('total_changes', 0))
+            print("Total files: %s", status['file_stats']['total_files'])
+            print("Total size: %s MB", status['file_stats']['total_size'] / (1024 * 1024):.1f)
+            print("Stored issues: %s", len(status['issues']))
 
     elif args.command == "analyze":
         analysis = gitwiz.analyze_repository()
         if args.detailed:
             print(json.dumps(analysis, indent=2))
         else:
-            print(f"Analysis completed at {analysis['timestamp']}")
-            print(f"Issues found: {len(analysis['issues_found'])}")
-            print(f"Optimizations suggested: {len(analysis['optimizations'])}")
-            print(f"Archives analyzed: {len(analysis['archive_analysis'])}")
+            print("Analysis completed at %s", analysis['timestamp'])
+            print("Issues found: %s", len(analysis['issues_found']))
+            print("Optimizations suggested: %s", len(analysis['optimizations']))
+            print("Archives analyzed: %s", len(analysis['archive_analysis']))
 
             if analysis["issues_found"]:
                 print("\nTop Issues:")
                 for issue in analysis["issues_found"][:5]:
-                    print(f"  - {issue['issue_type']}: {issue['description']}")
+                    print("  - %s: {issue[", issue['issue_type'])
 
             if analysis["optimizations"]:
                 print("\nOptimizations:")
                 for opt in analysis["optimizations"][:5]:
-                    print(f"  - {opt}")
+                    print("  - %s", opt)
 
     elif args.command == "memory":
         # Show memory database stats
         issues = gitwiz._get_stored_issues()
-        print(f"Stored issues: {len(issues)}")
+        print("Stored issues: %s", len(issues))
         if issues:
             print("\nRecent issues:")
             for issue in issues[:10]:
-                print(f"  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})")
+                print("  - %s: {issue[", issue['issue_type'])
 
 
 if __name__ == "__main__":

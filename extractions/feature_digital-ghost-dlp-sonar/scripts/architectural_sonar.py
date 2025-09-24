@@ -70,10 +70,10 @@ def parse_architecture_blueprint(file_path):
                 return None
             return yaml.safe_load(f)
     except FileNotFoundError:
-        print(f"Warning: Architecture blueprint not found at {file_path}")
+        print("Warning: Architecture blueprint not found at %s", file_path)
         return None
     except Exception as e:
-        print(f"Error parsing YAML blueprint: {e}")
+        print("Error parsing YAML blueprint: %s", e)
         return None
 
 
@@ -141,7 +141,7 @@ def analyze_code_metrics(file_path):
         }
 
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Could not analyze metrics for {file_path}: {e}")
+        print("Could not analyze metrics for {file_path}: %s", e)
         metrics = {"error": str(e)}
 
     return metrics
@@ -178,11 +178,11 @@ def main():
 
     all_results = {}
     python_files = list(get_python_files(SRC_DIRS))
-    print(f"Found {len(python_files)} Python files to analyze.")
+    print("Found %s Python files to analyze.", len(python_files))
 
     for i, file_path in enumerate(python_files):
         relative_path = file_path.relative_to(WORKSPACE_ROOT)
-        print(f"[{i+1}/{len(python_files)}] Analyzing: {relative_path}")
+        print("[{i+1}/{len(python_files)}] Analyzing: %s", relative_path)
 
         # In a real implementation, 'allowed_deps' would be derived from the blueprint
         allowed_deps = []
@@ -204,7 +204,8 @@ def main():
     with open(REPORT_OUTPUT_FILE, 'w') as f:
         json.dump(all_results, f, indent=2)
 
-    print(f"\n✅ Scan complete. Report generated at: {REPORT_OUTPUT_FILE}")
+    print("
+✅ Scan complete. Report generated at: %s", REPORT_OUTPUT_FILE)
     # Here you could add logic to summarize findings and print a high-level report.
 
 

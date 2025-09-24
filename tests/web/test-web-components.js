@@ -59,6 +59,22 @@ global.fetch = mock.fn(() => Promise.resolve({
   json: () => Promise.resolve({ status: 'success' })
 }));
 
+
+// Enhanced multi-character sanitization for security
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return '';
+    
+  // Remove control characters and potential XSS
+  const sanitized = input
+    .replace(/[\x00-\x1f\x7f-\x9f]/g, '') // Control chars
+    .replace(/<script[^>]*>.*?<\/script>/gi, '') // Script tags
+    .replace(/javascript:/gi, '') // JavaScript protocol
+    .replace(/on\w+\s*=/gi, ''); // Event handlers
+    
+  // Truncate to reasonable length
+  return sanitized.substring(0, 1000);
+}
+
 test('Aurora Web Logger - Basic functionality', async (t) => {
   // Load Aurora Web Logger
   const loggerPath = path.join(projectRoot, 'static/js/aurora-web-logger.js');

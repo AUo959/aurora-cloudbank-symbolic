@@ -28,7 +28,7 @@ class BranchCleanupManager:
             )
             
             if result.returncode == 0:
-                print(f"✅ Deleted: {branch_name} - {reason}")
+                print("✅ Deleted: {branch_name} - %s", reason)
                 self.deleted_count += 1
                 return True
             else:
@@ -105,15 +105,16 @@ class BranchCleanupManager:
         print("\n" + "=" * 50)
         print("📊 PHASE 2 CLEANUP RESULTS")
         print("=" * 50)
-        print(f"✅ Branches deleted: {self.deleted_count}")
-        print(f"❌ Errors encountered: {len(self.errors)}")
+        print("✅ Branches deleted: %s", self.deleted_count)
+        print("❌ Errors encountered: %s", len(self.errors))
         
         if self.errors:
             print("\n⚠️ Errors Details:")
             for error in self.errors:
-                print(f"  • {error}")
+                print("  • %s", error)
         
-        print(f"\n🎯 Progress toward zero PRs: -{self.deleted_count} branches")
+        print("
+🎯 Progress toward zero PRs: -%s branches", self.deleted_count)
 
 
 def main():
@@ -136,7 +137,8 @@ def main():
         cleanup_manager.report_results()
         return 1
     except Exception as e:
-        print(f"\n💥 Unexpected error: {e}")
+        print("
+💥 Unexpected error: %s", e)
         cleanup_manager.report_results()
         return 1
 

@@ -39,10 +39,10 @@ class DependencyAutoUpdater:
                 capture_output=True,
             )
 
-            print(f"✅ Safety backup created: {self.backup_branch}")
+            print("✅ Safety backup created: %s", self.backup_branch)
             return True
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to create backup: {e}")
+            print("❌ Failed to create backup: %s", e)
             return False
 
     def scan_python_dependencies(self) -> Dict[str, Any]:
@@ -80,13 +80,13 @@ class DependencyAutoUpdater:
                     scan_result["outdated"] = outdated
                     scan_result["scan_successful"] = True
 
-                    print(f"📦 Found {len(outdated)} outdated Python packages")
+                    print("📦 Found %s outdated Python packages", len(outdated))
                     for pkg in outdated[:5]:  # Show first 5
-                        print(f"  • {pkg['name']}: {pkg['version']} → {pkg['latest_version']}")
+                        print("  • %s: {pkg[", pkg['name'])
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
-                print(f"❌ Python dependency scan failed: {e}")
+                print("❌ Python dependency scan failed: %s", e)
 
         return scan_result
 
@@ -119,13 +119,13 @@ class DependencyAutoUpdater:
                     scan_result["outdated"] = outdated
                     scan_result["scan_successful"] = True
 
-                    print(f"📦 Found {len(outdated)} outdated Node.js packages")
+                    print("📦 Found %s outdated Node.js packages", len(outdated))
                     for pkg_name, info in list(outdated.items())[:5]:  # Show first 5
-                        print(f"  • {pkg_name}: {info['current']} → {info['latest']}")
+                        print("  • {pkg_name}: %s → {info[", info['current'])
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
-                print(f"❌ Node.js dependency scan failed: {e}")
+                print("❌ Node.js dependency scan failed: %s", e)
 
         return scan_result
 
@@ -138,7 +138,7 @@ class DependencyAutoUpdater:
             scan_result = self.scan_python_dependencies()
             if scan_result["outdated"]:
                 for pkg in scan_result["outdated"]:
-                    print(f"  Would update: {pkg['name']} {pkg['version']} → {pkg['latest_version']}")
+                    print("  Would update: %s {pkg[", pkg['name'])
             update_result["success"] = True
             return update_result
 
@@ -165,10 +165,10 @@ class DependencyAutoUpdater:
                 print("✅ Python dependencies updated successfully")
                 update_result["success"] = True
             else:
-                print(f"❌ Python dependency update failed: {result.stderr}")
+                print("❌ Python dependency update failed: %s", result.stderr)
 
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"❌ Python dependency update error: {e}")
+            print("❌ Python dependency update error: %s", e)
 
         return update_result
 
@@ -181,7 +181,7 @@ class DependencyAutoUpdater:
             scan_result = self.scan_node_dependencies()
             if scan_result["outdated"]:
                 for pkg_name, info in scan_result["outdated"].items():
-                    print(f"  Would update: {pkg_name} {info['current']} → {info['latest']}")
+                    print("  Would update: {pkg_name} %s → {info[", info['current'])
             update_result["success"] = True
             return update_result
 
@@ -200,10 +200,10 @@ class DependencyAutoUpdater:
                 print("✅ Node.js dependencies updated successfully")
                 update_result["success"] = True
             else:
-                print(f"❌ Node.js dependency update failed: {result.stderr}")
+                print("❌ Node.js dependency update failed: %s", result.stderr)
 
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"❌ Node.js dependency update error: {e}")
+            print("❌ Node.js dependency update error: %s", e)
 
         return update_result
 
@@ -241,7 +241,7 @@ class DependencyAutoUpdater:
                     audit_result["python_audit"] = json.loads(audit_cmd.stdout)
                     print("✅ Python security audit completed")
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"ℹ️  Python security audit not available: {e}")
+            print("ℹ️  Python security audit not available: %s", e)
 
         # Node.js security audit
         package_json = self.project_root / "package.json"
@@ -261,7 +261,7 @@ class DependencyAutoUpdater:
                     print("✅ Node.js security audit completed")
 
             except (OSError, ValueError, RuntimeError) as e:
-                print(f"ℹ️  Node.js security audit failed: {e}")
+                print("ℹ️  Node.js security audit failed: %s", e)
 
         return audit_result
 
@@ -369,9 +369,9 @@ def main():
     if args.comprehensive:
         result = updater.execute_comprehensive_update(dry_run=args.dry_run)
         print("\n📊 Workflow Result Summary:")
-        print(f"  Python packages scanned: {len(result['python_scan'].get('outdated', []))}")
-        print(f"  Node.js packages scanned: {len(result['node_scan'].get('outdated', []))}")
-        print(f"  Updates successful: {result['success']}")
+        print("  Python packages scanned: %s", len(result['python_scan'].get('outdated', [])))
+        print("  Node.js packages scanned: %s", len(result['node_scan'].get('outdated', [])))
+        print("  Updates successful: %s", result['success'])
 
     elif args.scan:
         print("📦 Scanning Dependencies...")

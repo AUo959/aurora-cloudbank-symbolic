@@ -39,10 +39,10 @@ def main():
     backup_pattern = re.compile(r"backup")
     for branch in merged:
         if feature_pattern.search(branch):
-            print(f"Deleting merged feature branch: {branch}")
+            print("Deleting merged feature branch: %s", branch)
             delete_remote_branch(branch)
         elif backup_pattern.search(branch):
-            print(f"Archiving backup branch: {branch}")
+            print("Archiving backup branch: %s", branch)
             archive_branch(branch)
 
 

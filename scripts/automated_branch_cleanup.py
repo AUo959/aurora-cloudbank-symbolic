@@ -66,7 +66,7 @@ class BranchCleanupManager:
 
             
         if result.returncode != 0:
-                print(f"Error getting branch info: {result.stderr}")
+                print("Error getting branch info: %s", result.stderr)
                 
         return {}
 
@@ -105,7 +105,7 @@ class BranchCleanupManager:
         return branches
 
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Error analyzing branches: {e}")
+            print("Error analyzing branches: %s", e)
             
         return {}
 
@@ -162,7 +162,7 @@ class BranchCleanupManager:
 
         # Limit cleanup per run for safety
         if len(cleanup_candidates) > max_per_run:
-            print(f"⚠️  Limiting cleanup to {max_per_run} branches per run for safety")
+            print("⚠️  Limiting cleanup to %s branches per run for safety", max_per_run)
         cleanup_candidates = cleanup_candidates[:max_per_run]
 
         for branch in cleanup_candidates:
@@ -171,7 +171,7 @@ class BranchCleanupManager:
 
                 
         if dry_run:
-                    print(f"🔍 DRY RUN: Would {action} branch {branch['name']}")
+                    print("🔍 DRY RUN: Would {action} branch %s", branch['name'])
                     
         results["skipped"].append({"branch": branch["name"], "action": action})
                 
@@ -181,14 +181,14 @@ class BranchCleanupManager:
         if success:
                         results[action].append(branch["name"])
                         
-        print(f"✅ {action.title()} branch: {branch['name']}")
+        print("✅ {action.title()} branch: %s", branch['name'])
                     
         else:
                         results["errors"].append({"branch": branch["name"], "action": action})
 
             
         except (OSError, ValueError, RuntimeError) as e:
-                print(f"❌ Error processing {branch['name']}: {e}")
+                print("❌ Error processing %s: {e}", branch['name'])
                 
         results["errors"].append({"branch": branch["name"], "error": str(e)})
 
@@ -245,11 +245,11 @@ class BranchCleanupManager:
         return True
 
         except subprocess.CalledProcessError as e:
-            print(f"Git command failed: {e}")
+            print("Git command failed: %s", e)
             
         return False
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Unexpected error: {e}")
+            print("Unexpected error: %s", e)
             
         return False
 
@@ -352,7 +352,7 @@ def main():
     # Save report
     report_path = Path("branch_cleanup_report.md")
     report_path.write_text(final_report)
-    print(f"📄 Report saved to: {report_path}")
+    print("📄 Report saved to: %s", report_path)
 
     
         if dry_run:

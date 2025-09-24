@@ -85,9 +85,9 @@ class IntelligentWorkflowManager:
         total_time_saved = 0
         for phase_name, phase_result in results["phases"].items():
             if isinstance(phase_result, dict):
-        phase_time_saved = phase_result.get("time_saved_minutes", 0)
+                phase_time_saved = phase_result.get("time_saved_minutes", 0)
                 
-        if isinstance(phase_time_saved, (int, float)):
+                if isinstance(phase_time_saved, (int, float)):
                     total_time_saved += phase_time_saved
 
         results["total_time_saved_minutes"] = total_time_saved

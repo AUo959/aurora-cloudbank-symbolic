@@ -45,18 +45,14 @@ jobs:
         with:
           fetch-depth: 1  # Shallow clone for faster checkout
 
-      - name: Guard: ensure default code scanning setup is disabled (warn-only)
+      - name: "Guard: ensure default code scanning setup is disabled (warn-only)"
         shell: bash
         run: |
           set -euo pipefail
           url="https://api.github.com/repos/${{ github.repository }}/code-scanning/default-setup"
           code=$(curl -sS -o /tmp/default_setup.json -w '%{http_code}' -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github+json" "$url" || true)
           if [[ "$code" == "200" ]]; then
-            state=$(python3 - <<'PY'
-import json
-print(json.load(open('/tmp/default_setup.json')).get('state',''))
-PY
-)
+            state=$(python3 -c "import json; print(json.load(open('/tmp/default_setup.json')).get('state',''))")
             if [[ "$state" == "configured" || "$state" == "enabled" ]]; then
               echo "::warning::Default Code Scanning setup is enabled (state=$state). Disable it to use this custom CodeQL workflow. Proceeding without failing."
             fi

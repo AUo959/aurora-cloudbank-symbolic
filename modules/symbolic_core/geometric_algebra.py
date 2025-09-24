@@ -24,7 +24,19 @@ class GeometricAlgebra:
 
     def mult(self, a, b):
         if self._mock:
-            return a * b  # simple numeric multiplication
+            # Mock implementation for string blade multiplication
+            if isinstance(a, str) and isinstance(b, str):
+                if a == b:
+                    return 1  # e1*e1 = 1
+                elif {a, b} == {"e1", "e2"}:
+                    return "e12"  # e1*e2 = e12
+                elif {a, b} == {"e2", "e3"}:
+                    return "e23"  # e2*e3 = e23
+                elif {a, b} == {"e1", "e3"}:
+                    return "e13"  # e1*e3 = e13
+                else:
+                    return f"{a}*{b}"
+            return a * b  # numeric multiplication
         return a * b
 
     def pretty(self, a):

@@ -13,24 +13,24 @@ from pathlib import Path
 
 def test_command(cmd, description):
     """Test a command and report results."""
-    print(f"\n🧪 Testing: {description}")
-    print(f"Command: {' '.join(cmd)}")
+    print("\n🧪 Testing: {description}")
+    print("Command: {' '.join(cmd)}")
     try:        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)        
         if result.returncode == 0:
-            print(f"✅ SUCCESS: {description}")
+            print("✅ SUCCESS: {description}")
             
         if result.stdout:
-                print(f"Output: {result.stdout[:200]}{'...' if len(result.stdout) > 200 else ''}")
+                print("Output: {result.stdout[:200]}{'...' if len(result.stdout) > 200 else ''}")
         
         else:
-            print(f"❌ FAILED: {description}")
+            print("❌ FAILED: {description}")
             
         if result.stderr:
-                print(f"Error: {result.stderr[:200]}{'...' if len(result.stderr) > 200 else ''}")
+                print("Error: {result.stderr[:200]}{'...' if len(result.stderr) > 200 else ''}")
     except subprocess.TimeoutExpired:
-        print(f"⏰ TIMEOUT: {description}")
+        print("⏰ TIMEOUT: {description}")
     except Exception as e:
-        print(f"❌ ERROR: {description} - {str(e)}")
+        print("❌ ERROR: {description} - {str(e)}")
 
 
 def main():

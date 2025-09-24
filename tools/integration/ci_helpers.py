@@ -103,7 +103,7 @@ class CIHelpers:
         issues = []
         for check_name, check_result in validation["validations"].items():
             if check_result["status"] != "passed":
-                issues.extend(check_result.get("issues", [f"{check_name} failed"]))
+                issues.extend(check_result.get("issues", ["{check_name} failed"]))
 
         validation["issues"] = issues
         validation["status"] = "passed" if not issues else "failed"
@@ -179,7 +179,7 @@ print('✅ Deployment manifest generated')
         with open(workflow_path, "w") as f:
             f.write(workflow_content.strip())
 
-        print(f"📄 GitHub Actions workflow created: {workflow_path}")
+        print("📄 GitHub Actions workflow created: {workflow_path}")
         return str(workflow_path)
 
     def _check_python_lint(self) -> Dict[str, Any]:
@@ -226,7 +226,7 @@ print('✅ Deployment manifest generated')
                 result["status"] = "passed"
             else:
                 result["status"] = "warning"  # Not a failure, but worth noting
-                result["issues"] = [f"{k}: {len(v)} issues" for k, v in drift_issues.items() if v]
+                result["issues"] = ["{k}: {len(v)} issues" for k, v in drift_issues.items() if v]
 
         except Exception as e:
             result["status"] = "failed"
@@ -254,7 +254,7 @@ print('✅ Deployment manifest generated')
                 result["status"] = "passed"
             else:
                 result["status"] = "failed"
-                result["issues"] = [f"Invalid seal: {seal_id}" for seal_id in failed_seals]
+                result["issues"] = ["Invalid seal: {seal_id}" for seal_id in failed_seals]
 
         except Exception as e:
             result["status"] = "failed"
@@ -360,7 +360,7 @@ print('✅ Deployment manifest generated')
             result["status"] = "passed"
         else:
             result["status"] = "failed"
-            result["issues"] = [f"Missing file: {f}" for f in missing_files]
+            result["issues"] = ["Missing file: {f}" for f in missing_files]
 
         return result
 
@@ -402,17 +402,17 @@ def main():
         print("🔍 Running pre-commit checks...")
         results = ci.run_pre_commit_checks()
 
-        print(f"\n📊 Pre-commit Check Results: {results['overall_status']}")
+        print("\n📊 Pre-commit Check Results: {results['overall_status']}")
 
         for check_name, check_result in results["checks"].items():
             status_icon = (
                 "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
             )
-            print(f"{status_icon} {check_name}: {check_result['status']}")
+            print("{status_icon} {check_name}: {check_result['status']}")
 
             if check_result.get("issues"):
                 for issue in check_result["issues"]:
-                    print(f"    - {issue}")
+                    print("    - {issue}")
 
     elif args.command == "manifest":
         manifest = ci.generate_deployment_manifest()
@@ -421,28 +421,28 @@ def main():
         with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        print(f"📦 Deployment manifest saved: {output_path}")
+        print("📦 Deployment manifest saved: {output_path}")
 
     elif args.command == "validate":
         validation = ci.validate_repository_state()
 
         status_icon = "✅" if validation["status"] == "passed" else "❌"
-        print(f"{status_icon} Repository Validation: {validation['status']}")
+        print("{status_icon} Repository Validation: {validation['status']}")
 
         for check_name, check_result in validation["validations"].items():
             check_icon = (
                 "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
             )
-            print(f"  {check_icon} {check_name}: {check_result['status']}")
+            print("  {check_icon} {check_name}: {check_result['status']}")
 
         if validation["issues"]:
             print("\n⚠️  Issues found:")
             for issue in validation["issues"]:
-                print(f"    - {issue}")
+                print("    - {issue}")
 
     elif args.command == "workflow":
         workflow_path = ci.create_github_actions_workflow()
-        print(f"📄 GitHub Actions workflow created: {workflow_path}")
+        print("📄 GitHub Actions workflow created: {workflow_path}")
 
 
 if __name__ == "__main__":

@@ -99,10 +99,10 @@ class IntelligentTestSelector:
             if os.getenv("GITHUB_EVENT_NAME") == "pull_request":
                 # For PR, compare with base branch
                 base_ref = os.getenv("GITHUB_BASE_REF", "main")
-                cmd = ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"]
+                cmd = ["git", "dif", "--name-only", "origin/{base_ref}...HEAD"]
             else:
                 # For push, compare with previous commit
-                cmd = ["git", "diff", "--name-only", "HEAD~1", "HEAD"]
+                cmd = ["git", "dif", "--name-only", "HEAD~1", "HEAD"]
 <<<<<<< HEAD
             
             result = subprocess.run(cmd, capture_output=True, text=True, check=False)
@@ -110,11 +110,11 @@ class IntelligentTestSelector:
             if result.returncode == 0:
                 return set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
             else:
-                print(f"⚠️ Git diff failed: {result.stderr}")
+                print("⚠️ Git diff failed: {result.stderr}")
                 return set()
                 
         except Exception as e:
-            print(f"⚠️ Error getting changed files: {e}")
+            print("⚠️ Error getting changed files: {e}")
             return set()
     
     def _path_matches_pattern(self, file_path: str, pattern: str) -> bool:
@@ -123,14 +123,14 @@ class IntelligentTestSelector:
         
         # Handle directory patterns
         if pattern.endswith('/'):
-            return file_path.startswith(pattern) or f"/{pattern}" in f"/{file_path}/"
+            return file_path.startswith(pattern) or "/{pattern}" in "/{file_path}/"
         
         # Handle glob patterns
         if '*' in pattern:
             return fnmatch(file_path, pattern)
         
         # Handle exact matches and subpaths
-        return file_path == pattern or file_path.startswith(f"{pattern}/")
+        return file_path == pattern or file_path.startswith("{pattern}/")
     
 =======
 
@@ -139,11 +139,11 @@ class IntelligentTestSelector:
             if result.returncode == 0:
                 return set(result.stdout.strip().split("\n")) if result.stdout.strip() else set()
             else:
-                print(f"⚠️ Git diff failed: {result.stderr}")
+                print("⚠️ Git diff failed: {result.stderr}")
                 return set()
 
         except Exception as e:
-            print(f"⚠️ Error getting changed files: {e}")
+            print("⚠️ Error getting changed files: {e}")
             return set()
 
     def _path_matches_pattern(self, file_path: str, pattern: str) -> bool:
@@ -152,14 +152,14 @@ class IntelligentTestSelector:
 
         # Handle directory patterns
         if pattern.endswith("/"):
-            return file_path.startswith(pattern) or f"/{pattern}" in f"/{file_path}/"
+            return file_path.startswith(pattern) or "/{pattern}" in "/{file_path}/"
 
         # Handle glob patterns
         if "*" in pattern:
             return fnmatch(file_path, pattern)
 
         # Handle exact matches and subpaths
-        return file_path == pattern or file_path.startswith(f"{pattern}/")
+        return file_path == pattern or file_path.startswith("{pattern}/")
 
 >>>>>>> origin/main
     def select_tests(self) -> Dict[str, bool]:
@@ -171,9 +171,9 @@ class IntelligentTestSelector:
         
         selected_groups = {}
         
-        print(f"📁 Analyzing {len(self.changed_files)} changed files:")
+        print("📁 Analyzing {len(self.changed_files)} changed files:")
         for file in sorted(self.changed_files):
-            print(f"  - {file}")
+            print("  - {file}")
         
         print("\n🧪 Test selection analysis:")
         
@@ -185,9 +185,9 @@ class IntelligentTestSelector:
 
         selected_groups = {}
 
-        print(f"📁 Analyzing {len(self.changed_files)} changed files:")
+        print("📁 Analyzing {len(self.changed_files)} changed files:")
         for file in sorted(self.changed_files):
-            print(f"  - {file}")
+            print("  - {file}")
 
         print("\n🧪 Test selection analysis:")
 
@@ -212,9 +212,9 @@ class IntelligentTestSelector:
 
 >>>>>>> origin/main
             if should_run:
-                print(f"  ✅ {group}: Will run (matched: {', '.join(set(matched_patterns))})")
+                print("  ✅ {group}: Will run (matched: {', '.join(set(matched_patterns))})")
             else:
-                print(f"  ⏭️ {group}: Skipping (no relevant changes)")
+                print("  ⏭️ {group}: Skipping (no relevant changes)")
 <<<<<<< HEAD
         
         # Always run security tests if security-related files changed
@@ -266,9 +266,9 @@ class IntelligentTestSelector:
         
         matrix = {"include": include}
         
-        print(f"\n📊 Generated test matrix: {len(include)} test groups")
+        print("\n📊 Generated test matrix: {len(include)} test groups")
         for item in include:
-            print(f"  - {item['test-group']}")
+            print("  - {item['test-group']}")
         
         return matrix
     
@@ -276,9 +276,9 @@ class IntelligentTestSelector:
 
         matrix = {"include": include}
 
-        print(f"\n📊 Generated test matrix: {len(include)} test groups")
+        print("\n📊 Generated test matrix: {len(include)} test groups")
         for item in include:
-            print(f"  - {item['test-group']}")
+            print("  - {item['test-group']}")
 
         return matrix
 
@@ -369,7 +369,7 @@ def main():
         skip = selector.should_skip_build()
         if args.output_format == "github":
             with open(os.environ["GITHUB_OUTPUT"], "a") as gh_out:
-                gh_out.write(f"skip_build={str(skip).lower()}\n")
+                gh_out.write("skip_build={str(skip).lower()}\n")
         else:
             print(json.dumps({"skip_build": skip}))
         return
@@ -388,7 +388,7 @@ def main():
         github_output = os.environ.get("GITHUB_OUTPUT")
         if github_output:
             with open(github_output, "a") as gh_out:
-                gh_out.write(f"matrix={matrix_json}\n")
+                gh_out.write("matrix={matrix_json}\n")
                 # Also output individual test group flags
                 selected = selector.select_tests()
                 for group, should_run in selected.items():
@@ -397,7 +397,7 @@ def main():
 =======
                     safe_group = group.replace("-", "_")
 >>>>>>> origin/main
-                    gh_out.write(f"run_{safe_group}={str(should_run).lower()}\n")
+                    gh_out.write("run_{safe_group}={str(should_run).lower()}\n")
         else:
             # Fallback for local runs
             print(json.dumps(matrix, indent=2))

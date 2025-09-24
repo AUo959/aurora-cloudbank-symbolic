@@ -117,7 +117,7 @@ class AuroraBranchManager:
             json.dump(self.default_config, f, indent=2)
 
         
-        print(f"✅ Configuration saved to: {self.config_file}")
+        print("✅ Configuration saved to: {self.config_file}")
 
     
         def get_current_branch(self):
@@ -155,7 +155,7 @@ class AuroraBranchManager:
                     subprocess.run(["git", "checkout", current_branch], cwd=self.repo_path)
         
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error creating develop branch: {e}")
+            print("❌ Error creating develop branch: {e}")
 
     
         def setup_branch_protection(self):
@@ -233,7 +233,7 @@ jobs:
             f.write(workflow_content)
 
         
-        print(f"✅ Branch protection workflow created: {branch_protection_workflow}")
+        print("✅ Branch protection workflow created: {branch_protection_workflow}")
 
     
         def create_gitflow_aliases(self):
@@ -250,12 +250,12 @@ jobs:
 
         for alias, command in aliases.items():
             try:
-                subprocess.run(["git", "config", "--local", f"alias.{alias}", command], cwd=self.repo_path, check=True)
+                subprocess.run(["git", "config", "--local", "alias.{alias}", command], cwd=self.repo_path, check=True)
                 
-        print(f"✅ Added alias: git {alias}")
+        print("✅ Added alias: git {alias}")
             
         except subprocess.CalledProcessError:
-                print(f"⚠️  Could not add alias: {alias}")
+                print("⚠️  Could not add alias: {alias}")
 
     
         def generate_branch_status_report(self):
@@ -292,20 +292,20 @@ jobs:
                 json.dump(report, f, indent=2)
 
             
-        print(f"✅ Branch status report saved: {report_file}")
+        print("✅ Branch status report saved: {report_file}")
 
             # Display summary
             print("\n📋 Current Status:")
             
-        print(f"   🌿 Current Branch: {current_branch}")
+        print("   🌿 Current Branch: {current_branch}")
             
-        print(f"   📊 Total Branches: {len(branches)}")
+        print("   📊 Total Branches: {len(branches)}")
             
-        print(f"   🔄 Aurora Version: {self.default_config['version']}")
+        print("   🔄 Aurora Version: {self.default_config['version']}")
 
         
         except Exception as e:
-            print(f"❌ Error generating report: {e}")
+            print("❌ Error generating report: {e}")
 
     
         def setup_complete_branch_system(self):
@@ -351,7 +351,7 @@ jobs:
         print("\n🔗 Integration Status:")
         
         for integration, details in self.default_config["integrations"].items():
-            print(f"   ✅ {integration}: {details['status']} ({details['version']})")
+            print("   ✅ {integration}: {details['status']} ({details['version']})")
 
 
 def main():

@@ -18,7 +18,7 @@ import sys
 
 def fix_js_style_syntax(file_path):
     """Fix JavaScript/Java-style syntax mixed into Python files"""
-    print(f"🔧 Fixing JS-style syntax in {file_path}")
+    print("🔧 Fixing JS-style syntax in {file_path}")
 
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
@@ -43,10 +43,9 @@ def fix_js_style_syntax(file_path):
 
 def fix_duplicate_encoding(file_path):
     """Fix duplicate encoding parameters in file operations"""
-    print(f"🔧 Fixing duplicate encoding in {file_path}")
+    print("🔧 Fixing duplicate encoding in {file_path}")
 
-    
-        with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
         original_content = content
 
@@ -54,7 +53,7 @@ def fix_duplicate_encoding(file_path):
     content = re.sub(r'(, encoding="utf-8"){2,}', r', encoding="utf-8"', content)
 
     
-        if content != original_content:
+    if content != original_content:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
         
@@ -90,7 +89,7 @@ def find_and_fix_python_files():
                 python_files.append(os.path.join(root, file))
 
     
-        print(f"📁 Found {len(python_files)} Python files to check")
+        print("📁 Found {len(python_files)} Python files to check")
         files_fixed = 0
     syntax_errors = []
 
@@ -100,7 +99,7 @@ def find_and_fix_python_files():
 
         
         if not is_valid:
-            print(f"❌ Syntax error in {file_path}")
+            print("❌ Syntax error in {file_path}")
             
         syntax_errors.append((file_path, error_msg))
 
@@ -114,7 +113,7 @@ def find_and_fix_python_files():
                 is_valid_after, _ = check_syntax(file_path)
                 
         if is_valid_after:
-                    print(f"✅ Fixed syntax errors in {file_path}")
+                    print("✅ Fixed syntax errors in {file_path}")
                     
         files_fixed += 1
                     # Remove from error list
@@ -122,17 +121,16 @@ def find_and_fix_python_files():
                 else:
                     print(f"⚠️  Could not automatically fix {file_path}")
 
-    
-        print("\n📊 Summary:")
-    print(f"   ✅ Files fixed: {files_fixed}")
-    print(f"   ❌ Files still with errors: {len(syntax_errors)}")
+    print("\n📊 Summary:")
+    print("   ✅ Files fixed: {files_fixed}")
+    print("   ❌ Files still with errors: {len(syntax_errors)}")
 
     
         if syntax_errors:
         print("\n🚨 Remaining syntax errors:")
         
         for file_path, error_msg in syntax_errors:
-            print(f"   {file_path}: {error_msg.strip()}")
+            print("   {file_path}: {error_msg.strip()}")
 
     
         return len(syntax_errors) == 0

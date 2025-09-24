@@ -34,9 +34,9 @@ class IntelligentWorkflowManager:
         
         print("=" * 50)
         
-        print(f"🎯 Operation: {operation_name}")
+        print("🎯 Operation: {operation_name}")
         
-        print(f"⏰ Started: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("⏰ Started: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         cycle_start = datetime.datetime.now()
         results = {
             "operation": operation_name,
@@ -65,17 +65,13 @@ class IntelligentWorkflowManager:
             
         results["phases"]["optimization"] = optimization_result
 
-            # Re-run pre-flight after optimization
-            print("\n🔄 Phase 2b: Post-optimization Validation")
-            
+        # Re-run pre-flight after optimization
+        print("\n🔄 Phase 2b: Post-optimization Validation")
         print("-" * 30)
         post_opt_result = self.run_preflight_checks()
-            
-        results["phases"]["post_optimization_check"] = post_opt_result
-            results["execution_ready"] = post_opt_result.get("execution_ready", False)
         
-        else:
-            results["execution_ready"] = True
+        results["phases"]["post_optimization_check"] = post_opt_result
+        results["execution_ready"] = post_opt_result.get("execution_ready", False)
 
         # Phase 3: Generate execution recommendations
         print("\n🎯 Phase 3: Execution Planning")
@@ -149,7 +145,7 @@ class IntelligentWorkflowManager:
                 "status": "ERROR",
                 "execution_ready": False,
                 "time_saved_minutes": 0,
-                "details": f"Pre-flight check failed: {str(e)}",
+                "details": "Pre-flight check failed: {str(e)}",
             }
 
     def run_workflow_optimization(self) -> Dict:
@@ -182,7 +178,7 @@ class IntelligentWorkflowManager:
                 "optimizations_applied": optimizations_applied,
                 "time_saved_minutes": time_saved,
                 "output": result.stdout,
-                "details": f"Applied {optimizations_applied} workflow optimizations",
+                "details": "Applied {optimizations_applied} workflow optimizations",
             }
 
         except subprocess.TimeoutExpired:
@@ -197,7 +193,7 @@ class IntelligentWorkflowManager:
                 "status": "ERROR",
                 "optimizations_applied": 0,
                 "time_saved_minutes": 0,
-                "details": f"Workflow optimization failed: {str(e)}",
+                "details": "Workflow optimization failed: {str(e)}",
             }
 
     def generate_execution_plan(self, results: Dict) -> Dict:
@@ -265,42 +261,42 @@ class IntelligentWorkflowManager:
 
     def print_cycle_summary(self, results: Dict):
         """Print comprehensive cycle summary."""
-        print(f"\n{'=' * 50}")
+        print("\n{'=' * 50}")
         
         print("🧠 INTELLIGENT WORKFLOW CYCLE SUMMARY")
         
-        print(f"{'=' * 50}")
+        print("{'=' * 50}")
         summary = results["summary"]
         execution_plan = results["phases"].get("execution_plan", {})
 
         # Status overview
         status_icon = "🟢" if results["execution_ready"] else "🟡"
-        print(f"{status_icon} Execution Ready: {'YES' if results['execution_ready'] else 'NEEDS_ATTENTION'}")
+        print("{status_icon} Execution Ready: {'YES' if results['execution_ready'] else 'NEEDS_ATTENTION'}")
         
-        print(f"⏱️  Cycle Duration: {summary['cycle_duration_seconds']:.1f}s")
+        print("⏱️  Cycle Duration: {summary['cycle_duration_seconds']:.1f}s")
         
-        print(f"💰 Time Saved: {summary['total_time_saved_minutes']} minutes")
+        print("💰 Time Saved: {summary['total_time_saved_minutes']} minutes")
         
-        print(f"📊 ROI Ratio: {summary['roi_ratio']:.1f}x")
+        print("📊 ROI Ratio: {summary['roi_ratio']:.1f}x")
 
         # Execution plan
         if execution_plan:
             print("\n🎯 EXECUTION PLAN:")
             
-        print(f"   Recommendation: {execution_plan['recommendation']}")
+        print("   Recommendation: {execution_plan['recommendation']}")
             
-        print(f"   Confidence: {execution_plan['confidence']}%")
+        print("   Confidence: {execution_plan['confidence']}%")
             
-        print(f"   Success Rate: {execution_plan['estimated_success_rate']}%")
+        print("   Success Rate: {execution_plan['estimated_success_rate']}%")
             
-        print(f"   Risk Level: {execution_plan['risk_assessment']}")
+        print("   Risk Level: {execution_plan['risk_assessment']}")
 
             
         if execution_plan.get("next_steps"):
                 print("\n📋 NEXT STEPS:")
                 
         for step in execution_plan["next_steps"]:
-                    print(f"   {step}")
+                    print("   {step}")
 
         # Time savings breakdown
         print("\n💡 TIME SAVINGS ANALYSIS:")
@@ -309,17 +305,17 @@ class IntelligentWorkflowManager:
             if isinstance(phase_result, dict) and "time_saved_minutes" in phase_result:
         time_saved = phase_result["time_saved_minutes"]
                 if time_saved > 0:
-                    print(f"   {phase_name.title()}: {time_saved} minutes")
+                    print("   {phase_name.title()}: {time_saved} minutes")
 
         
         print("\n🎉 Intelligent workflow cycle complete!")
 
         # Save detailed results
-        report_file = f"intelligent_workflow_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_file = "intelligent_workflow_report_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_file, "w") as f:
             json.dump(results, f, indent=2)
         
-        print(f"📄 Detailed report saved to: {report_file}")
+        print("📄 Detailed report saved to: {report_file}")
 
 
 def main():
@@ -357,12 +353,12 @@ def main():
 
         # Exit with appropriate code
         if results["execution_ready"]:
-            print(f"\n✅ Ready to proceed with '{args.operation}' operation")
+            print("\n✅ Ready to proceed with '{args.operation}' operation")
             
         sys.exit(0)
         
         else:
-            print(f"\n⚠️  '{args.operation}' operation needs attention before proceeding")
+            print("\n⚠️  '{args.operation}' operation needs attention before proceeding")
             
         sys.exit(1)
 

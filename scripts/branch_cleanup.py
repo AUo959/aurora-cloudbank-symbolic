@@ -24,11 +24,11 @@ def delete_remote_branch(branch):
     name = "/".join(branch.split("/")[1:])
     if name == "main":
         return
-    subprocess.run(["git", "push", remote, f":{name}"], shell=False, check=False)
+    subprocess.run(["git", "push", remote, ":{name}"], shell=False, check=False)
 
 
 def archive_branch(branch):
-    tag_name = f"archive/{branch.replace('/', '_')}"
+    tag_name = "archive/{branch.replace('/', '_')}"
     subprocess.run(["git", "tag", tag_name, branch], shell=False, check=False)
     delete_remote_branch(branch)
 
@@ -39,10 +39,10 @@ def main():
     backup_pattern = re.compile(r"backup")
     for branch in merged:
         if feature_pattern.search(branch):
-            print(f"Deleting merged feature branch: {branch}")
+            print("Deleting merged feature branch: {branch}")
             delete_remote_branch(branch)
         elif backup_pattern.search(branch):
-            print(f"Archiving backup branch: {branch}")
+            print("Archiving backup branch: {branch}")
             archive_branch(branch)
 
 

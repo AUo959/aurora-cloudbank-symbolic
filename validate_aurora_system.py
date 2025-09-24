@@ -20,9 +20,9 @@ import sys
 def test_holographic_interface():
     """Test the holographic interface orchestrator"""
     print("🌟 Testing Holographic Interface Orchestrator...")
-        orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
+    orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
     if not os.path.exists(orchestrator_path):
-        print(f"❌ {orchestrator_path} not found")
+        print("❌ {orchestrator_path} not found")
         
         return False
 
@@ -30,15 +30,13 @@ def test_holographic_interface():
     try:
         result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)        
         if result.returncode == 0:
-            print(f"✅ {orchestrator_path} - Valid Node.js syntax")
-            
-        return True
+            print("✅ {orchestrator_path} - Valid Node.js syntax")
+            return True
         else:
-            print(f"❌ {orchestrator_path} - Syntax error: {result.stderr}")
-            
-        return False
+            print("❌ {orchestrator_path} - Syntax error: {result.stderr}")
+            return False
     except Exception as e:
-        print(f"⚠️  Could not test Node.js syntax: {e}")
+        print("⚠️  Could not test Node.js syntax: {e}")
         
         return True  # Assume OK if Node.js not available
 
@@ -48,11 +46,11 @@ def test_aurora_custom_gpt_bridge():
     print("🔗 Testing Aurora Custom GPT Bridge...")
         bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
     if os.path.exists(bridge_path):
-        print(f"✅ {bridge_path} exists")
+        print("✅ {bridge_path} exists")
         
         return True
     else:
-        print(f"⚠️  {bridge_path} not found (may be in different location)")
+        print("⚠️  {bridge_path} not found (may be in different location)")
         
         return True  # Not critical for core tests
 
@@ -62,11 +60,11 @@ def test_orion_core_config():
     print("🛰️ Testing ORION Core Configuration...")
         config_path = "src/config/orion_core_config.js"
     if os.path.exists(config_path):
-        print(f"✅ {config_path} exists")
+        print("✅ {config_path} exists")
         
         return True
     else:
-        print(f"⚠️  {config_path} not found")
+        print("⚠️  {config_path} not found")
         
         return True  # Not critical
 
@@ -82,10 +80,10 @@ def test_core_documentation():
         all_exist = True
     for doc in docs:
         if os.path.exists(doc):
-            print(f"✅ {doc} exists")
+            print("✅ {doc} exists")
         
         else:
-            print(f"❌ {doc} missing")
+            print("❌ {doc} missing")
         all_exist = False
 
     return all_exist
@@ -108,7 +106,7 @@ def test_git_repository_status():
                 print("⚠️  Uncommitted changes found:")
                 
         for line in uncommitted.split("\n"):
-                    print(f"   {line}")
+                    print("   {line}")
             
         else:
                 print("✅ Repository is clean")
@@ -120,7 +118,7 @@ def test_git_repository_status():
         return False
 
     except Exception as e:
-        print(f"❌ Git error: {e}")
+        print("❌ Git error: {e}")
         
         return False
 
@@ -135,12 +133,12 @@ def test_system_integration():
     for file_path in key_files:
         if os.path.exists(file_path):
             integration_score += 1
-            print(f"✅ {file_path} exists")
+            print("✅ {file_path} exists")
         
         else:
-            print(f"❌ {file_path} missing")
+            print("❌ {file_path} missing")
         success_rate = (integration_score / len(key_files)) * 100
-    print(f"📊 Integration Score: {success_rate:.1f}%")
+    print("📊 Integration Score: {success_rate:.1f}%")
 
     
         return success_rate >= 80
@@ -165,7 +163,7 @@ def generate_validation_report():
 
     
         for test_name, test_func in tests:
-        print(f"\n📋 {test_name}")
+        print("\n📋 {test_name}")
         
         print("-" * 40)
         success = test_func()
@@ -177,8 +175,8 @@ def generate_validation_report():
     print("\n" + "=" * 60)
     print("🎯 VALIDATION SUMMARY")
     print("=" * 60)
-    print(f"✅ Tests Passed: {passed}/{total}")
-    print(f"📊 Success Rate: {(passed / total) * 100:.1f}%")
+    print("✅ Tests Passed: {passed}/{total}")
+    print("📊 Success Rate: {(passed / total) * 100:.1f}%")
 
     
         if passed == total:
@@ -197,7 +195,7 @@ def generate_validation_report():
         "status": status,
         "total_tests": total,
         "passed_tests": passed,
-        "success_rate": f"{(passed / total) * 100:.1f}%",
+        "success_rate": "{(passed / total) * 100:.1f}%",
         "test_results": results,
     }
 

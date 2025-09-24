@@ -307,7 +307,12 @@ class AuroraDeveloperCLI:
                         since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                     except ValueError:
                         print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
-            self.anchor_tracker.scan_repository(since=since_dt, pattern=getattr(args, "pattern", None))
+            self.anchor_tracker.scan_repository(
+                since=since_dt, 
+                pattern=getattr(args, "pattern", None),
+                quick_scan=True,
+                max_files=800
+            )
             self.anchor_tracker.build_lineage_map()
 
             if args.target:
@@ -448,6 +453,8 @@ class AuroraDeveloperCLI:
                 extensions=exts,
                 since=since_dt,
                 pattern=getattr(args, "pattern", None),
+                quick_scan=True,  # Enable quick scan for status command
+                max_files=500,    # Limit files for performance
             )
             total_anchors = sum(len(a) for a in anchors.values())
             if not getattr(args, "json", False):

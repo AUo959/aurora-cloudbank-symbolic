@@ -86,7 +86,7 @@ class ValidationManager:
 
         if strategy == "timestamped":
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            name = f"validation_report_{timestamp}.md"
+            name = "validation_report_{timestamp}.md"
             return self.repo_root / self.config["validation_dir"] / name
 
         elif strategy == "post_commit":
@@ -149,7 +149,7 @@ class ValidationManager:
                 f.write("\n".join(lines_to_add))
                 f.write("\n")
 
-            print(f"✅ Updated .gitignore with {len(lines_to_add)} validation exclusions")
+            print("✅ Updated .gitignore with {len(lines_to_add)} validation exclusions")
 
     def create_post_commit_hook(self):
         """Create post-commit hook to update validation files after commit"""
@@ -197,7 +197,7 @@ echo "✅ Post-commit validation update complete"
         if len(reports) > max_reports:
             for old_report in reports[max_reports:]:
                 old_report.unlink()
-                print(f"🗑️ Cleaned up old report: {old_report.name}")
+                print("🗑️ Cleaned up old report: {old_report.name}")
 
     def implement_strategy(self, strategy: str):
         """Implement a specific validation strategy"""
@@ -215,7 +215,7 @@ echo "✅ Post-commit validation update complete"
             validation_dir.mkdir(exist_ok=True)
             self.setup_pre_commit_exclusion()
             print("✅ Implemented timestamped strategy")
-            print(f"   - Reports saved to {validation_dir}")
+            print("   - Reports saved to {validation_dir}")
             print("   - Unique filenames prevent conflicts")
 
         elif strategy == "post_commit":
@@ -235,9 +235,9 @@ echo "✅ Post-commit validation update complete"
         """Generate status report of current validation setup"""
         print("\n🛰️ Aurora Validation Manager Status")
         print("=" * 50)
-        print(f"Strategy: {self.config['strategy']}")
-        print(f"Repository Root: {self.repo_root}")
-        print(f"Exclude from Commit: {self.config['exclude_from_commit']}")
+        print("Strategy: {self.config['strategy']}")
+        print("Repository Root: {self.repo_root}")
+        print("Exclude from Commit: {self.config['exclude_from_commit']}")
 
         # Check git hooks
         hooks_dir = self.repo_root / ".git" / "hooks"
@@ -245,15 +245,15 @@ echo "✅ Post-commit validation update complete"
         post_commit = hooks_dir / "post-commit"
 
         print("\nGit Hooks:")
-        print(f"  Pre-commit: {'✅' if pre_commit.exists() else '❌'}")
-        print(f"  Post-commit: {'✅' if post_commit.exists() else '❌'}")
+        print("  Pre-commit: {'✅' if pre_commit.exists() else '❌'}")
+        print("  Post-commit: {'✅' if post_commit.exists() else '❌'}")
 
         # Check validation directory
         validation_dir = self.repo_root / self.config["validation_dir"]
         if validation_dir.exists():
             reports = list(validation_dir.glob("*.md"))
-            print(f"\nValidation Directory: {validation_dir}")
-            print(f"  Reports: {len(reports)}")
+            print("\nValidation Directory: {validation_dir}")
+            print("  Reports: {len(reports)}")
 
         # Check current validation files
         print("\nCurrent Validation Files:")
@@ -261,9 +261,9 @@ echo "✅ Post-commit validation update complete"
             path = self.repo_root / vf
             if path.exists():
                 size = path.stat().st_size
-                print(f"  {vf}: {size} bytes")
+                print("  {vf}: {size} bytes")
             else:
-                print(f"  {vf}: Not found")
+                print("  {vf}: Not found")
 
 
 def main():
@@ -291,8 +291,8 @@ def main():
         manager.cleanup_old_reports()
     elif args.exclude_file:
         excluded = manager.should_exclude_from_commit(args.exclude_file)
-        print(f"File: {args.exclude_file}")
-        print(f"Exclude from commit: {excluded}")
+        print("File: {args.exclude_file}")
+        print("Exclude from commit: {excluded}")
     else:
         parser.print_help()
 

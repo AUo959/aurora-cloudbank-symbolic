@@ -28,7 +28,7 @@ def main():
     """Generate final security verification report."""
     print("🔒 AURORA CLOUDBANK - FINAL SECURITY VERIFICATION")
     print("=" * 60)
-    print(f"📅 Report Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("📅 Report Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("🎯 Verification: All Security Vulnerabilities Resolved")
     print()
 
@@ -42,7 +42,7 @@ def main():
         print("❌ CRITICAL: shell=True vulnerabilities still found:")
         
         for file in stdout.strip().split("\n"):
-            print(f"   - {file}")
+            print("   - {file}")
     else:
         print("✅ shell=True vulnerabilities: RESOLVED")
 
@@ -59,7 +59,7 @@ def main():
         
         for file in eval_files + exec_files:
             if file:
-                print(f"   - {file}")
+                print("   - {file}")
     else:
         print("✅ Dynamic code execution: CLEAN")
 
@@ -78,10 +78,10 @@ def main():
 
     for file in security_files:
         if Path(file).exists():
-            print(f"✅ {file}")
+            print("✅ {file}")
         
         else:
-            print(f"❌ {file} MISSING")
+            print("❌ {file} MISSING")
 
     
         print()

@@ -75,25 +75,46 @@ class SymbolicAnchorTracker:
         extensions: List[str] = None,
         since: Optional[datetime] = None,
         pattern: Optional[str] = None,
+        quick_scan: bool = False,
+        max_files: int = 1000,
     ) -> Dict[str, List[SymbolicAnchor]]:
         """Scan repository for symbolic anchors
 
         - extensions: file extensions to include
         - since: only scan files modified at or after this datetime
         - pattern: filter anchors to those whose ID or context contains this substring (case-insensitive)
+        - quick_scan: if True, limit scanning for performance
+        - max_files: maximum number of files to scan (for performance)
         """
         if extensions is None:
             extensions = ['.py', '.js', '.md', '.json', '.yaml', '.yml', '.txt']
 
         found_anchors = {}
+        files_scanned = 0
+
+        # Extensive skip patterns for performance
+        skip_dirs = {
+            '__pycache__', 'node_modules', '.git', '.venv', 'venv_opal2', 
+            '.pytest_cache', 'htmlcov', '.benchmarks', 'coverage'
+        }
 
         for root, dirs, files in os.walk(self.repo_path):
             # Skip hidden directories and common ignore patterns
-            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'node_modules']]
+            dirs[:] = [d for d in dirs if not d.startswith('.') and d not in skip_dirs]
+            
+            # Quick scan optimization: limit depth
+            if quick_scan:
+                current_depth = len(Path(root).relative_to(self.repo_path).parts)
+                if current_depth > 3:  # Limit depth to 3 levels
+                    continue
 
             for file in files:
+                if files_scanned >= max_files:
+                    break
+                    
                 if any(file.endswith(ext) for ext in extensions):
                     file_path = Path(root) / file
+                    files_scanned += 1
 
                     # Since filter (by file modification time)
                     if since is not None:
@@ -117,6 +138,10 @@ class SymbolicAnchorTracker:
                     if anchors:
                         rel_path = str(file_path.relative_to(self.repo_path))
                         found_anchors[rel_path] = anchors
+
+            # Break outer loop if we've hit max files
+            if files_scanned >= max_files:
+                break
 
         return found_anchors
 

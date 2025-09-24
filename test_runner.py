@@ -26,15 +26,14 @@ class AuroraTestRunner:
         cmd = [sys.executable, "-m", "pytest", "tests/test_native_implementations.py", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
-    
-        def run_unit_tests(self):
+    def run_unit_tests(self):
         """Run fast unit tests"""
         print("⚡ Running Unit Tests...")
         cmd = [sys.executable, "-m", "pytest", "-m", "unit", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
     
-        def run_smoke_tests(self):
+    def run_smoke_tests(self):
         """Run critical smoke tests"""
         print("💨 Running Smoke Tests...")
         cmd = [sys.executable, "-m", "pytest", "-m", "smoke", "-v", "--tb=short"]
@@ -69,22 +68,22 @@ class AuroraTestRunner:
         ]
         results = {}
         for test_name, test_func in tests:
-            print(f"\n{'=' * 50}")
+            print("\n{'=' * 50}")
             
-        print(f"Starting: {test_name}")
+        print("Starting: {test_name}")
             
         print("=" * 50)
         result = test_func()            
         results[test_name] = result.returncode == 0
 
             if result.returncode != 0:
-                print(f"❌ {test_name} failed!")
+                print("❌ {test_name} failed!")
             
         else:
-                print(f"✅ {test_name} passed!")
+                print("✅ {test_name} passed!")
 
         # Run performance benchmark
-        print(f"\n{'=' * 50}")
+        print("\n{'=' * 50}")
         
         print("Performance Benchmark")
         
@@ -94,7 +93,7 @@ class AuroraTestRunner:
 
         # Summary
         total_time = time.time() - start_time
-        print(f"\n{'=' * 50}")
+        print("\n{'=' * 50}")
         
         print("TEST SUMMARY")
         
@@ -103,10 +102,10 @@ class AuroraTestRunner:
         
         for test_name, passed in results.items():
             status = "✅ PASS" if passed else "❌ FAIL"
-            print(f"{status} {test_name}")
+            print("{status} {test_name}")
 
         
-        print(f"\nTotal execution time: {total_time:.2f} seconds")
+        print("\nTotal execution time: {total_time:.2f} seconds")
 
         # Return overall success
         return all(results.values())
@@ -139,7 +138,7 @@ def main():
             
         sys.exit(0 if success else 1)
         result = runner.run_performance_benchmark()            
-        print(f"Unknown test type: {test_type}")
+        print("Unknown test type: {test_type}")
             
         print("Available: native, unit, smoke, api, benchmark, all")
             

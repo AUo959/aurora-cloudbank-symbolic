@@ -76,6 +76,10 @@ get_ci_overall_state() {
   # Prefer Checks API (GitHub Actions) if present; fall back to legacy Status API
   local checks
   checks=$(api GET "/commits/$sha/check-runs" 2>/dev/null || true)
+  # Ensure we have JSON; if not, set to an empty object with no check_runs
+  if ! echo "$checks" | jq -e . >/dev/null 2>&1; then
+    checks='{"check_runs":[]}'
+  fi
   # Build a map of latest check-run per name (by started_at, fallback created_at), then operate on that set
   local latest_map latest_list total
   latest_map=$(echo "$checks" | jq -r '

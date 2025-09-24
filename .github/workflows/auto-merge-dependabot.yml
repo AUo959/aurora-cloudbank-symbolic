@@ -7,10 +7,18 @@ on:
         description: "Space-separated list of PR numbers to process"
         required: false
         default: "146 147 149 148 152 151"
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/process_dependabot_prs.sh'
+      - '.github/workflows/auto-merge-dependabot.yml'
 
 permissions:
   contents: write
   pull-requests: write
+  issues: write
+  checks: read
+  statuses: read
 
 concurrency:
   group: auto-merge-dependabot

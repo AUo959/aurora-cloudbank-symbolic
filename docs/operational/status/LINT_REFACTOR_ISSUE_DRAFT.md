@@ -48,7 +48,7 @@ Stage 2 – imports/collisions
 
 Stage 3 – undefined names/logic nits
 
-- [x] modules/opal2 (F821/E999) - F821 completed, E999 partially fixed
+- [ ] modules/opal2 (F821/E999)
 - [ ] modules/cask (F821/E999)
 - [ ] src/core (F821/E999)
 - [ ] src/bridges (F821/E999)

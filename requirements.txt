@@ -1,39 +1,13 @@
-# Aurora CloudBank Core Dependencies
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-pydantic>=2.11.7
-websockets>=11.0.0
-aiofiles>=23.0.0
-python-multipart>=0.0.6
-starlette>=0.27.0
-httpx>=0.28.1
-schedule>=1.2.0
+# Aurora CloudBank Opal2 - Secure Dependencies
+fastapi==0.104.1
+pydantic==2.4.2
+uvicorn[standard]==0.23.2
+starlette==0.27.0
+httpx==0.25.0
+pytest==7.4.3
+numpy==1.24.4
+websockets==11.0.3
 
-# Scientific Computing & Quantum
-numpy>=1.26
-qiskit>=1.1.0
-qiskit-aer>=0.15.0
-clifford>=1.4.0
-
-# Data Analysis & Visualization  
-pandas>=2.3.1
-plotly>=6.2.0
-PyYAML>=6.0.1
-
-# Code Quality & Testing
-flake8>=6.1.0
-black>=23.11.0
-isort>=5.12.0
-pytest>=8.0.0
-pytest-asyncio>=0.23.8
-
-# Security & Crypto
-cryptography>=41.0.0
-passlib>=1.7.4
-
-# Development Tools
-ipython>=8.17.0
-notebook>=7.0.0
-
-# Optional Enhanced Dependencies (with fallbacks)
-# Install with: pip install -r requirements.txt -r requirements-optional.txt
+# Security requirements
+bandit==1.7.5
+safety==2.3.5

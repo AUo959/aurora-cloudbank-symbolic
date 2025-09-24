@@ -147,7 +147,7 @@ class ImportFixer:
         return True
 
         except Exception as e:
-            print("Error processing {file_path}: {e}")
+            print(f"Error processing {file_path}: {e}")
             
         return False
 
@@ -169,26 +169,26 @@ class ImportFixer:
         python_files.append(file_path)
 
         
-        print("Found {len(python_files)} Python files to process")
+        print(f"Found {len(python_files)} Python files to process")
         files_fixed = 0
 
         for file_path in python_files:
             try:
                 if self.add_missing_imports(file_path):
                     files_fixed += 1
-                    print("✓ Fixed imports in {file_path}")
+                    print(f"✓ Fixed imports in {file_path}")
 
             
         except Exception as e:
-                print("✗ Error processing {file_path}: {e}")
+                print(f"✗ Error processing {file_path}: {e}")
                 
         continue
 
         print("\n=== Import Fixing Complete ===")
         
-        print("Files Fixed: {files_fixed}")
+        print(f"Files Fixed: {files_fixed}")
         
-        print("Files Processed: {len(python_files)}")
+        print(f"Files Processed: {len(python_files)}")
 
 
 def main():

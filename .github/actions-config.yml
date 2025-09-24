@@ -17,8 +17,6 @@ codeql:
 ci:
   # Continue on non-critical failures
   fail_fast: false
-  # Nudge: 2025-09-23 to trigger CI after CodeQL config change
-  nudge: true
 
   # Upload artifacts even on partial failures
   always_upload_artifacts: true

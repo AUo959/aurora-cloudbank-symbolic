@@ -107,8 +107,6 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-/node
-/npm
 
 # Runtime data
 pids
@@ -200,10 +198,3 @@ AURORA_VALIDATION_SUMMARY.md
 # Aurora CI/CD generated manifests (do not commit)
 aurora_ci_validation_manifest.json
 aurora_deployment_manifest.json
-
-# Local backups of deleted branches (git bundle archives)
-backups/
-*.bundle
-
-# Health monitor metrics
-.gitwiz/metrics/

@@ -57,45 +57,47 @@ class BranchManager:
         """
         try:
             # Get all remote branches with dates
-            cmd = [
+        cmd = [
                 "git",
                 "for-each-re",
                 "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
-            result = subprocess.run(
-                cmd,
+        result = subprocess.run(                cmd,
                 capture_output=True,
-                text=True,
+        text=True,
                 cwd=self.repo_path,
-                shell=False,
+        shell=False,
                 check=False,
             )
 
-            if result.returncode != 0:
-                print("Error getting branch info: {result.stderr}")
-                return []
+            
+        if result.returncode != 0:
+                print(f"Error getting branch info: {result.stderr}")
+                
+        return []
 
             branches = []
             for line in result.stdout.strip().split("\n"):
                 if not line:
                     continue
-                parts = line.split("|", 3)
+        parts = line.split("|", 3)
                 
-                if len(parts) >= 4:
+        if len(parts) >= 4:
                     branch_name, date_str, author, subject = parts
 
                     # Parse date
                     try:
-                        commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
-                        days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
+        commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+        days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
                     except ValueError:
-                        days_old = 0
+        days_old = 0
 
                     # Check if merged
                     is_merged = self.is_branch_merged(branch_name)
 
-                    branches.append(
+                    
+        branches.append(
                         {
                             "name": branch_name,
                             "date": date_str,
@@ -113,7 +115,7 @@ class BranchManager:
 
         
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error analyzing branches: {e}")
+            print(f"Error analyzing branches: {e}")
             
         return []
 
@@ -237,18 +239,18 @@ class BranchManager:
                             summary["deleted"].append(branch_name)
                         
         else:
-                            summary["errors"].append("Failed to delete {branch_name}: {result.stderr}")
+                            summary["errors"].append(f"Failed to delete {branch_name}: {result.stderr}")
                     
         except (OSError, ValueError, RuntimeError) as e:
-                        summary["errors"].append("Error deleting {branch_name}: {e}")
+                        summary["errors"].append(f"Error deleting {branch_name}: {e}")
                 
         else:
-                    summary["deleted"].append("[DRY-RUN] {branch_name}")
+                    summary["deleted"].append(f"[DRY-RUN] {branch_name}")
 
             
         elif action == "archive":
                 # Create tag for archive
-                tag_name = "archive/{branch_name.replace('origin/', '').replace('/', '-')}"
+                tag_name = f"archive/{branch_name.replace('origin/', '').replace('/', '-')}"
                 if confirm and not self.dry_run:
                     try:
         cmd = ["git", "tag", tag_name, branch_name]
@@ -260,13 +262,13 @@ class BranchManager:
         check=False,
                         )
                         
-        summary["archived"].append("{branch_name} -> {tag_name}")
+        summary["archived"].append(f"{branch_name} -> {tag_name}")
                     
         except (OSError, ValueError, RuntimeError) as e:
-                        summary["errors"].append("Error archiving {branch_name}: {e}")
+                        summary["errors"].append(f"Error archiving {branch_name}: {e}")
                 
         else:
-                    summary["archived"].append("[DRY-RUN] {branch_name} -> {tag_name}")
+                    summary["archived"].append(f"[DRY-RUN] {branch_name} -> {tag_name}")
 
             
         else:
@@ -287,7 +289,7 @@ class BranchManager:
         report = []
         report.append("# Aurora CloudBank - Branch Management Report")
         
-        report.append("**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        report.append(f"**Generated:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         
         report.append("")
 
@@ -306,14 +308,14 @@ class BranchManager:
         
         report.append("")
         
-        report.append("**Total Branches:** {total}")
+        report.append(f"**Total Branches:** {total}")
         
         report.append("")
         
         report.append("### By Action:")
         
         for action, count in sorted(by_action.items()):
-            report.append("- **{action.title()}**: {count} branches")
+            report.append(f"- **{action.title()}**: {count} branches")
 
         
         report.append("")
@@ -321,7 +323,7 @@ class BranchManager:
         report.append("### By Category:")
         
         for category, count in sorted(by_category.items()):
-            report.append("- **{category.replace('-', ' ').title()}**: {count} branches")
+            report.append(f"- **{category.replace('-', ' ').title()}**: {count} branches")
 
         
         report.append("")
@@ -336,22 +338,22 @@ class BranchManager:
             if not action_branches:
                 continue
 
-            report.append("### {action.title()} ({len(action_branches)} branches)")
+            report.append(f"### {action.title()} ({len(action_branches)} branches)")
             
         report.append("")
 
             
         for branch in action_branches:
                 merged_status = "✅ Merged" if branch["is_merged"] else "❌ Not merged"
-                report.append("- **{branch['name']}**")
+                report.append(f"- **{branch['name']}**")
                 
-        report.append("  - Age: {branch['days_old']} days")
+        report.append(f"  - Age: {branch['days_old']} days")
                 
-        report.append("  - Status: {merged_status}")
+        report.append(f"  - Status: {merged_status}")
                 
-        report.append("  - Category: {branch['category']}")
+        report.append(f"  - Category: {branch['category']}")
                 
-        report.append("  - Last commit: {branch['subject']}")
+        report.append(f"  - Last commit: {branch['subject']}")
                 
         report.append("")
 
@@ -394,7 +396,7 @@ def main():
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(report)
             
-        print("📄 Report saved to {args.output}")
+        print(f"📄 Report saved to {args.output}")
         
         else:
             print(report)
@@ -407,20 +409,20 @@ def main():
             
         print("\n✅ Cleanup Summary:")
             
-        print("  - Deleted: {len(summary['deleted'])} branches")
+        print(f"  - Deleted: {len(summary['deleted'])} branches")
             
-        print("  - Archived: {len(summary['archived'])} branches")
+        print(f"  - Archived: {len(summary['archived'])} branches")
             
-        print("  - Kept: {len(summary['kept'])} branches")
+        print(f"  - Kept: {len(summary['kept'])} branches")
             
-        print("  - Errors: {len(summary['errors'])} issues")
+        print(f"  - Errors: {len(summary['errors'])} issues")
 
             
         if summary["errors"]:
                 print("\n❌ Errors:")
                 
         for error in summary["errors"]:
-                    print("  - {error}")
+                    print(f"  - {error}")
 
     
         else:

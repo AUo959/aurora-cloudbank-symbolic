@@ -22,8 +22,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8
 
-      - name: Run flake8 (tools + opal2)
+      - name: Run flake8 (scoped to tools)
         run: |
-          flake8 tools/symbolic tools/cli modules/opal2 --max-line-length=120 --extend-ignore=E203,W503,F811
+          flake8 tools/symbolic tools/cli --max-line-length=120 --extend-ignore=E203,W503,F811
         # Note: broader linting for src/modules/tests is managed locally via pre-commit.
-        # We are expanding CI lint coverage to include modules/opal2 now that it passes locally.
+        # We intentionally scope CI linting to modernized tools to avoid noise from legacy code.

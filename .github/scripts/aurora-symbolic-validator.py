@@ -132,7 +132,7 @@ except Exception as e:
         except subprocess.TimeoutExpired:
             validation_results["status"] = "timeout"
         except Exception as e:
-            validation_results["status"] = "error:{e}"
+            validation_results["status"] = f"error:{e}"
 <<<<<<< HEAD
         
         return validation_results
@@ -236,7 +236,7 @@ except Exception as e:
         except subprocess.TimeoutExpired:
             dlp_results["status"] = "timeout"
         except Exception as e:
-            dlp_results["status"] = "error:{e}"
+            dlp_results["status"] = f"error:{e}"
 <<<<<<< HEAD
         
         return dlp_results
@@ -338,7 +338,7 @@ else:
         except subprocess.TimeoutExpired:
             security_results["status"] = "timeout"
         except Exception as e:
-            security_results["status"] = "error:{e}"
+            security_results["status"] = f"error:{e}"
 <<<<<<< HEAD
         
         return security_results
@@ -353,7 +353,7 @@ else:
         manifest = {
             "aurora_ci_validation": {
                 "timestamp": datetime.now().isoformat(),
-                "workflow_run": "github_actions_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                "workflow_run": f"github_actions_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 "symbolic_anchors": anchor_results,
                 "dlp_tracking": dlp_results,
                 "security_ethics": security_results,
@@ -421,11 +421,11 @@ else:
         with open(manifest_path, 'w') as f:
             json.dump(manifest, f, indent=2)
         
-        print("\n📄 Aurora CI manifest saved: {manifest_path}")
+        print(f"\n📄 Aurora CI manifest saved: {manifest_path}")
         
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print("\n🌟 Aurora Validation Status: {validation_status.upper()}")
+        print(f"\n🌟 Aurora Validation Status: {validation_status.upper()}")
         
 =======
 
@@ -437,11 +437,11 @@ else:
         with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        print("\n📄 Aurora CI manifest saved: {manifest_path}")
+        print(f"\n📄 Aurora CI manifest saved: {manifest_path}")
 
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print("\n🌟 Aurora Validation Status: {validation_status.upper()}")
+        print(f"\n🌟 Aurora Validation Status: {validation_status.upper()}")
 
 >>>>>>> origin/main
         if validation_status == "fully_operational":
@@ -509,13 +509,13 @@ def main():
         github_output = os.environ.get("GITHUB_OUTPUT")
 
         def write_output(name: str, value: str) -> None:
-            line = "{name}={value}\n"
+            line = f"{name}={value}\n"
             if github_output:
                 try:
                     with open(github_output, "a") as gh_out:
                         gh_out.write(line)
                 except Exception as e:
-                    print("Failed to write to GITHUB_OUTPUT: {e}", file=sys.stderr)
+                    print(f"Failed to write to GITHUB_OUTPUT: {e}", file=sys.stderr)
                     print(line, end="")
             else:
                 # Fallback for local runs

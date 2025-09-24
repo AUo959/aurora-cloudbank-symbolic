@@ -47,4 +47,13 @@ paths-ignore:
 # Use default queries only to fix enhanced analysis issues
 disable-default-queries: false
 
-# Note: Language setup is controlled by the workflow steps.
+# Compilation database settings for Python
+python:
+  setup: |
+    python -m pip install --upgrade pip
+    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+# JavaScript/TypeScript settings  
+javascript:
+  setup: |
+    if [ -f package.json ]; then npm ci || npm install; fi

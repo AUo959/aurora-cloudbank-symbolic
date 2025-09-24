@@ -108,7 +108,7 @@ class BranchManager:
             "git",
             "merge-base",
             "--is-ancestor",
-            "origin/{branch_name}",
+            f"origin/{branch_name}",
             "origin/main",
         ]        result = subprocess.run(cmd, capture_output=True, cwd=self.repo_path, shell=False, check=False)        
         return result.returncode == 0
@@ -158,7 +158,7 @@ class BranchManager:
         total_cleanup = sum(len(candidates) for candidates in analysis["cleanup_candidates"].values())
         
         if total_cleanup > 0:
-            analysis["recommendations"].append("Can safely delete {total_cleanup} stale branches")
+            analysis["recommendations"].append(f"Can safely delete {total_cleanup} stale branches")
 
         
         if len(analysis["categories"].get("dependency", [])) > 5:
@@ -189,7 +189,7 @@ class BranchManager:
             
         if should_delete:
                 if self.dry_run:
-                    cleanup_results["deleted"].append("[DRY RUN] Would delete: {branch.name}")
+                    cleanup_results["deleted"].append(f"[DRY RUN] Would delete: {branch.name}")
                 
         else:
                     try:
@@ -199,7 +199,7 @@ class BranchManager:
         cleanup_results["deleted"].append(branch.name)
                     
         except subprocess.CalledProcessError as e:
-                        cleanup_results["errors"].append("Failed to delete {branch.name}: {e}")
+                        cleanup_results["errors"].append(f"Failed to delete {branch.name}: {e}")
             
         else:
                 cleanup_results["skipped"].append(branch.name)
@@ -222,13 +222,13 @@ Generated: {datetime.datetime.now().isoformat()}
 """
 
         for category, branches in analysis["categories"].items():
-            report += "- **{category}**: {len(branches)} branches\n"
+            report += f"- **{category}**: {len(branches)} branches\n"
 
         report += """
 ## Cleanup Recommendations
 """
         for rec in analysis["recommendations"]:
-            report += "- {rec}\n"
+            report += f"- {rec}\n"
 
         report += """
 ## Detailed Cleanup Candidates
@@ -236,13 +236,13 @@ Generated: {datetime.datetime.now().isoformat()}
 ### Stale Merged Branches ({len(analysis['cleanup_candidates']['stale_merged'])})
 """
         for branch in analysis["cleanup_candidates"]["stale_merged"]:
-            report += "- `{branch}`\n"
+            report += f"- `{branch}`\n"
 
         report += """
 ### Old Unmerged Branches ({len(analysis['cleanup_candidates']['old_unmerged'])})
 """
         for branch in analysis["cleanup_candidates"]["old_unmerged"]:
-            report += "- `{branch}` (Review before deletion)\n"
+            report += f"- `{branch}` (Review before deletion)\n"
 
         return report
 
@@ -281,24 +281,24 @@ def main():
 
     
         if args.cleanup:
-        print("🧹 Starting branch cleanup {'(DRY RUN)' if manager.dry_run else '(EXECUTING)'}")
+        print(f"🧹 Starting branch cleanup {'(DRY RUN)' if manager.dry_run else '(EXECUTING)'}")
         results = manager.cleanup_stale_branches(args.max_age, args.categories)
 
         
-        print("\n✅ Deleted: {len(results['deleted'])}")
+        print(f"\n✅ Deleted: {len(results['deleted'])}")
         
         for branch in results["deleted"][:5]:  # Show first 5
-            print("  - {branch}")
+            print(f"  - {branch}")
         
         if len(results["deleted"]) > 5:
-            print("  ... and {len(results['deleted']) - 5} more")
+            print(f"  ... and {len(results['deleted']) - 5} more")
 
         
         if results["errors"]:
-            print("\n❌ Errors: {len(results['errors'])}")
+            print(f"\n❌ Errors: {len(results['errors'])}")
             
         for error in results["errors"]:
-                print("  - {error}")
+                print(f"  - {error}")
 
 
 if __name__ == "__main__":

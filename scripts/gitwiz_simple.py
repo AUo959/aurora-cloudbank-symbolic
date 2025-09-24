@@ -251,7 +251,7 @@ class GITWizSimple:
                         continue
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning("Error getting file stats: {e}")
+            logger.warning(f"Error getting file stats: {e}")
 
         return stats
 
@@ -287,7 +287,7 @@ class GITWizSimple:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning("Error getting stored issues: {e}")
+            logger.warning(f"Error getting stored issues: {e}")
 
         return issues
 
@@ -329,7 +329,7 @@ class GITWizSimple:
                             issue = RepositoryIssue(
                                 issue_type="MD022",
                                 file_path=str(md_file.relative_to(self.repo_path)),
-                                description="Header at line {i + 1} should have blank line before it",
+                                description=f"Header at line {i + 1} should have blank line before it",
                                 severity="low",
                             )
                             self.record_issue(issue)
@@ -340,14 +340,14 @@ class GITWizSimple:
                             issue = RepositoryIssue(
                                 issue_type="MD022",
                                 file_path=str(md_file.relative_to(self.repo_path)),
-                                description="Header at line {i + 1} should have blank line after it",
+                                description=f"Header at line {i + 1} should have blank line after it",
                                 severity="low",
                             )
                             self.record_issue(issue)
                             analysis["issues_found"].append(asdict(issue))
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning("Error analyzing {md_file}: {e}")
+                logger.warning(f"Error analyzing {md_file}: {e}")
 
     def _analyze_zip_files(self, analysis: Dict[str, Any]):
         """Analyze ZIP files in the repository."""
@@ -375,11 +375,11 @@ class GITWizSimple:
                     # Flag large archives as potential optimization targets
                     if zip_file.stat().st_size > 50 * 1024 * 1024:  # >50MB
                         analysis["optimizations"].append(
-                            "Large archive: {zip_file.name} ({zip_file.stat().st_size / (1024 * 1024):.1f}MB)"
+                            f"Large archive: {zip_file.name} ({zip_file.stat().st_size / (1024 * 1024):.1f}MB)"
                         )
 
             except (OSError, ValueError, RuntimeError) as e:
-                logger.warning("Error analyzing ZIP file {zip_file}: {e}")
+                logger.warning(f"Error analyzing ZIP file {zip_file}: {e}")
 
     def _check_common_repo_issues(self, analysis: Dict[str, Any]):
         """Check for common repository structure issues."""
@@ -415,7 +415,7 @@ class GITWizSimple:
                 try:
                     if file_path.stat().st_size > 100 * 1024 * 1024:  # >100MB
                         analysis["optimizations"].append(
-                            "Consider Git LFS for: {file_path.relative_to(self.repo_path)}"
+                            f"Consider Git LFS for: {file_path.relative_to(self.repo_path)}"
                         )
                 except (OSError, PermissionError):
                     continue
@@ -436,43 +436,43 @@ def main():
         if args.detailed:
             print(json.dumps(status, indent=2))
         else:
-            print("Repository: {status['repo_path']}")
-            print("Git repo: {status['git_status'].get('is_git_repo', False)}")
+            print(f"Repository: {status['repo_path']}")
+            print(f"Git repo: {status['git_status'].get('is_git_repo', False)}")
             if status["git_status"].get("is_git_repo"):
-                print("Current branch: {status['git_status'].get('current_branch', 'unknown')}")
-                print("Total changes: {status['git_status'].get('total_changes', 0)}")
-            print("Total files: {status['file_stats']['total_files']}")
-            print("Total size: {status['file_stats']['total_size'] / (1024 * 1024):.1f} MB")
-            print("Stored issues: {len(status['issues'])}")
+                print(f"Current branch: {status['git_status'].get('current_branch', 'unknown')}")
+                print(f"Total changes: {status['git_status'].get('total_changes', 0)}")
+            print(f"Total files: {status['file_stats']['total_files']}")
+            print(f"Total size: {status['file_stats']['total_size'] / (1024 * 1024):.1f} MB")
+            print(f"Stored issues: {len(status['issues'])}")
 
     elif args.command == "analyze":
         analysis = gitwiz.analyze_repository()
         if args.detailed:
             print(json.dumps(analysis, indent=2))
         else:
-            print("Analysis completed at {analysis['timestamp']}")
-            print("Issues found: {len(analysis['issues_found'])}")
-            print("Optimizations suggested: {len(analysis['optimizations'])}")
-            print("Archives analyzed: {len(analysis['archive_analysis'])}")
+            print(f"Analysis completed at {analysis['timestamp']}")
+            print(f"Issues found: {len(analysis['issues_found'])}")
+            print(f"Optimizations suggested: {len(analysis['optimizations'])}")
+            print(f"Archives analyzed: {len(analysis['archive_analysis'])}")
 
             if analysis["issues_found"]:
                 print("\nTop Issues:")
                 for issue in analysis["issues_found"][:5]:
-                    print("  - {issue['issue_type']}: {issue['description']}")
+                    print(f"  - {issue['issue_type']}: {issue['description']}")
 
             if analysis["optimizations"]:
                 print("\nOptimizations:")
                 for opt in analysis["optimizations"][:5]:
-                    print("  - {opt}")
+                    print(f"  - {opt}")
 
     elif args.command == "memory":
         # Show memory database stats
         issues = gitwiz._get_stored_issues()
-        print("Stored issues: {len(issues)}")
+        print(f"Stored issues: {len(issues)}")
         if issues:
             print("\nRecent issues:")
             for issue in issues[:10]:
-                print("  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})")
+                print(f"  - {issue['issue_type']}: {issue['file_path']} (fixes: {issue['fix_count']})")
 
 
 if __name__ == "__main__":

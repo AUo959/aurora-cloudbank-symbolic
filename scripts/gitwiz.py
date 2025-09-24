@@ -24,7 +24,7 @@ class GITWiz:
 
     def _run(self, cmd: list[str], check: bool = False) -> bool:
         """Run a command in the project root and echo output."""
-        print("+ {' '.join(cmd)}")
+        print(f"+ {' '.join(cmd)}")
         result = subprocess.run(            cmd,
             cwd=self.project_root,
         text=True,
@@ -40,7 +40,7 @@ class GITWiz:
             print(result.stderr)
         
         if check and result.returncode != 0:
-            raise RuntimeError("Command failed: {' '.join(cmd)}")
+            raise RuntimeError(f"Command failed: {' '.join(cmd)}")
         
         return result.returncode == 0
 
@@ -49,7 +49,8 @@ class GITWiz:
     def status(self) -> bool:
         return self._run(["git", "status"])
 
-    def lint_python(self) -> bool:
+    
+        def lint_python(self) -> bool:
         """Run flake8 if available."""
         if shutil.which("flake8"):
             return self._run(["flake8"])
@@ -99,7 +100,8 @@ class GITWiz:
         
         return self._run(["git", "commit", "-m", message])
 
-    def deploy(self) -> bool:
+    
+        def deploy(self) -> bool:
         """Run precheck, commit results and prepare for push."""
         self.precheck()
         
@@ -118,7 +120,7 @@ class GITWiz:
         return self._run(["git", "branch", "-a"])
 
     
-    def branch_create(self, name: str, base: str = "main") -> bool:
+        def branch_create(self, name: str, base: str = "main") -> bool:
         """Create a new branch from the given base."""
         self._run(["git", "checkout", base], check=True)
         

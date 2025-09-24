@@ -66,7 +66,7 @@ class BranchCleanupManager:
 
             
         if result.returncode != 0:
-                print("Error getting branch info: {result.stderr}")
+                print(f"Error getting branch info: {result.stderr}")
                 
         return {}
 
@@ -105,7 +105,7 @@ class BranchCleanupManager:
         return branches
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error analyzing branches: {e}")
+            print(f"Error analyzing branches: {e}")
             
         return {}
 
@@ -162,7 +162,7 @@ class BranchCleanupManager:
 
         # Limit cleanup per run for safety
         if len(cleanup_candidates) > max_per_run:
-            print("⚠️  Limiting cleanup to {max_per_run} branches per run for safety")
+            print(f"⚠️  Limiting cleanup to {max_per_run} branches per run for safety")
         cleanup_candidates = cleanup_candidates[:max_per_run]
 
         for branch in cleanup_candidates:
@@ -171,7 +171,7 @@ class BranchCleanupManager:
 
                 
         if dry_run:
-                    print("🔍 DRY RUN: Would {action} branch {branch['name']}")
+                    print(f"🔍 DRY RUN: Would {action} branch {branch['name']}")
                     
         results["skipped"].append({"branch": branch["name"], "action": action})
                 
@@ -181,14 +181,14 @@ class BranchCleanupManager:
         if success:
                         results[action].append(branch["name"])
                         
-        print("✅ {action.title()} branch: {branch['name']}")
+        print(f"✅ {action.title()} branch: {branch['name']}")
                     
         else:
                         results["errors"].append({"branch": branch["name"], "action": action})
 
             
         except (OSError, ValueError, RuntimeError) as e:
-                print("❌ Error processing {branch['name']}: {e}")
+                print(f"❌ Error processing {branch['name']}: {e}")
                 
         results["errors"].append({"branch": branch["name"], "error": str(e)})
 
@@ -218,7 +218,7 @@ class BranchCleanupManager:
         try:
             if action == "archived":
                 # Create tag before deleting
-                tag_name = "archive/{branch['name']}"
+                tag_name = f"archive/{branch['name']}"
                 subprocess.run(
                     ["git", "tag", tag_name, branch_name],
         check=True,
@@ -245,11 +245,11 @@ class BranchCleanupManager:
         return True
 
         except subprocess.CalledProcessError as e:
-            print("Git command failed: {e}")
+            print(f"Git command failed: {e}")
             
         return False
         except (OSError, ValueError, RuntimeError) as e:
-            print("Unexpected error: {e}")
+            print(f"Unexpected error: {e}")
             
         return False
 
@@ -259,13 +259,13 @@ class BranchCleanupManager:
         """Generate a comprehensive cleanup report."""
         report = [
             "# Branch Cleanup Analysis Report",
-            "**Generated:** {datetime.datetime.now().isoformat()}",
+            f"**Generated:** {datetime.datetime.now().isoformat()}",
             "",
             "## Summary",
-            "- **Total Branches:** {sum(len(v) for v in branches.values())}",
-            "- **Cleanup Candidates:** {len(branches.get('cleanup_candidates', []))}",
-            "- **Keep:** {len(branches.get('keep', []))}",
-            "- **Manual Review:** {len(branches.get('manual_review', []))}",
+            f"- **Total Branches:** {sum(len(v) for v in branches.values())}",
+            f"- **Cleanup Candidates:** {len(branches.get('cleanup_candidates', []))}",
+            f"- **Keep:** {len(branches.get('keep', []))}",
+            f"- **Manual Review:** {len(branches.get('manual_review', []))}",
             "",
         ]
 
@@ -273,10 +273,10 @@ class BranchCleanupManager:
             report.extend(
                 [
                     "## Cleanup Results",
-                    "- **Deleted:** {len(results.get('deleted', []))}",
-                    "- **Archived:** {len(results.get('archived', []))}",
-                    "- **Merged:** {len(results.get('merged', []))}",
-                    "- **Errors:** {len(results.get('errors', []))}",
+                    f"- **Deleted:** {len(results.get('deleted', []))}",
+                    f"- **Archived:** {len(results.get('archived', []))}",
+                    f"- **Merged:** {len(results.get('merged', []))}",
+                    f"- **Errors:** {len(results.get('errors', []))}",
                     "",
                 ]
             )
@@ -284,15 +284,15 @@ class BranchCleanupManager:
         # Add detailed branch listings
         for category, branch_list in branches.items():
             if branch_list:
-                report.extend(["## {category.title().replace('_', ' ')}", ""])
+                report.extend([f"## {category.title().replace('_', ' ')}", ""])
 
                 
         for branch in branch_list[:10]:  # Limit output
-                    report.append("- `{branch['name']}` ({branch['age_days']} days old)")
+                    report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
 
                 
         if len(branch_list) > 10:
-                    report.append("- ... and {len(branch_list) - 10} more")
+                    report.append(f"- ... and {len(branch_list) - 10} more")
 
                 
         report.append("")
@@ -352,7 +352,7 @@ def main():
     # Save report
     report_path = Path("branch_cleanup_report.md")
     report_path.write_text(final_report)
-    print("📄 Report saved to: {report_path}")
+    print(f"📄 Report saved to: {report_path}")
 
     
         if dry_run:

@@ -145,7 +145,7 @@ class RepositoryHealthMonitor:
                 metrics["git_status"] = "dirty" if result.stdout.strip() else "clean"
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error collecting metrics: {e}")
+            print(f"Error collecting metrics: {e}")
 
         return metrics
 
@@ -164,7 +164,7 @@ class RepositoryHealthMonitor:
 
             return history
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error loading history: {e}")
+            print(f"Error loading history: {e}")
             return []
 
     def save_history(self, history: List[Dict]):
@@ -173,7 +173,7 @@ class RepositoryHealthMonitor:
             with open(self.history_file, "w", encoding="utf-8") as f:
                 json.dump(history, f, indent=2)
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error saving history: {e}")
+            print(f"Error saving history: {e}")
 
     def analyze_trends(self, history: List[Dict]) -> Dict:
         """Analyze trends from historical data."""
@@ -211,7 +211,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "size_exceeded",
                     "severity": "warning",
-                    "message": "Repository size ({metrics['size_mb']}MB) exceeds threshold ({self.config['thresholds']['max_size_mb']}MB)",
+                    "message": f"Repository size ({metrics['size_mb']}MB) exceeds threshold ({self.config['thresholds']['max_size_mb']}MB)",
                     "metric": metrics["size_mb"],
                     "threshold": self.config["thresholds"]["max_size_mb"],
                 }
@@ -223,7 +223,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "file_count_exceeded",
                     "severity": "warning",
-                    "message": "File count ({metrics['file_count']}) exceeds threshold ({self.config['thresholds']['max_files']})",
+                    "message": f"File count ({metrics['file_count']}) exceeds threshold ({self.config['thresholds']['max_files']})",
                     "metric": metrics["file_count"],
                     "threshold": self.config["thresholds"]["max_files"],
                 }
@@ -235,7 +235,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "branch_count_exceeded",
                     "severity": "info",
-                    "message": "Branch count ({metrics['branch_count']}) exceeds threshold ({self.config['thresholds']['max_branches']})",
+                    "message": f"Branch count ({metrics['branch_count']}) exceeds threshold ({self.config['thresholds']['max_branches']})",
                     "metric": metrics["branch_count"],
                     "threshold": self.config["thresholds"]["max_branches"],
                 }
@@ -247,7 +247,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "cache_files_detected",
                     "severity": "error",
-                    "message": "Cache files detected ({metrics['cache_files']}), should be cleaned",
+                    "message": f"Cache files detected ({metrics['cache_files']}), should be cleaned",
                     "metric": metrics["cache_files"],
                     "threshold": self.config["thresholds"]["max_cache_files"],
                 }
@@ -259,7 +259,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "rapid_size_growth",
                     "severity": "warning",
-                    "message": "Repository growing rapidly ({trends['daily_size_growth']:.1f}MB/day)",
+                    "message": f"Repository growing rapidly ({trends['daily_size_growth']:.1f}MB/day)",
                     "metric": trends["daily_size_growth"],
                     "threshold": self.config["alerts"]["size_growth_rate"],
                 }
@@ -271,7 +271,7 @@ class RepositoryHealthMonitor:
         """Generate a comprehensive health report."""
         report = []
         report.append("# Aurora CloudBank - Repository Health Report")
-        report.append("**Generated:** {datetime.datetime.now().isoformat()}")
+        report.append(f"**Generated:** {datetime.datetime.now().isoformat()}")
         report.append("")
 
         # Health score calculation
@@ -287,31 +287,31 @@ class RepositoryHealthMonitor:
         score = max(0.0, score)
         health_status = "EXCELLENT" if score >= 9 else "GOOD" if score >= 7 else "MODERATE" if score >= 5 else "POOR"
 
-        report.append("## Overall Health Score: {health_status} ({score:.1f}/10)")
+        report.append(f"## Overall Health Score: {health_status} ({score:.1f}/10)")
         report.append("")
 
         # Current metrics
         report.append("## Current Metrics")
         report.append("")
-        report.append("- **Repository Size**: {metrics['size_mb']}MB")
-        report.append("- **File Count**: {metrics['file_count']:,}")
-        report.append("- **Active Branches**: {metrics['branch_count']}")
-        report.append("- **ZIP Files**: {metrics['zip_count']}")
-        report.append("- **Cache Files**: {metrics['cache_files']}")
-        report.append("- **Git Status**: {metrics['git_status']}")
+        report.append(f"- **Repository Size**: {metrics['size_mb']}MB")
+        report.append(f"- **File Count**: {metrics['file_count']:,}")
+        report.append(f"- **Active Branches**: {metrics['branch_count']}")
+        report.append(f"- **ZIP Files**: {metrics['zip_count']}")
+        report.append(f"- **Cache Files**: {metrics['cache_files']}")
+        report.append(f"- **Git Status**: {metrics['git_status']}")
         report.append("")
 
         # Trends
         if trends and "size_change_mb" in trends:
             report.append("## Recent Changes")
             report.append("")
-            report.append("- **Size Change**: {trends['size_change_mb']:+d}MB")
-            report.append("- **File Change**: {trends['file_change']:+d}")
-            report.append("- **Branch Change**: {trends['branch_change']:+d}")
-            report.append("- **ZIP Change**: {trends['zip_change']:+d}")
+            report.append(f"- **Size Change**: {trends['size_change_mb']:+d}MB")
+            report.append(f"- **File Change**: {trends['file_change']:+d}")
+            report.append(f"- **Branch Change**: {trends['branch_change']:+d}")
+            report.append(f"- **ZIP Change**: {trends['zip_change']:+d}")
 
             if "daily_size_growth" in trends:
-                report.append("- **Daily Growth Rate**: {trends['daily_size_growth']:+.1f}MB/day")
+                report.append(f"- **Daily Growth Rate**: {trends['daily_size_growth']:+.1f}MB/day")
             report.append("")
 
         # Alerts
@@ -320,7 +320,7 @@ class RepositoryHealthMonitor:
             report.append("")
             for alert in alerts:
                 severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert["severity"], "")
-                report.append("- {severity_emoji} **{alert['type'].replace('_', ' ').title()}**: {alert['message']}")
+                report.append(f"- {severity_emoji} **{alert['type'].replace('_', ' ').title()}**: {alert['message']}")
             report.append("")
 
         # Large files
@@ -328,7 +328,7 @@ class RepositoryHealthMonitor:
             report.append("## Large Files (>10MB)")
             report.append("")
             for file_path in metrics["large_files"][:10]:  # Limit to top 10
-                report.append("- `{file_path}`")
+                report.append(f"- `{file_path}`")
             report.append("")
 
         return "\n".join(report)
@@ -358,20 +358,20 @@ class RepositoryHealthMonitor:
             report_path = self.repo_path / "REPOSITORY_HEALTH_MONITOR.md"
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)
-            print("📄 Health report saved to: {report_path}")
+            print(f"📄 Health report saved to: {report_path}")
 
         # Print summary
         print("\n📊 Health Check Summary:")
-        print("  Repository Size: {metrics['size_mb']}MB")
-        print("  File Count: {metrics['file_count']:,}")
-        print("  Active Branches: {metrics['branch_count']}")
-        print("  Alerts: {len(alerts)}")
+        print(f"  Repository Size: {metrics['size_mb']}MB")
+        print(f"  File Count: {metrics['file_count']:,}")
+        print(f"  Active Branches: {metrics['branch_count']}")
+        print(f"  Alerts: {len(alerts)}")
 
         if alerts:
             print("\n🚨 Active Alerts:")
             for alert in alerts:
                 severity_emoji = {"error": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(alert["severity"], "")
-                print("  {severity_emoji} {alert['message']}")
+                print(f"  {severity_emoji} {alert['message']}")
 
         return {
             "metrics": metrics,
@@ -383,12 +383,12 @@ class RepositoryHealthMonitor:
     def monitor_continuously(self, interval: Optional[int] = None):
         """Run continuous monitoring."""
         interval = interval or self.config["monitoring_interval"]
-        print("🔄 Starting continuous monitoring (interval: {interval}s)")
+        print(f"🔄 Starting continuous monitoring (interval: {interval}s)")
 
         try:
             while True:
                 self.run_health_check()
-                print("💤 Sleeping for {interval} seconds...")
+                print(f"💤 Sleeping for {interval} seconds...")
                 time.sleep(interval)
         except KeyboardInterrupt:
             print("\n🛑 Monitoring stopped by user")

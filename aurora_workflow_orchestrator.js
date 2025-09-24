@@ -95,13 +95,13 @@ class AuroraWorkflowOrchestrator extends EventEmitter {
    * Setup event listeners for workflow events
    */
   setupEventListeners() {
-    this.on('phase-start', (phase) => {
+    this.on('phase-start', (/* phase */) => {
       this.log(`🔄 Phase ${phase} Starting`, 'INFO');
       this.currentPhase = phase;
       this.state = 'RUNNING';
     });
 
-    this.on('phase-complete', (phase) => {
+    this.on('phase-complete', (/* phase */) => {
       this.log(`✅ Phase ${phase} Complete`, 'INFO');
       this.currentPhase = null;
     });

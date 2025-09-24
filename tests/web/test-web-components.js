@@ -3,6 +3,9 @@
  * Basic tests for web components and API endpoints
  */
 
+/* eslint-env browser */
+/* global document */
+
 import { test, mock } from 'node:test';
 import assert from 'node:assert';
 import fs from 'fs';
@@ -26,14 +29,14 @@ global.window = {
 };
 
 global.document = {
-  getElementById: (id) => ({ 
+  getElementById: () => ({ 
     value: 'test-value',
     textContent: '',
     appendChild: () => {},
     scrollTop: 0,
     scrollHeight: 100
   }),
-  createElement: (tag) => ({
+  createElement: () => ({
     className: '',
     textContent: '',
     style: {},
@@ -73,7 +76,7 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
     // Fallback: Parse and execute safely without eval
     if (loggerCode.includes('class AuroraWebLogger')) {
       global.AuroraWebLogger = class AuroraWebLogger {
-        constructor(component, options = {}) {
+        constructor(component) {
           this.component = component;
           this.logLevel = 'INFO';
           this.sessionId = Date.now() + '-test';
@@ -149,21 +152,33 @@ test('Aurora Security - Basic functionality', async (t) => {
     global.AuroraSecurity = {
       sanitizeHTML: function(html) {
         // SECURITY: Use DOM parsing to safely extract text content without script execution
-        const div = document.createElement('div');
-        div.textContent = html; // Use textContent to prevent XSS
-        // Return safely escaped text
-        return div.textContent;
+        if (typeof document !== 'undefined') {
+          const div = document.createElement('div');
+          div.textContent = html; // Use textContent to prevent XSS
+          // Return safely escaped text
+          return div.textContent;
+        }
+        // Fallback for non-browser environments
+        return html.replace(/<[^>]*>/g, '');
       },
       escapeHtml: function(text) {
         // SECURITY: Safely escape HTML by setting text content and reading back
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        if (typeof document !== 'undefined') {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        // Fallback escaping for non-browser environments
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       },
       createSafeElement: function(tag, content) {
-        const element = document.createElement(tag);
-        element.textContent = content;
-        return element;
+        if (typeof document !== 'undefined') {
+          const element = document.createElement(tag);
+          element.textContent = content;
+          return element;
+        }
+        // Fallback for non-browser environments
+        return { tagName: tag, textContent: content };
       }
     };
   }

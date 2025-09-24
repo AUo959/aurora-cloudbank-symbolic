@@ -106,7 +106,7 @@ class AuroraWebServer {
     });
 
     this.app.post('/api/vsa/bind', (req, res) => {
-      const { symbol_a, symbol_b, result_name, dimension = 256 } = req.body;
+      const { result_name, dimension = 256 } = req.body;
             
       // Generate mock binding result
       const resultVector = Array.from({ length: Math.min(32, dimension) }, () => 

@@ -1,0 +1,40 @@
+name: Auto-merge Dependabot PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_list:
+        description: "Space-separated list of PR numbers to process"
+        required: false
+        default: "146 147 149 148 152 151"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: auto-merge-dependabot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Launch auto-merge watcher
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          POLL_INTERVAL_SECONDS: '30'
+          MAX_WAIT_SECONDS: '7200'
+          ALLOWED_FAILURE_REGEX: '^label$'
+        run: |
+          echo "Processing PRs: ${{ github.event.inputs.pr_list }}"
+          bash scripts/process_dependabot_prs.sh ${{ github.event.inputs.pr_list }}

@@ -14,6 +14,10 @@ fi
 PRS=(146 147 149 148 152 151)
 LABELS='["maintenance","dependencies","rebased"]'
 
+# Allow non-critical failing checks by default (tweak via ALLOWED_FAILURE_REGEX)
+# 'label' job failures should not block merges.
+ALLOWED_FAILURE_REGEX=${ALLOWED_FAILURE_REGEX:-'^label$'}
+
 # Polling configuration
 POLL_INTERVAL_SECONDS=${POLL_INTERVAL_SECONDS:-30}
 MAX_WAIT_SECONDS=${MAX_WAIT_SECONDS:-1800} # 30 minutes

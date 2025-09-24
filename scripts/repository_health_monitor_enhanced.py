@@ -335,7 +335,7 @@ class RepositoryHealthMonitor:
         if self.alerts.get("webhook_url"):
             self._send_webhook_alert(alert_message)
 
-        print(f"🚨 HEALTH ALERT TRIGGERED - Score: {metrics.health_score:.1f}/10")
+        print("🚨 HEALTH ALERT TRIGGERED - Score: %s/10", metrics.health_score:.1f)
         print(alert_message)
 
     def _format_alert_message(self, metrics: HealthMetrics) -> str:
@@ -427,7 +427,7 @@ class RepositoryHealthMonitor:
 
     def run_monitoring_cycle(self):
         """Run a single monitoring cycle"""
-        print(f"🔍 Starting health check at {datetime.datetime.now()}")
+        print("🔍 Starting health check at %s", datetime.datetime.now())
 
         # Collect metrics
         metrics = self.collect_metrics()
@@ -449,8 +449,8 @@ class RepositoryHealthMonitor:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        print(f"📊 Health Score: {metrics.health_score:.1f}/10")
-        print(f"📄 Report saved to: {report_file}")
+        print("📊 Health Score: %s/10", metrics.health_score:.1f)
+        print("📄 Report saved to: %s", report_file)
 
         return metrics
 
@@ -476,13 +476,13 @@ def main():
         while True:
             try:
                 monitor.run_monitoring_cycle()
-                print(f"💤 Sleeping for {args.interval} minutes...")
+                print("💤 Sleeping for %s minutes...", args.interval)
                 time.sleep(args.interval * 60)
             except KeyboardInterrupt:
                 print("\n👋 Monitoring stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                print(f"❌ Error in monitoring cycle: {e}")
+                print("❌ Error in monitoring cycle: %s", e)
                 time.sleep(60)  # Wait 1 minute before retrying
     else:
         # Single run

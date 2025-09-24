@@ -44,7 +44,7 @@ class Phase2SecurityRemediator:
                             if self.check_file_vulnerable(file_path):
                                 vulnerable_files.append(file_path)
         
-        print(f"📊 Found {len(vulnerable_files)} files with log injection vulnerabilities")
+        print("📊 Found %s files with log injection vulnerabilities", len(vulnerable_files))
         return vulnerable_files
     
     def check_file_vulnerable(self, file_path: str) -> bool:
@@ -83,7 +83,7 @@ class Phase2SecurityRemediator:
                     quote_char = match.group(4)
                     f_string_content = match.group(5)
                     
-                    print(f"  🔧 Fixing line {i+1}: {log_level} f-string")
+                    print("  🔧 Fixing line {i+1}: %s f-string", log_level)
                     
                     # Convert f-string to parameterized logging
                     # Extract variables from {variable} patterns
@@ -109,7 +109,7 @@ class Phase2SecurityRemediator:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(lines))
                 
-                print(f"  ✅ Fixed {file_path}")
+                print("  ✅ Fixed %s", file_path)
                 return True
             
             return False
@@ -139,7 +139,7 @@ class Phase2SecurityRemediator:
                     except:
                         continue
         
-        print(f"📊 Found {len(python_files)} files with shell=True patterns")
+        print("📊 Found %s files with shell=True patterns", len(python_files))
         
         for file_path in python_files[:15]:  # Process first 15 files
             try:
@@ -153,7 +153,7 @@ class Phase2SecurityRemediator:
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(fixed_content)
                     
-                    print(f"  🔧 Fixed shell injection in {file_path}")
+                    print("  🔧 Fixed shell injection in %s", file_path)
                     shell_fixes += 1
                     
             except Exception as e:
@@ -208,7 +208,7 @@ class Phase2SecurityRemediator:
                 with open(web_test_file, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(lines))
                 
-                print(f"  ✅ Enhanced sanitization in {web_test_file}")
+                print("  ✅ Enhanced sanitization in %s", web_test_file)
                 return True
         
         except Exception as e:
@@ -231,14 +231,14 @@ class Phase2SecurityRemediator:
                 print("  ✅ All tests passing - fixes validated")
                 return True
             else:
-                print(f"  ⚠️ Some tests failing: {result.stdout[-200:]}")
+                print("  ⚠️ Some tests failing: %s", result.stdout[-200:])
                 return False
                 
         except subprocess.TimeoutExpired:
             print("  ⚠️ Test validation timed out")
             return False
         except Exception as e:
-            print(f"  ⚠️ Test validation failed: {e}")
+            print("  ⚠️ Test validation failed: %s", e)
             return False
     
     def generate_phase2_report(self):
@@ -285,7 +285,8 @@ class Phase2SecurityRemediator:
         vulnerable_files = self.find_vulnerable_files()
         
         for file_path in vulnerable_files:
-            print(f"\n🔧 Processing: {file_path}")
+            print("
+🔧 Processing: %s", file_path)
             if self.fix_log_injection_in_file(file_path):
                 self.files_processed += 1
         
@@ -302,14 +303,14 @@ class Phase2SecurityRemediator:
         self.generate_phase2_report()
         
         print(f"\n🎯 Phase 2 Remediation Complete!")
-        print(f"📊 Total fixes applied: {self.fixes_applied}")
-        print(f"📁 Files processed: {self.files_processed}")
-        print(f"🧪 Tests validation: {'✅ PASS' if tests_passing else '⚠️ ISSUES'}")
+        print("📊 Total fixes applied: %s", self.fixes_applied)
+        print("📁 Files processed: %s", self.files_processed)
+        print("🧪 Tests validation: %s", '✅ PASS' if tests_passing else '⚠️ ISSUES')
         
         if self.errors:
-            print(f"⚠️ Errors encountered: {len(self.errors)}")
+            print("⚠️ Errors encountered: %s", len(self.errors))
             for error in self.errors[:5]:  # Show first 5 errors
-                print(f"  - {error}")
+                print("  - %s", error)
 
 if __name__ == "__main__":
     print("🛡️ Aurora CloudBank Security Phase 2 Remediation")

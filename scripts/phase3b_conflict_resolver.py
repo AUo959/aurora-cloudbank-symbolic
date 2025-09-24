@@ -57,20 +57,20 @@ class Phase3BConflictResolver:
             )
             
             if check_return and result.returncode != 0:
-                print(f"❌ Command failed: {command}")
+                print("❌ Command failed: %s", command)
                 if result.stderr:
-                    print(f"Error: {result.stderr}")
+                    print("Error: %s", result.stderr)
                 return None
                 
             return result
         except Exception as e:
-            print(f"❌ Exception running command: {command}")
-            print(f"Error: {e}")
+            print("❌ Exception running command: %s", command)
+            print("Error: %s", e)
             return None
 
     def analyze_conflicts_detailed(self, branch_name):
         """Get detailed conflict analysis"""
-        print(f"🔍 Detailed conflict analysis: {branch_name}")
+        print("🔍 Detailed conflict analysis: %s", branch_name)
         
         # Get merge-tree output for detailed conflicts
         merge_tree_cmd = f"git merge-tree $(git merge-base main origin/{branch_name}) main origin/{branch_name}"
@@ -113,7 +113,7 @@ class Phase3BConflictResolver:
         """Create a resolution branch for manual conflict handling"""
         resolution_branch = f"resolve-{branch_name.replace('/', '-')}"
         
-        print(f"🔧 Creating resolution branch: {resolution_branch}")
+        print("🔧 Creating resolution branch: %s", resolution_branch)
         
         # Create and switch to resolution branch
         checkout_result = self.run_command(f"git checkout -b {resolution_branch}")
@@ -137,12 +137,12 @@ class Phase3BConflictResolver:
                 if line.startswith('UU ') or line.startswith('AA '):
                     conflicted_files.append(line[3:])
             
-            print(f"📋 Found {len(conflicted_files)} conflicted files:")
+            print("📋 Found %s conflicted files:", len(conflicted_files))
             for file in conflicted_files[:5]:
-                print(f"   • {file}")
+                print("   • %s", file)
                 
             if len(conflicted_files) > 5:
-                print(f"   ... and {len(conflicted_files) - 5} more")
+                print("   ... and %s more", len(conflicted_files) - 5)
         
         return resolution_branch
 
@@ -166,7 +166,7 @@ class Phase3BConflictResolver:
             if not file_path.strip():
                 continue
                 
-            print(f"🔧 Analyzing conflicts in: {file_path}")
+            print("🔧 Analyzing conflicts in: %s", file_path)
             
             # Strategy 1: For workflow files, prefer main branch version if it's newer
             if '.github/workflows/' in file_path:
@@ -193,11 +193,11 @@ class Phase3BConflictResolver:
                     continue
         
         if resolved_files:
-            print(f"✅ Auto-resolved {len(resolved_files)} files:")
+            print("✅ Auto-resolved %s files:", len(resolved_files))
             for file in resolved_files[:3]:
-                print(f"   • {file}")
+                print("   • %s", file)
             if len(resolved_files) > 3:
-                print(f"   ... and {len(resolved_files) - 3} more")
+                print("   ... and %s more", len(resolved_files) - 3)
             
             # Add resolved files
             add_result = self.run_command("git add .")
@@ -208,9 +208,10 @@ class Phase3BConflictResolver:
     def resolve_branch_conflicts(self, candidate):
         """Resolve conflicts for a single branch"""
         branch_name = candidate["branch"]
-        print(f"\n🎯 RESOLVING CONFLICTS: {branch_name}")
-        print(f"   Type: {candidate['type']}")
-        print(f"   Description: {candidate['description']}")
+        print("
+🎯 RESOLVING CONFLICTS: %s", branch_name)
+        print("   Type: %s", candidate['type'])
+        print("   Description: %s", candidate['description'])
         
         resolution_record = {
             "branch": branch_name,
@@ -225,11 +226,11 @@ class Phase3BConflictResolver:
             resolution_record["conflict_analysis"] = analysis
             
             print(f"📊 Conflict Analysis:")
-            print(f"   Total files: {analysis['total_conflicts']}")
-            print(f"   Workflows: {analysis['types']['workflows']}")
-            print(f"   Core code: {analysis['types']['core_code']}")
-            print(f"   Tests: {analysis['types']['tests']}")
-            print(f"   Config: {analysis['types']['config']}")
+            print("   Total files: %s", analysis['total_conflicts'])
+            print("   Workflows: %s", analysis['types']['workflows'])
+            print("   Core code: %s", analysis['types']['core_code'])
+            print("   Tests: %s", analysis['types']['tests'])
+            print("   Config: %s", analysis['types']['config'])
             
             # Create resolution branch
             resolution_branch = self.create_resolution_branch(branch_name)
@@ -264,7 +265,7 @@ class Phase3BConflictResolver:
                         if merge_main:
                             resolution_record["status"] = "success"
                             resolution_record["merged_to_main"] = True
-                            print(f"✅ Successfully resolved and integrated {branch_name}")
+                            print("✅ Successfully resolved and integrated %s", branch_name)
                         else:
                             resolution_record["status"] = "main_merge_failed"
                     else:
@@ -283,7 +284,7 @@ class Phase3BConflictResolver:
         except Exception as e:
             resolution_record["status"] = "error"
             resolution_record["error"] = str(e)
-            print(f"❌ Exception during resolution: {e}")
+            print("❌ Exception during resolution: %s", e)
             self.run_command("git checkout main", False)
             
         resolution_record["end_time"] = datetime.now().isoformat()
@@ -326,20 +327,21 @@ class Phase3BConflictResolver:
         successful_resolutions = 0
         
         for candidate in self.conflicted_branches:
-            print(f"\n{'='*60}")
+            print("
+%s", '='*60)
             resolution_result = self.resolve_branch_conflicts(candidate)
             self.results["resolutions"].append(resolution_result)
             
             if resolution_result["status"] == "success":
                 successful_resolutions += 1
-                print(f"✅ Resolution #{successful_resolutions} completed")
+                print("✅ Resolution #%s completed", successful_resolutions)
             else:
-                print(f"⚠️  Resolution status: {resolution_result['status']}")
+                print("⚠️  Resolution status: %s", resolution_result['status'])
         
         # Final summary
         print(f"\n🎯 PHASE 3B SUMMARY:")
-        print(f"   Attempted: {len(self.conflicted_branches)}")
-        print(f"   Successful: {successful_resolutions}")
+        print("   Attempted: %s", len(self.conflicted_branches))
+        print("   Successful: %s", successful_resolutions)
         
         if successful_resolutions > 0:
             print("🧪 Running final validation...")

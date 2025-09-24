@@ -396,7 +396,7 @@ if __name__ == "__main__":
         print("✅ Dependencies healthy")
         sys.exit(0)
     else:
-        print(f"❌ Issues found: {{', '.join(issues)}}")
+        print("❌ Issues found: {%s}", ', '.join(issues))
         sys.exit(1)
 '''
             
@@ -624,20 +624,20 @@ def main():
     elif args.phase:
         if args.phase == "immediate":
             results = integration.execute_immediate_phase()
-            print(f"Phase 1 Results: {json.dumps(results, indent=2)}")
+            print("Phase 1 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "installation": 
             results = integration.execute_installation_phase()
-            print(f"Phase 2 Results: {json.dumps(results, indent=2)}")
+            print("Phase 2 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "persistence":
             results = integration.execute_persistence_phase()
-            print(f"Phase 3 Results: {json.dumps(results, indent=2)}")
+            print("Phase 3 Results: %s", json.dumps(results, indent=2))
         elif args.phase == "automation":
             results = integration.execute_automation_phase()
-            print(f"Phase 4 Results: {json.dumps(results, indent=2)}")
+            print("Phase 4 Results: %s", json.dumps(results, indent=2))
             
     elif args.status:
-        print(f"Existing Systems Detected: {integration.existing_systems}")
-        print(f"Integration Config: {integration.config}")
+        print("Existing Systems Detected: %s", integration.existing_systems)
+        print("Integration Config: %s", integration.config)
         
     else:
         print("Aurora CloudBank Dependency Management Integration")

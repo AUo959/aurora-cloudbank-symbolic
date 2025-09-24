@@ -116,7 +116,7 @@ def main():
     buckets = prioritize(rows)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(render_md(buckets), encoding="utf-8")
-    print(f"Wrote {OUT}")
+    print("Wrote %s", OUT)
 
 
 if __name__ == "__main__":

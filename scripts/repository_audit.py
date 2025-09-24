@@ -245,42 +245,43 @@ def main():
     # Print summary
     print("\n📋 AUDIT SUMMARY")
     print("-" * 30)
-    print(f"Total Files: {file_analysis['total_files']}")
-    print(f"Total Size: {file_analysis['total_size'] / (1024 * 1024):.2f} MB")
-    print(f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_zip_size'] / (1024 * 1024):.2f} MB)")
-    print(f"Markdown Files: {md_analysis['total_md_files']}")
-    print(f"Large Files: {len(file_analysis['large_files'])}")
-    print(f"Potential Duplicates: {len(file_analysis['duplicate_names'])}")
+    print("Total Files: %s", file_analysis['total_files'])
+    print("Total Size: %s MB", file_analysis['total_size'] / (1024 * 1024):.2f)
+    print("ZIP Files: %s ({zip_analysis[", zip_analysis['total_zip_files'])
+    print("Markdown Files: %s", md_analysis['total_md_files'])
+    print("Large Files: %s", len(file_analysis['large_files']))
+    print("Potential Duplicates: %s", len(file_analysis['duplicate_names']))
 
     print("\n🚨 CRITICAL RECOMMENDATIONS")
     for rec in recommendations["critical"]:
-        print(f"  • {rec}")
+        print("  • %s", rec)
 
     print("\n⚠️  IMPORTANT RECOMMENDATIONS")
     for rec in recommendations["important"]:
-        print(f"  • {rec}")
+        print("  • %s", rec)
 
     print("\n💡 SUGGESTIONS")
     for rec in recommendations["suggestions"]:
-        print(f"  • {rec}")
+        print("  • %s", rec)
 
     print("\n📦 ZIP FILE ANALYSIS")
     print("Top 10 largest ZIP files:")
     for i, zip_info in enumerate(zip_analysis["zip_details"][:10]):
-        print(f"  {i + 1}. {zip_info['name']} ({zip_info['size_mb']} MB) - {zip_info['category']}")
+        print("  {i + 1}. %s ({zip_info[", zip_info['name'])
 
     print("\n📝 MARKDOWN FILE CATEGORIES")
-    print(f"  Status Reports: {len(md_analysis['status_reports'])}")
-    print(f"  Documentation: {len(md_analysis['documentation'])}")
-    print(f"  Guides: {len(md_analysis['guides'])}")
-    print(f"  Other: {len(md_analysis['other'])}")
+    print("  Status Reports: %s", len(md_analysis['status_reports']))
+    print("  Documentation: %s", len(md_analysis['documentation']))
+    print("  Guides: %s", len(md_analysis['guides']))
+    print("  Other: %s", len(md_analysis['other']))
 
     # Save detailed report
     report_path = Path("/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json")
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
-    print(f"\n💾 Detailed report saved to: {report_path}")
+    print("
+💾 Detailed report saved to: %s", report_path)
 
     return report
 

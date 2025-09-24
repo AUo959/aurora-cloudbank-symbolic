@@ -47,18 +47,19 @@ def check_dependencies():
     for package in required_packages:
         try:
             __import__(package.replace("-", "_"))
-            print(f"  ✅ {package}")
+            print("  ✅ %s", package)
         except ImportError:
             missing_packages.append(package)
-            print(f"  ❌ {package} (missing)")
+            print("  ❌ %s (missing)", package)
 
     if missing_packages:
-        print(f"\n📥 Installing missing packages: {', '.join(missing_packages)}")
+        print("
+📥 Installing missing packages: %s", ', '.join(missing_packages))
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
             print("✅ Dependencies installed successfully")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to install dependencies: {e}")
+            print("❌ Failed to install dependencies: %s", e)
             return False
 
     return True
@@ -93,7 +94,7 @@ python3 scripts/git_pre_commit_hook.py
 
         return True
     except Exception as e:
-        print(f"  ❌ Failed to setup Git hooks: {e}")
+        print("  ❌ Failed to setup Git hooks: %s", e)
         return False
 
 
@@ -108,9 +109,9 @@ def create_validation_scripts():
         if script.exists():
             # Make executable
             os.chmod(script, 0o755)
-            print(f"  ✅ {script.name} configured")
+            print("  ✅ %s configured", script.name)
         else:
-            print(f"  ❌ {script.name} not found")
+            print("  ❌ %s not found", script.name)
             return False
 
     return True
@@ -125,7 +126,7 @@ def create_validation_directories():
     for dir_name in directories:
         dir_path = Path(dir_name)
         dir_path.mkdir(exist_ok=True)
-        print(f"  ✅ {dir_name}/ directory ready")
+        print("  ✅ %s/ directory ready", dir_name)
 
     return True
 
@@ -150,11 +151,11 @@ def test_validation_system():
 
         # Run quick validation test
         test_results = validator.validate_file("GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt")
-        print(f"  ✅ Test validation completed ({len(test_results)} checks)")
+        print("  ✅ Test validation completed (%s checks)", len(test_results))
 
         return True
     except Exception as e:
-        print(f"  ❌ Validation system test failed: {e}")
+        print("  ❌ Validation system test failed: %s", e)
         return False
 
 
@@ -334,13 +335,13 @@ def main():
             if not step_function():
                 failed_steps.append(step_name)
         except Exception as e:
-            print(f"❌ {step_name} setup failed: {e}")
+            print("❌ {step_name} setup failed: %s", e)
             failed_steps.append(step_name)
 
     print("\n" + "=" * 60)
 
     if failed_steps:
-        print(f"⚠️ Setup completed with issues in: {', '.join(failed_steps)}")
+        print("⚠️ Setup completed with issues in: %s", ', '.join(failed_steps))
         print("Please review the errors above and re-run setup if needed.")
     else:
         print("✅ Aurora CloudBank Canonical Validation System setup complete!")

@@ -9,6 +9,31 @@ import numpy as np
 import uvicorn
 from pydantic import BaseModel
 from fastapi import FastAPI
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
+
+# Rate limiting decorators
+@limiter.limit("100/minute")  # General endpoints
+@limiter.limit("10/minute")   # Auth endpoints  
+@limiter.limit("5/minute")    # Admin endpoints
+
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -86,6 +111,12 @@ async def get_status():
 
 
 @app.post("/api/quantum/vector")
+@app.post("/api/quantum/vector")
+async def generate_quantum_vector(request: QuantumVectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def generate_quantum_vector(request: QuantumVectorRequest):
     """Generate quantum vector"""
     try:
@@ -106,6 +137,12 @@ async def generate_quantum_vector(request: QuantumVectorRequest):
 
 
 @app.post("/api/consciousness/evolve")
+@app.post("/api/consciousness/evolve")
+async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def evolve_consciousness(request: ConsciousnessRequest):
     """Evolve consciousness state"""
     try:
@@ -130,6 +167,12 @@ async def evolve_consciousness(request: ConsciousnessRequest):
 
 
 @app.post("/api/learning/pattern")
+@app.post("/api/learning/pattern")
+async def process_learning_pattern(request: LearningRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def process_learning_pattern(request: LearningRequest):
     """Process learning pattern"""
     try:

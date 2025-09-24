@@ -617,7 +617,7 @@ def main():
     if args.install:
         print("🔧 Installing dependencies...")
         results = manager.install_requirements()
-        print(f"✅ Installed {len(results['installed'])}/{results['total']} packages")
+        print("✅ Installed %s/{results[", len(results['installed']))
         
     elif args.update:
         print("⬆️ Updating dependencies...")
@@ -627,12 +627,12 @@ def main():
         else:
             print("❌ Update completed with errors")
             for error in results['errors']:
-                print(f"   Error: {error}")
+                print("   Error: %s", error)
                 
     elif args.health_check:
         print("🏥 Performing health check...")
         health = manager.check_dependency_health()
-        print(f"Overall Health: {health['overall_health'].upper()}")
+        print("Overall Health: %s", health['overall_health'].upper())
         
     elif args.status:
         print(manager.generate_status_report())

@@ -17,6 +17,12 @@ from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+# CSRF Protection Security
+security = HTTPBearer()
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.responses import HTMLResponse
@@ -148,6 +154,11 @@ async def health_check():
 if AURORA_CUSTOM_GPT_AVAILABLE:
 
     @app.post("/api/aurora/command")
+async def aurora_custom_gpt_command(request_data: dict, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
     async def aurora_custom_gpt_command(request_data: dict):
         """Receive command from Aurora Custom GPT and route to command node"""
         server_state["requests_count"] += 1
@@ -201,6 +212,11 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/aurora/initialize")
+async def initialize_aurora_integration(token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
     async def initialize_aurora_integration():
         """Initialize Aurora Custom GPT integration"""
         server_state["requests_count"] += 1
@@ -241,6 +257,11 @@ else:
 
 
 @app.post("/api/bridge/gpt/connect/{agent_id}")
+async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any], token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
@@ -276,6 +297,11 @@ async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
 
 
 @app.post("/api/bridge/gpt/message/{agent_id}")
+async def relay_message(agent_id: str, request_data: Dict[str, Any], token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def relay_message(agent_id: str, request_data: Dict[str, Any]):
     """Relay message from Custom GPT agent"""
     try:
@@ -348,6 +374,11 @@ async def get_agent_status(agent_id: str):
 
 
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
+async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def update_heartbeat(agent_id: str):
     """Update agent heartbeat timestamp"""
     try:
@@ -375,6 +406,11 @@ async def update_heartbeat(agent_id: str):
 
 
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
+async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
 async def disconnect_agent(agent_id: str):
     """Disconnect an agent from the constellation"""
     try:

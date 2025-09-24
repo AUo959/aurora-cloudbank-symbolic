@@ -38,15 +38,15 @@ async def validate_agent_integration():
         from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
 
         agent = ChatGPTAgentModeIntegration()
-        print(f"✅ Agent integration initialized: {agent.agent_status}")
+        print("✅ Agent integration initialized: %s", agent.agent_status)
 
         # Test tool discovery
         tools_info = await agent.discover_tools()
-        print(f"✅ Tool discovery: {len(tools_info['tools'])} tools available")
+        print("✅ Tool discovery: %s tools available", len(tools_info['tools']))
 
         # List available tools
         for tool_name, tool_info in tools_info['tools'].items():
-            print(f"   🛠️  {tool_name}: {tool_info['description']}")
+            print("   🛠️  {tool_name}: %s", tool_info['description'])
 
         # Test system status
         status_result = await agent.execute_tool("system_status", {"detail_level": "basic"})
@@ -59,7 +59,7 @@ async def validate_agent_integration():
         session_result = await agent.execute_tool("session_management", {"action": "create"})
         if session_result['success']:
             session_id = session_result['result']['session_id']
-            print(f"✅ Session management: Working (test session: {session_id[:8]}...)")
+            print("✅ Session management: Working (test session: %s...)", session_id[:8])
         else:
             print("⚠️  Session management: Issues detected")
 
@@ -87,7 +87,7 @@ async def validate_agent_integration():
         return True
 
     except Exception as e:
-        print(f"❌ Agent integration failed: {str(e)}")
+        print("❌ Agent integration failed: %s", str(e))
         return False
 
 def validate_api_endpoints():
@@ -102,12 +102,12 @@ def validate_api_endpoints():
                 config = json.load(f)
 
             endpoints = config.get('integration_endpoints', {})
-            print(f"✅ Configuration loaded: {len(endpoints)} endpoints defined")
+            print("✅ Configuration loaded: %s endpoints defined", len(endpoints))
 
             for endpoint, info in endpoints.items():
                 method = info.get('method', 'GET')
                 desc = info.get('description', 'No description')
-                print(f"   🌐 {method} {endpoint}: {desc}")
+                print("   🌐 {method} {endpoint}: %s", desc)
 
             return True
         else:
@@ -115,7 +115,7 @@ def validate_api_endpoints():
             return False
 
     except Exception as e:
-        print(f"❌ API validation failed: {str(e)}")
+        print("❌ API validation failed: %s", str(e))
         return False
 
 def check_aurora_dependencies():
@@ -134,9 +134,9 @@ def check_aurora_dependencies():
     all_good = True
     for path, name in dependencies:
         if os.path.exists(path):
-            print(f"✅ {name}: Available")
+            print("✅ %s: Available", name)
         else:
-            print(f"⚠️  {name}: Not found at {path}")
+            print("⚠️  {name}: Not found at %s", path)
             all_good = False
 
     return all_good
@@ -180,9 +180,9 @@ async def main():
     agent_integration_ok = await validate_agent_integration()
 
     print("\n📊 Validation Results:")
-    print(f"   Dependencies: {'✅ PASS' if dependencies_ok else '❌ FAIL'}")
-    print(f"   API Configuration: {'✅ PASS' if api_config_ok else '❌ FAIL'}")
-    print(f"   Agent Integration: {'✅ PASS' if agent_integration_ok else '❌ FAIL'}")
+    print("   Dependencies: %s", '✅ PASS' if dependencies_ok else '❌ FAIL')
+    print("   API Configuration: %s", '✅ PASS' if api_config_ok else '❌ FAIL')
+    print("   Agent Integration: %s", '✅ PASS' if agent_integration_ok else '❌ FAIL')
 
     overall_status = dependencies_ok and api_config_ok and agent_integration_ok
 
@@ -206,7 +206,8 @@ if __name__ == "__main__":
         print("\n🛑 Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ Validation failed with error: {str(e)}")
+        print("
+❌ Validation failed with error: %s", str(e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

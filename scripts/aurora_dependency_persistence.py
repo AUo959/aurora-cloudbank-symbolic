@@ -369,7 +369,7 @@ def main():
         print("📸 Creating dependency snapshot...")
         snapshot = manager.create_dependency_snapshot()
         snapshot_file = manager.save_snapshot(snapshot)
-        print(f"✅ Snapshot saved: {snapshot_file}")
+        print("✅ Snapshot saved: %s", snapshot_file)
         
     elif args.restore_from_latest:
         print("🔄 Restoring dependencies from latest snapshot...")

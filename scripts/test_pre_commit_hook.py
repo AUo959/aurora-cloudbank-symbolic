@@ -57,5 +57,5 @@ class TestPreCommitHook(unittest.TestCase):
             self.assertEqual(rc, 0)
 
 if __name__ == "__main__":
-    print(f"[TEST] Starting validation tests @ {datetime.now(timezone.utc).isoformat()}")
+    print("[TEST] Starting validation tests @ %s", datetime.now(timezone.utc).isoformat())
     unittest.main(verbosity=2)

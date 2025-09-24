@@ -519,7 +519,7 @@ class ScheduledMaintenanceSystem:
     def run_task_now(self, task_name: str):
         """Run a specific task immediately"""
         if task_name not in self.tasks:
-            print(f"❌ Unknown task: {task_name}")
+            print("❌ Unknown task: %s", task_name)
             return False
 
         return self._run_task(task_name)
@@ -555,14 +555,15 @@ def main():
         print("\n📊 Maintenance Task Status:")
         print("=" * 50)
         for name, info in status.items():
-            print(f"\n{name}:")
-            print(f"  Enabled: {info['enabled']}")
-            print(f"  Last Run: {info['last_run'] or 'Never'}")
-            print(f"  Success/Failures: {info['success_count']}/{info['failure_count']}")
-            print(f"  Description: {info['description']}")
+            print("
+%s:", name)
+            print("  Enabled: %s", info['enabled'])
+            print("  Last Run: %s", info['last_run'] or 'Never')
+            print("  Success/Failures: %s/{info[", info['success_count'])
+            print("  Description: %s", info['description'])
 
     elif args.run_task:
-        print(f"🔧 Running task: {args.run_task}")
+        print("🔧 Running task: %s", args.run_task)
         success = maintenance.run_task_now(args.run_task)
         if success:
             print("✅ Task completed successfully")

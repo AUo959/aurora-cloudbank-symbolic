@@ -281,24 +281,26 @@ def main():
 
     
         if args.cleanup:
-        print(f"🧹 Starting branch cleanup {'(DRY RUN)' if manager.dry_run else '(EXECUTING)'}")
+        print("🧹 Starting branch cleanup %s", '(DRY RUN)' if manager.dry_run else '(EXECUTING)')
         results = manager.cleanup_stale_branches(args.max_age, args.categories)
 
         
-        print(f"\n✅ Deleted: {len(results['deleted'])}")
+        print("
+✅ Deleted: %s", len(results['deleted']))
         
         for branch in results["deleted"][:5]:  # Show first 5
-            print(f"  - {branch}")
+            print("  - %s", branch)
         
         if len(results["deleted"]) > 5:
-            print(f"  ... and {len(results['deleted']) - 5} more")
+            print("  ... and %s more", len(results['deleted']) - 5)
 
         
         if results["errors"]:
-            print(f"\n❌ Errors: {len(results['errors'])}")
+            print("
+❌ Errors: %s", len(results['errors']))
             
         for error in results["errors"]:
-                print(f"  - {error}")
+                print("  - %s", error)
 
 
 if __name__ == "__main__":

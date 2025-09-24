@@ -297,7 +297,8 @@ def main():
     with open(report_file, "w") as f:
         f.write(f"# GITWiz Enhanced Analysis Report\n\n```\n{report}\n```\n")
 
-    print(f"\n📄 Report saved to: {report_file}")
+    print("
+📄 Report saved to: %s", report_file)
 
 
 if __name__ == "__main__":

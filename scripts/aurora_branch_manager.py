@@ -73,7 +73,7 @@ class BranchManager:
 
             
         if result.returncode != 0:
-                print(f"Error getting branch info: {result.stderr}")
+                print("Error getting branch info: %s", result.stderr)
                 
         return []
 
@@ -115,7 +115,7 @@ class BranchManager:
 
         
         except (OSError, ValueError, RuntimeError) as e:
-            print(f"Error analyzing branches: {e}")
+            print("Error analyzing branches: %s", e)
             
         return []
 
@@ -396,7 +396,7 @@ def main():
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(report)
             
-        print(f"📄 Report saved to {args.output}")
+        print("📄 Report saved to %s", args.output)
         
         else:
             print(report)
@@ -409,20 +409,20 @@ def main():
             
         print("\n✅ Cleanup Summary:")
             
-        print(f"  - Deleted: {len(summary['deleted'])} branches")
+        print("  - Deleted: %s branches", len(summary['deleted']))
             
-        print(f"  - Archived: {len(summary['archived'])} branches")
+        print("  - Archived: %s branches", len(summary['archived']))
             
-        print(f"  - Kept: {len(summary['kept'])} branches")
+        print("  - Kept: %s branches", len(summary['kept']))
             
-        print(f"  - Errors: {len(summary['errors'])} issues")
+        print("  - Errors: %s issues", len(summary['errors']))
 
             
         if summary["errors"]:
                 print("\n❌ Errors:")
                 
         for error in summary["errors"]:
-                    print(f"  - {error}")
+                    print("  - %s", error)
 
     
         else:

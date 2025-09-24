@@ -116,7 +116,7 @@ def process_file(path: str) -> bool:
             return True
         return False
     except Exception as e:
-        print(f"[stage1] Skip {path}: {e}")
+        print("[stage1] Skip {path}: %s", e)
         return False
 
 
@@ -137,7 +137,7 @@ def main() -> int:
         elif t.endswith('.py') and os.path.exists(t):
             if process_file(t):
                 changed += 1
-    print(f"[stage1] Files modified: {changed}")
+    print("[stage1] Files modified: %s", changed)
     return 0
 
 

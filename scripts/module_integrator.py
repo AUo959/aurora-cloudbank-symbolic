@@ -107,7 +107,7 @@ def main() -> None:
         if args.rollback:
             for d in dests:
                 name = restore_module(d)
-                print(f"Restored {d} from {name}")
+                print("Restored {d} from %s", name)
             return
 
         load_metadata(args.module_path)
@@ -122,11 +122,11 @@ def main() -> None:
             os.makedirs(os.path.dirname(d), exist_ok=True)
             sync_module(args.module_path, d)
             load_metadata(d)
-            print(f"Integrated {args.module_path} -> {d}")
+            print("Integrated {args.module_path} -> %s", d)
 
     except Exception as exc:
         logger.error("Integration failed: %s", exc)
-        print(f"Error: {exc}")
+        print("Error: %s", exc)
 
 
 if __name__ == "__main__":

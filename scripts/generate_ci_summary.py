@@ -28,7 +28,7 @@ def load_json_report(file_path: str) -> Dict[str, Any]:
             with open(file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Warning: Failed to load {file_path}: {e}")
+            print("Warning: Failed to load {file_path}: %s", e)
     return {}
 
 

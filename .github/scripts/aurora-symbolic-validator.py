@@ -64,9 +64,9 @@ try:
     engine = SymbolicEngine()
     print('symbolic_engine:operational')
 except ImportError as e:
-    print(f'symbolic_engine:import_error:{e}')
+    print("symbolic_engine:import_error:%s", e)
 except Exception as e:
-    print(f'symbolic_engine:runtime_error:{e}')
+    print("symbolic_engine:runtime_error:%s", e)
 
 # Test T1 anchor system
 try:
@@ -74,7 +74,7 @@ try:
     print('t1_anchors:operational')
     print('anchor_protocol:T1_TEMPORAL_ANCHOR')
 except Exception as e:
-    print(f't1_anchors:error:{e}')
+    print("t1_anchors:error:%s", e)
 
 # Test SRB anchor system
 try:
@@ -83,7 +83,7 @@ try:
     print('anchor_protocol:SRB_TICK')
     print('anchor_protocol:ANCHOR_LOCKED')
 except Exception as e:
-    print(f'srb_anchors:error:{e}')
+    print("srb_anchors:error:%s", e)
 """
 <<<<<<< HEAD
             result = subprocess.run(
@@ -169,7 +169,7 @@ try:
 except ImportError:
     print('dlp_tracker:not_available')
 except Exception as e:
-    print(f'dlp_tracker:error:{e}')
+    print("dlp_tracker:error:%s", e)
 
 # Test memory sealing
 try:
@@ -180,7 +180,7 @@ try:
 except ImportError:
     print('memory_sealer:not_available')
 except Exception as e:
-    print(f'memory_sealer:error:{e}')
+    print("memory_sealer:error:%s", e)
 
 # Test native DLP export
 try:
@@ -191,7 +191,7 @@ try:
 except ImportError:
     print('native_dlp:not_available')
 except Exception as e:
-    print(f'native_dlp:error:{e}')
+    print("native_dlp:error:%s", e)
 """
 <<<<<<< HEAD
             result = subprocess.run(
@@ -286,7 +286,7 @@ try:
     else:
         print('picard_delta_3:not_found')
 except Exception as e:
-    print(f'picard_delta_3:error:{e}')
+    print("picard_delta_3:error:%s", e)
 
 # Test Aurora security scanner
 if os.path.exists('scripts/aurora_security_scanner.py'):
@@ -421,11 +421,13 @@ else:
         with open(manifest_path, 'w') as f:
             json.dump(manifest, f, indent=2)
         
-        print(f"\n📄 Aurora CI manifest saved: {manifest_path}")
+        print("
+📄 Aurora CI manifest saved: %s", manifest_path)
         
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print(f"\n🌟 Aurora Validation Status: {validation_status.upper()}")
+        print("
+🌟 Aurora Validation Status: %s", validation_status.upper())
         
 =======
 
@@ -437,11 +439,13 @@ else:
         with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        print(f"\n📄 Aurora CI manifest saved: {manifest_path}")
+        print("
+📄 Aurora CI manifest saved: %s", manifest_path)
 
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print(f"\n🌟 Aurora Validation Status: {validation_status.upper()}")
+        print("
+🌟 Aurora Validation Status: %s", validation_status.upper())
 
 >>>>>>> origin/main
         if validation_status == "fully_operational":

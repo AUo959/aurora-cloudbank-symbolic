@@ -31,7 +31,7 @@ def fix_trailing_whitespace(file_path):
 
         return True
     except Exception as e:
-        print(f"Error fixing whitespace in {file_path}: {e}")
+        print("Error fixing whitespace in {file_path}: %s", e)
         return False
 
 
@@ -72,7 +72,7 @@ def fix_indentation_errors(file_path):
 
         return True
     except Exception as e:
-        print(f"Error fixing indentation in {file_path}: {e}")
+        print("Error fixing indentation in {file_path}: %s", e)
         return False
 
 
@@ -91,7 +91,7 @@ def fix_f_string_issues(file_path):
 
         return True
     except Exception as e:
-        print(f"Error fixing f-strings in {file_path}: {e}")
+        print("Error fixing f-strings in {file_path}: %s", e)
         return False
 
 
@@ -129,7 +129,7 @@ def fix_line_length_issues(file_path):
 
         return True
     except Exception as e:
-        print(f"Error fixing line lengths in {file_path}: {e}")
+        print("Error fixing line lengths in {file_path}: %s", e)
         return False
 
 
@@ -143,16 +143,16 @@ def run_autopep8(file_path):
         )
         return True
     except subprocess.CalledProcessError:
-        print(f"autopep8 not available for {file_path}")
+        print("autopep8 not available for %s", file_path)
         return False
     except Exception as e:
-        print(f"Error running autopep8 on {file_path}: {e}")
+        print("Error running autopep8 on {file_path}: %s", e)
         return False
 
 
 def fix_python_file(file_path):
     """Apply all fixes to a Python file"""
-    print(f"Fixing {file_path}...")
+    print("Fixing %s...", file_path)
 
     success = True
 
@@ -192,11 +192,12 @@ def main():
             else:
                 error_count += 1
         else:
-            print(f"File not found: {file_path}")
+            print("File not found: %s", file_path)
             error_count += 1
 
-    print(f"\n✅ Fixed: {fixed_count} files")
-    print(f"❌ Errors: {error_count} files")
+    print("
+✅ Fixed: %s files", fixed_count)
+    print("❌ Errors: %s files", error_count)
 
     # Run final validation
     print("\n🔍 Running final validation...")
@@ -221,12 +222,12 @@ def main():
             print("✅ All linting issues resolved!")
         else:
             remaining_issues = result.stdout.count("\n") if result.stdout else 0
-            print(f"⚠️ {remaining_issues} issues remaining")
+            print("⚠️ %s issues remaining", remaining_issues)
             if result.stdout:
                 print("Remaining issues:")
                 print(result.stdout[:1000])  # Show first 1000 chars
     except Exception as e:
-        print(f"Could not run final validation: {e}")
+        print("Could not run final validation: %s", e)
 
 
 if __name__ == "__main__":

@@ -24,17 +24,17 @@ def execute_pruning_mission_phase_1():
     """Execute Phase 1 of repository pruning mission"""
     print("🌳 SSMT v3.0 Repository Pruning Mission - Phase 1")
     print("🎯 Mission: Consolidate PRs, close issues, trim branch sappers")
-    print(f"📋 Processing {len(PYTHON_DEPENDENCY_BRANCHES)} Python dependency branches")
+    print("📋 Processing %s Python dependency branches", len(PYTHON_DEPENDENCY_BRANCHES))
     print("⚡ Success Rate: 75% (validated with live automation)")
     
     print("\n🐍 Python Dependency Branches (Highest Success Rate):")
     for i, branch in enumerate(PYTHON_DEPENDENCY_BRANCHES, 1):
-        print(f"  {i}. {branch}")
+        print("  {i}. %s", branch)
     
     print(f"\n📊 Expected Results:")
-    print(f"  ✅ ~{int(len(PYTHON_DEPENDENCY_BRANCHES) * 0.75)} successful merges")
-    print(f"  ⏱️ ~{len(PYTHON_DEPENDENCY_BRANCHES) * 5} minutes manual work saved")
-    print(f"  🗑️ {len(PYTHON_DEPENDENCY_BRANCHES)} branches eliminated from repository")
+    print("  ✅ ~%s successful merges", int(len(PYTHON_DEPENDENCY_BRANCHES) * 0.75))
+    print("  ⏱️ ~%s minutes manual work saved", len(PYTHON_DEPENDENCY_BRANCHES) * 5)
+    print("  🗑️ %s branches eliminated from repository", len(PYTHON_DEPENDENCY_BRANCHES))
     
     print("\n🛡️ Safety Systems:")
     print("  ✅ Pre-merge validation with conflict simulation")
@@ -48,7 +48,8 @@ def execute_pruning_mission_phase_1():
         print("🚫 Pruning mission cancelled")
         return
     
-    print(f"\n🚀 Executing Phase 1 pruning mission on {len(PYTHON_DEPENDENCY_BRANCHES)} Python branches...")
+    print("
+🚀 Executing Phase 1 pruning mission on %s Python branches...", len(PYTHON_DEPENDENCY_BRANCHES))
     
     # Execute the enhanced automation with our Python dependency branches
     cmd = [
@@ -71,7 +72,7 @@ def execute_pruning_mission_phase_1():
         
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ Phase 1 pruning mission encountered issues: {e}")
+        print("❌ Phase 1 pruning mission encountered issues: %s", e)
         print("🛡️ Safety systems activated - repository protected")
         return False
 

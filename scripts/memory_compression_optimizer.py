@@ -172,7 +172,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print(f"  Would compress: {file_path} (est. {file_info['estimated_savings_kb']:.1f}KB saved)")
+                print("  Would compress: {file_path} (est. %sKB saved)", file_info['estimated_savings_kb']:.1f)
                 results["compressed_files"].append(file_info["path"])
                 results["total_savings_mb"] += file_info["estimated_savings_kb"] / 1024
                 continue
@@ -198,15 +198,15 @@ class MemoryCompressionOptimizer:
                     results["compressed_files"].append(str(file_path))
                     results["total_savings_mb"] += actual_savings / (1024 * 1024)
 
-                    print(f"✅ Compressed: {file_path} ({actual_savings / 1024:.1f}KB saved)")
+                    print("✅ Compressed: {file_path} (%sKB saved)", actual_savings / 1024:.1f)
                 else:
                     # Poor compression, remove compressed version
                     compressed_path.unlink()
-                    print(f"⚠️  Skipped: {file_path} (poor compression ratio)")
+                    print("⚠️  Skipped: %s (poor compression ratio)", file_path)
 
             except (OSError, PermissionError) as e:
                 results["failed_compressions"].append({"path": str(file_path), "error": str(e)})
-                print(f"❌ Failed to compress: {file_path} - {e}")
+                print("❌ Failed to compress: {file_path} - %s", e)
 
         return results
 
@@ -226,13 +226,13 @@ class MemoryCompressionOptimizer:
             keep_file = files[0]
             remove_files = files[1:]
 
-            print(f"🔄 Duplicate group (keeping {keep_file['path']}):")
+            print("🔄 Duplicate group (keeping %s):", keep_file['path'])
 
             for file_info in remove_files:
                 file_path = Path(file_info["path"])
 
                 if self.dry_run:
-                    print(f"  Would remove: {file_path} ({file_info['size_kb']:.1f}KB)")
+                    print("  Would remove: {file_path} (%sKB)", file_info['size_kb']:.1f)
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / 1024
                     continue
@@ -241,11 +241,11 @@ class MemoryCompressionOptimizer:
                     file_path.unlink()
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / (1024)
-                    print(f"✅ Removed duplicate: {file_path}")
+                    print("✅ Removed duplicate: %s", file_path)
 
                 except (OSError, PermissionError) as e:
                     results["failed_removals"].append({"path": str(file_path), "error": str(e)})
-                    print(f"❌ Failed to remove: {file_path} - {e}")
+                    print("❌ Failed to remove: {file_path} - %s", e)
 
         return results
 
@@ -305,7 +305,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print(f"  Would remove cache file: {file_path}")
+                print("  Would remove cache file: %s", file_path)
                 results["removed_files"].append(str(file_path))
                 results["total_savings_mb"] += file_info["size_kb"] / 1024
                 continue
@@ -318,11 +318,11 @@ class MemoryCompressionOptimizer:
 
                 results["removed_files"].append(str(file_path))
                 results["total_savings_mb"] += file_info["size_kb"] / 1024
-                print(f"✅ Removed cache: {file_path}")
+                print("✅ Removed cache: %s", file_path)
 
             except (OSError, PermissionError) as e:
                 results["failed_removals"].append({"path": str(file_path), "error": str(e)})
-                print(f"❌ Failed to remove cache: {file_path} - {e}")
+                print("❌ Failed to remove cache: {file_path} - %s", e)
 
         return results
 
@@ -451,7 +451,8 @@ class MemoryCompressionOptimizer:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        print(f"\n📄 Optimization report saved to: {report_file}")
+        print("
+📄 Optimization report saved to: %s", report_file)
 
         return {
             "analysis": analysis,

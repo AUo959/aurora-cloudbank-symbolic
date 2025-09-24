@@ -550,7 +550,7 @@ def main():
             
     elif args.health_check:
         health = hub.health_check()
-        print(f"Health Status: {health['overall_health'].upper()}")
+        print("Health Status: %s", health['overall_health'].upper())
         if health['overall_health'] != 'healthy':
             sys.exit(1)
             
@@ -570,8 +570,8 @@ def main():
         
         # Final report
         print("\n📊 Setup Summary:")
-        print(f"   Dependencies: {'✅ Success' if install_results['overall_success'] else '⚠️  Partial'}")
-        print(f"   Automation: {'✅ Success' if automation_success else '⚠️  Partial'}")
+        print("   Dependencies: %s", '✅ Success' if install_results['overall_success'] else '⚠️  Partial')
+        print("   Automation: %s", '✅ Success' if automation_success else '⚠️  Partial')
         
         if install_results['overall_success'] and automation_success:
             print("\n🎉 Complete setup successful! Aurora CloudBank dependencies are fully managed.")

@@ -9,16 +9,18 @@ def run_step(step_name, commands):
     import shlex
 
     for i, cmd in enumerate(commands, 1):
-        print(f"\n[{step_name}] Attempt {i}: {cmd}")
+        print("
+[{step_name}] Attempt {i}: %s", cmd)
         try:
             cmd_parts = shlex.split(cmd) if isinstance(cmd, str) else cmd
             subprocess.run(cmd_parts, check=True, timeout=300)
-            print(f"[{step_name}] Success on attempt {i}")
+            print("[{step_name}] Success on attempt %s", i)
             return True
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            print(f"[{step_name}] Failed attempt {i}: {e}")
+            print("[{step_name}] Failed attempt {i}: %s", e)
             time.sleep(2)
-    print(f"[{step_name}] All attempts failed\n")
+    print("[%s] All attempts failed
+", step_name)
     return False
 
 

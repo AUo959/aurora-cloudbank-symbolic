@@ -35,7 +35,7 @@ def clean_file(file_path):
             return True
         return False
     except Exception as e:
-        print(f"Error processing {file_path}: {e}")
+        print("Error processing {file_path}: %s", e)
         return False
 
 
@@ -50,7 +50,8 @@ def main():
     total_files = 0
 
     for ext in extensions:
-        print(f"\nCleaning {ext} files...")
+        print("
+Cleaning %s files...", ext)
         files = list(Path(".").rglob(f"*{ext}"))
 
         for file_path in files:
@@ -61,12 +62,12 @@ def main():
             total_files += 1
             if clean_file(file_path):
                 files_cleaned += 1
-                print(f"  ✓ Cleaned {file_path}")
+                print("  ✓ Cleaned %s", file_path)
 
     print("\n📊 Summary:")
-    print(f"  Total files processed: {total_files}")
-    print(f"  Files cleaned: {files_cleaned}")
-    print(f"  Files unchanged: {total_files - files_cleaned}")
+    print("  Total files processed: %s", total_files)
+    print("  Files cleaned: %s", files_cleaned)
+    print("  Files unchanged: %s", total_files - files_cleaned)
 
 
 if __name__ == "__main__":

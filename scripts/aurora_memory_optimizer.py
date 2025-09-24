@@ -468,13 +468,13 @@ def main():
 
     if args.optimize:
         dry_run = not args.execute
-        print(f"🔧 Running optimization suite {'(DRY RUN)' if dry_run else '(EXECUTING)'}")
+        print("🔧 Running optimization suite %s", '(DRY RUN)' if dry_run else '(EXECUTING)')
 
         results = optimizer.run_optimization_suite(dry_run=dry_run)
 
         if not dry_run:
             print("\n✅ Optimization complete!")
-            print(f"📊 Total space saved: {results['total_space_saved'] / 1024:.1f} KB")
+            print("📊 Total space saved: %s KB", results['total_space_saved'] / 1024:.1f)
 
             if results["json_optimization"]:
                 json_results = results["json_optimization"]
@@ -484,7 +484,7 @@ def main():
 
             if results["log_compression"]:
                 log_results = results["log_compression"]
-                print(f"📜 Log files: {log_results['compressed']} compressed, {log_results['space_saved']} bytes saved")
+                print("📜 Log files: %s compressed, {log_results[", log_results['compressed'])
 
         else:
             print("🔍 Analysis complete. Use --execute to run actual optimization.")

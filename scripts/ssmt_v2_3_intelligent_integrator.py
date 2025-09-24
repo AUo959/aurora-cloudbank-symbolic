@@ -46,7 +46,7 @@ class SSMTIntelligentIntegrator:
             with open("SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json", 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"⚠️ Could not load architectural analysis: {e}")
+            print("⚠️ Could not load architectural analysis: %s", e)
             return {}
 
     def select_integration_candidates(self) -> List[Dict]:
@@ -109,7 +109,7 @@ class SSMTIntelligentIntegrator:
         }
         
         try:
-            print(f"🧬 Creating compatibility layer for {branch}...")
+            print("🧬 Creating compatibility layer for %s...", branch)
             
             # Get critical files that have conflicts
             assessment = candidate["assessment_data"]
@@ -171,7 +171,7 @@ class {Path(critical_file).stem.title()}Enhancements:
                         f.write(layer_content)
                     
                     result["layers_created"].append(str(layer_name))
-                    print(f"   ✅ Created: {layer_name}")
+                    print("   ✅ Created: %s", layer_name)
             
             result["status"] = "success" if result["layers_created"] else "no_layers_needed"
             
@@ -192,7 +192,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         }
         
         try:
-            print(f"🔧 Filtered integration for {branch}...")
+            print("🔧 Filtered integration for %s...", branch)
             
             # Get safe files for integration (non-critical)
             diff_result = self.run_command(f"git diff --name-status main..origin/{branch}")
@@ -226,7 +226,7 @@ class {Path(critical_file).stem.title()}Enhancements:
             result["files_integrated"] = safe_integrations[:10]  # Limit for safety
             result["status"] = "success"
             
-            print(f"   ✅ Integrated {len(result['files_integrated'])} safe files")
+            print("   ✅ Integrated %s safe files", len(result['files_integrated']))
             
         except Exception as e:
             result["status"] = "error"
@@ -245,7 +245,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         }
         
         try:
-            print(f"💎 Value extraction for {branch}...")
+            print("💎 Value extraction for %s...", branch)
             
             # Create extraction directory
             extraction_dir = self.workspace_root / f"extractions/ssmt_v2_3/{branch.replace('/', '_')}"
@@ -271,7 +271,7 @@ class {Path(critical_file).stem.title()}Enhancements:
                         result["extractions"].append(str(extracted_file))
             
             result["status"] = "success"
-            print(f"   ✅ Extracted {len(result['extractions'])} valuable files")
+            print("   ✅ Extracted %s valuable files", len(result['extractions']))
             
         except Exception as e:
             result["status"] = "error"
@@ -312,8 +312,8 @@ class {Path(critical_file).stem.title()}Enhancements:
         """Execute SSMT v2.3 Intelligence-Driven Integration"""
         print("🧠 AURORA CLOUDBANK - SSMT v2.3: INTELLIGENCE-DRIVEN INTEGRATION")
         print("=" * 70)
-        print(f"🎯 SSMT Intelligent Integrator v{self.results['ssmt_version']}")
-        print(f"📊 Integration candidates: {len(self.integration_candidates)}")
+        print("🎯 SSMT Intelligent Integrator v%s", self.results['ssmt_version'])
+        print("📊 Integration candidates: %s", len(self.integration_candidates))
         
         if not self.integration_candidates:
             print("⚠️ No suitable integration candidates identified")
@@ -324,10 +324,11 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         # Process each candidate
         for candidate in self.integration_candidates:
-            print(f"\n{'='*50}")
-            print(f"🎯 Processing: {candidate['branch']}")
-            print(f"   Quality Score: {candidate['quality_score']}")
-            print(f"   Strategy: {candidate['integration_strategy']}")
+            print("
+%s", '='*50)
+            print("🎯 Processing: %s", candidate['branch'])
+            print("   Quality Score: %s", candidate['quality_score'])
+            print("   Strategy: %s", candidate['integration_strategy'])
             
             integration_result = self.integrate_candidate(candidate)
             self.results["integrations"].append(integration_result)
@@ -336,7 +337,7 @@ class {Path(critical_file).stem.title()}Enhancements:
                 successful_integrations += 1
                 print(f"✅ Integration successful!")
             else:
-                print(f"⚠️ Integration status: {integration_result.get('status', 'unknown')}")
+                print("⚠️ Integration status: %s", integration_result.get('status', 'unknown'))
         
         # Final validation
         print("\n🧪 Running system validation...")
@@ -351,9 +352,9 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         # Summary
         print(f"\n🎯 SSMT v2.3 SUMMARY:")
-        print(f"   Candidates processed: {len(self.integration_candidates)}")
-        print(f"   Successful integrations: {successful_integrations}")
-        print(f"   Success rate: {(successful_integrations/len(self.integration_candidates)*100):.1f}%")
+        print("   Candidates processed: %s", len(self.integration_candidates))
+        print("   Successful integrations: %s", successful_integrations)
+        print("   Success rate: %s%", (successful_integrations/len(self.integration_candidates)*100):.1f)
         
         # Save results
         self.results["status"] = "completed"
@@ -367,7 +368,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         if successful_integrations > 0:
             print(f"\n🚀 SSMT v2.3 Intelligence-Driven Integration completed successfully!")
-            print(f"🧠 Architectural intelligence successfully guided {successful_integrations} integrations!")
+            print("🧠 Architectural intelligence successfully guided %s integrations!", successful_integrations)
             return True
         else:
             print(f"\n⚠️ SSMT v2.3 completed with mixed results")

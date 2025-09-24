@@ -28,9 +28,9 @@ def execute_branch_deletions():
     print("🧹 Goal: Repository health improvement (60 → 52 branches)")
     print()
     
-    print(f"🗑️ Executing deletion of {len(safe_branches)} verified safe branches:")
+    print("🗑️ Executing deletion of %s verified safe branches:", len(safe_branches))
     for i, branch in enumerate(safe_branches, 1):
-        print(f"   {i}. {branch}")
+        print("   {i}. %s", branch)
     print()
     
     # Create backup record before deletion
@@ -49,7 +49,8 @@ def execute_branch_deletions():
     print("🛡️ Safety Check: Verifying branches exist before deletion...")
     
     for branch in safe_branches:
-        print(f"\n🗑️ Deleting branch: {branch}")
+        print("
+🗑️ Deleting branch: %s", branch)
         
         try:
             # First verify the branch exists
@@ -61,7 +62,7 @@ def execute_branch_deletions():
             )
             
             if check_result.returncode != 0:
-                print(f"   ⚠️ Branch {branch} not found - may already be deleted")
+                print("   ⚠️ Branch %s not found - may already be deleted", branch)
                 deletion_results.append({
                     "branch": branch,
                     "status": "not_found",
@@ -78,7 +79,7 @@ def execute_branch_deletions():
             )
             
             if delete_result.returncode == 0:
-                print(f"   ✅ Successfully deleted: {branch}")
+                print("   ✅ Successfully deleted: %s", branch)
                 successful_deletions += 1
                 deletion_results.append({
                     "branch": branch,
@@ -88,7 +89,7 @@ def execute_branch_deletions():
                 backup_record["branches_deleted"].append(branch)
             else:
                 error_msg = delete_result.stderr.strip()
-                print(f"   ❌ Failed to delete {branch}: {error_msg}")
+                print("   ❌ Failed to delete {branch}: %s", error_msg)
                 deletion_results.append({
                     "branch": branch,
                     "status": "failed",
@@ -96,7 +97,7 @@ def execute_branch_deletions():
                 })
                 
         except Exception as e:
-            print(f"   💥 Exception deleting {branch}: {str(e)}")
+            print("   💥 Exception deleting {branch}: %s", str(e))
             deletion_results.append({
                 "branch": branch,
                 "status": "exception", 
@@ -113,14 +114,14 @@ def execute_branch_deletions():
         json.dump(backup_record, f, indent=2)
     
     print(f"\n📊 Phase 2 Deletion Summary:")
-    print(f"   ✅ Successfully deleted: {successful_deletions}/{len(safe_branches)} branches")
+    print("   ✅ Successfully deleted: {successful_deletions}/%s branches", len(safe_branches))
     print(f"   📁 Backup record saved: phase_2_deletion_backup.json")
     
     if successful_deletions > 0:
         print(f"\n🎯 Repository Health Improvement:")
-        print(f"   📉 Branch count reduced by: {successful_deletions}")
+        print("   📉 Branch count reduced by: %s", successful_deletions)
         print(f"   🌳 Repository maintenance burden: REDUCED")
-        print(f"   ✅ Mission status: {'COMPLETE' if successful_deletions == len(safe_branches) else 'PARTIAL SUCCESS'}")
+        print("   ✅ Mission status: %s", 'COMPLETE' if successful_deletions == len(safe_branches) else 'PARTIAL SUCCESS')
     
     # Check final branch count
     try:
@@ -133,11 +134,12 @@ def execute_branch_deletions():
         
         if branch_count_result.returncode == 0:
             remaining_branches = len([b for b in branch_count_result.stdout.strip().split('\n') if b and not b.startswith('origin/HEAD')])
-            print(f"   📊 Current remote branch count: {remaining_branches}")
+            print("   📊 Current remote branch count: %s", remaining_branches)
     except:
         print("   📊 Could not determine final branch count")
     
-    print(f"\n🏆 SSMT v3.0 Phase 2 Repository Pruning: {'SUCCESS!' if successful_deletions > 0 else 'NEEDS REVIEW'}")
+    print("
+🏆 SSMT v3.0 Phase 2 Repository Pruning: %s", 'SUCCESS!' if successful_deletions > 0 else 'NEEDS REVIEW')
     
     return {
         "successful_deletions": successful_deletions,

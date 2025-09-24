@@ -30,7 +30,7 @@ jsonpointer==2.0
 jsonschema==4.10.3
 launchpadlib==1.11.0
 lazr.restfulclient==0.14.6
-lazr.uri==1.0.6
+lazr.uri==1.0.7
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
 mdurl==0.1.2

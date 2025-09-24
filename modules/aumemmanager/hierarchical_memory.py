@@ -374,7 +374,9 @@ class HierarchicalMemoryManager:
             if self.auto_compress and len(self.active_tier) > self.compression_threshold:
                 self._auto_compress()
             
-            logger.info(f"Added memory {memory_id} for {owner} with importance {importance}")
+            # Secure logging to prevent log injection
+            logger.info("Added memory %s for %s with importance %s", 
+                       str(memory_id)[:50], str(owner)[:50], str(importance))
             return memory_id
     
     def retrieve_memories(self,

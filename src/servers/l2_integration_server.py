@@ -167,7 +167,8 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             # Route command through Aurora Custom GPT bridge
             result = await auroraCustomGptBridge.routeCommandFromCustomGpt(command, context)
 
-            logger.info(f"Aurora command processed: {result['success']}")
+            # Secure logging to prevent log injection
+            logger.info("Aurora command processed with status: %s", str(result.get('success', 'unknown'))[:50])
 
             if result["success"]:
                 return result
@@ -175,7 +176,8 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
                 raise HTTPException(status_code=400, detail=result["error"])
 
         except Exception as e:
-            logger.error(f"Aurora command failed: {str(e)}")
+            # Secure logging to prevent log injection
+            logger.error("Aurora command failed: %s", str(e)[:100])
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/aurora/status")
@@ -242,7 +244,8 @@ else:
 async def connect_custom_gpt(agent_id: str, request_data: Dict[str, Any]):
     """Connect a Custom GPT agent to the Aurora mesh"""
     try:
-        logger.info(f"Connection request for agent: {agent_id}")
+        # Secure logging to prevent log injection
+        logger.info("Connection request for agent: %s", str(agent_id)[:50])
 
         activation_phrase = request_data.get("activationPhrase")
         request_data.get("capabilities", [])

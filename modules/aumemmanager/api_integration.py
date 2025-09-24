@@ -6,14 +6,11 @@ FastAPI endpoints for hierarchical memory management with quantum-symbolic capab
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
-import json
 import time
 
 from modules.aumemmanager import (
     HierarchicalMemoryManager,
-    MemoryType,
-    MemoryStatus,
-    QuantumSymbolicVector
+    MemoryType
 )
 
 # Global memory manager instance (in production, this would be properly managed)

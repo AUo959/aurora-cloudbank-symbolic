@@ -7,7 +7,7 @@ import hashlib
 from typing import Literal
 
 import numpy as np
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class SymbolicVector(BaseModel):
@@ -16,9 +16,10 @@ class SymbolicVector(BaseModel):
     vector: list  # Accept any type for vector elements
     vector_type: Literal["bipolar", "binary", "real"] = "bipolar"
 
-    @validator("vector")
-    def validate_vector(cls, v, values):
-        dim = values.get("dim", 512)
+    @field_validator("vector")
+    @classmethod
+    def validate_vector(cls, v, info):
+        dim = info.data.get("dim", 512)
         if len(v) != dim:
             raise ValueError(f"Vector length {len(v)} does not match dim {dim}")
         return v
@@ -40,7 +41,7 @@ class SymbolicVector(BaseModel):
         return cls(symbol=symbol, dim=dim, vector=vec, vector_type=vector_type)
 
     def to_json(self) -> dict:
-        return self.dict()
+        return self.model_dump()
 
     @classmethod
     def from_json(cls, data: dict) -> "SymbolicVector":

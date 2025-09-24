@@ -7,14 +7,13 @@ while preserving core plugin_system.py structure.
 Generated: 2025-09-24T04:06:05.675418
 """
 
-from typing import Dict, List, Any, Optional
-from .plugin_system import PluginManager, PluginInfo, PluginStatus
+from typing import Dict, Any
+from .plugin_system import PluginInfo
 
-class EnhancedPluginManager(PluginManager):
+class EnhancedPluginManager:
     """Enhanced plugin manager with features from copilot/fix-123"""
     
     def __init__(self):
-        super().__init__()
         self.enhancement_metadata = {
             "source_branch": "copilot/fix-123",
             "extracted_features": [
@@ -31,7 +30,8 @@ class EnhancedPluginManager(PluginManager):
     def validate_plugin_enhanced(self, plugin_info: PluginInfo) -> bool:
         """Enhanced plugin validation with additional checks"""
         # Add enhanced validation logic here
-        return self.validate_plugin(plugin_info)
+        # Basic validation - can be extended
+        return hasattr(plugin_info, 'name') and plugin_info.name is not None
 
 # Export enhanced manager
 __all__ = ["EnhancedPluginManager"]

@@ -1,0 +1,17 @@
+{
+  "entity_id": "hybrid_augmented_1758773263.507154",
+  "entity_type": "hybrid_augmented",
+  "anchor": "ENTITY-HYBRID_AUGMENTED-69e253eb",
+  "state": "active",
+  "capabilities": [
+    "all",
+    "transcendent"
+  ],
+  "entanglements": [],
+  "memory_keys": [],
+  "metadata": {},
+  "created_at": "2025-09-25T04:07:43.507171",
+  "last_heartbeat": "2025-09-25T04:07:43.507414",
+  "dlp_tag": "CRITICAL",
+  "seal": "ab039a878cb937ce87c840c4cd6007cc1f0606e133e6f82f026c9f0d0d98cd9d"
+}

@@ -110,5 +110,47 @@
     "consensus_weight": 1.0,
     "entropy_contribution": 0.0,
     "seal": "0dd6506c71d74d34a210fd56d7d5ed295fbac5c86336959acd70ff1a2d0d9aff"
+  },
+  "quantum_processor": {
+    "id": "quantum_processor",
+    "type": "quantum_agent",
+    "capabilities": [
+      "quantum_computation"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.859546",
+    "anchor": "AGENT-QUANTUM_PROCESSOR",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "3c0277f8d49c5839228d908061df964a86095e21dac35ccd93a7a5b79d14abf0"
+  },
+  "symbolic_reasoner": {
+    "id": "symbolic_reasoner",
+    "type": "symbolic_agent",
+    "capabilities": [
+      "symbolic_logic"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.861096",
+    "anchor": "AGENT-SYMBOLIC_REASONER",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "04bb5e1e6f2fd7008062b2e8318274345ca39b8b6f70bc23e1b5557a26d84f2c"
+  },
+  "bridge_monitor": {
+    "id": "bridge_monitor",
+    "type": "monitor_agent",
+    "capabilities": [
+      "fidelity_tracking"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.862112",
+    "anchor": "AGENT-BRIDGE_MONITOR",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "32f570de0acba4e2bc93ab5ecbedfd08d95132b554ff3eec834c2f070b75ba48"
   }
 }

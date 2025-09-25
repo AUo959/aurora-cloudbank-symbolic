@@ -88,67 +88,55 @@ def find_and_fix_python_files():
             if file.endswith('.py'):
                 python_files.append(os.path.join(root, file))
 
-    
-        print("📁 Found {len(python_files)} Python files to check")
-        files_fixed = 0
+    print(f"📁 Found {len(python_files)} Python files to check")
+    files_fixed = 0
     syntax_errors = []
 
     for file_path in python_files:
         # Check initial syntax
         is_valid, error_msg = check_syntax(file_path)
 
-        
         if not is_valid:
-            print("❌ Syntax error in {file_path}")
-            
-        syntax_errors.append((file_path, error_msg))
+            print(f"❌ Syntax error in {file_path}")
+            syntax_errors.append((file_path, error_msg))
 
             # Try to fix common issues
-        fixed_js = fix_js_style_syntax(file_path)
-        fixed_encoding = fix_duplicate_encoding(file_path)
+            fixed_js = fix_js_style_syntax(file_path)
+            fixed_encoding = fix_duplicate_encoding(file_path)
 
-            
-        if fixed_js or fixed_encoding:
+            if fixed_js or fixed_encoding:
                 # Check if fixes worked
                 is_valid_after, _ = check_syntax(file_path)
                 
-        if is_valid_after:
-                    print("✅ Fixed syntax errors in {file_path}")
-                    
-        files_fixed += 1
+                if is_valid_after:
+                    print(f"✅ Fixed syntax errors in {file_path}")
+                    files_fixed += 1
                     # Remove from error list
                     syntax_errors = [(f, e) for f, e in syntax_errors if f != file_path]
                 else:
                     print(f"⚠️  Could not automatically fix {file_path}")
 
     print("\n📊 Summary:")
-    print("   ✅ Files fixed: {files_fixed}")
-    print("   ❌ Files still with errors: {len(syntax_errors)}")
+    print(f"   ✅ Files fixed: {files_fixed}")
+    print(f"   ❌ Files still with errors: {len(syntax_errors)}")
 
-    
-        if syntax_errors:
+    if syntax_errors:
         print("\n🚨 Remaining syntax errors:")
-        
         for file_path, error_msg in syntax_errors:
-            print("   {file_path}: {error_msg.strip()}")
+            print(f"   {file_path}: {error_msg.strip()}")
 
-    
-        return len(syntax_errors) == 0
+    return len(syntax_errors) == 0
 
 
 if __name__ == "__main__":
     print("🌟 Aurora CloudBank Syntax Error Fixer")
     print("=" * 50)
-        success = find_and_fix_python_files()
+    success = find_and_fix_python_files()
 
-    
-        if success:
+    if success:
         print("\n🎉 All Python syntax errors fixed!")
-        
         print("CodeQL scanning should now work properly.")
-        
         sys.exit(0)
     else:
         print("\n⚠️  Some syntax errors require manual intervention.")
-        
         sys.exit(1)

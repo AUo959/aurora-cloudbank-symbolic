@@ -1,0 +1,17 @@
+{
+  "entity_id": "ai_agent_1758773104.334186",
+  "entity_type": "ai_agent",
+  "anchor": "ENTITY-AI_AGENT-a8748467",
+  "state": "active",
+  "capabilities": [
+    "reasoning",
+    "synthesis"
+  ],
+  "entanglements": [],
+  "memory_keys": [],
+  "metadata": {},
+  "created_at": "2025-09-25T04:05:04.334222",
+  "last_heartbeat": "2025-09-25T04:05:04.334497",
+  "dlp_tag": "TEST",
+  "seal": "ec37e1116339322e2fc563c2d9fa4d3a1ff152eb38b8544e4e1b3dd5484ba122"
+}

@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "anchor_seed": "EOS_SEED_ORION",
   "diagnostic_tag": "T1-DIAG-2025",
-  "timestamp": "2025-09-25T03:05:45.034980",
+  "timestamp": "2025-09-25T03:32:54.933691",
   "entropy_state": {
     "level": "nominal",
     "drift": 0.0
@@ -104,5 +104,5 @@
   ],
   "dlp_classification": "INTERNAL_USE",
   "team": "Aurora Core",
-  "thread_seal": "34a9237390209df4a8447fa5462c1df4643792d68b5b1597f92fdbed7fe76238"
+  "thread_seal": "3bfb7a4b95e09ebd01d17f2e21ffb92cddba7886b7cd198285600bbca5d870aa"
 }

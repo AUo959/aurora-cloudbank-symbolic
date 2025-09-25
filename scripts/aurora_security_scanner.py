@@ -45,6 +45,7 @@ class AuroraSecurityScanner:
 
         # Check for dangerous patterns
         dangerous_patterns = {
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern
             'innerHTML': (r'\.innerHTML\s*=', 'MEDIUM', 'innerHTML can lead to XSS, use textContent or DOMPurify'),
             'document.write': (r'document\.write\s*\(', 'HIGH', 'document.write can enable XSS attacks'),
@@ -95,7 +96,9 @@ class AuroraSecurityScanner:
         """Check Python content for security issues"""
 
         dangerous_patterns = {
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             'eval': (r'\beval\s*\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
             'exec': (r'\bexec\s*\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition
             'subprocess_shell': (
                 r'subprocess\.\w+.*shell\s*=\s*True',

@@ -99,6 +99,7 @@ async def test_opal2_integration():
         expression = {"symbol": "integration_test"}
         glyph_data = await glyph_core.generate_async(expression)
 
+        # SECURITY: Review hardcoded credentials - consider environment variables
         cache_key = "integration_test_key"
         await glyph_cache.set_async(cache_key, glyph_data)
 

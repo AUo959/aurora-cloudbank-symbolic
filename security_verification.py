@@ -46,10 +46,12 @@ def main():
         print("✅ shell=False vulnerabilities: RESOLVED")
 
     # Check for eval/exec usage
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
     find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_eval_cmd)
     eval_files = stdout.strip().split("\n") if stdout.strip() else []
     
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
     find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
     stdout, stderr, rc = secure_run(find_exec_cmd)
     exec_files = stdout.strip().split("\n") if stdout.strip() else []

@@ -18,7 +18,9 @@ def validate_xss_injection(file_path):
         
         # Dangerous patterns
         patterns = [
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             (r'eval\s*\(', 'eval() call - code injection risk'),
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
             (r'exec\s*\(', 'exec() call - code injection risk'),
             (r'\.innerHTML\s*=', 'innerHTML assignment - XSS risk'),
             (r'document\.write\s*\(', 'document.write() - XSS risk'),

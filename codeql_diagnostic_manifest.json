@@ -1,0 +1,108 @@
+{
+  "manifest_version": "1.0.0",
+  "anchor_seed": "EOS_SEED_ORION",
+  "diagnostic_tag": "T1-DIAG-2025",
+  "timestamp": "2025-09-25T02:47:16.581154",
+  "entropy_state": {
+    "level": "nominal",
+    "drift": 0.0
+  },
+  "diagnostics": {
+    "duplicate_workflows_hash": "93e111360b177209ce85e13d5c922f9330474dac50e8927b2fe9e7c8aeda895f",
+    "scan_failures": {
+      "scan_issues": [
+        {
+          "issue": "yaml.load without Loader",
+          "severity": "HIGH",
+          "occurrences": 11,
+          "anchor_ref": "ISSUE-YAML.LOAD_WITHOUT_LOADER",
+          "files_affected": [
+            "./.venv/lib/python3.11/site-packages/ruamel/yaml/util.py",
+            "./.venv/lib/python3.11/site-packages/pre_commit/languages/dart.py",
+            "./.venv/lib/python3.11/site-packages/pre_commit/commands/migrate_config.py",
+            "./.venv/lib/python3.11/site-packages/pre_commit/commands/autoupdate.py",
+            "./.venv/lib/python3.11/site-packages/safety/util.py"
+          ]
+        },
+        {
+          "issue": "SQL injection risks",
+          "severity": "HIGH",
+          "occurrences": 5,
+          "anchor_ref": "ISSUE-SQL_INJECTION_RISKS",
+          "files_affected": [
+            "./.venv/lib/python3.11/site-packages/nltk/sem/chat80.py",
+            "./scripts/aurora_codeql_diagnostics.py",
+            "./scripts/phase5_final_optimizer.py",
+            "./scripts/phase3b_security_remediator.py",
+            "./.security/sql_injection_validator.py"
+          ]
+        },
+        {
+          "issue": "Subprocess shell=True",
+          "severity": "MEDIUM",
+          "occurrences": 10,
+          "anchor_ref": "ISSUE-SUBPROCESS_SHELL=TRUE",
+          "files_affected": [
+            "./security_hardening_final.py",
+            "./scripts/phase3a_security_infrastructure.py",
+            "./scripts/aurora_codeql_diagnostics.py",
+            "./scripts/fix_codeql_issues.py",
+            "./scripts/phase4b_value_extractor.py"
+          ]
+        },
+        {
+          "issue": "Eval usage",
+          "severity": "HIGH",
+          "occurrences": 175,
+          "anchor_ref": "ISSUE-EVAL_USAGE",
+          "files_affected": [
+            "./security_remediation.py",
+            "./security_verification.py",
+            "./modules/opal2/symbolic_logic.py",
+            "./.venv/lib/python3.11/site-packages/rich/markup.py",
+            "./.venv/lib/python3.11/site-packages/mypy/modulefinder.py"
+          ]
+        },
+        {
+          "issue": "Exec usage",
+          "severity": "HIGH",
+          "occurrences": 122,
+          "anchor_ref": "ISSUE-EXEC_USAGE",
+          "files_affected": [
+            "./security_remediation.py",
+            "./security_verification.py",
+            "./.venv/lib/python3.11/site-packages/pkg_resources/__init__.py",
+            "./.venv/lib/python3.11/site-packages/pylint/config/config_initialization.py",
+            "./.venv/lib/python3.11/site-packages/pylint/config/utils.py"
+          ]
+        }
+      ],
+      "total_issues": 323,
+      "critical_count": 0,
+      "entropy_impact": 0.5
+    }
+  },
+  "recommended_actions": [
+    {
+      "priority": 1,
+      "action": "CONSOLIDATE_WORKFLOWS",
+      "anchor": "ACTION-001",
+      "command": "python3 scripts/consolidate_codeql.py"
+    },
+    {
+      "priority": 2,
+      "action": "FIX_SECURITY_ISSUES",
+      "anchor": "ACTION-002",
+      "command": "python3 scripts/fix_codeql_issues.py"
+    },
+    {
+      "priority": 3,
+      "action": "REMOVE_DEFAULT_SETUP",
+      "anchor": "ACTION-003",
+      "command": "bash scripts/disable_default_codeql.sh"
+    }
+  ],
+  "dlp_classification": "INTERNAL_USE",
+  "team": "Aurora Core",
+  "thread_seal": "f0fd28ffd73c7ef7136aafa5220ac4ee4657e9654b9b542b4f0edc7870315eb0"
+}

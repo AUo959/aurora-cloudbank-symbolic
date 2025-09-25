@@ -51,6 +51,7 @@ class TestPreCommitHook(unittest.TestCase):
             src = Path(__file__).parent / 'git_pre_commit_hook.py'
             code = src.read_text(encoding='utf-8')
             ns = {"__name__": "__test__", "__file__": str(src)}
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
             exec(compile(code, str(src), 'exec'), ns)
             self.assertEqual(ns["VALIDATOR_MODE"], "stub")
             rc = ns["main"]()

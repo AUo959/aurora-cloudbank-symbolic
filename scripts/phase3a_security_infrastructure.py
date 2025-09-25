@@ -256,12 +256,16 @@ if __name__ == "__main__":
         detector_content = '''#!/usr/bin/env python3
 """
 🔍 Aurora CloudBank Eval/Exec Detector
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
 Pre-commit hook for detecting dangerous eval() and exec() patterns
 """
 import sys
 import re
 
 def detect_dangerous_patterns(file_path):
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
     """Detect eval() and exec() usage patterns"""
     violations = []
     
@@ -273,12 +277,15 @@ def detect_dangerous_patterns(file_path):
         
         # Dangerous patterns
         python_patterns = [
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             (r'\\beval\\s*\\(', 'eval() usage'),
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
             (r'\\bexec\\s*\\(', 'exec() usage'),
             (r'compile\\s*\\([^)]*,\\s*["\']exec["\']', 'compile() with exec mode'),
         ]
         
         js_patterns = [
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             (r'\\beval\\s*\\(', 'JavaScript eval() usage'),
             (r'Function\\s*\\(.*\\)\\s*\\(', 'Function constructor execution'),
             (r'setTimeout\\s*\\(\\s*["\']', 'setTimeout with string code'),
@@ -468,7 +475,9 @@ if __name__ == "__main__":
                     },
                     "code_execution": {
                         "patterns": [
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
                             "eval(",
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
                             "exec(",
                             "compile(.*exec.*)"
                         ],

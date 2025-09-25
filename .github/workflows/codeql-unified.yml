@@ -1,0 +1,58 @@
+name: Aurora CodeQL Unified Analysis
+'on':
+  push:
+    branches:
+    - main
+    - develop
+  pull_request:
+    branches:
+    - main
+  schedule:
+  - cron: 30 5 * * 1
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+        - python
+        - javascript
+        include:
+        - language: python
+          build-mode: none
+        - language: javascript
+          build-mode: none
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended
+        config: "paths:\n  - src\n  - modules  \n  - aurora_api.py\n  - scripts\n\
+          paths-ignore:\n  - tests\n  - '**/*_test.py'\n  - node_modules\n  - venv\n\
+          \  - .venv\n  - __pycache__\n  - '*.pyc'\n  - CASK_Assets.zip\n  - '**/*.zip'\n\
+          \  - '**/*.gz'\n  - '**/*.tar'\n"
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: /language:${{matrix.language}}
+        upload: true
+        add-snippets: true
+    - name: Generate Symbolic Manifest
+      if: always()
+      run: "echo '{\n  \"anchor\": \"T1-SCAN-${{ matrix.language }}\",\n  \"timestamp\"\
+        : \"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\n  \"language\": \"${{ matrix.language\
+        \ }}\",\n  \"status\": \"${{ job.status }}\",\n  \"workflow_run_id\": \"${{\
+        \ github.run_id }}\",\n  \"commit_sha\": \"${{ github.sha }}\",\n  \"dlp_tag\"\
+        : \"SECURITY_SCAN\"\n}' > scan_manifest_${{ matrix.language }}.json"

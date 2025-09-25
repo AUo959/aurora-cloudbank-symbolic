@@ -200,8 +200,12 @@ class SecurityRemediator:
                         "status": "REMEDIATED",
                     },
                     "code_execution": {
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
                         "description": "Dynamic code execution via eval() or exec()",  # nosec - documentation
                         "severity": "CRITICAL",
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
                         "mitigation": "Avoid eval() and exec(), use safe alternatives",  # nosec - documentation
                         "status": "MONITORED",
                     },
@@ -345,6 +349,7 @@ class SecureHelpers:
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
         Safe alternative to eval() for simple expressions.  # nosec - documentation
 
         Args:
@@ -370,6 +375,7 @@ class SecureHelpers:
             # Use compile with restricted mode
             code = compile(expression, '<string>', 'eval')
             # Using restricted eval in secure context
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
@@ -483,6 +489,8 @@ This document outlines the security measures, policies, and best practices for t
 **Severity:** CRITICAL
 **Description:** Monitoring and prevention of dynamic code execution
 **Mitigation:**
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
+        # CRITICAL SECURITY: exec() usage detected - high code injection risk
 - Avoid `eval()` and `exec()` functions  # nosec - documentation
 - Use secure alternatives from `.security/secure_helpers.py`
 - Implement input validation
@@ -511,6 +519,7 @@ if secure.validate_file_path(file_path, allowed_dirs=['/safe/dir']):
 ### Safe Expression Evaluation
 ```python
 # ❌ UNSAFE (commented out for security)
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
 # result = eval(user_expression)  # nosec - commented example
 
 # ✅ SECURE

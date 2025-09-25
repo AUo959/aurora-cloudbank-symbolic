@@ -120,6 +120,7 @@ class SecureHelpers:
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
         Safe alternative to eval() for simple expressions.
 
         Args:
@@ -146,6 +147,7 @@ class SecureHelpers:
             # Use compile with restricted mode
             code = compile(expression, '<string>', 'eval')
 
+        # CRITICAL SECURITY: eval() usage detected - high code injection risk
             return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
 
         except Exception as e:

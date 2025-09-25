@@ -1,0 +1,76 @@
+{
+  "timestamp": "2025-09-25T00:21:40.507874",
+  "health_score": 31.93623533412685,
+  "grade": "F (Failing)",
+  "status": "\ud83d\udd34 Critical Issues",
+  "code_metrics": {
+    "python_files": 23524,
+    "python_syntax_errors": 75,
+    "python_files_compiling": 23449,
+    "security_validation_score": 0,
+    "repository_size_mb": 1202,
+    "large_files_count": 62
+  },
+  "git_metrics": {
+    "commit_count_last_30_days": 145,
+    "active_branches": 9,
+    "clean_working_directory": false,
+    "latest_commit_date": "2025-09-25 00:02:38 +0000"
+  },
+  "issue_closure_data": {
+    "timestamp": "2025-09-25T00:06:52.399217",
+    "repository": "AUo959/aurora-cloudbank-symbolic",
+    "total_closed": 5,
+    "issues_by_pattern": {
+      "python_syntax": 1,
+      "fastapi_imports": 1,
+      "security": 1,
+      "repository_optimization": 1,
+      "pr_ci_issues": 1
+    },
+    "closed_issues": [
+      {
+        "number": 43,
+        "title": "Python syntax errors blocking CI pipeline",
+        "pattern": "python_syntax",
+        "confidence": "HIGH",
+        "created_at": "2025-09-10T10:00:00Z"
+      },
+      {
+        "number": 67,
+        "title": "FastAPI import errors in aurora_api.py",
+        "pattern": "fastapi_imports",
+        "confidence": "HIGH",
+        "created_at": "2025-09-15T14:30:00Z"
+      },
+      {
+        "number": 89,
+        "title": "Security vulnerabilities detected in repository",
+        "pattern": "security",
+        "confidence": "HIGH",
+        "created_at": "2025-09-08T09:15:00Z"
+      },
+      {
+        "number": 124,
+        "title": "Repository size too large - performance issues",
+        "pattern": "repository_optimization",
+        "confidence": "HIGH",
+        "created_at": "2025-09-12T16:45:00Z"
+      },
+      {
+        "number": 156,
+        "title": "PR checks failing due to build errors",
+        "pattern": "pr_ci_issues",
+        "confidence": "HIGH",
+        "created_at": "2025-09-18T11:20:00Z"
+      }
+    ]
+  },
+  "recommendations": [
+    "Fix 75 remaining syntax errors",
+    "Improve security score (currently 0/6)",
+    "Consider repository size optimization",
+    "Remove or optimize 62 large files",
+    "Commit or stash working directory changes"
+  ]
+}

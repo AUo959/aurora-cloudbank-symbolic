@@ -1,0 +1,68 @@
+# Aurora CloudBank - Git Attributes for Performance
+# Large file handling and optimization
+
+# Binary files that should not be diffed
+*.zip binary
+*.tar.gz binary
+*.tgz binary
+*.rar binary
+*.7z binary
+*.pdf binary
+
+# Large data files
+*.pkl binary
+*.pickle binary
+*.npy binary
+*.npz binary
+*.h5 binary
+*.hdf5 binary
+
+# Machine learning models
+*.model binary
+*.ckpt binary
+*.pb binary
+*.pth binary
+*.safetensors binary
+
+# Media files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+
+# Archives and backups
+*_backup.* binary
+*_archive.* binary
+*.backup binary
+
+# Virtual environment files (should be excluded anyway)
+.venv/** binary
+venv/** binary
+__pycache__/** binary
+
+# Node modules
+node_modules/** binary
+
+# Compiled Python
+*.pyc binary
+*.pyo binary
+
+# OS files
+.DS_Store binary
+Thumbs.db binary
+
+# Git attributes for text files (ensure proper line endings)
+*.py text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+
+# Special handling for large text files
+*.log text -diff
+*.sql text -diff

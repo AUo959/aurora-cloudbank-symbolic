@@ -66,3 +66,6 @@ Thumbs.db binary
 # Special handling for large text files
 *.log text -diff
 *.sql text -diff
+
+# Large file optimization - Phase 2
+*.zip filter=lfs diff=lfs merge=lfs -text

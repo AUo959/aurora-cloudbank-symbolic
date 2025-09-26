@@ -108,11 +108,25 @@ class AuroraCustomGptBridge {
 
       this.integrationActive = false;
 
-      if (!commandNodeModule || typeof commandNodeModule.executeCommand !== 'function') {
+      // Determine if the export is a class (constructor) or an object
+      let commandNodeInstance;
+      if (
+        typeof commandNodeModule === 'function' &&
+        typeof commandNodeModule.prototype.executeCommand === 'function'
+      ) {
+        // It's a class, instantiate it
+        commandNodeInstance = new commandNodeModule();
+      } else if (
+        typeof commandNodeModule === 'object' &&
+        typeof commandNodeModule.executeCommand === 'function'
+      ) {
+        // It's an object with the method
+        commandNodeInstance = commandNodeModule;
+      } else {
         throw new Error('Aurora Command Node module does not expose executeCommand()');
       }
 
-      this.commandNode = commandNodeModule;
+      this.commandNode = commandNodeInstance;
 
       // Perform Aurora-specific handshake
       const handshakeResult = await this.performAuroraHandshake();

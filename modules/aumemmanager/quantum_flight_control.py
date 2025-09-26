@@ -18,6 +18,9 @@ from .hierarchical_memory import QuantumSymbolicVector
 
 logger = logging.getLogger(__name__)
 
+# Constants
+SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
+
 class QuantumFlightController:
     """Quantum-symbolic vector flight control system with Aurora CloudBank integration"""
     
@@ -87,7 +90,7 @@ class QuantumFlightController:
         self.active_vectors[vector_id] = qv
         self.metrics['vectors_created'] += 1
         
-        logger.info("Created quantum vector %s with magnitude %s, phase %s", str(vector_id)[:100], str(magnitude)[:100], str(phase)[:100])
+        logger.info("Created quantum vector %s with magnitude %s, phase %s", str(vector_id)[:SUMMARY_MAX_LENGTH], str(magnitude)[:SUMMARY_MAX_LENGTH], str(phase)[:SUMMARY_MAX_LENGTH])
         return qv
     
     def entangle_vectors(self, vector1_id: str, vector2_id: str, 
@@ -115,7 +118,7 @@ class QuantumFlightController:
             self.active_vectors[vector1_id].coherence_time *= (1 + coherence_boost)
             self.active_vectors[vector2_id].coherence_time *= (1 + coherence_boost)
             
-            logger.info("Enhanced entanglement strength due to shared Aurora anchors: %s", str(shared_anchors)[:100])
+            logger.info("Enhanced entanglement strength due to shared Aurora anchors: %s", str(shared_anchors)[:SUMMARY_MAX_LENGTH])
         
         self.metrics['entanglements_created'] += 1
         return True
@@ -332,7 +335,7 @@ class QuantumFlightController:
         if vector_id in self.symbolic_trajectory_cache:
             del self.symbolic_trajectory_cache[vector_id]
         
-        logger.info("Removed decoherent quantum vector %s", str(vector_id)[:100])
+        logger.info("Removed decoherent quantum vector %s", str(vector_id)[:SUMMARY_MAX_LENGTH])
 
 # Import time for temporal state management
 import time

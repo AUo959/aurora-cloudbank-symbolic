@@ -33,6 +33,9 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Constants
+SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs
+
 class MemoryType(Enum):
     """Types of memory supported by Aurora CloudBank integration"""
     AGENT = "agent"
@@ -238,7 +241,7 @@ class MemoryItem:
             tag_id = dlp_tracker.tag_symbolic_operation({
                 'memory_id': self.id,
                 'memory_type': self.memory_type.value,
-                'content_summary': str(self.content)[:100] + "..." if len(str(self.content)) > 100 else str(self.content),
+                'content_summary': str(self.content)[:SUMMARY_MAX_LENGTH] + "..." if len(str(self.content)) > SUMMARY_MAX_LENGTH else str(self.content),
                 'importance': self.importance
             })
             
@@ -262,7 +265,7 @@ class MemoryItem:
             return tag_id
             
         except Exception as e:
-            logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:100], str(e)[:100])
+            logger.warning("DLP tracking failed for memory %s: %s", str(self.id)[:SUMMARY_MAX_LENGTH], str(e)[:SUMMARY_MAX_LENGTH])
             return None
 
 
@@ -699,7 +702,7 @@ class HierarchicalMemoryManager:
         state = self.export_state()
         with open(filepath, 'w') as f:
             json.dump(state, f, indent=2, default=str)
-        logger.info("Aurora CloudBank memory system saved to %s", str(filepath)[:100])
+        logger.info("Aurora CloudBank memory system saved to %s", str(filepath)[:SUMMARY_MAX_LENGTH])
     
     def batch_process_lifecycle(self) -> Dict[str, Dict[str, int]]:
         """Process memory lifecycle operations in batch"""

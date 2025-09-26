@@ -48,25 +48,27 @@ class SecurityValidationSuite:
             return False
     
     def validate_all(self, files):
-        """Run all security validators"""
-        print("🛡️  Aurora CloudBank Security Validation Suite")
-        print("=" * 50)
+        """Run all security validators on provided files"""
+        print("� Running comprehensive security validation...")
+        
+        # Filter out non-existent files (handles deleted files in staging)
+        existing_files = []
+        for file in files:
+            if os.path.exists(file):
+                existing_files.append(file)
+            else:
+                print(f"⚠️  Skipping non-existent file: {file}")
+        
+        if not existing_files:
+            print("ℹ️  No existing files to validate")
+            return True
         
         all_passed = True
-        
         for validator_script, description in self.validators:
-            passed = self.run_validator(validator_script, description, files)
-            if not passed:
-                all_passed = False
-        
-        print("=" * 50)
-        
-        if all_passed:
-            print("🎉 ALL SECURITY VALIDATIONS PASSED!")
-            return True
-        else:
-            print("🚨 SECURITY VALIDATION FAILED - Please fix issues above")
-            return False
+            passed = self.run_validator(validator_script, description, existing_files)
+            all_passed = all_passed and passed
+            
+        return all_passed
 
 def main():
     """Main pre-commit hook entry point"""

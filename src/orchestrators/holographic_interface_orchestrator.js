@@ -59,6 +59,11 @@ class HolographicInterfaceOrchestrator {
   }
 
   setupRoutes() {
+    this.registerHolographicRoutes();
+    this.registerCollaborationRoutes();
+  }
+
+  registerHolographicRoutes() {
     // Serve holographic interface
     this.app.get('/', (req, res) => {
       res.sendFile(path.join(__dirname, '../interface/holographic_command_interface.html'));
@@ -115,10 +120,6 @@ class HolographicInterfaceOrchestrator {
     // Agent constellation status
     this.app.get('/api/holographic/agents', async (req, res) => {
       try {
-        if (!this.auroraCustomGptBridge) {
-          throw new Error('Aurora Custom GPT Bridge not initialized');
-        }
-
         const agentStatus = await this.getAgentConstellationStatus();
 
         res.json({
@@ -133,82 +134,6 @@ class HolographicInterfaceOrchestrator {
         res.status(500).json({
           success: false,
           error: error.message
-        });
-      }
-    });
-
-    // Serve collaboration chamber interface
-    this.app.get('/chamber', (req, res) => {
-      res.sendFile(path.join(__dirname, '../interfaces/aurora_collaboration_chamber.html'));
-    });
-
-    // Mesh communication endpoint
-    this.app.post('/api/mesh/broadcast', async (req, res) => {
-      try {
-        const { message, authority } = req.body;
-        const result = await this.broadcastToMesh(message, authority);
-
-        res.json({
-          success: true,
-          messageId: result.messageId,
-          timestamp: result.timestamp,
-          recipients: result.recipients
-        });
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          error: error.message
-        });
-      }
-    });
-
-    // Direct agent communication endpoint
-    this.app.post('/api/agent/:agentId/message', async (req, res) => {
-      try {
-        const { agentId } = req.params;
-        const { message, authority } = req.body;
-
-        const result = await this.sendDirectMessage(agentId, message, authority);
-
-        res.json({
-          success: true,
-          messageId: result.messageId,
-          timestamp: result.timestamp,
-          agent: agentId,
-          response: result.response
-        });
-      } catch (error) {
-        res.status(500).json({
-          success: false,
-          error: error.message
-        });
-      }
-    });
-
-    // Live feed endpoint
-    this.app.get('/api/chamber/feed', (req, res) => {
-      res.json({
-        success: true,
-        feed: this.liveFeed.slice(-50), // Last 50 messages
-        connectedClients: this.connectedClients.size,
-        activeSessions: this.collaborationSessions.size
-      });
-    });
-
-    // Command traceback endpoint
-    this.app.get('/api/chamber/traceback/:commandId', (req, res) => {
-      const { commandId } = req.params;
-      const traceback = this.commandTraceback.get(commandId);
-
-      if (traceback) {
-        res.json({
-          success: true,
-          traceback
-        });
-      } else {
-        res.status(404).json({
-          success: false,
-          error: 'Command traceback not found'
         });
       }
     });
@@ -378,7 +303,11 @@ class HolographicInterfaceOrchestrator {
   async initializeAuroraBridge() {
     try {
       this.auroraCustomGptBridge = new AuroraCustomGptBridge();
-      await this.auroraCustomGptBridge.initialize();
+      const initResult = await this.auroraCustomGptBridge.initialize();
+
+      if (!initResult.success) {
+        throw new Error(initResult.error || 'Aurora Custom GPT Bridge initialization failed');
+      }
 
       this.logger.info('Aurora Custom GPT Bridge initialized for holographic interface');
 
@@ -390,6 +319,7 @@ class HolographicInterfaceOrchestrator {
 
     } catch (error) {
       this.logger.error(`Failed to initialize Aurora Bridge: ${error.message}`);
+      this.auroraCustomGptBridge = null;
     }
   }
 
@@ -425,9 +355,6 @@ class HolographicInterfaceOrchestrator {
 
   async initializeCollaborationChamber() {
     try {
-      // Setup collaboration chamber routes
-      this.setupCollaborationRoutes();
-
       // Initialize live feed system
       this.setupLiveFeedSystem();
 
@@ -461,12 +388,24 @@ class HolographicInterfaceOrchestrator {
     // Execute through Aurora Custom GPT Bridge if available
     if (this.auroraCustomGptBridge) {
       try {
-        const bridgeResult = await this.auroraCustomGptBridge.routeCommand({
-          command,
-          source: 'holographic_interface',
-          authority,
-          sessionId: `holographic_${Date.now()}`
-        });
+        const bridgeResult = await this.auroraCustomGptBridge.routeCommandFromCustomGpt(
+          {
+            type: command,
+            data: {
+              issuedBy: source,
+              authority,
+              sessionId: `holographic_${Date.now()}`
+            },
+            metadata: {
+              origin: 'holographic_interface',
+              holographic: true
+            }
+          },
+          {
+            issuedBy: source,
+            channel: 'holographic_interface'
+          }
+        );
 
         return {
           status: 'success',
@@ -510,15 +449,31 @@ class HolographicInterfaceOrchestrator {
   }
 
   async getAgentConstellationStatus() {
-    const agents = [
+    if (this.auroraCustomGptBridge) {
+      try {
+        const status = await this.auroraCustomGptBridge.getConstellationStatus();
+
+        if (status && !status.error) {
+          if (Array.isArray(status.active_agents)) {
+            return status.active_agents;
+          }
+
+          if (Array.isArray(status.constellation)) {
+            return status.constellation;
+          }
+        }
+      } catch (error) {
+        this.logger.warn(`Falling back to static agent roster: ${error.message}`);
+      }
+    }
+
+    return [
       { name: 'ARCHY', status: 'active', drift: 0.0, specialization: 'Architecture & System Design' },
       { name: 'OPPY', status: 'active', drift: 0.0, specialization: 'Optimization & Performance' },
       { name: 'LIORA', status: 'active', drift: 0.0, specialization: 'Learning & Adaptation' },
       { name: 'STARLING_AU', status: 'active', drift: 0.0, specialization: 'Stellar Communication' },
       { name: 'RIVERTHREAD_808', status: 'active', drift: 0.0, specialization: 'Data Flow & Threading' }
     ];
-
-    return agents;
   }
 
   getAgentCapabilities(agentName) {
@@ -533,7 +488,7 @@ class HolographicInterfaceOrchestrator {
     return capabilities[agentName] || ['General AI Capabilities'];
   }
 
-  setupCollaborationRoutes() {
+  registerCollaborationRoutes() {
     // Serve collaboration chamber interface
     this.app.get('/chamber', (req, res) => {
       res.sendFile(path.join(__dirname, '../interfaces/aurora_collaboration_chamber.html'));

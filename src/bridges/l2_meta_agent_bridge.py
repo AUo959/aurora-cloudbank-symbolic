@@ -503,7 +503,6 @@ def cli():
         return 0
 
     asyncio.run(main())
-    return 0
 
 
 if __name__ == "__main__":

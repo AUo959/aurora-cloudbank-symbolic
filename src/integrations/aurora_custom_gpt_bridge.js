@@ -582,12 +582,7 @@ class AuroraCustomGptBridge {
     try {
       const initResult = await this.initializeCommandNodeIntegration();
 
-      if (!initResult.success) {
-        throw new Error(initResult.error || 'Aurora Custom GPT integration failed to initialize');
-      }
-
-      bridgeLogger.info('Aurora Custom GPT Bridge initialization complete');
-      return { success: true, message: 'Bridge initialized successfully' };
+      await this.initializeCommandNodeIntegration();
     } catch (error) {
       bridgeLogger.error('Aurora Custom GPT Bridge initialization failed', { error: error.message });
       return { success: false, error: error.message };

@@ -37,7 +37,7 @@ class CustomGptAgent:
     connected: Optional[datetime] = None
     last_heartbeat: Optional[datetime] = None
     drift_lock: float = 0.000
-    handshake_log: List[Dict] = None
+    handshake_log: Optional[List[Dict[str, Any]]] = None
 
     def __post_init__(self):
         if self.handshake_log is None:
@@ -465,12 +465,12 @@ l2_bridge = L2MetaAgentBridge()
 
 async def main():
     """Example usage of the L2 Meta-Agent Bridge"""
+    global l2_bridge  # Use the global instance consistently
 
     print("🌟 Aurora L2 Meta-Agent Bridge - Example Usage")
     print("=" * 50)
 
-    # Test activation
-    l2_bridge = L2MetaAgentBridge()
+    # Test activation using global bridge instance
     result = await l2_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
     print(f"ARCHY Activation: {result['success']}")
 

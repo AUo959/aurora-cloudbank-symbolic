@@ -1,0 +1,10 @@
+{
+  "type": "entropy_divergence",
+  "current": 0.37216084397248905,
+  "baseline": 0.5,
+  "drift": 0.12783915602751095,
+  "threshold": 0.1,
+  "timestamp": "2025-09-25T06:16:54.909110",
+  "anchor": "T6-EMERGENCE-2025",
+  "requires_arbitration": true
+}

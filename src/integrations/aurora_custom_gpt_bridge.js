@@ -419,16 +419,14 @@ class AuroraCustomGptBridge {
       );
 
       // Route through command node with Aurora context
-      const result = await Promise.resolve(
-        this.commandNode.executeCommand({
-          name: normalized.type,
-          context: anchor,
-          metadata: {
-            ...normalized.metadata,
-            auroraEnvelope: envelope
-          }
-        })
-      );
+      const result = await this.commandNode.executeCommand({
+        name: normalized.type,
+        context: anchor,
+        metadata: {
+          ...normalized.metadata,
+          auroraEnvelope: envelope
+        }
+      });
 
       bridgeLogger.bridge('Command routed successfully', {
         command: normalized.type,

@@ -1,0 +1,13 @@
+{
+  "type": "ENTROPY_DRIFT_EXCEEDED",
+  "value": 0.05,
+  "drift": 0.45,
+  "threshold": 0.1,
+  "timestamp": "2025-09-26T06:35:54.384939",
+  "anchor": "T8-STATUS-GUMAS-V2-2025",
+  "requires_arbitration": true,
+  "message": "Entropy drift 0.450 exceeds threshold 0.1",
+  "flagged_by": "T8-STATUS-GUMAS-V2-2025",
+  "flagged_at": "2025-09-26T06:35:54.384978",
+  "seal": "3828637333d8cc753e1fb0e49ba45a247a3f3703918e40c89cf8200786055732"
+}

@@ -6,8 +6,11 @@ Aurora CloudBank v3.5.1_macroready
 Bridge connector for L2 Custom GPT meta-agents with full ZIPWIZ handshake protocol
 """
 
+import argparse
 import asyncio
+import json
 import logging
+import sys
 
 # Configure logging
 from dataclasses import dataclass
@@ -215,7 +218,11 @@ class L2MetaAgentBridge:
                 )
 
             duration = (datetime.now() - start_time).total_seconds()
-            logger.info("ZIPWIZ handshake completed successfully for %s in %ss", str(agent.agent_id)[:100], str(duration:.2f)[:100])
+            logger.info(
+                "ZIPWIZ handshake completed successfully for %s in %ss",
+                str(agent.agent_id)[:100],
+                f"{duration:.2f}"[:100],
+            )
 
             return {
                 "success": True,
@@ -476,6 +483,27 @@ async def main():
         status = l2_bridge.get_constellation_status()
         print(f"Active Agents: {status['connected_agents']}/{status['total_agents']}")
 
+def cli():
+    """Command-line helper for integration layers."""
+
+    parser = argparse.ArgumentParser(
+        description="Aurora CloudBank L2 Meta-Agent Bridge utilities"
+    )
+    parser.add_argument(
+        "--constellation-status",
+        action="store_true",
+        help="Emit the current constellation status as JSON",
+    )
+
+    args = parser.parse_args()
+
+    if args.constellation_status:
+        status = l2_bridge.get_constellation_status()
+        print(json.dumps(status))
+        return 0
+
+    asyncio.run(main())
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    sys.exit(cli())

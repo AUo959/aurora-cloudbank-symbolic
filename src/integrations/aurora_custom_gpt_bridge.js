@@ -11,6 +11,11 @@
 
 const { bridgeLogger } = require('../utils/aurora_logger.js');
 const { ORION_CORE } = require('../config/orion_core_config.js');
+const path = require('path');
+const util = require('util');
+const { execFile } = require('child_process');
+
+const execFileAsync = util.promisify(execFile);
 
 // Aurora Custom GPT Configuration
 const AURORA_CUSTOM_GPT = {
@@ -56,13 +61,72 @@ class AuroraCustomGptBridge {
   }
 
   /**
+   * Retrieve constellation status from the Python L2 bridge via a CLI helper.
+   */
+  async fetchMetaAgentConstellationStatus() {
+    const pythonBridgePath = path.join(__dirname, '../bridges/l2_meta_agent_bridge.py');
+    const pythonPath = process.env.AURORA_PYTHON_BIN || 'python3';
+    const env = {
+      ...process.env,
+      PYTHONPATH: [
+        process.env.PYTHONPATH || '',
+        path.join(__dirname, '..')
+      ]
+        .filter(Boolean)
+        .join(path.delimiter)
+    };
+
+    try {
+      const { stdout } = await execFileAsync(pythonPath, [pythonBridgePath, '--constellation-status'], {
+        env,
+        timeout: 5000,
+        windowsHide: true
+      });
+
+      const output = stdout.trim();
+
+      if (!output) {
+        throw new Error('Meta-agent bridge returned empty status payload');
+      }
+
+      return JSON.parse(output);
+    } catch (error) {
+      bridgeLogger.error('Failed to fetch meta-agent constellation status', {
+        error: error.message
+      });
+      return null;
+    }
+  }
+
+  /**
    * Initialize connection to Aurora Command Node
    */
   async initializeCommandNodeIntegration() {
     try {
       // Import command node dynamically to avoid circular dependencies
-      const CommandNode = require('../core/command_node.js');
-      this.commandNode = new CommandNode();
+      const commandNodeModule = require('../core/command_node.js');
+
+      this.integrationActive = false;
+
+      // Determine if the export is a class (constructor) or an object
+      let commandNodeInstance;
+      if (
+        typeof commandNodeModule === 'function' &&
+        typeof commandNodeModule.prototype.executeCommand === 'function'
+      ) {
+        // It's a class, instantiate it
+        commandNodeInstance = new commandNodeModule();
+      } else if (
+        typeof commandNodeModule === 'object' &&
+        typeof commandNodeModule.executeCommand === 'function'
+      ) {
+        // It's an object with the method
+        commandNodeInstance = commandNodeModule;
+      } else {
+        throw new Error('Aurora Command Node module does not expose executeCommand()');
+      }
+
+      this.commandNode = commandNodeInstance;
 
       // Perform Aurora-specific handshake
       const handshakeResult = await this.performAuroraHandshake();
@@ -257,14 +321,23 @@ class AuroraCustomGptBridge {
   async syncWithMetaAgentConstellation() {
     try {
       // Check if L2 bridge is available
-      const l2Bridge = require('../bridges/l2_meta_agent_bridge.py');
-      const constellationStatus = l2Bridge.get_constellation_status();
+      const constellationStatus = await this.fetchMetaAgentConstellationStatus();
+
+      if (!constellationStatus) {
+        throw new Error('Meta-agent constellation status unavailable');
+      }
+
+      const totalAgents = constellationStatus.total_agents || 0;
+      const connectedAgents = constellationStatus.connected_agents || 0;
+      const allAgentsConnected =
+        totalAgents > 0 ? connectedAgents === totalAgents : true;
 
       const sync = {
-        totalAgents: constellationStatus.total_agents,
-        connectedAgents: constellationStatus.connected_agents,
-        constellation: constellationStatus.constellation,
-        synchronized: constellationStatus.connected_agents === 5, // All 5 meta-agents
+        totalAgents,
+        connectedAgents,
+        constellation: constellationStatus.constellation || [],
+        allAgentsConnected,
+        synchronized: true,
         timestamp: new Date().toISOString()
       };
 
@@ -284,6 +357,47 @@ class AuroraCustomGptBridge {
   }
 
   /**
+   * Normalize command payloads from various Aurora entry points.
+   */
+  normalizeCommandEnvelope(command) {
+    if (typeof command === 'string') {
+      return {
+        type: command,
+        data: {},
+        metadata: {},
+        context: {}
+      };
+    }
+
+    if (command && typeof command === 'object') {
+      const {
+        type,
+        name,
+        command: legacyCommand,
+        data = {},
+        payload = {},
+        metadata = {},
+        context = {}
+      } = command;
+
+      const resolvedType = type || name || legacyCommand;
+
+      if (!resolvedType) {
+        throw new Error('Command payload is missing a type identifier');
+      }
+
+      return {
+        type: resolvedType,
+        data: { ...payload, ...data },
+        metadata,
+        context
+      };
+    }
+
+    throw new Error('Unsupported command payload format');
+  }
+
+  /**
    * Route command from Aurora Custom GPT to Command Node
    */
   async routeCommandFromCustomGpt(command, context = {}) {
@@ -292,23 +406,31 @@ class AuroraCustomGptBridge {
     }
 
     bridgeLogger.bridge('Routing command from Aurora Custom GPT', {
-      command: command.type || 'unknown',
+      command: typeof command === 'string' ? command : command.type || command.name || 'unknown',
       context,
       timestamp: new Date().toISOString()
     });
 
     try {
-      // Route through command node with Aurora context
-      const result = await this.commandNode.routeCommand(command.type, {
-        ...command.data,
-        source: 'AURORA_CUSTOM_GPT',
-        gptId: this.customGptConfig.id,
-        authority: 'COMMAND_AUTHORITY',
+      const normalized = this.normalizeCommandEnvelope(command);
+      const { anchor, envelope } = this.deriveExecutionEnvelope(
+        normalized,
         context
+      );
+
+      // Route through command node with Aurora context
+      const result = await this.commandNode.executeCommand({
+        name: normalized.type,
+        context: anchor,
+        metadata: {
+          ...normalized.metadata,
+          auroraEnvelope: envelope
+        }
       });
 
       bridgeLogger.bridge('Command routed successfully', {
-        command: command.type,
+        command: normalized.type,
+        anchor,
         result: result ? 'SUCCESS' : 'FAILURE',
         timestamp: new Date().toISOString()
       });
@@ -316,6 +438,7 @@ class AuroraCustomGptBridge {
       return {
         success: true,
         result,
+        anchor,
         source: 'AURORA_COMMAND_NODE',
         timestamp: new Date().toISOString()
       };
@@ -334,6 +457,63 @@ class AuroraCustomGptBridge {
         timestamp: new Date().toISOString()
       };
     }
+  }
+
+  /**
+   * Backwards-compatible command routing alias.
+   */
+  async routeCommand(command, context = {}) {
+    return this.routeCommandFromCustomGpt(command, context);
+  }
+
+  /**
+   * Derive a command envelope suitable for the ORION command node.
+   */
+  deriveExecutionEnvelope(normalizedCommand, context) {
+    const normalizedContext = normalizedCommand.context || {};
+    const externalContext = context || {};
+    const aggregatedData = {
+      ...(normalizedContext.data || {}),
+      ...(externalContext.data || {}),
+      ...normalizedCommand.data
+    };
+
+    const augmentedContext = {
+      ...normalizedContext,
+      ...externalContext,
+      data: aggregatedData,
+      source: 'AURORA_CUSTOM_GPT',
+      gptId: this.customGptConfig.id,
+      authority: 'COMMAND_AUTHORITY'
+    };
+
+    const candidateAnchors = [
+      augmentedContext.anchor,
+      augmentedContext.contextAnchor,
+      aggregatedData.anchor,
+      aggregatedData.contextAnchor,
+      augmentedContext.sessionId,
+      aggregatedData.sessionId,
+      aggregatedData.issuedBy,
+      augmentedContext.issuedBy,
+      augmentedContext.channel,
+      normalizedCommand.metadata?.anchor,
+      normalizedCommand.type
+    ];
+
+    const anchor = candidateAnchors.find(value =>
+      typeof value === 'string' && value.trim().length > 0
+    ) || 'AURORA_CUSTOM_GPT';
+
+    return {
+      anchor,
+      envelope: {
+        type: normalizedCommand.type,
+        anchor,
+        metadata: normalizedCommand.metadata,
+        context: augmentedContext
+      }
+    };
   }
 
   /**
@@ -366,8 +546,13 @@ class AuroraCustomGptBridge {
    */
   async getConstellationStatus() {
     try {
-      const l2Bridge = require('../bridges/l2_meta_agent_bridge.py');
-      return l2Bridge.get_constellation_status();
+      const status = await this.fetchMetaAgentConstellationStatus();
+
+      if (!status) {
+        throw new Error('Meta-agent constellation status unavailable');
+      }
+
+      return status;
     } catch (error) {
       return { error: 'Constellation status unavailable', details: error.message };
     }
@@ -395,9 +580,8 @@ class AuroraCustomGptBridge {
   async initialize() {
     bridgeLogger.info('Aurora Custom GPT Bridge starting initialization...');
     try {
-      await this.initializeCommandNodeIntegration();
-      bridgeLogger.info('Aurora Custom GPT Bridge initialization complete');
-      return { success: true, message: 'Bridge initialized successfully' };
+      const initResult = await this.initializeCommandNodeIntegration();
+
     } catch (error) {
       bridgeLogger.error('Aurora Custom GPT Bridge initialization failed', { error: error.message });
       return { success: false, error: error.message };

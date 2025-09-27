@@ -17,31 +17,63 @@ if [[ -f ".githooks/pre-commit" ]]; then
     printf '✅ Git hooks configured\n'
 fi
 
+# ENHANCED FAILSAFE SETUP - Never fail silently
+printf '🛡️ Aurora CloudBank Failsafe Setup Starting...\n'
+
+# Create status tracking
+STATUS_FILE=".devcontainer_status.json"
+echo '{"status":"starting","timestamp":"'$(date -Iseconds)'"}' > "$STATUS_FILE"
+
+# Function to log and exit on failure
+failsafe_exit() {
+    local error_msg="$1"
+    printf '❌ FAILSAFE EXIT: %s\n' "$error_msg"
+    echo '{"status":"failed","error":"'"$error_msg"'","timestamp":"'$(date -Iseconds)'"}' > "$STATUS_FILE"
+    exit 1
+}
+
 # Use our comprehensive setup script if available
 if [[ -f "scripts/setup_environment.sh" ]]; then
-    printf '🔧 Running Aurora environment setup...\n'
-    bash scripts/setup_environment.sh
+    printf '🔧 Running Aurora comprehensive setup...\n'
+    if bash scripts/setup_environment.sh; then
+        printf '✅ Comprehensive setup completed successfully\n'
+    else
+        printf '⚠️ Comprehensive setup failed, running failsafe recovery...\n'
+        # Failsafe recovery
+        rm -rf "${VENV_DIR}" || true
+        python3 -m venv "${VENV_DIR}"
+        source "${VENV_DIR}/bin/activate"
+        python -m pip install --upgrade pip
+        
+        if [[ -f "requirements-lock.txt" ]]; then
+            if python -m pip install -r requirements-lock.txt --dry-run >/dev/null 2>&1; then
+                python -m pip install -r requirements-lock.txt || failsafe_exit "Failed to install dependencies"
+            else
+                failsafe_exit "Dependency conflicts in requirements-lock.txt"
+            fi
+        fi
+    fi
 else
-    # Fallback to basic setup with validation
-    printf '⚠️ Using fallback setup (setup_environment.sh not found)\n'
+    printf '⚠️ Comprehensive setup script not found, using enhanced fallback...\n'
     
-    python3 -m venv "${VENV_DIR}"
-    source "${VENV_DIR}/bin/activate"
+    # Enhanced fallback with comprehensive error checking
+    rm -rf "${VENV_DIR}" || true
+    python3 -m venv "${VENV_DIR}" || failsafe_exit "Failed to create virtual environment"
+    source "${VENV_DIR}/bin/activate" || failsafe_exit "Failed to activate virtual environment"
     
-    python -m pip install --upgrade pip
-    python -m pip install --upgrade wheel setuptools
+    python -m pip install --upgrade pip || failsafe_exit "Failed to upgrade pip"
+    python -m pip install --upgrade wheel setuptools || printf '⚠️ Warning: Failed to upgrade wheel/setuptools\n'
     
     if [[ -f "requirements-lock.txt" ]]; then
-        # Test dependency resolution before installing
         printf '🧪 Testing dependency resolution...\n'
-        if python -m pip install -r requirements-lock.txt --dry-run; then
+        if python -m pip install -r requirements-lock.txt --dry-run >/dev/null 2>&1; then
             printf '✅ Dependency resolution test passed\n'
-            python -m pip install -r requirements-lock.txt
+            python -m pip install -r requirements-lock.txt || failsafe_exit "Failed to install requirements"
         else
-            printf '❌ Dependency conflicts detected!\n'
-            printf '💡 Check requirements-lock.txt for version conflicts\n'
-            exit 1
+            failsafe_exit "Dependency conflicts detected in requirements-lock.txt"
         fi
+    else
+        printf '⚠️ No requirements-lock.txt found\n'
     fi
 fi
 

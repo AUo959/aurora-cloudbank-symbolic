@@ -10,7 +10,7 @@ DLP Tag: CORE_INFRASTRUCTURE
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 import logging
@@ -39,7 +39,7 @@ class SymbolicMemoryManager:
         entry = {
             "key": key,
             "value": value,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "anchor": f"{self.anchor}-{key.upper()}",
             "dlp_tag": dlp_tag,
             "entropy": self._calculate_entropy(value)
@@ -111,12 +111,12 @@ class SymbolicMemoryManager:
             "key": key,
             "expected_seal": expected,
             "actual_seal": actual,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "requires_arbitration": True
         }
         
         # Save for review
-        divergence_path = Path(f".nexus/divergences/{key}_{datetime.utcnow().timestamp()}.json")
+        divergence_path = Path(f".nexus/divergences/{key}_{datetime.now(UTC).timestamp()}.json")
         divergence_path.parent.mkdir(parents=True, exist_ok=True)
         divergence_path.write_text(json.dumps(divergence, indent=2))
         
@@ -127,7 +127,7 @@ class SymbolicMemoryManager:
         alert = {
             "type": "entropy_drift",
             "drift": drift,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "anchor": self.anchor
         }
         
@@ -140,7 +140,7 @@ class SymbolicMemoryManager:
             "manifest_version": "1.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": datetime.now(UTC).isoformat(),
             "team": "Aurora Core",
             "memory_count": len(self.memory_store),
             "sealed_count": len(self.sealed_memories),

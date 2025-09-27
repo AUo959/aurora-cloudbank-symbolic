@@ -119,9 +119,16 @@ class TestEnhancedConsciousnessSingle(unittest.TestCase):
         with open(snapshots[0], 'r') as f:
             snapshot_data = json.load(f)
         
-        self.assertIn('timestamp', snapshot_data)
-        self.assertIn('observation_count', snapshot_data)
-        self.assertIn('entropy_history', snapshot_data)
+        # Check if timestamp is at root or in data section
+        if 'data' in snapshot_data:
+            data_section = snapshot_data['data']
+            self.assertIn('timestamp', data_section)
+            self.assertIn('observation_count', data_section)
+            self.assertIn('entropy_history', data_section)
+        else:
+            self.assertIn('timestamp', snapshot_data)
+            self.assertIn('observation_count', snapshot_data)
+            self.assertIn('entropy_history', snapshot_data)
         self.assertIn('seal', snapshot_data)
     
     def test_divergent_truth_flagging(self):

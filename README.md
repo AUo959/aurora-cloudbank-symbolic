@@ -96,6 +96,11 @@ make install && make run
 # Visit http://localhost:8000
 ```
 
+> 💡 **Python tooling tip:** To avoid Debian's `externally-managed-environment` error when installing
+> packages (for example `numpy` or `pytest`), run `./scripts/setup_python_venv.sh`. The helper provisions
+> a reusable virtual environment and is described in detail in
+> [`docs/python_env_setup.md`](docs/python_env_setup.md).
+
 **Status**: ✅ **Production-ready** with bulletproof rebuild protection and enterprise-grade security
 
 **Production Validation:**

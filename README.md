@@ -555,6 +555,20 @@ clifford, numba
 
 # Testing & Quality
 pytest, flake8, black
+
+### ✅ JavaScript Test Suites
+Aurora’s JavaScript checks now run on Node’s native test runner for full ESM compatibility.
+
+```bash
+npm run test         # Runs core Node-based suites and web interface tests
+npm run test:node    # Core integration checks (crypto, PAS orchestration, config)
+npm run test:web     # Browser-facing harness powered by node:test mocks
+npm run test:jest    # Optional legacy Jest harness (no ESM guarantees)
+```
+
+> **AES key requirement** – crypto tests expect `AES_KEY_256_HEX` (64 hex chars). The harness auto-generates a
+> disposable key if it’s missing so the suite is safe to run locally, but production deployments must still
+> inject their managed secret.
 ```
 
 ### **🌟 Infallible Setup**

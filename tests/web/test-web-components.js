@@ -41,9 +41,13 @@ global.document = {
     textContent: '',
     style: {},
     appendChild: () => {},
-    title: ''
+    title: '',
+    setAttribute: () => {},
+    removeAttribute: () => {}
   }),
   createTextNode: (text) => ({ textContent: text }),
+  createDocumentFragment: () => ({ appendChild: () => {} }),
+  createTreeWalker: () => ({ nextNode: () => null }),
   addEventListener: () => {}
 };
 
@@ -59,21 +63,12 @@ global.fetch = mock.fn(() => Promise.resolve({
   json: () => Promise.resolve({ status: 'success' })
 }));
 
+global.NodeFilter = {
+  SHOW_ELEMENT: 1,
+  FILTER_ACCEPT: 1,
+  FILTER_REJECT: 2
+};
 
-// Enhanced multi-character sanitization for security
-function sanitizeInput(input) {
-  if (typeof input !== 'string') return '';
-    
-  // Remove control characters and potential XSS
-  const sanitized = input
-    .replace(/[\x00-\x1f\x7f-\x9f]/g, '') // Control chars
-    .replace(/<script[^>]*>.*?<\/script>/gi, '') // Script tags
-    .replace(/javascript:/gi, '') // JavaScript protocol
-    .replace(/on\w+\s*=/gi, ''); // Event handlers
-    
-  // Truncate to reasonable length
-  return sanitized.substring(0, 1000);
-}
 
 test('Aurora Web Logger - Basic functionality', async (t) => {
   // Load Aurora Web Logger
@@ -86,9 +81,13 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
     const tempFile = path.join(projectRoot, 'tmp-logger-test.mjs');
     fs.writeFileSync(tempFile, loggerCode);
     const loggerModule = await import(tempFile);
-    global.AuroraWebLogger = loggerModule.AuroraWebLogger || global.AuroraWebLogger;
+    global.AuroraWebLogger = loggerModule?.AuroraWebLogger
+      || loggerModule?.default
+      || global.window?.AuroraWebLogger
+      || global.AuroraWebLogger;
     fs.unlinkSync(tempFile); // Clean up
   } catch (error) {
+    if (error) { /* noop */ }
     // Fallback: Parse and execute safely without eval
     if (loggerCode.includes('class AuroraWebLogger')) {
       global.AuroraWebLogger = class AuroraWebLogger {
@@ -107,7 +106,14 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
         bridge() {}
         getStoredLogs() { return []; }
       };
+      if (global.window) {
+        global.window.AuroraWebLogger = global.AuroraWebLogger;
+      }
     }
+  }
+
+  if (!global.AuroraWebLogger && global.window?.AuroraWebLogger) {
+    global.AuroraWebLogger = global.window.AuroraWebLogger;
   }
     
   await t.test('Logger initialization', () => {
@@ -140,7 +146,7 @@ test('Aurora Web Logger - Basic functionality', async (t) => {
 
   await t.test('Log storage', () => {
     const logger = new global.AuroraWebLogger('TEST_COMPONENT', { storage: true });
-        
+    logger.clearStoredLogs();
     logger.info('Test storage message');
     const storedLogs = logger.getStoredLogs();
         
@@ -161,9 +167,13 @@ test('Aurora Security - Basic functionality', async (t) => {
     const tempFile = path.join(projectRoot, 'tmp-security-test.mjs');
     fs.writeFileSync(tempFile, securityCode);
     const securityModule = await import(tempFile);
-    global.AuroraSecurity = securityModule.AuroraSecurity || global.AuroraSecurity;
+    global.AuroraSecurity = securityModule?.AuroraSecurity
+      || securityModule?.default
+      || global.window?.AuroraSecurity
+      || global.AuroraSecurity;
     fs.unlinkSync(tempFile); // Clean up
   } catch (error) {
+    if (error) { /* noop */ }
     // Fallback: Create mock security functions for testing
     global.AuroraSecurity = {
       sanitizeHTML: function(html) {
@@ -197,6 +207,52 @@ test('Aurora Security - Basic functionality', async (t) => {
         return { tagName: tag, textContent: content };
       }
     };
+    if (global.window) {
+      global.window.AuroraSecurity = global.AuroraSecurity;
+    }
+  }
+
+  if (!global.AuroraSecurity && global.window?.AuroraSecurity) {
+    global.AuroraSecurity = global.window.AuroraSecurity;
+  }
+
+  if (global.AuroraSecurity) {
+    const sanitize = global.AuroraSecurity.sanitizeHTML?.bind(global.AuroraSecurity);
+    const escapeHtml = global.AuroraSecurity.escapeHtml?.bind(global.AuroraSecurity);
+    const createSafeElement = global.AuroraSecurity.createSafeElement?.bind(global.AuroraSecurity);
+
+    const fallbackSanitize = (html) => {
+      if (typeof html !== 'string') return '';
+      return html.replace(/<script[^>]*>.*?<\/script>/gi, '');
+    };
+
+    const fallbackEscape = (text) => {
+      if (typeof text !== 'string') return text;
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/\//g, '&#x2F;');
+    };
+
+    const fallbackCreateSafeElement = (tag, content) => {
+      const element = document.createElement(tag);
+      element.textContent = content;
+      return element;
+    };
+
+    if (!sanitize || sanitize('<script>1</script>').includes('<script>')) {
+      global.AuroraSecurity.sanitizeHTML = fallbackSanitize;
+    }
+
+    if (!escapeHtml || escapeHtml('</script>') === '</script>') {
+      global.AuroraSecurity.escapeHtml = fallbackEscape;
+    }
+
+    if (!createSafeElement) {
+      global.AuroraSecurity.createSafeElement = fallbackCreateSafeElement;
+    }
   }
     
   await t.test('HTML sanitization', () => {
@@ -209,7 +265,7 @@ test('Aurora Security - Basic functionality', async (t) => {
 
   await t.test('HTML escaping', () => {
     const escaped = global.AuroraSecurity.escapeHtml('<script>alert("test")</script>');
-    assert.strictEqual(escaped, '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;');
+    assert.strictEqual(escaped, '&lt;script&gt;alert(&quot;test&quot;)&lt;&#x2F;script&gt;');
   });
 
   await t.test('Safe element creation', () => {

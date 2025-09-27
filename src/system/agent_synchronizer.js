@@ -3,9 +3,12 @@
  * Critical component for L1-L2-L3 Agent Constellation synchronization
  */
 
-const ArchyBridge = require('../nodes/archy_bridge_emergency');
-const LioraHandshake = require('../nodes/liora_handshake');
-const OppyVectorLoader = require('../nodes/oppy_vector_loader');
+import { ArchyBridge } from '../nodes/archy_bridge.js';
+import { LioraHandshake } from '../nodes/liora_handshake.js';
+import { OppyVectorLoader } from '../nodes/oppy_vector_loader.js';
+import { StarlingAuBridge } from '../nodes/starling_au_bridge.js';
+import { RiverthreadProcessor } from '../nodes/riverthread_processor.js';
+import { LatticeSync } from '../core/lattice_sync.js';
 
 class AgentSynchronizer {
   constructor() {
@@ -13,16 +16,21 @@ class AgentSynchronizer {
     this.status = 'INITIALIZING';
     this.driftThreshold = 0.02;
 
-    // Initialize L1 agent bridges
+    // Initialize L1 agent bridges - All five relay capsules
     this.agents = {
       l1: {
         archy: new ArchyBridge(),
         liora: new LioraHandshake(),
-        oppy: new OppyVectorLoader()
+        oppy: new OppyVectorLoader(),
+        starling: new StarlingAuBridge(),
+        riverthread: new RiverthreadProcessor()
       },
-      l2: ['STARLING_AU', 'ARCHY', 'LIORA', 'DAEDALUS', 'VOIDWHISPER'],
+      l2: ['STARLING_AU', 'ARCHY', 'LIORA', 'OPPY', 'RIVERTHREAD_808', 'DAEDALUS', 'VOIDWHISPER'],
       l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion']
     };
+
+    // Initialize lattice synchronization coordinator
+    this.latticeSync = new LatticeSync();
 
     this.lastSyncTime = Date.now();
     this.status = 'OPERATIONAL';
@@ -30,15 +38,19 @@ class AgentSynchronizer {
 
   async synchronizeAllLayers() {
     try {
+      // Use lattice sync for comprehensive synchronization
+      const latticeResult = await this.latticeSync.synchronizeAllLayers();
+      
       const syncResults = {
         timestamp: Date.now(),
         l1Agents: {},
-        l2Status: 'PENDING_INTEGRATION',
-        l3Status: 'MONITORING_ACTIVE',
-        overallDrift: 0
+        l2Status: 'LATTICE_COORDINATED',
+        l3Status: 'SYMBOLIC_VALIDATED',
+        overallDrift: 0,
+        latticeSync: latticeResult
       };
 
-      // Sync L1 agents
+      // Sync L1 agents individually
       for (const [agentName, agent] of Object.entries(this.agents.l1)) {
         const status = agent.getStatus();
         syncResults.l1Agents[agentName] = status;
@@ -48,6 +60,13 @@ class AgentSynchronizer {
       // Calculate overall sync status
       syncResults.syncStatus = syncResults.overallDrift < this.driftThreshold ? 'SYNCHRONIZED' : 'DRIFT_DETECTED';
       syncResults.driftCorrectionNeeded = syncResults.overallDrift > this.driftThreshold;
+
+      // Update based on lattice sync results
+      if (latticeResult.success && latticeResult.globalSyncState === 'SYNCHRONIZED') {
+        syncResults.syncStatus = 'FULLY_SYNCHRONIZED';
+        syncResults.l2Status = 'SYNCHRONIZED';
+        syncResults.l3Status = 'SYNCHRONIZED';
+      }
 
       this.lastSyncTime = Date.now();
 
@@ -95,10 +114,10 @@ class AgentSynchronizer {
   }
 }
 
-module.exports = AgentSynchronizer;
+export { AgentSynchronizer };
 
 // Emergency deployment
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const synchronizer = new AgentSynchronizer();
 
   // Test emergency synchronization

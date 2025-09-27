@@ -1,5 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DIAG_PATH = path.join(
   __dirname,
@@ -30,4 +34,4 @@ function saveDiagnostics(data) {
   fs.writeFileSync(DIAG_PATH, JSON.stringify(data, null, 2));
 }
 
-module.exports = { DIAG_PATH, loadDiagnostics, saveDiagnostics };
+export { DIAG_PATH, loadDiagnostics, saveDiagnostics };

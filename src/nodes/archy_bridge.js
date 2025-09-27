@@ -9,11 +9,11 @@
  * Drift Level Reduction: Δ > 0.5 → Δ < 0.02 (Target)
  */
 
-const AuroraCommandRouter = require('../aurora_command_router');
-const { EthicsEngine } = require('../core/ethics_engine');
+import { AuroraCommandRouter } from '../system/aurora_command_router.js';
+import { EthicsEngine } from '../core/ethics_layer.js';
 
 // Import Aurora logging system
-const { bridgeLogger } = require('../utils/aurora_logger.js');
+import { bridgeLogger } from '../utils/aurora_logger.js';
 
 class ArchyBridge {
   constructor() {
@@ -50,18 +50,19 @@ class ArchyBridge {
       });
 
       // Register with Aurora command node
-      await this.commandRouter.registerAgent({
-        id: this.agentId,
-        type: 'L1_BRIDGE',
-        role: this.role,
-        capabilities: [
-          'architectural_analysis',
-          'structural_planning',
-          'system_coordination',
-          'l2_agent_bridge',
-          'ethics_validation'
-        ]
+      await this.commandRouter.registerRoute('L1', this.agentId, async (request) => {
+        // Handle incoming commands for this bridge
+        return await this.processCommand(request);
       });
+      
+      // Store capabilities for reference
+      this.capabilities = [
+        'architectural_analysis',
+        'structural_planning',
+        'system_coordination',
+        'l2_agent_bridge',
+        'ethics_validation'
+      ];
 
       // Initialize ethics validation
       await this.ethicsEngine.initialize();
@@ -90,16 +91,59 @@ class ArchyBridge {
     }
   }
 
+  async processCommand(request) {
+    try {
+      // Process incoming commands routed to this bridge
+      bridgeLogger.bridge(`[ARCHY_BRIDGE] Processing command: ${request.type}`, {
+        agentId: this.agentId,
+        requestType: request.type,
+        timestamp: Date.now()
+      });
+
+      // Route to appropriate handler based on command type
+      switch (request.type) {
+        case 'architectural_analysis':
+          return await this.processArchitecturalCommand(request);
+        case 'drift_status_request':
+          return await this.getDriftStatus();
+        case 'agent_status':
+          return await this.getAgentStatus();
+        default:
+          return {
+            success: false,
+            error: `Unknown command type: ${request.type}`,
+            timestamp: Date.now()
+          };
+      }
+    } catch (error) {
+      bridgeLogger.error(`[ARCHY_BRIDGE] Command processing failed: ${error.message}`, {
+        error: error.message,
+        request: request
+      });
+      return {
+        success: false,
+        error: error.message,
+        timestamp: Date.now()
+      };
+    }
+  }
+
   async establishL2Connection() {
     // Bridge to L2 ARCHY agent through Aurora command routing
-    const l2Connection = await this.commandRouter.establishBridge({
-      sourceAgent: this.agentId,
-      targetAgent: 'ARCHY',
-      layer: 'L2_GUMAS',
-      protocol: 'aurora_secure_channel'
+    const l2Connection = await this.commandRouter.dispatch({
+      agent: 'ARCHY',
+      layer: 'L2',
+      command: {
+        type: 'establish_connection',
+        sourceAgent: this.agentId,
+        protocol: 'aurora_secure_channel'
+      },
+      metadata: {
+        clearanceLevel: 'L1_L2_BRIDGE'
+      }
     });
 
-    if (l2Connection.status === 'CONNECTED') {
+    if (l2Connection.success) {
       bridgeLogger.bridge('🔗 [ARCHY_BRIDGE] L2 ARCHY agent connection established', {
         connectionType: 'L2_GUMAS',
         protocol: 'aurora_secure_channel',
@@ -243,7 +287,7 @@ class ArchyBridge {
     await this.commandRouter.disconnectBridge(this.agentId, 'ARCHY');
 
     // Unregister from Aurora command node
-    await this.commandRouter.unregisterAgent(this.agentId);
+    await this.commandRouter.unregisterRoute('L1', this.agentId);
 
     this.status = 'SHUTDOWN';
     bridgeLogger.bridge('✅ [ARCHY_BRIDGE] Agent shutdown complete', {
@@ -253,10 +297,10 @@ class ArchyBridge {
   }
 }
 
-module.exports = ArchyBridge;
+export { ArchyBridge };
 
 // Emergency initialization for drift correction
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   bridgeLogger.drift('🚨 [EMERGENCY] Deploying ARCHY_BRIDGE for Agent Constellation drift correction...', {
     deployment: 'emergency',
     purpose: 'drift_correction',

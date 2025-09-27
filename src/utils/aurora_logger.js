@@ -6,8 +6,8 @@
  * Supports L1/L2/L3 layer context and drift monitoring
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 class AuroraLogger {
   constructor(component = 'AURORA_SYSTEM', options = {}) {
@@ -173,6 +173,15 @@ class AuroraLogger {
     });
   }
 
+  audit(message, auditContext = {}, metadata = {}) {
+    this.log('INFO', message, {
+      auditContext,
+      type: 'AUDIT_TRAIL',
+      timestamp: Date.now(),
+      ...metadata
+    });
+  }
+
   shouldLog(level) {
     const levels = { DEBUG: 0, INFO: 1, WARN: 2, ERROR: 3 };
     return levels[level] >= levels[this.logLevel];
@@ -190,8 +199,5 @@ const bridgeLogger = new AuroraLogger('BRIDGE_AGENTS');
 const commandLogger = new AuroraLogger('COMMAND_NODE');
 const ethicsLogger = new AuroraLogger('ETHICS_ENGINE');
 
-module.exports = AuroraLogger;
-module.exports.systemLogger = systemLogger;
-module.exports.bridgeLogger = bridgeLogger;
-module.exports.commandLogger = commandLogger;
-module.exports.ethicsLogger = ethicsLogger;
+export default AuroraLogger;
+export { systemLogger, bridgeLogger, commandLogger, ethicsLogger };

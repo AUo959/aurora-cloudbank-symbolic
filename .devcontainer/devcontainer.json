@@ -1,99 +1,58 @@
 {
-  "name": "Aurora Reflective Autonomy DevContainer",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "postCreateCommand": "/bin/bash .devcontainer/post-create.sh",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode-remote.remote-containers",
-        "ms-vscode-remote.remote-ssh",
-        "ms-vscode-remote.vscode-remote-extensionpack",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.flake8",
-        "ms-python.black-formatter",
-        "ms-python.isort",
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
-        "eamodio.gitlens",
-        "redhat.vscode-yaml",
-        "yzhang.markdown-all-in-one",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "editorconfig.editorconfig",
-        "ms-azuretools.vscode-docker",
-        "ms-toolsai.jupyter",
-        "littlefoxteam.vscode-python-test-adapter",
-        "ms-vscode.makefile-tools",
-        "ms-vscode.vscode-json",
-        "bradlc.vscode-tailwindcss",
-        "formulahendry.auto-rename-tag",
-        "christian-kohler.path-intellisense",
-        "streetsidesoftware.code-spell-checker",
-        "ms-vscode.test-adapter-converter",
-        "ms-python.debugpy",
-        "ms-toolsai.vscode-ai"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "terminal.integrated.profiles.linux": {
-          "bash": {
-            "path": "/bin/bash"
-          }
+    "name": "Aurora CloudBank Symbolic (Rebuild-Protected)",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "18"
         },
-        "terminal.integrated.automationShell.linux": "/bin/bash",
-        "terminal.integrated.shellIntegration.enabled": true,
-        "git.enabled": true,
-        "git.path": "/usr/bin/git",
-        "git.terminalAuthentication": true,
-        "terminal.integrated.inheritEnv": true,
-        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
-        "python.analysis.extraPaths": [
-          "${containerWorkspaceFolder}/src",
-          "${containerWorkspaceFolder}/modules"
-        ],
-        "python.linting.enabled": true,
-        "python.linting.pylintEnabled": true,
-        "python.linting.flake8Enabled": true,
-        "python.formatting.provider": "black",
-        "python.sortImports.args": ["--profile", "black"],
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-          "source.organizeImports": "explicit"
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.flake8",
+                "ms-python.black-formatter",
+                "ms-toolsai.jupyter",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "ms-vscode.vscode-json"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "./.venv/bin/python",
+                "python.terminal.activateEnvironment": true,
+                "python.formatting.provider": "black",
+                "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
+                "files.autoSave": "afterDelay",
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
+        }
+    },
+    "onCreateCommand": "bash scripts/prevent_rebuild_failures.py --pre-rebuild || echo 'Pre-rebuild protection failed, continuing with fallback'",
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "postStartCommand": "python3 scripts/prevent_rebuild_failures.py || echo 'Post-start validation completed with warnings'",
+    "mounts": [
+        "source=aurora-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
+    ],
+    "forwardPorts": [8000, 3000, 5000],
+    "portsAttributes": {
+        "8000": {
+            "label": "Aurora API Server",
+            "onAutoForward": "notify"
         },
-        "files.associations": {
-          "*.jsonc": "jsonc"
-        },
-  "jupyter.askForKernelRestart": false,
-  "jupyter.interactiveWindow.textEditor.executeSelection": true
-      }
-    }
-  },
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
+        "3000": {
+            "label": "Frontend Dev Server",
+            "onAutoForward": "silent"
+        }
     },
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11",
-      "installTools": true
+    "remoteUser": "vscode",
+    "containerEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}",
+        "AURORA_ENVIRONMENT": "development",
+        "REBUILD_PROTECTION": "enabled"
     },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "configureZshAsDefaultShell": false,
-      "installOhMyZsh": false,
-      "upgradePackages": true,
-      "username": "node",
-      "userUid": "automatic",
-      "userGid": "automatic"
-    }
-  }
+    "initializeCommand": "echo 'Initializing Aurora CloudBank with rebuild protection...'",
+    "shutdownAction": "stopContainer"
 }

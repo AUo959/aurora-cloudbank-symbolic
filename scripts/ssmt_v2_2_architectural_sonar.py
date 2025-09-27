@@ -84,10 +84,17 @@ class SSMTArchitecturalSonar:
         ]
 
     def run_command(self, command: str, check_return: bool = True) -> Optional[subprocess.CompletedProcess]:
-        """Execute shell command with enhanced error handling"""
+        """Execute shell command with enhanced error handling - SECURITY FIX"""
         try:
+            # SECURITY FIX: Replace shell=True with secure array-based execution
+            import shlex
+            if isinstance(command, str):
+                command_args = shlex.split(command)
+            else:
+                command_args = command
+                
             result = subprocess.run(
-                command, shell=True, capture_output=True, text=True, 
+                command_args, shell=False, capture_output=True, text=True, 
                 cwd=self.workspace_root, timeout=180
             )
             return result if not check_return or result.returncode == 0 else None

@@ -160,17 +160,75 @@ class AuroraSecurityMiddleware {
   }
 
   /**
+   * Validate URL scheme - SECURITY FIX for incomplete URL scheme check
+   */
+  validateURLScheme(url) {
+    if (typeof url !== 'string') return false;
+    
+    try {
+      const urlObj = new URL(url);
+      
+      // Only allow safe schemes
+      const allowedSchemes = ['http:', 'https:', 'data:', 'mailto:'];
+      
+      if (!allowedSchemes.includes(urlObj.protocol)) {
+        return false;
+      }
+      
+      // Additional checks for specific schemes
+      if (urlObj.protocol === 'data:') {
+        // Only allow safe data URLs (images, not JavaScript)
+        const mimeType = url.split(',')[0].split(':')[1].split(';')[0];
+        const safeMimeTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml'];
+        return safeMimeTypes.includes(mimeType);
+      }
+      
+      return true;
+    } catch (error) {
+      // Invalid URL
+      return false;
+    }
+  }
+
+  /**
+   * Sanitize URLs in content - SECURITY FIX
+   */
+  sanitizeURLs(content) {
+    if (typeof content !== 'string') return content;
+    
+    // Find and validate URLs in href and src attributes
+    return content.replace(/(href|src)\s*=\s*["']([^"']*)["']/gi, (match, attr, url) => {
+      if (this.validateURLScheme(url)) {
+        return match; // URL is safe, keep it
+      } else {
+        return `${attr}="#"`;  // Replace with safe placeholder
+      }
+    });
+  }
+
+  /**
    * Sanitize input string
    */
   sanitizeInput(input) {
     if (typeof input !== 'string') return input;
+    
+    // First sanitize URLs
+    let sanitized = this.sanitizeURLs(input);
+    
     // Use sanitize-html to remove all HTML tags and dangerous protocols
-    return sanitizeHtml(input, {
+    sanitized = sanitizeHtml(sanitized, {
       allowedTags: [],
       allowedAttributes: {},
       // Disallow all protocols that could be dangerous. Remove href/src attributes.
-      allowedSchemes: [],
+      allowedSchemes: ['http', 'https', 'mailto'],
     });
+    
+    // Additional length validation to prevent DoS
+    if (sanitized.length > 2000) {
+      sanitized = sanitized.substring(0, 2000);
+    }
+    
+    return sanitized;
   }
 
   /**

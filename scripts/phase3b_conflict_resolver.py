@@ -46,11 +46,18 @@ class Phase3BConflictResolver:
         ]
 
     def run_command(self, command, check_return=True):
-        """Execute shell command with error handling"""
+        """Execute shell command with error handling - SECURITY FIX"""
         try:
+            # SECURITY FIX: Replace shell=True with secure array-based execution
+            import shlex
+            if isinstance(command, str):
+                command_args = shlex.split(command)
+            else:
+                command_args = command
+                
             result = subprocess.run(
-                command, 
-                shell=True, 
+                command_args, 
+                shell=False,  # SECURITY FIX: Changed from True to False
                 capture_output=True, 
                 text=True, 
                 cwd=self.workspace_root

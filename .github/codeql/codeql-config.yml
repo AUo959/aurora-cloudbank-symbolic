@@ -1,47 +1,17 @@
-name: "Aurora CloudBank CodeQL Config"
-
-# Paths to include in analysis
+name: "Aurora CodeQL Unified Config"
 paths:
-  - "modules/"
-  - "scripts/"
-  - "aurora_api.py"
-  - "*.py"
-  - "*.js"
-  - "*.ts"
-
-# Paths to exclude from analysis
+  - src
+  - modules
+  - scripts
 paths-ignore:
-  - "**/node_modules/**"
-  - "**/dist/**"
-  - "**/build/**"
-  - "**/__pycache__/**"
-  - "**/.*/**"
-  - "**/*.min.js"
-  - "**/*.bundle.js"
-  - "**/vendor/**"
-  - "**/third_party/**"
+  - tests
+  - "**/*_test.py"
+  - node_modules
+  - venv
+  - .venv
+  - __pycache__
+  - "*.pyc"
+  - CASK_Assets.zip
   - "**/*.zip"
-  - "**/*.pdf"
-  - "**/*.md"
-  - "**/logs/**"
-  - "**/temp/**"
-  - "**/tmp/**"
-
-# Disable problematic queries that might cause proxy issues
-disable-default-queries: false
-
-# Custom queries for Aurora-specific patterns
-queries:
-  - uses: security-and-quality
-  - uses: security-experimental
-
-# Compilation database settings for Python
-python:
-  setup: |
-    python -m pip install --upgrade pip
-    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-# JavaScript/TypeScript settings
-javascript:
-  setup: |
-    if [ -f package.json ]; then npm ci || npm install; fi
+  - "**/*.gz"
+  - "**/*.tar"

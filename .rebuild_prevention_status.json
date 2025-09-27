@@ -1,7 +1,7 @@
 {
-  "status": "validation_completed",
-  "message": "Regular validation completed",
-  "timestamp": "2025-09-27T14:14:54.404139",
-  "python_version": "3.12.11 (main, Jun  4 2025, 09:55:47) [GCC 14.2.0]",
+  "status": "validation_failed",
+  "message": "Failed checks: environment_health",
+  "timestamp": "2025-09-27T14:24:58.276440",
+  "python_version": "3.12.11 (main, Aug 12 2025, 23:10:44) [GCC 14.2.0]",
   "workspace": "/workspaces/aurora-cloudbank-symbolic"
 }

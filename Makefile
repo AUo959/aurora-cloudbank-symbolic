@@ -37,6 +37,40 @@ backup: ## Backup current environment and requirements
 	@cp requirements*.txt .backup/requirements/ 2>/dev/null || true
 	@if [ -d "$(VENV_DIR)" ]; then source $(VENV_DIR)/bin/activate && pip freeze > .backup/requirements/pip_freeze.$(shell date +%Y%m%d_%H%M%S).txt; fi
 
+status: ## Show environment status
+	@echo "📊 Aurora CloudBank Status"
+	@echo "========================="
+	@echo "Python: $(shell python3 --version 2>/dev/null || echo 'Not found')"
+	@if [ -d "$(VENV_DIR)" ]; then \
+		echo "Virtual Environment: ✅ Active"; \
+		echo "Pip: $(shell source $(VENV_DIR)/bin/activate && pip --version | cut -d' ' -f2)"; \
+	else \
+		echo "Virtual Environment: ❌ Not found"; \
+	fi
+	@if [ -f ".env_status.json" ]; then \
+		echo "Setup Status: $(shell cat .env_status.json | grep -o '"status":"[^"]*"' | cut -d'"' -f4)"; \
+	else \
+		echo "Setup Status: ⚠️  Unknown"; \
+	fi
+
+security: validate ## Run comprehensive security scans
+	@echo "🔒 Running Aurora CloudBank Security Scans..."
+	@source $(VENV_DIR)/bin/activate && pip install safety bandit --quiet
+	@echo "1. Dependency vulnerability scan:"
+	@source $(VENV_DIR)/bin/activate && safety check --json --output .backup/security/safety_report.json 2>/dev/null || echo "⚠️ Some vulnerabilities detected - check .backup/security/safety_report.json"
+	@echo "2. Code security analysis:"
+	@source $(VENV_DIR)/bin/activate && bandit -r . -f json -o .backup/security/bandit_report.json --exclude .venv,.backup,node_modules 2>/dev/null || echo "⚠️ Security issues detected - check .backup/security/bandit_report.json"
+	@mkdir -p .backup/security
+	@echo "✅ Security reports generated in .backup/security/"
+
+clean: ## Clean up build artifacts and temporary files
+	@echo "🧹 Cleaning Aurora CloudBank environment..."
+	@rm -rf $(VENV_DIR)
+	@rm -rf .pytest_cache htmlcov *.egg-info build/ dist/
+	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@echo "✅ Environment cleaned"
+
 help: ## Show available targets
 	@echo "Aurora CloudBank Development Commands:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'

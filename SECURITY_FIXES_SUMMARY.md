@@ -22,6 +22,7 @@ logger.info("Generated AIF_TOKEN: %s", AIF_TOKEN[:8] + "..." + AIF_TOKEN[-4:])
 **Additional Protection**: Created `.security/secure_logging.py` with `SecureLogger` class for comprehensive log injection prevention.
 
 ### 2. Shell Injection Vulnerabilities (HIGH)
+
 **Issue**: `subprocess` calls with `shell=True` allowing command injection
 **Files Fixed**:
 - `scripts/aurora_codeql_diagnostics.py`

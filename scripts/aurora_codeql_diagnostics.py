@@ -166,7 +166,7 @@ class CodeQLSymbolicDiagnostic:
                 # SECURITY FIX: Replace shell=True with secure array-based command execution
                 import shlex
                 command_args = shlex.split(command)
-                result = subprocess.run(command_args, capture_output=True, text=True)
+                result = subprocess.run(command_args, capture_output=True, text=True, shell=False)
                 if result.stdout.strip():
                     files = result.stdout.strip().split('\n')
                     occurrences = len(files)

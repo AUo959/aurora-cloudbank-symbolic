@@ -150,7 +150,7 @@ python test_security_fixes.py
 4. **Security Headers**: Add additional security headers (HSTS, HPKP)
 5. **Vulnerability Scanning**: Set up automated security scanning in CI/CD
 
-### Monitoring:
+### Monitoring
 - Enable security alerts for new vulnerabilities
 - Regular security audits using `scripts/aurora_security_scanner.py`
 - Monitor logs for security incidents

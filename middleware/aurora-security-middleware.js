@@ -6,13 +6,19 @@
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const sanitizeHtml = require('sanitize-html');
+const crypto = require('crypto');
 
 class AuroraSecurityMiddleware {
   constructor(app) {
     this.app = app;
+    this.csrfTokens = new Map(); // Store CSRF tokens temporarily (use Redis in production)
     this.setupSecurityHeaders();
     this.setupRateLimiting();
     this.setupCSP();
+    this.setupCSRFProtection();
+    this.setupSessionSecurity();
+    this.setupSecureCookies();
+    this.setupInputValidation();
   }
 
   /**
@@ -87,6 +93,49 @@ class AuroraSecurityMiddleware {
   }
 
   /**
+   * CSRF Protection - SECURITY FIX
+   */
+  setupCSRFProtection() {
+    this.app.use('/api', (req, res, next) => {
+      if (req.method === 'GET' || req.method === 'HEAD') {
+        return next();
+      }
+
+      // Generate CSRF token for new sessions
+      if (!req.session?.csrfToken) {
+        const token = crypto.randomBytes(32).toString('hex');
+        if (req.session) {
+          req.session.csrfToken = token;
+        } else {
+          // Fallback if no session middleware
+          this.csrfTokens.set(req.ip, token);
+        }
+      }
+
+      // Validate CSRF token for state-changing requests
+      const clientToken = req.headers['x-csrf-token'] || req.body._csrf;
+      const sessionToken = req.session?.csrfToken || this.csrfTokens.get(req.ip);
+
+      if (!clientToken || !sessionToken || clientToken !== sessionToken) {
+        return res.status(403).json({ error: 'Invalid CSRF token' });
+      }
+
+      next();
+    });
+
+    // Provide CSRF token endpoint
+    this.app.get('/api/csrf-token', (req, res) => {
+      const token = crypto.randomBytes(32).toString('hex');
+      if (req.session) {
+        req.session.csrfToken = token;
+      } else {
+        this.csrfTokens.set(req.ip, token);
+      }
+      res.json({ csrfToken: token });
+    });
+  }
+
+  /**
    * Configure additional CSP rules for WebSocket and dynamic content
    */
   setupCSP() {
@@ -97,6 +146,42 @@ class AuroraSecurityMiddleware {
         `script-src 'self' 'nonce-${res.locals.nonce}'; object-src 'none';`
       );
       next();
+    });
+  }
+
+  /**
+   * Session Security Enhancement - SECURITY FIX
+   */
+  setupSessionSecurity() {
+    this.app.use((req, res, next) => {
+      // Session timeout and regeneration
+      if (req.session) {
+        const now = Date.now();
+        
+        // Session timeout (30 minutes)
+        if (req.session.lastActivity && (now - req.session.lastActivity) > 30 * 60 * 1000) {
+          req.session.destroy((err) => {
+            if (err) console.error('Session destroy error:', err);
+          });
+          return res.status(401).json({ error: 'Session expired' });
+        }
+        
+        // Update last activity
+        req.session.lastActivity = now;
+        
+        // Regenerate session ID periodically (every 15 minutes)
+        if (!req.session.lastRegeneration || (now - req.session.lastRegeneration) > 15 * 60 * 1000) {
+          req.session.regenerate((err) => {
+            if (err) console.error('Session regeneration error:', err);
+            req.session.lastRegeneration = now;
+            next();
+          });
+        } else {
+          next();
+        }
+      } else {
+        next();
+      }
     });
   }
 

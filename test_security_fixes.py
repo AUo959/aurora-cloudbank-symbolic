@@ -73,6 +73,48 @@ def test_url_validation_fix():
             print("❌ URL validation fix not found in middleware/aurora-security-middleware.js")
     return False
 
+def test_csrf_protection_fix():
+    """Test that CSRF protection is added"""
+    middleware_path = "middleware/aurora-security-middleware.js"
+    if os.path.exists(middleware_path):
+        with open(middleware_path, 'r') as f:
+            content = f.read()
+        
+        if 'setupCSRFProtection' in content and 'x-csrf-token' in content:
+            print("✅ CSRF protection fix applied in middleware/aurora-security-middleware.js")
+            return True
+        else:
+            print("❌ CSRF protection fix not found in middleware/aurora-security-middleware.js")
+    return False
+
+def test_secure_logging_fix():
+    """Test that secure logging helper is created"""
+    secure_logging_path = ".security/secure_logging.py"
+    if os.path.exists(secure_logging_path):
+        with open(secure_logging_path, 'r') as f:
+            content = f.read()
+        
+        if 'sanitize_log_input' in content and 'SecureLogger' in content:
+            print("✅ Secure logging helper created in .security/secure_logging.py")
+            return True
+        else:
+            print("❌ Secure logging helper not complete")
+    return False
+
+def test_input_validation_enhancements():
+    """Test that input validation enhancements are added"""
+    secure_helpers_path = ".security/secure_helpers.py"
+    if os.path.exists(secure_helpers_path):
+        with open(secure_helpers_path, 'r') as f:
+            content = f.read()
+        
+        if 'validate_input_length' in content and 'validate_email' in content and 'sanitize_filename' in content:
+            print("✅ Input validation enhancements added to .security/secure_helpers.py")
+            return True
+        else:
+            print("❌ Input validation enhancements not complete")
+    return False
+
 def main():
     """Run all security fix validation tests"""
     print("🔍 Validating Security Fixes Applied")
@@ -82,7 +124,10 @@ def main():
         ("Log Injection Fix", test_log_injection_fix),
         ("Shell Injection Fix", test_shell_injection_fix), 
         ("HTML Sanitization Fix", test_html_sanitization_fix),
-        ("URL Validation Fix", test_url_validation_fix)
+        ("URL Validation Fix", test_url_validation_fix),
+        ("CSRF Protection Fix", test_csrf_protection_fix),
+        ("Secure Logging Fix", test_secure_logging_fix),
+        ("Input Validation Enhancements", test_input_validation_enhancements)
     ]
     
     passed = 0

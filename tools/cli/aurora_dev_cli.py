@@ -35,7 +35,7 @@ class AuroraDeveloperCLI:
 
     def print_banner(self):
         """Print Aurora Developer CLI banner"""
-        banner = """
+        banner = f"""
 ╔═══════════════════════════════════════════════════╗
 ║              Aurora Developer CLI                 ║
 ║        T71 Symbolic Infrastructure Genesis        ║

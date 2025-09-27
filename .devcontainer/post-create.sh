@@ -6,14 +6,43 @@ VENV_DIR="${WORKSPACE_DIR}/.venv"
 
 printf '\n🚀 Aurora CloudBank DevContainer setup starting...\n'
 
-python3 -m venv "${VENV_DIR}"
-source "${VENV_DIR}/bin/activate"
+# Make scripts executable first
+chmod +x scripts/*.sh 2>/dev/null || true
+chmod +x scripts/*.py 2>/dev/null || true
 
-python -m pip install --upgrade pip
-python -m pip install --upgrade wheel setuptools
+# Setup git hooks for dependency validation
+if [[ -f ".githooks/pre-commit" ]]; then
+    chmod +x .githooks/pre-commit
+    git config core.hooksPath .githooks
+    printf '✅ Git hooks configured\n'
+fi
 
-if [[ -f "requirements-lock.txt" ]]; then
-  python -m pip install -r requirements-lock.txt
+# Use our comprehensive setup script if available
+if [[ -f "scripts/setup_environment.sh" ]]; then
+    printf '🔧 Running Aurora environment setup...\n'
+    bash scripts/setup_environment.sh
+else
+    # Fallback to basic setup with validation
+    printf '⚠️ Using fallback setup (setup_environment.sh not found)\n'
+    
+    python3 -m venv "${VENV_DIR}"
+    source "${VENV_DIR}/bin/activate"
+    
+    python -m pip install --upgrade pip
+    python -m pip install --upgrade wheel setuptools
+    
+    if [[ -f "requirements-lock.txt" ]]; then
+        # Test dependency resolution before installing
+        printf '🧪 Testing dependency resolution...\n'
+        if python -m pip install -r requirements-lock.txt --dry-run; then
+            printf '✅ Dependency resolution test passed\n'
+            python -m pip install -r requirements-lock.txt
+        else
+            printf '❌ Dependency conflicts detected!\n'
+            printf '💡 Check requirements-lock.txt for version conflicts\n'
+            exit 1
+        fi
+    fi
 fi
 
 if [[ -f "requirements-test.txt" ]]; then
@@ -58,4 +87,35 @@ fi
 git config --global init.defaultBranch main || true
 git config --global commit.gpgsign true || true
 
+# Create activation helper
+cat > activate_aurora.sh << 'EOF'
+#!/bin/bash
+# Quick activation script for Aurora CloudBank environment
+
+if [[ -f ".venv/bin/activate" ]]; then
+    source .venv/bin/activate
+    echo "✅ Aurora CloudBank environment activated"
+    echo "🌐 API docs: http://localhost:8000/docs (when running)"
+    echo "🧪 Run tests: python -m pytest tests/"
+    echo "🔧 Validate deps: python scripts/validate_dependencies.py"
+else
+    echo "❌ Virtual environment not found"
+    echo "Run: bash scripts/setup_environment.sh"
+fi
+EOF
+
+chmod +x activate_aurora.sh
+
+# Validate the setup
+if [[ -f "scripts/validate_dependencies.py" ]] && [[ -d "${VENV_DIR}" ]]; then
+    source "${VENV_DIR}/bin/activate"
+    if python scripts/validate_dependencies.py; then
+        printf '🎯 Aurora CloudBank validation passed!\n'
+    else
+        printf '⚠️ Validation warnings detected\n'
+    fi
+fi
+
 printf '\n✅ DevContainer setup complete. Python interpreter: %s\n' "${VENV_DIR}/bin/python"
+printf '📝 Quick start: source activate_aurora.sh\n'
+printf '🔧 Validate setup: python scripts/validate_dependencies.py\n'

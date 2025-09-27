@@ -1,3 +1,16 @@
+# Aurora CloudBank Symbolic System Dependencies
+# Locked versions for reproducible builds
+#
+# CRITICAL DEPENDENCY NOTES:
+# - httpx >= 0.28.0 required for httpcore 1.x compatibility
+# - httpcore >= 1.0.0 required for h11 0.16.0 security updates
+# - h11 >= 0.16.0 required for security vulnerabilities
+# - FastAPI/Starlette versions must align with httpx/httpcore
+#
+# CONFLICT PREVENTION:
+# Run 'python scripts/validate_dependencies.py' before changes
+# Run 'bash scripts/setup_environment.sh' for clean setup
+
 aiofiles==24.1.0
 annotated-types==0.7.0
 anyio==4.11.0
@@ -12,9 +25,9 @@ fastapi==0.117.1
 gitdb==4.0.12
 GitPython==3.1.45
 h11==0.16.0
-httpcore==0.18.0
+httpcore==1.0.9
 httptools==0.6.4
-httpx==0.25.0
+httpx==0.28.1
 idna==3.10
 iniconfig==2.1.0
 limits==5.5.0

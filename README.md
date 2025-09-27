@@ -472,6 +472,31 @@ python3 scripts/infallible_codespace_init.py  # Fixes any environment issues
 ```
 *Automatically executed by devcontainer - ensures 100% setup success rate*
 
+### **🛡️ Advanced Dependency Management**
+**Industry-leading dependency conflict prevention system**:
+
+```bash
+# Comprehensive environment setup with validation
+bash scripts/setup_environment.sh
+
+# Quick dependency validation
+python scripts/validate_dependencies.py
+
+# Using Makefile targets
+make setup     # Complete environment setup
+make validate  # Dependency validation
+make status    # Environment status
+```
+
+**🔧 Key Features:**
+- **Proactive Conflict Detection**: Prevents `httpx`/`httpcore`/`h11` version conflicts
+- **Automatic Backup**: Creates backups before dependency changes
+- **Git Pre-commit Hooks**: Validates dependencies before commits
+- **CI/CD Integration**: GitHub Actions dependency validation
+- **Self-healing Setup**: Automatic environment recovery on rebuild
+
+📚 **[Complete Documentation](docs/DEPENDENCY_MANAGEMENT.md)**
+
 ## 🛠️ **Automation Pipeline**
 
 ### **🤖 SSMT v3.0 - Self-Healing Repository Management**

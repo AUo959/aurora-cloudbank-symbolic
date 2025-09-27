@@ -1,7 +1,45 @@
-# Makefile for common developer tasks
+# Aurora CloudBank Symbolic System Makefile
+# Common developer tasks with dependency management
+
+# Environment settings
+PYTHON := python3
+VENV_DIR := .venv
+PIP := $(VENV_DIR)/bin/pip
+PYTHON_VENV := $(VENV_DIR)/bin/python
 
 install:
 	pip install -r requirements.txt
+
+# New dependency management targets
+.PHONY: setup validate deps-check deps-update backup help
+
+setup: ## Set up development environment with dependency validation
+	@echo "🚀 Setting up Aurora CloudBank environment..."
+	@bash scripts/setup_environment.sh
+
+validate: ## Validate dependencies and environment
+	@if [ ! -d "$(VENV_DIR)" ]; then echo "❌ Virtual environment not found. Run 'make setup' first."; exit 1; fi
+	@echo "🔍 Validating dependencies..."
+	@source $(VENV_DIR)/bin/activate && python scripts/validate_dependencies.py
+
+deps-check: validate ## Check for dependency conflicts
+	@echo "🧪 Checking for dependency conflicts..."
+	@source $(VENV_DIR)/bin/activate && pip check
+
+deps-update: ## Update dependencies (with backup)
+	@echo "📦 Updating dependencies..."
+	@if [ ! -d ".backup/requirements" ]; then mkdir -p .backup/requirements; fi
+	@cp requirements-lock.txt .backup/requirements/requirements-lock.txt.$(shell date +%Y%m%d_%H%M%S) 2>/dev/null || true
+
+backup: ## Backup current environment and requirements
+	@echo "💾 Creating backup..."
+	@mkdir -p .backup/{requirements,venv}
+	@cp requirements*.txt .backup/requirements/ 2>/dev/null || true
+	@if [ -d "$(VENV_DIR)" ]; then source $(VENV_DIR)/bin/activate && pip freeze > .backup/requirements/pip_freeze.$(shell date +%Y%m%d_%H%M%S).txt; fi
+
+help: ## Show available targets
+	@echo "Aurora CloudBank Development Commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 lint:
 	flake8 modules/reflective_autonomy

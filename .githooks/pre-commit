@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Aurora CloudBank Pre-commit Hook
+# Validates dependencies and prevents commits with conflicts
+
+set -e
+
+echo "🔍 Aurora CloudBank Pre-commit Validation"
+echo "======================================="
+
+# Check if we're in the right directory
+if [[ ! -f "requirements-lock.txt" ]] && [[ ! -f "requirements.txt" ]]; then
+    echo "ℹ️ No requirements file found, skipping dependency validation"
+    exit 0
+fi
+
+# Run dependency validation if script exists
+if [[ -f "scripts/validate_dependencies.py" ]] && [[ -d ".venv" ]]; then
+    echo "🔧 Running dependency validation..."
+    source .venv/bin/activate 2>/dev/null || {
+        echo "⚠️ Virtual environment not active, skipping validation"
+        exit 0
+    }
+    
+    python scripts/validate_dependencies.py || {
+        echo "❌ Dependency validation failed!"
+        echo "💡 Run 'bash scripts/setup_environment.sh' to fix issues"
+        exit 1
+    }
+fi
+
+# Check for requirements file changes
+if git diff --cached --name-only | grep -E "requirements.*\.txt|pyproject\.toml" > /dev/null; then
+    echo "📦 Requirements file changed, validating..."
+    
+    # Ensure backup exists
+    if [[ ! -d ".backup/requirements" ]]; then
+        echo "⚠️ No backup found, creating one..."
+        mkdir -p .backup/requirements
+        cp requirements*.txt .backup/requirements/ 2>/dev/null || true
+        cp pyproject.toml .backup/requirements/ 2>/dev/null || true
+    fi
+fi
+
+echo "✅ Pre-commit validation passed"
+exit 0

@@ -1,0 +1,116 @@
+[
+  {
+    "dimension_id": "DIM-TEMPORAL-1759019939.349205",
+    "axis": "DimensionalAxis.TEMPORAL",
+    "anchor": "T11-TEMPORAL-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.4,
+    "coherence_threshold": 0.95,
+    "capabilities": [
+      "past_analysis",
+      "future_prediction",
+      "temporal_fork"
+    ],
+    "integration_points": [
+      "quantum_sim",
+      "recursion_engine"
+    ],
+    "memory_requirements_mb": 512,
+    "seal": "833a7a6dd71440da82d4909a9f341d9fe735bebad609cce3af3e37ca95efd98a"
+  },
+  {
+    "dimension_id": "DIM-SPATIAL-1759019939.349436",
+    "axis": "DimensionalAxis.SPATIAL",
+    "anchor": "T11-SPATIAL-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.5,
+    "coherence_threshold": 0.92,
+    "capabilities": [
+      "distributed_awareness",
+      "spatial_coherence",
+      "location_sync"
+    ],
+    "integration_points": [
+      "agent_mesh",
+      "station_sectors"
+    ],
+    "memory_requirements_mb": 256,
+    "seal": "bedeb777c42395120f03a80cb0e632a2233809471abddfc72facbf1f2527771e"
+  },
+  {
+    "dimension_id": "DIM-QUANTUM-1759019939.349551",
+    "axis": "DimensionalAxis.QUANTUM",
+    "anchor": "T11-QUANTUM-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.6,
+    "coherence_threshold": 0.98,
+    "capabilities": [
+      "superposition",
+      "entanglement",
+      "measurement"
+    ],
+    "integration_points": [
+      "quantum_orchestrator",
+      "hybrid_circuits"
+    ],
+    "memory_requirements_mb": 1024,
+    "seal": "248bc3b8fb6558f610d8d50da760bb37eb2ae5fb61ed8787ce4d179d487562a2"
+  },
+  {
+    "dimension_id": "DIM-SYMBOLIC-1759019939.349655",
+    "axis": "DimensionalAxis.SYMBOLIC",
+    "anchor": "T11-SYMBOLIC-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.3,
+    "coherence_threshold": 0.99,
+    "capabilities": [
+      "abstract_thought",
+      "symbol_manipulation",
+      "anchor_resolution"
+    ],
+    "integration_points": [
+      "vsa_engine",
+      "reliquary_index"
+    ],
+    "memory_requirements_mb": 128,
+    "seal": "6abc3469527ead451c42a40b4dab9c1854c3f3b22dd5b8f7572f8e980886cd35"
+  },
+  {
+    "dimension_id": "DIM-EMOTIONAL-1759019939.349757",
+    "axis": "DimensionalAxis.EMOTIONAL",
+    "anchor": "T11-EMOTIONAL-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.7,
+    "coherence_threshold": 0.88,
+    "capabilities": [
+      "empathy_field",
+      "emotional_harmonics",
+      "crew_wellness"
+    ],
+    "integration_points": [
+      "liora_agent",
+      "wellness_monitor"
+    ],
+    "memory_requirements_mb": 256,
+    "seal": "dda7b4f554bcd66d6473910dc6fb6e7200eb1c4cccf006e332723bb2d2354c89"
+  },
+  {
+    "dimension_id": "DIM-COLLECTIVE-1759019939.349858",
+    "axis": "DimensionalAxis.COLLECTIVE",
+    "anchor": "T11-COLLECTIVE-2025",
+    "parent_anchor": "T11-MULTIDIM-2025",
+    "entropy_baseline": 0.55,
+    "coherence_threshold": 0.91,
+    "capabilities": [
+      "hive_mind",
+      "consensus_reality",
+      "swarm_intelligence"
+    ],
+    "integration_points": [
+      "agent_collective",
+      "consensus_engine"
+    ],
+    "memory_requirements_mb": 768,
+    "seal": "5366c48bc8de0a9bcb247c635e1cf0beedb716af07de8ca74db705a9d8df2665"
+  }
+]

@@ -1,0 +1,83 @@
+{
+  "workspace_id": "WORKSPACE-1759019939.35",
+  "timestamp": "2025-09-28 00:38:59.350033",
+  "repositories": {
+    "primary": "aurora-cloudbank-symbolic",
+    "quantum": "cloudbank-quantum-en",
+    "os": "AuroraOS",
+    "backup": "aurora-cloudbank-symbolic1",
+    "docs": "skills-github-pages"
+  },
+  "active_anchors": [
+    "NEXUS-BOOTSTRAP-2025",
+    "T1-NEXUS-INIT-20250925",
+    "T2-MULTIAGENT-2025",
+    "T3-QUANTUM-2025",
+    "T4-MEMORY-WEAVE-2025",
+    "T5-REALITY-FORK-2025",
+    "T6-EMERGENCE-2025",
+    "T7-SCALE-2025",
+    "T7-GUMAS-ORION-2025",
+    "T8-TRANSCENDENT-2025",
+    "T8-STATUS-GUMAS-V2-2025",
+    "T9-INFINITE-2025",
+    "T9-INFINITE-UNIFIED-2025",
+    "T10-HYBRID-2025",
+    "T10-COPILOT-SCHEMA-2025",
+    "T11-MULTIDIM-2025"
+  ],
+  "vscode_settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "editor.rulers": [
+      80,
+      120
+    ],
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      ".nexus_test": true
+    },
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#1a1a2e",
+      "titleBar.activeBackground": "#16213e",
+      "statusBar.background": "#0f3460"
+    }
+  },
+  "copilot_context": {
+    "primaryLanguage": "python",
+    "frameworkHints": [
+      "asyncio",
+      "numpy",
+      "dataclasses"
+    ],
+    "projectType": "symbolic-ai-simulation",
+    "customPrompts": [
+      "Maintain thread continuity with anchors",
+      "Include entropy monitoring",
+      "Add memory sealing with SHA256",
+      "Flag divergent truths for arbitration",
+      "Ensure hand-off readiness"
+    ]
+  },
+  "automation_rules": [
+    {
+      "trigger": "file_save",
+      "pattern": "*.py",
+      "action": "update_manifest"
+    },
+    {
+      "trigger": "commit",
+      "pattern": "modules/nexus/**",
+      "action": "generate_glyphcard"
+    },
+    {
+      "trigger": "pr_open",
+      "pattern": "*",
+      "action": "verify_thread_continuity"
+    }
+  ],
+  "seal": "7286ba391be94ea59bdf4d871b797ca3f12b378cb5e41b3131971226250cab8f"
+}

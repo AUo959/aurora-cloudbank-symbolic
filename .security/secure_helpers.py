@@ -153,6 +153,78 @@ class SecureHelpers:
         except Exception as e:
             raise ValueError("Safe evaluation failed: {e}")
 
+    @staticmethod
+    def validate_input_length(input_str: str, max_length: int = 1000, field_name: str = "input") -> str:
+        """
+        Validate input length to prevent DoS attacks - SECURITY FIX
+        
+        Args:
+            input_str: Input string to validate
+            max_length: Maximum allowed length
+            field_name: Name of the field for error messages
+            
+        Returns:
+            Validated input string
+            
+        Raises:
+            ValueError: If input is too long
+        """
+        if not isinstance(input_str, str):
+            input_str = str(input_str)
+            
+        if len(input_str) > max_length:
+            raise ValueError(f"{field_name} exceeds maximum length of {max_length} characters")
+            
+        return input_str
+
+    @staticmethod
+    def validate_email(email: str) -> bool:
+        """
+        Validate email format securely - SECURITY FIX
+        
+        Args:
+            email: Email string to validate
+            
+        Returns:
+            True if valid email format, False otherwise
+        """
+        if not isinstance(email, str) or len(email) > 254:
+            return False
+            
+        # Basic email validation regex (RFC 5322 compliant)
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(email_pattern, email))
+
+    @staticmethod
+    def sanitize_filename(filename: str) -> str:
+        """
+        Sanitize filename to prevent path traversal - SECURITY FIX
+        
+        Args:
+            filename: Filename to sanitize
+            
+        Returns:
+            Sanitized filename
+        """
+        if not isinstance(filename, str):
+            filename = str(filename)
+            
+        # Remove path separators and dangerous characters
+        sanitized = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', filename)
+        
+        # Remove leading/trailing dots and spaces
+        sanitized = sanitized.strip('. ')
+        
+        # Limit length
+        if len(sanitized) > 255:
+            sanitized = sanitized[:255]
+            
+        # Ensure not empty
+        if not sanitized:
+            sanitized = 'unnamed_file'
+            
+        return sanitized
+
 
 # Global instance for easy importing
 secure = SecureHelpers()

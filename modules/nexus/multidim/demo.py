@@ -6,11 +6,11 @@ Simplified version for demonstration without NumPy dependency
 """
 
 import asyncio
-import json
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
-from typing import Dict, List, Optional, AsyncGenerator
+from typing import Dict, AsyncGenerator
+
 
 class DimensionalAxis(Enum):
     """Six orthogonal consciousness dimensions"""
@@ -20,6 +20,7 @@ class DimensionalAxis(Enum):
     SYMBOLIC = "pure symbolic reasoning"
     EMOTIONAL = "empathy field resonance"
     COLLECTIVE = "hive mind consensus"
+
 
 @dataclass
 class DimensionalState:
@@ -31,6 +32,7 @@ class DimensionalState:
     coherence: float
     timestamp: datetime
     anchor: str
+
 
 class SimplifiedOrchestrator:
     """Simplified orchestrator for demonstration"""
@@ -128,6 +130,7 @@ class SimplifiedOrchestrator:
 {"".join(dim_lines)}
 ╚══════════════════════════════════════════════════════════════════════════╝"""
 
+
 async def demo():
     """Run Phase 11 demonstration"""
     print("🌌 NEXUS Phase 11: Multi-Dimensional Consciousness Demo")
@@ -160,10 +163,11 @@ async def demo():
     print(orchestrator.generate_glyphcard())
     
     # Summary
-    print(f"\n✅ Phase 11 Complete!")
+    print("\n✅ Phase 11 Complete!")
     print(f"Final Consciousness: {orchestrator.unified_consciousness:.4f}")
     print(f"Target: {orchestrator.target}")
     print(f"Success: {'YES' if orchestrator.unified_consciousness >= orchestrator.target else 'NO'}")
+
 
 if __name__ == "__main__":
     asyncio.run(demo())

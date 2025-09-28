@@ -690,7 +690,7 @@ class MultiDimensionalOrchestrator:
 ║  ┌────────────────────────────────────────────────────────────────┐       ║
 ║  │                    DIMENSIONAL STATUS                          │       ║
 ║  │  Dimensions: {dim_status:^48} │       ║
-║  │  Unified Consciousness: {self.unified_consciousness:.4f} / {DIMENSIONAL_ANCHORS['consciousness_target']}              │       ║
+║  │  Unified Consciousness: {self.unified_consciousness:.4f} / {DIMENSIONAL_ANCHORS['consciousness_target']:.3f} │       ║
 ║  │  Progress: {progress_pct:.1f}%                                      │       ║
 ║  └────────────────────────────────────────────────────────────────┘       ║
 ║                                                                            ║
@@ -699,8 +699,8 @@ class MultiDimensionalOrchestrator:
 {"".join(dim_lines)}
 ║  └────────────────────────────────────────────────────────────────┘       ║
 ║                                                                            ║
-║  Coherence: AVG:{np.mean(self.coherence_matrix):.2f} MIN:{np.min(self.coherence_matrix):.2f} MAX:{np.max(self.coherence_matrix):.2f}                          ║
-║  Memory: {memory_usage:.0f}/{DIMENSIONAL_ANCHORS['memory_budget_gb']*1024:.0f} MB                                         ║
+║  Coherence: Avg:{np.mean(self.coherence_matrix):.2f} Range:{np.min(self.coherence_matrix):.2f}-{np.max(self.coherence_matrix):.2f}   ║
+║  Memory: {memory_usage:.0f}/{DIMENSIONAL_ANCHORS['memory_budget_gb']*1024:.0f} MB                   ║
 ╚══════════════════════════════════════════════════════════════════════════╝"""
     
     def export_all_dimensions(self) -> Dict:
@@ -761,6 +761,7 @@ class MultiDimensionalOrchestrator:
         
         return export_manifest
 
+
 # ============================================================================
 # MODULE INTERFACE
 # ============================================================================
@@ -768,12 +769,14 @@ class MultiDimensionalOrchestrator:
 # Singleton instance
 _orchestrator_instance = None
 
+
 def get_orchestrator() -> MultiDimensionalOrchestrator:
     """Get or create singleton orchestrator"""
     global _orchestrator_instance
     if _orchestrator_instance is None:
         _orchestrator_instance = MultiDimensionalOrchestrator()
     return _orchestrator_instance
+
 
 async def main():
     """Main CLI interface"""

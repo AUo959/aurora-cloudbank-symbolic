@@ -569,6 +569,15 @@ npm run test:jest    # Optional legacy Jest harness (no ESM guarantees)
 > **AES key requirement** – crypto tests expect `AES_KEY_256_HEX` (64 hex chars). The harness auto-generates a
 > disposable key if it’s missing so the suite is safe to run locally, but production deployments must still
 > inject their managed secret.
+
+### 🧹 JavaScript Linting
+Use the scoped lint entry points to avoid the legacy 6k-report deluge:
+
+```bash
+npm run lint        # Auto-fix curated JS surfaces (static assets + tests + scripts)
+npm run lint:check  # Same targets, report-only
+npm run lint:full   # Full repository sweep (expect lots of historical warnings)
+```
 ```
 
 ### **🌟 Infallible Setup**

@@ -237,8 +237,8 @@ class AuroraSecurityUtils {
     if (typeof data === 'string') {
       try {
         data = JSON.parse(data);
-      } catch (e) {
-        return { error: 'Invalid JSON data' };
+      } catch (error) {
+        return { error: 'Invalid JSON data', detail: String(error) };
       }
     }
 

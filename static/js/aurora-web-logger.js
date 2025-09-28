@@ -177,7 +177,7 @@ class AuroraWebLogger {
         }).catch(() => {}); // Fail silently if backend unavailable
       }
     } catch (error) {
-      // Fail silently - logging should not break the app
+      console.warn('AuroraWebLogger failed to send log entry:', error);
     }
   }
 

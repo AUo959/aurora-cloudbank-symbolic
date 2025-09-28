@@ -16,7 +16,7 @@ if not AIF_TOKEN or AIF_TOKEN == "change-me":
     # Generate cryptographically secure random token
     AIF_TOKEN = secrets.token_urlsafe(32)
     logger.warning("No secure AIF_TOKEN provided. Generated random token for this session.")
-    logger.info(f"Generated AIF_TOKEN: {AIF_TOKEN}")
+    logger.info("Generated AIF_TOKEN: %s", AIF_TOKEN[:8] + "..." + AIF_TOKEN[-4:])  # Only log partial token for security
     print(f"⚠️  WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
     print("   Set AIF_TOKEN environment variable for production use.")
 

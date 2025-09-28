@@ -184,8 +184,13 @@ test('Aurora Security - Basic functionality', async (t) => {
           // Return safely escaped text
           return div.textContent;
         }
-        // Fallback for non-browser environments
-        return html.replace(/<[^>]*>/g, '');
+        // SECURITY FIX: Improved HTML stripping for non-browser environments
+        // Remove script tags first, then all other HTML tags
+        return html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remove script blocks
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')   // Remove style blocks  
+          .replace(/<[^>]*>/g, '')                          // Remove remaining HTML tags
+          .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'); // Decode entities
       },
       escapeHtml: function(text) {
         // SECURITY: Safely escape HTML by setting text content and reading back
@@ -194,8 +199,14 @@ test('Aurora Security - Basic functionality', async (t) => {
           div.textContent = text;
           return div.innerHTML;
         }
-        // Fallback escaping for non-browser environments
-        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Fallback escaping for non-browser environments - comprehensive HTML escaping
+        return String(text)
+          .replace(/&/g, '&amp;')   // Must be first
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#x27;')
+          .replace(/\//g, '&#x2F;');
       },
       createSafeElement: function(tag, content) {
         if (typeof document !== 'undefined') {
@@ -223,7 +234,19 @@ test('Aurora Security - Basic functionality', async (t) => {
 
     const fallbackSanitize = (html) => {
       if (typeof html !== 'string') return '';
-      return html.replace(/<script[^>]*>.*?<\/script>/gi, '');
+      
+      // SECURITY FIX: Comprehensive sanitization for fallback mode
+      return html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')  // Remove script blocks completely
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')    // Remove style blocks
+        .replace(/javascript:/gi, '')                      // Remove javascript: protocol
+        .replace(/on\w+\s*=/gi, '')                       // Remove event handlers like onclick
+        .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '') // Remove iframes
+        .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '') // Remove object tags
+        .replace(/<embed[^>]*>/gi, '')                    // Remove embed tags
+        .replace(/<link[^>]*>/gi, '')                     // Remove link tags
+        .replace(/<meta[^>]*>/gi, '')                     // Remove meta tags
+        .substring(0, 2000);                              // Limit length to prevent DoS
     };
 
     const fallbackEscape = (text) => {

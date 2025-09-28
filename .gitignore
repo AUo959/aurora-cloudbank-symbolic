@@ -29,6 +29,12 @@ logs/
 data/
 *.log
 
+# Security and temporary files
+security_scan_report.json
+test_security_fixes.py
+/tmp/
+.security_temp/
+
 # Unit test / coverage reports
 htmlcov/
 .tox/

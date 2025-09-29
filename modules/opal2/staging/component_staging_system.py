@@ -556,7 +556,7 @@ class QuantumFieldVisualizer:
     
     # Get dashboard
     dashboard = staging.get_component_dashboard()
-    print(f"\n📊 STAGING DASHBOARD")
+    print("\n📊 STAGING DASHBOARD")
     print(f"Total components: {dashboard['total_components']}")
     print(f"Chassis candidates: {dashboard['chassis_ready_count']}")
     

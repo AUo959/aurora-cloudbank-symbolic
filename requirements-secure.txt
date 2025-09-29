@@ -45,5 +45,5 @@ toml==0.10.2                        # Configuration file parsing
 
 # Security Scanning & Validation
 safety==2.3.5                       # Dependency vulnerability scanning
-pip-audit==2.6.1                    # Security auditing tool
+pip-audit==2.9.0                    # Security auditing tool
 semgrep==1.45.0                     # Static analysis security scanner

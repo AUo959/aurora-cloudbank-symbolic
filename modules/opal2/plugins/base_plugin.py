@@ -198,8 +198,7 @@ class PluginRegistry:
 
     def __init__(self):
         self.plugins: Dict[str, BasePlugin] = {}
-            plugin_type: [] for plugin_type in PluginType
-        }
+        self.plugin_types = {plugin_type: [] for plugin_type in PluginType}
         self.validation_rules = {
             "max_execution_time": 5.0,  # seconds
             "max_memory_usage": 100,  # MB

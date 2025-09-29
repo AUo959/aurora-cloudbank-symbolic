@@ -23,7 +23,7 @@ plotly==5.17.0                      # Visualization library
 scipy==1.11.4                       # Scientific computing
 
 # Development & Testing (Security Focused)
-pytest==7.4.3                       # Testing framework
+pytest==8.4.2                       # Testing framework
 black==24.3.0                      # Code formatting
 flake8==6.1.0                       # Linting with security rules
 bandit==1.7.5                       # Security vulnerability scanner

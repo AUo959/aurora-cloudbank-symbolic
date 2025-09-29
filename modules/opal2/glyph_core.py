@@ -126,42 +126,32 @@ class GlyphCore:
             "async_support": True,
             "supported_types": ["quantum_glyph", "geometric_glyph", "symbolic_glyph"],
         }
-#!/usr/bin/env python3
-"""
-Opal2 Glyph Core System
-Provides core glyph functionality for Aurora Diff Integration
-"""
 
 class GlyphCore:
-    """Core glyph processing system for Opal2"""
+    """Unified Glyph Core system for Opal2"""
     
-    def __init__(self):
+    def __init__(self, dim: int = 8):
         self.initialized = False
-        
+        self.dim = dim
+    
     async def initialize(self):
         """Initialize glyph core system"""
         self.initialized = True
-        
+        return True
+    
+    def get_capabilities(self) -> Dict[str, Any]:
+        """Get glyph core capabilities"""
+        return {
+            "dimension": self.dim,
+            "quantum_support": True,
+            "async_support": True,
+            "supported_types": ["quantum_glyph", "geometric_glyph", "symbolic_glyph"],
+        }
+    
     def process_glyph(self, glyph_data):
         """Process glyph data"""
         return {"status": "processed", "data": glyph_data}
-#!/usr/bin/env python3
-"""
-Opal2 Glyph Core System
-Basic implementation for Aurora integration
-"""
-
-class GlyphCore:
-    """Basic Glyph Core system for Opal2"""
     
-    def __init__(self):
-        self.initialized = False
-        
-    async def initialize(self):
-        """Initialize glyph core"""
-        self.initialized = True
-        return True
-        
     def get_status(self):
         """Get glyph core status"""
         return {"status": "active", "initialized": self.initialized}

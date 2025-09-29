@@ -304,7 +304,7 @@ class QuantumRenderer:
 
     def _hsl_to_rgb(self, h: float, s: float, l: float) -> Tuple[int, int, int]:
         """Convert HSL to RGB color values."""
-        h, s, line = h / 360, s / 100, l / 100
+        h, s, l = h / 360, s / 100, l / 100
 
         def hue_to_rgb(p, q, t):
             if t < 0:

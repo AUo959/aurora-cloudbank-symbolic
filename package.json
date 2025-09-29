@@ -50,7 +50,7 @@
     "@babel/core": "^7.22.0",
     "@babel/preset-env": "^7.22.0",
     "@types/jest": "^29.5.0",
-    "audit-ci": "^6.6.1",
+    "audit-ci": "^7.1.0",
     "concurrently": "^8.0.0",
     "eslint": "^9.36.0",
     "eslint-plugin-security": "^1.7.1",

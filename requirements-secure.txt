@@ -44,6 +44,6 @@ pyyaml==6.0.1                       # YAML parsing - security patched
 toml==0.10.2                        # Configuration file parsing
 
 # Security Scanning & Validation
-safety==2.3.5                       # Dependency vulnerability scanning
+safety==3.6.2                       # Dependency vulnerability scanning
 pip-audit==2.6.1                    # Security auditing tool
 semgrep==1.45.0                     # Static analysis security scanner

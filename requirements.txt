@@ -10,4 +10,4 @@ websockets==11.0.3
 
 # Security requirements
 bandit==1.7.5
-safety==2.3.5
+safety==3.6.2

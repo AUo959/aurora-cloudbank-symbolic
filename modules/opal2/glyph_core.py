@@ -1,6 +1,4 @@
 """Opal2 Glyph Core
-from pathlib import Path
-import time
 ===================
 
 This module provides glyph generation utilities that combine geometric algebra
@@ -20,7 +18,6 @@ from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "config" / "opal2_graphics.yaml"
 
-
 class GlyphGenerator:
     """Generate glyph structures using geometric algebra and quantum vectors."""
 
@@ -29,12 +26,10 @@ class GlyphGenerator:
             path = DEFAULT_CONFIG
         else:
             path = Path(config_path)
-
         if path.exists():
             with open(path, "r", encoding="utf-8") as f:
                 cfg: Dict[str, Any] = yaml.safe_load(f) or {}
             dim = cfg.get("opal2", {}).get("graphics_card", {}).get("default_dim", dim)
-
         self.dim = dim
         self.ga = GeometricAlgebra()
 
@@ -61,15 +56,12 @@ class GlyphGenerator:
             "multivector": str(mv),
         }
 
-
 class GlyphCore:
     """Enhanced glyph core with async support for the Opal2 API"""
 
     def __init__(self, dim: int = 8, config_path: str | None = None):
         self.logger = logging.getLogger(__name__)
-
         self.generator = GlyphGenerator(dim=dim, config_path=config_path)
-
         self.dim = dim
 
     async def generate_async(
@@ -110,7 +102,7 @@ class GlyphCore:
             return base_glyph
 
         except Exception as e:
-            logger.error("Error generating glyph: %s", str(e)[:100])
+            self.logger.error(f"Error generating glyph: {e}")
             raise
 
     async def test_generation(self) -> Dict[str, Any]:
@@ -134,3 +126,42 @@ class GlyphCore:
             "async_support": True,
             "supported_types": ["quantum_glyph", "geometric_glyph", "symbolic_glyph"],
         }
+#!/usr/bin/env python3
+"""
+Opal2 Glyph Core System
+Provides core glyph functionality for Aurora Diff Integration
+"""
+
+class GlyphCore:
+    """Core glyph processing system for Opal2"""
+    
+    def __init__(self):
+        self.initialized = False
+        
+    async def initialize(self):
+        """Initialize glyph core system"""
+        self.initialized = True
+        
+    def process_glyph(self, glyph_data):
+        """Process glyph data"""
+        return {"status": "processed", "data": glyph_data}
+#!/usr/bin/env python3
+"""
+Opal2 Glyph Core System
+Basic implementation for Aurora integration
+"""
+
+class GlyphCore:
+    """Basic Glyph Core system for Opal2"""
+    
+    def __init__(self):
+        self.initialized = False
+        
+    async def initialize(self):
+        """Initialize glyph core"""
+        self.initialized = True
+        return True
+        
+    def get_status(self):
+        """Get glyph core status"""
+        return {"status": "active", "initialized": self.initialized}

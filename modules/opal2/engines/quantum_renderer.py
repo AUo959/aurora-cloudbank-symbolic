@@ -1,6 +1,5 @@
-"""
-Opal2 Quantum Rendering Engine
-==============================
+"""Opal2 Quantum Rendering Engine
+=================================
 
 Advanced quantum-enhanced rendering engine for the Opal2 modular system.
 Provides high-performance quantum circuit visualization and symbolic rendering.
@@ -9,13 +8,17 @@ Provides high-performance quantum circuit visualization and symbolic rendering.
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 from modules.symbolic_core.quantum_vsa import QuantumSymbolicVector
 
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 class RenderingMode(Enum):
     """Rendering modes for different use cases."""
@@ -24,7 +27,6 @@ class RenderingMode(Enum):
     SYMBOLIC_VECTOR = "symbolic_vector"
     GEOMETRIC_ALGEBRA = "geometric_algebra"
     HYBRID = "hybrid"
-
 
 @dataclass
 class RenderingConfig:
@@ -48,7 +50,6 @@ class RenderingConfig:
     memory_limit_mb: int = 100
     cache_enabled: bool = True
 
-
 class QuantumRenderer:
     """High-performance quantum rendering engine."""
 
@@ -63,7 +64,9 @@ class QuantumRenderer:
             "memory_usage": 0,
         }
 
-    def render_quantum_circuit(self, quantum_vector: QuantumSymbolicVector) -> Dict[str, Any]:
+    def render_quantum_circuit(
+        self, quantum_vector: QuantumSymbolicVector
+    ) -> Dict[str, Any]:
         """Render a quantum circuit visualization."""
         start_time = time.time()
 
@@ -147,7 +150,9 @@ class QuantumRenderer:
         hybrid_data = {
             "quantum_layer": quantum_result["data"],
             "symbolic_layer": symbolic_result["data"],
-            "integration_mapping": self._create_integration_mapping(quantum_result, symbolic_result),
+            "integration_mapping": self._create_integration_mapping(
+                quantum_result, symbolic_result
+            ),
             "coherence_overlay": self._create_coherence_overlay(quantum_vector),
         }
 
@@ -157,7 +162,9 @@ class QuantumRenderer:
             "metadata": {
                 "quantum_metadata": quantum_result["metadata"],
                 "symbolic_metadata": symbolic_result["metadata"],
-                "integration_quality": self._calculate_integration_quality(quantum_result, symbolic_result),
+                "integration_quality": self._calculate_integration_quality(
+                    quantum_result, symbolic_result
+                ),
                 "render_time_ms": (time.time() - start_time) * 1000,
             },
             "config": self.config.__dict__,
@@ -193,7 +200,9 @@ class QuantumRenderer:
             "optimizations": optimizations,
         }
 
-    def _generate_circuit_data(self, quantum_vector: QuantumSymbolicVector) -> Dict[str, Any]:
+    def _generate_circuit_data(
+        self, quantum_vector: QuantumSymbolicVector
+    ) -> Dict[str, Any]:
         """Generate quantum circuit data from vector."""
         return {
             "gates": self._extract_quantum_gates(quantum_vector),
@@ -202,7 +211,9 @@ class QuantumRenderer:
             "entanglement_map": self._create_entanglement_map(quantum_vector),
         }
 
-    def _create_quantum_visualization(self, circuit_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_quantum_visualization(
+        self, circuit_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create visual representation of quantum circuit."""
         return {
             "gate_positions": self._calculate_gate_positions(circuit_data),
@@ -225,7 +236,7 @@ class QuantumRenderer:
         # Use geometric algebra for spatial representation
         mv = self.ga.blades["scalar"]
         for i, component in enumerate(vector.vector):
-            blade_key = f"e{i + 1}" if f"e{i + 1}" in self.ga.blades else "scalar"
+            blade_key = f"e{i+1}" if f"e{i+1}" in self.ga.blades else "scalar"
             mv = mv + component * self.ga.blades[blade_key]
 
         return {
@@ -255,7 +266,9 @@ class QuantumRenderer:
             "gradient_stops": self._create_gradient_stops(colors),
         }
 
-    def _calculate_spatial_coordinates(self, vector: QuantumSymbolicVector) -> List[Tuple[float, float, float]]:
+    def _calculate_spatial_coordinates(
+        self, vector: QuantumSymbolicVector
+    ) -> List[Tuple[float, float, float]]:
         """Calculate 3D spatial coordinates for vector visualization."""
         coords = []
         for i in range(0, len(vector.vector), 3):
@@ -285,11 +298,13 @@ class QuantumRenderer:
         self.performance_metrics["total_render_time"] += render_time
 
         # Estimate memory usage (simplified)
-        self.performance_metrics["memory_usage"] = len(self.render_cache) * 10  # Rough estimate
+        self.performance_metrics["memory_usage"] = (
+            len(self.render_cache) * 10
+        )  # Rough estimate
 
-    def _hsl_to_rgb(self, hue_deg: float, sat_pct: float, light_pct: float) -> Tuple[int, int, int]:
+    def _hsl_to_rgb(self, h: float, s: float, l: float) -> Tuple[int, int, int]:
         """Convert HSL to RGB color values."""
-        h, s, light = hue_deg / 360, sat_pct / 100, light_pct / 100
+        h, s, line = h / 360, s / 100, l / 100
 
         def hue_to_rgb(p, q, t):
             if t < 0:
@@ -305,10 +320,10 @@ class QuantumRenderer:
             return p
 
         if s == 0:
-            r = g = b = light
+            r = g = b = l
         else:
-            q = light * (1 + s) if light < 0.5 else light + s - light * s
-            p = 2 * light - q
+            q = l * (1 + s) if l < 0.5 else l + s - l * s
+            p = 2 * l - q
             r = hue_to_rgb(p, q, h + 1 / 3)
             g = hue_to_rgb(p, q, h)
             b = hue_to_rgb(p, q, h - 1 / 3)
@@ -317,7 +332,9 @@ class QuantumRenderer:
 
     # Additional helper methods for quantum visualization
 
-    def _extract_quantum_gates(self, vector: QuantumSymbolicVector) -> List[Dict[str, Any]]:
+    def _extract_quantum_gates(
+        self, vector: QuantumSymbolicVector
+    ) -> List[Dict[str, Any]]:
         """Extract quantum gates from vector representation."""
         gates = []
         # Simplified gate extraction logic
@@ -343,10 +360,12 @@ class QuantumRenderer:
         for i in range(len(vector.vector) - 1):
             correlation = abs(vector.vector[i] * vector.vector[i + 1])
             if correlation > 0.1:
-                entanglement_map[f"q{i}-q{i + 1}"] = correlation
+                entanglement_map[f"q{i}-q{i+1}"] = correlation
         return entanglement_map
 
-    def _calculate_gate_positions(self, circuit_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _calculate_gate_positions(
+        self, circuit_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Calculate positions for quantum gates."""
         positions = []
         for gate in circuit_data["gates"]:
@@ -360,7 +379,9 @@ class QuantumRenderer:
             )
         return positions
 
-    def _generate_qubit_lines(self, circuit_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_qubit_lines(
+        self, circuit_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Generate qubit line visualizations."""
         lines = []
         for qubit in range(circuit_data["qubits"]):
@@ -374,7 +395,9 @@ class QuantumRenderer:
             )
         return lines
 
-    def _create_connection_paths(self, circuit_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _create_connection_paths(
+        self, circuit_data: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """Create connection paths for entangled qubits."""
         paths = []
         for connection, strength in circuit_data["entanglement_map"].items():
@@ -436,7 +459,9 @@ class QuantumRenderer:
 
         return {"r": avg_rgb[0], "g": avg_rgb[1], "b": avg_rgb[2]}
 
-    def _create_gradient_stops(self, colors: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _create_gradient_stops(
+        self, colors: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Create gradient stops for color transitions."""
         stops = []
         for i, color in enumerate(colors):
@@ -448,12 +473,16 @@ class QuantumRenderer:
     ) -> Dict[str, Any]:
         """Create integration mapping between quantum and symbolic layers."""
         return {
-            "overlay_points": self._calculate_overlay_points(quantum_result, symbolic_result),
+            "overlay_points": self._calculate_overlay_points(
+                quantum_result, symbolic_result
+            ),
             "blend_modes": ["multiply", "screen", "overlay"],
             "synchronization": "real_time",
         }
 
-    def _create_coherence_overlay(self, vector: QuantumSymbolicVector) -> Dict[str, Any]:
+    def _create_coherence_overlay(
+        self, vector: QuantumSymbolicVector
+    ) -> Dict[str, Any]:
         """Create coherence overlay visualization."""
         coherence = self._calculate_coherence(vector)
         return {
@@ -463,7 +492,9 @@ class QuantumRenderer:
             "color_shift": coherence * 50,
         }
 
-    def _calculate_integration_quality(self, quantum_result: Dict[str, Any], symbolic_result: Dict[str, Any]) -> float:
+    def _calculate_integration_quality(
+        self, quantum_result: Dict[str, Any], symbolic_result: Dict[str, Any]
+    ) -> float:
         """Calculate quality of quantum-symbolic integration."""
         # Simplified quality measure
         quantum_quality = 1.0 - (quantum_result["metadata"]["render_time_ms"] / 1000)

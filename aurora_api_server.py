@@ -39,6 +39,7 @@ from typing import Any, Dict, List, Optional
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
+from fastapi.staticfiles import StaticFiles
 
 
 
@@ -59,6 +60,9 @@ class LearningRequest(BaseModel):
 
 
 app = FastAPI(title="Aurora CloudBank API", description="Quantum-Aware Symbolic Processing Framework", version="3.5.1")
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Enable CORS
 app.add_middleware(
@@ -262,7 +266,7 @@ async def health_check():
 
 if __name__ == "__main__":
     print("🌐 Starting Aurora CloudBank API Server...")
-    print("🔗 Dashboard: http://localhost:8000")
-    print("📖 API Docs: http://localhost:8000/docs")
+    print("🔗 Dashboard: http://localhost:5000")
+    print("📖 API Docs: http://localhost:5000/docs")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=5000)

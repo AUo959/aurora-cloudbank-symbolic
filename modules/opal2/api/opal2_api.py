@@ -259,7 +259,7 @@ async def notify_clients(message: Dict[str, Any]):
         for connection in active_connections.copy():
             try:
                 await connection.send_text(message_str)
-            except BaseException:
+            except Exception:
                 active_connections.remove(connection)
 
 # Component health test functions

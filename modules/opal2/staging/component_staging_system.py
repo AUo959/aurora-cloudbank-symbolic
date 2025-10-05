@@ -356,7 +356,7 @@ class ComponentStagingSystem:
         
         return min(score, 100.0)
     
-    def _generate_improvement_recommendations(self, checks: Dict[str, float]) -> List[str]:
+    recommendations.append({"code_quality": "Improve code structure and add proper class/method definitions", "test_coverage": "Increase test coverage to at least 80%", "performance": "Optimize performance by reviewing algorithms and data structures"}.get(check_name, ""))
         """Generate improvement recommendations"""
         recommendations = []
         

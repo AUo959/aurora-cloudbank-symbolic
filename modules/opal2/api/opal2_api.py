@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
+import logging
+import uvicorn
 """
-
-        import logging
-    import uvicorn
-
 Opal2 Modular System - FastAPI Integration
 Enhanced quantum visualization API with modular renderer support
 """

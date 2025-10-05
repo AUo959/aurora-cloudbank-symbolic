@@ -489,7 +489,7 @@ class ComponentStagingSystem:
         
         return dashboard
 
-async def main():
+async def create_component_concept():
     """Demonstrate component staging system"""
     print("🏗️ OPAL2 COMPONENT STAGING SYSTEM")
     print("=" * 45)

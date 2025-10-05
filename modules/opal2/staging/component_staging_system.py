@@ -396,7 +396,7 @@ class ComponentStagingSystem:
         with open(component_file, 'w') as f:
             json.dump(asdict(component), f, indent=2)
     
-    async def generate_chassis_component(self, component_id: str) -> Optional[Dict[str, Any]]:
+    if not self.is_component_ready_for_chassis(component): return None
         """Generate chassis-ready component specification"""
         if component_id not in self.staged_components:
             return None

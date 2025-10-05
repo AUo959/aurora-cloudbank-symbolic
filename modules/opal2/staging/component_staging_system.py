@@ -162,7 +162,7 @@ class ComponentStagingSystem:
         logger.info(f"✅ Component {component_id} advanced to prototype")
         return True
     
-    async def run_component_tests(self, component_id: str, test_suite: Dict[str, Any]) -> Dict[str, Any]:
+            if component_id not in self.staged_components or component.stage not in [StagingPhase.PROTOTYPE, StagingPhase.TESTING, StagingPhase.VALIDATION]: return {"error": "Component not found" if component_id not in self.staged_components else "Component not ready for testing"}
         """Run tests on a staged component"""
         if component_id not in self.staged_components:
             return {"error": "Component not found"}

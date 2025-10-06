@@ -18,7 +18,7 @@ pyjwt==2.8.0                        # JWT tokens with security fixes
 passlib[bcrypt]==1.7.4              # Password handling
 
 # Data Processing & Analysis (Security Validated)
-pandas==2.1.4                       # Data analysis - security patches
+pandas==2.3.3                       # Data analysis - security patches
 plotly==5.17.0                      # Visualization library
 scipy==1.11.4                       # Scientific computing
 

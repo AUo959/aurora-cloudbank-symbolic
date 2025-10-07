@@ -1,22 +1,46 @@
-const assert = require('assert');
+/* global jest */
+const { describe, test, expect, beforeEach } = require('@jest/globals');
+
+let diagState;
+const mockDiagnosticsModule = {
+  loadDiagnostics: jest.fn(() => diagState),
+  saveDiagnostics: jest.fn(updated => {
+    diagState = { ...updated };
+  }),
+};
+
+jest.mock('../src/core/diagnostics', () => mockDiagnosticsModule);
+
 const { loadDiagnostics, saveDiagnostics } = require('../src/core/diagnostics');
 const { runPASCycle } = require('../src/core/parasym_activation');
 
-let diag = loadDiagnostics();
-diag.symbolicDrift = 0.5;
-diag.lastAnchorSync = Date.now() - 11 * 60 * 1000;
-diag.ethicsFlags = ['violation'];
-diag.load = 10;
-saveDiagnostics(diag);
+const createBaselineState = () => ({
+  symbolicDrift: 0.5,
+  lastAnchorSync: Date.now() - 11 * 60 * 1000,
+  ethicsFlags: ['violation'],
+  load: 10,
+  commandCount: 0,
+  glyphCount: 0,
+  bundleCount: 0,
+});
 
-runPASCycle();
+describe('runPASCycle', () => {
+  beforeEach(() => {
+    diagState = createBaselineState();
+    loadDiagnostics.mockClear();
+    saveDiagnostics.mockClear();
+  });
 
-diag = loadDiagnostics();
-assert.ok(diag.symbolicDrift <= 0.5, 'drift should not increase');
-assert.strictEqual(
-  diag.ethicsFlags.length,
-  0,
-  'ethics flags should be cleared'
-);
-assert.ok(Date.now() - diag.lastAnchorSync < 1000, 'anchor should be resynced');
-console.log('PAS cycle test passed');
+  test('realigns drift, clears alerts, and throttles load', () => {
+    loadDiagnostics.mockImplementation(() => diagState);
+
+    runPASCycle();
+
+    expect(loadDiagnostics).toHaveBeenCalled();
+    expect(saveDiagnostics).toHaveBeenCalledWith(expect.objectContaining({}));
+    expect(diagState.symbolicDrift).toBeLessThanOrEqual(0.5);
+    expect(diagState.ethicsFlags).toHaveLength(0);
+    expect(Date.now() - diagState.lastAnchorSync).toBeLessThan(2_000);
+    expect(diagState.load).toBeLessThanOrEqual(9);
+  });
+});

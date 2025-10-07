@@ -128,12 +128,12 @@ pyjwt==2.8.0                        # JWT tokens with security fixes
 passlib[bcrypt]==1.7.4              # Password handling
 
 # Data Processing & Analysis (Security Validated)
-pandas==2.1.4                       # Data analysis - security patches
+pandas==2.3.3                       # Data analysis - security patches
 plotly==5.17.0                      # Visualization library
 scipy==1.11.4                       # Scientific computing
 
 # Development & Testing (Security Focused)
-pytest==7.4.3                       # Testing framework
+pytest==8.4.2                       # Testing framework
 black==23.11.0                      # Code formatting
 flake8==6.1.0                       # Linting with security rules
 bandit==1.7.5                       # Security vulnerability scanner
@@ -154,8 +154,8 @@ pyyaml==6.0.1                       # YAML parsing - security patched
 toml==0.10.2                        # Configuration file parsing
 
 # Security Scanning & Validation
-safety==2.3.5                       # Dependency vulnerability scanning
-pip-audit==2.6.1                    # Security auditing tool
+safety==3.6.2                       # Dependency vulnerability scanning
+pip-audit==2.9.0                    # Security auditing tool
 semgrep==1.45.0                     # Static analysis security scanner
 """
         

@@ -1,0 +1,57 @@
+# Aurora CloudBank Symbolic - Development & Testing Dependencies
+# Install along with core requirements: pip install -r requirements.txt -r requirements-dev.txt
+
+# ===================================================================
+# TESTING FRAMEWORK
+# ===================================================================
+pytest>=8.4.2                       # Testing framework
+pytest-asyncio>=0.23.0              # Async test support
+pytest-cov>=7.0.0                   # Coverage reporting
+coverage>=7.10.7                    # Coverage measurement
+
+# ===================================================================
+# CODE QUALITY & FORMATTING
+# ===================================================================
+black>=24.3.0                       # Code formatting
+flake8>=6.1.0                       # Linting
+isort>=5.12.0                       # Import sorting
+mypy>=1.7.0                         # Static type checking
+
+# ===================================================================
+# SECURITY SCANNING & VALIDATION
+# ===================================================================
+bandit>=1.7.5                       # Security vulnerability scanner
+bandit[toml]>=1.7.5                 # Bandit with TOML support
+safety>=3.6.2                       # Dependency vulnerability scanning
+pip-audit>=2.9.0                    # Security auditing tool
+semgrep>=1.45.0                     # Static analysis security scanner
+
+# ===================================================================
+# DEVELOPMENT PRODUCTIVITY
+# ===================================================================
+pre-commit>=3.5.0                   # Git hooks
+python-dotenv>=1.1.1                # Environment management
+GitPython>=3.1.45                   # Git integration
+httptools>=0.6.4                    # Fast HTTP parsing
+uvloop>=0.21.0                      # Fast event loop (Unix)
+watchfiles>=1.1.0                   # File watching for auto-reload
+
+# ===================================================================
+# DOCUMENTATION
+# ===================================================================
+mkdocs>=1.5.0                       # Documentation generator
+mkdocs-material>=9.4.0              # Material theme for MkDocs
+rich>=14.1.0                        # Rich terminal formatting
+Pygments>=2.19.2                    # Syntax highlighting
+markdown-it-py>=4.0.0               # Markdown parser
+
+# ===================================================================
+# DEPLOYMENT & PRODUCTION TOOLS
+# ===================================================================
+gunicorn>=21.2.0                    # WSGI HTTP server
+
+# ===================================================================
+# DEPENDENCY MANAGEMENT
+# ===================================================================
+dparse>=0.6.4                       # Dependency file parser
+packaging>=21.3                     # Version handling

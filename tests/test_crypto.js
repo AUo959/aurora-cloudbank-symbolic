@@ -1,13 +1,14 @@
-const assert = require('assert');
+const { describe, test, expect } = require('@jest/globals');
 const { encrypt, decrypt } = require('../crypto_refactored');
 
-const plaintext = 'Encryption test string';
-const { encryptedData, iv } = encrypt(plaintext);
-const decrypted = decrypt(encryptedData, iv);
+describe('crypto_refactored', () => {
+  test('performs an AES-256 round trip', () => {
+    const plaintext = 'Encryption test string';
+    const { encryptedData, iv } = encrypt(plaintext);
+    const decrypted = decrypt(encryptedData, iv);
 
-assert.strictEqual(
-  decrypted,
-  plaintext,
-  'decrypted text should match original'
-);
-console.log('Encryption round-trip successful');
+    expect(decrypted).toBe(plaintext);
+    expect(iv).toMatch(/^[0-9a-f]{32}$/i);
+    expect(encryptedData).toMatch(/^[0-9a-f]+$/i);
+  });
+});

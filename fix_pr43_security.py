@@ -153,13 +153,13 @@ pydantic==2.4.2
 uvicorn[standard]==0.23.2
 starlette==0.27.0
 httpx==0.25.0
-pytest==7.4.3
+pytest==8.4.2
 numpy==1.24.4
 websockets==11.0.3
 
 # Security requirements
 bandit==1.7.5
-safety==2.3.5
+safety==3.6.2
 """
     
     with open("requirements.txt", 'w', encoding='utf-8') as f:

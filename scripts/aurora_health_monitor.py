@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
-from pathlib import Path
-import argparse
-import json
-import subprocess
-import sys
-import time
 """
 Aurora CloudBank - Repository Health Monitoring System
 =====================================================
@@ -108,7 +101,9 @@ class HealthMonitor:
         }
 
         try:
-            # Repository size            result = subprocess.run(                ["du", "-sm", "."],
+            # Repository size
+            result = subprocess.run(
+                ["du", "-sm", "."],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -120,7 +115,9 @@ class HealthMonitor:
 
             # File count
             result = subprocess.run(
-                ["find", ".", "-type", ""],            result = subprocess.run(                text=True,
+                ["find", ".", "-type", "f"],
+                capture_output=True,
+                text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
@@ -132,7 +129,9 @@ class HealthMonitor:
             result = subprocess.run(
                 ["git", "branch", "-r"],
                 capture_output=True,
-                text=True,            result = subprocess.run(                shell=False,
+                text=True,
+                cwd=self.repo_path,
+                shell=False,
                 check=False,
             )
             if result.returncode == 0:
@@ -144,11 +143,13 @@ class HealthMonitor:
 
             # Python cache files
             result = subprocess.run(
-                ["find", ".", "-name", "*.pyc", "-type", ""],
+                ["find", ".", "-name", "*.pyc", "-type", "f"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
-                shell=False,            result = subprocess.run(            )
+                shell=False,
+                check=False,
+            )
             if result.returncode == 0:
                 pyc_files = result.stdout.strip().split("\n")
                 metrics["pyc_file_count"] = len([f for f in pyc_files if f])
@@ -181,13 +182,15 @@ class HealthMonitor:
 
             # Large files (>10MB)
             result = subprocess.run(
-                ["find", ".", "-type", "", "-size", "+10M"],
+                ["find", ".", "-type", "f", "-size", "+10M"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
                 shell=False,
                 check=False,
-            )            result = subprocess.run(                large_files = result.stdout.strip().split("\n")
+            )
+            if result.returncode == 0:
+                large_files = result.stdout.strip().split("\n")
                 metrics["large_files"] = [f for f in large_files if f]
 
             # Calculate health score
@@ -197,7 +200,7 @@ class HealthMonitor:
             metrics["issues"] = self.check_issues(metrics)
 
         except (OSError, ValueError, RuntimeError) as e:
-logger.error("Error collecting metrics: %s", str(e)[:100])
+            self.logger.error("Error collecting metrics: %s", str(e)[:100])
             metrics["error"] = str(e)
 
         return metrics
@@ -259,7 +262,8 @@ logger.error("Error collecting metrics: %s", str(e)[:100])
 
         if metrics["repository_size_mb"] > self.thresholds["max_size_mb"]:
             issues.append(
-                f"Repository size ({metrics['repository_size_mb']}MB) exceeds threshold ({self.thresholds['max_size_mb']}MB)"
+                f"Repository size ({metrics['repository_size_mb']}MB) "
+                f"exceeds threshold ({self.thresholds['max_size_mb']}MB)"
             )
 
         if metrics["file_count"] > self.thresholds["max_files"]:
@@ -327,9 +331,9 @@ logger.error("Error collecting metrics: %s", str(e)[:100])
 
                 if file_date < cutoff_date:
                     file_path.unlink()
-logger.info("Cleaned up old metrics file: %s", str(file_path)[:100])
+                    self.logger.info("Cleaned up old metrics file: %s", str(file_path)[:100])
             except (OSError, ValueError, RuntimeError) as e:
-logger.warning("Error cleaning metrics file %s: %s", str(file_path)[:100], str(e)[:100])
+                self.logger.warning("Error cleaning metrics file %s: %s", str(file_path)[:100], str(e)[:100])
 
     def send_alert(self, metrics: Dict):
         """Send alert if health issues are detected.
@@ -343,7 +347,7 @@ logger.warning("Error cleaning metrics file %s: %s", str(file_path)[:100], str(e
         alert_message = self.format_alert_message(metrics)
 
         # Log alert
-logger.warning("Health alert: %s", str(alert_message)[:100])
+        self.logger.warning("Health alert: %s", str(alert_message)[:100])
 
         # File notification
         if self.config["notifications"]["file"]:
@@ -351,7 +355,7 @@ logger.warning("Health alert: %s", str(alert_message)[:100])
                 with open(self.config["notifications"]["file"], "a", encoding="utf-8") as f:
                     f.write(f"{datetime.datetime.now().isoformat()}: {alert_message}\n")
             except (OSError, ValueError, RuntimeError) as e:
-logger.error("Error writing alert to file: %s", str(e)[:100])
+                self.logger.error("Error writing alert to file: %s", str(e)[:100])
 
     def format_alert_message(self, metrics: Dict) -> str:
         """Format alert message.
@@ -464,7 +468,7 @@ logger.error("Error writing alert to file: %s", str(e)[:100])
         Args:
             interval_minutes: Minutes between health checks
         """
-logger.info("Starting health monitoring (interval: %s minutes)", str(interval_minutes)[:100])
+        self.logger.info("Starting health monitoring (interval: %s minutes)", str(interval_minutes)[:100])
 
         while True:
             try:
@@ -492,7 +496,7 @@ logger.info("Starting health monitoring (interval: %s minutes)", str(interval_mi
                 self.logger.info("Monitoring stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-logger.error("Error in monitoring loop: %s", str(e)[:100])
+                self.logger.error("Error in monitoring loop: %s", str(e)[:100])
                 time.sleep(60)  # Wait 1 minute before retrying
 
 

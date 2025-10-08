@@ -1,10 +1,7 @@
-
 """
 Aurora Opal2 Immersive Web Environment Core
 State-of-the-art web interface architecture with quantum enhancement
 """
-
-import asyncio
 import json
 import logging
 from datetime import datetime

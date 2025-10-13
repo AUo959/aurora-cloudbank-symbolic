@@ -14,7 +14,7 @@ numpy==1.24.3                       # Numerical computing - security patched
 # Security & Cryptography
 cryptography==41.0.7                # Latest cryptographic library
 bcrypt==4.1.2                       # Password hashing
-pyjwt==2.8.0                        # JWT tokens with security fixes
+pyjwt==2.10.1                        # JWT tokens with security fixes
 passlib[bcrypt]==1.7.4              # Password handling
 
 # Data Processing & Analysis (Security Validated)

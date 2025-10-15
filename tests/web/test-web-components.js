@@ -94,13 +94,13 @@ function sanitizeInput(input) {
       // Control characters: Remove ASCII control chars (0x00-0x1F) and 
       // extended control chars (0x7F-0x9F) which can be used to hide malicious
       // content or bypass filters (null bytes, carriage returns, line feeds, etc.)
-      .replaceAll(/[\x00-\x1f\x7f-\x9f]/g, '')
+      .replace(/[\x00-\x1f\x7f-\x9f]/g, '')
       // Script tags: Remove all script tags and their content
-      .replaceAll(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
       // JavaScript protocol: Remove javascript: pseudo-protocol from URLs
-      .replaceAll(/javascript:/gi, '')
+      .replace(/javascript:/gi, '')
       // Event handlers: Remove inline event handler attributes (onclick, onload, etc.)
-      .replaceAll(/on\w+\s*=/gi, '');
+      .replace(/on\w+\s*=/gi, '');
   } while (sanitized.length !== previousLength);
   
   // Truncate to reasonable length to prevent DoS

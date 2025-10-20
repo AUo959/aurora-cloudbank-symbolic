@@ -148,9 +148,12 @@ async def cache_stats() -> Dict[str, Any]:
 
 
 @app.delete("/cache/clear")
-async def clear_cache() -> Dict[str, Any]:
-    """Clear the glyph cache."""
+async def clear_cache(
+    token: HTTPAuthorizationCredentials = Depends(security),
+) -> Dict[str, Any]:
+    """Clear the glyph cache with CSRF validation."""
 
+    _verify_token(token)
     cleared_count = await glyph_cache.clear_async()
     return {"success": True, "cleared_items": cleared_count}
 

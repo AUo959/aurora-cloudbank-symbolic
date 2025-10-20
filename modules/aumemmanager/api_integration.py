@@ -20,6 +20,8 @@ memory_manager = HierarchicalMemoryManager(max_active_memories=1000)
 router = APIRouter(prefix="/memory", tags=["AuMemManager"])
 
 # Pydantic models for API requests/responses
+
+
 class MemoryCreateRequest(BaseModel):
     content: Any = Field(..., description="Memory content (any JSON-serializable data)")
     memory_type: str = Field(..., description="Type of memory (agent, faction, narrative, etc.)")
@@ -76,6 +78,8 @@ class SystemMetricsResponse(BaseModel):
     quantum_network_density: float
 
 @router.post("/create", response_model=Dict[str, str])
+
+
 async def create_memory(request: MemoryCreateRequest):
     """Create a new memory item with quantum-symbolic capabilities"""
     try:
@@ -84,7 +88,7 @@ async def create_memory(request: MemoryCreateRequest):
             memory_type = MemoryType(request.memory_type.lower())
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid memory type: {request.memory_type}")
-        
+
         memory_id = memory_manager.add_memory(
             content=request.content,
             memory_type=memory_type,
@@ -95,17 +99,19 @@ async def create_memory(request: MemoryCreateRequest):
             aurora_anchors=request.aurora_anchors,
             cultural_score=request.cultural_score
         )
-        
+
         return {
             "memory_id": memory_id,
             "status": "created",
             "message": f"Memory created successfully with ID: {memory_id}"
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create memory: {str(e)}")
 
 @router.post("/retrieve", response_model=List[MemoryResponse])
+
+
 async def retrieve_memories(request: MemoryRetrievalRequest):
     """Retrieve memories using attention-based scoring"""
     try:
@@ -116,7 +122,7 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
                 memory_type = MemoryType(request.memory_type.lower())
             except ValueError:
                 raise HTTPException(status_code=400, detail=f"Invalid memory type: {request.memory_type}")
-        
+
         memories = memory_manager.retrieve_memories(
             query=request.query,
             owner=request.owner,
@@ -125,7 +131,7 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
             include_quantum=request.include_quantum,
             cultural_filter=request.cultural_filter
         )
-        
+
         # Convert to response format
         response_memories = []
         for memory in memories:
@@ -139,7 +145,7 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
                     "entanglement_links": memory.quantum_vector.entanglement_links,
                     "symbolic_anchors": memory.quantum_vector.symbolic_anchors
                 }
-            
+
             response_memories.append(MemoryResponse(
                 id=memory.id,
                 content=memory.content,
@@ -153,13 +159,15 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
                 cask_cultural_score=memory.cask_cultural_score,
                 quantum_vector=quantum_data
             ))
-        
+
         return response_memories
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve memories: {str(e)}")
 
 @router.post("/quantum/create_vector", response_model=Dict[str, Any])
+
+
 async def create_quantum_vector(request: QuantumVectorRequest):
     """Create a quantum-symbolic vector for memory management"""
     try:
@@ -170,7 +178,7 @@ async def create_quantum_vector(request: QuantumVectorRequest):
             aurora_anchors=request.aurora_anchors,
             dlp_classification=request.dlp_classification
         )
-        
+
         return {
             "vector_id": qv.vector_id,
             "magnitude": qv.magnitude,
@@ -179,16 +187,18 @@ async def create_quantum_vector(request: QuantumVectorRequest):
             "symbolic_anchors": qv.symbolic_anchors,
             "status": "created"
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create quantum vector: {str(e)}")
 
 @router.post("/quantum/entangle", response_model=Dict[str, str])
+
+
 async def entangle_vectors(vector1_id: str, vector2_id: str):
     """Create quantum entanglement between two vectors"""
     try:
         success = memory_manager.flight_controller.entangle_vectors(vector1_id, vector2_id)
-        
+
         if success:
             return {
                 "status": "entangled",
@@ -198,11 +208,13 @@ async def entangle_vectors(vector1_id: str, vector2_id: str):
             }
         else:
             raise HTTPException(status_code=404, detail="One or both vectors not found")
-            
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to entangle vectors: {str(e)}")
 
 @router.post("/quantum/trajectory", response_model=Dict[str, Any])
+
+
 async def compute_trajectory(request: TrajectoryRequest):
     """Compute quantum vector trajectory using flight control"""
     try:
@@ -210,13 +222,13 @@ async def compute_trajectory(request: TrajectoryRequest):
             "magnitude": request.target_magnitude,
             "phase": request.target_phase
         }
-        
+
         trajectory = memory_manager.flight_controller.compute_trajectory(
             vector_id=request.vector_id,
             target_state=target_state,
             trajectory_type=request.trajectory_type
         )
-        
+
         return {
             "vector_id": request.vector_id,
             "trajectory_type": request.trajectory_type,
@@ -224,16 +236,18 @@ async def compute_trajectory(request: TrajectoryRequest):
             "trajectory": trajectory,
             "status": "computed"
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to compute trajectory: {str(e)}")
 
 @router.get("/metrics", response_model=SystemMetricsResponse)
+
+
 async def get_system_metrics():
     """Get comprehensive system metrics"""
     try:
         metrics = memory_manager.get_metrics()
-        
+
         return SystemMetricsResponse(
             total_memories=metrics.get('total_memories', 0),
             active_memories=metrics.get('active_memories', 0),
@@ -245,27 +259,31 @@ async def get_system_metrics():
             average_cultural_score=metrics.get('average_cultural_score', 0.0),
             quantum_network_density=metrics.get('quantum_network_density', 0.0)
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get metrics: {str(e)}")
 
 @router.post("/lifecycle/batch_process", response_model=Dict[str, Any])
+
+
 async def batch_process_lifecycle():
     """Process memory lifecycle operations (decay, compression, cleanup)"""
     try:
         results = memory_manager.batch_process_lifecycle()
-        
+
         return {
             "status": "completed",
             "timestamp": time.time(),
             "results": results,
             "message": "Batch lifecycle processing completed successfully"
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to process lifecycle: {str(e)}")
 
 @router.post("/compress", response_model=Dict[str, Any])
+
+
 async def compress_memories(
     compression_ratio: float = Query(0.5, ge=0.1, le=0.9, description="Compression ratio"),
     importance_threshold: float = Query(5.0, ge=0.0, le=10.0, description="Importance threshold")
@@ -276,18 +294,20 @@ async def compress_memories(
             compression_ratio=compression_ratio,
             importance_threshold=importance_threshold
         )
-        
+
         return {
             "status": "completed",
             "compression_ratio": compression_ratio,
             "importance_threshold": importance_threshold,
             "results": results
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to compress memories: {str(e)}")
 
 @router.get("/export", response_model=Dict[str, Any])
+
+
 async def export_system_state():
     """Export complete system state"""
     try:
@@ -297,11 +317,13 @@ async def export_system_state():
             "export_timestamp": state["export_timestamp"],
             "system_state": state
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to export state: {str(e)}")
 
 @router.get("/quantum/network_analysis", response_model=Dict[str, Any])
+
+
 async def get_quantum_network_analysis():
     """Get detailed quantum entanglement network analysis"""
     try:
@@ -311,12 +333,14 @@ async def get_quantum_network_analysis():
             "timestamp": time.time(),
             "network_analysis": analysis
         }
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to analyze quantum network: {str(e)}")
 
 # Health check endpoint
 @router.get("/health")
+
+
 async def health_check():
     """Health check for AuMemManager system"""
     try:

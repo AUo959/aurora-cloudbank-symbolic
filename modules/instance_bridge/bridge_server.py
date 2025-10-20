@@ -3,9 +3,7 @@ from typing import Dict, Set
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
-
 app = FastAPI(title="Aurora Instance Bridge")
-
 
 class ConnectionManager:
     """Manage websocket connections across channels."""
@@ -28,9 +26,7 @@ class ConnectionManager:
             if connection is not sender:
                 await connection.send_text(message)
 
-
 manager = ConnectionManager()
-
 
 @app.websocket("/ws/{channel}/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str) -> None:
@@ -41,7 +37,6 @@ async def websocket_endpoint(websocket: WebSocket, channel: str, client_id: str)
             await manager.broadcast(channel, f"{client_id}: {data}", websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket, channel)
-
 
 if __name__ == "__main__":
     # SECURITY: Bind to localhost only for security (change to 0.0.0.0 only if external access needed)

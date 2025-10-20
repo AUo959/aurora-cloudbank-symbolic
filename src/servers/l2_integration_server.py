@@ -87,19 +87,16 @@ server_state = {
 
 # Middleware to track requests
 
-
 @app.middleware("http")
 async def track_requests(request: Request, call_next):
     server_state["requests_count"] += 1
     response = await call_next(request)
     return response
 
-
 # Mount static files for dashboard
 dashboard_dir = Path(__file__).parent.parent / "dashboard"
 if dashboard_dir.exists():
     app.mount("/static", StaticFiles(directory=str(dashboard_dir)), name="static")
-
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard():
@@ -129,7 +126,6 @@ async def dashboard():
         logger.error("Dashboard error: %s", str(str(e))[:100])
         return HTMLResponse(f"<h1>Dashboard Error: {str(e)}</h1>", status_code=500)
 
-
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -142,7 +138,6 @@ async def health_check():
         "timestamp": datetime.now().isoformat(),
         "aurora_custom_gpt_available": AURORA_CUSTOM_GPT_AVAILABLE,
     }
-
 
 # Aurora Custom GPT Integration Endpoints
 if AURORA_CUSTOM_GPT_AVAILABLE:
@@ -243,9 +238,7 @@ else:
             "timestamp": datetime.now().isoformat(),
         }
 
-
 # L2 Meta-Agent Bridge Endpoints
-
 
 @app.post("/api/bridge/gpt/connect/{agent_id}")
 async def connect_custom_gpt(
@@ -289,7 +282,6 @@ async def connect_custom_gpt(
         logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-
 @app.post("/api/bridge/gpt/message/{agent_id}")
 async def relay_message(
     agent_id: str,
@@ -326,7 +318,6 @@ async def relay_message(
         logger.error("Message relay failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-
 @app.get("/api/bridge/constellation/status")
 async def get_constellation_status():
     """Get status of the entire agent constellation"""
@@ -349,7 +340,6 @@ async def get_constellation_status():
         logger.error("Status retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
-
 @app.get("/api/bridge/gpt/status/{agent_id}")
 async def get_agent_status(agent_id: str):
     """Get detailed status of a specific agent"""
@@ -368,7 +358,6 @@ async def get_agent_status(agent_id: str):
     except Exception as e:
         logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
-
 
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
 async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
@@ -400,7 +389,6 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
         logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Heartbeat update failed: {str(e)}")
 
-
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
 async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Disconnect an agent from the constellation with CSRF validation."""
@@ -425,9 +413,7 @@ async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = 
         logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Disconnect failed: {str(e)}")
 
-
 # Additional API endpoints
-
 
 @app.get("/api/agents")
 async def list_agents():
@@ -454,7 +440,6 @@ async def list_agents():
         logger.error("Agent listing failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Agent listing failed: {str(e)}")
 
-
 @app.get("/api/orion-core")
 async def get_orion_core_info():
     """Get ORION Core configuration information"""
@@ -478,9 +463,7 @@ async def get_orion_core_info():
         logger.error("ORION Core info retrieval failed: %s", str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"ORION Core info failed: {str(e)}")
 
-
 # Server lifecycle events
-
 
 @app.on_event("startup")
 async def startup_event():
@@ -492,7 +475,6 @@ async def startup_event():
     logger.info("Health Check: http://localhost:8000/health")
 
     # Initialize any background tasks here
-
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -507,9 +489,7 @@ async def shutdown_event():
             except Exception as e:
                 logger.error("Error disconnecting %s: %s", str(agent_id)[:100], str(str(e))[:100])
 
-
 # Main entry point
-
 
 def main():
     """Main entry point for the server"""
@@ -534,7 +514,6 @@ def main():
     uvicorn.run(
         "l2_integration_server:app", host=args.host, port=args.port, reload=args.reload, log_level=args.log_level
     )
-
 
 if __name__ == "__main__":
     main()

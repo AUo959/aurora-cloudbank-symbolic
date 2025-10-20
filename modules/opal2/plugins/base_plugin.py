@@ -33,6 +33,8 @@ class PluginStatus(Enum):
     VALIDATING = "validating"
 
 @dataclass
+
+
 class PluginMetadata:
     """Metadata for plugin description and validation."""
 
@@ -79,16 +81,22 @@ class BasePlugin(ABC):
         self._initialization_time = time.time()
 
     @abstractmethod
+
+
     def initialize(self, config: Dict[str, Any]) -> bool:
         """Initialize the plugin with configuration."""
         pass
 
     @abstractmethod
+
+
     def process(self, input_data: Any, options: Dict[str, Any]) -> Any:
         """Process input data according to plugin functionality."""
         pass
 
     @abstractmethod
+
+
     def cleanup(self) -> bool:
         """Clean up plugin resources."""
         pass
@@ -131,6 +139,8 @@ class RendererPlugin(BasePlugin):
         self.cache_enabled = True
 
     @abstractmethod
+
+
     def render(
         self, render_data: Dict[str, Any], options: Dict[str, Any]
     ) -> Dict[str, Any]:
@@ -157,6 +167,8 @@ class ExporterPlugin(BasePlugin):
     """Base class for export plugins."""
 
     @abstractmethod
+
+
     def export(
         self, data: Dict[str, Any], output_format: str, options: Dict[str, Any]
     ) -> bytes:
@@ -180,6 +192,8 @@ class FilterPlugin(BasePlugin):
     """Base class for filter/effect plugins."""
 
     @abstractmethod
+
+
     def apply_filter(
         self, data: Dict[str, Any], filter_params: Dict[str, Any]
     ) -> Dict[str, Any]:

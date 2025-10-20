@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-from datetime import datetime
-from pathlib import Path
-import hashlib
-import json
 """
 Manifest Generator - Auto-manifest creation for symbolic exports
 Part of T71 Symbolic Infrastructure Genesis

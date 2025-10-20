@@ -165,7 +165,9 @@ jobs:
 
     - name: Generate Deployment Manifest
       run: |
-        python -c "from tools.integration.ci_helpers import CIHelpers; ci = CIHelpers(); manifest = ci.generate_deployment_manifest(); print('✅ Deployment manifest generated')"
+        python -c "from tools.integration.ci_helpers import CIHelpers; \\
+        ci = CIHelpers(); manifest = ci.generate_deployment_manifest(); \\
+        print('✅ Deployment manifest generated')"
 """
 
         workflow_path = self.repo_path / ".github" / "workflows" / "t71_validation.yml"
@@ -209,6 +211,7 @@ jobs:
         try:
             # Import and run anchor tracker
             sys.path.insert(0, str(self.repo_path / "tools"))
+            from symbolic.anchor_tracker import SymbolicAnchorTracker  # noqa: F401
 
             tracker = SymbolicAnchorTracker(str(self.repo_path))
             tracker.scan_repository()
@@ -235,6 +238,7 @@ jobs:
 
         try:
             sys.path.insert(0, str(self.repo_path / "tools"))
+            from symbolic.memory_sealer import MemorySealingEngine  # noqa: F401
 
             sealer = MemorySealingEngine(str(self.repo_path))
 
@@ -416,28 +420,28 @@ def main():
         with open(output_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        print("📦 Deployment manifest saved: {output_path}")
+        print(f"📦 Deployment manifest saved: {output_path}")
 
     elif args.command == "validate":
         validation = ci.validate_repository_state()
 
         status_icon = "✅" if validation["status"] == "passed" else "❌"
-        print("{status_icon} Repository Validation: {validation['status']}")
+        print(f"{status_icon} Repository Validation: {validation['status']}")
 
         for check_name, check_result in validation["validations"].items():
             check_icon = (
                 "✅" if check_result["status"] == "passed" else "❌" if check_result["status"] == "failed" else "⚠️"
             )
-            print("  {check_icon} {check_name}: {check_result['status']}")
+            print(f"  {check_icon} {check_name}: {check_result['status']}")
 
         if validation["issues"]:
             print("\n⚠️  Issues found:")
             for issue in validation["issues"]:
-                print("    - {issue}")
+                print(f"    - {issue}")
 
     elif args.command == "workflow":
         workflow_path = ci.create_github_actions_workflow()
-        print("📄 GitHub Actions workflow created: {workflow_path}")
+        print(f"📄 GitHub Actions workflow created: {workflow_path}")
 
 
 if __name__ == "__main__":

@@ -94,14 +94,14 @@ class SymbolicAnchorTracker:
 
         # Extensive skip patterns for performance
         skip_dirs = {
-            '__pycache__', 'node_modules', '.git', '.venv', 'venv_opal2', 
+            '__pycache__', 'node_modules', '.git', '.venv', 'venv_opal2',
             '.pytest_cache', 'htmlcov', '.benchmarks', 'coverage'
         }
 
         for root, dirs, files in os.walk(self.repo_path):
             # Skip hidden directories and common ignore patterns
             dirs[:] = [d for d in dirs if not d.startswith('.') and d not in skip_dirs]
-            
+
             # Quick scan optimization: limit depth
             if quick_scan:
                 current_depth = len(Path(root).relative_to(self.repo_path).parts)
@@ -111,7 +111,7 @@ class SymbolicAnchorTracker:
             for file in files:
                 if files_scanned >= max_files:
                     break
-                    
+
                 if any(file.endswith(ext) for ext in extensions):
                     file_path = Path(root) / file
                     files_scanned += 1

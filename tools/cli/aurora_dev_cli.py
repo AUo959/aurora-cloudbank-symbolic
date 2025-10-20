@@ -308,7 +308,7 @@ class AuroraDeveloperCLI:
                     except ValueError:
                         print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
             self.anchor_tracker.scan_repository(
-                since=since_dt, 
+                since=since_dt,
                 pattern=getattr(args, "pattern", None),
                 quick_scan=True,
                 max_files=200

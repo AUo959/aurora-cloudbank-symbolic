@@ -206,7 +206,7 @@ class ChatGPTAgentModeIntegration:
         # Validate parameters against schema
         try:
             self._validate_parameters(parameters, tool_def["parameters"])
-        except Exception as e:
+        except Exception:
             # Optionally log exception server-side here
             return {
                 "success": False,
@@ -243,7 +243,7 @@ class ChatGPTAgentModeIntegration:
             # Optionally log exception server-side here
             return response
 
-        except Exception as e:
+        except Exception:
             error_response = {
                 "success": False,
                 "error": "Tool execution failed.",

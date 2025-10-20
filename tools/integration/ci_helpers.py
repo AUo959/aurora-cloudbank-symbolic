@@ -2,14 +2,13 @@
 """
 CI/CD Integration Helpers
 Part of T71 Symbolic Infrastructure Genesis
+
+Automation helpers for continuous integration and deployment
 """
 
 import argparse
 import subprocess
 import sys
-
-Automation helpers for continuous integration and deployment
-"""
 
 
 import json
@@ -166,11 +165,7 @@ jobs:
 
     - name: Generate Deployment Manifest
       run: |
-        python -c "
-ci = CIHelpers()
-manifest = ci.generate_deployment_manifest()
-print('✅ Deployment manifest generated')
-        "
+        python -c "from tools.integration.ci_helpers import CIHelpers; ci = CIHelpers(); manifest = ci.generate_deployment_manifest(); print('✅ Deployment manifest generated')"
 """
 
         workflow_path = self.repo_path / ".github" / "workflows" / "t71_validation.yml"

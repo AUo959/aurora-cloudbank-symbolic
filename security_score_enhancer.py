@@ -16,13 +16,8 @@ Focus Areas:
 6. Security Documentation & Policies
 """
 
-import hashlib
 import json
-import os
 import re
-import secrets
-import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -492,7 +487,14 @@ class SecurityMonitor:
             'DATA_EXFILTRATION': ['Monitor network traffic', 'Check data access logs', 'Review user permissions']
         }
 
-        return response_map.get(event_type, ['Investigate incident', 'Review security logs', 'Update security measures'])
+        return response_map.get(
+            event_type,
+            [
+                'Investigate incident',
+                'Review security logs',
+                'Update security measures',
+            ],
+        )
 
     def generate_security_report(self):
         """Generate comprehensive security monitoring report"""
@@ -743,18 +745,21 @@ curl http://localhost:8000/security/status
         print("🏆 **SECURITY ENHANCEMENT RESULTS**")
         print("=" * 70)
 
-        print(f"📊 **SECURITY SCORE PROGRESSION:**")
-        print(f"   • Starting Score: 80/100")
+        print("📊 **SECURITY SCORE PROGRESSION:**")
+        print("   • Starting Score: 80/100")
         print(f"   • Final Score: {final_score}/100")
         print(f"   • Improvement: +{improvement} points")
-        print(f"   • Achievement: {'🎊 PERFECT SECURITY!' if final_score == 100 else '🚀 OUTSTANDING!'}")
+        print(
+            "   • Achievement: "
+            f"{'🎊 PERFECT SECURITY!' if final_score == 100 else '🚀 OUTSTANDING!'}"
+        )
 
         print(f"\n🔧 **ENHANCEMENTS IMPLEMENTED ({len(self.security_fixes)}):**")
         for fix in self.security_fixes:
             if fix['score_impact'] > 0:
                 print(f"   • {fix['action']}: {fix['details']} (+{fix['score_impact']})")
 
-        print(f"\n📋 **SECURITY DELIVERABLES:**")
+        print("\n📋 **SECURITY DELIVERABLES:**")
         deliverables = [
             "requirements-secure.txt - Security-enhanced dependencies",
             "security-policy.json - Comprehensive security policy",
@@ -783,7 +788,11 @@ curl http://localhost:8000/security/status
                 "Update dependencies monthly",
                 "Review security configurations quarterly"
             ],
-            'certification': 'AURORA CLOUDBANK - PERFECT SECURITY ACHIEVED' if final_score == 100 else 'OUTSTANDING SECURITY IMPLEMENTED'
+            'certification': (
+                'AURORA CLOUDBANK - PERFECT SECURITY ACHIEVED'
+                if final_score == 100
+                else 'OUTSTANDING SECURITY IMPLEMENTED'
+            ),
         }
 
         # Save final report
@@ -794,10 +803,10 @@ curl http://localhost:8000/security/status
         print(f"\n📊 **Final security enhancement report saved: {report_file.name}**")
 
         if final_score >= 95:
-            print(f"\n🎊 **MISSION ACCOMPLISHED: PERFECT SECURITY ACHIEVED!**")
+            print("\n🎊 **MISSION ACCOMPLISHED: PERFECT SECURITY ACHIEVED!**")
             print(f"🏆 **Aurora CloudBank Security Score: {final_score}/100**")
-            print(f"🔒 **Status: Enterprise-Grade Security Implementation**")
-            print(f"✨ **Ready for production deployment with perfect security!**")
+            print("🔒 **Status: Enterprise-Grade Security Implementation**")
+            print("✨ **Ready for production deployment with perfect security!**")
 
         print("\n" + "=" * 70)
 

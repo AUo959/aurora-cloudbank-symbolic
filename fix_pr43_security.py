@@ -95,7 +95,10 @@ def fix_api_security():
     # Fix PEP8 spacing issues (add missing blank lines before classes and functions)
     pep8_fixes = [
         ('class RenderRequest(BaseModel):', '\n\nclass RenderRequest(BaseModel):'),
-        ('class GlyphGenerationRequest(BaseModel):', '\n\nclass GlyphGenerationRequest(BaseModel):'),
+        (
+            'class GlyphGenerationRequest(BaseModel):',
+            '\n\nclass GlyphGenerationRequest(BaseModel):',
+        ),
         ('class WebSocketMessage(BaseModel):', '\n\nclass WebSocketMessage(BaseModel):'),
         ('@app.get("/"):', '\n\n@app.get("/"):'),
         ('@app.get("/health"):', '\n\n@app.get("/health"):'),
@@ -105,12 +108,18 @@ def fix_api_security():
         ('@app.get("/cache/stats"):', '\n\n@app.get("/cache/stats"):'),
         ('@app.delete("/cache/clear"):', '\n\n@app.delete("/cache/clear"):'),
         ('@app.websocket("/ws"):', '\n\n@app.websocket("/ws"):'),
-        ('async def notify_clients(message: Dict[str, Any]):', '\n\nasync def notify_clients(message: Dict[str, Any]):'),
+        (
+            "async def notify_clients(message: Dict[str, Any]):",
+            "\n\nasync def notify_clients(message: Dict[str, Any]):",
+        ),
         ('async def test_glyph_core():', '\n\nasync def test_glyph_core():'),
         ('async def test_quantum_renderer():', '\n\nasync def test_quantum_renderer():'),
         ('async def test_plugin_system():', '\n\nasync def test_plugin_system():'),
         ('async def test_cache_system():', '\n\nasync def test_cache_system():'),
-        ('@app.get("/demo", response_class=HTMLResponse):', '\n\n@app.get("/demo", response_class=HTMLResponse):'),
+        (
+            '@app.get("/demo", response_class=HTMLResponse):',
+            '\n\n@app.get("/demo", response_class=HTMLResponse):',
+        ),
     ]
 
     for old, new in pep8_fixes:

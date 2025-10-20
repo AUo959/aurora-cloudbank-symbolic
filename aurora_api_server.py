@@ -7,38 +7,16 @@ FastAPI-based REST API for Aurora CloudBank services
 import random
 import numpy as np
 import uvicorn
-from pydantic import BaseModel
-from fastapi import FastAPI, Depends
-
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-
-limiter = Limiter(key_func=get_remote_address)
-
-# Rate limiting decorators
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from starlette.middleware.cors import CORSMiddleware
-
-# CSRF Protection Security
-security = HTTPBearer()
-
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from starlette.middleware.cors import CORSMiddleware
-
-# CSRF Protection Security
-security = HTTPBearer()
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-# Pydantic models for API
-
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from fastapi.responses import HTMLResponse
-from fastapi.responses import JSONResponse
-from fastapi import HTTPException
+
+from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials
+
+# Import centralized security configuration
+from src.middleware.fastapi_security import security, limiter, setup_cors_middleware
 
 
 
@@ -60,14 +38,8 @@ class LearningRequest(BaseModel):
 
 app = FastAPI(title="Aurora CloudBank API", description="Quantum-Aware Symbolic Processing Framework", version="3.5.1")
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Enable CORS using centralized configuration
+setup_cors_middleware(app)
 
 # Global status
 system_status = {
@@ -106,14 +78,12 @@ async def get_status():
 
 
 @app.post("/api/quantum/vector")
-@app.post("/api/quantum/vector")
 async def generate_quantum_vector(request: QuantumVectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Generate quantum vector"""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
         raise HTTPException(status_code=403, detail='Invalid CSRF token')
 
-async def generate_quantum_vector(request: QuantumVectorRequest):
-    """Generate quantum vector"""
     try:
         # Simulate quantum vector generation
         vector_data = [random.uniform(-1, 1) for _ in range(request.dimension)]
@@ -132,14 +102,12 @@ async def generate_quantum_vector(request: QuantumVectorRequest):
 
 
 @app.post("/api/consciousness/evolve")
-@app.post("/api/consciousness/evolve")
 async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Evolve consciousness state"""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
         raise HTTPException(status_code=403, detail='Invalid CSRF token')
 
-async def evolve_consciousness(request: ConsciousnessRequest):
-    """Evolve consciousness state"""
     try:
         # Simulate consciousness evolution
 
@@ -162,14 +130,12 @@ async def evolve_consciousness(request: ConsciousnessRequest):
 
 
 @app.post("/api/learning/pattern")
-@app.post("/api/learning/pattern")
 async def process_learning_pattern(request: LearningRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Process learning pattern"""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
         raise HTTPException(status_code=403, detail='Invalid CSRF token')
 
-async def process_learning_pattern(request: LearningRequest):
-    """Process learning pattern"""
     try:
         # Simulate pattern processing
 

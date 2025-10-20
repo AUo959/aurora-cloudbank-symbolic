@@ -14,10 +14,10 @@ from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 
 # Import centralized security configuration
-from src.middleware.fastapi_security import security, limiter, setup_cors_middleware
-
+from src.middleware.fastapi_security import security, setup_cors_middleware
 
 
 class QuantumVectorRequest(BaseModel):
@@ -37,6 +37,9 @@ class LearningRequest(BaseModel):
 
 
 app = FastAPI(title="Aurora CloudBank API", description="Quantum-Aware Symbolic Processing Framework", version="3.5.1")
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Enable CORS using centralized configuration
 setup_cors_middleware(app)
@@ -78,7 +81,10 @@ async def get_status():
 
 
 @app.post("/api/quantum/vector")
-async def generate_quantum_vector(request: QuantumVectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+async def generate_quantum_vector(
+    request: QuantumVectorRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """Generate quantum vector"""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:

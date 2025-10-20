@@ -210,11 +210,11 @@ class MyCustomRenderer(RendererPlugin):
             plugin_type=PluginType.RENDERER,
             capabilities=["custom_effects", "high_performance"]
         )
-    
+
     async def render(self, data: Dict[str, Any], context: Dict[str, Any]) -> str:
         # Your custom rendering logic here
         return "custom_rendered_output"
-    
+
     def get_supported_formats(self) -> List[str]:
         return ["custom_format"]
 

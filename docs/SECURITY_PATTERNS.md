@@ -216,3 +216,68 @@ def test_csrf_protection():
 
 *Last Updated: 2025-10-20*
 *Aurora CloudBank Symbolic - Quantum-Enhanced Governance Stack*
+
+## Migration Guide for Existing Code
+
+If you have existing FastAPI endpoints that need to be migrated to use the centralized security module:
+
+### Step 1: Update Imports
+
+**Before:**
+```python
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette.middleware.cors import CORSMiddleware
+
+limiter = Limiter(key_func=get_remote_address)
+security = HTTPBearer()
+```
+
+**After:**
+```python
+from src.middleware.fastapi_security import security, limiter, setup_cors_middleware
+from fastapi.security import HTTPAuthorizationCredentials
+```
+
+### Step 2: Update CORS Middleware Setup
+
+**Before:**
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+**After:**
+```python
+setup_cors_middleware(app)  # Uses sensible defaults
+```
+
+### Step 3: No Changes Needed for Endpoints
+
+Endpoint definitions remain the same:
+```python
+@app.post("/api/endpoint")
+async def my_endpoint(token: HTTPAuthorizationCredentials = Depends(security)):
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    # ... rest of endpoint logic
+```
+
+### Step 4: Remove Duplicate Definitions
+
+Remove any duplicate:
+- `@app.post()` decorators
+- `async def` function definitions
+- Import statements
+
+---
+
+*Migration completed as of commit e075190*
+*All API files now use centralized security module*

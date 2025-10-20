@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-from datetime import datetime
-import json
 """
 Opal2 Modular System - Quantum Renderer
 Advanced quantum-enhanced rendering with modular plugin support
 """
 
 import asyncio
+import json
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -16,7 +16,6 @@ import numpy as np
 
 from ...symbolic.geometric_algebra import GeometricAlgebra
 from ...symbolic.quantum_symbolic_vector import QuantumSymbolicVector
-
 
 class RenderMode(Enum):
     """Rendering mode enumeration"""
@@ -26,7 +25,6 @@ class RenderMode(Enum):
     INTERACTIVE = "interactive"
     REALTIME = "realtime"
 
-
 class QuantumState(Enum):
     """Quantum enhancement state"""
 
@@ -35,13 +33,14 @@ class QuantumState(Enum):
     ENHANCED = "enhanced"
     SUPERPOSITION = "superposition"
 
-
 @dataclass
 class RenderContext:
     """Render context containing all rendering parameters"""
 
     glyph_data: Dict[str, Any]
-    dimensions: Dict[str, int] = field(default_factory=lambda: {"width": 800, "height": 600})
+    dimensions: Dict[str, int] = field(
+        default_factory=lambda: {"width": 800, "height": 600}
+    )
     mode: RenderMode = RenderMode.STATIC
     quantum_state: QuantumState = QuantumState.ENHANCED
     quantum_params: Dict[str, float] = field(default_factory=dict)
@@ -57,7 +56,6 @@ class RenderContext:
                 "superposition_depth": 3,
                 "decoherence_rate": 0.1,
             }
-
 
 @dataclass
 class RenderResult:
@@ -80,7 +78,6 @@ class RenderResult:
             "quantum_metrics": self.quantum_metrics,
             "cache_key": self.cache_key,
         }
-
 
 class QuantumRenderer:
     """
@@ -174,7 +171,9 @@ class QuantumRenderer:
             render_time = asyncio.get_event_loop().time() - start_time
 
             # Generate quantum metrics
-            quantum_metrics = await self._calculate_quantum_metrics(context, enhanced_data)
+            quantum_metrics = await self._calculate_quantum_metrics(
+                context, enhanced_data
+            )
 
             # Create result
             result = RenderResult(
@@ -201,7 +200,9 @@ class QuantumRenderer:
             if context_id in self.active_contexts:
                 del self.active_contexts[context_id]
 
-    async def _apply_quantum_enhancement(self, context: RenderContext) -> Dict[str, Any]:
+    async def _apply_quantum_enhancement(
+        self, context: RenderContext
+    ) -> Dict[str, Any]:
         """Apply quantum enhancement to glyph data"""
         enhanced_data = context.glyph_data.copy()
 
@@ -210,12 +211,16 @@ class QuantumRenderer:
 
         # Apply coherence factor
         coherence = context.quantum_params.get("coherence_factor", 0.8)
-        enhanced_data["coherence_matrix"] = self._generate_coherence_matrix(enhanced_data, coherence)
+        enhanced_data["coherence_matrix"] = self._generate_coherence_matrix(
+            enhanced_data, coherence
+        )
 
         # Apply entanglement
         if context.quantum_state in [QuantumState.ENHANCED, QuantumState.SUPERPOSITION]:
             entanglement = context.quantum_params.get("entanglement_strength", 0.6)
-            enhanced_data["entanglement_data"] = self._generate_entanglement_data(enhanced_data, entanglement)
+            enhanced_data["entanglement_data"] = self._generate_entanglement_data(
+                enhanced_data, entanglement
+            )
 
         # Apply superposition
         if context.quantum_state == QuantumState.SUPERPOSITION:
@@ -226,7 +231,9 @@ class QuantumRenderer:
 
         return enhanced_data
 
-    def _generate_coherence_matrix(self, data: Dict[str, Any], factor: float) -> np.ndarray:
+    def _generate_coherence_matrix(
+        self, data: Dict[str, Any], factor: float
+    ) -> np.ndarray:
         """Generate quantum coherence matrix"""
         # Extract dimensionality from data
         dims = data.get("dimensions", 3)
@@ -238,11 +245,15 @@ class QuantumRenderer:
         for i in range(dims):
             for j in range(dims):
                 if i != j:
-                    coherence_matrix[i, j] = factor * np.exp(1j * np.pi * (i + j) / dims)
+                    coherence_matrix[i, j] = factor * np.exp(
+                        1j * np.pi * (i + j) / dims
+                    )
 
         return coherence_matrix
 
-    def _generate_entanglement_data(self, data: Dict[str, Any], strength: float) -> Dict[str, Any]:
+    def _generate_entanglement_data(
+        self, data: Dict[str, Any], strength: float
+    ) -> Dict[str, Any]:
         """Generate quantum entanglement data"""
         # Create entangled pairs based on glyph structure
         entanglement_pairs = []
@@ -264,7 +275,9 @@ class QuantumRenderer:
         return {
             "pairs": entanglement_pairs,
             "global_strength": strength,
-            "correlation_matrix": self._generate_correlation_matrix(len(vertices), strength),
+            "correlation_matrix": self._generate_correlation_matrix(
+                len(vertices), strength
+            ),
         }
 
     def _generate_correlation_matrix(self, size: int, strength: float) -> np.ndarray:
@@ -279,7 +292,9 @@ class QuantumRenderer:
 
         return matrix
 
-    def _generate_superposition_states(self, data: Dict[str, Any], depth: int) -> List[Dict[str, Any]]:
+    def _generate_superposition_states(
+        self, data: Dict[str, Any], depth: int
+    ) -> List[Dict[str, Any]]:
         """Generate quantum superposition states"""
         states = []
 
@@ -298,7 +313,9 @@ class QuantumRenderer:
 
         return states
 
-    def _modify_data_for_state(self, data: Dict[str, Any], state_index: int, total_states: int) -> Dict[str, Any]:
+    def _modify_data_for_state(
+        self, data: Dict[str, Any], state_index: int, total_states: int
+    ) -> Dict[str, Any]:
         """Modify glyph data for specific superposition state"""
         modified_data = data.copy()
 
@@ -308,7 +325,9 @@ class QuantumRenderer:
 
             # Apply rotation based on state
             angle = 2 * np.pi * state_index / total_states
-            rotation_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+            rotation_matrix = np.array(
+                [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
+            )
 
             # Apply rotation to 2D vertices
             if vertices.shape[1] >= 2:
@@ -327,7 +346,9 @@ class QuantumRenderer:
         # Coherence metric
         if "coherence_matrix" in enhanced_data:
             coherence_matrix = enhanced_data["coherence_matrix"]
-            metrics["coherence_score"] = np.abs(np.trace(coherence_matrix)) / coherence_matrix.shape[0]
+            metrics["coherence_score"] = (
+                np.abs(np.trace(coherence_matrix)) / coherence_matrix.shape[0]
+            )
 
         # Entanglement metric
         if "entanglement_data" in enhanced_data:
@@ -338,7 +359,9 @@ class QuantumRenderer:
         if "superposition_states" in enhanced_data:
             states = enhanced_data["superposition_states"]
             metrics["superposition_depth"] = len(states)
-            metrics["superposition_uniformity"] = np.std([s["amplitude"] for s in states])
+            metrics["superposition_uniformity"] = np.std(
+                [s["amplitude"] for s in states]
+            )
 
         # Quantum fidelity
         metrics["quantum_fidelity"] = self._calculate_quantum_fidelity(enhanced_data)
@@ -352,7 +375,9 @@ class QuantumRenderer:
 
         if "coherence_matrix" in enhanced_data:
             coherence_matrix = enhanced_data["coherence_matrix"]
-            fidelity *= np.abs(np.linalg.det(coherence_matrix)) ** (1.0 / coherence_matrix.shape[0])
+            fidelity *= np.abs(np.linalg.det(coherence_matrix)) ** (
+                1.0 / coherence_matrix.shape[0]
+            )
 
         return min(fidelity, 1.0)
 
@@ -365,11 +390,15 @@ class QuantumRenderer:
 
         # Keep only last 100 measurements
         if len(self.performance_metrics[renderer]) > 100:
-            self.performance_metrics[renderer] = self.performance_metrics[renderer][-100:]
+            self.performance_metrics[renderer] = self.performance_metrics[renderer][
+                -100:
+            ]
 
     # Built-in renderer implementations
 
-    async def _render_webgl(self, enhanced_data: Dict[str, Any], context: RenderContext) -> str:
+    async def _render_webgl(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> str:
         """WebGL renderer implementation"""
         # Generate WebGL shader code
         vertex_shader = self._generate_vertex_shader(enhanced_data, context)
@@ -391,7 +420,9 @@ class QuantumRenderer:
 
         return json.dumps(webgl_scene, default=str)
 
-    def _generate_vertex_shader(self, enhanced_data: Dict[str, Any], context: RenderContext) -> str:
+    def _generate_vertex_shader(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> str:
         """Generate WebGL vertex shader"""
         return """
         #version 300 es
@@ -438,7 +469,9 @@ class QuantumRenderer:
         }
         """
 
-    def _generate_fragment_shader(self, enhanced_data: Dict[str, Any], context: RenderContext) -> str:
+    def _generate_fragment_shader(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> str:
         """Generate WebGL fragment shader"""
         return """
         #version 300 es
@@ -490,12 +523,16 @@ class QuantumRenderer:
         }
         """
 
-    def _generate_uniforms(self, enhanced_data: Dict[str, Any], context: RenderContext) -> Dict[str, Any]:
+    def _generate_uniforms(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> Dict[str, Any]:
         """Generate WebGL uniforms"""
         uniforms = {
             "time": 0.0,
             "coherenceFactor": context.quantum_params.get("coherence_factor", 0.8),
-            "entanglementStrength": context.quantum_params.get("entanglement_strength", 0.6),
+            "entanglementStrength": context.quantum_params.get(
+                "entanglement_strength", 0.6
+            ),
             "superpositionDepth": context.quantum_params.get("superposition_depth", 3),
         }
 
@@ -506,7 +543,9 @@ class QuantumRenderer:
 
         return uniforms
 
-    def _render_canvas(self, enhanced_data: Dict[str, Any], context: RenderContext) -> str:
+    def _render_canvas(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> str:
         """Canvas 2D renderer implementation"""
         # Generate Canvas drawing commands
         canvas_commands = []
@@ -542,7 +581,9 @@ class QuantumRenderer:
 
             # Apply quantum styling
             coherence_factor = context.quantum_params.get("coherence_factor", 0.8)
-            canvas_commands.append(f"ctx.strokeStyle = 'rgba(100, 150, 255, {coherence_factor})';")
+            canvas_commands.append(
+                f"ctx.strokeStyle = 'rgba(100, 150, 255, {coherence_factor})';"
+            )
             canvas_commands.append("ctx.lineWidth = 2;")
             canvas_commands.append("ctx.stroke();")
 
@@ -554,14 +595,24 @@ class QuantumRenderer:
         height = context.dimensions["height"]
 
         svg_elements = []
-        svg_elements.append(f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">')
+        svg_elements.append(
+            f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">'
+        )
 
         # Add quantum gradient definitions
         svg_elements.append("<defs>")
-        svg_elements.append('<linearGradient id="quantumGradient" x1="0%" y1="0%" x2="100%" y2="100%">')
-        svg_elements.append('<stop offset="0%" style="stop-color:#3366FF;stop-opacity:0.8" />')
-        svg_elements.append('<stop offset="50%" style="stop-color:#6699FF;stop-opacity:0.6" />')
-        svg_elements.append('<stop offset="100%" style="stop-color:#99CCFF;stop-opacity:0.4" />')
+        svg_elements.append(
+            '<linearGradient id="quantumGradient" x1="0%" y1="0%" x2="100%" y2="100%">'
+        )
+        svg_elements.append(
+            '<stop offset="0%" style="stop-color:#3366FF;stop-opacity:0.8" />'
+        )
+        svg_elements.append(
+            '<stop offset="50%" style="stop-color:#6699FF;stop-opacity:0.6" />'
+        )
+        svg_elements.append(
+            '<stop offset="100%" style="stop-color:#99CCFF;stop-opacity:0.4" />'
+        )
         svg_elements.append("</linearGradient>")
         svg_elements.append("</defs>")
 
@@ -600,7 +651,9 @@ class QuantumRenderer:
 
         return "\n".join(svg_elements)
 
-    def _render_quantum_field(self, enhanced_data: Dict[str, Any], context: RenderContext) -> Dict[str, Any]:
+    def _render_quantum_field(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> Dict[str, Any]:
         """Quantum field renderer implementation"""
         # Generate quantum field visualization data
         field_data = {
@@ -625,13 +678,19 @@ class QuantumRenderer:
                         "x": i,
                         "y": j,
                         "value": field_value,
-                        "phase": (np.angle(field_value) if isinstance(field_value, complex) else 0),
+                        "phase": (
+                            np.angle(field_value)
+                            if isinstance(field_value, complex)
+                            else 0
+                        ),
                     }
                 )
 
         return field_data
 
-    def _calculate_quantum_field_value(self, x: int, y: int, enhanced_data: Dict[str, Any]) -> complex:
+    def _calculate_quantum_field_value(
+        self, x: int, y: int, enhanced_data: Dict[str, Any]
+    ) -> complex:
         """Calculate quantum field value at specific point"""
         # Simplified quantum field calculation
         field_value = 0 + 0j
@@ -648,7 +707,9 @@ class QuantumRenderer:
 
         return field_value
 
-    def _render_holographic(self, enhanced_data: Dict[str, Any], context: RenderContext) -> Dict[str, Any]:
+    def _render_holographic(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> Dict[str, Any]:
         """Holographic renderer implementation"""
         # Generate holographic visualization data
         holographic_data = {
@@ -664,7 +725,9 @@ class QuantumRenderer:
         for i in range(0, width, 2):
             for j in range(0, height, 2):
                 # Calculate holographic interference
-                interference = self._calculate_holographic_interference(i, j, enhanced_data)
+                interference = self._calculate_holographic_interference(
+                    i, j, enhanced_data
+                )
 
                 holographic_data["interference_pattern"].append(
                     {
@@ -677,7 +740,9 @@ class QuantumRenderer:
 
         return holographic_data
 
-    def _calculate_holographic_interference(self, x: int, y: int, enhanced_data: Dict[str, Any]) -> complex:
+    def _calculate_holographic_interference(
+        self, x: int, y: int, enhanced_data: Dict[str, Any]
+    ) -> complex:
         """Calculate holographic interference pattern"""
         # Reference wave
         reference_wave = np.exp(1j * 2 * np.pi * (x + y) * 0.01)
@@ -694,7 +759,9 @@ class QuantumRenderer:
 
         return interference
 
-    def _render_geometric_algebra(self, enhanced_data: Dict[str, Any], context: RenderContext) -> Dict[str, Any]:
+    def _render_geometric_algebra(
+        self, enhanced_data: Dict[str, Any], context: RenderContext
+    ) -> Dict[str, Any]:
         """Geometric algebra renderer implementation"""
         # Generate geometric algebra visualization
         ga_data = {
@@ -765,3 +832,4 @@ class QuantumRenderer:
     def list_renderers(self) -> List[str]:
         """List available renderers"""
         return list(self.render_plugins.keys())
+# (All lines from 835 to 879 are removed)

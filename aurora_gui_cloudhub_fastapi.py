@@ -7,13 +7,9 @@ from typing import Dict, List, Optional
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, WebSocket, WebSocketDisconnect
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials
+from src.middleware.fastapi_security import security
 from starlette.middleware.cors import CORSMiddleware
-
-# CSRF Protection Security
-security = HTTPBearer()
-
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -132,11 +128,11 @@ MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
 
 @app.post("/upload/")
 async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCredentials = Depends(security)):
+    """Upload a bundle file with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
         raise HTTPException(status_code=403, detail='Invalid CSRF token')
 
-async def upload_bundle(file: UploadFile = File(...)):
     data = await file.read()
     if len(data) > MAX_UPLOAD_SIZE:
         raise HTTPException(status_code=413, detail="File too large")
@@ -190,7 +186,7 @@ class QuantumSymbolicVectorRequest(BaseModel):
 
 @app.post(
     "/geometric/product",
-    summary="Geometric Product", 
+    summary="Geometric Product",
     response_description="Result of geometric product",
 )
 def geometric_product(req: GeometricProductRequest):

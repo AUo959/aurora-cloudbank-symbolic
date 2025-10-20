@@ -110,7 +110,7 @@ class GlyphCore:
             return base_glyph
 
         except Exception as e:
-            logger.error("Error generating glyph: %s", str(e)[:100])
+            self.logger.error("Error generating glyph: %s", str(e)[:100])
             raise
 
     async def test_generation(self) -> Dict[str, Any]:

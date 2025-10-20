@@ -2,11 +2,6 @@ from typing import Dict, Set
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from starlette.middleware.cors import CORSMiddleware
-
-# CSRF Protection Security
-security = HTTPBearer()
 
 
 app = FastAPI(title="Aurora Instance Bridge")

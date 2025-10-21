@@ -79,35 +79,8 @@ jobs:
       continue-on-error: true
       run: |
         source .venv/bin/activate
-        python -c '
-import sys
-try:
-    import fastapi
-    import httpx
-    import httpcore
-    import h11
-    print("✅ Core dependencies loaded successfully")
-    print(f"FastAPI: {fastapi.__version__}")
-    print(f"httpx: {httpx.__version__}")
-    print(f"httpcore: {httpcore.__version__}")
-    print(f"h11: {h11.__version__}")
-    
-    # Verify compatibility
-    import packaging.version as pv
-    if pv.parse(httpx.__version__) >= pv.parse("0.28.0"):
-        print("✅ httpx version compatible with httpcore 1.x")
-    else:
-        print("⚠️ httpx version may not support httpcore 1.x")
-        
-    if pv.parse(httpcore.__version__) >= pv.parse("1.0.0"):
-        print("✅ httpcore version compatible with h11 0.16.0")
-    else:
-        print("⚠️ httpcore version may not support h11 0.16.0")
-        
-except ImportError as e:
-    print(f"❌ Import error: {e}")
-    sys.exit(1)
-' || echo "⚠️ Import test failed (non-blocking)"
+        echo "🔍 Testing critical imports..."
+        python -c "import fastapi, httpx, httpcore, h11; print('✅ All imports successful')" || echo "⚠️ Import test failed (non-blocking)"
     
     - name: Upload dependency report
       if: always()

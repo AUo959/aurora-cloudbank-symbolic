@@ -114,7 +114,7 @@ class AuroraDependencyHub:
             except Exception as e:
                 pass
 logger.warning("Failed to load config: %s", str(e)[:100])
-                
+
         return default_config
         
     def save_config(self):
@@ -127,7 +127,7 @@ logger.warning("Failed to load config: %s", str(e)[:100])
         package_name = package_spec.split('>=')[0].split('==')[0].split('[')[0]
         
 logger.info("Installing Python package: %s", str(package_spec)[:100])
-        
+
         max_retries = self.config["installation_strategy"]["max_retries"]
         timeout = self.config["installation_strategy"]["timeout_per_package"]
         
@@ -170,17 +170,17 @@ logger.info("Installing Python package: %s", str(package_spec)[:100])
                     if result.returncode == 0:
                         self.installation_state["python_packages"]["installed"].append(package_spec)
 logger.info("✅ Successfully installed: %s", str(package_spec)[:100])
-                        return True
-                        
+return True
+
                 except subprocess.TimeoutExpired:
                     pass
 logger.warning("Timeout installing %s with %s (attempt %s)", str(package_spec)[:100], str(index)[:100], str(attempt + 1)[:100])
-                    continue
-                except Exception as e:
+continue
+except Exception as e:
                     pass
 logger.warning("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
-                    continue
-                    
+continue
+
             # Wait before retry
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)
@@ -189,15 +189,15 @@ logger.warning("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
         
         if is_critical:
 logger.error("❌ CRITICAL: Failed to install %s", str(package_spec)[:100])
-        else:
+else:
 logger.warning("⚠️  Failed to install optional package: %s", str(package_spec)[:100])
-            
+
         return False
         
     def install_node_package_robust(self, package_spec: str) -> bool:
         """Install Node.js package with robust error handling"""
 logger.info("Installing Node.js package: %s", str(package_spec)[:100])
-        
+
         registries = [
             "https://registry.npmjs.org/",
             "https://registry.npm.taobao.org/"
@@ -218,17 +218,17 @@ logger.info("Installing Node.js package: %s", str(package_spec)[:100])
                 if result.returncode == 0:
                     self.installation_state["node_packages"]["installed"].append(package_spec)
 logger.info("✅ Successfully installed Node.js package: %s", str(package_spec)[:100])
-                    return True
-                    
+return True
+
             except Exception as e:
                 pass
 logger.warning("Failed to install %s with %s: %s", str(package_spec)[:100], str(registry)[:100], str(e)[:100])
-                continue
-                
+continue
+
         self.installation_state["node_packages"]["failed"].append(package_spec)
 logger.warning("⚠️  Failed to install Node.js package: %s", str(package_spec)[:100])
-        return False
-        
+return False
+
     def install_all_dependencies(self) -> Dict[str, Any]:
         """Install all dependencies systematically"""
         self.logger.info("🚀 Starting comprehensive dependency installation...")
@@ -247,7 +247,7 @@ logger.warning("⚠️  Failed to install Node.js package: %s", str(package_spec
         results["critical_python"]["total"] = len(critical_packages)
         
 logger.info("📦 Installing %s critical Python packages...", str(len(critical_packages))[:100])
-        for package in critical_packages:
+for package in critical_packages:
             if self.install_python_package_robust(package, is_critical=True):
                 results["critical_python"]["installed"] += 1
             else:
@@ -258,7 +258,7 @@ logger.info("📦 Installing %s critical Python packages...", str(len(critical_p
         results["development_python"]["total"] = len(dev_packages)
         
 logger.info("🛠️  Installing %s development Python packages...", str(len(dev_packages))[:100])
-        for package in dev_packages:
+for package in dev_packages:
             if self.install_python_package_robust(package, is_critical=False):
                 results["development_python"]["installed"] += 1
             else:
@@ -269,7 +269,7 @@ logger.info("🛠️  Installing %s development Python packages...", str(len(dev
         results["optional_python"]["total"] = len(optional_packages)
         
 logger.info("🔬 Installing %s optional Python packages...", str(len(optional_packages))[:100])
-        for package in optional_packages:
+for package in optional_packages:
             if self.install_python_package_robust(package, is_critical=False):
                 results["optional_python"]["installed"] += 1
             else:
@@ -281,7 +281,7 @@ logger.info("🔬 Installing %s optional Python packages...", str(len(optional_p
         
         if node_packages and (self.project_root / "package.json").exists():
 logger.info("📦 Installing %s Node.js packages...", str(len(node_packages))[:100])
-            for package in node_packages:
+for package in node_packages:
                 if self.install_node_package_robust(package):
                     results["node_packages"]["installed"] += 1
                 else:
@@ -296,8 +296,8 @@ logger.info("📦 Installing %s Node.js packages...", str(len(node_packages))[:1
         results["end_time"] = datetime.now().isoformat()
         
 logger.info("🏁 Installation complete. Success rate: %s", str(critical_success_rate:.1%)[:100])
-        return results
-        
+return results
+
     def setup_automated_systems(self):
         """Set up all automated dependency management systems"""
         self.logger.info("⚙️ Setting up automated dependency management systems...")
@@ -323,7 +323,7 @@ logger.info("🏁 Installation complete. Success rate: %s", str(critical_success
         except Exception as e:
             pass
 logger.warning("Persistence setup failed: %s", str(e)[:100])
-            
+
         # 2. Set up automated scheduler
         try:
             scheduler_script = self.project_root / "scripts" / "aurora_automated_update_scheduler.py"
@@ -342,7 +342,7 @@ logger.warning("Persistence setup failed: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.warning("Scheduler setup failed: %s", str(e)[:100])
-            
+
         # 3. Create startup script
         try:
             self._create_startup_script()
@@ -351,7 +351,7 @@ logger.warning("Scheduler setup failed: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.warning("Startup script creation failed: %s", str(e)[:100])
-            
+
         # 4. Set up health monitoring
         try:
             self._setup_health_monitoring()
@@ -360,10 +360,10 @@ logger.warning("Startup script creation failed: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.warning("Health monitoring setup failed: %s", str(e)[:100])
-            
+
 logger.info("🎯 Automated systems setup: %s/%s successful", str(success_count)[:100], str(total_systems)[:100])
-        return success_count == total_systems
-        
+return success_count == total_systems
+
     def _create_startup_script(self):
         """Create comprehensive startup script"""
         script_content = f'''#!/bin/bash
@@ -406,7 +406,7 @@ fi
 
 log_message "🚀 Aurora CloudBank dependency startup check complete"
 '''
-        
+
         script_path = self.project_root / "scripts" / "aurora_startup_check.sh"
         with open(script_path, 'w') as f:
             f.write(script_content)
@@ -421,7 +421,7 @@ log_message "🚀 Aurora CloudBank dependency startup check complete"
 # Run startup check on reboot
 @reboot cd "{self.project_root}" && bash scripts/aurora_startup_check.sh >/dev/null 2>&1
 '''
-        
+
         cron_file = Path.home() / ".aurora_dependency_monitoring"
         with open(cron_file, 'w') as f:
             f.write(cron_content)
@@ -446,10 +446,10 @@ log_message "🚀 Aurora CloudBank dependency startup check complete"
         # Check Python packages
         try:
             result = subprocess.run([sys.executable, "-m", "pip", "list"], 
-                                  capture_output=True, text=True, timeout=30)
+            capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
                 installed_packages = {line.split()[0].lower() for line in result.stdout.split('\n') 
-                                    if line.strip() and not line.startswith('Package')}
+                if line.strip() and not line.startswith('Package')}
                 
                 missing_critical = []
                 for package_spec in self.config["critical_python_packages"]:
@@ -468,7 +468,7 @@ log_message "🚀 Aurora CloudBank dependency startup check complete"
         if (self.project_root / "package.json").exists():
             try:
                 result = subprocess.run(["npm", "list", "--depth=0"], 
-                                      capture_output=True, text=True, timeout=30, cwd=self.project_root)
+                capture_output=True, text=True, timeout=30, cwd=self.project_root)
                 health_report["node_status"] = "healthy" if result.returncode in [0, 1] else "degraded"
             except Exception:
                 health_report["node_status"] = "error"
@@ -517,7 +517,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 # 💡 Recommendations:
 """
-        
+
         for rec in health['recommendations']:
             report += f"   • {rec}\n"
             
@@ -558,7 +558,7 @@ def main():
             
     elif args.health_check:
         health = hub.health_check()
-        print("Health Status: %s", health['overall_health'].upper())
+        print(f"Health Status: {health['overall_health'].upper(}"))
         if health['overall_health'] != 'healthy':
             sys.exit(1)
             
@@ -578,8 +578,8 @@ def main():
         
         # Final report
         print("\n📊 Setup Summary:")
-        print("   Dependencies: %s", '✅ Success' if install_results['overall_success'] else '⚠️  Partial')
-        print("   Automation: %s", '✅ Success' if automation_success else '⚠️  Partial')
+        print(f"   Dependencies: {'✅ Success' if install_results['overall_success'] else '⚠️  Partial'}")
+        print(f"   Automation: {'✅ Success' if automation_success else '⚠️  Partial'}")
         
         if install_results['overall_success'] and automation_success:
             print("\n🎉 Complete setup successful! Aurora CloudBank dependencies are fully managed.")

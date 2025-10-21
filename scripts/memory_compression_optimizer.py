@@ -241,7 +241,7 @@ class MemoryCompressionOptimizer:
                     file_path.unlink()
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / (1024)
-                    print("✅ Removed duplicate: %s", file_path)
+                    print(f"✅ Removed duplicate: {file_path}")
 
                 except (OSError, PermissionError) as e:
                     results["failed_removals"].append({"path": str(file_path), "error": str(e)})
@@ -305,7 +305,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print("  Would remove cache file: %s", file_path)
+                print(f"  Would remove cache file: {file_path}")
                 results["removed_files"].append(str(file_path))
                 results["total_savings_mb"] += file_info["size_kb"] / 1024
                 continue
@@ -318,7 +318,7 @@ class MemoryCompressionOptimizer:
 
                 results["removed_files"].append(str(file_path))
                 results["total_savings_mb"] += file_info["size_kb"] / 1024
-                print("✅ Removed cache: %s", file_path)
+                print(f"✅ Removed cache: {file_path}")
 
             except (OSError, PermissionError) as e:
                 results["failed_removals"].append({"path": str(file_path), "error": str(e)})

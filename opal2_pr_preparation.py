@@ -115,7 +115,7 @@ class Opal2PRPreparation:
 
 
         if missing_files:
-            print("❌ Missing files: {', '.join(missing_files)}")
+            print(f"❌ Missing files: {', '.join(missing_files)}")
 
         return False
 
@@ -133,10 +133,10 @@ class Opal2PRPreparation:
             if result.returncode == 0:
                 print("  ✅ flake8: No issues found")
         except Exception as e:
-            print("  ⚠️ flake8 check failed: {e}")
+            print(f"  ⚠️ flake8 check failed: {e}")
 
         else:
-                print("  ⚠️ flake8: Issues found\n{result.stdout}")
+                print(f"  ⚠️ flake8: Issues found\n{result.stdout}")
 
             # Run black check
             print("  Running black...")
@@ -215,7 +215,7 @@ class Opal2PRPreparation:
 
 
         if missing_sections:
-            print("  ❌ Missing documentation sections: {', '.join(missing_sections)}")
+            print(f"  ❌ Missing documentation sections: {', '.join(missing_sections)}")
 
         return False
 
@@ -239,7 +239,7 @@ class Opal2PRPreparation:
 
 
         if existing_configs:
-            print("  ✅ Configuration files present: {', '.join(existing_configs)}")
+            print(f"  ✅ Configuration files present: {', '.join(existing_configs)}")
 
         self.pr_checklist["configuration"] = True
         else:
@@ -253,11 +253,11 @@ class Opal2PRPreparation:
         try:
             print("  Running integration tests...")
         result = subprocess.run(
-                [
-                    "pytest",
-                    str(self.tests_dir / "test_opal2_system.py::TestIntegration"),
-                    "-v",
-                ],
+        [
+        "pytest",
+        str(self.tests_dir / "test_opal2_system.py::TestIntegration"),
+        "-v",
+        ],
         result = subprocess.run(                text=True,
             )
 
@@ -267,7 +267,7 @@ class Opal2PRPreparation:
 
         self.pr_checklist["integration"] = True
             else:
-                print("  ❌ Integration tests failed:\n{result.stdout}")
+                print(f"  ❌ Integration tests failed:\n{result.stdout}")
 
 
         except FileNotFoundError:
@@ -279,20 +279,20 @@ class Opal2PRPreparation:
         try:
             print("  Running performance tests...")
         result = subprocess.run(
-                [
-                    "pytest",
-                    str(self.tests_dir / "test_opal2_system.py::TestPerformance"),
-                    "-v",
-                ],
+        [
+        "pytest",
+        str(self.tests_dir / "test_opal2_system.py::TestPerformance"),
+        "-v",
+        ],
         capture_output=True,
-                text=True,
+        text=True,
         result = subprocess.run(
             if result.returncode == 0:
                 print("  ✅ Performance tests passed")
 
         self.pr_checklist["performance"] = True
             else:
-                print("  ❌ Performance tests failed:\n{result.stdout}")
+                print(f"  ❌ Performance tests failed:\n{result.stdout}")
 
 
         except FileNotFoundError:
@@ -316,7 +316,7 @@ class Opal2PRPreparation:
             json.dump(summary, f, indent=2)
 
 
-        print("  ✅ PR summary saved to {summary_path}")
+        print(f"  ✅ PR summary saved to {summary_path}")
 
         # Generate PR template
         self.generate_pr_template()
@@ -454,7 +454,7 @@ No migration required - This is a new system addition.
             f.write(template)
 
 
-        print("  ✅ PR template saved to {template_path}")
+        print(f"  ✅ PR template saved to {template_path}")
 
 
         def display_final_checklist(self):
@@ -466,7 +466,7 @@ No migration required - This is a new system addition.
 
         for item, status in self.pr_checklist.items():
         status_icon = "✅" if status else "❌"
-            print("{status_icon} {item.replace('_', ' ').title()}")
+            print(f"{status_icon} {item.replace('_', ' ').title()}")
         all_ready = all(self.pr_checklist.values())
 
 
@@ -500,14 +500,14 @@ No migration required - This is a new system addition.
                 # Create new branch
                 subprocess.run(["git", "checkout", "-b", branch_name])
 
-        print("✅ Created new branch: {branch_name}")
+        print(f"✅ Created new branch: {branch_name}")
 
         else:
-                print("⚠️ Branch {branch_name} already exists")
+                print(f"⚠️ Branch {branch_name} already exists")
 
 
         except Exception as e:
-            print("❌ Failed to create branch: {e}")
+            print(f"❌ Failed to create branch: {e}")
 
 
         def add_and_commit_files(self):
@@ -524,13 +524,13 @@ No migration required - This is a new system addition.
 
             # Commit with descriptive message
         commit_message = (
-                "🔮 Add Opal2 Modular System Expansion\n\n"
-                + "- Quantum-enhanced rendering engine\n"
-                + "- Modular plugin architecture\n"
-                + "- Advanced configuration management\n"
-                + "- FastAPI integration with WebSocket support\n"
-                + "- Comprehensive test suite\n"
-                + "- Full documentation"
+        "🔮 Add Opal2 Modular System Expansion\n\n"
+        + "- Quantum-enhanced rendering engine\n"
+        + "- Modular plugin architecture\n"
+        + "- Advanced configuration management\n"
+        + "- FastAPI integration with WebSocket support\n"
+        + "- Comprehensive test suite\n"
+        + "- Full documentation"
             )
 
 
@@ -540,7 +540,7 @@ No migration required - This is a new system addition.
 
 
         except Exception as e:
-            print("❌ Failed to commit files: {e}")
+            print(f"❌ Failed to commit files: {e}")
 
 
 def main():
@@ -585,7 +585,7 @@ def main():
 
         print("\n🎉 Ready to push to remote!")
 
-        print("Run: git push origin {branch_name}")
+        print(f"Run: git push origin {branch_name}")
 
         print("Then create your PR on GitHub/GitLab")
 

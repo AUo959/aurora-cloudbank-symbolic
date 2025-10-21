@@ -65,22 +65,22 @@ class AuroraTestRunner:
         ]
         results = {}
         for test_name, test_func in tests:
-            print("\n{'=' * 50}")
+            print(f"\n{'=' * 50}")
             
-        print("Starting: {test_name}")
+        print(f"Starting: {test_name}")
             
         print("=" * 50)
         result = test_func()            
         results[test_name] = result.returncode == 0
 
             if result.returncode != 0:
-                print("❌ {test_name} failed!")
+                print(f"❌ {test_name} failed!")
             
         else:
-                print("✅ {test_name} passed!")
+                print(f"✅ {test_name} passed!")
 
         # Run performance benchmark
-        print("\n{'=' * 50}")
+        print(f"\n{'=' * 50}")
         
         print("Performance Benchmark")
         
@@ -90,7 +90,7 @@ class AuroraTestRunner:
 
         # Summary
         total_time = time.time() - start_time
-        print("\n{'=' * 50}")
+        print(f"\n{'=' * 50}")
         
         print("TEST SUMMARY")
         
@@ -99,10 +99,10 @@ class AuroraTestRunner:
         
         for test_name, passed in results.items():
             status = "✅ PASS" if passed else "❌ FAIL"
-            print("{status} {test_name}")
+            print(f"{status} {test_name}")
 
         
-        print("\nTotal execution time: {total_time} seconds")
+        print(f"\nTotal execution time: {total_time} seconds")
 
         # Return overall success
         return all(results.values())
@@ -135,7 +135,7 @@ def main():
             
         sys.exit(0 if success else 1)
         result = runner.run_performance_benchmark()            
-        print("Unknown test type: {test_type}")
+        print(f"Unknown test type: {test_type}")
             
         print("Available: native, unit, smoke, api, benchmark, all")
             

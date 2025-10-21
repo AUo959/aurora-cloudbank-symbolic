@@ -129,7 +129,7 @@ class GITWizSimple:
                 cursor.execute(
                     """
                     INSERT INTO issues (issue_type, file_path, description, severity,
-                                      fix_applied, first_seen, last_seen, fix_count)
+                    fix_applied, first_seen, last_seen, fix_count)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                     (
@@ -265,7 +265,7 @@ class GITWizSimple:
                 cursor.execute(
                     """
                     SELECT issue_type, file_path, description, severity,
-                           fix_applied, first_seen, last_seen, fix_count
+                    fix_applied, first_seen, last_seen, fix_count
                     FROM issues
                     ORDER BY last_seen DESC
                     LIMIT 20
@@ -436,14 +436,14 @@ def main():
         if args.detailed:
             print(json.dumps(status, indent=2))
         else:
-            print("Repository: %s", status['repo_path'])
-            print("Git repo: %s", status['git_status'].get('is_git_repo', False))
+            print(f"Repository: {status['repo_path']}")
+            print(f"Git repo: {status['git_status'].get('is_git_repo', False}"))
             if status["git_status"].get("is_git_repo"):
-                print("Current branch: %s", status['git_status'].get('current_branch', 'unknown'))
-                print("Total changes: %s", status['git_status'].get('total_changes', 0))
-            print("Total files: %s", status['file_stats']['total_files'])
+                print(f"Current branch: {status['git_status'].get('current_branch', 'unknown'}"))
+                print(f"Total changes: {status['git_status'].get('total_changes', 0}"))
+            print(f"Total files: {status['file_stats']['total_files']}")
             print("Total size: %s MB", status['file_stats']['total_size'] / (1024 * 1024):.1f)
-            print("Stored issues: %s", len(status['issues']))
+            print(f"Stored issues: {len(status['issues']}"))
 
     elif args.command == "analyze":
         analysis = gitwiz.analyze_repository()
@@ -451,14 +451,14 @@ def main():
             print(json.dumps(analysis, indent=2))
         else:
             print("Analysis completed at %s", analysis['timestamp'])
-            print("Issues found: %s", len(analysis['issues_found']))
-            print("Optimizations suggested: %s", len(analysis['optimizations']))
-            print("Archives analyzed: %s", len(analysis['archive_analysis']))
+            print(f"Issues found: {len(analysis['issues_found']}"))
+            print(f"Optimizations suggested: {len(analysis['optimizations']}"))
+            print(f"Archives analyzed: {len(analysis['archive_analysis']}"))
 
             if analysis["issues_found"]:
                 print("\nTop Issues:")
                 for issue in analysis["issues_found"][:5]:
-                    print("  - %s: {issue[", issue['issue_type'])
+                    print(f"  - %s: {issue[", issue['issue_type'])
 
             if analysis["optimizations"]:
                 print("\nOptimizations:")
@@ -468,7 +468,7 @@ def main():
     elif args.command == "memory":
         # Show memory database stats
         issues = gitwiz._get_stored_issues()
-        print("Stored issues: %s", len(issues))
+        print(f"Stored issues: {len(issues}"))
         if issues:
             print("\nRecent issues:")
             for issue in issues[:10]:

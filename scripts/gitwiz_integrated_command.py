@@ -595,7 +595,7 @@ Examples:
   %(prog)s lint-scan --detailed --target scripts/
   %(prog)s workflow --type enhanced --aggressive
   %(prog)s status
-        """,
+  """,
 """
     )
 

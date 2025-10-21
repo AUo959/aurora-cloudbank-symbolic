@@ -146,7 +146,7 @@ def process_file_critical(file_path: str) -> dict:
         fixes["unused_imports"] = remove_unused_imports(file_path)
 
     except Exception as e:
-        print("Error processing {file_path}: %s", e)
+        print(f"Error processing {file_path}: {e}")
         return {}
 
     return fixes

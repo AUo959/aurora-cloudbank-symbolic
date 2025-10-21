@@ -22,7 +22,7 @@ def test_holographic_interface():
     print("🌟 Testing Holographic Interface Orchestrator...")
     orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
     if not os.path.exists(orchestrator_path):
-        print("❌ {orchestrator_path} not found")
+        print(f"❌ {orchestrator_path} not found")
         
         return False
 
@@ -30,13 +30,13 @@ def test_holographic_interface():
     try:
         result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)        
         if result.returncode == 0:
-            print("✅ {orchestrator_path} - Valid Node.js syntax")
+            print(f"✅ {orchestrator_path} - Valid Node.js syntax")
             return True
         else:
-            print("❌ {orchestrator_path} - Syntax error: {result.stderr}")
+            print(f"❌ {orchestrator_path} - Syntax error: {result.stderr}")
             return False
     except Exception as e:
-        print("⚠️  Could not test Node.js syntax: {e}")
+        print(f"⚠️  Could not test Node.js syntax: {e}")
         
         return True  # Assume OK if Node.js not available
 
@@ -58,11 +58,11 @@ def test_orion_core_config():
     print("🛰️ Testing ORION Core Configuration...")
         config_path = "src/config/orion_core_config.js"
     if os.path.exists(config_path):
-        print("✅ {config_path} exists")
+        print(f"✅ {config_path} exists")
         
         return True
     else:
-        print("⚠️  {config_path} not found")
+        print(f"⚠️  {config_path} not found")
         
         return True  # Not critical
 
@@ -78,10 +78,10 @@ def test_core_documentation():
         all_exist = True
     for doc in docs:
         if os.path.exists(doc):
-            print("✅ {doc} exists")
+            print(f"✅ {doc} exists")
         
         else:
-            print("❌ {doc} missing")
+            print(f"❌ {doc} missing")
         all_exist = False
 
     return all_exist
@@ -105,7 +105,7 @@ def test_git_repository_status():
                 print("⚠️  Uncommitted changes found:")
                 
         for line in uncommitted.split("\n"):
-                    print("   {line}")
+                    print(f"   {line}")
             
         else:
                 print("✅ Repository is clean")
@@ -117,7 +117,7 @@ def test_git_repository_status():
         return False
 
     except Exception as e:
-        print("❌ Git error: {e}")
+        print(f"❌ Git error: {e}")
         
         return False
 
@@ -132,12 +132,12 @@ def test_system_integration():
     for file_path in key_files:
         if os.path.exists(file_path):
             integration_score += 1
-            print("✅ {file_path} exists")
+            print(f"✅ {file_path} exists")
         
         else:
-            print("❌ {file_path} missing")
+            print(f"❌ {file_path} missing")
         success_rate = (integration_score / len(key_files)) * 100
-    print("📊 Integration Score: {success_rate}%")
+    print(f"📊 Integration Score: {success_rate}%")
 
     
         return success_rate >= 80
@@ -162,7 +162,7 @@ def generate_validation_report():
 
     
         for test_name, test_func in tests:
-        print("\n📋 {test_name}")
+        print(f"\n📋 {test_name}")
         
         print("-" * 40)
         success = test_func()
@@ -174,8 +174,8 @@ def generate_validation_report():
     print("\n" + "=" * 60)
     print("🎯 VALIDATION SUMMARY")
     print("=" * 60)
-    print("✅ Tests Passed: {passed}/{total}")
-    print("📊 Success Rate: {(passed / total) * 100}%")
+    print(f"✅ Tests Passed: {passed}/{total}")
+    print(f"📊 Success Rate: {(passed / total) * 100}%")
 
     
         if passed == total:

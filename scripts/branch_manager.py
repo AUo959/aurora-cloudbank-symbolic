@@ -88,13 +88,13 @@ class BranchManager:
             # Categorize branch
             category = self._categorize_branch(branch_name)
         branch_info = BranchInfo(
-                name=branch_name,
+        name=branch_name,
         last_commit_date=commit_date,
-                last_commit_hash=commit_hash,
+        last_commit_hash=commit_hash,
         author=author,
-                is_merged=is_merged,
+        is_merged=is_merged,
         days_old=days_old,
-                category=category,
+        category=category,
             )
             
         branches.append(branch_info)
@@ -180,10 +180,10 @@ class BranchManager:
 
         for branch in branches:
         should_delete = (
-                branch.category in categories
-                and branch.is_merged
-                and branch.days_old > max_age_days
-                and branch.name not in ["main", "develop", "master"]
+        branch.category in categories
+        and branch.is_merged
+        and branch.days_old > max_age_days
+        and branch.name not in ["main", "develop", "master"]
             )
 
             
@@ -197,7 +197,7 @@ class BranchManager:
                         subprocess.run(cmd, check=True, cwd=self.repo_path)
                         
         cleanup_results["deleted"].append(branch.name)
-                    
+        
         except subprocess.CalledProcessError as e:
                         cleanup_results["errors"].append(f"Failed to delete {branch.name}: {e}")
             
@@ -227,7 +227,7 @@ Generated: {datetime.datetime.now().isoformat()}
         report += """
 ## Cleanup Recommendations
 """
-        for rec in analysis["recommendations"]:
+for rec in analysis["recommendations"]:
             report += f"- {rec}\n"
 
         report += """
@@ -235,13 +235,13 @@ Generated: {datetime.datetime.now().isoformat()}
 
 ### Stale Merged Branches ({len(analysis['cleanup_candidates']['stale_merged'])})
 """
-        for branch in analysis["cleanup_candidates"]["stale_merged"]:
+for branch in analysis["cleanup_candidates"]["stale_merged"]:
             report += f"- `{branch}`\n"
 
         report += """
 ### Old Unmerged Branches ({len(analysis['cleanup_candidates']['old_unmerged'])})
 """
-        for branch in analysis["cleanup_candidates"]["old_unmerged"]:
+for branch in analysis["cleanup_candidates"]["old_unmerged"]:
             report += f"- `{branch}` (Review before deletion)\n"
 
         return report
@@ -287,7 +287,7 @@ def main():
         
         print("")
 # ✅ Deleted: %s", len(results['deleted']))
-        
+
         for branch in results["deleted"][:5]:  # Show first 5
             print("  - %s", branch)
         
@@ -298,7 +298,7 @@ def main():
         if results["errors"]:
             print("")
 # ❌ Errors: %s", len(results['errors']))
-            
+
         for error in results["errors"]:
                 print("  - %s", error)
 

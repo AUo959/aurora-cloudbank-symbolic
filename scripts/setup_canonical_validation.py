@@ -55,11 +55,11 @@ def check_dependencies():
     if missing_packages:
         print("")
 # 📥 Installing missing packages: %s", ', '.join(missing_packages))
-        try:
+try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
             print("✅ Dependencies installed successfully")
         except subprocess.CalledProcessError as e:
-            print("❌ Failed to install dependencies: %s", e)
+            print(f"❌ Failed to install dependencies: {e}")
             return False
 
     return True
@@ -94,7 +94,7 @@ python3 scripts/git_pre_commit_hook.py
 
         return True
     except Exception as e:
-        print("  ❌ Failed to setup Git hooks: %s", e)
+        print(f"  ❌ Failed to setup Git hooks: {e}")
         return False
 
 
@@ -155,7 +155,7 @@ def test_validation_system():
 
         return True
     except Exception as e:
-        print("  ❌ Validation system test failed: %s", e)
+        print(f"  ❌ Validation system test failed: {e}")
         return False
 
 
@@ -336,13 +336,13 @@ def main():
             if not step_function():
                 failed_steps.append(step_name)
         except Exception as e:
-            print("❌ {step_name} setup failed: %s", e)
+            print(f"❌ {step_name} setup failed: {e}")
             failed_steps.append(step_name)
 
     print("\n" + "=" * 60)
 
     if failed_steps:
-        print("⚠️ Setup completed with issues in: %s", ', '.join(failed_steps))
+        print(f"⚠️ Setup completed with issues in: {', '.join(failed_steps}"))
         print("Please review the errors above and re-run setup if needed.")
     else:
         print("✅ Aurora CloudBank Canonical Validation System setup complete!")

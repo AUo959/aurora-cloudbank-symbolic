@@ -68,7 +68,7 @@ class DependencyPersistenceManager:
             except Exception as e:
                 pass
 logger.warning("Failed to load config: %s", str(e)[:100])
-                
+
         return default_config
         
     def save_config(self):
@@ -89,20 +89,20 @@ logger.warning("Failed to load config: %s", str(e)[:100])
         # Capture Python packages
         try:
             result = subprocess.run([sys.executable, "-m", "pip", "list", "--format=json"], 
-                                  capture_output=True, text=True, timeout=30)
+            capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
                 packages = json.loads(result.stdout)
                 snapshot["python_packages"] = {pkg["name"]: pkg["version"] for pkg in packages}
         except Exception as e:
             pass
 logger.warning("Failed to capture Python packages: %s", str(e)[:100])
-            
+
         # Capture Node.js packages
         package_json = self.project_root / "package.json"
         if package_json.exists():
             try:
                 result = subprocess.run(["npm", "list", "--json", "--depth=0"], 
-                                      capture_output=True, text=True, timeout=30, cwd=self.project_root)
+                capture_output=True, text=True, timeout=30, cwd=self.project_root)
                 if result.stdout:
                     npm_data = json.loads(result.stdout)
                     dependencies = npm_data.get("dependencies", {})
@@ -110,7 +110,7 @@ logger.warning("Failed to capture Python packages: %s", str(e)[:100])
             except Exception as e:
                 pass
 logger.warning("Failed to capture Node.js packages: %s", str(e)[:100])
-                
+
         # Capture system info
         snapshot["system_info"] = {
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
@@ -137,8 +137,8 @@ logger.warning("Failed to capture Node.js packages: %s", str(e)[:100])
             json.dump(snapshot, f, indent=2)
             
 logger.info("Dependency snapshot saved: %s", str(snapshot_file)[:100])
-        return snapshot_file
-        
+return snapshot_file
+
     def restore_dependencies_from_snapshot(self, snapshot_file: Path = None) -> bool:
         """Restore dependencies from snapshot"""
         if snapshot_file is None:
@@ -154,7 +154,7 @@ logger.info("Dependency snapshot saved: %s", str(snapshot_file)[:100])
                 snapshot = json.load(f)
                 
 logger.info("Restoring dependencies from %s", str(snapshot_file)[:100])
-            
+
             # Restore Python packages
             success = True
             for package, version in snapshot["python_packages"].items():
@@ -172,8 +172,8 @@ logger.info("Restoring dependencies from %s", str(snapshot_file)[:100])
         except Exception as e:
             pass
 logger.error("Failed to restore from snapshot: %s", str(e)[:100])
-            return False
-            
+return False
+
     def _install_python_package_safe(self, package_spec: str) -> bool:
         """Safely install Python package with fallbacks"""
         try:
@@ -198,19 +198,19 @@ logger.error("Failed to restore from snapshot: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.warning("Failed to install %s: %s", str(package_spec)[:100], str(e)[:100])
-            return False
-            
+return False
+
     def _install_node_packages_safe(self) -> bool:
         """Safely install Node.js packages"""
         try:
             result = subprocess.run(["npm", "install"], 
-                                  capture_output=True, text=True, timeout=60, cwd=self.project_root)
+            capture_output=True, text=True, timeout=60, cwd=self.project_root)
             return result.returncode == 0
         except Exception as e:
             pass
 logger.warning("Failed to install Node.js packages: %s", str(e)[:100])
-            return False
-            
+return False
+
     def create_startup_restoration_script(self):
         """Create script that runs on startup to restore dependencies"""
         script_content = f'''#!/bin/bash
@@ -239,15 +239,15 @@ fi
 
 echo "🚀 Aurora CloudBank dependency check complete"
 '''
-        
+
         script_path = self.project_root / "scripts" / "aurora_startup_restore.sh"
         with open(script_path, 'w') as f:
             f.write(script_content)
         script_path.chmod(0o755)
         
 logger.info("Startup restoration script created: %s", str(script_path)[:100])
-        return script_path
-        
+return script_path
+
     def setup_automatic_persistence(self):
         """Set up automatic dependency persistence"""
         self.logger.info("Setting up automatic dependency persistence...")
@@ -263,7 +263,7 @@ logger.info("Startup restoration script created: %s", str(script_path)[:100])
 # Restore dependencies if needed at startup
 @reboot cd "{self.project_root}" && bash scripts/aurora_startup_restore.sh >/dev/null 2>&1
 """
-        
+
         cron_file = Path.home() / ".aurora_dependency_cron"
         with open(cron_file, 'w') as f:
             f.write(cron_content)
@@ -275,7 +275,7 @@ logger.info("Startup restoration script created: %s", str(script_path)[:100])
         except subprocess.CalledProcessError as e:
             pass
 logger.warning("Failed to install cron job: %s", str(e)[:100])
-            
+
         # Create systemd user service for environments that support it
         self._create_systemd_service()
         
@@ -295,7 +295,7 @@ Environment=PATH=/usr/local/bin:/usr/bin:/bin
 [Install]
 WantedBy=default.target
 """
-        
+
         try:
             service_dir = Path.home() / ".config" / "systemd" / "user"
             service_dir.mkdir(parents=True, exist_ok=True)
@@ -308,7 +308,7 @@ WantedBy=default.target
         except Exception as e:
             pass
 logger.warning("Failed to create systemd service: %s", str(e)[:100])
-            
+
     def cleanup_old_backups(self):
         """Clean up old backup snapshots"""
         snapshots = list(self.backup_dir.glob("dependency_snapshot_*.json"))
@@ -318,7 +318,7 @@ logger.warning("Failed to create systemd service: %s", str(e)[:100])
             for old_snapshot in snapshots[:-self.config["max_backups"]]:
                 old_snapshot.unlink()
 logger.info("Removed old snapshot: %s", str(old_snapshot)[:100])
-                
+
     def generate_persistence_report(self) -> str:
         """Generate comprehensive persistence status report"""
         snapshots = list(self.backup_dir.glob("dependency_snapshot_*.json"))
@@ -335,14 +335,14 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 # 🔄 Critical Packages Tracked:
 """
-        
+
         for pkg in self.config["critical_packages"]:
             report += f"   • {pkg}\n"
             
         report += f"""
 # 📦 Node.js Packages Tracked:
 """
-        
+
         for pkg in self.config["nodejs_packages"]:
             report += f"   • {pkg}\n"
             
@@ -355,7 +355,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
    Node.js packages: {len(snapshot_data.get('node_packages', {}))}
    Timestamp: {snapshot_data.get('timestamp', 'Unknown')}
 """
-        
+
         return report
 
 def main():
@@ -377,7 +377,7 @@ def main():
         print("📸 Creating dependency snapshot...")
         snapshot = manager.create_dependency_snapshot()
         snapshot_file = manager.save_snapshot(snapshot)
-        print("✅ Snapshot saved: %s", snapshot_file)
+        print(f"✅ Snapshot saved: {snapshot_file}")
         
     elif args.restore_from_latest:
         print("🔄 Restoring dependencies from latest snapshot...")

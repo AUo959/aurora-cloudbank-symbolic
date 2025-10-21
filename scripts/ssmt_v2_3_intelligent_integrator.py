@@ -46,7 +46,7 @@ class SSMTIntelligentIntegrator:
             with open("SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json", 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print("⚠️ Could not load architectural analysis: %s", e)
+            print(f"⚠️ Could not load architectural analysis: {e}")
             return {}
 
     def select_integration_candidates(self) -> List[Dict]:
@@ -167,11 +167,11 @@ class {Path(critical_file).stem.title()}Enhancements:
 # For now, this serves as a framework for manual enhancement integration
 
 '''
-                    with open(layer_path, 'w') as f:
+with open(layer_path, 'w') as f:
                         f.write(layer_content)
                     
                     result["layers_created"].append(str(layer_name))
-                    print("   ✅ Created: %s", layer_name)
+                    print(f"   ✅ Created: {layer_name}")
             
             result["status"] = "success" if result["layers_created"] else "no_layers_needed"
             
@@ -257,7 +257,7 @@ class {Path(critical_file).stem.title()}Enhancements:
                 valuable_files = []
                 for file_path in diff_result.stdout.strip().split('\n'):
                     if file_path.strip() and (file_path.endswith(('.py', '.md', '.yml')) and 
-                                            ('doc' in file_path.lower() or 'script' in file_path.lower() or 'readme' in file_path.lower())):
+                    ('doc' in file_path.lower() or 'script' in file_path.lower() or 'readme' in file_path.lower())):
                         valuable_files.append(file_path.strip())
                 
                 for file_path in valuable_files[:5]:
@@ -313,7 +313,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         print("🧠 AURORA CLOUDBANK - SSMT v2.3: INTELLIGENCE-DRIVEN INTEGRATION")
         print("=" * 70)
         print("🎯 SSMT Intelligent Integrator v%s", self.results['ssmt_version'])
-        print("📊 Integration candidates: %s", len(self.integration_candidates))
+        print(f"📊 Integration candidates: {len(self.integration_candidates}"))
         
         if not self.integration_candidates:
             print("⚠️ No suitable integration candidates identified")
@@ -324,11 +324,10 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         # Process each candidate
         for candidate in self.integration_candidates:
-            print("")
-%s", '='*50)
-            print("🎯 Processing: %s", candidate['branch'])
-            print("   Quality Score: %s", candidate['quality_score'])
-            print("   Strategy: %s", candidate['integration_strategy'])
+            print("")%s", '='*50")
+            print(f"🎯 Processing: {candidate['branch']}")
+            print(f"   Quality Score: {candidate['quality_score']}")
+            print(f"   Strategy: {candidate['integration_strategy']}")
             
             integration_result = self.integrate_candidate(candidate)
             self.results["integrations"].append(integration_result)
@@ -337,7 +336,7 @@ class {Path(critical_file).stem.title()}Enhancements:
                 successful_integrations += 1
                 print(f"✅ Integration successful!")
             else:
-                print("⚠️ Integration status: %s", integration_result.get('status', 'unknown'))
+                print(f"⚠️ Integration status: {integration_result.get('status', 'unknown'}"))
         
         # Final validation
         print("\n🧪 Running system validation...")
@@ -352,8 +351,8 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         # Summary
         print(f"\n🎯 SSMT v2.3 SUMMARY:")
-        print("   Candidates processed: %s", len(self.integration_candidates))
-        print("   Successful integrations: %s", successful_integrations)
+        print(f"   Candidates processed: {len(self.integration_candidates}"))
+        print(f"   Successful integrations: {successful_integrations}")
         print("   Success rate: %s%", (successful_integrations/len(self.integration_candidates)*100):.1f)
         
         # Save results

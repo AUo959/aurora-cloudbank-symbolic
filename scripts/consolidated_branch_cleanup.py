@@ -25,10 +25,10 @@ class ConsolidatedBranchCleanup:
             with open(analysis_file, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            print("❌ Analysis file not found: %s", analysis_file)
+            print(f"❌ Analysis file not found: {analysis_file}")
             return {}
         except json.JSONDecodeError:
-            print("❌ Invalid JSON in analysis file: %s", analysis_file)
+            print(f"❌ Invalid JSON in analysis file: {analysis_file}")
             return {}
 
     def delete_merged_branches(self, branches: List[Dict]) -> Dict:
@@ -41,7 +41,7 @@ class ConsolidatedBranchCleanup:
 
         print("")
 # 🗑️  Deleting %s merged branches...", len(branches))
-        
+
         for branch in branches:
             branch_name = branch['name']
             
@@ -52,7 +52,7 @@ class ConsolidatedBranchCleanup:
                 
             try:
                 if self.dry_run:
-                    print("   [DRY RUN] Would delete: %s", branch_name)
+                    print(f"   [DRY RUN] Would delete: {branch_name}")
                     results['deleted'] += 1
                 else:
                     # Delete remote branch
@@ -65,14 +65,14 @@ class ConsolidatedBranchCleanup:
                     )
                     
                     if result.returncode == 0:
-                        print("   ✅ Deleted: %s", branch_name)
+                        print(f"   ✅ Deleted: {branch_name}")
                         results['deleted'] += 1
                     else:
-                        print("   ❌ Failed to delete {branch_name}: %s", result.stderr)
+                        print(f"   ❌ Failed to delete {branch_name}: {result.stderr}")
                         results['errors'] += 1
                         
             except Exception as e:
-                print("   ❌ Error deleting {branch_name}: %s", e)
+                print(f"   ❌ Error deleting {branch_name}: {e}")
                 results['errors'] += 1
 
         return results
@@ -86,14 +86,14 @@ class ConsolidatedBranchCleanup:
 
         print("")
 # 📦 Creating archive tags for %s branches...", len(branches))
-        
+
         for branch in branches:
             branch_name = branch['name']
             tag_name = f"archive/{branch_name.replace('/', '_')}"
             
             try:
                 if self.dry_run:
-                    print("   [DRY RUN] Would create tag: %s", tag_name)
+                    print(f"   [DRY RUN] Would create tag: {tag_name}")
                     results['archived'] += 1
                 else:
                     # Create tag
@@ -119,14 +119,14 @@ class ConsolidatedBranchCleanup:
                             print("   ✅ Archived: {branch_name} -> %s", tag_name)
                             results['archived'] += 1
                         else:
-                            print("   ❌ Failed to push tag {tag_name}: %s", push_result.stderr)
+                            print(f"   ❌ Failed to push tag {tag_name}: {push_result.stderr}")
                             results['errors'] += 1
                     else:
-                        print("   ❌ Failed to create tag {tag_name}: %s", result.stderr)
+                        print(f"   ❌ Failed to create tag {tag_name}: {result.stderr}")
                         results['errors'] += 1
                         
             except Exception as e:
-                print("   ❌ Error archiving {branch_name}: %s", e)
+                print(f"   ❌ Error archiving {branch_name}: {e}")
                 results['errors'] += 1
 
         return results
@@ -224,8 +224,7 @@ class ConsolidatedBranchCleanup:
         
         # Step 3: Generate PR recommendations
         if analysis['pull_requests_needed']:
-            print("")
-%s", self.generate_pr_recommendations(analysis['pull_requests_needed']))
+            print("")%s", self.generate_pr_recommendations(analysis['pull_requests_needed'])")
         
         # Step 4: Generate summary
         print(self.generate_consolidation_summary(analysis, results))
@@ -236,11 +235,11 @@ class ConsolidatedBranchCleanup:
 def main():
     parser = argparse.ArgumentParser(description="Aurora CloudBank Consolidated Branch Cleanup")
     parser.add_argument("--analysis", default="/tmp/comprehensive_consolidation_analysis.json",
-                       help="Path to consolidation analysis JSON file")
+    help="Path to consolidation analysis JSON file")
     parser.add_argument("--execute", action="store_true",
-                       help="Execute cleanup (default: dry run)")
+    help="Execute cleanup (default: dry run)")
     parser.add_argument("--no-archive", action="store_true",
-                       help="Skip archiving important branches")
+    help="Skip archiving important branches")
     
     args = parser.parse_args()
     
@@ -263,7 +262,7 @@ def main():
     if results['errors'] > 0:
         print("")
 # ⚠️  Completed with %s errors", results['errors'])
-        sys.exit(1)
+sys.exit(1)
     else:
         print(f"\n✅ Consolidation completed successfully!")
         sys.exit(0)

@@ -245,12 +245,12 @@ def main():
     # Print summary
     print("\n📋 AUDIT SUMMARY")
     print("-" * 30)
-    print("Total Files: %s", file_analysis['total_files'])
+    print(f"Total Files: {file_analysis['total_files']}")
     print("Total Size: %s MB", file_analysis['total_size'] / (1024 * 1024):.2f)
-    print("ZIP Files: %s ({zip_analysis[", zip_analysis['total_zip_files'])
-    print("Markdown Files: %s", md_analysis['total_md_files'])
-    print("Large Files: %s", len(file_analysis['large_files']))
-    print("Potential Duplicates: %s", len(file_analysis['duplicate_names']))
+    print(f"ZIP Files: %s ({zip_analysis[", zip_analysis['total_zip_files'])
+    print(f"Markdown Files: {md_analysis['total_md_files']}")
+    print(f"Large Files: {len(file_analysis['large_files']}"))
+    print(f"Potential Duplicates: {len(file_analysis['duplicate_names']}"))
 
     print("\n🚨 CRITICAL RECOMMENDATIONS")
     for rec in recommendations["critical"]:
@@ -267,13 +267,13 @@ def main():
     print("\n📦 ZIP FILE ANALYSIS")
     print("Top 10 largest ZIP files:")
     for i, zip_info in enumerate(zip_analysis["zip_details"][:10]):
-        print("  {i + 1}. %s ({zip_info[", zip_info['name'])
+        print(f"  {i + 1}. %s ({zip_info[", zip_info['name'])
 
     print("\n📝 MARKDOWN FILE CATEGORIES")
-    print("  Status Reports: %s", len(md_analysis['status_reports']))
-    print("  Documentation: %s", len(md_analysis['documentation']))
-    print("  Guides: %s", len(md_analysis['guides']))
-    print("  Other: %s", len(md_analysis['other']))
+    print(f"  Status Reports: {len(md_analysis['status_reports']}"))
+    print(f"  Documentation: {len(md_analysis['documentation']}"))
+    print(f"  Guides: {len(md_analysis['guides']}"))
+    print(f"  Other: {len(md_analysis['other']}"))
 
     # Save detailed report
     report_path = Path("/workspaces/aurora-cloudbank-symbolic/REPOSITORY_AUDIT_REPORT.json")

@@ -51,22 +51,22 @@ class BranchCleanupManager:
         try:
             # Get all remote branches with metadata
         cmd = [
-                "git",
-                "for-each-re",
-                "--format=%(refname:short)|%(committerdate:iso)|%(authorname)|%(ahead-behind:HEAD)",
-                "refs/remotes/origin/",
+        "git",
+        "for-each-re",
+        "--format=%(refname:short)|%(committerdate:iso)|%(authorname)|%(ahead-behind:HEAD)",
+        "refs/remotes/origin/",
             ]
         result = subprocess.run(                cmd,
-                capture_output=True,
+        capture_output=True,
         text=True,
-                cwd=self.repo_path,
+        cwd=self.repo_path,
         shell=False,
-                check=False,
+        check=False,
             )
 
             
         if result.returncode != 0:
-                print("Error getting branch info: %s", result.stderr)
+                print(f"Error getting branch info: {result.stderr}")
                 
         return {}
 
@@ -76,13 +76,13 @@ class BranchCleanupManager:
                 if not line:
                     continue
         parts = line.split("|")
-                
+        
         if len(parts) < 3:
                     continue
 
                 branch_name = parts[0].replace("origin/", "")
         commit_date = parts[1]
-                author = parts[2]
+        author = parts[2]
         ahead_behind = parts[3] if len(parts) > 3 else "0\t0"
 
                 # Skip HEAD reference
@@ -98,14 +98,14 @@ class BranchCleanupManager:
                     "age_days": self._calculate_age_days(commit_date),
                 }
         category = self._categorize_branch(branch_info)
-                
+        
         branches[category].append(branch_info)
 
             
         return branches
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error analyzing branches: %s", e)
+            print(f"Error analyzing branches: {e}")
             
         return {}
 
@@ -175,15 +175,15 @@ class BranchCleanupManager:
                     print("🔍 DRY RUN: Would {action} branch %s", branch['name'])
                     
         results["skipped"].append({"branch": branch["name"], "action": action})
-                
+        
         else:
                     success = self._execute_branch_action(branch, action)
                     
         if success:
                         results[action].append(branch["name"])
                         
-        print("✅ {action.title()} branch: %s", branch['name'])
-                    
+        print(f"✅ {action.title()} branch: {branch['name']}")
+        
         else:
                         results["errors"].append({"branch": branch["name"], "action": action})
 
@@ -223,9 +223,9 @@ class BranchCleanupManager:
                 subprocess.run(
                     ["git", "tag", tag_name, branch_name],
         check=True,
-                    cwd=self.repo_path,
-                )
-                
+        cwd=self.repo_path,
+        )
+        
         subprocess.run(["git", "push", "origin", tag_name], check=True, cwd=self.repo_path)
 
             
@@ -240,17 +240,17 @@ class BranchCleanupManager:
                 subprocess.run(
                     ["git", "push", "origin", "--delete", branch_short],
         check=True,
-                    cwd=self.repo_path,
-                )
-                
+        cwd=self.repo_path,
+        )
+        
         return True
 
         except subprocess.CalledProcessError as e:
-            print("Git command failed: %s", e)
+            print(f"Git command failed: {e}")
             
         return False
         except (OSError, ValueError, RuntimeError) as e:
-            print("Unexpected error: %s", e)
+            print(f"Unexpected error: {e}")
             
         return False
 
@@ -289,7 +289,7 @@ class BranchCleanupManager:
 
                 
         for branch in branch_list[:10]:  # Limit output
-                    report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
+        report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
 
                 
         if len(branch_list) > 10:
@@ -353,7 +353,7 @@ def main():
     # Save report
     report_path = Path("branch_cleanup_report.md")
     report_path.write_text(final_report)
-    print("📄 Report saved to: %s", report_path)
+    print(f"📄 Report saved to: {report_path}")
 
     
         if dry_run:

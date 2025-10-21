@@ -44,10 +44,10 @@ class AutomatedBranchManager:
         try:
             # Get branch info with commit dates
         cmd = [
-                "git",
-                "for-each-re",
-                "--format=%(refname:short)|%(committerdate:iso)|%(objectname)",
-                "refs/remotes/origin",
+        "git",
+        "for-each-re",
+        "--format=%(refname:short)|%(committerdate:iso)|%(objectname)",
+        "refs/remotes/origin",
             ]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         branches = []
@@ -63,12 +63,12 @@ class AutomatedBranchManager:
                 branch_name = parts[0].replace("origin/", "")
                 # Parse commit date - handle timezone by removing it
         date_str = parts[1].split("+")[0].split("-")[0]  # Remove timezone
-                if "T" not in date_str:
+        if "T" not in date_str:
                     date_str = parts[1].replace(" ", "T").split("+")[0]
                 try:
                     pass
         commit_date = datetime.datetime.fromisoformat(date_str)
-                
+        
         except ValueError:
                     # Fallback to current time if parsing fails
                     commit_date = datetime.datetime.now()
@@ -85,22 +85,22 @@ class AutomatedBranchManager:
 
                 
         branches.append(
-                    BranchInfo(
+        BranchInfo(
         name=branch_name,
-                        last_commit_date=commit_date,
+        last_commit_date=commit_date,
         commit_hash=commit_hash[:8],
-                        is_merged=is_merged,
+        is_merged=is_merged,
         days_old=days_old,
-                        category=category,
-                    )
-                )
+        category=category,
+        )
+        )
 
             
         return sorted(branches, key=lambda x: x.last_commit_date, reverse=True)
 
         
         except subprocess.CalledProcessError as e:
-            print("Error getting branch info: %s", e)
+            print(f"Error getting branch info: {e}")
             
         return []
 
@@ -109,11 +109,11 @@ class AutomatedBranchManager:
         try:
             pass
         cmd = [
-                "git",
-                "merge-base",
-                "--is-ancestor",
-                f"origin/{branch_name}",
-                "origin/main",
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        f"origin/{branch_name}",
+        "origin/main",
             ]
             result = subprocess.run(cmd, capture_output=True, shell=False, check=False)
             
@@ -212,21 +212,21 @@ class AutomatedBranchManager:
                     print("⚠️  Skipping %s - not confirmed merged", branch.name)
                     
         results["skipped"].append(branch.name)
-                    
+        
         continue
 
                 # Delete remote branch
         cmd = ["git", "push", "origin", "--delete", branch.name]
-                subprocess.run(cmd, check=True, capture_output=True)
+        subprocess.run(cmd, check=True, capture_output=True)
 
                 
-        print("✅ Deleted branch: %s", branch.name)
-                
+        print(f"✅ Deleted branch: {branch.name}")
+        
         results["deleted"].append(branch.name)
 
             
         except subprocess.CalledProcessError as e:
-                print("❌ Failed to delete {branch.name}: %s", e)
+                print(f"❌ Failed to delete {branch.name}: {e}")
                 
         results["failed"].append(branch.name)
 
@@ -340,9 +340,9 @@ def main():
 
     
         print("📈 Found %s branches total", analysis['total_branches'])
-    print("✅ Safe to delete: %s", len(analysis['candidates']['safe_to_delete']))
-    print("⚠️  Requires review: %s", len(analysis['candidates']['requires_review']))
-    print("🔒 Protected: %s", len(analysis['candidates']['protected']))
+    print(f"✅ Safe to delete: {len(analysis['candidates']['safe_to_delete']}"))
+    print(f"⚠️  Requires review: {len(analysis['candidates']['requires_review']}"))
+    print(f"🔒 Protected: {len(analysis['candidates']['protected']}"))
 
     # Execute cleanup if requested
     cleanup_results = None
@@ -361,7 +361,7 @@ def main():
         f.write(report)
 
     
-        print("📄 Report saved to: %s", report_file)
+        print(f"📄 Report saved to: {report_file}")
 
 
 if __name__ == "__main__":

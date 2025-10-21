@@ -533,7 +533,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError):
             pass  # Don't fail maintenance due to logging issues
 
-        print("🔧 {message}")
+        print(f"🔧 {message}")
 
     def start_scheduler(self):
         """Start the maintenance scheduler."""
@@ -612,16 +612,16 @@ def main():
         return
 
     if args.run_now:
-        print("🏃 Running maintenance task: {args.run_now}")
+        print(f"🏃 Running maintenance task: {args.run_now}")
         result = scheduler.run_immediate_maintenance(args.run_now)
-        print("Result: {result}")
+        print(f"Result: {result}")
         return
 
     if args.run_all:
         print("🏃 Running all maintenance tasks...")
         results = scheduler.run_immediate_maintenance()
         for task_name, result in results.items():
-            print("   {task_name}: {result.get('status', 'unknown')}")
+            print(f"   {task_name}: {result.get('status', 'unknown')}")
         return
 
     if args.daemon:

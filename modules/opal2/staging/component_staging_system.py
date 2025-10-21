@@ -93,7 +93,7 @@ class ComponentStagingSystem:
                         logger.error(f"Failed to load component {component_file}: {e}")
     
     async def create_concept(self, component_id: str, name: str, description: str, 
-                           author: str, concept_notes: str = "") -> StagedComponent:
+    author: str, concept_notes: str = "") -> StagedComponent:
         """Create a new component concept"""
         logger.info(f"🌱 Creating new component concept: {component_id}")
         
@@ -122,7 +122,7 @@ class ComponentStagingSystem:
         return component
     
     async def advance_to_prototype(self, component_id: str, prototype_code: str, 
-                                 capabilities: List[str]) -> bool:
+    capabilities: List[str]) -> bool:
         """Advance component from concept to prototype"""
         if component_id not in self.staged_components:
             logger.error(f"Component {component_id} not found")

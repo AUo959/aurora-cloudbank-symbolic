@@ -39,15 +39,15 @@ class Phase3CSmartResolver:
             )
             
             if check_return and result.returncode != 0:
-                print("❌ Command failed: %s", command)
+                print(f"❌ Command failed: {command}")
                 if result.stderr:
-                    print("Error: %s", result.stderr)
+                    print(f"Error: {result.stderr}")
                 return None
                 
             return result
         except Exception as e:
-            print("❌ Exception running command: %s", command)
-            print("Error: %s", e)
+            print(f"❌ Exception running command: {command}")
+            print(f"Error: {e}")
             return None
 
     def backup_current_state(self):
@@ -61,7 +61,7 @@ class Phase3CSmartResolver:
             shutil.rmtree(backup_dir)
         
         shutil.copytree(opal2_dir, backup_dir)
-        print("✅ Backup created: %s", backup_dir)
+        print(f"✅ Backup created: {backup_dir}")
         return backup_dir
 
     def extract_valuable_changes(self, branch_name):
@@ -120,13 +120,13 @@ class Phase3CSmartResolver:
             
             try:
                 if status == 'A':  # Added file
-                    print("  + Adding: %s", file_path)
+                    print(f"  + Adding: {file_path}")
                     self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
                     self.run_command(f"git add {file_path}")
                     applied_files.append(file_path)
                     
                 elif status == 'M':  # Modified file  
-                    print("  ~ Modifying: %s", file_path)
+                    print(f"  ~ Modifying: {file_path}")
                     # For modified files, we'll prefer the branch version for non-core files
                     if not any(core in file_path for core in ['src/core/', 'modules/opal2/']):
                         self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
@@ -134,13 +134,13 @@ class Phase3CSmartResolver:
                         applied_files.append(file_path)
                         
                 elif status == 'D':  # Deleted file
-                    print("  - Deleting: %s", file_path)
+                    print(f"  - Deleting: {file_path}")
                     if Path(self.workspace_root / file_path).exists():
                         self.run_command(f"git rm {file_path}", False)
                         applied_files.append(file_path)
                         
             except Exception as e:
-                print("⚠️  Failed to apply {file_path}: %s", e)
+                print(f"⚠️  Failed to apply {file_path}: {e}")
                 continue
         
         if applied_files:
@@ -216,9 +216,9 @@ class EnhancedPluginManager(PluginManager):
 # Export enhanced manager
 __all__ = ["EnhancedPluginManager"]
 '''
-            
+
             enhancement_file.write_text(enhancement_content)
-            print("✅ Created enhancement layer: %s", enhancement_file)
+            print(f"✅ Created enhancement layer: {enhancement_file}")
             return str(enhancement_file)
         
         return None
@@ -227,7 +227,7 @@ __all__ = ["EnhancedPluginManager"]
         """Smart resolution strategy for a single branch"""
         print("")
 # 🎯 SMART RESOLUTION: %s", branch_name)
-        
+
         resolution_record = {
             "branch": branch_name,
             "start_time": datetime.now().isoformat(),
@@ -286,7 +286,7 @@ __all__ = ["EnhancedPluginManager"]
         except Exception as e:
             resolution_record["status"] = "error"
             resolution_record["error"] = str(e)
-            print("❌ Smart resolution error: %s", e)
+            print(f"❌ Smart resolution error: {e}")
             
         resolution_record["end_time"] = datetime.now().isoformat()
         return resolution_record
@@ -307,8 +307,7 @@ __all__ = ["EnhancedPluginManager"]
         successful_resolutions = 0
         
         for branch_name in target_branches:
-            print("")
-%s", '='*60)
+            print("")%s", '='*60")
             resolution_result = self.smart_resolve_branch(branch_name)
             self.results["smart_resolutions"].append(resolution_result)
             
@@ -317,8 +316,8 @@ __all__ = ["EnhancedPluginManager"]
             
         # Final validation
         print(f"\n🎯 PHASE 3C SUMMARY:")
-        print("   Attempted: %s", len(target_branches))
-        print("   Successful: %s", successful_resolutions)
+        print(f"   Attempted: {len(target_branches}"))
+        print(f"   Successful: {successful_resolutions}")
         
         if successful_resolutions > 0:
             print("🧪 Final system validation...")
@@ -343,7 +342,7 @@ __all__ = ["EnhancedPluginManager"]
         
         if successful_resolutions > 0:
             print("\n🚀 Phase 3C completed with smart resolutions!")
-            print("💾 Backup available at: %s", backup_dir)
+            print(f"💾 Backup available at: {backup_dir}")
             return True
         else:
             print("\n⚠️  Phase 3C completed - manual review may be needed")

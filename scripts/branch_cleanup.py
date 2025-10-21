@@ -8,10 +8,10 @@ import re
 
 
 def get_merged_branches():    result = subprocess.run(        ["git", "branch", "-r", "--merged", "origin/main"],
-        capture_output=True,
-        text=True,
-        shell=False,
-        check=False,
+capture_output=True,
+text=True,
+shell=False,
+check=False,
     )
     merged = [
         line.strip() for line in result.stdout.splitlines() if line.strip() and not line.strip().endswith("/main")
@@ -39,10 +39,10 @@ def main():
     backup_pattern = re.compile(r"backup")
     for branch in merged:
         if feature_pattern.search(branch):
-            print("Deleting merged feature branch: %s", branch)
+            print(f"Deleting merged feature branch: {branch}")
             delete_remote_branch(branch)
         elif backup_pattern.search(branch):
-            print("Archiving backup branch: %s", branch)
+            print(f"Archiving backup branch: {branch}")
             archive_branch(branch)
 
 

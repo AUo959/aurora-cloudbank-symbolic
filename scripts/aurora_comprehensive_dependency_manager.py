@@ -132,7 +132,7 @@ class AuroraComprehensiveDependencyManager:
             except Exception as e:
                 pass
 logger.warning("Failed to load config: %s, using defaults", str(e)[:100])
-                
+
         return default_config
         
     def _save_config(self):
@@ -174,8 +174,8 @@ logger.warning("Failed to load config: %s, using defaults", str(e)[:100])
         except Exception as e:
             pass
 logger.warning("Failed to create symbolic anchor: %s", str(e)[:100])
-            return None
-            
+return None
+
     def robust_install_package(self, package_spec: str, package_type: str = "python") -> bool:
         """Install package with robust error handling and retry logic"""
         anchor_id = self._create_symbolic_anchor("install", {
@@ -190,7 +190,7 @@ logger.warning("Failed to create symbolic anchor: %s", str(e)[:100])
             try:
                 pass
 logger.info("Installing %s (attempt %s/%s)", str(package_spec)[:100], str(attempt + 1)[:100], str(max_retries)[:100])
-                
+
                 if package_type == "python":
                     result = self._install_python_package(package_spec, timeout)
                 elif package_type == "node":
@@ -201,24 +201,24 @@ logger.info("Installing %s (attempt %s/%s)", str(package_spec)[:100], str(attemp
                 if result:
                     self.installed_packages.add(package_spec)
 logger.info("Successfully installed %s", str(package_spec)[:100])
-                    return True
-                    
+return True
+
             except subprocess.TimeoutExpired:
                 pass
 logger.warning("Timeout installing %s (attempt %s)", str(package_spec)[:100], str(attempt + 1)[:100])
-                if attempt < max_retries - 1:
+if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)  # Exponential backoff
                     
             except Exception as e:
                 pass
 logger.error("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
-                if attempt < max_retries - 1:
+if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)
                     
         self.failed_packages.add(package_spec)
 logger.error("Failed to install %s after %s attempts", str(package_spec)[:100], str(max_retries)[:100])
-        return False
-        
+return False
+
     def _install_python_package(self, package_spec: str, timeout: int) -> bool:
         """Install Python package with fallback to backup indexes"""
         indexes = [
@@ -248,12 +248,12 @@ logger.error("Failed to install %s after %s attempts", str(package_spec)[:100], 
             except subprocess.TimeoutExpired:
                 pass
 logger.warning("Timeout with index %s", str(index)[:100])
-                continue
-            except Exception as e:
+continue
+except Exception as e:
                 pass
 logger.warning("Failed with index %s: %s", str(index)[:100], str(e)[:100])
-                continue
-                
+continue
+
         return False
         
     def _install_node_package(self, package_spec: str, timeout: int) -> bool:
@@ -280,12 +280,12 @@ logger.warning("Failed with index %s: %s", str(index)[:100], str(e)[:100])
             except subprocess.TimeoutExpired:
                 pass
 logger.warning("Timeout with registry %s", str(registry)[:100])
-                continue
-            except Exception as e:
+continue
+except Exception as e:
                 pass
 logger.warning("Failed with registry %s: %s", str(registry)[:100], str(e)[:100])
-                continue
-                
+continue
+
         return False
         
     def install_requirements(self, requirements_file: str = "requirements.txt") -> Dict[str, Any]:
@@ -301,14 +301,14 @@ logger.warning("Failed with registry %s: %s", str(registry)[:100], str(e)[:100])
         requirements_path = self.project_root / requirements_file
         if not requirements_path.exists():
 logger.error("Requirements file not found: %s", str(requirements_file)[:100])
-            return results
-            
+return results
+
         with open(requirements_path, 'r') as f:
             requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
             
         results["total"] = len(requirements)
 logger.info("Installing %s packages from %s", str(results['total'])[:100], str(requirements_file)[:100])
-        
+
         for requirement in requirements:
             if self.robust_install_package(requirement, "python"):
                 results["installed"].append(requirement)
@@ -318,8 +318,8 @@ logger.info("Installing %s packages from %s", str(results['total'])[:100], str(r
         results["success_rate"] = len(results["installed"]) / results["total"] if results["total"] > 0 else 0
         
 logger.info("Installation complete: %s/%s packages installed", str(len(results['installed']))[:100], str(results['total'])[:100])
-        return results
-        
+return results
+
     def check_dependency_health(self) -> Dict[str, Any]:
         """Comprehensive dependency health check"""
         health_report = {
@@ -333,7 +333,7 @@ logger.info("Installation complete: %s/%s packages installed", str(len(results['
         # Check Python dependencies
         try:
             result = subprocess.run([sys.executable, "-m", "pip", "list"], 
-                                  capture_output=True, text=True, timeout=30)
+            capture_output=True, text=True, timeout=30)
             if result.returncode == 0:
                 python_packages = len([line for line in result.stdout.split('\n') if line.strip() and not line.startswith('Package')])
                 health_report["python"]["packages"] = python_packages
@@ -350,7 +350,7 @@ logger.info("Installation complete: %s/%s packages installed", str(len(results['
         if package_json.exists():
             try:
                 result = subprocess.run(["npm", "list", "--depth=0"], 
-                                      capture_output=True, text=True, timeout=30, cwd=self.project_root)
+                capture_output=True, text=True, timeout=30, cwd=self.project_root)
                 # npm list returns non-zero for missing packages, but that's ok
                 node_packages = len([line for line in result.stdout.split('\n') if '├──' in line or '└──' in line])
                 health_report["node"]["packages"] = node_packages
@@ -385,7 +385,7 @@ logger.info("Installation complete: %s/%s packages installed", str(len(results['
         # Check Python with pip-audit if available
         try:
             result = subprocess.run([sys.executable, "-m", "pip_audit", "--format=json"], 
-                                  capture_output=True, text=True, timeout=60)
+            capture_output=True, text=True, timeout=60)
             if result.returncode == 0:
                 audit_data = json.loads(result.stdout)
                 security_report["vulnerabilities"] += len(audit_data.get("vulnerabilities", []))
@@ -397,7 +397,7 @@ logger.info("Installation complete: %s/%s packages installed", str(len(results['
         if (self.project_root / "package.json").exists():
             try:
                 result = subprocess.run(["npm", "audit", "--json"], 
-                                      capture_output=True, text=True, timeout=60, cwd=self.project_root)
+                capture_output=True, text=True, timeout=60, cwd=self.project_root)
                 if result.stdout:
                     audit_data = json.loads(result.stdout)
                     security_report["vulnerabilities"] += audit_data.get("metadata", {}).get("vulnerabilities", {}).get("total", 0)
@@ -419,26 +419,26 @@ logger.info("Installation complete: %s/%s packages installed", str(len(results['
         # Check outdated Python packages
         try:
             result = subprocess.run([sys.executable, "-m", "pip", "list", "--outdated", "--format=json"], 
-                                  capture_output=True, text=True, timeout=60)
+            capture_output=True, text=True, timeout=60)
             if result.returncode == 0:
                 outdated_data = json.loads(result.stdout)
                 update_report["python_outdated"] = outdated_data
         except Exception as e:
             pass
 logger.warning("Failed to check outdated Python packages: %s", str(e)[:100])
-            
+
         # Check outdated Node.js packages
         if (self.project_root / "package.json").exists():
             try:
                 result = subprocess.run(["npm", "outdated", "--json"], 
-                                      capture_output=True, text=True, timeout=60, cwd=self.project_root)
+                capture_output=True, text=True, timeout=60, cwd=self.project_root)
                 if result.stdout:
                     outdated_data = json.loads(result.stdout)
                     update_report["node_outdated"] = list(outdated_data.keys())
             except Exception as e:
                 pass
 logger.warning("Failed to check outdated Node.js packages: %s", str(e)[:100])
-                
+
         # Generate recommendations
         total_outdated = len(update_report["python_outdated"]) + len(update_report["node_outdated"])
         if total_outdated > 0:
@@ -465,7 +465,7 @@ logger.warning("Failed to check outdated Node.js packages: %s", str(e)[:100])
         try:
             pass
 logger.info("🚀 Starting comprehensive dependency update (dry_run=%s)", str(dry_run)[:100])
-            
+
             # Step 1: Health check
             self.logger.info("📊 Performing initial health check...")
             workflow_result["health_check"] = self.check_dependency_health()
@@ -496,7 +496,7 @@ logger.info("🚀 Starting comprehensive dependency update (dry_run=%s)", str(dr
         except Exception as e:
             workflow_result["errors"].append(str(e))
 logger.error("❌ Comprehensive update failed: %s", str(e)[:100])
-            
+
         workflow_result["end_time"] = datetime.now().isoformat()
         return workflow_result
         
@@ -507,7 +507,7 @@ logger.error("❌ Comprehensive update failed: %s", str(e)[:100])
         # Apply Python security fixes
         try:
             result = subprocess.run([sys.executable, "-m", "pip", "install", "--upgrade", "--user", "pip"], 
-                                  capture_output=True, text=True, timeout=120)
+            capture_output=True, text=True, timeout=120)
             if result.returncode == 0:
                 security_result["python_fixes"].append("Updated pip to latest version")
         except Exception as e:
@@ -517,7 +517,7 @@ logger.error("❌ Comprehensive update failed: %s", str(e)[:100])
         if (self.project_root / "package.json").exists():
             try:
                 result = subprocess.run(["npm", "audit", "fix"], 
-                                      capture_output=True, text=True, timeout=120, cwd=self.project_root)
+                capture_output=True, text=True, timeout=120, cwd=self.project_root)
                 if result.returncode == 0:
                     security_result["node_fixes"].append("Applied npm audit fix")
             except Exception as e:
@@ -548,7 +548,7 @@ Environment=PATH=/usr/local/bin:/usr/bin:/bin
 [Install]
 WantedBy=multi-user.target
 """
-        
+
         timer_content = f"""[Unit]
 Description=Aurora CloudBank Dependency Manager Timer
 Requires=aurora-dependency-manager.service
@@ -560,7 +560,7 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 """
-        
+
         try:
             service_dir = Path.home() / ".config" / "systemd" / "user"
             service_dir.mkdir(parents=True, exist_ok=True)
@@ -572,7 +572,7 @@ WantedBy=timers.target
         except Exception as e:
             pass
 logger.warning("Failed to set up automated scheduling: %s", str(e)[:100])
-            
+
     def generate_status_report(self) -> str:
         """Generate comprehensive status report"""
         health = self.check_dependency_health()
@@ -599,7 +599,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
    
 # 💡 Recommendations:
 """
-        
+
         for rec in updates['update_recommendations']:
             report += f"   • {rec}\n"
             
@@ -630,7 +630,7 @@ def main():
     if args.install:
         print("🔧 Installing dependencies...")
         results = manager.install_requirements()
-        print("✅ Installed %s/{results[", len(results['installed']))
+        print(f"✅ Installed %s/{results[", len(results['installed']))
         
     elif args.update:
         print("⬆️ Updating dependencies...")
@@ -640,12 +640,12 @@ def main():
         else:
             print("❌ Update completed with errors")
             for error in results['errors']:
-                print("   Error: %s", error)
+                print(f"   Error: {error}")
                 
     elif args.health_check:
         print("🏥 Performing health check...")
         health = manager.check_dependency_health()
-        print("Overall Health: %s", health['overall_health'].upper())
+        print(f"Overall Health: {health['overall_health'].upper(}"))
         
     elif args.status:
         print(manager.generate_status_report())

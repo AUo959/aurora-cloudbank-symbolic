@@ -32,17 +32,17 @@ async def demo_tool_discovery(agent):
     print("-" * 30)
 
     tools_info = await agent.discover_tools()
-    print("Available tools: %s", len(tools_info['tools']))
+    print(f"Available tools: {len(tools_info['tools']}"))
 
     for tool_name, tool_def in tools_info['tools'].items():
         print("")
 # 🛠️  %s", tool_name)
-        print("   Description: %s", tool_def['description'])
-        print("   Parameters: %s", list(tool_def['parameters']['properties'].keys()))
+print(f"   Description: {tool_def['description']}")
+print(f"   Parameters: {list(tool_def['parameters']['properties'].keys(}")))
 
     print("")
 Symbolic Anchors: %s", tools_info['symbolic_anchors']['anchor_seed'])
-    print("Ethics Protocol: %s", tools_info['symbolic_anchors']['ethics_protocol'])
+    print(f"Ethics Protocol: {tools_info['symbolic_anchors']['ethics_protocol']}")
     print()
 
 async def demo_geometric_algebra(agent):
@@ -63,9 +63,9 @@ Test {i}: %s {case[", case['expression_a'])
         result = await agent.execute_tool("geometric_algebra", case)
         if result['success']:
             geo_result = result['result']['geometric_result']
-            print("Result: %s", geo_result)
+            print(f"Result: {geo_result}")
         else:
-            print("Error: %s", result['error'])
+            print(f"Error: {result['error']}")
     print()
 
 async def demo_session_management(agent):
@@ -104,7 +104,7 @@ async def demo_session_management(agent):
 
             if get_result['success']:
                 state = get_result['result']['state']['state']
-                print("✅ Session state: %s", state)
+                print(f"✅ Session state: {state}")
 
                 # Clean up - delete session
                 delete_result = await agent.execute_tool("session_management", {
@@ -130,15 +130,15 @@ async def demo_symbolic_processing(agent):
     for i, op in enumerate(operations, 1):
         print("")
 Operation {i}: %s", op['operation'])
-        print("Input: %s", op['data'])
+print(f"Input: {op['data']}")
 
         result = await agent.execute_tool("symbolic_processing", op)
         if result['success']:
             processed = result['result']
             print("Status: ✅ %s", processed['symbolic_validation'])
-            print("Context: %s", processed['anchor_context'])
+            print(f"Context: {processed['anchor_context']}")
         else:
-            print("Error: %s", result['error'])
+            print(f"Error: {result['error']}")
     print()
 
 async def demo_system_status(agent):
@@ -155,13 +155,13 @@ Status level: %s", level)
         result = await agent.execute_tool("system_status", {"detail_level": level})
         if result['success']:
             status = result['result']
-            print("Agent Status: %s", status['agent_status'])
-            print("Active Sessions: %s", status['active_sessions'])
-            print("Available Tools: %s", len(status['available_tools']))
+            print(f"Agent Status: {status['agent_status']}")
+            print(f"Active Sessions: {status['active_sessions']}")
+            print(f"Available Tools: {len(status['available_tools']}"))
 
             if level == "detailed":
-                print("Capabilities: %s", len(status.get('capabilities', [])))
-                print("Sonnet4 Status: %s", status.get('sonnet4_status', 'unknown'))
+                print(f"Capabilities: {len(status.get('capabilities', []}")))
+                print(f"Sonnet4 Status: {status.get('sonnet4_status', 'unknown'}"))
 
             if level == "full":
                 print("Tool Registry: %s))}", len(status.get('tool_registry', {)
@@ -186,7 +186,7 @@ async def demo_error_handling(agent):
     if not result['success']:
         print("Error handled gracefully ✅")
         suggestions = result.get('recovery_suggestions', [])
-        print("Recovery suggestions: %s", len(suggestions))
+        print(f"Recovery suggestions: {len(suggestions}"))
         for suggestion in suggestions[:2]:  # Show first 2 suggestions
             print("  • %s", suggestion)
     else:
@@ -200,7 +200,7 @@ async def main():
     try:
         # Initialize agent
         agent = ChatGPTAgentModeIntegration()
-        print("🚀 Agent initialized with status: %s", agent.agent_status)
+        print(f"🚀 Agent initialized with status: {agent.agent_status}")
         print()
 
         # Run demos
@@ -215,17 +215,17 @@ async def main():
         final_status = await agent.get_agent_status()
         print("🎯 Final Integration Status")
         print("-" * 30)
-        print("Mode: %s", final_status['agent_mode'])
-        print("Version: %s", final_status['version'])
-        print("Tools Available: %s", final_status['tools_available'])
-        print("DLP Compliance: %s", final_status['dlp_compliance'])
-        print("Integration: %s", final_status['integration_status'])
+        print(f"Mode: {final_status['agent_mode']}")
+        print(f"Version: {final_status['version']}")
+        print(f"Tools Available: {final_status['tools_available']}")
+        print(f"DLP Compliance: {final_status['dlp_compliance']}")
+        print(f"Integration: {final_status['integration_status']}")
 
         print("\n🎉 Demo completed successfully!")
         print("Aurora CloudBank is ready for ChatGPT Agent Mode integration.")
 
     except Exception as e:
-        print("❌ Demo failed: %s", str(e))
+        print(f"❌ Demo failed: {str(e}"))
         traceback.print_exc()
         return 1
 

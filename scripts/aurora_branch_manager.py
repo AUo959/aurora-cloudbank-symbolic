@@ -58,22 +58,22 @@ class BranchManager:
         try:
             # Get all remote branches with dates
         cmd = [
-                "git",
-                "for-each-re",
-                "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
-                "refs/remotes/origin/",
+        "git",
+        "for-each-re",
+        "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
+        "refs/remotes/origin/",
             ]
         result = subprocess.run(                cmd,
-                capture_output=True,
+        capture_output=True,
         text=True,
-                cwd=self.repo_path,
+        cwd=self.repo_path,
         shell=False,
-                check=False,
+        check=False,
             )
 
 
         if result.returncode != 0:
-                print("Error getting branch info: %s", result.stderr)
+                print(f"Error getting branch info: {result.stderr}")
 
         return []
 
@@ -91,7 +91,7 @@ class BranchManager:
                         pass
         commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
-                    except ValueError:
+        except ValueError:
                         pass
         days_old = 0
 
@@ -100,24 +100,24 @@ class BranchManager:
 
 
         branches.append(
-                        {
-                            "name": branch_name,
-                            "date": date_str,
-                            "days_old": days_old,
-                            "author": author,
-                            "subject": (subject[:50] + "..." if len(subject) > 50 else subject),
-                            "is_merged": is_merged,
-                            "category": self.categorize_branch(branch_name),
-                            "action": self.recommend_action(branch_name, days_old, is_merged),
-                        }
-                    )
+        {
+        "name": branch_name,
+        "date": date_str,
+        "days_old": days_old,
+        "author": author,
+        "subject": (subject[:50] + "..." if len(subject) > 50 else subject),
+        "is_merged": is_merged,
+        "category": self.categorize_branch(branch_name),
+        "action": self.recommend_action(branch_name, days_old, is_merged),
+        }
+        )
 
 
         return sorted(branches, key=lambda x: x["days_old"], reverse=True)
 
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error analyzing branches: %s", e)
+            print(f"Error analyzing branches: {e}")
 
         return []
 
@@ -229,12 +229,12 @@ class BranchManager:
                             branch_name.replace("origin/", ""),
                         ]
         result = subprocess.run(
-                            cmd,                        result = subprocess.run(
+        cmd,                        result = subprocess.run(
         text=True,
-                            cwd=self.repo_path,
+        cwd=self.repo_path,
         shell=False,
-                            check=False,
-                        )
+        check=False,
+        )
 
 
         if result.returncode == 0:
@@ -257,13 +257,13 @@ class BranchManager:
                     try:
                         pass
         cmd = ["git", "tag", tag_name, branch_name]
-                        subprocess.run(
-                            cmd,
-                            capture_output=True,
+        subprocess.run(
+        cmd,
+        capture_output=True,
         cwd=self.repo_path,
-                            shell=False,
+        shell=False,
         check=False,
-                        )
+        )
 
         summary["archived"].append(f"{branch_name} -> {tag_name}")
 

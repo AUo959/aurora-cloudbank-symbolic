@@ -104,7 +104,7 @@ class AuroraAutomatedUpdateScheduler:
             except Exception as e:
                 pass
 logger.warning("Failed to load config: %s", str(e)[:100])
-                
+
         return default_config
         
     def _save_config(self):
@@ -128,7 +128,7 @@ logger.warning("Failed to load config: %s", str(e)[:100])
         except ImportError as e:
             pass
 logger.warning("Could not import dependency managers: %s", str(e)[:100])
-            
+
     def schedule_all_tasks(self):
         """Schedule all automated tasks"""
         self.logger.info("🕐 Setting up automated update schedules...")
@@ -161,8 +161,8 @@ logger.warning("Could not import dependency managers: %s", str(e)[:100])
                 
                 if health["overall_health"] in ["critical", "degraded"]:
 logger.warning("Health check failed: %s", str(health['overall_health'])[:100])
-                    self._trigger_emergency_response()
-                else:
+self._trigger_emergency_response()
+else:
                     self.logger.info("✅ Daily health check passed")
                     
                 # Create snapshot if persistence is enabled
@@ -173,8 +173,8 @@ logger.warning("Health check failed: %s", str(health['overall_health'])[:100])
         except Exception as e:
             pass
 logger.error("Health check failed: %s", str(e)[:100])
-            self._send_notification("Health Check Failed", str(e))
-            
+self._send_notification("Health Check Failed", str(e))
+
     def _run_security_update(self):
         """Run weekly security update"""
         self.logger.info("🔒 Running weekly security update...")
@@ -186,7 +186,7 @@ logger.error("Health check failed: %s", str(e)[:100])
                 
                 if security_report["vulnerabilities"] > 0:
 logger.warning("Found %s vulnerabilities", str(security_report['vulnerabilities'])[:100])
-                    
+
                     # Create GitWiz branch if enabled
                     if self.config["gitwiz_integration"]["enabled"]:
                         self._create_update_branch("security-updates")
@@ -204,8 +204,8 @@ logger.warning("Found %s vulnerabilities", str(security_report['vulnerabilities'
         except Exception as e:
             pass
 logger.error("Security update failed: %s", str(e)[:100])
-            self._send_notification("Security Update Failed", str(e))
-            
+self._send_notification("Security Update Failed", str(e))
+
     def _run_full_update(self):
         """Run monthly full dependency update"""
         self.logger.info("⬆️ Running monthly full dependency update...")
@@ -217,7 +217,7 @@ logger.error("Security update failed: %s", str(e)[:100])
                     snapshot = self.persistence_manager.create_dependency_snapshot()
                     backup_file = self.persistence_manager.save_snapshot(snapshot)
 logger.info("Backup created: %s", str(backup_file)[:100])
-                    
+
                 # Create GitWiz branch if enabled
                 if self.config["gitwiz_integration"]["enabled"]:
                     self._create_update_branch("monthly-updates")
@@ -247,8 +247,8 @@ logger.info("Backup created: %s", str(backup_file)[:100])
         except Exception as e:
             pass
 logger.error("Full update failed: %s", str(e)[:100])
-            self._send_notification("Full Update Failed", str(e))
-            
+self._send_notification("Full Update Failed", str(e))
+
     def _trigger_emergency_response(self):
         """Trigger emergency dependency fixes"""
         self.logger.warning("🚨 Triggering emergency dependency response...")
@@ -272,7 +272,7 @@ logger.error("Full update failed: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.error("Emergency response failed: %s", str(e)[:100])
-            
+
     def _create_update_branch(self, branch_name: str):
         """Create Git branch for updates"""
         try:
@@ -280,47 +280,47 @@ logger.error("Emergency response failed: %s", str(e)[:100])
             full_branch_name = f"{branch_name}_{timestamp}"
             
             subprocess.run(["git", "checkout", "-b", full_branch_name], 
-                         cwd=self.project_root, check=True, capture_output=True)
+            cwd=self.project_root, check=True, capture_output=True)
             
 logger.info("Created update branch: %s", str(full_branch_name)[:100])
-            
+
         except subprocess.CalledProcessError as e:
             pass
 logger.warning("Failed to create branch: %s", str(e)[:100])
-            
+
     def _commit_updates(self, message: str):
         """Commit dependency updates"""
         try:
             subprocess.run(["git", "add", "."], cwd=self.project_root, check=True, capture_output=True)
             subprocess.run(["git", "commit", "-m", message], 
-                         cwd=self.project_root, check=True, capture_output=True)
+            cwd=self.project_root, check=True, capture_output=True)
             
 logger.info("Committed updates: %s", str(message)[:100])
-            
+
         except subprocess.CalledProcessError as e:
             pass
 logger.warning("Failed to commit updates: %s", str(e)[:100])
-            
+
     def _run_validation_tests(self) -> bool:
         """Run validation tests after updates"""
         try:
             # Try to run pytest if available
             result = subprocess.run([sys.executable, "-m", "pytest", "--tb=short", "-v"], 
-                                  cwd=self.project_root, capture_output=True, text=True, timeout=300)
+            cwd=self.project_root, capture_output=True, text=True, timeout=300)
             
             if result.returncode == 0:
                 self.logger.info("✅ Validation tests passed")
                 return True
             else:
 logger.warning("❌ Validation tests failed: %s", str(result.stderr)[:100])
-                return False
-                
+return False
+
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             pass
 logger.warning("Could not run validation tests: %s", str(e)[:100])
-            # If we can't run tests, assume it's ok
-            return True
-            
+# If we can't run tests, assume it's ok
+return True
+
     def _rollback_updates(self):
         """Rollback dependency updates"""
         try:
@@ -332,7 +332,7 @@ logger.warning("Could not run validation tests: %s", str(e)[:100])
         except Exception as e:
             pass
 logger.error("Rollback failed: %s", str(e)[:100])
-            
+
     def _send_notification(self, title: str, message: str):
         """Send notification about update status"""
         if not self.config["notification"]["enabled"]:
@@ -347,7 +347,7 @@ logger.error("Rollback failed: %s", str(e)[:100])
         # Log notification
         if "log" in self.config["notification"]["methods"]:
 logger.info("NOTIFICATION: %s - %s", str(title)[:100], str(message)[:100])
-            
+
         # Save to file
         if "file" in self.config["notification"]["methods"]:
             notifications_file = self.project_root / ".aurora" / "notifications.json"
@@ -384,8 +384,8 @@ logger.info("NOTIFICATION: %s - %s", str(title)[:100], str(message)[:100])
             except Exception as e:
                 pass
 logger.error("Scheduler error: %s", str(e)[:100])
-                time.sleep(300)  # Wait 5 minutes before retrying
-                
+time.sleep(300)  # Wait 5 minutes before retrying
+
     def run_once(self, task_name: str):
         """Run a specific task once"""
         task_map = {
@@ -397,10 +397,10 @@ logger.error("Scheduler error: %s", str(e)[:100])
         
         if task_name in task_map:
 logger.info("Running task: %s", str(task_name)[:100])
-            task_map[task_name]()
-        else:
+task_map[task_name]()
+else:
 logger.error("Unknown task: %s", str(task_name)[:100])
-            
+
     def generate_scheduler_status(self) -> str:
         """Generate scheduler status report"""
         next_runs = []
@@ -424,7 +424,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
    Status: {'✅ Enabled' if self.config['notification']['enabled'] else '❌ Disabled'}
    Methods: {', '.join(self.config['notification']['methods'])}
 """
-        
+
         return report
 
 def main():
@@ -434,7 +434,7 @@ def main():
     parser = argparse.ArgumentParser(description="Aurora CloudBank Automated Update Scheduler")
     parser.add_argument("--start", action="store_true", help="Start the scheduler daemon")
     parser.add_argument("--run-task", choices=["health_check", "security_update", "full_update", "emergency_response"], 
-                       help="Run a specific task once")
+    help="Run a specific task once")
     parser.add_argument("--status", action="store_true", help="Show scheduler status")
     parser.add_argument("--setup", action="store_true", help="Set up scheduler configuration")
     

@@ -75,7 +75,7 @@ class SecurityRemediationEngine:
         }
         self.remediation_log.append(issue_data)
 logger.error("❌ SECURITY ISSUE: %s (%s:%s)", str(message)[:100], str(file_path)[:100], str(line_num)[:100])
-        
+
     def log_fix(self, message: str, file_path: str = ""):
         """Log successful fix with DLP tracking"""
         self.issues_fixed += 1
@@ -122,7 +122,7 @@ logger.info("🔧 FIXED: %s (%s)", str(message)[:100], str(file_path)[:100])
                 continue
                 
 logger.info("🔍 Checking %s for log injection...", str(file_path)[:100])
-            
+
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
                 
@@ -172,7 +172,7 @@ def sanitize_log_input(input_str):
     sanitized = input_str.replace('\\n', '\\\\n').replace('\\r', '\\\\r')
     return re.sub(r'[\\x00-\\x1f\\x7f-\\x9f]', '', sanitized)[:200]
 '''
-                
+
                 import_section.append('import re  # Added for security')
                 import_section.append(secure_helper)
                 
@@ -251,7 +251,7 @@ class AuroraSecureHelpers(SecureHelpers):
         
         return self.sanitize_input(message)
 '''
-            
+
             with open(enabled_file, 'a') as f:
                 f.write(aurora_integration)
             
@@ -380,7 +380,7 @@ class AuroraSecurityMiddleware {
 
 module.exports = AuroraSecurityMiddleware;
 '''
-        
+
         os.makedirs('middleware', exist_ok=True)
         with open('middleware/aurora-security-middleware-enhanced.js', 'w') as f:
             f.write(middleware_content)
@@ -391,7 +391,7 @@ module.exports = AuroraSecurityMiddleware;
         """Run comprehensive security remediation"""
         self.logger.info("🚀 Starting Aurora CloudBank Security Remediation...")
 logger.info("📊 Target: Address 362 GitHub security alerts")
-        
+
         # Phase 1: Critical fixes
         self.logger.info("🔧 PHASE 1: Critical Security Fixes")
         self.fix_log_injection_vulnerabilities()
@@ -409,7 +409,7 @@ logger.info("📊 Target: Address 362 GitHub security alerts")
         self.logger.info("✅ Security remediation completed!")
 logger.info("📊 Issues found: %s", str(self.issues_found)[:100])
 logger.info("🔧 Issues fixed: %s", str(self.issues_fixed)[:100])
-        
+
     def generate_remediation_report(self):
         """Generate comprehensive remediation report"""
         report = {

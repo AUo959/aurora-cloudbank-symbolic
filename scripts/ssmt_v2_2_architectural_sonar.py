@@ -115,7 +115,7 @@ class SSMTArchitecturalSonar:
         try:
             print("")
 # 🔍 ARCHITECTURAL SONAR: %s", branch_name)
-            
+
             # Get branch files for analysis
             diff_result = self.run_command(f"git diff --name-only main..origin/{branch_name}", False)
             if not diff_result or diff_result.returncode != 0:
@@ -131,7 +131,7 @@ class SSMTArchitecturalSonar:
                 if any(critical in file_path for critical in self.ssmt_patterns["critical_architecture_files"]):
                     file_analysis = self.analyze_file_architecture(branch_name, file_path)
                     file_analyses.append(file_analysis)
-                    print("   📊 {file_path}: %s", file_analysis.get('quality_score', 'N/A'))
+                    print(f"   📊 {file_path}: {file_analysis.get('quality_score', 'N/A'}"))
             
             analysis["file_analyses"] = file_analyses
             analysis["architectural_metrics"] = self.compute_branch_architectural_metrics(file_analyses)
@@ -141,12 +141,12 @@ class SSMTArchitecturalSonar:
             # Generate integration recommendations
             analysis["integration_recommendations"] = self.generate_integration_recommendations(analysis)
             
-            print("   🎯 Quality Score: %s", analysis['architectural_metrics'].get('overall_quality_score', 'N/A'))
-            print("   🏗️ Architecture Risk: %s", analysis['entropy_assessment'].get('risk_level', 'unknown'))
+            print(f"   🎯 Quality Score: {analysis['architectural_metrics'].get('overall_quality_score', 'N/A'}"))
+            print(f"   🏗️ Architecture Risk: {analysis['entropy_assessment'].get('risk_level', 'unknown'}"))
             
         except Exception as e:
             analysis["error"] = str(e)
-            print("   ❌ Analysis error: %s", e)
+            print(f"   ❌ Analysis error: {e}")
         
         analysis["end_time"] = datetime.now().isoformat()
         return analysis
@@ -244,7 +244,7 @@ class SSMTArchitecturalSonar:
             
             # SSMT compliance ratio
             compliant_files = sum(1 for fa in file_analyses 
-                                if fa.get("ssmt_compliance") in ["good", "not_applicable"])
+            if fa.get("ssmt_compliance") in ["good", "not_applicable"])
             metrics["ssmt_compliance_ratio"] = compliant_files / len(file_analyses) if file_analyses else 0
             
             # Overall quality score calculation
@@ -381,11 +381,11 @@ class SSMTArchitecturalSonar:
         # Summary report
         total_branches = len(self.analysis_targets)
         high_quality = sum(1 for assessment in self.results["enhanced_branch_assessments"] 
-                          if assessment.get("architectural_metrics", {}).get("overall_quality_score", 0) > 70)
+        if assessment.get("architectural_metrics", {}).get("overall_quality_score", 0) > 70)
         
         print(f"\n🎯 SSMT v2.2 ARCHITECTURAL ANALYSIS COMPLETE:")
-        print("   Branches analyzed: %s", total_branches)
-        print("   High-quality branches: %s", high_quality)
+        print(f"   Branches analyzed: {total_branches}")
+        print(f"   High-quality branches: {high_quality}")
         print("   Analysis success rate: %s%", (len([a for a in self.results['enhanced_branch_assessments'] if 'error' not in a]) / total_branches * 100):.1f)
         
         print(f"\n📄 Detailed results saved to: SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json")

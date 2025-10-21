@@ -145,7 +145,7 @@ class RepositoryHealthMonitor:
                 metrics["git_status"] = "dirty" if result.stdout.strip() else "clean"
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error collecting metrics: %s", e)
+            print(f"Error collecting metrics: {e}")
 
         return metrics
 
@@ -164,7 +164,7 @@ class RepositoryHealthMonitor:
 
             return history
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error loading history: %s", e)
+            print(f"Error loading history: {e}")
             return []
 
     def save_history(self, history: List[Dict]):
@@ -173,7 +173,7 @@ class RepositoryHealthMonitor:
             with open(self.history_file, "w", encoding="utf-8") as f:
                 json.dump(history, f, indent=2)
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error saving history: %s", e)
+            print(f"Error saving history: {e}")
 
     def analyze_trends(self, history: List[Dict]) -> Dict:
         """Analyze trends from historical data."""
@@ -358,14 +358,14 @@ class RepositoryHealthMonitor:
             report_path = self.repo_path / "REPOSITORY_HEALTH_MONITOR.md"
             with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report)
-            print("📄 Health report saved to: %s", report_path)
+            print(f"📄 Health report saved to: {report_path}")
 
         # Print summary
         print("\n📊 Health Check Summary:")
         print("  Repository Size: %sMB", metrics['size_mb'])
-        print("  File Count: %s", metrics['file_count']:,)
-        print("  Active Branches: %s", metrics['branch_count'])
-        print("  Alerts: %s", len(alerts))
+        print(f"  File Count: {metrics['file_count']:,}")
+        print(f"  Active Branches: {metrics['branch_count']}")
+        print(f"  Alerts: {len(alerts}"))
 
         if alerts:
             print("\n🚨 Active Alerts:")

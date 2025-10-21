@@ -38,7 +38,7 @@ def test_api_imports():
         return True
 
     except Exception as e:
-        print("❌ Import failed: %s", e)
+        print(f"❌ Import failed: {e}")
         return False
 
 

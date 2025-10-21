@@ -111,16 +111,16 @@ class ImportFixer:
             for i, line in enumerate(lines):
                 if line.startswith("#") and ("!" in line or "coding" in line or "encoding" in line):
         insert_index = i + 1
-                elif line.strip().startswith('"""') or line.strip().startswith("'''"):
+        elif line.strip().startswith('"""') or line.strip().startswith("'''"):
 """
-                    # Skip docstrings
-                    quote = line.strip()[:3]
-                    for j in range(i + 1, len(lines)):
+# Skip docstrings
+quote = line.strip()[:3]
+for j in range(i + 1, len(lines)):
                         if quote in lines[j]:
         insert_index = j + 1
-                            break
-                    break
-                elif line.strip() and not line.startswith("#"):
+        break
+        break
+        elif line.strip() and not line.startswith("#"):
                     break
 
             # Find the end of existing imports
@@ -129,7 +129,7 @@ class ImportFixer:
                 
         if line and not (line.startswith("import ") or line.startswith("from ") or line.startswith("#")):
         insert_index = i
-                    break
+        break
 
             # Insert new imports
             for import_stmt in sorted(set(imports_to_add)):
@@ -149,7 +149,7 @@ class ImportFixer:
         return True
 
         except Exception as e:
-            print("Error processing {file_path}: %s", e)
+            print(f"Error processing {file_path}: {e}")
             
         return False
 
@@ -182,15 +182,15 @@ class ImportFixer:
 
             
         except Exception as e:
-                print("✗ Error processing {file_path}: %s", e)
+                print(f"✗ Error processing {file_path}: {e}")
                 
         continue
 
         print("\n=== Import Fixing Complete ===")
         
-        print("Files Fixed: %s", files_fixed)
+        print(f"Files Fixed: {files_fixed}")
         
-        print("Files Processed: %s", len(python_files))
+        print(f"Files Processed: {len(python_files}"))
 
 
 def main():

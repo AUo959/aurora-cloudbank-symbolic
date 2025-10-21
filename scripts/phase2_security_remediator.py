@@ -191,7 +191,7 @@ class Phase2SecurityRemediator:
     return sanitized.substring(0, 1000);
   }
 '''
-            
+
             # Insert after the imports section if not already present
             if 'sanitizeInput' not in content and 'Enhanced multi-character sanitization' not in content:
                 # Find a good insertion point
@@ -231,14 +231,14 @@ class Phase2SecurityRemediator:
                 print("  ✅ All tests passing - fixes validated")
                 return True
             else:
-                print("  ⚠️ Some tests failing: %s", result.stdout[-200:])
+                print(f"  ⚠️ Some tests failing: {result.stdout[-200:]}")
                 return False
                 
         except subprocess.TimeoutExpired:
             print("  ⚠️ Test validation timed out")
             return False
         except Exception as e:
-            print("  ⚠️ Test validation failed: %s", e)
+            print(f"  ⚠️ Test validation failed: {e}")
             return False
     
     def generate_phase2_report(self):
@@ -271,7 +271,7 @@ class Phase2SecurityRemediator:
 ---
 *Aurora CloudBank Security - Phase 2 Complete*
 """
-        
+
         with open('PHASE2_SECURITY_REPORT.md', 'w') as f:
             f.write(report)
         
@@ -288,7 +288,7 @@ class Phase2SecurityRemediator:
         for file_path in vulnerable_files:
             print("")
 # 🔧 Processing: %s", file_path)
-            if self.fix_log_injection_in_file(file_path):
+if self.fix_log_injection_in_file(file_path):
                 self.files_processed += 1
         
         # Step 2: Fix shell injection patterns
@@ -304,12 +304,12 @@ class Phase2SecurityRemediator:
         self.generate_phase2_report()
         
         print(f"\n🎯 Phase 2 Remediation Complete!")
-        print("📊 Total fixes applied: %s", self.fixes_applied)
-        print("📁 Files processed: %s", self.files_processed)
-        print("🧪 Tests validation: %s", '✅ PASS' if tests_passing else '⚠️ ISSUES')
+        print(f"📊 Total fixes applied: {self.fixes_applied}")
+        print(f"📁 Files processed: {self.files_processed}")
+        print(f"🧪 Tests validation: {'✅ PASS' if tests_passing else '⚠️ ISSUES'}")
         
         if self.errors:
-            print("⚠️ Errors encountered: %s", len(self.errors))
+            print(f"⚠️ Errors encountered: {len(self.errors}"))
             for error in self.errors[:5]:  # Show first 5 errors
                 print("  - %s", error)
 

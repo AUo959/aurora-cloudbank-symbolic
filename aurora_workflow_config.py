@@ -209,7 +209,7 @@ logger.info("Configuration saved to %s", str(config_file)[:100])
         except Exception as e:
             pass
 logger.error("Configuration validation failed: %s", str(e)[:100])
-            return False
+return False
 
     def generate_docker_compose(self) -> str:
         """Generate Docker Compose configuration from workflow config"""

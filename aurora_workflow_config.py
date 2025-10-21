@@ -151,9 +151,9 @@ class AuroraWorkflowConfig:
                 with open(env_config_file, "r") as f:
                     env_config = yaml.safe_load(f)
                     self.merge_config(self.config, env_config)
-                    logger.info("Loaded environment config: %s", str(env)[:100])
+                    self.logger.info("Loaded environment config: %s", str(env)[:100])
             except Exception as e:
-                logger.error("Failed to load environment config: %s", str(e)[:100])
+                self.logger.error("Failed to load environment config: %s", str(e)[:100])
 
     def merge_config(self, base: Dict, override: Dict) -> Dict:
         """Recursively merge configuration dictionaries"""
@@ -170,7 +170,7 @@ class AuroraWorkflowConfig:
 
         with open(config_file, "w") as f:
             yaml.dump(self.config, f, default_flow_style=False, indent=2)
-            logger.info("Configuration saved to %s", str(config_file)[:100])
+            self.logger.info("Configuration saved to %s", str(config_file)[:100])
 
     def get_service_config(self, service_name: str) -> Optional[Dict]:
         """Get configuration for specific service"""
@@ -206,9 +206,8 @@ class AuroraWorkflowConfig:
             return True
 
         except Exception as e:
-            pass
-logger.error("Configuration validation failed: %s", str(e)[:100])
-return False
+            self.logger.error("Configuration validation failed: %s", str(e)[:100])
+            return False
 
     def generate_docker_compose(self) -> str:
         """Generate Docker Compose configuration from workflow config"""
@@ -303,8 +302,7 @@ return False
         template_file = self.config_dir / f"{environment}.yaml"
         with open(template_file, "w") as f:
             yaml.dump(env_config, f, default_flow_style=False, indent=2)
-
-logger.info("Created environment template: %s", str(template_file)[:100])
+            self.logger.info("Created environment template: %s", str(template_file)[:100])
 
 
 def main():

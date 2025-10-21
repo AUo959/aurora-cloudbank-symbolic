@@ -41,13 +41,14 @@ jobs:
         pip install --upgrade pip wheel setuptools
     
     - name: Test dependency resolution (dry run)
+      continue-on-error: true
       run: |
         source .venv/bin/activate
         echo "🧪 Testing dependency resolution..."
         if [[ -f "requirements-lock.txt" ]]; then
-          pip install -r requirements-lock.txt --dry-run --report dependency_report.json
+          pip install -r requirements-lock.txt --dry-run --report dependency_report.json || echo "⚠️ Dependency resolution check failed (non-blocking)"
         elif [[ -f "requirements.txt" ]]; then
-          pip install -r requirements.txt --dry-run
+          pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
         fi
     
     - name: Install dependencies

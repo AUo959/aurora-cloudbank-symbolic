@@ -46,16 +46,22 @@ jobs:
         upload: true
     - name: Generate Symbolic Manifest
       if: always()
+      continue-on-error: true
       run: |
-        python3 scripts/symbolic_manifest.py \
-          --language "${{ matrix.language }}" \
-          --anchor "T1-SCAN-${{ matrix.language }}" \
-          --team "Aurora Dev" \
-          --ethics-protocol "Picard_Delta_3" \
-          --dlp-tag "SECURITY_SCAN" \
-          --symbolic-tags SRB-CodeQL SECURITY_SCAN
+        if [ -f "scripts/symbolic_manifest.py" ]; then
+          python3 scripts/symbolic_manifest.py \
+            --language "${{ matrix.language }}" \
+            --anchor "T1-SCAN-${{ matrix.language }}" \
+            --team "Aurora Dev" \
+            --ethics-protocol "Picard_Delta_3" \
+            --dlp-tag "SECURITY_SCAN" \
+            --symbolic-tags SRB-CodeQL SECURITY_SCAN
+        else
+          echo "⚠️ symbolic_manifest.py not found, skipping manifest generation"
+        fi
     - name: Upload Manifest Artifact
       if: always()
+      continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
         name: scan-manifest-${{ matrix.language }}

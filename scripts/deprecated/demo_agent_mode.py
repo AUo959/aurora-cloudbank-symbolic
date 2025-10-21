@@ -32,23 +32,21 @@ async def demo_tool_discovery(agent):
     print("-" * 30)
 
     tools_info = await agent.discover_tools()
-    print(f"Available tools: {len(tools_info['tools']}"))
+    print(f"Available tools: {len(tools_info['tools'])}")
 
     for tool_name, tool_def in tools_info['tools'].items():
-        print("")
-# 🛠️  %s", tool_name)
-print(f"   Description: {tool_def['description']}")
-print(f"   Parameters: {list(tool_def['parameters']['properties'].keys(}")))
+        print(f"\n🛠️  {tool_name}")
+        print(f"   Description: {tool_def['description']}")
+        print(f"   Parameters: {list(tool_def['parameters']['properties'].keys())}")
 
-    print("")
-Symbolic Anchors: %s", tools_info['symbolic_anchors']['anchor_seed'])
+    print(f"\nSymbolic Anchors: {tools_info['symbolic_anchors']['anchor_seed']}")
     print(f"Ethics Protocol: {tools_info['symbolic_anchors']['ethics_protocol']}")
     print()
 
 async def demo_geometric_algebra(agent):
     """Demonstrate geometric algebra capabilities"""
     print("🧮 Demo 2: Geometric Algebra Computation")
-    print("-f" * 40)
+    print("-" * 40)
 
     test_cases = [
         {"expression_a": "e1", "expression_b": "e2", "operation": "mult"},
@@ -57,15 +55,14 @@ async def demo_geometric_algebra(agent):
     ]
 
     for i, case in enumerate(test_cases, 1):
-        print("f")
-Test {i}: %s {case[", case['expression_a'])
+        print(f"\nTest {i}: {case['expression_a']} {case['operation']} {case['expression_b']}")
 
         result = await agent.execute_tool("geometric_algebra", case)
         if result['success']:
             geo_result = result['result']['geometric_result']
             print(f"Result: {geo_result}")
         else:
-            print(fff"Error: {result['error']}")
+            print(f"Error: {result['error']}")
     print()
 
 async def demo_session_management(agent):
@@ -78,11 +75,11 @@ async def demo_session_management(agent):
     create_result = await agent.execute_tool("session_management", {
         "action": "create",
         "state_data": {"demo": "session", "timestamp": datetime.now().isoformat()}
-    )
+    })
 
     if create_result['success']:
         session_id = create_result['result']['session_id']
-        print("✅ Session created: %s...", session_id[:8])
+        print(f"✅ Session created: {session_id[:8]}...")
 
         # Update session
         print("Updating session state...")

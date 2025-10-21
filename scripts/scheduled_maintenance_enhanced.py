@@ -380,7 +380,7 @@ class ScheduledMaintenanceSystem:
         if os.path.exists("requirements.txt"):
             try:
                 # This would typically use pip-audit or safety
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["pip", "list", "--outdated"],
                     capture_output=True,
                     text=True,
@@ -396,7 +396,7 @@ class ScheduledMaintenanceSystem:
         # Check Node.js dependencies
         if os.path.exists("package.json"):
             try:
-                _ = subprocess.run(
+                result = subprocess.run(
                     ["npm", "outdated"],
                     capture_output=True,
                     text=True,
@@ -418,7 +418,7 @@ class ScheduledMaintenanceSystem:
         try:
             # Find files larger than 50MB
             cmd = ["find", ".", "-type", "", "-size", "+50M"]
-            _ = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
+            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, check=False)
 
             for line in result.stdout.strip().split("\n"):
                 if not line.strip():
@@ -471,7 +471,7 @@ class ScheduledMaintenanceSystem:
     def _get_dir_size(self, path: str) -> int:
         """Get directory size in bytes"""
         try:
-            _ = subprocess.run(
+            result = subprocess.run(
                 ["du", "-sb", path],
                 capture_output=True,
                 text=True,

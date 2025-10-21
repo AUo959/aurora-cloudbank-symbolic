@@ -58,3 +58,11 @@ If any script needs to be restored:
 3. Test thoroughly
 4. Move back to scripts/ directory
 5. Update relevant documentation
+
+#### Additional Script Deprecated 2025-10-21
+
+**demo_agent_mode.py**
+- **Error Type:** Multiple SyntaxErrors (mismatched brackets throughout file)
+- **Line:** 35, 78, 90, 164+
+- **Reason:** Demo/example file with extensive syntax corruption, not used in production
+- **Impact:** No production impact, example code only

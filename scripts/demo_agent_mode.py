@@ -35,12 +35,12 @@ async def demo_tool_discovery(agent):
     print("Available tools: %s", len(tools_info['tools']))
 
     for tool_name, tool_def in tools_info['tools'].items():
-        print("
-🛠️  %s", tool_name)
+        print("")
+# 🛠️  %s", tool_name)
         print("   Description: %s", tool_def['description'])
         print("   Parameters: %s", list(tool_def['parameters']['properties'].keys()))
 
-    print("
+    print("")
 Symbolic Anchors: %s", tools_info['symbolic_anchors']['anchor_seed'])
     print("Ethics Protocol: %s", tools_info['symbolic_anchors']['ethics_protocol'])
     print()
@@ -57,7 +57,7 @@ async def demo_geometric_algebra(agent):
     ]
 
     for i, case in enumerate(test_cases, 1):
-        print("
+        print("")
 Test {i}: %s {case[", case['expression_a'])
 
         result = await agent.execute_tool("geometric_algebra", case)
@@ -128,7 +128,7 @@ async def demo_symbolic_processing(agent):
     ]
 
     for i, op in enumerate(operations, 1):
-        print("
+        print("")
 Operation {i}: %s", op['operation'])
         print("Input: %s", op['data'])
 
@@ -149,7 +149,7 @@ async def demo_system_status(agent):
     status_levels = ["basic", "detailed", "full"]
 
     for level in status_levels:
-        print("
+        print("")
 Status level: %s", level)
 
         result = await agent.execute_tool("system_status", {"detail_level": level})

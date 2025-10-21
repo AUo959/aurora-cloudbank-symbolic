@@ -104,8 +104,8 @@ class FinalBranchCleanup:
         if len(self.failed_branches) == 0:
             print("\n🎉 SUCCESS: ZERO OPEN PRS ACHIEVED!")
         else:
-            print("
-⚠️  %s branches require manual review", len(self.failed_branches))
+            print("")
+# ⚠️  %s branches require manual review", len(self.failed_branches))
 
 if __name__ == "__main__":
     cleanup = FinalBranchCleanup()

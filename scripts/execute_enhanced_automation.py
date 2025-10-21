@@ -35,8 +35,8 @@ def execute_enhanced_automation():
     # Convert to space-separated string for command
     branches_str = " ".join(VALIDATED_BRANCHES)
     
-    print("
-🔧 Executing enhanced automation on %s branches...", len(VALIDATED_BRANCHES))
+    print("")
+# 🔧 Executing enhanced automation on %s branches...", len(VALIDATED_BRANCHES))
     
     # Execute the live automation script with our validated branches
     cmd = [

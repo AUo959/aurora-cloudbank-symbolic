@@ -669,7 +669,7 @@ class RepositoryHealthMonitor:
             # Trim history
             self._trim_history()
 
-            logger.debug("Monitoring cycle complete. Health score: %s", str(metrics.health_score:.2f)[:100])
+            logger.debug("Monitoring cycle complete. Health score: %s", str(metrics.health_score)[:100])
 
         except Exception as e:
             logger.error("Monitoring cycle failed: %s", str(e)[:100])
@@ -856,9 +856,9 @@ def main():
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
             print("✅ Health Check Complete")
-            print("📊 Health Score: %s", metrics.health_score:.2f)
+            print("📊 Health Score: %s", metrics.health_score)
             print("📁 Files: %s", metrics.file_count)
-            print("💾 Size: %sMB", metrics.repository_size_mb:.1f)
+            print("💾 Size: %sMB", metrics.repository_size_mb)
             print("🌿 Branches: %s", metrics.branch_count)
 
             if metrics.alerts:

@@ -66,6 +66,7 @@ class DependencyPersistenceManager:
                     loaded_config = json.load(f)
                 return {**default_config, **loaded_config}
             except Exception as e:
+                pass
 logger.warning("Failed to load config: %s", str(e)[:100])
                 
         return default_config
@@ -93,6 +94,7 @@ logger.warning("Failed to load config: %s", str(e)[:100])
                 packages = json.loads(result.stdout)
                 snapshot["python_packages"] = {pkg["name"]: pkg["version"] for pkg in packages}
         except Exception as e:
+            pass
 logger.warning("Failed to capture Python packages: %s", str(e)[:100])
             
         # Capture Node.js packages
@@ -106,6 +108,7 @@ logger.warning("Failed to capture Python packages: %s", str(e)[:100])
                     dependencies = npm_data.get("dependencies", {})
                     snapshot["node_packages"] = {name: info.get("version", "unknown") for name, info in dependencies.items()}
             except Exception as e:
+                pass
 logger.warning("Failed to capture Node.js packages: %s", str(e)[:100])
                 
         # Capture system info
@@ -167,6 +170,7 @@ logger.info("Restoring dependencies from %s", str(snapshot_file)[:100])
             return success
             
         except Exception as e:
+            pass
 logger.error("Failed to restore from snapshot: %s", str(e)[:100])
             return False
             
@@ -192,6 +196,7 @@ logger.error("Failed to restore from snapshot: %s", str(e)[:100])
             return result.returncode == 0
             
         except Exception as e:
+            pass
 logger.warning("Failed to install %s: %s", str(package_spec)[:100], str(e)[:100])
             return False
             
@@ -202,6 +207,7 @@ logger.warning("Failed to install %s: %s", str(package_spec)[:100], str(e)[:100]
                                   capture_output=True, text=True, timeout=60, cwd=self.project_root)
             return result.returncode == 0
         except Exception as e:
+            pass
 logger.warning("Failed to install Node.js packages: %s", str(e)[:100])
             return False
             
@@ -267,6 +273,7 @@ logger.info("Startup restoration script created: %s", str(script_path)[:100])
             subprocess.run(["crontab", str(cron_file)], check=True)
             self.logger.info("✅ Automatic persistence cron job installed")
         except subprocess.CalledProcessError as e:
+            pass
 logger.warning("Failed to install cron job: %s", str(e)[:100])
             
         # Create systemd user service for environments that support it
@@ -299,6 +306,7 @@ WantedBy=default.target
                 
             self.logger.info("✅ Systemd user service created")
         except Exception as e:
+            pass
 logger.warning("Failed to create systemd service: %s", str(e)[:100])
             
     def cleanup_old_backups(self):
@@ -317,22 +325,22 @@ logger.info("Removed old snapshot: %s", str(old_snapshot)[:100])
         latest_snapshot = max(snapshots, key=lambda x: x.stat().st_mtime) if snapshots else None
         
         report = f"""
-🔧 Aurora CloudBank Dependency Persistence Report
+# 🔧 Aurora CloudBank Dependency Persistence Report
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-📊 Persistence Status:
+# 📊 Persistence Status:
    Auto-restore: {'✅ Enabled' if self.config['auto_restore'] else '❌ Disabled'}
    Backup snapshots: {len(snapshots)}
    Latest snapshot: {latest_snapshot.name if latest_snapshot else 'None'}
 
-🔄 Critical Packages Tracked:
+# 🔄 Critical Packages Tracked:
 """
         
         for pkg in self.config["critical_packages"]:
             report += f"   • {pkg}\n"
             
         report += f"""
-📦 Node.js Packages Tracked:
+# 📦 Node.js Packages Tracked:
 """
         
         for pkg in self.config["nodejs_packages"]:
@@ -342,7 +350,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             with open(latest_snapshot, 'r') as f:
                 snapshot_data = json.load(f)
             report += f"""
-📈 Latest Snapshot Info:
+# 📈 Latest Snapshot Info:
    Python packages: {len(snapshot_data.get('python_packages', {}))}
    Node.js packages: {len(snapshot_data.get('node_packages', {}))}
    Timestamp: {snapshot_data.get('timestamp', 'Unknown')}

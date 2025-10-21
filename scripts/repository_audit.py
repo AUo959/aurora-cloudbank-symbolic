@@ -280,8 +280,8 @@ def main():
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2)
 
-    print("
-💾 Detailed report saved to: %s", report_path)
+    print("")
+# 💾 Detailed report saved to: %s", report_path)
 
     return report
 

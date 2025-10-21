@@ -156,7 +156,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info("✅ Quality check completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("✅ Quality check completed in %ss", str(execution_time)[:100])
 
         # Format output
         if output_format == "markdown":
@@ -237,7 +237,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info("✅ Maintenance workflow completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("✅ Maintenance workflow completed in %ss", str(execution_time)[:100])
 
         return results
 
@@ -290,7 +290,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info("✅ Lint scan completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("✅ Lint scan completed in %ss", str(execution_time)[:100])
 
         return results
 
@@ -366,7 +366,7 @@ class GitWizIntegratedCommand:
         execution_time = (datetime.utcnow() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
-        logger.info("✅ %s workflow completed in %ss", str(workflow_type)[:100], str(execution_time:.2f)[:100])
+        logger.info("✅ %s workflow completed in %ss", str(workflow_type)[:100], str(execution_time)[:100])
 
         return results
 
@@ -596,6 +596,7 @@ Examples:
   %(prog)s workflow --type enhanced --aggressive
   %(prog)s status
         """,
+"""
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

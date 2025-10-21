@@ -137,14 +137,14 @@ def demonstrate_aumemmanager_integration():
         include_quantum=True
     )
     
-    print("
-📋 Mission-Critical Memories Found: %s", len(mission_memories))
+    print("")
+# 📋 Mission-Critical Memories Found: %s", len(mission_memories))
     for i, memory in enumerate(mission_memories):
         aurora_info = f" [Aurora Anchors: {', '.join(memory.symbolic_anchors)}]" if memory.symbolic_anchors else ""
-        cultural_info = f" [Cultural Score: {memory.cask_cultural_score:.2f}]"
+        cultural_info = f" [Cultural Score: {memory.cask_cultural_score}]"
         qv_info = ""
         if memory.quantum_vector:
-            qv_info = f" [QV: mag={memory.quantum_vector.magnitude:.1f}, phase={memory.quantum_vector.phase:.2f}, coherence={memory.quantum_vector.coherence_time:.3f}]"
+            qv_info = f" [QV: mag={memory.quantum_vector.magnitude}, phase={memory.quantum_vector.phase}, coherence={memory.quantum_vector.coherence_time}]"
         
         print("  {i+1}. [{memory.memory_type.value}] Importance: {memory.importance}{aurora_info}{cultural_info}%s", qv_info)
         if isinstance(memory.content, dict) and 'mission' in memory.content:
@@ -158,8 +158,8 @@ def demonstrate_aumemmanager_integration():
         include_quantum=True
     )
     
-    print("
-🔮 Aurora Symbolic Memories Found: %s", len(anchor_memories))
+    print("")
+# 🔮 Aurora Symbolic Memories Found: %s", len(anchor_memories))
     for i, memory in enumerate(anchor_memories):
         print("  {i+1}. Anchors: %s", memory.symbolic_anchors)
         print("      Content: %s", memory.content.get('symbolic_anchor', 'N/A'))
@@ -173,10 +173,10 @@ def demonstrate_aumemmanager_integration():
         top_k=2
     )
     
-    print("
-🌍 Cultural-Aware Memories Found: %s", len(cultural_memories))
+    print("")
+# 🌍 Cultural-Aware Memories Found: %s", len(cultural_memories))
     for i, memory in enumerate(cultural_memories):
-        print("  {i+1}. Cultural Score: %s", memory.cask_cultural_score:.2f)
+        print("  {i+1}. Cultural Score: %s", memory.cask_cultural_score)
         if isinstance(memory.content, dict) and 'cultural_context' in memory.content:
             print("      Context: %s", memory.content['cultural_context'])
     
@@ -203,8 +203,8 @@ def demonstrate_aumemmanager_integration():
                 quantum_vectors[1], target_state, trajectory_type="cultural_aware"
             )
             
-            print("
-🌍 Cultural-Aware Trajectory (%s waypoints):", len(cultural_trajectory))
+            print("")
+# 🌍 Cultural-Aware Trajectory (%s waypoints):", len(cultural_trajectory))
             print("   Cultural Factor: %s", cultural_trajectory[0].get('cultural_factor', 'N/A'))
             print("   Cultural Coherence: %s", cultural_trajectory[-1].get('cultural_coherence', 'N/A'))
     
@@ -214,7 +214,7 @@ def demonstrate_aumemmanager_integration():
     print(f"📊 Initial State:")
     print("   Active Memories: %s", initial_metrics['active_memories'])
     print("   Aurora Anchored: %s", initial_metrics['aurora_anchored_memories'])
-    print("   Average Cultural Score: %s", initial_metrics['average_cultural_score']:.3f)
+    print("   Average Cultural Score: %s", initial_metrics['average_cultural_score'])
     
     # Simulate time passage and decay
     decay_stats = memory_manager.decay_memories(elapsed_time=7200.0)  # 2 hours
@@ -244,8 +244,8 @@ def demonstrate_aumemmanager_integration():
         ("Quantum Vectors", final_metrics['quantum_vectors']),
         ("Entangled Pairs", final_metrics['entangled_pairs']),
         ("Aurora Anchor Coverage", final_metrics['aurora_anchor_coverage']),
-        ("Quantum Network Density", f"{final_metrics['quantum_network_density']:.3f}"),
-        ("Average Cultural Score", f"{final_metrics['average_cultural_score']:.3f}"),
+        ("Quantum Network Density", f"{final_metrics['quantum_network_density']}"),
+        ("Average Cultural Score", f"{final_metrics['average_cultural_score']}"),
         ("DLP Tracked Memories", final_metrics['dlp_tracked_memories'])
     ]
     
@@ -259,7 +259,7 @@ def demonstrate_aumemmanager_integration():
     network_display = [
         ("Total Vectors", network_analysis['total_vectors']),
         ("Total Entanglements", network_analysis['total_entanglements']),
-        ("Network Density", f"{network_analysis['network_density']:.3f}"),
+        ("Network Density", f"{network_analysis['network_density']}"),
         ("Most Connected Vector", network_analysis['most_connected_vector']),
         ("Aurora Anchor Coverage", len(network_analysis['aurora_anchor_coverage']))
     ]

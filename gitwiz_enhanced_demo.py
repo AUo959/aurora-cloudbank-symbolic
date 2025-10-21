@@ -204,7 +204,7 @@ class GITWizDemo:
         report.append("-" * 50)
         file_analysis = analysis["file_analysis"]
         report.append(f"Total Files: {file_analysis['total_files']:,}")
-        report.append(f"Total Size: {file_analysis['total_size_mb']:.1f} MB")
+        report.append(f"Total Size: {file_analysis['total_size_mb']} MB")
         report.append("")
         report.append("Top File Types:")
         for ext, count in list(file_analysis["file_types"].items())[:5]:
@@ -217,7 +217,7 @@ class GITWizDemo:
             report.append("📦 ZIP ARCHIVE ANALYSIS")
             report.append("-" * 50)
             report.append(f"Total ZIP Files: {zip_analysis['total_zip_files']}")
-            report.append(f"Total ZIP Size: {zip_analysis['total_zip_size_mb']:.1f} MB")
+            report.append(f"Total ZIP Size: {zip_analysis['total_zip_size_mb']} MB")
             report.append("Sample ZIP Files:")
             for zip_file in zip_analysis["zip_locations"][:5]:
                 report.append(f"  • {zip_file}")
@@ -297,8 +297,8 @@ def main():
     with open(report_file, "w") as f:
         f.write(f"# GITWiz Enhanced Analysis Report\n\n```\n{report}\n```\n")
 
-    print("
-📄 Report saved to: %s", report_file)
+    print("")
+# 📄 Report saved to: %s", report_file)
 
 
 if __name__ == "__main__":

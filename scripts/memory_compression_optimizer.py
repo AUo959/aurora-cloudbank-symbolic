@@ -172,7 +172,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print("  Would compress: {file_path} (est. %sKB saved)", file_info['estimated_savings_kb']:.1f)
+                print("  Would compress: {file_path} (est. %sKB saved)", file_info['estimated_savings_kb'])
                 results["compressed_files"].append(file_info["path"])
                 results["total_savings_mb"] += file_info["estimated_savings_kb"] / 1024
                 continue
@@ -198,7 +198,7 @@ class MemoryCompressionOptimizer:
                     results["compressed_files"].append(str(file_path))
                     results["total_savings_mb"] += actual_savings / (1024 * 1024)
 
-                    print("✅ Compressed: {file_path} (%sKB saved)", actual_savings / 1024:.1f)
+                    print("✅ Compressed: {file_path} (%sKB saved)", actual_savings / 1024)
                 else:
                     # Poor compression, remove compressed version
                     compressed_path.unlink()
@@ -232,7 +232,7 @@ class MemoryCompressionOptimizer:
                 file_path = Path(file_info["path"])
 
                 if self.dry_run:
-                    print("  Would remove: {file_path} (%sKB)", file_info['size_kb']:.1f)
+                    print("  Would remove: {file_path} (%sKB)", file_info['size_kb'])
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / 1024
                     continue
@@ -335,8 +335,8 @@ class MemoryCompressionOptimizer:
             "## Repository Analysis Summary",
             "",
             f"- **Total Files**: {analysis['total_files']:,}",
-            f"- **Total Size**: {analysis['total_size_mb']:.1f}MB",
-            f"- **Optimization Potential**: {analysis['optimization_potential_mb']:.1f}MB",
+            f"- **Total Size**: {analysis['total_size_mb']}MB",
+            f"- **Optimization Potential**: {analysis['optimization_potential_mb']}MB",
             "",
             "## Optimization Opportunities",
             "",
@@ -348,15 +348,15 @@ class MemoryCompressionOptimizer:
             report_lines.extend(
                 [
                     f"### Compressible Files ({len(analysis['compressible_files'])} files)",
-                    f"**Potential Savings**: {total_compressible / 1024:.1f}MB",
+                    f"**Potential Savings**: {total_compressible / 1024}MB",
                     "",
                 ]
             )
 
             for file_info in analysis["compressible_files"][:10]:
                 report_lines.append(
-                    f"- `{file_info['path']}` - {file_info['size_kb']:.1f}KB "
-                    f"(save ~{file_info['estimated_savings_kb']:.1f}KB)"
+                    f"- `{file_info['path']}` - {file_info['size_kb']}KB "
+                    f"(save ~{file_info['estimated_savings_kb']}KB)"
                 )
 
             if len(analysis["compressible_files"]) > 10:
@@ -370,13 +370,13 @@ class MemoryCompressionOptimizer:
             report_lines.extend(
                 [
                     f"### Duplicate Files ({len(analysis['duplicate_files'])} groups)",
-                    f"**Potential Savings**: {total_duplicate_savings / 1024:.1f}MB",
+                    f"**Potential Savings**: {total_duplicate_savings / 1024}MB",
                     "",
                 ]
             )
 
             for group in analysis["duplicate_files"][:5]:
-                report_lines.append(f"- {len(group['files'])} duplicates, save {group['savings_kb'] / 1024:.1f}MB")
+                report_lines.append(f"- {len(group['files'])} duplicates, save {group['savings_kb'] / 1024}MB")
 
             report_lines.append("")
 
@@ -385,7 +385,7 @@ class MemoryCompressionOptimizer:
             report_lines.extend([f"### Large Files ({len(analysis['large_files'])} files)", ""])
 
             for file_info in analysis["large_files"][:5]:
-                report_lines.append(f"- `{file_info['path']}` - {file_info['size_mb']:.1f}MB")
+                report_lines.append(f"- `{file_info['path']}` - {file_info['size_mb']}MB")
 
             report_lines.append("")
 
@@ -395,7 +395,7 @@ class MemoryCompressionOptimizer:
             report_lines.extend(
                 [
                     f"### Cache Files ({len(analysis['cache_files'])} files)",
-                    f"**Total Size**: {total_cache_size / 1024:.1f}MB",
+                    f"**Total Size**: {total_cache_size / 1024}MB",
                     "",
                 ]
             )
@@ -409,7 +409,7 @@ class MemoryCompressionOptimizer:
                 if isinstance(results, dict) and "total_savings_mb" in results:
                     total_savings += results["total_savings_mb"]
 
-            report_lines.append(f"**Total Space Saved**: {total_savings:.1f}MB")
+            report_lines.append(f"**Total Space Saved**: {total_savings}MB")
             report_lines.append("")
 
         return "\n".join(report_lines)
@@ -451,8 +451,8 @@ class MemoryCompressionOptimizer:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        print("
-📄 Optimization report saved to: %s", report_file)
+        print("")
+# 📄 Optimization report saved to: %s", report_file)
 
         return {
             "analysis": analysis,

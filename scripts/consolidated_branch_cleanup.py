@@ -39,8 +39,8 @@ class ConsolidatedBranchCleanup:
             'skipped': 0
         }
 
-        print("
-🗑️  Deleting %s merged branches...", len(branches))
+        print("")
+# 🗑️  Deleting %s merged branches...", len(branches))
         
         for branch in branches:
             branch_name = branch['name']
@@ -84,8 +84,8 @@ class ConsolidatedBranchCleanup:
             'errors': 0
         }
 
-        print("
-📦 Creating archive tags for %s branches...", len(branches))
+        print("")
+# 📦 Creating archive tags for %s branches...", len(branches))
         
         for branch in branches:
             branch_name = branch['name']
@@ -224,7 +224,7 @@ class ConsolidatedBranchCleanup:
         
         # Step 3: Generate PR recommendations
         if analysis['pull_requests_needed']:
-            print("
+            print("")
 %s", self.generate_pr_recommendations(analysis['pull_requests_needed']))
         
         # Step 4: Generate summary
@@ -261,8 +261,8 @@ def main():
     
     # Exit with appropriate code
     if results['errors'] > 0:
-        print("
-⚠️  Completed with %s errors", results['errors'])
+        print("")
+# ⚠️  Completed with %s errors", results['errors'])
         sys.exit(1)
     else:
         print(f"\n✅ Consolidation completed successfully!")

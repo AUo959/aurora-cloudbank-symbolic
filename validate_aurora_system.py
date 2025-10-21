@@ -44,14 +44,12 @@ def test_holographic_interface():
 def test_aurora_custom_gpt_bridge():
     """Test Aurora Custom GPT bridge connection"""
     print("🔗 Testing Aurora Custom GPT Bridge...")
-        bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
+    bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
     if os.path.exists(bridge_path):
-        print("✅ {bridge_path} exists")
-        
+        print(f"✅ {bridge_path} exists")
         return True
     else:
-        print("⚠️  {bridge_path} not found (may be in different location)")
-        
+        print(f"⚠️  {bridge_path} not found (may be in different location)")
         return True  # Not critical for core tests
 
 
@@ -95,6 +93,7 @@ def test_git_repository_status():
 
     
         try:
+            pass
         # Check if we're in a git repository
         result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=".")
 
@@ -138,7 +137,7 @@ def test_system_integration():
         else:
             print("❌ {file_path} missing")
         success_rate = (integration_score / len(key_files)) * 100
-    print("📊 Integration Score: {success_rate:.1f}%")
+    print("📊 Integration Score: {success_rate}%")
 
     
         return success_rate >= 80
@@ -176,7 +175,7 @@ def generate_validation_report():
     print("🎯 VALIDATION SUMMARY")
     print("=" * 60)
     print("✅ Tests Passed: {passed}/{total}")
-    print("📊 Success Rate: {(passed / total) * 100:.1f}%")
+    print("📊 Success Rate: {(passed / total) * 100}%")
 
     
         if passed == total:
@@ -195,7 +194,7 @@ def generate_validation_report():
         "status": status,
         "total_tests": total,
         "passed_tests": passed,
-        "success_rate": "{(passed / total) * 100:.1f}%",
+        "success_rate": "{(passed / total) * 100}%",
         "test_results": results,
     }
 

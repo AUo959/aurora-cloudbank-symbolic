@@ -112,6 +112,7 @@ class AuroraDependencyHub:
                     loaded_config = json.load(f)
                 return {**default_config, **loaded_config}
             except Exception as e:
+                pass
 logger.warning("Failed to load config: %s", str(e)[:100])
                 
         return default_config
@@ -172,9 +173,11 @@ logger.info("✅ Successfully installed: %s", str(package_spec)[:100])
                         return True
                         
                 except subprocess.TimeoutExpired:
+                    pass
 logger.warning("Timeout installing %s with %s (attempt %s)", str(package_spec)[:100], str(index)[:100], str(attempt + 1)[:100])
                     continue
                 except Exception as e:
+                    pass
 logger.warning("Error installing %s: %s", str(package_spec)[:100], str(e)[:100])
                     continue
                     
@@ -218,6 +221,7 @@ logger.info("✅ Successfully installed Node.js package: %s", str(package_spec)[
                     return True
                     
             except Exception as e:
+                pass
 logger.warning("Failed to install %s with %s: %s", str(package_spec)[:100], str(registry)[:100], str(e)[:100])
                 continue
                 
@@ -317,6 +321,7 @@ logger.info("🏁 Installation complete. Success rate: %s", str(critical_success
             else:
                 self.logger.warning("⚠️  Persistence script not found")
         except Exception as e:
+            pass
 logger.warning("Persistence setup failed: %s", str(e)[:100])
             
         # 2. Set up automated scheduler
@@ -335,6 +340,7 @@ logger.warning("Persistence setup failed: %s", str(e)[:100])
             else:
                 self.logger.warning("⚠️  Scheduler script not found")
         except Exception as e:
+            pass
 logger.warning("Scheduler setup failed: %s", str(e)[:100])
             
         # 3. Create startup script
@@ -343,6 +349,7 @@ logger.warning("Scheduler setup failed: %s", str(e)[:100])
             self.logger.info("✅ Startup script created")
             success_count += 1
         except Exception as e:
+            pass
 logger.warning("Startup script creation failed: %s", str(e)[:100])
             
         # 4. Set up health monitoring
@@ -351,6 +358,7 @@ logger.warning("Startup script creation failed: %s", str(e)[:100])
             self.logger.info("✅ Health monitoring configured")
             success_count += 1
         except Exception as e:
+            pass
 logger.warning("Health monitoring setup failed: %s", str(e)[:100])
             
 logger.info("🎯 Automated systems setup: %s/%s successful", str(success_count)[:100], str(total_systems)[:100])
@@ -488,26 +496,26 @@ log_message "🚀 Aurora CloudBank dependency startup check complete"
         health = self.health_check()
         
         report = f"""
-🔧 Aurora CloudBank Dependency Management Hub
+# 🔧 Aurora CloudBank Dependency Management Hub
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-📊 Overall Health: {health['overall_health'].upper()}
+# 📊 Overall Health: {health['overall_health'].upper()}
 
-🐍 Python Dependencies:
+# 🐍 Python Dependencies:
    Status: {health['python_status']}
    Critical packages: {len(self.config['critical_python_packages'])}
    Missing critical: {len(health['critical_packages']['missing'])}
 
-📦 Node.js Dependencies:
+# 📦 Node.js Dependencies:
    Status: {health['node_status']}
    Configured packages: {len(self.config['node_packages'])}
 
-🤖 Automation Status:
+# 🤖 Automation Status:
    Auto persistence: {'✅ Enabled' if self.config['automation']['auto_persistence'] else '❌ Disabled'}
    Auto scheduling: {'✅ Enabled' if self.config['automation']['auto_scheduling'] else '❌ Disabled'}
    Health monitoring: {'✅ Enabled' if self.config['automation']['health_monitoring'] else '❌ Disabled'}
 
-💡 Recommendations:
+# 💡 Recommendations:
 """
         
         for rec in health['recommendations']:

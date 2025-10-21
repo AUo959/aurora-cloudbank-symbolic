@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🔧 Aurora CloudBank Workflow Configuration Manager
+# 🔧 Aurora CloudBank Workflow Configuration Manager
 Manages workflow configurations, environments, and deployment settings
 """
 
@@ -153,6 +153,7 @@ class AuroraWorkflowConfig:
                     self.merge_config(self.config, env_config)
 logger.info("Loaded environment config: %s", str(env)[:100])
             except Exception as e:
+                pass
 logger.error("Failed to load environment config: %s", str(e)[:100])
 
     def merge_config(self, base: Dict, override: Dict) -> Dict:
@@ -207,6 +208,7 @@ logger.info("Configuration saved to %s", str(config_file)[:100])
             return True
 
         except Exception as e:
+            pass
 logger.error("Configuration validation failed: %s", str(e)[:100])
             return False
 

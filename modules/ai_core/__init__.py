@@ -23,11 +23,8 @@ from modules.ai_core.unified_ai_interface import (
 )
 
 try:
-    from modules.ai_core.claude_integration_hub import (
-        ClaudeIntegrationHub,
-        claude_hub,
-        sonnet4_hub,  # Backward compatibility
-    )
+    from modules.ai_core.claude_integration_hub import sonnet4_hub  # Backward compatibility
+    from modules.ai_core.claude_integration_hub import ClaudeIntegrationHub, claude_hub
 except ImportError:
     ClaudeIntegrationHub = None
     claude_hub = None

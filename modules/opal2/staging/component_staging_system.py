@@ -274,7 +274,7 @@ class ComponentStagingSystem:
         
         await self.save_component(component)
         
-        logger.info(f"✅ Validation complete for {component_id}: {validation_results['overall_score']:.1f}% score")
+        logger.info(f"✅ Validation complete for {component_id}: {validation_results['overall_score']}% score")
         return validation_results
     
     def _check_code_quality(self, component: StagedComponent) -> float:
@@ -551,7 +551,7 @@ class QuantumFieldVisualizer:
     # Validate component
     print("🔍 Validating component...")
     validation = await staging.validate_component(concept.component_id)
-    print(f"Validation score: {validation['overall_score']:.1f}%")
+    print(f"Validation score: {validation['overall_score']}%")
     print(f"Chassis ready: {validation['chassis_ready']}")
     
     # Get dashboard

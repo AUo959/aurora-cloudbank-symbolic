@@ -167,6 +167,7 @@ class BranchCleanupManager:
 
         for branch in cleanup_candidates:
             try:
+                pass
         action = self._determine_cleanup_action(branch)
 
                 

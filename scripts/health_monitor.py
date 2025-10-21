@@ -259,7 +259,7 @@ class RepositoryHealthMonitor:
                 {
                     "type": "rapid_size_growth",
                     "severity": "warning",
-                    "message": f"Repository growing rapidly ({trends['daily_size_growth']:.1f}MB/day)",
+                    "message": f"Repository growing rapidly ({trends['daily_size_growth']}MB/day)",
                     "metric": trends["daily_size_growth"],
                     "threshold": self.config["alerts"]["size_growth_rate"],
                 }
@@ -287,7 +287,7 @@ class RepositoryHealthMonitor:
         score = max(0.0, score)
         health_status = "EXCELLENT" if score >= 9 else "GOOD" if score >= 7 else "MODERATE" if score >= 5 else "POOR"
 
-        report.append(f"## Overall Health Score: {health_status} ({score:.1f}/10)")
+        report.append(f"## Overall Health Score: {health_status} ({score}/10)")
         report.append("")
 
         # Current metrics

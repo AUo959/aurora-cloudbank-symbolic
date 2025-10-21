@@ -58,7 +58,7 @@ async def test_opal2_integration():
             print("✅ Cache store/retrieve successful")
             stats = await glyph_cache.get_stats()
             print("   - Cache size: %s", stats['cache_size'])
-            print("   - Hit rate: %s%", stats['hit_rate']:.1f)
+            print("   - Hit rate: %s%".replace("%s%", "%.1f%%"), stats['hit_rate'])
         else:
             print("❌ Cache retrieve failed")
             return False

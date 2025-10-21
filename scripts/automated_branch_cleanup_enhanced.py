@@ -66,6 +66,7 @@ class AutomatedBranchManager:
                 if "T" not in date_str:
                     date_str = parts[1].replace(" ", "T").split("+")[0]
                 try:
+                    pass
         commit_date = datetime.datetime.fromisoformat(date_str)
                 
         except ValueError:
@@ -106,6 +107,7 @@ class AutomatedBranchManager:
     def _is_branch_merged(self, branch_name: str) -> bool:
         """Check if branch is merged into main"""
         try:
+            pass
         cmd = [
                 "git",
                 "merge-base",

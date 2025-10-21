@@ -266,8 +266,8 @@ class IntelligentTestSelector:
         
         matrix = {"include": include}
         
-        print("
-📊 Generated test matrix: %s test groups", len(include))
+        print("")
+# 📊 Generated test matrix: %s test groups", len(include))
         for item in include:
             print("  - %s", item['test-group'])
         
@@ -277,8 +277,8 @@ class IntelligentTestSelector:
 
         matrix = {"include": include}
 
-        print("
-📊 Generated test matrix: %s test groups", len(include))
+        print("")
+# 📊 Generated test matrix: %s test groups", len(include))
         for item in include:
             print("  - %s", item['test-group'])
 

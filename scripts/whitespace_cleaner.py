@@ -50,7 +50,7 @@ def main():
     total_files = 0
 
     for ext in extensions:
-        print("
+        print("")
 Cleaning %s files...", ext)
         files = list(Path(".").rglob(f"*{ext}"))
 

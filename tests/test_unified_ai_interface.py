@@ -4,8 +4,9 @@ Tests for AI Core Unified Interface
 Tests model selection, fallback chains, and integration
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from modules.ai_core.unified_ai_interface import (
     AIModel,

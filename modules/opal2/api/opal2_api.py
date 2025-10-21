@@ -13,12 +13,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from ...symbolic.symbolic_core import SymbolicCore
 from ..glyph_cache import GlyphCache
 from ..glyph_core import GlyphCore
 from ..plugin_system import PluginSystem
 from ..quantum_renderer import QuantumRenderer
-from ...symbolic.symbolic_core import SymbolicCore
-
 
 security = HTTPBearer()
 logger = logging.getLogger(__name__)

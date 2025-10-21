@@ -85,11 +85,12 @@ THREAD_CHAIN: List[str] = [
     "T9-INFINITE-UNIFIED-2025",
 ]
 
-_RECURSION_ROOT: Path
-_MANIFESTS_PATH: Path
-_CHECKPOINTS_PATH: Path
-_ARBITRATION_PATH: Path
-_INDEX_PATH: Path
+# Initialize to temp values - will be set by configure_recursion_paths()
+_RECURSION_ROOT = Path(".nexus/recursion")
+_MANIFESTS_PATH = Path(".nexus/recursion/manifests")
+_CHECKPOINTS_PATH = Path(".nexus/recursion/checkpoints")
+_ARBITRATION_PATH = Path(".nexus/recursion/arbitration")
+_INDEX_PATH = Path(".nexus/recursion/index")
 
 
 def configure_recursion_paths(root_path: Path | str | None = None, *, reset_orchestrator: bool = True) -> Path:

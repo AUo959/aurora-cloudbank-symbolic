@@ -53,8 +53,8 @@ def check_dependencies():
             print("  ❌ %s (missing)", package)
 
     if missing_packages:
-        print("
-📥 Installing missing packages: %s", ', '.join(missing_packages))
+        print("")
+# 📥 Installing missing packages: %s", ', '.join(missing_packages))
         try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
             print("✅ Dependencies installed successfully")
@@ -164,6 +164,7 @@ def create_usage_documentation():
     print("\n📚 Creating usage documentation...")
 
     usage_doc = """# Aurora CloudBank Canonical Validation System - Usage Guide
+"""
 
 ## Overview
 The canonical validation system ensures all development work adheres to the ORION CORE canonical specification automatically.

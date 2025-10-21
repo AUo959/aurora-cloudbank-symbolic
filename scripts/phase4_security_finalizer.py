@@ -498,7 +498,7 @@ class Phase4SecurityFinalizer:
         if alert_analysis['target_achieved']:
             print(f"  🎉 TARGET ACHIEVED: <50 alerts reached!")
         else:
-            print("  🎯 Target progress: %s% complete", ((362 - alert_analysis['remaining_alerts']) / 362) * 100:.1f)
+            print("  🎯 Target progress: %s% complete", ((362 - alert_analysis['remaining_alerts']) / 362) * 100)
         
         print("  🧪 Comprehensive scan: %s", '✅ PASSED' if security_scan_passed else '⚠️ ISSUES')
         

@@ -415,6 +415,7 @@ The Opal2 system is now ready for advanced quantum-enhanced visualization workfl
     def generate_pr_template(self):
         """Generate PR template"""
         template = """# 🔮 Opal2 Modular System Expansion
+"""
 
 ## Summary
 {self.generate_pr_description()}

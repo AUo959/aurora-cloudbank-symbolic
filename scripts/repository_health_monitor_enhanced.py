@@ -335,7 +335,7 @@ class RepositoryHealthMonitor:
         if self.alerts.get("webhook_url"):
             self._send_webhook_alert(alert_message)
 
-        print("🚨 HEALTH ALERT TRIGGERED - Score: %s/10", metrics.health_score:.1f)
+        print("🚨 HEALTH ALERT TRIGGERED - Score: %s/10", metrics.health_score)
         print(alert_message)
 
     def _format_alert_message(self, metrics: HealthMetrics) -> str:
@@ -449,7 +449,7 @@ class RepositoryHealthMonitor:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        print("📊 Health Score: %s/10", metrics.health_score:.1f)
+        print("📊 Health Score: %s/10", metrics.health_score)
         print("📄 Report saved to: %s", report_file)
 
         return metrics

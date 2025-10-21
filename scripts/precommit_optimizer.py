@@ -422,7 +422,7 @@ def main():
         benchmarks = optimizer.benchmark_hooks()
 
         if "total_time" in benchmarks:
-            print("⏱️ Total execution time: %s seconds", benchmarks['total_time']:.2f)
+            print("⏱️ Total execution time: %s seconds", benchmarks['total_time'])
             print("✅ Success: %s", benchmarks['success'])
         elif "error" in benchmarks:
             print("❌ Benchmark failed: %s", benchmarks['error'])

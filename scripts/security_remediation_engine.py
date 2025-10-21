@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🛡️ Aurora CloudBank Security Remediation Engine
+# 🛡️ Aurora CloudBank Security Remediation Engine
 Automated fix for 362 GitHub code scanning alerts
 
 Critical Issues Addressed:
@@ -288,6 +288,7 @@ class AuroraSecureHelpers(SecureHelpers):
                         self.log_fix(f"Fixed shell injection in {file_path}")
                         
             except Exception as e:
+                pass
 logger.warning("Could not process %s: %s", str(file_path)[:100], str(e)[:100])
     
     def create_security_middleware(self):

@@ -5,18 +5,14 @@ Provides runtime control over AI model selection, capabilities inspection,
 and fallback configuration.
 """
 
+from typing import Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
-from typing import Dict, List, Optional
 
 try:
-    from modules.ai_core import (
-        AIModel,
-        claude_hub,
-        gpt5_hub,
-        unified_ai,
-    )
+    from modules.ai_core import AIModel, claude_hub, gpt5_hub, unified_ai
 except ImportError:
     # Graceful degradation
     AIModel = None

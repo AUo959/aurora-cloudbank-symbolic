@@ -125,14 +125,14 @@ def execute_safe_branch_deletion(branches: list, dry_run: bool = True) -> dict:
     }
     
     if dry_run:
-        print("
-📋 DRY RUN - Would delete %s branches", len(safe_deletions))
+        print("")
+# 📋 DRY RUN - Would delete %s branches", len(safe_deletions))
         return result
     
     # Execute actual deletions
     if safe_deletions:
-        print("
-⚠️ This will permanently delete %s branches!", len(safe_deletions))
+        print("")
+# ⚠️ This will permanently delete %s branches!", len(safe_deletions))
         confirmation = input("Type 'DELETE-STALE-BRANCHES' to confirm: ")
         
         if confirmation != "DELETE-STALE-BRANCHES":
@@ -177,8 +177,8 @@ def execute_pruning_mission_phase_2():
     print("🎯 Mission: Safe deletion of stale branches (60+ days old)")
     print("🧹 Goal: Repository health improvement through targeted cleanup")
     
-    print("
-📋 Stale Branch Deletion Candidates (%s total):", len(STALE_BRANCHES_FOR_DELETION))
+    print("")
+# 📋 Stale Branch Deletion Candidates (%s total):", len(STALE_BRANCHES_FOR_DELETION))
     for i, branch in enumerate(STALE_BRANCHES_FOR_DELETION, 1):
         print("  {i:2d}. %s", branch)
     
@@ -196,8 +196,8 @@ def execute_pruning_mission_phase_2():
     print(json.dumps(dry_run_result, indent=2))
     
     if dry_run_result["safe_deletions"]:
-        print("
-🚀 Ready to execute deletion of %s safe branches", len(dry_run_result['safe_deletions']))
+        print("")
+# 🚀 Ready to execute deletion of %s safe branches", len(dry_run_result['safe_deletions']))
         proceed = input("Execute actual deletion? (y/N): ")
         
         if proceed.lower() == 'y':

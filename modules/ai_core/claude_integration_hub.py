@@ -10,13 +10,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
 try:
-    from modules.ai_core.unified_ai_interface import (
-        AIModel,
-        AIProvider,
-        AIRequest,
-        AIResponse,
-        unified_ai,
-    )
+    from modules.ai_core.unified_ai_interface import AIModel, AIProvider, AIRequest, AIResponse, unified_ai
 except ImportError:
     # Graceful fallback for testing
     AIModel = None

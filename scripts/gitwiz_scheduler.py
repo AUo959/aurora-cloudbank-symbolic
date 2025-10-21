@@ -165,7 +165,7 @@ class GitWizScheduler:
             execution_time = (datetime.utcnow() - start_time).total_seconds()
 
             if result.returncode == 0:
-                logger.info("Command completed successfully in %ss", str(execution_time:.2f)[:100])
+                logger.info("Command completed successfully in %ss", str(execution_time)[:100])
                 return {
                     "success": True,
                     "output": result.stdout,
@@ -248,7 +248,7 @@ class GitWizScheduler:
             self._send_notification(f"Job {job_name} completed with issues", job_results)
 
         self._save_status()
-        logger.info("✅ Job %s completed in %ss", str(job_name)[:100], str(execution_time:.2f)[:100])
+        logger.info("✅ Job %s completed in %ss", str(job_name)[:100], str(execution_time)[:100])
 
     def _generate_job_report(self, job_results: Dict[str, Any]):
         """Generate a detailed report for a job."""

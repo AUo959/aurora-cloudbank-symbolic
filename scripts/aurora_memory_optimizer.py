@@ -345,7 +345,7 @@ Generated: {datetime.datetime.now().isoformat()}
 ## Repository Analysis
 - **Total Size**: {analysis['total_size'] / (1024*1024):.1f} MB
 - **Total Files**: {sum(info['count'] for info in analysis['file_types'].values())}
-- **Optimization Potential**: {analysis['optimization_potential'] / 1024:.1f} KB
+- **Optimization Potential**: {analysis['optimization_potential'] / 1024} KB
 
 ## File Type Distribution
 """
@@ -375,7 +375,7 @@ Found {len(analysis['compression_opportunities'])} files suitable for compressio
 """
 
         total_savings = sum(opp["estimated_savings"] for opp in analysis["compression_opportunities"])
-        report += f"- **Potential Space Savings**: {total_savings / 1024:.1f} KB\n"
+        report += f"- **Potential Space Savings**: {total_savings / 1024} KB\n"
 
         report += """
 ## Duplicate Files
@@ -389,13 +389,13 @@ Found {len(duplicates)} sets of duplicate files:
                 savings = file_size * (len(files) - 1)
                 duplicate_savings += savings
 
-                report += f"- {len(files)} identical files ({file_size / 1024:.1f}KB each):\n"
+                report += f"- {len(files)} identical files ({file_size / 1024}KB each):\n"
                 for file_path in files[:3]:  # Show first 3
                     report += f"  - `{file_path}`\n"
                 if len(files) > 3:
                     report += f"  - ... and {len(files) - 3} more\n"
 
-        report += f"\n**Total Duplicate Savings Potential**: {duplicate_savings / 1024:.1f} KB\n"
+        report += f"\n**Total Duplicate Savings Potential**: {duplicate_savings / 1024} KB\n"
 
         report += """
 ## Optimization Recommendations
@@ -474,7 +474,7 @@ def main():
 
         if not dry_run:
             print("\n✅ Optimization complete!")
-            print("📊 Total space saved: %s KB", results['total_space_saved'] / 1024:.1f)
+            print("📊 Total space saved: %s KB", results['total_space_saved'] / 1024)
 
             if results["json_optimization"]:
                 json_results = results["json_optimization"]

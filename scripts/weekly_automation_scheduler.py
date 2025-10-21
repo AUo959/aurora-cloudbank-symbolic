@@ -253,7 +253,7 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--manual":
         # Manual trigger
         success = scheduler.manual_maintenance_trigger()
-        print("
+        print("")
 %s", '✅ Manual maintenance completed successfully!' if success else '❌ Manual maintenance encountered issues.')
     
     elif len(sys.argv) > 1 and sys.argv[1] == "--setup":
@@ -265,7 +265,7 @@ def main():
         # Scheduled run
         print("⏰ Scheduled maintenance time reached!")
         success = scheduler.run_scheduled_maintenance()
-        print("
+        print("")
 %s", '✅ Scheduled maintenance completed!' if success else '❌ Scheduled maintenance had issues.')
     
     else:

@@ -266,7 +266,7 @@ class LintCleanupManager:
         execution_time = (dt.datetime.utcnow() - scan_start).total_seconds()
         scan_results["execution_time"] = execution_time
 
-        logger.info("✅ Lint scan completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("✅ Lint scan completed in %ss", str(execution_time)[:100])
         logger.info("Found %s total issues", str(len(self.discovered_issues))[:100])
 
         return scan_results
@@ -341,7 +341,7 @@ class LintCleanupManager:
         execution_time = (dt.datetime.utcnow() - workflow_start).total_seconds()
         workflow_results["execution_time"] = execution_time
 
-        logger.info("✅ Automated fix workflow completed in %ss", str(execution_time:.2f)[:100])
+        logger.info("✅ Automated fix workflow completed in %ss", str(execution_time)[:100])
         logger.info("Applied %s fixes total", str(workflow_results['total_fixes'])[:100])
 
         return workflow_results

@@ -39,22 +39,19 @@ class AuroraTestRunner:
         cmd = [sys.executable, "-m", "pytest", "-m", "smoke", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
-    
-        def run_api_tests(self):
+    def run_api_tests(self):
         """Run API and web interface tests"""
         print("🌐 Running API Tests...")
         cmd = [sys.executable, "-m", "pytest", "-m", "api", "-v", "--tb=short"]
         return subprocess.run(cmd, cwd=self.project_root)
 
-    
-        def run_performance_benchmark(self):
+    def run_performance_benchmark(self):
         """Run performance benchmarks"""
         print("🏃 Running Performance Benchmarks...")
         cmd = [sys.executable, "performance_benchmark.py"]
         return subprocess.run(cmd, cwd=self.project_root)
 
-    
-        def run_all_tests(self):
+    def run_all_tests(self):
         """Run comprehensive test suite"""
         print("🚀 Running Complete Test Suite...")
         start_time = time.time()
@@ -105,7 +102,7 @@ class AuroraTestRunner:
             print("{status} {test_name}")
 
         
-        print("\nTotal execution time: {total_time:.2f} seconds")
+        print("\nTotal execution time: {total_time} seconds")
 
         # Return overall success
         return all(results.values())

@@ -88,9 +88,11 @@ class BranchManager:
 
                     # Parse date
                     try:
+                        pass
         commit_date = datetime.datetime.fromisoformat(date_str.replace("Z", "+00:00"))
         days_old = (datetime.datetime.now(datetime.timezone.utc) - commit_date).days
                     except ValueError:
+                        pass
         days_old = 0
 
                     # Check if merged
@@ -253,6 +255,7 @@ class BranchManager:
                 tag_name = f"archive/{branch_name.replace('origin/', '').replace('/', '-')}"
                 if confirm and not self.dry_run:
                     try:
+                        pass
         cmd = ["git", "tag", tag_name, branch_name]
                         subprocess.run(
                             cmd,

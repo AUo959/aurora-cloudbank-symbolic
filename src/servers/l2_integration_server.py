@@ -16,16 +16,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.security import HTTPAuthorizationCredentials
-from src.middleware.fastapi_security import security
-from starlette.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.responses import JSONResponse
-from src.integrations.chatgpt_agent_mode import auroraCustomGptBridge
-from fastapi.staticfiles import StaticFiles
 import uvicorn
-from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
+
+from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT, auroraCustomGptBridge
+from src.middleware.fastapi_security import security
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

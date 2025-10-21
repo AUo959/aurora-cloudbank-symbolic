@@ -285,8 +285,8 @@ def main():
         results = manager.cleanup_stale_branches(args.max_age, args.categories)
 
         
-        print("
-✅ Deleted: %s", len(results['deleted']))
+        print("")
+# ✅ Deleted: %s", len(results['deleted']))
         
         for branch in results["deleted"][:5]:  # Show first 5
             print("  - %s", branch)
@@ -296,8 +296,8 @@ def main():
 
         
         if results["errors"]:
-            print("
-❌ Errors: %s", len(results['errors']))
+            print("")
+# ❌ Errors: %s", len(results['errors']))
             
         for error in results["errors"]:
                 print("  - %s", error)

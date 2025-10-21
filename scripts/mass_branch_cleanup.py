@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🗑️ Aurora CloudBank - Mass Branch Cleanup Script
+# 🗑️ Aurora CloudBank - Mass Branch Cleanup Script
 Systematically removes redundant and superseded branches to achieve zero open PRs.
 """
 
@@ -113,8 +113,8 @@ class BranchCleanupManager:
             for error in self.errors:
                 print("  • %s", error)
         
-        print("
-🎯 Progress toward zero PRs: -%s branches", self.deleted_count)
+        print("")
+# 🎯 Progress toward zero PRs: -%s branches", self.deleted_count)
 
 
 def main():
@@ -137,8 +137,8 @@ def main():
         cleanup_manager.report_results()
         return 1
     except Exception as e:
-        print("
-💥 Unexpected error: %s", e)
+        print("")
+# 💥 Unexpected error: %s", e)
         cleanup_manager.report_results()
         return 1
 

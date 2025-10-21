@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🛡️ Aurora CloudBank Security Phase 2: Systematic Log Injection Remediation
+# 🛡️ Aurora CloudBank Security Phase 2: Systematic Log Injection Remediation
 Automated fix for remaining f-string logging vulnerabilities
 
 Targets:
@@ -244,6 +244,7 @@ class Phase2SecurityRemediator:
     def generate_phase2_report(self):
         """Generate Phase 2 completion report"""
         report = f"""# 🛡️ Phase 2 Security Remediation Report
+"""
 
 ## 📊 Summary
 - **Files processed**: {self.files_processed}
@@ -285,8 +286,8 @@ class Phase2SecurityRemediator:
         vulnerable_files = self.find_vulnerable_files()
         
         for file_path in vulnerable_files:
-            print("
-🔧 Processing: %s", file_path)
+            print("")
+# 🔧 Processing: %s", file_path)
             if self.fix_log_injection_in_file(file_path):
                 self.files_processed += 1
         

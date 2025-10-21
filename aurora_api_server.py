@@ -5,16 +5,16 @@ FastAPI-based REST API for Aurora CloudBank services
 """
 
 import random
-import numpy as np
-import uvicorn
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
-from fastapi import FastAPI, Depends, HTTPException
+import numpy as np
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 # Import centralized security configuration
 from src.middleware.fastapi_security import security, setup_cors_middleware

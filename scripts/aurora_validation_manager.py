@@ -252,7 +252,7 @@ echo "✅ Post-commit validation update complete"
         validation_dir = self.repo_root / self.config["validation_dir"]
         if validation_dir.exists():
             reports = list(validation_dir.glob("*.md"))
-            print("
+            print("")
 Validation Directory: %s", validation_dir)
             print("  Reports: %s", len(reports))
 
@@ -300,3 +300,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""

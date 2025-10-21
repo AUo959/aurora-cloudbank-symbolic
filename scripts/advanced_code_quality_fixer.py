@@ -375,7 +375,7 @@ class AdvancedCodeQualityFixer:
                 remaining = int(result.stdout.strip())
                 print("Remaining Issues: %s", remaining)
                 improvement = ((1165 - remaining) / 1165) * 100
-                print("Improvement: %s%", improvement:.1f)
+                print("Improvement: %s%", improvement)
         except Exception:
             pass
 

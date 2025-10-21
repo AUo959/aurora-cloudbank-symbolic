@@ -215,8 +215,8 @@ class Phase3BConflictResolver:
     def resolve_branch_conflicts(self, candidate):
         """Resolve conflicts for a single branch"""
         branch_name = candidate["branch"]
-        print("
-🎯 RESOLVING CONFLICTS: %s", branch_name)
+        print("")
+# 🎯 RESOLVING CONFLICTS: %s", branch_name)
         print("   Type: %s", candidate['type'])
         print("   Description: %s", candidate['description'])
         
@@ -334,7 +334,7 @@ class Phase3BConflictResolver:
         successful_resolutions = 0
         
         for candidate in self.conflicted_branches:
-            print("
+            print("")
 %s", '='*60)
             resolution_result = self.resolve_branch_conflicts(candidate)
             self.results["resolutions"].append(resolution_result)

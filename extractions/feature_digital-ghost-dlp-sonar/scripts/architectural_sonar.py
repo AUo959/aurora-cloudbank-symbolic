@@ -204,8 +204,8 @@ def main():
     with open(REPORT_OUTPUT_FILE, 'w') as f:
         json.dump(all_results, f, indent=2)
 
-    print("
-✅ Scan complete. Report generated at: %s", REPORT_OUTPUT_FILE)
+    print("")
+# ✅ Scan complete. Report generated at: %s", REPORT_OUTPUT_FILE)
     # Here you could add logic to summarize findings and print a high-level report.
 
 

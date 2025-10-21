@@ -113,8 +113,8 @@ class SSMTArchitecturalSonar:
         }
         
         try:
-            print("
-🔍 ARCHITECTURAL SONAR: %s", branch_name)
+            print("")
+# 🔍 ARCHITECTURAL SONAR: %s", branch_name)
             
             # Get branch files for analysis
             diff_result = self.run_command(f"git diff --name-only main..origin/{branch_name}", False)

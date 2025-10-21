@@ -49,8 +49,8 @@ def execute_branch_deletions():
     print("🛡️ Safety Check: Verifying branches exist before deletion...")
     
     for branch in safe_branches:
-        print("
-🗑️ Deleting branch: %s", branch)
+        print("")
+# 🗑️ Deleting branch: %s", branch)
         
         try:
             # First verify the branch exists
@@ -138,8 +138,8 @@ def execute_branch_deletions():
     except:
         print("   📊 Could not determine final branch count")
     
-    print("
-🏆 SSMT v3.0 Phase 2 Repository Pruning: %s", 'SUCCESS!' if successful_deletions > 0 else 'NEEDS REVIEW')
+    print("")
+# 🏆 SSMT v3.0 Phase 2 Repository Pruning: %s", 'SUCCESS!' if successful_deletions > 0 else 'NEEDS REVIEW')
     
     return {
         "successful_deletions": successful_deletions,

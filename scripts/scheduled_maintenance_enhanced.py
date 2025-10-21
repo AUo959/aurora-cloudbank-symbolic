@@ -161,7 +161,7 @@ class ScheduledMaintenanceSystem:
             task.last_run = start_time.isoformat()
 
             duration = (datetime.datetime.now() - start_time).total_seconds()
-            self._log(f"Task completed successfully: {task.name} ({duration:.1f}s)")
+            self._log(f"Task completed successfully: {task.name} ({duration}s)")
 
             return True
 
@@ -249,7 +249,7 @@ class ScheduledMaintenanceSystem:
         final_size = self._get_dir_size(".")
         results["space_freed_mb"] = max(0, (initial_size - final_size) / (1024 * 1024))
 
-        self._log(f"Cache cleanup completed: {results['space_freed_mb']:.1f}MB freed")
+        self._log(f"Cache cleanup completed: {results['space_freed_mb']}MB freed")
         return results
 
     def _task_branch_analysis(self) -> Dict:
@@ -444,7 +444,7 @@ class ScheduledMaintenanceSystem:
             if results["large_files"]:
                 results["recommendations"].append(
                     f"Consider archiving {len(results['large_files'])} large files "
-                    f"({results['total_size_mb']:.1f}MB total)"
+                    f"({results['total_size_mb']}MB total)"
                 )
 
         except subprocess.CalledProcessError:
@@ -555,7 +555,7 @@ def main():
         print("\n📊 Maintenance Task Status:")
         print("=" * 50)
         for name, info in status.items():
-            print("
+            print("")
 %s:", name)
             print("  Enabled: %s", info['enabled'])
             print("  Last Run: %s", info['last_run'] or 'Never')

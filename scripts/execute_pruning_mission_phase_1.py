@@ -48,8 +48,8 @@ def execute_pruning_mission_phase_1():
         print("🚫 Pruning mission cancelled")
         return
     
-    print("
-🚀 Executing Phase 1 pruning mission on %s Python branches...", len(PYTHON_DEPENDENCY_BRANCHES))
+    print("")
+# 🚀 Executing Phase 1 pruning mission on %s Python branches...", len(PYTHON_DEPENDENCY_BRANCHES))
     
     # Execute the enhanced automation with our Python dependency branches
     cmd = [

@@ -22,10 +22,10 @@ sys.path.insert(0, os.path.abspath('.'))
 def print_banner():
     """Print Aurora CloudBank agent mode banner"""
     banner = """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                    🌟 Aurora CloudBank Agent Mode                            ║
-║                       ChatGPT Integration Ready                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                    🌟 Aurora CloudBank Agent Mode                            ║
+# ║                       ChatGPT Integration Ready                              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
 """
     print(banner)
 
@@ -144,29 +144,29 @@ def check_aurora_dependencies():
 def print_integration_summary():
     """Print integration summary and next steps"""
     summary = """
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           🎯 Integration Summary                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  Aurora CloudBank is now ready for ChatGPT Agent Mode integration!         │
-│                                                                             │
-│  📋 Available Capabilities:                                                │
-│     • Function calling with 4 core tools                                   │
-│     • Session persistence and state management                             │
-│     • Real-time WebSocket communication                                    │
-│     • Symbolic processing with Aurora's quantum engine                     │
-│     • Geometric algebra computations                                       │
-│     • Comprehensive error handling and recovery                            │
-│                                                                             │
-│  🚀 Quick Start:                                                           │
-│     1. Start Aurora API: uvicorn aurora_api:app --reload                   │
-│     2. Discover tools: GET /agent/tools                                    │
-│     3. Execute tools: POST /agent/execute                                  │
-│     4. Stream mode: WebSocket /agent/stream                                │
-│                                                                             │
-│  📖 Documentation: docs/CHATGPT_AGENT_MODE_INTEGRATION.md                  │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+# ┌─────────────────────────────────────────────────────────────────────────────┐
+# │                           🎯 Integration Summary                            │
+# ├─────────────────────────────────────────────────────────────────────────────┤
+# │                                                                             │
+# │  Aurora CloudBank is now ready for ChatGPT Agent Mode integration!         │
+# │                                                                             │
+# │  📋 Available Capabilities:                                                │
+# │     • Function calling with 4 core tools                                   │
+# │     • Session persistence and state management                             │
+# │     • Real-time WebSocket communication                                    │
+# │     • Symbolic processing with Aurora's quantum engine                     │
+# │     • Geometric algebra computations                                       │
+# │     • Comprehensive error handling and recovery                            │
+# │                                                                             │
+# │  🚀 Quick Start:                                                           │
+# │     1. Start Aurora API: uvicorn aurora_api:app --reload                   │
+# │     2. Discover tools: GET /agent/tools                                    │
+# │     3. Execute tools: POST /agent/execute                                  │
+# │     4. Stream mode: WebSocket /agent/stream                                │
+# │                                                                             │
+# │  📖 Documentation: docs/CHATGPT_AGENT_MODE_INTEGRATION.md                  │
+# │                                                                             │
+# └─────────────────────────────────────────────────────────────────────────────┘
 """
     print(summary)
 
@@ -206,8 +206,8 @@ if __name__ == "__main__":
         print("\n🛑 Validation interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print("
-❌ Validation failed with error: %s", str(e))
+        print("")
+# ❌ Validation failed with error: %s", str(e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

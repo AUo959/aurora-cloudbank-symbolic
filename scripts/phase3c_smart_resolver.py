@@ -225,8 +225,8 @@ __all__ = ["EnhancedPluginManager"]
 
     def smart_resolve_branch(self, branch_name):
         """Smart resolution strategy for a single branch"""
-        print("
-🎯 SMART RESOLUTION: %s", branch_name)
+        print("")
+# 🎯 SMART RESOLUTION: %s", branch_name)
         
         resolution_record = {
             "branch": branch_name,
@@ -307,7 +307,7 @@ __all__ = ["EnhancedPluginManager"]
         successful_resolutions = 0
         
         for branch_name in target_branches:
-            print("
+            print("")
 %s", '='*60)
             resolution_result = self.smart_resolve_branch(branch_name)
             self.results["smart_resolutions"].append(resolution_result)

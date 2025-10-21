@@ -421,13 +421,13 @@ else:
         with open(manifest_path, 'w') as f:
             json.dump(manifest, f, indent=2)
         
-        print("
-📄 Aurora CI manifest saved: %s", manifest_path)
+        print("")
+# 📄 Aurora CI manifest saved: %s", manifest_path)
         
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print("
-🌟 Aurora Validation Status: %s", validation_status.upper())
+        print("")
+# 🌟 Aurora Validation Status: %s", validation_status.upper())
         
 =======
 
@@ -439,13 +439,13 @@ else:
         with open(manifest_path, "w") as f:
             json.dump(manifest, f, indent=2)
 
-        print("
-📄 Aurora CI manifest saved: %s", manifest_path)
+        print("")
+# 📄 Aurora CI manifest saved: %s", manifest_path)
 
         # Print summary
         validation_status = manifest["aurora_ci_validation"]["validation_status"]
-        print("
-🌟 Aurora Validation Status: %s", validation_status.upper())
+        print("")
+# 🌟 Aurora Validation Status: %s", validation_status.upper())
 
 >>>>>>> origin/main
         if validation_status == "fully_operational":

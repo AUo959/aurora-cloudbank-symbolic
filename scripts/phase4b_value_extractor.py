@@ -285,8 +285,8 @@ class SSMTValueExtractor:
         branch_name = target["branch"]
         focus_areas = target["extraction_focus"]
         
-        print("
-🔍 VALUE EXTRACTION: %s", branch_name)
+        print("")
+# 🔍 VALUE EXTRACTION: %s", branch_name)
         print("   Focus: %s", ', '.join(focus_areas))
         print("   Description: %s", target['description'])
         

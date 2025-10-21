@@ -195,8 +195,8 @@ def main():
             print("File not found: %s", file_path)
             error_count += 1
 
-    print("
-✅ Fixed: %s files", fixed_count)
+    print("")
+# ✅ Fixed: %s files", fixed_count)
     print("❌ Errors: %s files", error_count)
 
     # Run final validation

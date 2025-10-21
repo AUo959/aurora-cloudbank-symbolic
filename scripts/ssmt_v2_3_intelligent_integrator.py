@@ -324,7 +324,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         
         # Process each candidate
         for candidate in self.integration_candidates:
-            print("
+            print("")
 %s", '='*50)
             print("🎯 Processing: %s", candidate['branch'])
             print("   Quality Score: %s", candidate['quality_score'])

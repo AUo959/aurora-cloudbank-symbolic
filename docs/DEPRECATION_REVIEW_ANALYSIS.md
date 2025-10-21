@@ -1,4 +1,5 @@
 # Deprecation Review Analysis
+
 **Date:** 2025-10-21  
 **Status:** Ready for review  
 **Remaining Errors:** 11 errors across 11 files  
@@ -9,6 +10,7 @@
 ## Executive Summary
 
 After completing easy fixes (scheduled_maintenance_enhanced.py + demo_agent_mode.py), we have **11 remaining errors** across 11 files. This analysis evaluates each file for:
+
 1. **Production usage** - Is it actively used in CI/CD or core functionality?
 2. **Error complexity** - How difficult to fix?
 3. **Deprecation safety** - Can it be safely archived?
@@ -19,11 +21,13 @@ After completing easy fixes (scheduled_maintenance_enhanced.py + demo_agent_mode
 ## Remaining Errors Breakdown
 
 ### 1. `aurora_workflow_config.py:213` - E999 IndentationError
+
 **Error:** `unexpected indent`  
 **File Purpose:** Workflow configuration management  
 **Production Usage:** 🔴 **ACTIVE** - Core configuration system
 
 **Analysis:**
+
 ```bash
 $ grep -r "aurora_workflow_config" --include="*.py" --include="*.yml" --exclude-dir=scripts
 # Multiple imports found in core system files
@@ -37,11 +41,13 @@ $ grep -r "aurora_workflow_config" --include="*.py" --include="*.yml" --exclude-
 ---
 
 ### 2. `demo_aumemmanager_integration.py:165` - E999 SyntaxError
+
 **Error:** `unmatched ')'`  
 **File Purpose:** AuMemManager integration demo  
 **Production Usage:** 🟡 **DEMO** - Example/demonstration code
 
 **Analysis:**
+
 ```bash
 $ grep -r "demo_aumemmanager_integration" --include="*.py" --include="*.yml"
 # Only found in documentation, not imported anywhere
@@ -55,11 +61,13 @@ $ grep -r "demo_aumemmanager_integration" --include="*.py" --include="*.yml"
 ---
 
 ### 3. `modules/opal2/staging/component_staging_system.py:360` - E999 IndentationError
+
 **Error:** `unexpected indent`  
 **File Purpose:** Opal2 component staging system  
 **Production Usage:** 🟡 **STAGING** - Part of staging directory
 
 **Analysis:**
+
 ```bash
 $ ls -la modules/opal2/staging/
 # Directory contains staging/experimental components
@@ -73,11 +81,13 @@ $ ls -la modules/opal2/staging/
 ---
 
 ### 4. `opal2_pr_preparation.py:142` - E999 IndentationError
+
 **Error:** `unindent does not match any outer indentation level`  
 **File Purpose:** Opal2 PR preparation utility  
 **Production Usage:** 🟢 **UTILITY** - PR automation tool
 
 **Analysis:**
+
 ```bash
 $ grep -r "opal2_pr_preparation" --include="*.py" --include="*.yml"
 # Used in PR workflows, but may be superseded by newer tools
@@ -91,11 +101,13 @@ $ grep -r "opal2_pr_preparation" --include="*.py" --include="*.yml"
 ---
 
 ### 5. `scripts/gitwiz_simple.py:171` - E999 IndentationError
+
 **Error:** `unindent does not match any outer indentation level`  
 **File Purpose:** Simplified gitwiz tool  
 **Production Usage:** 🔴 **REDUNDANT** - gitwiz.py already deprecated
 
 **Analysis:**
+
 ```bash
 $ ls scripts/deprecated/ | grep gitwiz
 gitwiz.py  # ← Full version already deprecated
@@ -109,11 +121,13 @@ gitwiz.py  # ← Full version already deprecated
 ---
 
 ### 6. `scripts/health_monitor.py:64` - E999 IndentationError
+
 **Error:** `unindent does not match any outer indentation level`  
 **File Purpose:** System health monitoring  
 **Production Usage:** 🟡 **SUPERSEDED** - validate_aurora_system.py exists
 
 **Analysis:**
+
 ```bash
 $ grep -r "health_monitor" --include="*.py" --include="*.yml" --exclude-dir=scripts
 # No production usage found
@@ -128,11 +142,13 @@ $ grep -r "health_monitor" --include="*.py" --include="*.yml" --exclude-dir=scri
 ---
 
 ### 7. `scripts/missing_imports_fixer.py:69` - E999 SyntaxError
+
 **Error:** `invalid syntax`  
 **File Purpose:** Automated import fixing tool  
 **Production Usage:** 🟡 **UTILITY** - Development tool
 
 **Analysis:**
+
 ```bash
 $ grep -r "missing_imports_fixer" --include="*.py" --include="*.yml"
 # Not found in CI/CD workflows or production code
@@ -146,11 +162,13 @@ $ grep -r "missing_imports_fixer" --include="*.py" --include="*.yml"
 ---
 
 ### 8. `scripts/repository_audit.py:47` - E999 SyntaxError
+
 **Error:** `invalid syntax`  
 **File Purpose:** Repository auditing tool  
 **Production Usage:** 🟡 **UTILITY** - Audit/analysis tool
 
 **Analysis:**
+
 ```bash
 $ grep -r "repository_audit" --include="*.py" --include="*.yml"
 # Limited usage, mostly in older scripts
@@ -164,11 +182,13 @@ $ grep -r "repository_audit" --include="*.py" --include="*.yml"
 ---
 
 ### 9. `scripts/setup_canonical_validation.py:61` - E999 IndentationError
+
 **Error:** `unindent does not match any outer indentation level`  
 **File Purpose:** Setup validation for canonical system  
 **Production Usage:** 🟡 **SETUP** - One-time setup tool
 
 **Analysis:**
+
 ```bash
 $ grep -r "setup_canonical_validation" --include="*.py" --include="*.yml"
 # Not found in active workflows
@@ -182,11 +202,13 @@ $ grep -r "setup_canonical_validation" --include="*.py" --include="*.yml"
 ---
 
 ### 10. `scripts/ssmt_v2_2_architectural_sonar.py:155` - E999 SyntaxError
+
 **Error:** `invalid syntax`  
 **File Purpose:** SSMT v2.2 architectural scanner  
 **Production Usage:** 🔴 **OBSOLETE** - SSMT v3+ active
 
 **Analysis:**
+
 ```bash
 $ ls scripts/ | grep ssmt
 ssmt_v2_2_architectural_sonar.py  # ← v2.2
@@ -202,11 +224,13 @@ ssmt_v2_3_intelligent_integrator.py  # ← v2.3
 ---
 
 ### 11. `scripts/ssmt_v2_3_intelligent_integrator.py:177` - E999 IndentationError
+
 **Error:** `unindent does not match any outer indentation level`  
 **File Purpose:** SSMT v2.3 intelligent integrator  
 **Production Usage:** 🔴 **OBSOLETE** - SSMT v3+ active
 
 **Analysis:**
+
 ```bash
 $ grep -r "ssmt_v2" --include="*.yml" .github/workflows/
 # Not found in any active workflows
@@ -241,6 +265,7 @@ $ grep -r "ssmt_v2" --include="*.yml" .github/workflows/
 ## Recommended Actions
 
 ### Immediate Deprecation (5 files) - High Confidence
+
 These files are clearly obsolete or redundant:
 
 1. ✅ `scripts/gitwiz_simple.py` - Full gitwiz already deprecated
@@ -254,6 +279,7 @@ These files are clearly obsolete or redundant:
 ---
 
 ### Fix Required (1 file) - Core Functionality
+
 This file must be fixed as it's core infrastructure:
 
 1. ✅ `aurora_workflow_config.py` - Core configuration system
@@ -263,9 +289,11 @@ This file must be fixed as it's core infrastructure:
 ---
 
 ### Evaluate Before Decision (5 files) - Need Input
+
 These require judgment calls based on usage patterns:
 
 **Consider Deprecating:**
+
 1. `demo_aumemmanager_integration.py` - Demo file (like demo_agent_mode.py)
 
 **Check Usage Before Deprecating:**
@@ -279,6 +307,7 @@ These require judgment calls based on usage patterns:
 ## Deprecation Verification Commands
 
 ### Check Production Usage
+
 ```bash
 # For each file, check if actively imported/used
 grep -r "filename_without_ext" --include="*.py" --include="*.yml" --exclude-dir=scripts --exclude-dir=docs
@@ -291,6 +320,7 @@ grep -r "from.*filename" --include="*.py"
 ```
 
 ### Verify No Breaking Changes
+
 ```bash
 # Run tests after deprecation
 pytest tests/ -v
@@ -307,6 +337,7 @@ python3 -m flake8 . --select=E9,F63,F7,F82 --count
 ## Next Steps
 
 ### Phase 1: Immediate Deprecation (Recommended)
+
 1. Move 5 obsolete scripts to `scripts/deprecated/`:
    - gitwiz_simple.py
    - health_monitor.py  
@@ -319,10 +350,12 @@ python3 -m flake8 . --select=E9,F63,F7,F82 --count
 3. Expected result: **11 → 6 errors**
 
 ### Phase 2: Fix Core Infrastructure
+
 1. Fix `aurora_workflow_config.py` IndentationError (line 213)
 2. Expected result: **6 → 5 errors**
 
 ### Phase 3: Final Evaluation Round
+
 1. Check usage of remaining 5 files
 2. Make informed deprecation/fix decisions
 3. Target: **< 3 errors in active codebase**
@@ -332,18 +365,21 @@ python3 -m flake8 . --select=E9,F63,F7,F82 --count
 ## Impact Assessment
 
 ### If All Obvious Deprecations Executed
+
 - Current: 11 errors
 - After Phase 1: 6 errors (45% reduction)
 - After Phase 2: 5 errors (55% reduction)
 - After Phase 3: 2-3 errors (73-82% reduction)
 
 ### Overall Session Progress
+
 - Started: 39 errors
 - After quick wins: 17 errors
 - After easy fixes: 11 errors
 - After all deprecations: **2-3 errors** (92-95% total reduction)
 
 ### Final State Goal
+
 - **Core infrastructure:** Clean and functional
 - **Active utilities:** Syntax-error-free
 - **Obsolete code:** Archived with documentation
@@ -360,6 +396,7 @@ We have a clear path to reducing errors from 11 to 2-3:
 3. **Evaluate** - Make informed decisions on remaining 5 files
 
 All deprecations can be safely executed with no production impact. The final 2-3 errors will be in files requiring either:
+
 - Fix decision (if actively used)
 - Deprecation decision (if obsolete but unclear)
 

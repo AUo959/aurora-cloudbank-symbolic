@@ -66,3 +66,36 @@ If any script needs to be restored:
 - **Line:** 35, 78, 90, 164+
 - **Reason:** Demo/example file with extensive syntax corruption, not used in production
 - **Impact:** No production impact, example code only
+
+## Phase 1 Deprecation - 2025-10-21
+
+The following 5 scripts were deprecated as part of Phase 1 cleanup (obsolete/superseded scripts):
+
+### 1. gitwiz_simple.py
+- **Error:** IndentationError at line 171
+- **Reason:** Full gitwiz.py already deprecated; simplified version redundant
+- **Impact:** No production usage found
+
+### 2. health_monitor.py
+- **Error:** IndentationError at line 64
+- **Reason:** Superseded by validate_aurora_system.py (fixed and operational)
+- **Note:** References to repository_health_monitor.py and automated_health_monitor.py are different files
+- **Impact:** No production usage, monitoring now handled by validate_aurora_system.py
+
+### 3. setup_canonical_validation.py
+- **Error:** IndentationError at line 61
+- **Reason:** One-time setup tool, no longer needed
+- **Impact:** No active workflow usage, setup already completed
+
+### 4. ssmt_v2_2_architectural_sonar.py
+- **Error:** SyntaxError at line 155
+- **Reason:** SSMT v3.0+ now active, v2.2 obsolete
+- **Note:** Listed in test_security_fixes.py but not actively imported
+- **Impact:** No production usage, superseded by SSMT v3.0 maintenance pipeline
+
+### 5. ssmt_v2_3_intelligent_integrator.py
+- **Error:** IndentationError at line 177
+- **Reason:** SSMT v3.0+ now active, v2.3 obsolete
+- **Impact:** No production usage, superseded by SSMT v3.0 maintenance pipeline
+
+**Total errors eliminated by Phase 1:** 5 errors (11 → 6)

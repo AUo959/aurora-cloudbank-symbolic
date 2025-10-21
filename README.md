@@ -58,6 +58,18 @@
 
 ---
 
+## 🔄 **CI/CD Workflow Status**
+
+[![Unified CI/CD](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-unified-ci.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/aurora-unified-ci.yml)
+[![Python CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/python-ci.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/python-ci.yml)
+[![Node.js CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/ci.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml)
+[![Deploy Pages](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/deploy-pages.yml)
+
+**🚀 New:** Unified CI/CD workflow consolidates 4 workflows with 40-50% faster execution and automatic caching! [Learn more →](docs/WORKFLOW_CONSOLIDATION.md)
+
+---
+
 ## ✨ **What Makes Aurora CloudBank Special**
 
 Aurora CloudBank represents a breakthrough in **intelligent repository management**, **quantum-symbolic computing**, and **enterprise security**. With our revolutionary **SSMT v3.0 automation pipeline** and **comprehensive security transformation**, this repository maintains itself at enterprise-level quality while delivering cutting-edge quantum computing capabilities.

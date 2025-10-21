@@ -300,6 +300,7 @@ continue
         
         requirements_path = self.project_root / requirements_file
         if not requirements_path.exists():
+            pass  # Placeholder
 logger.error("Requirements file not found: %s", str(requirements_file)[:100])
 return results
 

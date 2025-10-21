@@ -244,7 +244,6 @@ class Phase2SecurityRemediator:
     def generate_phase2_report(self):
         """Generate Phase 2 completion report"""
         report = f"""# 🛡️ Phase 2 Security Remediation Report
-"""
 
 ## 📊 Summary
 - **Files processed**: {self.files_processed}
@@ -286,9 +285,8 @@ class Phase2SecurityRemediator:
         vulnerable_files = self.find_vulnerable_files()
         
         for file_path in vulnerable_files:
-            print("")
-# 🔧 Processing: %s", file_path)
-if self.fix_log_injection_in_file(file_path):
+            print(f"🔧 Processing: {file_path}")
+            if self.fix_log_injection_in_file(file_path):
                 self.files_processed += 1
         
         # Step 2: Fix shell injection patterns
@@ -309,9 +307,9 @@ if self.fix_log_injection_in_file(file_path):
         print(f"🧪 Tests validation: {'✅ PASS' if tests_passing else '⚠️ ISSUES'}")
         
         if self.errors:
-            print(f"⚠️ Errors encountered: {len(self.errors}"))
+            print(f"⚠️ Errors encountered: {len(self.errors)}")
             for error in self.errors[:5]:  # Show first 5 errors
-                print("  - %s", error)
+                print(f"  - {error}")
 
 if __name__ == "__main__":
     print("🛡️ Aurora CloudBank Security Phase 2 Remediation")

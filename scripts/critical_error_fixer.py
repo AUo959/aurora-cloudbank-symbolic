@@ -191,10 +191,9 @@ def main():
     print("\nCritical Fix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print("%s: {count} files", fix_type.replace('_', ' ').title())
+        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print("")
-Processed %s critical Python files.", len(problem_files))
+    print(f"Processed {len(problem_files)} critical Python files.")
     return 0
 
 

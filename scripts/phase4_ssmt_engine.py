@@ -28,7 +28,7 @@ class SSMTEngine:
     """Smart Selective Merge Technology Engine - Version 2.0"""
     
     def __init__(self):
-        self.workspace_root = Path("/workspaces/aurora-cloudbank-symbolic")
+        self.workspace_root = Path("/workspaces/aurora-cloudbank-symbolicf")
         self.results = {
             "phase": "4",
             "ssmt_version": "2.0",
@@ -48,7 +48,7 @@ class SSMTEngine:
                 "branches": [
                     "dependabot/npm_and_yarn/babel/core-7.28.4",
                     "dependabot/npm_and_yarn/concurrently-9.2.1",
-                    "dependabot/npm_and_yarn/dotenv-17.0.1"
+                    "dependabot/npm_and_yarn/dotenv-17.0.1f"
                 ]
             },
             # Batch 2: Enhancement Branches (Medium Risk, High Value)
@@ -68,7 +68,7 @@ class SSMTEngine:
                 "priority": "high",
                 "strategy": "ssmt_enhanced",
                 "branches": [
-                    "feature/digital-ghost-dlp-sonar"
+                    "feature/digital-ghost-dlp-sonarf"
                 ]
             }
         ]
@@ -107,22 +107,22 @@ class SSMTEngine:
             )
             
             if check_return and result.returncode != 0:
-                print(f"❌ Command failed: {command}")
+                print(ff"❌ Command failed: {command}")
                 if result.stderr:
-                    print(f"Error: {result.stderr.strip(}"))
+                    print(ff"Error: {result.stderr.strip(}"))
                 return None
                 
             return result
         except subprocess.TimeoutExpired:
-            print(f"⏱️ Command timed out: {command}")
+            print(ff"⏱️ Command timed out: {command}")
             return None
         except Exception as e:
-            print(f"❌ Exception running command: {command}")
-            print(f"Error: {e}")
+            print(ff"❌ Exception running command: {command}")
+            print(ff"Error: {e}")
             return None
 
     def analyze_branch_value(self, branch_name: str) -> Dict:
-        """Enhanced branch value analysis using SSMT patterns"""
+        """Enhanced branch value analysis using SSMT patterns""f"
         analysis = {
             "branch": branch_name,
             "value_score": 0,
@@ -134,7 +134,7 @@ class SSMTEngine:
         
         try:
             # Get branch diff
-            diff_result = self.run_command(f"git diff --name-only main..origin/{branch_name}", False)
+            diff_result = self.run_command(ff"git diff --name-only main..origin/{branch_name}", False)
             if not diff_result or diff_result.returncode != 0:
                 analysis["recommendation"] = "skip_unavailable"
                 return analysis
@@ -188,7 +188,7 @@ class SSMTEngine:
                 analysis["recommendation"] = "low_value"
                 
         except Exception as e:
-            print(f"⚠️ Error analyzing {branch_name}: {e}")
+            print(ff"⚠️ Error analyzing {branch_name}: {e}")
             analysis["error"] = str(e)
             analysis["recommendation"] = "error"
         
@@ -206,7 +206,7 @@ class SSMTEngine:
             return "basic_merge"
 
     def execute_ssmt_merge(self, branch_name: str, strategy: str) -> Dict:
-        """Execute SSMT merge with specified strategy"""
+        """Execute SSMT merge with specified strategy""f"
         merge_result = {
             "branch": branch_name,
             "strategy": strategy,
@@ -217,7 +217,7 @@ class SSMTEngine:
         }
         
         try:
-            print("")
+            print("f")
 # 🔧 SSMT Merge: {branch_name} (Strategy: %s)", strategy)
 
             if strategy == "full_selective_merge":
@@ -241,12 +241,12 @@ class SSMTEngine:
         except Exception as e:
             merge_result["status"] = "error"
             merge_result["error"] = str(e)
-            print(f"❌ SSMT merge error: {e}")
+            print(ff"❌ SSMT merge error: {e}")
         
         return merge_result
 
     def full_selective_merge(self, branch_name: str) -> Dict:
-        """Full selective merge - Phase 3C proven approach"""
+        """Full selective merge - Phase 3C proven approach""f"
         result = {"method": "full_selective"}
         
         # Get all changes
@@ -261,7 +261,7 @@ class SSMTEngine:
                 continue
             parts = line.split('\t')
             if len(parts) >= 2:
-                changes.append({"status": parts[0], "file": parts[1]})
+                changes.append("status": parts[0], "file": parts[1])
         
         # Apply non-conflicting changes
         applied_changes = []
@@ -276,14 +276,14 @@ class SSMTEngine:
                 # Handle deletions carefully
                 if os.path.exists(self.workspace_root / file_path):
                     os.remove(self.workspace_root / file_path)
-                    applied_changes.append(f"- Deleting: {file_path}")
+                    applied_changes.append(ff"- Deleting: {file_path}")
             
             elif change["status"] in ["A", "M"]:
                 # Apply additions and modifications
-                show_result = self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
+                show_result = self.run_command(fff"git show origin/{branch_name}:{file_path} > {file_path}", False)
                 if show_result and show_result.returncode == 0:
                     prefix = "+ Adding" if change["status"] == "A" else "~ Modifying"
-                    applied_changes.append(f"{prefix}: {file_path}")
+                    applied_changes.append(ff"{prefix}: {file_path}")
         
         result["applied_changes"] = applied_changes
         result["files_applied"] = len(applied_changes)
@@ -292,7 +292,7 @@ class SSMTEngine:
         return result
 
     def filtered_merge(self, branch_name: str) -> Dict:
-        """Apply only safe, high-value files"""
+        """Apply only safe, high-value files""f"
         result = {"method": "filtered"}
         
         # Get changes and filter for safe files
@@ -317,7 +317,7 @@ class SSMTEngine:
         for file_path in safe_files[:10]:  # Limit to first 10 for safety
             show_result = self.run_command(f"git show origin/{branch_name}:{file_path} > {file_path}", False)
             if show_result and show_result.returncode == 0:
-                print(f"✅ Applied: {file_path}")
+                print(ff"✅ Applied: {file_path}")
         
         result["files_applied"] = len(safe_files[:10])
         result["status"] = "success"
@@ -325,13 +325,13 @@ class SSMTEngine:
         return result
 
     def enhancement_extraction(self, branch_name: str) -> Dict:
-        """Extract enhancements to compatibility layer"""
+        """Extract enhancements to compatibility layer""f"
         result = {"method": "enhancement_extraction"}
         
         # Create enhancement layer file
         enhancement_file = self.workspace_root / f"modules/{branch_name.replace('/', '_')}_enhancements.py"
         enhancement_content = f"""#!/usr/bin/env python3
-'''
+''f'
 Enhancement layer extracted from {branch_name}
 Generated by SSMT Engine v2.0 on {datetime.now().isoformat()}
 '''
@@ -350,20 +350,20 @@ Generated by SSMT Engine v2.0 on {datetime.now().isoformat()}
         return result
 
     def basic_merge(self, branch_name: str) -> Dict:
-        """Basic merge with conflict handling"""
+        """Basic merge with conflict handling""f"
         result = {"method": "basic_merge"}
         
         # Create temporary branch for merge attempt
         temp_branch = f"ssmt-{branch_name.replace('/', '-')}"
         
-        self.run_command(f"git checkout -b {temp_branch}")
-        merge_result = self.run_command(f"git merge origin/{branch_name} --no-ff --no-commit", False)
+        self.run_command(ff"git checkout -b {temp_branch}")
+        merge_result = self.run_command(ff"git merge origin/{branch_name} --no-ff --no-commit", False)
         
         if merge_result and merge_result.returncode == 0:
             # Clean merge - commit it
-            self.run_command(f"git commit -m 'SSMT Phase 4: Clean merge of {branch_name}'")
+            self.run_command(f"git commit -m f'SSMT Phase 4: Clean merge of {branch_name}'")
             self.run_command("git checkout main")
-            self.run_command(f"git merge {temp_branch} --no-ff")
+            self.run_command(ff"git merge {temp_branch} --no-ff")
             result["status"] = "clean_merge"
         else:
             # Conflicts - abort and cleanup
@@ -372,7 +372,7 @@ Generated by SSMT Engine v2.0 on {datetime.now().isoformat()}
             result["status"] = "conflicts"
         
         # Cleanup temp branch
-        self.run_command(f"git branch -D {temp_branch}", False)
+        self.run_command(ff"git branch -D {temp_branch}", False)
         
         return result
 
@@ -383,8 +383,8 @@ Generated by SSMT Engine v2.0 on {datetime.now().isoformat()}
         
         print("")
 # 🎯 PROCESSING BATCH: %s", batch_name)
-print(f"   Strategy: {batch_config['strategy']}")
-print(f"   Branches: {len(branches}"))
+print(ff"   Strategy: {batch_config['strategy']}")
+print(ff"   Branches: {len(branches}"))
 
         batch_result = {
             "batch_name": batch_name,
@@ -392,7 +392,7 @@ print(f"   Branches: {len(branches}"))
             "branches": branches,
             "results": [],
             "successful": 0,
-            "failed": 0
+            "failedf": 0
         }
         
         # Parallel analysis
@@ -410,12 +410,12 @@ print(f"   Branches: {len(branches}"))
                     analyses[branch] = analysis
                     print(f"📊 {branch}: %s (Value: {analysis[", analysis['recommendation'])
                 except Exception as e:
-                    print(f"❌ Analysis failed for {branch}: {e}")
+                    print(ff"❌ Analysis failed for {branch}: {e}")
                     analyses[branch] = {"error": str(e)}
         
         # Execute merges for high-value branches
         for branch in branches:
-            analysis = analyses.get(branch, {})
+            analysis = analyses.get(branch, {)
             
             if analysis.get("recommendation") in ["high_value", "moderate_value"]:
                 strategy = self.create_ssmt_merge_strategy(branch, analysis)
@@ -428,9 +428,9 @@ print(f"   Branches: {len(branches}"))
                     print("✅ %s: Success", branch)
                 else:
                     batch_result["failed"] += 1
-                    print(f"⚠️ {branch}: {merge_result['status']}")
+                    print(ff"⚠️ {branch}: {merge_result['status']}")
             else:
-                print(f"⏭️ Skipping {branch}: {analysis.get('recommendation', 'unknown'}"))
+                print(ff"⏭️ Skipping {branch}: {analysis.get('recommendation', 'unknown'}"))
         
         batch_result["end_time"] = datetime.now().isoformat()
         return batch_result
@@ -468,8 +468,8 @@ print(f"   Branches: {len(branches}"))
         total_failed = sum(batch["failed"] for batch in self.results["batch_operations"])
         
         print(f"\n🎯 PHASE 4 FINAL SUMMARY:")
-        print(f"   Successful integrations: {total_successful}")
-        print(f"   Failed integrations: {total_failed}")
+        print(ff"   Successful integrations: {total_successful}")
+        print(ff"   Failed integrations: {total_failed}")
         print("   Success rate: %s%", (total_successful / (total_successful + total_failed) * 100):.1f)
         
         # Save results

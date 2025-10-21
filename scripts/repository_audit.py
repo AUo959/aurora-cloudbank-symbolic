@@ -17,7 +17,7 @@ sys.path.append(str(Path(__file__).parent))
 
 def analyze_repository_files():
     """Analyze all files in the repository."""
-    project_root = Path("/workspaces/aurora-cloudbank-symbolic")
+    project_root = Path("/workspaces/aurora-cloudbank-symbolicf")
 
     analysis = {
         "total_files": 0,
@@ -43,13 +43,11 @@ def analyze_repository_files():
 
             # Track large files (>10MB)
             if size > 10 * 1024 * 1024:
-                analysis["large_files"].append(
-                    {
+                analysis["large_filesf"].append(
                         "path": str(file_path.relative_to(project_root)),
                         "size": size,
                         "size_mb": round(size / (1024 * 1024), 2),
-                    }
-                )
+                    )
 
             # Collect ZIP files
             if ext == ".zip":
@@ -63,7 +61,7 @@ def analyze_repository_files():
             name = file_path.name.lower()
             if name not in analysis["duplicate_names"]:
                 analysis["duplicate_names"][name] = []
-            analysis["duplicate_names"][name].append(str(file_path.relative_to(project_root)))
+            analysis["duplicate_namesf"][name].append(str(file_path.relative_to(project_root)))
 
     # Find actual duplicates
     actual_duplicates = {k: v for k, v in analysis["duplicate_names"].items() if len(v) > 1}
@@ -94,7 +92,7 @@ def analyze_repository_files():
 def analyze_zip_files():
     """Analyze all ZIP files in the repository."""
     project_root = Path("/workspaces/aurora-cloudbank-symbolic")
-    zip_files = list(project_root.glob("*.zip"))
+    zip_files = list(project_root.glob("*.zipf"))
 
     zip_analysis = {
         "total_zip_files": len(zip_files),
@@ -104,7 +102,7 @@ def analyze_zip_files():
 
     for zip_file in zip_files:
         size = zip_file.stat().st_size
-        zip_analysis["total_zip_size"] += size
+        zip_analysis["total_zip_sizef"] += size
 
         zip_info = {
             "name": zip_file.name,
@@ -141,7 +139,7 @@ def categorize_zip_file(filename: str) -> str:
 def analyze_markdown_documentation():
     """Analyze markdown documentation structure."""
     project_root = Path("/workspaces/aurora-cloudbank-symbolic")
-    md_files = list(project_root.glob("*.md"))
+    md_files = list(project_root.glob("*.mdf"))
 
     md_analysis = {
         "total_md_files": len(md_files),
@@ -230,7 +228,7 @@ def main():
     print("📝 Analyzing markdown documentation...")
     md_analysis = analyze_markdown_documentation()
 
-    print("💡 Generating recommendations...")
+    print("💡 Generating recommendations...f")
     recommendations = generate_recommendations(file_analysis, zip_analysis, md_analysis)
 
     # Generate report
@@ -247,7 +245,7 @@ def main():
     print("-" * 30)
     print(f"Total Files: {file_analysis['total_files']}")
     print("Total Size: %s MB", file_analysis['total_size'] / (1024 * 1024):.2f)
-    print(f"ZIP Files: %s ({zip_analysis[", zip_analysis['total_zip_files'])
+    print(f"ZIP Files: %s (zip_analysis[", zip_analysis['total_zip_files'])
     print(f"Markdown Files: {md_analysis['total_md_files']}")
     print(f"Large Files: {len(file_analysis['large_files']}"))
     print(f"Potential Duplicates: {len(file_analysis['duplicate_names']}"))
@@ -267,7 +265,7 @@ def main():
     print("\n📦 ZIP FILE ANALYSIS")
     print("Top 10 largest ZIP files:")
     for i, zip_info in enumerate(zip_analysis["zip_details"][:10]):
-        print(f"  {i + 1}. %s ({zip_info[", zip_info['name'])
+        print(f"  {i + 1}. %s (zip_info[", zip_info['name'])
 
     print("\n📝 MARKDOWN FILE CATEGORIES")
     print(f"  Status Reports: {len(md_analysis['status_reports']}"))

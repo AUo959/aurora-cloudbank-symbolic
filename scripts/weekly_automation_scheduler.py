@@ -31,7 +31,7 @@ class WeeklyAutomationScheduler:
                 "health_reporting": True,
                 "safe_deletions": False  # Require manual approval
             },
-            "thresholds": {
+            "thresholdsf": {
                 "branch_count_warning": 35,
                 "branch_count_critical": 45,
                 "stale_days_aggressive": 30,
@@ -80,7 +80,7 @@ class WeeklyAutomationScheduler:
     def run_scheduled_maintenance(self):
         """Execute scheduled maintenance tasks"""
         print("🕒 SSMT v3.0 Weekly Automated Maintenance")
-        print(f"📅 Scheduled run at: {datetime.now(}").strftime('%Y-%m-%d %H:%M:%S'))
+        print("📅 Scheduled run at: {}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
         print()
         
         # Update schedule
@@ -253,8 +253,8 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--manual":
         # Manual trigger
         success = scheduler.manual_maintenance_trigger()
-        print("")%s", '✅ Manual maintenance completed successfully!' if success else '❌ Manual maintenance encountered issues.'")
-    
+        msg = '✅ Manual maintenance completed successfully!' if success else '❌ Manual maintenance encountered issues.'
+        print(msg)    
     elif len(sys.argv) > 1 and sys.argv[1] == "--setup":
         # Setup monitoring files
         scheduler.setup_continuous_monitoring()
@@ -264,21 +264,25 @@ def main():
         # Scheduled run
         print("⏰ Scheduled maintenance time reached!")
         success = scheduler.run_scheduled_maintenance()
-        print("")%s", '✅ Scheduled maintenance completed!' if success else '❌ Scheduled maintenance had issues.'")
+        msg = '✅ Scheduled maintenance completed!' if success else '❌ Scheduled maintenance had issues.'
+        print(msg)
     
     else:
         # Status check
         next_run = datetime.fromisoformat(scheduler.schedule["next_run"]) if scheduler.schedule["next_run"] else None
         print("📅 SSMT v3.0 Weekly Automation Status")
         print(f"   🔧 Automation enabled: {scheduler.schedule['enabled']}")
-        print(f"   ⏰ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S'}") if next_run else 'Not scheduled')
+        if next_run:
+            print(f"   ⏰ Next scheduled run: {next_run.strftime('%Y-%m-%d %H:%M:%S')}")
+        else:
+            print("   ⏰ Next scheduled run: Not scheduled")
         
         if scheduler.schedule["last_run"]:
             last_run = datetime.fromisoformat(scheduler.schedule["last_run"])
-            print(f"   📅 Last run: {last_run.strftime('%Y-%m-%d %H:%M:%S'}"))
+            print(f"   📅 Last run: {last_run.strftime('%Y-%m-%d %H:%M:%S')}")
         
-        print(f"\n💡 Run with --manual for immediate maintenance")
-        print(f"💡 Run with --setup to create monitoring dashboard")
+        print("\n💡 Run with --manual for immediate maintenance")
+        print("💡 Run with --setup to create monitoring dashboard")
 
 if __name__ == "__main__":
     main()

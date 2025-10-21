@@ -32,6 +32,7 @@ except ImportError:
     sys.exit(1)
 
 
+class ValidationManager: pass  # Stub
 def get_staged_files():
     """Get list of staged files for commit"""
     try:

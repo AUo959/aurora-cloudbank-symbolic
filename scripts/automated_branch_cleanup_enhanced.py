@@ -331,6 +331,7 @@ def main():
 
     
         if not branches:
+            pass  # Placeholder
         print("❌ No branches found or error occurred")
         
         return

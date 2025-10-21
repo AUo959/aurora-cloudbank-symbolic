@@ -555,12 +555,11 @@ def main():
         print("\n📊 Maintenance Task Status:")
         print("=" * 50)
         for name, info in status.items():
-            print("")
-%s:", name)
-print(f"  Enabled: {info['enabled']}")
-print(f"  Last Run: {info['last_run'] or 'Never'}")
-print(f"  Success/Failures: %s/{info[", info['success_count'])
-print(f"  Description: {info['description']}")
+            print(f"\n{name}:")
+            print(f"  Enabled: {info['enabled']}")
+            print(f"  Last Run: {info['last_run'] or 'Never'}")
+            print(f"  Success/Failures: {info['success_count']}/{info['failure_count']}")
+            print(f"  Description: {info['description']}")
 
     elif args.run_task:
         print(f"🔧 Running task: {args.run_task}")

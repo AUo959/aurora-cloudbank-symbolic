@@ -50,9 +50,8 @@ def main():
     total_files = 0
 
     for ext in extensions:
-        print("")
-Cleaning %s files...", ext)
-files = list(Path(".").rglob(f"*{ext}"))
+        print(f"Cleaning {ext} files...")
+        files = list(Path(".").rglob(f"*{ext}"))
 
         for file_path in files:
             # Skip certain directories

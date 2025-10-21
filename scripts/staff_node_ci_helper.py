@@ -23,6 +23,7 @@ from logging import getLogger as get_logger
 logger = get_logger("staff_node_ci_helper")
 
 
+import shlex
 def run_cmd(cmd: str) -> None:
     """Run a shell command and exit on failure."""
     logger.info("Running: %s", cmd)

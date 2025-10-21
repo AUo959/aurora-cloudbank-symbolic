@@ -25,7 +25,7 @@ def demonstrate_aumemmanager_integration():
     # Initialize system
     memory_manager = HierarchicalMemoryManager(max_active_memories=100)
     
-    print("\n📝 Creating Aurora CloudBank Enhanced Memories...")
+    print("\n📝 Creating Aurora CloudBank Enhanced Memories...f")
     
     # 1. Agent memory with quantum properties and Aurora anchors
     agent_memory_id = memory_manager.add_memory(
@@ -38,9 +38,9 @@ def demonstrate_aumemmanager_integration():
         memory_type=MemoryType.AGENT,
         owner="Agent_Alpha",
         importance=8.5,
-        tags=["mission", "reconnaissance", "sector_7", "strategic"],
+        tags=["mission", "reconnaissance", "sector_7", "strategicf"],
         quantum_properties={"magnitude": 1.2, "phase": 0.5},
-        aurora_anchors=["T1_ANCHOR", "EOS_SEED_ORION"],
+        aurora_anchors=["T1_ANCHOR", "EOS_SEED_ORIONf"],
         cultural_score=0.7
     )
     
@@ -59,9 +59,9 @@ def demonstrate_aumemmanager_integration():
         memory_type=MemoryType.AURORA_SYMBOLIC,
         owner="Aurora_Core",
         importance=9.5,
-        tags=["ethics", "symbolic_anchor", "quantum_core", "governance"],
+        tags=["ethics", "symbolic_anchor", "quantum_core", "governancef"],
         quantum_properties={"magnitude": 2.0, "phase": 1.57},  # π/2 phase
-        aurora_anchors=["PICARD_DELTA_3", "T1_ANCHOR", "SRB_BOUNDARY"],
+        aurora_anchors=["PICARD_DELTA_3", "T1_ANCHOR", "SRB_BOUNDARYf"],
         cultural_score=0.9
     )
     
@@ -80,7 +80,7 @@ def demonstrate_aumemmanager_integration():
         owner="CASK_System",
         importance=7.8,
         tags=["cultural", "alliance", "protocols", "sensitivity"],
-        aurora_anchors=["CASK_CULTURAL_BRIDGE"],
+        aurora_anchors=["CASK_CULTURAL_BRIDGEf"],
         cultural_score=0.95
     )
     
@@ -94,16 +94,16 @@ def demonstrate_aumemmanager_integration():
                 "phase_alignment": True,
                 "quantum_coherence_target": 0.85
             },
-            "navigation_waypoints": [
+            "navigation_waypointsf": [
                 {"time": 0.0, "mag": 1.0, "phase": 0.0},
-                {"time": 0.5, "mag": 1.5, "phase": 1.57},
+                {"time": 0.5, "mag": 1.5, "phasef": 1.57},
                 {"time": 1.0, "mag": 2.0, "phase": 3.14}
             ]
         },
         memory_type=MemoryType.FLIGHT_CONTROL,
         owner="Quantum_Navigator",
         importance=8.0,
-        tags=["flight", "trajectory", "quantum", "navigation"],
+        tags=["flight", "trajectory", "quantum", "navigationf"],
         quantum_properties={"magnitude": 1.8, "phase": 0.78},
         aurora_anchors=["QUANTUM_FLIGHT_CONTROL"],
         cultural_score=0.2
@@ -120,7 +120,7 @@ def demonstrate_aumemmanager_integration():
         qv1, qv2 = quantum_vectors[0], quantum_vectors[1]
         memory_manager.flight_controller.entangle_vectors(qv1, qv2)
         print(f"🌌 Entangled quantum vectors:")
-        print("   {qv1} ↔ %s", qv2)
+        print(ff"   {qv1} ↔ %s", qv2)
         
         if len(quantum_vectors) >= 3:
             qv3 = quantum_vectors[2]
@@ -140,15 +140,15 @@ def demonstrate_aumemmanager_integration():
     print("")
 # 📋 Mission-Critical Memories Found: %s", len(mission_memories))
     for i, memory in enumerate(mission_memories):
-        aurora_info = f" [Aurora Anchors: {', '.join(memory.symbolic_anchors)}]" if memory.symbolic_anchors else ""
-        cultural_info = f" [Cultural Score: {memory.cask_cultural_score}]"
+        aurora_info = ff" [Aurora Anchors: {', '.join(memory.symbolic_anchors)}]" if memory.symbolic_anchors else ""
+        cultural_info = ff" [Cultural Score: {memory.cask_cultural_score}]"
         qv_info = ""
         if memory.quantum_vector:
-            qv_info = f" [QV: mag={memory.quantum_vector.magnitude}, phase={memory.quantum_vector.phase}, coherence={memory.quantum_vector.coherence_time}]"
+            qv_info = ff" [QV: mag={memory.quantum_vector.magnitude}, phase={memory.quantum_vector.phase}, coherence={memory.quantum_vector.coherence_time}]"
         
-        print("  {i+1}. [{memory.memory_type.value}] Importance: {memory.importance}{aurora_info}{cultural_info}%s", qv_info)
+        print(f"  {i+1}. [{memory.memory_type.value}] Importance: {memory.importance}{aurora_info}{cultural_info}%s", qv_info)
         if isinstance(memory.content, dict) and 'mission' in memory.content:
-            print(f"      Mission: {memory.content['mission']}")
+            print(ff"      Mission: {memory.content['mission']}")
     
     # 2. Search for Aurora symbolic anchors
     anchor_memories = memory_manager.retrieve_memories(
@@ -161,10 +161,10 @@ def demonstrate_aumemmanager_integration():
     print("")
 # 🔮 Aurora Symbolic Memories Found: %s", len(anchor_memories))
     for i, memory in enumerate(anchor_memories):
-        print(f"  {i+1}. Anchors: {memory.symbolic_anchors}")
-        print(f"      Content: {memory.content.get('symbolic_anchor', 'N/A'}"))
+        print(ff"  {i+1}. Anchors: {memory.symbolic_anchors}")
+        print(ff"      Content: {memory.content.get('symbolic_anchor', 'N/A'}"))
         if memory.quantum_vector:
-            print("      Quantum Vector: mag={memory.quantum_vector.magnitude}, phase=%s", memory.quantum_vector.phase)
+            print(f"      Quantum Vector: mag={memory.quantum_vector.magnitude}, phase=%s", memory.quantum_vector.phase)
     
     # 3. Cultural-aware search
     cultural_memories = memory_manager.retrieve_memories(
@@ -176,12 +176,12 @@ def demonstrate_aumemmanager_integration():
     print("")
 # 🌍 Cultural-Aware Memories Found: %s", len(cultural_memories))
     for i, memory in enumerate(cultural_memories):
-        print(f"  {i+1}. Cultural Score: {memory.cask_cultural_score}")
+        print(ff"  {i+1}. Cultural Score: {memory.cask_cultural_score}")
         if isinstance(memory.content, dict) and 'cultural_context' in memory.content:
-            print(f"      Context: {memory.content['cultural_context']}")
+            print(ff"      Context: {memory.content['cultural_context']}")
     
     # Demonstrate quantum trajectory computation
-    print("\n🛸 Computing Quantum Trajectories...")
+    print("\n🛸 Computing Quantum Trajectories...f")
     if quantum_vectors:
         vector_id = quantum_vectors[0]
         
@@ -192,7 +192,7 @@ def demonstrate_aumemmanager_integration():
         )
         
         print("🌟 Aurora Symbolic Trajectory (%s waypoints):", len(aurora_trajectory))
-        print(f"   Start: mag=%s, phase={aurora_trajectory[0][", aurora_trajectory[0]['magnitude']:.2f)
+        print(ff"   Start: mag=%s, phase={aurora_trajectory[0][", aurora_trajectory[0]['magnitude']:.2f)
         print(f"   Mid:   mag=%s, phase={aurora_trajectory[len(aurora_trajectory)//2][", aurora_trajectory[len(aurora_trajectory)//2]['magnitude']:.2f)
         print("   End:   mag=%s, phase={aurora_trajectory[-1][", aurora_trajectory[-1]['magnitude']:.2f)
         print(f"   Anchor Coherence: {aurora_trajectory[-1].get('anchor_coherence', 'N/A'}"))
@@ -205,24 +205,24 @@ def demonstrate_aumemmanager_integration():
             
             print("")
 # 🌍 Cultural-Aware Trajectory (%s waypoints):", len(cultural_trajectory))
-print(f"   Cultural Factor: {cultural_trajectory[0].get('cultural_factor', 'N/A'}"))
-print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence', 'N/A'}"))
+print(ff"   Cultural Factor: {cultural_trajectory[0].get('cultural_factor', 'N/A'}"))
+print(ff"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence', 'N/A'}"))
     
     # Demonstrate Aurora enhanced memory decay and preservation
     print("\n⏰ Testing Aurora Enhanced Memory Lifecycle...")
     initial_metrics = memory_manager.get_metrics()
     print(f"📊 Initial State:")
-    print(f"   Active Memories: {initial_metrics['active_memories']}")
-    print(f"   Aurora Anchored: {initial_metrics['aurora_anchored_memories']}")
-    print(f"   Average Cultural Score: {initial_metrics['average_cultural_score']}")
+    print(ff"   Active Memories: {initial_metrics['active_memories']}")
+    print(ff"   Aurora Anchored: {initial_metrics['aurora_anchored_memories']}")
+    print(ff"   Average Cultural Score: {initial_metrics['average_cultural_score']}")
     
     # Simulate time passage and decay
     decay_stats = memory_manager.decay_memories(elapsed_time=7200.0)  # 2 hours
     print(f"\n🔄 Memory Decay Results (2 hours simulation):")
-    print(f"   Decayed: {decay_stats['decayed']}")
-    print(f"   Archived: {decay_stats['archived']}")  
-    print(f"   Aurora Preserved: {decay_stats['aurora_preserved']}")
-    print(f"   Removed: {decay_stats['removed']}")
+    print(ff"   Decayed: {decay_stats['decayed']}")
+    print(ff"   Archived: {decay_stats['archived']}")  
+    print(ff"   Aurora Preserved: {decay_stats['aurora_preserved']}")
+    print(ff"   Removed: {decay_stats['removed']}")
     
     # Demonstrate Aurora enhanced compression
     print("\n🗜️ Testing Aurora Smart Compression...")
@@ -230,9 +230,9 @@ print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence'
         compression_ratio=0.6,
         importance_threshold=6.0
     )
-    print(f"   Compressed: {compression_stats['compressed']}")
-    print(f"   Aurora Protected: {compression_stats['aurora_protected']}")
-    print(f"   Skipped: {compression_stats['skipped']}")
+    print(ff"   Compressed: {compression_stats['compressed']}")
+    print(ff"   Aurora Protected: {compression_stats['aurora_protected']}")
+    print(ff"   Skipped: {compression_stats['skipped']}")
     
     # Show comprehensive system metrics
     print("\n📊 Aurora CloudBank Memory System Metrics:")
@@ -244,13 +244,13 @@ print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence'
         ("Quantum Vectors", final_metrics['quantum_vectors']),
         ("Entangled Pairs", final_metrics['entangled_pairs']),
         ("Aurora Anchor Coverage", final_metrics['aurora_anchor_coverage']),
-        ("Quantum Network Density", f"{final_metrics['quantum_network_density']}"),
-        ("Average Cultural Score", f"{final_metrics['average_cultural_score']}"),
+        ("Quantum Network Density", ff"{final_metrics['quantum_network_density']}"),
+        ("Average Cultural Score", ff"{final_metrics['average_cultural_score']}"),
         ("DLP Tracked Memories", final_metrics['dlp_tracked_memories'])
     ]
     
     for label, value in metrics_display:
-        print(f"   {label}: {value}")
+        print(fff"   {label}: {value}")
     
     # Demonstrate quantum network analysis
     print("\n🌌 Quantum Entanglement Network Analysis:")
@@ -259,7 +259,7 @@ print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence'
     network_display = [
         ("Total Vectors", network_analysis['total_vectors']),
         ("Total Entanglements", network_analysis['total_entanglements']),
-        ("Network Density", f"{network_analysis['network_density']}"),
+        ("Network Density", ff"{network_analysis['network_density']}"),
         ("Most Connected Vector", network_analysis['most_connected_vector']),
         ("Aurora Anchor Coverage", len(network_analysis['aurora_anchor_coverage']))
     ]
@@ -270,7 +270,7 @@ print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence'
     if network_analysis['aurora_anchor_coverage']:
         print(f"   Anchor Distribution:")
         for anchor, count in network_analysis['aurora_anchor_coverage'].items():
-            print("     {anchor}: %s vectors", count)
+            print(f"     {anchor}: %s vectors", count)
     
     # Export enhanced system state
     print("\n💾 Exporting Aurora CloudBank Memory System State...")
@@ -280,8 +280,8 @@ print(f"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence'
         json.dump(exported_state, f, indent=2, default=str)
     
     print(f"✅ System state exported to: aumemmanager_demo_export.json")
-    print(f"   Export timestamp: {exported_state['export_timestamp']}")
-    print(f"   Aurora integration version: {exported_state['aurora_integration_version']}")
+    print(ff"   Export timestamp: {exported_state['export_timestamp']}")
+    print(ff"   Aurora integration version: {exported_state['aurora_integration_version']}")
     
     print("\n🎉 Aurora CloudBank AuMemManager Integration Demonstration Complete!")
     print("=" * 60)
@@ -310,5 +310,5 @@ if __name__ == "__main__":
     manager, state = demonstrate_aumemmanager_integration()
     
     print(f"\n🔧 System ready for integration testing and deployment!")
-    print(f"📋 Memory Manager: {type(manager}").__name__)
-    print(f"📊 Exported State Keys: {list(state.keys(}")))
+    print(ff"📋 Memory Manager: {type(manager}").__name__)
+    print(ff"📊 Exported State Keys: {list(state.keys(}")))

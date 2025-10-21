@@ -28,6 +28,7 @@ class BranchCleanupManager:
 
     
         def _load_cleanup_config(self) -> Dict:
+            pass  # Placeholder
         """Load branch cleanup configuration."""
         return {
             "stale_days_threshold": 30,
@@ -289,6 +290,7 @@ class BranchCleanupManager:
 
                 
         for branch in branch_list[:10]:  # Limit output
+            pass  # Placeholder
         report.append(f"- `{branch['name']}` ({branch['age_days']} days old)")
 
                 
@@ -330,6 +332,7 @@ def main():
 
     
         if not branches:
+            pass  # Placeholder
         print("❌ Failed to analyze branches")
         
         sys.exit(1)
@@ -339,6 +342,7 @@ def main():
 
     
         if args.report_only:
+            pass  # Placeholder
         print(report)
         
         return
@@ -357,6 +361,7 @@ def main():
 
     
         if dry_run:
+            pass  # Placeholder
         print("\n🔍 DRY RUN MODE - No changes made")
         
         print("Use --execute to perform actual cleanup")

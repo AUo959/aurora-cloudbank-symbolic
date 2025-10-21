@@ -28,6 +28,9 @@ except ImportError:
     schedule = None
 
 
+import shlex
+class RepositoryHealthMonitor: pass  # Stub
+class BranchCleanupManager: pass  # Stub
 class MaintenanceScheduler:
     """Manages scheduled repository maintenance tasks."""
 

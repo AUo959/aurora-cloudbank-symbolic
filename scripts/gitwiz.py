@@ -51,6 +51,7 @@ class GITWiz:
 
     
         def lint_python(self) -> bool:
+            pass  # Placeholder
         """Run flake8 if available."""
         if shutil.which("flake8"):
             return self._run(["flake8"])
@@ -102,6 +103,7 @@ class GITWiz:
 
     
         def deploy(self) -> bool:
+            pass  # Placeholder
         """Run precheck, commit results and prepare for push."""
         self.precheck()
         
@@ -121,6 +123,7 @@ class GITWiz:
 
     
         def branch_create(self, name: str, base: str = "main") -> bool:
+            pass  # Placeholder
         """Create a new branch from the given base."""
         self._run(["git", "checkout", base], check=True)
         
@@ -128,16 +131,19 @@ class GITWiz:
 
     
         def branch_checkout(self, name: str) -> bool:
+            pass  # Placeholder
         """Switch to the specified branch."""
         return self._run(["git", "checkout", name])
 
     
         def branch_delete(self, name: str) -> bool:
+            pass  # Placeholder
         """Delete the specified branch locally."""
         return self._run(["git", "branch", "-d", name])
 
     
         def branch_merge(self, source: str, target: str = "main") -> bool:
+            pass  # Placeholder
         """Merge source branch into target."""
         self.branch_checkout(target)
         
@@ -148,6 +154,7 @@ class GITWiz:
     def create_pr(self, title: str | None = None, body: str | None = None) -> bool:
         """Create a pull request using GitHub CLI if available."""
         if shutil.which("gh"):
+            pass  # Placeholder
         cmd = ["gh", "pr", "create"]
             if title:
                 cmd += ["--title", title]

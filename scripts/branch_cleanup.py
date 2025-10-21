@@ -8,6 +8,7 @@ import re
 
 
 def get_merged_branches():    result = subprocess.run(        ["git", "branch", "-r", "--merged", "origin/main"],
+    pass  # Placeholder
 capture_output=True,
 text=True,
 shell=False,

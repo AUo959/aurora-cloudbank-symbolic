@@ -68,16 +68,14 @@ class AuroraTestRunner:
             print(f"\n{'=' * 50}")
             
         print(f"Starting: {test_name}")
-            
         print("=" * 50)
-        result = test_func()            
+        result = test_func()
         results[test_name] = result.returncode == 0
-
-            if result.returncode != 0:
-                print(f"❌ {test_name} failed!")
-            
+        
+        if result.returncode != 0:
+            print(f"❌ {test_name} failed!")
         else:
-                print(f"✅ {test_name} passed!")
+            print(f"✅ {test_name} passed!")
 
         # Run performance benchmark
         print(f"\n{'=' * 50}")
@@ -114,6 +112,7 @@ def main():
 
     
         if len(sys.argv) > 1:
+            pass  # Placeholder
         test_type = sys.argv[1].lower()
 
         

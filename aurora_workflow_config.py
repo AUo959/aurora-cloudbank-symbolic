@@ -170,8 +170,7 @@ class AuroraWorkflowConfig:
 
         with open(config_file, "w") as f:
             yaml.dump(self.config, f, default_flow_style=False, indent=2)
-
-logger.info("Configuration saved to %s", str(config_file)[:100])
+            logger.info("Configuration saved to %s", str(config_file)[:100])
 
     def get_service_config(self, service_name: str) -> Optional[Dict]:
         """Get configuration for specific service"""

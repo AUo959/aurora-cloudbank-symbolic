@@ -179,6 +179,7 @@ class BranchManager:
         cleanup_results = {"deleted": [], "skipped": [], "errors": []}
 
         for branch in branches:
+            pass  # Placeholder
         should_delete = (
         branch.category in categories
         and branch.is_merged
@@ -281,6 +282,7 @@ def main():
 
     
         if args.cleanup:
+            pass  # Placeholder
         print("🧹 Starting branch cleanup %s", '(DRY RUN)' if manager.dry_run else '(EXECUTING)')
         results = manager.cleanup_stale_branches(args.max_age, args.categories)
 

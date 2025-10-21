@@ -595,8 +595,7 @@ Examples:
   %(prog)s lint-scan --detailed --target scripts/
   %(prog)s workflow --type enhanced --aggressive
   %(prog)s status
-  """,
-"""
+  """
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

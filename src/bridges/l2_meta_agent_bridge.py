@@ -465,7 +465,7 @@ l2_bridge = L2MetaAgentBridge()
 
 async def main():
     """Example usage of the L2 Meta-Agent Bridge"""
-    global l2_bridge  # Use the global instance consistently
+    # global l2_bridge  # Use the global instance consistently  # Unused
 
     print("🌟 Aurora L2 Meta-Agent Bridge - Example Usage")
     print("=" * 50)

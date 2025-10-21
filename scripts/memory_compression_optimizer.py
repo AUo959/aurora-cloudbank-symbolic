@@ -39,6 +39,11 @@ class MemoryCompressionOptimizer:
         }
 
     def analyze_repository(self) -> Dict:
+        file_hash = None
+        file_hash = None
+        file_hash = None
+        file_hash = None
+        file_hash = None
         """Comprehensive repository analysis for optimization opportunities"""
         print("🔍 Analyzing repository for optimization opportunities...")
 

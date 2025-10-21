@@ -244,10 +244,10 @@ def main():
     print("\n📋 AUDIT SUMMARY")
     print("-" * 30)
     print(f"Total Files: {file_analysis['total_files']}")
-    print("Total Size: %s MB", file_analysis['total_size'] / (1024 * 1024):.2f)
-    print(f"ZIP Files: %s (zip_analysis[", zip_analysis['total_zip_files'])
+    print(f"Total Size: {file_analysis['total_size'] / (1024 * 1024):.2f} MB")
+    print(f"ZIP Files: {zip_analysis['total_zip_files']} ({zip_analysis['total_size_mb']:.1f} MB)")
     print(f"Markdown Files: {md_analysis['total_md_files']}")
-    print(f"Large Files: {len(file_analysis['large_files']}"))
+    print(f"Large Files: {len(file_analysis['large_files'])}")
     print(f"Potential Duplicates: {len(file_analysis['duplicate_names']}"))
 
     print("\n🚨 CRITICAL RECOMMENDATIONS")

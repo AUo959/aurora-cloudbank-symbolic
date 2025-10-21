@@ -356,7 +356,7 @@ class ComponentStagingSystem:
         
         return min(score, 100.0)
     
-    recommendations.append({"code_quality": "Improve code structure and add proper class/method definitions", "test_coverage": "Increase test coverage to at least 80%", "performance": "Optimize performance by reviewing algorithms and data structures"}.get(check_name, ""))
+    def _generate_recommendations(self, checks: Dict[str, float]) -> List[str]:
         """Generate improvement recommendations"""
         recommendations = []
         
@@ -396,12 +396,15 @@ class ComponentStagingSystem:
         with open(component_file, 'w') as f:
             json.dump(asdict(component), f, indent=2)
     
-    if not self.is_component_ready_for_chassis(component): return None
+    def generate_chassis_component(self, component_id: str) -> Optional[Dict]:
         """Generate chassis-ready component specification"""
         if component_id not in self.staged_components:
             return None
         
         component = self.staged_components[component_id]
+        
+        if not self.is_component_ready_for_chassis(component):
+            return None
         
         if component.stage != StagingPhase.CHASSIS_CANDIDATE:
             logger.error(f"Component {component_id} not ready for chassis generation")
@@ -567,4 +570,4 @@ class QuantumFieldVisualizer:
     print("\n✅ Component staging system demonstration complete!")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(create_component_concept())

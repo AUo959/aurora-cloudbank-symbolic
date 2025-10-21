@@ -61,11 +61,9 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Aurora L2 Meta-Agent Integration Server",
-    description="L2 Custom GPT bridge with ZIPWIZ handshake protocol",
-    version="3.5.1_macroready",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    title="Aurora L2 Integration Server",
+    description="L2 Meta-Agent Integration with real-time dashboard",
+    version="1.0.0",
 )
 
 # Add CORS middleware

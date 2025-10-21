@@ -151,10 +151,9 @@ class AuroraWorkflowConfig:
                 with open(env_config_file, "r") as f:
                     env_config = yaml.safe_load(f)
                     self.merge_config(self.config, env_config)
-logger.info("Loaded environment config: %s", str(env)[:100])
+                    logger.info("Loaded environment config: %s", str(env)[:100])
             except Exception as e:
-                pass
-logger.error("Failed to load environment config: %s", str(e)[:100])
+                logger.error("Failed to load environment config: %s", str(e)[:100])
 
     def merge_config(self, base: Dict, override: Dict) -> Dict:
         """Recursively merge configuration dictionaries"""

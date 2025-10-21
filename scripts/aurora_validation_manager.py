@@ -10,14 +10,11 @@ This module provides multiple strategies for handling the validation file update
 4. Memory-based validation - skip file writes during commit process
 
 Author: Aurora CloudBank Development Team
-"""
-
-import argparse
 Version: 1.0.0
 Date: July 14, 2025
 """
 
-
+import argparse
 import json
 import os
 from datetime import datetime
@@ -252,9 +249,8 @@ echo "✅ Post-commit validation update complete"
         validation_dir = self.repo_root / self.config["validation_dir"]
         if validation_dir.exists():
             reports = list(validation_dir.glob("*.md"))
-            print("")
-Validation Directory: %s", validation_dir)
-            print("  Reports: %s", len(reports))
+            print(f"\nValidation Directory: {validation_dir}")
+            print(f"  Reports: {len(reports)}")
 
         # Check current validation files
         print("\nCurrent Validation Files:")
@@ -262,9 +258,9 @@ Validation Directory: %s", validation_dir)
             path = self.repo_root / vf
             if path.exists():
                 size = path.stat().st_size
-                print("  {vf}: %s bytes", size)
+                print(f"  {vf}: {size} bytes")
             else:
-                print("  %s: Not found", vf)
+                print(f"  {vf}: Not found")
 
 
 def main():
@@ -300,4 +296,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-"""

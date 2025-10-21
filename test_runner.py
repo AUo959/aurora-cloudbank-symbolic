@@ -110,12 +110,9 @@ def main():
     """Main test runner entry point"""
     runner = AuroraTestRunner()
 
-    
-        if len(sys.argv) > 1:
-            pass  # Placeholder
+    if len(sys.argv) > 1:
         test_type = sys.argv[1].lower()
 
-        
         if test_type == "native":
             _ = runner.run_native_tests()
         

@@ -9,6 +9,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def fix_broken_print_statements(content):
     """Fix broken print statements with %s format specifiers."""
     changes = 0

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
+
 """
 Quick test script for GITWiz Enhanced functionality
 """

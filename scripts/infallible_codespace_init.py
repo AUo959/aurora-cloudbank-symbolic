@@ -1,8 +1,8 @@
 import os
+import shlex
 import shutil
 import subprocess
 import time
-import shlex
 
 
 def run_step(step_name, commands):

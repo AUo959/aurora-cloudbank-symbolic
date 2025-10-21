@@ -13,7 +13,8 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
+
 
 class Phase2SecurityRemediator:
     """Phase 2: Systematic log injection vulnerability fixes"""

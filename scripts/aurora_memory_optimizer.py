@@ -260,7 +260,7 @@ class MemoryOptimizer:
 
                 for file_path in files:
                     try:
-                        self._calculate_file_hash(file_path)
+                        file_hash = self._calculate_file_hash(file_path)
 
                         if file_hash not in hash_groups:
                             hash_groups[file_hash] = []

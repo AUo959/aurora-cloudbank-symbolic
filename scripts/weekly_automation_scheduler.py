@@ -4,11 +4,12 @@ SSMT v3.0 Weekly Automation Scheduler
 Schedules and manages automated repository maintenance
 """
 
-import subprocess
 import json
 import os
+import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
+
 
 class WeeklyAutomationScheduler:
     """Manages weekly automated maintenance tasks"""

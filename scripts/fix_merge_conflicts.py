@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
+
 def find_conflict_files() -> List[Path]:
     """Find all Python files with merge conflict markers"""
     repo_root = Path.cwd()

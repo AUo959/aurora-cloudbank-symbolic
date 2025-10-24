@@ -9,11 +9,11 @@ Allows iterative development before chassis integration
 import asyncio
 import json
 import logging
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, field, asdict
 
 logger = logging.getLogger(__name__)
 
@@ -413,8 +413,8 @@ class ComponentStagingSystem:
         logger.info(f"🏗️ Generating chassis component for: {component_id}")
         
         # Import chassis system
-        from modules.opal2.chassis.quantum_chassis_system import ComponentSpec, ChassisSlotType
-        
+        from modules.opal2.chassis.quantum_chassis_system import ChassisSlotType, ComponentSpec
+
         # Determine slot type based on capabilities
         slot_type = ChassisSlotType.PROCESSOR  # Default
         if any("render" in cap.lower() for cap in component.capabilities):

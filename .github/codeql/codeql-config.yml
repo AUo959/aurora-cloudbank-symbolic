@@ -1,13 +1,18 @@
 name: "Aurora CodeQL Unified Config"
 
+queries:
+  - uses: security-extended
+
 paths:
   - src
   - modules
   - scripts
+  - tools
 
 paths-ignore:
   - tests
   - "**/*_test.py"
+  - "**/*test*.py"
   - node_modules
   - venv
   - .venv

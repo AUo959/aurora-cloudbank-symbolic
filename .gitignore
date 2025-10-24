@@ -214,3 +214,9 @@ secrets/
 private/
 *.secret
 auth_config.json
+
+# Aurora Snapshot & Reliquary Tools
+.snapshots/
+.glyphcards/
+.glyphdiffs/
+.reliquary/

@@ -84,7 +84,7 @@ jobs:
     
     - name: Upload dependency report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dependency-report-python-${{ matrix.python-version }}
         path: |
@@ -101,7 +101,7 @@ jobs:
         
     - name: Upload security report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-report-python-${{ matrix.python-version }}
         path: safety-report.json

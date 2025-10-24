@@ -1,19 +1,30 @@
+# SRB:ci-labeler-array T1 - Aurora CloudBank PR Labeler Configuration
+# Anchor: EOS_SEED_ORION | Team: AUo959-team
+# Updated: 2025-10-24 - Fixed array format for actions/labeler@v5
+
 ci:
-  - .github/workflows/**
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**'
 
 opal2:
-  - modules/opal2/**
+  - changed-files:
+    - any-glob-to-any-file: 'modules/opal2/**'
 
 scripts:
-  - scripts/**
+  - changed-files:
+    - any-glob-to-any-file: 'scripts/**'
 
 tools:
-  - tools/**
+  - changed-files:
+    - any-glob-to-any-file: 'tools/**'
 
 docs:
-  - docs/**
+  - changed-files:
+    - any-glob-to-any-file: 'docs/**'
 
 config:
-  - pyproject.toml
-  - setup.cfg
-  - Makefile
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'pyproject.toml'
+      - 'setup.cfg'
+      - 'Makefile'

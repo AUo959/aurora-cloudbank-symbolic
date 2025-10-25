@@ -137,36 +137,64 @@ class CommandChainParser:
     
     def _generate_naked_command_message(self, cmd_name: str) -> str:
         """
-        Generate helpful error message for naked commands.
+        Generate natural, contextual error message for naked commands.
+        
+        Guidelines maintained:
+        - Clever and almost sarcastic
+        - Helpful without being preachy
+        - Enhances rather than hinders
+        - Conversational and in rhythm
         
         Args:
             cmd_name: Name of the command without terminator
             
         Returns:
-            Helpful error message guiding user
+            Contextual error message
         """
+        # Natural variations that flow with context - no template bank
+        import random
+        
+        # Command-specific context awareness
+        is_destructive = cmd_name in ('deploy', 'clean', 'restore', 'commit')
+        is_critical = cmd_name in ('seal', 'validate', 'verify', 'anchor')
+        
+        # Build message naturally based on command context
+        if is_destructive:
+            opener = f"Whoa there! #{cmd_name} needs confirmation first."
+            safety_note = "You wouldn't hit 'delete all' without a safety check, right?"
+        elif is_critical:
+            opener = f"Hold up - #{cmd_name} is missing something important."
+            safety_note = "Critical commands need the full handshake."
+        else:
+            opener = f"Almost there! #{cmd_name} is incomplete."
+            safety_note = "Commands need their safety terminator to execute."
+        
+        # Natural flow, not template
+        fix_lead = random.choice([
+            "The fix?",
+            "Easy fix:",
+            "Just add:",
+            "Here's what you need:",
+        ])
+        
+        confirmation = random.choice([
+            "That //. at the end? Think of it as the 'I'm sure' button.",
+            "The //. terminator means 'yes, really execute this.'",
+            "Those three characters (//.) are your commit gesture.",
+            "The //. is your safety cover - lift it to press the button.",
+        ])
+        
+        # Compose naturally
         message = f"""
-╔══════════════════════════════════════════════════════════════════╗
-║  ⚠️  Incomplete Command Detected                                 ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  Found: #{cmd_name}                                               ║
-║  Status: Not quite ready for launch                             ║
-║                                                                  ║
-║  Commands need their safety terminator. You know, like how      ║
-║  you wouldn't press a big red button without the safety cover.  ║
-║                                                                  ║
-╠══════════════════════════════════════════════════════════════════╣
-║  The Fix (it's easier than you think)                           ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  What you typed:  #{cmd_name}                                     ║
-║  What I need:     #{cmd_name}//.                                  ║
-║                                                                  ║
-║  That's it. Just add //. at the end.                            ║
-║  Think of it as the "yes, I really mean this" button.           ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝
+{opener}
+
+{safety_note}
+
+{fix_lead}
+  What you typed:  #{cmd_name}
+  What it needs:   #{cmd_name}//.
+
+{confirmation}
 """
         return message.strip()
     

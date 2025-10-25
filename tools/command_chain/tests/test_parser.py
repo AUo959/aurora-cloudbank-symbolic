@@ -55,7 +55,9 @@ class TestCommandChainParser:
         assert result.naked_commands[0].name == "seal"
         assert result.naked_commands[0].is_valid is False
         assert result.has_errors is True
-        assert "Incomplete Command" in result.naked_commands[0].error_message
+        # Dynamic message - just check it exists and has key info
+        assert "#seal" in result.naked_commands[0].error_message
+        assert "//." in result.naked_commands[0].error_message
     
     def test_naked_command_multiple(self):
         """Test detection of multiple naked commands"""
@@ -170,17 +172,19 @@ class TestCommandChainParser:
         assert result is False
     
     def test_error_message_format(self):
-        """Test that error messages are properly formatted"""
+        """Test that error messages contain essential elements"""
         result = self.parser.parse("#seal")
         
         error_msg = result.naked_commands[0].error_message
         
-        assert "Incomplete Command" in error_msg
+        # Check for essential elements (dynamic content)
         assert "#seal" in error_msg
         assert "//." in error_msg
-        assert "What you typed" in error_msg
-        assert "What I need" in error_msg
-        assert "safety terminator" in error_msg
+        assert "What you typed" in error_msg or "What it needs" in error_msg
+        
+        # Should be natural and conversational
+        assert len(error_msg) > 50  # Substantial message
+        assert len(error_msg) < 500  # Not overwhelming
     
     def test_command_position_tracking(self):
         """Test that command positions are tracked"""
@@ -333,10 +337,10 @@ class TestCommandChainIntegration:
         assert not is_valid
         assert len(errors) == 2
         
-        # Each error should be helpful
+        # Each error should be helpful and contain essential info
         for error in errors:
-            assert "Incomplete Command" in error
             assert "//." in error
+            assert len(error) > 50  # Substantial guidance
 
 
 if __name__ == "__main__":

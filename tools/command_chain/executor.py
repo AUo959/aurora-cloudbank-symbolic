@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from .parser import Command, CommandChainParser
+from .real_implementations import RealCommandImplementations
 
 
 @dataclass
@@ -65,10 +66,11 @@ class CommandExecutor:
     - Extensible handler system
     """
     
-    def __init__(self):
+    def __init__(self, workspace_root: Optional[str] = None):
         self.parser = CommandChainParser()
         self.handlers: Dict[str, Callable] = {}
         self.execution_history: List[ChainExecutionResult] = []
+        self.real_impl = RealCommandImplementations(workspace_root)
         self._register_default_handlers()
     
     def _register_default_handlers(self):
@@ -412,114 +414,113 @@ class CommandExecutor:
         Philosophy: "Quickly sort pending changes with consistent high quality"
         Not scheduled - on-demand, anytime you need it.
         """
-        # Multi-phase execution plan
-        phases = {
-            'phase_1_check': {
-                'name': 'Check for Pending Changes',
-                'operations': [
-                    'git status --porcelain',
-                    'git diff --stat',
-                    'Check for untracked files',
-                    'Identify modification categories'
-                ],
-                'purpose': 'Comprehensive change detection'
-            },
-            'phase_2_stage': {
-                'name': 'Intelligent Staging',
-                'operations': [
-                    'Stage modified source files',
-                    'Stage documentation updates',
-                    'Stage configuration changes',
-                    'Stage test files',
-                    'Review auto-generated files'
-                ],
-                'purpose': 'Smart, category-based staging'
-            },
-            'phase_3_commit': {
-                'name': 'Generate & Commit',
-                'operations': [
-                    'Analyze changes for commit message',
-                    'Generate semantic commit message',
-                    'Create commit with DLP tags',
-                    'Verify commit success'
-                ],
-                'purpose': 'Meaningful, traceable commits'
-            },
-            'phase_4_sync': {
-                'name': 'Sync to Main',
-                'operations': [
-                    'git pull --rebase origin main',
-                    'Resolve conflicts (if any)',
-                    'git push origin main',
-                    'Verify remote sync'
-                ],
-                'purpose': 'Safe synchronization with remote'
-            },
-            'phase_5_validate': {
-                'name': 'Quick Validation Check',
-                'operations': [
-                    'Run lint check (critical files only)',
-                    'Run fast unit tests',
-                    'Check health endpoints',
-                    'Verify file integrity'
-                ],
-                'purpose': 'Ensure quality and stability'
-            },
-            'phase_6_verify': {
-                'name': 'Performance Verification',
-                'operations': [
-                    'Measure operation timing',
-                    'Check success metrics',
-                    'Verify system readiness',
-                    'Generate completion report'
-                ],
-                'purpose': 'Confirm optimal performance'
-            }
-        }
+        start_time = datetime.utcnow()
+        results = {}
+        success = True
         
-        # Execution summary
-        execution_plan = {
+        # Phase 1: Check for pending changes
+        status_result = self._handle_status()
+        results['phase_1_check'] = status_result
+        
+        if not status_result.get('success'):
+            return {
+                'status': 'failed',
+                'action': 'comprehensive_sync_validate',
+                'message': '❌ #321//. Failed at Phase 1: Status check failed',
+                'results': results,
+                'error': status_result.get('error')
+            }
+        
+        # Check if there are any changes to commit
+        if status_result.get('clean'):
+            # Phase 4: Just sync (no commit needed)
+            sync_result = self._handle_sync()
+            results['phase_4_sync'] = sync_result
+            
+            # Phase 5: Quick validation
+            test_result = self._handle_testfast()
+            results['phase_5_validate'] = test_result
+            
+            total_time = (datetime.utcnow() - start_time).total_seconds()
+            
+            return {
+                'status': 'executed',
+                'action': 'comprehensive_sync_validate',
+                'message': f'✅ #321//. Complete (no changes to commit) - {total_time:.1f}s',
+                'mode': 'sync_only',
+                'phases_executed': ['check', 'sync', 'validate'],
+                'results': results,
+                'success': sync_result.get('success') and test_result.get('success'),
+                'total_time': total_time
+            }
+        
+        # Phase 2-3: Stage and commit changes
+        commit_result = self._handle_commit()
+        results['phase_2_3_stage_commit'] = commit_result
+        
+        if not commit_result.get('success'):
+            success = False
+            return {
+                'status': 'failed',
+                'action': 'comprehensive_sync_validate',
+                'message': '❌ #321//. Failed at Phase 2-3: Commit failed',
+                'results': results,
+                'error': commit_result.get('error')
+            }
+        
+        # Phase 4: Sync to main
+        sync_result = self._handle_sync()
+        results['phase_4_sync'] = sync_result
+        
+        if not sync_result.get('success'):
+            success = False
+            # Note: Commit succeeded but push failed
+            return {
+                'status': 'partial',
+                'action': 'comprehensive_sync_validate',
+                'message': '⚠️ #321//. Partial: Committed locally but sync failed',
+                'results': results,
+                'error': sync_result.get('error'),
+                'recovery': 'Changes are committed locally. Run #SYNC//. when network is available.'
+            }
+        
+        # Phase 5: Quick validation
+        test_result = self._handle_testfast()
+        results['phase_5_validate'] = test_result
+        
+        if not test_result.get('success'):
+            success = False
+            # Note: Everything synced but tests failed
+            return {
+                'status': 'warning',
+                'action': 'comprehensive_sync_validate',
+                'message': '⚠️ #321//. Synced but validation failed',
+                'results': results,
+                'warning': 'Changes are synced but tests failed. Consider fixing.',
+                'test_failures': test_result.get('failures', [])
+            }
+        
+        # Phase 6: Calculate final metrics
+        total_time = (datetime.utcnow() - start_time).total_seconds()
+        
+        return {
             'status': 'executed',
             'action': 'comprehensive_sync_validate',
-            'message': '🔄 #321//. Complete sync & validate - All phases ready',
+            'message': f'✅ #321//. Complete: All phases successful - {total_time:.1f}s',
             'mode': 'comprehensive',
-            'phases': phases,
-            'estimated_time': '30-60 seconds',
-            'requires_approval': False,  # Safe to auto-execute
-            'rollback_safe': True,
-            'description': 'Comprehensive check, stage, commit, sync, and validate workflow',
-            'philosophy': 'Complete, intelligent, validated synchronization',
-            'command_chain': [
-                '#STATUS//.',      # Phase 1: Check
-                '#COMMIT//.',      # Phase 2-3: Stage & Commit
-                '#SYNC//.',        # Phase 4: Sync to main
-                '#TESTFAST//.',    # Phase 5: Validate
-                '#VALIDATE//.'     # Phase 6: Verify
-            ],
-            'safety_checks': {
-                'pre_flight': [
-                    'Check for uncommitted changes',
-                    'Verify branch is main or feature',
-                    'Ensure remote is accessible',
-                    'Confirm no conflicts exist'
-                ],
-                'post_flight': [
-                    'Verify all changes pushed',
-                    'Confirm tests passing',
-                    'Check system health',
-                    'Validate performance metrics'
-                ]
+            'phases_executed': ['check', 'stage_commit', 'sync', 'validate'],
+            'results': results,
+            'success': success,
+            'total_time': total_time,
+            'summary': {
+                'files_committed': commit_result.get('staged_count', 0),
+                'commit_hash': commit_result.get('commit_hash', 'unknown'),
+                'commits_pushed': sync_result.get('pushed_commits', 0),
+                'tests_passed': test_result.get('passed', 0),
+                'tests_failed': test_result.get('failed', 0)
             },
-            'intelligence': {
-                'smart_staging': 'Groups files by type and importance',
-                'commit_generation': 'Analyzes changes for meaningful messages',
-                'conflict_detection': 'Identifies and helps resolve conflicts',
-                'validation_scope': 'Runs only critical checks for speed',
-                'performance_tracking': 'Measures and reports timing'
-            }
+            'philosophy': 'Complete, intelligent, validated synchronization'
         }
-        
-        return execution_plan
     
     def _handle_capsule_ready(self) -> Dict[str, Any]:
         """Handle #717//. - Capsule-Ready"""
@@ -914,11 +915,32 @@ class CommandExecutor:
     
     def _handle_commit(self) -> Dict[str, Any]:
         """Handle #COMMIT//. - Smart commit with auto-generated message"""
+        # First, stage files intelligently
+        add_result = self.real_impl.git_add_intelligent()
+        
+        if not add_result.get('success'):
+            return {
+                'status': 'executed',
+                'action': 'smart_commit',
+                'success': False,
+                'message': 'Failed to stage files',
+                'error': add_result.get('error')
+            }
+        
+        # Then commit with auto-generated message
+        commit_result = self.real_impl.git_commit()
+        
         return {
             'status': 'executed',
             'action': 'smart_commit',
-            'message': 'Changes committed with generated message',
-            'commit_hash': hashlib.sha256(str(datetime.utcnow()).encode()).hexdigest()[:7]
+            'success': commit_result.get('success', False),
+            'commit_hash': commit_result.get('commit_hash', 'unknown'),
+            'commit_message': commit_result.get('message', ''),
+            'staged_count': add_result.get('staged_count', 0),
+            'categories': add_result.get('categories', {}),
+            'message': f"Committed {add_result.get('staged_count', 0)} files: "
+                      f"{commit_result.get('commit_hash', 'unknown')}",
+            'error': commit_result.get('error')
         }
     
     def _handle_push(self) -> Dict[str, Any]:
@@ -1007,13 +1029,21 @@ class CommandExecutor:
     
     def _handle_testfast(self) -> Dict[str, Any]:
         """Handle #TESTFAST//. - Run fast unit tests only"""
+        test_result = self.real_impl.run_tests_fast()
+        
         return {
             'status': 'executed',
             'action': 'test_fast',
-            'message': 'Fast unit tests completed',
+            'success': test_result.get('success', False),
+            'passed': test_result.get('passed', 0),
+            'failed': test_result.get('failed', 0),
+            'duration': test_result.get('duration', 0),
+            'failures': test_result.get('failures', []),
+            'message': f"Tests: {test_result.get('passed', 0)} passed, "
+                      f"{test_result.get('failed', 0)} failed "
+                      f"({test_result.get('duration', 0):.1f}s)",
             'command': 'pytest -m unit -x',
-            'tests_run': 'unit_tests_only',
-            'estimated_time': '< 10s'
+            'error': test_result.get('error')
         }
     
     def _handle_testunit(self) -> Dict[str, Any]:
@@ -1049,22 +1079,37 @@ class CommandExecutor:
     
     def _handle_fmt(self) -> Dict[str, Any]:
         """Handle #FMT//. - Format code with black/isort"""
+        fmt_result = self.real_impl.format_code()
+        
         return {
             'status': 'executed',
             'action': 'format_code',
-            'message': 'Code formatted successfully',
+            'success': fmt_result.get('success', False),
+            'black_changed': fmt_result.get('black_changed', 0),
+            'isort_changed': fmt_result.get('isort_changed', 0),
+            'errors': fmt_result.get('errors', []),
+            'message': 'Code formatted successfully' if fmt_result.get('success')
+                      else 'Format failed',
             'tools': ['black', 'isort'],
-            'files_formatted': 'all_python_files'
+            'error': fmt_result.get('error')
         }
     
     def _handle_lintfix(self) -> Dict[str, Any]:
         """Handle #LINTFIX//. - Auto-fix linting errors"""
+        lint_result = self.real_impl.lint_code()
+        
         return {
             'status': 'executed',
-            'action': 'lint_autofix',
-            'message': 'Linting errors auto-fixed',
+            'action': 'lint_check',
+            'success': lint_result.get('success', False),
+            'errors': lint_result.get('errors', 0),
+            'warnings': lint_result.get('warnings', 0),
+            'files_checked': lint_result.get('files_checked', 0),
+            'details': lint_result.get('details', []),
+            'message': f"Lint: {lint_result.get('errors', 0)} errors, "
+                      f"{lint_result.get('warnings', 0)} warnings",
             'command': 'flake8 --extend-ignore=E203,W503 --max-line-length=120',
-            'fixes_applied': ['format', 'imports', 'unused_vars']
+            'error': lint_result.get('error')
         }
     
     def _handle_lintcheck(self) -> Dict[str, Any]:
@@ -1079,22 +1124,43 @@ class CommandExecutor:
     
     def _handle_status(self) -> Dict[str, Any]:
         """Handle #STATUS//. - Git status with enhanced info"""
+        status_data = self.real_impl.git_status()
+        
+        branch = status_data.get('branch', 'unknown')
+        changes = status_data.get('total_changes', 0)
+        
         return {
             'status': 'executed',
             'action': 'git_status_enhanced',
-            'message': 'Git status retrieved',
-            'info': ['branch', 'modified_files', 'staged_changes', 'untracked'],
-            'ahead_behind': 'tracking_info'
+            'success': not status_data.get('error'),
+            'branch': branch,
+            'clean': status_data.get('clean', False),
+            'modified_files': status_data.get('modified_files', []),
+            'untracked_files': status_data.get('untracked_files', []),
+            'staged_files': status_data.get('staged_files', []),
+            'total_changes': changes,
+            'ahead': status_data.get('ahead', 0),
+            'behind': status_data.get('behind', 0),
+            'message': f"Branch: {branch} | Changes: {changes}",
+            'error': status_data.get('error')
         }
     
     def _handle_sync(self) -> Dict[str, Any]:
         """Handle #SYNC//. - Fetch and sync with remote"""
+        sync_result = self.real_impl.git_pull_push()
+        
         return {
             'status': 'executed',
             'action': 'git_sync',
-            'message': 'Synced with remote (fetch --all --prune)',
-            'command': 'git fetch --all --prune',
-            'pruned': 'stale_branches'
+            'success': sync_result.get('pull_success') and sync_result.get('push_success'),
+            'pull_success': sync_result.get('pull_success', False),
+            'push_success': sync_result.get('push_success', False),
+            'conflicts': sync_result.get('conflicts', []),
+            'pushed_commits': sync_result.get('pushed_commits', 0),
+            'message': f"Sync: {'✓' if sync_result.get('push_success') else '✗'} "
+                      f"({sync_result.get('pushed_commits', 0)} commits pushed)",
+            'command': 'git pull --rebase && git push',
+            'error': sync_result.get('error')
         }
     
     def _handle_branch(self) -> Dict[str, Any]:

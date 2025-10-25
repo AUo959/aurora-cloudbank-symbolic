@@ -100,6 +100,24 @@ class CommandChainParser:
         'RUN', 'FIX', 'CHECK', 'COMMIT', 'PUSH',
         'REFACTOR', 'OPTIMIZE', 'DOCUMENT', 'SECURITY',
         'ANALYZE', 'SEARCH', 'TRACE', 'DIFF',
+        
+        # Tier 2: Workflow Accelerators (Dev Cycle Optimization)
+        'TESTFAST', 'TESTUNIT', 'TESTWATCH', 'TESTLAST',
+        'FMT', 'LINTFIX', 'LINTCHECK',
+        'STATUS', 'SYNC', 'BRANCH', 'STASH', 'REBASE',
+        'VENV', 'INSTALL', 'FREEZE',
+        'SERVER', 'RESTART', 'LOGS', 'ROUTES',
+        'FIND', 'GREP', 'TREE', 'IMPORTS',
+        
+        # Tier 3: Advanced Operations
+        'FEATURE', 'PR', 'MERGE', 'TESTGEN', 'DEBUG',
+        'ENV', 'CLEAN', 'DEPLOY', 'MONITOR',
+        'README', 'CHANGELOG', 'DOCSTRING',
+        
+        # Tier 4: Compound Commands (Multi-Step Workflows)
+        'QUICKFIX', 'SHIPIT', 'CLEANUP', 'HOTFIX',
+        'AUDIT', 'POLISH', 'VALIDATE', 'BUILDTEST',
+        'ANALYZE', 'SEARCH', 'TRACE', 'DIFF',
     }
     
     def __init__(self):

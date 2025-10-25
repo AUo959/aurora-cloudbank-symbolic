@@ -1,1 +1,11 @@
 blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/AUo959/aurora-cloudbank-symbolic/discussions
+    about: Ask questions, share ideas, or discuss Aurora architecture
+  - name: 📖 Documentation
+    url: https://auo959.github.io/aurora-cloudbank-symbolic
+    about: Read the comprehensive Aurora documentation
+  - name: 🔒 Security Issue
+    url: https://github.com/AUo959/aurora-cloudbank-symbolic/security/advisories/new
+    about: Report security vulnerabilities privately

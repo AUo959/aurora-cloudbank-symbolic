@@ -73,7 +73,33 @@ clean: ## Clean up build artifacts and temporary files
 
 help: ## Show available targets
 	@echo "Aurora CloudBank Development Commands:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	# Quicksave targets
+quicksave: ## Create a quicksave snapshot (usage: make quicksave DESC="description")
+	@python3 tools/quicksave.py create "$(DESC)" --focus "Session work" --next "Continue from here"
+
+quickload: ## Load current quicksave and display reconstitution brief
+	@python3 tools/quicksave.py load
+
+quicklist:  ## List all available quicksaves
+	@python3 tools/quicksave.py list
+
+pr-check:  ## Evaluate current changes as if submitting a PR
+	@python3 tools/pr_evaluator.py
+
+pr-eval:  ## Evaluate current changes and save detailed results
+	@python3 tools/pr_evaluator.py --output pr_evaluation.json
+	@echo "Detailed results saved to pr_evaluation.json"
+
+pr-integrate:  ## Analyze integration strategy for evaluated PR (requires BRANCH and EVAL_FILE)
+	@python3 tools/selective_integrator.py $(BRANCH) --evaluation $(EVAL_FILE) --output integration_plan.json
+
+pr-integrate-execute:  ## Execute integration plan (requires BRANCH and EVAL_FILE)
+	@python3 tools/selective_integrator.py $(BRANCH) --evaluation $(EVAL_FILE) --execute
+
+help: ## Show this help message
+	@echo 'Aurora CloudBank Symbolic System - Available targets:'
+	@echo ''
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 lint:
 	flake8 modules/reflective_autonomy

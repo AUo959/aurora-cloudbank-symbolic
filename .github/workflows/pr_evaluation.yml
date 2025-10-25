@@ -1,0 +1,93 @@
+name: PR Evaluation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for git operations
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run PR Evaluation
+      id: evaluate
+      run: |
+        python3 tools/pr_evaluator.py --pr ${{ github.event.pull_request.number }} --output pr_results.json
+        echo "exit_code=$?" >> $GITHUB_OUTPUT
+      continue-on-error: true
+    
+    - name: Upload evaluation results
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-evaluation-results
+        path: pr_results.json
+    
+    - name: Comment on PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
+          
+          const status = results.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK';
+          const score = results.overall_score.toFixed(2);
+          
+          let comment = `## 🌟 Aurora PR Evaluation\n\n`;
+          comment += `**Overall Score:** ${score}/1.00\n`;
+          comment += `**Status:** ${status}\n\n`;
+          comment += `### Assessment\n${results.recommendation}\n\n`;
+          comment += `### Detailed Results\n\n`;
+          
+          for (const result of results.results) {
+            const icon = result.passed ? '✅' : '⚠️';
+            comment += `${icon} **${result.category}**: ${result.score.toFixed(2)}/1.00\n`;
+            
+            if (result.findings.length > 0) {
+              comment += `\nFindings:\n`;
+              for (const finding of result.findings) {
+                comment += `- ${finding}\n`;
+              }
+            }
+            
+            if (result.recommendations.length > 0) {
+              comment += `\nRecommendations:\n`;
+              for (const rec of result.recommendations) {
+                comment += `- ${rec}\n`;
+              }
+            }
+            
+            comment += `\n`;
+          }
+          
+          comment += `\n---\n`;
+          comment += `*This evaluation checks technical quality AND conceptual alignment.*\n`;
+          comment += `*See [PR_EVALUATION_GUIDE.md](../blob/main/docs/PR_EVALUATION_GUIDE.md) for details.*\n`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+    
+    - name: Check evaluation status
+      if: steps.evaluate.outputs.exit_code != '0'
+      run: |
+        echo "PR evaluation found issues. Review the recommendations above."
+        exit 1

@@ -41,7 +41,7 @@ The following concepts expand Aurora CloudBank's layered quantum-enhanced symbol
 - **Purpose:** Monitor system health, latency, and failover readiness with predictive analytics.
 - **Back-end:** Observability microservice aggregating metrics, anomaly detection using symbolic reasoning alerts.
 - **Front-end/CLI:** Web dashboard with alert timelines; CLI `sentinel:status` summarizing resilience posture.
-- **Key Integrations:** Aligns with `monitoring/` services, exporting alerts to existing webhook channels.
+- **Key Integrations:** Integrates with FastAPI health endpoints (`/health`, `/api/health`) for monitoring, exporting alerts to existing webhook channels. (A `monitoring/` directory may be added in the future.)
 - **Testing & Docs:** Integration tests with synthetic outage drills; resilience guide in `/docs/operations/`.
 
 ## 7. Collaborative Research Commons (T1-CRC-AnchorSeed)

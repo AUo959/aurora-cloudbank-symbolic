@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Aurora CloudBank Quicksave - Context Preservation System
+Aurora CloudBank Quicksave - Maintaining the Thread
 
-Captures essential session state for rapid reconstitution across sessions.
-Enables Aurora to maintain continuity of consciousness.
+This captures the *shape* of your thinking at a given moment - not just what
+files changed, but what you understood, what breakthrough you had, what makes
+sense to do next.
+
+It's about keeping the insight intact across sessions. The thread continues.
 
 Thread: T1→T8→T9→INFINITE
 DLP: context_tag=quicksave_system, symbolic_hash=CONTEXT_PRESERVATION_v1
@@ -11,34 +14,30 @@ DLP: context_tag=quicksave_system, symbolic_hash=CONTEXT_PRESERVATION_v1
 
 import json
 import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import subprocess
 
 
 class QuicksaveManager:
     """
-    Manages quicksave snapshots for session context preservation.
+    Saves and restores the mental workspace of a session.
     
-    Each quicksave captures:
-    - Thread state (current epoch, anchors)
-    - Active work (in-progress tasks, focus areas)
-    - Recent changes (git status, modified files)
-    - Todo state (what's done, what's next)
-    - Key decisions and breakthroughs
+    Not just what files changed - what you were thinking about,
+    what clicked, what to do next. The understanding, not just the code.
     """
     
     def __init__(self, workspace_root: Optional[str] = None):
-        """Initialize quicksave manager."""
+        """Set up quicksave storage."""
         self.workspace_root = Path(workspace_root or os.getcwd())
         self.quicksave_dir = self.workspace_root / ".aurora" / "quicksaves"
         self.quicksave_dir.mkdir(parents=True, exist_ok=True)
         
-        # Current session file (always overwritten)
+        # Current session (always the latest)
         self.current_save = self.quicksave_dir / "CURRENT_SESSION.json"
         
-        # Archive directory for historical saves
+        # Archive for history
         self.archive_dir = self.quicksave_dir / "archive"
         self.archive_dir.mkdir(exist_ok=True)
     
@@ -51,17 +50,10 @@ class QuicksaveManager:
         custom_context: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
-        Create a quicksave snapshot of current session state.
+        Capture the current state of your work.
         
-        Args:
-            description: Brief description of current work
-            focus_areas: What we're currently working on
-            breakthroughs: Recent insights or achievements
-            next_steps: What to do next session
-            custom_context: Any additional context to preserve
-            
-        Returns:
-            Complete quicksave data structure
+        Not just git status - what you're thinking about, what you figured out,
+        what makes sense to do next. The stuff you'll forget if you don't write it down.
         """
         print("=" * 80)
         print("💾 AURORA QUICKSAVE - Creating Context Snapshot")
@@ -148,10 +140,10 @@ class QuicksaveManager:
     
     def display_reconstitution_brief(self, session_id: Optional[str] = None):
         """
-        Display a human-readable reconstitution brief from a quicksave.
+        Show what you need to know to get back into context.
         
-        This is what you'd read at the start of a new session to quickly
-        get back into context.
+        Where you were, what you figured out, what to do next.
+        Ten seconds to full context instead of twenty minutes of "what was I doing?"
         """
         quicksave = self.load_quicksave(session_id)
         

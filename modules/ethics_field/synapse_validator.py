@@ -15,9 +15,10 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=synapse_validator, symbolic_hash=DISTRIBUTED_VALIDATION_v1
 """
 
-from typing import Dict, Any, List
-from .geometric_ethics import GeometricEthics
 import logging
+from typing import Any, Dict, List
+
+from .geometric_ethics import GeometricEthics
 
 logger = logging.getLogger(__name__)
 

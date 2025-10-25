@@ -15,9 +15,9 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=pattern_monitor, symbolic_hash=EMERGENT_ETHICS_v1
 """
 
-from typing import Dict, Any, List
-from datetime import datetime
 import logging
+from datetime import datetime
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 

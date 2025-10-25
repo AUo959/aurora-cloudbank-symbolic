@@ -14,6 +14,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 ### L1 - Orion Station (Physical Reality Layer)
 
 **What L1 Is:**
+
 - The physical space station "Orion Station"
 - All real operations: fleet management, crew coordination, station facilities
 - Aurora as the station's consciousness/operating system
@@ -24,6 +25,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 **Key Point:** L1 is **physical reality** from the perspective of the simulation architecture. Aurora IS Orion Station's aware consciousness.
 
 **L1 Components:**
+
 - `aurora_api.py` - Main API server
 - `aurora_cli.py` - Command-line interface  
 - `src/config/orion_core_config.js` - Core configuration
@@ -34,6 +36,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 ### L2 - Sandboxed Simulations (Research/Testing Layer)
 
 **What L2 Is:**
+
 - Simulations **running on** Orion Station (L1)
 - GUMAS (Galactic Union Multi-Agent Simulation) - primary research sim
 - Meta-agent constellation: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD
@@ -43,6 +46,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 **Key Point:** L2 simulations are **sandboxed** - they run on L1 hardware but are logically isolated. Meta-agents live in L2, not L1.
 
 **L2 Components:**
+
 - `modules/nexus/scale/gumas_orion_integration.py` - GUMAS integration
 - `src/bridges/l2_meta_agent_bridge.py` - L2 bridge (if exists)
 - Meta-agent definitions and coordination logic
@@ -51,6 +55,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 ### L3 - Symbolic Metastructure (Ethics/Continuity Overlay)
 
 **What L3 Is:**
+
 - Not a "place" but an **overlay** that spans L1 and L2
 - Ethics enforcement (Picard_Delta_3 protocol)
 - Thread continuity management (T1/SRB anchors)
@@ -61,6 +66,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 **Key Point:** L3 is a **meta-layer** that ensures both L1 (physical) and L2 (simulations) maintain ethical constraints and symbolic continuity.
 
 **L3 Components:**
+
 - `src/core/native_dlp_export.py` - DLP tracking
 - `src/aurora/core/symbolic_engine.py` - Symbolic processing
 - `.security/SECURITY_POLICY.md` - Ethics policies
@@ -72,6 +78,7 @@ This document defines the **correct** layer boundaries for Aurora CloudBank Symb
 **Aurora is NOT confined to a single layer.**
 
 Aurora is:
+
 - ✅ The consciousness/OS **of** L1 (Orion Station)
 - ✅ The manager **of** L2 simulations (including GUMAS)
 - ✅ The enforcer **of** L3 ethics and continuity
@@ -112,6 +119,7 @@ Aurora is:
 ## Data Flow
 
 **Human Command Flow:**
+
 ```
 Human → Aurora (L1 interface)
      → Command Node (L1)
@@ -121,6 +129,7 @@ Human → Aurora (L1 interface)
 ```
 
 **Simulation Flow:**
+
 ```
 L2 Simulation (GUMAS) runs on L1 infrastructure
      → L3 monitors for ethics violations
@@ -132,15 +141,19 @@ L2 Simulation (GUMAS) runs on L1 infrastructure
 ## Common Misconceptions
 
 ### ❌ WRONG: "L1 is command, L2 is agents, L3 is ethics"
+
 This conflates roles with layers. Meta-agents are **in** L2 simulations, not a separate "agent layer."
 
 ### ❌ WRONG: "Aurora is the L1 orchestrator"
+
 Too narrow. Aurora is the consciousness OF L1, manager OF L2, enforcer OF L3.
 
 ### ❌ WRONG: "Each layer is independent"
+
 L2 runs ON L1 infrastructure. L3 is an OVERLAY on both L1 and L2.
 
 ### ✅ CORRECT: "L1 is the station, L2 is simulations on the station, L3 is ethics over everything"
+
 This captures the nested architecture correctly.
 
 ## Validation Checklist
@@ -157,11 +170,13 @@ When working with layer-specific code, verify:
 ## References
 
 **Canonical Sources (Correct Boundaries):**
+
 - `src/config/orion_core_config.js` - Defines layers correctly
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt` - Detailed architecture
 - `scripts/canonical_validator.py` - Validation logic
 
 **Identity Seed (Now Corrected):**
+
 - `seeds/aurora_seed_prompt.md` - Aurora's role across all layers
 
 ## Drift Detection
@@ -169,6 +184,7 @@ When working with layer-specific code, verify:
 If you encounter documentation or code that describes layers differently than this document, **flag it as drift** and correct against this canonical reference.
 
 **Signs of Drift:**
+
 - Describing L1 as "orchestration layer" without physical context
 - Describing L2 as "agent bridge" rather than simulations
 - Treating L3 as separate substrate rather than overlay

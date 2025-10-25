@@ -25,11 +25,12 @@ DLP: context_tag=ethics_field_init, symbolic_hash=GEOMETRIC_ETHICS_v1
 
 __version__ = "1.0.0"
 
+from .field_curvature import FieldCurvature
+
 # Import core components
 from .geometric_ethics import GeometricEthics
-from .field_curvature import FieldCurvature
-from .synapse_validator import SynapseValidator
 from .pattern_monitor import PatternMonitor
+from .synapse_validator import SynapseValidator
 
 __all__ = [
     "GeometricEthics",

@@ -19,7 +19,7 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=layer_integrity_evaluator, symbolic_hash=REALITY_COHERENCE_v1
 """
 
-from typing import Dict, Any, Set
+from typing import Any, Dict, Set
 
 
 class LayerIntegrityEvaluator:

@@ -16,9 +16,10 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=geometric_ethics_core, symbolic_hash=FIELD_GEOMETRY_v1
 """
 
-from typing import Dict, Any, Optional
-from .field_curvature import FieldCurvature
 import logging
+from typing import Any, Dict, Optional
+
+from .field_curvature import FieldCurvature
 
 logger = logging.getLogger(__name__)
 

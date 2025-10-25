@@ -14,8 +14,8 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=picard_delta_3_evaluator, symbolic_hash=AUTONOMY_RESPECT_v1
 """
 
-from typing import Dict, Any, Optional
 import math
+from typing import Any, Dict, Optional
 
 
 class PicardDelta3Evaluator:

@@ -80,8 +80,15 @@ quicksave: ## Create a quicksave snapshot (usage: make quicksave DESC="descripti
 quickload: ## Load current quicksave and display reconstitution brief
 	@python3 tools/quicksave.py load
 
-quicklist: ## List all available quicksaves
+quicklist:  ## List all available quicksaves
 	@python3 tools/quicksave.py list
+
+pr-check:  ## Evaluate current changes as if submitting a PR
+	@python3 tools/pr_evaluator.py
+
+pr-eval:  ## Evaluate current changes and save detailed results
+	@python3 tools/pr_evaluator.py --output pr_evaluation.json
+	@echo "Detailed results saved to pr_evaluation.json"
 
 help: ## Show this help message
 	@echo 'Aurora CloudBank Symbolic System - Available targets:'

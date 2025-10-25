@@ -20,8 +20,8 @@ Features:
 """
 
 import re
-from typing import List, Dict
 from dataclasses import dataclass
+from typing import Dict, List
 
 from .parser import CommandChainParser, ParseResult
 

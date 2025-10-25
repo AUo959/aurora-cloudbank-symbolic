@@ -18,10 +18,10 @@ Features:
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Callable
 from enum import Enum
+from typing import Callable, List, Optional
 
-from .executor import CommandExecutor, ExecutionResult, ChainExecutionResult
+from .executor import ChainExecutionResult, CommandExecutor, ExecutionResult
 
 
 class FlowControlType(Enum):

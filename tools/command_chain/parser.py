@@ -94,6 +94,12 @@ class CommandChainParser:
         'DIAGNOW', 'RESETCORE', 'SENTRYSTAT', 'SUP', 'OPTISEED',
         'PULSEWALK', 'CLEANDEPLOY', 'SANDDROP', 'THREADWAKE',
         'RESUME', 'BUP',
+        
+        # Tier 1: Immediate Impact (High-Value Commands)
+        'CONTEXT', 'SAVE', 'LOAD', 'SUMMARY', 'PLAN',
+        'RUN', 'FIX', 'CHECK', 'COMMIT', 'PUSH',
+        'REFACTOR', 'OPTIMIZE', 'DOCUMENT', 'SECURITY',
+        'ANALYZE', 'SEARCH', 'TRACE', 'DIFF',
     }
     
     def __init__(self):

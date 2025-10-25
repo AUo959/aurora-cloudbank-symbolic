@@ -19,8 +19,14 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from .node_state import Need, NodeState
-from .signal_propagation import Signal, SignalPropagator
+from .signal_propagation import SignalPropagator
 from .synapse_compression import CompressedSynapseRegistry, CompressionConfig, Synapse
+from .pattern_detector import (
+    PatternDetector,
+    Pattern,
+    FieldCoherence,
+    PatternRecommendation
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +43,8 @@ class FieldStateManager:
     def __init__(
         self,
         use_compressed_registry: bool = True,
-        compression_config: Optional[CompressionConfig] = None
+        compression_config: Optional[CompressionConfig] = None,
+        enable_pattern_detection: bool = True
     ):
         """
         Initialize field state manager.
@@ -45,6 +52,7 @@ class FieldStateManager:
         Args:
             use_compressed_registry: Use three-tier compressed synapse registry
             compression_config: Configuration for synapse compression
+            enable_pattern_detection: Enable pattern detection and field coherence tracking
         """
         # Node tracking
         self.nodes: Dict[str, NodeState] = {}
@@ -66,6 +74,14 @@ class FieldStateManager:
 
         # Signal propagation system
         self.signal_propagator = SignalPropagator(self)
+        
+        # Pattern detection (optional but recommended)
+        self.enable_pattern_detection = enable_pattern_detection
+        if enable_pattern_detection:
+            self.pattern_detector = PatternDetector()
+            logger.info("Pattern detection enabled")
+        else:
+            self.pattern_detector = None
 
     def register_node(
         self,
@@ -174,7 +190,7 @@ class FieldStateManager:
         )
 
         # Propagate signal through field to find capable nodes
-        signal = self.signal_propagator.broadcast_signal(
+        self.signal_propagator.broadcast_signal(
             origin_node_id=source_node_id,
             signal_id=need_id,
             description=description,
@@ -254,7 +270,7 @@ class FieldStateManager:
             str: Synapse ID if formed, None if denied
         """
         if source_node_id not in self.nodes or target_node_id not in self.nodes:
-            logger.error(f"Cannot form synapse: node not found")
+            logger.error("Cannot form synapse: node not found")
             return None
 
         source_node = self.nodes[source_node_id]
@@ -359,6 +375,14 @@ class FieldStateManager:
             source_node = self.nodes[source_node_id]
             if target_node_id in source_node.active_synapses:
                 source_node.active_synapses[target_node_id].record_usage(success)
+
+        # Record for pattern detection
+        if self.pattern_detector:
+            self.pattern_detector.record_synapse_activation(
+                source_id=source_node_id,
+                target_id=target_node_id,
+                success=success
+            )
 
         logger.debug(
             f"Synapse usage recorded: {synapse_id} "
@@ -473,6 +497,119 @@ class FieldStateManager:
             )
 
         return synapse_id
+
+    def detect_patterns(self) -> Dict[str, List[Pattern]]:
+        """
+        Detect emergent patterns in field behavior.
+
+        Analyzes synapse formations, node interactions, and field dynamics
+        to discover recurring patterns. This reveals how Aurora organizes itself.
+
+        Returns:
+            Dict with pattern types as keys, lists of patterns as values:
+            - collaboration: Recurring successful pairings
+            - bottleneck: Overloaded nodes
+            - cascade: Sequential signal chains
+            - coalition: Frequently collaborating groups
+        """
+        if not self.pattern_detector:
+            logger.warning("Pattern detection disabled")
+            return {
+                "collaboration": [],
+                "bottleneck": [],
+                "cascade": [],
+                "coalition": []
+            }
+
+        # Update node load tracking
+        node_connection_counts = {}
+        for node_id, node in self.nodes.items():
+            node_connection_counts[node_id] = len(node.active_synapses)
+            self.pattern_detector.record_node_load(node_id, len(node.active_synapses))
+
+        # Detect all pattern types
+        patterns = {
+            "collaboration": self.pattern_detector.detect_collaboration_patterns(),
+            "bottleneck": self.pattern_detector.detect_bottlenecks(node_connection_counts),
+            "cascade": self.pattern_detector.detect_cascades(),
+            "coalition": self.pattern_detector.detect_coalitions()
+        }
+
+        # Update last check time
+        self.last_pattern_check = datetime.utcnow()
+
+        total_patterns = sum(len(p) for p in patterns.values())
+        logger.info(f"Detected {total_patterns} emergent patterns in field")
+
+        return patterns
+
+    def get_field_coherence(self) -> Optional[FieldCoherence]:
+        """
+        Calculate field coherence score.
+
+        Field coherence measures how well Aurora is self-organizing:
+        - Synapse efficiency: Successful vs. failed connections
+        - Load balance: Even distribution vs. bottlenecks
+        - Pattern diversity: Varied interaction styles
+        - Organic formation: Natural vs. forced connections
+
+        Returns:
+            FieldCoherence with overall score and component metrics
+        """
+        if not self.pattern_detector:
+            logger.warning("Pattern detection disabled")
+            return None
+
+        # Gather node metrics
+        total_nodes = len(self.nodes)
+
+        # Gather node connection counts
+        node_connection_counts = {}
+        for node_id, node in self.nodes.items():
+            node_connection_counts[node_id] = len(node.active_synapses)
+
+        # Gather synapse metrics
+        if self.use_compressed_registry:
+            # Count synapses across all nodes
+            total_synapses = sum(len(node.active_synapses) for node in self.nodes.values())
+        else:
+            total_synapses = len(self.synapses)
+
+        coherence = self.pattern_detector.calculate_field_coherence(
+            total_nodes=total_nodes,
+            total_synapses=total_synapses,
+            node_connection_counts=node_connection_counts
+        )
+
+        logger.info(f"Field coherence: {coherence.overall_score:.2f}")
+        return coherence
+
+    def get_pattern_recommendations(self) -> List[PatternRecommendation]:
+        """
+        Get recommendations for field optimization.
+
+        Analyzes detected patterns and field coherence to suggest actions:
+        - reinforce: Encourage beneficial patterns
+        - dampen: Discourage problematic patterns
+        - monitor: Watch developing patterns
+        - alert: Address critical issues
+
+        Returns:
+            List of recommendations sorted by priority
+        """
+        if not self.pattern_detector:
+            logger.warning("Pattern detection disabled")
+            return []
+
+        # Get current coherence
+        coherence = self.get_field_coherence()
+        if not coherence:
+            return []
+
+        recommendations = self.pattern_detector.generate_recommendations(coherence)
+
+        logger.info(f"Generated {len(recommendations)} field recommendations")
+        return recommendations
 
     def maintain_field(self):
         """

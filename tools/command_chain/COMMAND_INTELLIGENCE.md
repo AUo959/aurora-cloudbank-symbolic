@@ -1,4 +1,5 @@
 # Command Intelligence System
+
 **Anchor:** CMD-CHAIN-INTELLIGENCE-001  
 **DLP:** CONFIDENTIAL  
 **Version:** 1.0.0
@@ -10,13 +11,16 @@ The Command Intelligence System enables commands to work **both** behind the sce
 ## Two-Mode Operation
 
 ### 1. Behind-the-Scenes Execution ⚡
+
 Commands execute **transparently** when:
+
 - Operation is read-only (analysis, status checks)
 - High confidence the command is optimal (> 80%)
 - Fast execution (< 30 seconds)
 - Non-destructive operation
 
 **Example:**
+
 ```
 User: "What's our git status?"
 System: ⚡ Running #STATUS//. behind the scenes: Show git status with tracking info
@@ -24,13 +28,16 @@ System: ⚡ Running #STATUS//. behind the scenes: Show git status with tracking 
 ```
 
 ### 2. User-Facing Suggestions 💡
+
 Commands are **offered as options** when:
+
 - Operation requires user approval (commit, deploy, merge)
 - Multiple valid approaches exist
 - Potentially destructive operation
 - Long-running operation (> 30 seconds)
 
 **Example:**
+
 ```
 User: "Ready to deploy this"
 System: 💡 Suggested: #SHIPIT//. - Full CI pipeline before deployment
@@ -62,6 +69,7 @@ The system analyzes your messages for common intents:
 ## Command Categories by Execution Mode
 
 ### Auto-Execute Commands (Behind the Scenes) ⚡
+
 **Read-only, fast, non-destructive**
 
 ```python
@@ -86,6 +94,7 @@ The system analyzes your messages for common intents:
 ```
 
 ### Suggest to User (Offer as Options) 💡
+
 **Requires approval, potentially destructive, or long-running**
 
 ```python
@@ -108,6 +117,7 @@ The system analyzes your messages for common intents:
 ```
 
 ### Ask Permission (Risky Operations) 🤔
+
 **Requires explicit confirmation**
 
 ```python
@@ -120,6 +130,7 @@ The system analyzes your messages for common intents:
 ## How It Works for You (The User)
 
 ### Scenario 1: Quick Testing
+
 ```
 You: "Let me run tests quickly"
 
@@ -132,6 +143,7 @@ System: ⚡ Running #TESTFAST//. behind the scenes: Run unit tests only (< 10s)
 **What happened:** System detected "tests" + "quickly" → auto-executed `#TESTFAST//.`
 
 ### Scenario 2: Ready to Deploy
+
 ```
 You: "This looks ready to ship"
 
@@ -147,6 +159,7 @@ System: 💡 Suggested: #SHIPIT//. - Full CI pipeline before deployment
 **What happened:** System detected deployment intent → offered comprehensive pre-deployment check
 
 ### Scenario 3: Code Quality Fix
+
 ```
 You: "Let's clean up the formatting before committing"
 
@@ -165,6 +178,7 @@ System: ⚡ Running #QUICKFIX//. behind the scenes: Format + lint + fast tests
 ## How It Works for Copilot (Behind the Scenes)
 
 ### When to Auto-Execute
+
 Copilot automatically runs commands when:
 
 1. **User asks for information**
@@ -183,6 +197,7 @@ Copilot automatically runs commands when:
    - Analysis and discovery
 
 ### When to Suggest with Symbolic Aliases
+
 Copilot offers commands as options when:
 
 1. **User approval needed**
@@ -199,6 +214,7 @@ Copilot offers commands as options when:
    - `#BUILDTEST//.` (1 min) → Ask permission
 
 ### Offering Symbolic Aliases
+
 When suggesting commands, Copilot provides:
 
 ✅ **Symbolic Alias:** Clear, memorable name (`#QUICKFIX//.`)  
@@ -208,6 +224,7 @@ When suggesting commands, Copilot provides:
 ✅ **Alternative Options:** Other valid approaches
 
 **Example Response:**
+
 ```
 💡 I can help with that! Here are your options:
 
@@ -296,6 +313,7 @@ ask_permission_commands = {
 ## Benefits
 
 ### For Users 👨‍💻
+
 - **Faster workflow:** Commands execute when you need them
 - **Clear options:** Symbolic aliases are memorable (`#QUICKFIX//.` not `fmt-lint-test-v2`)
 - **Flexibility:** Auto-execute transparent operations, approve critical ones
@@ -303,6 +321,7 @@ ask_permission_commands = {
 - **Composability:** Combine commands into custom workflows
 
 ### For Copilot 🤖
+
 - **Proactive optimization:** Fix issues before user notices
 - **Consistent quality:** Auto-format, auto-lint, auto-test
 - **Clear communication:** Use symbolic aliases to explain actions
@@ -312,6 +331,7 @@ ask_permission_commands = {
 ## Real-World Examples
 
 ### Example 1: User Edits Code
+
 ```
 User: [Edits python file, introduces formatting inconsistency]
 
@@ -329,6 +349,7 @@ Copilot:
 ```
 
 ### Example 2: User Ready to Commit
+
 ```
 User: "I think this is ready to commit"
 
@@ -352,6 +373,7 @@ Copilot:
 ```
 
 ### Example 3: User Deploying
+
 ```
 User: "Let's deploy this to production"
 

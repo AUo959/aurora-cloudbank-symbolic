@@ -9,24 +9,44 @@
 
 ## Overview
 
-`#321//.` is the **complete workflow automation command** for syncing all work to main with full validation. It handles everything from checking for changes to verifying optimal performance, so you never have to think about the sync process again.
+`#321//.` is the **universal "clean the working tree" command** - your go-to solution for quickly syncing pending changes anytime. It handles everything from checking for changes to verifying optimal performance with consistent high quality.
 
-Think of it as your **end-of-session autopilot** - comprehensive, intelligent, and validated synchronization.
+**Use it whenever you want a clean working tree:**
+- Right now, there are pending changes? → `#321//.` and everything gets sorted
+- About to switch tasks? → `#321//.` and you're ready
+- End of session? → `#321//.` and you're done
+- Middle of development? → `#321//.` whenever you want a clean slate
+
+Think of it as your **on-demand sync automation** - comprehensive, intelligent, and validated synchronization, available whenever you need it.
 
 ---
 
 ## 🎯 Core Philosophy
 
-> **"Complete, intelligent, validated synchronization"**
+> **"Quickly sort pending changes with consistent high quality"**
 
 ### What Makes #321//. Special
 
-1. **6-Phase Execution** - Every step from check to verify
-2. **Intelligent Staging** - Groups files by type and importance
-3. **Smart Commits** - Generates meaningful messages from change analysis
-4. **Safe Syncing** - Pull with rebase, conflict detection, push verification
-5. **Quick Validation** - Critical checks only for speed
-6. **Performance Tracking** - Measures timing and reports success
+1. **Always Available** - Use anytime, not just end-of-session
+2. **6-Phase Execution** - Every step from check to verify
+3. **Intelligent Staging** - Groups files by type and importance
+4. **Smart Commits** - Generates meaningful messages from change analysis
+5. **Safe Syncing** - Pull with rebase, conflict detection, push verification
+6. **Quick Validation** - Critical checks only for speed
+7. **Performance Tracking** - Measures timing and reports success
+8. **Clean Working Tree** - Guaranteed clean state after execution
+
+### The Universal Sync Command
+
+`#321//.` is **not** just for end-of-session. Use it **anytime** you want to:
+- Clean your working tree quickly
+- Sync pending changes with high quality
+- Get back to a pristine state
+- Save work without thinking about the steps
+- Ensure everything is backed up
+- Prepare for the next task
+
+**Right now you have pending changes?** → Just invoke `#321//.` and everything gets sorted.
 
 ---
 
@@ -220,25 +240,47 @@ sha256sum -c CHECKSUMS.txt (if exists)
 
 ## 🎮 Usage Patterns
 
-### Pattern 1: End of Coding Session
+### Pattern 1: Right Now - Clean Working Tree
 ```
-Situation: Done coding for the day, want to sync everything
+Situation: You have pending changes, want them sorted quickly
 
 Solution:
   User: #321//.
   
   System:
-    [Phase 1] Checking for changes... ✅ 15 files modified
+    [Phase 1] Checking for changes... ✅ 8 files modified
     [Phase 2] Staging intelligently... ✅ Grouped by type
-    [Phase 3] Generating commit... ✅ "feat(api): Add new endpoints"
+    [Phase 3] Generating commit... ✅ "refactor: Update command docs"
     [Phase 4] Syncing to main... ✅ Pushed successfully
     [Phase 5] Running validation... ✅ Tests pass
-    [Phase 6] Verifying performance... ✅ Optimal (42.3s)
+    [Phase 6] Verifying performance... ✅ Optimal (28.4s)
   
-  Result: Everything synced, validated, ready for tomorrow
+  Result: Working tree clean, changes synced, ready to continue work
+  
+  Use Case: Anytime you want pending changes sorted with high quality
 ```
 
-### Pattern 2: Before Context Switch
+### Pattern 2: Mid-Development Checkpoint
+```
+Situation: In the middle of coding, want to save progress
+
+Solution:
+  User: #321//.
+  
+  System:
+    → Detects uncommitted changes
+    → Stages intelligently (work in progress)
+    → Commits: "wip: Add new feature implementation"
+    → Syncs to main
+    → Quick validation
+    → Back to clean slate
+  
+  Result: Progress saved, tree clean, can continue coding immediately
+  
+  Use Case: Regular checkpoints during development (every 30-60 min)
+```
+
+### Pattern 3: Before Context Switch
 ```
 Situation: Need to switch to different task, save current work
 
@@ -254,9 +296,31 @@ Solution:
     → Confirms system ready
   
   Result: Work saved, main is clean, safe to switch context
+  
+  Use Case: Switching tasks, taking break, or changing focus
 ```
 
-### Pattern 3: Pre-Deployment
+### Pattern 4: End of Coding Session
+```
+Situation: Done coding for the day, want to sync everything
+
+Solution:
+  User: #321//.
+  
+  System:
+    [Phase 1] Checking for changes... ✅ 15 files modified
+    [Phase 2] Staging intelligently... ✅ Grouped by type
+    [Phase 3] Generating commit... ✅ "feat(api): Add new endpoints"
+    [Phase 4] Syncing to main... ✅ Pushed successfully
+    [Phase 5] Running validation... ✅ Tests pass
+    [Phase 6] Verifying performance... ✅ Optimal (42.3s)
+  
+  Result: Everything synced, validated, ready for tomorrow
+  
+  Use Case: Daily wrap-up, end of work session
+```
+
+### Pattern 5: Pre-Deployment
 ```
 Situation: About to deploy, want everything synced and validated
 
@@ -272,14 +336,16 @@ Solution:
     → Performance verification
   
   Result: Confident everything is synced, tested, and ready to deploy
+  
+  Use Case: Pre-deployment confidence check
 ```
 
-### Pattern 4: Hourly Save Habit
+### Pattern 6: Continuous Checkpoint Habit
 ```
-Situation: Want to sync work regularly (every hour)
+Situation: Want to keep working tree clean throughout development
 
 Solution:
-  User: #321//. (once per hour)
+  User: #321//. (whenever you see changes pile up)
   
   System:
     → Quick check (< 5s if no changes)
@@ -289,8 +355,21 @@ Solution:
     → Quick validation
     → Performance tracking
   
-  Result: Work continuously backed up, never lose progress
+  Result: Work continuously backed up, always clean tree, never lose progress
+  
+  Use Case: Regular sync habit (every 30-60 min, or whenever tree gets dirty)
 ```
+
+### The Key Insight
+
+**#321//. is not scheduled - it's on-demand:**
+- Not "only at end of session"
+- Not "only before switching"
+- **Anytime you want pending changes sorted**
+- Anytime you want a clean working tree
+- Anytime you want high-quality sync
+
+Think of it like `git commit && git push` but **intelligent and validated**.
 
 ---
 
@@ -436,19 +515,28 @@ You could execute this manually, but `#321//.` handles it intelligently with:
 
 ### ✅ Perfect For:
 
-- **End of Session** - Sync everything before closing
+- **Right Now** - You have pending changes, sort them quickly
+- **Clean Working Tree** - Want pristine state to continue work
+- **Mid-Development** - Save progress without thinking about steps
 - **Context Switch** - Save work before switching tasks
-- **Regular Saves** - Hourly sync habit for safety
+- **End of Session** - Sync everything before closing
+- **Regular Checkpoints** - Keep work backed up continuously (30-60 min intervals)
 - **Pre-Deployment** - Ensure everything is ready
 - **Collaboration** - Keep main up-to-date for team
-- **Peace of Mind** - Know everything is backed up
+- **Anytime Sync** - Whenever you want changes sorted with high quality
+
+### The Universal Rule:
+
+**See pending changes? Want them sorted? → #321//.**
+
+It's that simple. Not scheduled, not planned - **on-demand, anytime you need it.**
 
 ### ❌ Not Ideal For:
 
-- **Partial Commits** - Want to stage specific files only
-- **WIP Commits** - Experimenting, not ready to sync
-- **Feature Branches** - Working in isolated branch
-- **Manual Control** - Want explicit control over each step
+- **Partial Commits** - Want to stage specific files only (use `git add -p`)
+- **WIP Commits** - Experimenting, not ready to sync (though #321//. can handle WIP)
+- **Feature Branches** - Working in isolated branch (adapt workflow)
+- **Manual Control** - Want explicit control over each step (use individual commands)
 
 ---
 

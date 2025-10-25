@@ -390,6 +390,9 @@ class CommandExecutor:
     def _handle_comprehensive_sync(self) -> Dict[str, Any]:
         """Handle #321//. - Comprehensive Sync & Validate
         
+        Universal "clean the working tree" command - use anytime you have
+        pending changes and want them sorted quickly with high quality.
+        
         Complete workflow for syncing all changes to main with validation:
         1. Check for pending changes (git status, untracked files)
         2. Stage changes intelligently (selective staging by file type)
@@ -399,13 +402,15 @@ class CommandExecutor:
         6. Verify optimal performance (timing, success metrics)
         
         Use when:
-        - Ready to save and sync all work
-        - Want complete workflow automation
-        - Need confidence everything is synced
-        - Preparing to switch context or end session
-        - Want validation that system is ready to continue
+        - RIGHT NOW - You have pending changes, want them sorted
+        - Mid-development - Save progress checkpoint
+        - Context switch - Save work before switching tasks
+        - End of session - Final sync before closing
+        - Regular checkpoints - Keep work backed up (30-60 min intervals)
+        - Anytime sync - Whenever you want a clean working tree
         
-        Philosophy: "Comprehensive, intelligent, validated synchronization"
+        Philosophy: "Quickly sort pending changes with consistent high quality"
+        Not scheduled - on-demand, anytime you need it.
         """
         # Multi-phase execution plan
         phases = {

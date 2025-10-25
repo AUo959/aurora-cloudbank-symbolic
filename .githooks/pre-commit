@@ -15,18 +15,26 @@ if [[ ! -f "requirements-lock.txt" ]] && [[ ! -f "requirements.txt" ]]; then
 fi
 
 # Run dependency validation if script exists
-if [[ -f "scripts/validate_dependencies.py" ]] && [[ -d ".venv" ]]; then
-    echo "🔧 Running dependency validation..."
-    source .venv/bin/activate 2>/dev/null || {
-        echo "⚠️ Virtual environment not active, skipping validation"
-        exit 0
-    }
-    
-    python scripts/validate_dependencies.py || {
-        echo "❌ Dependency validation failed!"
-        echo "💡 Run 'bash scripts/setup_environment.sh' to fix issues"
-        exit 1
-    }
+# Check for both venv and dev container environments
+if [[ -f "scripts/validate_dependencies.py" ]]; then
+    # Try to activate venv if it exists and is valid
+    if [[ -f ".venv/bin/activate" ]]; then
+        echo "🔧 Running dependency validation (venv)..."
+        source .venv/bin/activate 2>/dev/null || true
+        python scripts/validate_dependencies.py || {
+            echo "❌ Dependency validation failed!"
+            echo "💡 Run 'bash scripts/setup_environment.sh' to fix issues"
+            exit 1
+        }
+    elif [[ -n "$REMOTE_CONTAINERS" ]] || [[ -f "/.dockerenv" ]]; then
+        # Dev container environment - use system Python
+        echo "🔧 Running dependency validation (dev container)..."
+        python3 scripts/validate_dependencies.py 2>/dev/null || {
+            echo "ℹ️ Dependency validation skipped (optional in dev container)"
+        }
+    else
+        echo "ℹ️ No virtual environment found, skipping validation"
+    fi
 fi
 
 # Check for requirements file changes

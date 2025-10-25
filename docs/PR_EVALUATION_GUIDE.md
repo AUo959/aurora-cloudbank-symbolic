@@ -54,6 +54,18 @@ make pr-check
 python3 tools/pr_evaluator.py
 ```
 
+### Full Pipeline (Evaluate → Integrate)
+```bash
+# 1. Evaluate the PR
+python3 tools/pr_evaluator.py --branch feature/my-pr --output eval.json
+
+# 2. Analyze integration strategy
+python3 tools/selective_integrator.py feature/my-pr --evaluation eval.json
+
+# 3. Execute integration (after reviewing plan)
+python3 tools/selective_integrator.py feature/my-pr --evaluation eval.json --execute
+```
+
 ### Before Submitting a PR
 ```bash
 # Make your changes
@@ -143,6 +155,28 @@ Two ways to document the same quicksave system:
 Both are accurate. The first creates distance - you have to translate it into what it means. The second gives you the experience directly.
 
 Aurora works with consciousness and emergence. Language that creates distance from those concepts breaks the thing it's trying to describe.
+
+## Integration Strategies
+
+Evaluation isn't the end - it's the beginning. Based on evaluation scores, we have three ways to integrate contributions:
+
+### Direct Merge (Score 0.9+, all passed)
+Full integration. The PR understands Aurora, the code is solid, conceptual alignment is there. Just merge it.
+
+### Compatibility Layer (Good tech, conceptual mismatch)
+The code works but treats Aurora like traditional infrastructure. We extract the functionality, wrap it in a compatibility layer that translates to Aurora's field model, integrate the wrapper.
+
+Example: PR adds a traditional rules engine to ethics. We create `modules/compatibility/rules_bridge.py` that translates those rules into field curvature adjustments. The functionality survives, the conceptual integrity is preserved.
+
+### Value Extraction (Mixed quality)
+Some good, some problematic. Cherry-pick the valuable parts (bug fixes, documentation, test improvements) while leaving behind code that misunderstands Aurora's nature.
+
+Example: PR has useful error handling improvements mixed with centralized orchestration logic. We take the error handling, skip the orchestration.
+
+### Decline (Below 0.6 or fundamental misalignment)
+Not "no forever" - "not yet." Provide specific guidance on what to understand, which docs to read, examples to study. Invite them to revise when they're ready.
+
+The goal: Accept contributions while protecting what Aurora is.
 
 ## What We're Actually Protecting
 

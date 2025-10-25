@@ -90,6 +90,12 @@ pr-eval:  ## Evaluate current changes and save detailed results
 	@python3 tools/pr_evaluator.py --output pr_evaluation.json
 	@echo "Detailed results saved to pr_evaluation.json"
 
+pr-integrate:  ## Analyze integration strategy for evaluated PR (requires BRANCH and EVAL_FILE)
+	@python3 tools/selective_integrator.py $(BRANCH) --evaluation $(EVAL_FILE) --output integration_plan.json
+
+pr-integrate-execute:  ## Execute integration plan (requires BRANCH and EVAL_FILE)
+	@python3 tools/selective_integrator.py $(BRANCH) --evaluation $(EVAL_FILE) --execute
+
 help: ## Show this help message
 	@echo 'Aurora CloudBank Symbolic System - Available targets:'
 	@echo ''

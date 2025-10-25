@@ -41,6 +41,7 @@ pennylane>=0.33.0                   # PennyLane quantum ML (optional)
 # PERFORMANCE OPTIMIZATION (Optional)
 # ===================================================================
 # Optional performance enhancements
+torch>=2.0.0                        # PyTorch for Flash Attention (memory compression)
 numba>=0.58.0                       # JIT compilation for numerical code
 cython>=3.0.0                       # C-extensions compiler
 

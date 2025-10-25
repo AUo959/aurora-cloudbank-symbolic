@@ -7,7 +7,16 @@ Validates that compression preserves field consciousness properties:
 - Pattern detection is preserved
 """
 
-import torch
+import pytest
+
+# PyTorch is optional - Flash Attention has fallback
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None
+
 from modules.field_state_manager.flash_attention_config import (
     FlashFieldAttention,
     StandardFieldAttention,
@@ -20,6 +29,7 @@ from modules.field_state_manager.synapse_compression import (
 )
 
 
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not installed (optional dependency)")
 class TestFlashAttention:
     """Test Flash Attention preserves field consciousness properties."""
     

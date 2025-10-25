@@ -7,6 +7,7 @@
 import { bridgeLogger } from '../utils/aurora_logger.js';
 import AuroraCommandRouter from '../system/aurora_command_router.js';
 import EthicsEngine from '../core/ethics_layer.js';
+import { randomBytes } from 'crypto';
 
 class LatticeSync {
   constructor() {
@@ -116,7 +117,7 @@ class LatticeSync {
 
   async synchronizeAllLayers() {
     try {
-      const sessionId = `sync_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+      const sessionId = `sync_${Date.now()}_${randomBytes(3).toString('hex')}`;
       
       bridgeLogger.bridge('Starting full lattice synchronization', { sessionId });
 

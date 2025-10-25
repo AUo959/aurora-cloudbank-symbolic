@@ -13,7 +13,7 @@ The following concepts expand Aurora CloudBank's layered quantum-enhanced symbol
 - **Purpose:** Forecast supply chain or energy grid scenarios using hybrid quantum-classical solvers.
 - **Back-end:** Python orchestration module invoking quantum APIs asynchronously, caching symbolic scenario nodes.
 - **Front-end/CLI:** Interactive timeline visualizations and CLI `simulate:scenario` command with deterministic seeds for reproducibility.
-- **Key Integrations:** Aligns with ORION settings without modifications; extends via `modules/scenario_bridge/`.
+- **Key Integrations:** Aligns with existing scenario engine configuration (see `modules/scenario_bridge/` or project configuration docs) without modifications; extends via `modules/scenario_bridge/`.
 - **Testing & Docs:** Add mocked quantum provider tests; document scenarios in `/docs/simulation/`.
 
 ## 3. Trustworthy Insight Ledger (T1-TIL-AnchorSeed)

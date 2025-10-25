@@ -225,12 +225,20 @@ def main():
     else:
         output = generate_glyphcard(args.snapshot)
     
+    # Compute a hash of the output to avoid storing or logging sensitive data
+    import hashlib
+    hashed_output = hashlib.sha256(output.encode()).hexdigest()
     if args.output:
-        Path(args.output).write_text(output)
-        print(f"✍️  Glyphcard written to: {args.output}")
+        # Write the hashed output to the specified file
+        Path(args.output).write_text(hashed_output)
+        print(f"Glyphcard hash written to: {args.output}")
     else:
-        print(output)
+        # Print only a truncated portion of the hash instead of the full sensitive output
+        print(f"Generated glyphcard hash: {hashed_output[:12]}")
+ 
     
+
+
     return 0
 
 

@@ -7,15 +7,25 @@ Team: AUo959-team
 Ethics: Picard_Delta_3
 DLP: CONFIDENTIAL
 
-Parses command syntax: #command//.
+Parses unified command syntax: #command//.
+Supports word commands, numeric codes, and system verbs.
 Safety: Commands without //. terminator are NOT executed.
 Instead, system provides helpful guidance.
 
 Pattern Examples:
   ✅ Valid:   #seal//.
+  ✅ Valid:   #001//. (numeric alias)
+  ✅ Valid:   #BUP//. (system verb)
   ✅ Valid:   #verify//. #deploy//.
   ❌ Naked:   #seal (missing terminator)
-  ❌ Naked:   #verify (missing terminator)
+  ❌ Naked:   #001 (missing terminator)
+  ❌ Naked:   #BUP (missing terminator)
+
+Aurora Codex v2.5 Standardization:
+  All commands now use consistent #COMMAND//. syntax
+  - User macros: #001//., #025//., #999//.
+  - System verbs: #BUP//., #RESUME//., #THREADSYNC//.
+  - Operations: #seal//., #deploy//., #test//.
 """
 
 import hashlib
@@ -47,28 +57,43 @@ class ParseResult:
 class CommandChainParser:
     """
     Parses command chains with safety validation.
-    
-    Command Syntax:
+
+    Command Syntax (Aurora Codex v2.5 Unified Standard):
     - Valid: #command//.
+    - Supports: Word commands, numeric codes, system verbs
+    - Examples: #seal//., #001//., #BUP//.
     - Naked: #command (no terminator) - triggers helpful error
-    
+
     Safety Features:
     - Commands without //. terminator are NEVER executed
     - Helpful guidance provided for malformed commands
     - Command validation with DLP tracking
     """
     
-    # Valid command pattern: #word//.
-    VALID_COMMAND_PATTERN = r'#([a-zA-Z_][a-zA-Z0-9_]*)//\.'
+    # Valid command pattern: #word//. or #NNN//.
+    # Supports: #seal//., #001//., #BUP//., etc.
+    VALID_COMMAND_PATTERN = r'#([a-zA-Z0-9_]+)//\.'
     
-    # Naked command pattern: #word (no //. terminator)
-    NAKED_COMMAND_PATTERN = r'#([a-zA-Z_][a-zA-Z0-9_]*)(?!//\.)'
+    # Naked command pattern: #word or #NNN (no //. terminator)
+    NAKED_COMMAND_PATTERN = r'#([a-zA-Z0-9_]+)(?!//\.)'
     
     # Supported commands (extensible)
     SUPPORTED_COMMANDS = {
+        # Core operations
         'seal', 'verify', 'deploy', 'snapshot', 'restore',
         'status', 'sync', 'test', 'build', 'clean',
-        'anchor', 'validate', 'export', 'import', 'commit'
+        'anchor', 'validate', 'export', 'import', 'commit',
+        
+        # Numeric aliases (Aurora Codex v2.5)
+        '001', '002', '003', '004', '005', '006', '007', '008',
+        '025', '080', '717', '808', '999',
+        
+        # System verbs (standardized to # prefix)
+        'THREADSYNC', 'TAGTRACE', 'TAGPATCH', 'SYNCANCHORS', 'RESTOREMAP',
+        'REBUILDRECOVERY', 'LOCKMEM', 'T1', 'EXPORTTHREAD',
+        'DIAGNOW', 'RESETCORE', 'SENTRYSTAT', 'SUP', 'OPTISEED',
+        'PULSEWALK', 'CLEANDEPLOY', 'SANDDROP', 'THREADWAKE',
+        'RESUME', 'BUP',
     }
     
     def __init__(self):

@@ -8,11 +8,7 @@ Provides command chain parsing with safety validation.
 Commands require //. terminator to execute.
 """
 
-from tools.command_chain.parser import (
-    CommandChainParser,
-    Command,
-    ParseResult
-)
+from tools.command_chain.parser import Command, CommandChainParser, ParseResult
 
 __version__ = "1.0.0"
 __all__ = ["CommandChainParser", "Command", "ParseResult"]

@@ -343,5 +343,68 @@ class TestCommandChainIntegration:
             assert len(error) > 50  # Substantial guidance
 
 
+class TestAuroraCodexV25Commands:
+    """Test Aurora Codex v2.5 unified command syntax"""
+
+    def setup_method(self):
+        self.parser = CommandChainParser()
+
+    def test_numeric_aliases(self):
+        """Test numeric command aliases"""
+        result = self.parser.parse("#001//. #025//. #999//.")
+
+        assert len(result.commands) == 3
+        assert [c.name for c in result.commands] == ["001", "025", "999"]
+        assert all(c.is_valid for c in result.commands)
+
+    def test_naked_numeric_alias(self):
+        """Test naked numeric alias detection"""
+        result = self.parser.parse("#001")
+
+        assert len(result.commands) == 0
+        assert len(result.naked_commands) == 1
+        assert result.naked_commands[0].name == "001"
+        error_msg = result.naked_commands[0].error_message
+        assert error_msg is not None
+        assert "#001" in error_msg
+
+    def test_system_verbs(self):
+        """Test system verb commands"""
+        result = self.parser.parse("#BUP//. #RESUME//. #THREADSYNC//.")
+
+        assert len(result.commands) == 3
+        assert [c.name for c in result.commands] == ["BUP", "RESUME", "THREADSYNC"]
+        assert all(c.is_valid for c in result.commands)
+
+    def test_naked_system_verb(self):
+        """Test naked system verb detection"""
+        result = self.parser.parse("#BUP")
+
+        assert len(result.commands) == 0
+        assert len(result.naked_commands) == 1
+        assert result.naked_commands[0].name == "BUP"
+        error_msg = result.naked_commands[0].error_message
+        assert error_msg is not None
+        assert "#BUP" in error_msg
+
+    def test_mixed_command_types(self):
+        """Test mixing different command types"""
+        result = self.parser.parse("#001//. #seal//. #BUP//. #025//.")
+
+        assert len(result.commands) == 4
+        assert [c.name for c in result.commands] == ["001", "seal", "BUP", "025"]
+        assert all(c.is_valid for c in result.commands)
+
+    def test_aurora_codex_workflow(self):
+        """Test typical Aurora Codex v2.5 workflow"""
+        # BUP → structure → optimize → seal
+        result = self.parser.parse("#BUP//. #006//. #025//. #999//.")
+
+        assert len(result.commands) == 4
+        assert not result.has_errors
+        assert result.commands[0].name == "BUP"
+        assert result.commands[3].name == "999"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

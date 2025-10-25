@@ -48,7 +48,7 @@ The following concepts expand Aurora CloudBank's layered quantum-enhanced symbol
 - **Purpose:** Shared workspace for teams to craft symbolic hypotheses, run experiments, and track results.
 - **Back-end:** Notebook orchestration layer coordinating compute sessions, storing outputs with symbolic anchors.
 - **Front-end/CLI:** Real-time collaborative UI with role-based access; CLI `commons:session` to manage labs.
-- **Key Integrations:** Uses metadata alignment with `symbolic/` schemas; leverages existing auth modules.
+- **Key Integrations:** Uses metadata alignment with `symbolic/` schemas; leverages FastAPI session management and ChatGPT Agent Mode session store for authentication (or planned authentication infrastructure if not yet implemented).
 - **Testing & Docs:** Access control tests and concurrency simulations; researcher onboarding docs in `/docs/research/`.
 
 These concepts are ready for refinement into implementation roadmaps, including precise API definitions, acceptance criteria, and compliance reviews.

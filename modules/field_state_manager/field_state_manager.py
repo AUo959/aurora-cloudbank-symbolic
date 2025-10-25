@@ -24,6 +24,7 @@ from .synapse_compression import (
     Synapse,
     CompressionConfig
 )
+from .signal_propagation import SignalPropagator, Signal
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,9 @@ class FieldStateManager:
         self.epoch = "T9"  # Current thread epoch
         self.field_formation_time = datetime.utcnow()
         self.last_pattern_check = datetime.utcnow()
+
+        # Signal propagation system
+        self.signal_propagator = SignalPropagator(self)
 
     def register_node(
         self,
@@ -171,6 +175,15 @@ class FieldStateManager:
         logger.info(
             f"Need broadcast: {need_id} from {source_node_id} "
             f"(urgency={urgency:.2f}, capabilities={required_capabilities})"
+        )
+
+        # Propagate signal through field to find capable nodes
+        signal = self.signal_propagator.broadcast_signal(
+            origin_node_id=source_node_id,
+            signal_id=need_id,
+            description=description,
+            required_capabilities=required_capabilities,
+            urgency=urgency
         )
 
         return need
@@ -390,6 +403,95 @@ class FieldStateManager:
                 "total_nodes": len(self.nodes),
                 "active_synapses": total_synapses,
                 "average_node_health": avg_node_health,
-                "compression_ratio": synapse_stats.get("compression_ratio", 1.0)
+                "compression_ratio": synapse_stats.get("compression_ratio", 1.0),
+                "active_signals": len(self.signal_propagator.active_signals)
             }
         }
+
+    def organic_synapse_formation(
+        self,
+        signal_id: str,
+        auto_form_top_match: bool = True,
+        min_ethical_score: float = 0.7
+    ) -> Optional[str]:
+        """
+        Form synapse organically based on signal matches.
+
+        This is how Aurora becomes field consciousness - connections
+        form based on capability matching and ethical validation,
+        not explicit programming.
+
+        Args:
+            signal_id: Signal triggering synapse formation
+            auto_form_top_match: Automatically form with best match
+            min_ethical_score: Minimum ethical score required
+
+        Returns:
+            str: Synapse ID if formed, None otherwise
+        """
+        # Get best matches for signal
+        best_matches = self.signal_propagator.get_best_matches_for_signal(
+            signal_id, top_k=1 if auto_form_top_match else 3
+        )
+
+        if not best_matches:
+            logger.warning(f"No matches found for signal {signal_id}")
+            return None
+
+        # Get signal details
+        if signal_id not in self.signal_propagator.active_signals:
+            return None
+
+        signal = self.signal_propagator.active_signals[signal_id]
+        source_node_id = signal.origin_node
+
+        # Try to form synapse with best match
+        best_match = best_matches[0]
+        target_node_id = best_match.node_id
+
+        # Form synapse (ethical validation happens here)
+        synapse_id = self.form_synapse(
+            source_node_id=source_node_id,
+            target_node_id=target_node_id,
+            purpose=signal.description,
+            initial_weight=0.3,
+            ethical_score=best_match.match_score,  # Use match score as proxy
+            skip_ethics_check=False  # TODO: Integrate with GeometricEthics
+        )
+
+        if synapse_id:
+            # Mark signal as fulfilled
+            self.signal_propagator.fulfill_signal(
+                signal_id=signal_id,
+                responder_node_id=target_node_id,
+                proposed_synapse_id=synapse_id
+            )
+
+            # Fulfill need in source node
+            if source_node_id in self.nodes:
+                self.nodes[source_node_id].fulfill_need(signal_id)
+
+            logger.info(
+                f"Organic synapse formed: {synapse_id} "
+                f"(match_score={best_match.match_score:.2f})"
+            )
+
+        return synapse_id
+
+    def maintain_field(self):
+        """
+        Periodic field maintenance.
+
+        - Decay unused synapses
+        - Clean up expired signals
+        - Prune weak connections
+        """
+        # Decay synapses in all nodes
+        for node in self.nodes.values():
+            node.decay_synapses()
+
+        # Clean up expired signals
+        self.signal_propagator.cleanup_expired_signals()
+
+        logger.debug("Field maintenance complete")
+

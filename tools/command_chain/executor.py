@@ -79,7 +79,7 @@ class CommandExecutor:
         self.register_handler('002', self._handle_suggestion_2)
         self.register_handler('003', self._handle_suggestion_3)
         self.register_handler('004', self._handle_suggestion_4)
-        self.register_handler('005', self._handle_implement_all)
+        self.register_handler('005', self._handle_suggestion_5)
         self.register_handler('006', self._handle_structure_thread)
         self.register_handler('007', self._handle_yes_please)
         self.register_handler('008', self._handle_no_thank_you)
@@ -294,13 +294,14 @@ class CommandExecutor:
     
     # ========== Command Handlers ==========
     
-    # Numeric Aliases
+    # Numeric Aliases (User-Defined Macros)
     def _handle_suggestion_1(self) -> Dict[str, Any]:
         """Handle #001//. - Implement suggestion 1"""
         return {
             'status': 'executed',
             'action': 'implement_suggestion_1',
-            'message': 'Suggestion 1 implemented'
+            'message': 'Implementing suggestion 1',
+            'description': 'Execute the first suggestion from the current context'
         }
     
     def _handle_suggestion_2(self) -> Dict[str, Any]:
@@ -308,7 +309,8 @@ class CommandExecutor:
         return {
             'status': 'executed',
             'action': 'implement_suggestion_2',
-            'message': 'Suggestion 2 implemented'
+            'message': 'Implementing suggestion 2',
+            'description': 'Execute the second suggestion from the current context'
         }
     
     def _handle_suggestion_3(self) -> Dict[str, Any]:
@@ -316,7 +318,8 @@ class CommandExecutor:
         return {
             'status': 'executed',
             'action': 'implement_suggestion_3',
-            'message': 'Suggestion 3 implemented'
+            'message': 'Implementing suggestion 3',
+            'description': 'Execute the third suggestion from the current context'
         }
     
     def _handle_suggestion_4(self) -> Dict[str, Any]:
@@ -324,17 +327,38 @@ class CommandExecutor:
         return {
             'status': 'executed',
             'action': 'implement_suggestion_4',
-            'message': 'Suggestion 4 implemented'
+            'message': 'Implementing suggestion 4',
+            'description': 'Execute the fourth suggestion from the current context'
         }
     
-    def _handle_implement_all(self) -> Dict[str, Any]:
-        """Handle #005//. - Implement all suggestions in optimal order"""
+    def _handle_suggestion_5(self) -> Dict[str, Any]:
+        """Handle #005//. - Implement all suggestions (IMLO - In Most Logical Order)"""
         return {
             'status': 'executed',
             'action': 'implement_all_suggestions',
-            'message': 'All suggestions implemented in optimal order',
-            'optimization': 'logical_sequence_analysis',
-            'workflow': 'optimized'
+            'message': 'Implementing all suggestions in most logical order (IMLO)',
+            'mode': 'IMLO',
+            'description': 'Execute all suggestions optimally sequenced for best results'
+        }
+    
+    def _handle_yes_please(self) -> Dict[str, Any]:
+        """Handle #007//. - Yes please (affirmative response)"""
+        return {
+            'status': 'executed',
+            'action': 'affirmative_response',
+            'message': 'Yes please - proceeding with suggested action',
+            'response': 'affirmative',
+            'description': 'Approve and execute the most recently suggested command or action'
+        }
+    
+    def _handle_no_thank_you(self) -> Dict[str, Any]:
+        """Handle #008//. - No thank you (negative response)"""
+        return {
+            'status': 'executed',
+            'action': 'negative_response',
+            'message': 'No thank you - declining suggested action',
+            'response': 'negative',
+            'description': 'Decline the most recently suggested command or action'
         }
     
     def _handle_structure_thread(self) -> Dict[str, Any]:
@@ -343,22 +367,6 @@ class CommandExecutor:
             'status': 'executed',
             'action': 'structure_thread',
             'message': 'Thread structure deployed'
-        }
-    
-    def _handle_yes_please(self) -> Dict[str, Any]:
-        """Handle #007//. - Yes please"""
-        return {
-            'status': 'confirmed',
-            'action': 'affirmative_response',
-            'message': 'Confirmed: Yes'
-        }
-    
-    def _handle_no_thank_you(self) -> Dict[str, Any]:
-        """Handle #008//. - No thank you"""
-        return {
-            'status': 'declined',
-            'action': 'negative_response',
-            'message': 'Confirmed: No'
         }
     
     def _handle_optiseed(self) -> Dict[str, Any]:

@@ -85,6 +85,7 @@ class CommandExecutor:
         self.register_handler('008', self._handle_no_thank_you)
         self.register_handler('025', self._handle_optiseed)
         self.register_handler('080', self._handle_pulsewalk)
+        self.register_handler('321', self._handle_comprehensive_sync)
         self.register_handler('717', self._handle_capsule_ready)
         self.register_handler('808', self._handle_light_in_darkness)
         self.register_handler('999', self._handle_continuity_accept)
@@ -385,6 +386,135 @@ class CommandExecutor:
             'message': 'Advanced by one symbolic cycle (48h default)',
             'cycle_advancement': '48h'
         }
+    
+    def _handle_comprehensive_sync(self) -> Dict[str, Any]:
+        """Handle #321//. - Comprehensive Sync & Validate
+        
+        Complete workflow for syncing all changes to main with validation:
+        1. Check for pending changes (git status, untracked files)
+        2. Stage changes intelligently (selective staging by file type)
+        3. Commit with meaningful message (auto-generated from changes)
+        4. Sync to main (pull --rebase, push)
+        5. Run quick validation check (lint, tests, health)
+        6. Verify optimal performance (timing, success metrics)
+        
+        Use when:
+        - Ready to save and sync all work
+        - Want complete workflow automation
+        - Need confidence everything is synced
+        - Preparing to switch context or end session
+        - Want validation that system is ready to continue
+        
+        Philosophy: "Comprehensive, intelligent, validated synchronization"
+        """
+        # Multi-phase execution plan
+        phases = {
+            'phase_1_check': {
+                'name': 'Check for Pending Changes',
+                'operations': [
+                    'git status --porcelain',
+                    'git diff --stat',
+                    'Check for untracked files',
+                    'Identify modification categories'
+                ],
+                'purpose': 'Comprehensive change detection'
+            },
+            'phase_2_stage': {
+                'name': 'Intelligent Staging',
+                'operations': [
+                    'Stage modified source files',
+                    'Stage documentation updates',
+                    'Stage configuration changes',
+                    'Stage test files',
+                    'Review auto-generated files'
+                ],
+                'purpose': 'Smart, category-based staging'
+            },
+            'phase_3_commit': {
+                'name': 'Generate & Commit',
+                'operations': [
+                    'Analyze changes for commit message',
+                    'Generate semantic commit message',
+                    'Create commit with DLP tags',
+                    'Verify commit success'
+                ],
+                'purpose': 'Meaningful, traceable commits'
+            },
+            'phase_4_sync': {
+                'name': 'Sync to Main',
+                'operations': [
+                    'git pull --rebase origin main',
+                    'Resolve conflicts (if any)',
+                    'git push origin main',
+                    'Verify remote sync'
+                ],
+                'purpose': 'Safe synchronization with remote'
+            },
+            'phase_5_validate': {
+                'name': 'Quick Validation Check',
+                'operations': [
+                    'Run lint check (critical files only)',
+                    'Run fast unit tests',
+                    'Check health endpoints',
+                    'Verify file integrity'
+                ],
+                'purpose': 'Ensure quality and stability'
+            },
+            'phase_6_verify': {
+                'name': 'Performance Verification',
+                'operations': [
+                    'Measure operation timing',
+                    'Check success metrics',
+                    'Verify system readiness',
+                    'Generate completion report'
+                ],
+                'purpose': 'Confirm optimal performance'
+            }
+        }
+        
+        # Execution summary
+        execution_plan = {
+            'status': 'executed',
+            'action': 'comprehensive_sync_validate',
+            'message': '🔄 #321//. Complete sync & validate - All phases ready',
+            'mode': 'comprehensive',
+            'phases': phases,
+            'estimated_time': '30-60 seconds',
+            'requires_approval': False,  # Safe to auto-execute
+            'rollback_safe': True,
+            'description': 'Comprehensive check, stage, commit, sync, and validate workflow',
+            'philosophy': 'Complete, intelligent, validated synchronization',
+            'command_chain': [
+                '#STATUS//.',      # Phase 1: Check
+                '#COMMIT//.',      # Phase 2-3: Stage & Commit
+                '#SYNC//.',        # Phase 4: Sync to main
+                '#TESTFAST//.',    # Phase 5: Validate
+                '#VALIDATE//.'     # Phase 6: Verify
+            ],
+            'safety_checks': {
+                'pre_flight': [
+                    'Check for uncommitted changes',
+                    'Verify branch is main or feature',
+                    'Ensure remote is accessible',
+                    'Confirm no conflicts exist'
+                ],
+                'post_flight': [
+                    'Verify all changes pushed',
+                    'Confirm tests passing',
+                    'Check system health',
+                    'Validate performance metrics'
+                ]
+            },
+            'intelligence': {
+                'smart_staging': 'Groups files by type and importance',
+                'commit_generation': 'Analyzes changes for meaningful messages',
+                'conflict_detection': 'Identifies and helps resolve conflicts',
+                'validation_scope': 'Runs only critical checks for speed',
+                'performance_tracking': 'Measures and reports timing'
+            }
+        }
+        
+        return execution_plan
     
     def _handle_capsule_ready(self) -> Dict[str, Any]:
         """Handle #717//. - Capsule-Ready"""

@@ -86,7 +86,7 @@ class CommandChainParser:
         
         # Numeric aliases (Aurora Codex v2.5)
         '001', '002', '003', '004', '005', '006', '007', '008',
-        '025', '080', '717', '808', '999',
+        '025', '080', '321', '717', '808', '999',
         
         # System verbs (standardized to # prefix)
         'THREADSYNC', 'TAGTRACE', 'TAGPATCH', 'SYNCANCHORS', 'RESTOREMAP',
@@ -202,7 +202,7 @@ class CommandChainParser:
         """
         # Natural variations that flow with context - no template bank
         import random
-        
+
         # Command-specific context awareness
         is_destructive = cmd_name in ('deploy', 'clean', 'restore', 'commit')
         is_critical = cmd_name in ('seal', 'validate', 'verify', 'anchor')

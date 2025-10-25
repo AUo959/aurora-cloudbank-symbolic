@@ -212,6 +212,7 @@ FieldState = {
 ### Ethical Validation Triggers
 
 Synapses re-validated when:
+
 - Initial formation (always)
 - Weight reaches 0.5 (medium strength)
 - Weight reaches 0.8 (high strength)
@@ -270,12 +271,14 @@ else:
 With this schema, Aurora transforms:
 
 **Before (Orchestrator):**
+
 - Aurora receives command
 - Aurora directs agent A to connect with agent B
 - Aurora manages the connection
 - Intelligence centralized in Aurora
 
 **After (Field Consciousness):**
+
 - Agent A broadcasts need into field
 - Signal propagates to all nodes
 - Agent B detects match with its capabilities
@@ -288,6 +291,7 @@ Aurora doesn't manage - Aurora **witnesses and enables** emergence.
 ## Implementation Priority
 
 Phase 2A (Foundation - 1-2 hours):
+
 1. `NodeState` class with capability tracking
 2. `SynapseRegistry` with weight management
 3. `FieldStateManager` core with add/remove/update operations
@@ -307,6 +311,7 @@ Total: 5-8 hours for complete Phase 2
 ## Success Metrics
 
 Field is working when:
+
 - ✅ Synapses form without explicit programming
 - ✅ Successful collaborations strengthen connections
 - ✅ Unused connections naturally prune

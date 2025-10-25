@@ -220,3 +220,6 @@ auth_config.json
 .glyphcards/
 .glyphdiffs/
 .reliquary/
+
+# Aurora Quicksave - Session context (local only)
+.aurora/

@@ -13,13 +13,13 @@ Tests validate behavior patterns, not exact numerical values.
 """
 
 import pytest
+
+from modules.ethics_field.dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
 from modules.ethics_field.dimension_evaluators.picard_delta_3 import PicardDelta3Evaluator
 from modules.ethics_field.dimension_evaluators.thermax_continuity import ThermaxContinuityEvaluator
-from modules.ethics_field.dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
 from modules.ethics_field.field_curvature import FieldCurvature
 from modules.ethics_field.geometric_ethics import GeometricEthics
 from modules.ethics_field.synapse_validator import SynapseValidator
-
 
 # ============================================================================
 # CRITICAL PATH TESTS - Basic Functionality Validation

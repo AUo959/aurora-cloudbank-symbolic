@@ -8,11 +8,12 @@ Team: AUo959-team
 Comprehensive test suite for command chain parser.
 """
 
-import pytest
 import sys
 from pathlib import Path
 
-from tools.command_chain.parser import CommandChainParser, Command, ParseResult
+import pytest
+
+from tools.command_chain.parser import Command, CommandChainParser, ParseResult
 
 # Add project root to path if needed
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -54,7 +55,7 @@ class TestCommandChainParser:
         assert result.naked_commands[0].name == "seal"
         assert result.naked_commands[0].is_valid is False
         assert result.has_errors is True
-        assert "Missing Terminator" in result.naked_commands[0].error_message
+        assert "Incomplete Command" in result.naked_commands[0].error_message
     
     def test_naked_command_multiple(self):
         """Test detection of multiple naked commands"""
@@ -174,12 +175,12 @@ class TestCommandChainParser:
         
         error_msg = result.naked_commands[0].error_message
         
-        assert "COMMAND SYNTAX ERROR" in error_msg
+        assert "Incomplete Command" in error_msg
         assert "#seal" in error_msg
         assert "//." in error_msg
-        assert "CORRECT SYNTAX" in error_msg
-        assert "WHY THIS MATTERS" in error_msg
-        assert "QUICK FIX" in error_msg
+        assert "What you typed" in error_msg
+        assert "What I need" in error_msg
+        assert "safety terminator" in error_msg
     
     def test_command_position_tracking(self):
         """Test that command positions are tracked"""
@@ -334,7 +335,7 @@ class TestCommandChainIntegration:
         
         # Each error should be helpful
         for error in errors:
-            assert "COMMAND SYNTAX ERROR" in error
+            assert "Incomplete Command" in error
             assert "//." in error
 
 

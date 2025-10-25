@@ -18,10 +18,10 @@ Pattern Examples:
   ❌ Naked:   #verify (missing terminator)
 """
 
+import hashlib
 import re
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
-import hashlib
+from typing import List, Optional, Tuple
 
 
 @dataclass
@@ -147,37 +147,24 @@ class CommandChainParser:
         """
         message = f"""
 ╔══════════════════════════════════════════════════════════════════╗
-║ ⚠️  COMMAND SYNTAX ERROR: Missing Terminator                     ║
+║  ⚠️  Incomplete Command Detected                                 ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  You entered: #{cmd_name}                                         ║
+║  Found: #{cmd_name}                                               ║
+║  Status: Not quite ready for launch                             ║
 ║                                                                  ║
-║  ❌ This command is INCOMPLETE and will NOT be executed.         ║
-║                                                                  ║
-╠══════════════════════════════════════════════════════════════════╣
-║  📖 CORRECT SYNTAX                                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  Commands MUST end with the //. terminator for safety.          ║
-║                                                                  ║
-║  ✅ Correct:   #{cmd_name}//.                                     ║
-║  ❌ Incorrect: #{cmd_name}                                        ║
+║  Commands need their safety terminator. You know, like how      ║
+║  you wouldn't press a big red button without the safety cover.  ║
 ║                                                                  ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  💡 WHY THIS MATTERS                                             ║
+║  The Fix (it's easier than you think)                           ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
-║  The //. terminator prevents accidental command execution.      ║
-║  Powerful commands require explicit, intentional syntax.         ║
+║  What you typed:  #{cmd_name}                                     ║
+║  What I need:     #{cmd_name}//.                                  ║
 ║                                                                  ║
-╠══════════════════════════════════════════════════════════════════╣
-║  🎯 QUICK FIX                                                    ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  Did you mean to execute this command?                          ║
-║  Add the //. terminator:                                        ║
-║                                                                  ║
-║    #{cmd_name}//.                                                 ║
+║  That's it. Just add //. at the end.                            ║
+║  Think of it as the "yes, I really mean this" button.           ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 """

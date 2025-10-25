@@ -13,16 +13,22 @@ import pytest
 try:
     import torch
     TORCH_AVAILABLE = True
+    # Only import torch-dependent modules if torch is available
+    from modules.field_state_manager.flash_attention_config import (
+        FlashAttentionConfig,
+        FlashFieldAttention,
+        StandardFieldAttention,
+        validate_flash_attention_equivalence,
+    )
 except ImportError:
     TORCH_AVAILABLE = False
     torch = None
+    # Provide stubs so module loads
+    FlashAttentionConfig = None
+    FlashFieldAttention = None
+    StandardFieldAttention = None
+    validate_flash_attention_equivalence = None
 
-from modules.field_state_manager.flash_attention_config import (
-    FlashAttentionConfig,
-    FlashFieldAttention,
-    StandardFieldAttention,
-    validate_flash_attention_equivalence,
-)
 from modules.field_state_manager.synapse_compression import CompressedSynapseRegistry, CompressionConfig
 
 

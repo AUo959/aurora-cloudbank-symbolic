@@ -1,0 +1,8 @@
+{
+  "type": "ENTROPY_DRIFT_EXCEEDED",
+  "drift": 0.15000000000000002,
+  "threshold": 0.1,
+  "timestamp": "2025-10-25T13:10:23.570031",
+  "anchor": "T8-STATUS-GUMAS-2025",
+  "requires_arbitration": true
+}

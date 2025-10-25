@@ -1,0 +1,7 @@
+{
+  "key": "secure_key",
+  "expected_seal": "ff28bc62f1fae5aa461b1dd800f507cfc0a05c790309f7de3380568e38a336bc",
+  "actual_seal": "5f0a8838b39ee9b570d34c2eea9df2c9ba258ef95e6900d750b1e335f9fc6b0e",
+  "timestamp": "2025-10-25T13:10:20.442676+00:00",
+  "requires_arbitration": true
+}

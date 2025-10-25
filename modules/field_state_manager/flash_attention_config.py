@@ -12,7 +12,12 @@ DLP: context_tag=flash_attention_config, symbolic_hash=FIELD_AWARENESS_v1
 from dataclasses import dataclass
 from typing import Optional
 
-import torch
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    torch = None  # Placeholder for type checking
 
 
 @dataclass

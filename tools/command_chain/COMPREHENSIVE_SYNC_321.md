@@ -12,6 +12,7 @@
 `#321//.` is the **universal "clean the working tree" command** - your go-to solution for quickly syncing pending changes anytime. It handles everything from checking for changes to verifying optimal performance with consistent high quality.
 
 **Use it whenever you want a clean working tree:**
+
 - Right now, there are pending changes? → `#321//.` and everything gets sorted
 - About to switch tasks? → `#321//.` and you're ready
 - End of session? → `#321//.` and you're done
@@ -39,6 +40,7 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 ### The Universal Sync Command
 
 `#321//.` is **not** just for end-of-session. Use it **anytime** you want to:
+
 - Clean your working tree quickly
 - Sync pending changes with high quality
 - Get back to a pristine state
@@ -53,15 +55,18 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 ## 📊 The 6 Phases
 
 ### Phase 1: Check for Pending Changes
+
 **Purpose:** Comprehensive change detection
 
 **Operations:**
+
 - `git status --porcelain` - Machine-readable status
 - `git diff --stat` - Change statistics
 - Check for untracked files
 - Identify modification categories (source, docs, config, tests)
 
 **Output:**
+
 - Total files changed
 - Categories of changes
 - Untracked files list
@@ -70,9 +75,11 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 ---
 
 ### Phase 2: Intelligent Staging
+
 **Purpose:** Smart, category-based staging
 
 **Operations:**
+
 - Stage modified source files (highest priority)
 - Stage documentation updates
 - Stage configuration changes
@@ -80,6 +87,7 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 - Review auto-generated files (selective staging)
 
 **Intelligence:**
+
 - Groups files by type
 - Prioritizes source code changes
 - Handles documentation separately
@@ -87,6 +95,7 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 - Selective staging for safety
 
 **Example Staging Order:**
+
 ```bash
 1. src/**/*.py          # Source code (priority 1)
 2. tests/**/*.py        # Test files (priority 2)
@@ -98,15 +107,18 @@ Think of it as your **on-demand sync automation** - comprehensive, intelligent, 
 ---
 
 ### Phase 3: Generate & Commit
+
 **Purpose:** Meaningful, traceable commits
 
 **Operations:**
+
 - Analyze changes for commit message context
 - Generate semantic commit message
 - Create commit with DLP tags
 - Verify commit success
 
 **Commit Message Structure:**
+
 ```
 <type>(scope): <subject>
 
@@ -119,6 +131,7 @@ DLP: CMD-CHAIN-CONTEXT-TAG
 ```
 
 **Semantic Types:**
+
 - `feat:` - New features
 - `fix:` - Bug fixes
 - `docs:` - Documentation changes
@@ -129,15 +142,18 @@ DLP: CMD-CHAIN-CONTEXT-TAG
 ---
 
 ### Phase 4: Sync to Main
+
 **Purpose:** Safe synchronization with remote
 
 **Operations:**
+
 - `git pull --rebase origin main` - Get latest changes
 - Resolve conflicts (if any) - Interactive resolution support
 - `git push origin main` - Push to remote
 - Verify remote sync - Confirm push success
 
 **Safety Features:**
+
 - Rebase instead of merge (cleaner history)
 - Conflict detection before push
 - Automatic retry on network issues
@@ -145,6 +161,7 @@ DLP: CMD-CHAIN-CONTEXT-TAG
 - Remote tracking validation
 
 **Conflict Resolution:**
+
 ```
 If conflicts detected:
   1. Show conflicting files
@@ -157,15 +174,18 @@ If conflicts detected:
 ---
 
 ### Phase 5: Quick Validation Check
+
 **Purpose:** Ensure quality and stability
 
 **Operations:**
+
 - Run lint check (critical files only)
 - Run fast unit tests
 - Check health endpoints (if applicable)
 - Verify file integrity
 
 **Validation Scope (Optimized for Speed):**
+
 ```bash
 # Lint (critical files only)
 flake8 src/core/*.py src/integrations/*.py --select=E,F
@@ -181,6 +201,7 @@ sha256sum -c CHECKSUMS.txt (if exists)
 ```
 
 **Success Criteria:**
+
 - ✅ No critical lint errors
 - ✅ All unit tests pass
 - ✅ Health endpoints respond (if applicable)
@@ -189,15 +210,18 @@ sha256sum -c CHECKSUMS.txt (if exists)
 ---
 
 ### Phase 6: Performance Verification
+
 **Purpose:** Confirm optimal performance
 
 **Operations:**
+
 - Measure operation timing
 - Check success metrics
 - Verify system readiness
 - Generate completion report
 
 **Metrics Tracked:**
+
 - Phase 1 timing (change detection)
 - Phase 2 timing (staging)
 - Phase 3 timing (commit)
@@ -207,6 +231,7 @@ sha256sum -c CHECKSUMS.txt (if exists)
 - Success rate
 
 **Completion Report:**
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ #321//. COMPLETE - ALL PHASES SUCCESSFUL
@@ -241,6 +266,7 @@ sha256sum -c CHECKSUMS.txt (if exists)
 ## 🎮 Usage Patterns
 
 ### Pattern 1: Right Now - Clean Working Tree
+
 ```
 Situation: You have pending changes, want them sorted quickly
 
@@ -261,6 +287,7 @@ Solution:
 ```
 
 ### Pattern 2: Mid-Development Checkpoint
+
 ```
 Situation: In the middle of coding, want to save progress
 
@@ -281,6 +308,7 @@ Solution:
 ```
 
 ### Pattern 3: Before Context Switch
+
 ```
 Situation: Need to switch to different task, save current work
 
@@ -301,6 +329,7 @@ Solution:
 ```
 
 ### Pattern 4: End of Coding Session
+
 ```
 Situation: Done coding for the day, want to sync everything
 
@@ -321,6 +350,7 @@ Solution:
 ```
 
 ### Pattern 5: Pre-Deployment
+
 ```
 Situation: About to deploy, want everything synced and validated
 
@@ -341,6 +371,7 @@ Solution:
 ```
 
 ### Pattern 6: Continuous Checkpoint Habit
+
 ```
 Situation: Want to keep working tree clean throughout development
 
@@ -363,6 +394,7 @@ Solution:
 ### The Key Insight
 
 **#321//. is not scheduled - it's on-demand:**
+
 - Not "only at end of session"
 - Not "only before switching"
 - **Anytime you want pending changes sorted**
@@ -376,6 +408,7 @@ Think of it like `git commit && git push` but **intelligent and validated**.
 ## 🛡️ Safety Features
 
 ### Pre-Flight Checks
+
 ```
 Before executing, #321//. verifies:
   ✓ Check for uncommitted changes
@@ -387,6 +420,7 @@ Before executing, #321//. verifies:
 ```
 
 ### Post-Flight Validation
+
 ```
 After executing, #321//. confirms:
   ✓ Verify all changes pushed
@@ -398,6 +432,7 @@ After executing, #321//. confirms:
 ```
 
 ### Rollback Safety
+
 ```
 If any phase fails:
   1. Stop execution immediately
@@ -413,7 +448,9 @@ If any phase fails:
 ## 🧠 Intelligence Features
 
 ### 1. Smart Staging
+
 Groups files by type and importance:
+
 - **Source Code** - Highest priority, staged first
 - **Tests** - Second priority, ensures quality
 - **Documentation** - Third priority, keeps docs in sync
@@ -421,7 +458,9 @@ Groups files by type and importance:
 - **Auto-Generated** - Lowest priority, review before staging
 
 ### 2. Commit Message Generation
+
 Analyzes changes to create meaningful commits:
+
 ```python
 def analyze_changes(files):
     # Detect patterns
@@ -438,7 +477,9 @@ def analyze_changes(files):
 ```
 
 ### 3. Conflict Detection
+
 Proactive conflict identification:
+
 - Compares local vs remote before merge
 - Identifies conflicting files
 - Suggests resolution strategies
@@ -446,14 +487,18 @@ Proactive conflict identification:
 - Provides manual resolution for complex conflicts
 
 ### 4. Validation Scope Optimization
+
 Runs only critical checks for speed:
+
 - **Lint** - Critical errors only (E, F categories)
 - **Tests** - Unit tests only (fast, < 10s)
 - **Health** - Basic endpoint check
 - **Integrity** - Core files only
 
 ### 5. Performance Tracking
+
 Measures and reports timing:
+
 - Per-phase timing
 - Bottleneck identification
 - Trend analysis over time
@@ -465,6 +510,7 @@ Measures and reports timing:
 ## ⚡ Performance Characteristics
 
 ### Typical Execution Time
+
 ```
 Small Changes (1-5 files):    15-25 seconds
 Medium Changes (6-20 files):  30-45 seconds
@@ -473,6 +519,7 @@ No Changes (status check):    2-5 seconds
 ```
 
 ### Bottleneck Analysis
+
 ```
 Phase 1 (Check):      2-5s   (fast, git operations)
 Phase 2 (Stage):      3-8s   (depends on file count)
@@ -483,6 +530,7 @@ Phase 6 (Verify):     1-2s   (report generation)
 ```
 
 ### Optimization Tips
+
 1. **Regular Syncs** - Smaller changesets = faster execution
 2. **Unit Tests Only** - Skip integration tests for speed
 3. **Selective Staging** - Review auto-generated files separately
@@ -504,6 +552,7 @@ Phase 6 (Verify):     1-2s   (report generation)
 ```
 
 You could execute this manually, but `#321//.` handles it intelligently with:
+
 - Error handling between phases
 - Rollback on failure
 - Performance tracking
@@ -511,9 +560,9 @@ You could execute this manually, but `#321//.` handles it intelligently with:
 
 ---
 
-## 💡 When to Use #321//.
+## 💡 When to Use #321//
 
-### ✅ Perfect For:
+### ✅ Perfect For
 
 - **Right Now** - You have pending changes, sort them quickly
 - **Clean Working Tree** - Want pristine state to continue work
@@ -525,13 +574,13 @@ You could execute this manually, but `#321//.` handles it intelligently with:
 - **Collaboration** - Keep main up-to-date for team
 - **Anytime Sync** - Whenever you want changes sorted with high quality
 
-### The Universal Rule:
+### The Universal Rule
 
 **See pending changes? Want them sorted? → #321//.**
 
 It's that simple. Not scheduled, not planned - **on-demand, anytime you need it.**
 
-### ❌ Not Ideal For:
+### ❌ Not Ideal For
 
 - **Partial Commits** - Want to stage specific files only (use `git add -p`)
 - **WIP Commits** - Experimenting, not ready to sync (though #321//. can handle WIP)
@@ -543,6 +592,7 @@ It's that simple. Not scheduled, not planned - **on-demand, anytime you need it.
 ## 🔍 Output Examples
 
 ### Success Output
+
 ```bash
 $ #321//.
 
@@ -588,6 +638,7 @@ $ #321//.
 ```
 
 ### Failure Output (with Recovery)
+
 ```bash
 $ #321//.
 
@@ -645,6 +696,7 @@ $ #321//.
 ## 🚀 Real-World Scenarios
 
 ### Scenario 1: Daily Development
+
 ```
 Morning: Start work
   - Pull latest changes
@@ -660,6 +712,7 @@ End of Day: Wrap up
 ```
 
 ### Scenario 2: Collaboration
+
 ```
 Team Project:
   - Multiple developers
@@ -678,6 +731,7 @@ Result:
 ```
 
 ### Scenario 3: CI/CD Pipeline
+
 ```
 Pre-Deployment:
   1. #321//. (ensure everything synced)
@@ -695,6 +749,7 @@ Benefits:
 ## 🔧 Configuration (Future)
 
 ### Customizable Settings
+
 ```json
 {
   "commit_message_template": "feat: {summary}",
@@ -721,14 +776,16 @@ Benefits:
 
 ## 🎓 Best Practices
 
-### DO:
+### DO
+
 - ✅ Use #321//. regularly (hourly habit)
 - ✅ Trust the intelligent staging
 - ✅ Review completion report
 - ✅ Use before context switches
 - ✅ Use at end of sessions
 
-### DON'T:
+### DON'T
+
 - ❌ Use for experimental WIP code
 - ❌ Bypass validation checks
 - ❌ Ignore conflict warnings
@@ -746,6 +803,7 @@ It's the **confidence** that comes from knowing:
 > **Everything is checked, staged, committed, synced, validated, and verified.**
 
 You don't have to think about:
+
 - "Did I commit everything?"
 - "Did I push to remote?"
 - "Are the tests passing?"

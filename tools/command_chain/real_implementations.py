@@ -14,10 +14,10 @@ Pattern:
   Mock → Real → Subprocess → Parse → Return
 """
 
-import subprocess
 import os
-from typing import Dict, Any, List, Optional
+import subprocess
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class RealCommandImplementations:

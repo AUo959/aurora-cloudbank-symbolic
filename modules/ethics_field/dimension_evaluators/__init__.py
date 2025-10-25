@@ -18,10 +18,10 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=dimension_evaluators_init
 """
 
+from .collective_welfare import CollectiveWelfareEvaluator
+from .layer_integrity import LayerIntegrityEvaluator
 from .picard_delta_3 import PicardDelta3Evaluator
 from .thermax_continuity import ThermaxContinuityEvaluator
-from .layer_integrity import LayerIntegrityEvaluator
-from .collective_welfare import CollectiveWelfareEvaluator
 from .transparency import TransparencyEvaluator
 
 __all__ = [

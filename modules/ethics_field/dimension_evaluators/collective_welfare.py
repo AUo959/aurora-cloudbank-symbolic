@@ -14,7 +14,7 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=collective_welfare_evaluator, symbolic_hash=DISTRIBUTED_BENEFIT_v1
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class CollectiveWelfareEvaluator:

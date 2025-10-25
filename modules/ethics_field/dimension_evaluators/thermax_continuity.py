@@ -14,8 +14,8 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=thermax_continuity_evaluator, symbolic_hash=MEMORY_COHERENCE_v1
 """
 
-from typing import Dict, Any, List
 import re
+from typing import Any, Dict, List
 
 
 class ThermaxContinuityEvaluator:

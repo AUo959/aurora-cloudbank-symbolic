@@ -21,11 +21,12 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=field_curvature, symbolic_hash=COMPOSITE_ETHICS_v1
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
+from .dimension_evaluators.collective_welfare import CollectiveWelfareEvaluator
+from .dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
 from .dimension_evaluators.picard_delta_3 import PicardDelta3Evaluator
 from .dimension_evaluators.thermax_continuity import ThermaxContinuityEvaluator
-from .dimension_evaluators.layer_integrity import LayerIntegrityEvaluator
-from .dimension_evaluators.collective_welfare import CollectiveWelfareEvaluator
 from .dimension_evaluators.transparency import TransparencyEvaluator
 
 

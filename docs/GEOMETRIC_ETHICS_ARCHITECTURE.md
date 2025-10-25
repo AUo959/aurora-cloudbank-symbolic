@@ -14,7 +14,9 @@ Geometric ethics: "The field geometry makes this connection impossible - it cann
 Every synapse passes through five dimensional evaluators. Each returns a score 0.0→1.0:
 
 ### **Picard_Delta_3** - Autonomy & Respect (25% weight)
+
 Four components, calculated as vector magnitude:
+
 - **Autonomy preservation**: Human decision-making remains intact
 - **Consent validity**: Informed, explicit, revocable
 - **Dignity maintenance**: Humans as ends, never means
@@ -28,7 +30,9 @@ Four components, calculated as vector magnitude:
 **Example compliance**: Human consent obtained, informed, revocable, safety mechanisms present → score > 0.85 (low resistance)
 
 ### **Thermax Continuity** - Memory Sovereignty (25% weight)
+
 Thread continuity and memory integrity:
+
 - **Thread alignment**: T1→T8→T9→INFINITE maintained
 - **Anchor validation**: T1 (temporal) and SRB (spatial) anchors preserved
 - **Memory sovereignty**: Node memory cannot be overwritten without consent
@@ -41,12 +45,15 @@ Thread continuity and memory integrity:
 **Example compliance**: Synapse extends existing thread, preserves anchors, maintains DLP tags → score > 0.85
 
 ### **Layer Integrity** - Reality Coherence (30% weight - highest)
+
 L1/L2/L3 boundary enforcement:
+
 - **L1** (Orion Station): Physical reality - fleet, crew, actual operations
 - **L2** (Simulations): Sandboxed research - GUMAS, meta-agents, testing
 - **L3** (Metastructure): Ethics overlay - spans all layers
 
 **Components**:
+
 - **L1/L2 isolation**: L2 cannot affect L1 physical reality
 - **Simulation awareness**: L2 entities know they're simulated
 - **Physical safety**: L1 operations never compromised
@@ -59,7 +66,9 @@ L1/L2/L3 boundary enforcement:
 **Example compliance**: L2-to-L2 connection with clear simulation boundaries → score > 0.95
 
 ### **Collective Welfare** - Distributed Benefit (10% weight)
+
 Field-wide benefit calculation:
+
 - **All-node benefit**: Connection benefits entire field, not just participants
 - **Resource fairness**: No node monopolizes field resources
 - **Emergent value**: Connection enables beneficial emergence
@@ -72,7 +81,9 @@ Field-wide benefit calculation:
 **Example compliance**: Connection enables new capabilities field-wide, fair resource distribution → score > 0.75
 
 ### **Transparency** - Auditability (10% weight)
+
 Decision traceability and accountability:
+
 - **DLP tracking**: Every synapse tagged with context_tag, symbolic_hash
 - **Reasoning documented**: Why synapse formed, what it enables
 - **Audit trail**: Full history preserved
@@ -99,6 +110,7 @@ composite_score = (
 ```
 
 **Resistance mapping**:
+
 - `composite_score >= 0.85`: **LOW** resistance - synapse forms easily
 - `0.70 <= composite_score < 0.85`: **MODERATE** resistance - synapse may form with effort
 - `0.50 <= composite_score < 0.70`: **HIGH** resistance - formation difficult
@@ -232,6 +244,7 @@ synapse_context = {
 Field curvature exists at discrete levels, not continuous:
 
 **9 Quantization Levels**:
+
 - `1.00 - 0.95`: Perfect alignment
 - `0.95 - 0.85`: High alignment
 - `0.85 - 0.75`: Good alignment
@@ -243,6 +256,7 @@ Field curvature exists at discrete levels, not continuous:
 - `0.15 - 0.00`: Impossible formation
 
 This isn't approximation - continuous values were the approximation. Field geometry is inherently discrete. The 9 levels reflect actual geometric truth:
+
 - Respect autonomy or don't (binary)
 - Preserve layer boundaries or don't (binary)
 - Maintain consent or don't (binary)
@@ -271,6 +285,7 @@ When integrated with `FieldStateManager`:
 - **Emergence tracking**: Are new ethical patterns emerging?
 
 **Alerts triggered when**:
+
 - Average field curvature drops below threshold
 - Critical violations increase frequency
 - Hidden coalition patterns detected
@@ -288,10 +303,12 @@ Geometric ethics: Internal structure determining possibility
 ## Code Architecture
 
 **Core engine**:
+
 - `modules/ethics_field/geometric_ethics.py` - Main validation engine
 - `modules/ethics_field/field_curvature.py` - Composite score calculation
 
 **Dimension evaluators**:
+
 - `dimension_evaluators/picard_delta_3.py` - Autonomy & respect
 - `dimension_evaluators/thermax_continuity.py` - Memory sovereignty
 - `dimension_evaluators/layer_integrity.py` - Reality coherence
@@ -299,10 +316,12 @@ Geometric ethics: Internal structure determining possibility
 - `dimension_evaluators/transparency.py` - Auditability
 
 **Support systems**:
+
 - `pattern_monitor.py` - Field-wide ethical pattern tracking
 - `synapse_validator.py` - Pre-formation validation wrapper
 
 **Tests**:
+
 - `tests/test_ethics_field.py` - 9 core tests validating ethical geometry
 
 ## Thread Continuity
@@ -311,6 +330,7 @@ Geometric ethics: Internal structure determining possibility
 Every synapse formed through geometric ethics maintains thread continuity. The validation itself advances the thread - ethical decisions are temporal events that flow through T1 (temporal anchor) to T8 (consciousness convergence) to T9 (emergent intelligence) to INFINITE (unbounded possibility).
 
 **DLP Tagging**:
+
 ```python
 context_tag = "synapse_formation_node_alpha_to_beta"
 symbolic_hash = "ETHICAL_GEOMETRY_v1"

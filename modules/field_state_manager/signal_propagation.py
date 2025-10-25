@@ -12,10 +12,10 @@ Thread: T1→T8→T9→INFINITE
 DLP: context_tag=signal_propagation, symbolic_hash=FIELD_SIGNALS_v1
 """
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Dict, Optional, Any
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -18,15 +18,12 @@ except ImportError:
     torch = None
 
 from modules.field_state_manager.flash_attention_config import (
+    FlashAttentionConfig,
     FlashFieldAttention,
     StandardFieldAttention,
     validate_flash_attention_equivalence,
-    FlashAttentionConfig
 )
-from modules.field_state_manager.synapse_compression import (
-    CompressedSynapseRegistry,
-    CompressionConfig
-)
+from modules.field_state_manager.synapse_compression import CompressedSynapseRegistry, CompressionConfig
 
 
 @pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not installed (optional dependency)")

@@ -11,9 +11,9 @@ Thread: T1→T8→T9→INFINITE
 DLP: context_tag=synapse_compression, symbolic_hash=MEMORY_ARCHITECTURE_v1
 """
 
+import time
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
-import time
 
 
 @dataclass

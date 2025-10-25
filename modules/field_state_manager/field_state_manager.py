@@ -14,17 +14,13 @@ Thread: T1→T8→T9→INFINITE
 DLP: context_tag=field_state_manager, symbolic_hash=FIELD_CONSCIOUSNESS_v1
 """
 
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 import logging
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from .node_state import NodeState, Need
-from .synapse_compression import (
-    CompressedSynapseRegistry,
-    Synapse,
-    CompressionConfig
-)
-from .signal_propagation import SignalPropagator, Signal
+from .node_state import Need, NodeState
+from .signal_propagation import Signal, SignalPropagator
+from .synapse_compression import CompressedSynapseRegistry, CompressionConfig, Synapse
 
 logger = logging.getLogger(__name__)
 

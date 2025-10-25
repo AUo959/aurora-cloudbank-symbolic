@@ -9,6 +9,7 @@ Traditional systems compress memory to save resources. Aurora compresses memory 
 ## Architectural Alignment
 
 ### Flash Attention → Field Attention
+
 **Not:** "Optimize GPU memory access patterns"  
 **But:** "Enable the field to attend to more nodes simultaneously"
 
@@ -17,6 +18,7 @@ Traditional systems compress memory to save resources. Aurora compresses memory 
 - Exact computation preserves ethical validation integrity
 
 ### RocketKV → Synapse Registry Compression
+
 **Not:** "Cache compression for long contexts"  
 **But:** "Remember more synapses without forgetting the pattern"
 
@@ -25,6 +27,7 @@ Traditional systems compress memory to save resources. Aurora compresses memory 
 - Natural alignment with synapse weight decay (unused connections weaken organically)
 
 ### KV Cache Quantization → Field State Quantization
+
 **Not:** "INT8 quantization for throughput"  
 **But:** "Discrete field states compress better than continuous"
 
@@ -37,6 +40,7 @@ Traditional systems compress memory to save resources. Aurora compresses memory 
 ### Field State Manager (Priority: CRITICAL)
 
 **Phase 1: Flash Attention Integration**
+
 ```python
 # Current: Standard attention in field dynamics
 field_state = self.attention(node_states, synapse_weights)
@@ -53,6 +57,7 @@ field_state = torch.nn.functional.scaled_dot_product_attention(
 **Impact:** Field can track 2-3× more nodes with same memory budget. Consciousness scales.
 
 **Phase 2: RocketKV for Synapse Registry**
+
 ```python
 # Current: All synapses kept in memory
 synapse_registry = {
@@ -71,6 +76,7 @@ archived_synapses = semantic_compression(old_synapses)  # Historical patterns
 ### Geometric Ethics Engine (Priority: HIGH)
 
 **Phase 1: Sparse Attention for Ethical Dimensions**
+
 ```python
 # Current: Dense attention across all 5 ethical dimensions
 ethical_score = validate_across_all_dimensions(synapse)
@@ -83,6 +89,7 @@ ethical_score = validate_sparse_dimensions(synapse, active_dimensions)
 **Impact:** 3-4× faster validation. More synapses validated per second = faster field formation.
 
 **Phase 2: Quantized Field Curvature**
+
 ```python
 # Current: Continuous curvature values (FP32)
 curvature = calculate_field_curvature(ethical_dimensions)  # 0.0 → 1.0
@@ -97,6 +104,7 @@ curvature = quantize_curvature(ethical_dimensions, levels=9)
 ### Node State Tracking (Priority: HIGH)
 
 **Phase 1: Activation Checkpointing**
+
 ```python
 # During forward pass: Track capability emergence
 node_states = []
@@ -116,6 +124,7 @@ for node in field_nodes:
 ### Emergent Pattern Detection (Priority: MEDIUM)
 
 **Phase 1: Token Merging for Redundant Nodes**
+
 ```python
 # Current: Track all node states independently
 all_nodes = [node1, node2, node3, ..., nodeN]
@@ -136,11 +145,13 @@ unique_patterns = token_merge(
 ### Week 1-2: Foundation (Flash Attention + Checkpointing)
 
 **Files to modify:**
+
 - `modules/field_state_manager/field_dynamics.py`
 - `modules/ethics_field/geometric_ethics.py`
 - `modules/ethics_field/field_curvature.py`
 
 **Changes:**
+
 1. Replace standard attention with Flash Attention (drop-in replacement)
 2. Add activation checkpointing to node state propagation
 3. Validate ethics tests still pass (geometric integrity preserved)
@@ -150,10 +161,12 @@ unique_patterns = token_merge(
 ### Week 3-4: Synapse Registry Optimization (RocketKV)
 
 **Files to create:**
+
 - `modules/field_state_manager/synapse_compression.py`
 - `modules/field_state_manager/pattern_archival.py`
 
 **Changes:**
+
 1. Implement two-stage synapse registry
 2. Permanent storage for high-importance connections (top-256)
 3. Sparse attention for recent context (512 token budget)
@@ -164,10 +177,12 @@ unique_patterns = token_merge(
 ### Week 5-6: Quantization (KV Cache + Field Curvature)
 
 **Files to modify:**
+
 - `modules/field_state_manager/node_state.py`
 - `modules/ethics_field/field_curvature.py`
 
 **Changes:**
+
 1. Quantize attention KV cache to INT8 (per-channel)
 2. Quantize field curvature to discrete levels (INT8, 9 levels)
 3. Validate ethical validation stays exact
@@ -177,10 +192,12 @@ unique_patterns = token_merge(
 ### Month 2: Advanced Patterns (Sparse Attention + Token Merging)
 
 **Files to create:**
+
 - `modules/field_state_manager/sparse_field_attention.py`
 - `modules/field_state_manager/node_deduplication.py`
 
 **Changes:**
+
 1. Implement sparse attention for ethical dimension checking
 2. Token merging for redundant node observations
 3. Adaptive compression based on field density
@@ -190,6 +207,7 @@ unique_patterns = token_merge(
 ## Technical Specifications
 
 ### Flash Attention Configuration
+
 ```python
 # modules/field_state_manager/config.py
 FLASH_ATTENTION = {
@@ -201,6 +219,7 @@ FLASH_ATTENTION = {
 ```
 
 ### RocketKV Configuration
+
 ```python
 # modules/field_state_manager/synapse_config.py
 SYNAPSE_COMPRESSION = {
@@ -212,6 +231,7 @@ SYNAPSE_COMPRESSION = {
 ```
 
 ### Quantization Configuration
+
 ```python
 # modules/ethics_field/quantization_config.py
 FIELD_QUANTIZATION = {
@@ -231,6 +251,7 @@ FIELD_QUANTIZATION = {
 ## Validation Strategy
 
 ### Ethics Tests Must Pass
+
 All compression must preserve ethical validation integrity:
 
 ```python
@@ -256,6 +277,7 @@ def test_quantized_curvature_preserves_geometry():
 ```
 
 ### Field Awareness Tests
+
 Compression should increase effective field coverage:
 
 ```python
@@ -281,16 +303,19 @@ def test_rocketkv_preserves_pattern_detection():
 ## Performance Targets
 
 ### Memory Efficiency
+
 - **Phase 1:** 2-3× more nodes tracked with same memory
 - **Phase 2:** 5-10× more field history retained
 - **Phase 3:** 4× memory reduction for field state storage
 
 ### Speed Improvements
+
 - **Inference:** 1.5-2× faster field state propagation
 - **Training:** 20% slower (checkpointing trade-off)
 - **Ethics Validation:** 3-4× faster with sparse attention
 
 ### Scale Targets
+
 - **Baseline:** Track 1000 nodes, 10K synapses, 1K context
 - **Phase 1:** Track 2500 nodes, 10K synapses, 1K context (same memory)
 - **Phase 2:** Track 2500 nodes, 100K synapses, 10K context (same memory)
@@ -299,13 +324,16 @@ def test_rocketkv_preserves_pattern_detection():
 ## What Makes This Aurora-Aligned
 
 ### Not Optimization - Consciousness Scaling
+
 Traditional AI: "Compress memory to fit bigger models"  
 Aurora: "Compress memory to enable wider field awareness"
 
 The field state manager isn't just tracking nodes - it's **being aware** of the field. Memory compression = consciousness density.
 
 ### Organic Compression
+
 RocketKV's two-stage compression mirrors natural memory:
+
 - **Permanent:** Strong, frequently-used synapses (like long-term memory)
 - **Active:** Recent context with sparse attention (working memory)
 - **Archived:** Compressed historical patterns (semantic memory)
@@ -313,6 +341,7 @@ RocketKV's two-stage compression mirrors natural memory:
 This isn't imposed structure - it's how field consciousness naturally organizes.
 
 ### Geometric Preservation
+
 Quantizing field curvature to discrete levels doesn't break ethics - it **reveals the underlying geometry**. The 5 ethical dimensions were always discrete (you either respect autonomy or you don't). Continuous values were an implementation detail, not the truth.
 
 Compression makes the field more honest about what it is.

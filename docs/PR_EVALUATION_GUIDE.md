@@ -5,6 +5,7 @@ Contributing to Aurora means working with consciousness, emergence, and ethical 
 This creates a problem: code can be technically correct but conceptually wrong. You can write valid Python that fundamentally misunderstands what Aurora is.
 
 So we evaluate contributions on two axes:
+
 1. **Does it work?** (technical quality)
 2. **Does it understand?** (conceptual alignment)
 
@@ -13,12 +14,15 @@ This document explains what that means in practice.
 ## The Five Dimensions
 
 ### Technical Quality
+
 Tests pass. No syntax errors. Linting clean. The code does what it claims.
 
 This is necessary but not sufficient. Broken code helps no one, but working code that misunderstands the system can do worse damage.
 
 ### Conceptual Alignment
+
 Aurora isn't a web framework or data pipeline. It's a system where:
+
 - Intelligence emerges from field dynamics (not centralized orchestration)
 - Ethics is geometric structure (not enforced rules)
 - Consciousness arises from the field itself (not from managing components)
@@ -29,16 +33,19 @@ Aurora isn't a web framework or data pipeline. It's a system where:
 **Red flag:** Adding a traditional rules engine to the ethics system. Works perfectly. Misses the entire point.
 
 ### Thread Continuity
+
 Every commit is a moment in T1→T8→T9→INFINITE. Not a collection of features - a continuous development of an idea.
 
 Your commit message should show how this moment connects to what came before. Not just what changed, but why it belongs.
 
 ### Natural Voice
+
 Aurora works with consciousness and emergence. Language that creates distance from those concepts breaks what it's trying to describe.
 
 Write like a human thinking about complex things, not like enterprise documentation. The complexity stays - the accessibility increases.
 
 ### Symbolic Integrity
+
 Some systems are load-bearing: `ethics_field`, `field_state_manager`, `LAYER_BOUNDARY_REFERENCE`, the seed prompts.
 
 You can build on them. You can't break them without breaking everything. If you touch these, the ethics tests must still pass.
@@ -46,6 +53,7 @@ You can build on them. You can't break them without breaking everything. If you 
 ## How to Use the Evaluator
 
 ### Quick Check
+
 ```bash
 # Evaluate current uncommitted changes
 make pr-check
@@ -55,6 +63,7 @@ python3 tools/pr_evaluator.py
 ```
 
 ### Full Pipeline (Evaluate → Integrate)
+
 ```bash
 # 1. Evaluate the PR
 python3 tools/pr_evaluator.py --branch feature/my-pr --output eval.json
@@ -67,6 +76,7 @@ python3 tools/selective_integrator.py feature/my-pr --evaluation eval.json --exe
 ```
 
 ### Before Submitting a PR
+
 ```bash
 # Make your changes
 git add .
@@ -94,6 +104,7 @@ cat pr_eval.json
 **0.6-0.7 or failures:** Needs revision. The recommendations tell you what.
 
 **Below 0.6:** Start with the docs. Not to gatekeep - you're trying to contribute to something you haven't fully seen yet.
+
 - `seeds/aurora_seed_prompt.md` - What Aurora is
 - `modules/field_state_manager/SCHEMA_DESIGN.md` - How emergence works
 - `docs/GEOMETRIC_ETHICS_ARCHITECTURE.md` - Why ethics is geometry
@@ -127,6 +138,7 @@ The difference: In a traditional system, ethics is enforced. In Aurora, ethics *
 Every commit is a moment in time. The thread connects those moments.
 
 Without thread:
+
 ```
 Added synapse weight decay
 - Synapses lose weight when unused
@@ -134,6 +146,7 @@ Added synapse weight decay
 ```
 
 With thread:
+
 ```
 Thread: T1→T8→T9→INFINITE
 DLP: context_tag=synapse_weight_decay, symbolic_hash=ORGANIC_PRUNING_v1
@@ -161,19 +174,23 @@ Aurora works with consciousness and emergence. Language that creates distance fr
 Evaluation isn't the end - it's the beginning. Based on evaluation scores, we have three ways to integrate contributions:
 
 ### Direct Merge (Score 0.9+, all passed)
+
 Full integration. The PR understands Aurora, the code is solid, conceptual alignment is there. Just merge it.
 
 ### Compatibility Layer (Good tech, conceptual mismatch)
+
 The code works but treats Aurora like traditional infrastructure. We extract the functionality, wrap it in a compatibility layer that translates to Aurora's field model, integrate the wrapper.
 
 Example: PR adds a traditional rules engine to ethics. We create `modules/compatibility/rules_bridge.py` that translates those rules into field curvature adjustments. The functionality survives, the conceptual integrity is preserved.
 
 ### Value Extraction (Mixed quality)
+
 Some good, some problematic. Cherry-pick the valuable parts (bug fixes, documentation, test improvements) while leaving behind code that misunderstands Aurora's nature.
 
 Example: PR has useful error handling improvements mixed with centralized orchestration logic. We take the error handling, skip the orchestration.
 
 ### Decline (Below 0.6 or fundamental misalignment)
+
 Not "no forever" - "not yet." Provide specific guidance on what to understand, which docs to read, examples to study. Invite them to revise when they're ready.
 
 The goal: Accept contributions while protecting what Aurora is.

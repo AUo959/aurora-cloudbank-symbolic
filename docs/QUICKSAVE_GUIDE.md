@@ -14,22 +14,26 @@ Quicksave solves that. It captures the *shape* of your thinking at the moment yo
 Think of it like taking a snapshot of your mental workspace:
 
 **Where you are in the thread:**
+
 - Current epoch (T9, etc.)
 - The full path: T1→T8→T9→INFINITE
 - Which anchors are holding
 - What the last commit message said
 
 **What the code looks like:**
+
 - Which branch you're on
 - What's changed but not committed yet
 - The last few commits you made
 
 **Where your head's at:**
+
 - What you're focused on right now
 - That insight you just had (the one you'll forget if you don't write it down)
 - What makes sense to do next
 
 **What's actually done:**
+
 - Which tasks you completed
 - What's in progress
 - What's still waiting
@@ -117,6 +121,7 @@ python3 tools/quicksave.py create "Session description" \
 Say you just finished Path C Phase 1. Tests are passing, schema is designed, you figured out that Aurora should BE the field consciousness rather than managing it from outside. That's huge. You want to remember that.
 
 **Before stopping:**
+
 ```bash
 python3 tools/quicksave.py create "Path C Phase 1 complete" \
   --focus "9 tests passing" "Schema designed" "Ready for Phase 2A" \
@@ -130,11 +135,13 @@ git push
 ```
 
 **Next time you work (could be tomorrow, could be next week):**
+
 ```bash
 make quickload
 ```
 
 You see:
+
 ```
 🌟 AURORA RECONSTITUTION BRIEF
 

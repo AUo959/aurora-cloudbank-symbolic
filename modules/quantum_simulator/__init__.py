@@ -3,10 +3,15 @@ Quantum State Synthesizer
 
 Hybrid quantum-classical scenario simulator and forecasting engine.
 
-Anchor: T1-QSS-001, T1-QSS-002, T1-QSS-003
+Anchor: T1-QSS-001, T1-QSS-002, T1-QSS-003, T1-QSS-DLP
 """
 
 from .api import router as quantum_simulator_router
+from .dlp_integration import (
+    QuantumSimulatorDLPIntegration,
+    get_dlp_integration,
+    set_dlp_integration,
+)
 from .orchestrator import (
     MockQuantumProvider,
     QuantumOrchestrator,
@@ -30,15 +35,19 @@ from .schemas import (
     ScenarioType,
     SimulationResult,
     SimulationStatus,
-    StateVector as StateVectorModel,
 )
+from .schemas import StateVector as StateVectorModel
 
 __version__ = "0.1.0"
-__anchor__ = "T1-QSS-001, T1-QSS-002, T1-QSS-003"
+__anchor__ = "T1-QSS-001, T1-QSS-002, T1-QSS-003, T1-QSS-DLP"
 
 __all__ = [
     # API Router
     "quantum_simulator_router",
+    # DLP Integration
+    "QuantumSimulatorDLPIntegration",
+    "get_dlp_integration",
+    "set_dlp_integration",
     # Orchestration
     "QuantumOrchestrator",
     "QuantumProvider",

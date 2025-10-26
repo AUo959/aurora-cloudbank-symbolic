@@ -14,12 +14,7 @@ from typing import Callable, Dict, List, Optional
 import numpy as np
 
 from .quantum_state import QuantumState
-from .schemas import (
-    MeasurementResult,
-    OptimizationMethod,
-    OptimizationResult,
-    QuantumBackend,
-)
+from .schemas import MeasurementResult, OptimizationMethod, OptimizationResult, QuantumBackend
 
 
 class QuantumProvider(ABC):

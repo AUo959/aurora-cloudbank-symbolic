@@ -3,7 +3,7 @@ Scenario Engine
 
 Executes quantum-classical hybrid simulations for various scenario types.
 
-Anchor: T1-QSS-001
+Anchor: T1-QSS-001, T1-QSS-DLP
 """
 
 import asyncio
@@ -14,6 +14,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
+from .dlp_integration import get_dlp_integration
 from .orchestrator import QuantumOrchestrator
 from .schemas import (
     ForecastConfig,
@@ -34,15 +35,17 @@ class ScenarioEngine:
     risk analysis, optimization, Monte Carlo, quantum annealing.
     """
 
-    def __init__(self, orchestrator: QuantumOrchestrator):
+    def __init__(self, orchestrator: QuantumOrchestrator, enable_dlp: bool = True):
         """
         Initialize scenario engine.
 
         Args:
             orchestrator: Quantum orchestrator for backend management
+            enable_dlp: Enable DLP tracking (default: True)
         """
         self.orchestrator = orchestrator
         self.active_simulations: Dict[str, SimulationStatus] = {}
+        self.dlp_integration = get_dlp_integration() if enable_dlp else None
 
     async def execute_scenario(self, request: ScenarioRequest) -> SimulationResult:
         """
@@ -55,10 +58,17 @@ class ScenarioEngine:
             SimulationResult with all outputs
         """
         simulation_id = str(uuid.uuid4())
-        start_time = time.time()
+        start_time_epoch = time.time()
+        start_time_dt = datetime.now(timezone.utc)
+
+        # Track scenario creation in DLP
+        if self.dlp_integration:
+            self.dlp_integration.track_scenario_created(
+                simulation_id=simulation_id,
+                request=request,
+            )
 
         # Initialize status tracking
-        start_time = datetime.now(timezone.utc)
         self.active_simulations[simulation_id] = SimulationStatus(
             simulation_id=simulation_id,
             status="running",
@@ -87,20 +97,20 @@ class ScenarioEngine:
             else:
                 raise ValueError(f"Unsupported scenario type: {request.scenario_type}")
 
-            execution_time = time.time() - start_time
+            execution_time = time.time() - start_time_epoch
 
             # Mark as completed
             self.active_simulations[simulation_id].status = "completed"
             self.active_simulations[simulation_id].progress = 1.0
             self.active_simulations[simulation_id].message = "Simulation completed successfully"
 
-            return SimulationResult(
+            simulation_result = SimulationResult(
                 simulation_id=simulation_id,
                 scenario_name=request.name or f"{request.scenario_type.value}_simulation",
                 scenario_type=request.scenario_type,
                 status="completed",
                 backend_used=request.backend,
-                start_time=start_time,
+                start_time=start_time_dt,
                 end_time=datetime.now(timezone.utc),
                 execution_time_seconds=execution_time,
                 measurement_result=result.get("measurement"),
@@ -112,13 +122,30 @@ class ScenarioEngine:
                 tags=request.tags,
             )
 
+            # Track successful completion in DLP
+            if self.dlp_integration:
+                self.dlp_integration.track_simulation_completed(
+                    result=simulation_result,
+                    execution_time=execution_time,
+                )
+
+            return simulation_result
+
         except Exception as e:
-            execution_time = time.time() - start_time
+            execution_time = time.time() - start_time_epoch
 
             # Mark as failed
             if simulation_id in self.active_simulations:
                 self.active_simulations[simulation_id].status = "failed"
                 self.active_simulations[simulation_id].message = f"Simulation failed: {str(e)}"
+
+            # Track error in DLP
+            if self.dlp_integration:
+                self.dlp_integration.track_simulation_error(
+                    simulation_id=simulation_id,
+                    error_message=str(e),
+                    scenario_type=request.scenario_type.value,
+                )
 
             return SimulationResult(
                 simulation_id=simulation_id,
@@ -126,7 +153,7 @@ class ScenarioEngine:
                 scenario_type=request.scenario_type,
                 status="failed",
                 backend_used=request.backend,
-                start_time=start_time,
+                start_time=start_time_dt,
                 end_time=datetime.now(timezone.utc),
                 execution_time_seconds=execution_time,
                 measurement_result=None,

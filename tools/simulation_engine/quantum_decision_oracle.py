@@ -19,13 +19,13 @@ Team: AUo959-team
 Ethics: Picard_Delta_3
 """
 
-import json
 import hashlib
-from dataclasses import dataclass, asdict, field
-from datetime import datetime, UTC
-from typing import Dict, List, Optional, Any, Tuple
-from enum import Enum
+import json
 import math
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class CriterionType(Enum):

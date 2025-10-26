@@ -13,13 +13,15 @@ Test Coverage:
 Anchor: TEST-QUANTUM-DECISION-V1
 """
 
-import pytest
 import json
+
+import pytest
+
 from tools.simulation_engine.quantum_decision_oracle import (
-    QuantumDecisionOracle,
-    DecisionCriterion,
     CriterionType,
-    DecisionRecommendation
+    DecisionCriterion,
+    DecisionRecommendation,
+    QuantumDecisionOracle,
 )
 
 

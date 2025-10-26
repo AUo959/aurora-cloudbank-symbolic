@@ -9,9 +9,10 @@ quick visualization.
 
 
 import os
-import pandas as pd
-from io import StringIO
 import zipfile
+from io import StringIO
+
+import pandas as pd
 
 # Optional dependency: Plotly. Degrade gracefully if unavailable.
 try:  # pragma: no cover - environment dependent

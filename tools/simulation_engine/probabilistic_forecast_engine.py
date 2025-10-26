@@ -18,12 +18,12 @@ Ethics: Picard_Delta_3
 """
 
 import json
-import statistics
-from dataclasses import dataclass, asdict
-from datetime import datetime, UTC
-from typing import List, Optional, Dict, Any, Tuple
-from enum import Enum
 import random
+import statistics
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class TrendType(Enum):

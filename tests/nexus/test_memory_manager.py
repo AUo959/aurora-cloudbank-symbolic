@@ -6,17 +6,19 @@ Seed: EOS_SEED_ORION
 Team: Aurora Core
 """
 
-import pytest
-import sys
-from pathlib import Path
 import json
-import tempfile
 import shutil
+import sys
+import tempfile
+from pathlib import Path
+
+import pytest
 
 # Add module path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modules.nexus.core.memory_manager import SymbolicMemoryManager
+
 
 class TestSymbolicMemoryManager:
     """Test suite for Symbolic Memory Manager"""

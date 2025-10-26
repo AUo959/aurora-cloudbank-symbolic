@@ -13,6 +13,7 @@ The Orion Station Simulation Engine provides production-grade tools for real-wor
 ## Philosophy
 
 The "Orion Station" framing positions Aurora's simulation engine as:
+
 - **Research-Grade Infrastructure** - High-fidelity computational facility
 - **Sandboxed Uncertainty** - Controlled probabilistic modeling environments  
 - **Production-Ready** - Real-world applications with practical value
@@ -27,18 +28,21 @@ The "Orion Station" framing positions Aurora's simulation engine as:
 Routes real-world risk calculations through nested probabilistic simulations.
 
 **Features:**
+
 - **6 Distribution Types:** Normal, Uniform, Triangular, Exponential, Lognormal, Beta
 - **Nested Simulations:** Multi-level uncertainty quantification
 - **Sensitivity Analysis:** Parameter variation impact assessment
 - **Scenario Comparison:** Side-by-side risk profile evaluation
 
 **Use Cases:**
+
 - Financial portfolio risk analysis
 - Project timeline uncertainty quantification
 - Supply chain disruption modeling
 - Clinical trial outcome prediction
 
 **Example:**
+
 ```python
 from tools.simulation_engine.monte_carlo_risk_simulator import (
     MonteCarloRiskSimulator,
@@ -89,6 +93,7 @@ print(f"95% CI: [${result.p5:,.2f}, ${result.p95:,.2f}]")
 Multi-criteria decision analysis with quantum-inspired probability amplitude scoring.
 
 **Features:**
+
 - **Criterion Types:** MAXIMIZE, MINIMIZE, TARGET
 - **Weighted Criteria:** Flexible importance assignment (0-1)
 - **Quantum-Inspired Scoring:** Probability amplitude normalization
@@ -96,12 +101,14 @@ Multi-criteria decision analysis with quantum-inspired probability amplitude sco
 - **Uncertainty Identification:** Close races, conflicting criteria, high variance
 
 **Use Cases:**
+
 - Technology stack selection
 - Vendor evaluation
 - Treatment option comparison
 - Strategic planning decisions
 
 **Example:**
+
 ```python
 from tools.simulation_engine.quantum_decision_oracle import (
     QuantumDecisionOracle,
@@ -154,6 +161,7 @@ print(f"Uncertainty Factors: {result.uncertainty_factors}")
 Time-series forecasting with simulation-based confidence intervals.
 
 **Features:**
+
 - **5 Forecast Methods:**
   - Naive (last value propagation)
   - Moving Average
@@ -165,12 +173,14 @@ Time-series forecasting with simulation-based confidence intervals.
 - **Trend Detection:** Automatic linear trend identification
 
 **Use Cases:**
+
 - Sales and revenue forecasting
 - Resource demand prediction
 - Market trend analysis
 - Capacity planning
 
 **Example:**
+
 ```python
 from tools.simulation_engine.probabilistic_forecast_engine import (
     ProbabilisticForecastEngine,
@@ -204,11 +214,14 @@ for i in range(result.horizon):
 ## Technical Details
 
 ### Dependencies
+
 - **Standard Library Only** - No external packages required
 - Python 3.11+ (timezone-aware datetime with `datetime.UTC`)
 
 ### Result Anchoring
+
 All tools include DLP metadata:
+
 ```python
 {
     "timestamp": "2025-01-26T16:20:24.004945Z",
@@ -221,7 +234,9 @@ All tools include DLP metadata:
 ```
 
 ### Reproducibility
+
 All tools support seed-based reproducibility:
+
 ```python
 result1 = simulator.run_simulation("scenario", seed=42)
 result2 = simulator.run_simulation("scenario", seed=42)
@@ -229,7 +244,9 @@ assert result1.mean == result2.mean  # Identical results
 ```
 
 ### JSON Export
+
 Every tool can export results:
+
 ```python
 simulator.export_simulation(result, "result.json")
 oracle.export_decision(result, "decision.json")
@@ -239,11 +256,13 @@ engine.export_forecast(result, "forecast.json")
 ## Testing
 
 ### Test Suite
+
 - **56 tests total** across 3 test files
 - **Markers:** `@pytest.mark.unit`, `@pytest.mark.integration`, `@pytest.mark.simulation`
 - **Coverage:** API validation, statistical accuracy, edge cases, reproducibility
 
 ### Running Tests
+
 ```bash
 # All simulation engine tests
 pytest tests/simulation_engine/ -v
@@ -258,7 +277,9 @@ pytest tests/simulation_engine/ -m unit -v
 ```
 
 ### Running Demos
+
 Each tool has a built-in demonstration:
+
 ```bash
 # Monte Carlo Risk Simulator demo
 python3 tools/simulation_engine/monte_carlo_risk_simulator.py
@@ -323,6 +344,7 @@ When adding new simulation tools:
 ## License & Ethics
 
 All simulation tools follow Aurora CloudBank's ethical guidelines:
+
 - **Transparency** - Clear uncertainty communication
 - **Reproducibility** - Seed-based determinism
 - **Bias Awareness** - Statistical assumptions documented

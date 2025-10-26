@@ -1,12 +1,9 @@
-import pytest
-from modules.cask_tool import (
-    generate_architecture_chart,
-    load_risk_assessment,
-    load_specifications,
-    load_vs_sota,
-)
 import os
 import zipfile
+
+import pytest
+
+from modules.cask_tool import generate_architecture_chart, load_risk_assessment, load_specifications, load_vs_sota
 
 
 # Check if CASK assets are available (not just LFS pointer)

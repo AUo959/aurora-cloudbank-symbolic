@@ -74,6 +74,7 @@ markers = [
     "security: Security and authentication tests",
     "api: API and web interface tests",
     "cli: Command line interface tests",
+    "resilience: Resilience Sentinel monitoring tests",
 
     # Environment markers
     "local: Tests for local development only",

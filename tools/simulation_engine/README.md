@@ -1,6 +1,6 @@
 # Orion Station Simulation Engine
 
-**High-fidelity probabilistic computing infrastructure powered by Aurora's nested simulation capabilities**
+### High-fidelity probabilistic computing infrastructure powered by Aurora's nested simulation capabilities
 
 ## Overview
 
@@ -27,21 +27,21 @@ The "Orion Station" framing positions Aurora's simulation engine as:
 
 Routes real-world risk calculations through nested probabilistic simulations.
 
-**Features:**
+### Features:
 
 - **6 Distribution Types:** Normal, Uniform, Triangular, Exponential, Lognormal, Beta
 - **Nested Simulations:** Multi-level uncertainty quantification
 - **Sensitivity Analysis:** Parameter variation impact assessment
 - **Scenario Comparison:** Side-by-side risk profile evaluation
 
-**Use Cases:**
+### Use Cases:
 
 - Financial portfolio risk analysis
 - Project timeline uncertainty quantification
 - Supply chain disruption modeling
 - Clinical trial outcome prediction
 
-**Example:**
+### Example:
 
 ```python
 from tools.simulation_engine.monte_carlo_risk_simulator import (
@@ -92,7 +92,7 @@ print(f"95% CI: [${result.p5:,.2f}, ${result.p95:,.2f}]")
 
 Multi-criteria decision analysis with quantum-inspired probability amplitude scoring.
 
-**Features:**
+### Features:
 
 - **Criterion Types:** MAXIMIZE, MINIMIZE, TARGET
 - **Weighted Criteria:** Flexible importance assignment (0-1)
@@ -100,14 +100,14 @@ Multi-criteria decision analysis with quantum-inspired probability amplitude sco
 - **Confidence Calculation:** Statistical separation with variance penalty
 - **Uncertainty Identification:** Close races, conflicting criteria, high variance
 
-**Use Cases:**
+### Use Cases:
 
 - Technology stack selection
 - Vendor evaluation
 - Treatment option comparison
 - Strategic planning decisions
 
-**Example:**
+### Example:
 
 ```python
 from tools.simulation_engine.quantum_decision_oracle import (
@@ -160,7 +160,7 @@ print(f"Uncertainty Factors: {result.uncertainty_factors}")
 
 Time-series forecasting with simulation-based confidence intervals.
 
-**Features:**
+### Features:
 
 - **5 Forecast Methods:**
   - Naive (last value propagation)
@@ -172,14 +172,14 @@ Time-series forecasting with simulation-based confidence intervals.
 - **Volatility Analysis:** Historical variance calculation
 - **Trend Detection:** Automatic linear trend identification
 
-**Use Cases:**
+### Use Cases:
 
 - Sales and revenue forecasting
 - Resource demand prediction
 - Market trend analysis
 - Capacity planning
 
-**Example:**
+### Example:
 
 ```python
 from tools.simulation_engine.probabilistic_forecast_engine import (
@@ -352,4 +352,4 @@ All simulation tools follow Aurora CloudBank's ethical guidelines:
 
 ---
 
-**Built with Aurora CloudBank Symbolic** | **Powered by Nested Simulations** | **Anchored in Reality**
+### Built with Aurora CloudBank Symbolic** | **Powered by Nested Simulations** | **Anchored in Reality

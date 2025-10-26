@@ -10,39 +10,44 @@
 
 ## Who Is This For?
 
-### ✅ You Should Use Aurora If You...
+### ✅ You Should Use Aurora If You
 
 **Financial Analysts & Risk Managers**
+
 - Need to run Monte Carlo simulations on portfolios
 - Want confidence intervals on forecasts, not just point estimates
 - Require reproducible, auditable risk analysis
 - → Use: `monte_carlo_risk_simulator.py`
 
 **Data Scientists & Decision Analysts**
+
 - Evaluate options with 10+ competing criteria
 - Need to explain decision confidence to stakeholders
 - Want to detect biased scoring patterns
 - → Use: `quantum_decision_oracle.py`
 
 **Business Forecasters & Planners**
+
 - Create sales forecasts with uncertainty bands
 - Model supply chain disruptions
 - Predict resource needs with confidence intervals
 - → Use: `probabilistic_forecast_engine.py`
 
 **AI Researchers & Ethics Teams**
+
 - Study cultural bias in AI systems
 - Need traceable, auditable ML pipelines
 - Develop ethically-aware AI patterns
 - → Use: Full platform with CASK integration
 
 **Software Developers**
+
 - Need pattern optimization tools
 - Want symbolic operation libraries
 - Require memory management research tools
 - → Use: Symbolic infrastructure APIs
 
-### ❌ Aurora Is NOT For You If...
+### ❌ Aurora Is NOT For You If
 
 - You need a no-code GUI tool (currently CLI/API only)
 - You're looking for a specific industry solution (Aurora is general-purpose)
@@ -58,6 +63,7 @@
 **Problem:** Need to understand downside risk of $1M portfolio
 
 **Aurora Solution:**
+
 ```python
 # Define portfolio parameters
 stocks = SimulationParameter("stocks", NORMAL, {"mean": 1000000, "std": 150000})
@@ -81,6 +87,7 @@ print(f"95th percentile (good scenario): ${result.p95:,.2f}")
 **Problem:** Choose between Python/FastAPI, Rust/Actix, Go/Gin for new service
 
 **Aurora Solution:**
+
 ```python
 # Define criteria with business priorities
 oracle.add_criterion("performance", MAXIMIZE, weight=0.35)
@@ -106,6 +113,7 @@ print(f"Uncertainty factors: {result.uncertainty_factors}")
 **Problem:** Need Q4 sales forecast with realistic uncertainty for budgeting
 
 **Aurora Solution:**
+
 ```python
 # Input historical sales data
 historical = TimeSeriesData(values=past_12_months, frequency="monthly")
@@ -129,6 +137,7 @@ for i in range(6):
 **Problem:** New hiring AI might discriminate; need to detect and quantify bias
 
 **Aurora Solution:**
+
 ```python
 # Analyze AI patterns against cultural sensitivity database
 from modules.cask_tool import CASKAnalyzer
@@ -149,18 +158,22 @@ if bias_score > threshold:
 ## How Is This Different From...?
 
 ### vs. Excel/Spreadsheets
+
 - **Aurora:** Reproducible, scriptable, handles complex distributions, auditable
 - **Excel:** Manual, error-prone, limited statistical functions, no audit trail
 
 ### vs. R/Python statsmodels
+
 - **Aurora:** Integrated decision + ethics + auditing in one platform, no dependency management
 - **statsmodels:** Requires stitching multiple libraries, no cultural intelligence, manual tracking
 
 ### vs. Commercial Risk Software (@RISK, Crystal Ball)
+
 - **Aurora:** Free, open-source, customizable, standard library only
 - **Commercial:** Expensive licenses, vendor lock-in, black-box algorithms
 
 ### vs. Custom In-House Tools
+
 - **Aurora:** Production-ready, tested, maintained by community
 - **Custom:** Maintenance burden, likely lacks cultural intelligence or audit features
 
@@ -169,6 +182,7 @@ if bias_score > threshold:
 ## Quick Start: See Value in 5 Minutes
 
 ### Option 1: Risk Analysis Demo
+
 ```bash
 git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git
 cd aurora-cloudbank-symbolic
@@ -177,12 +191,14 @@ python3 tools/simulation_engine/monte_carlo_risk_simulator.py
 ```
 
 ### Option 2: Decision Analysis Demo
+
 ```bash
 python3 tools/simulation_engine/quantum_decision_oracle.py
 # See technology stack recommendation with confidence scores
 ```
 
 ### Option 3: Forecasting Demo
+
 ```bash
 python3 tools/simulation_engine/probabilistic_forecast_engine.py
 # See 6-month sales forecast with uncertainty bands
@@ -195,17 +211,20 @@ python3 tools/simulation_engine/probabilistic_forecast_engine.py
 ## What's Included Out of the Box?
 
 ### ✅ Core Tools (Standard Library Only)
+
 - Monte Carlo Risk Simulator (6 distribution types, nested simulations)
 - Quantum Decision Oracle (multi-criteria analysis, confidence scoring)
 - Probabilistic Forecast Engine (5 methods, confidence intervals)
 
 ### ✅ Advanced Features (Optional)
+
 - Cultural Intelligence (CASK) - Detect bias in patterns
 - Data Lineage Protocol (DLP) - Complete audit trails
 - Geometric Algebra - Quantum computing operations
 - Memory Management (AuMemManager) - Hierarchical storage
 
 ### ✅ Production Infrastructure
+
 - FastAPI backend (27 endpoints)
 - GitHub Actions CI/CD
 - Automated testing (262 tests)
@@ -217,6 +236,7 @@ python3 tools/simulation_engine/probabilistic_forecast_engine.py
 ## Success Criteria: When Should You Use Aurora?
 
 ### Perfect Fit ✅
+
 - You write Python code regularly
 - You need probabilistic analysis (risk, decisions, forecasts)
 - You value reproducibility and auditability
@@ -225,11 +245,13 @@ python3 tools/simulation_engine/probabilistic_forecast_engine.py
 - You're comfortable with CLI/API tools
 
 ### Possible Fit ⚠️
+
 - You're learning data science (good educational tool)
 - You need occasional risk analysis (might be overkill)
 - You have a team that can learn new tools (training investment)
 
 ### Poor Fit ❌
+
 - You need a GUI dashboard (not available yet)
 - You want industry-specific features (general-purpose tool)
 - You need immediate production deployment (requires setup)

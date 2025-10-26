@@ -11,7 +11,6 @@ Interactive CLI for Aurora CloudBank operations
 """
 
 
-
 class AuroraCLI:
     """Aurora CloudBank Command Line Interface"""
 
@@ -228,6 +227,109 @@ class AuroraCLI:
         except Exception as e:
             print(f"❌ Error running Data Guardian command: {e}")
 
+    def run_quantum_simulator_command(self, subcommand: str):
+        """Run Quantum Simulator command (run, list, stats, etc.)"""
+        try:
+            import asyncio
+            from modules.quantum_simulator import (
+                OptimizationMethod,
+                QuantumBackend,
+                ScenarioRequest,
+                ScenarioType,
+                get_cache,
+                get_orchestrator,
+            )
+            from modules.quantum_simulator.scenario_engine import ScenarioEngine
+
+            if subcommand.startswith("run "):
+                # Parse scenario type
+                parts = subcommand.split(" ", 1)
+                scenario_type = parts[1] if len(parts) > 1 else "optimization"
+
+                print(f"🔬 Running {scenario_type} quantum simulation...")
+
+                # Create request
+                request = ScenarioRequest(
+                    scenario_type=ScenarioType(scenario_type),
+                    name=f"CLI {scenario_type} simulation",
+                    description=f"Command-line initiated {scenario_type} simulation",
+                    backend=QuantumBackend.MOCK,
+                    optimization_method=OptimizationMethod.QAOA,
+                    parameters={"max_iterations": 50},
+                    seed=42,
+                )
+
+                # Run simulation
+                async def run_sim():
+                    orchestrator = await get_orchestrator()
+                    engine = ScenarioEngine(orchestrator)
+                    result = await engine.execute_scenario(request)
+                    return result
+
+                result = asyncio.run(run_sim())
+
+                print(f"✅ Simulation completed: {result.simulation_id}")
+                print(f"   Status: {result.status}")
+                print(f"   Execution time: {result.execution_time_seconds:.2f}s")
+                if result.optimization_result:
+                    print(f"   Objective value: {result.optimization_result.objective_value:.4f}")
+
+            elif subcommand == "list":
+                # List cached scenarios
+                cache = get_cache()
+                scenarios = cache.list_scenarios(limit=20)
+
+                print(f"\n📋 Cached Simulations ({len(scenarios)}):")
+                print("=" * 80)
+                for scenario in scenarios:
+                    sim_id = scenario.simulation_id[:16]
+                    sim_type = scenario.scenario_type.value
+                    sim_status = scenario.status
+                    print(f"  {sim_id}... | {sim_type:15} | {sim_status:10}")
+
+            elif subcommand == "stats":
+                # Show cache stats
+                cache = get_cache()
+                stats = cache.get_cache_stats()
+
+                print("\n📊 Quantum Simulator Cache Statistics:")
+                print("=" * 50)
+                print(f"  Total entries:     {stats['total_entries']}")
+                print(f"  Active entries:    {stats['active_entries']}")
+                print(f"  Expired entries:   {stats['expired_entries']}")
+                print(f"  Cache utilization: {stats['cache_utilization']:.1%}")
+                print(f"  Total accesses:    {stats['total_accesses']}")
+                print(f"  Avg access count:  {stats['avg_access_count']:.1f}")
+
+            elif subcommand == "backends":
+                # List available backends
+                async def list_backends():
+                    orchestrator = await get_orchestrator()
+                    return orchestrator.list_available_backends()
+
+                backends = asyncio.run(list_backends())
+
+                print("\n🔧 Available Quantum Backends:")
+                print("=" * 40)
+                for backend in backends:
+                    print(f"  ✓ {backend.value}")
+
+            elif subcommand == "clear":
+                # Clear cache
+                cache = get_cache()
+                count = cache.clear_all()
+                print(f"✅ Cleared {count} cached simulations")
+
+            else:
+                print(f"❓ Unknown Quantum Simulator command: {subcommand}")
+                print("Available: run, list, stats, backends, clear")
+
+        except ImportError as e:
+            print("❌ Quantum Simulator module not available")
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"❌ Error running Quantum Simulator command: {e}")
+
     def show_status(self):
         """Show system status"""
         print("📊 Aurora CloudBank System Status")
@@ -276,6 +378,10 @@ class AuroraCLI:
                 elif command.startswith("data:"):
                     # Data Guardian commands
                     self.run_data_guardian_command(command)
+                elif command.startswith("qsim:"):
+                    # Quantum Simulator commands
+                    subcommand = command.split(":", 1)[1]
+                    self.run_quantum_simulator_command(subcommand)
                 elif command == "clear":
                     # SECURITY: Using shell=False for safe subprocess execution
                     subprocess.run(["clear"], shell=False)
@@ -310,6 +416,13 @@ Data Guardian Commands:
   data:strategies        List redaction strategies
   data:pii-types         List detectable PII types
 
+Quantum Simulator Commands:
+  qsim:run <type>        Run quantum simulation (supply_chain, energy_grid, optimization, etc.)
+  qsim:list              List cached simulations
+  qsim:stats             Show cache statistics
+  qsim:backends          List available quantum backends
+  qsim:clear             Clear simulation cache
+
 Utility Commands:
   help           Show this help message
   clear          Clear screen
@@ -322,6 +435,10 @@ Examples:
   aurora> data:scan myfile.txt
   aurora> data:redact myfile.txt --strategy mask
   aurora> data:strategies
+  aurora> qsim:run optimization
+  aurora> qsim:list
+  aurora> qsim:stats
+  aurora> qsim:backends
 
 🌟 Aurora CloudBank v3.5.1 - Quantum-Aware Symbolic Processing
 """

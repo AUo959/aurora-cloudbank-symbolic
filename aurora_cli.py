@@ -94,6 +94,139 @@ class AuroraCLI:
         except Exception as e:
             print(f"❌ Error running integration test: {e}")
 
+    def run_data_guardian_command(self, command: str):
+        """Run Data Guardian command (data:scan, data:redact, etc.)"""
+        try:
+            # Import Data Guardian CLI
+            from modules.data_guardian.cli import DataGuardianCLI
+
+            # Parse command (e.g., "data:scan file.txt" or "data:strategies")
+            parts = command.split(maxsplit=1)
+            if len(parts) < 1:
+                print("❓ Usage: data:<subcommand> [args]")
+                print("Examples: data:scan file.txt, data:redact file.txt --strategy mask, data:strategies")
+                return
+
+            subcommand = parts[0].replace("data:", "")
+            args = parts[1].split() if len(parts) > 1 else []
+
+            # Create CLI instance
+            cli = DataGuardianCLI()
+
+            # Execute subcommand
+            if subcommand == "scan":
+                if not args:
+                    print("❓ Usage: data:scan <file> [--confidence 0.7] [--region US] [--format text|json]")
+                    return
+
+                file_path = args[0]
+                confidence = 0.7
+                region = "US"
+                output_format = "text"
+
+                # Parse simple flags
+                i = 1
+                while i < len(args):
+                    if args[i] == "--confidence" and i + 1 < len(args):
+                        confidence = float(args[i + 1])
+                        i += 2
+                    elif args[i] == "--region" and i + 1 < len(args):
+                        region = args[i + 1]
+                        i += 2
+                    elif args[i] == "--format" and i + 1 < len(args):
+                        output_format = args[i + 1]
+                        i += 2
+                    else:
+                        i += 1
+
+                result = cli.scan_file(file_path, confidence, region, output_format)
+
+                if "error" in result:
+                    print(f"❌ Error: {result['error']}")
+                    return
+
+                import json
+
+                if output_format == "json":
+                    print(json.dumps(result, indent=2))
+                else:
+                    print(f"📄 File: {result.get('file')}")
+                    print(f"🔍 Total detections: {result['total_detections']}")
+                    if result['total_detections'] > 0:
+                        print("\n📊 Detections by type:")
+                        print(result['summary'])
+
+            elif subcommand == "redact":
+                if not args:
+                    print("❓ Usage: data:redact <file> [--output <file>] [--strategy mask] [--in-place]")
+                    return
+
+                file_path = args[0]
+                output_path = None
+                strategy = "mask"
+                confidence = 0.7
+                region = "US"
+                in_place = False
+
+                # Parse flags
+                i = 1
+                while i < len(args):
+                    if args[i] in ["--output", "-o"] and i + 1 < len(args):
+                        output_path = args[i + 1]
+                        i += 2
+                    elif args[i] in ["--strategy", "-s"] and i + 1 < len(args):
+                        strategy = args[i + 1]
+                        i += 2
+                    elif args[i] == "--confidence" and i + 1 < len(args):
+                        confidence = float(args[i + 1])
+                        i += 2
+                    elif args[i] == "--region" and i + 1 < len(args):
+                        region = args[i + 1]
+                        i += 2
+                    elif args[i] == "--in-place":
+                        in_place = True
+                        i += 1
+                    else:
+                        i += 1
+
+                result = cli.redact_file(file_path, output_path, strategy, confidence, region, in_place)
+
+                if "error" in result:
+                    print(f"❌ Error: {result['error']}")
+                    return
+
+                print(f"📄 File: {result['file']}")
+                print(f"📝 Output: {result['output_file']}")
+                print(f"🔒 Total redactions: {result['total_redactions']}")
+                print(f"🛡️ Strategy: {result['strategy']}")
+                print(f"📋 Audit entries: {result['audit_entries']}")
+
+            elif subcommand == "strategies":
+                result = cli.list_strategies()
+                print("🛡️ Available Redaction Strategies:")
+                print("=" * 60)
+                for strategy in result["strategies"]:
+                    print(f"  {strategy['name']:12} - {strategy['description']}")
+                print(f"\n✨ Default: {result['default']}")
+
+            elif subcommand == "pii-types":
+                result = cli.list_pii_types()
+                print("🔍 Detectable PII Types:")
+                print("=" * 60)
+                for pii_type in result["pii_types"]:
+                    print(f"  {pii_type['type']:18} - {pii_type['description']}")
+                print(f"\n📊 Total: {result['total']} types")
+
+            else:
+                print(f"❓ Unknown Data Guardian command: {subcommand}")
+                print("Available: scan, redact, strategies, pii-types")
+
+        except ImportError:
+            print("❌ Data Guardian module not available")
+            print("Install with: pip install -e .")
+        except Exception as e:
+            print(f"❌ Error running Data Guardian command: {e}")
+
     def show_status(self):
         """Show system status"""
         print("📊 Aurora CloudBank System Status")
@@ -139,6 +272,9 @@ class AuroraCLI:
                     self.run_learning_demo()
                 elif command == "test" or command == "t":
                     self.run_integration_test()
+                elif command.startswith("data:"):
+                    # Data Guardian commands
+                    self.run_data_guardian_command(command)
                 elif command == "clear":
                     # SECURITY: Using shell=False for safe subprocess execution
                     subprocess.run(["clear"], shell=False)
@@ -167,6 +303,12 @@ Core Commands:
   learning  (l)  Run adaptive learning demo
   test      (t)  Run comprehensive integration test
 
+Data Guardian Commands:
+  data:scan <file>       Scan file for PII
+  data:redact <file>     Redact PII from file
+  data:strategies        List redaction strategies
+  data:pii-types         List detectable PII types
+
 Utility Commands:
   help           Show this help message
   clear          Clear screen
@@ -176,6 +318,9 @@ Examples:
   aurora> status
   aurora> quantum
   aurora> test
+  aurora> data:scan myfile.txt
+  aurora> data:redact myfile.txt --strategy mask
+  aurora> data:strategies
 
 🌟 Aurora CloudBank v3.5.1 - Quantum-Aware Symbolic Processing
 """

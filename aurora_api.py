@@ -40,6 +40,16 @@ except ImportError:
     AUMEMMANAGER_AVAILABLE = False
     AUMEMMANAGER_ROUTER = None
 
+# Import Data Guardian API integration
+try:
+    from modules.data_guardian.api import router as data_guardian_router
+    DATA_GUARDIAN_AVAILABLE = True
+    DATA_GUARDIAN_ROUTER = data_guardian_router
+except ImportError:
+    print("Data Guardian not available - PII detection/redaction features disabled")
+    DATA_GUARDIAN_AVAILABLE = False
+    DATA_GUARDIAN_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -56,6 +66,15 @@ if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
     except Exception as e:
         print(f"❌ Failed to integrate AuMemManager API routes: {e}")
         AUMEMMANAGER_AVAILABLE = False
+
+# Include Data Guardian API routes if available
+if DATA_GUARDIAN_AVAILABLE and DATA_GUARDIAN_ROUTER:
+    try:
+        app.include_router(DATA_GUARDIAN_ROUTER)
+        print("✅ Data Guardian API routes integrated successfully")
+    except Exception as e:
+        print(f"❌ Failed to integrate Data Guardian API routes: {e}")
+        DATA_GUARDIAN_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

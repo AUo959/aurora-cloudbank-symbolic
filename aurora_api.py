@@ -44,7 +44,8 @@ except ImportError:
 
 # Import Insight Ledger API integration
 try:
-    from modules.insight_ledger.api import initialize_ledger, router as insight_ledger_router
+    from modules.insight_ledger.api import initialize_ledger
+    from modules.insight_ledger.api import router as insight_ledger_router
     INSIGHT_LEDGER_AVAILABLE = True
     INSIGHT_LEDGER_ROUTER = insight_ledger_router
 except ImportError:
@@ -52,6 +53,16 @@ except ImportError:
     INSIGHT_LEDGER_AVAILABLE = False
     INSIGHT_LEDGER_ROUTER = None
     initialize_ledger = None
+
+# Import Quantum Simulator API integration
+try:
+    from modules.quantum_simulator.api import router as quantum_simulator_router
+    QUANTUM_SIMULATOR_AVAILABLE = True
+    QUANTUM_SIMULATOR_ROUTER = quantum_simulator_router
+except ImportError:
+    print("Quantum Simulator not available - quantum simulation features disabled")
+    QUANTUM_SIMULATOR_AVAILABLE = False
+    QUANTUM_SIMULATOR_ROUTER = None
 
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
@@ -90,6 +101,15 @@ if INSIGHT_LEDGER_AVAILABLE and INSIGHT_LEDGER_ROUTER:
     except Exception as e:
         print(f"❌ Failed to integrate Insight Ledger API routes: {e}")
         INSIGHT_LEDGER_AVAILABLE = False
+
+# Include Quantum Simulator API routes if available
+if QUANTUM_SIMULATOR_AVAILABLE and QUANTUM_SIMULATOR_ROUTER:
+    try:
+        app.include_router(QUANTUM_SIMULATOR_ROUTER)
+        print("✅ Quantum Simulator API routes integrated successfully")
+    except Exception as e:
+        print(f"❌ Failed to integrate Quantum Simulator API routes: {e}")
+        QUANTUM_SIMULATOR_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

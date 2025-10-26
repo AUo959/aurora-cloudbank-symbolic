@@ -3,9 +3,10 @@ Quantum State Synthesizer
 
 Hybrid quantum-classical scenario simulator and forecasting engine.
 
-Anchor: T1-QSS-001, T1-QSS-002
+Anchor: T1-QSS-001, T1-QSS-002, T1-QSS-003
 """
 
+from .api import router as quantum_simulator_router
 from .orchestrator import (
     MockQuantumProvider,
     QuantumOrchestrator,
@@ -33,9 +34,11 @@ from .schemas import (
 )
 
 __version__ = "0.1.0"
-__anchor__ = "T1-QSS-001, T1-QSS-002"
+__anchor__ = "T1-QSS-001, T1-QSS-002, T1-QSS-003"
 
 __all__ = [
+    # API Router
+    "quantum_simulator_router",
     # Orchestration
     "QuantumOrchestrator",
     "QuantumProvider",

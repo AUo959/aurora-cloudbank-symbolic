@@ -23,9 +23,10 @@ except ImportError:
 class DataGuardianCLI:
     """Command-line interface for Data Guardian operations."""
 
-    def __init__(self):
+    def __init__(self, region: str = "US"):
         """Initialize CLI with detector and redactor."""
-        self.detector = PIIDetector()
+        self.region = region
+        self.detector = PIIDetector(region=region)
         self.redactor = RedactionEngine()
 
     def scan_file(
@@ -57,7 +58,7 @@ class DataGuardianCLI:
             return {"error": f"File is not valid UTF-8: {file_path}"}
 
         # Detect PII
-        detections = self.detector.detect(content, confidence_threshold, region)
+        detections = self.detector.detect(content, confidence_threshold)
 
         # Format output
         if output_format == "json":
@@ -66,11 +67,11 @@ class DataGuardianCLI:
                 "total_detections": len(detections),
                 "detections": [
                     {
-                        "type": d.pii_type.value,
-                        "value": d.value,
-                        "confidence": d.confidence,
-                        "region": d.region,
-                        "location": {"start": d.start, "end": d.end} if d.start is not None else None,
+                        "type": d['type'],
+                        "value": d['match'],
+                        "confidence": d['confidence'],
+                        "region": d.get('region'),
+                        "location": {"start": d['start'], "end": d['end']} if d.get('start') is not None else None,
                     }
                     for d in detections
                 ],
@@ -123,7 +124,7 @@ class DataGuardianCLI:
             return {"error": f"Invalid strategy: {strategy}. Valid: mask, hash, remove, partial, token, synthetic"}
 
         # Detect PII
-        detections = self.detector.detect(content, confidence_threshold, region)
+        detections = self.detector.detect(content, confidence_threshold)
 
         if not detections:
             return {
@@ -178,7 +179,7 @@ class DataGuardianCLI:
         content = sys.stdin.read()
 
         # Detect PII
-        detections = self.detector.detect(content, confidence_threshold, region)
+        detections = self.detector.detect(content, confidence_threshold)
 
         # Format output
         if output_format == "json":
@@ -187,11 +188,11 @@ class DataGuardianCLI:
                 "total_detections": len(detections),
                 "detections": [
                     {
-                        "type": d.pii_type.value,
-                        "value": d.value,
-                        "confidence": d.confidence,
-                        "region": d.region,
-                        "location": {"start": d.start, "end": d.end} if d.start is not None else None,
+                        "type": d['type'],
+                        "value": d['match'],
+                        "confidence": d['confidence'],
+                        "region": d.get('region'),
+                        "location": {"start": d['start'], "end": d['end']} if d.get('start') is not None else None,
                     }
                     for d in detections
                 ],
@@ -229,7 +230,7 @@ class DataGuardianCLI:
             return {"error": f"Invalid strategy: {strategy}. Valid: mask, hash, remove, partial, token, synthetic"}
 
         # Detect PII
-        detections = self.detector.detect(content, confidence_threshold, region)
+        detections = self.detector.detect(content, confidence_threshold)
 
         if not detections:
             # No PII, output original
@@ -311,7 +312,7 @@ class DataGuardianCLI:
         # Group by type
         by_type = {}
         for d in detections:
-            type_name = d.pii_type.value
+            type_name = d['type']
             if type_name not in by_type:
                 by_type[type_name] = []
             by_type[type_name].append(d)
@@ -320,7 +321,7 @@ class DataGuardianCLI:
         for pii_type, items in sorted(by_type.items()):
             lines.append(f"  {pii_type}: {len(items)} detection(s)")
             for item in items[:3]:  # Show first 3
-                lines.append(f"    - {item.value[:50]}... (confidence: {item.confidence:.2f})")
+                lines.append(f"    - {item['match'][:50]}... (confidence: {item['confidence']:.2f})")
             if len(items) > 3:
                 lines.append(f"    ... and {len(items) - 3} more")
 

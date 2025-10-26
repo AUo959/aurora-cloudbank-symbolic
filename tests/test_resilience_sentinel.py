@@ -7,31 +7,18 @@ Anchor: T1-RSD-004-TESTS
 """
 
 import time
+
 import pytest
 
-from modules.resilience_sentinel.metrics import (
-    Metric,
-    MetricType,
-    MetricHistory,
-)
-from modules.resilience_sentinel.alert_manager import (
-    Alert,
-    AlertRule,
-    AlertManager,
-    AlertSeverity,
-)
-from modules.resilience_sentinel.monitoring_engine import (
-    MonitoringEngine,
-    MetricCollector,
-    HealthStatus,
-)
+from modules.resilience_sentinel.alert_manager import Alert, AlertManager, AlertRule, AlertSeverity
+from modules.resilience_sentinel.metrics import Metric, MetricHistory, MetricType
+from modules.resilience_sentinel.monitoring_engine import HealthStatus, MetricCollector, MonitoringEngine
 from modules.resilience_sentinel.notifications import (
+    ConsoleNotificationChannel,
+    LogNotificationChannel,
     NotificationConfig,
     NotificationRouter,
-    LogNotificationChannel,
-    ConsoleNotificationChannel,
 )
-
 
 # ============================================================================
 # Metric Tests

@@ -10,12 +10,11 @@ Anchor: T1-RSD-003-NOTIFY
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from .alert_manager import Alert, AlertSeverity
-
 
 # Configure logger for notifications
 logger = logging.getLogger("resilience_sentinel.notifications")

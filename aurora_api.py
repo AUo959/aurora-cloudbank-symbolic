@@ -6,29 +6,21 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException, WebSocket, Depends
+from fastapi import Depends, FastAPI, HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
-# Import centralized security configuration
-from src.middleware.fastapi_security import (
-    security,
-    limiter,
-    require_auth,
-    secure_compare,
-)
-
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
-from modules.symbolic_core.sonnet4_integration_hub import (
-    enable_sonnet4_globally,
-    sonnet4_hub,
-)
+from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globally, sonnet4_hub
 
 # Import ChatGPT Agent Mode integration
 from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
+
+# Import centralized security configuration
+from src.middleware.fastapi_security import limiter, require_auth, secure_compare, security
 
 # Import AuMemManager API integration
 try:

@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field
 from .alert_manager import AlertSeverity
 from .monitoring_engine import MonitoringEngine
 
-
 # Pydantic models for API requests/responses
 
 class MetricResponse(BaseModel):

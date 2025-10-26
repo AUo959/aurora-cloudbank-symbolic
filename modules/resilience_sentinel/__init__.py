@@ -21,13 +21,13 @@ from .monitoring_engine import HealthStatus, MetricCollector, MonitoringEngine
 
 try:
     from .notifications import (
-        NotificationRouter,
+        ConsoleNotificationChannel,
+        EmailNotificationChannel,
+        LogNotificationChannel,
         NotificationChannel,
         NotificationConfig,
-        LogNotificationChannel,
+        NotificationRouter,
         WebhookNotificationChannel,
-        EmailNotificationChannel,
-        ConsoleNotificationChannel,
         get_notification_router,
     )
     NOTIFICATIONS_AVAILABLE = True

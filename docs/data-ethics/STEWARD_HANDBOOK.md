@@ -196,7 +196,7 @@ detector.add_rule(custom_rule)
 |----------|-------------|----------|---------|
 | `MASK` | Structure-preserving asterisks | Visual privacy, debugging | `john@example.com` → `****@*******.***` |
 | `HASH` | SHA256 deterministic hash | Consistent pseudonymization | `test@example.com` → `SHA256:a1b2c3...` |
-| `REMOVE` | Complete deletion | Maximum privacy | `Email: test@example.com` → `Email: ` |
+| `REMOVE` | Complete deletion | Maximum privacy | `Email: test@example.com` → `Email:` |
 | `PARTIAL` | Show first/last chars | Human recognition | `longname@example.com` → `lo*****@ex*****.com` |
 | `TOKEN` | Numbered placeholders | Reversible with key | `test@example.com` → `[PII-EMAIL-001]` |
 | `SYNTHETIC` | Fake but realistic data | Testing environments | `real@example.com` → `fake42@example.com` |

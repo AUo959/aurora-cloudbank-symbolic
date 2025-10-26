@@ -6,13 +6,13 @@ FastAPI routes for PII detection and redaction services.
 Anchor: T1-EDG-002-API
 """
 
-from fastapi import APIRouter, HTTPException, Body
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Body, HTTPException
 from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any
 
 from .detection_rules import PIIDetector, PIIType
 from .redaction import RedactionEngine, RedactionStrategy
-
 
 # Pydantic models for API requests/responses
 

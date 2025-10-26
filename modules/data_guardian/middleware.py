@@ -6,12 +6,13 @@ Intercepts requests and responses to automatically detect and redact PII.
 Anchor: T1-EDG-001-MIDDLEWARE
 """
 
+import json
+import time
+from typing import Callable, Optional
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
-from typing import Callable, Optional
-import json
-import time
 
 from .detection_rules import PIIDetector
 from .redaction import RedactionEngine, RedactionStrategy

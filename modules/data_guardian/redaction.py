@@ -6,10 +6,10 @@ Implements various redaction strategies for detected PII.
 Anchor: T1-EDG-001-REDACTION
 """
 
-from enum import Enum
-from typing import Dict, List, Optional
 import hashlib
 import secrets
+from enum import Enum
+from typing import Dict, List, Optional
 
 
 class RedactionStrategy(Enum):

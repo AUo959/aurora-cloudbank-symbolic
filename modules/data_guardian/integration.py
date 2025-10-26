@@ -6,18 +6,18 @@ Chain: #005//004/EDG
 Anchor: T1-EDG-004
 """
 
-import sys
-import json
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from datetime import datetime
 import hashlib
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add src to path for DLP imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 try:
-    from core.native_dlp_export import NativeDLPTracker, NativeDLPTag
+    from core.native_dlp_export import NativeDLPTag, NativeDLPTracker
 except ImportError:
     # Fallback if src path not available
     NativeDLPTracker = None

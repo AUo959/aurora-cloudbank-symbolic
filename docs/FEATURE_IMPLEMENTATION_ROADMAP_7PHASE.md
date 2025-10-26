@@ -505,6 +505,7 @@ jobs:
 ## 🚨 Risk Management
 
 ### Technical Risks
+
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | Quantum API availability | Medium | High | Mock provider fallback, offline mode |
@@ -513,6 +514,7 @@ jobs:
 | Performance degradation | Medium | High | Load testing, caching layer, circuit breakers |
 
 ### Business Risks
+
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | Scope creep | High | Medium | Strict phase boundaries, change control board |

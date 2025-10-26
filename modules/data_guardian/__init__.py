@@ -7,10 +7,10 @@ Anchor: T1-EDG-001
 Version: 0.1.0
 """
 
-from .detection_rules import PIIDetector, DetectionRule, PIIType
-from .redaction import RedactionEngine, RedactionStrategy
-from .middleware import DataGuardianMiddleware
 from .cli import DataGuardianCLI
+from .detection_rules import DetectionRule, PIIDetector, PIIType
+from .middleware import DataGuardianMiddleware
+from .redaction import RedactionEngine, RedactionStrategy
 
 __all__ = [
     "PIIDetector",

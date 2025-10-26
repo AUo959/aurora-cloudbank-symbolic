@@ -8,9 +8,9 @@ Anchor: T1-EDG-001-DETECTION
 """
 
 import re
-from enum import Enum
-from typing import List, Dict, Optional, Pattern
 from dataclasses import dataclass
+from enum import Enum
+from typing import Dict, List, Optional, Pattern
 
 
 class PIIType(Enum):

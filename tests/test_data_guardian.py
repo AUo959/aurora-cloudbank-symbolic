@@ -7,18 +7,19 @@ Anchor: T1-EDG-TEST-001
 Target: 90%+ code coverage
 """
 
-import pytest
 import sys
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 
 # Add modules to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from modules.data_guardian.detection_rules import PIIDetector, PIIType
-from modules.data_guardian.redaction import RedactionEngine, RedactionStrategy
-from modules.data_guardian.middleware import DataGuardianMiddleware
 from modules.data_guardian.cli import DataGuardianCLI
+from modules.data_guardian.detection_rules import PIIDetector, PIIType
+from modules.data_guardian.middleware import DataGuardianMiddleware
+from modules.data_guardian.redaction import RedactionEngine, RedactionStrategy
 
 
 @pytest.mark.unit

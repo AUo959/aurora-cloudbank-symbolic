@@ -14,13 +14,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from .ledger_core import InsightLedger
-from .schemas import (
-    AuditQuery,
-    InsightRecord,
-    LedgerEntry,
-    LedgerStats,
-    VerificationReport,
-)
+from .schemas import AuditQuery, InsightRecord, LedgerEntry, LedgerStats, VerificationReport
 
 # Initialize router
 router = APIRouter(prefix="/ledger", tags=["Insight Ledger"])

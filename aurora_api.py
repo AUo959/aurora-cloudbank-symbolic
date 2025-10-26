@@ -42,6 +42,17 @@ except ImportError:
     DATA_GUARDIAN_AVAILABLE = False
     DATA_GUARDIAN_ROUTER = None
 
+# Import Insight Ledger API integration
+try:
+    from modules.insight_ledger.api import initialize_ledger, router as insight_ledger_router
+    INSIGHT_LEDGER_AVAILABLE = True
+    INSIGHT_LEDGER_ROUTER = insight_ledger_router
+except ImportError:
+    print("Insight Ledger not available - audit trail features disabled")
+    INSIGHT_LEDGER_AVAILABLE = False
+    INSIGHT_LEDGER_ROUTER = None
+    initialize_ledger = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -67,6 +78,18 @@ if DATA_GUARDIAN_AVAILABLE and DATA_GUARDIAN_ROUTER:
     except Exception as e:
         print(f"❌ Failed to integrate Data Guardian API routes: {e}")
         DATA_GUARDIAN_AVAILABLE = False
+
+# Include Insight Ledger API routes if available
+if INSIGHT_LEDGER_AVAILABLE and INSIGHT_LEDGER_ROUTER:
+    try:
+        app.include_router(INSIGHT_LEDGER_ROUTER)
+        # Initialize ledger with default storage path
+        if initialize_ledger:
+            initialize_ledger(storage_path="./data/insight_ledger")
+        print("✅ Insight Ledger API routes integrated successfully")
+    except Exception as e:
+        print(f"❌ Failed to integrate Insight Ledger API routes: {e}")
+        INSIGHT_LEDGER_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

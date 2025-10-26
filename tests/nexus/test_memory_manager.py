@@ -108,11 +108,11 @@ class TestSymbolicMemoryManager:
     def test_timestamp_recording(self):
         """Test timestamp recording"""
         import datetime
-        before = datetime.datetime.utcnow()
+        before = datetime.datetime.now(datetime.UTC)
         
         self.manager.store("time_test", "value")
         
-        after = datetime.datetime.utcnow()
+        after = datetime.datetime.now(datetime.UTC)
         
         entry = self.manager.memory_store["time_test"]
         entry_time = datetime.datetime.fromisoformat(entry["timestamp"])

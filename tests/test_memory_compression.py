@@ -208,6 +208,7 @@ class TestSynapseCompression:
         assert synapse.ethical_score == 1.0, "Should preserve ethical score"
 
 
+@pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not installed (optional dependency)")
 class TestMemoryCompressionIntegration:
     """Integration tests for complete compression pipeline."""
     

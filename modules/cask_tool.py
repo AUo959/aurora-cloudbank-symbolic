@@ -22,14 +22,19 @@ except Exception:  # pragma: no cover - fallback path
 
 
 ASSET_ZIP = "CASK_Assets.zip"
+ASSET_ZIP_ARCHIVE = os.path.join("archives", "CASK_Assets.zip")
 RECTANGLE_PADDING = 0.4  # Padding for architecture chart rectangles
 
 
 def _open_asset(name: str) -> str:
     """Return the contents of ``name`` within ``ASSET_ZIP`` as a string."""
-    if not os.path.exists(ASSET_ZIP):
-        raise FileNotFoundError(f"{ASSET_ZIP} not found")
-    with zipfile.ZipFile(ASSET_ZIP) as zf:
+    # Try current directory first, then archives directory
+    zip_path = ASSET_ZIP if os.path.exists(ASSET_ZIP) else ASSET_ZIP_ARCHIVE
+    
+    if not os.path.exists(zip_path):
+        raise FileNotFoundError(f"{ASSET_ZIP} not found (checked . and archives/)")
+    
+    with zipfile.ZipFile(zip_path) as zf:
         with zf.open(name) as file:
             return file.read().decode("utf-8")
 

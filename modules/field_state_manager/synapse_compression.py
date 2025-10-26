@@ -247,6 +247,11 @@ class CompressedSynapseRegistry:
         # Update permanent storage
         self.permanent = new_permanent
         
+        # Remove promoted synapses from active (they're now in permanent)
+        for key in new_permanent:
+            if key in self.active:
+                del self.active[key]
+        
         # Move demoted synapses to active
         for key, synapse in moved_to_active:
             if key not in self.active:

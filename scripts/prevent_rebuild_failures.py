@@ -44,35 +44,41 @@ class RebuildFailurePrevention:
             print("❌ Python 3 not available")
             return False
         
-        # Check virtual environment
-        if not self.venv_dir.exists():
-            print("❌ Virtual environment not found")
-            return False
+        # Determine which Python to use (venv or system)
+        venv_python = self.venv_dir / "bin" / "python"
+        if venv_python.exists():
+            python_executable = str(venv_python)
+            print("📦 Using virtual environment Python")
+        else:
+            python_executable = "python3"
+            print("🐍 Using system Python (venv not available)")
         
-        # Check if virtual environment is functional
+        # Check if Python is functional
         try:
             result = subprocess.run([
-                str(self.venv_dir / "bin" / "python"),
+                python_executable,
                 "-c", "import sys; print(sys.version)"
             ], capture_output=True, text=True, timeout=10)
             
             if result.returncode != 0:
-                print("❌ Virtual environment is corrupted")
+                print("❌ Python environment is not functional")
                 return False
         except (subprocess.TimeoutExpired, FileNotFoundError):
-            print("❌ Virtual environment is not functional")
+            print("❌ Python environment check failed")
             return False
         
         # Check critical dependencies
         try:
             result = subprocess.run([
-                str(self.venv_dir / "bin" / "python"),
+                python_executable,
                 "-c", "import fastapi, httpx, httpcore, h11; print('Dependencies OK')"
             ], capture_output=True, text=True, timeout=10)
             
             if result.returncode != 0:
                 print("❌ Critical dependencies missing or broken")
+                print(f"   Error: {result.stderr}")
                 return False
+            print(f"✅ {result.stdout.strip()}")
         except (subprocess.TimeoutExpired, FileNotFoundError):
             print("❌ Dependency check failed")
             return False
@@ -120,7 +126,7 @@ class RebuildFailurePrevention:
 set -e
 
 echo "🚨 Aurora CloudBank Emergency Recovery"
-echo "=====================================" 
+echo "====================================="
 
 cd "{self.workspace_root}"
 
@@ -257,14 +263,18 @@ echo "✅ Pre-rebuild protection completed"
         if not self.backup_dir.exists():
             print("❌ Backup directory not found")
             return False
-        
-        # Check if we have recent backups
-        backup_files = list(self.backup_dir.rglob("*requirements*.txt"))
+
+        # Check if we have recent backups (look in subdirectories too)
+        backup_files = (
+            list(self.backup_dir.rglob("*requirements*.txt")) +
+            list(self.backup_dir.rglob("*requirements*.backup"))
+        )
+
         if not backup_files:
             print("❌ No backup files found")
             return False
-        
-        print(f"✅ Backup system check passed ({len(backup_files)} backup files)")
+
+        print(f"✅ Backup system check passed ({len(backup_files)} backup files found)")
         return True
 
 

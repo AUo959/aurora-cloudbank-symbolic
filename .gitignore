@@ -223,3 +223,8 @@ auth_config.json
 
 # Aurora Quicksave - Session context (local only)
 .aurora/
+
+# Aurora Nexus - Runtime operational files (local only)
+.nexus/arbitration/entropy_*.json
+.nexus/divergences/secure_key_*.json
+.nexus/recursion/checkpoints/*.json

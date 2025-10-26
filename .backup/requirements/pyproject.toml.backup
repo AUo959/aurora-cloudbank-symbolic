@@ -67,9 +67,10 @@ markers = [
 
     # Component-based markers
     "native: Native implementation tests",
-    "opal2: Opal2 modular system tests", 
+    "opal2: Opal2 modular system tests",
     "aurora: Aurora core system tests",
     "quantum: Quantum processing tests",
+    "simulation: Simulation engine tests",
     "security: Security and authentication tests",
     "api: API and web interface tests",
     "cli: Command line interface tests",

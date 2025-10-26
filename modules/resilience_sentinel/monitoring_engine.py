@@ -8,13 +8,22 @@ Anchor: T1-RSD-001-ENGINE
 """
 
 import time
-import psutil
-from enum import Enum
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
-from .metrics import Metric, MetricType, MetricHistory
-from .alert_manager import AlertManager, AlertSeverity, AlertRule, DEFAULT_RULES
+import psutil
+
+from .alert_manager import DEFAULT_RULES, AlertManager, AlertRule, AlertSeverity
+from .metrics import Metric, MetricHistory, MetricType
+
+try:
+    from .notifications import NotificationRouter, get_notification_router
+    NOTIFICATIONS_AVAILABLE = True
+except ImportError:
+    NOTIFICATIONS_AVAILABLE = False
+    NotificationRouter = None
+    get_notification_router = None
 
 
 class HealthStatus(Enum):
@@ -168,6 +177,7 @@ class MonitoringEngine:
         collection_interval: int = 60,
         history_size: int = 1000,
         enable_default_rules: bool = True,
+        enable_notifications: bool = True,
     ):
         """
         Initialize monitoring engine.
@@ -176,6 +186,7 @@ class MonitoringEngine:
             collection_interval: Seconds between metric collections
             history_size: Maximum metrics to store per metric name
             enable_default_rules: Whether to load default alert rules
+            enable_notifications: Whether to enable alert notifications
         """
         self.collection_interval = collection_interval
         self.history = MetricHistory(max_size=history_size)
@@ -184,6 +195,12 @@ class MonitoringEngine:
         self.is_running = False
         self.last_collection_time = 0.0
         self.health_checks: List[HealthCheck] = []
+
+        # Notification router
+        self.notification_router = None
+        if enable_notifications and NOTIFICATIONS_AVAILABLE:
+            if get_notification_router is not None:
+                self.notification_router = get_notification_router()
 
         # Load default alert rules
         if enable_default_rules:
@@ -227,6 +244,29 @@ class MonitoringEngine:
             alerts = self.alert_manager.evaluate_metric(metric)
             all_alerts.extend(alerts)
         return all_alerts
+
+    async def evaluate_and_notify_alerts(self, metrics: List[Metric]) -> Dict[str, Any]:
+        """
+        Evaluate metrics and send notifications for triggered alerts.
+
+        Args:
+            metrics: Metrics to evaluate
+
+        Returns:
+            Dict with alerts and notification results
+        """
+        alerts = self.evaluate_alerts(metrics)
+
+        notification_results = {}
+        if self.notification_router and alerts:
+            for alert in alerts:
+                results = await self.notification_router.route_alert(alert)
+                notification_results[alert.id] = results
+
+        return {
+            "alerts": alerts,
+            "notification_results": notification_results,
+        }
 
     def run_health_checks(self) -> HealthStatus:
         """
@@ -404,3 +444,23 @@ class MonitoringEngine:
             handler: Callable accepting Alert
         """
         self.alert_manager.register_handler(severity, handler)
+
+    def get_notification_router(self):
+        """Get the notification router instance."""
+        return self.notification_router
+
+    def get_notification_status(self) -> Dict[str, Any]:
+        """
+        Get notification system status.
+
+        Returns:
+            Dict with channels and notification stats
+        """
+        if not self.notification_router:
+            return {"enabled": False, "message": "Notifications not available"}
+
+        return {
+            "enabled": True,
+            "channels": self.notification_router.get_channel_status(),
+            "recent_notifications": self.notification_router.get_notification_history(limit=20),
+        }

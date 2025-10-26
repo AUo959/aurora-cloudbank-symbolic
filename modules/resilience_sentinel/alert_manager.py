@@ -8,10 +8,10 @@ Anchor: T1-RSD-001-ALERTS
 """
 
 import time
-from enum import Enum
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 from .metrics import Metric
 

@@ -8,11 +8,11 @@ Anchor: T1-RSD-001-METRICS
 """
 
 import time
-from enum import Enum
-from typing import Dict, List, Optional, Any
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime
-from collections import deque
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class MetricType(Enum):

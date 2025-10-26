@@ -9,16 +9,40 @@ Provides:
 - Alert rule management with threshold detection
 - Health status aggregation
 - Historical metric tracking
+- Multi-channel alert notifications
 
 Anchor: T1-RSD-001
-Version: 0.1.0
+Version: 0.2.0
 """
 
-from .monitoring_engine import MonitoringEngine, MetricCollector, HealthStatus
-from .alert_manager import AlertManager, Alert, AlertSeverity, AlertRule
-from .metrics import MetricType, Metric, MetricHistory
+from .alert_manager import Alert, AlertManager, AlertRule, AlertSeverity
+from .metrics import Metric, MetricHistory, MetricType
+from .monitoring_engine import HealthStatus, MetricCollector, MonitoringEngine
 
-__version__ = "0.1.0"
+try:
+    from .notifications import (
+        NotificationRouter,
+        NotificationChannel,
+        NotificationConfig,
+        LogNotificationChannel,
+        WebhookNotificationChannel,
+        EmailNotificationChannel,
+        ConsoleNotificationChannel,
+        get_notification_router,
+    )
+    NOTIFICATIONS_AVAILABLE = True
+except ImportError:
+    NOTIFICATIONS_AVAILABLE = False
+    NotificationRouter = None
+    NotificationChannel = None
+    NotificationConfig = None
+    LogNotificationChannel = None
+    WebhookNotificationChannel = None
+    EmailNotificationChannel = None
+    ConsoleNotificationChannel = None
+    get_notification_router = None
+
+__version__ = "0.2.0"
 __anchor__ = "T1-RSD-001"
 
 __all__ = [
@@ -35,4 +59,14 @@ __all__ = [
     "MetricType",
     "Metric",
     "MetricHistory",
+    # Notifications
+    "NotificationRouter",
+    "NotificationChannel",
+    "NotificationConfig",
+    "LogNotificationChannel",
+    "WebhookNotificationChannel",
+    "EmailNotificationChannel",
+    "ConsoleNotificationChannel",
+    "get_notification_router",
+    "NOTIFICATIONS_AVAILABLE",
 ]

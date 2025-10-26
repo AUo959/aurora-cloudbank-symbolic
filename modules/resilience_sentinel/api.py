@@ -8,12 +8,13 @@ Anchor: T1-RSD-002
 """
 
 import asyncio
-from typing import Dict, List, Optional, Any
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Query
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
-from .monitoring_engine import MonitoringEngine
 from .alert_manager import AlertSeverity
+from .monitoring_engine import MonitoringEngine
 
 
 # Pydantic models for API requests/responses
@@ -358,6 +359,62 @@ async def delete_alert_rule(rule_name: str):
         raise HTTPException(status_code=404, detail=f"Rule '{rule_name}' not found")
 
     return {"success": True, "message": f"Rule '{rule_name}' deleted"}
+
+
+@router.get("/notifications/status")
+async def get_notification_status():
+    """
+    Get notification system status.
+
+    Returns enabled channels, configuration, and recent notification history.
+    """
+    engine = get_monitoring_engine()
+    return engine.get_notification_status()
+
+
+@router.get("/notifications/channels")
+async def list_notification_channels():
+    """
+    List all registered notification channels.
+
+    Returns channel names, types, and status.
+    """
+    engine = get_monitoring_engine()
+    router_inst = engine.get_notification_router()
+
+    if not router_inst:
+        return {"enabled": False, "channels": []}
+
+    return {
+        "enabled": True,
+        "channels": router_inst.list_channels(),
+        "status": router_inst.get_channel_status(),
+    }
+
+
+@router.get("/notifications/history")
+async def get_notification_history(
+    limit: int = Query(100, ge=1, le=1000, description="Number of records to return"),
+):
+    """
+    Get notification history.
+
+    Args:
+        limit: Number of recent notifications to return (1-1000)
+
+    Returns:
+        List of notification records with alert ID, channel, success status
+    """
+    engine = get_monitoring_engine()
+    router_inst = engine.get_notification_router()
+
+    if not router_inst:
+        return {"enabled": False, "history": []}
+
+    return {
+        "enabled": True,
+        "history": router_inst.get_notification_history(limit=limit),
+    }
 
 
 @router.get("/dashboard", response_model=DashboardResponse)

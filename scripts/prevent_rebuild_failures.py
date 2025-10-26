@@ -6,11 +6,11 @@ Comprehensive protection against DevContainer rebuild issues.
 
 import json
 import os
+import shutil
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
-import shutil
+from pathlib import Path
 
 
 class RebuildFailurePrevention:

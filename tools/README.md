@@ -19,6 +19,7 @@ tools/
 │   ├── memory_sealer.py     # SHA256 sealing with state recovery
 │   └── manifest_generator.py # Auto-manifest creation
 ├── cli/
+│   ├── onboarding_wizard.py # 🌟 NEW: Interactive setup wizard
 │   └── aurora_dev_cli.py    # Unified command interface
 ├── indexing/
 │   └── reliquary_indexer.js # Fast semantic search & cross-reference
@@ -28,6 +29,22 @@ tools/
 ```
 
 ## 🚀 Quick Start
+
+### 🌟 New Developer? Start Here!
+
+**Run the onboarding wizard** for an interactive guided setup:
+
+```bash
+python tools/cli/onboarding_wizard.py
+```
+
+The wizard will guide you through:
+- Environment health check and setup
+- Makefile commands and workflows
+- Symbolic anchor tracking
+- Memory sealing operations
+- Quicksave workflow
+- API server and demos
 
 ### Installation
 ```bash
@@ -103,7 +120,37 @@ python tools/symbolic/memory_sealer.py verify SEAL_ID
 python tools/symbolic/memory_sealer.py restore SEAL_ID --dry-run
 ```
 
-### 3. Aurora Developer CLI
+### 3. Onboarding Wizard
+**File**: `tools/cli/onboarding_wizard.py` 🌟 **NEW**
+
+Interactive wizard for new developer setup and onboarding:
+- Environment health check via `make health-check`
+- Automated setup with `make setup`
+- Makefile command discovery and explanations
+- Symbolic anchor tracking demonstrations
+- Memory sealing tutorials
+- Quicksave workflow guidance
+- API server and demo launch options
+
+```bash
+# Run the interactive onboarding wizard
+python tools/cli/onboarding_wizard.py
+```
+
+**Features**:
+- User confirmation prompts before executing commands
+- Step-by-step guidance with clear explanations
+- Educational content about Aurora CloudBank
+- Saves completion record to `.aurora/onboarding/`
+- Can be interrupted and resumed at any time
+
+**Perfect for**:
+- New developers joining the project
+- Understanding Aurora CloudBank workflows
+- Learning symbolic infrastructure concepts
+- Getting familiar with available tools
+
+### 4. Aurora Developer CLI
 **File**: `tools/cli/aurora_dev_cli.py`
 
 Unified command interface for all symbolic operations:
@@ -131,7 +178,7 @@ python tools/cli/aurora_dev_cli.py manifest --target T71_INFRA
 python tools/cli/aurora_dev_cli.py diff T70_DOC T71_INFRA
 ```
 
-### 4. Reliquary Indexer
+### 5. Reliquary Indexer
 **File**: `tools/indexing/reliquary_indexer.js`
 
 High-performance semantic search and cross-reference engine:
@@ -150,7 +197,7 @@ node tools/indexing/reliquary_indexer.js anchor T71_INFRA
 node tools/indexing/reliquary_indexer.js diff T70_DOC T71_INFRA
 ```
 
-### 5. Integration Helpers
+### 6. Integration Helpers
 **Files**: `tools/integration/bridge_hooks.js`, `tools/integration/ci_helpers.py`
 
 Automation and integration capabilities:

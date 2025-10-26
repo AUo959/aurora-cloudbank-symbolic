@@ -65,8 +65,11 @@
 [![Node.js CI](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/ci.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/codeql-unified.yml)
 [![Deploy Pages](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/deploy-pages.yml)
+[![PR Selective Integration](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/pr-selective-integration.yml/badge.svg)](https://github.com/AUo959/aurora-cloudbank-symbolic/actions/workflows/pr-selective-integration.yml)
 
 **🚀 New:** Unified CI/CD workflow consolidates 4 workflows with 40-50% faster execution and automatic caching! [Learn more →](docs/WORKFLOW_CONSOLIDATION.md)
+
+**🌟 Revolutionary:** Selective Integration System - Intelligent PR evaluation with 4 integration strategies (direct merge, compatibility layer, value extraction, decline). [Learn more →](docs/SELECTIVE_INTEGRATION.md)
 
 ---
 

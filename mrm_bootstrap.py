@@ -162,11 +162,15 @@ def generate_store_py() -> str:
 Memory Retrieval Module - Storage Backend
 
 Manages persistent memory storage with vector indexing and similarity search.
+
+Exports and imports symbolic vectors through THREAD_TRANSFER_BRIDGE_v1 for 
+cross-thread memory continuity.
 """
 
 from typing import List, Optional, Tuple
 import uuid
 import math
+import hashlib
 from datetime import datetime
 
 
@@ -293,9 +297,8 @@ class MemoryStore:
         """
         # Mock implementation: simple hash-based embedding
         # TODO: Replace with actual embedding model
-        import hashlib
         
-        hash_val = int(hashlib.md5(text.encode()).hexdigest(), 16)
+        hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
         dimension = self._config.vector_dimension
         
         # Generate pseudo-random vector from hash
@@ -470,7 +473,7 @@ class MemoryCache:
         Returns:
             Cache key string
         """
-        query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+        query_hash = hashlib.sha256(query.encode()).hexdigest()[:8]
         return f"query:{context_id}:{query_hash}:{top_k}"
 '''
 
@@ -482,14 +485,25 @@ Memory Retrieval Module - Core Orchestration
 
 Orchestrates retrieval operations combining store, cache, and scoring.
 Integrates with DLP tracking and AuMemManager.
+
+Thread: T1→T8→T9→INFINITE
+DLP: context_tag=MRM_INIT, symbolic_hash=EOS_SEED_ORION
 """
 
 from typing import List, Dict
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
+
+# DLP tracking integration
+try:
+    from src.core.native_dlp_export import NativeDLPTracker
+    DLP_AVAILABLE = True
+except ImportError:
+    DLP_AVAILABLE = False
+    logger.warning("NativeDLPTracker not available, DLP tracking disabled")
 
 
 class MemoryRetrievalCore:
@@ -516,6 +530,12 @@ class MemoryRetrievalCore:
         self._config = config
         self._store = MemoryStore(config)
         self._cache = MemoryCache(config)
+        
+        # Initialize DLP tracker if available
+        if DLP_AVAILABLE:
+            self._dlp_tracker = NativeDLPTracker()
+        else:
+            self._dlp_tracker = None
     
     @classmethod
     def get_instance(cls):
@@ -544,22 +564,35 @@ class MemoryRetrievalCore:
         Returns:
             Generated memory_id
         """
-        # TODO: Add DLP tracking
-        # context_tag = f"mrm:add:{context_id}"
-        # tracker = NativeDLPTracker(context_tag=context_tag)
+        # Add DLP tracking with Picard_Delta_3 protocol
+        context_tag = f"MRM:add:{context_id}"
+        
+        if self._dlp_tracker:
+            tag_id = self._dlp_tracker.create_tag("add_memory", {
+                "context_id": context_id,
+                "content_preview": content[:100] if len(content) > 100 else content,
+            })
+            tag = self._dlp_tracker.tags[tag_id]
+            tag.add_anchor_protocol("Picard_Delta_3")
+            tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+            tag.add_t1_srb_anchor("SRB_SYMBOLIC_BRIDGE")
+            tag.metadata["context_tag"] = context_tag
         
         # Ensure metadata has required fields
         if "importance" not in metadata:
             metadata["importance"] = 0.5
         if "created_at" not in metadata:
-            metadata["created_at"] = datetime.now().isoformat()
+            metadata["created_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # Add DLP context tag to metadata
+        metadata["dlp_tag"] = context_tag
         
         memory_id = self._store.add_memory(context_id, content, metadata)
         
         # Invalidate cache for this context
         self._cache.invalidate(f"query:{context_id}:")
         
-        logger.info(f"Added memory {memory_id} to context {context_id}")
+        logger.info(f"Added memory {memory_id} to context {context_id}", extra={"context_tag": context_tag})
         return memory_id
     
     def retrieve_memories(self, context_id: str, query: str, top_k: int = 10) -> List[Dict]:
@@ -574,6 +607,19 @@ class MemoryRetrievalCore:
         Returns:
             List of scored and ranked memory results
         """
+        # Add DLP tracking for query operation
+        context_tag = f"MRM:query:{context_id}"
+        
+        if self._dlp_tracker:
+            tag_id = self._dlp_tracker.create_tag("query_memory", {
+                "context_id": context_id,
+                "query_preview": query[:100] if len(query) > 100 else query,
+                "top_k": top_k,
+            })
+            tag = self._dlp_tracker.tags[tag_id]
+            tag.add_anchor_protocol("Picard_Delta_3")
+            tag.metadata["context_tag"] = context_tag
+        
         # Check cache first
         cache_key = self._cache.make_query_key(context_id, query, top_k)
         cached_results = self._cache.get(cache_key)
@@ -652,7 +698,12 @@ class MemoryRetrievalCore:
         
         try:
             created = datetime.fromisoformat(created_at)
-            age_days = (datetime.now() - created).total_seconds() / 86400
+            # Ensure timezone awareness
+            if created.tzinfo is None:
+                created = created.replace(tzinfo=timezone.utc)
+            
+            now = datetime.now(timezone.utc)
+            age_days = (now - created).total_seconds() / 86400
             decay_rate = 0.1  # Configurable
             return math.exp(-decay_rate * age_days)
         except Exception:
@@ -760,11 +811,16 @@ def query_memory(context_id: str, query: str, top_k: int = 10) -> Dict:
     if not query or not isinstance(query, str):
         return {"success": False, "error": "Invalid query"}
     
-    if not isinstance(top_k, int) or top_k < 1 or top_k > 100:
-        return {"success": False, "error": "top_k must be between 1 and 100"}
-    
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
+        from modules.memory_retrieval.config import MemoryRetrievalConfig
+        
+        # Get max allowed results from config
+        config = MemoryRetrievalConfig.from_env()
+        max_allowed = max(100, config.max_results * 10)  # Allow up to 10x config default
+        
+        if not isinstance(top_k, int) or top_k < 1 or top_k > max_allowed:
+            return {"success": False, "error": f"top_k must be between 1 and {max_allowed}"}
         
         core = MemoryRetrievalCore.get_instance()
         results = core.retrieve_memories(context_id, query, top_k)

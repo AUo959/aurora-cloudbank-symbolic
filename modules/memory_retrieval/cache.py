@@ -130,5 +130,5 @@ class MemoryCache:
         Returns:
             Cache key string
         """
-        query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+        query_hash = hashlib.sha256(query.encode()).hexdigest()[:8]
         return f"query:{context_id}:{query_hash}:{top_k}"

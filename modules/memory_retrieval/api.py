@@ -87,11 +87,16 @@ def query_memory(context_id: str, query: str, top_k: int = 10) -> Dict:
     if not query or not isinstance(query, str):
         return {"success": False, "error": "Invalid query"}
     
-    if not isinstance(top_k, int) or top_k < 1 or top_k > 100:
-        return {"success": False, "error": "top_k must be between 1 and 100"}
-    
     try:
         from modules.memory_retrieval.core import MemoryRetrievalCore
+        from modules.memory_retrieval.config import MemoryRetrievalConfig
+        
+        # Get max allowed results from config
+        config = MemoryRetrievalConfig.from_env()
+        max_allowed = max(100, config.max_results * 10)  # Allow up to 10x config default
+        
+        if not isinstance(top_k, int) or top_k < 1 or top_k > max_allowed:
+            return {"success": False, "error": f"top_k must be between 1 and {max_allowed}"}
         
         core = MemoryRetrievalCore.get_instance()
         results = core.retrieve_memories(context_id, query, top_k)

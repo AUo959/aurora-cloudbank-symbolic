@@ -2,11 +2,15 @@
 Memory Retrieval Module - Storage Backend
 
 Manages persistent memory storage with vector indexing and similarity search.
+
+Exports and imports symbolic vectors through THREAD_TRANSFER_BRIDGE_v1 for 
+cross-thread memory continuity.
 """
 
 from typing import List, Optional, Tuple
 import uuid
 import math
+import hashlib
 from datetime import datetime
 
 
@@ -133,9 +137,8 @@ class MemoryStore:
         """
         # Mock implementation: simple hash-based embedding
         # TODO: Replace with actual embedding model
-        import hashlib
         
-        hash_val = int(hashlib.md5(text.encode()).hexdigest(), 16)
+        hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
         dimension = self._config.vector_dimension
         
         # Generate pseudo-random vector from hash

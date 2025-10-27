@@ -231,6 +231,7 @@ class AuroraCLI:
         """Run Quantum Simulator command (run, list, stats, etc.)"""
         try:
             import asyncio
+
             from modules.quantum_simulator import (
                 OptimizationMethod,
                 QuantumBackend,

@@ -2095,7 +2095,7 @@ The Quantum State Synthesizer provides a comprehensive platform for quantum-enha
 ### Support
 
 For issues, questions, or contributions:
-- **GitHub Issues**: https://github.com/AUo959/aurora-cloudbank-symbolic/issues
+- **GitHub Issues**: <https://github.com/AUo959/aurora-cloudbank-symbolic/issues>
 - **CLI Help**: `aurora> help`
 - **API Health**: `GET /api/quantum-simulator/health`
 

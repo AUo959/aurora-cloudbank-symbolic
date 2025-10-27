@@ -30,7 +30,6 @@ from modules.quantum_simulator import (
 )
 from modules.quantum_simulator.api import router as quantum_simulator_router
 
-
 # ============================================================================
 # Quantum State Tests
 # ============================================================================

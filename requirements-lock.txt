@@ -11,7 +11,7 @@
 # Run 'python scripts/validate_dependencies.py' before changes
 # Run 'bash scripts/setup_environment.sh' for clean setup
 
-aiofiles==24.1.0
+aiofiles==25.1.0
 annotated-types==0.7.0
 anyio==4.11.0
 bandit==1.7.5

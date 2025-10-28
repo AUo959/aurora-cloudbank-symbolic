@@ -35,7 +35,7 @@
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
     "express-rate-limit": "^8.0.1",
-    "express-validator": "^7.2.1",
+    "express-validator": "^7.3.0",
     "helmet": "^8.1.0",
     "http": "^0.0.1-security",
     "jsdom": "^26.1.0",

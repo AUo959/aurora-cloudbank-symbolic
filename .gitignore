@@ -29,6 +29,9 @@ logs/
 data/
 *.log
 
+# Backup files (timestamped dependency snapshots)
+.backup/**/*.20*
+
 # Security and temporary files
 security_scan_report.json
 test_security_fixes.py

@@ -3,7 +3,7 @@
 
 # Core Framework Dependencies (Security Validated)
 fastapi==0.104.1                    # Latest stable with security patches
-uvicorn[standard]==0.24.0           # Production ASGI server
+uvicorn[standard]==0.38.0           # Production ASGI server
 pydantic==2.5.0                     # Data validation with security fixes
 
 # Quantum Computing (Verified Secure)
@@ -30,7 +30,7 @@ bandit==1.7.5                       # Security vulnerability scanner
 
 # Web Security
 python-multipart==0.0.18             # File upload handling
-python-jose[cryptography]==3.3.0    # JWT and JWS implementation
+python-jose[cryptography]==3.5.0    # JWT and JWS implementation
 httpx==0.25.2                       # HTTP client with security features
 
 # Monitoring & Logging (Security Enhanced)
@@ -39,7 +39,7 @@ prometheus-client==0.19.0           # Metrics collection
 python-json-logger==2.0.7           # JSON logging format
 
 # Environment & Configuration
-python-dotenv==1.1.1                # Environment variable management
+python-dotenv==1.2.1                # Environment variable management
 pyyaml==6.0.1                       # YAML parsing - security patched
 toml==0.10.2                        # Configuration file parsing
 

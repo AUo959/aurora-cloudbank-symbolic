@@ -1,0 +1,140 @@
+# Milestone: M1 - Memory Retrieval Module Foundation
+
+## Description
+
+The Memory Retrieval Module (MRM) Foundation milestone establishes the core infrastructure for context-aware memory retrieval in AuroraOS. This foundational work includes:
+
+- **Specification Documentation**: Complete technical specification defining requirements, architecture, and data structures
+- **Module Scaffolding**: Automated bootstrap script generating consistent module structure
+- **Core Components Implementation**: Development of Config, Store, Cache, Core, and API modules
+- **DLP Integration**: Full Data Lineage Protocol compliance with T1/SRB anchor tracking
+- **Testing Infrastructure**: Comprehensive test suite with unit and integration tests
+- **API Interface**: Python function interface for memory operations (foundation for future HTTP endpoints)
+
+This milestone delivers a production-ready foundation enabling intelligent memory storage and retrieval with multi-factor scoring (relevance, importance, recency, cultural sensitivity).
+
+## Target Completion Date
+
+**Due**: 2025-11-30
+
+## Associated Issues
+
+The following tasks are part of this milestone (to be created as GitHub issues):
+
+### Documentation Tasks
+- `spec_documentation`: Create MRM specification document (docs/AURORA_MRM_SPEC_v0.1.md)
+- `project_reference`: Create project master reference (PROJECT_MASTER_REFERENCE.md)
+- `implementation_instructions`: Create implementation guidelines (COPILOT_INSTRUCTIONS.md)
+
+### Scaffolding Tasks
+- `bootstrap_scaffold`: Create and execute bootstrap script (mrm_bootstrap.py)
+- `milestone_definition`: Create milestone file (.github/milestones/M1_foundation.yml)
+- `issue_matrix`: Create issue matrix (GITHUB_ISSUE_MATRIX.yml)
+
+### Implementation Tasks
+- `implement_config_module`: Implement configuration module (modules/memory_retrieval/config.py)
+- `implement_store_module`: Implement storage backend (modules/memory_retrieval/store.py)
+- `implement_cache_module`: Implement TTL cache with genealogy (modules/memory_retrieval/cache.py)
+- `implement_core_module`: Implement retrieval orchestration (modules/memory_retrieval/core.py)
+- `implement_api_module`: Implement API interface (modules/memory_retrieval/api.py)
+
+### Testing Tasks
+- `unit_tests`: Create unit tests for all modules
+- `integration_tests`: Create end-to-end integration tests
+- `dlp_compliance_tests`: Verify DLP tagging and anchor protocols
+- `performance_tests`: Validate query performance targets
+
+### Integration Tasks
+- `aumemmanager_integration`: Integrate with AuMemManager quantum memory system
+- `dlp_tracker_integration`: Integrate with NativeDLPTracker
+- `fastapi_preparation`: Prepare API structure for future FastAPI integration
+
+## Success Criteria
+
+This milestone will be considered complete when all of the following are achieved:
+
+### Code Completion
+- [ ] All five core modules implemented (config, store, cache, core, api)
+- [ ] Bootstrap script functional and generates correct structure
+- [ ] Package properly initialized with `__init__.py`
+
+### Quality Standards
+- [ ] Test coverage exceeds 80% across all modules
+- [ ] All code passes linting (Flake8 120-char limit)
+- [ ] Type hints present on all public functions
+- [ ] Docstrings complete for all public methods
+
+### Functional Requirements
+- [ ] Memory storage and retrieval working end-to-end
+- [ ] Vector similarity search functional
+- [ ] Multi-factor scoring implemented (relevance, importance, recency, cultural)
+- [ ] TTL-based caching operational with 60-80% hit rate
+- [ ] Context isolation enforced (memories separated by context_id)
+
+### Integration Requirements
+- [ ] DLP compliance verified (all operations tagged)
+- [ ] T1/SRB anchor protocols implemented
+- [ ] AuMemManager integration complete (with graceful fallback)
+- [ ] Export manifest generation functional
+
+### Performance Requirements
+- [ ] Cached query latency < 100ms (95th percentile)
+- [ ] Uncached query latency < 500ms (95th percentile)
+- [ ] Cache hit rate between 60-80% in test scenarios
+
+### Documentation Requirements
+- [ ] Specification document complete and accurate
+- [ ] Implementation instructions clear and comprehensive
+- [ ] Module docstrings match specification
+- [ ] Project master reference updated
+
+## Metrics and KPIs
+
+Track the following metrics throughout milestone execution:
+
+- **Task Completion Rate**: Percentage of associated issues completed
+- **Test Coverage**: Percentage of code covered by automated tests
+- **Bug Density**: Number of defects per 1000 lines of code
+- **Code Review Cycle Time**: Average time from PR submission to merge
+- **API Consistency**: Alignment between specification and implementation
+
+## Dependencies
+
+### Internal Dependencies
+- DLP tracking system (`src/core/native_dlp_export.py`)
+- AuMemManager module (optional, graceful degradation required)
+- Existing test infrastructure and pytest configuration
+
+### External Dependencies
+- Python 3.11+ runtime
+- pytest with async support
+- Standard library packages (uuid, hashlib, datetime, logging, etc.)
+- Optional: sentence-transformers for embeddings (can use mock initially)
+
+## Risk Factors
+
+### Technical Risks
+- **Vector similarity performance**: Linear search may not scale; mitigate with simple optimizations initially
+- **AuMemManager availability**: Ensure graceful degradation if module unavailable
+- **Cache hit rate**: May require tuning to achieve 60-80% target
+
+### Process Risks
+- **Scope creep**: Stick to foundation features; defer advanced features to Phase 2
+- **Integration complexity**: Test integrations early and often
+- **Documentation drift**: Keep docs synchronized with implementation
+
+## Next Steps After Milestone
+
+Upon completion of M1, the following enhancements are planned for subsequent milestones:
+
+- **M2: Advanced Features** - Custom weighting, cross-project retrieval, memory clustering
+- **M3: Performance Optimization** - Batch operations, async API, HNSW indexing
+- **M4: Production Hardening** - Monitoring, alerting, operational tools
+- **M5: Plugin Ecosystem** - Multiple embedding providers, storage backends, scoring strategies
+
+## Version History
+
+- **v0.1** (2025-10-27): Initial milestone definition
+  - Established scope and success criteria
+  - Defined associated tasks
+  - Set target completion date

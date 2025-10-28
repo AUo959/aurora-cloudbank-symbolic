@@ -2,7 +2,6 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-
 # This workflow checks out code, performs a Codacy security scan
 # and integrates the results with the
 # GitHub Advanced Security code scanning feature.  For more information on
@@ -10,9 +9,7 @@
 # https://github.com/codacy/codacy-analysis-cli-action.
 # For more information on Codacy Analysis CLI in general, see
 # https://github.com/codacy/codacy-analysis-cli.
-
 name: Codacy Security Scan
-
 on:
   push:
     branches: [ "main" ]
@@ -21,10 +18,8 @@ on:
     branches: [ "main" ]
   schedule:
     - cron: '44 11 * * 5'
-
 permissions:
   contents: read
-
 jobs:
   codacy-security-scan:
     permissions:
@@ -37,7 +32,6 @@ jobs:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
         uses: actions/checkout@v4
-
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@<full-length-commit-sha>
@@ -54,9 +48,8 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           # Use INT32_MAX (2147483647) to effectively disable the issue limit ("unlimited").
           max-allowed-issues: 2147483647
-
       # Upload the SARIF file generated in the previous step
-        uses: github/codeql-action/upload-sarif@b3d6b6e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2e2
+      - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif

@@ -171,7 +171,7 @@ class {Path(critical_file).stem.title()}Enhancements:
 # For now, this serves as a framework for manual enhancement integration
 
 '''
-with open(layer_path, 'w') as f:
+                    with open(layer_path, 'w') as f:
                         f.write(layer_content)
                     
                     result["layers_created"].append(str(layer_name))
@@ -317,7 +317,7 @@ with open(layer_path, 'w') as f:
         print("🧠 AURORA CLOUDBANK - SSMT v2.3: INTELLIGENCE-DRIVEN INTEGRATION")
         print("=" * 70)
         print("🎯 SSMT Intelligent Integrator v%s", self.results['ssmt_version'])
-        print(f"📊 Integration candidates: {len(self.integration_candidates}"))
+        print(f"📊 Integration candidates: {len(self.integration_candidates)}")
         
         if not self.integration_candidates:
             print("⚠️ No suitable integration candidates identified")
@@ -328,7 +328,7 @@ with open(layer_path, 'w') as f:
         
         # Process each candidate
         for candidate in self.integration_candidates:
-            print("")%s", '='*50")
+            print('=' * 50)
             print(f"🎯 Processing: {candidate['branch']}")
             print(f"   Quality Score: {candidate['quality_score']}")
             print(f"   Strategy: {candidate['integration_strategy']}")
@@ -340,7 +340,7 @@ with open(layer_path, 'w') as f:
                 successful_integrations += 1
                 print(f"✅ Integration successful!")
             else:
-                print(f"⚠️ Integration status: {integration_result.get('status', 'unknown'}"))
+                print(f"⚠️ Integration status: {integration_result.get('status', 'unknown')}")
         
         # Final validation
         print("\n🧪 Running system validation...")
@@ -355,9 +355,9 @@ with open(layer_path, 'w') as f:
         
         # Summary
         print(f"\n🎯 SSMT v2.3 SUMMARY:")
-        print(f"   Candidates processed: {len(self.integration_candidates}"))
+        print(f"   Candidates processed: {len(self.integration_candidates)}")
         print(f"   Successful integrations: {successful_integrations}")
-        print("   Success rate: %s%", (successful_integrations/len(self.integration_candidates)*100):.1f)
+        print(f"   Success rate: {(successful_integrations/len(self.integration_candidates)*100):.1f}%")
         
         # Save results
         self.results["status"] = "completed"

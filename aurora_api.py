@@ -64,6 +64,20 @@ except ImportError:
     QUANTUM_SIMULATOR_AVAILABLE = False
     QUANTUM_SIMULATOR_ROUTER = None
 
+# Import Thread Transfer Bridge integration
+try:
+    from modules.reflective_autonomy.thread_transfer import (
+        ThreadTransferBridge,
+        get_bridge_instance,
+        initialize_bridge
+    )
+    THREAD_BRIDGE_AVAILABLE = True
+except ImportError:
+    print("Thread Transfer Bridge not available - cross-thread continuity features disabled")
+    THREAD_BRIDGE_AVAILABLE = False
+    get_bridge_instance = None
+    initialize_bridge = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -445,6 +459,216 @@ async def agent_websocket_endpoint(websocket: WebSocket):
 
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
+
+
+# ==============================================================================
+# THREAD TRANSFER BRIDGE ENDPOINTS
+# ==============================================================================
+
+@app.get("/api/thread-bridge/status")
+@limiter.limit("20/minute")
+async def thread_bridge_status_endpoint():
+    """
+    Get Thread Transfer Bridge status
+    
+    Returns current bridge status, drift metrics, and companion thread health.
+    """
+    if not THREAD_BRIDGE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Thread Transfer Bridge not available"
+        )
+    
+    try:
+        bridge = get_bridge_instance()
+        status = bridge.get_status()
+        
+        return {
+            "success": True,
+            "status": status.status,
+            "drift": status.drift,
+            "drift_alert_level": status.drift_alert_level,
+            "companion_threads": status.companion_threads,
+            "synchronized_threads": status.synchronized_threads,
+            "last_handshake": status.last_handshake.isoformat() if status.last_handshake else None,
+            "continuity_seal": status.continuity_seal,
+            "anchor_seed": status.anchor_seed,
+            "ethics_protocol": status.ethics_protocol,
+            "context_tag": "thread_bridge_status",
+            "timestamp": "2025-10-28T00:00:00Z"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Bridge status error: {str(e)}")
+
+
+class HandshakeRequest(BaseModel):
+    """Request model for thread handshake"""
+    thread_id: str
+
+
+@app.post("/api/thread-bridge/handshake")
+@limiter.limit("10/minute")
+async def thread_bridge_handshake_endpoint(request: HandshakeRequest):
+    """
+    Initiate handshake sequence with a companion thread
+    
+    Executes the 5-stage handshake: INIT → VERIFY_ANCHOR → LOCK_DRIFT →
+    ALIGN_ETHICS → SYNC_COMPLETE
+    """
+    if not THREAD_BRIDGE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Thread Transfer Bridge not available"
+        )
+    
+    try:
+        bridge = get_bridge_instance()
+        result = bridge.handshake(request.thread_id)
+        
+        if not result.get("success"):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": result.get("error"),
+                    "stages": result.get("stages", []),
+                    "context_tag": "thread_bridge_handshake_failed"
+                }
+            )
+        
+        return {
+            "success": True,
+            "thread_id": result["thread_id"],
+            "timestamp": result["timestamp"].isoformat(),
+            "stages": result["stages"],
+            "context_tag": "thread_bridge_handshake_success"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Handshake error: {str(e)}")
+
+
+class ValidateRequest(BaseModel):
+    """Request model for continuity validation"""
+    source: str
+    target: str
+
+
+@app.post("/api/thread-bridge/validate")
+@limiter.limit("30/minute")
+async def thread_bridge_validate_endpoint(request: ValidateRequest):
+    """
+    Validate continuity between two threads before transfer
+    
+    Checks anchor alignment, drift levels, and ethics compatibility.
+    """
+    if not THREAD_BRIDGE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Thread Transfer Bridge not available"
+        )
+    
+    try:
+        bridge = get_bridge_instance()
+        validation = bridge.validate_continuity(request.source, request.target)
+        
+        return {
+            "success": True,
+            "valid": validation.get("valid"),
+            "source": validation["source"],
+            "target": validation["target"],
+            "timestamp": validation["timestamp"].isoformat(),
+            "checks": validation["checks"],
+            "error": validation.get("error"),
+            "context_tag": "thread_bridge_validation"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
+
+
+@app.get("/api/thread-bridge/companions")
+@limiter.limit("30/minute")
+async def thread_bridge_companions_endpoint():
+    """
+    Get list of all companion threads with their status
+    
+    Returns detailed information about each companion thread including
+    alignment status, drift levels, and last sync timestamp.
+    """
+    if not THREAD_BRIDGE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Thread Transfer Bridge not available"
+        )
+    
+    try:
+        bridge = get_bridge_instance()
+        companions = bridge.get_companion_threads()
+        
+        return {
+            "success": True,
+            "companion_threads": companions,
+            "count": len(companions),
+            "anchor_seed": bridge.capsule.get("anchor_seed"),
+            "context_tag": "thread_bridge_companions"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Companions query error: {str(e)}")
+
+
+class TransferRequest(BaseModel):
+    """Request model for context transfer"""
+    source: str
+    target: str
+    context_data: Dict[str, Any]
+
+
+@app.post("/api/thread-bridge/transfer")
+@limiter.limit("10/minute")
+async def thread_bridge_transfer_endpoint(request: TransferRequest):
+    """
+    Transfer context from source thread to target thread
+    
+    Performs full validation, ethics checks, and secure state transfer
+    between companion threads.
+    """
+    if not THREAD_BRIDGE_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Thread Transfer Bridge not available"
+        )
+    
+    try:
+        bridge = get_bridge_instance()
+        result = bridge.transfer_context(
+            source=request.source,
+            target=request.target,
+            context_data=request.context_data
+        )
+        
+        if not result.get("success"):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "error": result.get("error"),
+                    "validation": result.get("validation"),
+                    "context_tag": "thread_bridge_transfer_failed"
+                }
+            )
+        
+        return {
+            "success": True,
+            "source": result["source"],
+            "target": result["target"],
+            "timestamp": result["timestamp"].isoformat(),
+            "bytes_transferred": result["bytes_transferred"],
+            "drift_delta": result["drift_delta"],
+            "continuity_seal": result["continuity_seal"],
+            "context_tag": "thread_bridge_transfer_success"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Transfer error: {str(e)}")
+
 
 # Example quantum endpoint (stub)
 # @app.post("/quantum/vsa")

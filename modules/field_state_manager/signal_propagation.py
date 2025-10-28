@@ -14,7 +14,7 @@ DLP: context_tag=signal_propagation, symbolic_hash=FIELD_SIGNALS_v1
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class SignalResponse:
     responder_node: str
     capability_match: float
     proposed_synapse_id: Optional[str] = None
-    response_time: datetime = field(default_factory=datetime.utcnow)
+    response_time: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class Signal:
@@ -76,7 +76,7 @@ class Signal:
         self.reached_nodes: List[str] = [origin_node]
         self.potential_matches: List[PotentialMatch] = []
         self.responses: List[SignalResponse] = []
-        self.timestamp = datetime.utcnow()
+        self.timestamp = datetime.now(UTC)
         self.fulfilled = False
 
     def can_propagate(self) -> bool:

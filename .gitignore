@@ -228,3 +228,7 @@ auth_config.json
 .nexus/arbitration/entropy_*.json
 .nexus/divergences/secure_key_*.json
 .nexus/recursion/checkpoints/*.json
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

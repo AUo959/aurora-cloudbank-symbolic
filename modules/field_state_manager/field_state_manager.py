@@ -19,14 +19,9 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from .node_state import Need, NodeState
+from .pattern_detector import FieldCoherence, Pattern, PatternDetector, PatternRecommendation
 from .signal_propagation import SignalPropagator
 from .synapse_compression import CompressedSynapseRegistry, CompressionConfig, Synapse
-from .pattern_detector import (
-    PatternDetector,
-    Pattern,
-    FieldCoherence,
-    PatternRecommendation
-)
 
 logger = logging.getLogger(__name__)
 

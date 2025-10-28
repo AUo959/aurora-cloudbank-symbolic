@@ -1,0 +1,81 @@
+name: Auto Assign and Review
+
+on:
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, ready_for_review, labeled]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Auto-assign reviewers to PRs
+  assign-reviewers:
+    if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'ready_for_review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto assign reviewers
+        uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: '.github/auto_assign.yml'
+
+  # Auto-assign issues and PRs to repository owner
+  assign-to-owner:
+    if: (github.event_name == 'issues' && github.event.action == 'opened') || (github.event_name == 'pull_request' && github.event.action == 'opened')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign issue or PR to repository owner
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = context.issue.number;
+            
+            // Assign to repository owner as fallback/triage
+            await github.rest.issues.addAssignees({
+              owner,
+              repo,
+              issue_number: issueNumber,
+              assignees: [owner]
+            });
+            
+            console.log(`Assigned to repository owner: ${owner}`);
+
+  # Label-based assignment for priority issues
+  label-based-assignment:
+    if: (github.event_name == 'issues' || github.event_name == 'pull_request') && github.event.action == 'labeled'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign based on label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = context.issue.number;
+            const labelName = context.payload.label.name;
+            
+            // Priority label-based assignment
+            const labelAssignments = {
+              'bug': [owner],
+              'security': [owner],
+              'critical': [owner],
+              'blocker': [owner]
+            };
+            
+            if (labelAssignments[labelName]) {
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number: issueNumber,
+                assignees: labelAssignments[labelName]
+              });
+              
+              console.log(`Assigned to ${labelAssignments[labelName].join(', ')} based on label: ${labelName}`);
+            } else {
+              console.log(`No assignment rule for label: ${labelName}`);
+            }

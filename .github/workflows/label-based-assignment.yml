@@ -1,0 +1,75 @@
+name: Label-Based Auto-Assignment
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+
+jobs:
+  assign-by-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      
+    steps:
+      - name: Assign Bug or Security labeled issues to domain experts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const item = context.payload.issue || context.payload.pull_request;
+            const label = context.payload.label.name.toLowerCase();
+            const itemNumber = item.number;
+            const itemType = context.payload.issue ? 'issue' : 'pull_request';
+            
+            // Define assignees for different labels
+            const labelAssignments = {
+              'bug': ['AUo959'],  // Maintainer + QA group
+              'security': ['AUo959'],  // Maintainer + Security domain experts
+              'critical': ['AUo959'],  // Maintainer for critical issues
+              'blocker': ['AUo959']  // Maintainer for blocker issues
+            };
+            
+            // Check if the label matches any of our assignment rules
+            if (labelAssignments[label]) {
+              const assignees = labelAssignments[label];
+              
+              try {
+                // Add assignees to the issue or PR
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: itemNumber,
+                  assignees: assignees
+                });
+                
+                // For PRs, also request reviewers
+                if (itemType === 'pull_request') {
+                  await github.rest.pulls.requestReviewers({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: itemNumber,
+                    reviewers: assignees
+                  });
+                }
+                
+                console.log(`Successfully assigned ${label} labeled ${itemType} #${itemNumber} to ${assignees.join(', ')}`);
+                
+                // Add a comment to document the auto-assignment
+                const commentBody = `🤖 **Auto-Assignment**\n\nThis ${itemType} has been automatically assigned to the ${label} domain experts: ${assignees.map(a => `@${a}`).join(', ')}\n\n**Label:** \`${label}\`\n**Reason:** Label-based automatic assignment for quality assurance and proper domain expertise.`;
+                
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: itemNumber,
+                  body: commentBody
+                });
+                
+              } catch (error) {
+                console.log(`Assignment failed: ${error.message}`);
+              }
+            } else {
+              console.log(`Label '${label}' does not have automatic assignment rules configured.`);
+            }

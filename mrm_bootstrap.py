@@ -171,7 +171,7 @@ from typing import List, Optional, Tuple
 import uuid
 import math
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class MemoryStore:
@@ -213,7 +213,7 @@ class MemoryStore:
             "content": content,
             "embedding": embedding,
             "metadata": metadata,
-            "created_at": datetime.now().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
         }
         
         self._memories.append(memory)

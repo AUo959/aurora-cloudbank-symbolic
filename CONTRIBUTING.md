@@ -1,14 +1,8 @@
 # Contributing to Aurora CloudBank Symbolic# Contributing to Aurora Reflective Autonomy System
 
-
-
 Thank you for your interest in contributing to Aurora! This guide will help you get started and understand our development workflow.Thank you for your interest in contributing!
 
-
-
 ## 🚀 Quick Start## How to Contribute
-
-
 
 ### Prerequisites- Fork the repository
 

@@ -12,8 +12,9 @@ DLP: context_tag=test_pattern_detection, symbolic_hash=PATTERN_INTELLIGENCE_TEST
 """
 
 import pytest
+
 from modules.field_state_manager.field_state_manager import FieldStateManager
-from modules.field_state_manager.pattern_detector import Pattern, FieldCoherence
+from modules.field_state_manager.pattern_detector import FieldCoherence, Pattern
 
 
 @pytest.mark.unit

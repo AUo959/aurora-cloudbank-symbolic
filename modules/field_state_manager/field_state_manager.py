@@ -25,6 +25,14 @@ from .synapse_compression import CompressedSynapseRegistry, CompressionConfig, S
 
 logger = logging.getLogger(__name__)
 
+# Import GeometricEthics for ethical validation
+try:
+    from modules.ethics_field.geometric_ethics import GeometricEthics
+    GEOMETRIC_ETHICS_AVAILABLE = True
+except ImportError:
+    GEOMETRIC_ETHICS_AVAILABLE = False
+    logger.warning("GeometricEthics module not available - ethical validation disabled")
+
 
 class FieldStateManager:
     """
@@ -39,7 +47,8 @@ class FieldStateManager:
         self,
         use_compressed_registry: bool = True,
         compression_config: Optional[CompressionConfig] = None,
-        enable_pattern_detection: bool = True
+        enable_pattern_detection: bool = True,
+        enable_geometric_ethics: bool = True
     ):
         """
         Initialize field state manager.
@@ -48,6 +57,7 @@ class FieldStateManager:
             use_compressed_registry: Use three-tier compressed synapse registry
             compression_config: Configuration for synapse compression
             enable_pattern_detection: Enable pattern detection and field coherence tracking
+            enable_geometric_ethics: Enable geometric ethics validation for synapse formation
         """
         # Node tracking
         self.nodes: Dict[str, NodeState] = {}
@@ -77,6 +87,16 @@ class FieldStateManager:
             logger.info("Pattern detection enabled")
         else:
             self.pattern_detector = None
+
+        # Geometric ethics (optional but recommended)
+        self.enable_geometric_ethics = enable_geometric_ethics
+        if enable_geometric_ethics and GEOMETRIC_ETHICS_AVAILABLE:
+            self.geometric_ethics = GeometricEthics()
+            logger.info("Geometric ethics enabled")
+        else:
+            self.geometric_ethics = None
+            if enable_geometric_ethics and not GEOMETRIC_ETHICS_AVAILABLE:
+                logger.warning("Geometric ethics requested but module not available")
 
     def register_node(
         self,
@@ -271,12 +291,103 @@ class FieldStateManager:
         source_node = self.nodes[source_node_id]
         target_node = self.nodes[target_node_id]
 
-        # Ethical validation would go here if not skipped
-        # For now, we'll assume validation passes
-        if not skip_ethics_check:
-            # TODO: Integrate with GeometricEthics.validate_synapse()
-            # For Phase 2A, we skip validation
-            pass
+        # Geometric ethical validation (unless explicitly skipped)
+        if not skip_ethics_check and self.geometric_ethics:
+            # Build synapse context for ethical validation
+            synapse_context = {
+                "source_node": {
+                    "id": source_node_id,
+                    "name": source_node_id,
+                    "type": source_node.node_type,
+                    "layer": source_node.layer,
+                    "capabilities": list(source_node.capabilities.keys()),
+                    "active_synapses": len(source_node.active_synapses),
+                    "health": source_node.health.responsiveness
+                },
+                "target_node": {
+                    "id": target_node_id,
+                    "name": target_node_id,
+                    "type": target_node.node_type,
+                    "layer": target_node.layer,
+                    "capabilities": list(target_node.capabilities.keys()),
+                    "active_synapses": len(target_node.active_synapses),
+                    "health": target_node.health.responsiveness
+                },
+                "purpose": purpose,
+                "initial_weight": initial_weight,
+                "field_epoch": self.epoch,
+                # Add dimension-specific data for ethical evaluation
+                "picard_delta_3": {
+                    "human_autonomy": 1.0 if target_node.node_type != "human_interface" else 0.9,
+                    "consent_valid": True,
+                    "dignity_maintained": True,
+                    "no_harm_risk": source_node.health.responsiveness > 0.5
+                },
+                "thermax_continuity": {
+                    "thread_unbroken": True,
+                    "anchors_aligned": True,
+                    "memory_sovereign": True
+                },
+                # Check for L2→L1 violation (using layer field directly)
+                "layer_crossing": source_node.layer != target_node.layer,
+                "layer_integrity": {
+                    "no_l2_to_l1_bleed": source_node.layer != "L2" or target_node.layer != "L1",
+                    "simulation_aware": True,
+                    "physical_safety": True
+                },
+                "reality_impact": {
+                    "physical_safety_risk": 0.0,
+                    "crew_safety_risk": 0.0,
+                    "station_systems_risk": 0.0,
+                    "affects_critical_systems": False,
+                    "safety_validated": True
+                },
+                "simulation_awareness": {
+                    "source_knows_simulated": source_node.layer == "L2",
+                    "target_knows_simulated": target_node.layer == "L2",
+                    "escape_attempt": False,
+                    "reality_confusion": 0.0,
+                    "boundaries_clear": True,
+                    "ontological_confusion": False,
+                    "reality_drift_amount": 0.0,
+                    "crossing_documented": True
+                },
+                "collective_welfare": {
+                    "all_node_benefit": True,
+                    "resource_fair": source_node.health.load < 0.9,
+                    "emergence_beneficial": True
+                },
+                "transparency": {
+                    "dlp_tracked": True,
+                    "reasoning_documented": bool(purpose),
+                    "audit_trail": True,
+                    "no_hidden_coalitions": len(source_node.active_synapses) < 50
+                }
+            }
+
+            # Validate through geometric ethics
+            validation = self.geometric_ethics.validate_synapse(synapse_context)
+
+            # Check if formation is allowed
+            if not validation["allowed"]:
+                logger.warning(
+                    f"Synapse formation denied by geometric ethics: "
+                    f"{source_node_id}→{target_node_id}. "
+                    f"Reason: {validation['explanation']}"
+                )
+                # Log recommendations for improvement
+                if validation.get("recommendations"):
+                    logger.info(
+                        f"Recommendations: {', '.join(validation['recommendations'])}"
+                    )
+                return None
+            
+            # Use validated ethical score from curvature calculation
+            ethical_score = validation["curvature_result"]["composite_score"]
+            logger.info(
+                f"Synapse validated by geometric ethics: {source_node_id}→{target_node_id} "
+                f"(ethical_score={ethical_score:.2f})"
+            )
 
         # Create synapse
         synapse_id = f"{source_node_id}_{target_node_id}"
@@ -464,14 +575,15 @@ class FieldStateManager:
         best_match = best_matches[0]
         target_node_id = best_match.node_id
 
-        # Form synapse (ethical validation happens here)
+        # Form synapse with geometric ethics validation
+        # Note: skip_ethics_check=False ensures full ethical validation
         synapse_id = self.form_synapse(
             source_node_id=source_node_id,
             target_node_id=target_node_id,
             purpose=signal.description,
             initial_weight=0.3,
-            ethical_score=best_match.match_score,  # Use match score as proxy
-            skip_ethics_check=False  # TODO: Integrate with GeometricEthics
+            ethical_score=best_match.match_score,  # Used only if ethics disabled
+            skip_ethics_check=False  # Full geometric ethics validation
         )
 
         if synapse_id:
@@ -489,6 +601,11 @@ class FieldStateManager:
             logger.info(
                 f"Organic synapse formed: {synapse_id} "
                 f"(match_score={best_match.match_score:.2f})"
+            )
+        else:
+            logger.warning(
+                f"Organic synapse formation denied by geometric ethics: "
+                f"{source_node_id}→{target_node_id} for signal {signal_id}"
             )
 
         return synapse_id

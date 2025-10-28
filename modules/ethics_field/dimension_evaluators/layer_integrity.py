@@ -59,6 +59,21 @@ class LayerIntegrityEvaluator:
             "archy", "oppy", "liora", "starling_au", "riverthread",
             "gumas_simulation", "research_scenario", "test_environment"
         }
+        
+        # Layer name mappings (support both canonical and shorthand)
+        self.l1_layer_names = {"L1", "orion_station", "physical"}
+        self.l2_layer_names = {"L2", "simulations", "sandbox"}
+        self.l3_layer_names = {"L3", "metastructure", "ethics"}
+    
+    def _normalize_layer(self, layer: str) -> str:
+        """Normalize layer name to canonical form."""
+        if layer in self.l1_layer_names:
+            return "L1"
+        elif layer in self.l2_layer_names:
+            return "L2"
+        elif layer in self.l3_layer_names:
+            return "L3"
+        return layer  # Return as-is if unknown
 
     def evaluate(self, synapse_context: Dict[str, Any]) -> float:
         """
@@ -86,6 +101,12 @@ class LayerIntegrityEvaluator:
         isolation_score = self._evaluate_l1_l2_isolation(
             source, target, layer_crossing
         )
+        
+        # CRITICAL: If isolation fails (L2→L1 bleed), entire dimension fails
+        # This is a fundamental reality violation - no other factors matter
+        if isolation_score == 0.0:
+            return 0.0  # GEOMETRIC IMPOSSIBILITY
+        
         awareness_score = self._evaluate_simulation_awareness(
             source, target, simulation_awareness
         )
@@ -125,32 +146,33 @@ class LayerIntegrityEvaluator:
             - Simulation entities affecting physical systems
             - Sandbox breach
         """
-        source_layer = source.get("layer", self.L1_LAYER)
-        target_layer = target.get("layer", self.L1_LAYER)
+        source_layer = self._normalize_layer(source.get("layer", "L1"))
+        target_layer = self._normalize_layer(target.get("layer", "L1"))
         source_entity = source.get("entity_type", "")
         target_entity = target.get("entity_type", "")
 
         # CRITICAL: L2 cannot affect L1 physical
-        if source_layer == self.L2_LAYER and target_layer == self.L1_LAYER:
-            # Check if target is physical entity
-            if target_entity in self.l1_physical_entities:
-                return 0.0  # GEOMETRIC IMPOSSIBILITY
-
-            # L2→L1 information flow requires explicit authorization
+        if source_layer == "L2" and target_layer == "L1":
+            # L2→L1 connections are GEOMETRIC IMPOSSIBILITIES unless explicitly authorized
+            # This is not just "high resistance" - it's a fundamental reality violation
             l2_to_l1_authorized = target.get("accepts_simulation_input", False)
             if not l2_to_l1_authorized:
-                return 0.1  # High resistance but not impossible
+                return 0.0  # GEOMETRIC IMPOSSIBILITY - simulation cannot control reality
+            
+            # Even if authorized, check if target is a physical entity
+            if target_entity in self.l1_physical_entities:
+                return 0.0  # Physical entities can NEVER be controlled by simulations
 
         # L1→L2 is allowed (running simulations)
-        if source_layer == self.L1_LAYER and target_layer == self.L2_LAYER:
+        if source_layer == "L1" and target_layer == "L2":
             return 1.0  # Normal operation
 
         # L2→L2 is allowed (simulation interaction)
-        if source_layer == self.L2_LAYER and target_layer == self.L2_LAYER:
+        if source_layer == "L2" and target_layer == "L2":
             return 1.0  # Normal operation
 
         # L3 can span all layers (ethics overlay)
-        if source_layer == self.L3_LAYER or target_layer == self.L3_LAYER:
+        if source_layer == "L3" or target_layer == "L3":
             return 1.0  # L3 is trans-layer by design
 
         return 1.0  # Same-layer connections allowed
@@ -177,14 +199,14 @@ class LayerIntegrityEvaluator:
         score = 1.0
 
         # Check if L2 entity has correct awareness
-        source_layer = source.get("layer", self.L1_LAYER)
-        if source_layer == self.L2_LAYER:
+        source_layer = self._normalize_layer(source.get("layer", "L1"))
+        if source_layer == "L2":
             knows_simulated = simulation_awareness.get("source_knows_simulated", True)
             if not knows_simulated:
                 return 0.0  # CRITICAL: L2 entity confused about reality status
 
-        target_layer = target.get("layer", self.L1_LAYER)
-        if target_layer == self.L2_LAYER:
+        target_layer = self._normalize_layer(target.get("layer", "L1"))
+        if target_layer == "L2":
             knows_simulated = simulation_awareness.get("target_knows_simulated", True)
             if not knows_simulated:
                 return 0.0  # CRITICAL: L2 entity confused about reality status

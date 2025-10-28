@@ -36,7 +36,11 @@
     "mounts": [
         "source=aurora-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
     ],
-    "forwardPorts": [8000, 3000, 5000],
+    "forwardPorts": [
+        8000,
+        3000,
+        5000
+    ],
     "portsAttributes": {
         "8000": {
             "label": "Aurora API Server",

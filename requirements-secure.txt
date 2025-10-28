@@ -30,7 +30,7 @@ bandit==1.7.5                       # Security vulnerability scanner
 
 # Web Security
 python-multipart==0.0.18             # File upload handling
-python-jose[cryptography]==3.3.0    # JWT and JWS implementation
+python-jose[cryptography]==3.5.0    # JWT and JWS implementation
 httpx==0.25.2                       # HTTP client with security features
 
 # Monitoring & Logging (Security Enhanced)

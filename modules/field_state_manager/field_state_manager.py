@@ -15,7 +15,7 @@ DLP: context_tag=field_state_manager, symbolic_hash=FIELD_CONSCIOUSNESS_v1
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional
 
 from .node_state import Need, NodeState
@@ -64,8 +64,8 @@ class FieldStateManager:
 
         # Field state
         self.epoch = "T9"  # Current thread epoch
-        self.field_formation_time = datetime.utcnow()
-        self.last_pattern_check = datetime.utcnow()
+        self.field_formation_time = datetime.now(UTC)
+        self.last_pattern_check = datetime.now(UTC)
 
         # Signal propagation system
         self.signal_propagator = SignalPropagator(self)
@@ -288,7 +288,7 @@ class FieldStateManager:
                 target_node=target_node_id,
                 weight=initial_weight,
                 usage_count=0,
-                last_used=datetime.utcnow(),
+                last_used=datetime.now(UTC),
                 ethical_score=ethical_score,
                 success_rate=1.0
             )
@@ -300,7 +300,7 @@ class FieldStateManager:
                 target_node=target_node_id,
                 weight=initial_weight,
                 usage_count=0,
-                last_used=datetime.utcnow(),
+                last_used=datetime.now(UTC),
                 ethical_score=ethical_score,
                 success_rate=1.0
             )
@@ -339,7 +339,7 @@ class FieldStateManager:
             synapse = self.synapse_registry.get_synapse(synapse_id)
             if synapse:
                 synapse.usage_count += 1
-                synapse.last_used = datetime.utcnow()
+                synapse.last_used = datetime.now(UTC)
 
                 if success:
                     synapse.weight = min(1.0, synapse.weight + 0.1)
@@ -358,7 +358,7 @@ class FieldStateManager:
             if synapse_id in self.synapses:
                 synapse = self.synapses[synapse_id]
                 synapse.usage_count += 1
-                synapse.last_used = datetime.utcnow()
+                synapse.last_used = datetime.now(UTC)
 
                 if success:
                     synapse.weight = min(1.0, synapse.weight + 0.1)
@@ -408,7 +408,7 @@ class FieldStateManager:
             avg_node_health = 0.0
 
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "epoch": self.epoch,
             "nodes": {
                 node_id: node.to_dict()
@@ -531,7 +531,7 @@ class FieldStateManager:
         }
 
         # Update last check time
-        self.last_pattern_check = datetime.utcnow()
+        self.last_pattern_check = datetime.now(UTC)
 
         total_patterns = sum(len(p) for p in patterns.values())
         logger.info(f"Detected {total_patterns} emergent patterns in field")

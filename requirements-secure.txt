@@ -3,7 +3,7 @@
 
 # Core Framework Dependencies (Security Validated)
 fastapi==0.104.1                    # Latest stable with security patches
-uvicorn[standard]==0.24.0           # Production ASGI server
+uvicorn[standard]==0.38.0           # Production ASGI server
 pydantic==2.5.0                     # Data validation with security fixes
 
 # Quantum Computing (Verified Secure)

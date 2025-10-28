@@ -128,6 +128,17 @@ class ScenarioRequest(BaseModel):
 class StateVector(BaseModel):
     """Quantum state vector representation."""
 
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "json_schema_extra": {
+            "example": {
+                "amplitudes": [0.707 + 0j, 0.707 + 0j],
+                "num_qubits": 1,
+                "basis_labels": ["|0⟩", "|1⟩"],
+            }
+        }
+    }
+
     amplitudes: List[complex] = Field(..., description="Complex amplitudes")
     num_qubits: int = Field(..., ge=1, le=50, description="Number of qubits")
     basis_labels: Optional[List[str]] = Field(None, description="Basis state labels")
@@ -143,15 +154,6 @@ class StateVector(BaseModel):
         if not (0.99 <= norm_sq <= 1.01):  # Allow small numerical errors
             raise ValueError(f"State vector not normalized: norm² = {norm_sq}")
         return v
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "amplitudes": [0.707 + 0j, 0.707 + 0j],
-                "num_qubits": 1,
-                "basis_labels": ["|0⟩", "|1⟩"],
-            }
-        }
 
 
 class MeasurementResult(BaseModel):

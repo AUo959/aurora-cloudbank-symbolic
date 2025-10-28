@@ -1,0 +1,94 @@
+name: Auto-merge Admin PRs
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.pull_request.labels.*.name, 'auto-merge') &&
+      (contains(github.event.pull_request.labels.*.name, 'admin-approved') ||
+       github.actor == 'AUo959' ||
+       contains(github.event.pull_request.title, '#321//.') ||
+       contains(github.event.pull_request.title, '⬆️'))
+    
+    steps:
+      - name: Check PR status
+        id: pr-status
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            console.log('PR mergeable state:', pr.data.mergeable_state);
+            console.log('PR mergeable:', pr.data.mergeable);
+            
+            return {
+              mergeable: pr.data.mergeable,
+              state: pr.data.mergeable_state
+            };
+      
+      - name: Auto-approve PR
+        if: github.actor == 'AUo959'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                event: 'APPROVE',
+                body: '✅ Auto-approved by admin workflow'
+              });
+              console.log('PR approved');
+            } catch (error) {
+              console.log('Approval error (may already be approved):', error.message);
+            }
+      
+      - name: Enable auto-merge
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              merge_method: 'squash',
+              commit_title: context.payload.pull_request.title,
+              commit_message: 'Auto-merged by admin workflow'
+            });
+            console.log('PR merged successfully');
+      
+      - name: Delete branch
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              const branch = context.payload.pull_request.head.ref;
+              if (!branch.startsWith('main') && !branch.startsWith('master')) {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${branch}`
+                });
+                console.log(`Deleted branch: ${branch}`);
+              }
+            } catch (error) {
+              console.log('Branch deletion skipped:', error.message);
+            }

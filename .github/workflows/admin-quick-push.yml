@@ -1,0 +1,52 @@
+name: Quick Push to Main (Admin Bypass)
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: 'Commit message'
+        required: true
+        type: string
+      branch:
+        description: 'Source branch to merge'
+        required: true
+        type: string
+        default: 'sync/321-comprehensive-system-sync'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  admin-push:
+    runs-on: ubuntu-latest
+    if: github.actor == 'AUo959'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      
+      - name: Configure git
+        run: |
+          git config user.name "Aurora Admin Bot"
+          git config user.email "aurora-bot@users.noreply.github.com"
+      
+      - name: Merge branch to main
+        run: |
+          git fetch origin ${{ inputs.branch }}
+          git merge origin/${{ inputs.branch }} --no-ff -m "${{ inputs.commit_message }}"
+      
+      - name: Push to main
+        run: |
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Delete source branch
+        run: |
+          git push origin --delete ${{ inputs.branch }} || echo "Branch deletion skipped"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

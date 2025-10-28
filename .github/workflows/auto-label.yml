@@ -1,0 +1,58 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Check for keywords and apply labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const keywords = {
+              'security': ['security'],
+              'docs': ['docs', 'documentation'],
+              'enhancement': ['enhancement', 'feature'],
+              'critical': ['critical', 'urgent'],
+              'blocker': ['blocker', 'blocking']
+            };
+            
+            const item = context.payload.issue || context.payload.pull_request;
+            const title = item.title.toLowerCase();
+            const body = (item.body || '').toLowerCase();
+            const content = title + ' ' + body;
+            
+            const labelsToAdd = [];
+            
+            for (const [label, keywords_list] of Object.entries(keywords)) {
+              for (const keyword of keywords_list) {
+                if (content.includes(keyword)) {
+                  labelsToAdd.push(label);
+                  break;
+                }
+              }
+            }
+            
+            if (labelsToAdd.length > 0) {
+              const itemType = context.payload.issue ? 'issue' : 'pull_request';
+              const itemNumber = item.number;
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: itemNumber,
+                labels: labelsToAdd
+              });
+              
+              console.log(`Added labels: ${labelsToAdd.join(', ')} to ${itemType} #${itemNumber}`);
+            } else {
+              console.log('No matching keywords found.');
+            }

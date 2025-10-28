@@ -1,0 +1,109 @@
+name: Auto-assign Issues and Pull Requests
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Auto-assign to maintainer
+      uses: pozil/auto-assign-issue@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        assignees: AUo959
+        numOfAssignee: 1
+        
+    - name: Fallback assignment if primary maintainer unavailable
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fallbackAssignees = ['AUo959'];
+          const rotatingAssignees = ['AUo959'];
+          
+          // Get current issue or PR number
+          const issueNumber = context.issue.number;
+          const eventType = context.eventName;
+          
+          // Try primary assignee first
+          try {
+            if (eventType === 'issues') {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                assignees: fallbackAssignees
+              });
+            } else if (eventType === 'pull_request') {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: issueNumber,
+                reviewers: fallbackAssignees
+              });
+              
+              // Also assign the PR
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                assignees: fallbackAssignees
+              });
+            }
+            
+            console.log(`Successfully assigned ${eventType} #${issueNumber} to ${fallbackAssignees.join(', ')}`);
+          } catch (error) {
+            console.log(`Assignment failed: ${error.message}`);
+            
+            // Fallback to rotating assignment
+            const assigneeIndex = issueNumber % rotatingAssignees.length;
+            const selectedAssignee = rotatingAssignees[assigneeIndex];
+            
+            try {
+              if (eventType === 'issues') {
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  assignees: [selectedAssignee]
+                });
+              } else if (eventType === 'pull_request') {
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  assignees: [selectedAssignee]
+                });
+              }
+              
+              console.log(`Fallback: assigned ${eventType} #${issueNumber} to ${selectedAssignee}`);
+            } catch (fallbackError) {
+              console.log(`Fallback assignment also failed: ${fallbackError.message}`);
+            }
+          }
+          
+    - name: Add triage label
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const issueNumber = context.issue.number;
+          
+          try {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ['needs-triage', 'auto-assigned']
+            });
+            
+            console.log(`Added triage labels to #${issueNumber}`);
+          } catch (error) {
+            console.log(`Failed to add labels: ${error.message}`);
+          }

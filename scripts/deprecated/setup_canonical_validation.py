@@ -279,7 +279,7 @@ def main():
     
     # Run setup steps
     steps = [
-        ("Dependencies", lambda: check_dependencies()),
+        ("Dependencies", check_dependencies),
         ("Git Hooks", lambda: setup_git_hooks(repo_root)),
         ("Configuration", lambda: setup_config_files(repo_root)),
         ("Validator Scripts", lambda: create_validator_script(repo_root)),

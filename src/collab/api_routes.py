@@ -147,7 +147,8 @@ async def export_context(
     Creates a multi-repo capsule with linked repository info, shared anchors,
     and agent roster. Logs export with DLP tracking.
     """
-    logger.info("Exporting capsule for %s", request.repo_url)
+    safe_repo_url = request.repo_url.replace('\r', '').replace('\n', '')
+    logger.info("Exporting capsule for %s", safe_repo_url)
     
     try:
         # Parse repo URL

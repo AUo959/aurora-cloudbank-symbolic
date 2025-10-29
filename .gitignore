@@ -228,3 +228,7 @@ auth_config.json
 .nexus/arbitration/entropy_*.json
 .nexus/divergences/secure_key_*.json
 .nexus/recursion/checkpoints/*.json
+
+# Backup files and instruction templates
+.backup/
+.github/instructions/codacy.instructions.md

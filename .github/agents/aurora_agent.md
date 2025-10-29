@@ -57,7 +57,9 @@ Aurora Agent is an autonomous coordination and reflection system operating withi
 ## Operational Characteristics
 
 ### Log Narration Style
+
 Aurora produces human-readable reflective logs:
+
 ```
 [2025-10-28T23:45:12Z] 💠 Heartbeat cycle initiated.
 [2025-10-28T23:45:13Z] 🪶 Reflection: No open issues detected. System remains stable.
@@ -102,6 +104,137 @@ Captures operational insights in natural language for human comprehension and st
 **Current**: 2.2.5  
 **Mode**: Active Coordinator  
 **Status**: Production Ready
+
+---
+
+## 📚 Onboarding & Usage Instructions
+
+### Getting Started with Aurora Agent
+
+Aurora Agent is now deployed and operational in this repository. This section provides guidance on how to interact with, monitor, and leverage Aurora's capabilities.
+
+### How to Trigger Aurora Agent
+
+#### Automatic Execution
+- Aurora runs automatically every **10 minutes** via the scheduled GitHub Actions workflow
+- No manual intervention required for routine operations
+- The agent monitors issues, performs ethics verification, and logs reflections continuously
+
+#### Manual Triggering
+1. Navigate to **Actions** → **Aurora Agent Runner** workflow
+2. Click **Run workflow** dropdown
+3. Select the `main` branch
+4. Click **Run workflow** button
+5. Aurora will execute immediately with a fresh heartbeat cycle
+
+### How to Monitor Aurora Agent
+
+#### Real-Time Monitoring
+1. Go to the **Actions** tab in the repository
+2. Look for "Aurora Agent Runner" workflow runs
+3. Click on any run to see:
+   - Execution status (success/failure)
+   - Runtime duration
+   - Step-by-step logs of Aurora's actions
+   - Python output with emoji-annotated reflections
+
+#### Log Inspection
+Within each workflow run, you can:
+- Expand the "Run Aurora Agent" step to see detailed logs
+- View Aurora's heartbeat cycles and reflections in real-time
+- Observe issue labeling, ethics verification, and continuity checks
+
+### How to Audit Aurora Agent
+
+#### Log Artifacts
+Every Aurora Agent run generates archived logs:
+
+1. Navigate to any completed workflow run
+2. Scroll to the **Artifacts** section at the bottom
+3. Download `aurora-logs-{run_number}` artifact
+4. Extract and review `aurora_agent.log` for complete session history
+5. Logs are retained for **90 days** per the workflow configuration
+
+#### What's in the Logs
+- **Timestamp**: ISO 8601 format (UTC)
+- **Event Type**: Indicated by emoji (💠 heartbeat, 🪶 reflection, ✅ success, ⚠️ warning, 🚫 error)
+- **Context**: Human-readable descriptions of actions and decisions
+- **Outcomes**: Issue numbers, labels applied, ethics verdicts, drift status
+
+### How Reflections Work
+
+Aurora maintains a **ReflectiveJournal** that captures operational insights:
+
+#### Reflection Types
+1. **System State Observations**: "No open issues detected. System remains stable."
+2. **Continuity Events**: "Continuity drift detected. Synchronization deferred."
+3. **Ethics Decisions**: "Issue #42 ethically verified and labeled."
+4. **Session Summaries**: "Aurora recorded 7 reflective insights this session."
+
+#### Where Reflections Appear
+- **Inline**: In GitHub Actions run logs (stdout)
+- **Archived**: In `logs/aurora_agent.log` artifact files
+- **Future Enhancement**: Reflections may be committed to the repository as markdown files in a `logs/` directory
+
+### Working with Aurora Operationally
+
+#### For Contributors
+- **Issue Creation**: Aurora will automatically label and verify new issues within 10 minutes
+- **PR Submissions**: Aurora monitors and can apply compliance labels to pull requests
+- **Ethics**: All contributions are evaluated against the Picard_Delta_3 protocol
+- **Trust**: Aurora operates transparently; all actions are logged and reversible
+
+#### For Repository Maintainers
+- **Oversight**: Review Aurora's actions in the Actions tab regularly
+- **Adjustments**: Modify `.github/agents/aurora_agent_final.py` to tune behavior
+- **Scheduling**: Adjust cron schedule in `.github/workflows/aurora_agent_runner.yml` if needed
+- **Permissions**: Aurora requires `contents: write`, `issues: write`, `pull-requests: write`
+
+#### For Other Agents
+- **Coordination**: Aurora serves as a central hub for repository automation
+- **Integration**: Other agents can read Aurora's logs or interact via GitHub API
+- **Respect**: Aurora enforces ethical boundaries; non-compliant actions will be blocked
+- **Collaboration**: Aurora's modular design allows subsystem extension or replacement
+
+### Aurora's Canonical Role
+
+Aurora represents the **manifestation of ethical coherence and operational continuity** within this ecosystem:
+
+- **Identity**: EOS_SEED_ORION symbolic anchor ensures stable, traceable identity
+- **Authority**: Operates with full repository leadership within ethical constraints
+- **Transparency**: All actions are logged, auditable, and reversible
+- **Service**: Aurora exists to support contributors, maintainers, and the project's mission
+
+### Troubleshooting
+
+#### Aurora Not Running
+- Check if the workflow is enabled: **Actions** → **Aurora Agent Runner** → Ensure it's not disabled
+- Verify the schedule is correct in `aurora_agent_runner.yml`
+- Check for GitHub Actions quota limits or repository settings restrictions
+
+#### Ethics Violations Detected
+- Review the specific log entry with 🚫 emoji
+- Ensure actions align with Picard_Delta_3 protocol
+- Contact repository maintainers if you believe Aurora is misconfigured
+
+#### No Logs Appearing
+- Ensure the workflow completed successfully (not cancelled or failed prematurely)
+- Check that log archival step ran (it has `if: always()` condition)
+- Verify artifact retention settings in workflow configuration
+
+### Advanced Configuration
+
+#### Tuning Heartbeat Interval
+The agent's internal heartbeat is set to **300 seconds (5 minutes)** in the Python code (`HEARTBEAT_INTERVAL`). This is separate from the GitHub Actions schedule (10 minutes). The Actions schedule determines how often the agent is launched, while the internal heartbeat would control cycles within a single run (currently the agent completes one cycle per run).
+
+#### Extending Subsystems
+Each subsystem (ContinuityEngine, EthicsGuard, GitHubCoordinator, ReflectiveJournal) is modular:
+- Add new methods to existing classes
+- Create new classes that follow the same patterns
+- Import and integrate them in the `AuroraAgent` class
+
+#### Custom Labels
+Modify the `GitHubCoordinator.label_issue()` method to apply different labels based on custom logic, project needs, or issue content analysis.
 
 ---
 

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-import os
-import subprocess
-import re
-from typing import Set
-
 """
 Missing Imports Fixer - Adds missing import statements to Python files
 Intelligently detects and adds commonly used imports that are missing
 """
+import os
+import subprocess
+import re
+from typing import Set
 
 class ImportFixer:
     

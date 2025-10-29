@@ -86,6 +86,8 @@ def test_python_scripts_use_python_interpreter(devcontainer_dir):
             if ".py" in cmd and "scripts/" in cmd:
                 assert not cmd.strip().startswith("bash scripts/"), \
                     f"Python scripts in postCreateCommand should use python3, not bash in {config_file.name}"
+                assert "python3 " in cmd or "python " in cmd, \
+                    f"Python scripts should be executed with python3 in {config_file.name}"
 
 
 def test_prevent_rebuild_failures_script_exists(repo_root):

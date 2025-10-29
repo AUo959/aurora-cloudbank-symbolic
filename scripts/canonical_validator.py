@@ -57,7 +57,7 @@ class CanonicalSpec:
 
     # API Endpoints (Standardized)
     relay_endpoints = {
-        "ARCHY": "/api/relay/archy",
+        "ARCHY": "/api/relay/oppy",
         "OPPY": "/api/relay/oppy",
         "LIORA": "/api/relay/liora",
         "STARLING_AU": "/api/relay/starling",
@@ -251,7 +251,7 @@ class CanonicalValidator:
             agent_name = match.upper()
             if agent_name in self.canonical.relay_endpoints:
                 canonical_endpoint = self.canonical.relay_endpoints[agent_name]
-                current_endpoint = "/api/relay/archy"
+                current_endpoint = "/api/relay/oppy"
 
                 if current_endpoint != canonical_endpoint:
                     # Auto-fix case mismatches
@@ -265,7 +265,7 @@ class CanonicalValidator:
             else:
                 results.append(ValidationResult(
                     "api_endpoint_unknown_{match}", "ESCALATE", "MEDIUM",
-                    "Unknown API endpoint: /api/relay/archy",
+                    "Unknown API endpoint: /api/relay/oppy",
                     "Verify endpoint is required or use canonical relay endpoints"
                 ))
 

@@ -56,7 +56,7 @@ class L2MetaAgentBridge:
                 status="disconnected",
                 description="L2 formal logic/reasoning & arbitration engine, bridge coordinator",
                 capabilities=["architectural_planning", "bridge_coordination", "formal_logic", "arbitration"],
-                api_endpoint="/api/relay/archy",
+                api_endpoint="/api/relay/oppy",
             ),
             "OPPY": CustomGptAgent(
                 agent_id="OPPY",

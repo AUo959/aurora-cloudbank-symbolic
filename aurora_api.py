@@ -1128,7 +1128,7 @@ async def v2_predict_drift(drift_request: DriftPredictionRequest, request: Reque
             "predicted_drift": prediction.predicted_drift,
             "severity": prediction.severity.value,
             "confidence": prediction.confidence.value,
-            "horizon_hours": prediction.horizon_hours,
+            "prediction_horizon_hours": prediction.prediction_horizon_hours,
             "recommendations": prediction.recommendations,
             "context_tag": "v2_drift_predicted"
         }
@@ -1216,7 +1216,7 @@ async def v2_get_prediction_accuracy(request: Request):
     
     try:
         predictor = get_drift_predictor()
-        accuracy = await predictor.get_accuracy_metrics()
+        accuracy = await predictor.get_prediction_accuracy()
         
         return {
             "success": True,
@@ -1259,8 +1259,7 @@ async def v2_apply_correction(thread_id: str, predicted_drift: float, current_dr
                 {
                     "strategy": action.strategy.value,
                     "priority": action.priority,
-                    "description": action.description,
-                    "requires_approval": action.requires_manual_approval
+                    "description": action.description
                 }
                 for action in actions
             ],

@@ -42,19 +42,19 @@ class CapabilityManager:
         """(Placeholder) Probes the quantum simulation backend."""
         capability_name = "quantum_simulator"
         try:
-            # from modules.quantum_simulator import QuantumScenarioSimulator # Guarded import
+            # from modules.quantum_simulator import QuantumScenarioSimulator  # Guarded import
             
             start_time = time.time()
             # In a real implementation, this would run a simple, standardized circuit.
             # e.g., simulator = QuantumScenarioSimulator(); await simulator.run_benchmark()
-            time.sleep(0.15) # Simulate benchmark execution
+            time.sleep(0.15)  # Simulate benchmark execution
             latency = (time.time() - start_time) * 1000
             
             self._registry[capability_name] = CapabilityStatus(
                 available=True,
                 latency_ms=round(latency, 2),
-                error_rate=0.001, # Placeholder value
-                details={"backend": "qasm_simulator", "version": "0.12.0"} # Placeholder
+                error_rate=0.001,  # Placeholder value
+                details={"backend": "qasm_simulator", "version": "0.12.0"}  # Placeholder
             )
             logger.info(f"Capability '{capability_name}' is available (Latency: {latency:.2f}ms).")
         except ImportError:
@@ -65,18 +65,18 @@ class CapabilityManager:
         """(Placeholder) Probes the Clifford geometric algebra engine."""
         capability_name = "geometric_algebra"
         try:
-            # from modules.symbolic_core import GeometricAlgebraEngine # Guarded import
+            # from modules.symbolic_core import GeometricAlgebraEngine  # Guarded import
             
             start_time = time.time()
             # e.g., engine = GeometricAlgebraEngine(); engine.run_benchmark()
-            time.sleep(0.05) # Simulate benchmark execution
+            time.sleep(0.05)  # Simulate benchmark execution
             latency = (time.time() - start_time) * 1000
             
             self._registry[capability_name] = CapabilityStatus(
                 available=True,
                 latency_ms=round(latency, 2),
                 error_rate=0.0,
-                details={"library": "clifford", "version": "1.4.3"} # Placeholder
+                details={"library": "clifford", "version": "1.4.3"}  # Placeholder
             )
             logger.info(f"Capability '{capability_name}' is available (Latency: {latency:.2f}ms).")
         except ImportError:

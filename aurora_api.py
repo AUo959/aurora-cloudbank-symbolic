@@ -19,6 +19,14 @@ from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globall
 # Import ChatGPT Agent Mode integration
 from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 
+# Import Gemini Agent Mode integration
+try:
+    from src.integrations.gemini_agent_integration import gemini_agent_integration
+    GEMINI_AGENT_AVAILABLE = True
+except ImportError:
+    print("Gemini Agent not available - Gemini features disabled")
+    GEMINI_AGENT_AVAILABLE = False
+
 # Import centralized security configuration
 from src.middleware.fastapi_security import limiter, require_auth, secure_compare, security
 
@@ -478,6 +486,49 @@ async def agent_websocket_endpoint(websocket: WebSocket):
 
     except Exception as e:
         await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
+
+
+# ================================
+# Gemini Agent Mode Endpoints
+# ================================
+
+@app.get("/agent/gemini/tools")
+async def get_gemini_agent_tools():
+    """
+    Discover available agent tools for Gemini Agent Mode.
+    """
+    if not GEMINI_AGENT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Gemini Agent not available")
+    try:
+        tools_info = gemini_agent_integration.list_tools()
+        return JSONResponse(content={"tools": tools_info})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to discover Gemini tools: {str(e)}")
+
+
+@app.post("/agent/gemini/execute")
+async def execute_gemini_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Execute a Gemini agent tool, respecting the Symbolic Sandbox Protocol (SSP).
+    A 'dry_run' parameter is used to get an impact report before committing.
+    """
+    if not GEMINI_AGENT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Gemini Agent not available")
+
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+
+    try:
+        result = await gemini_agent_integration.handle_tool_call(
+            tool_name=request.tool_name,
+            params=request.parameters
+        )
+        return JSONResponse(content=result)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini tool execution failed: {str(e)}")
 
 
 # ==============================================================================

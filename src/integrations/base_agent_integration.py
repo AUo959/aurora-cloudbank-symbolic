@@ -5,7 +5,7 @@ Defines the base class for all AI agent integrations (e.g., ChatGPT, Gemini, Cla
 This promotes a unified, interoperable architecture for exposing system tools to different AI models.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Callable, Awaitable
+from typing import Dict, Any, List, Callable, Awaitable, Optional
 
 class BaseAgentIntegration(ABC):
     """
@@ -25,7 +25,13 @@ class BaseAgentIntegration(ABC):
         """
         pass
 
-    def register_tool(self, name: str, handler: Callable[..., Awaitable[Dict]], description: str, parameters: Dict[str, Any]):
+    def register_tool(
+        self,
+        name: str,
+        handler: Callable[..., Awaitable[Dict]],
+        description: str,
+        parameters: Dict[str, Any]
+    ):
         """
         Registers a tool for the agent.
         
@@ -42,7 +48,7 @@ class BaseAgentIntegration(ABC):
             "parameters": parameters,
         }
 
-    def get_tool(self, name: str) -> Dict[str, Any]:
+    def get_tool(self, name: str) -> Optional[Dict[str, Any]]:
         """Retrieves a registered tool by name."""
         return self._tools.get(name)
 

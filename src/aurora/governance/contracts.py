@@ -12,21 +12,46 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class VCCPreCondition(BaseModel):
     """Defines the required state before a contract can be executed."""
-    required_schemas: Dict[str, Type] = Field(default_factory=dict, description="Input data schemas that must be satisfied.")
-    initial_srb_state: str = Field(..., description="The expected Symbolic Reference Base (SRB) anchor state.")
+    required_schemas: Dict[str, Type] = Field(
+        default_factory=dict,
+        description="Input data schemas that must be satisfied."
+    )
+    initial_srb_state: str = Field(
+        ...,
+        description="The expected Symbolic Reference Base (SRB) anchor state."
+    )
+
 
 class VCCExecutionStep(BaseModel):
     """A single, required step in the computational path."""
-    tool_name: str = Field(..., description="The exact name of the agent tool or function to be called.")
-    context_tag: str = Field(..., description="The mandatory Data Lineage Protocol (DLP) context tag for this step.")
-    parameter_schema: Dict[str, Any] = Field(default_factory=dict, description="A schema to validate the parameters passed to the tool.")
+    tool_name: str = Field(
+        ...,
+        description="The exact name of the agent tool or function to be called."
+    )
+    context_tag: str = Field(
+        ...,
+        description="The mandatory Data Lineage Protocol (DLP) context tag for this step."
+    )
+    parameter_schema: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="A schema to validate the parameters passed to the tool."
+    )
+
 
 class VCCPostCondition(BaseModel):
     """Defines the state that must be achieved upon successful contract completion."""
-    final_srb_state: str = Field(..., description="The expected SRB anchor state after execution.")
-    output_validation_hash: str = Field(..., description="A symbolic hash of the final output to ensure integrity.")
+    final_srb_state: str = Field(
+        ...,
+        description="The expected SRB anchor state after execution."
+    )
+    output_validation_hash: str = Field(
+        ...,
+        description="A symbolic hash of the final output to ensure integrity."
+    )
+
 
 class ComputationalContract(BaseModel):
     """
@@ -34,11 +59,15 @@ class ComputationalContract(BaseModel):
     """
     contract_id: str = Field(..., description="A unique identifier for this contract.")
     version: str = Field("1.0.0", description="The version of the contract schema.")
-    description: str = Field("", description="A human-readable description of the contract's purpose.")
+    description: str = Field(
+        "",
+        description="A human-readable description of the contract's purpose."
+    )
     
     pre_conditions: VCCPreCondition
     execution_path: List[VCCExecutionStep]
     post_conditions: VCCPostCondition
+
 
 class ContractExecutor:
     """
@@ -83,8 +112,9 @@ class ContractExecutor:
             "success": True,
             "contract_id": self.contract.contract_id,
             "audit_trail": self.audit_log,
-            "final_output": "placeholder_output" # This would be the actual result
+            "final_output": "placeholder_output"  # This would be the actual result
         }
+
 
 # Example Usage (for demonstration)
 if __name__ == "__main__":

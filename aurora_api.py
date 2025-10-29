@@ -738,7 +738,7 @@ class RepositoryRegisterRequest(BaseModel):
 
 @app.post("/api/v2/nodes/register")
 @limiter.limit("30/minute")
-async def v2_register_node(request: NodeRegisterRequest):
+async def v2_register_node(node_request: NodeRegisterRequest, request: Request):
     """
     Register a new bridge node in the distributed constellation.
     
@@ -754,12 +754,12 @@ async def v2_register_node(request: NodeRegisterRequest):
     try:
         registry = get_node_registry()
         node = await registry.register_node(
-            hostname=request.hostname,
-            port=request.port,
-            region=request.region,
-            capacity=request.capacity,
-            version=request.version,
-            capabilities=request.capabilities or []
+            hostname=node_request.hostname,
+            port=node_request.port,
+            region=node_request.region,
+            capacity=node_request.capacity,
+            version=node_request.version,
+            capabilities=node_request.capabilities or []
         )
         
         return {
@@ -1091,7 +1091,7 @@ async def v2_execute_cross_repo_handshake(bridge_id: str, request: Request):
 
 @app.post("/api/v2/drift/predict")
 @limiter.limit("30/minute")
-async def v2_predict_drift(request: DriftPredictionRequest):
+async def v2_predict_drift(drift_request: DriftPredictionRequest, request: Request):
     """
     Predict future drift based on current features.
     
@@ -1107,28 +1107,28 @@ async def v2_predict_drift(request: DriftPredictionRequest):
         predictor = get_drift_predictor()
         
         features = DriftFeatures(
-            drift_velocity=request.drift_velocity,
-            drift_acceleration=request.drift_acceleration,
-            handshake_count=request.handshake_count,
-            average_handshake_duration=request.average_handshake_duration,
-            failed_handshake_ratio=request.failed_handshake_ratio,
-            time_of_day=request.time_of_day,
-            day_of_week=request.day_of_week,
-            thread_age_hours=request.thread_age_hours,
-            anchor_changes=request.anchor_changes,
-            sync_frequency=request.sync_frequency,
-            node_count=request.node_count
+            drift_velocity=drift_request.drift_velocity,
+            drift_acceleration=drift_request.drift_acceleration,
+            handshake_count=drift_request.handshake_count,
+            average_handshake_duration=drift_request.average_handshake_duration,
+            failed_handshake_ratio=drift_request.failed_handshake_ratio,
+            time_of_day=drift_request.time_of_day,
+            day_of_week=drift_request.day_of_week,
+            thread_age_hours=drift_request.thread_age_hours,
+            anchor_changes=drift_request.anchor_changes,
+            sync_frequency=drift_request.sync_frequency,
+            node_count=drift_request.node_count
         )
         
-        prediction = await predictor.predict_drift(features, request.thread_id)
+        prediction = await predictor.predict_drift(features, drift_request.thread_id)
         
         return {
             "success": True,
-            "thread_id": request.thread_id,
+            "thread_id": drift_request.thread_id,
             "predicted_drift": prediction.predicted_drift,
             "severity": prediction.severity.value,
             "confidence": prediction.confidence.value,
-            "horizon_hours": prediction.horizon_hours,
+            "prediction_horizon_hours": prediction.prediction_horizon_hours,
             "recommendations": prediction.recommendations,
             "context_tag": "v2_drift_predicted"
         }
@@ -1216,7 +1216,7 @@ async def v2_get_prediction_accuracy(request: Request):
     
     try:
         predictor = get_drift_predictor()
-        accuracy = await predictor.get_accuracy_metrics()
+        accuracy = await predictor.get_prediction_accuracy()
         
         return {
             "success": True,
@@ -1259,8 +1259,7 @@ async def v2_apply_correction(thread_id: str, predicted_drift: float, current_dr
                 {
                     "strategy": action.strategy.value,
                     "priority": action.priority,
-                    "description": action.description,
-                    "requires_approval": action.requires_manual_approval
+                    "description": action.description
                 }
                 for action in actions
             ],
@@ -1276,7 +1275,7 @@ async def v2_apply_correction(thread_id: str, predicted_drift: float, current_dr
 
 @app.post("/api/v2/layers/bridge")
 @limiter.limit("20/minute")
-async def v2_create_layer_bridge(request: LayerBridgeRequest):
+async def v2_create_layer_bridge(layer_request: LayerBridgeRequest, request: Request):
     """
     Create a multi-layer bridge (L1/L2/L3).
     
@@ -1299,17 +1298,17 @@ async def v2_create_layer_bridge(request: LayerBridgeRequest):
             "L2": BridgeLayer.L2,
             "L3": BridgeLayer.L3
         }
-        layer = layer_map.get(request.layer.upper())
+        layer = layer_map.get(layer_request.layer.upper())
         
         if not layer:
-            raise HTTPException(status_code=400, detail=f"Invalid layer: {request.layer}")
+            raise HTTPException(status_code=400, detail=f"Invalid layer: {layer_request.layer}")
         
         bridge = await layer_manager.create_bridge(
-            bridge_id=request.bridge_id,
+            bridge_id=layer_request.bridge_id,
             layer=layer,
-            source_id=request.source_id,
-            target_id=request.target_id,
-            thread_id=request.thread_id
+            source_id=layer_request.source_id,
+            target_id=layer_request.target_id,
+            thread_id=layer_request.thread_id
         )
         
         return {
@@ -1534,3 +1533,8 @@ async def v2_cascade_validate(thread_id: str, request: Request):
 
 # def quantum_vsa_endpoint(...):
 #     ...
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

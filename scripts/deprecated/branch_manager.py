@@ -60,9 +60,10 @@ class BranchManager:
     def get_branch_info(self, branch: str) -> Optional[BranchInfo]:
         """Get detailed information about a branch"""
         try:
-            # Get last commit info
+            # Get last commit info with explicit date format
             result = subprocess.run(
-                ["git", "-C", self.repo_path, "log", "-1", "--format=%H|%ci|%an", f"origin/{branch}"],
+                ["git", "-C", self.repo_path, "log", "-1", 
+                 "--date=format:%Y-%m-%d", "--format=%H|%cd|%an", f"origin/{branch}"],
                 capture_output=True,
                 text=True,
                 check=True
@@ -74,7 +75,7 @@ class BranchManager:
             commit_hash, commit_date, author = result.stdout.strip().split("|")
             
             # Calculate days old
-            commit_datetime = datetime.strptime(commit_date[:10], "%Y-%m-%d")
+            commit_datetime = datetime.strptime(commit_date, "%Y-%m-%d")
             days_old = (datetime.now() - commit_datetime).days
             
             # Check if merged

@@ -19,6 +19,8 @@ def devcontainer_dir(repo_root):
     return repo_root / ".devcontainer"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_devcontainer_configs_exist(devcontainer_dir):
     """Test that devcontainer configuration files exist."""
     assert devcontainer_dir.exists(), ".devcontainer directory should exist"
@@ -26,6 +28,8 @@ def test_devcontainer_configs_exist(devcontainer_dir):
     assert (devcontainer_dir / "post-create.sh").exists(), "post-create.sh should exist"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_devcontainer_json_valid(devcontainer_dir):
     """Test that devcontainer.json is valid JSON."""
     config_file = devcontainer_dir / "devcontainer.json"
@@ -36,6 +40,8 @@ def test_devcontainer_json_valid(devcontainer_dir):
     assert "name" in config, "devcontainer.json should have a name field"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_devcontainer_improved_json_valid(devcontainer_dir):
     """Test that devcontainer-improved.json is valid JSON."""
     config_file = devcontainer_dir / "devcontainer-improved.json"
@@ -47,6 +53,9 @@ def test_devcontainer_improved_json_valid(devcontainer_dir):
         assert "name" in config, "devcontainer-improved.json should have a name field"
 
 
+@pytest.mark.unit
+@pytest.mark.critical
+@pytest.mark.ci
 def test_python_scripts_use_python_interpreter(devcontainer_dir):
     """
     Test that Python scripts are executed with python3, not bash.
@@ -90,12 +99,16 @@ def test_python_scripts_use_python_interpreter(devcontainer_dir):
                     f"Python scripts should be executed with python3 in {config_file.name}"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_prevent_rebuild_failures_script_exists(repo_root):
     """Test that the prevent_rebuild_failures.py script exists."""
     script_path = repo_root / "scripts" / "prevent_rebuild_failures.py"
     assert script_path.exists(), "scripts/prevent_rebuild_failures.py should exist"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_prevent_rebuild_failures_is_python(repo_root):
     """Test that prevent_rebuild_failures.py has Python shebang."""
     script_path = repo_root / "scripts" / "prevent_rebuild_failures.py"
@@ -107,6 +120,8 @@ def test_prevent_rebuild_failures_is_python(repo_root):
             "prevent_rebuild_failures.py should have a Python shebang"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_post_create_script_is_bash(devcontainer_dir):
     """Test that post-create.sh has bash shebang."""
     script_path = devcontainer_dir / "post-create.sh"
@@ -118,6 +133,8 @@ def test_post_create_script_is_bash(devcontainer_dir):
             "post-create.sh should have a bash/sh shebang"
 
 
+@pytest.mark.unit
+@pytest.mark.ci
 def test_devcontainer_consistency(devcontainer_dir):
     """Test that both devcontainer files use consistent interpreter patterns."""
     main_config = devcontainer_dir / "devcontainer.json"

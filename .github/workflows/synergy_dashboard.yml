@@ -228,7 +228,9 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Auto-update: Synergy Dashboard Module (Issue #260)"
-            git push
+            # Extract branch name and push explicitly to avoid detached HEAD issues
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            git push origin HEAD:"${BRANCH_NAME}"
           fi
       
       - name: Upload dashboard artifact (for PRs)

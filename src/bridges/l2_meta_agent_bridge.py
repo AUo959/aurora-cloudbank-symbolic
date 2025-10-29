@@ -56,7 +56,7 @@ class L2MetaAgentBridge:
                 status="disconnected",
                 description="L2 formal logic/reasoning & arbitration engine, bridge coordinator",
                 capabilities=["architectural_planning", "bridge_coordination", "formal_logic", "arbitration"],
-                api_endpoint="/api/relay/oppy",
+                api_endpoint="/api/relay/liora",
             ),
             "OPPY": CustomGptAgent(
                 agent_id="OPPY",
@@ -65,7 +65,7 @@ class L2MetaAgentBridge:
                 status="disconnected",
                 description="L2 memory/data processing & system operations analyst, vector processor",
                 capabilities=["data_processing", "vector_analysis", "memory_operations", "system_monitoring"],
-                api_endpoint="/api/relay/oppy",
+                api_endpoint="/api/relay/liora",
             ),
             "LIORA": CustomGptAgent(
                 agent_id="LIORA",

@@ -237,3 +237,4 @@ auth_config.json
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
 .devcontainer/hooks/
+.rebuild_degraded_state.json

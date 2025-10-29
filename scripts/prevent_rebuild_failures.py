@@ -4,6 +4,7 @@ Aurora CloudBank Rebuild Failure Prevention System
 Comprehensive protection against DevContainer rebuild issues.
 """
 
+import hashlib
 import json
 import os
 import shutil
@@ -100,6 +101,11 @@ class RebuildFailurePrevention:
     def create_pre_rebuild_backup(self):
         """Create comprehensive backup before rebuild."""
         print("💾 Creating pre-rebuild backup...")
+        
+        # Ensure backup directory exists (setup step)
+        if not self.backup_dir.exists():
+            print("📁 Creating backup directory...")
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
         
         backup_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_subdir = self.backup_dir / f"pre_rebuild_{backup_timestamp}"
@@ -210,6 +216,9 @@ echo "✅ Pre-rebuild protection completed"
         
         Args:
             skip_dependencies: If True, skip dependency checks (useful during pre-rebuild)
+            
+        Returns:
+            tuple: (all_passed: bool, validation_results: dict)
         """
         print("🧪 Running validation suite...")
         
@@ -230,7 +239,7 @@ echo "✅ Pre-rebuild protection completed"
             self.log_status("validation_failed", f"Failed checks: {', '.join(failed_checks)}")
             print(f"❌ Validation failed: {', '.join(failed_checks)}")
         
-        return all_passed
+        return all_passed, validation_results
     
     def validate_dependencies(self) -> bool:
         """Validate dependency configuration."""
@@ -274,12 +283,10 @@ echo "✅ Pre-rebuild protection completed"
         return True
     
     def check_backup_systems(self) -> bool:
-        """Check backup system availability."""
+        """Check backup system availability (validation only - does not create directories)."""
         if not self.backup_dir.exists():
-            print("⚠️  Backup directory not found (will be created)")
-            # Create backup directory if it doesn't exist
-            self.backup_dir.mkdir(parents=True, exist_ok=True)
-            return True
+            print("⚠️  Backup directory not found")
+            return False
 
         # Check if we have recent backups (look in subdirectories too)
         backup_files = (
@@ -288,8 +295,8 @@ echo "✅ Pre-rebuild protection completed"
         )
 
         if not backup_files:
-            print("⚠️  No backup files found yet (will be created)")
-            return True
+            print("⚠️  No backup files found yet")
+            return False
 
         print(f"✅ Backup system check passed ({len(backup_files)} backup files found)")
         return True
@@ -304,13 +311,49 @@ def main():
         preventer.log_status("pre_rebuild_started", "Pre-rebuild protection starting")
         preventer.create_pre_rebuild_backup()
         preventer.install_rebuild_protection()
-        if not preventer.run_validation_suite(skip_dependencies=True):
-            print("⚠️  Some validation checks failed, but continuing...")
+        
+        # Run validation with DLP tracking for degraded state
+        all_passed, validation_results = preventer.run_validation_suite(skip_dependencies=True)
+        
+        if not all_passed:
+            # Log degraded state with DLP-style context tags and tracking
+            failed_checks = [k for k, v in validation_results.items() if not v]
+            degraded_state = {
+                "context_tag": "PRE_REBUILD_DEGRADED_STATE",
+                "t1_anchor": f"T1_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                "srb_anchor": "SRB:REBUILD_PROTECTION_DEGRADED",
+                "failed_checks": failed_checks,
+                "validation_results": validation_results,
+                "symbolic_hash": hashlib.sha256(
+                    json.dumps(validation_results, sort_keys=True).encode()
+                ).hexdigest()[:16],
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            print(f"⚠️  Pre-rebuild validation degraded state detected:")
+            print(f"   Context: {degraded_state['context_tag']}")
+            print(f"   Failed checks: {', '.join(failed_checks)}")
+            print(f"   Symbolic hash: {degraded_state['symbolic_hash']}")
+            
+            # Log degraded state to status file for tracking
+            preventer.log_status(
+                "pre_rebuild_degraded", 
+                f"Degraded state: {', '.join(failed_checks)}"
+            )
+            
+            # Save degraded state metadata for DLP traceability
+            degraded_state_file = preventer.workspace_root / ".rebuild_degraded_state.json"
+            with open(degraded_state_file, 'w') as f:
+                json.dump(degraded_state, f, indent=2)
+            
+            print("⚠️  Continuing with degraded state (pre-rebuild phase)...")
+        
         preventer.log_status("pre_rebuild_completed", "Pre-rebuild protection completed")
     else:
         # Regular validation mode - check everything including dependencies
         preventer.log_status("validation_started", "Regular validation starting")
-        if not preventer.run_validation_suite(skip_dependencies=False):
+        all_passed, _ = preventer.run_validation_suite(skip_dependencies=False)
+        if not all_passed:
             sys.exit(1)
         preventer.log_status("validation_completed", "Regular validation completed")
     

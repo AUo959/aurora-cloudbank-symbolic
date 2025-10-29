@@ -47,7 +47,7 @@ def demonstrate_aumemmanager_integration():
     # 2. Aurora symbolic memory with advanced quantum vector
     symbolic_memory_id = memory_manager.add_memory(
         content={
-            "symbolic_anchor": "PICARD_DELTA_3_ETHICS",
+            "symbolic_anchor": "Picard_Delta_3_ETHICS",
             "vector_state": [0.8, 0.6, 0.4, 0.2],
             "entanglement_target": "system_core",
             "temporal_coherence": 0.95,

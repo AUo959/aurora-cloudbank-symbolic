@@ -40,7 +40,7 @@ async def demo_tool_discovery(agent):
         print(f"   Parameters: {list(tool_def['parameters']['properties'].keys())}")
 
     print(f"\nSymbolic Anchors: {tools_info['symbolic_anchors']['anchor_seed']}")
-    print(f"Ethics Protocol: {tools_info['symbolic_anchors']['ethics_protocol']}")
+    print(f"Picard_Delta_3: {tools_info['symbolic_anchors']['ethics_protocol']}")
     print()
 
 async def demo_geometric_algebra(agent):

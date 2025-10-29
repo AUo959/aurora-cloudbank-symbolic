@@ -42,7 +42,7 @@ class Phase3SecurityInfrastructure:
         
         tag = self.dlp_tracker.tags[self.phase3_tag_id]
         tag.add_anchor_protocol("PHASE3_SECURITY_DEPLOY")
-        tag.add_anchor_protocol("PICARD_DELTA_3")
+        tag.add_anchor_protocol("Picard_Delta_3")
         tag.add_t1_srb_anchor("T1_INFRASTRUCTURE_SECURITY")
         tag.metadata.update({
             'context_tag': 'phase3_infrastructure_deployment',

@@ -251,7 +251,7 @@ class CanonicalValidator:
             agent_name = match.upper()
             if agent_name in self.canonical.relay_endpoints:
                 canonical_endpoint = self.canonical.relay_endpoints[agent_name]
-                current_endpoint = "/api/relay/{match}"
+                current_endpoint = "/api/relay/archy"
 
                 if current_endpoint != canonical_endpoint:
                     # Auto-fix case mismatches
@@ -265,7 +265,7 @@ class CanonicalValidator:
             else:
                 results.append(ValidationResult(
                     "api_endpoint_unknown_{match}", "ESCALATE", "MEDIUM",
-                    "Unknown API endpoint: /api/relay/{match}",
+                    "Unknown API endpoint: /api/relay/archy",
                     "Verify endpoint is required or use canonical relay endpoints"
                 ))
 

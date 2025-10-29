@@ -22,7 +22,7 @@ async function runDemo() {
     console.log(`Anchor: ${evaluator.anchor}`);
     console.log(`Parent: ${evaluator.parentAnchor}`);
     console.log(`Seed: ${evaluator.seed}`);
-    console.log(`Ethics Protocol: ${evaluator.ethics}`);
+    console.log(`Picard_Delta_3: ${evaluator.ethics}`);
     
     // Scenario 1: High-fairness, high-privacy action
     console.log('\n📊 SCENARIO 1: High-fairness, high-privacy action');

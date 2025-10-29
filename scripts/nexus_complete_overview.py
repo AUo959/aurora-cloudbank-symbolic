@@ -266,7 +266,7 @@ class NEXUSSystemOverview:
             "Cross-System Integration": "100% operational across all phases",
             "Thread Continuity": "Perfect anchor chain preservation",
             "Data Lineage": "Complete DLP tracking with audit trails",
-            "Security": "Cryptographic sealing with memory ethics protocols"
+            "Security": "Cryptographic sealing with memory Picard_Delta_3s"
         }
         
         for spec, value in specs.items():

@@ -125,6 +125,19 @@ if QUANTUM_SIMULATOR_AVAILABLE and QUANTUM_SIMULATOR_ROUTER:
         print(f"❌ Failed to integrate Quantum Simulator API routes: {e}")
         QUANTUM_SIMULATOR_AVAILABLE = False
 
+# Include Cross-Repo Collaboration API routes
+try:
+    from src.collab.api_routes import router as collab_router
+    app.include_router(collab_router)
+    print("✅ Cross-Repo Collaboration API routes integrated successfully")
+    COLLAB_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️  Cross-Repo Collaboration not available: {e}")
+    COLLAB_AVAILABLE = False
+except Exception as e:
+    print(f"❌ Failed to integrate Cross-Repo Collaboration API routes: {e}")
+    COLLAB_AVAILABLE = False
+
 ga = GeometricAlgebra()
 
 

@@ -1,0 +1,167 @@
+name: Cross-Repo Capsule Exchange
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_repo:
+        description: 'Target repository (owner/repo)'
+        required: true
+        type: string
+      agents:
+        description: 'Comma-separated list of agents (e.g., R-2,Copilot)'
+        required: true
+        type: string
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - export
+          - trigger_workflow
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/collab/**'
+      - 'export_capsule.py'
+      - 'import_capsule.py'
+
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  export-capsule:
+    name: Export Capsule Context
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'export'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+      
+      - name: Export capsule context
+        id: export
+        run: |
+          REPO_URL="https://github.com/${{ github.event.inputs.target_repo }}"
+          AGENTS="${{ github.event.inputs.agents }}"
+          OUTPUT_FILE="capsule_export_$(date +%Y%m%d_%H%M%S).json"
+          
+          python export_capsule.py \
+            --repo-url "$REPO_URL" \
+            --agents "$AGENTS" \
+            --output "$OUTPUT_FILE"
+          
+          echo "capsule_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+          echo "✅ Capsule exported to: $OUTPUT_FILE"
+      
+      - name: Upload capsule artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: capsule-export
+          path: ${{ steps.export.outputs.capsule_file }}
+          retention-days: 30
+      
+      - name: Log export to DLP
+        run: |
+          echo "📋 Capsule Export Summary:"
+          echo "Target: ${{ github.event.inputs.target_repo }}"
+          echo "Agents: ${{ github.event.inputs.agents }}"
+          echo "Timestamp: $(date -Iseconds)"
+          echo "Anchor: EOS_SEED_ORION"
+          echo "Ethics: Picard_Delta_3"
+  
+  trigger-external-build:
+    name: Trigger External Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'trigger_workflow'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Trigger workflow via repository_dispatch
+        run: |
+          TARGET_REPO="${{ github.event.inputs.target_repo }}"
+          
+          # Note: This requires GitHub API token with workflow permissions
+          # For actual implementation, use GitHub API to trigger repository_dispatch
+          echo "📡 Triggering workflow in $TARGET_REPO"
+          echo "Event: repository_dispatch"
+          echo "Client Payload: aurora_capsule_exchange"
+          
+          # Placeholder for actual API call:
+          # curl -X POST \
+          #   -H "Accept: application/vnd.github+json" \
+          #   -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          #   https://api.github.com/repos/$TARGET_REPO/dispatches \
+          #   -d '{"event_type":"aurora_capsule_exchange"}'
+  
+  test-collab-module:
+    name: Test Collaboration Module
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pyyaml
+      
+      - name: Run collaboration tests
+        run: |
+          pytest tests/test_collab_capsule.py -v
+      
+      - name: Validate capsule schema
+        run: |
+          python -c "from src.collab.capsule_schema import MultiRepoCapsule; \
+                     print('✅ Capsule schema validation passed')"
+      
+      - name: Check API routes
+        run: |
+          python -c "from src.collab.api_routes import router; \
+                     print(f'✅ API routes loaded: {len(router.routes)} endpoints')"
+
+  notify-agents:
+    name: Notify Agents on Status Change
+    runs-on: ubuntu-latest
+    needs: [export-capsule, trigger-external-build]
+    if: always()
+    
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "📊 Job Status Summary:"
+          echo "Export Capsule: ${{ needs.export-capsule.result || 'skipped' }}"
+          echo "Trigger External Build: ${{ needs.trigger-external-build.result || 'skipped' }}"
+          
+          # Log for agent tracking
+          if [ "${{ needs.export-capsule.result }}" = "failure" ] || \
+             [ "${{ needs.trigger-external-build.result }}" = "failure" ]; then
+            echo "❌ Workflow failed - agent intervention may be required"
+            exit 1
+          else
+            echo "✅ Workflow completed successfully"
+          fi

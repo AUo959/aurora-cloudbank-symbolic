@@ -75,6 +75,16 @@ jobs:
           echo "⚠️ Dependency validator not found, skipping Aurora-specific validation"
         fi
     
+    - name: Run Aurora dependency conflict detector
+      run: |
+        source .venv/bin/activate
+        if [[ -f "scripts/dependency_conflict_detector.py" ]]; then
+          echo "🔍 Running Aurora dependency conflict detector..."
+          python scripts/dependency_conflict_detector.py --scan --export dependency_conflicts.json
+        else
+          echo "⚠️ Conflict detector not found, skipping conflict detection"
+        fi
+    
     - name: Test critical imports
       continue-on-error: true
       run: |
@@ -89,6 +99,8 @@ jobs:
         name: dependency-report-python-${{ matrix.python-version }}
         path: |
           dependency_report.json
+          dependency_conflicts.json
+          .backup/requirements/dependency_report_*.json
           .venv/lib/python*/site-packages/*/METADATA
         retention-days: 7
     

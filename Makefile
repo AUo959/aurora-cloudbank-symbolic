@@ -25,6 +25,8 @@ validate: ## Validate dependencies and environment
 deps-check: validate ## Check for dependency conflicts
 	@echo "🧪 Checking for dependency conflicts..."
 	@source $(VENV_DIR)/bin/activate && pip check
+	@echo "🔍 Running Aurora dependency conflict detector..."
+	@source $(VENV_DIR)/bin/activate && python scripts/dependency_conflict_detector.py --scan
 
 deps-update: ## Update dependencies (with backup)
 	@echo "📦 Updating dependencies..."
@@ -70,6 +72,15 @@ clean: ## Clean up build artifacts and temporary files
 	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	@echo "✅ Environment cleaned"
+
+deps-fix: ## Auto-fix dependency conflicts (dry-run, use deps-fix-apply to apply)
+	@echo "🔧 Analyzing and suggesting dependency conflict fixes..."
+	@python3 scripts/dependency_conflict_detector.py --scan --fix
+
+deps-fix-apply: ## Apply automatic dependency conflict fixes
+	@echo "⚠️  Applying automatic dependency conflict fixes..."
+	@python3 scripts/dependency_conflict_detector.py --scan --fix --apply
+	@echo "✅ Fixes applied. Run 'make setup' to install updated dependencies"
 
 help: ## Show available targets
 	@echo "Aurora CloudBank Development Commands:"

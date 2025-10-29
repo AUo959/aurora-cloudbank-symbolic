@@ -1,9 +1,11 @@
 # Aurora CloudBank Dependency Management System
-## Prevention Strategy for Build Errors
+## R-2 Agent: Automated Dependency & Compatibility Sweeps
 
 ### 🎯 Overview
 
-This document outlines the comprehensive dependency management system implemented to prevent future build errors like the recent `httpx`/`httpcore`/`h11` version conflicts.
+This document outlines the comprehensive dependency management system implemented to prevent build errors and ensure dependency compatibility across the Aurora CloudBank ecosystem. 
+
+**Latest Enhancement (Issue #243):** Automated dependency conflict detection with PyPI integration and automatic resolution.
 
 ### 🛠️ Preventative Measures Implemented
 
@@ -170,3 +172,106 @@ make status
 ```
 
 This comprehensive system transforms reactive troubleshooting into proactive prevention, ensuring Aurora CloudBank maintains a stable development environment across all rebuilds and deployments.
+
+---
+
+## 🔍 Automated Conflict Detection (Issue #243)
+
+### New: Dependency Conflict Detector
+
+**Script:** `scripts/dependency_conflict_detector.py`  
+**Added:** 2025-10-29 (R-2 Agent)
+
+#### Features
+
+1. **Real-time Conflict Detection**
+   - Scans `requirements-lock.txt` for version incompatibilities
+   - Queries PyPI for package requirements
+   - Identifies critical vs. warning-level conflicts
+   - Exit code 1 for critical conflicts (blocks CI/CD)
+
+2. **Automatic Resolution**
+   - Suggests compatible versions within constraints
+   - Finds highest compatible version from PyPI
+   - Backs up files before applying changes
+   - Dry-run mode for previewing fixes
+
+3. **Comprehensive Reporting**
+   - JSON reports saved to `.backup/requirements/`
+   - Detailed conflict information with severity levels
+   - Resolution suggestions for each conflict
+   - Health status: healthy, warning, or critical
+
+#### Quick Start
+
+```bash
+# Scan for conflicts
+make deps-check
+
+# Preview automatic fixes
+make deps-fix
+
+# Apply fixes
+make deps-fix-apply
+make setup
+```
+
+#### Command Line Usage
+
+```bash
+# Detailed scan
+python3 scripts/dependency_conflict_detector.py --scan
+
+# Scan and export
+python3 scripts/dependency_conflict_detector.py --scan --export report.json
+
+# Show fixes (dry-run)
+python3 scripts/dependency_conflict_detector.py --scan --fix
+
+# Apply fixes
+python3 scripts/dependency_conflict_detector.py --scan --fix --apply
+```
+
+#### CI/CD Integration
+
+The conflict detector runs automatically in the `dependency-validation.yml` workflow:
+- On push when dependency files change
+- On pull requests
+- Uploads conflict reports as artifacts
+- Blocks merge if critical conflicts detected
+
+#### Recent Fixes
+
+**2025-10-29:** Fixed critical starlette/FastAPI conflict
+- **Problem:** FastAPI 0.117.1 requires starlette<0.49.0
+- **Found:** starlette==0.49.1 in requirements-lock.txt
+- **Fixed:** Updated to starlette==0.48.0
+- **Status:** ✅ Healthy (0 conflicts)
+
+#### Report Format
+
+```json
+{
+  "timestamp": "2025-10-29T12:16:49.064441",
+  "conflicts": [],
+  "total_packages": 58,
+  "conflict_count": 0,
+  "resolution_suggestions": [],
+  "health_status": "healthy"
+}
+```
+
+#### Best Practices
+
+1. **Before Committing**: Always run `make deps-check`
+2. **Review Fixes**: Use `make deps-fix` before applying
+3. **Monitor CI/CD**: Download and review conflict reports
+4. **Keep Backups**: Automatic backups in `.backup/requirements/`
+
+#### Future Enhancements (Issue #243 Roadmap)
+
+- **Phase 2:** Cross-repository dependency mapping
+- **Phase 3:** Dependency usage analytics
+- **Phase 4:** Automated dependency updates with testing
+
+See the [dependency detector script](../scripts/dependency_conflict_detector.py) for implementation details.

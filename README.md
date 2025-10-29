@@ -196,6 +196,15 @@ curl -X POST http://localhost:8000/quantum/simulate \
 - WebSocket support for real-time updates
 - CSRF protection and security validation
 
+**Code Quality System** ([Issue #258](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/258) - New!)
+- Automated flake8 + SonarCloud analysis
+- Severity-based violation classification (Critical/High/Medium/Low)
+- Auto-creates GitHub issues for critical violations
+- PR quality gates with detailed reports
+- Aurora DLP-compliant reflection reporting
+- 20+ test cases with full coverage
+- Comprehensive documentation (see [docs/CODE_QUALITY_SYSTEM.md](docs/CODE_QUALITY_SYSTEM.md))
+
 ### 🔧 Experimental Components
 
 **Vector Symbolic Architecture**
@@ -220,6 +229,11 @@ curl -X POST http://localhost:8000/quantum/simulate \
 - 30+ test files with async support
 - Type hints throughout for Python 3.11+
 - Flake8 compliant (120-char line limit)
+- **Automated Quality Analysis** ([Issue #258](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/258))
+  - Integrated flake8 + SonarCloud analysis
+  - Automatic issue creation for critical violations
+  - PR quality gates with detailed reports
+  - Aurora DLP-compliant reporting
 
 **Testing:**
 - 30+ integration tests for Thread Bridge v2
@@ -283,6 +297,10 @@ pytest -m quantum       # Quantum-specific tests
 # Code quality checks
 make lint              # Run linting (scoped to modernized code)
 make check             # Lint + test suite
+
+# Advanced code quality analysis (Issue #258)
+python src/core/code_quality_analyzer.py --output reports/quality.json
+make lint-all          # Comprehensive linting across all code
 ```
 
 ### Common Tasks

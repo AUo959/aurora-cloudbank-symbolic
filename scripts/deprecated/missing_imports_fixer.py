@@ -3,6 +3,7 @@
 Missing Imports Fixer - Adds missing import statements to Python files
 Intelligently detects and adds commonly used imports that are missing
 """
+import ast
 import os
 import subprocess
 import re
@@ -95,12 +96,23 @@ class ImportFixer:
         if lines[0].startswith('#!'):
             insert_position = 1
         
-        # Skip module docstring if present
-        if insert_position < len(lines) and lines[insert_position].strip().startswith('"""'):
-            for i in range(insert_position + 1, len(lines)):
-                if '"""' in lines[i]:
-                    insert_position = i + 1
-                    break
+        # Skip module docstring if present using AST
+        try:
+            tree = ast.parse(content)
+            docstring = ast.get_docstring(tree)
+            if docstring:
+                # Find the end line of the docstring
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Expr) and isinstance(node.value, (ast.Str, ast.Constant)):
+                        # Check if this is the module docstring (first statement)
+                        if tree.body and tree.body[0] == node:
+                            # The end line is node.end_lineno (1-indexed)
+                            # We want to insert after this line
+                            insert_position = max(insert_position, node.end_lineno)
+                            break
+        except SyntaxError:
+            # If AST parsing fails, fall back to simple heuristic
+            pass
         
         # Insert imports
         for import_statement in sorted(set(imports_to_add)):

@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-Simple test for dependency conflict detector
-Runs without pytest to test basic functionality
+Test suite for dependency conflict detector
+
+This can be run standalone (python3 tests/test_dependency_conflict_detector.py)
+or via pytest. Designed to work without pytest installed for basic validation.
 """
 
 import sys
 import json
+import tempfile
 from pathlib import Path
 
 # Add scripts directory to path
@@ -103,25 +106,28 @@ def test_export_report():
     detector = DependencyConflictDetector()
     report = detector.generate_report()
     
-    # Export to temp file
-    output_file = Path('/tmp/test_dependency_report.json')
-    result_file = detector.export_report(report, output_file)
+    # Export to temp file (cross-platform)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
+        output_file = Path(tmp.name)
     
-    assert result_file.exists(), "Export file should exist"
-    
-    # Read back and validate
-    with open(result_file) as f:
-        data = json.load(f)
-    
-    assert 'timestamp' in data, "Should have timestamp"
-    assert 'conflicts' in data, "Should have conflicts"
-    assert 'health_status' in data, "Should have health_status"
-    
-    # Cleanup
-    output_file.unlink(missing_ok=True)
-    
-    print("   ✅ Report export works correctly")
-    return True
+    try:
+        result_file = detector.export_report(report, output_file)
+        
+        assert result_file.exists(), "Export file should exist"
+        
+        # Read back and validate
+        with open(result_file) as f:
+            data = json.load(f)
+        
+        assert 'timestamp' in data, "Should have timestamp"
+        assert 'conflicts' in data, "Should have conflicts"
+        assert 'health_status' in data, "Should have health_status"
+        
+        print("   ✅ Report export works correctly")
+        return True
+    finally:
+        # Cleanup
+        output_file.unlink(missing_ok=True)
 
 
 def run_all_tests():

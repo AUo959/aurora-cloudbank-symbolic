@@ -61,13 +61,13 @@ def test_post_create_has_protected_deactivate():
     # Check that the protective checks are present
     assert "command -v deactivate" in content, \
         "post-create.sh should check for deactivate command availability"
-    assert 'VIRTUAL_ENV:-' in content or 'VIRTUAL_ENV-' in content, \
-        "post-create.sh should check if VIRTUAL_ENV is set"
+    assert '${VIRTUAL_ENV:-}' in content, \
+        "post-create.sh should check if VIRTUAL_ENV is set using '${VIRTUAL_ENV:-}' pattern"
     
     # Verify no unprotected deactivate calls
+    # We specifically look for the protective pattern used in the fix
     lines = content.split('\n')
-    in_conditional = False
-    conditional_depth = 0
+    found_protected_deactivate = False
     
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
@@ -76,22 +76,27 @@ def test_post_create_has_protected_deactivate():
         if stripped.startswith('#'):
             continue
         
-        # Track conditional blocks
-        if 'if command -v deactivate' in line or 'if [[ -n "${VIRTUAL_ENV' in line:
-            in_conditional = True
-            conditional_depth += 1
-        elif stripped.startswith('if '):
-            conditional_depth += 1
-        elif stripped == 'fi':
-            conditional_depth -= 1
-            if conditional_depth == 0:
-                in_conditional = False
-        
-        # Check for unprotected deactivate
+        # Look for standalone deactivate commands
         if re.match(r'^\s*deactivate\s*$', line):
-            assert in_conditional, \
+            # Check if the previous few lines contain the protective pattern
+            context_start = max(0, i - 5)
+            context = '\n'.join(lines[context_start:i])
+            
+            # Verify this deactivate is protected by the specific pattern we use
+            is_protected = (
+                'command -v deactivate' in context and
+                '${VIRTUAL_ENV:-}' in context
+            )
+            
+            assert is_protected, \
                 f"Found unprotected deactivate at line {i}. " \
-                f"All deactivate calls must be inside protective conditionals."
+                f"Deactivate must be protected by 'command -v deactivate' and VIRTUAL_ENV checks."
+            
+            found_protected_deactivate = True
+    
+    # Ensure we found at least one protected deactivate (confirming the fix is in place)
+    assert found_protected_deactivate, \
+        "Expected to find at least one protected deactivate call with the fix pattern"
 
 
 def test_post_create_strict_error_handling():

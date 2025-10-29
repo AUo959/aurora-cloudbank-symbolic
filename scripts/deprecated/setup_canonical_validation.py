@@ -190,7 +190,7 @@ if __name__ == "__main__":
     try:
         with open(validator_script, "w") as f:
             f.write(script_content)
-        os.chmod(validator_script, 0o755)
+        os.chmod(validator_script, 0o700)
         print(f"  ✅ {validator_script.name} created")
         return True
     except Exception as e:

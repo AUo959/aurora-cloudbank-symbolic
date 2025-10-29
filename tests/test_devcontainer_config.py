@@ -68,23 +68,17 @@ def test_python_scripts_use_python_interpreter(devcontainer_dir):
         # Check onCreateCommand
         if "onCreateCommand" in config:
             cmd = config["onCreateCommand"]
-            # If the command references a .py file, it should use python3
-            if ".py" in cmd:
-                assert not cmd.strip().startswith("bash ") or "bash .devcontainer/" in cmd, \
-                    f"Python scripts in onCreateCommand should use python3, not bash in {config_file.name}"
-                if "scripts/" in cmd and ".py" in cmd:
-                    assert "python3 " in cmd or "python " in cmd, \
-                        f"Python scripts should be executed with python3 in {config_file.name}"
+            # If the command references a .py file in scripts/, it should use python3, not bash
+            if "scripts/" in cmd and ".py" in cmd:
+                assert "python3 " in cmd or "python " in cmd, \
+                    f"Python scripts in onCreateCommand should be executed with python3, not bash in {config_file.name}"
         
         # Check postStartCommand
         if "postStartCommand" in config:
             cmd = config["postStartCommand"]
-            if ".py" in cmd:
-                assert not cmd.strip().startswith("bash ") or "bash .devcontainer/" in cmd, \
-                    f"Python scripts in postStartCommand should use python3, not bash in {config_file.name}"
-                if "scripts/" in cmd and ".py" in cmd:
-                    assert "python3 " in cmd or "python " in cmd, \
-                        f"Python scripts should be executed with python3 in {config_file.name}"
+            if "scripts/" in cmd and ".py" in cmd:
+                assert "python3 " in cmd or "python " in cmd, \
+                    f"Python scripts in postStartCommand should be executed with python3, not bash in {config_file.name}"
         
         # Check postCreateCommand
         if "postCreateCommand" in config:

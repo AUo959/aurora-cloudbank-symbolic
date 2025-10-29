@@ -145,6 +145,7 @@ class StateVector(BaseModel):
         return v
 
     class Config:
+        arbitrary_types_allowed = True
         json_schema_extra = {
             "example": {
                 "amplitudes": [0.707 + 0j, 0.707 + 0j],

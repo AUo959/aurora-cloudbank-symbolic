@@ -3,7 +3,6 @@ Tests for DevContainer configuration validation.
 Ensures codespace initialization scripts are correctly configured.
 """
 import json
-import os
 import pytest
 from pathlib import Path
 

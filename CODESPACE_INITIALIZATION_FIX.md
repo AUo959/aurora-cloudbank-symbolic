@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-The Aurora CloudBank Symbolic devcontainer was failing to start with the error "nothing will open". This occurred after a previous fix attempt that didn't fully resolve the underlying initialization timing issues.
+The Aurora CloudBank Symbolic devcontainer was failing to start, with the specific symptom being that the GitHub Codespace would not complete initialization. The user reported "nothing will open", indicating that the devcontainer initialization process was blocked, preventing the codespace from becoming available for use. This occurred after a previous fix attempt (PR #263) that didn't fully resolve the underlying initialization timing issues.
 
 ## Root Cause Analysis
 
@@ -117,6 +117,14 @@ Future changes should:
 The previous fix (PR #263) attempted to resolve this by:
 - Moving requirements-lock.txt to `.archived_requirements/`
 - Updating devcontainer configuration
-- Adding fallback logic with `|| echo`
+- Adding fallback logic with `|| echo 'fallback message'`
 
-This fix addresses the root cause by making the validation script itself more lifecycle-aware.
+**Why the Previous Fix Failed:**
+The fallback logic in the devcontainer.json (`|| echo 'fallback'`) was insufficient because:
+1. The Python script explicitly called `sys.exit(1)` when validation failed
+2. In bash, the exit code from the last command in a pipeline/chain determines the overall exit code
+3. Even though `|| echo 'fallback'` would run, the echo command returns 0, but the damage was already done - the script had already exited with code 1
+4. The devcontainer initialization process treats any non-zero exit from `onCreateCommand` as a fatal error that blocks container creation
+5. The fallback message was printed, but the container initialization was already aborted
+
+This fix addresses the root cause by making the validation script itself lifecycle-aware, ensuring it never exits with code 1 during the pre-rebuild phase.

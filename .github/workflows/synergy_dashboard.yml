@@ -219,6 +219,7 @@ jobs:
           EOF
           
       - name: Commit and push dashboard
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -229,3 +230,10 @@ jobs:
             git commit -m "Auto-update: Synergy Dashboard Module (Issue #260)"
             git push
           fi
+      
+      - name: Upload dashboard artifact (for PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: synergy-dashboard
+          path: .github/dashboards/synergy_dashboard.md

@@ -85,7 +85,7 @@ exit 0
 '''
     
     try:
-        with open(pre_commit_hook, "w") as f:
+        with open(pre_commit_hook, "w", encoding="utf-8") as f:
             f.write(hook_script)
         
         # Make the hook executable

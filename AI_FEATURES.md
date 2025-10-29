@@ -1,7 +1,6 @@
 # 🤖 AI Features - GitHub Models Integration
 
 ## Overview
-
 Aurora CloudBank leverages GitHub Models to provide intelligent, AI-powered development workflows. Our AI features are built using production-ready prompts that integrate seamlessly with the repository's development process.
 
 ---
@@ -9,26 +8,21 @@ Aurora CloudBank leverages GitHub Models to provide intelligent, AI-powered deve
 ## 🎯 AI Pull Request Summarizer
 
 ### Feature Description
-
 The **AI Pull Request Summarizer** is a high-value AI feature that automatically generates comprehensive, actionable summaries of pull requests by analyzing code changes, commit messages, and PR metadata.
 
 ### Key Benefits
-
 - **Time Savings**: Reduces reviewer time by providing instant, structured PR summaries
 - **Consistency**: Ensures all PRs have standardized, professional summaries
 - **Improved Code Review**: Highlights key changes, impacts, and areas requiring attention
 - **Better Documentation**: Creates permanent, searchable records of what each PR accomplishes
 
 ### Technical Implementation
-
 **Model**: OpenAI GPT-4.1  
 **Prompt File**: [`ai_pr_summarizer.prompt.yml`](https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/ai_pr_summarizer.prompt.yml)  
 **Temperature**: 0.3 (optimized for consistent, deterministic outputs)
 
 ### How It Works
-
 The AI PR Summarizer analyzes multiple dimensions of a pull request:
-
 1. **PR Title & Description** - Understanding the stated intent
 2. **Commit Messages** - Tracking the development narrative
 3. **Files Changed** - Identifying affected components
@@ -36,9 +30,7 @@ The AI PR Summarizer analyzes multiple dimensions of a pull request:
 5. **Impact Assessment** - Evaluating effects on architecture, performance, and functionality
 
 ### Output Format
-
 The AI generates structured summaries with the following sections:
-
 #### **Summary**
 A concise 1-2 sentence overview of the PR's purpose and accomplishments.
 
@@ -59,126 +51,135 @@ Testing requirements and considerations for validating the changes.
 ## 📋 Using the AI PR Summarizer
 
 ### Option 1: GitHub Models Playground
-
 1. Navigate to the [Models](https://github.com/AUo959/aurora-cloudbank-symbolic/models) section
 2. Open the `ai_pr_summarizer.prompt.yml` prompt
-3. Fill in the required variables:
-   - `{{pr_title}}` - The pull request title
-   - `{{pr_description}}` - The PR description text
-   - `{{commit_messages}}` - List of commit messages
-   - `{{files_changed}}` - List of modified files
-   - `{{diff_content}}` - Summary of the code changes
-4. Click "Run" to generate the summary
-5. Copy the generated summary and add it to your PR description
+3. Paste PR URL or metadata and run the prompt
 
-### Option 2: API Integration
+### Option 2: GitHub Actions Integration (suggested)
+- Trigger on `pull_request` events
+- Run the prompt with PR metadata and post the summary as a comment
 
-You can integrate the AI PR Summarizer into your CI/CD pipeline using the GitHub Models API:
+### Option 3: Local CLI (advanced)
+- Use the GitHub Models SDK or Azure AI Inference to invoke the prompt from a script
 
-```python
-import os
-from azure.ai.inference import ChatCompletionsClient
-from azure.ai.inference.models import SystemMessage, UserMessage
-from azure.core.credentials import AzureKeyCredential
+---
 
-# Initialize client
-endpoint = "https://models.github.ai/inference"
-model = "openai/gpt-4.1"
-token = os.environ["GITHUB_TOKEN"]
+## 🧠 Agent Actions (Automated Repo Tasks & Documentation)
 
-client = ChatCompletionsClient(
-    endpoint=endpoint,
-    credential=AzureKeyCredential(token)
-)
+### Feature Description
+The **Agent Actions** module automates routine repository tasks and documentation operations. It can generate or update docs, perform maintenance, and propose non-breaking improvements aligned with repo standards.
 
-# Load prompt from the repository
-system_prompt = """You are an expert code reviewer and technical writer..."""
-user_prompt = f"""Analyze this Pull Request and provide a comprehensive summary:
+### Key Capabilities
+- Automated documentation updates (README, API docs, architecture notes)
+- Repository maintenance (dependency checks, stale issue/PR review, workflow drift detection)
+- Code quality insights (style, lint, static analysis suggestions)
+- Task automation (branch cleanup, labels, milestones, templated comments)
 
-**PR Title**: {pr_title}
-**PR Description**: {pr_description}
-**Commit Messages**: {commit_messages}
-**Files Changed**: {files_changed}
-**Diff Summary**: {diff_content}
-"""
+### Technical Implementation
+**Prompt File**: Models → Prompts → `agent_actions.prompt.yml`  
+**Model**: OpenAI GPT-4.1 (recommended)  
+**Defaults**: Temperature 0.2-0.3, max tokens tuned for long outputs
 
-# Generate summary
-response = client.complete(
-    messages=[
-        SystemMessage(system_prompt),
-        UserMessage(user_prompt)
-    ],
-    temperature=0.3,
-    model=model
-)
+### Usage
+- Models UI: Select `agent_actions` and provide variables: `task_type`, `repository_context`, `scope`
+- CI/CD: Invoke nightly or on-demand to propose changes and open PRs with summary reports
 
-ai_summary = response.choices[0].message.content
-print(ai_summary)
-```
+### Input Variables
+- `task_type`: e.g., "update_docs", "repo_maintenance", "code_quality_audit"
+- `repository_context`: brief summary or links to modules/areas to consider
+- `scope`: constraints such as folders, file globs, or components
 
-### Option 3: GitHub Actions Workflow
+### Output
+- Action plan (steps, commands)
+- Risk/mitigation
+- Expected outcomes and validation checks
+- Structured YAML output suitable for ingestion by pipelines
 
-Create a workflow file `.github/workflows/ai_pr_summary.yml`:
+### Example Workflow Suggestions
+- Nightly maintenance plan → open issue with tasks checklist
+- Pre-release doc sweep → update changelog snippets and README badges
+- Weekly label hygiene → apply standardized labels and close stale threads
 
-```yaml
-name: AI PR Summary Generator
+---
 
-on:
-  pull_request:
-    types: [opened, synchronize]
+## 📝 Changelog Automation (Release Notes from PRs/Commits)
 
-jobs:
-  generate-summary:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Generate AI Summary
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Extract PR details
-          # Call GitHub Models API with ai_pr_summarizer prompt
-          # Post summary as PR comment
-          echo "AI Summary generation workflow"
-```
+### Feature Description
+The **Changelog Automation** feature generates high-quality release notes and CHANGELOG.md updates from commits, PRs, and linked issues. It categorizes changes and produces a release summary suitable for GitHub Releases.
+
+### Technical Implementation
+**Prompt File**: Models → Prompts → `changelog_automation.prompt.yml`  
+**Model**: OpenAI GPT-4.1 (or compatible)  
+**Conventions**: Follows Keep a Changelog + SemVer categories
+
+### Usage
+- Provide variables: `version`, `start_date`, `end_date`, `commit_list`, `pr_list`, `issue_list`
+- Output includes a CHANGELOG section and a concise GitHub Release body
+
+### Categories
+- Features, Enhancements, Bug Fixes, Breaking Changes, Documentation, Chores
+
+### Output
+- Markdown section for CHANGELOG.md
+- Release summary (2-3 sentences)
+- Migration notes for breaking changes
+- Contributor acknowledgments and linked references
+
+### Example Workflow Suggestions
+- On tag push: generate release notes → update CHANGELOG.md → create GitHub Release
+- On weekly cadence: draft release notes PR for human review
+
+---
+
+## 🚦 Intelligent Code Triage (Issues/PRs Prioritization)
+
+### Feature Description
+The **Intelligent Code Triage** system classifies issues and pull requests by urgency, risk, and relevance. It suggests labels, owners, and next steps to streamline backlog management.
+
+### Technical Implementation
+**Prompt File**: Models → Prompts → `code_triage.prompt.yml`  
+**Model**: OpenAI GPT-4.1 (or compatible)  
+**Integration**: Optional webhook/Action to auto-comment with triage JSON and apply labels
+
+### Inputs
+- `item_type`, `item_number`, `title`, `description`, `author`, `current_labels`, `comment_count`, `diff_summary`
+
+### Outputs
+- Priority: Critical/High/Medium/Low with justification
+- Risk assessment: security, breaking, architectural, dependency impacts
+- Relevance score (1-10) and suggested labels
+- Recommended actions, estimated effort, dependencies, reviewer suggestions
+- Structured JSON for automation (labeling, routing, dashboards)
+
+### Example Workflow Suggestions
+- On new issue/PR opened: run triage → auto-apply labels and mention owners
+- Daily triage digest: summary of Critical/High items for maintainers
 
 ---
 
 ## 🔧 Best Practices
 
 ### For PR Authors
-
 1. **Provide Context**: Write clear PR titles and descriptions to help the AI understand intent
 2. **Meaningful Commits**: Use descriptive commit messages that explain the "why" behind changes
 3. **Review AI Output**: Always review and refine AI-generated summaries before finalizing
 4. **Update as Needed**: Regenerate summaries when significant changes are made to the PR
 
 ### For Reviewers
-
 1. **Use as Starting Point**: Treat AI summaries as helpful context, not replacement for thorough review
 2. **Verify Claims**: Cross-check AI assessments against actual code changes
 3. **Provide Feedback**: If AI summaries are inaccurate, note what was missed for future improvements
 
 ### For Repository Maintainers
-
-1. **Standardize Usage**: Encourage consistent use of AI summaries across all PRs
-2. **Monitor Quality**: Regularly review AI-generated summaries for accuracy and usefulness
-3. **Iterate on Prompts**: Update the prompt based on team feedback and evolving needs
+1. **Standardize Usage**: Encourage consistent use of AI across PRs and releases
+2. **Monitor Quality**: Regularly review AI outputs for accuracy and usefulness
+3. **Iterate on Prompts**: Update prompts based on team feedback and evolving needs
 4. **Track Metrics**: Measure time savings and review quality improvements
 
 ---
 
 ## 🚀 Future AI Features
-
 The AI PR Summarizer is the first of many AI-powered features planned for Aurora CloudBank:
-
 - **AI Code Review Assistant**: Automated code quality analysis and suggestions
 - **AI Documentation Generator**: Automatic generation of API documentation
 - **AI Test Case Suggester**: Intelligent test case recommendations based on code changes
@@ -188,7 +189,6 @@ The AI PR Summarizer is the first of many AI-powered features planned for Aurora
 ---
 
 ## 📚 Additional Resources
-
 - [GitHub Models Documentation](https://docs.github.com/github-models/about-github-models)
 - [OpenAI GPT-4.1 Model Card](https://github.com/marketplace/models/catalog)
 - [Prompt Engineering Best Practices](https://docs.github.com/github-models/use-github-models/storing-prompts-in-github-repositories)
@@ -197,9 +197,7 @@ The AI PR Summarizer is the first of many AI-powered features planned for Aurora
 ---
 
 ## 💡 Contributing
-
-Have ideas for improving the AI PR Summarizer or suggestions for new AI features? We welcome contributions!
-
+Have ideas for improving these AI features or suggestions for new ones? We welcome contributions!
 1. Review the [Contributing Guidelines](CONTRIBUTING.md)
 2. Open an issue to discuss your proposed changes
 3. Submit a PR with prompt improvements or new features

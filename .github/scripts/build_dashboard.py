@@ -1,39 +1,61 @@
 #!/usr/bin/env python3
-"""Build Synergy Dashboard from registry and repo files with Prometheus/OpenTelemetry metrics."""
+"""Build Synergy Dashboard from registry and repo files with Prometheus/OpenTelemetry metrics.
 
+Refinements:
+- Support new performance metrics: cpu_usage, memory_footprint_mb, uptime_hours, success_rate
+- Add safe handling for missing/empty metrics and fields
+- Render additional columns in docs/DASHBOARD.md
+"""
+
+from __future__ import annotations
 import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
-import datetime
+from typing import Dict, List, Optional, Any
+import datetime as dt
 import urllib.parse
 
 try:
-    import requests
+    import requests  # type: ignore
 except Exception:
-    requests = None  # Fallback when requests isn't available in GH Actions runtime
+    requests = None  # Fallback when requests isn't available
 
 # -----------------------
 # Configuration
 # -----------------------
+# PROMETHEUS_QUERY_URL should point to the Prometheus HTTP API /api/v1/query endpoint
 PROMETHEUS_QUERY_URL = os.getenv("PROMETHEUS_QUERY_URL", "http://localhost:9090/api/v1/query")
-# Optional: endpoint that exposes OTel metrics via Prometheus-compatible exporter
-OTEL_METRICS_ENDPOINT = os.getenv("OTEL_METRICS_ENDPOINT", None)
-# A label or prefix that maps repo components to metrics labels
+# Range window for rate/avg queries
+WINDOW = os.getenv("PROMQL_WINDOW", "5m")
+# Metric label key that maps components to metrics series
 COMPONENT_LABEL_KEY = os.getenv("COMPONENT_LABEL_KEY", "component")
 
-# Expected Prometheus metric names (override via env if your deployment differs)
+# Optional metric names (override via env if your deployment differs)
 METRIC_INVOCATIONS = os.getenv("METRIC_INVOCATIONS", "component_invocations_total")
 METRIC_ERRORS = os.getenv("METRIC_ERRORS", "component_errors_total")
-METRIC_LATENCY = os.getenv("METRIC_LATENCY", "component_response_time_seconds_sum")
+METRIC_LATENCY_SUM = os.getenv("METRIC_LATENCY", "component_response_time_seconds_sum")
 METRIC_LATENCY_COUNT = os.getenv("METRIC_LATENCY_COUNT", "component_response_time_seconds_count")
 
-# Prometheus range window for point-in-time rate/avg queries (PromQL subquery window)
-WINDOW = os.getenv("PROMQL_WINDOW", "5m")
+# New metric names for CPU/Memory/Uptime/Success Rate if available in Prometheus
+METRIC_CPU = os.getenv("METRIC_CPU", "component_cpu_usage_percent")
+METRIC_MEM = os.getenv("METRIC_MEM", "component_memory_footprint_megabytes")
+METRIC_UPTIME = os.getenv("METRIC_UPTIME", "component_uptime_hours")
+METRIC_SUCCESS_RATE = os.getenv("METRIC_SUCCESS_RATE", "component_success_rate_percent")
+
+ROOT = Path(__file__).resolve().parents[2]  # repo root
+DOCS_DASHBOARD = ROOT / "docs" / "DASHBOARD.md"
+REGISTRY_PATH = ROOT / ".github" / "registry" / "registry.json"
+
+# -----------------------
+# Helpers
+# -----------------------
+
+def now_iso() -> str:
+    return dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
 
-def safe_requests_get(url: str, params: Optional[Dict] = None, timeout: int = 8) -> Optional[dict]:
+def safe_requests_get(url: str, params: Optional[Dict[str, Any]] = None, timeout: int = 8) -> Optional[dict]:
     if requests is None:
         return None
     try:
@@ -45,13 +67,12 @@ def safe_requests_get(url: str, params: Optional[Dict] = None, timeout: int = 8)
         return None
 
 
-def build_promql_rate(metric: str, component: str) -> str:
-    comp = urllib.parse.quote(component)
-    return f"sum(rate({metric}{{{COMPONENT_LABEL_KEY}=\"{component}\"}}[{WINDOW}]))"
-
-
 def build_promql_sum(metric: str, component: str) -> str:
-    return f"sum({metric}{{{COMPONENT_LABEL_KEY}=\"{component}\"}})"
+    return f'sum({metric}{{{COMPONENT_LABEL_KEY}="{component}"}})'
+
+
+def build_promql_rate(metric: str, component: str) -> str:
+    return f'sum(rate({metric}{{{COMPONENT_LABEL_KEY}="{component}"}}[{WINDOW}]))'
 
 
 def query_prometheus_scalar(query: str) -> Optional[float]:
@@ -60,190 +81,200 @@ def query_prometheus_scalar(query: str) -> Optional[float]:
         return None
     result = data.get("data", {}).get("result", [])
     if not result:
-        return 0.0
-    # Instant vector result: take first sample value
+        return None
     try:
-        value = result[0].get("value")
-        if isinstance(value, list) and len(value) >= 2:
-            return float(value[1])
+        # value: [timestamp, stringValue]
+        value = float(result[0].get("value", [None, "0"][1]))
+        return value
+    except Exception:
+        try:
+            return float(result[0]["value"][1])
+        except Exception:
+            return None
+
+
+# -----------------------
+# Registry loading and normalization
+# -----------------------
+
+def load_registry() -> Dict[str, Any]:
+    if not REGISTRY_PATH.exists():
+        return {"agents": [], "components": []}
+    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            return {"agents": [], "components": []}
+
+
+def get_nested(dct: Dict[str, Any], path: List[str], default: Any = None) -> Any:
+    cur = dct
+    for p in path:
+        if not isinstance(cur, dict) or p not in cur:
+            return default
+        cur = cur[p]
+    return cur
+
+
+def fmt(v: Optional[Any], default: str = "-") -> str:
+    if v is None:
+        return default
+    if isinstance(v, float):
+        return f"{v:.2f}"
+    return str(v)
+
+
+def normalize_perf_metrics(item: Dict[str, Any]) -> Dict[str, Optional[float]]:
+    perf = item.get("performance_metrics") or {}
+    return {
+        "cpu_usage": _coerce_float(perf.get("cpu_usage")),
+        "memory_footprint_mb": _coerce_float(perf.get("memory_footprint_mb")),
+        "uptime_hours": _coerce_float(perf.get("uptime_hours")),
+        "success_rate": _coerce_float(perf.get("success_rate")),
+    }
+
+
+def _coerce_float(v: Any) -> Optional[float]:
+    try:
+        if v is None or v == "":
+            return None
+        return float(v)
     except Exception:
         return None
-    return None
 
 
-def get_component_metrics(component: str) -> Dict[str, Optional[float]]:
-    """Collect metrics for a component from Prometheus and optional OTel endpoint."""
-    metrics = {"invocations": None, "errors": None, "error_rate": None, "avg_latency": None}
+# -----------------------
+# Metrics aggregation (Prometheus + registry fallback)
+# -----------------------
 
-    # Prefer rate-based instantaneous view for invocations and errors
-    inv_q = build_promql_rate(METRIC_INVOCATIONS, component)
-    err_q = build_promql_rate(METRIC_ERRORS, component)
+def enrich_with_prom_metrics(component_name: str, base_metrics: Dict[str, Optional[float]]) -> Dict[str, Optional[float]]:
+    # Attempt to pull live metrics; fallback to registry values when missing
+    # CPU
+    cpu_q = build_promql_sum(METRIC_CPU, component_name)
+    cpu_v = query_prometheus_scalar(cpu_q)
+    # Memory
+    mem_q = build_promql_sum(METRIC_MEM, component_name)
+    mem_v = query_prometheus_scalar(mem_q)
+    # Uptime
+    uptime_q = build_promql_sum(METRIC_UPTIME, component_name)
+    uptime_v = query_prometheus_scalar(uptime_q)
+    # Success rate
+    sr_q = build_promql_sum(METRIC_SUCCESS_RATE, component_name)
+    sr_v = query_prometheus_scalar(sr_q)
 
-    invocations_per_s = query_prometheus_scalar(inv_q)
-    errors_per_s = query_prometheus_scalar(err_q)
-
-    # Compute error rate percentage from rates if both available
-    if invocations_per_s is not None and invocations_per_s >= 0:
-        metrics["invocations"] = invocations_per_s
-        if errors_per_s is not None and errors_per_s >= 0:
-            metrics["errors"] = errors_per_s
-            metrics["error_rate"] = (errors_per_s / invocations_per_s * 100.0) if invocations_per_s > 0 else 0.0
-
-    # Average response time via rate of sums divided by rate of counts
-    lat_sum_q = f"sum(rate({METRIC_LATENCY}{{{COMPONENT_LABEL_KEY}=\"{component}\"}}[{WINDOW}]))"
-    lat_cnt_q = f"sum(rate({METRIC_LATENCY_COUNT}{{{COMPONENT_LABEL_KEY}=\"{component}\"}}[{WINDOW}]))"
-    lat_sum = query_prometheus_scalar(lat_sum_q)
-    lat_cnt = query_prometheus_scalar(lat_cnt_q)
-    if lat_sum is not None and lat_cnt is not None and lat_cnt > 0:
-        metrics["avg_latency"] = lat_sum / lat_cnt
-
-    # Optional: If an OTel metrics endpoint is provided and Prometheus returns None, try fallback
-    # This assumes the endpoint exposes Prometheus text or JSON convertible via sidecar. Keep simple: skip detailed scrape.
-    # Hook placeholder for future extension.
-
-    return metrics
+    return {
+        "cpu_usage": cpu_v if cpu_v is not None else base_metrics.get("cpu_usage"),
+        "memory_footprint_mb": mem_v if mem_v is not None else base_metrics.get("memory_footprint_mb"),
+        "uptime_hours": uptime_v if uptime_v is not None else base_metrics.get("uptime_hours"),
+        "success_rate": sr_v if sr_v is not None else base_metrics.get("success_rate"),
+    }
 
 
-def load_registry(registry_path: str) -> Dict:
-    """Load the registry.json file."""
-    try:
-        with open(registry_path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(f"Error: Registry file not found at {registry_path}")
-        return {"agents": [], "components": []}
-    except json.JSONDecodeError as e:
-        print(f"Error: Invalid JSON in registry file: {e}")
-        return {"agents": [], "components": []}
+# -----------------------
+# Dashboard rendering
+# -----------------------
+
+def render_table(headers: List[str], rows: List[List[str]]) -> str:
+    # Simple GitHub-flavored markdown table
+    line1 = "| " + " | ".join(headers) + " |\n"
+    sep = "| " + " | ".join(["---"] * len(headers)) + " |\n"
+    body = "".join(["| " + " | ".join(r) + " |\n" for r in rows])
+    return line1 + sep + body
 
 
-def scan_python_files(repo_root: str) -> Set[str]:
-    """Scan repository for Python files and extract component names."""
-    components = set()
-    repo_path = Path(repo_root)
+def build_dashboard_md(registry: Dict[str, Any]) -> str:
+    timestamp = now_iso()
+    agents: List[Dict[str, Any]] = registry.get("agents", []) or []
+    components: List[Dict[str, Any]] = registry.get("components", []) or []
 
-    for py_file in repo_path.rglob('*.py'):
-        # Skip virtual environments and hidden directories
-        if any(part.startswith('.') or part == 'venv' for part in py_file.parts):
-            continue
+    headers = [
+        "Name",
+        "Type",
+        "Version",
+        "Status",
+        "Owner",
+        "CPU %",
+        "Memory MB",
+        "Uptime (h)",
+        "Success %",
+        "Errors (recent)",
+        "Last Updated",
+        "Description",
+    ]
 
-        try:
-            with open(py_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-                # Simple heuristic: look for class definitions
-                for line in content.split('\n'):
-                    if line.strip().startswith('class '):
-                        class_name = line.split('class ')[1].split('(')[0].split(':')[0].strip()
-                        components.add(class_name)
-        except Exception as e:
-            print(f"Warning: Could not read {py_file}: {e}")
+    def row_for(item: Dict[str, Any], kind: str) -> List[str]:
+        name = item.get("name") or "unknown"
+        version = item.get("version") or "-"
+        status = item.get("status") or "-"
+        owner = item.get("owner") or "-"
+        desc = item.get("description") or "-"
+        last_updated = item.get("last_updated") or "-"
 
-    return components
+        base_metrics = normalize_perf_metrics(item)
+        # Enrich via Prometheus if possible
+        enriched = enrich_with_prom_metrics(name, base_metrics)
 
+        # Errors
+        err_hist = item.get("error_history") or []
+        err_cell = "-"
+        if isinstance(err_hist, list) and err_hist:
+            # show last 2 compact
+            recent = err_hist[-2:]
+            def fmt_err(e: Dict[str, Any]) -> str:
+                ts = e.get("timestamp", "?")
+                sev = e.get("severity", "?")
+                msg = e.get("error", "?")
+                return f"{ts} [{sev}] {msg}"
+            err_cell = "; ".join(fmt_err(e) for e in recent)
 
-def build_dashboard_table(registry: Dict, discovered_components: Set[str]) -> str:
-    """Build the Markdown table for the dashboard."""
-    lines: List[str] = []
-    lines.append("# Synergy Dashboard")
-    lines.append("")
-    lines.append("Auto-generated dashboard showing agents, components, relationships, and live metrics.")
-    lines.append("")
+        row = [
+            str(name),
+            kind,
+            str(version),
+            str(status),
+            str(owner),
+            fmt(enriched.get("cpu_usage")),
+            fmt(enriched.get("memory_footprint_mb")),
+            fmt(enriched.get("uptime_hours")),
+            fmt(enriched.get("success_rate")),
+            err_cell,
+            str(last_updated),
+            str(desc),
+        ]
+        return row
 
-    # Agents section
-    lines.append("## Agents")
-    lines.append("")
-    lines.append("| Name | Version | Description | Dependencies | Status |")
-    lines.append("|------|---------|-------------|--------------|--------|")
+    rows: List[List[str]] = []
+    for a in agents:
+        rows.append(row_for(a, "agent"))
+    for c in components:
+        rows.append(row_for(c, "component"))
 
-    for agent in registry.get('agents', []):
-        name = agent.get('name', 'N/A')
-        version = agent.get('version', 'N/A')
-        description = agent.get('description', 'N/A')
-        deps = ', '.join(agent.get('dependencies', []))
-        status = agent.get('status', 'unknown')
-        lines.append(f"| {name} | {version} | {description} | {deps} | {status} |")
+    table = render_table(headers, rows)
 
-    lines.append("")
-
-    # Components section with metrics
-    lines.append("## Components")
-    lines.append("")
-    lines.append("| Name | Version | Description | Dependencies | Status | Invocation Count (req/s) | Error Rate (%) | Avg. Response Time (s) |")
-    lines.append("|------|---------|-------------|--------------|--------|--------------------------:|---------------:|-----------------------:|")
-
-    for component in registry.get('components', []):
-        name = component.get('name', 'N/A')
-        version = component.get('version', 'N/A')
-        description = component.get('description', 'N/A')
-        deps = ', '.join(component.get('dependencies', []))
-        status = component.get('status', 'unknown')
-
-        invocations = error_rate = avg_latency = "N/A"
-        m = get_component_metrics(name)
-        if m:
-            if m.get("invocations") is not None:
-                invocations = f"{m['invocations']:.4f}"
-            if m.get("error_rate") is not None:
-                error_rate = f"{m['error_rate']:.2f}"
-            if m.get("avg_latency") is not None:
-                avg_latency = f"{m['avg_latency']:.4f}"
-
-        lines.append(
-            f"| {name} | {version} | {description} | {deps} | {status} | {invocations} | {error_rate} | {avg_latency} |"
-        )
-
-    lines.append("")
-
-    # Discovered classes
-    lines.append("## Discovered Python Classes")
-    lines.append("")
-    if discovered_components:
-        lines.append("The following Python classes were discovered in the repository:")
-        lines.append("")
-        for comp in sorted(discovered_components):
-            lines.append(f"- {comp}")
-    else:
-        lines.append("No Python classes discovered.")
-
-    lines.append("")
-    lines.append("---")
-    ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    lines.append(f"*Last updated: {ts} by build_dashboard.py*")
-
-    # Metrics config hint
-    lines.append("")
-    lines.append("> Metrics powered by Prometheus/OpenTelemetry. Configure via env: PROMETHEUS_QUERY_URL, COMPONENT_LABEL_KEY, METRIC_* and PROMQL_WINDOW.")
-
-    return '\n'.join(lines)
+    md = [
+        "# Synergy Dashboard",
+        "",
+        f"Generated: {timestamp}",
+        "",
+        "Notes:",
+        "- Metrics columns may include live data from Prometheus when available.",
+        "- Missing metrics are shown as '-' to indicate unavailability.",
+        "",
+        table,
+        "",
+    ]
+    return "\n".join(md)
 
 
-def main():
-    """Main entry point."""
-    # Determine paths
-    script_dir = Path(__file__).parent
-    repo_root = script_dir.parent.parent
-    registry_path = repo_root / '.github' / 'registry' / 'registry.json'
-    dashboard_path = repo_root / '.github' / 'dashboards' / 'synergy_dashboard.md'
-
-    print(f"Loading registry from: {registry_path}")
-    registry = load_registry(str(registry_path))
-
-    print(f"Scanning Python files in: {repo_root}")
-    discovered = scan_python_files(str(repo_root))
-    print(f"Discovered {len(discovered)} Python classes")
-
-    print("Building dashboard...")
-    dashboard_content = build_dashboard_table(registry, discovered)
-
-    # Ensure dashboard directory exists
-    dashboard_path.parent.mkdir(parents=True, exist_ok=True)
-
-    print(f"Writing dashboard to: {dashboard_path}")
-    with open(dashboard_path, 'w') as f:
-        f.write(dashboard_content)
-
-    print("Dashboard built successfully!")
+def main() -> int:
+    registry = load_registry()
+    content = build_dashboard_md(registry)
+    DOCS_DASHBOARD.parent.mkdir(parents=True, exist_ok=True)
+    with open(DOCS_DASHBOARD, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"Wrote dashboard to {DOCS_DASHBOARD}")
+    return 0
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    raise SystemExit(main())

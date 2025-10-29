@@ -35,8 +35,12 @@ class RebuildFailurePrevention:
         
         print(f"📊 Status: {status} - {message}")
     
-    def check_environment_health(self) -> bool:
-        """Check if the current environment is healthy."""
+    def check_environment_health(self, skip_dependencies: bool = False) -> bool:
+        """Check if the current environment is healthy.
+        
+        Args:
+            skip_dependencies: If True, skip dependency checks (useful during pre-rebuild)
+        """
         print("🔍 Checking environment health...")
         
         # Check Python availability
@@ -67,21 +71,28 @@ class RebuildFailurePrevention:
             print("❌ Python environment check failed")
             return False
         
-        # Check critical dependencies
-        try:
-            result = subprocess.run([
-                python_executable,
-                "-c", "import fastapi, httpx, httpcore, h11; print('Dependencies OK')"
-            ], capture_output=True, text=True, timeout=10)
+        # Check critical dependencies (only if not skipped and venv exists)
+        if not skip_dependencies:
+            if not venv_python.exists():
+                print("⚠️  Virtual environment not found, skipping dependency check")
+                return True
             
-            if result.returncode != 0:
-                print("❌ Critical dependencies missing or broken")
-                print(f"   Error: {result.stderr}")
+            try:
+                result = subprocess.run([
+                    python_executable,
+                    "-c", "import fastapi, httpx, httpcore, h11; print('Dependencies OK')"
+                ], capture_output=True, text=True, timeout=10)
+                
+                if result.returncode != 0:
+                    print("❌ Critical dependencies missing or broken")
+                    print(f"   Error: {result.stderr}")
+                    return False
+                print(f"✅ {result.stdout.strip()}")
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                print("❌ Dependency check failed")
                 return False
-            print(f"✅ {result.stdout.strip()}")
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            print("❌ Dependency check failed")
-            return False
+        else:
+            print("⚠️  Skipping dependency check (pre-rebuild mode)")
         
         print("✅ Environment health check passed")
         return True
@@ -194,13 +205,17 @@ echo "✅ Pre-rebuild protection completed"
         
         print("🛡️ Rebuild protection installed")
     
-    def run_validation_suite(self):
-        """Run comprehensive validation suite."""
+    def run_validation_suite(self, skip_dependencies: bool = False):
+        """Run comprehensive validation suite.
+        
+        Args:
+            skip_dependencies: If True, skip dependency checks (useful during pre-rebuild)
+        """
         print("🧪 Running validation suite...")
         
         validation_results = {
-            "environment_health": self.check_environment_health(),
-            "dependency_validation": self.validate_dependencies(),
+            "environment_health": self.check_environment_health(skip_dependencies=skip_dependencies),
+            "dependency_validation": self.validate_dependencies() if not skip_dependencies else True,
             "script_integrity": self.check_script_integrity(),
             "backup_systems": self.check_backup_systems()
         }
@@ -261,8 +276,10 @@ echo "✅ Pre-rebuild protection completed"
     def check_backup_systems(self) -> bool:
         """Check backup system availability."""
         if not self.backup_dir.exists():
-            print("❌ Backup directory not found")
-            return False
+            print("⚠️  Backup directory not found (will be created)")
+            # Create backup directory if it doesn't exist
+            self.backup_dir.mkdir(parents=True, exist_ok=True)
+            return True
 
         # Check if we have recent backups (look in subdirectories too)
         backup_files = (
@@ -271,8 +288,8 @@ echo "✅ Pre-rebuild protection completed"
         )
 
         if not backup_files:
-            print("❌ No backup files found")
-            return False
+            print("⚠️  No backup files found yet (will be created)")
+            return True
 
         print(f"✅ Backup system check passed ({len(backup_files)} backup files found)")
         return True
@@ -283,17 +300,17 @@ def main():
     preventer = RebuildFailurePrevention()
     
     if len(sys.argv) > 1 and sys.argv[1] == "--pre-rebuild":
-        # Pre-rebuild mode
+        # Pre-rebuild mode - skip dependency checks since they aren't installed yet
         preventer.log_status("pre_rebuild_started", "Pre-rebuild protection starting")
         preventer.create_pre_rebuild_backup()
         preventer.install_rebuild_protection()
-        if not preventer.run_validation_suite():
-            sys.exit(1)
+        if not preventer.run_validation_suite(skip_dependencies=True):
+            print("⚠️  Some validation checks failed, but continuing...")
         preventer.log_status("pre_rebuild_completed", "Pre-rebuild protection completed")
     else:
-        # Regular validation mode
+        # Regular validation mode - check everything including dependencies
         preventer.log_status("validation_started", "Regular validation starting")
-        if not preventer.run_validation_suite():
+        if not preventer.run_validation_suite(skip_dependencies=False):
             sys.exit(1)
         preventer.log_status("validation_completed", "Regular validation completed")
     

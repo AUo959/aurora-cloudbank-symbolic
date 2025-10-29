@@ -25,6 +25,11 @@ from src.collab.capsule_schema import (
     create_shared_anchor,
     validate_capsule_compatibility
 )
+from src.collab.drift_monitor import (
+    get_drift_monitor,
+    DriftEventType,
+    DriftLevel
+)
 from src.core.native_dlp_export import NativeDLPTracker
 from src.middleware.fastapi_security import require_auth
 
@@ -39,6 +44,9 @@ router = APIRouter(
 
 # DLP tracker for all collab operations
 dlp_tracker = NativeDLPTracker()
+
+# Drift monitor for all drift tracking
+drift_monitor = get_drift_monitor()
 
 
 # Request/Response Models
@@ -191,6 +199,16 @@ async def export_context(
             "ethics_flag": "Picard_Delta_3"
         })
         
+        # Record drift event
+        drift_monitor.record_drift(
+            drift_value=capsule.symbolic_drift,
+            event_type=DriftEventType.CAPSULE_EXPORT,
+            target_repo=f"{owner}/{repo_name}",
+            capsule_id=capsule_id,
+            agent_roster=request.agents,
+            metadata={"dlp_tag_id": tag_id}
+        )
+        
         return ExportResponse(
             success=True,
             capsule_id=capsule_id,
@@ -269,6 +287,18 @@ async def import_context(
             "validation_results": validation_results,
             "trust_level": request.trust_level
         })
+        
+        # Record drift event
+        drift_monitor.record_drift(
+            drift_value=capsule.symbolic_drift,
+            event_type=DriftEventType.CAPSULE_IMPORT,
+            capsule_id=capsule.capsule_id,
+            agent_roster=capsule.agent_roster,
+            metadata={
+                "dlp_tag_id": tag_id,
+                "validation_results": validation_results
+            }
+        )
         
         return ImportResponse(
             success=True,
@@ -443,10 +473,122 @@ async def get_collab_status(
     
     Returns active capsules, agent roster, drift metrics.
     """
+    drift_stats = drift_monitor.get_statistics()
+    
     return {
         "status": "active",
         "anchor_seed": "EOS_SEED_ORION",
         "ethics_protocol": "Picard_Delta_3",
         "dlp_summary": dlp_tracker.get_system_summary(),
+        "drift_statistics": drift_stats.to_dict(),
         "timestamp": datetime.now().isoformat()
     }
+
+
+@router.get("/drift/statistics")
+async def get_drift_statistics(
+    token: HTTPAuthorizationCredentials = Depends(require_auth)
+) -> Dict[str, Any]:
+    """
+    Get detailed drift statistics and trends.
+    
+    Returns comprehensive drift metrics, event counts, and trend analysis.
+    """
+    stats = drift_monitor.get_statistics()
+    recent_events = drift_monitor.get_recent_events(10)
+    
+    return {
+        "statistics": stats.to_dict(),
+        "recent_events": [e.to_dict() for e in recent_events],
+        "thresholds": {
+            "green": {"max": drift_monitor.THRESHOLD_YELLOW, "description": "< 0.1% drift"},
+            "yellow": {
+                "min": drift_monitor.THRESHOLD_YELLOW,
+                "max": drift_monitor.THRESHOLD_RED,
+                "description": "0.1-0.2% drift"
+            },
+            "red": {"min": drift_monitor.THRESHOLD_RED, "description": "> 0.2% drift"}
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@router.get("/drift/events")
+async def get_drift_events(
+    level: Optional[str] = None,
+    event_type: Optional[str] = None,
+    limit: int = 50,
+    token: HTTPAuthorizationCredentials = Depends(require_auth)
+) -> Dict[str, Any]:
+    """
+    Get drift events with optional filtering.
+    
+    Query Parameters:
+        - level: Filter by drift level (green, yellow, red)
+        - event_type: Filter by event type
+        - limit: Maximum number of events to return (default: 50, max: 200)
+    """
+    # Validate limit
+    limit = min(limit, 200)
+    
+    # Get events
+    if level:
+        try:
+            drift_level = DriftLevel(level.lower())
+            events = drift_monitor.get_events_by_level(drift_level)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid drift level: {level}"
+            )
+    elif event_type:
+        try:
+            evt_type = DriftEventType(event_type.lower())
+            events = drift_monitor.get_events_by_type(evt_type)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid event type: {event_type}"
+            )
+    else:
+        events = drift_monitor.get_recent_events(limit)
+    
+    # Limit results
+    events = events[-limit:]
+    
+    return {
+        "total_events": len(events),
+        "events": [e.to_dict() for e in events],
+        "filters": {
+            "level": level,
+            "event_type": event_type,
+            "limit": limit
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@router.post("/drift/diff")
+async def compute_capsule_diff(
+    before: Dict[str, Any],
+    after: Dict[str, Any],
+    token: HTTPAuthorizationCredentials = Depends(require_auth)
+) -> Dict[str, Any]:
+    """
+    Compute difference between capsule states before/after an operation.
+    
+    Returns detailed diff showing changes in drift, agents, repos, and anchors.
+    """
+    try:
+        diff = drift_monitor.compute_capsule_diff(before, after)
+        return {
+            "success": True,
+            "diff": diff,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error("Failed to compute capsule diff: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Diff computation failed: {str(e)}"
+        )

@@ -145,7 +145,7 @@ class InsightLedger:
                 "content": insight.content,
                 "context": insight.context,
                 "source": insight.source,
-                "tags": insight.tags,
+                "tags": sorted(list(set(insight.tags or []))),  # Ensure tags are sorted and unique
                 "severity": insight.severity,
                 "related_anchor": insight.related_anchor,
             }
@@ -194,14 +194,6 @@ class InsightLedger:
 
             self._save_index()
 
-            # Auto-checkpoint if enabled
-            if (
-                self.auto_checkpoint > 0
-                and self._index["entry_count"] % self.auto_checkpoint == 0
-            ):
-                self._create_checkpoint()
-
-            # Return as LedgerEntry schema
             return LedgerEntry(**complete_entry)
 
     def _create_checkpoint(self) -> None:
@@ -231,7 +223,38 @@ class InsightLedger:
         Returns:
             Complete ledger entry with cryptographic signatures
         """
-        return self._append_entry(insight)
+        entry = self._append_entry(insight)
+
+        # Perform checkpointing outside the main append lock
+        should_checkpoint = False
+        with self._lock:
+            if (
+                self.auto_checkpoint > 0
+                and self._index["entry_count"] % self.auto_checkpoint == 0
+            ):
+                # Check if the last entry was already a checkpoint to avoid loops
+                if not self._is_last_entry_checkpoint():
+                    should_checkpoint = True
+        
+        if should_checkpoint:
+            self._create_checkpoint()
+
+        return entry
+
+    def _is_last_entry_checkpoint(self) -> bool:
+        """Check if the last entry in the file is a checkpoint."""
+        if not self.entries_file.exists():
+            return False
+        try:
+            with open(self.entries_file, 'rb') as f:
+                f.seek(-2, 2)  # Go to the end of the file
+                while f.read(1) != b'\n':
+                    f.seek(-2, 1)
+                last_line = f.readline().decode()
+                last_entry = json.loads(last_line)
+                return last_entry.get("entry_type") == EntryType.CHECKPOINT.value
+        except (IOError, json.JSONDecodeError):
+            return False
 
     def query_history(self, query: Optional[AuditQuery] = None) -> List[LedgerEntry]:
         """
@@ -435,7 +458,7 @@ class InsightLedger:
         Returns:
             Number of entries exported
         """
-        entries = self.query_history(AuditQuery(limit=100000))
+        entries = self.query_history(AuditQuery(limit=10000))
 
         if not include_genesis:
             entries = [e for e in entries if "genesis" not in (e.tags or [])]

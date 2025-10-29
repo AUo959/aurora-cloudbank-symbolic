@@ -220,7 +220,7 @@ class QuantumDecisionOracle:
         second_score = rankings[1][1]
         
         # Close race
-        if abs(top_score - second_score) < 0.1:
+        if abs(top_score - second_score) < 0.01:
             factors.append("Alternatives are closely matched in overall performance")
         
         # Check for conflicting criteria

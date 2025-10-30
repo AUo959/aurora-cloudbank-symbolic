@@ -11,11 +11,13 @@ Provides versioning, provenance, and execution monitoring for all subroutines.
 """
 
 from src.subroutines.reality_sim_monitor import RealitySimMonitor
+from src.subroutines.aurora_vision_alignment import VisionAlignmentManager
 from src.subroutines.registry import SubroutineRegistry, Subroutine
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __all__ = [
     "RealitySimMonitor",
+    "VisionAlignmentManager",
     "SubroutineRegistry",
     "Subroutine"
 ]

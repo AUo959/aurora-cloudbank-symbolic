@@ -45,6 +45,32 @@
         "/workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py: Line 78: f-string print (potential log output) - print(f\"\\n\ud83d\udd27 {description}...\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py: Line 79: f-string print (potential log output) - print(f\"   Command: {' '.join(cmd)}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py..."
+    },
+    {
+      "timestamp": "2025-10-30T03:14:01.073968",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_dependency_conflict_detector.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_dlp_auto_tracker.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 237: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to initialize Insight Ledger: {e}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 275: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to record to Insight Ledger: {e}\")\n  \u274c /workspaces/aurora..."
+    },
+    {
+      "timestamp": "2025-10-30T03:32:36.628374",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 7,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/aurora_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/examples/subroutine_demo.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/api.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/reality_sim_monitor.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/registry.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_subroutines.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/aurora_api.py: Line 114: f-string print (potential log output) - print(f\"\u274c Failed to integrate AuMemManager API routes: {e}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/aurora_api.py: Line 123: f-string print (potential log output) - print(f\"\u274c Failed to integrate Data Guardian API routes: {e}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/aurora_a..."
     }
   ]
 }

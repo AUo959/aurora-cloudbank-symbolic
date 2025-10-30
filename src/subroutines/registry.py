@@ -245,6 +245,33 @@ class SubroutineRegistry:
             dlp_anchor="SUBROUTINE-REALITY-SIM-001"
         )
         self.register(reality_sim)
+        
+        # Register Vision Alignment Manager
+        vision_alignment = Subroutine(
+            id="vision_alignment_manager",
+            name="Vision Alignment Manager",
+            version="1.0.0",
+            description=(
+                "Ensures strategic alignment with ultra-high fidelity reality simulation "
+                "& human-AI collaboration maxim"
+            ),
+            author=SubroutineAuthor(
+                name="AUo959-team",
+                team="Orion Station Crew",
+                role="Strategic Alignment"
+            ),
+            created_at=datetime.utcnow().isoformat(),
+            updated_at=datetime.utcnow().isoformat(),
+            status=SubroutineStatus.ACTIVE,
+            category=SubroutineCategory.EXECUTIVE,
+            module_path="src.subroutines.aurora_vision_alignment",
+            class_name="VisionAlignmentManager",
+            entry_point="enforce_alignment",
+            integrations=["system_state", "crew_registry", "simulation_layer", "knowledge_base", "audit_log"],
+            tags=["vision", "alignment", "collaboration", "fidelity", "strategic"],
+            dlp_anchor="SUBROUTINE-VISION-ALIGN-001"
+        )
+        self.register(vision_alignment)
 
     def register(self, subroutine: Subroutine) -> bool:
         """

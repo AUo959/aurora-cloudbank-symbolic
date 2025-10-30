@@ -13,8 +13,13 @@ Comprehensive tests for Aurora's subroutine system including:
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.subroutines.reality_sim_monitor import RealitySimMonitor, RealityCheckResult
+from src.subroutines.aurora_vision_alignment import (
+    VisionAlignmentManager,
+    AlignmentRecord,
+    AlignmentReviewResult
+)
 from src.subroutines.registry import (
     SubroutineRegistry,
     Subroutine,
@@ -280,6 +285,140 @@ class TestSubroutineRegistry:
         registry2 = get_subroutine_registry()
         
         assert registry1 is registry2  # Same instance
+
+
+@pytest.mark.unit
+class TestVisionAlignmentManager:
+    """Test Vision Alignment Manager subroutine"""
+
+    def test_initialization(self):
+        """Test manager initialization with defaults"""
+        manager = VisionAlignmentManager()
+        
+        assert manager.system_state is not None
+        assert manager.crew_registry is not None
+        assert manager.simulation_layer is not None
+        assert manager.knowledge_base is not None
+        assert manager.audit_log is not None
+        assert manager.min_fidelity == 0.95
+        assert manager._alignment_count == 0
+
+    def test_enforce_alignment_success(self):
+        """Test successful vision alignment"""
+        manager = VisionAlignmentManager()
+        
+        comp_id = "test_comp_001"
+        input_data = {"computation_type": "quantum_opt", "params": {"x": 1}}
+        outcomes = {"result": "success", "metrics": {"fidelity": 0.98}}
+        
+        record = manager.enforce_alignment(comp_id, input_data, outcomes)
+        
+        assert isinstance(record, AlignmentRecord)
+        assert record.computation_id == comp_id
+        assert record.alignment_status == 'aligned'
+        assert record.fidelity_score >= manager.min_fidelity
+        assert len(record.gaps_detected) == 0
+        assert manager._success_count == 1
+
+    def test_enforce_alignment_low_fidelity(self):
+        """Test alignment failure due to low fidelity"""
+        manager = VisionAlignmentManager(min_fidelity=0.99)  # Set high threshold
+        
+        comp_id = "test_comp_002"
+        input_data = {"computation_type": "test"}
+        outcomes = {"result": "test"}
+        
+        record = manager.enforce_alignment(comp_id, input_data, outcomes)
+        
+        # Mock sim returns 0.98, should fail 0.99 threshold
+        assert record.alignment_status == 'failed'
+        assert record.fidelity_score < 0.99
+        assert manager._failure_count == 1
+
+    def test_periodic_review_not_due(self):
+        """Test periodic review when not yet due"""
+        manager = VisionAlignmentManager(review_interval_days=30)
+        
+        # Set last review to recent
+        manager._last_review = datetime.utcnow() - timedelta(days=5)
+        
+        result = manager.periodic_alignment_review()
+        
+        assert isinstance(result, AlignmentReviewResult)
+        assert result.computations_reviewed == 0
+        assert "not yet due" in result.recommendations[0].lower()
+
+    def test_periodic_review_with_gaps(self):
+        """Test periodic review detecting alignment gaps"""
+        manager = VisionAlignmentManager(review_interval_days=30)
+        
+        # Run some alignments first
+        for i in range(5):
+            comp_id = f"test_comp_{i}"
+            manager.enforce_alignment(comp_id, {"test": i}, {"result": i})
+        
+        # Set last review to past
+        last_review = datetime.utcnow() - timedelta(days=31)
+        
+        result = manager.periodic_alignment_review(last_review)
+        
+        assert isinstance(result, AlignmentReviewResult)
+        assert result.computations_reviewed > 0
+        assert result.overall_health in ['healthy', 'warning', 'critical']
+
+    def test_get_stats(self):
+        """Test statistics tracking"""
+        manager = VisionAlignmentManager()
+        
+        # Run multiple alignments
+        for i in range(5):
+            comp_id = f"test_comp_{i}"
+            manager.enforce_alignment(comp_id, {"test": i}, {"result": i})
+        
+        stats = manager.get_stats()
+        
+        assert stats['total_alignments'] == 5
+        assert stats['successful'] > 0
+        assert 'success_rate' in stats
+        assert 'alignment_rate' in stats
+
+    def test_vision_statement(self):
+        """Test vision statement is set"""
+        manager = VisionAlignmentManager()
+        
+        assert "ultra-high fidelity reality simulation" in manager.vision_statement.lower()
+        assert "orion station" in manager.vision_statement.lower()
+        assert "collaborative" in manager.vision_statement.lower()
+
+
+@pytest.mark.unit
+class TestSubroutineRegistryExtended:
+    """Test SubroutineRegistry with Vision Alignment Manager"""
+
+    def test_initialization(self):
+        """Test registry initialization"""
+        registry = SubroutineRegistry()
+        
+        assert len(registry._subroutines) >= 2  # Should have both built-in subroutines
+        assert "reality_sim_monitor" in registry._subroutines
+        assert "vision_alignment_manager" in registry._subroutines
+        
+        stats = registry.get_stats()
+        assert stats['total_subroutines'] >= 2
+
+    def test_vision_alignment_registered(self):
+        """Test Vision Alignment Manager is properly registered"""
+        registry = SubroutineRegistry()
+        
+        vision_sub = registry.get("vision_alignment_manager")
+        
+        assert vision_sub is not None
+        assert vision_sub.name == "Vision Alignment Manager"
+        assert vision_sub.version == "1.0.0"
+        assert vision_sub.category == SubroutineCategory.EXECUTIVE
+        assert vision_sub.status == SubroutineStatus.ACTIVE
+        assert "vision" in vision_sub.tags
+        assert "alignment" in vision_sub.tags
 
 
 @pytest.mark.integration

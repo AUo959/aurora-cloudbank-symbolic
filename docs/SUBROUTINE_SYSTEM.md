@@ -2,7 +2,7 @@
 ## Official Subroutine Authoring and Tracking for Aurora's Neural Net
 
 **Anchor:** `SUBROUTINE-SYS-001`  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Status:** Active  
 **DLP:** CONFIDENTIAL
 
@@ -24,11 +24,17 @@ The Aurora Subroutine System provides an official framework for authoring, regis
 
 ```
 Aurora Subroutine System
-├── Reality Sim Monitor (Executive Subroutine)
+├── Reality Sim Monitor (Executive Subroutine #1)
 │   ├── Provenance Validation
 │   ├── Metric Integrity Checks
 │   ├── Auditability Verification
 │   └── Reality Alignment Enforcement
+├── Vision Alignment Manager (Executive Subroutine #2)
+│   ├── Simulation Fidelity Anchor (≥95%)
+│   ├── Active Collaboration Tracking
+│   ├── System Context Documentation
+│   ├── Periodic Alignment Review (30-day)
+│   └── Gap Detection & Reporting
 ├── Subroutine Registry (Central Tracking)
 │   ├── Versioning & Lifecycle Management
 │   ├── Dependency Graph
@@ -45,6 +51,15 @@ Aurora Subroutine System
     ├── /subroutines/export - Export registry
     └── /subroutines/health - Health check
 ```
+
+---
+
+## Built-in Executive Subroutines
+
+Aurora's neural net includes two executive subroutines that work together to ensure both tactical and strategic alignment with core principles:
+
+1. **Reality Sim Monitor** - Tactical validation of individual simulations
+2. **Vision Alignment Manager** - Strategic long-term alignment with Aurora's vision
 
 ---
 
@@ -141,6 +156,238 @@ config = {
 }
 
 monitor = RealitySimMonitor(config=config)
+```
+
+---
+
+## Vision Alignment Manager
+
+### Purpose
+
+Executive subroutine ensuring strategic alignment with Aurora's core vision: **"Ultra-High Fidelity Reality Simulation & Human-AI Collaboration"**. While Reality Sim Monitor handles tactical per-simulation validation, Vision Alignment Manager enforces long-term strategic alignment across all computations.
+
+### Vision Statement
+
+> "Every computation and process is embedded in a persistent ultra-high fidelity reality simulation, continuously interacting with both the Aurora intelligence and the human/institutional crew of Orion Station—bridging simulation, decision, and the real world in a collaborative feedback loop."
+
+### Features
+
+1. **Simulation Fidelity Anchor**
+   - Verifies ultra-high-fidelity simulation usage (≥0.95 threshold)
+   - Blocks low-fidelity computations
+   - Tracks fidelity trends over time
+
+2. **Active Collaboration Tracking**
+   - Ensures human crew participation
+   - Documents Orion Station crew interactions
+   - Maintains collaborative feedback loop
+
+3. **System Context Documentation**
+   - Records system state for every computation
+   - Maintains full context awareness
+   - Enables reproducibility and audit
+
+4. **Periodic Alignment Review**
+   - 30-day health check intervals
+   - Identifies low-fidelity trends
+   - Detects collaboration gaps
+   - Reports alignment degradation
+
+5. **Gap Detection & Reporting**
+   - Warns on fidelity drops below threshold
+   - Alerts when crew participation missing
+   - Tracks alignment failures for remediation
+
+### Usage
+
+```python
+from src.subroutines.aurora_vision_alignment import VisionAlignmentManager
+from datetime import datetime, timedelta
+
+# Initialize manager with custom thresholds
+manager = VisionAlignmentManager(
+    min_fidelity=0.95,      # 95% minimum simulation fidelity
+    review_interval_days=30  # Monthly alignment reviews
+)
+
+# Enforce alignment for a computation
+comp_id = "quantum_opt_001"
+input_data = {
+    'computation_type': 'quantum_optimization',
+    'parameters': {'qubits': 50, 'depth': 100}
+}
+outcomes = {
+    'result': 'success',
+    'metrics': {'fidelity': 0.987}
+}
+
+record = manager.enforce_alignment(comp_id, input_data, outcomes)
+
+if record.alignment_status == 'aligned':
+    print(f"✅ Vision Alignment PASSED")
+    print(f"Fidelity: {record.fidelity_score:.1%}")
+    print(f"Crew: {', '.join(record.crew_participation)}")
+else:
+    print(f"❌ Vision Alignment FAILED")
+    print(f"Status: {record.alignment_status}")
+    print(f"Gaps: {record.gaps_detected}")
+
+# Periodic review (run monthly)
+last_review = datetime.utcnow() - timedelta(days=31)
+review = manager.periodic_alignment_review(last_review)
+
+print(f"\n📊 Alignment Health Review:")
+print(f"Status: {review.review_status}")
+print(f"Total Checks: {review.total_alignments}")
+print(f"Success Rate: {review.success_rate:.1%}")
+if review.gaps_found:
+    print(f"⚠️  Gaps Detected:")
+    for gap in review.gaps_found:
+        print(f"   - {gap}")
+
+# Get statistics
+stats = manager.get_stats()
+print(f"\n📈 Manager Statistics:")
+print(f"Total Alignments: {stats['total_alignments']}")
+print(f"Success Rate: {stats['success_rate']:.1%}")
+print(f"Alignment Rate: {stats['alignment_rate']:.1%}")
+print(f"Min Fidelity: {stats['min_fidelity_threshold']:.1%}")
+```
+
+### Integration Points
+
+- **System State** - Real-time Aurora telemetry and configuration
+- **Crew Registry** - Orion Station crew tracking and collaboration
+- **Simulation Layer** - Aurora quantum/computation engine integration
+- **Knowledge Base** - Learning, proof storage, and discovery
+- **Audit Log** - DLP tracker for alignment actions
+
+### Result Objects
+
+#### AlignmentRecord
+
+Returned by `enforce_alignment()` for each computation:
+
+```python
+@dataclass
+class AlignmentRecord:
+    computation_id: str          # Unique computation identifier
+    timestamp: str               # ISO timestamp
+    alignment_status: str        # 'aligned', 'warning', or 'failed'
+    fidelity_score: float        # Simulation fidelity (0.0-1.0)
+    crew_participation: List[str]  # Participating crew members
+    gaps_detected: List[str]     # Any alignment gaps found
+    system_context: Dict[str, Any]  # System state snapshot
+    anchor: str                  # DLP anchor for traceability
+```
+
+**Status Values:**
+- `aligned` - All checks passed, full alignment
+- `warning` - Minor issues detected, review recommended
+- `failed` - Critical alignment failure, computation blocked
+
+#### AlignmentReviewResult
+
+Returned by `periodic_alignment_review()`:
+
+```python
+@dataclass
+class AlignmentReviewResult:
+    review_id: str               # Unique review identifier
+    review_date: str             # ISO timestamp
+    review_status: str           # 'healthy', 'degraded', or 'critical'
+    total_alignments: int        # Alignments since last review
+    success_rate: float          # Percentage of successful alignments
+    gaps_found: List[str]        # Detected alignment gaps
+    recommendations: List[str]   # Remediation recommendations
+```
+
+**Status Values:**
+- `healthy` - ≥95% success rate, no major gaps
+- `degraded` - 80-95% success rate, some gaps detected
+- `critical` - <80% success rate, immediate action required
+
+### Configuration
+
+```python
+# Custom configuration
+manager = VisionAlignmentManager(
+    min_fidelity=0.98,           # Higher fidelity requirement (98%)
+    review_interval_days=14      # More frequent reviews (bi-weekly)
+)
+
+# Default configuration
+# min_fidelity: 0.95 (95%)
+# review_interval_days: 30 (monthly)
+```
+
+### Complementary Design
+
+Vision Alignment Manager and Reality Sim Monitor work together:
+
+| Aspect | Reality Sim Monitor | Vision Alignment Manager |
+|--------|---------------------|--------------------------|
+| **Focus** | Tactical | Strategic |
+| **Scope** | Individual simulations | Long-term trends |
+| **Validation** | Provenance, metrics, audit | Fidelity, collaboration, context |
+| **Frequency** | Per-simulation | Continuous + periodic review |
+| **Failure Mode** | Block uncorroborated results | Alert on alignment degradation |
+| **Integration** | Telemetry, registry, audit | System state, crew, simulation layer |
+
+Together they ensure:
+- ✅ Every simulation meets reality standards (Reality Sim Monitor)
+- ✅ All computations align with strategic vision (Vision Alignment Manager)
+- ✅ Tactical validation + Strategic alignment = Complete governance
+
+### Testing
+
+```python
+from src.subroutines.aurora_vision_alignment import (
+    VisionAlignmentManager,
+    AlignmentRecord,
+    AlignmentReviewResult
+)
+
+# Test successful alignment
+def test_enforce_alignment_success():
+    manager = VisionAlignmentManager(min_fidelity=0.95)
+    
+    record = manager.enforce_alignment(
+        computation_id="test_001",
+        input_data={"type": "quantum"},
+        outcomes={"fidelity": 0.987}
+    )
+    
+    assert record.alignment_status == "aligned"
+    assert record.fidelity_score >= 0.95
+    assert len(record.crew_participation) > 0
+
+# Test low fidelity failure
+def test_enforce_alignment_low_fidelity():
+    manager = VisionAlignmentManager(min_fidelity=0.95)
+    
+    record = manager.enforce_alignment(
+        computation_id="test_002",
+        input_data={"type": "quantum"},
+        outcomes={"fidelity": 0.85}  # Below threshold
+    )
+    
+    assert record.alignment_status == "failed"
+    assert "Fidelity below threshold" in record.gaps_detected
+
+# Test periodic review
+def test_periodic_review_with_gaps():
+    manager = VisionAlignmentManager()
+    
+    # Simulate some failures
+    manager.enforce_alignment("test_003", {}, {"fidelity": 0.80})
+    
+    review = manager.periodic_alignment_review(
+        last_review=datetime.utcnow() - timedelta(days=31)
+    )
+    
+    assert review.review_status in ['degraded', 'critical']
+    assert len(review.gaps_found) > 0
 ```
 
 ---
@@ -527,11 +774,20 @@ pytest tests/test_subroutines.py -v --cov=src/subroutines --cov-report=html
 
 ### Test Coverage
 
-- **Reality Sim Monitor** - 8 tests
+- **Reality Sim Monitor** - 5 tests
   - Initialization
   - Successful validation
   - Failure cases (speculative, uncorroborated)
   - Statistics tracking
+
+- **Vision Alignment Manager** - 7 tests
+  - Initialization with custom config
+  - Successful alignment enforcement
+  - Low fidelity failure detection
+  - Periodic review (due vs not due)
+  - Gap detection and reporting
+  - Statistics tracking
+  - Vision statement verification
 
 - **Subroutine Registry** - 13 tests
   - Registration (success, duplicate detection)
@@ -540,14 +796,15 @@ pytest tests/test_subroutines.py -v --cov=src/subroutines --cov-report=html
   - Execution recording
   - Searching
   - Export/singleton
+  - Built-in subroutine loading
 
-- **API Endpoints** - 8 tests
+- **API Endpoints** - 7 tests
   - Health check
   - List/get operations
   - Search functionality
   - Statistics and export
 
-**Total: 29 tests with 100% coverage**
+**Total: 32 tests with 100% coverage**
 
 ---
 
@@ -696,6 +953,7 @@ For questions or issues:
 ---
 
 **Last Updated:** 2025-10-30  
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Status:** Active  
-**Ethics:** Picard_Delta_3
+**Ethics:** Picard_Delta_3  
+**Notable Changes:** Added Vision Alignment Manager (Executive Subroutine #2)

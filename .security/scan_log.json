@@ -83,6 +83,16 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_subroutines.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-10-30T04:21:04.212053",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/agents/aurora_consciousness_agent.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 25: f-string print (potential log output) - print(f\"\\n{'=' * 70}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 26: f-string print (potential log output) - print(f\"  {title}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 52: f-string print (po..."
     }
   ]
 }

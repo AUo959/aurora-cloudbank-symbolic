@@ -219,8 +219,9 @@ class QuantumDecisionOracle:
         top_score = rankings[0][1]
         second_score = rankings[1][1]
         
-        # Close race
-        if abs(top_score - second_score) < 0.1:
+        # Close race - check if difference is less than 60% of top score
+        # (accounts for normalization amplifying small raw score differences)
+        if top_score > 0 and abs(top_score - second_score) / top_score < 0.60:
             factors.append("Alternatives are closely matched in overall performance")
         
         # Check for conflicting criteria

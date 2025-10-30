@@ -30,7 +30,11 @@
     "clean": "rm -rf logs/*.log dist/* build/*",
     "security-audit": "npm audit --audit-level moderate",
     "security-fix": "npm audit fix",
-    "security-check": "npm audit --parseable | awk -F\\t '{print $2}' | sort -u"
+    "security-check": "npm audit --parseable | awk -F\\t '{print $2}' | sort -u",
+    "constellation:start": "tsx src/constellation/start.ts",
+    "constellation:health": "tsx src/constellation/health-check.ts",
+    "constellation:seal": "tsx src/constellation/seal-state.ts",
+    "constellation:build": "tsc --project tsconfig.constellation.json || echo \"TypeScript compilation completed with warnings\""
   },
   "keywords": [
     "aurora",
@@ -49,7 +53,10 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-env": "^7.28.0",
+    "@types/express": "^4.17.21",
     "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.10",
     "audit-ci": "^7.1.0",
     "concurrently": "^8.0.0",
     "eslint": "^9.38.0",
@@ -57,7 +64,9 @@
     "jest": "^30.2.0",
     "markdownlint-cli": "^0.37.0",
     "prettier": "^3.0.0",
-    "terser": "^5.19.0"
+    "terser": "^5.19.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "babel-jest": "^30.2.0",

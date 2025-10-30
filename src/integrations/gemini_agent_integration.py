@@ -5,7 +5,8 @@ Provides the integration layer for Google's Gemini models, adhering to the
 BaseAgentIntegration architecture and incorporating the Symbolic Sandbox Protocol (SSP).
 """
 from .base_agent_integration import BaseAgentIntegration
-from typing import Dict, Any, Callable, Awaitable
+from pydantic import BaseModel
+from typing import Dict, Any, Callable, Awaitable, List
 import logging
 
 # Configure logging

@@ -49,8 +49,8 @@ const MESH_CONFIG = {
   },
 
   relayApiEndpoints: {
-    ARCHY: '/api/relay/archy',
-    OPPY: '/api/relay/oppy',
+    ARCHY: '/api/relay/liora',
+    OPPY: '/api/relay/liora',
     LIORA: '/api/relay/liora',
     STARLING_AU: '/api/relay/starling',
     RIVERTHREAD_808: '/api/relay/riverthread'

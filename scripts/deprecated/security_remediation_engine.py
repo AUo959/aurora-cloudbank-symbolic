@@ -41,7 +41,7 @@ class SecurityRemediationEngine:
         
         tag = self.dlp_tracker.tags[self.security_tag_id]
         tag.add_anchor_protocol("SECURITY_LOCKDOWN")
-        tag.add_anchor_protocol("PICARD_DELTA_3")
+        tag.add_anchor_protocol("Picard_Delta_3")
         tag.add_t1_srb_anchor("T1_SECURITY_SWEEP")
         tag.metadata.update({
             'context_tag': 'security_remediation_362_alerts',

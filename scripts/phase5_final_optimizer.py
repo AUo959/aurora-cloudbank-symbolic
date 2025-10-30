@@ -578,7 +578,7 @@ Memory Seal: {self.dlp_tracker['memory_seal']}
 ## 🔐 Symbolic Anchor Verification
 - T1 Temporal Anchor: ✅ Locked
 - SRB Boundary Resolution: ✅ Verified  
-- Picard Delta 3 Ethics: ✅ Enforced
+- Picard_Delta_3 Ethics: ✅ Enforced
 - Memory Seal Integrity: ✅ {self.dlp_tracker['memory_seal'][:16]}...
 
 ---

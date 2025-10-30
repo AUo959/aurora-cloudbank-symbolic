@@ -14,6 +14,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+from utils import find_git_root
 
 
 def print_header():
@@ -267,12 +268,7 @@ def main():
     print_header()
     
     # Get repository root
-    repo_root = Path.cwd()
-    while not (repo_root / ".git").exists():
-        if repo_root == repo_root.parent:
-            print("❌ Not in a git repository")
-            sys.exit(1)
-        repo_root = repo_root.parent
+    repo_root = find_git_root()
     
     print(f"📂 Repository root: {repo_root}")
     print()

@@ -87,8 +87,16 @@ class ImportFixer:
         with open(file_path, 'r') as f:
             content = f.read()
         
+        # Detect line ending style
+        if '\r\n' in content:
+            line_ending = '\r\n'
+        elif '\r' in content:
+            line_ending = '\r'
+        else:
+            line_ending = '\n'
+        
         # Add imports at the top after shebang/docstring
-        lines = content.split('\n')
+        lines = content.splitlines(keepends=True)
         insert_position = 0
         
         # Skip shebang
@@ -104,12 +112,12 @@ class ImportFixer:
         
         # Insert imports
         for import_statement in sorted(set(imports_to_add)):
-            lines.insert(insert_position, import_statement)
+            lines.insert(insert_position, import_statement + line_ending)
             insert_position += 1
         
         # Write back
         with open(file_path, 'w') as f:
-            f.write('\n'.join(lines))
+            f.write(''.join(lines))
         
         print(f"Added {len(imports_to_add)} imports to {file_path}")
 

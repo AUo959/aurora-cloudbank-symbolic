@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from pathlib import Path
+import os
 from enum import Enum
 
 from src.improvement import (
@@ -100,15 +101,21 @@ async def analyze_file(request: AnalyzeFileRequest):
     Returns list of suggestions for the specified file.
     """
     engine = get_improvement_engine()
-    file_path = Path(request.file_path)
-    
-    if not file_path.exists():
+    requested_path = Path(request.file_path)
+    # Compute the full, normalized path under the SAFE_ROOT
+    full_path = (SAFE_ROOT / requested_path).resolve()
+
+    # Ensure the resolved path is inside SAFE_ROOT
+    if not str(full_path).startswith(str(SAFE_ROOT)):
+        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+
+    if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
-    
-    if not file_path.is_file():
+
+    if not full_path.is_file():
         raise HTTPException(status_code=400, detail=f"Not a file: {request.file_path}")
-    
-    suggestions = engine.analyze_file(file_path)
+
+    suggestions = engine.analyze_file(full_path)
     return [s.to_dict() for s in suggestions]
 
 

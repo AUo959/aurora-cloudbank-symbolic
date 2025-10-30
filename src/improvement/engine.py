@@ -18,6 +18,8 @@ from typing import List, Dict, Optional, Any, Set
 from enum import Enum
 from pathlib import Path
 
+from src.core.native_dlp_export import NativeDLPTracker
+
 logger = logging.getLogger(__name__)
 
 
@@ -294,10 +296,27 @@ class CodeImprovementEngine:
     - Category and severity prioritization
     - Integration with existing quality tools
     - Safe automation boundaries
+    - DLP tracking for traceability
     """
     
     def __init__(self):
         self._patterns: List[ImprovementPattern] = []
+        self.dlp_tracker = NativeDLPTracker()
+        
+        # Initialize DLP tracking for engine
+        self._engine_tag_id = self.dlp_tracker.create_tag(
+            "code_improvement_engine_init",
+            {"engine": "CodeImprovementEngine", "version": "1.0"}
+        )
+        tag = self.dlp_tracker.tags[self._engine_tag_id]
+        tag.add_anchor_protocol("CODE_IMPROVEMENT_TRACKING")
+        tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        tag.metadata.update({
+            'context_tag': 'improvement_engine_initialization',
+            'symbolic_hash_validation': True,
+            'dlp_level': 'DLP_L1_OPERATIONAL'
+        })
+        
         self._register_default_patterns()
     
     def _register_default_patterns(self):
@@ -325,10 +344,27 @@ class CodeImprovementEngine:
         Returns:
             List of improvement suggestions
         """
+        # Create DLP tag for file analysis operation
+        file_analysis_data = {
+            "file_path": str(file_path),
+            "operation": "analyze_file"
+        }
+        analysis_tag_id = self.dlp_tracker.create_tag("file_analysis", file_analysis_data)
+        analysis_tag = self.dlp_tracker.tags[analysis_tag_id]
+        analysis_tag.add_dependency(self._engine_tag_id)
+        analysis_tag.add_anchor_protocol("CODE_ANALYSIS_TRACKING")
+        analysis_tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        analysis_tag.metadata.update({
+            'context_tag': f'file_analysis_{file_path.name}',
+            'symbolic_hash_validation': True,
+            'file_path': str(file_path)
+        })
+        
         try:
             content = file_path.read_text()
         except Exception as e:
             logger.error("Failed to read file %s: %s", file_path, e)
+            analysis_tag.metadata['error'] = str(e)
             return []
         
         suggestions = []
@@ -338,6 +374,10 @@ class CodeImprovementEngine:
                 suggestions.extend(pattern_suggestions)
             except Exception as e:
                 logger.error("Pattern %s failed on %s: %s", pattern.name, file_path, e)
+        
+        # Update DLP tag with results
+        analysis_tag.metadata['suggestions_count'] = len(suggestions)
+        analysis_tag.metadata['patterns_applied'] = len(self._patterns)
         
         return suggestions
     
@@ -356,6 +396,24 @@ class CodeImprovementEngine:
         Returns:
             Dict mapping file paths to suggestions
         """
+        # Create DLP tag for directory analysis operation
+        dir_analysis_data = {
+            "directory": str(directory),
+            "file_patterns": file_patterns,
+            "operation": "analyze_directory"
+        }
+        dir_tag_id = self.dlp_tracker.create_tag("directory_analysis", dir_analysis_data)
+        dir_tag = self.dlp_tracker.tags[dir_tag_id]
+        dir_tag.add_dependency(self._engine_tag_id)
+        dir_tag.add_anchor_protocol("CODE_ANALYSIS_TRACKING")
+        dir_tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        dir_tag.add_t1_srb_anchor("SRB_SYMBOLIC_BRIDGE")
+        dir_tag.metadata.update({
+            'context_tag': f'directory_analysis_{directory.name}',
+            'symbolic_hash_validation': True,
+            'directory_path': str(directory)
+        })
+        
         if file_patterns is None:
             file_patterns = ["*.py"]
         
@@ -367,6 +425,10 @@ class CodeImprovementEngine:
                     suggestions = self.analyze_file(file_path)
                     if suggestions:
                         results[str(file_path)] = suggestions
+        
+        # Update DLP tag with results
+        dir_tag.metadata['files_analyzed'] = len(results)
+        dir_tag.metadata['total_suggestions'] = sum(len(s) for s in results.values())
         
         logger.info("Analyzed directory %s: found improvements in %d files", directory, len(results))
         return results
@@ -418,6 +480,22 @@ class CodeImprovementEngine:
         Returns:
             Report dictionary with statistics and suggestions
         """
+        # Create DLP tag for report generation operation
+        report_data = {
+            "operation": "generate_report",
+            "num_files": len(analysis_results)
+        }
+        report_tag_id = self.dlp_tracker.create_tag("report_generation", report_data)
+        report_tag = self.dlp_tracker.tags[report_tag_id]
+        report_tag.add_dependency(self._engine_tag_id)
+        report_tag.add_anchor_protocol("REPORT_GENERATION_TRACKING")
+        report_tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        report_tag.metadata.update({
+            'context_tag': 'improvement_report_generation',
+            'symbolic_hash_validation': True,
+            'report_type': 'code_improvement'
+        })
+        
         total_suggestions = sum(len(suggestions) for suggestions in analysis_results.values())
         
         # Group by category
@@ -444,6 +522,12 @@ class CodeImprovementEngine:
             1 for suggestions in analysis_results.values()
             for s in suggestions if s.safe_to_auto_apply
         )
+        
+        # Update DLP tag with report statistics
+        report_tag.metadata['total_suggestions'] = total_suggestions
+        report_tag.metadata['by_category'] = by_category
+        report_tag.metadata['by_severity'] = by_severity
+        report_tag.metadata['auto_fixable'] = auto_fixable
         
         return {
             "total_files_analyzed": len(analysis_results),

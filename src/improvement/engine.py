@@ -310,6 +310,15 @@ class CodeImprovementEngine:
             ErrorHandlingPattern()
         ])
     
+    def get_patterns(self) -> List[ImprovementPattern]:
+        """
+        Get registered improvement patterns
+        
+        Returns:
+            List of registered patterns
+        """
+        return list(self._patterns)
+    
     def register_pattern(self, pattern: ImprovementPattern):
         """Register custom improvement pattern"""
         self._patterns.append(pattern)

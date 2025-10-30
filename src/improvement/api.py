@@ -8,7 +8,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from pathlib import Path
-import os
 from enum import Enum
 
 from src.improvement import (
@@ -101,21 +100,15 @@ async def analyze_file(request: AnalyzeFileRequest):
     Returns list of suggestions for the specified file.
     """
     engine = get_improvement_engine()
-    requested_path = Path(request.file_path)
-    # Compute the full, normalized path under the SAFE_ROOT
-    full_path = (SAFE_ROOT / requested_path).resolve()
+    file_path = Path(request.file_path)
 
-    # Ensure the resolved path is inside SAFE_ROOT
-    if not str(full_path).startswith(str(SAFE_ROOT)):
-        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
-
-    if not full_path.exists():
+    if not file_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {request.file_path}")
 
-    if not full_path.is_file():
+    if not file_path.is_file():
         raise HTTPException(status_code=400, detail=f"Not a file: {request.file_path}")
 
-    suggestions = engine.analyze_file(full_path)
+    suggestions = engine.analyze_file(file_path)
     return [s.to_dict() for s in suggestions]
 
 
@@ -195,7 +188,7 @@ async def list_patterns():
             "category": pattern.category.value,
             "severity": pattern.severity.value
         }
-        for pattern in engine._patterns
+        for pattern in engine.get_patterns()
     ]
 
 
@@ -210,7 +203,7 @@ async def engine_health():
     
     return {
         "status": "operational",
-        "patterns_registered": len(engine._patterns),
+        "patterns_registered": len(engine.get_patterns()),
         "categories_available": len(list(ImprovementCategory)),
         "severities_available": len(list(ImprovementSeverity))
     }

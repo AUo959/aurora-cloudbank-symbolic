@@ -14,6 +14,7 @@ The **Code Improvement Engine** is an automated code quality analysis system tha
 - **Advanced Filtering**: Filter by confidence, category, severity, and pattern
 - **REST API**: Full FastAPI integration for programmatic access
 - **Automated Reporting**: Generate comprehensive analysis reports
+- **DLP Tracking**: Built-in Data Lineage Protocol tracking for all analysis operations with context tags and symbolic hash validation
 
 ## Core Concepts
 
@@ -340,6 +341,75 @@ for project_dir in projects:
 # Export consolidated report
 with open("analysis_report.json", "w") as f:
     json.dump(all_results, f, indent=2)
+```
+
+### DLP Tracking and Traceability
+
+The Code Improvement Engine includes built-in **Data Lineage Protocol (DLP)** tracking for all analysis operations. This ensures full traceability and auditability of improvement suggestions.
+
+#### Features
+
+- **Context Tags**: Every analysis operation has a unique context tag for identification
+- **Symbolic Hash Validation**: Content hashing ensures data integrity
+- **Anchor Protocols**: Aurora-specific anchor protocols (`CODE_IMPROVEMENT_ENGINE`)
+- **T1/SRB Anchors**: Temporal and Symbolic Reference Base anchors for state tracking
+- **Operation Dependencies**: Track relationships between file and directory analyses
+- **Export Manifests**: Generate comprehensive DLP manifests for audit trails
+
+#### Usage
+
+```python
+from src.improvement import get_improvement_engine
+
+engine = get_improvement_engine()
+
+# Analyze with automatic DLP tracking
+results = engine.analyze_directory("src/")
+report = engine.generate_report(results)
+
+# Access DLP information
+print(f"Report DLP tag: {report['dlp_tag_id']}")
+print(f"Context tag: {report['context_tag']}")
+
+# Export DLP manifest for audit trail
+manifest = engine.export_dlp_manifest("my_analysis")
+print(f"Total operations tracked: {manifest['total_tags']}")
+print(f"Anchor protocols: {manifest['aurora_metadata']['anchor_protocols']}")
+print(f"T1/SRB anchors: {manifest['aurora_metadata']['t1_srb_anchors']}")
+
+# Inspect individual DLP tags
+for tag_id, tag in engine.dlp_tracker.tags.items():
+    print(f"Tag: {tag_id}")
+    print(f"  Operation: {tag.operation}")
+    print(f"  Context: {tag.metadata.get('context_tag')}")
+    print(f"  Hash: {tag.metadata.get('symbolic_hash_validation', 'N/A')[:16]}...")
+```
+
+#### DLP Manifest Structure
+
+```json
+{
+  "manifest_name": "improvement_engine_analysis",
+  "total_tags": 5,
+  "aurora_metadata": {
+    "anchor_protocols": ["CODE_IMPROVEMENT_ENGINE"],
+    "t1_srb_anchors": ["T1_TEMPORAL_ANCHOR"],
+    "continuity_preserved": true,
+    "performance_optimized": true
+  },
+  "tags": [
+    {
+      "tag_id": "dlp_000001_...",
+      "operation": "improvement_analysis",
+      "metadata": {
+        "context_tag": "analyze_file_module.py_...",
+        "symbolic_hash_validation": "a3f2c...",
+        "file_path": "src/module.py",
+        "suggestions_count": 3
+      }
+    }
+  ]
+}
 ```
 
 ## API Reference

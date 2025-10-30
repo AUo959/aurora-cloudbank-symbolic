@@ -18,6 +18,8 @@ from typing import List, Dict, Optional, Any, Set
 from enum import Enum
 from pathlib import Path
 
+from src.core.native_dlp_export import NativeDLPTracker
+
 logger = logging.getLogger(__name__)
 
 
@@ -299,6 +301,7 @@ class CodeImprovementEngine:
     def __init__(self):
         self._patterns: List[ImprovementPattern] = []
         self._register_default_patterns()
+        self.dlp_tracker = NativeDLPTracker()
     
     def _register_default_patterns(self):
         """Register built-in improvement patterns"""
@@ -325,11 +328,41 @@ class CodeImprovementEngine:
         Returns:
             List of improvement suggestions
         """
+        # Create DLP tag for file analysis operation
+        context_tag = f"analyze_file_{file_path.name}_{int(file_path.stat().st_mtime) if file_path.exists() else 0}"
+        
         try:
             content = file_path.read_text()
         except Exception as e:
             logger.error("Failed to read file %s: %s", file_path, e)
             return []
+        
+        # Track the analysis operation with DLP
+        analysis_data = {
+            "file_path": str(file_path),
+            "file_size": len(content),
+            "context_tag": context_tag,
+            "operation_type": "file_analysis"
+        }
+        tag_id = self.dlp_tracker.create_tag("improvement_analysis", analysis_data)
+        tag = self.dlp_tracker.tags[tag_id]
+        
+        # Add improvement-specific metadata
+        tag.metadata.update({
+            "analysis_type": "code_improvement",
+            "file_path": str(file_path),
+            "patterns_count": len(self._patterns),
+            "context_tag": context_tag
+        })
+        
+        # Add symbolic hash validation
+        import hashlib
+        content_hash = hashlib.sha256(content.encode()).hexdigest()
+        tag.metadata["symbolic_hash_validation"] = content_hash
+        
+        # Add anchor protocols
+        tag.add_anchor_protocol("CODE_IMPROVEMENT_ENGINE")
+        tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
         
         suggestions = []
         for pattern in self._patterns:
@@ -338,6 +371,10 @@ class CodeImprovementEngine:
                 suggestions.extend(pattern_suggestions)
             except Exception as e:
                 logger.error("Pattern %s failed on %s: %s", pattern.name, file_path, e)
+        
+        # Update tag with results
+        tag.metadata["suggestions_count"] = len(suggestions)
+        tag.metadata["patterns_executed"] = [p.name for p in self._patterns]
         
         return suggestions
     
@@ -359,7 +396,39 @@ class CodeImprovementEngine:
         if file_patterns is None:
             file_patterns = ["*.py"]
         
+        # Create DLP tag for directory analysis operation
+        import hashlib
+        import time
+        context_tag = f"analyze_directory_{directory.name}_{int(time.time())}"
+        
+        analysis_data = {
+            "directory": str(directory),
+            "file_patterns": file_patterns,
+            "context_tag": context_tag,
+            "operation_type": "directory_analysis"
+        }
+        tag_id = self.dlp_tracker.create_tag("improvement_directory_analysis", analysis_data)
+        tag = self.dlp_tracker.tags[tag_id]
+        
+        # Add directory analysis metadata
+        tag.metadata.update({
+            "analysis_type": "directory_improvement",
+            "directory": str(directory),
+            "file_patterns": file_patterns,
+            "context_tag": context_tag
+        })
+        
+        # Add symbolic hash validation for directory structure
+        dir_structure = f"{directory}:{','.join(file_patterns)}"
+        dir_hash = hashlib.sha256(dir_structure.encode()).hexdigest()
+        tag.metadata["symbolic_hash_validation"] = dir_hash
+        
+        # Add anchor protocols
+        tag.add_anchor_protocol("CODE_IMPROVEMENT_ENGINE")
+        tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        
         results = {}
+        file_tags = []
         
         for pattern in file_patterns:
             for file_path in directory.rglob(pattern):
@@ -367,6 +436,21 @@ class CodeImprovementEngine:
                     suggestions = self.analyze_file(file_path)
                     if suggestions:
                         results[str(file_path)] = suggestions
+                        # Track dependency on individual file analysis
+                        file_analysis_tags = [
+                            tid for tid in self.dlp_tracker.tags.keys()
+                            if str(file_path) in self.dlp_tracker.tags[tid].metadata.get("file_path", "")
+                        ]
+                        file_tags.extend(file_analysis_tags[-1:])  # Add most recent tag
+        
+        # Add dependencies on file analysis operations
+        for file_tag_id in file_tags:
+            if file_tag_id in self.dlp_tracker.tags:
+                tag.add_dependency(file_tag_id)
+        
+        # Update tag with results
+        tag.metadata["files_analyzed"] = len(results)
+        tag.metadata["total_suggestions"] = sum(len(suggestions) for suggestions in results.values())
         
         logger.info("Analyzed directory %s: found improvements in %d files", directory, len(results))
         return results
@@ -418,6 +502,30 @@ class CodeImprovementEngine:
         Returns:
             Report dictionary with statistics and suggestions
         """
+        # Create DLP tag for report generation
+        import hashlib
+        import time
+        context_tag = f"generate_report_{int(time.time())}"
+        
+        report_data = {
+            "files_count": len(analysis_results),
+            "context_tag": context_tag,
+            "operation_type": "report_generation"
+        }
+        tag_id = self.dlp_tracker.create_tag("improvement_report", report_data)
+        tag = self.dlp_tracker.tags[tag_id]
+        
+        # Add report metadata
+        tag.metadata.update({
+            "report_type": "code_improvement_summary",
+            "files_analyzed": len(analysis_results),
+            "context_tag": context_tag
+        })
+        
+        # Add anchor protocols
+        tag.add_anchor_protocol("CODE_IMPROVEMENT_ENGINE")
+        tag.add_t1_srb_anchor("T1_TEMPORAL_ANCHOR")
+        
         total_suggestions = sum(len(suggestions) for suggestions in analysis_results.values())
         
         # Group by category
@@ -445,6 +553,20 @@ class CodeImprovementEngine:
             for s in suggestions if s.safe_to_auto_apply
         )
         
+        # Generate report hash for validation
+        report_summary = f"{len(analysis_results)}:{total_suggestions}:{by_category}:{by_severity}"
+        report_hash = hashlib.sha256(report_summary.encode()).hexdigest()
+        tag.metadata["symbolic_hash_validation"] = report_hash
+        
+        # Update tag with report statistics
+        tag.metadata.update({
+            "total_suggestions": total_suggestions,
+            "by_category": by_category,
+            "by_severity": by_severity,
+            "auto_fixable": auto_fixable,
+            "safe_auto_apply": safe_auto_apply
+        })
+        
         return {
             "total_files_analyzed": len(analysis_results),
             "total_suggestions": total_suggestions,
@@ -455,8 +577,22 @@ class CodeImprovementEngine:
             "suggestions": {
                 file_path: [s.to_dict() for s in suggestions]
                 for file_path, suggestions in analysis_results.items()
-            }
+            },
+            "dlp_tag_id": tag_id,
+            "context_tag": context_tag
         }
+    
+    def export_dlp_manifest(self, manifest_name: str = "improvement_engine_analysis") -> Dict[str, Any]:
+        """
+        Export DLP tracking manifest for improvement operations
+        
+        Args:
+            manifest_name: Name for the manifest
+        
+        Returns:
+            DLP manifest dictionary with all tracked operations
+        """
+        return self.dlp_tracker.create_export_manifest(manifest_name)
 
 
 # Global engine instance

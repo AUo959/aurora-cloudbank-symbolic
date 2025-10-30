@@ -18,6 +18,10 @@ from src.improvement import (
 )
 
 
+# Define SAFE_ROOT for path validation
+# This restricts file/directory access to prevent path traversal attacks
+SAFE_ROOT = Path(os.getenv('IMPROVEMENT_SAFE_ROOT', Path.cwd())).resolve()
+
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
 

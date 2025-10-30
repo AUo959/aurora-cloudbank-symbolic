@@ -52,27 +52,39 @@ starlette==0.49.1 pinned (CONFLICT!)
 # Inconsistent Python versions:
 aurora-ci-minimal.yml:      python-version: '3.10' ❌
 synergy_dashboard.yml:      python-version: '3.10' ❌
+branch-protection.yml:      python-version: '3.11' ❌
 dependency-validation.yml:  python-version: ["3.11", "3.12"] ✅
+# Project docs specify: Python 3.12+ required
 ```
 
 **Impact:**
 - Potential package compatibility issues
 - Inconsistent test results across workflows
 - Risk of using unsupported language features
+- Misalignment with project documentation (Python 3.12+ requirement)
 
 **Resolution:**
-Standardized all workflows to **Python 3.11**:
+Standardized all workflows to **Python 3.12** (matching project requirements):
 ```yaml
-aurora-ci-minimal.yml:    python-version: '3.11' ✅
-synergy_dashboard.yml:    python-version: '3.11' ✅
-branch-protection.yml:    python-version: '3.11' ✅ (already correct)
+aurora-ci-minimal.yml:    python-version: '3.12' ✅
+synergy_dashboard.yml:    python-version: '3.12' ✅
+branch-protection.yml:    python-version: '3.12' ✅
+pyproject.toml:           target-version: ['py312'] ✅
+# dependency-validation.yml continues testing 3.11 & 3.12 (matrix)
 ```
+
+**Rationale for Python 3.12:**
+- Project documentation (copilot-instructions.md) specifies "Python 3.12+" as backend requirement
+- Docker images (v2_ADMIN_GUIDE.md) use Python 3.12
+- Python 3.12 provides latest language features and performance improvements
+- dependency-validation.yml continues matrix testing (3.11, 3.12) to ensure backward compatibility
+- Ensures all CI workflows use the same version as production environment
 
 **Benefits:**
 - Consistent behavior across all workflows
-- Aligns with dependency-validation matrix (3.11, 3.12)
+- Aligns with documented project requirements
 - Avoids Python 3.10 compatibility edge cases
-- Ensures latest package features available
+- Ensures latest package features and security updates available
 
 ---
 
@@ -121,9 +133,10 @@ Updated to latest stable versions:
 - ✅ `DEPENDENCY_FIX_VALIDATION.md` - Detailed validation report
 
 ### 2. Workflow Standardization
-- ✅ `.github/workflows/aurora-ci-minimal.yml` - Python 3.11, actions@v4/v5
-- ✅ `.github/workflows/synergy_dashboard.yml` - Python 3.11, actions@v4/v5
-- ✅ `.github/workflows/branch-protection.yml` - actions@v4/v5
+- ✅ `.github/workflows/aurora-ci-minimal.yml` - Python 3.12, actions@v4/v5
+- ✅ `.github/workflows/synergy_dashboard.yml` - Python 3.12, actions@v4/v5
+- ✅ `.github/workflows/branch-protection.yml` - Python 3.12, actions@v4/v5
+- ✅ `pyproject.toml` - Updated to py312
 - ✅ `WORKFLOW_UPDATES.md` - Workflow update documentation
 
 ### 3. Documentation
@@ -154,7 +167,8 @@ pip check
 - ✅ h11 0.16.0
 
 ### Workflow Consistency
-- ✅ All workflows use Python 3.11
+- ✅ All workflows use Python 3.12 (matching project requirements)
+- ✅ dependency-validation.yml tests both 3.11 and 3.12 (matrix testing)
 - ✅ All checkout actions use @v4
 - ✅ All setup-python actions use @v5
 - ✅ All upload-artifact actions use @v4
@@ -258,7 +272,7 @@ v3 (outdated) → v4 (latest) ✅
 
 All identified workflow issues have been successfully remediated through:
 1. **Dependency conflict resolution** (starlette downgrade)
-2. **Python version standardization** (3.11 across all workflows)
+2. **Python version standardization** (3.12 across all workflows, matching project requirements)
 3. **GitHub Actions modernization** (v4/v5 updates)
 
 These fixes establish a solid foundation for reliable CI/CD operations and should significantly reduce the workflow failure rate.

@@ -1,0 +1,50 @@
+{
+  "scans": [
+    {
+      "timestamp": "2025-10-30T02:28:10.684611",
+      "status": "PASSED",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/observability/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/observability/telemetry.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_telemetry.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-10-30T02:36:35.405538",
+      "status": "PASSED",
+      "files_scanned": 5,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/synergy/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/synergy/api.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/synergy/component_registry.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_component_registry.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_synergy_api.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-10-30T02:51:23.508021",
+      "status": "PASSED",
+      "files_scanned": 5,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/improvement/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/improvement/api.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/improvement/engine.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_improvement_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_improvement_engine.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-10-30T03:03:44.441093",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py: Line 78: f-string print (potential log output) - print(f\"\\n\ud83d\udd27 {description}...\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py: Line 79: f-string print (potential log output) - print(f\"   Command: {' '.join(cmd)}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py..."
+    }
+  ]
+}

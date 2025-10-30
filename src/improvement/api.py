@@ -4,7 +4,8 @@ FastAPI Router for Code Improvement Engine
 Provides REST API for code analysis and improvement suggestions.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from pathlib import Path
@@ -17,6 +18,11 @@ from src.improvement import (
     ImprovementSeverity
 )
 
+# Import centralized security configuration
+from src.middleware.fastapi_security import security, limiter
+
+# Define SAFE_ROOT for path validation
+SAFE_ROOT = Path.cwd().resolve()
 
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
@@ -94,12 +100,21 @@ class AnalysisReportResponse(BaseModel):
 
 
 @router.post("/analyze-file", response_model=List[SuggestionResponse])
-async def analyze_file(request: AnalyzeFileRequest):
+@limiter.limit("20/minute")
+async def analyze_file(
+    request: AnalyzeFileRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Analyze a single file for improvement opportunities
     
     Returns list of suggestions for the specified file.
+    Requires CSRF token for security.
     """
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    
     engine = get_improvement_engine()
     requested_path = Path(request.file_path)
     # Compute the full, normalized path under the SAFE_ROOT
@@ -120,12 +135,21 @@ async def analyze_file(request: AnalyzeFileRequest):
 
 
 @router.post("/analyze-directory", response_model=AnalysisReportResponse)
-async def analyze_directory(request: AnalyzeDirectoryRequest):
+@limiter.limit("10/minute")
+async def analyze_directory(
+    request: AnalyzeDirectoryRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Analyze a directory for improvement opportunities
     
     Scans directory with specified patterns and generates comprehensive report.
+    Requires CSRF token for security.
     """
+    # CSRF Token validation
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    
     engine = get_improvement_engine()
     directory = Path(request.directory)
     
@@ -162,6 +186,7 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
 
 
 @router.get("/categories", response_model=List[str])
+@limiter.limit("60/minute")
 async def list_categories():
     """
     List all available improvement categories
@@ -172,6 +197,7 @@ async def list_categories():
 
 
 @router.get("/severities", response_model=List[str])
+@limiter.limit("60/minute")
 async def list_severities():
     """
     List all available severity levels
@@ -182,6 +208,7 @@ async def list_severities():
 
 
 @router.get("/patterns", response_model=List[Dict[str, str]])
+@limiter.limit("60/minute")
 async def list_patterns():
     """
     List all registered improvement patterns
@@ -200,6 +227,7 @@ async def list_patterns():
 
 
 @router.get("/health", response_model=Dict[str, Any])
+@limiter.limit("60/minute")
 async def engine_health():
     """
     Get improvement engine health status

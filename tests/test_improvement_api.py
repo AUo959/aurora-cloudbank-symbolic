@@ -95,7 +95,8 @@ def test_analyze_file_endpoint(client, temp_python_file):
     """Test file analysis endpoint"""
     response = client.post(
         "/improvements/analyze-file",
-        json={"file_path": str(temp_python_file)}
+        json={"file_path": str(temp_python_file)},
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -113,7 +114,8 @@ def test_analyze_file_not_found(client):
     """Test file analysis with non-existent file"""
     response = client.post(
         "/improvements/analyze-file",
-        json={"file_path": "/nonexistent/file.py"}
+        json={"file_path": "/nonexistent/file.py"},
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 404
@@ -127,7 +129,8 @@ def test_analyze_file_with_filtering(client, temp_python_file):
         "/improvements/analyze-file",
         json={
             "file_path": str(temp_python_file)
-        }
+        },
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -152,7 +155,8 @@ def test_analyze_directory_endpoint(client, tmp_path):
     
     response = client.post(
         "/improvements/analyze-directory",
-        json={"directory": str(test_dir)}
+        json={"directory": str(test_dir)},
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -177,7 +181,8 @@ def test_analyze_directory_with_patterns(client, tmp_path):
         "/improvements/analyze-directory",
         json={
             "directory": str(test_dir)
-        }
+        },
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -199,7 +204,8 @@ def test_analyze_directory_with_category_filter(client, tmp_path):
         json={
             "directory": str(test_dir),
             "categories": ["readability"]
-        }
+        },
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -226,7 +232,8 @@ def test_analyze_directory_with_severity_filter(client, tmp_path):
         json={
             "directory": str(test_dir),
             "severities": ["high", "critical"]
-        }
+        },
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -245,7 +252,8 @@ def test_analyze_directory_not_found(client):
     """Test directory analysis with non-existent directory"""
     response = client.post(
         "/improvements/analyze-directory",
-        json={"directory": "/nonexistent/directory"}
+        json={"directory": "/nonexistent/directory"},
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 404
@@ -263,7 +271,8 @@ def test_analyze_directory_summary_statistics(client, tmp_path):
     
     response = client.post(
         "/improvements/analyze-directory",
-        json={"directory": str(test_dir)}
+        json={"directory": str(test_dir)},
+        headers={"Authorization": "Bearer valid_token_123456"}
     )
     
     assert response.status_code == 200
@@ -274,3 +283,46 @@ def test_analyze_directory_summary_statistics(client, tmp_path):
     assert "by_category" in data
     assert "by_severity" in data
     assert data["total_files_analyzed"] >= 2
+
+
+@pytest.mark.api
+@pytest.mark.improvement
+@pytest.mark.security
+def test_analyze_file_without_token(client, temp_python_file):
+    """Test file analysis endpoint requires CSRF token"""
+    response = client.post(
+        "/improvements/analyze-file",
+        json={"file_path": str(temp_python_file)}
+    )
+    
+    assert response.status_code == 403  # Forbidden without auth token
+
+
+@pytest.mark.api
+@pytest.mark.improvement
+@pytest.mark.security
+def test_analyze_directory_without_token(client, tmp_path):
+    """Test directory analysis endpoint requires CSRF token"""
+    test_dir = tmp_path / "test_project"
+    test_dir.mkdir()
+    
+    response = client.post(
+        "/improvements/analyze-directory",
+        json={"directory": str(test_dir)}
+    )
+    
+    assert response.status_code == 403  # Forbidden without auth token
+
+
+@pytest.mark.api
+@pytest.mark.improvement
+@pytest.mark.security
+def test_analyze_file_with_short_token(client, temp_python_file):
+    """Test file analysis endpoint rejects short CSRF tokens"""
+    response = client.post(
+        "/improvements/analyze-file",
+        json={"file_path": str(temp_python_file)},
+        headers={"Authorization": "Bearer short"}
+    )
+    
+    assert response.status_code == 403  # Invalid CSRF token

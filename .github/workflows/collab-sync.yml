@@ -1,0 +1,47 @@
+name: collab-sync
+on:
+  repository_dispatch:
+    types: [r2.context-transfer, r2.status-sync, r2.workflow-trigger]
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
+permissions:
+  contents: read
+  actions: write
+  checks: write
+  issues: write
+  pull-requests: write
+jobs:
+  r2-context-transfer:
+    if: github.event.action == 'r2.context-transfer' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load agent config
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setOutput('ok', true)
+      - name: R-2 context sync
+        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-context-sync@main
+        with:
+          allowlist: ${{ toJson(fromJson(env.R2_ALLOWLIST)) }}
+  r2-status-sync:
+    if: github.event.action == 'r2.status-sync'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: R-2 status propagation
+        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-status-sync@main
+  r2-workflow-trigger:
+    if: github.event.action == 'r2.workflow-trigger'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dispatch downstream workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.R2_TOKEN }}
+          repository: ${{ inputs.repository || 'AUo959/aurora-cloudbank-runtime' }}
+          event-type: r2.accept-handoff
+          client-payload: ${{ inputs.payload || '{}' }}

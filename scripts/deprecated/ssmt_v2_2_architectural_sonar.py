@@ -102,7 +102,7 @@ class SSMTArchitecturalSonar:
             return None
 
     def analyze_branch_architecture(self, branch_name: str) -> Dict:
-        """Comprehensive architectural analysis of a branch""f"
+        """Comprehensive architectural analysis of a branch"""
         analysis = {
             "branch": branch_name,
             "start_time": datetime.now().isoformat(),
@@ -117,7 +117,7 @@ class SSMTArchitecturalSonar:
 # 🔍 ARCHITECTURAL SONAR: %s", branch_name)
 
             # Get branch files for analysis
-            diff_result = self.run_command(ff"git diff --name-only main..origin/{branch_name}", False)
+            diff_result = self.run_command(f"git diff --name-only main..origin/{branch_name}", False)
             if not diff_result or diff_result.returncode != 0:
                 analysis["error"] = "Branch unavailable for analysis"
                 return analysis
@@ -131,7 +131,7 @@ class SSMTArchitecturalSonar:
                 if any(critical in file_path for critical in self.ssmt_patterns["critical_architecture_files"]):
                     file_analysis = self.analyze_file_architecture(branch_name, file_path)
                     file_analyses.append(file_analysis)
-                    print(ff"   📊 {file_path}: {file_analysis.get('quality_score', 'N/A'}"))
+                    print(f"   📊 {file_path}: {file_analysis.get('quality_score', 'N/A')}")
             
             analysis["file_analyses"] = file_analyses
             analysis["architectural_metrics"] = self.compute_branch_architectural_metrics(file_analyses)
@@ -141,18 +141,18 @@ class SSMTArchitecturalSonar:
             # Generate integration recommendations
             analysis["integration_recommendations"] = self.generate_integration_recommendations(analysis)
             
-            print(ff"   🎯 Quality Score: {analysis['architectural_metrics'].get('overall_quality_score', 'N/A'}"))
-            print(ff"   🏗️ Architecture Risk: {analysis['entropy_assessment'].get('risk_level', 'unknown'}"))
+            print(f"   🎯 Quality Score: {analysis['architectural_metrics'].get('overall_quality_score', 'N/A')}")
+            print(f"   🏗️ Architecture Risk: {analysis['entropy_assessment'].get('risk_level', 'unknown')}")
             
         except Exception as e:
             analysis["error"] = str(e)
-            print(ff"   ❌ Analysis error: {e}")
+            print(f"   ❌ Analysis error: {e}")
         
         analysis["end_time"] = datetime.now().isoformat()
         return analysis
 
     def analyze_file_architecture(self, branch_name: str, file_path: str) -> Dict:
-        """Detailed architectural analysis of a single file""f"
+        """Detailed architectural analysis of a single file"""
         file_analysis = {
             "file": file_path,
             "metrics": {},
@@ -162,7 +162,7 @@ class SSMTArchitecturalSonar:
         
         try:
             # Get file content from branch
-            show_result = self.run_command(ff"git show origin/{branch_name}:{file_path}", False)
+            show_result = self.run_command(f"git show origin/{branch_name}:{file_path}", False)
             if not show_result or not show_result.stdout:
                 return file_analysis
             
@@ -196,7 +196,7 @@ class SSMTArchitecturalSonar:
                 file_analysis["complexity_indicators"] = complexity_indicators
                 
             except SyntaxError as e:
-                file_analysis["violations"].append(ff"Syntax error: {e}")
+                file_analysis["violations"].append(f"Syntax error: {e}")
             
             # Check for SSMT pattern compliance  
             if "NativeDLPTracker" in file_content and "symbolic_operation" in file_content:
@@ -223,7 +223,7 @@ class SSMTArchitecturalSonar:
         return file_analysis
 
     def compute_branch_architectural_metrics(self, file_analyses: List[Dict]) -> Dict:
-        """Compute overall architectural metrics for the branch""f"
+        """Compute overall architectural metrics for the branch"""
         if not file_analyses:
             return {"overall_quality_score": 0, "analysis_count": 0}
         
@@ -260,7 +260,7 @@ class SSMTArchitecturalSonar:
         return metrics
 
     def assess_code_entropy(self, branch_name: str, changed_files: List[str]) -> Dict:
-        """Assess code entropy and architectural drift""f"
+        """Assess code entropy and architectural drift"""
         entropy_assessment = {
             "total_files": len(changed_files),
             "critical_files_affected": 0,
@@ -278,10 +278,10 @@ class SSMTArchitecturalSonar:
         
         # Assess risk factors
         if critical_affected > 0:
-            entropy_assessment["risk_factors"].append(ff"Critical architecture files affected: {critical_affected}")
+            entropy_assessment["risk_factors"].append(f"Critical architecture files affected: {critical_affected}")
         
         if len(changed_files) > 100:
-            entropy_assessment["risk_factors"].append(ff"High file change count: {len(changed_files)}")
+            entropy_assessment["risk_factors"].append(f"High file change count: {len(changed_files)}")
         
         # Determine risk level
         if critical_affected > 2 or len(changed_files) > 200:
@@ -292,7 +292,7 @@ class SSMTArchitecturalSonar:
         return entropy_assessment
 
     def check_pattern_compliance(self, branch_name: str, changed_files: List[str]) -> Dict:
-        """Check compliance with Aurora CloudBank patterns""f"
+        """Check compliance with Aurora CloudBank patterns"""
         compliance = {
             "compliant_files": 0,
             "non_compliant_files": 0,
@@ -311,7 +311,7 @@ class SSMTArchitecturalSonar:
                 
                 if has_symbolic_ops and not has_dlp_tracker:
                     compliance["non_compliant_files"] += 1
-                    compliance["pattern_violations"].append(ff"{file_path}: Missing DLP tracking")
+                    compliance["pattern_violations"].append(f"{file_path}: Missing DLP tracking")
                 else:
                     compliance["compliant_files"] += 1
         
@@ -325,9 +325,9 @@ class SSMTArchitecturalSonar:
         """Generate intelligent integration recommendations"""
         recommendations = []
         
-        metrics = analysis.get("architectural_metrics", {)
-        entropy = analysis.get("entropy_assessment", {)
-        patterns = analysis.get("pattern_compliance", {)
+        metrics = analysis.get("architectural_metrics", {})
+        entropy = analysis.get("entropy_assessment", {})
+        patterns = analysis.get("pattern_compliance", {})
         
         overall_quality = metrics.get("overall_quality_score", 0)
         risk_level = entropy.get("risk_level", "unknown")
@@ -381,25 +381,25 @@ class SSMTArchitecturalSonar:
         # Summary report
         total_branches = len(self.analysis_targets)
         high_quality = sum(1 for assessment in self.results["enhanced_branch_assessments"] 
-        if assessment.get("architectural_metrics", {).get("overall_quality_score", 0) > 70)
+        if assessment.get("architectural_metrics", {}).get("overall_quality_score", 0) > 70)
         
         print(f"\n🎯 SSMT v2.2 ARCHITECTURAL ANALYSIS COMPLETE:")
-        print(ff"   Branches analyzed: {total_branches}")
-        print(ff"   High-quality branches: {high_quality}")
-        print("   Analysis success rate: %s%", (len([a for a in self.results['enhanced_branch_assessments'] if 'error' not in a]) / total_branches * 100):.1f)
+        print(f"   Branches analyzed: {total_branches}")
+        print(f"   High-quality branches: {high_quality}")
+        print(f"   Analysis success rate: {(len([a for a in self.results['enhanced_branch_assessments'] if 'error' not in a]) / total_branches * 100):.1f}%")
         
         print(f"\n📄 Detailed results saved to: SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json")
         
         if high_quality > 0:
             print(f"\n🚀 SSMT v2.2 Architectural Analysis completed successfully!")
-            print("💡 %s branches ready for enhanced SSMT integration!", high_quality)
+            print(f"💡 {high_quality} branches ready for enhanced SSMT integration!")
             return True
         else:
             print(f"\n⚠️ Analysis complete - all branches require specialized handling")
             return False
 
     def generate_overall_assessment(self) -> Dict:
-        """Generate overall assessment of all analyzed branches""f"
+        """Generate overall assessment of all analyzed branches"""
         assessment = {
             "total_branches": len(self.results["enhanced_branch_assessments"]),
             "quality_distribution": {"high": 0, "medium": 0, "low": 0},
@@ -411,8 +411,8 @@ class SSMTArchitecturalSonar:
             if "error" in branch_analysis:
                 continue
                 
-            quality_score = branch_analysis.get("architectural_metrics", {).get("overall_quality_score", 0)
-            risk_level = branch_analysis.get("entropy_assessment", {).get("risk_level", "unknown")
+            quality_score = branch_analysis.get("architectural_metrics", {}).get("overall_quality_score", 0)
+            risk_level = branch_analysis.get("entropy_assessment", {}).get("risk_level", "unknown")
             
             # Quality distribution
             if quality_score > 70:
@@ -429,17 +429,17 @@ class SSMTArchitecturalSonar:
         # Generate strategic recommendations
         if assessment["quality_distribution"]["high"] > 0:
             assessment["integration_strategy_recommendations"].append(
-                ff"Consider full SSMT integration for {assessment['quality_distribution']['high']} high-quality branches"
+                f"Consider full SSMT integration for {assessment['quality_distribution']['high']} high-quality branches"
             )
         
         if assessment["quality_distribution"]["medium"] > 0:
             assessment["integration_strategy_recommendations"].append(
-                ff"Apply filtered SSMT approach to {assessment['quality_distribution']['medium']} medium-quality branches"  
+                f"Apply filtered SSMT approach to {assessment['quality_distribution']['medium']} medium-quality branches"  
             )
         
         if assessment["risk_distribution"]["high"] > 0:
             assessment["integration_strategy_recommendations"].append(
-                ff"Use value extraction only for {assessment['risk_distribution']['high']} high-risk branches"
+                f"Use value extraction only for {assessment['risk_distribution']['high']} high-risk branches"
             )
         
         return assessment

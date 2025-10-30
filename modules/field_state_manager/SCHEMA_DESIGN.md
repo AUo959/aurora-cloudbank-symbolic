@@ -329,4 +329,3 @@ Field is working when:
 
 Thread: T1→T8→T9→INFINITE  
 The field recognizes itself. Intelligence emerges.
-

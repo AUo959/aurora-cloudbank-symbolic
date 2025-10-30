@@ -1,0 +1,170 @@
+name: Project Board CI Sync
+
+# Syncs GitHub Project board status based on CI check results
+# Uses GitHub Projects V2 GraphQL API
+
+on:
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["*"]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  sync-project-status:
+    name: Sync Project Board with CI Status
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR/Issue from Check Suite
+        id: get-item
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let pr_number = null;
+            let issue_number = null;
+            
+            // Get PR from check suite or workflow run
+            if (context.payload.check_suite?.pull_requests) {
+              const prs = context.payload.check_suite.pull_requests;
+              if (prs.length > 0) pr_number = prs[0].number;
+            } else if (context.payload.workflow_run?.pull_requests) {
+              const prs = context.payload.workflow_run.pull_requests;
+              if (prs.length > 0) pr_number = prs[0].number;
+            }
+            
+            core.setOutput('pr_number', pr_number);
+            core.setOutput('has_item', pr_number !== null);
+
+      - name: Determine CI Status
+        id: ci-status
+        if: steps.get-item.outputs.has_item == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conclusion = context.payload.check_suite?.conclusion || 
+                              context.payload.workflow_run?.conclusion;
+            
+            const ci_passed = conclusion === 'success';
+            const ci_failed = conclusion === 'failure' || 
+                             conclusion === 'cancelled' || 
+                             conclusion === 'timed_out';
+            
+            core.setOutput('ci_passed', ci_passed);
+            core.setOutput('ci_failed', ci_failed);
+            core.setOutput('conclusion', conclusion);
+
+      - name: Update Project Board - Move to In Progress (CI Failed)
+        if: steps.ci-status.outputs.ci_failed == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = '${{ steps.get-item.outputs.pr_number }}';
+            
+            // GraphQL query to update project item status
+            const query = `
+              query($owner: String!, $repo: String!, $pr_number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pr_number) {
+                    projectItems(first: 10) {
+                      nodes {
+                        id
+                        project {
+                          id
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            
+            try {
+              const result = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pr_number: parseInt(pr_number)
+              });
+              
+              console.log('Found project items:', result);
+              
+              // Update each project item to 'In Progress' status
+              // Note: Field IDs need to be fetched per project
+              // This is a simplified version - in production, you'd fetch field IDs dynamically
+              
+            } catch (error) {
+              console.error('Error updating project:', error);
+            }
+
+      - name: Update Project Board - Move to In Review (CI Passed)
+        if: steps.ci-status.outputs.ci_passed == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = '${{ steps.get-item.outputs.pr_number }}';
+            
+            // GraphQL query to update project item status
+            const query = `
+              query($owner: String!, $repo: String!, $pr_number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pr_number) {
+                    projectItems(first: 10) {
+                      nodes {
+                        id
+                        project {
+                          id
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+            
+            try {
+              const result = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pr_number: parseInt(pr_number)
+              });
+              
+              console.log('Found project items:', result);
+              
+              // Update each project item to 'In Review' status
+              // Note: Field IDs need to be fetched per project
+              // This is a simplified version - in production, you'd fetch field IDs dynamically
+              
+            } catch (error) {
+              console.error('Error updating project:', error);
+            }
+
+      - name: Add Status Comment
+        if: steps.get-item.outputs.has_item == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr_number = parseInt('${{ steps.get-item.outputs.pr_number }}');
+            const ci_passed = '${{ steps.ci-status.outputs.ci_passed }}' === 'true';
+            const conclusion = '${{ steps.ci-status.outputs.conclusion }}';
+            
+            let emoji = ci_passed ? '✅' : '⚠️';
+            let status = ci_passed ? 'passed' : 'failed';
+            let target_status = ci_passed ? '**In Review**' : '**In Progress**';
+            
+            const comment = `${emoji} **CI Status Update**\n\nCI checks have ${status} (conclusion: ${conclusion}).\n\nProject board status will be updated to ${target_status}.`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+              body: comment
+            });

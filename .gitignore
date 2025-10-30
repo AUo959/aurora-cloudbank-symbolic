@@ -29,6 +29,10 @@ logs/
 data/
 *.log
 
+# Backup files (timestamped dependency snapshots)
+.backup/pre_rebuild_*/
+.backup/**/*.20*
+
 # Security and temporary files
 security_scan_report.json
 test_security_fixes.py
@@ -231,4 +235,8 @@ auth_config.json
 
 # Backup files and instruction templates
 .backup/
+
+# Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+.devcontainer/hooks/
+.rebuild_degraded_state.json

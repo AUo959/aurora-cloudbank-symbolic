@@ -9,7 +9,7 @@ DLP: context_tag=node_state, symbolic_hash=FIELD_NODE_v1
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Dict, List, Optional
 
 
@@ -33,7 +33,7 @@ class Need:
     description: str
     urgency: float  # 0.0 → 1.0
     required_capabilities: List[str]
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     
     def is_urgent(self, threshold: float = 0.7) -> bool:
         """Is this need urgent?"""
@@ -45,7 +45,7 @@ class SynapseConnection:
     """Active connection to another node."""
     target_node_id: str
     weight: float  # 0.0 → 1.0 connection strength
-    last_used: datetime = field(default_factory=datetime.utcnow)
+    last_used: datetime = field(default_factory=lambda: datetime.now(UTC))
     success_count: int = 0
     failure_count: int = 0
     ethical_score: float = 1.0
@@ -57,7 +57,7 @@ class SynapseConnection:
     
     def record_usage(self, success: bool):
         """Record synapse usage and adjust weight."""
-        self.last_used = datetime.utcnow()
+        self.last_used = datetime.now(UTC)
         if success:
             self.success_count += 1
             self.weight = min(1.0, self.weight + 0.1)  # Strengthen
@@ -104,7 +104,7 @@ class NodeState:
         self.current_needs: List[Need] = []
         self.active_synapses: Dict[str, SynapseConnection] = {}
         self.health = NodeHealth()
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(UTC)
         
     def add_capability(
         self,
@@ -119,7 +119,7 @@ class NodeState:
             availability=availability
         )
         self.capabilities[name] = capability
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(UTC)
         return capability
     
     def broadcast_need(
@@ -137,13 +137,13 @@ class NodeState:
             required_capabilities=required_capabilities
         )
         self.current_needs.append(need)
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(UTC)
         return need
     
     def fulfill_need(self, need_id: str):
         """Mark a need as fulfilled and remove it."""
         self.current_needs = [n for n in self.current_needs if n.need_id != need_id]
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(UTC)
     
     def form_synapse(
         self,
@@ -158,14 +158,14 @@ class NodeState:
             ethical_score=ethical_score
         )
         self.active_synapses[target_node_id] = synapse
-        self.last_update = datetime.utcnow()
+        self.last_update = datetime.now(UTC)
         return synapse
     
     def prune_synapse(self, target_node_id: str):
         """Remove a synapse that has decayed too much."""
         if target_node_id in self.active_synapses:
             del self.active_synapses[target_node_id]
-            self.last_update = datetime.utcnow()
+            self.last_update = datetime.now(UTC)
     
     def get_synapse(self, target_node_id: str) -> Optional[SynapseConnection]:
         """Get synapse to specific node if exists."""
@@ -173,7 +173,7 @@ class NodeState:
     
     def decay_synapses(self, decay_rate: float = 0.01):
         """Apply natural decay to unused synapses."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         pruned = []
         
         for target_id, synapse in self.active_synapses.items():

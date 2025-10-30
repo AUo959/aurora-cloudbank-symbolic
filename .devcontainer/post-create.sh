@@ -100,7 +100,10 @@ if [[ ! -f "${HOME}/.bash_profile" ]]; then
   touch "${HOME}/.bash_profile"
 fi
 
-deactivate
+# Deactivate virtual environment if one is active
+if command -v deactivate &> /dev/null && [[ -n "${VIRTUAL_ENV:-}" ]]; then
+  deactivate
+fi
 
 cp -f .devcontainer/bashrc ~/.bashrc
 

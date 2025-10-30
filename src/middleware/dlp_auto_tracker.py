@@ -21,11 +21,11 @@ except ImportError:
             self.tags = {}
             self.operation_counter = 0
         
-        def create_tag(self, operation: str, data: dict, context_tag: str = None) -> str:
+        def create_tag(self, operation: str, data: dict, tag_id: Optional[str] = None) -> str:
             self.operation_counter += 1
-            tag_id = f"dlp_mock_{self.operation_counter}"
-            self.tags[tag_id] = {"operation": operation, "data": data}
-            return tag_id
+            result_tag_id = tag_id or f"dlp_mock_{self.operation_counter}"
+            self.tags[result_tag_id] = {"operation": operation, "data": data}
+            return result_tag_id
 
 try:
     from modules.insight_ledger.api import get_ledger
@@ -118,7 +118,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
         request_tag_id = self.dlp_tracker.create_tag(
             operation=f"api_request_{request.method}_{self._normalize_path(request.url.path)}",
             data=request_data,
-            context_tag=f"request_{int(time.time() * 1000)}"
+            tag_id=f"request_{int(time.time() * 1000)}"
         )
         self.total_tracked += 1
         
@@ -132,7 +132,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
         response_tag_id = self.dlp_tracker.create_tag(
             operation=f"api_response_{response.status_code}",
             data=response_data,
-            context_tag=f"response_{int(time.time() * 1000)}"
+            tag_id=f"response_{int(time.time() * 1000)}"
         )
         
         # Link request and response tags

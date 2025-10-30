@@ -50,6 +50,8 @@ minversion = "6.0"
 addopts = [
     "-ra",
     "-v",
+    "--timeout=300",  # 5 minute timeout per test
+    "--timeout-method=thread",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]

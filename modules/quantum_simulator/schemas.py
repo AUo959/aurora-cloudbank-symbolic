@@ -155,6 +155,16 @@ class StateVector(BaseModel):
             raise ValueError(f"State vector not normalized: norm² = {norm_sq}")
         return v
 
+    class Config:
+        arbitrary_types_allowed = True
+        json_schema_extra = {
+            "example": {
+                "amplitudes": [0.707 + 0j, 0.707 + 0j],
+                "num_qubits": 1,
+                "basis_labels": ["|0⟩", "|1⟩"],
+            }
+        }
+
 
 class MeasurementResult(BaseModel):
     """Result from quantum measurement."""

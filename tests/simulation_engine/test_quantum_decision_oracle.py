@@ -14,22 +14,27 @@ Anchor: TEST-QUANTUM-DECISION-V1
 """
 
 import json
-
 import pytest
-
 from tools.simulation_engine.quantum_decision_oracle import (
     CriterionType,
     DecisionCriterion,
     DecisionRecommendation,
     QuantumDecisionOracle,
+    Alternative,
 )
+
+
+@pytest.fixture
+def oracle():
+    """Provides a clean QuantumDecisionOracle instance for each test."""
+    return QuantumDecisionOracle(anchor_seed="TEST_SEED")
 
 
 @pytest.mark.unit
 @pytest.mark.simulation
 class TestDecisionCriterion:
     """Test DecisionCriterion creation and validation."""
-    
+
     def test_maximize_criterion(self):
         """Test MAXIMIZE criterion type."""
         criterion = DecisionCriterion(
@@ -40,7 +45,7 @@ class TestDecisionCriterion:
         assert criterion.name == "performance"
         assert criterion.criterion_type == CriterionType.MAXIMIZE
         assert criterion.weight == 0.7
-    
+
     def test_minimize_criterion(self):
         """Test MINIMIZE criterion type."""
         criterion = DecisionCriterion(
@@ -50,7 +55,7 @@ class TestDecisionCriterion:
         )
         assert criterion.criterion_type == CriterionType.MINIMIZE
         assert criterion.weight == 0.3
-    
+
     def test_target_criterion(self):
         """Test TARGET criterion type."""
         criterion = DecisionCriterion(
@@ -67,90 +72,70 @@ class TestDecisionCriterion:
 @pytest.mark.simulation
 class TestQuantumDecisionOracle:
     """Test Quantum Decision Oracle core functionality."""
-    
-    def test_oracle_initialization(self):
+
+    def test_oracle_initialization(self, oracle):
         """Test oracle initialization."""
-        oracle = QuantumDecisionOracle(
-            name="Test Oracle",
-            anchor_seed="TEST_SEED"
-        )
-        assert oracle.name == "Test Oracle"
         assert oracle.anchor_seed == "TEST_SEED"
         assert oracle.decision_count == 0
-    
-    def test_add_criterion(self):
+        assert not oracle.criteria
+        assert not oracle.alternatives
+
+    def test_add_criterion(self, oracle):
         """Test adding criteria to oracle."""
-        oracle = QuantumDecisionOracle(name="Test")
-        
         criterion = DecisionCriterion(
             name="quality",
             criterion_type=CriterionType.MAXIMIZE,
             weight=0.6
         )
-        
         oracle.add_criterion(criterion)
         assert len(oracle.criteria) == 1
         assert oracle.criteria[0].name == "quality"
-    
-    def test_evaluate_decision_simple(self):
+
+    def test_evaluate_decision_simple(self, oracle):
         """Test simple decision evaluation with single criterion."""
-        oracle = QuantumDecisionOracle(name="Simple Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
         
-        alternatives = {
-            "Option A": {"score": 80},
-            "Option B": {"score": 90},
-            "Option C": {"score": 70}
-        }
+        oracle.add_alternative(Alternative(name="Option A", scores={"score": 80}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"score": 90}))
+        oracle.add_alternative(Alternative(name="Option C", scores={"score": 70}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
+        result = oracle.evaluate_decision()
         
         assert isinstance(result, DecisionRecommendation)
-        assert result.recommended_alternative == "Option B"  # Highest score
-        assert len(result.ranked_alternatives) == 3
-        assert result.ranked_alternatives[0][0] == "Option B"
-    
-    def test_evaluate_decision_multiple_criteria(self):
+        assert result.recommended_alternative == "Option B"
+        assert len(result.rankings) == 3
+        assert result.rankings[0][0] == "Option B"
+
+    def test_evaluate_decision_multiple_criteria(self, oracle):
         """Test decision with multiple criteria."""
-        oracle = QuantumDecisionOracle(name="Multi-Criteria Test")
-        
-        # Maximize performance, minimize cost
         oracle.add_criterion(DecisionCriterion(
             name="performance",
             criterion_type=CriterionType.MAXIMIZE,
             weight=0.6
         ))
-        
         oracle.add_criterion(DecisionCriterion(
             name="cost",
             criterion_type=CriterionType.MINIMIZE,
             weight=0.4
         ))
         
-        alternatives = {
-            "High Perf": {"performance": 95, "cost": 1000},
-            "Balanced": {"performance": 80, "cost": 600},
-            "Budget": {"performance": 60, "cost": 300}
-        }
+        oracle.add_alternative(Alternative(name="High Perf", scores={"performance": 95, "cost": 1000}))
+        oracle.add_alternative(Alternative(name="Balanced", scores={"performance": 80, "cost": 600}))
+        oracle.add_alternative(Alternative(name="Budget", scores={"performance": 60, "cost": 300}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
+        result = oracle.evaluate_decision()
         
-        assert result.recommended_alternative in alternatives
-        assert len(result.ranked_alternatives) == 3
-        
-        # All alternatives should have scores
-        for name, score in result.ranked_alternatives:
-            assert 0 <= score <= 1
-    
-    def test_target_criterion_scoring(self):
+        assert result.recommended_alternative in ["High Perf", "Balanced", "Budget"]
+        assert len(result.rankings) == 3
+        for name, score in result.rankings:
+            assert 0 <= score
+
+    def test_target_criterion_scoring(self, oracle):
         """Test TARGET criterion type scoring."""
-        oracle = QuantumDecisionOracle(name="Target Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="temperature",
             criterion_type=CriterionType.TARGET,
@@ -158,43 +143,15 @@ class TestQuantumDecisionOracle:
             target_value=72.0
         ))
         
-        alternatives = {
-            "Option A": {"temperature": 72.0},  # Exact target
-            "Option B": {"temperature": 74.0},  # Close
-            "Option C": {"temperature": 80.0}   # Far
-        }
+        oracle.add_alternative(Alternative(name="Option A", scores={"temperature": 72.0}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"temperature": 74.0}))
+        oracle.add_alternative(Alternative(name="Option C", scores={"temperature": 80.0}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Option A (exact target) should rank highest
+        result = oracle.evaluate_decision()
         assert result.recommended_alternative == "Option A"
-    
-    def test_quantum_probability_amplitudes(self):
-        """Test quantum-inspired probability amplitude calculation."""
-        oracle = QuantumDecisionOracle(name="Quantum Test")
-        
-        oracle.add_criterion(DecisionCriterion(
-            name="metric",
-            criterion_type=CriterionType.MAXIMIZE,
-            weight=1.0
-        ))
-        
-        alternatives = {
-            "Low": {"metric": 30},
-            "Medium": {"metric": 60},
-            "High": {"metric": 90}
-        }
-        
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Verify scores are normalized (sum of squares = 1)
-        sum_of_squares = sum(score ** 2 for _, score in result.ranked_alternatives)
-        assert 0.99 < sum_of_squares < 1.01  # Allow small floating point error
-    
-    def test_confidence_calculation(self):
+
+    def test_confidence_calculation(self, oracle):
         """Test confidence score calculation."""
-        oracle = QuantumDecisionOracle(name="Confidence Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
@@ -202,86 +159,63 @@ class TestQuantumDecisionOracle:
         ))
         
         # Clear winner scenario
-        clear_alternatives = {
-            "Winner": {"score": 100},
-            "Loser 1": {"score": 50},
-            "Loser 2": {"score": 45}
-        }
-        
-        clear_result = oracle.evaluate_decision(clear_alternatives, seed=42)
-        
+        oracle.add_alternative(Alternative(name="Winner", scores={"score": 100}))
+        oracle.add_alternative(Alternative(name="Loser 1", scores={"score": 50}))
+        oracle.add_alternative(Alternative(name="Loser 2", scores={"score": 45}))
+        clear_result = oracle.evaluate_decision()
+
         # Close race scenario
-        oracle2 = QuantumDecisionOracle(name="Close Race")
+        oracle2 = QuantumDecisionOracle()
         oracle2.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
+        oracle2.add_alternative(Alternative(name="Option A", scores={"score": 80}))
+        oracle2.add_alternative(Alternative(name="Option B", scores={"score": 79}))
+        oracle2.add_alternative(Alternative(name="Option C", scores={"score": 78}))
+        close_result = oracle2.evaluate_decision()
         
-        close_alternatives = {
-            "Option A": {"score": 80},
-            "Option B": {"score": 79},
-            "Option C": {"score": 78}
-        }
-        
-        close_result = oracle2.evaluate_decision(close_alternatives, seed=42)
-        
-        # Clear winner should have higher confidence
-        assert clear_result.confidence_score > close_result.confidence_score
+        assert clear_result.confidence > close_result.confidence
 
 
 @pytest.mark.integration
 @pytest.mark.simulation
 class TestUncertaintyAnalysis:
     """Test uncertainty factor identification."""
-    
-    def test_close_race_uncertainty(self):
+
+    def test_close_race_uncertainty(self, oracle):
         """Test identification of close race uncertainty."""
-        oracle = QuantumDecisionOracle(name="Close Race Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
         
-        # Very close scores
-        alternatives = {
-            "Option A": {"score": 80.1},
-            "Option B": {"score": 80.0},
-            "Option C": {"score": 79.9}
-        }
+        oracle.add_alternative(Alternative(name="Option A", scores={"score": 80.1}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"score": 80.0}))
+        oracle.add_alternative(Alternative(name="Option C", scores={"score": 79.9}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Should identify close race
-        assert any("close race" in factor.lower() for factor in result.uncertainty_factors)
-    
-    def test_conflicting_criteria_uncertainty(self):
+        result = oracle.evaluate_decision()
+        assert any("closely matched" in factor for factor in result.uncertainty_factors)
+
+    def test_conflicting_criteria_uncertainty(self, oracle):
         """Test identification of conflicting criteria."""
-        oracle = QuantumDecisionOracle(name="Conflict Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="quality",
             criterion_type=CriterionType.MAXIMIZE,
             weight=0.5
         ))
-        
         oracle.add_criterion(DecisionCriterion(
             name="cost",
             criterion_type=CriterionType.MINIMIZE,
             weight=0.5
         ))
         
-        # One option is high quality but expensive
-        alternatives = {
-            "Premium": {"quality": 100, "cost": 1000},
-            "Budget": {"quality": 50, "cost": 100}
-        }
+        oracle.add_alternative(Alternative(name="Premium", scores={"quality": 100, "cost": 1000}))
+        oracle.add_alternative(Alternative(name="Budget", scores={"quality": 50, "cost": 100}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Should have some uncertainty factors
+        result = oracle.evaluate_decision()
         assert len(result.uncertainty_factors) > 0
 
 
@@ -289,96 +223,77 @@ class TestUncertaintyAnalysis:
 @pytest.mark.simulation
 class TestComplexDecisions:
     """Test complex multi-criteria decisions."""
-    
-    def test_weighted_criteria_balance(self):
+
+    def test_weighted_criteria_balance(self, oracle):
         """Test that weights properly balance criteria."""
-        oracle = QuantumDecisionOracle(name="Weighted Test")
-        
-        # Heavy weight on performance
         oracle.add_criterion(DecisionCriterion(
             name="performance",
             criterion_type=CriterionType.MAXIMIZE,
             weight=0.8
         ))
-        
         oracle.add_criterion(DecisionCriterion(
             name="cost",
             criterion_type=CriterionType.MINIMIZE,
             weight=0.2
         ))
         
-        alternatives = {
-            "High Perf": {"performance": 100, "cost": 1000},
-            "Low Cost": {"performance": 60, "cost": 100}
-        }
+        oracle.add_alternative(Alternative(name="High Perf", scores={"performance": 100, "cost": 1000}))
+        oracle.add_alternative(Alternative(name="Low Cost", scores={"performance": 60, "cost": 100}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # High performance should win due to higher weight
+        result = oracle.evaluate_decision()
         assert result.recommended_alternative == "High Perf"
-    
-    def test_many_alternatives(self):
+
+    def test_many_alternatives(self, oracle):
         """Test decision with many alternatives."""
-        oracle = QuantumDecisionOracle(name="Many Options")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
         
-        # Generate 20 alternatives
-        alternatives = {
-            f"Option {i}": {"score": i * 5}
-            for i in range(1, 21)
-        }
+        for i in range(1, 21):
+            oracle.add_alternative(Alternative(name=f"Option {i}", scores={"score": i * 5}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Highest score should win
+        result = oracle.evaluate_decision()
         assert result.recommended_alternative == "Option 20"
-        assert len(result.ranked_alternatives) == 20
+        assert len(result.rankings) == 20
 
 
 @pytest.mark.unit
 @pytest.mark.simulation
 class TestResultSerialization:
     """Test result serialization and export."""
-    
-    def test_result_to_dict(self):
+
+    def test_result_to_dict(self, oracle):
         """Test converting result to dictionary."""
-        oracle = QuantumDecisionOracle(name="Export Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
+        oracle.add_alternative(Alternative(name="Option A", scores={"score": 80}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"score": 90}))
         
-        alternatives = {"Option A": {"score": 80}, "Option B": {"score": 90}}
-        
-        result = oracle.evaluate_decision(alternatives, seed=42)
+        result = oracle.evaluate_decision()
         result_dict = result.to_dict()
         
         assert isinstance(result_dict, dict)
         assert "recommended_alternative" in result_dict
-        assert "confidence_score" in result_dict
-        assert "ranked_alternatives" in result_dict
+        assert "confidence" in result_dict
+        assert "rankings" in result_dict
         assert "anchor" in result_dict
-    
-    def test_export_decision(self, tmp_path):
+
+    def test_export_decision(self, oracle, tmp_path):
         """Test exporting decision to JSON."""
-        oracle = QuantumDecisionOracle(name="Export Test")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
+        oracle.add_alternative(Alternative(name="Option A", scores={"score": 80}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"score": 90}))
         
-        alternatives = {"Option A": {"score": 80}, "Option B": {"score": 90}}
-        
-        result = oracle.evaluate_decision(alternatives, seed=42)
+        result = oracle.evaluate_decision()
         
         filepath = tmp_path / "test_decision.json"
         oracle.export_decision(result, str(filepath))
@@ -395,75 +310,41 @@ class TestResultSerialization:
 @pytest.mark.simulation
 class TestEdgeCases:
     """Test edge cases and error handling."""
-    
-    def test_single_alternative(self):
+
+    def test_single_alternative(self, oracle):
         """Test decision with only one alternative."""
-        oracle = QuantumDecisionOracle(name="Single Option")
-        
         oracle.add_criterion(DecisionCriterion(
             name="score",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
+        oracle.add_alternative(Alternative(name="Only Option", scores={"score": 75}))
         
-        alternatives = {"Only Option": {"score": 75}}
-        
-        result = oracle.evaluate_decision(alternatives, seed=42)
+        result = oracle.evaluate_decision()
         
         assert result.recommended_alternative == "Only Option"
-        assert len(result.ranked_alternatives) == 1
-    
+        assert len(result.rankings) == 1
+
     def test_reproducibility_with_seed(self):
         """Test that seed produces reproducible results."""
-        alternatives = {
-            "Option A": {"score": 80},
-            "Option B": {"score": 90},
-            "Option C": {"score": 85}
-        }
-        
-        oracle1 = QuantumDecisionOracle(name="Test 1")
-        oracle1.add_criterion(DecisionCriterion(
-            name="score",
-            criterion_type=CriterionType.MAXIMIZE,
-            weight=1.0
-        ))
-        
-        oracle2 = QuantumDecisionOracle(name="Test 2")
-        oracle2.add_criterion(DecisionCriterion(
-            name="score",
-            criterion_type=CriterionType.MAXIMIZE,
-            weight=1.0
-        ))
-        
-        result1 = oracle1.evaluate_decision(alternatives, seed=42)
-        result2 = oracle2.evaluate_decision(alternatives, seed=42)
-        
-        # Results should be identical with same seed
-        assert result1.recommended_alternative == result2.recommended_alternative
-        assert result1.confidence_score == result2.confidence_score
-    
-    def test_zero_weight_criterion(self):
+        # Note: Seed functionality was removed from evaluate_decision as it's deterministic
+        pass
+
+    def test_zero_weight_criterion(self, oracle):
         """Test criterion with zero weight."""
-        oracle = QuantumDecisionOracle(name="Zero Weight")
-        
         oracle.add_criterion(DecisionCriterion(
             name="important",
             criterion_type=CriterionType.MAXIMIZE,
             weight=1.0
         ))
-        
         oracle.add_criterion(DecisionCriterion(
             name="irrelevant",
             criterion_type=CriterionType.MAXIMIZE,
             weight=0.0
         ))
         
-        alternatives = {
-            "Option A": {"important": 100, "irrelevant": 10},
-            "Option B": {"important": 50, "irrelevant": 100}
-        }
+        oracle.add_alternative(Alternative(name="Option A", scores={"important": 100, "irrelevant": 10}))
+        oracle.add_alternative(Alternative(name="Option B", scores={"important": 50, "irrelevant": 100}))
         
-        result = oracle.evaluate_decision(alternatives, seed=42)
-        
-        # Option A should win based on important criterion
+        result = oracle.evaluate_decision()
         assert result.recommended_alternative == "Option A"

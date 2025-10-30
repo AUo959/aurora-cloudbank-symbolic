@@ -127,16 +127,22 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     Scans directory with specified patterns and generates comprehensive report.
     """
     engine = get_improvement_engine()
-    directory = Path(request.directory)
-    
-    if not directory.exists():
+    requested_path = Path(request.directory)
+    # Compute the full, normalized path under the SAFE_ROOT
+    full_path = (SAFE_ROOT / requested_path).resolve()
+
+    # Ensure the resolved path is inside SAFE_ROOT
+    if not str(full_path).startswith(str(SAFE_ROOT)):
+        raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
+
+    if not full_path.exists():
         raise HTTPException(status_code=404, detail=f"Directory not found: {request.directory}")
-    
-    if not directory.is_dir():
+
+    if not full_path.is_dir():
         raise HTTPException(status_code=400, detail=f"Not a directory: {request.directory}")
-    
+
     # Analyze directory
-    results = engine.analyze_directory(directory, request.file_patterns)
+    results = engine.analyze_directory(full_path, request.file_patterns)
     
     # Apply filters
     if request.categories or request.severities or request.min_confidence > 0.5:

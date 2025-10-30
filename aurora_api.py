@@ -155,6 +155,18 @@ except ImportError as e:
     COLLAB_AVAILABLE = False
 except Exception as e:
     print(f"❌ Failed to integrate Cross-Repo Collaboration API routes: {e}")
+
+# Include Subroutine API routes
+try:
+    from src.subroutines.api import router as subroutine_router
+    app.include_router(subroutine_router)
+    print("✅ Subroutine API routes integrated successfully")
+    SUBROUTINE_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️  Subroutine system not available: {e}")
+    SUBROUTINE_AVAILABLE = False
+except Exception as e:
+    print(f"❌ Failed to integrate Subroutine API routes: {e}")
     COLLAB_AVAILABLE = False
 
 ga = GeometricAlgebra()

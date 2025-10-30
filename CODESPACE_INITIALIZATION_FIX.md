@@ -1,6 +1,17 @@
 # Codespace Initialization Fix - October 29, 2025
 
-## Problem Statement
+## LATEST UPDATE: Deactivate Command Fix
+
+**Date:** 2025-10-29  
+**Critical Fix:** Fixed unconditional `deactivate` command in `.devcontainer/post-create.sh` that was causing initialization failures.
+
+See detailed documentation: [docs/CODESPACE_DEACTIVATE_FIX.md](docs/CODESPACE_DEACTIVATE_FIX.md)
+
+The post-create script was calling `deactivate` unconditionally, which failed during initial Codespace creation when no virtual environment was active. This has been fixed by adding proper conditional checks.
+
+---
+
+## Problem Statement (Historical)
 
 The Aurora CloudBank Symbolic devcontainer was failing to start, with the specific symptom being that the GitHub Codespace would not complete initialization. The user reported "nothing will open", indicating that the devcontainer initialization process was blocked, preventing the codespace from becoming available for use. This occurred after a previous fix attempt (PR #263) that didn't fully resolve the underlying initialization timing issues.
 

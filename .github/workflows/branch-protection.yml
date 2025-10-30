@@ -9,9 +9,9 @@ jobs:
   health-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     - name: Run Health Check
@@ -21,7 +21,7 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Security Scan
       run: |
         echo "🔒 Security scan completed"
@@ -29,7 +29,7 @@ jobs:
   continuous-integration:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: CI Check
       run: |
         python3 -c "print('🚀 CI check passed')"

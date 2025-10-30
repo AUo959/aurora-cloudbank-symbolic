@@ -35,7 +35,6 @@ def test_parse_requirements_file():
     assert 'starlette' in packages, "Should find starlette"
     
     print(f"   ✅ Parsed {len(packages)} packages")
-    return True
 
 
 def test_parse_version_spec():
@@ -57,7 +56,6 @@ def test_parse_version_spec():
     assert upper == "", f"Expected '', got '{upper}'"
     
     print("   ✅ Version spec parsing works correctly")
-    return True
 
 
 def test_check_version_compatibility():
@@ -79,7 +77,6 @@ def test_check_version_compatibility():
         "0.39.0 should NOT be compatible with >=0.40.0,<0.49.0"
     
     print("   ✅ Version compatibility checking works correctly")
-    return True
 
 
 def test_generate_report():
@@ -96,7 +93,6 @@ def test_generate_report():
     
     print(f"   ✅ Generated report: {report.total_packages} packages, "
           f"{report.conflict_count} conflicts, status={report.health_status}")
-    return True
 
 
 def test_export_report():
@@ -124,7 +120,6 @@ def test_export_report():
         assert 'health_status' in data, "Should have health_status"
         
         print("   ✅ Report export works correctly")
-        return True
     finally:
         # Cleanup
         output_file.unlink(missing_ok=True)
@@ -149,8 +144,8 @@ def run_all_tests():
     
     for test in tests:
         try:
-            if test():
-                passed += 1
+            test()  # Tests now return None, not True
+            passed += 1
         except AssertionError as e:
             print(f"   ❌ FAILED: {e}")
             failed += 1

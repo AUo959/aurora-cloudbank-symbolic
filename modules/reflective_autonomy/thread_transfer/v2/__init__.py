@@ -17,7 +17,7 @@ DLP: context_tag=bridge_v2_core, symbolic_hash=BRIDGE_V2_INIT
 """
 
 # Phase 1: Distributed Bridge Nodes
-from .distributed_consensus import RaftConsensus, ConsensusState, ConsensusConfig
+from .distributed_consensus import RaftConsensus, ConsensusState, ConsensusConfig, initialize_consensus
 from .node_registry import (
     BridgeNode,
     NodeRegistry,
@@ -102,6 +102,7 @@ __all__ = [
     "RaftConsensus",
     "ConsensusState",
     "ConsensusConfig",
+    "initialize_consensus",
     "BridgeNode",
     "NodeRegistry",
     "NodeStatus",

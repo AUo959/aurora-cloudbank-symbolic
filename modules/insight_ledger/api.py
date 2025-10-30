@@ -294,7 +294,7 @@ async def get_entry_by_id(entry_id: str) -> LedgerEntry:
         ledger = get_ledger()
 
         # Query for the specific entry
-        query = AuditQuery(limit=100000)  # Search entire ledger
+        query = AuditQuery(limit=10000)  # Search entire ledger
         entries = ledger.query_history(query)
 
         for entry in entries:

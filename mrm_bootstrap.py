@@ -296,7 +296,9 @@ class MemoryStore:
             Embedding vector
         """
         # Mock implementation: simple hash-based embedding
-        # TODO: Replace with actual embedding model
+        # NOTE: Production systems should use sentence-transformers or similar
+        # This deterministic hash-based approach provides consistent embeddings
+        # suitable for development and testing without external dependencies
         
         hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
         dimension = self._config.vector_dimension

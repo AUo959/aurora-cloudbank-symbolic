@@ -4,6 +4,19 @@
  * Symbolic Anchor: T1_CONSTELLATION_PRIME
  */
 
+interface SealResponse {
+  success: boolean;
+  snapshots: {
+    registry: {
+      stateHash: string;
+      timestamp: string;
+    };
+    orchestrator: {
+      snapshotHash: string;
+    };
+  };
+}
+
 async function sealState() {
   const baseUrl = process.env.CONSTELLATION_URL || 'http://localhost:5000';
   
@@ -17,7 +30,7 @@ async function sealState() {
       }
     });
     
-    const data = await response.json();
+    const data = await response.json() as SealResponse;
     
     if (data.success) {
       console.log('✅ Memory state sealed');

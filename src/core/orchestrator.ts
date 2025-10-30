@@ -358,7 +358,13 @@ export class Orchestrator extends EventEmitter {
    */
   getStats(): {
     totalTasks: number;
-    queueStats: ReturnType<typeof this.getQueueStats>;
+    queueStats: {
+      high: number;
+      normal: number;
+      low: number;
+      running: number;
+      total: number;
+    };
     taskStats: MemorySnapshot['tasks'];
   } {
     const tasks = Array.from(this.tasks.values());

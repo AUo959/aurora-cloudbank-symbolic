@@ -4,6 +4,12 @@
  * Symbolic Anchor: T1_CONSTELLATION_PRIME
  */
 
+interface HealthResponse {
+  status: string;
+  anchor: string;
+  timestamp: string;
+}
+
 async function healthCheck() {
   const baseUrl = process.env.CONSTELLATION_URL || 'http://localhost:5000';
   
@@ -11,7 +17,7 @@ async function healthCheck() {
     console.log('[T1_CONSTELLATION_PRIME] Performing health check...');
     
     const response = await fetch(`${baseUrl}/api/health`);
-    const data = await response.json();
+    const data = await response.json() as HealthResponse;
     
     if (data.status === 'healthy') {
       console.log('✅ Constellation is healthy');

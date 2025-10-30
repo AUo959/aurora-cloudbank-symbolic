@@ -536,6 +536,17 @@ from src.improvement.engine import LongFunctionPattern
 LongFunctionPattern.max_lines = 100  # Default: 50
 ```
 
+> **Note:** To enable this configuration, ensure your `LongFunctionPattern` implementation in `src/improvement/engine.py` includes:
+>
+> ```python
+> class LongFunctionPattern(PatternBase):
+>     max_lines = 50  # Default threshold, can be overridden
+>     ...
+>     def match(self, node):
+>         ...
+>         if function_length > self.max_lines:
+>             # flag as long function
+> ```
 ### Global Settings
 
 ```python

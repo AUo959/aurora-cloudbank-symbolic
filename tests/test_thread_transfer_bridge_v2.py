@@ -32,6 +32,7 @@ from modules.reflective_autonomy.thread_transfer.v2 import (
     LoadBalancingStrategy,
     ConsensusState,
 )
+from modules.reflective_autonomy.thread_transfer.v2.distributed_consensus import initialize_consensus
 
 # Phase 2: Cross-Repository Continuity
 from modules.reflective_autonomy.thread_transfer.v2 import (

@@ -113,7 +113,7 @@ class ComplexityPattern(ImprovementPattern):
                         automated_fix_available=False,
                         safe_to_auto_apply=False,
                         confidence_score=0.8,
-                        context_lines=[lines[max(0, i-2):min(len(lines), i+2)]]
+                        context_lines=lines[max(0, i-2):min(len(lines), i+2)]
                     ))
         
         return suggestions

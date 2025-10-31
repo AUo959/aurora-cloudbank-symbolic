@@ -130,17 +130,31 @@ class WebhookNotificationChannel(NotificationChannel):
             logger.error(f"Webhook channel '{self.name}' missing URL configuration")
             return False
 
-        # In production, use httpx or requests to POST
-        # For now, log the webhook attempt
+        # Send alert via HTTP POST using httpx
         alert_data = alert.to_dict()
-        logger.info(f"[WEBHOOK] Sending alert to {webhook_url}: {json.dumps(alert_data, indent=2)}")
+        logger.info(f"[WEBHOOK] Sending alert to {webhook_url}")
 
-        # TODO: Implement actual HTTP POST when httpx is available
-        # async with httpx.AsyncClient() as client:
-        #     response = await client.post(webhook_url, json=alert_data)
-        #     return response.status_code == 200
-
-        return True
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    webhook_url,
+                    json=alert_data,
+                    headers={"Content-Type": "application/json"}
+                )
+                if response.status_code in (200, 201, 202, 204):
+                    logger.info(f"[WEBHOOK] Alert sent successfully: {response.status_code}")
+                    return True
+                else:
+                    logger.warning(f"[WEBHOOK] Unexpected status code: {response.status_code}")
+                    return False
+        except ImportError:
+            logger.warning("[WEBHOOK] httpx not available, logging alert instead")
+            logger.info(f"[WEBHOOK] Alert data: {json.dumps(alert_data, indent=2)}")
+            return True
+        except Exception as e:
+            logger.error(f"[WEBHOOK] Failed to send alert: {e}")
+            return False
 
 
 class EmailNotificationChannel(NotificationChannel):
@@ -159,21 +173,44 @@ class EmailNotificationChannel(NotificationChannel):
             logger.error(f"Email channel '{self.name}' has no recipients configured")
             return False
 
-        # Format email
+        # Format and send email
         subject = f"[{alert.severity.value.upper()}] {alert.title}"
         body = self.format_alert_message(alert)
-
-        # In production, use smtplib or email service
-        # For now, log the email attempt
         logger.info(f"[EMAIL] Sending alert to {recipients}: {subject}")
-        logger.debug(f"Email body:\n{body}")
 
-        # TODO: Implement actual email sending
-        # smtp_server = smtp_config.get("server", "localhost")
-        # smtp_port = smtp_config.get("port", 587)
-        # Use smtplib to send email
+        try:
+            import smtplib
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
 
-        return True
+            smtp_server = smtp_config.get("server", "localhost")
+            smtp_port = smtp_config.get("port", 587)
+            smtp_user = smtp_config.get("username")
+            smtp_password = smtp_config.get("password")
+            use_tls = smtp_config.get("use_tls", True)
+
+            # Create message
+            msg = MIMEMultipart()
+            msg["From"] = smtp_config.get("from_address", "aurora@cloudbank.local")
+            msg["To"] = ", ".join(recipients)
+            msg["Subject"] = subject
+            msg.attach(MIMEText(body, "plain"))
+
+            # Send email
+            with smtplib.SMTP(smtp_server, smtp_port, timeout=30) as server:
+                if use_tls:
+                    server.starttls()
+                if smtp_user and smtp_password:
+                    server.login(smtp_user, smtp_password)
+                server.send_message(msg)
+
+            logger.info(f"[EMAIL] Alert sent successfully to {len(recipients)} recipients")
+            return True
+
+        except Exception as e:
+            logger.error(f"[EMAIL] Failed to send email: {e}")
+            logger.debug(f"Email body:\n{body}")
+            return False
 
 
 class ConsoleNotificationChannel(NotificationChannel):

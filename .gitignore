@@ -30,6 +30,7 @@ data/
 *.log
 
 # Backup files (timestamped dependency snapshots)
+.backup/pre_rebuild_*/
 .backup/**/*.20*
 
 # Security and temporary files
@@ -232,6 +233,10 @@ auth_config.json
 .nexus/divergences/secure_key_*.json
 .nexus/recursion/checkpoints/*.json
 
+# Backup files and instruction templates
+.backup/
 
-#Ignore vscode AI rules
+# Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+.devcontainer/hooks/
+.rebuild_degraded_state.json

@@ -22,28 +22,6 @@ class AutomationAuditor:
         self.warnings = []
         self.info = []
         
-        # Try to determine repository name from git config
-        try:
-            import subprocess
-            result = subprocess.run(
-                ['git', 'config', '--get', 'remote.origin.url'],
-                capture_output=True,
-                text=True,
-                cwd=self.repo_root
-            )
-            if result.returncode == 0:
-                url = result.stdout.strip()
-                # Extract owner/repo from URL - validate GitHub URL format
-                if url.startswith('https://github.com/') or url.startswith('git@github.com:'):
-                    parts = url.rstrip('.git').split('/')
-                    self.repo_name = f"{parts[-2]}/{parts[-1]}"
-                else:
-                    self.repo_name = "Unknown Repository"
-            else:
-                self.repo_name = "Unknown Repository"
-        except Exception:
-            self.repo_name = "Unknown Repository"
-        
     def audit_workflows(self) -> Dict[str, Any]:
         """Audit GitHub Actions workflows"""
         print("🔍 Auditing GitHub Actions Workflows...")
@@ -109,13 +87,11 @@ class AutomationAuditor:
         
         # Check for infinite loop issue
         if "while True:" in content and "single_run" not in content:
-            lines = content.split('\n')
-            loop_line = next((i for i, line in enumerate(lines, 1) if 'while True:' in line), None)
             issues.append({
                 "severity": "CRITICAL",
                 "issue": "Infinite loop detected in agent",
                 "description": "Agent uses 'while True:' which blocks in GitHub Actions",
-                "line": loop_line
+                "line": content.split('\n').index(next(line for line in content.split('\n') if 'while True:' in line)) + 1
             })
             self.issues.append(
                 "❌ Aurora Agent: Infinite loop causes workflow to hang"
@@ -285,7 +261,7 @@ class AutomationAuditor:
         # Compile report
         report = {
             "timestamp": datetime.now().isoformat(),
-            "repository": self.repo_name,
+            "repository": "AUo959/aurora-cloudbank-symbolic",
             "auditor": "automation_audit.py v1.0",
             "summary": {
                 "total_issues": len(self.issues),

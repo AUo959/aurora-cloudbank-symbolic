@@ -21,9 +21,7 @@ from pydantic import BaseModel, Field
 from src.collab.capsule_schema import (
     MultiRepoCapsule,
     LinkedRepository,
-    SharedAnchor,
-    create_shared_anchor,
-    validate_capsule_compatibility
+    create_shared_anchor
 )
 from src.collab.drift_monitor import (
     get_drift_monitor,
@@ -332,8 +330,8 @@ async def trigger_workflow(
     """
     logger.info("Triggering workflow %s in %s", request.workflow_name, request.target_repo)
     
-    # Tag with DLP
-    tag_id = dlp_tracker.create_tag("workflow_trigger", {
+    # Tag with DLP (for audit trail)
+    _ = dlp_tracker.create_tag("workflow_trigger", {
         "target_repo": request.target_repo,
         "workflow_name": request.workflow_name,
         "event_type": request.event_type
@@ -449,8 +447,8 @@ async def sync_agent_status(
     # Calculate alignment drift (simplified)
     alignment_drift = 0.0 if not missing_agents else len(missing_agents) * 0.001
     
-    # Tag with DLP
-    tag_id = dlp_tracker.create_tag("agent_sync", {
+    # Tag with DLP (for audit trail)
+    _ = dlp_tracker.create_tag("agent_sync", {
         "synced_count": len(synced_agents),
         "missing_count": len(missing_agents)
     })

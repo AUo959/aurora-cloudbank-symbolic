@@ -7,7 +7,6 @@ DLP: context_tag=collab_tests
 
 import json
 import pytest
-from datetime import datetime
 
 from src.collab.capsule_schema import (
     MultiRepoCapsule,
@@ -293,6 +292,3 @@ class TestLinkedRepository:
         assert restored.owner == repo.owner
         assert restored.repo_name == repo.repo_name
 
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])

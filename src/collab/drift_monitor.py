@@ -12,10 +12,11 @@ Ethics: Picard_Delta_3
 
 import json
 import logging
+import threading
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -352,11 +353,15 @@ class DriftMonitor:
 
 # Global drift monitor instance
 _drift_monitor = None
+_drift_monitor_lock = threading.Lock()
 
 
 def get_drift_monitor() -> DriftMonitor:
-    """Get or create global drift monitor instance."""
+    """Get or create global drift monitor instance (thread-safe)."""
     global _drift_monitor
     if _drift_monitor is None:
-        _drift_monitor = DriftMonitor()
+        with _drift_monitor_lock:
+            # Double-check pattern for thread safety
+            if _drift_monitor is None:
+                _drift_monitor = DriftMonitor()
     return _drift_monitor

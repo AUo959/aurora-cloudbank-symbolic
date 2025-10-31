@@ -141,6 +141,7 @@ class MultiRepoCapsule:
     
     # Agent roster
     agent_roster: List[str] = field(default_factory=list)
+    # Internal set of active agent names. Serialized as list for JSON, deserialized back to set.
     active_agents: Set[str] = field(default_factory=set)
     
     # Timestamps and status

@@ -26,8 +26,7 @@ from typing import List, Optional
 sys.path.insert(0, str(Path(__file__).parent))
 
 from src.collab.capsule_schema import (
-    MultiRepoCapsule,
-    validate_capsule_compatibility
+    MultiRepoCapsule
 )
 from src.core.native_dlp_export import NativeDLPTracker
 

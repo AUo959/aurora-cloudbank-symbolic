@@ -157,10 +157,8 @@ try:
     from src.collab.api_routes import router as collab_router
     app.include_router(collab_router)
     print("✅ Cross-Repo Collaboration API routes integrated successfully")
-    COLLAB_AVAILABLE = True
 except ImportError as e:
     print(f"⚠️  Cross-Repo Collaboration not available: {e}")
-    COLLAB_AVAILABLE = False
 except Exception as e:
     print(f"❌ Failed to integrate Cross-Repo Collaboration API routes: {e}")
 
@@ -175,7 +173,7 @@ except ImportError as e:
     SUBROUTINE_AVAILABLE = False
 except Exception as e:
     print(f"❌ Failed to integrate Subroutine API routes: {e}")
-    COLLAB_AVAILABLE = False
+    SUBROUTINE_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

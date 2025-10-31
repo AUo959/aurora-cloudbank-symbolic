@@ -93,6 +93,17 @@
         "/workspaces/aurora-cloudbank-symbolic/src/agents/aurora_consciousness_agent.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 25: f-string print (potential log output) - print(f\"\\n{'=' * 70}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 26: f-string print (potential log output) - print(f\"  {title}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/aurora_agent_demo.py: Line 52: f-string print (po..."
+    },
+    {
+      "timestamp": "2025-10-30T05:01:37.394805",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/code_generation_framework.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/quantum_decision_oracle.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_decision_oracle.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/code_generation_framework.py: Line 307: f-string logging - lines.append(f\"    logger.info(f'\ud83d\udd27 {spec.name} called: {param_log}')\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/quantum_decision_oracle.py: Line 526: f-string print (potential log output) - >>> print(f\"Confidence: {result.confidence:.2f}\")\n  \u274c /workspaces/aurora-cloudbank-symb..."
     }
   ]
 }

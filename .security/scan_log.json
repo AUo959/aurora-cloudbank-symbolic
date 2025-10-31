@@ -1,6 +1,17 @@
 {
   "scans": [
     {
+      "timestamp": "2025-10-30T01:56:45.782680",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/memory_retrieval/store.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py",
+        "/workspaces/aurora-cloudbank-symbolic/mrm_bootstrap.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 130: f-string logging - logger.error(f\"Webhook channel '{self.name}' missing URL configuration\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 135: f-string logging - logger.info(f\"[WEBHOOK] Sending alert to {webhook_url}\")\n  \u274c /workspaces/aurora-..."
+    },
+    {
       "timestamp": "2025-10-30T02:28:10.684611",
       "status": "PASSED",
       "files_scanned": 3,

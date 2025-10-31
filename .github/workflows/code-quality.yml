@@ -72,24 +72,7 @@ jobs:
           if [ -f reports/code_quality_report.json ]; then
             echo "## Code Quality Analysis Summary" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Extract key metrics from report
-            python -c "
-          import json
-          with open('reports/code_quality_report.json') as f:
-              report = json.load(f)
-              summary = report.get('analysis_summary', {})
-              severity = summary.get('severity_breakdown', {})
-              
-              print(f\"**Status:** {'✅ Passed' if summary.get('passed') else '❌ Failed'}\")
-              print(f\"**Total Violations:** {summary.get('total_violations', 0)}\")
-              print()
-              print('### Severity Breakdown')
-              print(f\"- 🔴 Critical: {severity.get('critical', 0)}\")
-              print(f\"- 🟠 High: {severity.get('high', 0)}\")
-              print(f\"- 🟡 Medium: {severity.get('medium', 0)}\")
-              print(f\"- 🟢 Low: {severity.get('low', 0)}\")
-          " >> $GITHUB_STEP_SUMMARY
+            python scripts/parse_code_quality_report.py reports/code_quality_report.json >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ No code quality report generated" >> $GITHUB_STEP_SUMMARY
           fi
@@ -171,21 +154,7 @@ jobs:
       - name: Check quality gate
         if: always()
         run: |
-          if [ -f reports/code_quality_report.json ]; then
-            python -c "
-          import json, sys
-          with open('reports/code_quality_report.json') as f:
-              report = json.load(f)
-              if not report.get('analysis_summary', {}).get('passed', False):
-                  print('❌ Quality gate FAILED - Critical violations detected')
-                  sys.exit(1)
-              else:
-                  print('✅ Quality gate PASSED')
-          "
-          else
-            echo "⚠️ No report to evaluate"
-            exit 1
-          fi
+          python scripts/parse_code_quality_report.py reports/code_quality_report.json --check-gate
 
   sonarcloud:
     name: "SonarCloud Analysis"

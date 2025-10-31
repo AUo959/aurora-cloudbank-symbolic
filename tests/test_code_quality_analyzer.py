@@ -6,7 +6,7 @@ Part of Issue #258: Automated code quality analysis
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime
 
 # Import the modules we're testing

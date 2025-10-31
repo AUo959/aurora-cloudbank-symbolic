@@ -4,6 +4,7 @@ Integrates flake8 and code quality metrics with Aurora's reflection system.
 Implements Issue #258: Automated code quality analysis and reporting.
 """
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -11,6 +12,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
+
+# Import Aurora symbolic engine for proper chain notation
+try:
+    from src.aurora.core.symbolic_engine import SymbolicEngine
+except ImportError:
+    # Fallback if symbolic engine not available
+    SymbolicEngine = None
 
 
 @dataclass
@@ -98,6 +106,14 @@ class CodeQualityAnalyzer:
         """
         self.repo_path = repo_path or Path.cwd()
         self.config_file = self.repo_path / '.flake8'
+        
+        # Initialize symbolic engine for proper chain notation
+        if SymbolicEngine:
+            self.symbolic_engine = SymbolicEngine()
+            # Execute chain for Issue #258 (001 to 258)
+            self.symbolic_engine.execute_chain(1, 258)
+        else:
+            self.symbolic_engine = None
         
     def _determine_severity(self, error_code: str) -> str:
         """
@@ -248,6 +264,28 @@ class CodeQualityAnalyzer:
         Returns:
             Dictionary in Aurora reflection format with DLP tracking
         """
+        # Get chain notation from symbolic engine or use fallback
+        if self.symbolic_engine:
+            chain_notation = '001//258//'  # Issue #258 chain
+            t1_state = self.symbolic_engine.t1.export()
+            srb_state = self.symbolic_engine.srb.export()
+        else:
+            chain_notation = '001//258//'  # Static fallback
+            t1_state = None
+            srb_state = None
+        
+        dlp_trail = {
+            'anchor_protocol': 'T1/SRB',
+            'analysis_version': '1.0.0',
+            'chain_notation': chain_notation,
+        }
+        
+        # Add anchor states if symbolic engine available
+        if t1_state:
+            dlp_trail['t1_anchor'] = t1_state
+        if srb_state:
+            dlp_trail['srb_anchor'] = srb_state
+        
         return {
             'context_tag': 'code_quality_analysis',
             'timestamp': report.timestamp,
@@ -264,16 +302,11 @@ class CodeQualityAnalyzer:
             },
             'violations': [v.to_dict() for v in report.violations],
             'metadata': report.analysis_metadata,
-            'dlp_trail': {
-                'anchor_protocol': 'T1/SRB',
-                'analysis_version': '1.0.0',
-                'chain_notation': '001//258//',  # References Issue #258
-            }
+            'dlp_trail': dlp_trail
         }
     
     def _compute_hash(self, report: CodeQualityReport) -> str:
         """Compute symbolic hash for DLP validation."""
-        import hashlib
         content = json.dumps(report.to_dict(), sort_keys=True)
         return hashlib.sha256(content.encode()).hexdigest()[:16]
     
@@ -333,9 +366,9 @@ def main():
     report = analyzer.run_flake8_analysis(args.paths)
     
     if args.reflection:
-        output = analyzer.generate_reflection_report(report)
+        analyzer.generate_reflection_report(report)
     else:
-        output = report.to_dict()
+        report.to_dict()
     
     # Print summary
     print(f"\n{'='*60}")

@@ -83,7 +83,7 @@ class CodeQualityIssueCreator:
         
         # Create issue via GitHub API
         headers = {
-            'Authorization': f'token {self.github_token}',
+            'Authorization': f'Bearer {self.github_token}',
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Aurora-Code-Quality-Bot'
         }

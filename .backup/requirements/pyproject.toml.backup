@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 120
-target-version = ['py311']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -50,8 +50,8 @@ minversion = "6.0"
 addopts = [
     "-ra",
     "-v",
-    "--timeout=300",  # 5 minute timeout per test
-    "--timeout-method=thread",
+    # "--timeout=300",  # 5 minute timeout per test (requires pytest-timeout)
+    # "--timeout-method=thread",
 ]
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -77,6 +77,7 @@ markers = [
     "api: API and web interface tests",
     "cli: Command line interface tests",
     "resilience: Resilience Sentinel monitoring tests",
+    "improvement: Code improvement engine tests",
 
     # Environment markers
     "local: Tests for local development only",

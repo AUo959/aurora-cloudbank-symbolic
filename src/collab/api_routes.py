@@ -235,7 +235,9 @@ async def import_context(
     
     Validates seals/anchors, runs ethics checks, and returns activation report.
     """
-    logger.info("Importing capsule: %s", request.capsule_data.get("capsule_id", "unknown"))
+    # Sanitize capsule_id for logging to prevent log injection
+    safe_capsule_id = str(request.capsule_data.get("capsule_id", "unknown")).replace('\r', '').replace('\n', '')
+    logger.info("Importing capsule: %s", safe_capsule_id)
     
     try:
         # Parse capsule
@@ -328,7 +330,10 @@ async def trigger_workflow(
     Supports event chaining for multi-repo sync.
     Note: Requires GitHub API credentials for actual workflow triggering.
     """
-    logger.info("Triggering workflow %s in %s", request.workflow_name, request.target_repo)
+    # Sanitize inputs for logging to prevent log injection
+    safe_workflow_name = request.workflow_name.replace('\r', '').replace('\n', '')
+    safe_target_repo = request.target_repo.replace('\r', '').replace('\n', '')
+    logger.info("Triggering workflow %s in %s", safe_workflow_name, safe_target_repo)
     
     # Tag with DLP (for audit trail)
     _ = dlp_tracker.create_tag("workflow_trigger", {
@@ -362,7 +367,9 @@ async def repo_linking_invite(
     
     Exchanges anchors, permissions, and establishes trust chain.
     """
-    logger.info("Creating invitation for %s", request.repo_url)
+    # Sanitize repo_url for logging to prevent log injection
+    safe_repo_url = request.repo_url.replace('\r', '').replace('\n', '')
+    logger.info("Creating invitation for %s", safe_repo_url)
     
     try:
         # Create invitation ID

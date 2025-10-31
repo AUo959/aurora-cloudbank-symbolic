@@ -447,9 +447,10 @@ async def execute_subroutine(request: SubroutineExecutionRequest) -> Dict[str, A
         raise
     except Exception as e:
         logger.error("Execution failed: %s", str(e))
+        # Don't expose internal error details to users
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Execution failed: {str(e)}"
+            detail="Execution failed. Please check logs for details."
         )
 
 
@@ -525,8 +526,9 @@ async def health_check() -> Dict[str, Any]:
     
     except Exception as e:
         logger.error("Health check failed: %s", str(e))
+        # Don't expose internal error details in health check responses
         return {
             "success": False,
             "status": "unhealthy",
-            "error": str(e)
+            "error": "Health check failed. See logs for details."
         }

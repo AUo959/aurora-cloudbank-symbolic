@@ -330,16 +330,20 @@ class SubroutineRegistry:
         """Update subroutine status"""
         subroutine = self.get(subroutine_id)
         if not subroutine:
-            logger.error("Subroutine not found: %s", subroutine_id)
+            # Sanitize subroutine_id for logging to prevent log injection
+            safe_id = subroutine_id.replace('\r', '').replace('\n', '')
+            logger.error("Subroutine not found: %s", safe_id)
             return False
         
         old_status = subroutine.status
         subroutine.status = status
         subroutine.updated_at = datetime.utcnow().isoformat()
         
+        # Sanitize subroutine_id for logging to prevent log injection
+        safe_id = subroutine_id.replace('\r', '').replace('\n', '')
         logger.info(
             "Updated subroutine '%s' status: %s -> %s",
-            subroutine_id,
+            safe_id,
             old_status.value,
             status.value
         )

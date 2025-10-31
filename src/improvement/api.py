@@ -17,6 +17,10 @@ from src.improvement import (
 )
 
 
+# Define SAFE_ROOT as the workspace root directory for path security validation
+SAFE_ROOT = Path(__file__).parent.parent.parent.resolve()
+
+
 router = APIRouter(prefix="/improvements", tags=["Code Improvements"])
 
 

@@ -1,5 +1,6 @@
 """Tests for Aurora Cloudbank Symbolic Engine"""
 
+import pytest
 import sys
 from pathlib import Path
 
@@ -7,6 +8,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 
+@pytest.mark.unit
+@pytest.mark.aurora
+@pytest.mark.critical
 def test_t1_anchor():
     """Test T1 temporal anchor"""
     from aurora.core.symbolic_engine import T1Anchor
@@ -22,6 +26,9 @@ def test_t1_anchor():
     assert export["state"] == state
 
 
+@pytest.mark.unit
+@pytest.mark.aurora
+@pytest.mark.critical
 def test_srb_anchor():
     """Test SRB boundary anchor"""
     from aurora.core.symbolic_engine import SRBAnchor
@@ -37,6 +44,9 @@ def test_srb_anchor():
     assert export["resolution"] == resolution
 
 
+@pytest.mark.integration
+@pytest.mark.aurora
+@pytest.mark.critical
 def test_symbolic_engine():
     """Test complete symbolic engine"""
     from aurora.core.symbolic_engine import SymbolicEngine

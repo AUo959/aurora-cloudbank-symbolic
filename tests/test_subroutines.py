@@ -13,7 +13,7 @@ Comprehensive tests for Aurora's subroutine system including:
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from src.subroutines.reality_sim_monitor import RealitySimMonitor, RealityCheckResult
 from src.subroutines.aurora_vision_alignment import (
     VisionAlignmentManager,
@@ -154,8 +154,8 @@ class TestSubroutineRegistry:
             version="1.0.0",
             description="Test description",
             author=author,
-            created_at=datetime.utcnow().isoformat(),
-            updated_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
             status=SubroutineStatus.DRAFT,
             category=SubroutineCategory.UTILITY,
             module_path="test.module",
@@ -180,8 +180,8 @@ class TestSubroutineRegistry:
             version="2.0.0",
             description="Duplicate",
             author=author,
-            created_at=datetime.utcnow().isoformat(),
-            updated_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
             status=SubroutineStatus.DRAFT,
             category=SubroutineCategory.UTILITY,
             module_path="test",
@@ -340,7 +340,7 @@ class TestVisionAlignmentManager:
         manager = VisionAlignmentManager(review_interval_days=30)
         
         # Set last review to recent
-        manager._last_review = datetime.utcnow() - timedelta(days=5)
+        manager._last_review = datetime.now(UTC) - timedelta(days=5)
         
         result = manager.periodic_alignment_review()
         
@@ -358,7 +358,7 @@ class TestVisionAlignmentManager:
             manager.enforce_alignment(comp_id, {"test": i}, {"result": i})
         
         # Set last review to past
-        last_review = datetime.utcnow() - timedelta(days=31)
+        last_review = datetime.now(UTC) - timedelta(days=31)
         
         result = manager.periodic_alignment_review(last_review)
         

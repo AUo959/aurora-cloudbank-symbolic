@@ -16,7 +16,7 @@ real-world impact tracking for every computation in Aurora's neural net.
 
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import logging
 
 logger = logging.getLogger(__name__)
@@ -203,7 +203,7 @@ class VisionAlignmentManager:
         # Create alignment record
         alignment_record = AlignmentRecord(
             computation_id=computation_id,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             input_snapshot=input_data,
             sim_metadata=sim_result,
             crew_participation=crew_involved,
@@ -281,7 +281,7 @@ class VisionAlignmentManager:
                 'system_state_snapshot': self.system_state.get_snapshot(),
                 'input_data': input_data,
                 'outcomes': outcomes,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(UTC).isoformat()
             }
             
             self.knowledge_base.store_context(computation_id, context)
@@ -332,8 +332,8 @@ class VisionAlignmentManager:
         Returns:
             AlignmentReviewResult with findings and recommendations
         """
-        last_review = last_review or self._last_review or (datetime.utcnow() - self.periodic_review_interval)
-        now = datetime.utcnow()
+        last_review = last_review or self._last_review or (datetime.now(UTC) - self.periodic_review_interval)
+        now = datetime.now(UTC)
         
         # Check if review is due
         if now - last_review < self.periodic_review_interval:

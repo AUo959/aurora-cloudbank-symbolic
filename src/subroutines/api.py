@@ -107,7 +107,7 @@ async def register_subroutine(request: SubroutineCreate) -> Dict[str, Any]:
             )
         
         # Create subroutine
-        from datetime import datetime
+        from datetime import datetime, UTC
         subroutine = Subroutine(
             id=request.id,
             name=request.name,
@@ -119,8 +119,8 @@ async def register_subroutine(request: SubroutineCreate) -> Dict[str, Any]:
                 email=request.author.email,
                 role=request.author.role
             ),
-            created_at=datetime.utcnow().isoformat(),
-            updated_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
             status=SubroutineStatus.DRAFT,
             category=category_enum,
             module_path=request.module_path,

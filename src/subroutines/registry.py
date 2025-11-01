@@ -12,7 +12,7 @@ Provides versioning, provenance, dependency management, and execution monitoring
 
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 import logging
 import hashlib
@@ -176,7 +176,7 @@ class Subroutine:
         """Record a subroutine execution"""
         execution = SubroutineExecution(
             execution_id=execution_id,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             inputs_hash=self._hash_data(inputs),
             outputs_hash=self._hash_data(outputs) if success else "",
             success=success,
@@ -193,7 +193,7 @@ class Subroutine:
         else:
             self.failure_count += 1
         
-        self.updated_at = datetime.utcnow().isoformat()
+        self.updated_at = datetime.now(UTC).isoformat()
 
     @staticmethod
     def _hash_data(data: Dict[str, Any]) -> str:
@@ -233,8 +233,8 @@ class SubroutineRegistry:
                 team="Aurora Core",
                 role="System Architect"
             ),
-            created_at=datetime.utcnow().isoformat(),
-            updated_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
             status=SubroutineStatus.ACTIVE,
             category=SubroutineCategory.EXECUTIVE,
             module_path="src.subroutines.reality_sim_monitor",
@@ -260,8 +260,8 @@ class SubroutineRegistry:
                 team="Orion Station Crew",
                 role="Strategic Alignment"
             ),
-            created_at=datetime.utcnow().isoformat(),
-            updated_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
+            updated_at=datetime.now(UTC).isoformat(),
             status=SubroutineStatus.ACTIVE,
             category=SubroutineCategory.EXECUTIVE,
             module_path="src.subroutines.aurora_vision_alignment",
@@ -337,7 +337,7 @@ class SubroutineRegistry:
         
         old_status = subroutine.status
         subroutine.status = status
-        subroutine.updated_at = datetime.utcnow().isoformat()
+        subroutine.updated_at = datetime.now(UTC).isoformat()
         
         # Sanitize subroutine_id for logging to prevent log injection
         safe_id = subroutine_id.replace('\r', '').replace('\n', '')
@@ -406,7 +406,7 @@ class SubroutineRegistry:
         """Export full registry state"""
         return {
             'registry_version': '1.0.0',
-            'exported_at': datetime.utcnow().isoformat(),
+            'exported_at': datetime.now(UTC).isoformat(),
             'subroutines': [s.to_dict() for s in self._subroutines.values()],
             'stats': self.get_stats()
         }

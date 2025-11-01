@@ -115,6 +115,15 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_decision_oracle.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/code_generation_framework.py: Line 307: f-string logging - lines.append(f\"    logger.info(f'\ud83d\udd27 {spec.name} called: {param_log}')\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/quantum_decision_oracle.py: Line 526: f-string print (potential log output) - >>> print(f\"Confidence: {result.confidence:.2f}\")\n  \u274c /workspaces/aurora-cloudbank-symb..."
+    },
+    {
+      "timestamp": "2025-11-01T23:19:05.039643",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/reality_sim_monitor.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/subroutines/reality_sim_monitor.py: Line 394: f-string print (potential log output) - print(f\"Reality Check: {'PASSED' if result.success else 'FAILED'}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/subroutines/reality_sim_monitor.py: Line 395: f-string print (potential log output) - print(f\"Checks Passed: {result.checks_passed}\")\n  \u274c /wo..."
     }
   ]
 }

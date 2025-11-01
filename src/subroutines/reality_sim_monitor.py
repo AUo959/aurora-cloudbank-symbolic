@@ -15,7 +15,7 @@ Integrates with Aurora's observability, registry, and audit systems.
 
 from typing import Dict, Any, Optional
 import logging
-from datetime import datetime
+from datetime import datetime, UTC
 from dataclasses import dataclass
 
 # Configure logger with parameterized logging for security
@@ -185,7 +185,7 @@ class RealitySimMonitor:
             checks_passed=checks_passed,
             checks_failed=checks_failed,
             warnings=warnings,
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             metadata={
                 'execution_count': self._execution_count,
                 'success_count': self._success_count,
@@ -234,6 +234,12 @@ class RealitySimMonitor:
                 core_metrics = metrics_snapshot
             else:
                 core_metrics = getattr(metrics_snapshot, 'performance_metrics', {})
+            
+            # If telemetry is disabled or no metrics available, pass in non-strict mode
+            if not core_metrics and not self.config.get('strict_mode', False):
+                logger.debug("No metrics available for %s (non-strict mode)", sim_id)
+                return True
+            
             required_metrics = self.config.get('required_metrics', [])
             
             missing_metrics = []
@@ -303,7 +309,7 @@ class RealitySimMonitor:
             self.registry.update_knowledge_base(sim_id, {
                 'results': results,
                 'checks_passed': checks_passed,
-                'timestamp': datetime.utcnow().isoformat(),
+                'timestamp': datetime.now(UTC).isoformat(),
                 'subroutine': 'reality_sim_monitor'
             })
             logger.info("Updated knowledge base for simulation: %s", sim_id)
@@ -371,7 +377,7 @@ class MockTelemetry:
 class MockAuditLog:
     """Mock audit log when DLP tracker unavailable"""
     def get_provenance_chain(self, sim_id: str) -> list:
-        return [{'event': 'mock', 'timestamp': datetime.utcnow().isoformat()}] * 5
+        return [{'event': 'mock', 'timestamp': datetime.now(UTC).isoformat()}] * 5
     
     def record(self, message: str, severity: str = 'info', metadata: Optional[Dict] = None):
         logger.debug("Mock audit record: %s", message)

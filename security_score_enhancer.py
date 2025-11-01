@@ -17,9 +17,14 @@ Focus Areas:
 """
 
 import json
+import logging
 import re
 from datetime import datetime
 from pathlib import Path
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class SecurityScoreEnhancer:
@@ -50,7 +55,7 @@ class SecurityScoreEnhancer:
         else:
             status_emoji = "⚠️"
         impact_text = f" (+{score_impact})" if score_impact > 0 else ""
-        print(f"   {status_emoji} {action}: {details}{impact_text}")
+        logger.info("   %s %s: %s%s", status_emoji, action, details, impact_text)
 
         if score_impact > 0:
             self.security_score += score_impact
@@ -482,7 +487,7 @@ class SecurityMonitor:
             'recommended_actions': self.get_response_actions(event['event_type'])
         }
 
-        print(f"🚨 SECURITY ALERT: {alert['message']}")
+        logger.warning("SECURITY ALERT: %s", alert["message"])
         return alert
 
     def get_response_actions(self, event_type):
@@ -735,7 +740,7 @@ curl http://localhost:8000/security/status
         print("🔒 **AURORA CLOUDBANK - SECURITY SCORE ENHANCEMENT SUITE**")
         print("=" * 70)
         print("🎯 **Target: Achieve Perfect 100/100 Security Score**")
-        print(f"📊 **Starting Score: {self.security_score}/100**")
+        logger.info("Starting Score: %s/100", self.security_score)
 
         # Execute all security enhancements
         _, _ = self.analyze_github_vulnerabilities()
@@ -755,17 +760,17 @@ curl http://localhost:8000/security/status
 
         print("📊 **SECURITY SCORE PROGRESSION:**")
         print("   • Starting Score: 80/100")
-        print(f"   • Final Score: {final_score}/100")
-        print(f"   • Improvement: +{improvement} points")
+        logger.info("   Final Score: %s/100", final_score)
+        logger.info("   Improvement: +%s points", improvement)
         print(
             "   • Achievement: "
             f"{'🎊 PERFECT SECURITY!' if final_score == 100 else '🚀 OUTSTANDING!'}"
         )
 
-        print(f"\n🔧 **ENHANCEMENTS IMPLEMENTED ({len(self.security_fixes)}):**")
+        logger.info("ENHANCEMENTS IMPLEMENTED (%s):", len(self.security_fixes))
         for fix in self.security_fixes:
             if fix['score_impact'] > 0:
-                print(f"   • {fix['action']}: {fix['details']} (+{fix['score_impact']})")
+                logger.info("   %s: %s (+%s)", fix["action"], fix["details"], fix["score_impact"])
 
         print("\n📋 **SECURITY DELIVERABLES:**")
         deliverables = [
@@ -779,7 +784,7 @@ curl http://localhost:8000/security/status
         ]
 
         for deliverable in deliverables:
-            print(f"   ✅ {deliverable}")
+            logger.info("   %s", deliverable)
 
         # Generate final security report
         final_report = {
@@ -808,11 +813,11 @@ curl http://localhost:8000/security/status
         with open(report_file, 'w') as f:
             json.dump(final_report, f, indent=2)
 
-        print(f"\n📊 **Final security enhancement report saved: {report_file.name}**")
+        logger.info("Final security enhancement report saved: %s", report_file.name)
 
         if final_score >= 95:
             print("\n🎊 **MISSION ACCOMPLISHED: PERFECT SECURITY ACHIEVED!**")
-            print(f"🏆 **Aurora CloudBank Security Score: {final_score}/100**")
+            logger.info("Aurora CloudBank Security Score: %s/100", final_score)
             print("🔒 **Status: Enterprise-Grade Security Implementation**")
             print("✨ **Ready for production deployment with perfect security!**")
 

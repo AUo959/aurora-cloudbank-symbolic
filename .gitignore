@@ -151,6 +151,9 @@ bower_components
 
 # Local validation reports (not for version control)
 PRE_COMMIT_VALIDATION_ISSUES.md
+reports/*.json
+reports/*.txt
+!reports/.gitkeep
 
 # Output of 'npm pack'
 *.tgz

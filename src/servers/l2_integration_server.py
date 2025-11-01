@@ -35,12 +35,12 @@ try:
         AURORA_CUSTOM_GPT_AVAILABLE = True
         auroraCustomGptBridge = auroraCustomGptBridge  # Ensure variable is bound
         AURORA_CUSTOM_GPT = AURORA_CUSTOM_GPT  # Ensure variable is bound
-        print("🌟 Aurora Custom GPT bridge integration available")
+        logging.info("Aurora Custom GPT bridge integration available")
     except ImportError as e:
         AURORA_CUSTOM_GPT_AVAILABLE = False
         auroraCustomGptBridge = None
         AURORA_CUSTOM_GPT = None
-        print(f"⚠️ Aurora Custom GPT bridge not available: {e}")
+        logging.warning("Aurora Custom GPT bridge not available: %s", str(e))
 except ImportError:
     # Fallback for testing
 
@@ -57,6 +57,9 @@ except ImportError:
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Security constants
+INVALID_CSRF_TOKEN_MSG = 'Invalid CSRF token'
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -146,7 +149,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Receive command from Aurora Custom GPT and route to command node with CSRF validation."""
         # CSRF Token validation
         if not token or len(token.credentials) < 10:
-            raise HTTPException(status_code=403, detail='Invalid CSRF token')
+            raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT command request")
@@ -203,7 +206,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         """Initialize Aurora Custom GPT integration with CSRF validation."""
         # CSRF Token validation
         if not token or len(token.credentials) < 10:
-            raise HTTPException(status_code=403, detail='Invalid CSRF token')
+            raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
         server_state["requests_count"] += 1
         logger.info("Aurora Custom GPT initialization request")
@@ -249,7 +252,7 @@ async def connect_custom_gpt(
     """Connect a Custom GPT agent to the Aurora mesh with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+        raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
     try:
         # Secure logging to prevent log injection
@@ -291,7 +294,7 @@ async def relay_message(
     """Relay message from Custom GPT agent with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+        raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
     try:
         logger.info("Message relay request from: %s", str(agent_id)[:100])
@@ -364,7 +367,7 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
     """Update agent heartbeat timestamp with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+        raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
     try:
         # Update heartbeat in bridge
@@ -394,7 +397,7 @@ async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = 
     """Disconnect an agent from the constellation with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+        raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
 
     try:
         logger.info("Disconnect request for: %s", str(agent_id)[:100])
@@ -502,14 +505,14 @@ def main():
 
     args = parser.parse_args()
 
-    print("\n" + "=" * 60)
-    print("🌟 AURORA L2 META-AGENT INTEGRATION SERVER")
-    print("=" * 60)
-    print(f"🚀 Version: {server_state['version']}")
-    print(f"🌐 Dashboard: http://{args.host}:{args.port}")
-    print(f"📚 API Docs: http://{args.host}:{args.port}/api/docs")
-    print(f"🔍 Health: http://{args.host}:{args.port}/health")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("AURORA L2 META-AGENT INTEGRATION SERVER")
+    logger.info("=" * 60)
+    logger.info("Version: %s", server_state['version'])
+    logger.info("Dashboard: http://%s:%s", args.host, args.port)
+    logger.info("API Docs: http://%s:%s/api/docs", args.host, args.port)
+    logger.info("Health: http://%s:%s/health", args.host, args.port)
+    logger.info("=" * 60)
 
     uvicorn.run(
         "l2_integration_server:app", host=args.host, port=args.port, reload=args.reload, log_level=args.log_level

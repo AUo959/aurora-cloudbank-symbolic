@@ -43,7 +43,12 @@ class SecurityScoreEnhancer:
 
         self.security_fixes.append(entry)
 
-        status_emoji = "✅" if status == "COMPLETED" else "🔧" if status == "IN_PROGRESS" else "⚠️"
+        if status == "COMPLETED":
+            status_emoji = "✅"
+        elif status == "IN_PROGRESS":
+            status_emoji = "🔧"
+        else:
+            status_emoji = "⚠️"
         impact_text = f" (+{score_impact})" if score_impact > 0 else ""
         print(f"   {status_emoji} {action}: {details}{impact_text}")
 
@@ -203,6 +208,9 @@ semgrep==1.45.0                     # Static analysis security scanner
         print("\n🔍 **ADVANCED CODE SECURITY SCANNING**")
         print("=" * 60)
 
+        # Constants for repeated strings
+        SQL_INJECTION_MSG = 'Potential SQL injection'
+
         security_patterns = [
             # Critical Security Patterns
             (r'password\s*=\s*["\'][^"\']*["\']', 'CRITICAL', 'Hardcoded password'),
@@ -228,10 +236,10 @@ semgrep==1.45.0                     # Static analysis security scanner
             (r'random\.random\s*\(', 'LOW', 'Weak random number generation'),
 
             # SQL Injection Patterns
-            (r'SELECT.*%s', 'HIGH', 'Potential SQL injection'),
-            (r'INSERT.*%s', 'HIGH', 'Potential SQL injection'),
-            (r'UPDATE.*%s', 'HIGH', 'Potential SQL injection'),
-            (r'DELETE.*%s', 'HIGH', 'Potential SQL injection'),
+            (r'SELECT.*%s', 'HIGH', SQL_INJECTION_MSG),
+            (r'INSERT.*%s', 'HIGH', SQL_INJECTION_MSG),
+            (r'UPDATE.*%s', 'HIGH', SQL_INJECTION_MSG),
+            (r'DELETE.*%s', 'HIGH', SQL_INJECTION_MSG),
         ]
 
         security_findings = {
@@ -730,9 +738,9 @@ curl http://localhost:8000/security/status
         print(f"📊 **Starting Score: {self.security_score}/100**")
 
         # Execute all security enhancements
-        vulnerability_data, audit_plan = self.analyze_github_vulnerabilities()
+        _, _ = self.analyze_github_vulnerabilities()
         self.enhance_dependency_security()
-        security_findings, findings_report = self.scan_code_security_patterns()
+        _, _ = self.scan_code_security_patterns()
         self.implement_security_hardening()
         self.create_security_monitoring()
         self.create_security_documentation()

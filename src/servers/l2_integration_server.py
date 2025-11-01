@@ -3,7 +3,33 @@
 Aurora L2 Integration Server
 Aurora CloudBank v3.5.1_macroready
 
-FastAPI server for L2 Meta-Agent Integration with real-time dashboard
+FastAPI server providing L2 Meta-Agent Integration with real-time dashboard.
+
+This server provides:
+- Health monitoring endpoints
+- Aurora Custom GPT integration (when available)
+- L2 Meta-Agent bridge API for agent management
+- Real-time agent constellation dashboard
+- CSRF-protected secure endpoints
+
+Key Endpoints:
+    GET  /health                            - System health check
+    GET  /                                  - Agent constellation dashboard
+    POST /api/aurora/command                - Command routing to Aurora GPT
+    GET  /api/aurora/status                 - Aurora GPT integration status
+    POST /api/bridge/gpt/connect/{agent_id} - Connect Custom GPT agent
+    POST /api/bridge/gpt/message/{agent_id} - Relay messages to agents
+    GET  /api/bridge/constellation/status   - Full constellation status
+
+Security:
+    - All POST endpoints require CSRF token validation
+    - Bearer token authentication via HTTPAuthorizationCredentials
+    - Request tracking middleware for audit trails
+
+DLP Protocol:
+    - context_tag: "l2_integration_server"
+    - All operations tracked for lineage
+    - Ethics validation: Picard_Delta_3 ✅
 """
 
 import argparse
@@ -45,12 +71,87 @@ except ImportError:
     # Fallback for testing
 
     class MockBridge:
+        """
+        Mock L2 Bridge for testing and development environments.
+        
+        Provides stub implementations of L2 Meta-Agent bridge functionality
+        when the full integration is not available. All methods return success
+        responses with minimal data for compatibility.
+        
+        Methods:
+            activate_agent(agent_id, phrase): Simulate agent activation
+            get_constellation_status(): Return empty constellation status
+            relay_message(agent_id, target, message, type): Mock message relay
+            get_agent_status(agent_id): Return mock agent status
+        
+        Attributes:
+            agents: Empty dict for agent tracking compatibility
+        
+        Note: This is a development/testing fallback. Production deployments
+        should use the full L2 bridge implementation.
+        """
+        
+        def __init__(self):
+            """Initialize mock bridge with empty agent registry."""
+            self.agents = {}
 
-        async def activate_agent(self, agent_id, phrase):
+        async def activate_agent(self, agent_id, _phrase):
+            """
+            Mock agent activation for testing.
+            
+            Args:
+                agent_id: Unique identifier for the agent to activate
+                _phrase: Activation phrase (unused in mock, prefixed with _ to indicate intentional)
+            
+            Returns:
+                Dict with success=True and the agent_id
+            """
             return {"success": True, "agent_id": agent_id}
 
         def get_constellation_status(self):
+            """
+            Get empty constellation status for testing.
+            
+            Returns:
+                Dict with constellation name and zero agents
+            """
             return {"constellation": "L2_META_AGENTS", "totalAgents": 0}
+        
+        async def relay_message(self, agent_id, target, message, message_type):
+            """
+            Mock message relay for testing.
+            
+            Args:
+                agent_id: Source agent identifier
+                target: Target destination
+                message: Message content
+                message_type: Type of message
+            
+            Returns:
+                Dict with success=True and relay confirmation
+            """
+            return {
+                "success": True,
+                "agent_id": agent_id,
+                "target": target,
+                "relayed": True
+            }
+        
+        def get_agent_status(self, agent_id):
+            """
+            Get mock status for an agent.
+            
+            Args:
+                agent_id: Agent identifier
+            
+            Returns:
+                Dict with basic status information
+            """
+            return {
+                "agent_id": agent_id,
+                "status": "active",
+                "connected": True
+            }
 
     l2_bridge = MockBridge()
 
@@ -249,7 +350,37 @@ async def connect_custom_gpt(
     request_data: Dict[str, Any],
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
-    """Connect a Custom GPT agent to the Aurora mesh with CSRF validation."""
+    """
+    Connect a Custom GPT agent to the Aurora mesh.
+    
+    Establishes a new connection for a Custom GPT agent to the L2 Meta-Agent
+    constellation. Requires valid activation phrase and CSRF token.
+    
+    Args:
+        agent_id: Unique identifier for the Custom GPT agent
+        request_data: Dict containing:
+            - activationPhrase (required): Phrase to activate the agent
+            - capabilities (optional): List of agent capabilities
+        token: Bearer token for CSRF validation
+    
+    Returns:
+        JSONResponse with:
+            - success: Boolean indicating connection status
+            - agent_id: Echo of the agent identifier
+            - server_info: Version and timestamp data
+    
+    Raises:
+        HTTPException 400: Missing or invalid activation phrase
+        HTTPException 403: Invalid CSRF token
+        HTTPException 500: Internal server error during connection
+    
+    Security:
+        - CSRF token validation required
+        - Agent ID sanitized to prevent injection
+        - Request logged with lineage tracking
+    
+    DLP: context_tag="bridge_gpt_connect"
+    """
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
         raise HTTPException(status_code=403, detail=INVALID_CSRF_TOKEN_MSG)
@@ -506,7 +637,7 @@ def main():
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info("AURORA L2 META-AGENT INTEGRATION SERVER")
+    logger.info("🌟 AURORA L2 META-AGENT INTEGRATION SERVER")
     logger.info("=" * 60)
     logger.info("Version: %s", server_state['version'])
     logger.info("Dashboard: http://%s:%s", args.host, args.port)

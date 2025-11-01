@@ -84,16 +84,19 @@ server_state = {
 
 # Middleware to track requests
 
+
 @app.middleware("http")
 async def track_requests(request: Request, call_next):
     server_state["requests_count"] += 1
     response = await call_next(request)
     return response
 
+
 # Mount static files for dashboard
 dashboard_dir = Path(__file__).parent.parent / "dashboard"
 if dashboard_dir.exists():
     app.mount("/static", StaticFiles(directory=str(dashboard_dir)), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard():

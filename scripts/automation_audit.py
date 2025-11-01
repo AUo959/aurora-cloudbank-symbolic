@@ -33,8 +33,8 @@ class AutomationAuditor:
             )
             if result.returncode == 0:
                 url = result.stdout.strip()
-                # Extract owner/repo from URL
-                if 'github.com' in url:
+                # Extract owner/repo from URL - validate GitHub URL format
+                if url.startswith('https://github.com/') or url.startswith('git@github.com:'):
                     parts = url.rstrip('.git').split('/')
                     self.repo_name = f"{parts[-2]}/{parts[-1]}"
                 else:

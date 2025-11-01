@@ -228,7 +228,12 @@ class RealitySimMonitor:
     ) -> bool:
         """Ensure telemetry reports all core metrics"""
         try:
-            core_metrics = self.telemetry.get_metrics(sim_id)
+            metrics_snapshot = self.telemetry.get_metrics_snapshot(sim_id)
+            # Extract performance metrics from snapshot (handles both MetricSnapshot and dict)
+            if isinstance(metrics_snapshot, dict):
+                core_metrics = metrics_snapshot
+            else:
+                core_metrics = getattr(metrics_snapshot, 'performance_metrics', {})
             required_metrics = self.config.get('required_metrics', [])
             
             missing_metrics = []
@@ -250,7 +255,7 @@ class RealitySimMonitor:
     ) -> bool:
         """Verify complete audit trail exists"""
         try:
-            audit_trail = self.audit_log.get_trail(sim_id)
+            audit_trail = self.audit_log.get_provenance_chain(sim_id)
             min_length = self.config.get('min_audit_length', 3)
             
             if not audit_trail or len(audit_trail) < min_length:
@@ -353,7 +358,7 @@ class MockRegistry:
 
 class MockTelemetry:
     """Mock telemetry when OpenTelemetry unavailable"""
-    def get_metrics(self, sim_id: str) -> Dict[str, Any]:
+    def get_metrics_snapshot(self, sim_id: str) -> Dict[str, Any]:
         return {
             'runtime': 1.0,
             'memory_usage': 100,
@@ -365,7 +370,7 @@ class MockTelemetry:
 
 class MockAuditLog:
     """Mock audit log when DLP tracker unavailable"""
-    def get_trail(self, sim_id: str) -> list:
+    def get_provenance_chain(self, sim_id: str) -> list:
         return [{'event': 'mock', 'timestamp': datetime.utcnow().isoformat()}] * 5
     
     def record(self, message: str, severity: str = 'info', metadata: Optional[Dict] = None):

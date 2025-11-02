@@ -105,6 +105,11 @@ async def analyze_file(request: AnalyzeFileRequest):
     """
     engine = get_improvement_engine()
     requested_path = Path(request.file_path)
+    # Explicit security: Disallow absolute paths and up-level references
+    if requested_path.is_absolute():
+        raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
+    if ".." in requested_path.parts:
+        raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
     # Compute the full, normalized path under the SAFE_ROOT
     full_path = (SAFE_ROOT / requested_path).resolve()
 
@@ -131,6 +136,11 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     """
     engine = get_improvement_engine()
     requested_path = Path(request.directory)
+    # Explicit security: Disallow absolute paths and up-level references
+    if requested_path.is_absolute():
+        raise HTTPException(status_code=400, detail="Absolute paths are not allowed.")
+    if ".." in requested_path.parts:
+        raise HTTPException(status_code=400, detail="Parent directory references ('..') are not allowed.")
     # Compute the full, normalized path under the SAFE_ROOT
     full_path = (SAFE_ROOT / requested_path).resolve()
 

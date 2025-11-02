@@ -407,7 +407,10 @@ async def connect_custom_gpt(
                 },
             )
         else:
-            logger.warning("Custom GPT %s connection failed: %s", str(agent_id)[:100], str(result.get('error'))[:100])
+            error_msg = str(result.get('error'))
+            # Sanitize potential log injection vectors
+            error_msg = error_msg.replace('\r\n', '').replace('\n', '').replace('\r', '')[:100]
+            logger.warning("Custom GPT %s connection failed: %s", str(agent_id)[:100], error_msg)
             raise HTTPException(status_code=400, detail=result.get("error", "Connection failed"))
 
     except HTTPException:

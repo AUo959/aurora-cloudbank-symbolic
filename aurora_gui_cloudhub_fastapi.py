@@ -229,6 +229,134 @@ def get_mcp_bridge():
     return JSONResponse(content=data)
 
 
+@app.get(
+    "/mcp_bridge/health",
+    summary="MCP Bridge Health Check",
+    response_description="MCP Bridge health status with security layer validation",
+    tags=["health", "mcp"],
+)
+def mcp_bridge_health_check():
+    """
+    Kubernetes-compatible health check endpoint for MCP Bridge Core.
+    
+    Returns:
+        - status: "healthy" or "degraded"
+        - security_layers: Status of all security layers (drift_lock, guardian_ring, ethics_lock)
+        - governance_layer: Current governance layer
+        - core_functions: Available core functions count
+        - external_hooks: Status of external integrations
+        - timestamp: Current timestamp for monitoring
+        - ready: Kubernetes readiness indicator
+        - live: Kubernetes liveness indicator
+    
+    Used by Kubernetes probes:
+        - livenessProbe: Checks if service is alive
+        - readinessProbe: Checks if service is ready to accept traffic
+    
+    Ethics Protocol: Picard_Delta_3 compliance verified
+    T1: System health timestamp
+    SRB: MCP_HEALTH_CHECK_v1
+    """
+    import time
+    from datetime import datetime, timezone
+    
+    try:
+        mcp_data = get_mcp_bridge_core()
+        security_layers = mcp_data.get("security_layers", {})
+        
+        # Validate security layers
+        drift_lock_active = security_layers.get("drift_lock") == "ACTIVE"
+        guardian_active = security_layers.get("guardian_ring") in ("ACTIVE", "STAGED_ACTIVE")
+        ethics_enforced = security_layers.get("ethics_lock") == "ENFORCED"
+        
+        all_security_active = drift_lock_active and guardian_active and ethics_enforced
+        
+        # Check core functions availability
+        core_functions = mcp_data.get("core_functions", [])
+        functions_count = len(core_functions)
+        
+        # External hooks validation
+        external_hooks = mcp_data.get("external_hooks", {})
+        mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
+        
+        # Determine overall health status
+        if all_security_active and functions_count >= 7 and mesh_sync_active:
+            status = "healthy"
+            ready = True
+            live = True
+        elif all_security_active and functions_count > 0:
+            status = "degraded"
+            ready = True
+            live = True
+        else:
+            status = "unhealthy"
+            ready = False
+            live = True  # Still alive, just not ready
+        
+        current_time = datetime.now(timezone.utc).isoformat()
+        
+        return {
+            "status": status,
+            "module_id": mcp_data.get("module_id", "UNKNOWN"),
+            "version": mcp_data.get("version", "UNKNOWN"),
+            "governance_layer": mcp_data.get("governance_layer", "UNKNOWN"),
+            "security_layers": {
+                "drift_lock": {
+                    "status": security_layers.get("drift_lock", "UNKNOWN"),
+                    "active": drift_lock_active
+                },
+                "guardian_ring": {
+                    "status": security_layers.get("guardian_ring", "UNKNOWN"),
+                    "active": guardian_active
+                },
+                "ethics_lock": {
+                    "status": security_layers.get("ethics_lock", "UNKNOWN"),
+                    "enforced": ethics_enforced
+                }
+            },
+            "core_functions": {
+                "count": functions_count,
+                "required": 7,
+                "available": functions_count >= 7
+            },
+            "external_hooks": {
+                "symbolic_mesh_sync": {
+                    "status": external_hooks.get("symbolic_mesh_sync", "UNKNOWN"),
+                    "active": mesh_sync_active
+                },
+                "gpt_parallel_nodes": len(external_hooks.get("gpt_parallel_nodes", []))
+            },
+            "ethics_protocol": mcp_data.get("ethics_protocol", "UNKNOWN"),
+            "anchor_seed": mcp_data.get("anchor_seed", "UNKNOWN"),
+            "timestamp": current_time,
+            "uptime_seconds": time.time(),
+            "kubernetes": {
+                "ready": ready,
+                "live": live
+            },
+            "aurora_metadata": {
+                "T1": current_time,
+                "SRB": "MCP_HEALTH_CHECK_v1",
+                "chain_notation": "#K8S//MCP//HEALTH//"
+            }
+        }
+        
+    except Exception as e:
+        logger.error("MCP health check failed: %s", str(e))
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "unhealthy",
+                "error": str(e),
+                "kubernetes": {
+                    "ready": False,
+                    "live": True
+                },
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        )
+
+
 @app.post(
     "/mcp_bridge/route_command",
     summary="Symbolic Command Routing via MCP Bridge",

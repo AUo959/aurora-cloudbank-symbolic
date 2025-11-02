@@ -3,6 +3,7 @@ import tempfile
 from pathlib import Path
 import subprocess
 import sys
+import pytest
 
 CLI = str(Path("tools/cli/aurora_dev_cli.py").resolve())
 PY = sys.executable

@@ -13,7 +13,7 @@ import json
 import tempfile
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Local imports with graceful fallback
 try:
@@ -39,7 +39,7 @@ class MockSymbolicObserver(SymbolicObserver):
     def observe_symbolic_state(self) -> dict:
         """Mock symbolic state observation."""
         observation = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "symbolic_data": self.symbolic_data,
             "observation_id": len(self.observations)
         }

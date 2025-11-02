@@ -1,3 +1,4 @@
+import pytest
 from modules.cask import (
     generate_risk_assessment,
     generate_technical_specifications,

@@ -6,7 +6,7 @@ Anchor: T8-TEST-STATUS-2025
 
 import unittest
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 
 from modules.nexus.gumas.gumas_orion_status_enhanced import (
@@ -49,7 +49,7 @@ class TestGUMASStatus(unittest.TestCase):
         """Test snapshot creation and sealing"""
         snapshot = StatusSnapshot(
             snapshot_id="TEST-SNAP",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             anchor_chain=THREAD_CHAIN,
             system_metrics={},
             entropy_state=EntropyState(),

@@ -365,11 +365,6 @@ def main():
     analyzer = CodeQualityAnalyzer()
     report = analyzer.run_flake8_analysis(args.paths)
     
-    if args.reflection:
-        analyzer.generate_reflection_report(report)
-    else:
-        report.to_dict()
-    
     # Print summary
     print(f"\n{'='*60}")
     print("Aurora Code Quality Analysis Report")
@@ -386,8 +381,16 @@ def main():
     
     # Save if output specified
     if args.output:
-        analyzer.save_report(report, args.output)
-        print(f"Report saved to: {args.output}")
+        if args.reflection:
+            # Generate reflection format and save it
+            reflection_report = analyzer.generate_reflection_report(report)
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            with open(args.output, 'w') as f:
+                json.dump(reflection_report, f, indent=2)
+            print(f"Reflection report saved to: {args.output}")
+        else:
+            analyzer.save_report(report, args.output)
+            print(f"Report saved to: {args.output}")
     
     # Exit with appropriate code
     sys.exit(0 if report.passed else 1)

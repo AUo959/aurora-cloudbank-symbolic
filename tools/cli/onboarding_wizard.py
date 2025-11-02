@@ -24,7 +24,7 @@ import subprocess
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, List, Dict, Tuple
+from typing import List, Tuple
 
 # Add workspace root to Python path
 WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
@@ -84,18 +84,18 @@ Let's get started! 🚀
                 text=True,
                 timeout=300
             )
-            
+
             if check and result.returncode != 0:
                 print(f"❌ Command failed with exit code {result.returncode}")
                 if result.stderr:
                     print(f"Error output:\n{result.stderr[:500]}")
                 return False, result.stderr
-            
+
             print(f"✅ {description} completed")
             return True, result.stdout
-        
+
         except subprocess.TimeoutExpired:
-            print(f"⏰ Command timed out after 300 seconds")
+            print("⏰ Command timed out after 300 seconds")
             return False, "Timeout"
         except Exception as e:
             print(f"❌ Error running command: {e}")
@@ -121,7 +121,7 @@ configured. It checks:
                 "Running health check",
                 check=False
             )
-            
+
             if success:
                 print("\n📊 Health Check Results:")
                 print(output[:1000] if len(output) > 1000 else output)
@@ -153,7 +153,7 @@ This may take a few minutes on first run.
                 "Setting up development environment",
                 check=False
             )
-            
+
             if success:
                 print("\n✅ Environment setup completed successfully!")
                 self.has_completed_steps.add("setup")
@@ -182,11 +182,11 @@ common development tasks. Let's explore what's available.
                 "Fetching available commands",
                 check=False
             )
-            
+
             if success:
                 print("\n📚 Available Make Commands:")
                 print(output)
-                
+
                 # Explain key commands
                 print("\n💡 KEY COMMANDS EXPLAINED:")
                 key_commands = {
@@ -202,11 +202,11 @@ common development tasks. Let's explore what's available.
                     "make security": "Run comprehensive security scans",
                     "make status": "Show environment status"
                 }
-                
+
                 for cmd, desc in key_commands.items():
                     print(f"\n  📌 {cmd}")
                     print(f"     {desc}")
-                
+
                 self.has_completed_steps.add("makefile")
             else:
                 print("⚠️  Could not fetch commands. Try running 'make help' manually.")
@@ -230,24 +230,24 @@ The Aurora Developer CLI helps you:
 
         if self.confirm("Would you like to see how anchor tracking works?"):
             print("\n🔍 Let's track some anchors in the repository...")
-            
+
             # Example: track anchors
             success, output = self.run_command(
                 ["python", "tools/cli/aurora_dev_cli.py", "anchor", "track", "--pattern", "T71"],
                 "Tracking T71 anchors",
                 check=False
             )
-            
+
             if success:
                 print("\n📊 Anchor Tracking Results:")
                 print(output[:800] if len(output) > 800 else output)
-                
+
                 print("\n💡 Try these commands:")
                 print("  python tools/cli/aurora_dev_cli.py anchor track")
                 print("  python tools/cli/aurora_dev_cli.py anchor track --pattern T70")
                 print("  python tools/cli/aurora_dev_cli.py anchor resolve <anchor_id>")
                 print("  python tools/cli/aurora_dev_cli.py status")
-                
+
                 self.has_completed_steps.add("anchors")
             else:
                 print("⚠️  Anchor tracking demo encountered an issue.")
@@ -282,13 +282,13 @@ To verify a seal:
 To restore a sealed state:
   python tools/cli/aurora_dev_cli.py restore <seal_id>
 """)
-            
+
             print("\n💡 Example Usage:")
             print("  # Seal the tools/cli directory")
             print("  python tools/cli/aurora_dev_cli.py seal tools/cli")
             print("\n  # Verify the seal")
             print("  python tools/cli/aurora_dev_cli.py seal tools/cli --verify --seal-id <id>")
-            
+
             self.has_completed_steps.add("sealing")
         else:
             print("⏭️  Skipping memory sealing tutorial")
@@ -313,7 +313,7 @@ Think of it as a save point for your development session!
             print("""
 1. CREATE a quicksave:
    make quicksave DESC="Your description here"
-   
+
    This captures the current state of your work including:
    - Git status and recent commits
    - Modified files and working tree state
@@ -321,12 +321,12 @@ Think of it as a save point for your development session!
 
 2. LIST all quicksaves:
    make quicklist
-   
+
    Shows all available quicksave snapshots with timestamps
 
 3. LOAD a quicksave:
    make quickload
-   
+
    Loads the most recent quicksave and displays a reconstitution brief
 """)
 
@@ -336,14 +336,14 @@ Think of it as a save point for your development session!
                     "Listing quicksaves",
                     check=False
                 )
-                
+
                 if success:
                     print("\n📋 Available Quicksaves:")
                     print(output)
                     self.has_completed_steps.add("quicksave")
                 else:
                     print("⚠️  Could not list quicksaves. They may not exist yet.")
-            
+
             print("\n💡 Tip: Create your first quicksave with:")
             print('   make quicksave DESC="Completed onboarding wizard"')
         else:
@@ -379,14 +379,14 @@ Aurora CloudBank provides several ways to explore the system:
                 "Checking system status",
                 check=False
             )
-            
+
             if success:
                 print("\n📊 System Status:")
                 print(output)
                 self.has_completed_steps.add("demos")
             else:
                 print("⚠️  Could not fetch status. Some dependencies may need setup.")
-        
+
         print("\n💡 Try these when ready:")
         print("   python aurora_cli.py --quantum")
         print("   python aurora_api.py  # Then visit http://localhost:8000/docs")
@@ -401,7 +401,7 @@ You've completed the Aurora CloudBank onboarding wizard!
 
 Here's what you've learned:
 """)
-        
+
         if "health_check" in self.has_completed_steps:
             print("  ✅ Environment health checking")
         if "setup" in self.has_completed_steps:
@@ -465,7 +465,7 @@ Thank you for joining us on this quantum-symbolic journey! 🚀
         """Run the complete onboarding wizard"""
         try:
             self.print_banner()
-            
+
             # Run all steps in sequence
             self.step_health_check()
             self.step_environment_setup()
@@ -475,12 +475,12 @@ Thank you for joining us on this quantum-symbolic journey! 🚀
             self.step_quicksave()
             self.step_demos_and_api()
             self.step_next_steps()
-            
+
             # Save onboarding completion
             self._save_completion_record()
-            
+
             return 0
-            
+
         except KeyboardInterrupt:
             print("\n\n⚠️  Onboarding interrupted. You can resume anytime by running:")
             print("   python tools/cli/onboarding_wizard.py")
@@ -494,17 +494,17 @@ Thank you for joining us on this quantum-symbolic journey! 🚀
         try:
             onboarding_dir = self.repo_path / ".aurora" / "onboarding"
             onboarding_dir.mkdir(parents=True, exist_ok=True)
-            
+
             record = {
                 "completed_at": datetime.now().isoformat(),
                 "version": self.version,
                 "completed_steps": list(self.has_completed_steps),
                 "wizard_version": "1.0.0"
             }
-            
+
             record_file = onboarding_dir / "completion_record.json"
             record_file.write_text(json.dumps(record, indent=2), encoding="utf-8")
-            
+
         except Exception:
             # Non-critical, don't fail if we can't save
             pass

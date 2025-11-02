@@ -1,3 +1,4 @@
+import pytest
 from modules.cask import (
     generate_risk_assessment,
     generate_technical_specifications,
@@ -5,6 +6,7 @@ from modules.cask import (
 )
 
 
+@pytest.mark.unit
 def test_specifications_columns():
     df = generate_technical_specifications()
     assert set(df.columns) == {
@@ -15,11 +17,13 @@ def test_specifications_columns():
     }
 
 
+@pytest.mark.unit
 def test_comparison_rows():
     df = generate_vs_sota_comparison()
     assert len(df) == 10
 
 
+@pytest.mark.unit
 def test_risk_assessment_priority():
     df = generate_risk_assessment()
     assert "Priority" in df.columns

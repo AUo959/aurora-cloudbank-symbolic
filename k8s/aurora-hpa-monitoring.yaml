@@ -1,0 +1,227 @@
+# Aurora CloudBank Symbolic - Horizontal Pod Autoscaler
+# Kubernetes HPA for automatic scaling of Aurora GUI CloudHub pods
+#
+# Ethics Protocol: Picard_Delta_3 - Efficient resource utilization
+# T1: HPA creation timestamp
+# SRB: K8S_HPA_v1
+# Chain Notation: #K8S//HPA//AURORA_GUI_CLOUDHUB//
+#
+# Features:
+# - CPU and memory-based autoscaling
+# - Custom metrics support (requests per second, VSA operations)
+# - Symbolic continuity during scaling events
+# - Zero-downtime scaling with proper pod lifecycle
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aurora-gui-cloudhub-hpa
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: autoscaling
+    ethics-protocol: picard-delta-3
+  annotations:
+    aurora.io/chain-notation: "#K8S//HPA//AURORA_GUI_CLOUDHUB//"
+    aurora.io/srb: "K8S_HPA_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+    aurora.io/scaling-policy: "Gradual scaling to preserve symbolic continuity"
+spec:
+  # Target deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aurora-gui-cloudhub
+  
+  # Minimum and maximum replicas
+  minReplicas: 3   # Minimum pods for high availability
+  maxReplicas: 20  # Maximum pods to prevent runaway scaling
+  
+  # Scaling behavior configuration
+  behavior:
+    # Scale up behavior - gradual increase
+    scaleUp:
+      stabilizationWindowSeconds: 60  # Wait 60s before scaling up
+      policies:
+      # Add maximum 4 pods or 100% of current pods (whichever is greater)
+      - type: Pods
+        value: 4
+        periodSeconds: 60
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      selectPolicy: Max  # Use the policy that adds most pods
+    
+    # Scale down behavior - conservative to preserve connections
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 minutes before scaling down
+      policies:
+      # Remove maximum 1 pod or 10% of current pods (whichever is less)
+      - type: Pods
+        value: 1
+        periodSeconds: 120
+      - type: Percent
+        value: 10
+        periodSeconds: 120
+      selectPolicy: Min  # Use the policy that removes fewest pods
+  
+  # Metrics for autoscaling decisions
+  metrics:
+  # CPU utilization target
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70  # Scale when average CPU > 70%
+  
+  # Memory utilization target
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80  # Scale when average memory > 80%
+  
+  # Custom metrics (requires metrics server and custom metrics API)
+  # Uncomment and configure based on your metrics infrastructure
+  
+  # Requests per second
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: http_requests_per_second
+  #     target:
+  #       type: AverageValue
+  #       averageValue: "100"  # Scale when RPS > 100 per pod
+  
+  # VSA operations per second
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: vsa_operations_per_second
+  #     target:
+  #       type: AverageValue
+  #       averageValue: "50"  # Scale when VSA ops > 50 per pod
+  
+  # WebSocket connections
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: websocket_connections
+  #     target:
+  #       type: AverageValue
+  #       averageValue: "100"  # Scale when connections > 100 per pod
+  
+  # External metrics (from Prometheus, Datadog, etc.)
+  # - type: External
+  #   external:
+  #     metric:
+  #       name: aurora_gui_cloudhub_latency_p95
+  #       selector:
+  #         matchLabels:
+  #           service: aurora-gui-cloudhub
+  #     target:
+  #       type: Value
+  #       value: "500m"  # Scale if p95 latency > 500ms
+
+---
+# VerticalPodAutoscaler (optional, requires VPA installed)
+# Automatically adjusts resource requests and limits
+# Note: Do not use VPA and HPA on the same metrics (CPU/memory)
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: aurora-gui-cloudhub-vpa
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: autoscaling
+  annotations:
+    aurora.io/chain-notation: "#K8S//VPA//AURORA_GUI_CLOUDHUB//"
+    aurora.io/srb: "K8S_VPA_v1"
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aurora-gui-cloudhub
+  
+  # Update mode
+  # Off: Only recommendations, no automatic updates
+  # Initial: Set resources on pod creation
+  # Recreate: Update by evicting and recreating pods
+  # Auto: Update without evicting pods (in-place)
+  updatePolicy:
+    updateMode: "Off"  # Start with recommendations only
+  
+  # Resource policy
+  resourcePolicy:
+    containerPolicies:
+    - containerName: aurora-gui-cloudhub
+      minAllowed:
+        cpu: "250m"
+        memory: "512Mi"
+      maxAllowed:
+        cpu: "2000m"
+        memory: "4Gi"
+      controlledResources:
+      - cpu
+      - memory
+      # Mode for resource recommendations
+      mode: Auto
+
+---
+# PodMonitor for Prometheus (if using Prometheus Operator)
+# Automatically scrapes metrics from pods
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: aurora-gui-cloudhub-metrics
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: monitoring
+  annotations:
+    aurora.io/chain-notation: "#K8S//MONITOR//METRICS//"
+spec:
+  selector:
+    matchLabels:
+      app: aurora-gui-cloudhub
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    # Relabeling for Aurora metadata
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_label_ethics_protocol]
+      targetLabel: ethics_protocol
+    - sourceLabels: [__meta_kubernetes_pod_annotation_aurora_io_chain_notation]
+      targetLabel: chain_notation
+
+---
+# ServiceMonitor for Prometheus (if using Prometheus Operator)
+# Scrapes metrics from service endpoint
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: aurora-gui-cloudhub-service-metrics
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: monitoring
+  annotations:
+    aurora.io/chain-notation: "#K8S//MONITOR//SERVICE//"
+spec:
+  selector:
+    matchLabels:
+      app: aurora-gui-cloudhub
+  endpoints:
+  - port: http
+    path: /mcp_bridge/health
+    interval: 15s
+    scrapeTimeout: 5s
+  - port: health
+    path: /mcp_bridge/health
+    interval: 15s
+    scrapeTimeout: 5s

@@ -9,6 +9,9 @@ def client():
     return TestClient(app)
 
 
+@pytest.mark.unit
+@pytest.mark.aurora
+@pytest.mark.cli
 def test_agent_tools(client):
     resp = client.get("/agent/tools")
     assert resp.status_code == 200
@@ -18,6 +21,8 @@ def test_agent_tools(client):
     assert data.get("dlp_level") == "DLP_L1_OK"
 
 
+@pytest.mark.unit
+@pytest.mark.cli
 def test_session_create_and_update(client):
     """Test that the session endpoint exists and responds appropriately."""
     # Test that the endpoint exists and handles requests
@@ -35,6 +40,9 @@ def test_session_create_and_update(client):
     assert True  # Test passes - API endpoint is functional
 
 
+@pytest.mark.unit
+@pytest.mark.cli
+@pytest.mark.api
 def test_api_health_alias(client):
     resp = client.get("/api/health")
     assert resp.status_code == 200

@@ -3,11 +3,14 @@ import tempfile
 from pathlib import Path
 import subprocess
 import sys
+import pytest
 
 CLI = str(Path("tools/cli/aurora_dev_cli.py").resolve())
 PY = sys.executable
 
 
+@pytest.mark.unit
+@pytest.mark.cli
 def test_cli_manifest_json_and_dlp_export():
     # Use repo root to exercise integrated behavior
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -32,6 +35,8 @@ def test_cli_manifest_json_and_dlp_export():
             assert dlp_out.exists()
 
 
+@pytest.mark.unit
+@pytest.mark.cli
 def test_cli_anchor_track_ext_json():
     proc = subprocess.run(
         [PY, CLI, "anchor", "track", "--ext", ".md", "--json"],

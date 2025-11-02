@@ -10,6 +10,16 @@
         "/workspaces/aurora-cloudbank-symbolic/mrm_bootstrap.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 130: f-string logging - logger.error(f\"Webhook channel '{self.name}' missing URL configuration\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 135: f-string logging - logger.info(f\"[WEBHOOK] Sending alert to {webhook_url}\")\n  \u274c /workspaces/aurora-..."
+    },
+    {
+      "timestamp": "2025-10-30T02:11:39.682327",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_dlp_auto_tracker.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 237: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to initialize Insight Ledger: {e}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 275: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to record to Insight Ledger: {e}\")\n\n\ud83d\udca1 Fix: Use parameteri..."
     }
   ]
 }

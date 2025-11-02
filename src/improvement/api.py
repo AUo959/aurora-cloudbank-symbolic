@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 from enum import Enum
-
+import os
 from src.improvement import (
     get_improvement_engine,
     ImprovementCategory,
@@ -109,7 +109,7 @@ async def analyze_file(request: AnalyzeFileRequest):
     full_path = (SAFE_ROOT / requested_path).resolve()
 
     # Ensure the resolved path is inside SAFE_ROOT
-    if not str(full_path).startswith(str(SAFE_ROOT)):
+    if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
         raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
 
     if not full_path.exists():
@@ -135,7 +135,7 @@ async def analyze_directory(request: AnalyzeDirectoryRequest):
     full_path = (SAFE_ROOT / requested_path).resolve()
 
     # Ensure the resolved path is inside SAFE_ROOT
-    if not str(full_path).startswith(str(SAFE_ROOT)):
+    if os.path.commonpath([str(SAFE_ROOT), str(full_path)]) != str(SAFE_ROOT):
         raise HTTPException(status_code=403, detail="Access to this path is not allowed.")
 
     if not full_path.exists():

@@ -31,8 +31,8 @@ LOG_FILE = os.path.join(LOG_PATH, "aurora_agent.log")
 HEARTBEAT_INTERVAL = 300  # seconds (5 min)
 
 GITHUB_API = "https://api.github.com"
-TOKEN = os.getenv("GITHUB_TOKEN", "YOUR_TOKEN_HERE")  # replace in deployment
-HEADERS = {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github+json"}
+TOKEN = os.getenv("GITHUB_TOKEN", "")
+HEADERS = {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github+json"} if TOKEN else {"Accept": "application/vnd.github+json"}
 
 # -------------------------- UTILITIES --------------------------
 
@@ -115,23 +115,47 @@ class ReflectiveJournal:
 # -------------------------- MAIN AGENT --------------------------
 
 class AuroraAgent:
-    def __init__(self):
+    def __init__(self, single_run=False):
         self.continuity = ContinuityEngine()
         self.guard = EthicsGuard()
         self.gh = GitHubCoordinator()
         self.journal = ReflectiveJournal()
         self.start_time = datetime.now(timezone.utc)
+        self.single_run = single_run
+        
+        # Log token status
+        if not TOKEN:
+            log_reflection("⚠️ Warning: GITHUB_TOKEN not set, API operations will be limited")
+        
         log_reflection("🌌 Aurora Agent initialization complete.")
         self.run_cycle()
 
     def run_cycle(self):
-        while True:
+        """Run agent heartbeat cycle(s).
+        
+        In single_run mode (GitHub Actions), executes once and exits.
+        In continuous mode, runs in an infinite loop with HEARTBEAT_INTERVAL delays.
+        """
+        if self.single_run:
+            # Single execution for GitHub Actions
             try:
                 self.heartbeat()
-                time.sleep(HEARTBEAT_INTERVAL)
-            except KeyboardInterrupt:
                 self.shutdown()
-                break
+            except Exception as e:
+                log_reflection(f"❌ Error during heartbeat: {e}")
+                self.shutdown()
+        else:
+            # Continuous execution for local/daemon mode
+            while True:
+                try:
+                    self.heartbeat()
+                    time.sleep(HEARTBEAT_INTERVAL)
+                except KeyboardInterrupt:
+                    self.shutdown()
+                    break
+                except Exception as e:
+                    log_reflection(f"❌ Error during heartbeat: {e}")
+                    time.sleep(HEARTBEAT_INTERVAL)
 
     def heartbeat(self):
         log_reflection("💠 Heartbeat cycle initiated.")
@@ -166,4 +190,7 @@ class AuroraAgent:
 
 if __name__ == "__main__":
     log_reflection("🚀 Launching Aurora Agent (Active Coordinator Mode)...")
-    agent = AuroraAgent()
+    # Check if running in CI/GitHub Actions environment
+    is_ci = os.getenv("CI", "false").lower() == "true" or os.getenv("GITHUB_ACTIONS", "false").lower() == "true"
+    log_reflection(f"🔧 Execution mode: {'Single-run (CI)' if is_ci else 'Continuous (Local)'}")
+    agent = AuroraAgent(single_run=is_ci)

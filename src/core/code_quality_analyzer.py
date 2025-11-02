@@ -8,7 +8,7 @@ import hashlib
 import json
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
@@ -192,7 +192,7 @@ class CodeQualityAnalyzer:
         passed = critical == 0
         
         return CodeQualityReport(
-            timestamp=datetime.utcnow().isoformat() + 'Z',
+            timestamp=datetime.now(UTC).isoformat(),
             total_violations=len(violations),
             critical_count=critical,
             high_count=high,

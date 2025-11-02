@@ -35,21 +35,11 @@ def test_aurora_agent_ci_mode():
         timeout=10
     )
     
-    if returncode != 0:
-        print(f"  ❌ FAILED: Exit code {returncode}")
-        print(f"  stderr: {stderr}")
-        return False
-    
-    if "Single-run (CI)" not in stdout:
-        print("  ❌ FAILED: Not running in single-run mode")
-        return False
-    
-    if "shutting down" not in stdout:
-        print("  ❌ FAILED: Agent did not shut down properly")
-        return False
+    assert returncode == 0, f"Exit code {returncode}, stderr: {stderr}"
+    assert "Single-run (CI)" in stdout, "Not running in single-run mode"
+    assert "shutting down" in stdout, "Agent did not shut down properly"
     
     print("  ✅ PASSED: Agent runs and exits cleanly in CI mode")
-    return True
 
 
 def test_aurora_agent_token_handling():
@@ -70,16 +60,10 @@ def test_aurora_agent_token_handling():
         env=env
     )
     
-    if "Warning: GITHUB_TOKEN not set" not in result.stdout:
-        print("  ❌ FAILED: Token warning not shown")
-        return False
-    
-    if result.returncode != 0:
-        print(f"  ❌ FAILED: Exit code {result.returncode} (should be 0)")
-        return False
+    assert "Warning: GITHUB_TOKEN not set" in result.stdout, "Token warning not shown"
+    assert result.returncode == 0, f"Exit code {result.returncode} (should be 0)"
     
     print("  ✅ PASSED: Agent handles missing token gracefully")
-    return True
 
 
 def test_makefile_no_warnings():
@@ -88,21 +72,11 @@ def test_makefile_no_warnings():
     
     returncode, stdout, stderr = run_command("make help")
     
-    if returncode != 0:
-        print(f"  ❌ FAILED: Exit code {returncode}")
-        return False
-    
-    if "warning: overriding recipe" in stderr:
-        print("  ❌ FAILED: Duplicate target warnings detected")
-        print(f"  stderr: {stderr}")
-        return False
-    
-    if "Aurora CloudBank Symbolic System" not in stdout:
-        print("  ❌ FAILED: Help output not correct")
-        return False
+    assert returncode == 0, f"Exit code {returncode}"
+    assert "warning: overriding recipe" not in stderr, f"Duplicate target warnings detected: {stderr}"
+    assert "Aurora CloudBank Symbolic System" in stdout, "Help output not correct"
     
     print("  ✅ PASSED: Makefile runs without warnings")
-    return True
 
 
 def test_audit_tool():
@@ -114,20 +88,13 @@ def test_audit_tool():
         timeout=60
     )
     
-    if returncode not in (0, 1):  # 0 = pass, 1 = warnings only
-        print(f"  ❌ FAILED: Unexpected exit code {returncode}")
-        return False
-    
-    if "Critical Issues: 0" not in stdout:
-        print("  ❌ FAILED: Critical issues detected")
-        print(f"  stdout: {stdout}")
-        return False
+    assert returncode in (0, 1), f"Unexpected exit code {returncode}"  # 0 = pass, 1 = warnings only
+    assert "Critical Issues: 0" in stdout, f"Critical issues detected: {stdout}"
     
     if "Overall Status: ✅ PASS" not in stdout:
         print("  ⚠️ WARNING: Status not PASS (may have warnings)")
     
     print("  ✅ PASSED: Audit tool runs and reports no critical issues")
-    return True
 
 
 def test_log_files_created():
@@ -139,23 +106,18 @@ def test_log_files_created():
     # Run agent to create log
     run_command("python .github/agents/aurora_agent_final.py", timeout=10)
     
-    if not log_file.exists():
-        print("  ❌ FAILED: Log file not created")
-        return False
+    assert log_file.exists(), "Log file not created"
     
     with open(log_file, 'r') as f:
         content = f.read()
-        
-    if "Aurora Agent" not in content:
-        print("  ❌ FAILED: Log content invalid")
-        return False
+    
+    assert "Aurora Agent" in content, "Log content invalid"
     
     print("  ✅ PASSED: Log files created correctly")
-    return True
 
 
 def main():
-    """Run all tests"""
+    """Run all tests (for standalone execution)"""
     print("\n" + "="*60)
     print("🌟 Aurora CloudBank - Automation Fixes Validation")
     print("="*60 + "\n")
@@ -172,25 +134,28 @@ def main():
         test_log_files_created,
     ]
     
-    results = []
+    failed_count = 0
     for test in tests:
         try:
-            results.append(test())
+            test()
+        except AssertionError as e:
+            print(f"  ❌ ASSERTION FAILED: {e}")
+            failed_count += 1
         except Exception as e:
             print(f"  ❌ ERROR: {e}")
-            results.append(False)
+            failed_count += 1
         print()
     
     # Summary
     print("="*60)
     print("📊 Test Summary")
     print("="*60)
-    passed = sum(results)
-    total = len(results)
+    passed = len(tests) - failed_count
+    total = len(tests)
     print(f"Passed: {passed}/{total}")
-    print(f"Failed: {total - passed}/{total}")
+    print(f"Failed: {failed_count}/{total}")
     
-    if all(results):
+    if failed_count == 0:
         print("\n✅ All tests PASSED - Automation fixes validated!")
         return 0
     else:

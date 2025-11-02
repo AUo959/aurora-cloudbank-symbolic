@@ -263,7 +263,7 @@ The workflow runs automatically on:
 ### Standard Report
 ```json
 {
-  "timestamp": "2025-10-29T12:00:00Z",
+  "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
   "total_violations": 10,
   "critical_count": 0,
   "high_count": 2,

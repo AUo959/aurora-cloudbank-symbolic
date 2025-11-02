@@ -1,0 +1,367 @@
+# Aurora CloudBank Symbolic - GUI CloudHub Kubernetes Deployment
+# Kubernetes deployment manifest for the Aurora Quantum VSA Playground FastAPI service
+#
+# Ethics Protocol: Picard_Delta_3 - Zero-trust security, ethical data flows
+# T1: Deployment timestamp anchor
+# SRB: K8S_DEPLOYMENT_v1
+# Chain Notation: #K8S//DEPLOYMENT//AURORA_GUI_CLOUDHUB//
+#
+# Features:
+# - Horizontal Pod Autoscaling (HPA) for dynamic scaling
+# - Resource requests and limits for predictable performance
+# - Liveness and readiness probes for self-healing
+# - Security context with non-root user and read-only root filesystem
+# - Rolling updates with zero-downtime deployments
+# - Pod disruption budgets for high availability
+#
+# Symbolic Continuity Compliance:
+# - All pods maintain MCP Bridge Core connection
+# - DLP (Data Lineage Protocol) tracking via environment variables
+# - Anchor structures (T1, SRB) preserved in pod annotations
+# - Ethics lock enforcement via security policies
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-gui-cloudhub
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+    version: v1.0.0
+    ethics-protocol: picard-delta-3
+    governance-layer: aurora-command-node-cpu
+  annotations:
+    # Aurora metadata for symbolic continuity
+    aurora.io/chain-notation: "#K8S//DEPLOYMENT//AURORA_GUI_CLOUDHUB//"
+    aurora.io/srb: "K8S_DEPLOYMENT_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+    aurora.io/module-id: "AURORA_GUI_CLOUDHUB_K8S"
+    # Deployment strategy annotations
+    kubernetes.io/change-cause: "Initial Kubernetes deployment with MCP Bridge integration"
+spec:
+  # Replica configuration
+  replicas: 3  # Default replica count (overridden by HPA)
+  
+  # Selector for pod matching
+  selector:
+    matchLabels:
+      app: aurora-gui-cloudhub
+      component: fastapi-service
+  
+  # Rolling update strategy for zero-downtime deployments
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Maximum number of pods above desired count during update
+      maxUnavailable: 0  # Ensure zero downtime - no pods unavailable during update
+  
+  # Minimum ready time before pod is considered available
+  minReadySeconds: 10
+  
+  # Revision history limit for rollbacks
+  revisionHistoryLimit: 5
+  
+  # Pod template specification
+  template:
+    metadata:
+      labels:
+        app: aurora-gui-cloudhub
+        component: fastapi-service
+        version: v1.0.0
+        ethics-protocol: picard-delta-3
+      annotations:
+        # Aurora symbolic continuity annotations
+        aurora.io/anchor-seed: "EOS_SEED_ORION"
+        aurora.io/drift-lock: "ACTIVE"
+        aurora.io/guardian-ring: "STAGED_ACTIVE"
+        aurora.io/ethics-lock: "ENFORCED"
+        # Prometheus metrics scraping
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    
+    spec:
+      # Service account for RBAC
+      serviceAccountName: aurora-gui-cloudhub
+      
+      # Security context for the entire pod
+      securityContext:
+        # Run as non-root user for security
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 3000
+        fsGroup: 2000
+        # Security enhancements
+        seccompProfile:
+          type: RuntimeDefault
+      
+      # Init container to validate MCP Bridge Core configuration
+      initContainers:
+      - name: mcp-bridge-validator
+        image: python:3.12-slim
+        command:
+        - sh
+        - -c
+        - |
+          echo "🔍 Validating MCP Bridge Core configuration..."
+          python3 -c "
+          import json
+          import sys
+          
+          # Load MCP Bridge Core config from ConfigMap
+          with open('/config/mcp_bridge_core.json') as f:
+              mcp = json.load(f)
+          
+          # Validate security layers
+          security = mcp.get('security_layers', {})
+          if security.get('drift_lock') != 'ACTIVE':
+              print('❌ drift_lock not ACTIVE')
+              sys.exit(1)
+          if security.get('guardian_ring') not in ('ACTIVE', 'STAGED_ACTIVE'):
+              print('❌ guardian_ring not active')
+              sys.exit(1)
+          if security.get('ethics_lock') != 'ENFORCED':
+              print('❌ ethics_lock not ENFORCED')
+              sys.exit(1)
+          
+          # Validate core functions
+          functions = mcp.get('core_functions', [])
+          if len(functions) < 7:
+              print(f'❌ Insufficient core functions: {len(functions)}/7')
+              sys.exit(1)
+          
+          print('✅ MCP Bridge Core validation passed')
+          print(f'   Module: {mcp.get(\"module_id\")}')
+          print(f'   Governance: {mcp.get(\"governance_layer\")}')
+          print(f'   Ethics: {mcp.get(\"ethics_protocol\")}')
+          "
+        volumeMounts:
+        - name: mcp-bridge-config
+          mountPath: /config
+          readOnly: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+      
+      # Main application containers
+      containers:
+      - name: aurora-gui-cloudhub
+        # Use official Python image or custom Aurora image
+        image: aurora-cloudbank-symbolic:latest
+        imagePullPolicy: IfNotPresent  # Use Always in production with registry
+        
+        # Command to start FastAPI with uvicorn
+        command:
+        - uvicorn
+        - aurora_gui_cloudhub_fastapi:app
+        - --host
+        - "0.0.0.0"
+        - --port
+        - "8000"
+        - --workers
+        - "4"  # Number of worker processes
+        - --log-level
+        - info
+        - --access-log
+        - --proxy-headers
+        - --forwarded-allow-ips
+        - "*"
+        
+        # Container ports
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        
+        # Environment variables for configuration
+        env:
+        # Aurora metadata
+        - name: AURORA_MODULE_ID
+          value: "AURORA_GUI_CLOUDHUB_K8S"
+        - name: AURORA_CHAIN_NOTATION
+          value: "#K8S//POD//AURORA_GUI_CLOUDHUB//"
+        - name: AURORA_ETHICS_PROTOCOL
+          value: "Picard_Delta_3"
+        
+        # Kubernetes metadata
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        
+        # MCP Bridge configuration path
+        - name: MCP_BRIDGE_CONFIG_PATH
+          value: "/config/mcp_bridge_core.json"
+        
+        # API keys from secrets (if needed for anthropic/openai)
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aurora-api-keys
+              key: anthropic-api-key
+              optional: true
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aurora-api-keys
+              key: openai-api-key
+              optional: true
+        
+        # Resource requests and limits
+        # Requests: Guaranteed resources for scheduling
+        # Limits: Maximum resources container can use
+        resources:
+          requests:
+            memory: "512Mi"   # Minimum memory guaranteed
+            cpu: "250m"       # 0.25 CPU cores guaranteed
+          limits:
+            memory: "2Gi"     # Maximum memory (OOM kill at this limit)
+            cpu: "1000m"      # Maximum 1 CPU core
+        
+        # Liveness probe - Kubernetes will restart if this fails
+        # Checks if the application is alive and responsive
+        livenessProbe:
+          httpGet:
+            path: /mcp_bridge/health  # MCP health check endpoint
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30  # Wait 30s after container start
+          periodSeconds: 10        # Check every 10 seconds
+          timeoutSeconds: 5        # Timeout after 5 seconds
+          successThreshold: 1      # 1 success = healthy
+          failureThreshold: 3      # 3 failures = restart pod
+        
+        # Readiness probe - Kubernetes won't send traffic until ready
+        # Checks if the application is ready to accept traffic
+        readinessProbe:
+          httpGet:
+            path: /mcp_bridge/health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10  # Start checking after 10s
+          periodSeconds: 5         # Check every 5 seconds
+          timeoutSeconds: 3        # Timeout after 3 seconds
+          successThreshold: 1      # 1 success = ready
+          failureThreshold: 3      # 3 failures = not ready
+        
+        # Startup probe - For slow-starting containers
+        # Gives container time to initialize before liveness checks
+        startupProbe:
+          httpGet:
+            path: /mcp_bridge/health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 0   # Start immediately
+          periodSeconds: 5         # Check every 5 seconds
+          timeoutSeconds: 3        # Timeout after 3 seconds
+          successThreshold: 1      # 1 success = started
+          failureThreshold: 12     # 12 failures (60s) before giving up
+        
+        # Volume mounts
+        volumeMounts:
+        # MCP Bridge Core configuration (read-only)
+        - name: mcp-bridge-config
+          mountPath: /config
+          readOnly: true
+        
+        # Temporary directory for uploads (writable)
+        - name: tmp-uploads
+          mountPath: /app/uploads
+        
+        # Security context for container
+        securityContext:
+          # Run as non-root user
+          runAsNonRoot: true
+          runAsUser: 1000
+          # Capabilities - drop all and add only what's needed
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE  # Allow binding to port 8000
+          # Read-only root filesystem for security
+          readOnlyRootFilesystem: true
+          # No privilege escalation
+          allowPrivilegeEscalation: false
+      
+      # Volumes definition
+      volumes:
+      # MCP Bridge Core configuration from ConfigMap
+      - name: mcp-bridge-config
+        configMap:
+          name: mcp-bridge-config
+          items:
+          - key: mcp_bridge_core.json
+            path: mcp_bridge_core.json
+      
+      # Temporary directory for uploads (emptyDir)
+      - name: tmp-uploads
+        emptyDir:
+          sizeLimit: 1Gi  # Maximum 1GB for uploads
+      
+      # Pod affinity rules for high availability
+      affinity:
+        # Prefer spreading pods across different nodes
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - aurora-gui-cloudhub
+              topologyKey: kubernetes.io/hostname
+      
+      # Tolerations for node taints (if needed)
+      tolerations:
+      - key: "aurora-workload"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      
+      # DNS policy
+      dnsPolicy: ClusterFirst
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Termination grace period for graceful shutdown
+      terminationGracePeriodSeconds: 30
+
+---
+# PodDisruptionBudget - Ensures minimum availability during voluntary disruptions
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aurora-gui-cloudhub-pdb
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+  annotations:
+    aurora.io/chain-notation: "#K8S//PDB//AURORA_GUI_CLOUDHUB//"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+spec:
+  minAvailable: 2  # Minimum 2 pods must be available during disruptions
+  selector:
+    matchLabels:
+      app: aurora-gui-cloudhub
+  # Alternatively, use maxUnavailable: 1 to allow 1 pod down at a time

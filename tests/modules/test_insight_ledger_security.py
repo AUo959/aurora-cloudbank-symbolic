@@ -10,9 +10,6 @@ Anchor: T1-SEC-LEDGER-001
 """
 
 import pytest
-from pathlib import Path
-import tempfile
-import os
 
 from modules.insight_ledger.ledger_core import InsightLedger, validate_safe_path
 from modules.insight_ledger.schemas import InsightRecord, InsightType
@@ -203,23 +200,10 @@ class TestExportLedgerSecurity:
 @pytest.mark.api
 class TestExportAPISecurityIntegration:
     """Integration tests for export API endpoint security."""
-
-    def test_api_export_rejects_absolute_paths(self):
-        """API export endpoint should reject absolute paths."""
-        # This would require FastAPI test client setup
-        # For now, testing at the ledger level is sufficient
-        # since API delegates to ledger.export_ledger()
-        pass
-
-    def test_api_export_rejects_traversal_attempts(self):
-        """API export endpoint should reject path traversal."""
-        # This would require FastAPI test client setup
-        pass
-
-    def test_api_export_returns_400_for_invalid_paths(self):
-        """API should return 400 Bad Request for invalid paths."""
-        # This would require FastAPI test client setup
-        pass
+    
+    # These tests require FastAPI test client setup
+    # The validation logic is fully tested at the ledger level
+    # API delegates to ledger.export_ledger() which is tested above
 
 
 if __name__ == "__main__":

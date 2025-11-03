@@ -1,10 +1,16 @@
 """
-FastAPI Router for Insight Ledger
+Insight Ledger API
 
-REST API endpoints for recording insights and verifying ledger integrity.
+FastAPI endpoints for the immutable insight ledger.
 
-Anchor: T1-TIL-002
+Anchor: T1-TIL-API-001
 """
+
+from datetime import datetime
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
 from datetime import datetime
 from pathlib import Path

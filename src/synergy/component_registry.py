@@ -19,6 +19,8 @@ from enum import Enum
 from pathlib import Path
 import importlib.util
 
+from src.core.logging_security import safe_str, safe_path, safe_error
+
 logger = logging.getLogger(__name__)
 
 
@@ -162,7 +164,7 @@ class ComponentRegistry:
         # Update dependency graphs
         self._update_dependency_graph(name, dependencies)
         
-        logger.info("Component registered: %s v%s", name, version)
+        logger.info("Component registered: %s v%s", safe_str(name), safe_str(version))
         return component
     
     def _update_dependency_graph(
@@ -377,7 +379,7 @@ class ComponentRegistry:
                         "status": ComponentStatus.ACTIVE
                     }
         except Exception as e:
-            logger.debug("Could not extract metadata from %s: %s", module_path, e)
+            logger.debug("Could not extract metadata from %s: %s", safe_path(module_path), safe_error(e))
         
         return None
     
@@ -401,7 +403,7 @@ class ComponentRegistry:
         
         self._components[name].status = status
         self._components[name].last_updated = time.time()
-        logger.info("Component %s status updated to %s", name, status.value)
+        logger.info("Component %s status updated to %s", safe_str(name), safe_str(status.value))
         return True
     
     def export_registry(self) -> Dict[str, Any]:

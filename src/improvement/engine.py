@@ -18,6 +18,8 @@ from typing import List, Dict, Optional, Any, Set
 from enum import Enum
 from pathlib import Path
 
+from src.core.logging_security import safe_str, safe_path, safe_error
+
 logger = logging.getLogger(__name__)
 
 
@@ -313,7 +315,7 @@ class CodeImprovementEngine:
     def register_pattern(self, pattern: ImprovementPattern):
         """Register custom improvement pattern"""
         self._patterns.append(pattern)
-        logger.info("Registered improvement pattern: %s", pattern.name)
+        logger.info("Registered improvement pattern: %s", safe_str(pattern.name))
     
     def analyze_file(self, file_path: Path) -> List[ImprovementSuggestion]:
         """
@@ -328,7 +330,7 @@ class CodeImprovementEngine:
         try:
             content = file_path.read_text()
         except Exception as e:
-            logger.error("Failed to read file %s: %s", file_path, e)
+            logger.error("Failed to read file %s: %s", safe_path(file_path), safe_error(e))
             return []
         
         suggestions = []
@@ -337,7 +339,7 @@ class CodeImprovementEngine:
                 pattern_suggestions = pattern.detect(str(file_path), content)
                 suggestions.extend(pattern_suggestions)
             except Exception as e:
-                logger.error("Pattern %s failed on %s: %s", pattern.name, file_path, e)
+                logger.error("Pattern %s failed on %s: %s", safe_str(pattern.name), safe_path(file_path), safe_error(e))
         
         return suggestions
     
@@ -368,7 +370,7 @@ class CodeImprovementEngine:
                     if suggestions:
                         results[str(file_path)] = suggestions
         
-        logger.info("Analyzed directory %s: found improvements in %d files", directory, len(results))
+        logger.info("Analyzed directory %s: found improvements in %d files", safe_path(directory), len(results))
         return results
     
     def filter_suggestions(

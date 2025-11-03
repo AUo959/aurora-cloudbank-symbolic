@@ -172,7 +172,7 @@ echo "✅ Post-commit validation update complete"
             f.write(hook_content)
 
         # Make executable
-        os.chmod(post_commit_hook, 0o755)
+        os.chmod(post_commit_hook, 0o700)
         print("✅ Created post-commit hook for validation updates")
 
     def cleanup_old_reports(self):

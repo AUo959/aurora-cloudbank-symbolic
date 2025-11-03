@@ -12,9 +12,11 @@ Demonstrates key features:
 import asyncio
 import sys
 from datetime import datetime
+from pathlib import Path
 
-# Add src to path for imports
-sys.path.insert(0, "/home/runner/work/aurora-cloudbank-symbolic/aurora-cloudbank-symbolic")
+# Add src to path for imports - use relative path detection
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 from src.coordination.event_models import (
     Event,

@@ -361,6 +361,9 @@ class EventCoordinationRegistry:
         Returns:
             ConflictReport if conflict detected, None otherwise
         """
+        conflict_event_to_publish = None
+        conflict = None
+
         async with self._lock:
             # Check if resource is locked by another agent
             if resource_id in self._resource_locks:
@@ -382,19 +385,20 @@ class EventCoordinationRegistry:
 
                     logger.warning(f"Conflict detected: {conflict.description}")
 
-                    # Publish conflict event
-                    conflict_event = Event(
+                    # Prepare conflict event for publishing outside lock
+                    conflict_event_to_publish = Event(
                         event_type=EventType.CONFLICT_DETECTED,
                         priority=EventPriority.HIGH,
                         source_agent_id="coordination_registry",
                         payload=conflict.model_dump(),
                         context_tag="COORD_CONFLICT",
                     )
-                    await self.publish_event(conflict_event)
 
-                    return conflict
+        # Publish conflict event outside lock to prevent deadlock
+        if conflict_event_to_publish:
+            await self.publish_event(conflict_event_to_publish)
 
-            return None
+        return conflict
 
     async def acquire_lock(self, agent_id: str, resource_id: str, ttl_seconds: int = 300) -> Dict[str, Any]:
         """
@@ -408,6 +412,8 @@ class EventCoordinationRegistry:
         Returns:
             Lock acquisition result
         """
+        lock_event_to_publish = None
+
         async with self._lock:
             if resource_id in self._resource_locks:
                 current_holder = self._resource_locks[resource_id]
@@ -415,22 +421,25 @@ class EventCoordinationRegistry:
 
             self._resource_locks[resource_id] = agent_id
 
-            # Publish lock event
-            lock_event = Event(
+            # Prepare lock event for publishing outside lock
+            lock_event_to_publish = Event(
                 event_type=EventType.LOCK_ACQUIRED,
                 priority=EventPriority.HIGH,
                 source_agent_id=agent_id,
                 payload={"resource_id": resource_id, "ttl_seconds": ttl_seconds},
                 context_tag="COORD_LOCK",
             )
-            await self.publish_event(lock_event)
-
-            # Schedule lock release
-            asyncio.create_task(self._auto_release_lock(resource_id, agent_id, ttl_seconds))
 
             logger.info(f"Lock acquired by {agent_id} on {resource_id}")
 
-            return {"success": True, "resource_id": resource_id, "expires_in": ttl_seconds}
+        # Publish lock event outside lock to prevent deadlock
+        if lock_event_to_publish:
+            await self.publish_event(lock_event_to_publish)
+
+        # Schedule lock release
+        asyncio.create_task(self._auto_release_lock(resource_id, agent_id, ttl_seconds))
+
+        return {"success": True, "resource_id": resource_id, "expires_in": ttl_seconds}
 
     async def release_lock(self, agent_id: str, resource_id: str) -> Dict[str, Any]:
         """
@@ -443,6 +452,8 @@ class EventCoordinationRegistry:
         Returns:
             Lock release result
         """
+        unlock_event_to_publish = None
+
         async with self._lock:
             if resource_id not in self._resource_locks:
                 return {"success": False, "error": "lock_not_found"}
@@ -452,19 +463,22 @@ class EventCoordinationRegistry:
 
             del self._resource_locks[resource_id]
 
-            # Publish unlock event
-            unlock_event = Event(
+            # Prepare unlock event for publishing outside lock
+            unlock_event_to_publish = Event(
                 event_type=EventType.LOCK_RELEASED,
                 priority=EventPriority.HIGH,
                 source_agent_id=agent_id,
                 payload={"resource_id": resource_id},
                 context_tag="COORD_LOCK",
             )
-            await self.publish_event(unlock_event)
 
             logger.info(f"Lock released by {agent_id} on {resource_id}")
 
-            return {"success": True, "resource_id": resource_id}
+        # Publish unlock event outside lock to prevent deadlock
+        if unlock_event_to_publish:
+            await self.publish_event(unlock_event_to_publish)
+
+        return {"success": True, "resource_id": resource_id}
 
     async def _auto_release_lock(self, resource_id: str, agent_id: str, ttl_seconds: int):
         """Automatically release lock after TTL"""
@@ -486,6 +500,8 @@ class EventCoordinationRegistry:
         Returns:
             Resolution result
         """
+        resolution_event_to_publish = None
+
         async with self._lock:
             if conflict_id not in self._conflicts:
                 return {"success": False, "error": "conflict_not_found"}
@@ -498,19 +514,22 @@ class EventCoordinationRegistry:
 
             self._metrics["conflicts_resolved"] += 1
 
-            # Publish resolution event
-            resolution_event = Event(
+            # Prepare resolution event for publishing outside lock
+            resolution_event_to_publish = Event(
                 event_type=EventType.CONFLICT_RESOLVED,
                 priority=EventPriority.HIGH,
                 source_agent_id=resolved_by,
                 payload=conflict.model_dump(),
                 context_tag="COORD_CONFLICT",
             )
-            await self.publish_event(resolution_event)
 
             logger.info(f"Conflict {conflict_id} resolved using strategy: {strategy}")
 
-            return {"success": True, "conflict_id": conflict_id, "strategy": strategy}
+        # Publish resolution event outside lock to prevent deadlock
+        if resolution_event_to_publish:
+            await self.publish_event(resolution_event_to_publish)
+
+        return {"success": True, "conflict_id": conflict_id, "strategy": strategy}
 
     async def create_workflow(self, workflow: WorkflowDefinition) -> Dict[str, Any]:
         """
@@ -522,22 +541,27 @@ class EventCoordinationRegistry:
         Returns:
             Workflow creation result
         """
+        workflow_event_to_publish = None
+
         async with self._lock:
             self._workflows[workflow.workflow_id] = workflow
 
-            # Publish workflow creation event
-            workflow_event = Event(
+            # Prepare workflow event for publishing outside lock
+            workflow_event_to_publish = Event(
                 event_type=EventType.WORKFLOW_STARTED,
                 priority=EventPriority.NORMAL,
                 source_agent_id=workflow.created_by,
                 payload=workflow.model_dump(),
                 context_tag="COORD_WORKFLOW",
             )
-            await self.publish_event(workflow_event)
 
             logger.info(f"Workflow {workflow.name} created by {workflow.created_by}")
 
-            return {"success": True, "workflow_id": workflow.workflow_id}
+        # Publish workflow event outside lock to prevent deadlock
+        if workflow_event_to_publish:
+            await self.publish_event(workflow_event_to_publish)
+
+        return {"success": True, "workflow_id": workflow.workflow_id}
 
     async def get_workflow_status(self, workflow_id: str) -> Optional[Dict[str, Any]]:
         """Get workflow status"""

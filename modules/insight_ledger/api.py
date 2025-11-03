@@ -1,10 +1,16 @@
 """
-FastAPI Router for Insight Ledger
+Insight Ledger API
 
-REST API endpoints for recording insights and verifying ledger integrity.
+FastAPI endpoints for the immutable insight ledger.
 
-Anchor: T1-TIL-002
+Anchor: T1-TIL-API-001
 """
+
+from datetime import datetime
+from typing import List, Optional
+
+from fastapi import APIRouter, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
 from datetime import datetime
 from pathlib import Path
@@ -253,23 +259,29 @@ async def export_ledger(
     - External analysis
     - Compliance reporting
     - Data migration
+    
+    Note:
+    - output_path must be relative to the safe export directory
+    - Absolute paths and parent directory references (..) are rejected
+    - Path traversal attempts will result in 400 Bad Request
     """
     try:
         ledger = get_ledger()
 
-        # Validate output path
-        output_file = Path(output_path)
-        if output_file.exists() and not output_file.is_file():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Output path is not a file"
-            )
-
+        # Path validation is now handled by ledger.export_ledger()
+        # which uses validate_safe_path() to prevent path traversal
         entries_exported = ledger.export_ledger(output_path, include_genesis=include_genesis)
 
         return ExportLedgerResponse(
             success=True, export_path=output_path, entries_exported=entries_exported
         )
 
+    except ValueError as e:
+        # Path validation errors from export_ledger
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid export path: {str(e)}"
+        )
     except HTTPException:
         raise
     except Exception as e:

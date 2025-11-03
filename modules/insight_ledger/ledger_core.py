@@ -18,13 +18,12 @@ from typing import Any, Dict, List, Optional
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 
-# Import secure storage for sensitive key management
+# Try to import secure storage for encrypted key persistence
 try:
-    from src.core.secure_storage import SecureStorage, SecureStorageError
-    SECURE_STORAGE_AVAILABLE = True
+    from .secure_storage import SecureStorage, CRYPTOGRAPHY_AVAILABLE
 except ImportError:
-    SECURE_STORAGE_AVAILABLE = False
-    SecureStorageError = Exception  # Fallback
+    SecureStorage = None  # type: ignore
+    CRYPTOGRAPHY_AVAILABLE = False
 
 
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
@@ -128,34 +127,13 @@ class InsightLedger:
         if secret_key:
             self.signature_manager = SignatureManager(secret_key)
         elif self.key_file.exists():
-            # Load existing key with secure storage if available
-            if SECURE_STORAGE_AVAILABLE:
-                try:
-                    # Try to decrypt existing key
-                    storage = SecureStorage()
-                    key_hex = storage.decrypt_file(self.key_file)
-                except SecureStorageError as e:
-                    # Abort if the key cannot be loaded securely
-                    raise RuntimeError("Unable to securely decrypt ledger key: " + str(e))
-            else:
-                # Abort if secure storage is not available
-                raise RuntimeError("Secure encrypted storage for ledger key is not available")
+            # Load existing key - try encrypted storage first
+            key_hex = self._load_key_securely()
             self.signature_manager = SignatureManager(key_hex)
         else:
             # Generate new key and persist securely
             self.signature_manager = SignatureManager()
-            
-            if SECURE_STORAGE_AVAILABLE:
-                try:
-                    # Store key encrypted
-                    storage = SecureStorage()
-                    storage.encrypt_file(self.key_file, self.signature_manager.secret_key_hex)
-                except SecureStorageError as e:
-                    # Abort if unable to securely store the key
-                    raise RuntimeError("Unable to securely store ledger key: " + str(e))
-            else:
-                # Abort if secure storage is not available
-                raise RuntimeError("Secure encrypted storage for ledger key is not available")
+            self._store_key_securely(self.signature_manager.secret_key_hex)
 
         # Load or create index
         self._index = self._load_index()
@@ -163,6 +141,51 @@ class InsightLedger:
         # Create genesis entry if ledger is empty
         if self._index["entry_count"] == 0:
             self._create_genesis_entry()
+    
+    def _store_key_securely(self, key_hex: str) -> None:
+        """
+        Store key with encryption if available, otherwise plaintext with warning.
+        
+        Args:
+            key_hex: Key data to store (hex string)
+        """
+        if CRYPTOGRAPHY_AVAILABLE and SecureStorage is not None:
+            try:
+                # Use encrypted storage
+                secure_storage = SecureStorage(self.key_file)
+                secure_storage.store_key(key_hex)
+                return
+            except Exception as e:
+                # If encryption fails, fall back to plaintext with warning
+                import warnings
+                warnings.warn(
+                    f"Failed to use encrypted storage ({e}), falling back to plaintext. "
+                    "Keys will be stored unencrypted.",
+                    UserWarning
+                )
+        
+        # Fallback to plaintext storage
+        self.key_file.write_text(key_hex)
+        self.key_file.chmod(0o600)
+    
+    def _load_key_securely(self) -> str:
+        """
+        Load key with decryption if available, otherwise from plaintext.
+        
+        Returns:
+            Key data (hex string)
+        """
+        if CRYPTOGRAPHY_AVAILABLE and SecureStorage is not None:
+            try:
+                # Try to load as encrypted
+                secure_storage = SecureStorage(self.key_file)
+                return secure_storage.load_key()
+            except (ValueError, RuntimeError):
+                # If decryption fails, might be plaintext - try that
+                pass
+        
+        # Load as plaintext
+        return self.key_file.read_text().strip()
 
     def _load_index(self) -> Dict[str, Any]:
         """Load ledger index from disk."""

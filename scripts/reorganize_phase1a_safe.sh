@@ -10,6 +10,10 @@
 #
 # Chain Notation: #001//010// (10-step doc cleanup only)
 
+# Temporarily disable set -e to see all errors
+# set -e
+# set -o pipefail
+
 set -euo pipefail
 
 # Configuration
@@ -56,8 +60,22 @@ execute_cmd() {
     local cmd="$1"
     if [[ "$DRY_RUN" == true ]]; then
         echo "  [DRY-RUN] $cmd"
+        return 0
     else
-        eval "$cmd"
+        # Run command and capture both stdout and stderr
+        local output
+        local exit_code
+        output=$(eval "$cmd" 2>&1) || exit_code=$?
+        
+        if [[ -n "$output" ]]; then
+            echo "$output"
+        fi
+        
+        if [[ ${exit_code:-0} -ne 0 ]]; then
+            log_error "Command failed (exit $exit_code): $cmd"
+            return $exit_code
+        fi
+        return 0
     fi
 }
 
@@ -152,18 +170,14 @@ step_004_baseline_tests() {
 
 # Step #005// - Create docs structure
 step_005_create_docs_structure() {
-    log_info "Step #005// - Creating Documentation Structure"
+    log_info "Step #005// - Verifying Documentation Structure"
     
-    # Create docs hierarchy
-    execute_cmd "mkdir -p docs/guides"
-    execute_cmd "mkdir -p docs/architecture"
-    execute_cmd "mkdir -p docs/reports/security"
-    execute_cmd "mkdir -p docs/reports/performance"
-    execute_cmd "mkdir -p docs/reports/maintenance"
-    execute_cmd "mkdir -p docs/api"
-    execute_cmd "mkdir -p docs/development"
+    # Use existing docs/ hierarchy - just ensure key subdirs exist
+    execute_cmd "mkdir -p docs/operational/reports"
+    execute_cmd "mkdir -p docs/operational/guides"
+    execute_cmd "mkdir -p docs/operational/architecture"
     
-    log_success "Documentation structure created"
+    log_success "Documentation structure verified"
 }
 
 # Step #006// - Move reports (safest category)
@@ -176,17 +190,27 @@ step_006_move_reports() {
     # Move various report types
     local moved_count=0
     
+    # Use nullglob to handle no matches gracefully
+    shopt -s nullglob
+    
     for pattern in "*_REPORT*.md" "*_AUDIT*.md" "*_ANALYSIS*.md" "*_COMPLETE*.md" "*_SUCCESS*.md"; do
         for file in $pattern; do
-            if [[ -f "$file" ]]; then
-                # Skip if already in docs/
-                if [[ "$file" != docs/* ]]; then
-                    execute_cmd "git mv '$file' docs/reports/"
-                    ((moved_count++))
+            if [[ -f "$file" && "$file" != docs/* ]]; then
+                # Skip if target already exists
+                if [[ ! -f "docs/operational/reports/$file" ]]; then
+                    if execute_cmd "git mv '$file' docs/operational/reports/"; then
+                        ((moved_count++))
+                    else
+                        log_warning "Failed to move $file, skipping..."
+                    fi
+                else
+                    log_warning "Skipping $file (already exists in target)"
                 fi
             fi
         done
     done
+    
+    shopt -u nullglob
     
     log_success "Reports moved: $moved_count files"
 }
@@ -199,16 +223,27 @@ step_007_move_guides() {
     
     local moved_count=0
     
+    # Use nullglob to handle no matches gracefully
+    shopt -s nullglob
+    
     for pattern in "*_GUIDE*.md" "*_WORKFLOW*.md" "OPTIMAL*.md"; do
         for file in $pattern; do
-            if [[ -f "$file" ]]; then
-                if [[ "$file" != docs/* ]]; then
-                    execute_cmd "git mv '$file' docs/guides/"
-                    ((moved_count++))
+            if [[ -f "$file" && "$file" != docs/* ]]; then
+                # Skip if target already exists
+                if [[ ! -f "docs/operational/guides/$file" ]]; then
+                    if execute_cmd "git mv '$file' docs/operational/guides/"; then
+                        ((moved_count++))
+                    else
+                        log_warning "Failed to move $file, skipping..."
+                    fi
+                else
+                    log_warning "Skipping $file (already exists in target)"
                 fi
             fi
         done
     done
+    
+    shopt -u nullglob
     
     log_success "Guides moved: $moved_count files"
 }
@@ -221,16 +256,27 @@ step_008_move_architecture() {
     
     local moved_count=0
     
+    # Use nullglob to handle no matches gracefully
+    shopt -s nullglob
+    
     for pattern in "*INTEGRATION*.md" "*ARCHITECTURE*.md" "AUMEMMANAGER*.md" "*DIAGRAMS*.md"; do
         for file in $pattern; do
-            if [[ -f "$file" ]]; then
-                if [[ "$file" != docs/* ]]; then
-                    execute_cmd "git mv '$file' docs/architecture/"
-                    ((moved_count++))
+            if [[ -f "$file" && "$file" != docs/* ]]; then
+                # Skip if target already exists
+                if [[ ! -f "docs/operational/architecture/$file" ]]; then
+                    if execute_cmd "git mv '$file' docs/operational/architecture/"; then
+                        ((moved_count++))
+                    else
+                        log_warning "Failed to move $file, skipping..."
+                    fi
+                else
+                    log_warning "Skipping $file (already exists in target)"
                 fi
             fi
         done
     done
+    
+    shopt -u nullglob
     
     log_success "Architecture docs moved: $moved_count files"
 }

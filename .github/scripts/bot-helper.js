@@ -173,8 +173,7 @@ class AuroraBot {
     const {
       identifier = null,
       updateExisting = this.config.spam_prevention?.consolidation?.update_existing ?? true,
-      onlyOnIssues = false,
-      minSeverity = null
+      onlyOnIssues = false
     } = options;
 
     // Check if we should skip this comment

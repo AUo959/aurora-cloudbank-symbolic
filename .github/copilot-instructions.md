@@ -1,5 +1,17 @@
 # Aurora CloudBank Symbolic – Copilot Instructions
 
+## ⚡ Quick Start for Agents
+
+**🎯 CRITICAL: Read this first!**
+
+Before working on ANY Aurora task, you MUST reference:
+- **[Command Reference](.github/COMMAND_REFERENCE.md)** - Custom command syntax (`#example//`, T1/SRB anchors, DLP protocol)
+- This includes chain notation (`#001//999//`), temporal anchors (`T1:`), DLP tags, and memory seals
+
+**All operations must follow Aurora's symbolic command patterns. See COMMAND_REFERENCE.md immediately.**
+
+---
+
 ## Project Overview
 Aurora CloudBank Symbolic is an advanced quantum-symbolic computing platform that combines Vector Symbolic Architecture (VSA), quantum memory management, cultural intelligence, and AI agent tools. The system features FastAPI endpoints, ChatGPT Agent Mode integration, Claude Sonnet 4 support, and the AuMemManager quantum memory system.
 
@@ -16,6 +28,7 @@ This repository models a quantum-symbolic governance stack where every feature m
 - **T1/SRB anchors** - Temporal and Symbolic Reference Base anchors for state tracking
 - **DLP tags** - Data Lineage Protocol tags for traceability
 - **Memory seals** - Quantum memory integrity markers
+- **Chain notation** - Symbolic execution sequences (`#001//999//`) - **[See Command Reference](.github/COMMAND_REFERENCE.md)**
 ## Repository Structure
 
 ### Key Entry Points
@@ -71,6 +84,50 @@ This repository models a quantum-symbolic governance stack where every feature m
 - **`make maintenance-scan`** - Run SSMT v3.0 automated maintenance pipeline
 - **`make maintenance-status`** - Inspect maintenance schedules
 - **`make security`** - Run comprehensive security scans (safety, bandit)
+
+## Aurora Command System 🎯
+
+**CRITICAL:** All agents MUST use Aurora's symbolic command notation. See **[COMMAND_REFERENCE.md](.github/COMMAND_REFERENCE.md)** for complete reference.
+
+### Essential Commands
+
+| Command | Usage | Example |
+|---------|-------|---------|
+| `#NNN//MMM//` | Chain notation | `#001//999//` - Execute chain from step 1 to 999 |
+| `T1:STATE` | Temporal anchor | `T1:42` - Current temporal state is 42 |
+| `SRB:RES` | Spatial-relational boundary | `SRB:1337` - Boundary resolution value |
+| `DLP:TAG` | Data lineage tag | `DLP:export_001` - Export with lineage tracking |
+| `@seal:HASH` | Memory seal | `@seal:abc123` - Memory checkpoint reference |
+
+### Quick Command Examples
+
+**Chain Execution:**
+```python
+from src.aurora.core.symbolic_engine import SymbolicEngine
+engine = SymbolicEngine()
+results = engine.execute_chain(1, 999)  # Chain: #001//999//
+```
+
+**DLP Export:**
+```python
+from src.core.native_dlp_export import NativeDLPTracker
+tracker = NativeDLPTracker()
+export = tracker.create_export(
+    data=results,
+    context_tag="agent_operation_001",  # DLP:agent_operation_001
+    symbolic_validation=True
+)
+```
+
+**Memory Seal:**
+```python
+pre_seal = memory_manager.seal_current_state()  # @seal:abc123...
+operation()
+post_seal = memory_manager.seal_current_state()  # @seal:def456...
+```
+
+**→ See [COMMAND_REFERENCE.md](.github/COMMAND_REFERENCE.md) for complete patterns, agent integration, and validation checklists.**
+
 ## Coding Standards and Patterns
 
 ### Code Style

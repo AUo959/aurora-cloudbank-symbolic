@@ -18,6 +18,14 @@ from typing import Any, Dict, List, Optional
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
 
+# Import secure storage for sensitive key management
+try:
+    from src.core.secure_storage import SecureStorage, SecureStorageError
+    SECURE_STORAGE_AVAILABLE = True
+except ImportError:
+    SECURE_STORAGE_AVAILABLE = False
+    SecureStorageError = Exception  # Fallback
+
 
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
     """
@@ -116,18 +124,40 @@ class InsightLedger:
         self.auto_checkpoint = auto_checkpoint
         self._lock = Lock()
 
-        # Initialize or load signature manager
+        # Initialize or load signature manager with secure storage
         if secret_key:
             self.signature_manager = SignatureManager(secret_key)
         elif self.key_file.exists():
-            # Load existing key
-            key_hex = self.key_file.read_text().strip()
+            # Load existing key with secure storage if available
+            if SECURE_STORAGE_AVAILABLE:
+                try:
+                    # Try to decrypt existing key
+                    storage = SecureStorage()
+                    key_hex = storage.decrypt_file(self.key_file)
+                except SecureStorageError:
+                    # Fallback: key might be stored in plain text (legacy)
+                    key_hex = self.key_file.read_text().strip()
+            else:
+                # Fallback: read plain text key
+                key_hex = self.key_file.read_text().strip()
             self.signature_manager = SignatureManager(key_hex)
         else:
-            # Generate new key and persist
+            # Generate new key and persist securely
             self.signature_manager = SignatureManager()
-            self.key_file.write_text(self.signature_manager.secret_key_hex)
-            self.key_file.chmod(0o600)  # Restrict permissions
+            
+            if SECURE_STORAGE_AVAILABLE:
+                try:
+                    # Store key encrypted
+                    storage = SecureStorage()
+                    storage.encrypt_file(self.key_file, self.signature_manager.secret_key_hex)
+                except SecureStorageError:
+                    # Fallback to plain text with warning
+                    self.key_file.write_text(self.signature_manager.secret_key_hex)
+                    self.key_file.chmod(0o600)  # Restrict permissions
+            else:
+                # Fallback to plain text with restricted permissions
+                self.key_file.write_text(self.signature_manager.secret_key_hex)
+                self.key_file.chmod(0o600)  # Restrict permissions
 
         # Load or create index
         self._index = self._load_index()

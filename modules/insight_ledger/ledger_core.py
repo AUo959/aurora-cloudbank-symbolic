@@ -150,7 +150,7 @@ class InsightLedger:
                     # Store key encrypted
                     storage = SecureStorage()
                     storage.encrypt_file(self.key_file, self.signature_manager.secret_key_hex)
-                except SecureStorageError:
+                except SecureStorageError as e:
                     # Abort if unable to securely store the key
                     raise RuntimeError("Unable to securely store ledger key: " + str(e))
             else:

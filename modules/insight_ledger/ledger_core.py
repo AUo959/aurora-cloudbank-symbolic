@@ -134,12 +134,12 @@ class InsightLedger:
                     # Try to decrypt existing key
                     storage = SecureStorage()
                     key_hex = storage.decrypt_file(self.key_file)
-                except SecureStorageError:
-                    # Fallback: key might be stored in plain text (legacy)
-                    key_hex = self.key_file.read_text().strip()
+                except SecureStorageError as e:
+                    # Abort if the key cannot be loaded securely
+                    raise RuntimeError("Unable to securely decrypt ledger key: " + str(e))
             else:
-                # Fallback: read plain text key
-                key_hex = self.key_file.read_text().strip()
+                # Abort if secure storage is not available
+                raise RuntimeError("Secure encrypted storage for ledger key is not available")
             self.signature_manager = SignatureManager(key_hex)
         else:
             # Generate new key and persist securely
@@ -151,13 +151,11 @@ class InsightLedger:
                     storage = SecureStorage()
                     storage.encrypt_file(self.key_file, self.signature_manager.secret_key_hex)
                 except SecureStorageError:
-                    # Fallback to plain text with warning
-                    self.key_file.write_text(self.signature_manager.secret_key_hex)
-                    self.key_file.chmod(0o600)  # Restrict permissions
+                    # Abort if unable to securely store the key
+                    raise RuntimeError("Unable to securely store ledger key: " + str(e))
             else:
-                # Fallback to plain text with restricted permissions
-                self.key_file.write_text(self.signature_manager.secret_key_hex)
-                self.key_file.chmod(0o600)  # Restrict permissions
+                # Abort if secure storage is not available
+                raise RuntimeError("Secure encrypted storage for ledger key is not available")
 
         # Load or create index
         self._index = self._load_index()

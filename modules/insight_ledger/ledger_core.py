@@ -8,6 +8,7 @@ Anchor: T1-TIL-001
 """
 
 import json
+import os
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
@@ -16,6 +17,51 @@ from typing import Any, Dict, List, Optional
 
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
+
+
+def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
+    """
+    Validate user-provided path is safe and within bounds.
+    
+    Args:
+        user_path: User-provided path string
+        safe_root: Root directory that path must be within
+        allow_create: If False, path must already exist
+        
+    Returns:
+        Validated absolute Path within safe_root
+        
+    Raises:
+        ValueError: If path is unsafe (absolute, contains .., outside bounds)
+    """
+    requested = Path(user_path)
+    
+    # Reject absolute paths from user input
+    if requested.is_absolute():
+        raise ValueError(f"Absolute paths not allowed: {user_path}")
+    
+    # Reject parent directory references
+    if ".." in requested.parts:
+        raise ValueError(f"Parent directory references not allowed: {user_path}")
+    
+    # Resolve to absolute path within safe_root
+    safe_root = safe_root.resolve()
+    full_path = (safe_root / requested).resolve()
+    
+    # Verify resolved path is within safe_root
+    try:
+        common = os.path.commonpath([safe_root, full_path])
+        if common != str(safe_root):
+            raise ValueError(f"Path outside allowed directory: {user_path}")
+    except ValueError as e:
+        # commonpath raises ValueError if paths are on different drives (Windows)
+        raise ValueError(f"Path validation failed: {user_path}") from e
+    
+    # Check existence if required
+    if not allow_create and not full_path.exists():
+        raise ValueError(f"Path does not exist: {user_path}")
+    
+    return full_path
 
 
 class EntryType(str, Enum):
@@ -45,11 +91,22 @@ class InsightLedger:
         Initialize insight ledger.
 
         Args:
-            storage_path: Directory path for ledger storage
+            storage_path: Directory path for ledger storage (relative to safe root)
             secret_key: HMAC secret key (hex). If None, loads or generates new.
             auto_checkpoint: Create checkpoint entry every N entries (0=disabled)
+            
+        Raises:
+            ValueError: If storage_path is invalid or outside safe directory
         """
-        self.storage_path = Path(storage_path)
+        # Define safe root for ledger storage
+        # In production, this should come from config
+        ledger_root = Path.cwd() / "data" / "ledgers"
+        
+        # Validate storage path is safe
+        # Allow creation since ledgers may not exist yet
+        validated_path = validate_safe_path(storage_path, ledger_root, allow_create=True)
+        
+        self.storage_path = validated_path
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
         self.entries_file = self.storage_path / "entries.jsonl"
@@ -452,12 +509,22 @@ class InsightLedger:
         Export ledger to JSON file.
 
         Args:
-            output_path: Path for export file
+            output_path: Path for export file (relative to safe export root)
             include_genesis: Whether to include genesis entry
 
         Returns:
             Number of entries exported
+            
+        Raises:
+            ValueError: If output_path is invalid or outside safe directory
         """
+        # Define safe export root
+        # In production, this should come from config
+        export_root = Path.cwd() / "data" / "exports"
+        
+        # Validate output path is safe
+        validated_path = validate_safe_path(output_path, export_root, allow_create=True)
+        
         entries = self.query_history(AuditQuery(limit=10000))
 
         if not include_genesis:
@@ -472,10 +539,9 @@ class InsightLedger:
             "entries": [entry.model_dump() for entry in entries],
         }
 
-        output_file = Path(output_path)
-        output_file.parent.mkdir(parents=True, exist_ok=True)
+        validated_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, "w") as f:
+        with open(validated_path, "w") as f:
             json.dump(export_data, f, indent=2, default=str)
 
         return len(entries)

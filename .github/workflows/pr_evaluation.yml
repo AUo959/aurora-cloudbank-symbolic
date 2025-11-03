@@ -43,47 +43,69 @@ jobs:
       with:
         script: |
           const fs = require('fs');
-          const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
+          const AuroraBot = require('./.github/scripts/bot-helper.js');
           
-          const status = results.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK';
-          const score = results.overall_score.toFixed(2);
-          
-          let comment = `## 🌟 Aurora PR Evaluation\n\n`;
-          comment += `**Overall Score:** ${score}/1.00\n`;
-          comment += `**Status:** ${status}\n\n`;
-          comment += `### Assessment\n${results.recommendation}\n\n`;
-          comment += `### Detailed Results\n\n`;
-          
-          for (const result of results.results) {
-            const icon = result.passed ? '✅' : '⚠️';
-            comment += `${icon} **${result.category}**: ${result.score.toFixed(2)}/1.00\n`;
-            
-            if (result.findings.length > 0) {
-              comment += `\nFindings:\n`;
-              for (const finding of result.findings) {
-                comment += `- ${finding}\n`;
-              }
-            }
-            
-            if (result.recommendations.length > 0) {
-              comment += `\nRecommendations:\n`;
-              for (const rec of result.recommendations) {
-                comment += `- ${rec}\n`;
-              }
-            }
-            
-            comment += `\n`;
+          if (!fs.existsSync('pr_results.json')) {
+            console.log('No evaluation results found, skipping comment');
+            return;
           }
           
-          comment += `\n---\n`;
-          comment += `*This evaluation checks technical quality AND conceptual alignment.*\n`;
-          comment += `*See [PR_EVALUATION_GUIDE.md](../blob/main/docs/PR_EVALUATION_GUIDE.md) for details.*\n`;
+          const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
+          const bot = new AuroraBot(github, context);
           
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
+          // Check if score is below threshold before commenting
+          const scoreThreshold = bot.config.pr_evaluation?.comments?.score_threshold || 0.7;
+          if (results.overall_score >= 0.9) {
+            console.log(`Score ${results.overall_score.toFixed(2)} is excellent, skipping verbose comment`);
+            
+            // Just add a minimal success comment
+            await bot.postComment(context.issue.number, 
+              `✅ **PR Evaluation: PASSED** (Score: ${results.overall_score.toFixed(2)}/1.00)`,
+              { 
+                identifier: 'pr-evaluation',
+                updateExisting: true 
+              }
+            );
+            return;
+          }
+          
+          // Build comment data
+          const status = results.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK';
+          const statusEmoji = results.passed ? '✅' : '⚠️';
+          
+          // Extract critical issues only
+          const criticalIssues = [];
+          const recommendations = [];
+          
+          for (const result of results.results) {
+            if (!result.passed && result.score < 0.7) {
+              if (result.findings.length > 0) {
+                criticalIssues.push(`**${result.category}**: ${result.findings[0]}`);
+              }
+              if (result.recommendations.length > 0) {
+                recommendations.push(...result.recommendations.slice(0, 2));
+              }
+            }
+          }
+          
+          const commentData = {
+            title: 'PR Evaluation',
+            status: `${status} (${results.overall_score.toFixed(2)}/1.00)`,
+            statusEmoji,
+            summary: results.recommendation,
+            criticalIssues,
+            recommendations: recommendations.slice(0, 5),
+            nextSteps: criticalIssues.length > 0 ? 
+              'Address the critical issues above before merging.' :
+              'Review recommendations to improve code quality.'
+          };
+          
+          const commentBody = bot.formatComment(commentData, 'actionable');
+          
+          await bot.postComment(context.issue.number, commentBody, {
+            identifier: 'pr-evaluation',
+            updateExisting: true,
+            onlyOnIssues: bot.config.pr_evaluation?.comments?.only_on_issues ?? true
           });
     
     - name: Check evaluation status

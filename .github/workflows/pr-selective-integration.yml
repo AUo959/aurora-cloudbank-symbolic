@@ -211,15 +211,18 @@ jobs:
           comment += `*This analysis combines technical evaluation with conceptual alignment assessment.*\n`;
           comment += `*Aurora isn't just a codebase - it's a living system with specific philosophical commitments.*\n`;
           
-          // Post comment
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+          // Write comment to file
+          const fs = require('fs');
+          fs.writeFileSync('/tmp/integration_analysis.md', comment);
           
-          console.log('✅ Posted integration analysis comment');
+          console.log('✅ Integration analysis prepared');
+    
+    - name: Post Integration Analysis Comment
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Use smart comment handler to update existing comment
+        bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "INTEGRATION_ANALYSIS" /tmp/integration_analysis.md
     
     - name: Add Strategy Label
       uses: actions/github-script@v7
@@ -276,20 +279,29 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          // Add auto-merge candidate comment
+          // Prepare auto-merge candidate comment
           const comment = `🎉 **This PR is eligible for auto-merge!**\n\n` +
             `With an excellent score of ${{ steps.evaluate.outputs.evaluation_score }} and direct merge strategy, ` +
             `this contribution can be integrated immediately once approved by a maintainer.\n\n` +
             `Maintainers: Review and approve to enable auto-merge.`;
           
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
-          
-          // Add ready-to-merge label
+          // Write to file
+          const fs = require('fs');
+          fs.writeFileSync('/tmp/auto_merge_eligible.md', comment);
+    
+    - name: Post Auto-Merge Eligibility Comment
+      if: steps.integration.outputs.integration_strategy == 'direct_merge' && steps.evaluate.outputs.evaluation_score >= 0.9
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Use smart comment handler
+        bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "AUTO_MERGE_ELIGIBLE" /tmp/auto_merge_eligible.md
+    
+    - name: Add Ready-to-Merge Label
+      if: steps.integration.outputs.integration_strategy == 'direct_merge' && steps.evaluate.outputs.evaluation_score >= 0.9
+      uses: actions/github-script@v7
+      with:
+        script: |
           try {
             await github.rest.issues.addLabels({
               issue_number: context.issue.number,

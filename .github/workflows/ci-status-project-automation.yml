@@ -121,71 +121,28 @@ jobs:
             core.setOutput('ci_status', ci_status);
             core.setOutput('failed_checks', failed_checks.join(', '));
 
-      - name: Update CI Status (Smart, Non-Spammy)
-        if: steps.get-info.outputs.item_number
-        uses: actions/github-script@v7
+      - name: Post CI Status Comment
+        if: steps.check_status.outputs.all_passed == 'true' || steps.check_status.outputs.has_failures == 'true'
         env:
-          ITEM_NUMBER: ${{ steps.get-info.outputs.item_number }}
-          ITEM_TYPE: ${{ steps.get-info.outputs.item_type }}
-          CI_PASSED: ${{ steps.check-ci.outputs.ci_passed }}
-          FAILED_CHECKS: ${{ steps.check-ci.outputs.failed_checks }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const AuroraBot = require('./.github/scripts/bot-helper.js');
-            const bot = new AuroraBot(github, context);
-            
-            const itemNumber = parseInt(process.env.ITEM_NUMBER);
-            const itemType = process.env.ITEM_TYPE;
-            const ciPassed = process.env.CI_PASSED === 'true';
-            const failedChecks = process.env.FAILED_CHECKS;
-            
-            // Only comment on state changes or critical failures
-            const shouldComment = bot.config.ci_status_automation?.comments?.only_on_state_change ?? true;
-            
-            if (ciPassed) {
-              // Only comment on success if configured to do so (usually after a failure)
-              console.log('✅ CI passed, updating labels silently');
-              
-              // Update labels silently
-              await bot.manageLabels(itemNumber, ['ci: passed'], 'ci', true);
-              
-              // Don't spam with success comments
-              return;
-            }
-            
-            // CI failed - check if we should comment
-            const failedList = failedChecks.split(', ');
-            const minThreshold = bot.config.ci_status_automation?.comments?.failure_threshold || 3;
-            
-            if (failedList.length < minThreshold && !failedList.some(c => c.includes('security') || c.includes('test'))) {
-              console.log(`Only ${failedList.length} non-critical checks failed, updating labels silently`);
-              await bot.manageLabels(itemNumber, ['ci: failed'], 'ci', true);
-              return;
-            }
-            
-            // Critical failures - post actionable comment
-            const commentData = {
-              title: 'CI Status Update',
-              status: '⚠️ Checks Failed',
-              statusEmoji: '⚠️',
-              criticalIssues: failedList.slice(0, 5).map(check => `**${check}**`),
-              nextSteps: 'Review failed checks and push fixes. CI will re-run automatically.',
-              actionItems: [
-                'Check the Details link for each failed check',
-                'Fix the issues locally and test',
-                'Push your fixes to trigger a new CI run'
-              ]
-            };
-            
-            const commentBody = bot.formatComment(commentData, 'actionable');
-            
-            await bot.postComment(itemNumber, commentBody, {
-              identifier: 'ci-status',
-              updateExisting: true
-            });
-            
-            await bot.manageLabels(itemNumber, ['ci: failed'], 'ci', true);
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create comment body
+          cat > /tmp/ci_status_comment.md << 'EOF'
+          ## ✅ CI Status Update
+          
+          **Status:** ${{ steps.check_status.outputs.all_passed == 'true' && 'All Checks Passed' || 'Some Checks Failed' }}
+          **Last Updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          ### Check Summary
+          - Total Checks: ${{ steps.check_status.outputs.total_checks }}
+          - Passed: ${{ steps.check_status.outputs.passed_checks }}
+          - Failed: ${{ steps.check_status.outputs.failed_checks }}
+          
+          ${{ steps.check_status.outputs.all_passed == 'true' && '🎉 Project board updated to **In Review**' || '⚠️ Please review failed checks before merging' }}
+          EOF
+          
+          # Use smart comment handler to update existing comment
+          bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "CI_STATUS_UPDATE" /tmp/ci_status_comment.md
 
   add-ci-status-to-cards:
     name: Display CI Status on Project Cards

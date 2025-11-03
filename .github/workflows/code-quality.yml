@@ -143,13 +143,17 @@ jobs:
             comment += '---\n';
             comment += '*Analysis performed by Aurora Code Quality Analyzer (Issue #258)*\n';
             
-            // Post comment
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: comment
-            });
+            // Write comment to file
+            const fs = require('fs');
+            fs.writeFileSync('/tmp/code_quality_comment.md', comment);
+      
+      - name: Post Code Quality Comment
+        if: steps.analyze_quality.outputs.should_comment == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Use smart comment handler to update existing comment
+          bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "CODE_QUALITY_REPORT" /tmp/code_quality_comment.md
       
       - name: Check quality gate
         if: always()

@@ -63,7 +63,12 @@ class SecureHelpers:
     def sanitize_input(user_input: str, max_length: int = 1000) -> str:
         """
         Sanitize user input to prevent injection attacks.
-
+        
+        Uses robust defense-in-depth approach:
+        - HTML entity escaping
+        - Iterative pattern removal to prevent bypass
+        - Control character filtering
+        
         Args:
             user_input: Raw user input
             max_length: Maximum allowed length
@@ -74,18 +79,45 @@ class SecureHelpers:
         if not isinstance(user_input, str):
             return ""
 
-        # Truncate to max length
+        # Truncate to max length first
         sanitized = user_input[:max_length]
 
-        # Remove or escape dangerous characters
+        # HTML escape all special characters
+        # This is the primary defense - converts < > & " ' to entities
         sanitized = html.escape(sanitized)
 
-        # Remove potential script tags and javascript
-        sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
-
-        sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-
-        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        # Defense in depth: Remove dangerous patterns iteratively
+        # Repeat until no changes occur (prevents nested bypass like <scr<script>ipt>)
+        previous_length = len(sanitized) + 1
+        iterations = 0
+        max_iterations = 5  # Prevent infinite loops
+        
+        while len(sanitized) != previous_length and iterations < max_iterations:
+            previous_length = len(sanitized)
+            iterations += 1
+            
+            # Remove script tags (even if escaped or nested)
+            sanitized = re.sub(
+                r'&lt;script[^&]*&gt;.*?&lt;/script&gt;',
+                '',
+                sanitized,
+                flags=re.IGNORECASE | re.DOTALL
+            )
+            
+            # Remove any remaining script-like patterns
+            sanitized = re.sub(r'script', '', sanitized, flags=re.IGNORECASE)
+            
+            # Remove javascript protocol (even if escaped)
+            sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
+            
+            # Remove event handlers (even if escaped)
+            sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+            
+            # Remove data URIs which can contain scripts
+            sanitized = re.sub(r'data:', '', sanitized, flags=re.IGNORECASE)
+            
+            # Remove vbscript protocol
+            sanitized = re.sub(r'vbscript:', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -148,7 +180,8 @@ class SecureHelpers:
             code = compile(expression, '<string>', 'eval')
 
         # CRITICAL SECURITY: eval() usage detected - high code injection risk
-            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
+            # Execute in restricted context
+            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec B307 - secured eval with restricted context
 
         except Exception as e:
             raise ValueError("Safe evaluation failed: {e}")

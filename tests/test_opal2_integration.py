@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from pathlib import Path
-import sys
 """
 Opal2 System Integration Test
 Test all components working together
@@ -15,8 +13,8 @@ from modules.opal2.glyph_core import GlyphCore
 from modules.opal2.plugin_system import PluginSystem
 from modules.opal2.quantum_renderer import QuantumRenderer
 
-# Add the project root to the Python path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Add the project root to the Python path (Phase 2 reorganization compatible)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 async def test_opal2_integration():

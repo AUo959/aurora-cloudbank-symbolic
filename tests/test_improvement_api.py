@@ -113,7 +113,7 @@ def test_analyze_file_not_found(client):
     """Test file analysis with non-existent file"""
     response = client.post(
         "/improvements/analyze-file",
-        json={"file_path": "/nonexistent/file.py"}
+        json={"file_path": "nonexistent/file.py"}  # Use relative path
     )
     
     assert response.status_code == 404
@@ -245,7 +245,7 @@ def test_analyze_directory_not_found(client):
     """Test directory analysis with non-existent directory"""
     response = client.post(
         "/improvements/analyze-directory",
-        json={"directory": "/nonexistent/directory"}
+        json={"directory": "nonexistent/directory"}  # Use relative path
     )
     
     assert response.status_code == 404

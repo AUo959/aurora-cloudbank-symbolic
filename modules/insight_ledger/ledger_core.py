@@ -156,9 +156,16 @@ class InsightLedger:
         Args:
             key_hex: Key data to store (hex string)
         """
-        if CRYPTOGRAPHY_AVAILABLE and SecureStorage is not None:
+        # Check if we should use encryption (requires consistent password)
+        use_encryption = (
+            CRYPTOGRAPHY_AVAILABLE and 
+            SecureStorage is not None and
+            os.environ.get('LEDGER_KEY_PASSWORD') is not None
+        )
+        
+        if use_encryption:
             try:
-                # Use encrypted storage
+                # Use encrypted storage with provided password
                 secure_storage = SecureStorage(self.key_file)
                 secure_storage.store_key(key_hex)
                 return
@@ -182,17 +189,34 @@ class InsightLedger:
         Returns:
             Key data (hex string)
         """
-        if CRYPTOGRAPHY_AVAILABLE and SecureStorage is not None:
+        # Check if we should try encryption (requires consistent password)
+        use_encryption = (
+            CRYPTOGRAPHY_AVAILABLE and 
+            SecureStorage is not None and
+            os.environ.get('LEDGER_KEY_PASSWORD') is not None
+        )
+        
+        if use_encryption:
             try:
-                # Try to load as encrypted
+                # Try to load as encrypted with provided password
                 secure_storage = SecureStorage(self.key_file)
                 return secure_storage.load_key()
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError, Exception):
                 # If decryption fails, might be plaintext - try that
                 pass
         
         # Load as plaintext
-        return self.key_file.read_text().strip()
+        content = self.key_file.read_text().strip()
+        
+        # Validate it's actually hex before returning
+        if not all(c in "0123456789abcdef" for c in content.lower()):
+            raise ValueError(
+                f"Key file contains invalid hex data. "
+                f"This may be caused by encrypted storage without a consistent password. "
+                f"Delete {self.key_file} and restart to generate a new key."
+            )
+        
+        return content
 
     def _load_index(self) -> Dict[str, Any]:
         """Load ledger index from disk."""

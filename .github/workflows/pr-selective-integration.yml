@@ -38,10 +38,12 @@ jobs:
     
     - name: Run PR Evaluation
       id: evaluate
+      env:
+        PR_BRANCH: ${{ github.head_ref }}
       run: |
         echo "🌟 Running Aurora PR Evaluation..."
         python3 tools/pr_evaluator.py \
-          --branch ${{ github.head_ref }} \
+          --branch "$PR_BRANCH" \
           --output eval.json
         
         # Store exit code but continue
@@ -57,10 +59,12 @@ jobs:
     
     - name: Run Selective Integration Analysis
       id: integration
+      env:
+        PR_BRANCH: ${{ github.head_ref }}
       run: |
         echo "🔧 Analyzing integration strategy..."
         python3 tools/selective_integrator.py \
-          ${{ github.head_ref }} \
+          "$PR_BRANCH" \
           --evaluation eval.json \
           --output integration_plan.json
         

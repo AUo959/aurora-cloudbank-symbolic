@@ -7,8 +7,8 @@
  * Version: 1.0.0
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 
 class AuroraBot {
@@ -328,23 +328,23 @@ class AuroraBot {
 
     if (sections.includes('critical_issues') && data.criticalIssues?.length > 0) {
       comment += `### 🚨 Critical Issues\n`;
-      data.criticalIssues.forEach(issue => {
+      for (const issue of data.criticalIssues) {
         comment += `- ${issue}\n`;
-      });
+      }
       comment += '\n';
     }
 
     if (sections.includes('key_findings') && data.findings?.length > 0) {
       comment += `### Key Findings\n`;
       const topFindings = data.findings.slice(0, 5);
-      topFindings.forEach(finding => {
+      for (const finding of topFindings) {
         comment += `- ${finding}\n`;
-      });
+      }
       if (data.findings.length > 5) {
         comment += `\n<details>\n<summary>Show ${data.findings.length - 5} more findings</summary>\n\n`;
-        data.findings.slice(5).forEach(finding => {
+        for (const finding of data.findings.slice(5)) {
           comment += `- ${finding}\n`;
-        });
+        }
         comment += `</details>\n`;
       }
       comment += '\n';
@@ -352,17 +352,17 @@ class AuroraBot {
 
     if (sections.includes('recommendations') && data.recommendations?.length > 0) {
       comment += `### 💡 Recommendations\n`;
-      data.recommendations.forEach(rec => {
+      for (const rec of data.recommendations) {
         comment += `- ${rec}\n`;
-      });
+      }
       comment += '\n';
     }
 
     if (sections.includes('action_items') && data.actionItems?.length > 0) {
       comment += `### 🎯 Action Items\n`;
-      data.actionItems.forEach((item, index) => {
+      for (const [index, item] of data.actionItems.entries()) {
         comment += `${index + 1}. ${item}\n`;
-      });
+      }
       comment += '\n';
     }
 

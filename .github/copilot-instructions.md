@@ -5,7 +5,7 @@
 **🎯 CRITICAL: Read this first!**
 
 Before working on ANY Aurora task, you MUST reference:
-- **[Command Reference](.github/COMMAND_REFERENCE.md)** - Custom command syntax (`#example//`, T1/SRB anchors, DLP protocol)
+- **[Command Reference](COMMAND_REFERENCE.md)** - Custom command syntax (`#example//`, T1/SRB anchors, DLP protocol)
 - This includes chain notation (`#001//999//`), temporal anchors (`T1:`), DLP tags, and memory seals
 
 **All operations must follow Aurora's symbolic command patterns. See COMMAND_REFERENCE.md immediately.**
@@ -28,7 +28,7 @@ This repository models a quantum-symbolic governance stack where every feature m
 - **T1/SRB anchors** - Temporal and Symbolic Reference Base anchors for state tracking
 - **DLP tags** - Data Lineage Protocol tags for traceability
 - **Memory seals** - Quantum memory integrity markers
-- **Chain notation** - Symbolic execution sequences (`#001//999//`) - **[See Command Reference](.github/COMMAND_REFERENCE.md)**
+- **Chain notation** - Symbolic execution sequences (`#001//999//`) - **[See Command Reference](COMMAND_REFERENCE.md)**
 ## Repository Structure
 
 ### Key Entry Points
@@ -87,7 +87,7 @@ This repository models a quantum-symbolic governance stack where every feature m
 
 ## Aurora Command System 🎯
 
-**CRITICAL:** All agents MUST use Aurora's symbolic command notation. See **[COMMAND_REFERENCE.md](.github/COMMAND_REFERENCE.md)** for complete reference.
+**CRITICAL:** All agents MUST use Aurora's symbolic command notation. See **[COMMAND_REFERENCE.md](COMMAND_REFERENCE.md)** for complete reference.
 
 ### Essential Commands
 
@@ -126,7 +126,7 @@ operation()
 post_seal = memory_manager.seal_current_state()  # @seal:def456...
 ```
 
-**→ See [COMMAND_REFERENCE.md](.github/COMMAND_REFERENCE.md) for complete patterns, agent integration, and validation checklists.**
+**→ See [COMMAND_REFERENCE.md](COMMAND_REFERENCE.md) for complete patterns, agent integration, and validation checklists.**
 
 ## Coding Standards and Patterns
 

@@ -18,12 +18,12 @@ def validate_cryptography(file_path):
         
         # Cryptography vulnerability patterns
         patterns = [
-            # Weak encryption
-            (r'DES\(', 'Weak DES encryption algorithm'),
-            (r'MD5\(', 'Weak MD5 hash algorithm'),
-            (r'SHA1\(', 'Weak SHA1 hash algorithm'),
-            (r'rc4', 'Weak RC4 encryption'),
-            (r'random\.random\(\)', 'Weak random number generation'),
+            # Weak encryption (word boundaries to avoid false positives like .includes())
+            (r'\bDES\s*\(', 'Weak DES encryption algorithm'),
+            (r'\bMD5\s*\(', 'Weak MD5 hash algorithm'),
+            (r'\bSHA1\s*\(', 'Weak SHA1 hash algorithm'),
+            (r'\bRC4\b', 'Weak RC4 encryption'),
+            (r'\brandom\.random\s*\(\)', 'Weak random number generation'),
             
             # Hardcoded secrets
             (r'password\s*=\s*["\'][^"\']{3,}["\']', 'Hardcoded password'),
@@ -45,24 +45,31 @@ def validate_cryptography(file_path):
         ]
         
         for i, line in enumerate(lines, 1):
-            # Skip comments and safe contexts
+            # Skip comments, docstrings, and safe contexts
             stripped = line.strip()
-            if stripped.startswith('#') or stripped.startswith('//'):
+            if (stripped.startswith('#') or stripped.startswith('//') or
+                    stripped.startswith('"""') or stripped.startswith("'''")):
                 continue
-                
+
+            # Skip pattern definition lines (avoid meta-detection)
+            if '(r\'' in line or '(r"' in line or 'patterns = [' in line:
+                continue
+
             for pattern, desc in patterns:
                 if re.search(pattern, line, re.IGNORECASE):
-                    # Check for secure alternatives
-                    if not any(safe_pattern in line.lower() for safe_pattern in [
-                        'sha256', 'sha384', 'sha512', 'aes', 'rsa', 'secrets.', 
-                        'cryptography.', 'bcrypt', 'scrypt', 'pbkdf2'
-                    ]):
+                    # Check for secure alternatives or pattern definitions
+                    safe_patterns = [
+                        'sha256', 'sha384', 'sha512', 'aes', 'rsa', 'secrets.',
+                        'cryptography.', 'bcrypt', 'scrypt', 'pbkdf2', 'pattern', 'regex'
+                    ]
+                    if not any(safe in line.lower() for safe in safe_patterns):
                         violations.append(f"Line {i}: {desc} - {line.strip()}")
-        
+
         return violations
-    
+
     except Exception as e:
         return [f"Error reading {file_path}: {e}"]
+
 
 def main():
     """Main validator function"""
@@ -78,11 +85,13 @@ def main():
         print("🚨 CRYPTOGRAPHY VULNERABILITIES DETECTED:")
         for violation in violations:
             print(f"  ❌ {violation}")
-        print("\n💡 Fix: Use strong encryption (AES, SHA-256+), secure random generators (secrets module), proper key management")
+        print("\n💡 Fix: Use strong encryption (AES, SHA-256+), "
+              "secure random generators (secrets module), proper key management")
         sys.exit(1)
-    
+
     print("✅ Cryptography validation passed")
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

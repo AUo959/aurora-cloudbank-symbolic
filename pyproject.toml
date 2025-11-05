@@ -78,6 +78,11 @@ markers = [
     "cli: Command line interface tests",
     "resilience: Resilience Sentinel monitoring tests",
     "improvement: Code improvement engine tests",
+    "bridge_v2: Thread Transfer Bridge V2 tests",
+    "synergy: Synergy module integration tests",
+    "observability: Telemetry and observability tests",
+    "ai: AI and unified AI interface tests",
+    "benchmark: Performance benchmarking tests",
 
     # Environment markers
     "local: Tests for local development only",

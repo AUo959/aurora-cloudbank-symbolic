@@ -105,10 +105,14 @@ keyring/
 .gitwiz/memory.db
 .gitwiz/last_commit_status.json
 .gitwiz/scheduler.log
+.gitwiz/config.json
 
 # GitWiz temporary files
 .gitwiz/*.tmp
 .gitwiz/*.lock
+
+# Automation audit reports (local analysis)
+automation_audit_report.json
 
 # Node.js dependencies and artifacts
 node_modules/

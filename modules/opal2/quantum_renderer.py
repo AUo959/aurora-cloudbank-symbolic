@@ -14,8 +14,8 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 
-from ...symbolic.geometric_algebra import GeometricAlgebra
-from ...symbolic.quantum_symbolic_vector import QuantumSymbolicVector
+from modules.symbolic_core.geometric_algebra import GeometricAlgebra
+from modules.symbolic_core.quantum_symbolic_vector import QuantumSymbolicVector
 
 class RenderMode(Enum):
     """Rendering mode enumeration"""

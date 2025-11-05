@@ -127,8 +127,9 @@ class MonteCarloRiskSimulator:
     infrastructure, providing research-grade uncertainty quantification.
     """
     
-    def __init__(self, anchor_seed: str = "ORION_SIM"):
+    def __init__(self, anchor_seed: str = "ORION_SIM", name: Optional[str] = None):
         self.anchor_seed = anchor_seed
+        self.name = name or f"Simulator_{anchor_seed}"
         self.simulation_count = 0
         self.scenarios: Dict[str, RiskScenario] = {}
         

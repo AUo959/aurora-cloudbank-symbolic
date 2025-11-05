@@ -175,7 +175,7 @@ results = await memory.search_memories(
 
 ```bash
 # Start the FastAPI server
-python aurora_api.py
+python api/aurora_api.py
 
 # Use any HTTP client
 curl -X POST http://localhost:8000/quantum/simulate \
@@ -302,7 +302,7 @@ make setup
 make test
 
 # Start the API server
-python aurora_api.py
+python api/aurora_api.py
 
 # Visit http://localhost:8000/docs for interactive API documentation
 ```
@@ -385,7 +385,10 @@ aurora-cloudbank-symbolic/
 │   ├── v2_DEVELOPER_GUIDE.md
 │   └── [comprehensive guides]
 │
-└── aurora_api.py                    # Main FastAPI server
+├── api/
+│   └── aurora_api.py                # Main FastAPI server (1,615 lines)
+│
+└── [other root files]
 ```
 
 ### Data Flow
@@ -625,7 +628,7 @@ pytest -m "not slow"
 # Solution: Kill existing process or use different port
 lsof -ti:8000 | xargs kill -9  # Kill process on port 8000
 # Or start on different port:
-uvicorn aurora_api:app --port 8001
+uvicorn api.aurora_api:app --port 8001
 
 # Problem: Missing environment variables
 # Solution: Check required environment variables

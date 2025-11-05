@@ -89,11 +89,10 @@ class TestAsyncFileIO:
         temp_files = []
 
         try:
-            # Create multiple temp files
+            # Create multiple temp files using context managers
             for i in range(5):
-                f = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=f'_{i}.txt')
-                temp_files.append(Path(f.name))
-                f.close()
+                with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=f'_{i}.txt') as f:
+                    temp_files.append(Path(f.name))
 
             # Concurrent writes
             async def write_file(path, content):

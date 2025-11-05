@@ -6,6 +6,7 @@ This module documents the performance improvements made to Aurora CloudBank
 and provides helper functions for efficient code patterns.
 """
 
+import itertools
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -160,7 +161,6 @@ def flatten_nested_iteration(outer_items: List[Any],
         # This should be refactored based on actual use case
         # Often can be replaced with list comprehensions or itertools
     """
-    import itertools
     result = []
     for outer in outer_items:
         inner = get_inner_items(outer)

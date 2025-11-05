@@ -7,6 +7,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
+import aiofiles
 import yaml
 
 logger = logging.getLogger(__name__)
@@ -127,7 +128,12 @@ class Sonnet4IntegrationHub:
         """Create fallback handler for GPT-4o compatibility"""
 
         async def fallback_handler(request, error):
-            logger.warning("Falling back to %s for client %s: %s", str(self.sonnet4_config.fallback_model)[:100], str(client_id)[:100], str(error)[:100])
+            logger.warning(
+                "Falling back to %s for client %s: %s",
+                str(self.sonnet4_config.fallback_model)[:100],
+                str(client_id)[:100],
+                str(error)[:100]
+            )
             # Implement fallback logic here
             return await self._handle_fallback_request(request, client_id)
 
@@ -179,8 +185,9 @@ class Sonnet4IntegrationHub:
                 },
             }
 
-            with open(self.config_path, "w") as f:
-                yaml.dump(self.config, f, default_flow_style=False)
+            # Use async file I/O to avoid blocking event loop
+            async with aiofiles.open(self.config_path, "w") as f:
+                await f.write(yaml.dump(self.config, default_flow_style=False))
 
         except Exception as e:
             logger.error("Failed to update config: %s", str(e)[:100])

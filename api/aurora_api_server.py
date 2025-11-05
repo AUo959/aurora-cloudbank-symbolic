@@ -8,6 +8,7 @@ import random
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import aiofiles
 import numpy as np
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
@@ -58,8 +59,9 @@ system_status = {
 async def dashboard():
     """Serve the Aurora CloudBank dashboard"""
     try:
-        with open("aurora_dashboard.html", "r") as f:
-            return f.read()
+        # Use async file I/O to avoid blocking event loop
+        async with aiofiles.open("aurora_dashboard.html", "r") as f:
+            return await f.read()
     except FileNotFoundError:
         return """
         <h1>Aurora CloudBank API</h1>

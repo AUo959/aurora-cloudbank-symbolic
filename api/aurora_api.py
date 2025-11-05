@@ -105,6 +105,16 @@ except ImportError:
     print("Thread Transfer Bridge v2 not available - distributed/predictive features disabled")
     THREAD_BRIDGE_V2_AVAILABLE = False
 
+# Import Event Coordination Registry API integration
+try:
+    from src.coordination.event_api import router as event_coordination_router
+    EVENT_COORDINATION_AVAILABLE = True
+    EVENT_COORDINATION_ROUTER = event_coordination_router
+except ImportError:
+    print("Event Coordination not available - multi-agent coordination features disabled")
+    EVENT_COORDINATION_AVAILABLE = False
+    EVENT_COORDINATION_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -174,6 +184,15 @@ except ImportError as e:
 except Exception as e:
     print(f"❌ Failed to integrate Subroutine API routes: {e}")
     SUBROUTINE_AVAILABLE = False
+
+# Include Event Coordination API routes if available
+if EVENT_COORDINATION_AVAILABLE and EVENT_COORDINATION_ROUTER:
+    try:
+        app.include_router(EVENT_COORDINATION_ROUTER)
+        print("✅ Event Coordination API routes integrated successfully")
+    except Exception as e:
+        print(f"❌ Failed to integrate Event Coordination API routes: {e}")
+        EVENT_COORDINATION_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

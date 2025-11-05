@@ -2,7 +2,7 @@
 # Version-pinned for security compliance and reproducible builds
 
 # Core Framework Dependencies (Security Validated)
-fastapi==0.104.1                    # Latest stable with security patches
+fastapi==0.118.0                    # Latest stable with security patches (aligned with starlette 0.49.1)
 uvicorn[standard]==0.38.0           # Production ASGI server
 pydantic==2.5.0                     # Data validation with security fixes
 
@@ -31,7 +31,7 @@ bandit==1.7.5                       # Security vulnerability scanner
 # Web Security
 python-multipart==0.0.18             # File upload handling
 python-jose[cryptography]==3.5.0    # JWT and JWS implementation
-httpx==0.25.2                       # HTTP client with security features
+httpx==0.28.1                       # HTTP client with security features (aligned with httpcore 1.x)
 
 # Monitoring & Logging (Security Enhanced)
 structlog==23.2.0                   # Structured logging

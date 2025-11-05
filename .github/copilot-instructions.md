@@ -23,6 +23,11 @@ Aurora CloudBank Symbolic is an advanced quantum-symbolic computing platform tha
 - **Quantum Components:** Geometric Algebra (Clifford), Vector Symbolic Architecture
 - **Memory System:** AuMemManager hierarchical memory with 56,000+ capacity
 
+**Primary Entry Points:**
+- `api/aurora_api.py` - Main FastAPI server (NOT `aurora_api.py` in root)
+- `scripts/setup_environment.sh` - Environment bootstrapping (NOT manual pip installs)
+- `Makefile` - All common tasks route through here first
+
 ## Core Concepts
 This repository models a quantum-symbolic governance stack where every feature must preserve:
 - **T1/SRB anchors** - Temporal and Symbolic Reference Base anchors for state tracking
@@ -32,9 +37,12 @@ This repository models a quantum-symbolic governance stack where every feature m
 ## Repository Structure
 
 ### Key Entry Points
-- **`aurora_api.py`** - Main FastAPI application server with 27 API routes (16 core + 11 AuMemManager)
-- **`aurora_cli.py`** - Command-line interface for system operations
-- **`Makefile`** - Primary development task automation (setup, test, lint, check)
+- **`api/aurora_api.py`** - Main FastAPI application server (1,615 lines, 27+ routes)
+  - NOT `aurora_api.py` in root (that's a legacy reference)
+  - Handles all module router injection (AuMemManager, Data Guardian, Insight Ledger, Quantum Simulator)
+  - Security via `src/middleware/fastapi_security.py` (rate limiting, CSRF, auth)
+- **`aurora_cli.py`** - Command-line interface (may not exist, check `api/` folder)
+- **`Makefile`** - Primary task automation (50+ targets including `setup`, `check`, `test`)
 
 ### Critical Directories
 - **`src/`** - Core source code organized by functionality
@@ -49,7 +57,7 @@ This repository models a quantum-symbolic governance stack where every feature m
 - **`.github/`** - GitHub configuration including workflows and templates
 
 ### Architecture Hotspots
-- **FastAPI Surface** (`aurora_api.py`): Rate-limited endpoints, ChatGPT Agent Mode (`/agent/*`), Sonnet 4 toggles, AuMemManager router injection
+- **FastAPI Surface** (`api/aurora_api.py`): Rate-limited endpoints, ChatGPT Agent Mode (`/agent/*`), Sonnet 4 toggles, AuMemManager router injection
 - **Agent Tools** (`src/integrations/chatgpt_agent_mode.py`): Tool registry; unknown tools raise `HTTPException`, errors return `success=False`
 - **Symbolic Engine** (`src/aurora/core/symbolic_engine.py`): Chain notation while advancing T1/SRB anchors
 - **DLP Tracker** (`src/core/native_dlp_export.py`): Canonical tracker requiring `context_tag`, anchor protocols, and manifest creation
@@ -63,6 +71,10 @@ This repository models a quantum-symbolic governance stack where every feature m
    make setup  # Runs scripts/setup_environment.sh
    python scripts/dev-status.py  # Confirm environment status
    ```
+   - **NEVER** run `pip install -r requirements.txt` directly
+   - Always use `make setup` which handles version conflicts and venv creation
+   - Uses `requirements-lock.txt` for pinned dependencies, not `requirements.txt`
+   
 2. **Check Status:** `make status` - View Python version, venv, and setup state
 
 ### Common Commands
@@ -73,7 +85,9 @@ This repository models a quantum-symbolic governance stack where every feature m
 - **`pytest tests/test_chatgpt_agent_mode.py`** - Run specific test file
 - **`pytest -m unit`** - Run fast unit tests only (using markers)
 - **`make run`** - Start the Aurora system
-- **`python aurora_api.py`** - Launch FastAPI server manually
+- **`python api/aurora_api.py`** - Launch FastAPI server manually (NOT `python aurora_api.py`)
+
+**Common Mistake:** Running `python aurora_api.py` fails because file is in `api/` subdirectory
 
 ### Service Endpoints
 - **Health Check:** `/health` and `/api/health`
@@ -248,19 +262,114 @@ For deliverables touching security or memory:
 
 ## Common Pitfalls to Avoid
 
-1. **Breaking DLP Chain:** Always include context tags and symbolic validation
-2. **Hardcoded Dependencies:** Use try/except for optional imports (e.g., AuMemManager)
-3. **Missing Test Markers:** Tag tests appropriately for selective execution
-4. **Ignoring Anchor Protocols:** T1/SRB anchors must advance with chain notation
-5. **Exposing Handler Details:** Sanitize tool payloads before returning to clients
-6. **Blocking Optional Failures:** Mock optional components; never break core features
-7. **Long Lines:** Respect 120-char limit consistently
-8. **Sync in Async:** Use async patterns throughout; never block the event loop
+### Critical Infrastructure Mistakes
+1. **Wrong pip Command:** NEVER run `pip install -r requirements.txt` - always use `make setup`
+   - Project uses `requirements-lock.txt` for pinned dependencies
+   - Direct pip bypasses httpx/httpcore conflict resolution
+   - `scripts/setup_environment.sh` handles version conflicts automatically
+2. **Wrong API Path:** Server is at `api/aurora_api.py` (NOT root `aurora_api.py`)
+   - Running `python aurora_api.py` fails - use `python api/aurora_api.py`
+   - Or use `make run` for proper orchestration
+3. **Skipping Test Markers:** Use `pytest -m unit` for fast tests, not full suite
+   - Full suite includes slow tests (>10 seconds)
+   - CI uses selective markers - match them locally
+
+### Code Pattern Mistakes
+4. **Breaking DLP Chain:** Always include context tags and symbolic validation
+5. **Hardcoded Dependencies:** Use try/except for optional imports (e.g., AuMemManager)
+6. **Ignoring Anchor Protocols:** T1/SRB anchors must advance with chain notation
+7. **Exposing Handler Details:** Sanitize tool payloads before returning to clients
+8. **Blocking Optional Failures:** Mock optional components; never break core features
+9. **Long Lines:** Respect 120-char limit consistently
+10. **Sync in Async:** Use async patterns throughout; never block the event loop
 
 ## Additional Resources
 
-- **Repository Health:** See `AURORA_HEALTH_OPTIMIZATION_COMPLETE.md` for metrics
+- **Workflow Investigation:** `.github/AGENT_WORKFLOW_INVESTIGATION.md` - Common mistakes and patterns
+- **Repository Health:** `AURORA_HEALTH_OPTIMIZATION_COMPLETE.md` for metrics
 - **Security Policy:** `.security/SECURITY_POLICY.md`
 - **Live Demo:** https://auo959.github.io/aurora-cloudbank-symbolic
 - **Contributing:** `CONTRIBUTING.md` for contribution guidelines
 - **Maintenance Reports:** Check `maintenance_report_*.json` for automation status
+
+## Module-Specific Patterns
+
+### AuMemManager (Quantum Memory)
+**Import Pattern:**
+```python
+from modules.aumemmanager import (
+    HierarchicalMemoryManager,
+    MemoryType,
+    MemoryStatus
+)
+```
+
+**Critical Requirements:**
+- Always set `cultural_score` parameter for CASK integration
+- Include `aurora_anchors` list for DLP compliance  
+- Use `MemoryType` enum (not strings): `MemoryType.AGENT`, `MemoryType.FACTION`, etc.
+- Global singleton at `modules.aumemmanager.api_integration.memory_manager`
+
+**API Routes:** `/memory/*` (11 endpoints)
+- POST `/memory/create` - Create memory with quantum properties
+- GET `/memory/search` - Semantic search with cultural filtering
+- GET `/memory/health` - System metrics and capacity
+
+### Quantum Simulator
+**Import Pattern:**
+```python
+from modules.quantum_simulator import (
+    QuantumOrchestrator,
+    ScenarioEngine,
+    ScenarioType,
+    QuantumBackend
+)
+```
+
+**Critical Requirements:**
+- Initialize cache before simulations: `initialize_cache()`
+- All operations are async - must use `await`
+- Include DLP `context_tag` in all simulation requests
+- Use `ScenarioType` enum: `SUPPLY_CHAIN`, `ENERGY_GRID`, `RISK_ANALYSIS`, etc.
+
+**API Routes:** `/quantum/*` (13 endpoints)
+- POST `/quantum/simulate` - Run quantum simulation
+- POST `/quantum/scenarios` - Complex scenario execution
+- GET `/quantum/backends` - Available quantum backends
+
+**Common Pattern:**
+```python
+orchestrator = get_orchestrator()
+result = await orchestrator.run_scenario(
+    scenario_type=ScenarioType.SUPPLY_CHAIN,
+    parameters={"num_locations": 5},
+    context_tag="simulation_001"  # Required for DLP
+)
+```
+
+## CI/CD Integration
+
+### Quality Gates (Issue #258)
+- **Automated Analysis:** All PRs run flake8 + SonarCloud
+- **Blocking Criteria:** Critical violations block merge
+- **Reports:** Uploaded as artifacts (30-day retention)
+- **Local Equivalent:** `make check` or `make lint-tools`
+
+### Dependency Validation
+- **Matrix Testing:** Python 3.11 and 3.12
+- **Dry-Run Phase:** Catches conflicts before installation
+- **Lock File:** Uses `requirements-lock.txt` for reproducibility
+- **Local Validation:** `python scripts/validate_dependencies.py`
+
+### Running CI Locally
+```bash
+make check                              # Fast check: lint + tests
+make lint-tools                         # Scoped lint (matches CI)
+python scripts/validate_dependencies.py # Dependency validation
+pytest -m "not slow"                    # Fast tests only (CI pattern)
+```
+
+### Workflow Files
+- `.github/workflows/code-quality.yml` - Quality analysis
+- `.github/workflows/dependency-validation.yml` - Dependency checks  
+- `.github/workflows/aurora-ci-minimal.yml` - Core CI (10 min)

@@ -5,7 +5,7 @@ Provides integration with GitHub API while maintaining Aurora's
 symbolic governance and DLP tracking protocols.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from ..auth import AuthType, create_auth_provider
@@ -158,7 +158,7 @@ class GitHubConnector(BaseConnector):
             return {
                 "status": "degraded",
                 "message": "httpx not available, using mock mode",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
         try:
@@ -169,20 +169,20 @@ class GitHubConnector(BaseConnector):
                     return {
                         "status": "healthy",
                         "rate_limit": response.json(),
-                        "timestamp": datetime.utcnow().isoformat(),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
 
             return {
                 "status": "healthy",
                 "message": "Mock mode active",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
         except Exception as e:
             return {
                 "status": "error",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
     def _get_default_headers(self) -> Dict[str, str]:

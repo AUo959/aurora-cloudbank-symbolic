@@ -6,7 +6,7 @@ external tool connectors with Aurora's symbolic governance.
 """
 
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Type
 
 from .base import BaseConnector, ConnectorConfig, ConnectorStatus
@@ -23,7 +23,7 @@ class ConnectorRegistry:
     def __init__(self):
         self._connectors: Dict[str, BaseConnector] = {}
         self._connector_types: Dict[str, Type[BaseConnector]] = {}
-        self._initialization_time = datetime.utcnow().isoformat()
+        self._initialization_time = datetime.now(timezone.utc).isoformat()
         self._context_tag = f"registry_{hashlib.sha256(self._initialization_time.encode()).hexdigest()[:8]}"
 
     def register_connector_type(self, connector_type: str, connector_class: Type[BaseConnector]) -> bool:
@@ -183,7 +183,7 @@ class ConnectorRegistry:
             "registered_types": list(self._connector_types.keys()),
             "status_distribution": status_counts,
             "type_distribution": type_counts,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 

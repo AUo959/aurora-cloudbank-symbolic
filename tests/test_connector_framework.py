@@ -6,7 +6,7 @@ and resilience patterns with Aurora's symbolic governance.
 """
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from src.integrations.connectors import (
     BaseConnector,
     ConnectorConfig,
@@ -58,7 +58,7 @@ class MockConnector(BaseConnector):
     async def health_check(self) -> Dict[str, Any]:
         return {
             "status": "healthy" if self._connected else "unhealthy",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 

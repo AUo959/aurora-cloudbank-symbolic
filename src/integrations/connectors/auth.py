@@ -9,7 +9,7 @@ import hashlib
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -132,7 +132,7 @@ class APIKeyAuth(AuthProvider):
             return False
 
         self._authenticated = True
-        self._auth_timestamp = datetime.utcnow().isoformat()
+        self._auth_timestamp = datetime.now(timezone.utc).isoformat()
         return True
 
     async def refresh(self) -> bool:
@@ -169,7 +169,7 @@ class OAuthAuth(AuthProvider):
         # Placeholder for OAuth flow
         # In production: redirect to auth URL, handle callback, exchange code for token
         self._authenticated = True
-        self._auth_timestamp = datetime.utcnow().isoformat()
+        self._auth_timestamp = datetime.now(timezone.utc).isoformat()
         return True
 
     async def refresh(self) -> bool:
@@ -201,7 +201,7 @@ class BearerTokenAuth(AuthProvider):
             return False
 
         self._authenticated = True
-        self._auth_timestamp = datetime.utcnow().isoformat()
+        self._auth_timestamp = datetime.now(timezone.utc).isoformat()
         return True
 
     async def refresh(self) -> bool:
@@ -229,7 +229,7 @@ class BasicAuth(AuthProvider):
             return False
 
         self._authenticated = True
-        self._auth_timestamp = datetime.utcnow().isoformat()
+        self._auth_timestamp = datetime.now(timezone.utc).isoformat()
         return True
 
     async def refresh(self) -> bool:

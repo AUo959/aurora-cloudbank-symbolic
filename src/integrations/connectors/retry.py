@@ -7,7 +7,7 @@ with Aurora's DLP tracking and error handling patterns.
 
 import asyncio
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional, Type
 
 
@@ -144,7 +144,7 @@ class RetryPolicy:
             "retry_success_rate": (
                 self._successful_retries / max(1, self._successful_retries + self._failed_retries)
             ),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 

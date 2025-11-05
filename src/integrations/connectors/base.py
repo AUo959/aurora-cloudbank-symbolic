@@ -9,7 +9,7 @@ import hashlib
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -71,7 +71,7 @@ class BaseConnector(ABC):
             "connector_id": self.connection_id,
             "connector_name": self.config.name,
             "connector_type": self.config.connector_type,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         self._create_symbolic_hash()
 
@@ -94,7 +94,7 @@ class BaseConnector(ABC):
             "anchor_seed": self.config.anchor_seed,
             "ethics_protocol": self.config.ethics_protocol,
             "status": self.status.value,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 

@@ -5,7 +5,7 @@ Provides comprehensive health monitoring and status tracking for
 connectors with Aurora's DLP tracking and symbolic governance.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -31,7 +31,7 @@ class HealthMonitor:
     def __init__(self):
         self._health_records: Dict[str, List[Dict[str, Any]]] = {}
         self._current_status: Dict[str, HealthStatus] = {}
-        self._context_tag = f"health_monitor_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        self._context_tag = f"health_monitor_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     async def check_connector_health(self, connector: BaseConnector) -> Dict[str, Any]:
         """
@@ -57,7 +57,7 @@ class HealthMonitor:
                 "connector_type": connector.config.connector_type,
                 "status": connector.status.value,
                 "health_status": health_status.value,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "metrics": connector_health,
                 "dlp_level": "DLP_L1_OK",
             }
@@ -79,7 +79,7 @@ class HealthMonitor:
                 "status": "error",
                 "health_status": HealthStatus.UNHEALTHY.value,
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "dlp_level": "DLP_L1_OK",
             }
 
@@ -185,7 +185,7 @@ class HealthMonitor:
                 conn_id: status.value
                 for conn_id, status in self._current_status.items()
             },
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 

@@ -6,7 +6,7 @@ circuit breaking and recovery following Aurora's resilience protocols.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any, Callable, Dict, Optional
 
@@ -67,7 +67,7 @@ class CircuitBreaker:
         if self._last_failure_time is None:
             return True
 
-        elapsed = datetime.utcnow() - self._last_failure_time
+        elapsed = datetime.now(timezone.utc) - self._last_failure_time
         return elapsed > timedelta(seconds=self.timeout_seconds)
 
     async def call(self, func: Callable, *args, **kwargs) -> Any:
@@ -123,7 +123,7 @@ class CircuitBreaker:
     def _on_failure(self):
         """Handle failed call"""
         self._failure_count += 1
-        self._last_failure_time = datetime.utcnow()
+        self._last_failure_time = datetime.now(timezone.utc)
 
         # Open circuit if threshold exceeded
         if self._failure_count >= self.failure_threshold:

@@ -8,7 +8,7 @@ with Aurora's DLP tracking and resource management protocols.
 import asyncio
 import time
 from collections import deque
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Deque, Dict, Optional
 
 
@@ -109,7 +109,7 @@ class RateLimiter:
                 self._throttled_requests / self._total_requests
                 if self._total_requests > 0 else 0
             ),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 
@@ -181,7 +181,7 @@ class ConnectionPool:
                 # Check if connection is still valid
                 if self._is_connection_valid(conn):
                     self._active_connections[conn_id] = conn
-                    conn["acquired_at"] = datetime.utcnow()
+                    conn["acquired_at"] = datetime.now(timezone.utc)
                     return conn_id
                 else:
                     # Connection expired, close it
@@ -210,7 +210,7 @@ class ConnectionPool:
                 return
 
             conn = self._active_connections.pop(connection_id)
-            conn["released_at"] = datetime.utcnow()
+            conn["released_at"] = datetime.now(timezone.utc)
 
             # Return to idle pool if under max idle
             if len(self._idle_connections) < self.max_connections:
@@ -227,11 +227,11 @@ class ConnectionPool:
         Returns:
             Connection ID
         """
-        conn_id = f"conn_{self._connection_count}_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        conn_id = f"conn_{self._connection_count}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
         conn = {
             "id": conn_id,
-            "created_at": datetime.utcnow(),
-            "acquired_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
+            "acquired_at": datetime.now(timezone.utc),
             "released_at": None,
         }
 
@@ -259,7 +259,7 @@ class ConnectionPool:
         if isinstance(released_at, str):
             released_at = datetime.fromisoformat(released_at)
 
-        idle_seconds = (datetime.utcnow() - released_at).total_seconds()
+        idle_seconds = (datetime.now(timezone.utc) - released_at).total_seconds()
         return idle_seconds < self.max_idle_time
 
     def get_status(self) -> Dict[str, Any]:
@@ -285,7 +285,7 @@ class ConnectionPool:
                 len(self._active_connections) / self.max_connections
                 if self.max_connections > 0 else 0
             ),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "dlp_level": "DLP_L1_OK",
         }
 

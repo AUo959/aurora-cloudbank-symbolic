@@ -20,7 +20,7 @@ import asyncio
 import hashlib
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from src.coordination.event_models import (
@@ -90,7 +90,7 @@ class EventCoordinationRegistry:
 
         # Registry status
         self._status = "initializing"
-        self._initialized_at = datetime.utcnow()
+        self._initialized_at = datetime.now(timezone.utc)
 
         logger.info("Event Coordination Registry initialized")
         self._status = "ready"
@@ -202,7 +202,7 @@ class EventCoordinationRegistry:
         async with self._lock:
             event.delivered_to.extend(delivered_to)
             event.delivery_attempts += 1
-            event.last_delivery_attempt = datetime.utcnow()
+            event.last_delivery_attempt = datetime.now(timezone.utc)
 
         return {
             "delivered_to": delivered_to,
@@ -509,7 +509,7 @@ class EventCoordinationRegistry:
             conflict = self._conflicts[conflict_id]
             conflict.resolution_status = "resolved"
             conflict.resolution_strategy = strategy
-            conflict.resolved_at = datetime.utcnow()
+            conflict.resolved_at = datetime.now(timezone.utc)
             conflict.resolved_by = resolved_by
 
             self._metrics["conflicts_resolved"] += 1
@@ -576,7 +576,7 @@ class EventCoordinationRegistry:
             return {
                 "status": self._status,
                 "initialized_at": self._initialized_at.isoformat(),
-                "uptime_seconds": (datetime.utcnow() - self._initialized_at).total_seconds(),
+                "uptime_seconds": (datetime.now(timezone.utc) - self._initialized_at).total_seconds(),
                 "metrics": self._metrics.copy(),
                 "counts": {
                     "events_in_history": len(self._event_history),

@@ -6,7 +6,7 @@ workflow orchestration, and all coordination features.
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -43,11 +43,11 @@ class TestEventModels:
         assert not event.is_expired()
 
         # Event with future expiry
-        event.expiry = datetime.utcnow() + timedelta(hours=1)
+        event.expiry = datetime.now(timezone.utc) + timedelta(hours=1)
         assert not event.is_expired()
 
         # Event with past expiry
-        event.expiry = datetime.utcnow() - timedelta(hours=1)
+        event.expiry = datetime.now(timezone.utc) - timedelta(hours=1)
         assert event.is_expired()
 
     def test_event_filter_matching(self):
@@ -166,7 +166,7 @@ class TestEventCoordinationRegistry:
         event = Event(
             event_type=EventType.TASK_CREATED,
             source_agent_id="agent-001",
-            expiry=datetime.utcnow() - timedelta(hours=1),
+            expiry=datetime.now(timezone.utc) - timedelta(hours=1),
         )
 
         result = await registry.publish_event(event)
@@ -308,7 +308,7 @@ class TestEventCoordinationRegistry:
         assert len(replayed) == 2
 
         # Replay with time filter
-        mid_time = datetime.utcnow()
+        mid_time = datetime.now(timezone.utc)
         event3 = Event(event_type=EventType.AGENT_HEARTBEAT, source_agent_id="agent-001")
         await registry.publish_event(event3)
 
@@ -463,10 +463,10 @@ class TestEventCoordinationRegistry:
         low_received = []
 
         async def critical_handler(event: Event):
-            critical_received.append(datetime.utcnow())
+            critical_received.append(datetime.now(timezone.utc))
 
         async def low_handler(event: Event):
-            low_received.append(datetime.utcnow())
+            low_received.append(datetime.now(timezone.utc))
 
         # Subscribe to critical events
         filter_critical = EventFilter(priorities=[EventPriority.CRITICAL])

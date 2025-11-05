@@ -6,11 +6,11 @@ following Aurora's DLP tracking and symbolic anchor patterns.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class EventPriority(str, Enum):
@@ -82,7 +82,7 @@ class Event(BaseModel):
     # Event metadata
     source_agent_id: str
     target_agent_ids: Optional[List[str]] = None  # None = broadcast to all subscribers
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expiry: Optional[datetime] = None
 
     # Event payload
@@ -106,8 +106,7 @@ class Event(BaseModel):
     last_delivery_attempt: Optional[datetime] = None
     delivered_to: List[str] = Field(default_factory=list)
 
-    class Config:
-        json_encoders = {datetime: lambda v: v.isoformat()}
+    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary"""
@@ -117,7 +116,7 @@ class Event(BaseModel):
         """Check if event has expired"""
         if self.expiry is None:
             return False
-        return datetime.utcnow() > self.expiry
+        return datetime.now(timezone.utc) > self.expiry
 
 
 class EventFilter(BaseModel):

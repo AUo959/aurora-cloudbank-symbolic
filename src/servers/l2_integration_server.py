@@ -171,7 +171,7 @@ app = FastAPI(
 
 # Add CORS middleware
 # SECURITY FIX: Use specific origins instead of wildcard when credentials are enabled
-allowed_origins = os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")
+allowed_origins = [origin.strip() for origin in os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,

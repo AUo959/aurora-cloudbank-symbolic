@@ -36,12 +36,15 @@ except ImportError:
 app = FastAPI(title="Aurora Quantum VSA Playground")
 
 # Add CORS middleware for frontend integration
+# SECURITY FIX: Use specific origins instead of wildcard when credentials are enabled
+allowed_origins = os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
+    max_age=86400,  # Cache preflight for 24 hours
 )
 
 # Configure logging

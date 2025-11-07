@@ -18,6 +18,10 @@ from functools import wraps
 from typing import Optional, List
 import secrets
 import hmac
+import hashlib
+import os
+import time
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -53,20 +57,182 @@ limiter = get_rate_limiter()
 # HTTPBearer security scheme for CSRF token validation
 security = HTTPBearer()
 
+# Get CSRF secret from environment
+CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY", "default-development-secret-change-in-production")
+CSRF_TOKEN_EXPIRY_SECONDS = 300  # 5 minutes
 
-def verify_csrf_token(token: HTTPAuthorizationCredentials) -> None:
+
+def generate_csrf_token(session_id: str) -> str:
     """
-    Verify CSRF token from HTTPBearer credentials.
-    Raises HTTPException if token is invalid.
+    Generate a cryptographically secure CSRF token.
+
+    Token format: session_id.timestamp.signature
+
+    Args:
+        session_id: Unique session identifier
+
+    Returns:
+        CSRF token string
+    """
+    timestamp = str(int(time.time()))
+    message = f"{session_id}.{timestamp}"
+    signature = hmac.new(
+        CSRF_SECRET_KEY.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return f"{session_id}.{timestamp}.{signature}"
+
+
+def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[str] = None) -> None:
+    """
+    Verify CSRF token with cryptographic validation.
+
+    SECURITY FIX: Replaces length-only check with HMAC verification.
 
     Args:
         token: HTTPAuthorizationCredentials from request
+        session_id: Optional session ID for binding validation
 
     Raises:
-        HTTPException: If token is missing or invalid (403)
+        HTTPException: If token is missing, expired, or invalid (403)
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    if not token:
+        raise HTTPException(status_code=403, detail='Missing CSRF token')
+
+    try:
+        # Parse token format: session_id.timestamp.signature
+        parts = token.credentials.split('.')
+        if len(parts) != 3:
+            raise ValueError("Invalid token format")
+
+        token_session_id, timestamp, signature = parts
+
+        # Verify session ID matches if provided
+        if session_id and token_session_id != session_id:
+            raise HTTPException(status_code=403, detail='Token session mismatch')
+
+        # Check expiration (5 minutes)
+        token_time = int(timestamp)
+        current_time = int(time.time())
+        if current_time - token_time > CSRF_TOKEN_EXPIRY_SECONDS:
+            raise HTTPException(status_code=403, detail='CSRF token expired')
+
+        # Verify HMAC signature
+        expected_message = f"{token_session_id}.{timestamp}"
+        expected_signature = hmac.new(
+            CSRF_SECRET_KEY.encode(),
+            expected_message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        # Use constant-time comparison to prevent timing attacks
+        if not hmac.compare_digest(signature, expected_signature):
+            raise HTTPException(status_code=403, detail='Invalid CSRF token signature')
+
+    except ValueError as e:
+        raise HTTPException(status_code=403, detail='Invalid CSRF token format')
+    except Exception as e:
+        # Log error securely without exposing details to client
+        raise HTTPException(status_code=403, detail='CSRF token validation failed')
+
+
+# ================================
+# WebSocket Authentication
+# ================================
+
+# Get WebSocket auth secret from environment
+WS_AUTH_SECRET = os.getenv("WS_AUTH_SECRET", "default-ws-secret-change-in-production")
+WS_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
+
+# Whitelist of allowed tool names for WebSocket execution
+ALLOWED_WS_TOOLS = {
+    "session_management",
+    "get_status",
+    "list_tools",
+    "echo",
+    "ping",
+}
+
+
+def generate_ws_token(client_id: str) -> str:
+    """
+    Generate a cryptographically secure WebSocket authentication token.
+
+    Token format: client_id.timestamp.signature
+
+    Args:
+        client_id: Unique client identifier
+
+    Returns:
+        WebSocket token string
+    """
+    timestamp = str(int(time.time()))
+    message = f"{client_id}.{timestamp}"
+    signature = hmac.new(
+        WS_AUTH_SECRET.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    return f"{client_id}.{timestamp}.{signature}"
+
+
+def verify_ws_token(token: str) -> Optional[str]:
+    """
+    Verify WebSocket authentication token.
+
+    Args:
+        token: WebSocket token string
+
+    Returns:
+        Client ID if valid, None otherwise
+    """
+    if not token:
+        return None
+
+    try:
+        # Parse token format: client_id.timestamp.signature
+        parts = token.split('.')
+        if len(parts) != 3:
+            return None
+
+        client_id, timestamp, signature = parts
+
+        # Check expiration
+        token_time = int(timestamp)
+        current_time = int(time.time())
+        if current_time - token_time > WS_TOKEN_EXPIRY_SECONDS:
+            return None
+
+        # Verify HMAC signature
+        expected_message = f"{client_id}.{timestamp}"
+        expected_signature = hmac.new(
+            WS_AUTH_SECRET.encode(),
+            expected_message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+
+        # Use constant-time comparison
+        if not hmac.compare_digest(signature, expected_signature):
+            return None
+
+        return client_id
+
+    except Exception:
+        return None
+
+
+def validate_ws_tool(tool_name: str) -> bool:
+    """
+    Validate if a tool is allowed for WebSocket execution.
+
+    Args:
+        tool_name: Name of the tool to validate
+
+    Returns:
+        True if tool is allowed, False otherwise
+    """
+    return tool_name in ALLOWED_WS_TOOLS
 
 
 # ================================
@@ -88,12 +254,15 @@ def setup_cors_middleware(app, allow_origins=None, allow_credentials=True,
     Returns:
         None (modifies app in place)
     """
+    # SECURITY FIX: Use secure defaults instead of wildcards
     if allow_origins is None:
-        allow_origins = ["*"]
+        # Get from environment or use localhost defaults
+        origins_str = os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080")
+        allow_origins = [origin.strip() for origin in origins_str.split(",")]
     if allow_methods is None:
-        allow_methods = ["*"]
+        allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     if allow_headers is None:
-        allow_headers = ["*"]
+        allow_headers = ["Content-Type", "Authorization", "X-CSRF-Token"]
 
     app.add_middleware(
         CORSMiddleware,
@@ -101,6 +270,7 @@ def setup_cors_middleware(app, allow_origins=None, allow_credentials=True,
         allow_credentials=allow_credentials,
         allow_methods=allow_methods,
         allow_headers=allow_headers,
+        max_age=86400,  # Cache preflight for 24 hours
     )
 
 

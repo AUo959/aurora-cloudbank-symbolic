@@ -264,6 +264,36 @@ def validate_ws_tool(tool_name: str) -> bool:
     return tool_name in ALLOWED_WS_TOOLS
 
 
+def sanitize_request_id(request_id: Optional[str]) -> Optional[str]:
+    """
+    Sanitize and validate request_id to prevent injection attacks and log pollution.
+
+    SECURITY: Validates that request_id matches expected format (UUID or alphanumeric)
+    to prevent injection attacks or log pollution.
+
+    Args:
+        request_id: Request ID from client (can be None)
+
+    Returns:
+        Sanitized request_id if valid, None if invalid or missing
+    """
+    if not request_id:
+        return None
+
+    # Enforce maximum length to prevent DoS
+    MAX_REQUEST_ID_LENGTH = 128
+    if len(request_id) > MAX_REQUEST_ID_LENGTH:
+        return None
+
+    # Allow only alphanumeric characters, hyphens, and underscores
+    # This covers UUID format and most standard request ID patterns
+    import re
+    if not re.match(r'^[a-zA-Z0-9_-]+$', request_id):
+        return None
+
+    return request_id
+
+
 # ================================
 # CORS Middleware Configuration
 # ================================

@@ -32,7 +32,8 @@ from src.middleware.fastapi_security import (
     limiter,
     security,
     verify_ws_token,
-    validate_ws_tool
+    validate_ws_tool,
+    sanitize_request_id
 )
 
 # Import AuMemManager API integration
@@ -522,12 +523,15 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             if data.get("type") == "tool_execution":
                 tool_name = data.get("tool_name", "").strip()
 
+                # SECURITY: Sanitize request_id to prevent injection attacks
+                request_id = sanitize_request_id(data.get("request_id"))
+
                 # SECURITY: Validate tool name against whitelist
                 if not validate_ws_tool(tool_name):
                     await websocket.send_json({
                         "type": "error",
                         "error": f"Tool '{tool_name}' is not allowed via WebSocket",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
                     continue
 
@@ -537,7 +541,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "error",
                         "error": "Invalid parameters format (must be object)",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
                     continue
 
@@ -550,14 +554,14 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "tool_result",
                         "result": result,
-                        "request_id": data.get("request_id")
+                        "request_id": request_id
                     })
                 except Exception as e:
                     # SECURITY: Don't expose internal error details
                     await websocket.send_json({
                         "type": "error",
                         "error": "Tool execution failed",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
 
             elif data.get("type") == "ping":

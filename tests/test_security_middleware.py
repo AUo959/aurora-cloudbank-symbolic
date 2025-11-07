@@ -84,7 +84,7 @@ class TestSecurityMiddleware:
         session_id = "test_session"
         token_string = generate_csrf_token(session_id)
         token = self._create_mock_token(token_string)
-        
+
         # Should not raise exception
         verify_csrf_token(token, session_id=session_id)
 
@@ -92,7 +92,7 @@ class TestSecurityMiddleware:
         """Test CSRF token verification with invalid format"""
         # Token without proper format (missing parts)
         token = self._create_mock_token("invalid_token_format")
-        
+
         with pytest.raises(HTTPException) as exc_info:
             verify_csrf_token(token)
         assert exc_info.value.status_code == 403
@@ -112,7 +112,7 @@ class TestSecurityMiddleware:
         old_timestamp = int(time.time()) - 310
         token_string = self._generate_test_csrf_token(session_id, old_timestamp)
         token = self._create_mock_token(token_string)
-        
+
         # Should not raise exception because token is within grace period
         verify_csrf_token(token, session_id=session_id)
 
@@ -124,7 +124,7 @@ class TestSecurityMiddleware:
         old_timestamp = int(time.time()) - 340
         token_string = self._generate_test_csrf_token(session_id, old_timestamp)
         token = self._create_mock_token(token_string)
-        
+
         # Should raise exception because token is beyond grace period
         with pytest.raises(HTTPException) as exc_info:
             verify_csrf_token(token, session_id=session_id)
@@ -138,7 +138,7 @@ class TestSecurityMiddleware:
         old_timestamp = int(time.time()) - CSRF_TOKEN_EXPIRY_SECONDS
         token_string = self._generate_test_csrf_token(session_id, old_timestamp)
         token = self._create_mock_token(token_string)
-        
+
         # Should not raise exception because token is at exact boundary (not exceeded)
         verify_csrf_token(token, session_id=session_id)
 
@@ -148,7 +148,7 @@ class TestSecurityMiddleware:
         session_id = "test_session"
         token_string = generate_csrf_token(session_id)
         token = self._create_mock_token(token_string)
-        
+
         # Should not raise exception
         verify_csrf_token(token, session_id=session_id)
 

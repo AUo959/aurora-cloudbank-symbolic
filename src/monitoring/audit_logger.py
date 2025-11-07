@@ -94,13 +94,33 @@ class AuditLogger:
         Args:
             storage_path: Path for persistent storage
             signing_key: Secret key for HMAC signing (loads from env if not provided)
+        
+        Raises:
+            ValueError: If no signing key provided in production mode (AURORA_ENV=production)
         """
         self.storage_path = storage_path
-        # Try environment variable first, then generate if not provided
+        
+        # Try environment variable first
         if signing_key is None:
             import os
             signing_key = os.getenv("MONITORING_SIGNING_KEY")
+            
+            # In production, require explicit signing key
+            if signing_key is None and os.getenv("AURORA_ENV") == "production":
+                raise ValueError(
+                    "MONITORING_SIGNING_KEY environment variable must be set in production. "
+                    "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
+                )
+        
         self.signing_key = signing_key or self._generate_key()
+        
+        # Warn if using generated key
+        if signing_key is None:
+            logger.warning(
+                "Using runtime-generated signing key. Audit chain verification will fail "
+                "across restarts. Set MONITORING_SIGNING_KEY environment variable for production."
+            )
+        
         self.entries: List[AuditEntry] = []
         self._next_id = 1
         

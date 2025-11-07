@@ -56,6 +56,11 @@ class ComplianceReportQuery(BaseModel):
 
 
 # Global monitoring system instance
+# Note: Using module-level global for simplicity in FastAPI integration.
+# For production with complex testing requirements, consider:
+# - Dependency injection with FastAPI's Depends()
+# - Application state via app.state
+# - Context managers for proper lifecycle management
 _monitoring_system: Optional[MonitoringSystem] = None
 
 

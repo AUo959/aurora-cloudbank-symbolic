@@ -261,7 +261,12 @@ class DriftDetector:
         context_tag: Optional[str]
     ) -> DriftAlert:
         """Create a drift alert"""
-        deviation = abs(current_value - baseline.mean) / baseline.mean if baseline.mean != 0 else 0
+        # Use epsilon for near-zero baselines to avoid inflated deviations
+        epsilon = 1e-10
+        if abs(baseline.mean) < epsilon:
+            deviation = abs(current_value - baseline.mean)
+        else:
+            deviation = abs(current_value - baseline.mean) / baseline.mean
         
         return DriftAlert(
             timestamp=datetime.utcnow().isoformat(),

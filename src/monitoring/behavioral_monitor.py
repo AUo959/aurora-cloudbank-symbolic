@@ -76,6 +76,7 @@ class BehaviorMonitor:
         self.retention_hours = retention_hours
         self.metrics_history: Dict[str, List[BehaviorMetrics]] = defaultdict(list)
         self.current_metrics: Dict[str, BehaviorMetrics] = {}
+        self._max_history_entries = 10000  # Safety limit to prevent unbounded growth
         
         logger.info("Behavior monitor initialized (retention=%d hours)", retention_hours)
     
@@ -327,6 +328,14 @@ class BehaviorMonitor:
             m for m in self.metrics_history[agent_id]
             if datetime.fromisoformat(m.timestamp) >= cutoff
         ]
+        
+        # Additional safety: enforce max entries limit
+        if len(self.metrics_history[agent_id]) > self._max_history_entries:
+            logger.warning(
+                "Agent %s exceeded max history entries (%d), trimming oldest",
+                agent_id, self._max_history_entries
+            )
+            self.metrics_history[agent_id] = self.metrics_history[agent_id][-self._max_history_entries:]
     
     def get_agent_ids(self) -> List[str]:
         """Get list of all monitored agent IDs"""

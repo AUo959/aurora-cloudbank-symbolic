@@ -21,7 +21,6 @@ import hmac
 import hashlib
 import os
 import time
-from datetime import datetime, timedelta
 
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials

@@ -519,12 +519,12 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             # Wait for messages from client
             data = await websocket.receive_json()
 
+            # SECURITY: Sanitize request_id to prevent injection attacks
+            request_id = sanitize_request_id(data.get("request_id"))
+
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 tool_name = data.get("tool_name", "").strip()
-
-                # SECURITY: Sanitize request_id to prevent injection attacks
-                request_id = sanitize_request_id(data.get("request_id"))
 
                 # SECURITY: Validate tool name against whitelist
                 if not validate_ws_tool(tool_name):
@@ -572,6 +572,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     "type": "error",
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"],
+                    "request_id": request_id,
                 })
 
     except Exception as e:

@@ -160,6 +160,9 @@ WS_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
 # Maximum length for request_id to prevent DoS attacks
 MAX_REQUEST_ID_LENGTH = 128
 
+# Compiled regex for request_id validation (performance optimization)
+REQUEST_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+
 # Whitelist of allowed tool names for WebSocket execution.
 # Each entry maps a tool name to a description and rationale for why it is allowed.
 ALLOWED_WS_TOOLS = {
@@ -290,7 +293,7 @@ def sanitize_request_id(request_id: Optional[str]) -> Optional[str]:
 
     # Allow only alphanumeric characters, hyphens, and underscores
     # This covers UUID format and most standard request ID patterns
-    if not re.match(r'^[a-zA-Z0-9_-]+$', request_id):
+    if not REQUEST_ID_PATTERN.match(request_id):
         return None
 
     return request_id

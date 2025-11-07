@@ -565,7 +565,11 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     })
 
             elif data.get("type") == "ping":
-                await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
+                await websocket.send_json({
+                    "type": "pong",
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "request_id": request_id
+                })
 
             else:
                 await websocket.send_json({

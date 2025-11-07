@@ -222,8 +222,8 @@ class SecureHelpers:
         }
 
         if isinstance(node, ast.Constant):
-            # Allow only numbers and strings
-            if not isinstance(node.value, (int, float, str, type(None))):
+            # Allow only numbers (int, float) and None
+            if not isinstance(node.value, (int, float, type(None))):
                 raise ValueError(f"Disallowed constant type: {type(node.value)}")
 
         elif isinstance(node, ast.Name):

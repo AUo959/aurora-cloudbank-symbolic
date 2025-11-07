@@ -80,20 +80,19 @@ class TestSecurityMiddleware:
 
     def test_verify_csrf_token_valid(self):
         """Test CSRF token verification with valid token"""
-        # Create a mock token with valid credentials
-        class MockToken:
-            credentials = "valid_token_12345"
-
-        token = MockToken()
+        # Generate a valid token using the actual generation function
+        session_id = "test_session"
+        token_string = generate_csrf_token(session_id)
+        token = self._create_mock_token(token_string)
+        
         # Should not raise exception
-        verify_csrf_token(token)
+        verify_csrf_token(token, session_id=session_id)
 
-    def test_verify_csrf_token_invalid_short(self):
-        """Test CSRF token verification with short token"""
-        class MockToken:
-            credentials = "short"
-
-        token = MockToken()
+    def test_verify_csrf_token_invalid_format(self):
+        """Test CSRF token verification with invalid format"""
+        # Token without proper format (missing parts)
+        token = self._create_mock_token("invalid_token_format")
+        
         with pytest.raises(HTTPException) as exc_info:
             verify_csrf_token(token)
         assert exc_info.value.status_code == 403

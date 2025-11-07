@@ -1012,7 +1012,7 @@ Add to CI/CD:
    - Migration guides
 
 2. **Code Documentation**
-   - Type hints throughout
+   - Type hints in all new modules; legacy code still being migrated
    - Docstrings with DLP anchors
    - Inline comments for complex logic
 

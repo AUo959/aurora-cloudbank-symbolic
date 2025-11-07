@@ -57,7 +57,12 @@ limiter = get_rate_limiter()
 security = HTTPBearer()
 
 # Get CSRF secret from environment
-CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY", "default-development-secret-change-in-production")
+CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY")
+if not CSRF_SECRET_KEY:
+    raise RuntimeError(
+        "CSRF_SECRET_KEY environment variable must be set to a strong, unpredictable value. "
+        "Refusing to start with default or missing secret."
+    )
 CSRF_TOKEN_EXPIRY_SECONDS = 300  # 5 minutes
 
 

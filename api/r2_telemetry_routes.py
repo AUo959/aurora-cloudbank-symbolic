@@ -146,8 +146,8 @@ async def get_detected_anomalies(
     """
     telemetry = get_r2_telemetry()
     
-    # Get recent anomalies from telemetry
-    anomalies = telemetry._detected_anomalies[-limit:] if telemetry._detected_anomalies else []
+    # Use public method to get anomalies
+    anomalies = telemetry.get_recent_anomalies(limit=limit)
     
     from dataclasses import asdict
     return [asdict(anomaly) for anomaly in anomalies]

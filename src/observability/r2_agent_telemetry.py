@@ -99,7 +99,8 @@ class PIIFilter:
     # Patterns that might contain PII
     PII_PATTERNS = [
         'email', 'password', 'token', 'api_key', 'secret',
-        'ssn', 'credit_card', 'phone', 'address', 'name'
+        'ssn', 'credit_card', 'phone', 'address',
+        'first_name', 'last_name', 'full_name'  # More specific than 'name'
     ]
     
     @staticmethod
@@ -153,10 +154,7 @@ class PIIFilter:
         # Email pattern
         text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', redact_value, text)
         
-        # API key patterns (common formats)
-        text = re.sub(r'\b[A-Za-z0-9]{32,}\b', redact_value, text)
-        
-        # Token patterns
+        # Token patterns - only redact if preceded by token/key/secret keywords
         text = re.sub(r'(token|key|secret)["\s:=]+[A-Za-z0-9_-]+', f'\\1: {redact_value}', text, flags=re.IGNORECASE)
         
         return text
@@ -266,7 +264,7 @@ class AnomalyDetector:
                     anomaly_type="high_failure_rate",
                     threshold=self._failure_rate_threshold,
                     current_value=failure_rate,
-                    details={"recent_failures": len([f for f in self._recent_failures])}
+                    details={"recent_failures": len(self._recent_failures)}
                 ))
         
         return anomalies
@@ -448,7 +446,8 @@ class R2AgentTelemetry:
             return {}
         
         try:
-            cpu_percent = self._process.cpu_percent(interval=0.1)
+            # Use non-blocking CPU measurement after initial call
+            cpu_percent = self._process.cpu_percent(interval=None)
             memory_info = self._process.memory_info()
             io_counters = self._process.io_counters() if hasattr(self._process, 'io_counters') else None
             
@@ -768,6 +767,18 @@ class R2AgentTelemetry:
         # Sort by start time (most recent first) and limit
         metrics.sort(key=lambda m: m.start_time, reverse=True)
         return metrics[:limit]
+    
+    def get_recent_anomalies(self, limit: int = 20) -> List[AnomalyDetectionResult]:
+        """
+        Get recently detected anomalies
+        
+        Args:
+            limit: Maximum number of anomalies to return
+            
+        Returns:
+            List of detected anomalies (most recent first)
+        """
+        return self._detected_anomalies[-limit:] if self._detected_anomalies else []
 
 
 # Global telemetry instance for R-2 agent

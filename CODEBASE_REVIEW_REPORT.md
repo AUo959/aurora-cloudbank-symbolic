@@ -30,6 +30,7 @@ Aurora CloudBank Symbolic is a **production-capable quantum-symbolic computing p
 - **Documentation:** 60+ files (3.7 MB)
 - **Lines of Code (Main API):** 1,633 lines
 - **Test Pass Rate:** ~90.5% (endpoint tests)
+- **Test Failure Rate:** ~9.5% (approx. 86 failing tests) — This is a significant issue and requires immediate attention.
 
 ---
 

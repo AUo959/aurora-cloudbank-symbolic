@@ -30,6 +30,24 @@ from src.middleware.fastapi_security import (
 class TestSecurityMiddleware:
     """Test suite for security middleware components"""
 
+    @staticmethod
+    def _create_mock_token(token_string: str):
+        """Helper method to create a mock token object"""
+        class MockToken:
+            credentials = token_string
+        return MockToken()
+
+    @staticmethod
+    def _generate_test_csrf_token(session_id: str, timestamp: int) -> str:
+        """Helper method to generate a test CSRF token with specific timestamp"""
+        message = f"{session_id}.{timestamp}"
+        signature = hmac.new(
+            CSRF_SECRET_KEY.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        return f"{session_id}.{timestamp}.{signature}"
+
     def test_rate_limiter_creation(self):
         """Test rate limiter instance creation"""
         rate_limiter = get_rate_limiter()
@@ -93,18 +111,9 @@ class TestSecurityMiddleware:
         # This is past the 300-second expiry but within the 30-second grace period
         session_id = "test_session"
         old_timestamp = int(time.time()) - 310
-        message = f"{session_id}.{old_timestamp}"
-        signature = hmac.new(
-            CSRF_SECRET_KEY.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        token_string = f"{session_id}.{old_timestamp}.{signature}"
-
-        class MockToken:
-            credentials = token_string
-
-        token = MockToken()
+        token_string = self._generate_test_csrf_token(session_id, old_timestamp)
+        token = self._create_mock_token(token_string)
+        
         # Should not raise exception because token is within grace period
         verify_csrf_token(token, session_id=session_id)
 
@@ -114,18 +123,9 @@ class TestSecurityMiddleware:
         # This is past both the 300-second expiry and 30-second grace period
         session_id = "test_session"
         old_timestamp = int(time.time()) - 340
-        message = f"{session_id}.{old_timestamp}"
-        signature = hmac.new(
-            CSRF_SECRET_KEY.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        token_string = f"{session_id}.{old_timestamp}.{signature}"
-
-        class MockToken:
-            credentials = token_string
-
-        token = MockToken()
+        token_string = self._generate_test_csrf_token(session_id, old_timestamp)
+        token = self._create_mock_token(token_string)
+        
         # Should raise exception because token is beyond grace period
         with pytest.raises(HTTPException) as exc_info:
             verify_csrf_token(token, session_id=session_id)
@@ -137,18 +137,9 @@ class TestSecurityMiddleware:
         # Generate a token with timestamp exactly 300 seconds in the past
         session_id = "test_session"
         old_timestamp = int(time.time()) - CSRF_TOKEN_EXPIRY_SECONDS
-        message = f"{session_id}.{old_timestamp}"
-        signature = hmac.new(
-            CSRF_SECRET_KEY.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
-        token_string = f"{session_id}.{old_timestamp}.{signature}"
-
-        class MockToken:
-            credentials = token_string
-
-        token = MockToken()
+        token_string = self._generate_test_csrf_token(session_id, old_timestamp)
+        token = self._create_mock_token(token_string)
+        
         # Should not raise exception because token is at exact boundary (not exceeded)
         verify_csrf_token(token, session_id=session_id)
 
@@ -157,11 +148,8 @@ class TestSecurityMiddleware:
         # Generate a fresh token using the actual generation function
         session_id = "test_session"
         token_string = generate_csrf_token(session_id)
-
-        class MockToken:
-            credentials = token_string
-
-        token = MockToken()
+        token = self._create_mock_token(token_string)
+        
         # Should not raise exception
         verify_csrf_token(token, session_id=session_id)
 

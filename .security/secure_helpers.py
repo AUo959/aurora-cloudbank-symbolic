@@ -179,8 +179,8 @@ class SecureHelpers:
         if len(expression) > max_length:
             raise ValueError(f"Expression exceeds maximum length of {max_length}")
 
-        # Whitelist allowed characters (more restrictive than regex)
-        allowed_chars = set('0123456789+-*/.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,')
+        # Whitelist allowed characters (digits, arithmetic ops, parentheses, decimal point, spaces)
+        allowed_chars = set('0123456789+-*/.() ')
         if not all(c in allowed_chars for c in expression):
             raise ValueError("Expression contains disallowed characters")
 

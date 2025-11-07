@@ -59,6 +59,7 @@ security = HTTPBearer()
 # Get CSRF secret from environment
 CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY", "default-development-secret-change-in-production")
 CSRF_TOKEN_EXPIRY_SECONDS = 300  # 5 minutes
+CSRF_CLOCK_SKEW_GRACE_SECONDS = 30  # Grace period for clock skew between client and server
 
 
 def generate_csrf_token(session_id: str) -> str:
@@ -111,10 +112,11 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
         if session_id and token_session_id != session_id:
             raise HTTPException(status_code=403, detail='Token session mismatch')
 
-        # Check expiration (5 minutes)
+        # Check expiration (5 minutes) with grace period for clock skew
+        # Grace period allows for minor time synchronization differences between client and server
         token_time = int(timestamp)
         current_time = int(time.time())
-        if current_time - token_time > CSRF_TOKEN_EXPIRY_SECONDS:
+        if current_time - token_time > CSRF_TOKEN_EXPIRY_SECONDS + CSRF_CLOCK_SKEW_GRACE_SECONDS:
             raise HTTPException(status_code=403, detail='CSRF token expired')
 
         # Verify HMAC signature

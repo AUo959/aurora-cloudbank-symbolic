@@ -17,7 +17,6 @@ import logging
 import time
 import hashlib
 import json
-import psutil
 import threading
 from contextlib import contextmanager
 from dataclasses import dataclass, field, asdict
@@ -25,6 +24,14 @@ from typing import Any, Dict, List, Optional, Callable
 from functools import wraps
 from datetime import datetime
 from collections import deque, defaultdict
+
+# Optional dependencies with graceful fallback
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 
 try:
     from opentelemetry import trace, metrics
@@ -343,12 +350,16 @@ class R2AgentTelemetry:
         self._success_counts = defaultdict(int)
         self._error_counts = defaultdict(int)
         
-        # Process monitoring
-        try:
-            self._process = psutil.Process()
-        except Exception:
+        # Process monitoring (optional - requires psutil)
+        if PSUTIL_AVAILABLE:
+            try:
+                self._process = psutil.Process()
+            except Exception as e:
+                self._process = None
+                logger.debug("Process monitoring unavailable: %s", e)
+        else:
             self._process = None
-            logger.warning("Process monitoring unavailable")
+            logger.debug("psutil not available - resource monitoring disabled")
         
         # Initialize OpenTelemetry
         if self.enabled:

@@ -30,12 +30,9 @@ except ImportError:
 # Import centralized security configuration
 from src.middleware.fastapi_security import (
     limiter,
-    require_auth,
-    secure_compare,
     security,
     verify_ws_token,
-    validate_ws_tool,
-    generate_ws_token
+    validate_ws_tool
 )
 
 # Import AuMemManager API integration

@@ -141,7 +141,12 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
 # ================================
 
 # Get WebSocket auth secret from environment
-WS_AUTH_SECRET = os.getenv("WS_AUTH_SECRET", "default-ws-secret-change-in-production")
+WS_AUTH_SECRET = os.getenv("WS_AUTH_SECRET")
+if not WS_AUTH_SECRET or WS_AUTH_SECRET == "default-ws-secret-change-in-production":
+    raise RuntimeError(
+        "WS_AUTH_SECRET environment variable must be set to a secure random value. "
+        "Do not use the default or leave it unset. Refusing to start."
+    )
 WS_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
 
 # Whitelist of allowed tool names for WebSocket execution.

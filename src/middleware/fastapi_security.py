@@ -136,6 +136,8 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
 
     except ValueError as e:
         raise HTTPException(status_code=403, detail='Invalid CSRF token format')
+    except HTTPException:
+        raise
     except Exception as e:
         # Log error securely without exposing details to client
         raise HTTPException(status_code=403, detail='CSRF token validation failed')

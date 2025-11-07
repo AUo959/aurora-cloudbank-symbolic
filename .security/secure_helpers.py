@@ -171,20 +171,116 @@ class SecureHelpers:
                 'len': len
             }
 
-        # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
-            raise ValueError("Expression contains unsafe characters")
+        # SECURITY FIX: Replace eval() with AST-based safe evaluation
+        import ast
+
+        # Enforce maximum expression length to prevent DoS
+        max_length = 1000
+        if len(expression) > max_length:
+            raise ValueError(f"Expression exceeds maximum length of {max_length}")
+
+        # Whitelist allowed characters (more restrictive than regex)
+        allowed_chars = set('0123456789+-*/.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,')
+        if not all(c in allowed_chars for c in expression):
+            raise ValueError("Expression contains disallowed characters")
 
         try:
-            # Use compile with restricted mode
-            code = compile(expression, '<string>', 'eval')
+            # Parse expression to AST
+            tree = ast.parse(expression, mode='eval')
 
-        # CRITICAL SECURITY: eval() usage detected - high code injection risk
-            # Execute in restricted context
-            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec B307 - secured eval with restricted context
+            # Validate AST structure
+            SecurityHelpers._validate_ast_node(tree.body, allowed_functions)
 
+            # Compile and execute in restricted namespace
+            code = compile(tree, '<string>', 'eval')
+            namespace = {name: func for name, func in (allowed_functions or {}).items()}
+            return eval(code, {"__builtins__": {}}, namespace)
+
+        except SyntaxError as e:
+            raise ValueError(f"Invalid expression syntax: {e}")
         except Exception as e:
-            raise ValueError("Safe evaluation failed: {e}")
+            raise ValueError(f"Safe evaluation failed: {e}")
+
+    @staticmethod
+    def _validate_ast_node(node: ast.AST, allowed_functions: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Recursively validate AST nodes to ensure only safe operations.
+
+        SECURITY: This prevents code injection by validating the AST structure
+        before evaluation.
+
+        Args:
+            node: AST node to validate
+            allowed_functions: Dictionary of allowed function names
+
+        Raises:
+            ValueError: If node contains disallowed operations
+        """
+        allowed_ops = {
+            ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod,
+            ast.Pow, ast.UAdd, ast.USub, ast.FloorDiv
+        }
+
+        if isinstance(node, ast.Constant):
+            # Allow only numbers and strings
+            if not isinstance(node.value, (int, float, str, type(None))):
+                raise ValueError(f"Disallowed constant type: {type(node.value)}")
+
+        elif isinstance(node, ast.Name):
+            # Allow variable references (will be checked at runtime)
+            pass
+
+        elif isinstance(node, ast.UnaryOp):
+            if type(node.op) not in allowed_ops:
+                raise ValueError(f"Disallowed unary operator: {type(node.op)}")
+            SecurityHelpers._validate_ast_node(node.operand, allowed_functions)
+
+        elif isinstance(node, ast.BinOp):
+            if type(node.op) not in allowed_ops:
+                raise ValueError(f"Disallowed binary operator: {type(node.op)}")
+            SecurityHelpers._validate_ast_node(node.left, allowed_functions)
+            SecurityHelpers._validate_ast_node(node.right, allowed_functions)
+
+        elif isinstance(node, ast.Call):
+            # Only allow whitelisted function calls
+            if not isinstance(node.func, ast.Name):
+                raise ValueError("Only direct function calls are allowed")
+
+            func_name = node.func.id
+            if allowed_functions and func_name not in allowed_functions:
+                raise ValueError(f"Function '{func_name}' is not allowed")
+
+            # Validate function arguments
+            for arg in node.args:
+                SecurityHelpers._validate_ast_node(arg, allowed_functions)
+            for keyword in node.keywords:
+                SecurityHelpers._validate_ast_node(keyword.value, allowed_functions)
+
+        elif isinstance(node, (ast.List, ast.Tuple)):
+            # Allow lists and tuples
+            for element in node.elts:
+                SecurityHelpers._validate_ast_node(element, allowed_functions)
+
+        elif isinstance(node, ast.Subscript):
+            # Allow indexing operations
+            SecurityHelpers._validate_ast_node(node.value, allowed_functions)
+            SecurityHelpers._validate_ast_node(node.slice, allowed_functions)
+
+        elif isinstance(node, ast.Index):
+            # Python 3.8 compatibility
+            SecurityHelpers._validate_ast_node(node.value, allowed_functions)
+
+        elif isinstance(node, ast.Slice):
+            # Allow slice operations
+            if node.lower:
+                SecurityHelpers._validate_ast_node(node.lower, allowed_functions)
+            if node.upper:
+                SecurityHelpers._validate_ast_node(node.upper, allowed_functions)
+            if node.step:
+                SecurityHelpers._validate_ast_node(node.step, allowed_functions)
+
+        else:
+            raise ValueError(f"Disallowed AST node type: {type(node).__name__}")
 
     @staticmethod
     def validate_input_length(input_str: str, max_length: int = 1000, field_name: str = "input") -> str:

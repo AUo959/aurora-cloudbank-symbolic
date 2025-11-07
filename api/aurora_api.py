@@ -28,7 +28,15 @@ except ImportError:
     GEMINI_AGENT_AVAILABLE = False
 
 # Import centralized security configuration
-from src.middleware.fastapi_security import limiter, require_auth, secure_compare, security
+from src.middleware.fastapi_security import (
+    limiter,
+    require_auth,
+    secure_compare,
+    security,
+    verify_ws_token,
+    validate_ws_tool,
+    generate_ws_token
+)
 
 # Import AuMemManager API integration
 try:
@@ -481,7 +489,18 @@ async def agent_websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time agent communication
     Supports streaming responses and persistent connections
+
+    SECURITY: Requires authentication token in query params
     """
+    # SECURITY FIX: Require authentication before accepting connection
+    token = websocket.query_params.get("token")
+    client_id = verify_ws_token(token) if token else None
+
+    if not client_id:
+        await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
+        return
+
+    # Accept connection only after authentication
     await websocket.accept()
 
     try:
@@ -492,18 +511,42 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             "symbolic_anchor": "EOS_SEED_ORION",
             "ethics_protocol": "Picard_Delta_3",
             "agent_mode": "chatgpt_agent_mode",
-            "context_tag": "websocket_agent_stream"
+            "context_tag": "websocket_agent_stream",
+            "client_id": client_id
         }
         await websocket.send_json(initial_message)
+
         while True:
             # Wait for messages from client
             data = await websocket.receive_json()
+
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
+                tool_name = data.get("tool_name", "").strip()
+
+                # SECURITY: Validate tool name against whitelist
+                if not validate_ws_tool(tool_name):
+                    await websocket.send_json({
+                        "type": "error",
+                        "error": f"Tool '{tool_name}' is not allowed via WebSocket",
+                        "request_id": data.get("request_id"),
+                    })
+                    continue
+
+                # SECURITY: Validate parameters type
+                parameters = data.get("parameters", {})
+                if not isinstance(parameters, dict):
+                    await websocket.send_json({
+                        "type": "error",
+                        "error": "Invalid parameters format (must be object)",
+                        "request_id": data.get("request_id"),
+                    })
+                    continue
+
                 try:
                     result = await chatgpt_agent_integration.execute_tool(
-                        tool_name=data.get("tool_name"),
-                        parameters=data.get("parameters", {}),
+                        tool_name=tool_name,
+                        parameters=parameters,
                         session_id=data.get("session_id")
                     )
                     await websocket.send_json({
@@ -512,13 +555,16 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                         "request_id": data.get("request_id")
                     })
                 except Exception as e:
+                    # SECURITY: Don't expose internal error details
                     await websocket.send_json({
                         "type": "error",
-                        "error": str(e),
+                        "error": "Tool execution failed",
                         "request_id": data.get("request_id"),
                     })
+
             elif data.get("type") == "ping":
                 await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
+
             else:
                 await websocket.send_json({
                     "type": "error",
@@ -527,7 +573,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                 })
 
     except Exception as e:
-        await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
+        await websocket.close(code=1011, reason="Internal error")
 
 
 # ================================

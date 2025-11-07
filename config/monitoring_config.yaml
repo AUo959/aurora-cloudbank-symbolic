@@ -65,7 +65,7 @@ behavioral_monitoring:
 
 # Storage Configuration
 storage:
-  # Base directory for monitoring data
+  # Base directory for monitoring data (can be overridden with MONITORING_STORAGE_DIR env var)
   base_dir: "./monitoring_data"
   
   # Audit log file
@@ -81,7 +81,7 @@ storage:
 
 # Ethics Rules Configuration
 ethics_rules:
-  # Path to ethics rules file
+  # Path to ethics rules file (can be overridden with ETHICS_RULES_PATH env var)
   rules_file: "./ethics/validation_engine/validation_rules.json"
   
   # Enable/disable specific rule categories
@@ -222,7 +222,9 @@ security:
   audit_signing:
     enabled: true
     algorithm: "HMAC-SHA256"
-    # Key should be stored in environment variable: MONITORING_SIGNING_KEY
+    # Key MUST be stored in environment variable: MONITORING_SIGNING_KEY
+    # Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+    # WARNING: Using runtime-generated keys causes audit chain verification to fail across restarts
   
   # API authentication
   api_auth:

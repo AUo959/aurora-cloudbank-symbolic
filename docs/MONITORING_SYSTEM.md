@@ -56,6 +56,24 @@ pip install fastapi pydantic
 pip install opentelemetry-api opentelemetry-sdk
 ```
 
+### Environment Variables
+
+Configure the following environment variables for production:
+
+```bash
+# Required for persistent audit chain verification
+export MONITORING_SIGNING_KEY="your-secret-key-here"  # Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+
+# Optional configuration paths
+export MONITORING_STORAGE_DIR="./monitoring_data"
+export ETHICS_RULES_PATH="./ethics/validation_engine/validation_rules.json"
+
+# Optional API authentication
+export MONITORING_API_TOKEN="your-api-token-here"
+```
+
+**Important**: The `MONITORING_SIGNING_KEY` must be consistent across system restarts to maintain audit chain verification. Never use runtime-generated keys in production.
+
 ### Setup
 
 ```python

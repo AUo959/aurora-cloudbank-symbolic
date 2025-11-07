@@ -69,11 +69,14 @@ def get_monitoring_system(
     if _monitoring_system is None:
         # Use default paths if not provided
         if storage_dir is None:
-            storage_dir = Path("./monitoring_data")
+            import os
+            storage_dir = Path(os.getenv("MONITORING_STORAGE_DIR", "./monitoring_data"))
         
         if ethics_rules_path is None:
-            # Try to find existing ethics rules
-            ethics_path = Path("./ethics/validation_engine/validation_rules.json")
+            import os
+            # Try environment variable first, then default path
+            ethics_path_str = os.getenv("ETHICS_RULES_PATH", "./ethics/validation_engine/validation_rules.json")
+            ethics_path = Path(ethics_path_str)
             if ethics_path.exists():
                 ethics_rules_path = ethics_path
         

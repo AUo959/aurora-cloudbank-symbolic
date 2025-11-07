@@ -93,9 +93,13 @@ class AuditLogger:
         
         Args:
             storage_path: Path for persistent storage
-            signing_key: Secret key for HMAC signing (generates if not provided)
+            signing_key: Secret key for HMAC signing (loads from env if not provided)
         """
         self.storage_path = storage_path
+        # Try environment variable first, then generate if not provided
+        if signing_key is None:
+            import os
+            signing_key = os.getenv("MONITORING_SIGNING_KEY")
         self.signing_key = signing_key or self._generate_key()
         self.entries: List[AuditEntry] = []
         self._next_id = 1

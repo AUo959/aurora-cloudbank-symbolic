@@ -5,6 +5,9 @@ Validates centralized security configuration for Aurora CloudBank.
 """
 
 import pytest
+import time
+import hmac
+import hashlib
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from fastapi.security import HTTPAuthorizationCredentials
@@ -15,8 +18,12 @@ from src.middleware.fastapi_security import (
     get_rate_limiter,
     setup_cors_middleware,
     verify_csrf_token,
+    generate_csrf_token,
     require_auth,
     secure_compare,
+    CSRF_SECRET_KEY,
+    CSRF_TOKEN_EXPIRY_SECONDS,
+    CSRF_CLOCK_SKEW_GRACE_SECONDS,
 )
 
 
@@ -79,6 +86,84 @@ class TestSecurityMiddleware:
         with pytest.raises(HTTPException) as exc_info:
             verify_csrf_token(None)
         assert exc_info.value.status_code == 403
+
+    def test_verify_csrf_token_clock_skew_valid(self):
+        """Test CSRF token verification with clock skew within grace period"""
+        # Generate a token with timestamp 310 seconds in the past
+        # This is past the 300-second expiry but within the 30-second grace period
+        session_id = "test_session"
+        old_timestamp = int(time.time()) - 310
+        message = f"{session_id}.{old_timestamp}"
+        signature = hmac.new(
+            CSRF_SECRET_KEY.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        token_string = f"{session_id}.{old_timestamp}.{signature}"
+
+        class MockToken:
+            credentials = token_string
+
+        token = MockToken()
+        # Should not raise exception because token is within grace period
+        verify_csrf_token(token, session_id=session_id)
+
+    def test_verify_csrf_token_clock_skew_expired(self):
+        """Test CSRF token verification beyond clock skew grace period"""
+        # Generate a token with timestamp 340 seconds in the past
+        # This is past both the 300-second expiry and 30-second grace period
+        session_id = "test_session"
+        old_timestamp = int(time.time()) - 340
+        message = f"{session_id}.{old_timestamp}"
+        signature = hmac.new(
+            CSRF_SECRET_KEY.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        token_string = f"{session_id}.{old_timestamp}.{signature}"
+
+        class MockToken:
+            credentials = token_string
+
+        token = MockToken()
+        # Should raise exception because token is beyond grace period
+        with pytest.raises(HTTPException) as exc_info:
+            verify_csrf_token(token, session_id=session_id)
+        assert exc_info.value.status_code == 403
+        assert "expired" in str(exc_info.value.detail).lower()
+
+    def test_verify_csrf_token_at_expiry_boundary(self):
+        """Test CSRF token verification at exact expiry boundary"""
+        # Generate a token with timestamp exactly 300 seconds in the past
+        session_id = "test_session"
+        old_timestamp = int(time.time()) - CSRF_TOKEN_EXPIRY_SECONDS
+        message = f"{session_id}.{old_timestamp}"
+        signature = hmac.new(
+            CSRF_SECRET_KEY.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        token_string = f"{session_id}.{old_timestamp}.{signature}"
+
+        class MockToken:
+            credentials = token_string
+
+        token = MockToken()
+        # Should not raise exception because token is at exact boundary (not exceeded)
+        verify_csrf_token(token, session_id=session_id)
+
+    def test_verify_csrf_token_fresh(self):
+        """Test CSRF token verification with freshly generated token"""
+        # Generate a fresh token using the actual generation function
+        session_id = "test_session"
+        token_string = generate_csrf_token(session_id)
+
+        class MockToken:
+            credentials = token_string
+
+        token = MockToken()
+        # Should not raise exception
+        verify_csrf_token(token, session_id=session_id)
 
     def test_setup_cors_middleware_default(self):
         """Test CORS middleware setup with default settings"""

@@ -144,15 +144,33 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
 WS_AUTH_SECRET = os.getenv("WS_AUTH_SECRET", "default-ws-secret-change-in-production")
 WS_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
 
-# Whitelist of allowed tool names for WebSocket execution
+# Whitelist of allowed tool names for WebSocket execution.
+# Each entry maps a tool name to a description and rationale for why it is allowed.
 ALLOWED_WS_TOOLS = {
-    "session_management",
-    "get_status",
-    "list_tools",
-    "echo",
-    "ping",
+    "session_management": (
+        "Allows clients to manage their session state (e.g., start/end session). "
+        "Required for secure session lifecycle management."
+    ),
+    "get_status": (
+        "Returns the current status of the WebSocket connection or server. "
+        "Permitted for health checks and client diagnostics."
+    ),
+    "list_tools": (
+        "Lists all available tools that the client can invoke. "
+        "Necessary for client-side tool discovery; does not execute any tool."
+    ),
+    "echo": (
+        "Echoes back the received message. "
+        "Used for connectivity testing and debugging; no side effects."
+    ),
+    "ping": (
+        "Responds with a pong to verify connection liveness. "
+        "Standard for WebSocket keepalive and latency measurement."
+    ),
 }
 
+# Set of allowed tool names for quick membership checks
+ALLOWED_WS_TOOL_NAMES = set(ALLOWED_WS_TOOLS.keys())
 
 def generate_ws_token(client_id: str) -> str:
     """

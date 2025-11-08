@@ -129,6 +129,56 @@ async def legacy_upload():
     """
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MiB
+CSRF_INVALID_MSG = "Invalid CSRF token"
+
+
+def _ga_build_mv(ga: GeometricAlgebra, vec_spec: Dict[str, float]) -> Any:
+    mv: Any = 0
+    for blade, coeff in vec_spec.items():
+        mv += coeff * ga.blades.get(blade, coeff if blade not in ga.blades else ga.blades[blade])
+    return mv
+
+
+def _ga_compute_product(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Dict[str, Any]:
+    result: Any = 1
+    for spec in vectors:
+        result = ga.mult(result, _ga_build_mv(ga, spec))
+    return {"result": ga.pretty(result), "type": "geometric_product"}
+
+
+def _ga_compute_commutator(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Optional[Dict[str, Any]]:
+    if len(vectors) < 2:
+        return None
+    mv_a = _ga_build_mv(ga, vectors[0])
+    mv_b = _ga_build_mv(ga, vectors[1])
+    ab = ga.mult(mv_a, mv_b)
+    ba = ga.mult(mv_b, mv_a)
+    ab_any: Any = ab
+    ba_any: Any = ba
+    if hasattr(ab_any, "__sub__") and hasattr(ab_any, "__add__"):
+        comm = ab_any - ba_any if not getattr(ga, "_mock", False) else ab_any + ba_any
+    else:
+        comm = ab_any
+    return {"result": ga.pretty(comm), "type": "commutator"}
+
+
+def _hash_seed(symbol: str) -> int:
+    return int(hashlib.sha256(symbol.encode()).hexdigest(), 16) % (2**32)
+
+
+def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
+    for _ in range(depth):
+        for q in range(qubits):
+            r = float(_rng.random())
+            if r < 0.3:
+                qc.h(q)
+            elif r < 0.6:
+                qc.x(q)
+            elif r < 0.8:
+                qc.z(q)
+            else:
+                if q < qubits - 1:
+                    qc.cx(q, q + 1)
 
 
 @app.post("/upload/")
@@ -136,7 +186,7 @@ async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCr
     """Upload a bundle file with CSRF validation."""
     # CSRF Token validation
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
 
     data = await file.read()
     if len(data) > MAX_UPLOAD_SIZE:
@@ -159,7 +209,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            for conn in list(connections):
+            for conn in connections:
                 if conn is websocket:
                     continue
                 try:
@@ -197,13 +247,13 @@ class QuantumSymbolicVectorRequest(BaseModel):
     dependencies=[Depends(security)],
 )
 def geometric_product(req: GeometricProductRequest, token: HTTPAuthorizationCredentials = Depends(security)):
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Compute the geometric product of two 3D vectors (a*e1, b*e2) using Clifford algebra.
+    """Compute the geometric product of two 3D vectors (a*e1, b*e2) using Clifford algebra.
+
     Request body: {"a": float, "b": float}
     Response: {"result": str}
     """
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     ga = GeometricAlgebra()
     a_mv = req.a * ga.blades["e1"]
     b_mv = req.b * ga.blades["e2"]
@@ -221,13 +271,13 @@ def quantum_symbolic_vector_endpoint(
     req: QuantumSymbolicVectorRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
 ):
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
+    """Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
+
     Request body: {"symbol": str, "dim": int}
     Response: {"symbol": str, "dim": int, "vector": list}
     """
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     dim = req.dim if req.dim is not None else 8
     vec = quantum_symbolic_vector(req.symbol, dim)
     return {"symbol": req.symbol, "dim": req.dim, "vector": vec.tolist()}
@@ -374,13 +424,13 @@ def mcp_route_command(
     dependencies=[Depends(security)],
 )
 def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Perform an operation on the VSA symbolic vector.
+    """Perform an operation on the VSA symbolic vector.
+
     Request body: {"symbol": str, "dimension": int, "operation_type": str}
     Response: {"symbol": str, "dimension": int, "result": Any}
     """
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     if req.operation_type == "generate":
         vec = quantum_symbolic_vector(req.symbol, req.dimension)
         result = vec.tolist()
@@ -406,13 +456,13 @@ def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials 
     dependencies=[Depends(security)],
 )
 def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Bind two symbolic vectors in the VSA.
+    """Bind two symbolic vectors in the VSA.
+
     Request body: {"symbol_a": str, "symbol_b": str, "result_name": str, "dimension": int}
     Response: {"result_name": str, "dimension": int, "result": Any}
     """
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     # Retrieve vectors from store
     vec_a = vsa_store.get(req.symbol_a)
     vec_b = vsa_store.get(req.symbol_b)
@@ -437,13 +487,13 @@ def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(
     dependencies=[Depends(security)],
 )
 def vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Compute similarity between two symbolic vectors in the VSA.
+    """Compute similarity between two symbolic vectors in the VSA.
+
     Request body: {"symbol_a": str, "symbol_b": str}
     Response: {"symbol_a": str, "symbol_b": str, "similarity": float}
     """
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     # Retrieve vectors from store
     vec_a = vsa_store.get(req.symbol_a)
     vec_b = vsa_store.get(req.symbol_b)
@@ -516,9 +566,11 @@ def geometric_algebra(req: GeometricAlgebraRequest):
         ab = ga.mult(blade1, blade2)
         ba = ga.mult(blade2, blade1)
         # Ensure subtraction/addition only if algebra elements support it
-        if hasattr(ab, "__sub__") and hasattr(ab, "__add__"):
-            return ab - ba if not getattr(ga, "_mock", False) else ab + ba
-        return ab
+        ab_any: Any = ab
+        ba_any: Any = ba
+        if hasattr(ab_any, "__sub__") and hasattr(ab_any, "__add__"):
+            return ab_any - ba_any if not getattr(ga, "_mock", False) else ab_any + ba_any
+        return ab_any
 
     if req.operation == "product":
         result = _ga_product()
@@ -537,11 +589,9 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 
 @app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector", dependencies=[Depends(security)])
 def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Generate a quantum symbolic vector for a given symbol."""
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Generate a quantum symbolic vector for a given symbol.
-    """
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     try:
         qsv = QuantumSymbolicVector(req.symbol, req.dimension)
         vsa_store[req.symbol] = qsv
@@ -549,7 +599,7 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
         return {
             "symbol": req.symbol,
             "dimension": req.dimension,
-            "vector": (qsv.vector.tolist() if hasattr(qsv.vector, "tolist") else list(qsv.vector))[:32],
+            "vector": np.asarray(qsv.vector).tolist()[:32],
             "vector_full_length": len(qsv.vector),
             "vector_type": "bipolar",
             "quantum_generated": True,
@@ -560,11 +610,9 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
 
 @app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])
 def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Bind two symbolic vectors using element-wise multiplication (XOR for bipolar)."""
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Bind two symbolic vectors using element-wise multiplication (XOR for bipolar).
-    """
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     try:
         # Generate vectors if they don't exist
         if req.symbol_a not in vsa_store:
@@ -577,13 +625,11 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
 
         # Ensure same dimension
         min_dim = min(len(vec_a), len(vec_b))
-        vec_a = vec_a[:min_dim]
-        vec_b = vec_b[:min_dim]
+        vec_a = np.asarray(vec_a[:min_dim])
+        vec_b = np.asarray(vec_b[:min_dim])
 
         # Bind operation (element-wise multiplication for bipolar vectors)
-        # Perform element-wise multiplication safely (numpy arrays)
-        # Element-wise multiplication using numpy for bipolar vectors
-        bound_vector = vec_a * vec_b  # vec_a/vec_b are numpy arrays from QuantumSymbolicVector
+        bound_vector = vec_a * vec_b  # numpy arrays element-wise multiplication
 
         # Create a new quantum symbolic vector using standard constructor then override vector data
         result_qsv = QuantumSymbolicVector(req.result_name, min_dim)
@@ -598,7 +644,7 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
             "symbol_b": req.symbol_b,
             "result_name": req.result_name,
             "dimension": min_dim,
-            "result_vector": bound_vector.tolist()[:32],
+            "result_vector": np.asarray(bound_vector).tolist()[:32],
             "similarity_a": float(np.dot(bound_vector, vec_a) / min_dim),
             "similarity_b": float(np.dot(bound_vector, vec_b) / min_dim),
         }
@@ -608,11 +654,9 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
 
 @app.post("/api/vsa/similarity", summary="Calculate VSA similarity", dependencies=[Depends(security)])
 def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Calculate cosine similarity between two VSA vectors."""
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Calculate cosine similarity between two VSA vectors.
-    """
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
     try:
         if req.symbol_a not in vsa_store:
             vsa_store[req.symbol_a] = QuantumSymbolicVector(req.symbol_a)
@@ -624,8 +668,8 @@ def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorization
 
         # Ensure same dimension
         min_dim = min(len(vec_a), len(vec_b))
-        vec_a = vec_a[:min_dim]
-        vec_b = vec_b[:min_dim]
+        vec_a = np.asarray(vec_a[:min_dim])
+        vec_b = np.asarray(vec_b[:min_dim])
 
         # Cosine similarity
         similarity = float(np.dot(vec_a, vec_b) / (np.linalg.norm(vec_a) * np.linalg.norm(vec_b)))
@@ -656,7 +700,7 @@ def list_vsa_vectors():
                 "symbol": symbol,
                 "dimension": len(qsv.vector),
                 "vector_type": getattr(qsv, "vector_type", "bipolar"),
-                "preview": (qsv.vector.tolist() if hasattr(qsv.vector, "tolist") else list(qsv.vector))[:8],
+                "preview": np.asarray(qsv.vector).tolist()[:8],
             }
             for symbol, qsv in vsa_store.items()
         ],
@@ -684,42 +728,16 @@ def advanced_geometric_operations(
     req: GeometricAlgebraRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
 ):
+    """Perform advanced geometric algebra operations on multiple vectors."""
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Perform advanced geometric algebra operations on multiple vectors.
-    """
-    def _build_mv(ga: GeometricAlgebra, vec_spec: Dict[str, float]) -> Any:
-        mv = 0
-        for blade, coeff in vec_spec.items():
-            mv += coeff * ga.blades.get(blade, coeff if blade not in ga.blades else ga.blades[blade])
-        return mv
-
-    def _compute_product(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Dict[str, Any]:
-        result = 1
-        for spec in vectors:
-            result = ga.mult(result, _build_mv(ga, spec))
-        return {"result": ga.pretty(result), "type": "geometric_product"}
-
-    def _compute_commutator(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Optional[Dict[str, Any]]:
-        if len(vectors) < 2:
-            return None
-        mv_a = _build_mv(ga, vectors[0])
-        mv_b = _build_mv(ga, vectors[1])
-        ab = ga.mult(mv_a, mv_b)
-        ba = ga.mult(mv_b, mv_a)
-        if hasattr(ab, "__sub__") and hasattr(ab, "__add__"):
-            comm = ab - ba if not getattr(ga, "_mock", False) else ab + ba
-        else:
-            comm = ab
-        return {"result": ga.pretty(comm), "type": "commutator"}
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
 
     try:
         ga = GeometricAlgebra()
         if req.operation == "product":
-            computed = [_compute_product(ga, req.vectors)]
+            computed = [_ga_compute_product(ga, req.vectors)]
         elif req.operation == "commutator":
-            comm = _compute_commutator(ga, req.vectors)
+            comm = _ga_compute_commutator(ga, req.vectors)
             computed = [comm] if comm else []
         else:
             return {"operation": req.operation, "input_vectors": req.vectors, "results": [], "mock_mode": ga._mock}
@@ -730,27 +748,9 @@ def advanced_geometric_operations(
 
 @app.post("/api/quantum/circuit", summary="Generate Quantum Circuit", dependencies=[Depends(security)])
 def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """Generate and analyze a quantum circuit for symbolic operations."""
     if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
-    """
-    Generate and analyze a quantum circuit for symbolic operations.
-    """
-    def _hash_seed(symbol: str) -> int:
-        return int(hashlib.sha256(symbol.encode()).hexdigest(), 16) % (2**32)
-
-    def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
-        for _ in range(depth):
-            for q in range(qubits):
-                r = float(_rng.random())
-                if r < 0.3:
-                    qc.h(q)
-                elif r < 0.6:
-                    qc.x(q)
-                elif r < 0.8:
-                    qc.z(q)
-                else:
-                    if q < qubits - 1:
-                        qc.cx(q, q + 1)
+        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
 
     try:
         if not QISKIT_AVAILABLE:

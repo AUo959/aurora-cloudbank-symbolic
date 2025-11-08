@@ -417,7 +417,16 @@ class TestIntegrationScenarios:
 
 
 # Performance benchmarks
+# Check if pytest-benchmark is available
+try:
+    import pytest_benchmark
+    BENCHMARK_AVAILABLE = True
+except ImportError:
+    BENCHMARK_AVAILABLE = False
+
+
 @pytest.mark.benchmark
+@pytest.mark.skipif(not BENCHMARK_AVAILABLE, reason="pytest-benchmark not installed")
 class TestPerformance:
     """Performance benchmarks"""
     

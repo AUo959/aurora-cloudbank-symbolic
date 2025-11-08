@@ -184,7 +184,12 @@ class TestSecurityMiddleware:
     def test_cors_middleware_integration(self):
         """Test CORS middleware integration with FastAPI app"""
         app = FastAPI()
-        setup_cors_middleware(app)
+        # Setup CORS with explicit allowed origins for testing
+        setup_cors_middleware(
+            app,
+            allow_origins=["https://example.com"],
+            allow_credentials=True
+        )
 
         @app.get("/test")
         async def test_endpoint():
@@ -195,6 +200,7 @@ class TestSecurityMiddleware:
         assert response.status_code == 200
         # Check CORS headers are present
         assert "access-control-allow-origin" in response.headers
+        assert response.headers["access-control-allow-origin"] == "https://example.com"
 
 
 class TestSecurityIntegration:
@@ -217,10 +223,12 @@ class TestSecurityIntegration:
         response = client.post("/secure")
         assert response.status_code == 403  # Forbidden (no auth header)
 
-        # Test with valid token
+        # Test with valid CSRF token
+        session_id = "test_session"
+        valid_token = generate_csrf_token(session_id)
         response = client.post(
             "/secure",
-            headers={"Authorization": "Bearer valid_token_123456"}
+            headers={"Authorization": f"Bearer {valid_token}"}
         )
         assert response.status_code == 200
         assert response.json()["status"] == "secure"

@@ -322,6 +322,18 @@
         "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 134: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:55:27.363118",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 4,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py",
+        "/workspaces/aurora-cloudbank-symbolic/conftest.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_dlp_auto_tracker.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_security_middleware.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 184: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 590: POS..."
     }
   ]
 }

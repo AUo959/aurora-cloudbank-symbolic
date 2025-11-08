@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-🔒 Aurora CloudBank Security Helpers
-
-
-Provides secure alternatives to common operations.
+Aurora CloudBank - Secure Helper Functions
+Provides security utilities and safe operations
 """
 
 import ast
 import html
+import logging
 import re
 import shlex
 import subprocess
@@ -76,7 +75,7 @@ def _validate_call(node: ast.Call, allowed_functions: Optional[Dict[str, Any]]) 
     if not isinstance(node.func, ast.Name):
         raise ValueError("Only direct function calls are allowed")
     func_name = node.func.id
-    if allowed_functions and func_name not in allowed_functions:
+    if allowed_functions is not None and func_name not in allowed_functions:
         raise ValueError(f"Function '{func_name}' is not allowed")
     for arg in node.args:
         _validate_ast_node(arg, allowed_functions)
@@ -382,8 +381,8 @@ class SecureHelpers:
         if len(expression) > max_length:
             raise ValueError(f"Expression exceeds maximum length of {max_length}")
 
-        # Whitelist allowed characters (digits, arithmetic ops, parentheses, decimal point, spaces)
-        allowed_chars = set('0123456789+-*/.() ')
+        # Whitelist: digits, operators, parens, decimal, spaces, letters, underscore, comma
+        allowed_chars = set('0123456789+-*/.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,')
         if not all(c in allowed_chars for c in expression):
             raise ValueError("Expression contains disallowed characters")
 

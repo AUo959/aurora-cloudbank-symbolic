@@ -495,7 +495,6 @@ async def agent_websocket_endpoint(websocket: WebSocket):
     client_id = verify_ws_token(token) if token else None
 
     if not client_id:
-        await websocket.accept()
         await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
         return
 

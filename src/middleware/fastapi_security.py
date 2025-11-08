@@ -21,6 +21,7 @@ import hmac
 import hashlib
 import os
 import time
+import re
 
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -158,6 +159,12 @@ if not WS_AUTH_SECRET or WS_AUTH_SECRET == "default-ws-secret-change-in-producti
     )
 WS_TOKEN_EXPIRY_SECONDS = 3600  # 1 hour
 
+# Maximum length for request_id to prevent DoS attacks
+MAX_REQUEST_ID_LENGTH = 128
+
+# Compiled regex for request_id validation (performance optimization)
+REQUEST_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+
 # Whitelist of allowed tool names for WebSocket execution.
 # Each entry maps a tool name to a description and rationale for why it is allowed.
 ALLOWED_WS_TOOLS = {
@@ -264,6 +271,34 @@ def validate_ws_tool(tool_name: str) -> bool:
         True if tool is allowed, False otherwise
     """
     return tool_name in ALLOWED_WS_TOOLS
+
+
+def sanitize_request_id(request_id: Optional[str]) -> Optional[str]:
+    """
+    Sanitize and validate request_id to prevent injection attacks and log pollution.
+
+    SECURITY: Validates that request_id matches expected format (UUID or alphanumeric)
+    to prevent injection attacks or log pollution.
+
+    Args:
+        request_id: Request ID from client (can be None)
+
+    Returns:
+        Sanitized request_id if valid, None if invalid or missing
+    """
+    if not request_id:
+        return None
+
+    # Enforce maximum length to prevent DoS
+    if len(request_id) > MAX_REQUEST_ID_LENGTH:
+        return None
+
+    # Allow only alphanumeric characters, hyphens, and underscores
+    # This covers UUID format and most standard request ID patterns
+    if not REQUEST_ID_PATTERN.match(request_id):
+        return None
+
+    return request_id
 
 
 # ================================

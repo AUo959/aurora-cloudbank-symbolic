@@ -32,7 +32,8 @@ from src.middleware.fastapi_security import (
     limiter,
     security,
     verify_ws_token,
-    validate_ws_tool
+    validate_ws_tool,
+    sanitize_request_id
 )
 
 # Import AuMemManager API integration
@@ -518,6 +519,9 @@ async def agent_websocket_endpoint(websocket: WebSocket):
             # Wait for messages from client
             data = await websocket.receive_json()
 
+            # SECURITY: Sanitize request_id to prevent injection attacks
+            request_id = sanitize_request_id(data.get("request_id"))
+
             # Process agent requests through WebSocket
             if data.get("type") == "tool_execution":
                 tool_name = data.get("tool_name", "").strip()
@@ -527,7 +531,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "error",
                         "error": f"Tool '{tool_name}' is not allowed via WebSocket",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
                     continue
 
@@ -537,7 +541,7 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "error",
                         "error": "Invalid parameters format (must be object)",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
                     continue
 
@@ -550,24 +554,29 @@ async def agent_websocket_endpoint(websocket: WebSocket):
                     await websocket.send_json({
                         "type": "tool_result",
                         "result": result,
-                        "request_id": data.get("request_id")
+                        "request_id": request_id
                     })
                 except Exception as e:
                     # SECURITY: Don't expose internal error details
                     await websocket.send_json({
                         "type": "error",
                         "error": "Tool execution failed",
-                        "request_id": data.get("request_id"),
+                        "request_id": request_id,
                     })
 
             elif data.get("type") == "ping":
-                await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
+                await websocket.send_json({
+                    "type": "pong",
+                    "timestamp": "2025-01-01T00:00:00Z",
+                    "request_id": request_id
+                })
 
             else:
                 await websocket.send_json({
                     "type": "error",
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"],
+                    "request_id": request_id,
                 })
 
     except Exception as e:

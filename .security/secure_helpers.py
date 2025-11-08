@@ -6,7 +6,6 @@ Provides security utilities and safe operations
 
 import ast
 import html
-import logging
 import re
 import shlex
 import subprocess
@@ -15,9 +14,11 @@ from typing import Any, Dict, List, Optional, Union
 
 
 def _validate_ast_node(node: ast.AST, allowed_functions: Optional[Dict[str, Any]] = None) -> None:
-    """Validate a single AST node using a small dispatcher to reduce branching.
+    """Validate a single AST node.
 
     SECURITY: Ensures only safe operations appear before controlled evaluation.
+    Allowed constructs: numeric constants, unary/binary arithmetic, simple name, whitelisted function call,
+    lists/tuples, subscripts (including slices).
     """
     # Fast-path simple constant / name nodes
     if isinstance(node, ast.Constant):
@@ -46,7 +47,7 @@ def _validate_ast_node(node: ast.AST, allowed_functions: Optional[Dict[str, Any]
     if isinstance(node, (ast.List, ast.Tuple)):
         _validate_sequence(node, allowed_functions)
         return
-    if isinstance(node, (ast.Subscript, ast.Index, ast.Slice)):
+    if isinstance(node, (ast.Subscript, ast.Slice)):
         _validate_slice_like(node, allowed_functions)
         return
 
@@ -94,10 +95,6 @@ def _validate_subscript(node: ast.Subscript, allowed_functions: Optional[Dict[st
     _validate_ast_node(node.slice, allowed_functions)
 
 
-def _validate_index(node: ast.Index, allowed_functions: Optional[Dict[str, Any]]) -> None:  # type: ignore[valid-type]
-    _validate_ast_node(node.value, allowed_functions)
-
-
 def _validate_slice(node: ast.Slice, allowed_functions: Optional[Dict[str, Any]]) -> None:
     if node.lower:
         _validate_ast_node(node.lower, allowed_functions)
@@ -108,114 +105,97 @@ def _validate_slice(node: ast.Slice, allowed_functions: Optional[Dict[str, Any]]
 
 
 def _validate_slice_like(node: ast.AST, allowed_functions: Optional[Dict[str, Any]]) -> None:
-    """Validate Subscript/Index/Slice nodes (consolidated)."""
+    """Validate Subscript / Slice nodes (Python 3.11+ – ast.Index removed)."""
     if isinstance(node, ast.Subscript):
         _validate_subscript(node, allowed_functions)
-    elif isinstance(node, ast.Index):  # type: ignore[attr-defined]
-        _validate_index(node, allowed_functions)  # type: ignore[arg-type]
     elif isinstance(node, ast.Slice):
         _validate_slice(node, allowed_functions)
     else:
         raise ValueError(f"Unsupported slice-like node: {type(node)}")
 
 
-def _evaluate_ast_node(node: ast.AST, allowed_functions: Dict[str, Any]) -> Any:
-    """Safely evaluate a validated AST node without using Python's built-in dynamic evaluator.
 
-    Uses a dispatch table to reduce cyclomatic complexity versus a long if/elif chain.
-    """
-    import operator
+class _EvalVisitor(ast.NodeVisitor):
+    def __init__(self, allowed_functions: Dict[str, Any]):
+        self.allowed_functions = allowed_functions
 
-    bin_ops = {
-        ast.Add: operator.add,
-        ast.Sub: operator.sub,
-        ast.Mult: operator.mul,
-        ast.Div: operator.truediv,
-        ast.FloorDiv: operator.floordiv,
-        ast.Mod: operator.mod,
-        ast.Pow: operator.pow,
-    }
-    unary_ops = {
-        ast.UAdd: operator.pos,
-        ast.USub: operator.neg,
-    }
+    def visit_Constant(self, node):
+        if isinstance(node.value, (int, float, type(None))):
+            return node.value
+        raise ValueError(f"Disallowed constant type: {type(node.value)}")
 
-    def _eval_constant(n: ast.Constant) -> Any:
-        if isinstance(n.value, (int, float, type(None))):
-            return n.value
-        raise ValueError(f"Disallowed constant type: {type(n.value)}")
-
-    def _eval_unary(n: ast.UnaryOp) -> Any:
-        op = unary_ops.get(type(n.op))
+    def visit_UnaryOp(self, node):
+        import operator
+        op = {ast.UAdd: operator.pos, ast.USub: operator.neg}.get(type(node.op))
         if not op:
-            raise ValueError(f"Unsupported unary operator: {type(n.op)}")
-        return op(_evaluate_ast_node(n.operand, allowed_functions))
+            raise ValueError(f"Unsupported unary operator: {type(node.op)}")
+        return op(self.visit(node.operand))
 
-    def _eval_binop(n: ast.BinOp) -> Any:
-        op = bin_ops.get(type(n.op))
+    def visit_BinOp(self, node):
+        import operator
+        bin_ops = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.FloorDiv: operator.floordiv,
+            ast.Mod: operator.mod,
+            ast.Pow: operator.pow,
+        }
+        op = bin_ops.get(type(node.op))
         if not op:
-            raise ValueError(f"Unsupported binary operator: {type(n.op)}")
-        left = _evaluate_ast_node(n.left, allowed_functions)
-        right = _evaluate_ast_node(n.right, allowed_functions)
-        return op(left, right)
+            raise ValueError(f"Unsupported binary operator: {type(node.op)}")
+        return op(self.visit(node.left), self.visit(node.right))
 
-    def _eval_name(n: ast.Name) -> Any:
-        if n.id in allowed_functions:
-            return allowed_functions[n.id]
-        raise ValueError(f"Name '{n.id}' is not allowed")
+    def visit_Name(self, node):
+        if node.id in self.allowed_functions:
+            return self.allowed_functions[node.id]
+        raise ValueError(f"Name '{node.id}' is not allowed")
 
-    def _eval_call(n: ast.Call) -> Any:
-        if not isinstance(n.func, ast.Name):
+    def visit_Call(self, node):
+        if not isinstance(node.func, ast.Name):
             raise ValueError("Only direct function calls are allowed")
-        func_name = n.func.id
-        if func_name not in allowed_functions:
+        func_name = node.func.id
+        if func_name not in self.allowed_functions:
             raise ValueError(f"Function '{func_name}' is not allowed")
-        func = allowed_functions[func_name]
-        evaluated_args = [_evaluate_ast_node(a, allowed_functions) for a in n.args]
-        evaluated_kwargs = {kw.arg: _evaluate_ast_node(kw.value, allowed_functions) for kw in n.keywords if kw.arg}
-        return func(*evaluated_args, **evaluated_kwargs)
+        func = self.allowed_functions[func_name]
+        args = [self.visit(a) for a in node.args]
+        kwargs = {kw.arg: self.visit(kw.value) for kw in node.keywords if kw.arg}
+        return func(*args, **kwargs)
 
-    def _eval_sequence(n: Union[ast.List, ast.Tuple]) -> Any:
-        items = [_evaluate_ast_node(e, allowed_functions) for e in n.elts]
-        return items if isinstance(n, ast.List) else tuple(items)
+    def visit_List(self, node):
+        return [self.visit(e) for e in node.elts]
 
-    def _eval_subscript(n: ast.Subscript) -> Any:
-        value = _evaluate_ast_node(n.value, allowed_functions)
-        index_node = n.slice
-        if isinstance(index_node, ast.Index) or hasattr(index_node, "value"):  # type: ignore[attr-defined]
-            idx_target = getattr(index_node, "value", index_node)
-            idx = _evaluate_ast_node(idx_target, allowed_functions) if isinstance(idx_target, ast.AST) else idx_target
-        elif isinstance(index_node, ast.Constant):
-            idx = index_node.value
-        else:
-            raise ValueError("Only simple constant indexing is allowed")
-        try:
-            return value[idx]  # type: ignore[index]
-        except (KeyError, IndexError, TypeError) as e:
-            raise ValueError(f"Subscript operation failed: {e}")
+    def visit_Tuple(self, node):
+        return tuple(self.visit(e) for e in node.elts)
 
-    def _eval_slice(n: ast.Slice) -> Any:
-        lower = _evaluate_ast_node(n.lower, allowed_functions) if n.lower else None
-        upper = _evaluate_ast_node(n.upper, allowed_functions) if n.upper else None
-        step = _evaluate_ast_node(n.step, allowed_functions) if n.step else None
+    def visit_Slice(self, node):
+        lower = self.visit(node.lower) if node.lower else None
+        upper = self.visit(node.upper) if node.upper else None
+        step = self.visit(node.step) if node.step else None
         return slice(lower, upper, step)
 
-    # Compact dispatch to reduce cyclomatic complexity
-    dispatch = (
-        (ast.Constant, _eval_constant),
-        (ast.UnaryOp, _eval_unary),
-        (ast.BinOp, _eval_binop),
-        (ast.Name, _eval_name),
-        (ast.Call, _eval_call),
-        (ast.List, _eval_sequence),
-        (ast.Tuple, _eval_sequence),
-        (ast.Subscript, _eval_subscript),
-        (ast.Slice, _eval_slice),
-    )
-    for cls, fn in dispatch:
-        if isinstance(node, cls):
-            return fn(node)  # type: ignore[misc]
-    raise ValueError(f"Unsupported AST node type: {type(node)}")
+    def visit_Subscript(self, node):
+        value = self.visit(node.value)
+        idx_node = node.slice
+        if isinstance(idx_node, ast.Slice):
+            idx = self.visit(idx_node)
+        elif isinstance(idx_node, ast.Constant):
+            idx = idx_node.value
+        else:
+            idx = self.visit(idx_node)
+        try:
+            return value[idx]  # type: ignore[index]
+        except Exception as e:
+            raise ValueError(f"Subscript operation failed: {e}")
+
+    def generic_visit(self, node):
+        raise ValueError(f"Unsupported AST node type: {type(node)}")
+
+def _evaluate_ast_node(node: ast.AST, allowed_functions: Dict[str, Any]) -> Any:
+    """Evaluate a validated AST node using a visitor pattern for clarity and maintainability."""
+    visitor = _EvalVisitor(allowed_functions)
+    return visitor.visit(node)
 
 
 class SecureHelpers:
@@ -315,7 +295,7 @@ class SecureHelpers:
             sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
             
             # Remove event handlers (even if escaped)
-            sanitized = re.sub(r'on[a-zA-Z0-9_]+\s*=', '', sanitized, flags=re.IGNORECASE)
+            sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
             
             # Remove data URIs which can contain scripts
             sanitized = re.sub(r'data:', '', sanitized, flags=re.IGNORECASE)
@@ -327,14 +307,13 @@ class SecureHelpers:
 
     @staticmethod
     def validate_file_path(file_path: str, allowed_dirs: Optional[List[str]] = None) -> bool:
-        """
-        Validate file path to prevent directory traversal attacks.
+        """Validate file path to prevent directory traversal attacks.
 
         Args:
             file_path: Path to validate
-            allowed_dirs: List of allowed directory prefixes
-
             allowed_dirs: Optional[List[str]]: List of allowed directory prefixes
+
+        Returns:
             True if path is safe, False otherwise
         """
         try:
@@ -355,15 +334,14 @@ class SecureHelpers:
 
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Optional[Dict[str, Any]] = None) -> Any:
-        """
-        Safe alternative to direct dynamic evaluation for simple expressions.
+        """Safe alternative to direct dynamic evaluation for simple expressions.
 
         Args:
             expression: Mathematical or simple expression
-            allowed_functions: Dictionary of allowed functions
+            allowed_functions: Optional mapping of function name to callable
 
         Returns:
-            allowed_functions: Optional[Dict[str, Any]]: Dictionary of allowed functions
+            Result of safe evaluation
         """
         if allowed_functions is None:
             allowed_functions = {
@@ -381,7 +359,8 @@ class SecureHelpers:
         if len(expression) > max_length:
             raise ValueError(f"Expression exceeds maximum length of {max_length}")
 
-        # Whitelist: digits, operators, parens, decimal, spaces, letters, underscore, comma
+    # Whitelist allowed characters (aligned with documentation & AST validation):
+        # digits, arithmetic ops, parentheses, decimal point, spaces, letters, underscore, comma.
         allowed_chars = set('0123456789+-*/.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,')
         if not all(c in allowed_chars for c in expression):
             raise ValueError("Expression contains disallowed characters")

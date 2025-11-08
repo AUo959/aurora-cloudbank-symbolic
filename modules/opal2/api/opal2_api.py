@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from src.middleware.fastapi_security import verify_csrf_token
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -109,25 +110,23 @@ async def health_check() -> Dict[str, Any]:
     }
 
 
-@app.post("/render")
+@app.post(  # verify_csrf inside"/render")
 async def render_glyph(
     request: RenderRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """Render a glyph with CSRF validation."""
-
-    _verify_token(token)
+    verify_csrf_token(token)
     return await _render_glyph_impl(request)
 
 
-@app.post("/generate")
+@app.post(  # verify_csrf inside"/generate")
 async def generate_glyph(
     request: GlyphGenerationRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """Generate a glyph with CSRF validation."""
-
-    _verify_token(token)
+    verify_csrf_token(token)
     return await _generate_glyph_impl(request)
 
 
@@ -151,8 +150,7 @@ async def clear_cache(
     token: HTTPAuthorizationCredentials = Depends(security),
 ) -> Dict[str, Any]:
     """Clear the glyph cache with CSRF validation."""
-
-    _verify_token(token)
+    verify_csrf_token(token)
     cleared_count = await glyph_cache.clear_async()
     return {"success": True, "cleared_items": cleared_count}
 
@@ -284,8 +282,7 @@ async def test_cache_system() -> Dict[str, Any]:
 
 
 def _verify_token(token: HTTPAuthorizationCredentials | None) -> None:
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail="Invalid CSRF token")
+    verify_csrf_token(token)
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -361,7 +358,13 @@ async def demo_interface() -> str:
 
                         if (renderResult.success) {
                             status.textContent = 'Render complete!';
-                            document.getElementById('render-area').innerHTML = renderResult.result;
+                            // SECURITY: Avoid innerHTML injection, assign as textContent
+                            const renderArea = document.getElementById('render-area');
+                            if (typeof renderResult.result === 'string') {
+                                renderArea.textContent = renderResult.result;
+                            } else {
+                                renderArea.textContent = JSON.stringify(renderResult.result);
+                            }
                         } else {
                             status.textContent = 'Render failed: ' + renderResult.error;
                         }

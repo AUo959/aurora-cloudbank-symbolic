@@ -16,19 +16,17 @@ Design follows defense-in-depth principles with:
 
 from functools import wraps
 from typing import Optional, List
-import secrets
 import hmac
 import hashlib
 import os
 import time
 import re
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 
 # ================================
@@ -140,11 +138,11 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
         if not hmac.compare_digest(signature, expected_signature):
             raise HTTPException(status_code=403, detail='Invalid CSRF token signature')
 
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=403, detail='Invalid CSRF token format')
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         # Log error securely without exposing details to client
         raise HTTPException(status_code=403, detail='CSRF token validation failed')
 
@@ -302,6 +300,28 @@ def sanitize_request_id(request_id: Optional[str]) -> Optional[str]:
         return None
 
     return request_id
+
+
+def sanitize_session_id(session_id: Optional[str]) -> Optional[str]:
+    """Sanitize and validate session_id similarly to request_id.
+
+    SECURITY: Enforces same character and length constraints used for request_id
+    so that any downstream binding (e.g., CSRF token session binding) cannot be
+    abused for log injection or resource exhaustion.
+
+    Args:
+        session_id: Raw session identifier from client.
+
+    Returns:
+        Sanitized session_id if valid; None otherwise.
+    """
+    if not session_id:
+        return None
+    if len(session_id) > MAX_REQUEST_ID_LENGTH:  # Reuse same cap
+        return None
+    if not REQUEST_ID_PATTERN.match(session_id):
+        return None
+    return session_id
 
 
 # ================================

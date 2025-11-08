@@ -11,7 +11,7 @@ import numpy as np
 _rng = np.random.default_rng()
 from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
-from src.middleware.fastapi_security import security
+from src.middleware.fastapi_security import security, verify_csrf_token
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -39,7 +39,9 @@ app = FastAPI(title="Aurora Quantum VSA Playground")
 
 # Add CORS middleware for frontend integration
 # SECURITY FIX: Use specific origins instead of wildcard when credentials are enabled
-allowed_origins = os.getenv("ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080").split(",")
+allowed_origins = [origin.strip() for origin in os.getenv(
+    "ALLOWED_CORS_ORIGINS", "http://localhost:3000,http://localhost:8080"
+).split(",")]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -181,12 +183,10 @@ def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
                     qc.cx(q, q + 1)
 
 
-@app.post("/upload/")
+@app.post(  # verify_csrf inside"/upload/")
 async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCredentials = Depends(security)):
     """Upload a bundle file with CSRF validation."""
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
 
     data = await file.read()
     if len(data) > MAX_UPLOAD_SIZE:
@@ -216,8 +216,17 @@ async def websocket_endpoint(websocket: WebSocket):
                     await conn.send_text(data)
                 except WebSocketDisconnect:
                     connections.remove(conn)
+                except Exception as e:
+                    # Parameterized logging to prevent potential log injection
+                    logger.error(
+                        "WebSocket broadcast error: %s (ws_id=%s)",
+                        str(e)[:100],
+                        id(conn),
+                    )
     except WebSocketDisconnect:
         connections.remove(websocket)
+    except Exception as e:
+        logger.error("WebSocket handler error: %s (ws_id=%s)", str(e)[:100], id(websocket))
 
 
 @app.on_event("startup")
@@ -240,7 +249,7 @@ class QuantumSymbolicVectorRequest(BaseModel):
     dim: Optional[int] = 8
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/geometric/product",
     summary="Geometric Product",
     response_description="Result of geometric product",
@@ -252,8 +261,7 @@ def geometric_product(req: GeometricProductRequest, token: HTTPAuthorizationCred
     Request body: {"a": float, "b": float}
     Response: {"result": str}
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     ga = GeometricAlgebra()
     a_mv = req.a * ga.blades["e1"]
     b_mv = req.b * ga.blades["e2"]
@@ -261,7 +269,7 @@ def geometric_product(req: GeometricProductRequest, token: HTTPAuthorizationCred
     return {"result": ga.pretty(result)}
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/quantum/symbolic_vector",
     summary="Quantum Symbolic Vector",
     response_description="Quantum-generated symbolic vector",
@@ -276,8 +284,7 @@ def quantum_symbolic_vector_endpoint(
     Request body: {"symbol": str, "dim": int}
     Response: {"symbol": str, "dim": int, "vector": list}
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     dim = req.dim if req.dim is not None else 8
     vec = quantum_symbolic_vector(req.symbol, dim)
     return {"symbol": req.symbol, "dim": req.dim, "vector": vec.tolist()}
@@ -396,7 +403,7 @@ def mcp_bridge_health_check():
         )
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/mcp_bridge/route_command",
     summary="Symbolic Command Routing via MCP Bridge",
     response_description="Routed command result",
@@ -417,7 +424,7 @@ def mcp_route_command(
     return router.route(command)
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/vsa/operation",
     summary="VSA Operation",
     response_description="Result of VSA operation",
@@ -429,8 +436,7 @@ def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials 
     Request body: {"symbol": str, "dimension": int, "operation_type": str}
     Response: {"symbol": str, "dimension": int, "result": Any}
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     if req.operation_type == "generate":
         vec = quantum_symbolic_vector(req.symbol, req.dimension)
         result = vec.tolist()
@@ -449,7 +455,7 @@ def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials 
     return {"symbol": req.symbol, "dimension": req.dimension, "result": result}
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/vsa/bind",
     summary="VSA Bind",
     response_description="Result of VSA bind operation",
@@ -461,8 +467,7 @@ def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(
     Request body: {"symbol_a": str, "symbol_b": str, "result_name": str, "dimension": int}
     Response: {"result_name": str, "dimension": int, "result": Any}
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     # Retrieve vectors from store
     vec_a = vsa_store.get(req.symbol_a)
     vec_b = vsa_store.get(req.symbol_b)
@@ -480,7 +485,7 @@ def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(
     }
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/vsa/similarity",
     summary="VSA Similarity",
     response_description="Similarity score between two symbolic vectors",
@@ -492,8 +497,7 @@ def vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredential
     Request body: {"symbol_a": str, "symbol_b": str}
     Response: {"symbol_a": str, "symbol_b": str, "similarity": float}
     """
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     # Retrieve vectors from store
     vec_a = vsa_store.get(req.symbol_a)
     vec_b = vsa_store.get(req.symbol_b)
@@ -510,7 +514,7 @@ def vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredential
     }
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/quantum/circuit",
     summary="Quantum Circuit",
     response_description="Result of quantum circuit operation",
@@ -532,7 +536,7 @@ def quantum_circuit(req: QuantumCircuitRequest):
     return result
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/geometric/algebra",
     summary="Geometric Algebra Operation",
     response_description="Result of geometric algebra operation",
@@ -587,11 +591,10 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 # === New VSA and Quantum Endpoints ===
 
 
-@app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector", dependencies=[Depends(security)])
+@app.post(  # verify_csrf inside"/api/vsa/generate", summary="Generate Quantum VSA Vector", dependencies=[Depends(security)])
 def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Generate a quantum symbolic vector for a given symbol."""
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     try:
         qsv = QuantumSymbolicVector(req.symbol, req.dimension)
         vsa_store[req.symbol] = qsv
@@ -608,11 +611,10 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
 
 
-@app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])
+@app.post(  # verify_csrf inside"/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])
 def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Bind two symbolic vectors using element-wise multiplication (XOR for bipolar)."""
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     try:
         # Generate vectors if they don't exist
         if req.symbol_a not in vsa_store:
@@ -652,11 +654,10 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
 
 
-@app.post("/api/vsa/similarity", summary="Calculate VSA similarity", dependencies=[Depends(security)])
+@app.post(  # verify_csrf inside"/api/vsa/similarity", summary="Calculate VSA similarity", dependencies=[Depends(security)])
 def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Calculate cosine similarity between two VSA vectors."""
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
     try:
         if req.symbol_a not in vsa_store:
             vsa_store[req.symbol_a] = QuantumSymbolicVector(req.symbol_a)
@@ -719,7 +720,7 @@ def clear_vsa_store():
     return {"message": f"Cleared {count} VSA vectors", "count": count}
 
 
-@app.post(
+@app.post(  # verify_csrf inside
     "/api/geometric/advanced",
     summary="Advanced Geometric Algebra Operations",
     dependencies=[Depends(security)],
@@ -729,8 +730,7 @@ def advanced_geometric_operations(
     token: HTTPAuthorizationCredentials = Depends(security),
 ):
     """Perform advanced geometric algebra operations on multiple vectors."""
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
 
     try:
         ga = GeometricAlgebra()
@@ -746,11 +746,10 @@ def advanced_geometric_operations(
         raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
 
 
-@app.post("/api/quantum/circuit", summary="Generate Quantum Circuit", dependencies=[Depends(security)])
+@app.post(  # verify_csrf inside"/api/quantum/circuit", summary="Generate Quantum Circuit", dependencies=[Depends(security)])
 def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Generate and analyze a quantum circuit for symbolic operations."""
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail=CSRF_INVALID_MSG)
+    verify_csrf_token(token)
 
     try:
         if not QISKIT_AVAILABLE:
@@ -797,31 +796,41 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
     }
     await websocket.send_json(welcome_msg)
 
+    async def _broadcast_operation(origin: WebSocket, data: dict) -> None:
+        broadcast_msg = {
+            "type": "vsa_update",
+            "operation": data.get("operation"),
+            "symbol": data.get("symbol"),
+            "timestamp": data.get("timestamp"),
+            "user": data.get("user", "anonymous"),
+        }
+        for conn in list(connections):
+            if conn is origin:
+                continue
+            try:
+                await conn.send_json(broadcast_msg)
+            except WebSocketDisconnect:
+                if conn in connections:
+                    connections.remove(conn)
+            except Exception as e:
+                logger.error(
+                    "WebSocket collab broadcast error: %s (ws_id=%s) user=%s",
+                    str(e)[:100],
+                    id(conn),
+                    broadcast_msg.get('user'),
+                )
+
     try:
         while True:
             data = await websocket.receive_json()
-
-            # Process collaborative VSA operations
-            if data.get("type") == "vsa_operation":
-                # Broadcast VSA operation to all connected clients
-                broadcast_msg = {
-                    "type": "vsa_update",
-                    "operation": data.get("operation"),
-                    "symbol": data.get("symbol"),
-                    "timestamp": data.get("timestamp"),
-                    "user": data.get("user", "anonymous"),
-                }
-
-                for conn in connections:
-                    if conn is websocket:
-                        continue
-                    try:
-                        await conn.send_json(broadcast_msg)
-                    except WebSocketDisconnect:
-                        connections.remove(conn)
+            msg_type = data.get("type")
+            if msg_type == "vsa_operation":
+                await _broadcast_operation(websocket, data)
 
     except WebSocketDisconnect:
         connections.remove(websocket)
+    except Exception as e:
+        logger.error("WebSocket collab handler error: %s (ws_id=%s)", str(e)[:100], id(websocket))
 
 if __name__ == "__main__":
 

@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # Import centralized security configuration
-from src.middleware.fastapi_security import security, setup_cors_middleware
+from src.middleware.fastapi_security import security, setup_cors_middleware, verify_csrf_token, sanitize_session_id
 
 
 class QuantumVectorRequest(BaseModel):
@@ -86,15 +86,13 @@ async def get_status():
     }
 
 
-@app.post("/api/quantum/vector")
+@app.post(  # verify_csrf inside"/api/quantum/vector")
 async def generate_quantum_vector(
     request: QuantumVectorRequest,
     token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Generate quantum vector"""
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    verify_csrf_token(token)
 
     try:
         # Simulate quantum vector generation
@@ -113,12 +111,10 @@ async def generate_quantum_vector(
         raise HTTPException(status_code=500, detail=f"Quantum processing error: {str(e)}")
 
 
-@app.post("/api/consciousness/evolve")
+@app.post(  # verify_csrf inside"/api/consciousness/evolve")
 async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Evolve consciousness state"""
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    verify_csrf_token(token)
 
     try:
         # Simulate consciousness evolution
@@ -141,12 +137,10 @@ async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthori
         raise HTTPException(status_code=500, detail=f"Consciousness processing error: {str(e)}")
 
 
-@app.post("/api/learning/pattern")
+@app.post(  # verify_csrf inside"/api/learning/pattern")
 async def process_learning_pattern(request: LearningRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Process learning pattern"""
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    verify_csrf_token(token)
 
     try:
         # Simulate pattern processing

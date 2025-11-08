@@ -502,15 +502,16 @@ def geometric_algebra(req: GeometricAlgebraRequest):
     Response: {"operation": str, "result": Any}
     """
     ga = GeometricAlgebra()
-    _ = None
+    # Initialize result to ensure it's always defined before return
+    result = None
 
     if req.operation == "product":
         # Compute geometric product
         blades = [ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))]
-        _ = ga.mult(*blades)
+        result = ga.mult(*blades)
     elif req.operation == "add":
         # Compute geometric addition
-        _ = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
+        result = sum((ga.blades[f"e{i + 1}"] for i in range(len(req.vectors))), start=ga.zero)
     elif req.operation == "commutator":
         # Compute commutator
         if len(req.vectors) != 2:
@@ -527,7 +528,8 @@ def geometric_algebra(req: GeometricAlgebraRequest):
         result = ga.commutator(blade1, blade2)
     else:
         raise HTTPException(status_code=400, detail="Invalid operation")
-
+    if result is None:
+        raise HTTPException(status_code=500, detail="Geometric algebra computation failed")
     return {"operation": req.operation, "result": ga.pretty(result)}
 
 # === New VSA and Quantum Endpoints ===
@@ -575,13 +577,13 @@ def bind_vsa_vectors(req: VSABindRequest):
         vec_b = vec_b[:min_dim]
 
         # Bind operation (element-wise multiplication for bipolar vectors)
+        # Perform element-wise multiplication safely (numpy arrays)
         bound_vector = vec_a * vec_b
 
-        # Store result
-        result_qsv = QuantumSymbolicVector.__new__(QuantumSymbolicVector)
-        result_qsv.symbol = req.result_name
+        # Create a new quantum symbolic vector using standard constructor then override vector data
+        result_qsv = QuantumSymbolicVector(req.result_name, min_dim)
+        result_qsv.vector = bound_vector  # overwrite generated data with bound result
         result_qsv.dim = min_dim
-        result_qsv.vector = bound_vector
         result_qsv.vector_type = "bipolar"
         vsa_store[req.result_name] = result_qsv
 
@@ -731,7 +733,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest):
         qc = QuantumCircuit(req.qubits, req.qubits)
 
         # Apply gates based on symbol and depth
-        for depth in range(req.depth):
+        for _ in range(req.depth):  # depth variable not used; replace with underscore to reduce lint noise
             for qubit in range(req.qubits):
                 gate_choice = np.random.rand()
                 if gate_choice < 0.3:

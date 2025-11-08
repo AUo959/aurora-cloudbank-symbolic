@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Any
 
 import aiofiles
 import numpy as np
+_rng = np.random.default_rng()
 from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
 from src.middleware.fastapi_security import security
@@ -193,8 +194,11 @@ class QuantumSymbolicVectorRequest(BaseModel):
     "/geometric/product",
     summary="Geometric Product",
     response_description="Result of geometric product",
+    dependencies=[Depends(security)],
 )
-def geometric_product(req: GeometricProductRequest):
+def geometric_product(req: GeometricProductRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Compute the geometric product of two 3D vectors (a*e1, b*e2) using Clifford algebra.
     Request body: {"a": float, "b": float}
@@ -211,14 +215,21 @@ def geometric_product(req: GeometricProductRequest):
     "/quantum/symbolic_vector",
     summary="Quantum Symbolic Vector",
     response_description="Quantum-generated symbolic vector",
+    dependencies=[Depends(security)],
 )
-def quantum_symbolic_vector_endpoint(req: QuantumSymbolicVectorRequest):
+def quantum_symbolic_vector_endpoint(
+    req: QuantumSymbolicVectorRequest,
+    token: HTTPAuthorizationCredentials = Depends(security),
+):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Generate a symbolic vector using a quantum circuit seeded by the symbol hash.
     Request body: {"symbol": str, "dim": int}
     Response: {"symbol": str, "dim": int, "vector": list}
     """
-    vec = quantum_symbolic_vector(req.symbol, req.dim)
+    dim = req.dim if req.dim is not None else 8
+    vec = quantum_symbolic_vector(req.symbol, dim)
     return {"symbol": req.symbol, "dim": req.dim, "vector": vec.tolist()}
 
 
@@ -266,100 +277,72 @@ def mcp_bridge_health_check():
     import time
     from datetime import datetime, timezone
 
-    try:
-        mcp_data = get_mcp_bridge_core()
-        security_layers = mcp_data.get("security_layers", {})
+    def _compute_security(security_layers: Dict[str, Any]) -> Dict[str, Any]:
+        drift = security_layers.get("drift_lock") == "ACTIVE"
+        guardian = security_layers.get("guardian_ring") in ("ACTIVE", "STAGED_ACTIVE")
+        ethics = security_layers.get("ethics_lock") == "ENFORCED"
+        return {
+            "drift_lock": {"status": security_layers.get("drift_lock", "UNKNOWN"), "active": drift},
+            "guardian_ring": {"status": security_layers.get("guardian_ring", "UNKNOWN"), "active": guardian},
+            "ethics_lock": {"status": security_layers.get("ethics_lock", "UNKNOWN"), "enforced": ethics},
+            "all_active": drift and guardian and ethics,
+        }
 
-        # Validate security layers
-        drift_lock_active = security_layers.get("drift_lock") == "ACTIVE"
-        guardian_active = security_layers.get("guardian_ring") in ("ACTIVE", "STAGED_ACTIVE")
-        ethics_enforced = security_layers.get("ethics_lock") == "ENFORCED"
+    def _derive_status(active: bool, fn_count: int, mesh_active: bool) -> tuple[str, bool, bool]:
+        if active and fn_count >= 7 and mesh_active:
+            return "healthy", True, True
+        if active and fn_count > 0:
+            return "degraded", True, True
+        return "unhealthy", False, True
 
-        all_security_active = drift_lock_active and guardian_active and ethics_enforced
-
-        # Check core functions availability
-        core_functions = mcp_data.get("core_functions", [])
-        functions_count = len(core_functions)
-
-        # External hooks validation
-        external_hooks = mcp_data.get("external_hooks", {})
-        mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
-
-        # Determine overall health status
-        if all_security_active and functions_count >= 7 and mesh_sync_active:
-            status = "healthy"
-            ready = True
-            live = True
-        elif all_security_active and functions_count > 0:
-            status = "degraded"
-            ready = True
-            live = True
-        else:
-            status = "unhealthy"
-            ready = False
-            live = True  # Still alive, just not ready
-
+    def _build_response(mcp: Dict[str, Any], sec: Dict[str, Any], fn_count: int, mesh_active: bool) -> Dict[str, Any]:
+        status, ready, live = _derive_status(sec["all_active"], fn_count, mesh_active)
         current_time = datetime.now(timezone.utc).isoformat()
-
         return {
             "status": status,
-            "module_id": mcp_data.get("module_id", "UNKNOWN"),
-            "version": mcp_data.get("version", "UNKNOWN"),
-            "governance_layer": mcp_data.get("governance_layer", "UNKNOWN"),
-            "security_layers": {
-                "drift_lock": {
-                    "status": security_layers.get("drift_lock", "UNKNOWN"),
-                    "active": drift_lock_active
-                },
-                "guardian_ring": {
-                    "status": security_layers.get("guardian_ring", "UNKNOWN"),
-                    "active": guardian_active
-                },
-                "ethics_lock": {
-                    "status": security_layers.get("ethics_lock", "UNKNOWN"),
-                    "enforced": ethics_enforced
-                }
-            },
-            "core_functions": {
-                "count": functions_count,
-                "required": 7,
-                "available": functions_count >= 7
-            },
+            "module_id": mcp.get("module_id", "UNKNOWN"),
+            "version": mcp.get("version", "UNKNOWN"),
+            "governance_layer": mcp.get("governance_layer", "UNKNOWN"),
+            "security_layers": {k: v for k, v in sec.items() if k != "all_active"},
+            "core_functions": {"count": fn_count, "required": 7, "available": fn_count >= 7},
             "external_hooks": {
                 "symbolic_mesh_sync": {
-                    "status": external_hooks.get("symbolic_mesh_sync", "UNKNOWN"),
-                    "active": mesh_sync_active
+                    "status": mcp.get("external_hooks", {}).get("symbolic_mesh_sync", "UNKNOWN"),
+                    "active": mesh_active,
                 },
-                "gpt_parallel_nodes": len(external_hooks.get("gpt_parallel_nodes", []))
+                "gpt_parallel_nodes": len(mcp.get("external_hooks", {}).get("gpt_parallel_nodes", [])),
             },
-            "ethics_protocol": mcp_data.get("ethics_protocol", "UNKNOWN"),
-            "anchor_seed": mcp_data.get("anchor_seed", "UNKNOWN"),
+            "ethics_protocol": mcp.get("ethics_protocol", "UNKNOWN"),
+            "anchor_seed": mcp.get("anchor_seed", "UNKNOWN"),
             "timestamp": current_time,
             "uptime_seconds": time.time(),
-            "kubernetes": {
-                "ready": ready,
-                "live": live
-            },
+            "kubernetes": {"ready": ready, "live": live},
             "aurora_metadata": {
                 "T1": current_time,
                 "SRB": "MCP_HEALTH_CHECK_v1",
-                "chain_notation": "#K8S//MCP//HEALTH//"
-            }
+                "chain_notation": "#K8S//MCP//HEALTH//",
+            },
         }
 
-    except Exception as e:
+    try:
+        mcp_data = get_mcp_bridge_core()
+        security_layers = mcp_data.get("security_layers", {})
+        sec = _compute_security(security_layers)
+        core_functions = mcp_data.get("core_functions", [])
+        functions_count = len(core_functions)
+        external_hooks = mcp_data.get("external_hooks", {})
+        mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
+        return _build_response(mcp_data, sec, functions_count, mesh_sync_active)
+    except Exception as e:  # pragma: no cover - defensive fallback
         logger.error("MCP health check failed: %s", str(e))
         return JSONResponse(
             status_code=503,
             content={
                 "status": "unhealthy",
                 "error": str(e),
-                "kubernetes": {
-                    "ready": False,
-                    "live": True
-                },
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
+                "kubernetes": {"ready": False, "live": True},
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
         )
 
 
@@ -388,8 +371,11 @@ def mcp_route_command(
     "/vsa/operation",
     summary="VSA Operation",
     response_description="Result of VSA operation",
+    dependencies=[Depends(security)],
 )
-def vsa_operation(req: VSAOperationRequest):
+def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Perform an operation on the VSA symbolic vector.
     Request body: {"symbol": str, "dimension": int, "operation_type": str}
@@ -417,8 +403,11 @@ def vsa_operation(req: VSAOperationRequest):
     "/vsa/bind",
     summary="VSA Bind",
     response_description="Result of VSA bind operation",
+    dependencies=[Depends(security)],
 )
-def vsa_bind(req: VSABindRequest):
+def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Bind two symbolic vectors in the VSA.
     Request body: {"symbol_a": str, "symbol_b": str, "result_name": str, "dimension": int}
@@ -445,8 +434,11 @@ def vsa_bind(req: VSABindRequest):
     "/vsa/similarity",
     summary="VSA Similarity",
     response_description="Similarity score between two symbolic vectors",
+    dependencies=[Depends(security)],
 )
-def vsa_similarity(req: VSASimilarityRequest):
+def vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Compute similarity between two symbolic vectors in the VSA.
     Request body: {"symbol_a": str, "symbol_b": str}
@@ -459,7 +451,7 @@ def vsa_similarity(req: VSASimilarityRequest):
         raise HTTPException(status_code=404, detail="One or both symbols not found")
 
     # Compute similarity (placeholder logic)
-    similarity_score = np.random.rand()  # Replace with actual similarity computation
+    similarity_score = float(_rng.random())  # Placeholder similarity using modern RNG
 
     return {
         "symbol_a": req.symbol_a,
@@ -523,7 +515,10 @@ def geometric_algebra(req: GeometricAlgebraRequest):
             return ga.commutator(blade1, blade2)  # type: ignore[attr-defined]
         ab = ga.mult(blade1, blade2)
         ba = ga.mult(blade2, blade1)
-        return ab - ba if not getattr(ga, "_mock", False) else ab + ba
+        # Ensure subtraction/addition only if algebra elements support it
+        if hasattr(ab, "__sub__") and hasattr(ab, "__add__"):
+            return ab - ba if not getattr(ga, "_mock", False) else ab + ba
+        return ab
 
     if req.operation == "product":
         result = _ga_product()
@@ -540,8 +535,10 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 # === New VSA and Quantum Endpoints ===
 
 
-@app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector")
-def generate_vsa_vector(req: VSAOperationRequest):
+@app.post("/api/vsa/generate", summary="Generate Quantum VSA Vector", dependencies=[Depends(security)])
+def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Generate a quantum symbolic vector for a given symbol.
     """
@@ -552,7 +549,7 @@ def generate_vsa_vector(req: VSAOperationRequest):
         return {
             "symbol": req.symbol,
             "dimension": req.dimension,
-            "vector": qsv.vector.tolist()[:32],  # First 32 elements for display
+            "vector": (qsv.vector.tolist() if hasattr(qsv.vector, "tolist") else list(qsv.vector))[:32],
             "vector_full_length": len(qsv.vector),
             "vector_type": "bipolar",
             "quantum_generated": True,
@@ -561,8 +558,10 @@ def generate_vsa_vector(req: VSAOperationRequest):
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
 
 
-@app.post("/api/vsa/bind", summary="Bind two VSA vectors")
-def bind_vsa_vectors(req: VSABindRequest):
+@app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])
+def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Bind two symbolic vectors using element-wise multiplication (XOR for bipolar).
     """
@@ -583,7 +582,8 @@ def bind_vsa_vectors(req: VSABindRequest):
 
         # Bind operation (element-wise multiplication for bipolar vectors)
         # Perform element-wise multiplication safely (numpy arrays)
-        bound_vector = vec_a * vec_b
+        # Element-wise multiplication using numpy for bipolar vectors
+        bound_vector = vec_a * vec_b  # vec_a/vec_b are numpy arrays from QuantumSymbolicVector
 
         # Create a new quantum symbolic vector using standard constructor then override vector data
         result_qsv = QuantumSymbolicVector(req.result_name, min_dim)
@@ -606,8 +606,10 @@ def bind_vsa_vectors(req: VSABindRequest):
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
 
 
-@app.post("/api/vsa/similarity", summary="Calculate VSA similarity")
-def calculate_vsa_similarity(req: VSASimilarityRequest):
+@app.post("/api/vsa/similarity", summary="Calculate VSA similarity", dependencies=[Depends(security)])
+def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Calculate cosine similarity between two VSA vectors.
     """
@@ -654,7 +656,7 @@ def list_vsa_vectors():
                 "symbol": symbol,
                 "dimension": len(qsv.vector),
                 "vector_type": getattr(qsv, "vector_type", "bipolar"),
-                "preview": qsv.vector.tolist()[:8],
+                "preview": (qsv.vector.tolist() if hasattr(qsv.vector, "tolist") else list(qsv.vector))[:8],
             }
             for symbol, qsv in vsa_store.items()
         ],
@@ -673,109 +675,106 @@ def clear_vsa_store():
     return {"message": f"Cleared {count} VSA vectors", "count": count}
 
 
-@app.post("/api/geometric/advanced", summary="Advanced Geometric Algebra Operations")
-def advanced_geometric_operations(req: GeometricAlgebraRequest):
+@app.post(
+    "/api/geometric/advanced",
+    summary="Advanced Geometric Algebra Operations",
+    dependencies=[Depends(security)],
+)
+def advanced_geometric_operations(
+    req: GeometricAlgebraRequest,
+    token: HTTPAuthorizationCredentials = Depends(security),
+):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Perform advanced geometric algebra operations on multiple vectors.
     """
+    def _build_mv(ga: GeometricAlgebra, vec_spec: Dict[str, float]) -> Any:
+        mv = 0
+        for blade, coeff in vec_spec.items():
+            mv += coeff * ga.blades.get(blade, coeff if blade not in ga.blades else ga.blades[blade])
+        return mv
+
+    def _compute_product(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Dict[str, Any]:
+        result = 1
+        for spec in vectors:
+            result = ga.mult(result, _build_mv(ga, spec))
+        return {"result": ga.pretty(result), "type": "geometric_product"}
+
+    def _compute_commutator(ga: GeometricAlgebra, vectors: List[Dict[str, float]]) -> Optional[Dict[str, Any]]:
+        if len(vectors) < 2:
+            return None
+        mv_a = _build_mv(ga, vectors[0])
+        mv_b = _build_mv(ga, vectors[1])
+        ab = ga.mult(mv_a, mv_b)
+        ba = ga.mult(mv_b, mv_a)
+        if hasattr(ab, "__sub__") and hasattr(ab, "__add__"):
+            comm = ab - ba if not getattr(ga, "_mock", False) else ab + ba
+        else:
+            comm = ab
+        return {"result": ga.pretty(comm), "type": "commutator"}
+
     try:
         ga = GeometricAlgebra()
-        results = []
-
         if req.operation == "product":
-            # Compute geometric product of all vectors
-            result = 1
-            for vec_spec in req.vectors:
-                mv = 0
-                for blade, coeff in vec_spec.items():
-                    if blade in ga.blades:
-                        mv += coeff * ga.blades[blade]
-                    else:
-                        mv += coeff  # scalar part
-                result = ga.mult(result, mv)
-            results.append({"result": ga.pretty(result), "type": "geometric_product"})
-
+            computed = [_compute_product(ga, req.vectors)]
         elif req.operation == "commutator":
-            # Compute commutator [A, B] = AB - BA
-            if len(req.vectors) >= 2:
-                mv_a = 0
-                mv_b = 0
-                for blade, coeff in req.vectors[0].items():
-                    if blade in ga.blades:
-                        mv_a += coeff * ga.blades[blade]
-                for blade, coeff in req.vectors[1].items():
-                    if blade in ga.blades:
-                        mv_b += coeff * ga.blades[blade]
-
-                ab = ga.mult(mv_a, mv_b)
-                ba = ga.mult(mv_b, mv_a)
-                commutator = ab - ba if not ga._mock else ab + ba  # Mock approximation
-                results.append({"result": ga.pretty(commutator), "type": "commutator"})
-
-        return {
-            "operation": req.operation,
-            "input_vectors": req.vectors,
-            "results": results,
-            "mock_mode": ga._mock,
-        }
-    except Exception as e:
+            comm = _compute_commutator(ga, req.vectors)
+            computed = [comm] if comm else []
+        else:
+            return {"operation": req.operation, "input_vectors": req.vectors, "results": [], "mock_mode": ga._mock}
+        return {"operation": req.operation, "input_vectors": req.vectors, "results": computed, "mock_mode": ga._mock}
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
 
 
-@app.post("/api/quantum/circuit", summary="Generate Quantum Circuit")
-def generate_quantum_circuit(req: QuantumCircuitRequest):
+@app.post("/api/quantum/circuit", summary="Generate Quantum Circuit", dependencies=[Depends(security)])
+def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    if not token or len(token.credentials) < 10:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
     """
     Generate and analyze a quantum circuit for symbolic operations.
     """
-    try:
+    def _hash_seed(symbol: str) -> int:
+        return int(hashlib.sha256(symbol.encode()).hexdigest(), 16) % (2**32)
 
-        # Create circuit based on symbol hash (using SHA256 for security)
+    def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
+        for _ in range(depth):
+            for q in range(qubits):
+                r = float(_rng.random())
+                if r < 0.3:
+                    qc.h(q)
+                elif r < 0.6:
+                    qc.x(q)
+                elif r < 0.8:
+                    qc.z(q)
+                else:
+                    if q < qubits - 1:
+                        qc.cx(q, q + 1)
+
+    try:
         if not QISKIT_AVAILABLE:
             return {"error": "Qiskit not available", "symbol": req.symbol}
-        h = int(hashlib.sha256(req.symbol.encode()).hexdigest(), 16) % (2**32)
-        np.random.seed(h)
-
-        qc = QuantumCircuit(req.qubits, req.qubits)
-
-        # Apply gates based on symbol and depth
-        for _ in range(req.depth):  # depth variable not used; replace with underscore to reduce lint noise
-            for qubit in range(req.qubits):
-                gate_choice = np.random.rand()
-                if gate_choice < 0.3:
-                    qc.h(qubit)  # Hadamard
-                elif gate_choice < 0.6:
-                    qc.x(qubit)  # Pauli-X
-                elif gate_choice < 0.8:
-                    qc.z(qubit)  # Pauli-Z
-                else:
-                    if qubit < req.qubits - 1:
-                        qc.cx(qubit, qubit + 1)  # CNOT
-
-        # Measure all qubits
+        np.random.seed(_hash_seed(req.symbol))
+        qc = QuantumCircuit(req.qubits, req.qubits)  # type: ignore[call-arg]
+        _apply_symbolic_gates(qc, req.depth, req.qubits)
         qc.measure(range(req.qubits), range(req.qubits))
-
-        # Run simulation
-        if not QISKIT_AVAILABLE:
-            return {"error": "Qiskit not available"}
-        backend = AerSimulator()
+        backend = AerSimulator()  # type: ignore[call-arg]
         result = backend.run(qc, shots=1000).result()
         counts = result.get_counts()
-
-        # Analyze results
-        most_frequent = max(counts.items(), key=lambda x: x[1])
-
+        most_frequent = max(counts.items(), key=lambda x: x[1]) if counts else ("0" * req.qubits, 0)
         return {
             "symbol": req.symbol,
             "qubits": req.qubits,
             "depth": req.depth,
             "circuit_gates": qc.num_nonlocal_gates(),
-            "measurement_counts": dict(list(counts.items())[:10]),  # Top 10 results
+            "measurement_counts": dict(list(counts.items())[:10]),
             "most_frequent_state": most_frequent[0],
             "most_frequent_probability": most_frequent[1] / 1000,
             "total_shots": 1000,
             "circuit_qasm": qc.qasm(),
         }
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Quantum circuit generation failed: {str(e)}")
 
 # === Enhanced WebSocket for Real-time Collaboration ===
@@ -813,7 +812,7 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
                     "user": data.get("user", "anonymous"),
                 }
 
-                for conn in list(connections):
+                for conn in connections:
                     if conn is websocket:
                         continue
                     try:

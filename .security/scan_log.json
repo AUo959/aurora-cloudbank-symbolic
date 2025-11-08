@@ -267,6 +267,51 @@
         "/workspaces/aurora-cloudbank-symbolic/.security/log_injection_validator.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-08T02:45:31.035638",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u274c XSS/Code Injection: FAILED\n\ud83d\udea8 XSS/INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 98: eval() call - code injection risk - \"\"\"Safely evaluate a validated AST node without using eval().\"\"\"\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 326: eval() call - code injection risk - Safe alternative to eval() for sim..."
+    },
+    {
+      "timestamp": "2025-11-08T02:51:06.976367",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 536: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:00:16.984628",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:06:16.730302",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 543: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:11:43.973715",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u274c XSS/Code Injection: FAILED\n\ud83d\udea8 XSS/INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 121: eval() call - code injection risk - \"\"\"Safely evaluate a validated AST node without using eval().\"\"\"\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 349: eval() call - code injection risk - Safe alternative to eval() for si..."
     }
   ]
 }

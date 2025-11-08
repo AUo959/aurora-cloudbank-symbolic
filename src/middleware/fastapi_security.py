@@ -122,7 +122,10 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
         # Grace period allows for minor time synchronization differences between client and server
         token_time = int(timestamp)
         current_time = int(time.time())
-        if current_time - token_time > CSRF_TOKEN_EXPIRY_SECONDS + CSRF_CLOCK_SKEW_GRACE_SECONDS:
+        age = current_time - token_time
+        if age < -CSRF_CLOCK_SKEW_GRACE_SECONDS:
+            raise HTTPException(status_code=403, detail='CSRF token timestamp invalid')
+        if age > CSRF_TOKEN_EXPIRY_SECONDS + CSRF_CLOCK_SKEW_GRACE_SECONDS:
             raise HTTPException(status_code=403, detail='CSRF token expired')
 
         # Verify HMAC signature

@@ -35,63 +35,86 @@ def _validate_ast_node(node: ast.AST, allowed_functions: Optional[Dict[str, Any]
     }
 
     if isinstance(node, ast.Constant):
-        # Allow only numbers (int, float) and None
-        if not isinstance(node.value, (int, float, type(None))):
-            raise ValueError(f"Disallowed constant type: {type(node.value)}")
+        _validate_constant(node)
 
     elif isinstance(node, ast.Name):
         # Allow variable references (will be checked at runtime)
         pass
 
     elif isinstance(node, ast.UnaryOp):
-        if type(node.op) not in allowed_ops:
-            raise ValueError(f"Disallowed unary operator: {type(node.op)}")
-        _validate_ast_node(node.operand, allowed_functions)
+        _validate_unary(node, allowed_ops, allowed_functions)
 
     elif isinstance(node, ast.BinOp):
-        if type(node.op) not in allowed_ops:
-            raise ValueError(f"Disallowed binary operator: {type(node.op)}")
-        _validate_ast_node(node.left, allowed_functions)
-        _validate_ast_node(node.right, allowed_functions)
+        _validate_binop(node, allowed_ops, allowed_functions)
 
     elif isinstance(node, ast.Call):
-        # Only allow whitelisted function calls
-        if not isinstance(node.func, ast.Name):
-            raise ValueError("Only direct function calls are allowed")
-
-        func_name = node.func.id
-        if allowed_functions and func_name not in allowed_functions:
-            raise ValueError(f"Function '{func_name}' is not allowed")
-
-        # Validate function arguments
-        for arg in node.args:
-            _validate_ast_node(arg, allowed_functions)
-        for keyword in node.keywords:
-            if keyword.arg:
-                _validate_ast_node(keyword.value, allowed_functions)
+        _validate_call(node, allowed_functions)
 
     elif isinstance(node, (ast.List, ast.Tuple)):
-        # Allow lists and tuples
-        for element in node.elts:
-            _validate_ast_node(element, allowed_functions)
+        _validate_sequence(node, allowed_functions)
 
     elif isinstance(node, ast.Subscript):
-        # Allow indexing operations
-        _validate_ast_node(node.value, allowed_functions)
-        _validate_ast_node(node.slice, allowed_functions)
+        _validate_subscript(node, allowed_functions)
 
     elif isinstance(node, ast.Index):
-        # Python 3.8 compatibility
-        _validate_ast_node(node.value, allowed_functions)  # type: ignore[attr-defined]
+        _validate_index(node, allowed_functions)  # type: ignore[attr-defined]
 
     elif isinstance(node, ast.Slice):
-        # Allow slice operations
-        if node.lower:
-            _validate_ast_node(node.lower, allowed_functions)
-        if node.upper:
-            _validate_ast_node(node.upper, allowed_functions)
-        if node.step:
-            _validate_ast_node(node.step, allowed_functions)
+        _validate_slice(node, allowed_functions)
+
+
+def _validate_constant(node: ast.Constant) -> None:
+    if not isinstance(node.value, (int, float, type(None))):
+        raise ValueError(f"Disallowed constant type: {type(node.value)}")
+
+
+def _validate_unary(node: ast.UnaryOp, allowed_ops: set, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if type(node.op) not in allowed_ops:
+        raise ValueError(f"Disallowed unary operator: {type(node.op)}")
+    _validate_ast_node(node.operand, allowed_functions)
+
+
+def _validate_binop(node: ast.BinOp, allowed_ops: set, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if type(node.op) not in allowed_ops:
+        raise ValueError(f"Disallowed binary operator: {type(node.op)}")
+    _validate_ast_node(node.left, allowed_functions)
+    _validate_ast_node(node.right, allowed_functions)
+
+
+def _validate_call(node: ast.Call, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if not isinstance(node.func, ast.Name):
+        raise ValueError("Only direct function calls are allowed")
+    func_name = node.func.id
+    if allowed_functions and func_name not in allowed_functions:
+        raise ValueError(f"Function '{func_name}' is not allowed")
+    for arg in node.args:
+        _validate_ast_node(arg, allowed_functions)
+    for keyword in node.keywords:
+        if keyword.arg:
+            _validate_ast_node(keyword.value, allowed_functions)
+
+
+def _validate_sequence(node: Union[ast.List, ast.Tuple], allowed_functions: Optional[Dict[str, Any]]) -> None:
+    for element in node.elts:
+        _validate_ast_node(element, allowed_functions)
+
+
+def _validate_subscript(node: ast.Subscript, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    _validate_ast_node(node.value, allowed_functions)
+    _validate_ast_node(node.slice, allowed_functions)
+
+
+def _validate_index(node: ast.Index, allowed_functions: Optional[Dict[str, Any]]) -> None:  # type: ignore[valid-type]
+    _validate_ast_node(node.value, allowed_functions)
+
+
+def _validate_slice(node: ast.Slice, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if node.lower:
+        _validate_ast_node(node.lower, allowed_functions)
+    if node.upper:
+        _validate_ast_node(node.upper, allowed_functions)
+    if node.step:
+        _validate_ast_node(node.step, allowed_functions)
 
 
 def _evaluate_ast_node(node: ast.AST, allowed_functions: Dict[str, Any]) -> Any:

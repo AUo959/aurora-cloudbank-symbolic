@@ -17,6 +17,48 @@
 | `DLP:TAG` | Data lineage protocol | `DLP:export_001` | [DLP Protocol](#dlp-protocol) |
 | `@seal:HASH` | Memory seal | `@seal:abc123` | [Memory Seals](#memory-seals) |
 
+## 🚀 Common Workflow Commands
+
+**Quick Access:** Frequently used command codes with direct documentation links.
+
+### Predefined Workflows
+- **[#321//.](../tools/command_chain/COMPREHENSIVE_SYNC_321.md)** - **Comprehensive Sync & Validate**
+    - Universal "clean working tree" command
+    - Stages, commits, syncs with remote, validates all changes
+    - **Use anytime:** You want pending changes sorted with high quality
+    - **Phases:** 6 (status → stage → commit → sync → validate → report)
+    - **Runtime:** ~30-60 seconds
+
+- **[#808//.](../tools/command_chain/OPTIMIZING_PULSE_808.md)** - **Optimizing Pulse** (if exists)
+    - Finds optimal path through complex workflows
+    - Performance analysis and recommendations
+
+### System Commands
+- **#001//.** through **#999//.** - Numeric aliases for system operations
+- See [`tools/command_chain/parser.py`](../tools/command_chain/parser.py) for full supported command list
+- Check `tools/command_chain/*_[0-9][0-9][0-9].md` for command-specific documentation
+
+### Command Syntax Patterns
+
+**Distinguish between:**
+
+1. **Chain Notation:** `#START//END//`
+     - Example: `#001//999//` - Execute steps 1 through 999
+     - Format: Two numbers with double slashes
+     - Used for: Sequential execution ranges
+
+2. **Command Codes:** `#CODE//.`
+     - Example: `#321//.` - Execute predefined command 321
+     - Format: Single number with terminator (`//.`)
+     - Used for: Workflow shortcuts and macros
+
+**Pattern Detection:**
+- If you see `#NNN//.` (ends with dot) → **Command code** (check `tools/command_chain/`)
+- If you see `#NNN//MMM//` (two numbers) → **Chain notation** (sequential execution)
+- If you see `#NNN//` (no terminator) → **Error** (incomplete syntax)
+
+---
+
 ---
 
 ## 📖 Core Command Systems

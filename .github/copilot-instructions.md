@@ -12,6 +12,29 @@ Before working on ANY Aurora task, you MUST reference:
 
 ---
 
+### 🔍 Command Discovery Quick Reference
+
+**When user mentions a command code** (e.g., `#321//.`, `#808//.`):
+
+1. **Check COMMAND_REFERENCE.md first** - Has "Common Workflow Commands" section with links
+2. **If not listed, search command_chain directory:**
+  ```bash
+  ls tools/command_chain/*_[0-9][0-9][0-9].md
+  ```
+  Example: `COMPREHENSIVE_SYNC_321.md` = #321//. documentation
+
+3. **Verify in parser:**
+  - Check `tools/command_chain/parser.py` SUPPORTED_COMMANDS list
+  - Confirms command code is valid
+
+4. **Pattern Recognition:**
+  - `#NNN//.` (ends with dot) → **Command code** (predefined workflow)
+  - `#NNN//MMM//` (two numbers) → **Chain notation** (sequential execution)
+
+**Expected response time:** < 30 seconds to locate and execute any documented command.
+
+---
+
 ## Project Overview
 Aurora CloudBank Symbolic is an advanced quantum-symbolic computing platform that combines Vector Symbolic Architecture (VSA), quantum memory management, cultural intelligence, and AI agent tools. The system features FastAPI endpoints, ChatGPT Agent Mode integration, Claude Sonnet 4 support, and the AuMemManager quantum memory system.
 

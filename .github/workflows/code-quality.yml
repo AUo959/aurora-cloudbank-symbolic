@@ -144,7 +144,6 @@ jobs:
             comment += '*Analysis performed by Aurora Code Quality Analyzer (Issue #258)*\n';
             
             // Write comment to file
-            const fs = require('fs');
             fs.writeFileSync('/tmp/code_quality_comment.md', comment);
       
       - name: Post Code Quality Comment

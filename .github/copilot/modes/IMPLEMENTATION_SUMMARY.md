@@ -4,6 +4,8 @@
 **Status:** ✅ Complete  
 **Version:** 1.0.0
 
+> **📍 LOCATION UPDATE (2025-11-08):** Chat modes moved to `.github/chatmodes/` for native GitHub Copilot support. This directory contains implementation documentation.
+
 ---
 
 ## What Was Created

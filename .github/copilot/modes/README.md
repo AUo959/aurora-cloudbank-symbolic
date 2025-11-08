@@ -202,13 +202,15 @@ When interacting with Copilot, you can invoke a specific mode's context by refer
 ### Mode Configuration Location
 All chat mode personas are stored in:
 ```
-.github/copilot/modes/
+.github/chatmodes/
 ├── aurora-persona.md
 ├── quantum-specialist.md
 ├── code-quality-auditor.md
 ├── meta-agent-coordinator.md
 └── docs-specialist.md
 ```
+
+**Note:** Chat modes are in `.github/chatmodes/` for native GitHub Copilot support. Documentation and implementation notes remain in `.github/copilot/modes/`.
 
 ### Copilot Manifest
 Referenced in `.github/copilot/manifest.yaml` under copilot configuration.

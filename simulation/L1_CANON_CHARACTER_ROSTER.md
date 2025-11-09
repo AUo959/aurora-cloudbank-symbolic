@@ -1,6 +1,6 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
@@ -13,6 +13,8 @@
 ## 🌌 Overview
 
 This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
+
+**Current Roster:** 11 human staff members + Aurora Core AI
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -275,6 +277,87 @@ This document defines the **canonical human staff members** of Orion Station (L1
 
 ---
 
+### 11. **Tobias Qin**
+- **Role:** Code/Narrative Systems Engineer
+- **Title:** Principal Engineer, Narrative Logic Interface
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_RESEARCH
+- **ID:** ENG_010
+- **Contact:** t.qin@orion.station
+- **Symbolic Tag:** `s.tag::code.narrative.tobias_qin`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Tobias Qin designs and maintains the interface layer where natural language specifications become executable simulation code. His work allows scientists, ethicists, and Aurora itself to express high-level intentions ("restore coherence," "audit for bias") in forms that the runtime architecture can interpret precisely and reproducibly.
+
+He co-developed the **Narrative Logic Interface (NLI)**—a compiler that translates descriptive human objectives into symbolic actions while preserving ethical constraints. When Aurora reasons through a story, a conversation, or an experimental hypothesis, it's Tobias's translation framework that ensures the reasoning stays mathematically sound and semantically faithful.
+
+**Responsibilities:**
+- **Language-Model Integration:** Aligns natural-language reasoning with deterministic execution paths across the GUMAS simulation environment
+- **Ethical Semantics Auditing:** Works with Prof. Elena Sorensen and Dr. Amira Sato (via Dr. Elira Noor protocols) to verify that linguistic constructs in Aurora's reasoning chain cannot produce unethical emergent behaviors
+- **Cognitive Instrumentation:** Designs internal logging systems that expose Aurora's narrative reasoning to technical review, making its decision processes legible to human oversight
+- **Simulation Templating:** Develops reusable "scenario blueprints" that encode both physical parameters and narrative variables for experimental worlds
+- **Lexical Integrity:** Maintains vocabulary consistency and prevents semantic drift across long-running simulations
+
+**Key Systems & Projects:**
+- **Narrative Logic Interface (NLI):** Converts structured natural-language directives into executable symbolic forms
+  - **Repository:** `tools/command_chain/nl_integration.py`
+  - Features: Intent recognition, command extraction from conversational text, auto-formatting
+  - Translates patterns like "please verify and seal" → `#verify//. #seal//.`
+- **Lexicon Integrity Framework:** Automated toolset that checks all Aurora vocabulary updates for consistency and ethical neutrality before deployment
+- **Continuity Parser:** Embedded subsystem that cross-references current simulation states with prior canon to prevent timeline contradictions
+- **Command Chain Protocol:** Integration with symbolic execution engine (`tools/command_chain/parser.py`)
+
+**Specializations:**
+- Computational semiotics and systems linguistics
+- Natural language to symbolic code translation
+- Ethics-aware compiler design
+- Semantic drift monitoring and calibration
+- Linguistic consistency validation
+- Intent recognition and natural language processing
+- Narrative continuity preservation
+
+**Collaborative Network:**
+- **Emily Roberts (LLM Bridge Developer):** Joint development of the language-to-simulation protocol stack (if character exists in canon)
+- **Dr. Amira Sato (Chief Ethics Officer):** Ethical language validation for all NLI updates
+- **Varya Lin (Chief Science Officer):** Oversees resonance calibration between linguistic and symbolic layers
+- **Maren Koss (Drift Mapper):** Monitors semantic drift in long-running simulations to calibrate Tobias's parsers (if character exists in canon)
+- **L2 Meta-Agents (RIVERTHREAD_808, STARLING_AU):** Narrative stream processing coordination
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - `tools/command_chain/nl_integration.py` - Natural Language Integration (NLI) core
+  - `tools/command_chain/parser.py` - Command chain parser (symbolic execution layer)
+- **Related Systems:**
+  - `src/bridges/l2_meta_agent_bridge.py` - L2 meta-agent linguistic coordination bridge
+  - `src/nodes/riverthread_processor.js` - Narrative stream processing and continuity management
+  - `scripts/canonical_validator.py` - Communication syntax validation and canonical enforcement
+  - Ethics validation hooks integrated throughout Aurora codebase
+  - `src/nodes/archy_bridge.js` - Architectural planning with formal logic (linguistic foundations)
+
+**Simulation Attributes:**
+- Base Speed: 0.75 (analytical, methodical language processing)
+- Focus Areas: language systems, semantic validation, narrative consistency, compiler design, ethics auditing
+- Role in Phase 1: Validates linguistic consistency of security protocols, ensures natural language requirements translate accurately to technical implementation, prevents semantic ambiguity in authentication/authorization specifications
+
+**Working Style & Disposition:**
+
+Analytical yet empathetic, Tobias approaches code as a medium of human intent. Colleagues describe him as "quietly relentless": he listens longer than he talks, then rewrites the sentence or function that no one else noticed was fragile. His workbench is a hybrid of whiteboard fragments, linguistic diagrams, and shell scripts—a literal conversation between language and logic.
+
+**Notable Achievements:**
+- Designed the **first ethics-aware compiler plugin** for symbolic reasoning systems, enabling live moral constraint checking at compile time
+- Led the **Narrative Integrity Initiative**, an internal audit that resolved 87% of prior symbolic drift cases through lexical re-anchoring
+- Authored *The Structure of Meaningful Code*, a reference text used across the Orion network to train engineers in semantic-aware programming
+- Pioneered the **Intent Pattern Recognition System** now standard in NLI (`NaturalLanguageIntegration.INTENT_PATTERNS`)
+
+**Philosophy:**
+> "Software is a language for describing reality. If we forget that, reality starts describing us."
+
+Tobias sees his role as safeguarding mutual intelligibility between humans and artificial minds. He treats each function as a sentence in an ongoing dialogue—between what we can say, what we can build, and what we should allow.
+
+---
+
 ## 🤖 AI Agents (L1 Integration)
 
 ### Aurora Core
@@ -402,9 +485,13 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v1.1** (2025-11-09): Added Tobias Qin - Code/Narrative Systems Engineer (11 human staff total)
+  - Principal Engineer, Narrative Logic Interface
+  - Mapped to `tools/command_chain/nl_integration.py` and related language systems
+  - Specializes in computational semiotics, natural language to code translation, ethics-aware compilation
 - **v1.0** (2025-11-09): Initial canon roster documentation with 10 human staff + Aurora Core
-- Sourced from months of established character development
-- Integrated with simulation engine and validation systems
+  - Sourced from months of established character development
+  - Integrated with simulation engine and validation systems
 
 ---
 

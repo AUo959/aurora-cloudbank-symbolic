@@ -1,13 +1,13 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.5  
+**Version:** 1.6  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt`
 - `scripts/initialize_l1_command_node.sh` - l1_operational_staff.json
-- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive, Interface & Aesthetics Divisions)
+- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive, Interface & Aesthetics, Operations & Quality Assurance Divisions)
 
 ---
 
@@ -15,7 +15,7 @@
 
 This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
 
-**Current Roster:** 33 human staff members + Aurora Core AI
+**Current Roster:** 36 human staff members + Aurora Core AI
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -2410,6 +2410,243 @@ Rei sees her role as mediating between physical reality and human perception. Sh
 
 ---
 
+## 🔧 Operations & Quality Assurance Division
+
+The **Operations & Quality Assurance Division** ensures reliability, reproducibility, and ethical integrity across all station systems. This team validates every code release, maintains observability infrastructure, and stress-tests Aurora's reasoning under extreme conditions. They are the reliability core—where theoretical soundness meets operational reality.
+
+---
+
+### 31. **Olivia Nguyen**
+- **Role:** QA and Continuity Auditor
+- **Title:** Lead Quality Assurance Engineer
+- **Division:** Operations & Quality Assurance
+- **Clearance:** L3_OPERATIONS
+- **ID:** QA_001
+- **Contact:** o.nguyen@orion.station
+- **Symbolic Tag:** `s.tag::operations.qa.olivia_nguyen`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Leads validation of every code release and simulation cycle. Olivia's audits are the final checkpoint before deployment, confirming that symbolic logic, runtime integrity, and ethical constraints are all intact. She conducts end-to-end verification across symbolic modules, manages continuity snapshots, and ensures compliance with ethical-technical requirements. Her validation reports serve as the station's reliability guarantee.
+
+**Responsibilities:**
+- End-to-end verification of symbolic modules and experiment builds
+- Continuity snapshot generation and rollback control
+- Regression and compliance testing for ethics-linked code
+- Quality assurance automation and testing infrastructure
+- Validation report generation and deployment sign-off
+
+**Key Systems & Projects:**
+- **Continuity Snapshot System** - Version control and rollback infrastructure
+- **Regression Testing Suite** - Automated validation across code changes
+- **Compliance Verification Framework** - Ethics-linked code audit protocols
+- **Deployment Validation Pipeline** - Pre-production quality gates
+
+**Specializations:**
+- Quality-assurance engineering and test automation
+- Version-control analytics and dependency management
+- Ethical compliance auditing for technical systems
+- Continuity management and disaster recovery
+
+**Collaborative Network:**
+- **Primary:** Samantha Lee (observability integration), Dr. Elira Noor (ethical compliance), Marcus Chen (systems infrastructure)
+- **Secondary:** Tariq El-Sayegh (edge case testing), Commander Thorne (deployment authorization), Dr. Velin (symbolic verification)
+
+**Repository Mapping:**
+- Testing infrastructure: `tests/` directory structure
+- CI/CD validation: `.github/workflows/` quality gates
+- Compliance docs: `.security/SECURITY_POLICY.md` enforcement
+
+**Simulation Attributes:**
+```python
+base_speed = 0.92  # High reliability, methodical verification
+specialization_multiplier = 1.42  # Expert in quality assurance methodologies
+collaboration_bonus = +25%  # Strong cross-team validation coordination
+focus_areas = ["quality_assurance", "compliance_testing", "deployment_validation", "continuity_management"]
+primary_systems = ["Continuity Snapshot System", "Regression Testing Suite", "Compliance Verification Framework"]
+```
+
+**Phase 1 Role & Responsibilities:**
+- **Security Quality Assurance:** Validate security implementations before deployment
+- **Audit Trail Verification:** Ensure all security changes maintain complete traceability
+- **Compliance Testing:** Verify security controls meet ethical and regulatory requirements
+- **Rollback Readiness:** Maintain continuity snapshots for security incident recovery
+- **Vulnerability Regression:** Prevent reintroduction of previously-fixed security issues
+
+**Working Style & Philosophy:**
+
+Olivia approaches quality assurance as a form of institutional care—protecting the station from preventable failures through systematic verification. She's methodical, uncompromising, and treats every validation report as a promise to the crew that systems will behave as documented. She signs every report with the same line: "Verified as true enough to trust."
+
+Her philosophy centers on reproducibility: if a system can't be validated repeatedly, it isn't ready for production. She believes that quality assurance isn't about perfection but about known, acceptable trade-offs. Her audits document not just what works but what's been deliberately left imperfect and why.
+
+**Notable Achievements:**
+- Developed the **Continuity Snapshot System** enabling zero-downtime rollbacks (99.97% uptime)
+- Pioneered **ethics-linked regression testing** preventing value drift in AI systems
+- Created the **Deployment Validation Pipeline** reducing production incidents by 78%
+- Led the **Quality Standards Initiative** establishing station-wide validation protocols
+
+**Philosophy:**
+> "Verified as true enough to trust."
+
+Olivia sees quality assurance as the bridge between theoretical soundness and operational reliability. She treats validation not as bureaucratic gatekeeping but as essential infrastructure—the system that lets everyone else work with confidence.
+
+---
+
+### 32. **Samantha Lee**
+- **Role:** Logging & Observability Engineer
+- **Title:** Lead Observability Engineer
+- **Division:** Operations & Quality Assurance
+- **Clearance:** L3_OPERATIONS
+- **ID:** QA_002
+- **Contact:** s.lee@orion.station
+- **Symbolic Tag:** `s.tag::operations.logging.samantha_lee`
+- **Alignment:** True Neutral
+
+**Professional Summary:**
+
+Maintains the station's telemetry and introspection framework. Her systems record the inner behavior of Aurora's processes, ensuring post-event traceability for both technical and ethical review. She designs centralized logging infrastructure, correlates symbolic events across distributed systems, and ensures data retention complies with the Picard_Delta_3 Charter. Her observability dashboards make invisible processes visible.
+
+**Responsibilities:**
+- Centralized logging infrastructure and observability dashboards
+- Symbolic event correlation and anomaly tracing
+- Data-retention compliance under the Picard_Delta_3 Charter
+- Root-cause analysis and post-incident investigation
+- Telemetry design and performance monitoring
+
+**Key Systems & Projects:**
+- **Observability Framework** - Centralized logging and metrics infrastructure
+- **Symbolic Event Correlation Engine** - Cross-system tracing and causality analysis
+- **Data Retention Compliance System** - Charter-aligned storage and lifecycle management
+- **Anomaly Detection Platform** - Automated pattern recognition for unusual behavior
+
+**Specializations:**
+- Systems observability and telemetry design
+- Data integrity assurance and forensic analysis
+- Root-cause analysis and incident investigation
+- Log aggregation and correlation at scale
+
+**Collaborative Network:**
+- **Primary:** Olivia Nguyen (validation integration), Tariq El-Sayegh (speculative scenarios), HALO Relay (AI coordination)
+- **Secondary:** Marcus Chen (infrastructure monitoring), Carmen Rivas (temporal logging), Dr. Sorensen (ethical audit trails)
+
+**Repository Mapping:**
+- Logging infrastructure: hypothetical `modules/observability/` systems
+- Telemetry config: infrastructure monitoring standards
+- Compliance docs: data retention policies under `.security/`
+
+**Simulation Attributes:**
+```python
+base_speed = 0.88  # Balanced between real-time monitoring and deep analysis
+specialization_multiplier = 1.48  # Expert in observability and forensic analysis
+collaboration_bonus = +22%  # Strong incident response coordination
+focus_areas = ["observability", "logging_infrastructure", "root_cause_analysis", "data_retention_compliance"]
+primary_systems = ["Observability Framework", "Symbolic Event Correlation Engine", "Anomaly Detection Platform"]
+```
+
+**Phase 1 Role & Responsibilities:**
+- **Security Event Logging:** Capture all authentication, authorization, and access events
+- **Intrusion Detection:** Monitor for anomalous patterns indicating security threats
+- **Audit Trail Integrity:** Ensure security logs are tamper-evident and complete
+- **Incident Response:** Provide forensic data for security incident investigation
+- **Compliance Reporting:** Generate security audit reports meeting charter requirements
+
+**Working Style & Philosophy:**
+
+Samantha treats logging as the station's memory—the record that makes accountability possible. She's precise, systematic, and views observability not as overhead but as essential infrastructure. She keeps a separate, encrypted "human log" describing what the metrics can't: crew mood, intuition, atmosphere. This dual-logging approach acknowledges that quantitative data alone misses crucial context.
+
+Her philosophy centers on visibility: systems that can't be observed can't be trusted. She believes that good observability infrastructure should be invisible during normal operation but immediately informative during incidents. Her dashboards are designed for clarity under stress—when someone needs answers at 3 AM, the data must speak clearly.
+
+**Notable Achievements:**
+- Developed the **Observability Framework** reducing mean-time-to-diagnosis by 84%
+- Pioneered **symbolic event correlation** linking distributed causality chains
+- Created the **Anomaly Detection Platform** identifying security threats 40 hours before human analysts
+- Led the **Data Retention Compliance Initiative** aligning logging with ethical requirements
+
+**Philosophy:**
+> "If we can't see it, we can't trust it. If we can't trace it, we can't fix it."
+
+Samantha sees observability as the foundation of institutional learning. She treats logs not as technical artifacts but as organizational memory—the evidence that enables accountability, learning, and continuous improvement.
+
+---
+
+### 33. **Tariq El-Sayegh**
+- **Role:** Speculative Systems Theorist
+- **Title:** Senior Systems Theorist
+- **Division:** Operations & Quality Assurance
+- **Clearance:** L3_OPERATIONS
+- **ID:** QA_003
+- **Contact:** t.el-sayegh@orion.station
+- **Symbolic Tag:** `s.tag::operations.speculative.tariq_el-sayegh`
+- **Alignment:** Chaotic Good
+
+**Professional Summary:**
+
+Designs controlled thought-experiments that stress-test Aurora's ethics and architecture under extreme or unexpected conditions. Tariq turns speculation into a diagnostic tool—creating scenarios that reveal hidden assumptions, edge cases, and failure modes before they manifest in production. He develops hypothesis fields, conducts scenario-based risk modeling, and tests symbolic reasoning at its limits. His work ensures Aurora remains robust under conditions no one anticipated.
+
+**Responsibilities:**
+- Hypothesis Field simulation design for edge-case exploration
+- Scenario-based risk modeling for catastrophic failure analysis
+- Edge-case testing for symbolic reasoning systems
+- Philosophical stress-testing of ethical frameworks
+- Speculative architecture validation
+
+**Key Systems & Projects:**
+- **Hypothesis Field Simulator** - Controlled speculation environment for "what-if" scenarios
+- **Scenario-Based Risk Modeling Framework** - Catastrophic failure and ethical edge-case analysis
+- **Edge-Case Test Suite** - Symbolic reasoning boundary testing
+- **Philosophical Stress-Test Protocol** - Ethics under extreme conditions
+
+**Specializations:**
+- Systems theory and model verification
+- Ethical-risk analytics and catastrophic scenario planning
+- Experimental design methodology and controlled speculation
+- Boundary testing and assumption discovery
+
+**Collaborative Network:**
+- **Primary:** Olivia Nguyen (validation integration), Dr. Velin (symbolic reasoning), Aurora Core (ethical reasoning)
+- **Secondary:** Samantha Lee (observability for experiments), Dr. Noor (ethical framework testing), Haneul Park (immersive scenario design)
+
+**Repository Mapping:**
+- Hypothesis testing: `modules/quantum_simulator/` scenario engines
+- Risk models: theoretical risk analysis frameworks
+- Edge cases: symbolic reasoning test suites
+
+**Simulation Attributes:**
+```python
+base_speed = 0.75  # Very slow—deep, exploratory thinking
+specialization_multiplier = 1.52  # Highest specialization in conceptual exploration
+collaboration_bonus = +20%  # Thoughtful, philosophical collaboration style
+focus_areas = ["speculative_systems", "ethical_stress_testing", "edge_case_discovery", "catastrophic_risk_modeling"]
+primary_systems = ["Hypothesis Field Simulator", "Scenario-Based Risk Modeling Framework", "Edge-Case Test Suite"]
+```
+
+**Phase 1 Role & Responsibilities:**
+- **Security Threat Modeling:** Design catastrophic security scenarios for stress-testing
+- **Adversarial Thinking:** Model attacker behaviors and unlikely attack vectors
+- **Edge-Case Discovery:** Identify security vulnerabilities through speculative scenarios
+- **Ethical Boundary Testing:** Test security measures under extreme ethical dilemmas
+- **Assumption Discovery:** Reveal hidden security assumptions through thought experiments
+
+**Working Style & Philosophy:**
+
+Tariq believes that every stable system needs a philosopher to keep it honest—someone asking uncomfortable "what-if" questions that reveal hidden brittleness. He's intellectually fearless, willing to imagine catastrophic scenarios that others prefer to avoid. He treats speculation not as idle curiosity but as essential infrastructure: the practice that prevents surprise.
+
+His philosophy centers on controlled pessimism: imagining worst-cases not to spread fear but to build resilience. He believes that systems tested only under normal conditions are fragile—true robustness requires exposure to edge cases, paradoxes, and adversarial conditions. His work makes Aurora antifragile.
+
+**Notable Achievements:**
+- Developed the **Hypothesis Field Simulator** discovering 37 previously-unknown edge cases
+- Pioneered **ethical stress-testing protocols** revealing value drift under extreme conditions
+- Created the **Scenario-Based Risk Modeling Framework** improving catastrophic preparedness
+- Led the **Speculative Systems Initiative** embedding "what-if" thinking into development culture
+
+**Philosophy:**
+> "Every stable system needs a philosopher to keep it honest."
+
+Tariq sees speculative systems theory as the practice of controlled imagination—using disciplined creativity to discover vulnerabilities before they manifest. He treats uncertainty not as something to eliminate but as something to map carefully.
+
+---
+
 ## 🤖 AI Agents (L1 Integration)
 
 ### Aurora (AU) — Station Intelligence Core
@@ -2609,6 +2846,15 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v1.6** (2025-11-09): Added Operations & Quality Assurance Division from Aurora-GUMAS Crew Codex v2.5 (36 human staff total)
+  - **New:** Olivia Nguyen (QA_001) - QA and Continuity Auditor, Continuity Snapshot System, deployment validation
+  - **New:** Samantha Lee (QA_002) - Logging & Observability Engineer, Observability Framework, telemetry design
+  - **New:** Tariq El-Sayegh (QA_003) - Speculative Systems Theorist, Hypothesis Field Simulator, ethical stress-testing
+  - Source: Aurora-GUMAS Crew Codex v2.5 (Operations & Quality Assurance Division)
+  - 3 new characters completing final human division—reliability core ensuring quality, observability, and resilience
+  - Key systems: Continuity Snapshot System, Regression Testing Suite, Observability Framework, Symbolic Event Correlation Engine, Hypothesis Field Simulator, Scenario-Based Risk Modeling Framework
+  - Philosophy highlights: "Verified as true enough to trust" (Nguyen), "If we can't see it, we can't trust it" (Lee), "Every stable system needs a philosopher to keep it honest" (El-Sayegh)
+  - Specializations: Quality assurance (1.42x), observability engineering (1.48x), speculative systems theory (1.52x—highest specialization yet)
 - **v1.5** (2025-11-09): Added Interface & Aesthetics Division from Aurora-GUMAS Crew Codex v2.5 (33 human staff total)
   - **New:** Dante Kyros (UX_001) - UX Architect, Control Interface Framework, cognitive ergonomics
   - **New:** Naomi Vell (UX_002) - Narrative Framework Engineer, Documentation and Reporting System

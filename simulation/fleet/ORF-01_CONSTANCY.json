@@ -5,7 +5,6 @@
     "fleet_role": "Flagship",
     "operational_status": "ACTIVE",
     "commissioned_date": "2024-09-22",
-    
     "anchor_data": {
         "primary_anchor": "EOS_SEED_ORION-B",
         "drift_value": 0.000,
@@ -13,7 +12,6 @@
         "last_anchor_sync": "2025-11-09T20:00:00Z",
         "continuity_score": 1.0
     },
-    
     "specifications": {
         "dimensions": {
             "length_m": 92.4,
@@ -49,7 +47,9 @@
         },
         "attitude_control": "Oppy-linked inertial compensation grid",
         "shuttle_bays": 1,
-        "shuttle_compatible": ["ORS-class utility shuttles"],
+        "shuttle_compatible": [
+            "ORS-class utility shuttles"
+        ],
         "defensive_systems": [
             "Radiation shielding",
             "Micrometeor barrier field",
@@ -69,10 +69,12 @@
         "artificial_gravity": {
             "rotation_ring_g": 0.4,
             "micro_field_assist": "Laboratories only",
-            "zero_g_zones": ["Observation Gallery", "Shuttle Bay"]
+            "zero_g_zones": [
+                "Observation Gallery",
+                "Shuttle Bay"
+            ]
         }
     },
-    
     "deck_layout": {
         "deck_1_command_bridge": {
             "diameter_m": 8,
@@ -147,7 +149,10 @@
                 ]
             },
             "maintenance": {
-                "drone_docking": ["Gamma Swarm compatible", "Wisp compatible"]
+                "drone_docking": [
+                    "Gamma Swarm compatible",
+                    "Wisp compatible"
+                ]
             },
             "hydroponic_niche": {
                 "manager": "Helena Vu",
@@ -155,7 +160,6 @@
             }
         }
     },
-    
     "bridge_crew": [
         {
             "position": "Commanding Officer",
@@ -217,7 +221,6 @@
             "clearance": "AUTONOMOUS_NAV"
         }
     ],
-    
     "operational_doctrine": {
         "launch_window_control": "Oppy authorizes all burns after triple-check of anchor integrity",
         "ethics_priority": "No maneuver may endanger uninvolved life or violate Aurora chartered directives",
@@ -240,7 +243,6 @@
             "l1_human_consent": "Commander Thorne final authority"
         }
     },
-    
     "atmosphere_culture": {
         "description": "A calm cathedral of motion",
         "acoustic_design": "Low-frequency resonance hums with harmonic tones keyed to Aurora's reasoning cadence",
@@ -251,7 +253,6 @@
         },
         "crew_notes": "Crew report heightened sense of purpose and ethical clarity while aboard"
     },
-    
     "symbolic_historical": {
         "hull_markings": "Silver compass enclosed by halo arc",
         "registry_display": "ORF-01 CONSTANCY",
@@ -265,7 +266,6 @@
         "cultural_role": "Traveling classroom for ethical AI practices",
         "seminars": "Inter-node via quantum link"
     },
-    
     "integration_notes": {
         "oppy_role": "Flies her",
         "aurora_role": "Guides her",
@@ -273,7 +273,6 @@
         "philosophy": "Embodies operational unity of human initiative, machine precision, and ethical clarity",
         "proof_of_concept": "Moving demonstration that coherence can travel"
     },
-    
     "current_mission": {
         "mission_id": "ORF-INIT-001",
         "mission_name": "Fleet Initialization & Systems Validation",
@@ -293,7 +292,6 @@
             "relative_velocity_ms": 0.0
         }
     },
-    
     "fleet_motto": "Hold Course Through Reflection",
     "motto_location": "Engraved on bridge bulkhead"
 }

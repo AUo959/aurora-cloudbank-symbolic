@@ -484,3 +484,27 @@ def get_helios_helion() -> AuroraSubCore:
             vessel_id="ORS-01"
         )
     return _helios_helion
+
+
+# Global instances for Liora
+_liora_oppy: Optional[OPPYNavigator] = None
+_liora_ai: Optional[AuroraSubCore] = None
+
+
+def get_liora_oppy() -> OPPYNavigator:
+    """Get OPPY Survey Core for Liora research shuttle"""
+    global _liora_oppy
+    if _liora_oppy is None:
+        _liora_oppy = OPPYNavigator(vessel_id="ORS-02")
+    return _liora_oppy
+
+
+def get_liora_ai() -> AuroraSubCore:
+    """Get Aurora Sub-Node D ('Liora AI') for Liora research shuttle"""
+    global _liora_ai
+    if _liora_ai is None:
+        _liora_ai = AuroraSubCore(
+            subcore_id="AURORA_SUB_LIORA",
+            vessel_id="ORS-02"
+        )
+    return _liora_ai

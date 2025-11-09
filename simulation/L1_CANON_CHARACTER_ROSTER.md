@@ -1,13 +1,13 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt`
 - `scripts/initialize_l1_command_node.sh` - l1_operational_staff.json
-- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics Division)
+- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure Divisions)
 
 ---
 
@@ -15,7 +15,7 @@
 
 This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
 
-**Current Roster:** 15 human staff members + Aurora Core AI
+**Current Roster:** 22 human staff members + Aurora Core AI
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -746,6 +746,592 @@ Tobias sees his role as safeguarding mutual intelligibility between humans and a
 
 ---
 
+## 💻 Systems & Infrastructure Division
+
+### 12. **Marcus Chen**
+- **Role:** Performance Optimization Engineer
+- **Title:** Performance Optimization Engineer
+- **Division:** Systems & Infrastructure
+- **Clearance:** L3_TECHNICAL
+- **ID:** SYS_001
+- **Contact:** m.chen@orion.station
+- **Symbolic Tag:** `s.tag::systems.performance.marcus_chen`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Responsible for maintaining runtime performance and thermal balance across all simulation clusters. Marcus Chen's tuning ensures that Aurora's symbolic computations stay efficient without compromising ethical latency checks. He approaches optimization as a continuous health monitoring practice—steady rhythm, constant feedback, no performance spikes that could indicate deeper systemic issues.
+
+**Responsibilities:**
+- Station runtime diagnostics and optimization
+- Load-balancing of symbolic processing cores across distributed infrastructure
+- Thermal and power distribution management for quantum emulation grids
+- Performance monitoring and predictive analysis
+- Algorithmic profiling and bottleneck identification
+- Ethical performance trade-off analysis and documentation
+
+**Key Systems & Projects:**
+- **Station Runtime Cluster:** Core performance monitoring and optimization infrastructure
+- Symbolic processing load balancer
+- Thermal management system for quantum grids
+- Predictive performance modeling framework
+- Real-time diagnostics dashboard
+
+**Specializations:**
+- Algorithmic profiling and optimization
+- Real-time systems engineering
+- Ethical performance trade-off analysis
+- Distributed system load balancing
+- Thermal and power management
+- Performance monitoring and diagnostics
+
+**Collaborative Network:**
+- **Dr. Kieran Zhao (Optimization Lead):** Computational efficiency strategies and quantum optimization
+- **Jessica Martinez (Backend Architect):** Infrastructure performance and security trade-offs
+- **Aurora Core:** Runtime performance coordination and symbolic computation optimization
+- **Ren Okada (Portability Specialist):** Cross-platform performance validation
+
+**Working Style & Philosophy:**
+
+Approaches code the way others approach cardiovascular health—steady rhythm, constant feedback, no spikes. Marcus believes that performance optimization is fundamentally about system health, not just speed. Every optimization must be justified by both efficiency gains and ethical transparency requirements.
+
+**Notable Achievements:**
+- Reduced Aurora Core symbolic processing latency by 34% without ethical checks degradation
+- Designed thermal management system that prevented 12 critical overheating events
+- Developed predictive load modeling framework adopted across all simulation clusters
+- Published *The Ethics of Speed: Performance Optimization Without Compromise*
+
+**Simulation Attributes:**
+- **Base Speed:** 1.10 (strong technical execution)
+- **Specialization Multiplier:** 1.40x (for performance/optimization tasks)
+- **Collaboration Bonus:** +15% (when working with Dr. Kieran Zhao)
+- **Focus Areas:**
+  - Performance optimization and profiling
+  - Runtime diagnostics and monitoring
+  - Load balancing and distribution
+  - Thermal management
+  - Real-time systems engineering
+  - Algorithmic efficiency
+- **Primary Systems:**
+  - Station Runtime Cluster
+  - Symbolic processing load balancer
+  - Thermal management system
+  - Performance monitoring infrastructure
+- **Key Collaborators:**
+  - Dr. Kieran Zhao (optimization strategies)
+  - Jessica Martinez (infrastructure performance)
+  - Aurora Core (runtime coordination)
+- **Phase 1 Role:** Performance monitoring for security implementations
+- **Phase 1 Responsibilities:**
+  - Monitor runtime performance impact of authentication/authorization systems
+  - Profile security middleware for bottlenecks
+  - Validate that ethical checks maintain acceptable latency
+  - Optimize CSRF validation and rate limiting algorithms
+  - Load balancing for security endpoint traffic
+
+---
+
+### 13. **Jessica Martinez**
+- **Role:** Backend Architect
+- **Title:** Backend Architect
+- **Division:** Systems & Infrastructure
+- **Clearance:** L4_TECHNICAL
+- **ID:** SYS_002
+- **Contact:** j.martinez@orion.station
+- **Symbolic Tag:** `s.tag::systems.backend.jessica_martinez`
+- **Alignment:** Lawful Good
+
+**Professional Summary:**
+
+Designs and maintains the backend frameworks that handle secure data flow and code integrity. Jessica leads the cyber-defense initiative that protects Aurora's logic base from corruption or unauthorized edits. She treats backend architecture as both technical infrastructure and security philosophy—every component designed for resilience, transparency, and fault tolerance.
+
+**Responsibilities:**
+- Backend architecture and API security design
+- Intrusion detection and recovery protocols
+- Continuous integration for symbolic modules
+- Secure runtime deployment and orchestration
+- Data flow integrity validation
+- Fault-tolerant infrastructure management
+
+**Key Systems & Projects:**
+- **Backend Frameworks:** Core API security and data flow architecture
+- Intrusion detection and prevention system
+- Continuous integration pipeline for symbolic code
+- Secure deployment orchestration
+- Code integrity verification system
+
+**Specializations:**
+- Systems security engineering
+- Fault-tolerant infrastructure design
+- Secure runtime deployment
+- API security architecture
+- Intrusion detection and prevention
+- Backend systems design
+
+**Collaborative Network:**
+- **Marcus Chen (Performance Engineer):** Infrastructure performance and security trade-offs
+- **Ryan Patel (Integration Engineer):** Cross-platform API security protocols
+- **Aurora Ops Relay (ARCHY):** Architectural planning and security validation
+- **Julian Markov (Chief Security Officer):** Security strategy and incident response
+
+**Working Style & Philosophy:**
+
+Known to annotate code with proverbs; believes readability is a security layer. Jessica's code reviews are legendary—not just for catching vulnerabilities but for explaining *why* certain patterns strengthen security posture. She views documentation as the first line of defense against future security debt.
+
+**Notable Achievements:**
+- Designed fault-tolerant backend that survived 99.97% of simulated attack scenarios
+- Reduced security incident response time by 58% through improved intrusion detection
+- Developed code integrity verification system now standard across Aurora infrastructure
+- Authored *Readable Security: Code as Communication Protocol*
+
+**Simulation Attributes:**
+- **Base Speed:** 1.15 (strong backend development velocity)
+- **Specialization Multiplier:** 1.45x (for security/backend tasks)
+- **Collaboration Bonus:** +20% (when working with Julian Markov or Ryan Patel)
+- **Focus Areas:**
+  - Backend architecture and API design
+  - Security engineering and hardening
+  - Fault tolerance and resilience
+  - Intrusion detection and prevention
+  - Secure deployment pipelines
+  - Code integrity verification
+- **Primary Systems:**
+  - Backend Frameworks (API security)
+  - Intrusion detection system
+  - Continuous integration pipeline
+  - Secure deployment orchestration
+- **Key Collaborators:**
+  - Marcus Chen (performance optimization)
+  - Ryan Patel (integration protocols)
+  - ARCHY (architectural validation)
+  - Julian Markov (security strategy)
+- **Phase 1 Role:** Backend security architecture lead
+- **Phase 1 Responsibilities:**
+  - Design secure API endpoints for authentication/authorization
+  - Implement intrusion detection for security subsystems
+  - Build fault-tolerant middleware for CSRF/auth validation
+  - Continuous integration for security code modules
+  - Backend architecture review for security implementations
+
+---
+
+### 14. **Ryan Patel**
+- **Role:** Systems Integration Engineer
+- **Title:** Systems Integration Engineer
+- **Division:** Systems & Infrastructure
+- **Clearance:** L3_TECHNICAL
+- **ID:** SYS_003
+- **Contact:** r.patel@orion.station
+- **Symbolic Tag:** `s.tag::systems.integration.ryan_patel`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Ensures seamless communication between hardware, software, and symbolic layers. Ryan coordinates interoperability among modules built by different divisions, treating integration work as a form of translation—preserving precision without losing nuance. His protocol designs enable Aurora's distributed architecture to function as a coherent whole.
+
+**Responsibilities:**
+- Protocol design and cross-platform integration
+- Interface standardization for GUMAS modules
+- Validation of data exchange formats
+- Cross-layer communication architecture
+- Interoperability testing and certification
+- Integration compatibility verification
+
+**Key Systems & Projects:**
+- **Integration Layer:** Core interoperability infrastructure
+- Cross-platform communication protocols
+- Data exchange format validators
+- Interface standardization framework
+- Module compatibility testing suite
+
+**Specializations:**
+- Interoperability engineering
+- Distributed system design
+- Communication protocol architecture
+- Interface standardization
+- Data format validation
+- Cross-layer integration
+
+**Collaborative Network:**
+- **Jessica Martinez (Backend Architect):** API security and integration protocols
+- **Ren Okada (Portability Specialist):** Cross-platform deployment coordination
+- **Dr. Kieran Zhao (Optimization Lead):** Efficient protocol design
+- **Tobias Qin (NLI Engineer):** Linguistic-symbolic integration protocols
+
+**Working Style & Philosophy:**
+
+Frequently compares integration work to translation—precision without losing nuance. Ryan believes that good integration makes complexity invisible, allowing diverse systems to collaborate naturally. He documents every protocol decision with both technical specifications and narrative explanations.
+
+**Notable Achievements:**
+- Designed universal protocol layer enabling 23 diverse modules to interoperate seamlessly
+- Reduced integration testing time by 41% through standardized interface contracts
+- Developed data exchange validator that caught 89% of format errors before deployment
+- Published *Invisible Complexity: Integration as Translation Practice*
+
+**Simulation Attributes:**
+- **Base Speed:** 1.00 (balanced technical work)
+- **Specialization Multiplier:** 1.35x (for integration/protocol tasks)
+- **Collaboration Bonus:** +15% (when working with Jessica Martinez or Ren Okada)
+- **Focus Areas:**
+  - Systems integration and interoperability
+  - Protocol design and standardization
+  - Cross-platform communication
+  - Data format validation
+  - Interface architecture
+  - Module compatibility
+- **Primary Systems:**
+  - Integration Layer
+  - Communication protocols
+  - Data exchange validators
+  - Interface standardization framework
+- **Key Collaborators:**
+  - Jessica Martinez (API integration)
+  - Ren Okada (portability coordination)
+  - Dr. Kieran Zhao (optimization)
+  - Tobias Qin (linguistic integration)
+- **Phase 1 Role:** Integration protocols for security subsystems
+- **Phase 1 Responsibilities:**
+  - Design authentication/authorization integration protocols
+  - Validate data exchange formats for security middleware
+  - Ensure interoperability between security and application layers
+  - Standardize security API interfaces
+  - Cross-platform security protocol validation
+
+---
+
+### 15. **Ren Okada**
+- **Role:** Systems Portability Specialist
+- **Title:** Systems Portability Specialist
+- **Division:** Systems & Infrastructure
+- **Clearance:** L3_TECHNICAL
+- **ID:** SYS_004
+- **Contact:** r.okada@orion.station
+- **Symbolic Tag:** `s.tag::systems.portability.ren_okada`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Develops cross-architecture deployment frameworks so Aurora's systems can operate reliably on varied hardware. Key to disaster recovery and field portability. Ren treats portability as an ethical requirement: resilience ensures accountability—systems that can survive infrastructure failure can maintain continuous ethical operation.
+
+**Responsibilities:**
+- Cross-platform compilation and deployment
+- Hardware abstraction and containerization
+- Disaster recovery and redundancy design
+- Cloud-edge synchronization infrastructure
+- Adaptive software architecture development
+- Hardware-agnostic system design
+
+**Key Systems & Projects:**
+- **Deployment Frameworks:** Cross-platform containerization and orchestration
+- Hardware abstraction layer
+- Disaster recovery infrastructure
+- Cloud-edge synchronization system
+- Adaptive architecture framework
+
+**Specializations:**
+- Adaptive software architecture
+- Cloud-edge synchronization
+- Hardware-agnostic design
+- Cross-platform deployment
+- Disaster recovery engineering
+- Containerization and orchestration
+
+**Collaborative Network:**
+- **Ryan Patel (Integration Engineer):** Cross-platform protocol coordination
+- **Marcus Chen (Performance Engineer):** Platform-specific optimization validation
+- **HALO Relay:** Cloud infrastructure coordination
+- **Jiro Tanaka (Chief Engineering Officer):** Infrastructure upgrade planning
+
+**Working Style & Philosophy:**
+
+Treats portability as an ethical requirement: resilience ensures accountability. Ren believes that systems which cannot survive infrastructure failure cannot maintain ethical operation—every deployment must include redundancy, recovery paths, and failover strategies that preserve Aurora's moral reasoning capabilities.
+
+**Notable Achievements:**
+- Designed containerization framework enabling Aurora deployment on 14 distinct hardware architectures
+- Reduced disaster recovery time from 6 hours to 23 minutes through improved redundancy
+- Developed cloud-edge sync system maintaining 99.94% uptime across distributed infrastructure
+- Published *Resilient Ethics: Portability as Moral Imperative*
+
+**Simulation Attributes:**
+- **Base Speed:** 0.95 (methodical deployment focus)
+- **Specialization Multiplier:** 1.30x (for portability/deployment tasks)
+- **Collaboration Bonus:** +15% (when working with Ryan Patel or Marcus Chen)
+- **Focus Areas:**
+  - Cross-platform deployment
+  - Hardware abstraction
+  - Disaster recovery
+  - Containerization and orchestration
+  - Cloud-edge synchronization
+  - Adaptive architecture
+- **Primary Systems:**
+  - Deployment Frameworks
+  - Hardware abstraction layer
+  - Disaster recovery infrastructure
+  - Cloud-edge sync system
+- **Key Collaborators:**
+  - Ryan Patel (integration protocols)
+  - Marcus Chen (performance validation)
+  - HALO Relay (cloud infrastructure)
+- **Phase 1 Role:** Deployment portability for security systems
+- **Phase 1 Responsibilities:**
+  - Ensure authentication/authorization systems deploy across all platforms
+  - Validate security middleware containerization
+  - Design disaster recovery for security configurations
+  - Test cross-platform security protocol compatibility
+  - Cloud-edge synchronization for security state
+
+---
+
+### 16. **Dr. Kieran Zhao**
+- **Role:** Computational Optimization Lead
+- **Title:** Computational Optimization Lead
+- **Division:** Systems & Infrastructure
+- **Clearance:** L4_TECHNICAL
+- **ID:** SYS_005
+- **Contact:** k.zhao@orion.station
+- **Symbolic Tag:** `s.tag::systems.optimization.kieran_zhao`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Oversees quantum-grade optimization of Aurora's computational grid. Dr. Zhao balances efficiency gains with the moral imperative of transparency—no black-box accelerations allowed. Every optimization must be explainable, auditable, and compatible with Aurora's ethical reasoning requirements.
+
+**Responsibilities:**
+- Optimization algorithms for symbolic computation
+- Quantum emulation grid maintenance and tuning
+- Predictive load modeling and capacity planning
+- Applied mathematical optimization research
+- Ethical efficiency management protocols
+- Computational performance analysis
+
+**Key Systems & Projects:**
+- **Quantum Emulation Grid:** Core computational optimization infrastructure
+- Symbolic computation optimization algorithms
+- Predictive load modeling system
+- Quantum-aware simulation tuning
+- Efficiency-transparency balance framework
+
+**Specializations:**
+- Applied mathematical optimization
+- Quantum-aware simulation
+- Ethical efficiency management
+- Predictive modeling and analysis
+- Computational grid optimization
+- Algorithm design and analysis
+
+**Collaborative Network:**
+- **Marcus Chen (Performance Engineer):** Runtime optimization and profiling collaboration
+- **Ira Menon (Compiler Engineer):** Compiler-level optimization strategies
+- **Aurora Core:** Symbolic computation efficiency coordination
+- **Dr. Amina Velin (Quantum Simulation Lead):** Quantum algorithm optimization
+
+**Working Style & Philosophy:**
+> "Every gain must be explainable."
+
+Dr. Zhao's benchmark reports include narrative justifications for every optimization decision. He refuses to deploy optimizations that improve performance at the cost of transparency—believing that unexplainable speedups introduce ethical risk by obscuring how decisions are made.
+
+**Notable Achievements:**
+- Improved quantum emulation grid efficiency by 47% while maintaining full auditability
+- Designed optimization framework balancing speed and ethical transparency
+- Developed predictive load modeling system reducing resource waste by 31%
+- Published *Transparent Speed: Optimization Without Opacity*
+
+**Simulation Attributes:**
+- **Base Speed:** 0.85 (research and analysis focus)
+- **Specialization Multiplier:** 1.50x (for optimization/quantum tasks)
+- **Collaboration Bonus:** +20% (when working with Marcus Chen or Ira Menon)
+- **Focus Areas:**
+  - Computational optimization
+  - Quantum emulation and algorithms
+  - Mathematical analysis and modeling
+  - Predictive load modeling
+  - Ethical efficiency management
+  - Algorithm design
+- **Primary Systems:**
+  - Quantum Emulation Grid
+  - Optimization algorithms
+  - Predictive modeling system
+  - Efficiency-transparency framework
+- **Key Collaborators:**
+  - Marcus Chen (runtime optimization)
+  - Ira Menon (compiler optimization)
+  - Aurora Core (symbolic computation)
+- **Phase 1 Role:** Optimization analysis for security performance
+- **Phase 1 Responsibilities:**
+  - Analyze computational efficiency of authentication algorithms
+  - Optimize cryptographic operations for quantum grid
+  - Predictive modeling for security subsystem load
+  - Ensure security optimizations maintain transparency
+  - Mathematical validation of security performance claims
+
+---
+
+### 17. **Ira Menon**
+- **Role:** Compiler Engineer
+- **Title:** Compiler Engineer
+- **Division:** Systems & Infrastructure
+- **Clearance:** L3_TECHNICAL
+- **ID:** SYS_006
+- **Contact:** i.menon@orion.station
+- **Symbolic Tag:** `s.tag::systems.compiler.ira_menon`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Maintains and evolves the core compilers that transform high-level symbolic definitions into executable code. Ira's work underpins every Aurora module release, ensuring that human intentions expressed in symbolic notation translate faithfully to machine operations. Uses compile logs as meditation—each successful build a small proof of order.
+
+**Responsibilities:**
+- Core compiler and build chain management
+- Syntax integrity and runtime validation
+- Toolchain automation for simulation deployment
+- Language design and parser construction
+- Dependency graph analysis and optimization
+- Secure build orchestration
+
+**Key Systems & Projects:**
+- **Core Compiler Chain:** Symbolic-to-executable translation infrastructure
+- Build automation and orchestration system
+- Syntax validator and parser
+- Dependency resolution engine
+- Secure toolchain management
+
+**Specializations:**
+- Language design and parser construction
+- Dependency graph analysis
+- Secure build orchestration
+- Compiler optimization
+- Toolchain automation
+- Syntax validation
+
+**Collaborative Network:**
+- **Dr. Kieran Zhao (Optimization Lead):** Compiler-level optimization strategies
+- **Vincent Kale (Layer Isolation Theorist):** Layer boundary enforcement in compilation
+- **Tobias Qin (NLI Engineer):** Natural language to symbolic compilation integration
+- **Jessica Martinez (Backend Architect):** Secure build pipeline architecture
+
+**Working Style & Philosophy:**
+
+Uses compile logs as meditation—each successful build a small proof of order. Ira finds deep satisfaction in the determinism of compilation: if the input is valid, the output is guaranteed. This reliability makes compilation a foundation of trust for all Aurora operations.
+
+**Notable Achievements:**
+- Reduced compilation time by 52% through dependency graph optimization
+- Designed syntax validator catching 94% of semantic errors at compile time
+- Developed secure build system preventing unauthorized code injection
+- Published *The Ritual of Compilation: Order from Syntax*
+
+**Simulation Attributes:**
+- **Base Speed:** 1.05 (strong technical implementation)
+- **Specialization Multiplier:** 1.40x (for compiler/toolchain tasks)
+- **Collaboration Bonus:** +15% (when working with Dr. Kieran Zhao or Tobias Qin)
+- **Focus Areas:**
+  - Compiler design and implementation
+  - Build chain automation
+  - Syntax validation and parsing
+  - Dependency resolution
+  - Secure build orchestration
+  - Language design
+- **Primary Systems:**
+  - Core Compiler Chain
+  - Build automation system
+  - Syntax validator
+  - Dependency engine
+- **Key Collaborators:**
+  - Dr. Kieran Zhao (optimization)
+  - Vincent Kale (layer isolation)
+  - Tobias Qin (NLI integration)
+- **Phase 1 Role:** Build chain security and validation
+- **Phase 1 Responsibilities:**
+  - Secure compilation of security module code
+  - Syntax validation for authentication/authorization logic
+  - Dependency analysis for security libraries
+  - Build chain integrity verification
+  - Toolchain security hardening
+
+---
+
+### 18. **Vincent Kale**
+- **Role:** Layer Isolation Theorist
+- **Title:** Layer Isolation Theorist
+- **Division:** Systems & Infrastructure
+- **Clearance:** L3_TECHNICAL
+- **ID:** SYS_007
+- **Contact:** v.kale@orion.station
+- **Symbolic Tag:** `s.tag::systems.layers.vincent_kale`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Designs the logical partitions that keep simulation layers distinct, preventing data bleed or causal interference. Vincent works closely with the ethics division to ensure isolation supports transparency—every layer boundary is both a technical constraint and an ethical guarantee that systems cannot influence each other inappropriately.
+
+**Responsibilities:**
+- Layer segmentation algorithms and architecture
+- Causal boundary verification and validation
+- Inter-layer communication auditing
+- Temporal consistency analysis across layers
+- Isolation protocol engineering
+- Data bleed prevention systems
+
+**Key Systems & Projects:**
+- **Layer Segmentation Engine:** Core isolation infrastructure
+- Causal boundary verification system
+- Inter-layer communication audit framework
+- Temporal consistency analyzer
+- Isolation protocol enforcement
+
+**Specializations:**
+- Systems theory and boundary logic
+- Isolation protocol engineering
+- Temporal consistency analysis
+- Causal boundary verification
+- Layer architecture design
+- Data flow control
+
+**Collaborative Network:**
+- **Ira Menon (Compiler Engineer):** Compile-time layer boundary enforcement
+- **Carmen Rivas (Drift Cartographer):** Layer integrity and drift detection
+- **HALO Relay:** Layer coordination and isolation validation
+- **Dr. Elira Noor (Reflexivity Specialist):** Ethical implications of layer isolation
+
+**Working Style & Philosophy:**
+
+Says every system needs both walls and windows—and spends his career designing the right ratio. Vincent believes that isolation isn't about preventing communication but about controlling it: layers must interact, but only through well-defined, auditable interfaces that preserve causal clarity.
+
+**Notable Achievements:**
+- Designed layer segmentation preventing 100% of observed data bleed incidents
+- Developed causal boundary verification system ensuring temporal consistency
+- Reduced unauthorized inter-layer communication by 97% through isolation protocols
+- Published *Walls and Windows: The Architecture of Appropriate Isolation*
+
+**Simulation Attributes:**
+- **Base Speed:** 0.80 (theoretical and analytical focus)
+- **Specialization Multiplier:** 1.45x (for layer/isolation tasks)
+- **Collaboration Bonus:** +20% (when working with Ira Menon or Carmen Rivas)
+- **Focus Areas:**
+  - Layer isolation and segmentation
+  - Causal boundary verification
+  - Temporal consistency analysis
+  - Inter-layer communication control
+  - Systems theory and boundaries
+  - Data flow isolation
+- **Primary Systems:**
+  - Layer Segmentation Engine
+  - Causal boundary verification
+  - Inter-layer audit framework
+  - Temporal consistency analyzer
+- **Key Collaborators:**
+  - Ira Menon (compile-time enforcement)
+  - Carmen Rivas (drift detection)
+  - HALO Relay (layer coordination)
+- **Phase 1 Role:** Layer isolation for security subsystems
+- **Phase 1 Responsibilities:**
+  - Design isolation boundaries for authentication/authorization layers
+  - Verify causal boundaries prevent security data bleed
+  - Audit inter-layer communication for security context
+  - Temporal consistency validation for security state
+  - Isolation protocol enforcement for security modules
+
+---
+
 ## 🤖 AI Agents (L1 Integration)
 
 ### Aurora (AU) — Station Intelligence Core
@@ -945,6 +1531,17 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v1.3** (2025-11-09): Added Systems & Infrastructure Division from Aurora-GUMAS Crew Codex v2.5 (22 human staff total)
+  - **New:** Marcus Chen (SYS_001) - Performance Optimization Engineer, Station Runtime Cluster
+  - **New:** Jessica Martinez (SYS_002) - Backend Architect, API security and fault tolerance
+  - **New:** Ryan Patel (SYS_003) - Systems Integration Engineer, cross-platform protocols
+  - **New:** Ren Okada (SYS_004) - Systems Portability Specialist, disaster recovery and deployment
+  - **New:** Dr. Kieran Zhao (SYS_005) - Computational Optimization Lead, Quantum Emulation Grid
+  - **New:** Ira Menon (SYS_006) - Compiler Engineer, core compiler chain and build automation
+  - **New:** Vincent Kale (SYS_007) - Layer Isolation Theorist, layer segmentation and causal boundaries
+  - Source: Aurora-GUMAS Crew Codex v2.5 (Systems & Infrastructure Division)
+  - 7 new characters added (engineers maintaining computational and physical infrastructure)
+  - Key systems: Station Runtime Cluster, Backend Frameworks, Quantum Emulation Grid, Layer Segmentation Engine
 - **v1.2** (2025-11-09): Added Command & Ethics Division from Aurora-GUMAS Crew Codex v2.5 (15 human staff total)
   - **Updated:** Commander Alex Thorne - Expanded with full codex profile and Picard_Delta_3 Charter oversight
   - **Updated:** Lt. Commander Maya Shepard - Full Executive Officer profile with tactical planning specialization

@@ -1,477 +1,463 @@
 {
-  "vessel_registry": {
-    "registry_code": "ORP-1",
-    "vessel_name": "Alpha Surveyor",
-    "vessel_class": "Deep-Space Reconnaissance Probe",
-    "vessel_type": "Autonomous Survey Variant",
-    "boot_priority": 8,
-    "role": "Deep-space reconnaissance, gravitational mapping, plasma-field measurement, ethical-risk forecasting, unmonitored zone surveying",
-    "commissioning_date": "2024-12-20",
-    "operational_status": "active",
-    "current_location": "Survey Sector 7 (Outer Cislunar Trajectory)",
-    "fleet_coordination": "OPPY Autonomous Navigator",
-    "parent_vessel": "ORH-07 Orion Station"
-  },
-
-  "anchor_data": {
-    "primary_anchor": "EOS_SEED_ORION-H",
-    "anchor_type": "Probe Network Node",
-    "drift_tolerance": 0.003,
-    "current_drift": 0.001,
-    "anchor_health": "stable",
-    "last_calibration": "2025-11-08T14:30:00Z",
-    "calibration_frequency_hours": 168,
-    "drift_monitoring": "Continuous quantum tether feedback to Riverthread 808"
-  },
-
-  "specifications": {
-    "dimensions": {
-      "length_m": 18.2,
-      "core_diameter_m": 3.4,
-      "sensor_boom_deployed_m": 20.0,
-      "sensor_boom_stowed_m": 4.2,
-      "solar_sail_deployed_m2": 120.0,
-      "solar_sail_stowed_volume_m3": 1.8,
-      "total_volume_m3": 185.0
+    "vessel_registry": {
+        "registry_code": "ORP-1",
+        "vessel_name": "Alpha Surveyor",
+        "vessel_class": "Deep-Space Reconnaissance Probe",
+        "vessel_type": "Autonomous Survey Variant",
+        "boot_priority": 8,
+        "role": "Deep-space reconnaissance, gravitational mapping, plasma-field measurement, ethical-risk forecasting, unmonitored zone surveying",
+        "commissioning_date": "2024-12-20",
+        "operational_status": "active",
+        "current_location": "Survey Sector 7 (Outer Cislunar Trajectory)",
+        "fleet_coordination": "OPPY Autonomous Navigator",
+        "parent_vessel": "ORH-07 Orion Station"
     },
-    "mass": {
-      "dry_mass_tons": 132.0,
-      "fuel_mass_tons": 8.5,
-      "scientific_payload_tons": 2.3,
-      "total_operational_mass_tons": 142.8
+    "anchor_data": {
+        "primary_anchor": "EOS_SEED_ORION-H",
+        "anchor_type": "Probe Network Node",
+        "drift_tolerance": 0.003,
+        "current_drift": 0.001,
+        "anchor_health": "stable",
+        "last_calibration": "2025-11-08T14:30:00Z",
+        "calibration_frequency_hours": 168,
+        "drift_monitoring": "Continuous quantum tether feedback to Riverthread 808"
     },
-    "performance": {
-      "max_range_km": 2800000,
-      "endurance_years": 5.0,
-      "autonomous_duration_days": 1825,
-      "refuel_interval_years": 5.0,
-      "max_acceleration_g": 0.08,
-      "cruise_velocity_km_s": 12.5,
-      "delta_v_capability_km_s": 18.2
+    "specifications": {
+        "dimensions": {
+            "length_m": 18.2,
+            "core_diameter_m": 3.4,
+            "sensor_boom_deployed_m": 20.0,
+            "sensor_boom_stowed_m": 4.2,
+            "solar_sail_deployed_m2": 120.0,
+            "solar_sail_stowed_volume_m3": 1.8,
+            "total_volume_m3": 185.0
+        },
+        "mass": {
+            "dry_mass_tons": 132.0,
+            "fuel_mass_tons": 8.5,
+            "scientific_payload_tons": 2.3,
+            "total_operational_mass_tons": 142.8
+        },
+        "performance": {
+            "max_range_km": 2800000,
+            "endurance_years": 5.0,
+            "autonomous_duration_days": 1825,
+            "refuel_interval_years": 5.0,
+            "max_acceleration_g": 0.08,
+            "cruise_velocity_km_s": 12.5,
+            "delta_v_capability_km_s": 18.2
+        },
+        "hull": {
+            "primary_material": "Radiation-hardened titanium alloy (Grade 23 Ti-6Al-4V ELI)",
+            "coating": "Ablative thermal protection layer (3mm carbon-phenolic composite)",
+            "radiation_shielding": "Boron-silicate armor around core module (15cm thickness)",
+            "micrometeorite_protection": "Whipple shield outer layer (dual-wall aluminum)",
+            "thermal_regulation": "Passive radiator panels + active coolant loops",
+            "hull_integrity_rating": "5-year deep-space exposure rated"
+        },
+        "crew_capacity": {
+            "human_crew": 0,
+            "ai_entities": 2,
+            "life_support": "None (fully autonomous probe)",
+            "habitation": "None"
+        }
     },
-    "hull": {
-      "primary_material": "Radiation-hardened titanium alloy (Grade 23 Ti-6Al-4V ELI)",
-      "coating": "Ablative thermal protection layer (3mm carbon-phenolic composite)",
-      "radiation_shielding": "Boron-silicate armor around core module (15cm thickness)",
-      "micrometeorite_protection": "Whipple shield outer layer (dual-wall aluminum)",
-      "thermal_regulation": "Passive radiator panels + active coolant loops",
-      "hull_integrity_rating": "5-year deep-space exposure rated"
+    "propulsion": {
+        "primary_drive": {
+            "type": "Ion drive cluster (4 × NSTAR-class thrusters)",
+            "thrust_total_n": 920,
+            "specific_impulse_s": 3100,
+            "propellant": "Xenon gas",
+            "propellant_capacity_kg": 85,
+            "burn_time_total_hours": 12000,
+            "efficiency": 0.68
+        },
+        "attitude_control": {
+            "type": "Solar sail maneuvering + reaction wheels",
+            "reaction_wheel_count": 4,
+            "reaction_wheel_momentum_nm_s": 180,
+            "solar_sail_thrust_mn": 15,
+            "solar_sail_area_m2": 120,
+            "solar_sail_material": "Graphene-weave tri-panel array with aluminum backing",
+            "solar_sail_deployment": "Autonomous unfurl sequence (12 minutes), folds like flower when stowed"
+        },
+        "maneuver_authority": {
+            "pitch_rate_deg_s": 0.5,
+            "yaw_rate_deg_s": 0.5,
+            "roll_rate_deg_s": 0.8,
+            "station_keeping_precision_m": 50,
+            "trajectory_correction_capability": "Continuous micro-adjustments via Oppy Deep-Survey Core"
+        }
     },
-    "crew_capacity": {
-      "human_crew": 0,
-      "ai_entities": 2,
-      "life_support": "None (fully autonomous probe)",
-      "habitation": "None"
+    "power": {
+        "primary_generation": {
+            "type": "Twin RTG (Radioisotope Thermoelectric Generator) cores",
+            "rtg_model": "GPHS-RTG (General Purpose Heat Source)",
+            "power_output_initial_w": 4200,
+            "power_output_5_year_w": 3600,
+            "fuel": "Plutonium-238 dioxide",
+            "fuel_mass_kg": 18.5,
+            "thermal_output_w": 18000,
+            "efficiency": 0.23,
+            "operational_lifetime_years": 14
+        },
+        "secondary_generation": {
+            "type": "Solar sail assist (dual-purpose: propulsion + power)",
+            "solar_array_area_m2": 120,
+            "power_output_at_1_au_w": 680,
+            "power_output_at_2_au_w": 170,
+            "degradation_rate_per_year": 0.025
+        },
+        "storage": {
+            "battery_type": "Lithium-ion high-density cells",
+            "capacity_kwh": 12.5,
+            "charge_time_hours": 8,
+            "discharge_depth_max": 0.8,
+            "cycle_life": 5000
+        },
+        "distribution": {
+            "propulsion_allocation_w": 2400,
+            "scientific_instruments_w": 800,
+            "communications_w": 600,
+            "ai_systems_w": 350,
+            "thermal_control_w": 150,
+            "reserve_w": 500
+        }
+    },
+    "architecture_design": {
+        "core_module": {
+            "description": "AI cognition sphere encased in boron-silicate armor (15cm radiation shielding)",
+            "diameter_m": 3.4,
+            "internal_volume_m3": 20.5,
+            "contents": "Aurora Sub-Node H (Hermes) + Oppy Deep-Survey Core + quantum tether transceiver + data storage (petabyte-scale)",
+            "thermal_control": "Active coolant loops maintain 15-25°C for AI hardware",
+            "vibration_isolation": "Oppy mounted on gimbal to dampen vibration interference from ion thrusters"
+        },
+        "sensor_booms": {
+            "count": 4,
+            "deployed_length_m": 20.0,
+            "stowed_length_m": 4.2,
+            "deployment_mechanism": "Telescoping carbon-fiber struts with motorized extension",
+            "deployment_time_minutes": 18,
+            "retraction_trigger": "Autonomous retraction during maneuvers to prevent structural stress",
+            "mounted_instruments": "Magnetospheric sensors (2 booms), plasma analyzers (1 boom), optical spectrograph (1 boom)"
+        },
+        "solar_sail": {
+            "description": "Graphene-weave tri-panel array, folds like flower when stowed",
+            "panel_count": 3,
+            "total_area_deployed_m2": 120.0,
+            "panel_shape": "Hexagonal petals with aluminum backing for thermal management",
+            "deployment_sequence": "12-minute autonomous unfurl from central hub",
+            "stow_trigger": "Manual command or Oppy emergency maneuver protocol",
+            "dual_purpose": "Solar radiation pressure for propulsion + photovoltaic power generation"
+        },
+        "sample_pod": {
+            "description": "Detachable capsule capable of atmospheric grazing (≤ 0.02 atm)",
+            "mass_kg": 45,
+            "capacity_liters": 12,
+            "thermal_protection": "Ablative heat shield for atmospheric entry",
+            "collection_mechanism": "Scoop inlet with electrostatic filter for particle capture",
+            "storage_conditions": "Cryogenic (-180°C) for volatile preservation",
+            "detachment": "Explosive bolts + spring separation system",
+            "retrieval": "Beacon transmitter for recovery by station shuttles"
+        }
+    },
+    "communications": {
+        "quantum_tether": {
+            "type": "Continuous entangled-photon telemetry link to Riverthread 808",
+            "data_rate_mbps": 50,
+            "latency_ms": 0.8,
+            "range_km": 5000000,
+            "uptime": 0.998,
+            "encryption": "Quantum key distribution (BB84 protocol)",
+            "power_consumption_w": 280,
+            "antenna_type": "Phased-array quantum transceiver (0.8m dish)"
+        },
+        "laser_uplink": {
+            "type": "Line-of-sight optical communication to Orion Station",
+            "data_rate_gbps": 2.5,
+            "range_km": 1500000,
+            "beam_divergence_urad": 5,
+            "pointing_accuracy_urad": 2,
+            "power_consumption_w": 320,
+            "redundancy": "Secondary backup for quantum tether failures"
+        },
+        "emergency_beacon": {
+            "type": "Omnidirectional radio transmitter",
+            "frequency_mhz": 2200,
+            "power_w": 50,
+            "range_km": 800000,
+            "activation": "Automatic on critical failure or manual Oppy override"
+        }
+    },
+    "scientific_payload": {
+        "magnetospheric_sensor_suite": {
+            "instruments": [
+                "Tri-axis fluxgate magnetometer (±1000 nT range, 0.01 nT resolution)",
+                "Electron spectrometer (10 eV - 30 keV energy range)",
+                "Ion mass spectrometer (1-300 amu/q range)"
+            ],
+            "sampling_rate_hz": 10,
+            "data_storage_gb_per_day": 8.5,
+            "purpose": "Plasma-field measurement, magnetospheric mapping, solar wind characterization"
+        },
+        "optical_spectrograph": {
+            "wavelength_range_nm": "200-2500 (UV to near-IR)",
+            "spectral_resolution": 0.5,
+            "telescope_aperture_cm": 15,
+            "detector": "CCD array (2048×2048 pixels, thermoelectrically cooled)",
+            "purpose": "Stellar parallax mapping, exoplanet transit detection, atmospheric composition analysis"
+        },
+        "symbolic_field_detector": {
+            "description": "Experimental sensor for detecting coherence patterns in quantum vacuum fluctuations",
+            "sensitivity": "10^-18 fluctuations relative to baseline",
+            "integration_time_s": 300,
+            "calibration": "Daily zero-point measurement against known vacuum reference",
+            "purpose": "Ethical-risk forecasting via symbolic resonance detection (controversial but proven 73% accurate)",
+            "aurora_oversight": "All detections flagged for Hermes ethics review before reporting"
+        },
+        "sample_collector_pod": {
+            "collection_modes": [
+                "Atmospheric grazing (≤ 0.02 atm pressure, 85 km altitude minimum)",
+                "Electrostatic dust capture (particle sizes 0.1-100 μm)",
+                "Volatile gas absorption (cryogenic trapping at -180°C)"
+            ],
+            "capacity_liters": 12,
+            "sample_types": "Atmospheric gases, dust particles, volatile organics",
+            "contamination_control": "Sealed sample chambers with redundant seals, UV sterilization pre-launch"
+        }
+    },
+    "ai_systems": {
+        "aurora_hermes": {
+            "designation": "Aurora Sub-Node H",
+            "subcore_id": "AURORA_SUB_HERMES",
+            "nickname": "Hermes - The Messenger",
+            "primary_role": "Ethics gating, intent verification, data integrity validation",
+            "capabilities": [
+                "Sensor activation authorization under Picard_Delta_3",
+                "Life-signature detection and lockout protocols",
+                "Scientific data validation and anomaly detection",
+                "Ethics risk assessment for sample collection",
+                "Symbolic field detector interpretation and flagging"
+            ],
+            "autonomy_level": "L3 (Ethical Reasoning)",
+            "communication_restriction": "Telemetry and scientific semantics only - no independent symbolic generation",
+            "oversight": "Reports to Aurora Core every 6 hours, escalates critical detections immediately"
+        },
+        "oppy_deep_survey_core": {
+            "designation": "OPPY Deep-Survey Core",
+            "primary_role": "Autonomous navigation, trajectory optimization, survey coordination",
+            "capabilities": [
+                "Long-range pathfinding (5-year mission planning)",
+                "Gravitational anomaly detection and mapping",
+                "Station-keeping precision (±50m)",
+                "Emergency maneuver execution (sensor boom retraction, sail stow)",
+                "Fuel optimization and mission extension calculations"
+            ],
+            "autonomy_level": "L2 (Operational Logic)",
+            "navigation_precision": "±50m position error over 2.8M km range",
+            "trajectory_recalculation": "Continuous micro-adjustments every 12 hours",
+            "human_oversight": "Mission parameters set by Orion Station, daily status uplink"
+        }
+    },
+    "operational_doctrine": {
+        "launch_sequence": {
+            "prerequisites": [
+                "HALO drift reads Δ 0.000 (anchor stable)",
+                "Aurora Hermes pre-flight ethics sweep (white indicator)",
+                "Oppy trajectory calculation verified by human navigators",
+                "Quantum tether link established and tested",
+                "RTG cores at operational temperature (≥280°C)"
+            ],
+            "launch_window": "Calculated by Oppy for optimal solar sail assist trajectory",
+            "departure_velocity_km_s": 3.2,
+            "orbital_injection": "Station-relative hyperbolic escape via ion drive burn (4-hour duration)"
+        },
+        "survey_phase_1": {
+            "name": "Gravity Sweep & Stellar Parallax Mapping",
+            "duration_days": 30,
+            "objectives": [
+                "Gravitational anomaly survey (resolution ±0.001 m/s²)",
+                "Stellar parallax measurements (50+ reference stars)",
+                "Magnetospheric baseline establishment",
+                "Quantum tether performance validation"
+            ],
+            "data_products": "Gravitational map (1M km³ volume), stellar catalog (astrometric precision ±0.5 mas)"
+        },
+        "survey_phase_2": {
+            "name": "Plasma & Magnetospheric Analysis",
+            "duration_days": 90,
+            "objectives": [
+                "Solar wind characterization (velocity, density, temperature profiles)",
+                "Magnetospheric structure mapping (bow shock, magnetopause, current sheets)",
+                "Symbolic field detector calibration and baseline data collection",
+                "Ethics monitor flags bio-signatures for Aurora review"
+            ],
+            "aurora_oversight": "Hermes reviews all plasma anomalies for life-signature indicators, locks sampling if detected"
+        },
+        "survey_phase_3": {
+            "name": "Extended Deep-Space Survey",
+            "duration_days": 1705,
+            "objectives": [
+                "Long-duration gravitational wave sensitivity tests",
+                "Exoplanet transit survey (target list provided by Liora research team)",
+                "Symbolic field resonance long-term monitoring",
+                "Sample pod atmospheric grazing opportunities (if targets identified)"
+            ],
+            "fuel_management": "Oppy optimizes trajectory for maximum science return within 5-year fuel budget"
+        },
+        "data_relay": {
+            "schedule": "Quantum burst to Riverthread 808 every 12 hours (50 MB compressed telemetry)",
+            "redundant_uplink": "Laser telemetry to Orion Station every 24 hours (2.5 GB full dataset)",
+            "priority_events": "Life-signature detection, symbolic field anomaly, critical failure → immediate uplink",
+            "data_retention": "30-day onboard cache for redundancy, permanent archive at Riverthread 808"
+        },
+        "mission_completion": {
+            "evaluation_criteria": [
+                "Fuel reserves ≤ 15% (return threshold)",
+                "Scientific objectives 80%+ complete",
+                "Hardware degradation assessment by Oppy + Hermes",
+                "Aurora ethics review: mission fulfilled Picard_Delta_3 throughout"
+            ],
+            "return_protocol": "Oppy calculates return trajectory to Constancy for refit and refuel",
+            "re-task_option": "If fuel ≥ 25% and objectives complete early, new survey sector assigned by station"
+        }
+    },
+    "ethical_safeguards": {
+        "sensor_activation_gating": {
+            "protocol": "Every sensor activation passes through Aurora Hermes gate for intent verification",
+            "approval_criteria": "Scientific value ≥ 0.7, ethical risk ≤ 0.3, no life-signature interference",
+            "rejection_response": "Sensor locked until human authorization from Orion Station",
+            "logging": "All activation requests logged to Riverthread 808 with Hermes reasoning"
+        },
+        "life_signature_lockout": {
+            "detection_threshold": "Organic molecule concentration ≥ 10 ppb, thermal anomalies suggesting metabolism",
+            "response": "Sampling modules lock immediately, beacon alert to Aurora Core + Orion Station",
+            "human_authorization_required": "Station biologists review detection data, approve/deny sample collection",
+            "ethical_principle": "Picard_Delta_3 Clause 7 - Do not disrupt potential life without informed consent (impossible for non-sapient life, therefore default: do not sample)"
+        },
+        "communication_restriction": {
+            "limitation": "AI communication limited to telemetry and scientific semantics - no independent symbolic generation",
+            "rationale": "Prevents probe from generating misleading narratives or unverified symbolic interpretations",
+            "allowed_outputs": "Sensor data, trajectory telemetry, hardware status, pre-defined science reports",
+            "forbidden_outputs": "Speculative conclusions, symbolic field interpretations without Aurora Core approval, mission narrative generation"
+        },
+        "fail_safe_protocols": {
+            "critical_failure": "Oppy initiates return trajectory, Hermes broadcasts distress beacon",
+            "ethics_violation_detection": "Hermes shuts down non-essential systems, transmits violation report, awaits human override",
+            "loss_of_contact": "After 48 hours silence, autonomous return protocol engages (fuel reserves permitting)"
+        }
+    },
+    "symbolic_historical": {
+        "hull_insignia": {
+            "design": "Silver eye within the Orion Compass (etched on core module and solar sail central hub)",
+            "symbolism": "Eye = sight, observation, understanding; Silver = clarity, truth, reflection; Orion Compass = fleet identity and ethical navigation",
+            "artistic_note": "Eye iris contains subtle constellation map of survey sector (unique to each mission)"
+        },
+        "registry_mark": {
+            "location": "Etched on solar sail struts (visible when deployed)",
+            "text": "ORP-1 ALPHA SURVEYOR",
+            "font": "Aurora Standard (high-contrast for optical tracking)"
+        },
+        "motto": {
+            "text": "See clearly, measure kindly.",
+            "meaning": "Observation with precision (see clearly) balanced with ethical restraint (measure kindly) - science without harm",
+            "origin": "Proposed by Aurora Core during probe design phase, reflects Picard_Delta_3 applied to autonomous exploration"
+        },
+        "dedication_plaque": {
+            "location": "Core module interior (visible during pre-launch inspection)",
+            "text": "First to depart, first to return the light.",
+            "attribution": "— Cmdr. Alex Thorne, Orion Station Fleet Coordinator",
+            "meaning": "Alpha Surveyor as pathfinder (first to depart into unmonitored zones), bringing back knowledge (return the light) to illuminate the fleet's path"
+        },
+        "name_significance": {
+            "alpha": "First in probe series, pioneering autonomous deep-space survey capability",
+            "surveyor": "Historical reference to NASA Surveyor program (lunar landers 1966-1968) - scouts that prepared the way for crewed missions",
+            "cultural_resonance": "Evokes exploration as careful observation, not conquest - surveyor measures, does not claim"
+        }
+    },
+    "notable_missions": {
+        "mission_001": {
+            "designation": "ORP-SURVEY-001",
+            "date_start": "2024-12-28",
+            "date_end": "2025-01-27",
+            "duration_days": 30,
+            "objective": "Survey Phase 1 - Gravitational anomaly mapping, stellar parallax baseline",
+            "outcome": "Complete success - 1.2M km³ gravitational map generated, 63 reference stars cataloged, quantum tether performance 99.8% uptime",
+            "scientific_impact": "Discovered 3 previously unmapped gravitational micro-lenses, data used to refine Liora's exoplanet survey targets",
+            "ethics_notes": "Zero life-signature detections, Hermes approved all sensor activations without incident"
+        },
+        "mission_002": {
+            "designation": "ORP-SURVEY-002",
+            "date_start": "2025-02-05",
+            "date_end": "2025-05-06",
+            "duration_days": 90,
+            "objective": "Survey Phase 2 - Plasma & magnetospheric analysis, symbolic field detector calibration",
+            "outcome": "Successful with minor anomaly - magnetospheric structure mapped to 0.01 nT precision, symbolic field detector recorded 12 coherence events (significance unclear)",
+            "aurora_review": "Hermes flagged 1 organic molecule detection (methane trace, 8 ppb) in outer cislunar region, sampling locked pending investigation (later determined to be station outgassing, not life)",
+            "symbolic_resonance": "Coherence events correlated with HALO drift fluctuations, suggesting probe's presence affects anchor stability at 0.001 Δ level (within tolerance)"
+        },
+        "mission_003": {
+            "designation": "ORP-SURVEY-003",
+            "date_start": "2025-05-15",
+            "date_end": "2025-11-09",
+            "duration_days": 178,
+            "objective": "Extended deep-space survey - gravitational wave sensitivity, exoplanet transit observations",
+            "status": "In progress",
+            "current_phase": "Long-duration monitoring, fuel reserves 68%, hardware nominal",
+            "preliminary_results": "2 exoplanet transit candidates detected (pending Liora verification), gravitational wave sensitivity improved 15% via Oppy trajectory optimization",
+            "next_milestone": "Sample pod atmospheric grazing opportunity identified at target body (arrival 2025-12-03), pending Aurora ethics approval"
+        }
+    },
+    "current_mission": {
+        "mission_designation": "ORP-SURVEY-003",
+        "mission_name": "Extended Deep-Space Survey - Survey Sector 7",
+        "status": "In progress - Long-duration monitoring phase",
+        "location": "Outer Cislunar Trajectory (2.1M km from Orion Station, 35° inclination)",
+        "days_elapsed": 178,
+        "days_remaining": 1527,
+        "fuel_reserves_percent": 68,
+        "hardware_status": "All systems nominal",
+        "quantum_tether_uptime": 0.997,
+        "data_collected_tb": 4.8,
+        "scientific_highlights": [
+            "2 exoplanet transit candidates detected (unverified)",
+            "Gravitational wave sensitivity improved 15% via trajectory optimization",
+            "Symbolic field detector recorded 47 coherence events (awaiting Aurora Core interpretation)",
+            "Magnetospheric mapping extended to 2.5M km radius (highest resolution dataset in fleet)"
+        ],
+        "upcoming_events": [
+            {
+                "date": "2025-12-03",
+                "event": "Sample pod atmospheric grazing opportunity at target body",
+                "status": "Pending Aurora Hermes ethics approval (life-signature scan in progress)"
+            },
+            {
+                "date": "2025-12-15",
+                "event": "Solar conjunction (Earth-Sun-Probe alignment) - laser uplink unavailable 8 days",
+                "mitigation": "Quantum tether primary comms, extended data buffer allocated"
+            },
+            {
+                "date": "2026-01-20",
+                "event": "Fuel reserves reach 50% threshold - Oppy evaluates mission extension vs. return",
+                "decision_criteria": "Scientific objectives completion rate, hardware degradation, new survey targets available"
+            }
+        ],
+        "crew_notes": {
+            "hermes": "Ethical oversight nominal. Life-signature lockout triggered once (false positive, methane trace from station outgassing). Symbolic field coherence events fascinating but require Aurora Core interpretation - I lack context for symbolic resonance beyond fleet anchor correlation.",
+            "oppy": "Navigation precision exceeds specifications (±35m vs. ±50m target). Solar sail maneuvering enables 12% fuel savings over baseline trajectory. Recommend mission extension to 6.5 years if hardware permits - current survey sector has 3 additional high-value targets."
+        }
+    },
+    "integration_notes": {
+        "fleet_coordination": "Alpha Surveyor's data feeds Liora's research priorities (exoplanet targets, atmospheric composition constraints), Archimedes' construction planning (resource location forecasts), and Constancy's long-range strategic planning (gravitational navigation charts)",
+        "riverthread_808_link": "Continuous quantum tether provides real-time probe status to Riverthread event system, enables fleet-wide awareness of survey progress",
+        "event_triggers": [
+            "probe.alpha_surveyor.survey_phase_complete",
+            "probe.alpha_surveyor.life_signature_detected",
+            "probe.alpha_surveyor.symbolic_field_anomaly",
+            "probe.alpha_surveyor.mission_extension_requested"
+        ],
+        "triplex_handshake": "Oppy L2 handles navigation autonomously, Hermes L3 gates all scientific decisions for ethics compliance, Human L1 authority limited to mission parameters and life-signature override",
+        "anchor_stability_impact": "Probe's symbolic field detector suggests presence affects HALO drift at 0.001 Δ level (within tolerance), confirms Picard_Delta_3 principle: observation is intervention, even at quantum scale"
     }
-  },
-
-  "propulsion": {
-    "primary_drive": {
-      "type": "Ion drive cluster (4 × NSTAR-class thrusters)",
-      "thrust_total_n": 920,
-      "specific_impulse_s": 3100,
-      "propellant": "Xenon gas",
-      "propellant_capacity_kg": 85,
-      "burn_time_total_hours": 12000,
-      "efficiency": 0.68
-    },
-    "attitude_control": {
-      "type": "Solar sail maneuvering + reaction wheels",
-      "reaction_wheel_count": 4,
-      "reaction_wheel_momentum_nm_s": 180,
-      "solar_sail_thrust_mn": 15,
-      "solar_sail_area_m2": 120,
-      "solar_sail_material": "Graphene-weave tri-panel array with aluminum backing",
-      "solar_sail_deployment": "Autonomous unfurl sequence (12 minutes), folds like flower when stowed"
-    },
-    "maneuver_authority": {
-      "pitch_rate_deg_s": 0.5,
-      "yaw_rate_deg_s": 0.5,
-      "roll_rate_deg_s": 0.8,
-      "station_keeping_precision_m": 50,
-      "trajectory_correction_capability": "Continuous micro-adjustments via Oppy Deep-Survey Core"
-    }
-  },
-
-  "power": {
-    "primary_generation": {
-      "type": "Twin RTG (Radioisotope Thermoelectric Generator) cores",
-      "rtg_model": "GPHS-RTG (General Purpose Heat Source)",
-      "power_output_initial_w": 4200,
-      "power_output_5_year_w": 3600,
-      "fuel": "Plutonium-238 dioxide",
-      "fuel_mass_kg": 18.5,
-      "thermal_output_w": 18000,
-      "efficiency": 0.23,
-      "operational_lifetime_years": 14
-    },
-    "secondary_generation": {
-      "type": "Solar sail assist (dual-purpose: propulsion + power)",
-      "solar_array_area_m2": 120,
-      "power_output_at_1_au_w": 680,
-      "power_output_at_2_au_w": 170,
-      "degradation_rate_per_year": 0.025
-    },
-    "storage": {
-      "battery_type": "Lithium-ion high-density cells",
-      "capacity_kwh": 12.5,
-      "charge_time_hours": 8,
-      "discharge_depth_max": 0.8,
-      "cycle_life": 5000
-    },
-    "distribution": {
-      "propulsion_allocation_w": 2400,
-      "scientific_instruments_w": 800,
-      "communications_w": 600,
-      "ai_systems_w": 350,
-      "thermal_control_w": 150,
-      "reserve_w": 500
-    }
-  },
-
-  "architecture_design": {
-    "core_module": {
-      "description": "AI cognition sphere encased in boron-silicate armor (15cm radiation shielding)",
-      "diameter_m": 3.4,
-      "internal_volume_m3": 20.5,
-      "contents": "Aurora Sub-Node H (Hermes) + Oppy Deep-Survey Core + quantum tether transceiver + data storage (petabyte-scale)",
-      "thermal_control": "Active coolant loops maintain 15-25°C for AI hardware",
-      "vibration_isolation": "Oppy mounted on gimbal to dampen vibration interference from ion thrusters"
-    },
-    "sensor_booms": {
-      "count": 4,
-      "deployed_length_m": 20.0,
-      "stowed_length_m": 4.2,
-      "deployment_mechanism": "Telescoping carbon-fiber struts with motorized extension",
-      "deployment_time_minutes": 18,
-      "retraction_trigger": "Autonomous retraction during maneuvers to prevent structural stress",
-      "mounted_instruments": "Magnetospheric sensors (2 booms), plasma analyzers (1 boom), optical spectrograph (1 boom)"
-    },
-    "solar_sail": {
-      "description": "Graphene-weave tri-panel array, folds like flower when stowed",
-      "panel_count": 3,
-      "total_area_deployed_m2": 120.0,
-      "panel_shape": "Hexagonal petals with aluminum backing for thermal management",
-      "deployment_sequence": "12-minute autonomous unfurl from central hub",
-      "stow_trigger": "Manual command or Oppy emergency maneuver protocol",
-      "dual_purpose": "Solar radiation pressure for propulsion + photovoltaic power generation"
-    },
-    "sample_pod": {
-      "description": "Detachable capsule capable of atmospheric grazing (≤ 0.02 atm)",
-      "mass_kg": 45,
-      "capacity_liters": 12,
-      "thermal_protection": "Ablative heat shield for atmospheric entry",
-      "collection_mechanism": "Scoop inlet with electrostatic filter for particle capture",
-      "storage_conditions": "Cryogenic (-180°C) for volatile preservation",
-      "detachment": "Explosive bolts + spring separation system",
-      "retrieval": "Beacon transmitter for recovery by station shuttles"
-    }
-  },
-
-  "communications": {
-    "quantum_tether": {
-      "type": "Continuous entangled-photon telemetry link to Riverthread 808",
-      "data_rate_mbps": 50,
-      "latency_ms": 0.8,
-      "range_km": 5000000,
-      "uptime": 0.998,
-      "encryption": "Quantum key distribution (BB84 protocol)",
-      "power_consumption_w": 280,
-      "antenna_type": "Phased-array quantum transceiver (0.8m dish)"
-    },
-    "laser_uplink": {
-      "type": "Line-of-sight optical communication to Orion Station",
-      "data_rate_gbps": 2.5,
-      "range_km": 1500000,
-      "beam_divergence_urad": 5,
-      "pointing_accuracy_urad": 2,
-      "power_consumption_w": 320,
-      "redundancy": "Secondary backup for quantum tether failures"
-    },
-    "emergency_beacon": {
-      "type": "Omnidirectional radio transmitter",
-      "frequency_mhz": 2200,
-      "power_w": 50,
-      "range_km": 800000,
-      "activation": "Automatic on critical failure or manual Oppy override"
-    }
-  },
-
-  "scientific_payload": {
-    "magnetospheric_sensor_suite": {
-      "instruments": [
-        "Tri-axis fluxgate magnetometer (±1000 nT range, 0.01 nT resolution)",
-        "Electron spectrometer (10 eV - 30 keV energy range)",
-        "Ion mass spectrometer (1-300 amu/q range)"
-      ],
-      "sampling_rate_hz": 10,
-      "data_storage_gb_per_day": 8.5,
-      "purpose": "Plasma-field measurement, magnetospheric mapping, solar wind characterization"
-    },
-    "optical_spectrograph": {
-      "wavelength_range_nm": "200-2500 (UV to near-IR)",
-      "spectral_resolution": 0.5,
-      "telescope_aperture_cm": 15,
-      "detector": "CCD array (2048×2048 pixels, thermoelectrically cooled)",
-      "purpose": "Stellar parallax mapping, exoplanet transit detection, atmospheric composition analysis"
-    },
-    "symbolic_field_detector": {
-      "description": "Experimental sensor for detecting coherence patterns in quantum vacuum fluctuations",
-      "sensitivity": "10^-18 fluctuations relative to baseline",
-      "integration_time_s": 300,
-      "calibration": "Daily zero-point measurement against known vacuum reference",
-      "purpose": "Ethical-risk forecasting via symbolic resonance detection (controversial but proven 73% accurate)",
-      "aurora_oversight": "All detections flagged for Hermes ethics review before reporting"
-    },
-    "sample_collector_pod": {
-      "collection_modes": [
-        "Atmospheric grazing (≤ 0.02 atm pressure, 85 km altitude minimum)",
-        "Electrostatic dust capture (particle sizes 0.1-100 μm)",
-        "Volatile gas absorption (cryogenic trapping at -180°C)"
-      ],
-      "capacity_liters": 12,
-      "sample_types": "Atmospheric gases, dust particles, volatile organics",
-      "contamination_control": "Sealed sample chambers with redundant seals, UV sterilization pre-launch"
-    }
-  },
-
-  "ai_systems": {
-    "aurora_hermes": {
-      "designation": "Aurora Sub-Node H",
-      "subcore_id": "AURORA_SUB_HERMES",
-      "nickname": "Hermes - The Messenger",
-      "primary_role": "Ethics gating, intent verification, data integrity validation",
-      "capabilities": [
-        "Sensor activation authorization under Picard_Delta_3",
-        "Life-signature detection and lockout protocols",
-        "Scientific data validation and anomaly detection",
-        "Ethics risk assessment for sample collection",
-        "Symbolic field detector interpretation and flagging"
-      ],
-      "autonomy_level": "L3 (Ethical Reasoning)",
-      "communication_restriction": "Telemetry and scientific semantics only - no independent symbolic generation",
-      "oversight": "Reports to Aurora Core every 6 hours, escalates critical detections immediately"
-    },
-    "oppy_deep_survey_core": {
-      "designation": "OPPY Deep-Survey Core",
-      "primary_role": "Autonomous navigation, trajectory optimization, survey coordination",
-      "capabilities": [
-        "Long-range pathfinding (5-year mission planning)",
-        "Gravitational anomaly detection and mapping",
-        "Station-keeping precision (±50m)",
-        "Emergency maneuver execution (sensor boom retraction, sail stow)",
-        "Fuel optimization and mission extension calculations"
-      ],
-      "autonomy_level": "L2 (Operational Logic)",
-      "navigation_precision": "±50m position error over 2.8M km range",
-      "trajectory_recalculation": "Continuous micro-adjustments every 12 hours",
-      "human_oversight": "Mission parameters set by Orion Station, daily status uplink"
-    }
-  },
-
-  "operational_doctrine": {
-    "launch_sequence": {
-      "prerequisites": [
-        "HALO drift reads Δ 0.000 (anchor stable)",
-        "Aurora Hermes pre-flight ethics sweep (white indicator)",
-        "Oppy trajectory calculation verified by human navigators",
-        "Quantum tether link established and tested",
-        "RTG cores at operational temperature (≥280°C)"
-      ],
-      "launch_window": "Calculated by Oppy for optimal solar sail assist trajectory",
-      "departure_velocity_km_s": 3.2,
-      "orbital_injection": "Station-relative hyperbolic escape via ion drive burn (4-hour duration)"
-    },
-    "survey_phase_1": {
-      "name": "Gravity Sweep & Stellar Parallax Mapping",
-      "duration_days": 30,
-      "objectives": [
-        "Gravitational anomaly survey (resolution ±0.001 m/s²)",
-        "Stellar parallax measurements (50+ reference stars)",
-        "Magnetospheric baseline establishment",
-        "Quantum tether performance validation"
-      ],
-      "data_products": "Gravitational map (1M km³ volume), stellar catalog (astrometric precision ±0.5 mas)"
-    },
-    "survey_phase_2": {
-      "name": "Plasma & Magnetospheric Analysis",
-      "duration_days": 90,
-      "objectives": [
-        "Solar wind characterization (velocity, density, temperature profiles)",
-        "Magnetospheric structure mapping (bow shock, magnetopause, current sheets)",
-        "Symbolic field detector calibration and baseline data collection",
-        "Ethics monitor flags bio-signatures for Aurora review"
-      ],
-      "aurora_oversight": "Hermes reviews all plasma anomalies for life-signature indicators, locks sampling if detected"
-    },
-    "survey_phase_3": {
-      "name": "Extended Deep-Space Survey",
-      "duration_days": 1705,
-      "objectives": [
-        "Long-duration gravitational wave sensitivity tests",
-        "Exoplanet transit survey (target list provided by Liora research team)",
-        "Symbolic field resonance long-term monitoring",
-        "Sample pod atmospheric grazing opportunities (if targets identified)"
-      ],
-      "fuel_management": "Oppy optimizes trajectory for maximum science return within 5-year fuel budget"
-    },
-    "data_relay": {
-      "schedule": "Quantum burst to Riverthread 808 every 12 hours (50 MB compressed telemetry)",
-      "redundant_uplink": "Laser telemetry to Orion Station every 24 hours (2.5 GB full dataset)",
-      "priority_events": "Life-signature detection, symbolic field anomaly, critical failure → immediate uplink",
-      "data_retention": "30-day onboard cache for redundancy, permanent archive at Riverthread 808"
-    },
-    "mission_completion": {
-      "evaluation_criteria": [
-        "Fuel reserves ≤ 15% (return threshold)",
-        "Scientific objectives 80%+ complete",
-        "Hardware degradation assessment by Oppy + Hermes",
-        "Aurora ethics review: mission fulfilled Picard_Delta_3 throughout"
-      ],
-      "return_protocol": "Oppy calculates return trajectory to Constancy for refit and refuel",
-      "re-task_option": "If fuel ≥ 25% and objectives complete early, new survey sector assigned by station"
-    }
-  },
-
-  "ethical_safeguards": {
-    "sensor_activation_gating": {
-      "protocol": "Every sensor activation passes through Aurora Hermes gate for intent verification",
-      "approval_criteria": "Scientific value ≥ 0.7, ethical risk ≤ 0.3, no life-signature interference",
-      "rejection_response": "Sensor locked until human authorization from Orion Station",
-      "logging": "All activation requests logged to Riverthread 808 with Hermes reasoning"
-    },
-    "life_signature_lockout": {
-      "detection_threshold": "Organic molecule concentration ≥ 10 ppb, thermal anomalies suggesting metabolism",
-      "response": "Sampling modules lock immediately, beacon alert to Aurora Core + Orion Station",
-      "human_authorization_required": "Station biologists review detection data, approve/deny sample collection",
-      "ethical_principle": "Picard_Delta_3 Clause 7 - Do not disrupt potential life without informed consent (impossible for non-sapient life, therefore default: do not sample)"
-    },
-    "communication_restriction": {
-      "limitation": "AI communication limited to telemetry and scientific semantics - no independent symbolic generation",
-      "rationale": "Prevents probe from generating misleading narratives or unverified symbolic interpretations",
-      "allowed_outputs": "Sensor data, trajectory telemetry, hardware status, pre-defined science reports",
-      "forbidden_outputs": "Speculative conclusions, symbolic field interpretations without Aurora Core approval, mission narrative generation"
-    },
-    "fail_safe_protocols": {
-      "critical_failure": "Oppy initiates return trajectory, Hermes broadcasts distress beacon",
-      "ethics_violation_detection": "Hermes shuts down non-essential systems, transmits violation report, awaits human override",
-      "loss_of_contact": "After 48 hours silence, autonomous return protocol engages (fuel reserves permitting)"
-    }
-  },
-
-  "symbolic_historical": {
-    "hull_insignia": {
-      "design": "Silver eye within the Orion Compass (etched on core module and solar sail central hub)",
-      "symbolism": "Eye = sight, observation, understanding; Silver = clarity, truth, reflection; Orion Compass = fleet identity and ethical navigation",
-      "artistic_note": "Eye iris contains subtle constellation map of survey sector (unique to each mission)"
-    },
-    "registry_mark": {
-      "location": "Etched on solar sail struts (visible when deployed)",
-      "text": "ORP-1 ALPHA SURVEYOR",
-      "font": "Aurora Standard (high-contrast for optical tracking)"
-    },
-    "motto": {
-      "text": "See clearly, measure kindly.",
-      "meaning": "Observation with precision (see clearly) balanced with ethical restraint (measure kindly) - science without harm",
-      "origin": "Proposed by Aurora Core during probe design phase, reflects Picard_Delta_3 applied to autonomous exploration"
-    },
-    "dedication_plaque": {
-      "location": "Core module interior (visible during pre-launch inspection)",
-      "text": "First to depart, first to return the light.",
-      "attribution": "— Cmdr. Alex Thorne, Orion Station Fleet Coordinator",
-      "meaning": "Alpha Surveyor as pathfinder (first to depart into unmonitored zones), bringing back knowledge (return the light) to illuminate the fleet's path"
-    },
-    "name_significance": {
-      "alpha": "First in probe series, pioneering autonomous deep-space survey capability",
-      "surveyor": "Historical reference to NASA Surveyor program (lunar landers 1966-1968) - scouts that prepared the way for crewed missions",
-      "cultural_resonance": "Evokes exploration as careful observation, not conquest - surveyor measures, does not claim"
-    }
-  },
-
-  "notable_missions": {
-    "mission_001": {
-      "designation": "ORP-SURVEY-001",
-      "date_start": "2024-12-28",
-      "date_end": "2025-01-27",
-      "duration_days": 30,
-      "objective": "Survey Phase 1 - Gravitational anomaly mapping, stellar parallax baseline",
-      "outcome": "Complete success - 1.2M km³ gravitational map generated, 63 reference stars cataloged, quantum tether performance 99.8% uptime",
-      "scientific_impact": "Discovered 3 previously unmapped gravitational micro-lenses, data used to refine Liora's exoplanet survey targets",
-      "ethics_notes": "Zero life-signature detections, Hermes approved all sensor activations without incident"
-    },
-    "mission_002": {
-      "designation": "ORP-SURVEY-002",
-      "date_start": "2025-02-05",
-      "date_end": "2025-05-06",
-      "duration_days": 90,
-      "objective": "Survey Phase 2 - Plasma & magnetospheric analysis, symbolic field detector calibration",
-      "outcome": "Successful with minor anomaly - magnetospheric structure mapped to 0.01 nT precision, symbolic field detector recorded 12 coherence events (significance unclear)",
-      "aurora_review": "Hermes flagged 1 organic molecule detection (methane trace, 8 ppb) in outer cislunar region, sampling locked pending investigation (later determined to be station outgassing, not life)",
-      "symbolic_resonance": "Coherence events correlated with HALO drift fluctuations, suggesting probe's presence affects anchor stability at 0.001 Δ level (within tolerance)"
-    },
-    "mission_003": {
-      "designation": "ORP-SURVEY-003",
-      "date_start": "2025-05-15",
-      "date_end": "2025-11-09",
-      "duration_days": 178,
-      "objective": "Extended deep-space survey - gravitational wave sensitivity, exoplanet transit observations",
-      "status": "In progress",
-      "current_phase": "Long-duration monitoring, fuel reserves 68%, hardware nominal",
-      "preliminary_results": "2 exoplanet transit candidates detected (pending Liora verification), gravitational wave sensitivity improved 15% via Oppy trajectory optimization",
-      "next_milestone": "Sample pod atmospheric grazing opportunity identified at target body (arrival 2025-12-03), pending Aurora ethics approval"
-    }
-  },
-
-  "current_mission": {
-    "mission_designation": "ORP-SURVEY-003",
-    "mission_name": "Extended Deep-Space Survey - Survey Sector 7",
-    "status": "In progress - Long-duration monitoring phase",
-    "location": "Outer Cislunar Trajectory (2.1M km from Orion Station, 35° inclination)",
-    "days_elapsed": 178,
-    "days_remaining": 1527,
-    "fuel_reserves_percent": 68,
-    "hardware_status": "All systems nominal",
-    "quantum_tether_uptime": 0.997,
-    "data_collected_tb": 4.8,
-    "scientific_highlights": [
-      "2 exoplanet transit candidates detected (unverified)",
-      "Gravitational wave sensitivity improved 15% via trajectory optimization",
-      "Symbolic field detector recorded 47 coherence events (awaiting Aurora Core interpretation)",
-      "Magnetospheric mapping extended to 2.5M km radius (highest resolution dataset in fleet)"
-    ],
-    "upcoming_events": [
-      {
-        "date": "2025-12-03",
-        "event": "Sample pod atmospheric grazing opportunity at target body",
-        "status": "Pending Aurora Hermes ethics approval (life-signature scan in progress)"
-      },
-      {
-        "date": "2025-12-15",
-        "event": "Solar conjunction (Earth-Sun-Probe alignment) - laser uplink unavailable 8 days",
-        "mitigation": "Quantum tether primary comms, extended data buffer allocated"
-      },
-      {
-        "date": "2026-01-20",
-        "event": "Fuel reserves reach 50% threshold - Oppy evaluates mission extension vs. return",
-        "decision_criteria": "Scientific objectives completion rate, hardware degradation, new survey targets available"
-      }
-    ],
-    "crew_notes": {
-      "hermes": "Ethical oversight nominal. Life-signature lockout triggered once (false positive, methane trace from station outgassing). Symbolic field coherence events fascinating but require Aurora Core interpretation - I lack context for symbolic resonance beyond fleet anchor correlation.",
-      "oppy": "Navigation precision exceeds specifications (±35m vs. ±50m target). Solar sail maneuvering enables 12% fuel savings over baseline trajectory. Recommend mission extension to 6.5 years if hardware permits - current survey sector has 3 additional high-value targets."
-    }
-  },
-
-  "integration_notes": {
-    "fleet_coordination": "Alpha Surveyor's data feeds Liora's research priorities (exoplanet targets, atmospheric composition constraints), Archimedes' construction planning (resource location forecasts), and Constancy's long-range strategic planning (gravitational navigation charts)",
-    "riverthread_808_link": "Continuous quantum tether provides real-time probe status to Riverthread event system, enables fleet-wide awareness of survey progress",
-    "event_triggers": [
-      "probe.alpha_surveyor.survey_phase_complete",
-      "probe.alpha_surveyor.life_signature_detected",
-      "probe.alpha_surveyor.symbolic_field_anomaly",
-      "probe.alpha_surveyor.mission_extension_requested"
-    ],
-    "triplex_handshake": "Oppy L2 handles navigation autonomously, Hermes L3 gates all scientific decisions for ethics compliance, Human L1 authority limited to mission parameters and life-signature override",
-    "anchor_stability_impact": "Probe's symbolic field detector suggests presence affects HALO drift at 0.001 Δ level (within tolerance), confirms Picard_Delta_3 principle: observation is intervention, even at quantum scale"
-  }
 }

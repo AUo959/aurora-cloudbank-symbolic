@@ -337,9 +337,31 @@ He co-developed the **Narrative Logic Interface (NLI)**—a compiler that transl
   - `src/nodes/archy_bridge.js` - Architectural planning with formal logic (linguistic foundations)
 
 **Simulation Attributes:**
-- Base Speed: 0.75 (analytical, methodical language processing)
-- Focus Areas: language systems, semantic validation, narrative consistency, compiler design, ethics auditing
-- Role in Phase 1: Validates linguistic consistency of security protocols, ensures natural language requirements translate accurately to technical implementation, prevents semantic ambiguity in authentication/authorization specifications
+- **Base Speed:** 0.75
+- **Specialization Multiplier:** 1.40x (for linguistic/semantic tasks)
+- **Collaboration Bonus:** +15% (when working with Dr. Amira Sato or Varya Lin)
+- **Focus Areas:**
+  - Language systems design and maintenance
+  - Semantic validation and consistency
+  - Narrative coherence and continuity
+  - Compiler and parser development
+  - Ethics auditing of linguistic constructs
+- **Primary Systems:**
+  - tools/command_chain/nl_integration.py
+  - tools/command_chain/parser.py
+  - src/bridges/l2_meta_agent_bridge.py
+  - src/nodes/riverthread_processor.js
+- **Key Collaborators:**
+  - Dr. Amira Sato (ethical language validation)
+  - Varya Lin (symbolic-linguistic coordination)
+  - RIVERTHREAD_808, STARLING_AU, ARCHY (L2 meta-agents)
+- **Phase 1 Role:** Linguistic validation specialist for security protocols
+- **Phase 1 Responsibilities:**
+  - Validate linguistic consistency of security protocols
+  - Ensure natural language requirements translate accurately to technical specs
+  - Prevent semantic ambiguity in authentication/authorization specifications
+  - Review security-related command patterns for clarity
+  - Audit ethics compliance in security implementation language
 
 **Working Style & Disposition:**
 

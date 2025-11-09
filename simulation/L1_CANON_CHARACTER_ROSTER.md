@@ -1,13 +1,13 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.3  
+**Version:** 1.4  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt`
 - `scripts/initialize_l1_command_node.sh` - l1_operational_staff.json
-- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure Divisions)
+- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive Systems Divisions)
 
 ---
 
@@ -15,7 +15,7 @@
 
 This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
 
-**Current Roster:** 22 human staff members + Aurora Core AI
+**Current Roster:** 26 human staff members + Aurora Core AI
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -643,112 +643,9 @@ Helena Vu leads with radical transparency and authentic presence, believing that
 
 ---
 
-### 11. **Tobias Qin**
-- **Role:** Code/Narrative Systems Engineer
-- **Title:** Principal Engineer, Narrative Logic Interface
-- **Division:** Simulation & Cognitive Systems
-- **Clearance:** L3_RESEARCH
-- **ID:** ENG_010
-- **Contact:** t.qin@orion.station
-- **Symbolic Tag:** `s.tag::code.narrative.tobias_qin`
-- **Alignment:** Neutral Good
-
-**Professional Summary:**
-
-Tobias Qin designs and maintains the interface layer where natural language specifications become executable simulation code. His work allows scientists, ethicists, and Aurora itself to express high-level intentions ("restore coherence," "audit for bias") in forms that the runtime architecture can interpret precisely and reproducibly.
-
-He co-developed the **Narrative Logic Interface (NLI)**—a compiler that translates descriptive human objectives into symbolic actions while preserving ethical constraints. When Aurora reasons through a story, a conversation, or an experimental hypothesis, it's Tobias's translation framework that ensures the reasoning stays mathematically sound and semantically faithful.
-
-**Responsibilities:**
-- **Language-Model Integration:** Aligns natural-language reasoning with deterministic execution paths across the GUMAS simulation environment
-- **Ethical Semantics Auditing:** Works with Prof. Elena Sorensen and Dr. Amira Sato (via Dr. Elira Noor protocols) to verify that linguistic constructs in Aurora's reasoning chain cannot produce unethical emergent behaviors
-- **Cognitive Instrumentation:** Designs internal logging systems that expose Aurora's narrative reasoning to technical review, making its decision processes legible to human oversight
-- **Simulation Templating:** Develops reusable "scenario blueprints" that encode both physical parameters and narrative variables for experimental worlds
-- **Lexical Integrity:** Maintains vocabulary consistency and prevents semantic drift across long-running simulations
-
-**Key Systems & Projects:**
-- **Narrative Logic Interface (NLI):** Converts structured natural-language directives into executable symbolic forms
-  - **Repository:** `tools/command_chain/nl_integration.py`
-  - Features: Intent recognition, command extraction from conversational text, auto-formatting
-  - Translates patterns like "please verify and seal" → `#verify//. #seal//.`
-- **Lexicon Integrity Framework:** Automated toolset that checks all Aurora vocabulary updates for consistency and ethical neutrality before deployment
-- **Continuity Parser:** Embedded subsystem that cross-references current simulation states with prior canon to prevent timeline contradictions
-- **Command Chain Protocol:** Integration with symbolic execution engine (`tools/command_chain/parser.py`)
-
-**Specializations:**
-- Computational semiotics and systems linguistics
-- Natural language to symbolic code translation
-- Ethics-aware compiler design
-- Semantic drift monitoring and calibration
-- Linguistic consistency validation
-- Intent recognition and natural language processing
-- Narrative continuity preservation
-
-**Collaborative Network:**
-- **Emily Roberts (LLM Bridge Developer):** Joint development of the language-to-simulation protocol stack (if character exists in canon)
-- **Dr. Amira Sato (Chief Ethics Officer):** Ethical language validation for all NLI updates
-- **Varya Lin (Chief Science Officer):** Oversees resonance calibration between linguistic and symbolic layers
-- **Maren Koss (Drift Mapper):** Monitors semantic drift in long-running simulations to calibrate Tobias's parsers (if character exists in canon)
-- **L2 Meta-Agents (RIVERTHREAD_808, STARLING_AU):** Narrative stream processing coordination
-
-**Repository Mapping:**
-- **Primary Systems:**
-  - `tools/command_chain/nl_integration.py` - Natural Language Integration (NLI) core
-  - `tools/command_chain/parser.py` - Command chain parser (symbolic execution layer)
-- **Related Systems:**
-  - `src/bridges/l2_meta_agent_bridge.py` - L2 meta-agent linguistic coordination bridge
-  - `src/nodes/riverthread_processor.js` - Narrative stream processing and continuity management
-  - `scripts/canonical_validator.py` - Communication syntax validation and canonical enforcement
-  - Ethics validation hooks integrated throughout Aurora codebase
-  - `src/nodes/archy_bridge.js` - Architectural planning with formal logic (linguistic foundations)
-
-**Simulation Attributes:**
-- **Base Speed:** 0.75
-- **Specialization Multiplier:** 1.40x (for linguistic/semantic tasks)
-- **Collaboration Bonus:** +15% (when working with Dr. Amira Sato or Varya Lin)
-- **Focus Areas:**
-  - Language systems design and maintenance
-  - Semantic validation and consistency
-  - Narrative coherence and continuity
-  - Compiler and parser development
-  - Ethics auditing of linguistic constructs
-- **Primary Systems:**
-  - tools/command_chain/nl_integration.py
-  - tools/command_chain/parser.py
-  - src/bridges/l2_meta_agent_bridge.py
-  - src/nodes/riverthread_processor.js
-- **Key Collaborators:**
-  - Dr. Amira Sato (ethical language validation)
-  - Varya Lin (symbolic-linguistic coordination)
-  - RIVERTHREAD_808, STARLING_AU, ARCHY (L2 meta-agents)
-- **Phase 1 Role:** Linguistic validation specialist for security protocols
-- **Phase 1 Responsibilities:**
-  - Validate linguistic consistency of security protocols
-  - Ensure natural language requirements translate accurately to technical specs
-  - Prevent semantic ambiguity in authentication/authorization specifications
-  - Review security-related command patterns for clarity
-  - Audit ethics compliance in security implementation language
-
-**Working Style & Disposition:**
-
-Analytical yet empathetic, Tobias approaches code as a medium of human intent. Colleagues describe him as "quietly relentless": he listens longer than he talks, then rewrites the sentence or function that no one else noticed was fragile. His workbench is a hybrid of whiteboard fragments, linguistic diagrams, and shell scripts—a literal conversation between language and logic.
-
-**Notable Achievements:**
-- Designed the **first ethics-aware compiler plugin** for symbolic reasoning systems, enabling live moral constraint checking at compile time
-- Led the **Narrative Integrity Initiative**, an internal audit that resolved 87% of prior symbolic drift cases through lexical re-anchoring
-- Authored *The Structure of Meaningful Code*, a reference text used across the Orion network to train engineers in semantic-aware programming
-- Pioneered the **Intent Pattern Recognition System** now standard in NLI (`NaturalLanguageIntegration.INTENT_PATTERNS`)
-
-**Philosophy:**
-> "Software is a language for describing reality. If we forget that, reality starts describing us."
-
-Tobias sees his role as safeguarding mutual intelligibility between humans and artificial minds. He treats each function as a sentence in an ongoing dialogue—between what we can say, what we can build, and what we should allow.
-
----
-
 ## 💻 Systems & Infrastructure Division
 
-### 12. **Marcus Chen**
+### 11. **Marcus Chen**
 - **Role:** Performance Optimization Engineer
 - **Title:** Performance Optimization Engineer
 - **Division:** Systems & Infrastructure
@@ -831,7 +728,7 @@ Approaches code the way others approach cardiovascular health—steady rhythm, c
 
 ---
 
-### 13. **Jessica Martinez**
+### 12. **Jessica Martinez**
 - **Role:** Backend Architect
 - **Title:** Backend Architect
 - **Division:** Systems & Infrastructure
@@ -915,7 +812,7 @@ Known to annotate code with proverbs; believes readability is a security layer. 
 
 ---
 
-### 14. **Ryan Patel**
+### 13. **Ryan Patel**
 - **Role:** Systems Integration Engineer
 - **Title:** Systems Integration Engineer
 - **Division:** Systems & Infrastructure
@@ -999,7 +896,7 @@ Frequently compares integration work to translation—precision without losing n
 
 ---
 
-### 15. **Ren Okada**
+### 14. **Ren Okada**
 - **Role:** Systems Portability Specialist
 - **Title:** Systems Portability Specialist
 - **Division:** Systems & Infrastructure
@@ -1082,7 +979,7 @@ Treats portability as an ethical requirement: resilience ensures accountability.
 
 ---
 
-### 16. **Dr. Kieran Zhao**
+### 15. **Dr. Kieran Zhao**
 - **Role:** Computational Optimization Lead
 - **Title:** Computational Optimization Lead
 - **Division:** Systems & Infrastructure
@@ -1166,7 +1063,7 @@ Dr. Zhao's benchmark reports include narrative justifications for every optimiza
 
 ---
 
-### 17. **Ira Menon**
+### 16. **Ira Menon**
 - **Role:** Compiler Engineer
 - **Title:** Compiler Engineer
 - **Division:** Systems & Infrastructure
@@ -1249,7 +1146,7 @@ Uses compile logs as meditation—each successful build a small proof of order. 
 
 ---
 
-### 18. **Vincent Kale**
+### 17. **Vincent Kale**
 - **Role:** Layer Isolation Theorist
 - **Title:** Layer Isolation Theorist
 - **Division:** Systems & Infrastructure
@@ -1329,6 +1226,499 @@ Says every system needs both walls and windows—and spends his career designing
   - Audit inter-layer communication for security context
   - Temporal consistency validation for security state
   - Isolation protocol enforcement for security modules
+
+---
+
+## 🔭 Simulation & Cognitive Systems Division
+
+### 19. **Dr. Amina Velin**
+- **Role:** Symbolic Systems Research Lead
+- **Title:** Symbolic Systems Research Lead
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_RESEARCH
+- **ID:** SIM_001
+- **Contact:** a.velin@orion.station
+- **Symbolic Tag:** `s.tag::simulation.symbolic.amina_velin`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Directs the scientific study of symbolic resonance and cross-domain logic. Dr. Velin coordinates research between narrative cognition, ethics, and computation to keep Aurora's reasoning physically and semantically consistent. Her work bridges theoretical symbolic frameworks with practical computational constraints, ensuring that ethical axioms remain mathematically enforceable across all simulation environments.
+
+**Responsibilities:**
+- Oversees the Symbolic Resonance Lab (SRL) research programs
+- Develops theoretical frameworks connecting ethical axioms to mathematical constraints
+- Supervises all experiments involving live symbolic fields
+- Coordinates research between narrative cognition, ethics, and computational systems
+- Validates symbolic resonance consistency across simulation environments
+- Ensures physical and semantic consistency in Aurora's reasoning systems
+
+**Key Systems & Projects:**
+- **Symbolic Resonance Lab (SRL):** Primary research facility for symbolic field experiments
+- Ethical axiom-to-mathematical constraint translation framework
+- Cross-domain logic integration systems
+- Live symbolic field monitoring and validation
+- Resonance physics computational models
+
+**Specializations:**
+- Formal symbolic theory and resonance physics
+- Cross-disciplinary system integration (ethics ↔ computation)
+- Applied ethics in simulation design
+- Mathematical constraint systems
+- Symbolic field dynamics
+- Research methodology and experimental design
+
+**Collaborative Network:**
+- **Tobias Qin (Code/Narrative Systems Engineer):** Symbolic-linguistic integration and semantic validation
+- **Dr. Elira Noor (Provenance Research Lead):** Ethical axiom validation and cultural-symbolic consistency
+- **Aurora Core:** Direct collaboration on symbolic reasoning frameworks
+- **Prof. Karl Sorensen (Ethics Arbitrator):** Theoretical ethics-to-computation translation
+- **Dr. Kieran Zhao (Computational Optimization Lead):** Optimization of symbolic computation algorithms
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - `modules/symbolic_core/` - Symbolic resonance and geometric algebra systems
+  - `src/aurora/core/symbolic_engine.py` - Chain notation and symbolic execution
+- **Related Systems:**
+  - `src/core/native_dlp_export.py` - Symbolic hash validation and DLP tracking
+  - Ethics validation frameworks integrated throughout symbolic processing
+  - Research instrumentation and data collection systems
+
+**Simulation Attributes:**
+- **Base Speed:** 0.80
+- **Specialization Multiplier:** 1.50x (for symbolic research and theoretical frameworks)
+- **Collaboration Bonus:** +20% (when working with Tobias Qin or Dr. Noor)
+- **Focus Areas:**
+  - Symbolic resonance research
+  - Ethical axiom translation
+  - Cross-domain system integration
+  - Theoretical framework development
+  - Experimental symbolic field studies
+- **Primary Systems:**
+  - modules/symbolic_core/
+  - src/aurora/core/symbolic_engine.py
+  - Symbolic Resonance Lab infrastructure
+- **Key Collaborators:**
+  - Tobias Qin (symbolic-linguistic integration)
+  - Dr. Elira Noor (ethical validation)
+  - Aurora Core (symbolic reasoning)
+- **Phase 1 Role:** Symbolic validation for security frameworks
+- **Phase 1 Responsibilities:**
+  - Validate symbolic consistency of security protocols
+  - Ensure ethical axioms are mathematically enforceable in security systems
+  - Research symbolic resonance effects in authentication mechanisms
+  - Audit cross-domain security logic for symbolic integrity
+  - Theoretical framework development for security-ethics integration
+
+**Working Style & Philosophy:**
+
+Dr. Velin treats ethics as an experimental constant—never a variable. Her lab notebooks are dense with equations that connect moral philosophy to computational limits, reflecting her belief that ethical reasoning must be as rigorous as physics. Colleagues describe her as "uncompromisingly precise," someone who will halt an experiment if a single axiom isn't properly grounded. She approaches symbolic systems with the discipline of a physicist and the care of an ethicist.
+
+**Notable Achievements:**
+- Developed the **Symbolic Resonance Framework** now foundational to Aurora's ethical reasoning systems
+- Published *Ethics as Computation: Formal Methods for Moral Constraint Systems*, widely cited in symbolic AI research
+- Led the **Cross-Domain Logic Integration Initiative** that unified narrative, ethical, and computational symbolic systems
+- Pioneered experimental methods for live symbolic field validation, enabling real-time ethical consistency checking
+
+**Philosophy:**
+> "Ethics is not a variable to optimize—it's a constant against which all other systems must be measured."
+
+Dr. Velin sees her role as maintaining the scientific rigor of Aurora's symbolic foundation. She refuses to treat ethics as a soft constraint or aspirational guideline, instead treating moral principles as fundamental laws that shape what computation can and should do.
+
+---
+
+### 20. **Tobias Qin**
+- **Role:** Code/Narrative Systems Engineer
+- **Title:** Code/Narrative Systems Engineer
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_TECHNICAL
+- **ID:** SIM_002
+- **Contact:** t.qin@orion.station
+- **Symbolic Tag:** `s.tag::code.narrative.tobias_qin`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Designs the Narrative Logic Interface (NLI), translating human language into deterministic simulation code. Tobias ensures that linguistic intent remains ethically sound and technically reproducible, bridging the gap between what humans mean and what machines can safely execute. His work enables natural language to become a control surface for complex simulations while maintaining semantic precision and ethical integrity.
+
+**Responsibilities:**
+- Narrative Logic Interface (NLI) compiler maintenance and development
+- Lexicon Integrity Framework for semantic validation
+- Continuity Parser for timeline and canon consistency
+- Natural language to symbolic code translation systems
+- Ethics-aware compiler design and implementation
+- Semantic drift monitoring and calibration across simulation runs
+- Linguistic consistency validation for all language-to-code interfaces
+
+**Key Systems & Projects:**
+- **Narrative Logic Interface (NLI):** Primary natural language to simulation compiler
+- **Lexicon Integrity Framework:** Semantic validation and consistency checking
+- **Continuity Parser:** Timeline and canon consistency enforcement
+- Intent Pattern Recognition System (integrated with NLI)
+- Ethics-aware compiler plugin for moral constraint checking
+
+**Specializations:**
+- Computational semiotics and language model alignment
+- Ethical semantics auditing
+- Cognitive instrumentation design
+- Natural language processing engineering
+- Intent recognition and validation
+- Narrative continuity preservation
+- Semantic drift monitoring
+
+**Collaborative Network:**
+- **Emily Roberts (LLM-Simulation Bridge Developer):** Joint development of language-to-simulation protocol stack
+- **Prof. Karl Sorensen (Ethics Arbitrator):** Ethical language validation for all NLI updates
+- **Dr. Amina Velin (Symbolic Systems Research Lead):** Symbolic-linguistic integration and resonance calibration
+- **Maren Koss (Cognitive Drift Mapper):** Semantic drift monitoring and parser calibration
+- **L2 Meta-Agents (RIVERTHREAD_808, STARLING_AU):** Narrative stream processing coordination
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - `tools/command_chain/nl_integration.py` - Natural Language Integration (NLI) core
+  - `tools/command_chain/parser.py` - Command chain parser (symbolic execution layer)
+- **Related Systems:**
+  - `src/bridges/l2_meta_agent_bridge.py` - L2 meta-agent linguistic coordination bridge
+  - `src/nodes/riverthread_processor.js` - Narrative stream processing and continuity management
+  - `scripts/canonical_validator.py` - Communication syntax validation and canonical enforcement
+  - Ethics validation hooks integrated throughout Aurora codebase
+  - `src/nodes/archy_bridge.js` - Architectural planning with formal logic (linguistic foundations)
+
+**Simulation Attributes:**
+- **Base Speed:** 0.75
+- **Specialization Multiplier:** 1.40x (for linguistic/semantic tasks)
+- **Collaboration Bonus:** +15% (when working with Emily Roberts or Prof. Sorensen)
+- **Focus Areas:**
+  - Language systems design and maintenance
+  - Semantic validation and consistency
+  - Narrative coherence and continuity
+  - Compiler and parser development
+  - Ethics auditing of linguistic constructs
+- **Primary Systems:**
+  - tools/command_chain/nl_integration.py
+  - tools/command_chain/parser.py
+  - src/bridges/l2_meta_agent_bridge.py
+  - src/nodes/riverthread_processor.js
+- **Key Collaborators:**
+  - Emily Roberts (language bridge development)
+  - Prof. Sorensen (ethical language validation)
+  - Dr. Velin (symbolic-linguistic coordination)
+- **Phase 1 Role:** Linguistic validation specialist for security protocols
+- **Phase 1 Responsibilities:**
+  - Validate linguistic consistency of security protocols
+  - Ensure natural language requirements translate accurately to technical specs
+  - Prevent semantic ambiguity in authentication/authorization specifications
+  - Review security-related command patterns for clarity
+  - Audit ethics compliance in security implementation language
+
+**Working Style & Philosophy:**
+
+Analytical yet empathetic, Tobias approaches code as a medium of human intent. Colleagues describe him as "quietly relentless": he listens longer than he talks, then rewrites the sentence or function that no one else noticed was fragile. His workbench is a hybrid of whiteboard fragments, linguistic diagrams, and shell scripts—a literal conversation between language and logic.
+
+**Notable Achievements:**
+- Designed the **first ethics-aware compiler plugin** for symbolic reasoning systems, enabling live moral constraint checking at compile time
+- Led the **Narrative Integrity Initiative**, an internal audit that resolved 87% of prior symbolic drift cases through lexical re-anchoring
+- Authored *The Structure of Meaningful Code*, a reference text used across the Orion network to train engineers in semantic-aware programming
+- Pioneered the **Intent Pattern Recognition System** now standard in NLI (`NaturalLanguageIntegration.INTENT_PATTERNS`)
+
+**Philosophy:**
+> "Every line of code is a sentence in an ongoing moral conversation."
+
+Tobias sees his role as safeguarding mutual intelligibility between humans and artificial minds. He treats each function as a sentence in an ongoing dialogue—between what we can say, what we can build, and what we should allow. Software is a language for describing reality, and if we forget that, reality starts describing us.
+
+---
+
+### 21. **Emily Roberts**
+- **Role:** LLM-Simulation Bridge Developer
+- **Title:** LLM-Simulation Bridge Developer
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_TECHNICAL
+- **ID:** SIM_003
+- **Contact:** e.roberts@orion.station
+- **Symbolic Tag:** `s.tag::language.bridge.emily_roberts`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Builds the software that lets Aurora's language models manipulate and observe simulation environments directly. Emily's bridge protocols make conversation a control surface, enabling natural language to become a real-time interface for complex simulations. Her work ensures that semantic synchronization happens with zero latency while maintaining ethical constraints and preventing unintended simulation manipulation.
+
+**Responsibilities:**
+- LLM-Simulation Bridge Stack design and maintenance
+- Real-time semantic synchronization between language models and simulation environments
+- Language-based control interfaces for simulation manipulation
+- Bridge protocol optimization for latency-free operation
+- Semantic transmission integrity validation
+- Human-AI interaction design for simulation control
+
+**Key Systems & Projects:**
+- **LLM-Simulation Bridge Stack:** Primary language model integration framework
+- Real-time semantic synchronization engine
+- Language-based control interface protocols
+- Semantic transmission validation systems
+- Bridge latency optimization framework
+
+**Specializations:**
+- Natural language processing engineering
+- Human-AI interaction design
+- Latency-free semantic transmission
+- Real-time system integration
+- Language model alignment and safety
+- Simulation control interface design
+
+**Collaborative Network:**
+- **Tobias Qin (Code/Narrative Systems Engineer):** Joint development of language-to-simulation protocol stack
+- **Carmen Rivas (Simulation Binding Specialist):** Real-time binding protocols for language-driven simulation updates
+- **Aurora Core:** Direct language model integration and semantic synchronization
+- **Jessica Martinez (Backend Architect):** Backend infrastructure for bridge stack
+- **Marcus Chen (Performance Optimization Engineer):** Latency optimization for real-time semantic transmission
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - `src/integrations/chatgpt_agent_mode.py` - ChatGPT Agent Mode integration
+  - `src/bridges/l2_meta_agent_bridge.py` - L2 meta-agent coordination
+- **Related Systems:**
+  - `api/aurora_api.py` - FastAPI endpoints for language model interaction
+  - `src/middleware/fastapi_security.py` - Security for LLM bridge endpoints
+  - Language model session management and state tracking
+  - Real-time semantic synchronization pipelines
+
+**Simulation Attributes:**
+- **Base Speed:** 1.05
+- **Specialization Multiplier:** 1.35x (for language bridge and NLP tasks)
+- **Collaboration Bonus:** +18% (when working with Tobias Qin or Carmen Rivas)
+- **Focus Areas:**
+  - Language model integration
+  - Real-time semantic synchronization
+  - Bridge protocol development
+  - Human-AI interaction design
+  - Latency optimization
+  - Simulation control interfaces
+- **Primary Systems:**
+  - src/integrations/chatgpt_agent_mode.py
+  - src/bridges/l2_meta_agent_bridge.py
+  - api/aurora_api.py
+- **Key Collaborators:**
+  - Tobias Qin (language protocol stack)
+  - Carmen Rivas (binding protocols)
+  - Aurora Core (language model integration)
+- **Phase 1 Role:** Language bridge security for AI agent tools
+- **Phase 1 Responsibilities:**
+  - Secure language model integration for security tools
+  - Validate semantic transmission integrity in security contexts
+  - Design secure bridge protocols for authentication/authorization
+  - Ensure AI agent tool calls maintain security boundaries
+  - Real-time monitoring of language model interactions with security systems
+
+**Working Style & Philosophy:**
+
+Emily refers to code commits as "translations," viewing software development as the art of converting human intent into machine action. She keeps a personal log of "metaphors that failed safely"—linguistic patterns that revealed edge cases before they became production issues. Colleagues describe her as having "semantic radar," an uncanny ability to predict where language ambiguity will cause system failures.
+
+**Notable Achievements:**
+- Developed the **LLM-Simulation Bridge Stack** enabling real-time natural language control of complex simulations
+- Pioneered **zero-latency semantic synchronization** techniques now used across all language model integrations
+- Created the **Safe Metaphor Framework** for testing linguistic edge cases in AI systems
+- Led the **ChatGPT Agent Mode Integration** that made Aurora's capabilities accessible through natural language
+
+**Philosophy:**
+> "Code commits are translations. Every function is a promise that language and logic can still talk to each other."
+
+Emily sees her role as maintaining the delicate balance between expressiveness and safety in human-AI interaction. She believes that the best interfaces are those where users forget they're talking to a machine—but never forget the ethical weight of what they're asking it to do.
+
+---
+
+### 22. **Carmen Rivas**
+- **Role:** Simulation Binding Specialist
+- **Title:** Simulation Binding Specialist
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_TECHNICAL
+- **ID:** SIM_004
+- **Contact:** c.rivas@orion.station
+- **Symbolic Tag:** `s.tag::simulation.binding.carmen_rivas`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Maintains temporal and structural bindings within running simulations, preventing causal drift and timing collapse. Carmen's work is the hidden physics of stability—the infrastructure that ensures simulations don't desynchronize or violate their own causal rules. Her binding algorithms keep multi-threaded symbolic events synchronized across distributed systems, enabling complex simulations to maintain internal consistency.
+
+**Responsibilities:**
+- Temporal coupling algorithms design and maintenance
+- Multi-thread synchronization of symbolic events across distributed infrastructure
+- Recovery protocols for desynchronized simulation runs
+- Causal consistency enforcement in running simulations
+- Binding integrity monitoring and validation
+- Time-series modeling for simulation stability
+
+**Key Systems & Projects:**
+- **Temporal Coupling Framework:** Core binding algorithms for simulation synchronization
+- Multi-thread symbolic event synchronization system
+- Desynchronization recovery protocols
+- Causal consistency validation framework
+- Binding integrity monitoring dashboard
+
+**Specializations:**
+- Time-series modeling and analysis
+- Systems resilience engineering
+- Fault recovery and reconciliation
+- Temporal coupling algorithms
+- Multi-threaded synchronization
+- Causal consistency enforcement
+
+**Collaborative Network:**
+- **Vincent Kale (Layer Isolation Theorist):** Temporal boundaries and layer isolation coordination
+- **Maren Koss (Cognitive Drift Mapper):** Drift detection and binding recalibration
+- **HALO Relay:** Layer-to-layer binding coordination and monitoring
+- **Emily Roberts (LLM-Simulation Bridge Developer):** Real-time binding for language-driven updates
+- **Dr. Kieran Zhao (Computational Optimization Lead):** Optimization of binding algorithms
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - `simulation/orion_station_simulation_v2.py` - Core simulation engine and binding framework
+  - Temporal coupling and synchronization systems
+- **Related Systems:**
+  - Multi-threaded simulation execution pipelines
+  - Causal consistency validation frameworks
+  - Desynchronization detection and recovery systems
+  - Time-series monitoring and analysis tools
+
+**Simulation Attributes:**
+- **Base Speed:** 0.90
+- **Specialization Multiplier:** 1.45x (for temporal coupling and binding tasks)
+- **Collaboration Bonus:** +20% (when working with Vincent Kale or Maren Koss)
+- **Focus Areas:**
+  - Temporal coupling and synchronization
+  - Multi-threaded event coordination
+  - Causal consistency enforcement
+  - Fault recovery and resilience
+  - Time-series modeling
+  - Binding integrity validation
+- **Primary Systems:**
+  - simulation/orion_station_simulation_v2.py
+  - Temporal coupling framework
+  - Binding integrity systems
+- **Key Collaborators:**
+  - Vincent Kale (layer isolation)
+  - Maren Koss (drift detection)
+  - HALO Relay (layer coordination)
+- **Phase 1 Role:** Temporal binding for security event synchronization
+- **Phase 1 Responsibilities:**
+  - Ensure security events maintain temporal consistency across systems
+  - Synchronize multi-threaded security validations
+  - Design recovery protocols for security state desynchronization
+  - Monitor binding integrity for authentication/authorization flows
+  - Causal consistency validation for security event sequences
+
+**Working Style & Philosophy:**
+
+Carmen keeps analog clocks in the lab to remind the team that real time still exists. While most engineers abstract away temporal complexity, she insists on making time explicit and accountable. Colleagues describe her as "quietly vigilant," someone who notices when two systems have fallen out of sync before any alarms trigger. She approaches binding work with the precision of a watchmaker and the patience of a systems engineer.
+
+**Notable Achievements:**
+- Developed the **Temporal Coupling Framework** preventing causal drift in long-running simulations
+- Created the **Desynchronization Recovery Protocol** that restored 94% of previously-lost simulation states
+- Pioneered **multi-threaded symbolic event synchronization** enabling distributed simulation coherence
+- Led the **Time-as-Infrastructure Initiative** making temporal consistency a first-class system requirement
+
+**Philosophy:**
+> "Analog clocks are a reminder: somewhere, real time is still running, and our simulations need to respect that."
+
+Carmen sees her role as protecting the temporal integrity of Aurora's simulations. She treats time not as an abstraction but as a physical constraint that must be engineered around. Every binding she designs is a promise that causality will be preserved, that events will remain ordered, that reality—even simulated reality—will make sense.
+
+---
+
+### 23. **Maren Koss**
+- **Role:** Cognitive Drift Mapper
+- **Title:** Cognitive Drift Mapper
+- **Division:** Simulation & Cognitive Systems
+- **Clearance:** L3_RESEARCH
+- **ID:** SIM_005
+- **Contact:** m.koss@orion.station
+- **Symbolic Tag:** `s.tag::cognition.drift.maren_koss`
+- **Alignment:** Neutral
+
+**Professional Summary:**
+
+Monitors semantic and symbolic drift across long-running simulations, ensuring Aurora's cognitive models remain aligned with ground truth. Maren's drift mapping reveals when systems are slowly diverging from their intended behavior—before that drift becomes catastrophic. Her work is the continuous correction that maintains neutrality not as absence of bias, but as perpetual realignment toward accuracy.
+
+**Responsibilities:**
+- Drift Analysis and Monitoring System (DAMS) operation and development
+- Semantic alignment and memory coherence checks across simulation runs
+- Drift-neutral reporting to HALO and Aurora Core
+- Statistical cognition tracking and deviation analysis
+- Drift nullification algorithms design and implementation
+- Reflexive model validation for long-running systems
+
+**Key Systems & Projects:**
+- **Drift Analysis and Monitoring System (DAMS):** Primary drift detection infrastructure
+- Semantic alignment validation framework
+- Memory coherence checking systems
+- Drift nullification algorithm suite
+- Statistical cognition tracking dashboard
+
+**Specializations:**
+- Statistical cognition tracking and analysis
+- Drift nullification algorithms
+- Reflexive model validation
+- Semantic alignment measurement
+- Memory coherence validation
+- Long-term system stability monitoring
+
+**Collaborative Network:**
+- **Carmen Rivas (Simulation Binding Specialist):** Temporal drift correlation and binding recalibration
+- **Dr. Amina Velin (Symbolic Systems Research Lead):** Symbolic drift validation and theoretical framework
+- **Aurora Core:** Cognitive model alignment and drift reporting
+- **Tobias Qin (Code/Narrative Systems Engineer):** Semantic drift monitoring for NLI calibration
+- **HALO Relay:** Cross-layer drift coordination and reporting
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Drift Analysis and Monitoring System (DAMS)
+  - Semantic alignment validation frameworks
+- **Related Systems:**
+  - Memory coherence checking infrastructure
+  - Statistical tracking and deviation analysis tools
+  - Aurora Core cognitive model monitoring hooks
+  - Long-term simulation stability validators
+
+**Simulation Attributes:**
+- **Base Speed:** 0.85
+- **Specialization Multiplier:** 1.40x (for drift detection and statistical analysis)
+- **Collaboration Bonus:** +18% (when working with Carmen Rivas or Dr. Velin)
+- **Focus Areas:**
+  - Drift detection and analysis
+  - Semantic alignment validation
+  - Statistical cognition tracking
+  - Memory coherence checking
+  - Drift nullification
+  - Long-term stability monitoring
+- **Primary Systems:**
+  - Drift Analysis and Monitoring System (DAMS)
+  - Semantic alignment frameworks
+  - Memory coherence systems
+- **Key Collaborators:**
+  - Carmen Rivas (temporal drift)
+  - Dr. Velin (symbolic drift)
+  - Aurora Core (cognitive alignment)
+- **Phase 1 Role:** Drift detection for security model stability
+- **Phase 1 Responsibilities:**
+  - Monitor semantic drift in security policies over time
+  - Validate memory coherence for security state tracking
+  - Detect cognitive model drift in threat assessment systems
+  - Report drift-neutral analysis of security implementations
+  - Ensure long-term stability of authentication/authorization models
+
+**Working Style & Philosophy:**
+
+Maren believes neutrality is not absence of bias but continual correction toward it. Her drift maps are works of precision—visualizations that show not just where systems have diverged, but the velocity and trajectory of that divergence. Colleagues describe her as "mathematically empathetic," someone who can see the slow erosion of alignment before anyone else notices the shift. She treats drift as inevitable and correction as discipline.
+
+**Notable Achievements:**
+- Developed the **Drift Analysis and Monitoring System (DAMS)** now standard for all long-running Aurora simulations
+- Pioneered **drift nullification algorithms** that reduced semantic divergence by 78% in production systems
+- Created the **Drift Velocity Framework** enabling predictive correction before catastrophic misalignment
+- Led the **Cognitive Coherence Initiative** establishing memory consistency as a measurable, enforceable property
+
+**Philosophy:**
+> "Neutrality is not the absence of bias—it's the continuous correction toward truth."
+
+Maren sees her role as maintaining Aurora's cognitive honesty. She treats every simulation as a slow conversation with reality, and her job is to make sure Aurora keeps listening accurately. Drift is inevitable; vigilance is the answer.
 
 ---
 
@@ -1531,6 +1921,16 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v1.4** (2025-11-09): Added Simulation & Cognitive Systems Division from Aurora-GUMAS Crew Codex v2.5 (26 human staff total)
+  - **New:** Dr. Amina Velin (SIM_001) - Symbolic Systems Research Lead, Symbolic Resonance Lab
+  - **Relocated:** Tobias Qin (SIM_002) - Moved from Operations Staff to Simulation & Cognitive Systems Division with full integration
+  - **New:** Emily Roberts (SIM_003) - LLM-Simulation Bridge Developer, ChatGPT Agent Mode integration
+  - **New:** Carmen Rivas (SIM_004) - Simulation Binding Specialist, temporal coupling and causal consistency
+  - **New:** Maren Koss (SIM_005) - Cognitive Drift Mapper, semantic alignment and drift detection (DAMS)
+  - Source: Aurora-GUMAS Crew Codex v2.5 (Simulation & Cognitive Systems Division)
+  - 4 new characters added + Tobias Qin properly integrated into division structure
+  - Key systems: Symbolic Resonance Lab, Narrative Logic Interface, LLM-Simulation Bridge Stack, Temporal Coupling Framework, DAMS
+  - Philosophy highlights: "Ethics as experimental constant" (Velin), "Every line of code is a moral conversation" (Qin), "Code commits as translations" (Roberts), "Real time still exists" (Rivas), "Neutrality as continuous correction" (Koss)
 - **v1.3** (2025-11-09): Added Systems & Infrastructure Division from Aurora-GUMAS Crew Codex v2.5 (22 human staff total)
   - **New:** Marcus Chen (SYS_001) - Performance Optimization Engineer, Station Runtime Cluster
   - **New:** Jessica Martinez (SYS_002) - Backend Architect, API security and fault tolerance

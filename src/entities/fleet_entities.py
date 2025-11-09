@@ -580,3 +580,27 @@ def get_lacewing_lyra() -> AuroraSubCore:
             vessel_id="ORS-05"
         )
     return _lacewing_lyra
+
+
+# Global instances for Alpha Surveyor
+_alpha_surveyor_oppy: Optional[OPPYNavigator] = None
+_alpha_surveyor_hermes: Optional[AuroraSubCore] = None
+
+
+def get_alpha_surveyor_oppy() -> OPPYNavigator:
+    """Get OPPY Deep-Survey Core for Alpha Surveyor reconnaissance probe"""
+    global _alpha_surveyor_oppy
+    if _alpha_surveyor_oppy is None:
+        _alpha_surveyor_oppy = OPPYNavigator(vessel_id="ORP-1")
+    return _alpha_surveyor_oppy
+
+
+def get_alpha_surveyor_hermes() -> AuroraSubCore:
+    """Get Aurora Sub-Node H ('Hermes') for Alpha Surveyor reconnaissance probe"""
+    global _alpha_surveyor_hermes
+    if _alpha_surveyor_hermes is None:
+        _alpha_surveyor_hermes = AuroraSubCore(
+            subcore_id="AURORA_SUB_HERMES",
+            vessel_id="ORP-1"
+        )
+    return _alpha_surveyor_hermes

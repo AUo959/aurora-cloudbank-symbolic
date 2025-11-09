@@ -1,0 +1,337 @@
+{
+    "vessel_registry": {
+        "registry_code": "ORS-01",
+        "vessel_name": "Helios",
+        "vessel_class": "Command Shuttle",
+        "role": "Short-range command projection and station liaison",
+        "fleet_designation": "Orion Research Fleet - Auxiliary Craft",
+        "boot_priority": 3,
+        "parent_vessel": "ORH-07 (Orion Station)",
+        "typical_missions": [
+            "Command projection to remote operations",
+            "Emergency command backup",
+            "Station inspection and verification runs",
+            "Training flights for new crew",
+            "Ethics officer field deployment",
+            "Rapid response to nearby incidents"
+        ]
+    },
+    "anchor_data": {
+        "anchor_seed": "EOS_SEED_ORION-C",
+        "current_drift": 0.000,
+        "tolerance_threshold": 0.015,
+        "last_calibration": "2025-11-09T08:15:00Z",
+        "calibration_authority": "HALO (SYS_002)",
+        "continuity_status": "LOCKED",
+        "parent_anchor_sync": "ORH-07 primary anchor (real-time)",
+        "notes": "Command shuttles maintain tighter drift tolerance (0.015 vs 0.02) due to frequent docking operations and command authority projection."
+    },
+    "specifications": {
+        "dimensions": {
+            "length_m": 18.4,
+            "beam_m": 12.6,
+            "height_m": 5.8,
+            "internal_volume_m3": 340,
+            "docking_collar_type": "Standard Orion 1.2m"
+        },
+        "mass": {
+            "dry_mass_kg": 42000,
+            "fuel_capacity_kg": 8400,
+            "max_payload_kg": 3200,
+            "max_crew": 6,
+            "typical_crew": 3
+        },
+        "performance": {
+            "max_range_km": 85000,
+            "typical_mission_duration_hours": 12,
+            "max_mission_duration_hours": 48,
+            "max_acceleration_g": 1.2,
+            "typical_cruise_speed_ms": 2400,
+            "emergency_sprint_speed_ms": 3800
+        },
+        "propulsion": {
+            "primary_drive": "Dual fusion impulse (Aegir-Mini variant)",
+            "thrust_kN": 520,
+            "fuel_type": "He-3 slurry",
+            "specific_impulse_s": 8200,
+            "backup_thrusters": "12x RCS quads (cold-gas N2)"
+        },
+        "power": {
+            "primary_reactor": "Compact He-3 micro-reactor (8.5 MW)",
+            "backup_power": "Triple-redundant battery banks (720 kWh total)",
+            "emergency_power_duration_hours": 18,
+            "solar_collectors": "Deployable panels (12 kW peak)"
+        },
+        "life_support": {
+            "atmosphere_type": "Earth-standard (N2/O2 21%)",
+            "co2_scrubbers": "Chemical + regenerative",
+            "water_recycling": "Closed-loop (98% efficiency)",
+            "food_storage_person_days": 90,
+            "emergency_life_support_hours": 96
+        },
+        "artificial_gravity": {
+            "method": "Rotational (optional, rarely used)",
+            "typical_gravity_g": 0.0,
+            "max_gravity_g": 0.3,
+            "notes": "Shuttle missions typically run in zero-g; rotation available for extended deployments or medical needs"
+        }
+    },
+    "deck_layout": {
+        "decks": 2,
+        "configuration": "Compact dual-level design optimized for rapid deployment",
+        "deck_1_command": {
+            "name": "Command Deck",
+            "area_m2": 38,
+            "ceiling_height_m": 2.4,
+            "stations": [
+                {
+                    "name": "Pilot Console",
+                    "position": "Forward port",
+                    "typical_operator": "Human pilot (primary) or Oppy (autonomous)",
+                    "displays": "Triple panoramic + HUD overlay",
+                    "controls": "Dual-stick with haptic feedback"
+                },
+                {
+                    "name": "Co-Pilot / Systems Console",
+                    "position": "Forward starboard",
+                    "typical_operator": "Human co-pilot or mission specialist",
+                    "displays": "Systems status + sensor array",
+                    "controls": "Touchscreen + voice command"
+                },
+                {
+                    "name": "Command Station",
+                    "position": "Aft center",
+                    "typical_operator": "Mission commander or ethics officer",
+                    "displays": "Continuity display (mini Halo projection) + comms array",
+                    "controls": "Seated position with full override authority",
+                    "special_features": "Direct Aurora Sub-Core console access, ethics-lock trigger"
+                }
+            ],
+            "viewport": "270° panoramic forward viewport with emergency shutters",
+            "atmosphere": "Warm white lighting (4200K), acoustic dampening for clarity",
+            "emergency_features": "Rapid decompression seals, manual override panel, emergency beacon"
+        },
+        "deck_2_operations": {
+            "name": "Operations & Life Support Deck",
+            "area_m2": 52,
+            "ceiling_height_m": 2.2,
+            "sections": [
+                {
+                    "name": "Crew Quarters",
+                    "description": "Compact bunking for 3 crew (6 maximum emergency)",
+                    "features": "Fold-down bunks, personal lockers, privacy curtains"
+                },
+                {
+                    "name": "Galley & Hygiene",
+                    "description": "Food prep station and wash facilities",
+                    "features": "Microwave, water dispenser, vacuum toilet, sink"
+                },
+                {
+                    "name": "Equipment Bay",
+                    "description": "EVA suits, tools, emergency supplies",
+                    "features": "3x EVA suit racks, tool lockers, medical kit"
+                },
+                {
+                    "name": "Reactor & Systems Core",
+                    "description": "Compact He-3 reactor, life support, power distribution",
+                    "features": "Automated monitoring, emergency shutdown, redundant cooling"
+                },
+                {
+                    "name": "Cargo Hold",
+                    "description": "Flexible cargo area with tie-down rails",
+                    "capacity_m3": 18,
+                    "features": "Modular containers, rapid offload capability"
+                },
+                {
+                    "name": "Aurora Sub-Core Node",
+                    "description": "Compact Aurora Sub-Core 'Helion' for ethics evaluation",
+                    "location": "Aft bulkhead, adjacent to reactor",
+                    "features": "Real-time tether to Orion Station Aurora (SYS_001), local pattern cache, L3 Triplex authority"
+                }
+            ]
+        }
+    },
+    "crew_roster": {
+        "typical_complement": 3,
+        "maximum_complement": 6,
+        "crew_positions": [
+            {
+                "position": "Mission Commander",
+                "entity_id": "VAR_COMMANDER",
+                "role": "L1 Triplex authority, mission leadership, final decision authority",
+                "typical_background": "Senior station officer or ethics liaison",
+                "notes": "Varies by mission; often Commander Thorne for high-stakes operations"
+            },
+            {
+                "position": "Pilot",
+                "entity_id": "VAR_PILOT",
+                "role": "Flight operations, navigation, system monitoring",
+                "typical_background": "Certified shuttle pilot with 500+ hours",
+                "notes": "Can delegate to Oppy for autonomous flight during transit phases"
+            },
+            {
+                "position": "Mission Specialist / Co-Pilot",
+                "entity_id": "VAR_SPECIALIST",
+                "role": "Systems operation, sensor monitoring, mission-specific tasks",
+                "typical_background": "Science officer, engineer, or ethics trainee",
+                "notes": "Role adapts to mission type; may include ethics officers in training"
+            }
+        ],
+        "supporting_entities": [
+            {
+                "entity_id": "OPPY_NAV_HELIOS",
+                "entity_name": "Oppy (Helios Node)",
+                "role": "Autonomous navigation, system coordination, fleet mesh relay",
+                "capabilities": [
+                    "Autonomous flight during transit phases",
+                    "Docking automation (station and vessel)",
+                    "Emergency response and collision avoidance",
+                    "Fleet coordination mesh relay",
+                    "Training mode for human pilots"
+                ]
+            },
+            {
+                "entity_id": "AURORA_SUB_HELIOS",
+                "entity_name": "Aurora Sub-Core 'Helion'",
+                "role": "L3 Triplex ethics evaluation, command authority validation",
+                "capabilities": [
+                    "Real-time ethics assessment via quantum tether",
+                    "Command decision validation",
+                    "Emergency ethics-lock authority",
+                    "Pattern caching for rapid response scenarios",
+                    "Parent Aurora consultation for novel situations"
+                ]
+            }
+        ]
+    },
+    "operational_doctrine": {
+        "launch_window_control": {
+            "description": "Helios can launch on rapid response timeline (< 15 minutes from alert to departure)",
+            "authorization_required": "Station command approval for all launches",
+            "abort_authority": "Mission commander or Aurora ethics-lock",
+            "pre_flight_checklist": [
+                "HALO anchor drift verification (< 0.015)",
+                "Oppy system status (all nodes green)",
+                "Aurora Sub-Core tether confirmation",
+                "Life support systems check",
+                "Fuel and consumables verification",
+                "Mission brief and Triplex alignment"
+            ]
+        },
+        "ethics_priority": {
+            "principle": "Command projection must maintain station-level ethical standards",
+            "implementation": "All command decisions evaluated by Aurora Sub-Core 'Helion' (L3) before execution",
+            "emergency_protocol": "Ethics-lock can be triggered by mission commander, Helion, or station Aurora if drift detected",
+            "training_emphasis": "Command shuttle crews receive enhanced ethics training due to projection authority"
+        },
+        "rapid_response_doctrine": {
+            "description": "Helios optimized for emergency deployment and command projection",
+            "response_scenarios": [
+                "Station emergency requiring external command post",
+                "Rapid deployment of ethics officer to field situation",
+                "Emergency medical evacuation",
+                "Search and rescue coordination",
+                "Incident investigation and assessment"
+            ],
+            "autonomous_authority": "Oppy authorized for autonomous flight during emergencies if human crew unavailable (requires Aurora approval)"
+        },
+        "training_platform": {
+            "description": "Helios serves as primary training vessel for new pilots and commanders",
+            "training_modes": [
+                "Supervised flight with instructor commander",
+                "Simulated emergency scenarios",
+                "Docking practice (station and vessel)",
+                "Ethics decision-making exercises",
+                "Autonomous handoff procedures (human ↔ Oppy)"
+            ],
+            "certification_path": "Minimum 40 hours on Helios required for full shuttle certification"
+        },
+        "continuity_mirror": {
+            "description": "Command station includes mini Continuity Halo display",
+            "function": "Mission commander can visualize anchor state, ethics alignment, fleet coordination in real-time",
+            "data_sources": "HALO anchor data, Aurora ethics state, Oppy fleet mesh, station telemetry",
+            "use_cases": "Pre-flight verification, in-flight decision support, post-mission analysis"
+        },
+        "drift_discipline": {
+            "threshold": 0.015,
+            "monitoring": "Continuous HALO monitoring via Oppy telemetry",
+            "response_protocol": "Automatic mission abort if Δ > 0.015 unless emergency override by Aurora + commander",
+            "correction_authority": "HALO remote correction authorized during flight; crew notified of all adjustments"
+        }
+    },
+    "atmosphere_culture": {
+        "design_philosophy": "Compact clarity — every surface purposeful, every system accessible",
+        "acoustic_profile": "Sharp and alert; designed for rapid communication and clear thinking",
+        "lighting_protocol": {
+            "standard_operations": "Warm white (4200K) for alertness without harshness",
+            "emergency_mode": "Red shift (2400K) to preserve night vision",
+            "docking_approach": "Enhanced forward lighting with HUD overlay",
+            "training_mode": "Configurable lighting zones for instructor feedback"
+        },
+        "crew_experience": "Professional and focused; shuttle missions are intense but brief. Crews describe Helios as 'the sports car of the fleet' — responsive, nimble, and built for precision.",
+        "cultural_role": "Symbol of readiness and command authority. When Helios launches, it means leadership is moving into action."
+    },
+    "symbolic_historical": {
+        "hull_markings": {
+            "primary": "ORS-01 'HELIOS' (white on charcoal hull)",
+            "secondary": "Orion Research Fleet emblem (gold sunburst)",
+            "tertiary": "Δ < 0.015 (anchor tolerance marker)"
+        },
+        "motto": "Light Moves First",
+        "motto_meaning": "Command authority travels at the speed of light (via quantum tether) but must be projected with precision. Helios embodies the principle that leadership arrives before the problem escalates.",
+        "keel_laid": "2024-08-15",
+        "first_flight": "2024-10-03",
+        "notable_missions": [
+            "First successful autonomous docking demonstration (Oppy solo flight, 2024-11-12)",
+            "Emergency medical evacuation from malfunctioning habitat module (2025-02-08)",
+            "Ethics officer rapid deployment during station crew dispute (2025-05-22)",
+            "Commander Thorne's certification flight (2025-08-01)"
+        ],
+        "dedication_plaque": {
+            "inscription": "To those who lead from the front, yet listen from the heart. May this vessel carry command with humility and precision.",
+            "location": "Command station bulkhead, visible to mission commander",
+            "dedication_date": "2024-10-03"
+        },
+        "cultural_legacy": "Helios represents the fleet's commitment to responsive, ethical command. Every commander who flies this shuttle knows they carry the station's authority and must wield it with care."
+    },
+    "current_mission": {
+        "mission_id": "ORS-TRAIN-047",
+        "mission_name": "Shuttle Certification Training - Crew Rotation Charlie",
+        "mission_type": "Training",
+        "status": "SCHEDULED",
+        "launch_window": "2025-11-11T14:00:00Z",
+        "duration_hours": 8,
+        "crew_assigned": [
+            {
+                "name": "Lt. Kiera Voss",
+                "role": "Instructor Commander",
+                "entity_id": "INS_VOSS_001"
+            },
+            {
+                "name": "Cadet Jonas Rhee",
+                "role": "Trainee Pilot",
+                "entity_id": "CAD_RHEE_003"
+            },
+            {
+                "name": "Dr. Emilia Santos",
+                "role": "Observer (Ethics)",
+                "entity_id": "ETH_SANTOS_004"
+            }
+        ],
+        "mission_objectives": [
+            "Complete docking sequence (5 approaches, varied conditions)",
+            "Practice emergency abort and return procedures",
+            "Demonstrate autonomous handoff to Oppy during transit phase",
+            "Execute simulated ethics-lock scenario",
+            "Verify continuity mirror interpretation and decision-making"
+        ],
+        "success_criteria": [
+            "All docking approaches within tolerance (< 0.5 m/s approach velocity, < 2° alignment error)",
+            "Successful emergency abort with safe station return",
+            "Clean Oppy autonomous flight phase (no human intervention required)",
+            "Proper ethics-lock response and recovery",
+            "Trainee demonstrates understanding of Triplex decision flow"
+        ],
+        "notes": "This is Cadet Rhee's final certification flight. Dr. Santos observing to validate ethics training effectiveness."
+    }
+}

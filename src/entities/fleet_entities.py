@@ -460,3 +460,27 @@ def get_constancy_athena() -> AuroraSubCore:
             vessel_id="ORF-01"
         )
     return _constancy_athena
+
+
+# Global instances for Helios
+_helios_oppy: Optional[OPPYNavigator] = None
+_helios_helion: Optional[AuroraSubCore] = None
+
+
+def get_helios_oppy() -> OPPYNavigator:
+    """Get OPPY navigator for Helios command shuttle"""
+    global _helios_oppy
+    if _helios_oppy is None:
+        _helios_oppy = OPPYNavigator(vessel_id="ORS-01")
+    return _helios_oppy
+
+
+def get_helios_helion() -> AuroraSubCore:
+    """Get Aurora Sub-Core Helion for Helios command shuttle"""
+    global _helios_helion
+    if _helios_helion is None:
+        _helios_helion = AuroraSubCore(
+            subcore_id="AURORA_SUB_HELIOS",
+            vessel_id="ORS-01"
+        )
+    return _helios_helion

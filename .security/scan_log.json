@@ -369,6 +369,43 @@
         "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line 287: POST endpoint without CSRF token validation - @app.post(\"/geometric/vector\", dependencies=[Depends(security)])\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line..."
+    },
+    {
+      "timestamp": "2025-11-09T01:41:44.523468",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_orion_simulation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 377: f-string print (potential log output) - print(f\"Ticks elapsed: {result['ticks']}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 378: f-string print (potential log output) - print(f\"Completed all: {result['completed']}\")\n  \u274c /workspaces/aurora-cloudbank-..."
+    },
+    {
+      "timestamp": "2025-11-09T01:47:11.705661",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py: Line 35: f-string print (potential log output) - print(f\"\u274c SECURITY ISSUE: {message}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py: Line 40: f-string print (potential log output) - print(f\"\ud83d\udd27 FIXED: {message}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/automa..."
+    },
+    {
+      "timestamp": "2025-11-09T01:53:26.132022",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py: Line 30: f-string print (potential log output) - print(f\"   {name:15} {status} | Task: {task:25} | Energy: [{fatigue_bar}]\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py: Line 34: f-string print (potential log output) - print(f\"\\n{'\u2501'*70}\")\n  \u274c /workspaces/aurora-cloudba..."
+    },
+    {
+      "timestamp": "2025-11-09T02:07:47.827143",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 408: f-string print (potential log output) - print(f\"Ticks elapsed: {result['ticks']}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 409: f-string print (potential log output) - print(f\"Completed all: {result['completed']}\")\n  \u274c /workspaces/aurora-cloudbank-..."
     }
   ]
 }

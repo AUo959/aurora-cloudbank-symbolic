@@ -508,3 +508,27 @@ def get_liora_ai() -> AuroraSubCore:
             vessel_id="ORS-02"
         )
     return _liora_ai
+
+
+# Global instances for Archimedes
+_archimedes_oppy: Optional[OPPYNavigator] = None
+_archimedes_daedalus: Optional[AuroraSubCore] = None
+
+
+def get_archimedes_oppy() -> OPPYNavigator:
+    """Get OPPY Structural Core for Archimedes construction shuttle"""
+    global _archimedes_oppy
+    if _archimedes_oppy is None:
+        _archimedes_oppy = OPPYNavigator(vessel_id="ORS-03")
+    return _archimedes_oppy
+
+
+def get_archimedes_daedalus() -> AuroraSubCore:
+    """Get Aurora Sub-Node E ('Daedalus') for Archimedes construction shuttle"""
+    global _archimedes_daedalus
+    if _archimedes_daedalus is None:
+        _archimedes_daedalus = AuroraSubCore(
+            subcore_id="AURORA_SUB_DAEDALUS",
+            vessel_id="ORS-03"
+        )
+    return _archimedes_daedalus

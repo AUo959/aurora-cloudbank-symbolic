@@ -11,13 +11,17 @@ Standardize how the Orion Station multi-agent simulation is executed, measured, 
 - Produce a lightweight transcript suitable for review and postmortems.
 - Enable deterministic replays via seed and event toggles.
 
-## Agents (Human-Mapped Roles)
-- Alex Thorn — Coordinator (assignment orchestration)
-- SecEng — Security Engineer (CSRF, auth, eval→AST)
-- Backend — Backend Engineer (CORS, API endpoints)
-- DevOps — DevOps Engineer (infra and rate limiting; assists Phase 1)
-- DocSpec — Documentation Specialist (docs/tests scaffolding)
-- Pilot — External Observer (insight pulses)
+## Agents (L1 Canon Human Staff - Orion Station)
+**Using canonical character roster from established system development**
+
+- **Alex Thorne** — Station Commander (mission/ethics lead, strategic coordination)
+- **Julian Markov** — Chief Security Officer (primary security implementation lead)
+- **Jiro Tanaka** — Engineering Lead (technical system modifications, backend work)
+- **Raj Patel** — Chief Engineer (infrastructure, DevOps, systems engineering)
+- **Dr. Amira Sato** — Chief Ethics Officer (ethics compliance, protocol audits)
+- **Varya Lin** — Chief Science Officer (technical validation, documentation)
+- **Maya Shepard** — Executive Officer/XO (cross-functional coordination, oversight)
+- **Leena Porter** — Bridge Operations (dispatch, monitoring, operations)
 
 ## Tasks (Phase 1)
 - T1: CORS Fix (2h)

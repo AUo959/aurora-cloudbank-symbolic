@@ -206,15 +206,47 @@ class OrionSimulation:
             "T4": Task("T4", "Replace eval() with AST", est_hours=3.0, remaining=3.0, depends_on=[]),
         }
 
-        # Define agents
+        # Define agents - L1 CANON HUMAN STAFF (Orion Station crew)
         self.agents: Dict[str, Agent] = {
-            # Crew constants
-            "Alex Thorn": Agent("Alex Thorn", role="Coordinator", base_speed=0.2, focus="coord"),
-            "SecEng": Agent("SecEng", role="Security Engineer", base_speed=1.25, focus="validation auth eval"),
-            "Backend": Agent("Backend", role="Backend Engineer", base_speed=1.10, focus="api cors"),
-            "DevOps": Agent("DevOps", role="DevOps Engineer", base_speed=0.90, focus="infra"),
-            "DocSpec": Agent("DocSpec", role="Documentation", base_speed=0.60, focus="doc"),
-            "Pilot": Agent("Pilot", role="Pilot (Earth)", base_speed=0.10, focus="insight"),
+            # Commander Alex Thorne - Mission/ethics lead, strategic coordination
+            "Alex Thorne": Agent(
+                "Alex Thorne", role="Station Commander", base_speed=0.3, focus="security ethics coord"
+            ),
+
+            # Julian Markov - Chief Security Officer, primary security implementation lead
+            "Julian Markov": Agent(
+                "Julian Markov", role="Chief Security Officer", base_speed=1.35, focus="security validation auth"
+            ),
+
+            # Jiro Tanaka - Engineering lead, technical system modifications
+            "Jiro Tanaka": Agent(
+                "Jiro Tanaka", role="Engineering Lead", base_speed=1.20, focus="api backend systems"
+            ),
+
+            # Raj Patel - Systems Engineer, infrastructure and DevOps
+            "Raj Patel": Agent(
+                "Raj Patel", role="Chief Engineer", base_speed=1.00, focus="infra devops"
+            ),
+
+            # Dr. Amira Sato - Chief Ethics Officer, ensures ethical protocol compliance
+            "Dr. Amira Sato": Agent(
+                "Dr. Amira Sato", role="Chief Ethics Officer", base_speed=0.50, focus="ethics audit"
+            ),
+
+            # Varya Lin - Chief Science Officer, technical validation and documentation
+            "Varya Lin": Agent(
+                "Varya Lin", role="Chief Science Officer", base_speed=0.70, focus="validation documentation"
+            ),
+
+            # Maya Shepard - XO/FleetOps Commander, cross-functional coordination
+            "Maya Shepard": Agent(
+                "Maya Shepard", role="Executive Officer", base_speed=0.80, focus="coordination oversight"
+            ),
+
+            # Leena Porter - Bridge Operations, dispatch and monitoring
+            "Leena Porter": Agent(
+                "Leena Porter", role="Bridge Operations", base_speed=0.60, focus="operations monitoring"
+            ),
         }
 
         self.completed: set[str] = set()
@@ -240,34 +272,45 @@ class OrionSimulation:
     def _apply_work(self, multiplier: float) -> List[Tuple[str, str, float]]:
         progress: List[Tuple[str, str, float]] = []
         for agent in self.agents.values():
-            if agent.role == "Coordinator":
-                agent.tick_recovery()
-                continue
-            if agent.assigned_task is None:
-                agent.tick_recovery()
-                continue
-            task = self.tasks.get(agent.assigned_task)
-            if not task or task.completed:
-                agent.assigned_task = None
-                agent.tick_recovery()
-                continue
-
-            # Base effort with stochasticity (partial progress realism)
-            focus_bonus = 1.10 if (agent.focus and any(f in task.name.lower() for f in agent.focus.split())) else 1.0
-            noise = self.rng.uniform(0.85, 1.15)
-            effort = agent.effective_speed() * focus_bonus * multiplier * noise
-            effort = min(2.0, max(0.1, effort))  # ensure some minimal forward motion
-
-            task.work(effort)
-            progress.append((agent.name, task.name, effort))
-            agent.tick_recovery()
-
-            if task.completed:
-                self.completed.add(task.id)
-                for a in self.agents.values():
-                    if a.assigned_task == task.id:
-                        a.assigned_task = None
+            work_result = self._process_agent_work(agent, multiplier)
+            if work_result:
+                progress.append(work_result)
         return progress
+
+    def _process_agent_work(self, agent: Agent, multiplier: float) -> Optional[Tuple[str, str, float]]:
+        """Process single agent's work for current tick"""
+        if agent.role == "Coordinator" or agent.assigned_task is None:
+            agent.tick_recovery()
+            return None
+        
+        task = self.tasks.get(agent.assigned_task)
+        if not task or task.completed:
+            agent.assigned_task = None
+            agent.tick_recovery()
+            return None
+
+        effort = self._calculate_effort(agent, task, multiplier)
+        task.work(effort)
+        agent.tick_recovery()
+        
+        if task.completed:
+            self._mark_task_complete(task.id)
+        
+        return (agent.name, task.name, effort)
+
+    def _calculate_effort(self, agent: Agent, task: Task, multiplier: float) -> float:
+        """Calculate effort for agent working on task"""
+        focus_bonus = 1.10 if (agent.focus and any(f in task.name.lower() for f in agent.focus.split())) else 1.0
+        noise = self.rng.uniform(0.85, 1.15)
+        effort = agent.effective_speed() * focus_bonus * multiplier * noise
+        return min(2.0, max(0.1, effort))
+
+    def _mark_task_complete(self, task_id: str) -> None:
+        """Mark task complete and unassign all agents"""
+        self.completed.add(task_id)
+        for agent in self.agents.values():
+            if agent.assigned_task == task_id:
+                agent.assigned_task = None
 
     def _log_and_transcript(self, tick: int, events: List[Event], progress: List[Tuple[str, str, float]]) -> None:
         ev_desc = "; ".join(f"{e.kind}+{int((e.multiplier-1)*100)}%" for e in events) or "none"
@@ -281,32 +324,44 @@ class OrionSimulation:
         self._append_chat_messages(tick, events, progress)
 
     def _append_chat_messages(self, tick: int, events: List[Event], progress: List[Tuple[str, str, float]]) -> None:
-        # Crew chat vibe: short, role-tagged messages
+        """Generate crew chat messages for transcript"""
         def say(agent: str, msg: str) -> None:
             self.transcript.append(f"[{tick:02d}] {agent}: {msg}")
 
         if tick == 0:
             say("Alex Thorn", "Aurora synced. Kicking off Phase 1. Assignments in flight.")
-        for e in events:
-            if e.kind == "swarm_sync":
-                say("Aurora", "Swarm sync detected — pairing up for throughput boost.")
-            if e.kind == "insight_pulse":
-                say("Pilot", "Pushing context: prioritize CSRF rigor; bind tokens to session.")
-            if e.kind == "cross_pollination":
-                say("DocSpec", "Capturing learnings for protocol appendix.")
-        for a, t, effort in progress:
-            if a == "SecEng":
-                say(a, f"Advancing {t} (+{effort:.2f}h).")
-            elif a == "Backend":
-                say(a, f"API path steady on {t} (+{effort:.2f}h).")
-            elif a == "DevOps":
-                say(a, f"Infra assist on {t} (+{effort:.2f}h).")
-            elif a == "DocSpec":
-                say(a, f"Documenting changes for {t} (+{effort:.2f}h).")
-            elif a == "Pilot":
-                say(a, f"Observing; echoing best practices for {t} (+{effort:.2f}h).")
+        
+        self._append_event_messages(say, events)
+        self._append_progress_messages(say, progress)
+        
         if all(t.completed for t in self.tasks.values()):
             say("Aurora", "Phase 1 criticals complete. Proceeding to validation gate.")
+
+    def _append_event_messages(self, say_func, events: List[Event]) -> None:
+        """Add event-triggered chat messages"""
+        event_messages = {
+            "swarm_sync": ("Aurora", "Swarm sync detected — pairing up for throughput boost."),
+            "insight_pulse": ("Pilot", "Pushing context: prioritize CSRF rigor; bind tokens to session."),
+            "cross_pollination": ("DocSpec", "Capturing learnings for protocol appendix.")
+        }
+        for e in events:
+            if e.kind in event_messages:
+                agent, msg = event_messages[e.kind]
+                say_func(agent, msg)
+
+    def _append_progress_messages(self, say_func, progress: List[Tuple[str, str, float]]) -> None:
+        """Add agent progress messages"""
+        agent_message_templates = {
+            "SecEng": "Advancing {task} (+{effort:.2f}h).",
+            "Backend": "API path steady on {task} (+{effort:.2f}h).",
+            "DevOps": "Infra assist on {task} (+{effort:.2f}h).",
+            "DocSpec": "Documenting changes for {task} (+{effort:.2f}h).",
+            "Pilot": "Observing; echoing best practices for {task} (+{effort:.2f}h)."
+        }
+        for agent, task, effort in progress:
+            if agent in agent_message_templates:
+                msg = agent_message_templates[agent].format(task=task, effort=effort)
+                say_func(agent, msg)
 
     def run(self, max_ticks: Optional[int] = None) -> Dict[str, Any]:
         limit = max_ticks if max_ticks is not None else self.max_ticks
@@ -331,9 +386,21 @@ class OrionSimulation:
         }
 
 
-
-def demo_run(seed: int, ticks: int, enable_emergent: bool, log_level: str, transcript_out: Optional[str]) -> None:
-    logging.basicConfig(level=getattr(logging, log_level.upper(), logging.INFO), format="%(levelname)s %(message)s")
+def demo_run(
+    seed: int,
+    ticks: int,
+    enable_emergent: bool,
+    log_level: str,
+    transcript_out: Optional[str],
+    json_out: Optional[str]
+) -> None:
+    """Run simulation and export results"""
+    import json
+    
+    logging.basicConfig(
+        level=getattr(logging, log_level.upper(), logging.INFO),
+        format="%(levelname)s %(message)s"
+    )
     sim = OrionSimulation(seed=seed, enable_emergent=enable_emergent)
     result = sim.run(max_ticks=ticks)
 
@@ -352,8 +419,13 @@ def demo_run(seed: int, ticks: int, enable_emergent: bool, log_level: str, trans
             f.write("\n".join(result["transcript"]))
         print(f"\nTranscript written to: {transcript_out}")
 
+    if json_out:
+        with open(json_out, "w", encoding="utf-8") as f:
+            json.dump(result, f, indent=2)
+        print(f"JSON summary written to: {json_out}")
+
     if not result["completed"]:
-        print("\nNOTE: Not all tasks finished within the time window — consider increasing ticks or adding agents.")
+        print("\nNOTE: Not all tasks finished — consider increasing ticks or adding agents.")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -361,8 +433,9 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=1337, help="Random seed")
     p.add_argument("--ticks", type=int, default=30, help="Max ticks (hours)")
     p.add_argument("--no-emergent", action="store_true", help="Disable emergent behavior events")
-    p.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"], help="Log level")
-    p.add_argument("--transcript-out", default=None, help="Write chat transcript to file path")
+    p.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    p.add_argument("--transcript-out", default=None, help="Write chat transcript to file")
+    p.add_argument("--json-out", default=None, help="Write JSON summary for pipeline consumption")
     return p.parse_args()
 
 
@@ -374,4 +447,5 @@ if __name__ == "__main__":
         enable_emergent=not args.no_emergent,
         log_level=args.log_level,
         transcript_out=args.transcript_out,
+        json_out=args.json_out,
     )

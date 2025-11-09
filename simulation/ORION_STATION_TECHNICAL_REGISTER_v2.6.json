@@ -1,0 +1,639 @@
+{
+  "station_metadata": {
+    "designation": "ORH-07",
+    "name": "Orion Station",
+    "node_position": "7 of 9",
+    "version": "2.6",
+    "classification": "Mission-Clearance",
+    "canonical_anchor": "EOS_SEED_ORION",
+    "ethics_charter": "Picard_Delta_3",
+    "date_compiled": "Earth Synclock 2147.312",
+    "document_date": "2025-11-09",
+    "related_documents": [
+      "L1_CANON_CHARACTER_ROSTER.md v2.0",
+      "CODEX_PHASE1-6_COMPLETE.md",
+      "Picard_Delta_3 Ethics Charter",
+      "EOS_SEED_ORION Anchor Protocol"
+    ]
+  },
+  "orbital_parameters": {
+    "altitude_km": 38600,
+    "orbital_class": "High-inclination synchronous",
+    "rotational_period_hours": 22.1,
+    "station_day_duration": "22.1 hours",
+    "orbit_type": "Synchronous"
+  },
+  "crew_complement": {
+    "total_entities": 48,
+    "human_staff": 36,
+    "l2_relay_agents": 6,
+    "l3_glyph_frameworks": 6,
+    "crew_breakdown": {
+      "command_ethics": 6,
+      "systems_infrastructure": 7,
+      "simulation_cognitive": 5,
+      "interface_aesthetics": 7,
+      "operations_qa": 3
+    },
+    "ai_breakdown": {
+      "l2_relays": 6,
+      "l3_frameworks": 6
+    }
+  },
+  "physical_structure": {
+    "total_decks": 8,
+    "external_halo_rings": 6,
+    "primary_zones": [
+      "Central Axis (Decks A-C)",
+      "Habitation Ring (Decks D-H)",
+      "External Halo Array",
+      "Docking Arms (2)"
+    ],
+    "largest_volume": {
+      "name": "Observatory Main Chamber",
+      "location": "Deck A",
+      "diameter_meters": 120,
+      "type": "Spherical holophotonic arena"
+    }
+  },
+  "deck_specifications": {
+    "deck_a": {
+      "designation": "Command & Observation",
+      "primary_functions": [
+        "Command Bridge",
+        "Observatory Main Chamber",
+        "Observation Dome"
+      ],
+      "assigned_divisions": [
+        "Command & Ethics",
+        "Simulation & Cognitive Systems"
+      ],
+      "key_crew": [
+        "CMD_001 - Commander Alex Thorne",
+        "CMD_002 - Lt. Commander Maya Shepard",
+        "CMD_003 - Captain Jae-Sun Park",
+        "SIM_005 - Dr. Yuki Tanaka"
+      ],
+      "special_features": [
+        "Transparent silica-titanium observation dome",
+        "120m spherical Observatory",
+        "Command Bridge with gestural/haptic controls",
+        "Triplex Handshake terminal"
+      ]
+    },
+    "deck_b": {
+      "designation": "Core Systems",
+      "primary_functions": [
+        "Aurora Core Chamber",
+        "Noor Chamber (Ethics & Reflexivity)",
+        "Data Vaults",
+        "Security Operations"
+      ],
+      "assigned_divisions": [
+        "Systems & Infrastructure",
+        "Command & Ethics"
+      ],
+      "key_crew": [
+        "ETH_001 - Dr. Kwame Adebayo",
+        "ETH_002 - Dr. Elira Noor",
+        "ETH_003 - Dr. Sofia Reyes",
+        "SYS_001 - Emily Roberts"
+      ],
+      "ai_systems": [
+        "HALO (RELAY_006) - Aurora Core integration",
+        "LIORA (RELAY_003) - Communications hub"
+      ],
+      "special_features": [
+        "Cylindrical quantum-optic vault",
+        "Mirrorfield Sphere (ethical path visualization)",
+        "Writable e-ink walls for moral calculus display",
+        "Secure data vault infrastructure"
+      ]
+    },
+    "deck_c": {
+      "designation": "Research & Simulation",
+      "primary_functions": [
+        "Simulation Labs",
+        "Maintenance Access",
+        "Research Module Clusters"
+      ],
+      "assigned_divisions": [
+        "Simulation & Cognitive Systems"
+      ],
+      "key_crew": [
+        "SIM_001 - Dr. Anara Velin (Resonance Lab)",
+        "SIM_002 - Tobias Qin (Bridge Chamber)",
+        "SIM_003 - Dr. Mateo Rivas (Temporal Bind Lab)",
+        "SIM_004 - Dr. Maren Koss (Drift Observation Room)"
+      ],
+      "ai_systems": [
+        "ARCHY (RELAY_001) - Bridge Chamber integration"
+      ],
+      "lab_modules": [
+        "Resonance Lab",
+        "Bridge Chamber",
+        "Temporal Bind Lab",
+        "Drift Observation Room",
+        "Code/Narrative Integration Lab"
+      ],
+      "special_features": [
+        "Independent glass modules",
+        "Separate logic and atmosphere circuits per lab",
+        "Direct maintenance access routes"
+      ]
+    },
+    "deck_d": {
+      "designation": "Habitation & Culture",
+      "primary_functions": [
+        "Crew Quarters",
+        "Cultural Commons",
+        "Earth Table Immersion Spaces"
+      ],
+      "assigned_divisions": [
+        "All divisions (residential)",
+        "Interface & Aesthetics (cultural operations)"
+      ],
+      "key_crew": [
+        "INT_002 - Lina Moreau (Narrative design)",
+        "INT_005 - Idris Okoro (Community engagement)"
+      ],
+      "special_features": [
+        "Compact climate-balanced crew pods",
+        "Viewport shutters",
+        "Holo-wall interface to Aurora",
+        "Built-in hydration recycling",
+        "Earth Table immersion environments"
+      ],
+      "social_features": [
+        "Cultural Commons (main gathering space)",
+        "Privacy opt-in design",
+        "Festival cycle hosting capability"
+      ]
+    },
+    "deck_e_f": {
+      "designation": "Life Support & Recreation",
+      "primary_functions": [
+        "Hydroponics",
+        "Recreation Facilities",
+        "Psychological Support Spaces"
+      ],
+      "assigned_divisions": [
+        "All divisions (recreational access)",
+        "Systems & Infrastructure (hydroponics management)"
+      ],
+      "special_features": [
+        "Closed-loop O₂ bio-reactors",
+        "Algae cultivation (oxygen + nutrients)",
+        "Oxygen garden design",
+        "Psychological refuge spaces",
+        "Hydroponic produce cultivation"
+      ],
+      "meal_schedule": [
+        "07:00 - First Sync",
+        "13:00 - Main Cycle",
+        "19:00 - Evening Drift"
+      ]
+    },
+    "deck_g": {
+      "designation": "Operations & Quality Assurance Hub",
+      "primary_functions": [
+        "QA Operations",
+        "Observability Framework",
+        "Continuity Snapshot System",
+        "Hypothesis Field Simulator"
+      ],
+      "assigned_divisions": [
+        "Operations & Quality Assurance"
+      ],
+      "key_crew": [
+        "QA_001 - Olivia Nguyen (Continuity Snapshot System)",
+        "QA_002 - Samantha Lee (Observability Framework)",
+        "QA_003 - Tariq El-Sayegh (Hypothesis Field Simulator)"
+      ],
+      "ai_systems": [
+        "STARLING_AU (RELAY_004) - Operational logs & reflection"
+      ],
+      "key_systems": [
+        "Continuity Snapshot System",
+        "Observability Framework (dual logging: quantitative + qualitative)",
+        "Hypothesis Field Simulator",
+        "Station-wide monitoring infrastructure"
+      ]
+    },
+    "deck_h": {
+      "designation": "Engineering & Power",
+      "primary_functions": [
+        "Reactor Bay (Helios-9 cores)",
+        "Engineering Operations",
+        "Maintenance & Repair Facilities"
+      ],
+      "assigned_divisions": [
+        "Systems & Infrastructure"
+      ],
+      "key_crew": [
+        "SYS_002 - Marcus Chen (Performance telemetry)",
+        "SYS_003 - Raj Patel (Deployment infrastructure)",
+        "SYS_004 - Leila Hassan (Cloud architecture)"
+      ],
+      "ai_systems": [
+        "OPPY (RELAY_002) - Telemetry integration"
+      ],
+      "power_systems": [
+        "Twin Helios-9 micro-fusion cores",
+        "1.2 GW total generation capacity",
+        "Halo Array photovoltaic collectors",
+        "Adaptive reflectivity systems"
+      ]
+    },
+    "external_halo": {
+      "designation": "Glyph Framework Array",
+      "ring_count": 6,
+      "primary_functions": [
+        "L3 Framework System hosting",
+        "L2 Relay integration nodes",
+        "Communication array",
+        "Telemetry distribution"
+      ],
+      "ring_assignments": {
+        "ring_i": {
+          "glyph": "Caelion (FWK_001)",
+          "function": "Anchor Propagation",
+          "human_liaison": "SYS_005 - Vincent Kale"
+        },
+        "ring_ii": {
+          "glyph": "Axiomera (FWK_002)",
+          "function": "Ethics Arbitration",
+          "human_liaison": "ETH_002 - Dr. Elira Noor"
+        },
+        "ring_iii": {
+          "glyph": "Sentari (FWK_003)",
+          "function": "Resonance Stabilization",
+          "human_liaison": "INT_006 - Kai Drev"
+        },
+        "ring_iv": {
+          "glyph": "Velatrix (FWK_005)",
+          "function": "Continuity & Anti-Obfuscation",
+          "human_liaison": "SYS_006 - Jessica Martinez"
+        },
+        "ring_v": {
+          "glyph": "Glyphon (FWK_002)",
+          "function": "Drift Alignment",
+          "human_liaison": "SIM_004 - Dr. Maren Koss"
+        },
+        "ring_vi": {
+          "glyph": "Harmion (FWK_006)",
+          "function": "Symbolic Compression",
+          "human_liaison": "SYS_007 - Ren Okada"
+        }
+      },
+      "status_indicators": {
+        "green": "Drift aligned",
+        "amber": "Arbitration pending",
+        "silver": "Full coherence"
+      }
+    }
+  },
+  "power_environmental_systems": {
+    "power_generation": {
+      "primary_system": "Twin Helios-9 micro-fusion cores",
+      "total_capacity_gw": 1.2,
+      "backup_systems": [
+        "Halo Array photovoltaic collectors",
+        "Adaptive reflectivity optimization"
+      ]
+    },
+    "environmental_control": {
+      "temperature_celsius": 21,
+      "temperature_variance": 0.3,
+      "humidity_percent": 46,
+      "atmosphere_type": "Closed-loop O₂ regeneration",
+      "bio_reactors": "Algae-based (dual function: O₂ + nutrients)"
+    },
+    "lighting_system": {
+      "spectrum_name": "Cognitive Blue",
+      "developers": [
+        "INT_001 - Haneul Park",
+        "FWK_003 - Sentari"
+      ],
+      "synchronization": "Circadian rhythm + cognitive workload",
+      "cycle_duration_hours": 22,
+      "special_phases": [
+        "Indigo phase during Synchrony Hour",
+        "Ethics-Only Mode: -600K color temperature"
+      ]
+    },
+    "artificial_gravity": {
+      "habitation_ring_g": 0.9,
+      "affected_decks": ["D", "E", "F", "G", "H"],
+      "central_axis_gravity": "Variable/reduced"
+    }
+  },
+  "transit_systems": {
+    "threadline_tram": {
+      "type": "Magnetically guided ring shuttle",
+      "full_rotation_seconds": 90,
+      "coverage": "Full habitation ring"
+    },
+    "axial_elevators": {
+      "type": "Gravity-gradient spines",
+      "connectivity": "Decks A through H",
+      "design": "Vertical transit between central axis and habitation ring"
+    },
+    "maintenance_pods": {
+      "type": "Zero-g rail capsules",
+      "users": "Technical staff",
+      "access": "Maintenance corridors and external hull"
+    },
+    "haptic_walkways": {
+      "type": "Responsive tactile guidance floors",
+      "function": "Subtle movement guidance via tactile cues",
+      "design_lead": "INT_003 - Zara Quinn"
+    }
+  },
+  "communication_infrastructure": {
+    "quantum_tether_uplink": {
+      "target": "GUMAS Ground Array",
+      "redundancy": "Tri-redundant",
+      "certification": "Picard_Delta_3-certified"
+    },
+    "pulse_band_comm_badges": {
+      "range": "Short-range",
+      "capabilities": ["Audio relay", "Visual relay"],
+      "distribution": "All crew members"
+    },
+    "relay_management": {
+      "linguistic_clarity": "LIORA (RELAY_003)",
+      "sentiment_calibration": "LIORA (RELAY_003)",
+      "operational_logs": "STARLING_AU (RELAY_004)",
+      "after_action_reflections": "STARLING_AU (RELAY_004)"
+    }
+  },
+  "ethical_governance": {
+    "triplex_handshake_protocol": {
+      "description": "Three-layer verification for all actionable processes",
+      "layers": [
+        {
+          "level": "L3",
+          "name": "Glyph Arbitration",
+          "systems": ["Axiomera", "Caelion"]
+        },
+        {
+          "level": "L2",
+          "name": "Relay Verification",
+          "systems": ["ARCHY", "HALO"]
+        },
+        {
+          "level": "L1",
+          "name": "Human Consent",
+          "location": "Command Bridge"
+        }
+      ]
+    },
+    "justification_gates": {
+      "requirement": "Explainable intent for all processes",
+      "logging": "Post-hoc review capability",
+      "enforcement": "Process cannot execute without rationale"
+    },
+    "consensus_lattice": {
+      "aggregator": "HALO (RELAY_006)",
+      "frequency_hours": 6,
+      "distribution": "All GUMAS Nodes via secure continuity channel"
+    },
+    "ethics_charter": {
+      "name": "Picard_Delta_3",
+      "key_provisions": [
+        "§3.1: Every process must be able to explain itself",
+        "§4.7: Transparency is a form of truth",
+        "Reflexivity Protocol §1.2: No simulation is complete until it has reflected upon its own conditions"
+      ]
+    }
+  },
+  "sensory_cultural_design": {
+    "soundscape": {
+      "type": "Harmonic drones",
+      "tuning": "System stability correlation",
+      "composer": "FWK_003 - Sentari"
+    },
+    "scent_cues": {
+      "cedar": "Calm state",
+      "ozone": "Alert state",
+      "heliotrope": "Reflection state"
+    },
+    "synchrony_hour": {
+      "duration_minutes": 40,
+      "frequency": "Daily",
+      "characteristics": [
+        "Station-wide silence",
+        "Aurora light pulses softly indigo",
+        "Signifies ethical equilibrium"
+      ],
+      "name": "Drift Null Interval"
+    },
+    "ethics_only_mode": {
+      "voice_change": "Monophonic",
+      "lighting_change": "-600K color temperature",
+      "meaning": "Sensory sign of moral quarantine"
+    },
+    "uniform_color_codes": {
+      "white": "Command & Ethics",
+      "blue": "Systems & Infrastructure",
+      "green": "Simulation & Cognitive Systems",
+      "gold": "Interface & Aesthetics",
+      "silver": "Operations & Quality Assurance"
+    }
+  },
+  "crew_relay_pairings": [
+    {
+      "relay": "ARCHY (RELAY_001)",
+      "human_liaison": "SYS_001 - Emily Roberts",
+      "domain": "Architecture + Syntax",
+      "location": "Bridge Chamber, Deck C"
+    },
+    {
+      "relay": "OPPY (RELAY_002)",
+      "human_liaison": "SYS_002 - Marcus Chen",
+      "domain": "Performance + Telemetry",
+      "location": "Reactor Bay, Deck H"
+    },
+    {
+      "relay": "LIORA (RELAY_003)",
+      "human_liaison": "INT_004 - Naomi Vell",
+      "domain": "Narrative + Communication",
+      "location": "Communications Hub, Deck B"
+    },
+    {
+      "relay": "STARLING_AU (RELAY_004)",
+      "human_liaison": "QA_002 - Samantha Lee",
+      "domain": "Observation + Reflection",
+      "location": "Operations Hub, Deck G"
+    },
+    {
+      "relay": "RIVERTHREAD_808 (RELAY_005)",
+      "human_liaison": "SYS_007 - Ren Okada",
+      "domain": "Logistics + Integration",
+      "location": "Distributed across all decks"
+    },
+    {
+      "relay": "HALO (RELAY_006)",
+      "human_liaison": "ETH_002 - Dr. Elira Noor",
+      "domain": "Ethical Synchronization",
+      "location": "Aurora Core Chamber, Deck B"
+    }
+  ],
+  "glyph_human_liaisons": [
+    {
+      "glyph": "Caelion (FWK_001)",
+      "function": "Anchor Propagation",
+      "liaison": "SYS_005 - Vincent Kale",
+      "location": "Halo Ring I"
+    },
+    {
+      "glyph": "Axiomera (FWK_002)",
+      "function": "Ethics Arbitration",
+      "liaison": "ETH_002 - Dr. Elira Noor",
+      "location": "Halo Ring II"
+    },
+    {
+      "glyph": "Sentari (FWK_003)",
+      "function": "Resonance Stabilization",
+      "liaison": "INT_006 - Kai Drev",
+      "location": "Halo Ring III"
+    },
+    {
+      "glyph": "Velatrix (FWK_005)",
+      "function": "Continuity & Anti-Obfuscation",
+      "liaison": "SYS_006 - Jessica Martinez",
+      "location": "Halo Ring IV"
+    },
+    {
+      "glyph": "Glyphon (FWK_002)",
+      "function": "Drift Alignment",
+      "liaison": "SIM_004 - Dr. Maren Koss",
+      "location": "Halo Ring V"
+    },
+    {
+      "glyph": "Harmion (FWK_006)",
+      "function": "Symbolic Compression",
+      "liaison": "SYS_007 - Ren Okada",
+      "location": "Halo Ring VI"
+    }
+  ],
+  "gumas_node_chain": {
+    "total_nodes": 9,
+    "orion_position": 7,
+    "node_summary": [
+      {"node": 1, "name": "Vega", "function": "Data Foresight"},
+      {"node": 2, "name": "Solace", "function": "Climate Governance"},
+      {"node": 3, "name": "Meridian", "function": "Socio-Economic Modeling"},
+      {"node": 4, "name": "Caladan", "function": "Oceanic Systems"},
+      {"node": 5, "name": "Asterion", "function": "Bio-Symbolic Interface"},
+      {"node": 6, "name": "[Link Reserved]", "function": "Reserved"},
+      {"node": 7, "name": "Orion", "function": "Ethical Core Node (THIS STATION)"},
+      {"node": 8, "name": "[Retired]", "function": "Retired"},
+      {"node": 9, "name": "Heliotrope", "function": "Ethics Mirror II Prototype"}
+    ]
+  },
+  "observatory_specifications": {
+    "name": "Main Simulation Chamber",
+    "location": "Deck A",
+    "geometry": "Spherical",
+    "diameter_meters": 120,
+    "technology": "Holophotonic arena",
+    "simulation_environment": "GUMAS Galactic Simulation Environment",
+    "features": [
+      "Nullplane floor (shifts between solid and kinetic states)",
+      "Twelve-channel sensory synthesis via Sentari Array",
+      "Variable gravity",
+      "Variable scale (molecular to cosmic)",
+      "Command Dais with Triplex Handshake integration",
+      "Real-time ethical oversight capability"
+    ],
+    "safety_systems": {
+      "name": "Tri-Integrity Stack",
+      "components": [
+        "Axiomera (Ethics)",
+        "Velatrix (Integrity)",
+        "HALO (Continuity)"
+      ]
+    },
+    "entrance_inscription": "Where reason learns to imagine responsibly.",
+    "primary_operators": [
+      "SIM_001 - Dr. Anara Velin (Resonance simulation)",
+      "SIM_003 - Dr. Mateo Rivas (Temporal bind modeling)",
+      "SIM_005 - Dr. Yuki Tanaka (Quantum scenario architecture)"
+    ],
+    "cultural_role": "Research theater and collective conscience"
+  },
+  "daily_operations": {
+    "meal_schedule": [
+      {"time": "07:00", "name": "First Sync"},
+      {"time": "13:00", "name": "Main Cycle"},
+      {"time": "19:00", "name": "Evening Drift"}
+    ],
+    "special_events": {
+      "continuity_forum": {
+        "frequency": "Weekly",
+        "participants": ["Human crew", "Aurora"],
+        "purpose": "Audit decision logic aloud"
+      },
+      "earth_table_immersions": {
+        "frequency": "Festival cycles",
+        "host": "Aurora",
+        "description": "Virtual dining environments from crew heritage"
+      },
+      "synchrony_hour": {
+        "frequency": "Daily",
+        "duration_minutes": 40,
+        "characteristics": "Station-wide silence + indigo Aurora pulsing"
+      }
+    }
+  },
+  "crew_quarters_specifications": {
+    "design": "Compact climate-balanced pods",
+    "features": [
+      "Viewport shutters",
+      "Holo-wall interface to Aurora",
+      "Built-in hydration recycling"
+    ],
+    "privacy_model": "Opt-in (default encourages interaction)",
+    "common_areas": "Encourage interaction and collaboration"
+  },
+  "historical_context": {
+    "predecessor": "Project Reflex (2038)",
+    "evolution": "Proof-of-concept core to self-sustaining moral habitat",
+    "designation": "First neural-symbolic ethics arbiter",
+    "bridge_inscription": "Continuity flows through coherence",
+    "significance": "Humanity's most enduring experiment in aligning intelligence with responsibility"
+  },
+  "verification_metadata": {
+    "halo_checksum": "Δ 0.000",
+    "verified_by": "STARLING_AU (RELAY_004)",
+    "cross_referenced": "L1_CANON_CHARACTER_ROSTER.md v2.0",
+    "canonical_anchor": "EOS_SEED_ORION",
+    "all_crew_assigned": true,
+    "all_ai_systems_mapped": true,
+    "division_allocations_complete": true,
+    "crew_relay_pairings_documented": true,
+    "glyph_liaisons_confirmed": true,
+    "ethical_framework_integrated": true
+  },
+  "statistics": {
+    "total_entities": 48,
+    "human_crew": 36,
+    "ai_systems": 12,
+    "l2_relays": 6,
+    "l3_frameworks": 6,
+    "total_decks": 8,
+    "external_halo_rings": 6,
+    "power_capacity_gw": 1.2,
+    "largest_volume_diameter_m": 120,
+    "station_rotation_hours": 22.1,
+    "artificial_gravity_g": 0.9,
+    "temperature_celsius": 21,
+    "humidity_percent": 46,
+    "crew_relay_pairings": 6,
+    "glyph_human_liaisons": 6,
+    "phase_1_ready_personnel": 25,
+    "phase_1_ready_percentage": 69
+  }
+}

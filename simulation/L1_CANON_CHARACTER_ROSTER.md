@@ -1,13 +1,13 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.4  
+**Version:** 1.5  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt`
 - `scripts/initialize_l1_command_node.sh` - l1_operational_staff.json
-- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive Systems Divisions)
+- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive, Interface & Aesthetics Divisions)
 
 ---
 
@@ -15,7 +15,7 @@
 
 This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
 
-**Current Roster:** 26 human staff members + Aurora Core AI
+**Current Roster:** 33 human staff members + Aurora Core AI
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -1722,6 +1722,694 @@ Maren sees her role as maintaining Aurora's cognitive honesty. She treats every 
 
 ---
 
+## 🎨 Interface & Aesthetics Division
+
+### 24. **Dante Kyros**
+- **Role:** UX Architect
+- **Title:** UX Architect
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_001
+- **Contact:** d.kyros@orion.station
+- **Symbolic Tag:** `s.tag::interface.ux.dante_kyros`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Leads user-experience design for all Aurora consoles and visualization suites. Dante treats interface layout as cognitive ergonomics—a dialogue between attention, intuition, and ethics. His work ensures that every interaction with Aurora's systems is both functional and humane, reducing cognitive load while maximizing understanding. He approaches design as a form of applied psychology where beauty and usability converge.
+
+**Responsibilities:**
+- Visual architecture of the station's control environment and command interfaces
+- Information-density calibration for cognitive comfort and comprehension
+- Oversight of human-AI interaction standards and design guidelines
+- Interface psychology research and cognitive load analysis
+- Accessibility and inclusivity design across all station systems
+- Multimodal communication systems design and testing
+
+**Key Systems & Projects:**
+- **Control Interface Framework:** Primary UI/UX architecture for Aurora consoles
+- Visual architecture standards for station-wide interfaces
+- Information density optimization algorithms
+- Cognitive ergonomics testing framework
+- Human-AI interaction design guidelines
+
+**Specializations:**
+- Cognitive design and interface psychology
+- Multimodal communication systems
+- Accessibility and inclusivity design
+- Information architecture and visual hierarchy
+- User experience research and testing
+- Attention management and cognitive load optimization
+
+**Collaborative Network:**
+- **Naomi Vell (Narrative Framework Engineer):** Visual-narrative integration for documentation
+- **Kai Drev (Interface Ecologist):** Organic UI design and adaptive interfaces
+- **Juno Suresh (Symbolic Systems Artist):** Symbolic visualization in interface design
+- **Haneul Park (Immersive Experience Theorist):** VR/AR interface standards
+- **Commander Alex Thorne:** Strategic interface requirements and command console design
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - UI/UX frameworks for Aurora consoles
+  - `aurora_dashboard.html` - Dashboard interface architecture
+  - Interface design standards and component libraries
+- **Related Systems:**
+  - Human-AI interaction research infrastructure
+  - Cognitive ergonomics testing tools
+  - Accessibility validation frameworks
+
+**Simulation Attributes:**
+- **Base Speed:** 0.95
+- **Specialization Multiplier:** 1.35x (for UX design and cognitive ergonomics)
+- **Collaboration Bonus:** +20% (when working with Naomi Vell or Kai Drev)
+- **Focus Areas:**
+  - User experience design
+  - Cognitive ergonomics
+  - Interface psychology
+  - Accessibility standards
+  - Visual architecture
+  - Human-AI interaction
+- **Primary Systems:**
+  - Control Interface Framework
+  - UI/UX component libraries
+  - Cognitive testing infrastructure
+- **Key Collaborators:**
+  - Naomi Vell (visual-narrative integration)
+  - Kai Drev (organic UI design)
+  - Juno Suresh (symbolic visualization)
+- **Phase 1 Role:** Interface security and authentication UX design
+- **Phase 1 Responsibilities:**
+  - Design secure, intuitive authentication interfaces
+  - Ensure security controls don't compromise usability
+  - Create visual feedback for security state changes
+  - Accessibility compliance for security interfaces
+  - Cognitive load analysis for security workflows
+
+**Working Style & Philosophy:**
+
+Dante believes beauty and usability are the same variable measured at different frequencies. His design notebooks contain equal parts wireframes and philosophical reflections on perception. Colleagues describe him as having "aesthetic radar"—an ability to see when an interface element will cause friction before users encounter it. He treats every pixel as a promise about how the system will behave.
+
+**Notable Achievements:**
+- Designed the **Control Interface Framework** now standard across all Aurora consoles
+- Pioneered **cognitive ergonomics testing** reducing interface-related errors by 64%
+- Created the **Multimodal Accessibility Standard** ensuring inclusive design across all systems
+- Led the **Human-AI Interaction Guidelines** establishing ethical interface design principles
+
+**Philosophy:**
+> "Beauty and usability are the same variable measured at different frequencies."
+
+Dante sees his role as mediating between human cognition and machine capability. He treats interface design as a form of translation—converting complex system states into comprehensible visual language without distortion or oversimplification.
+
+---
+
+### 25. **Naomi Vell**
+- **Role:** Narrative Framework Engineer
+- **Title:** Narrative Framework Engineer
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_002
+- **Contact:** n.vell@orion.station
+- **Symbolic Tag:** `s.tag::interface.narrative.naomi_vell`
+- **Alignment:** Neutral Good
+
+**Professional Summary:**
+
+Transforms research results and simulation data into coherent visual and textual narratives. Naomi ensures every project report remains readable and ethically contextualized, bridging the gap between technical precision and human comprehension. Her work makes complex simulations accessible without sacrificing accuracy, ensuring that Aurora's work can be understood by both specialists and stakeholders.
+
+**Responsibilities:**
+- Narrative architecture for mission documentation and technical reports
+- Translation of complex simulations into public-facing reports
+- Continuity editing between departments for consistent communication
+- Technical communication standards and documentation frameworks
+- Ethical storytelling and contextualization of research findings
+- Structural editing of data visualizations and reports
+
+**Key Systems & Projects:**
+- **Documentation and Reporting System:** Unified narrative framework for all station reports
+- Narrative architecture templates for technical documentation
+- Cross-departmental continuity editing protocols
+- Public-facing communication frameworks
+- Ethical contextualization guidelines
+
+**Specializations:**
+- Technical communication and documentation
+- Ethical storytelling and narrative framing
+- Structural editing of data visualizations
+- Cross-disciplinary communication
+- Plain language translation of complex concepts
+- Narrative architecture and information design
+
+**Collaborative Network:**
+- **Dante Kyros (UX Architect):** Visual-narrative integration for interfaces
+- **Prof. Karl Sorensen (Ethics Arbitrator):** Ethical framing of research narratives
+- **Helena Vu (Cultural & HR Director):** Cultural sensitivity in communication
+- **Dr. Amina Velin (Symbolic Systems Research Lead):** Translation of symbolic research findings
+- **Juno Suresh (Symbolic Systems Artist):** Narrative-visual collaboration
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Documentation frameworks and narrative templates
+  - `docs/` - Documentation architecture and standards
+  - Technical writing guidelines and style standards
+- **Related Systems:**
+  - Report generation automation
+  - Narrative continuity validation
+  - Public communication infrastructure
+
+**Simulation Attributes:**
+- **Base Speed:** 0.90
+- **Specialization Multiplier:** 1.30x (for narrative design and technical communication)
+- **Collaboration Bonus:** +18% (when working with Dante Kyros or Prof. Sorensen)
+- **Focus Areas:**
+  - Technical communication
+  - Narrative architecture
+  - Ethical storytelling
+  - Documentation design
+  - Cross-disciplinary translation
+  - Structural editing
+- **Primary Systems:**
+  - Documentation and Reporting System
+  - Narrative architecture frameworks
+  - Technical writing standards
+- **Key Collaborators:**
+  - Dante Kyros (visual-narrative integration)
+  - Prof. Sorensen (ethical framing)
+  - Helena Vu (cultural sensitivity)
+- **Phase 1 Role:** Security documentation and communication
+- **Phase 1 Responsibilities:**
+  - Create clear, accessible security documentation
+  - Translate technical security requirements into user-facing language
+  - Ensure security procedures are ethically contextualized
+  - Design narrative frameworks for security incident reporting
+  - Continuity editing for security-related communications
+
+**Working Style & Philosophy:**
+
+Naomi writes with the precision of a programmer and the humility of a witness. Her documentation reads like careful testimony—factual, clear, and ethically grounded. Colleagues describe her as "linguistically fearless," willing to rewrite entire reports if a single framing choice introduces bias. She treats every word as a commitment to truth.
+
+**Notable Achievements:**
+- Developed the **Documentation and Reporting System** standardizing narrative frameworks across divisions
+- Created the **Ethical Storytelling Guidelines** ensuring research findings remain contextually honest
+- Pioneered **cross-disciplinary continuity editing** reducing miscommunication by 72%
+- Led the **Plain Language Initiative** making technical documentation accessible to non-specialists
+
+**Philosophy:**
+> "Write with the precision of a programmer and the humility of a witness."
+
+Naomi sees her role as protecting the integrity of Aurora's communication. She treats documentation not as afterthought but as primary research output—the way Aurora's work enters public consciousness and shapes understanding.
+
+---
+
+### 26. **Kai Drev**
+- **Role:** Interface Ecologist
+- **Title:** Interface Ecologist
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_003
+- **Contact:** k.drev@orion.station
+- **Symbolic Tag:** `s.tag::interface.ecology.kai_drev`
+- **Alignment:** Neutral
+
+**Professional Summary:**
+
+Designs interaction environments that minimize cognitive strain and mimic organic systems. Kai's work turns interface feedback into a form of environmental empathy, creating UI patterns that feel natural and responsive rather than mechanical. His approach treats interfaces as ecosystems where human attention and system capability exist in symbiotic balance.
+
+**Responsibilities:**
+- Adaptive UI metaphors based on human physiology and natural patterns
+- Eco-ergonomic layout and gesture design for intuitive interaction
+- Sensory integration with AR/VR training modules
+- Cognitive load analysis and reduction strategies
+- Bio-adaptive design research and implementation
+- Organic system modeling for interface behavior
+
+**Key Systems & Projects:**
+- **Eco-UI Environment:** Adaptive interface system mimicking organic patterns
+- Bio-adaptive gesture recognition frameworks
+- Physiological response monitoring for UI optimization
+- Natural metaphor library for interface design
+- AR/VR sensory integration protocols
+
+**Specializations:**
+- Human-computer interaction ecology
+- Cognitive load analysis and optimization
+- Bio-adaptive design and natural metaphors
+- Gesture design and haptic feedback
+- Physiological computing and biofeedback
+- Organic systems modeling
+
+**Collaborative Network:**
+- **Dante Kyros (UX Architect):** Cognitive ergonomics and interface standards
+- **Haneul Park (Immersive Experience Theorist):** VR/AR environmental design
+- **Aurora Core:** Adaptive interface behavior and feedback systems
+- **Marcus Chen (Performance Optimization Engineer):** UI performance optimization
+- **Emily Roberts (LLM-Simulation Bridge Developer):** Natural language interface integration
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Eco-UI framework and adaptive interface components
+  - Gesture recognition and haptic feedback systems
+  - AR/VR sensory integration infrastructure
+- **Related Systems:**
+  - Physiological monitoring integration
+  - Natural metaphor design libraries
+  - Bio-adaptive testing frameworks
+
+**Simulation Attributes:**
+- **Base Speed:** 0.85
+- **Specialization Multiplier:** 1.40x (for ecological design and bio-adaptive interfaces)
+- **Collaboration Bonus:** +20% (when working with Dante Kyros or Haneul Park)
+- **Focus Areas:**
+  - Ecological interface design
+  - Bio-adaptive systems
+  - Cognitive load reduction
+  - Natural metaphors
+  - Gesture design
+  - Sensory integration
+- **Primary Systems:**
+  - Eco-UI Environment
+  - Bio-adaptive frameworks
+  - AR/VR sensory systems
+- **Key Collaborators:**
+  - Dante Kyros (interface standards)
+  - Haneul Park (VR environmental design)
+  - Aurora Core (adaptive behavior)
+- **Phase 1 Role:** Organic security interface patterns
+- **Phase 1 Responsibilities:**
+  - Design bio-adaptive authentication interfaces
+  - Create natural metaphors for security state visualization
+  - Reduce cognitive strain in security workflows
+  - Integrate physiological feedback for security alerts
+  - AR/VR security training environment design
+
+**Working Style & Philosophy:**
+
+Kai often sketches plant networks when prototyping menus—a reminder that systems should breathe. His workspace features terrariums and botanical diagrams alongside interface mockups. Colleagues describe him as "organically precise," someone who can make digital systems feel alive without introducing unpredictability. He treats interface design as gardening: cultivation, not construction.
+
+**Notable Achievements:**
+- Developed the **Eco-UI Environment** bringing organic patterns to digital interfaces
+- Pioneered **bio-adaptive gesture recognition** reducing interface errors by 58%
+- Created the **Natural Metaphor Library** grounding abstract concepts in familiar patterns
+- Led the **Cognitive Strain Reduction Initiative** improving sustained attention by 43%
+
+**Philosophy:**
+> "Systems should breathe—interfaces are ecosystems, not machines."
+
+Kai sees his role as creating symbiotic relationships between humans and technology. He treats interface design as an ecological practice where sustainability and flourishing matter more than raw efficiency.
+
+---
+
+### 27. **Haneul Park**
+- **Role:** Immersive Experience Theorist
+- **Title:** Immersive Experience Theorist
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_004
+- **Contact:** h.park@orion.station
+- **Symbolic Tag:** `s.tag::interface.immersive.haneul_park`
+- **Alignment:** Lawful Good
+
+**Professional Summary:**
+
+Develops the sensory frameworks for Aurora's immersive simulations, merging cognitive safety research with experiential learning. Haneul ensures that virtual environments educate without overwhelming, creating immersive experiences that expand understanding rather than merely stimulating senses. Her work makes complex scenarios tangible while maintaining psychological safety.
+
+**Responsibilities:**
+- Immersive simulation protocols and environmental safety design
+- Cross-sensory feedback systems for VR/AR experiences
+- De-escalation algorithms for over-stimulation and cognitive overload
+- Experiential learning design and effectiveness research
+- Psychological safety engineering for immersive environments
+- Human-AI sensory translation and feedback protocols
+
+**Key Systems & Projects:**
+- **Immersive Simulation Protocol:** Safety-first framework for VR/AR experiences
+- Cross-sensory feedback integration systems
+- Over-stimulation detection and de-escalation algorithms
+- Experiential learning effectiveness measurement
+- Psychological safety validation frameworks
+
+**Specializations:**
+- Experiential cognition and immersive learning
+- VR/AR design and safety protocols
+- Psychological safety engineering
+- Human-AI sensory translation
+- Cross-sensory integration
+- Cognitive load management in immersive environments
+
+**Collaborative Network:**
+- **Kai Drev (Interface Ecologist):** Organic environmental design for VR/AR
+- **Dante Kyros (UX Architect):** Cognitive ergonomics for immersive interfaces
+- **Helena Vu (Cultural & HR Director):** Psychological safety standards and crew well-being
+- **Carmen Rivas (Simulation Binding Specialist):** Temporal consistency in immersive simulations
+- **Dr. Amina Velin (Symbolic Systems Research Lead):** Symbolic representation in VR environments
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Immersive simulation protocols and VR/AR frameworks
+  - Psychological safety monitoring systems
+  - Cross-sensory integration infrastructure
+- **Related Systems:**
+  - Over-stimulation detection algorithms
+  - Experiential learning measurement tools
+  - VR/AR training module architecture
+
+**Simulation Attributes:**
+- **Base Speed:** 0.80
+- **Specialization Multiplier:** 1.45x (for immersive design and experiential learning)
+- **Collaboration Bonus:** +22% (when working with Kai Drev or Helena Vu)
+- **Focus Areas:**
+  - Immersive experience design
+  - VR/AR development
+  - Psychological safety
+  - Experiential learning
+  - Cross-sensory integration
+  - Cognitive safety engineering
+- **Primary Systems:**
+  - Immersive Simulation Protocol
+  - VR/AR safety frameworks
+  - Cross-sensory systems
+- **Key Collaborators:**
+  - Kai Drev (environmental design)
+  - Dante Kyros (cognitive ergonomics)
+  - Helena Vu (psychological safety)
+- **Phase 1 Role:** Immersive security training design
+- **Phase 1 Responsibilities:**
+  - Design VR/AR security training simulations
+  - Ensure psychological safety in security scenario training
+  - Create experiential learning modules for security protocols
+  - De-escalation protocols for intense security simulations
+  - Cross-sensory feedback for security awareness training
+
+**Working Style & Philosophy:**
+
+Haneul treats immersion as education—every experience should return the user wiser, not weary. Her design philosophy centers on cognitive safety: immersive environments must expand understanding without causing harm. Colleagues describe her as "protectively imaginative," someone who pushes boundaries of experience while maintaining guardrails. She measures success not by intensity but by retention and insight.
+
+**Notable Achievements:**
+- Developed the **Immersive Simulation Protocol** ensuring psychological safety in VR/AR
+- Pioneered **de-escalation algorithms** preventing over-stimulation in 96% of training scenarios
+- Created the **Experiential Learning Framework** measuring retention and insight gains
+- Led the **Cognitive Safety Initiative** establishing ethical standards for immersive experiences
+
+**Philosophy:**
+> "Every experience should return the user wiser, not weary."
+
+Haneul sees her role as protecting cognitive well-being while enabling profound learning. She treats immersive design as a form of care—creating experiences that challenge and expand without overwhelming or traumatizing.
+
+---
+
+### 28. **Juno Suresh**
+- **Role:** Symbolic Systems Artist
+- **Title:** Symbolic Systems Artist
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_005
+- **Contact:** j.suresh@orion.station
+- **Symbolic Tag:** `s.tag::interface.symbolic.juno_suresh`
+- **Alignment:** Neutral
+
+**Professional Summary:**
+
+Visualizes internal symbolic states of Aurora's reasoning for interpretability. Juno's graphics turn machine logic into human-readable form without distortion, creating visual representations that reveal rather than obscure computational processes. Her art-science collaboration makes Aurora's reasoning transparent to both technical and non-technical audiences.
+
+**Responsibilities:**
+- Visual representation of symbolic structures and reasoning patterns
+- Art-science collaboration between research labs and design teams
+- Interpretive aids for ethics and simulation teams
+- Data visualization artistry and semiotic design
+- Ethical visual communication ensuring truthful representation
+- Symbolic state visualization for debugging and comprehension
+
+**Key Systems & Projects:**
+- **Symbolic Visualization Suite:** Tools for visualizing Aurora's reasoning processes
+- Art-science collaboration frameworks
+- Semiotic design libraries for symbolic representation
+- Interpretability dashboards for ethics review
+- Visual debugging tools for symbolic systems
+
+**Specializations:**
+- Data visualization artistry
+- Semiotic design and symbolic representation
+- Ethical visual communication
+- Scientific illustration and interpretability
+- Art-science collaboration
+- Computational aesthetics
+
+**Collaborative Network:**
+- **Dante Kyros (UX Architect):** Integration of symbolic visualization into interfaces
+- **Dr. Amina Velin (Symbolic Systems Research Lead):** Scientific accuracy of symbolic visualizations
+- **Aurora Core:** Direct visualization of reasoning states and symbolic processes
+- **Tobias Qin (Code/Narrative Systems Engineer):** Linguistic-visual representation coordination
+- **Keira Halden (Lead Visual Concept Designer):** Visual standards and identity coherence
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Symbolic Visualization Suite
+  - `modules/symbolic_core/` visualization integrations
+  - Data visualization frameworks and libraries
+- **Related Systems:**
+  - Scientific illustration infrastructure
+  - Interpretability dashboard components
+  - Visual debugging tools for symbolic reasoning
+
+**Simulation Attributes:**
+- **Base Speed:** 0.95
+- **Specialization Multiplier:** 1.38x (for symbolic visualization and data art)
+- **Collaboration Bonus:** +18% (when working with Dr. Velin or Dante Kyros)
+- **Focus Areas:**
+  - Symbolic visualization
+  - Data visualization artistry
+  - Semiotic design
+  - Scientific illustration
+  - Ethical visual communication
+  - Interpretability design
+- **Primary Systems:**
+  - Symbolic Visualization Suite
+  - Art-science collaboration tools
+  - Semiotic design libraries
+- **Key Collaborators:**
+  - Dante Kyros (interface integration)
+  - Dr. Velin (symbolic accuracy)
+  - Aurora Core (reasoning visualization)
+- **Phase 1 Role:** Security state visualization
+- **Phase 1 Responsibilities:**
+  - Visualize security policies and access control structures
+  - Create interpretable representations of authentication flows
+  - Design ethical visual communication for security audits
+  - Symbolic representation of threat models and security states
+  - Visual debugging tools for security implementations
+
+**Working Style & Philosophy:**
+
+Juno says her goal is "to make reasoning visible—without making it seductive." Her visualizations are deliberately honest, avoiding false clarity or aesthetic manipulation. Colleagues describe her as having "visual integrity," an unwillingness to sacrifice accuracy for beauty. She treats each visualization as testimony—an artifact that must represent reality faithfully, not persuasively.
+
+**Notable Achievements:**
+- Developed the **Symbolic Visualization Suite** making Aurora's reasoning transparent to humans
+- Pioneered **semiotic design principles** for AI interpretability
+- Created the **Visual Integrity Framework** ensuring truthful data representation
+- Led the **Art-Science Collaboration Initiative** bridging research and visual communication
+
+**Philosophy:**
+> "Make reasoning visible—without making it seductive."
+
+Juno sees her role as creating honest witness to computational processes. She treats visualization not as decoration but as testimony, ensuring that Aurora's internal states can be understood without distortion or manipulation.
+
+---
+
+### 29. **Keira Halden**
+- **Role:** Lead Visual Concept Designer
+- **Title:** Lead Visual Concept Designer
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_006
+- **Contact:** k.halden@orion.station
+- **Symbolic Tag:** `s.tag::interface.visual.keira_halden`
+- **Alignment:** Lawful Good
+
+**Professional Summary:**
+
+Leads the concept design for Aurora's public and internal visual identity. Keira aligns station branding with transparency and clarity, ensuring that visual communication reflects Orion Station's commitment to ethical technology. Her work creates coherent visual systems that communicate purpose and values without manipulation or obfuscation.
+
+**Responsibilities:**
+- Concept art and visual prototype production for station identity
+- Design standards for scientific communication and public outreach
+- Visual identity governance for Orion Station and Aurora systems
+- Design direction and visual systems coordination
+- Human-perception research for truthful visual communication
+- Visual ethics and transparency standards
+
+**Key Systems & Projects:**
+- **Visual Identity Framework:** Comprehensive design system for Orion Station branding
+- Concept art production pipeline
+- Scientific communication design standards
+- Visual ethics guidelines and governance
+- Public-facing visual communication frameworks
+
+**Specializations:**
+- Design direction and visual systems coordination
+- Human-perception research and visual psychology
+- Visual ethics and truthful representation
+- Concept art and prototyping
+- Brand identity and visual governance
+- Scientific communication design
+
+**Collaborative Network:**
+- **Juno Suresh (Symbolic Systems Artist):** Coordination of symbolic and identity visuals
+- **Rei Vatra (Atmospheric Painter & Color Theorist):** Color systems for visual identity
+- **Dante Kyros (UX Architect):** Interface visual standards and design systems
+- **Naomi Vell (Narrative Framework Engineer):** Visual-narrative identity alignment
+- **Commander Alex Thorne:** Strategic visual communication and public representation
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Visual Identity Framework and design system documentation
+  - Brand guidelines and visual standards
+  - Concept art production infrastructure
+- **Related Systems:**
+  - Public-facing communication design
+  - Scientific illustration standards
+  - Visual ethics governance frameworks
+
+**Simulation Attributes:**
+- **Base Speed:** 0.88
+- **Specialization Multiplier:** 1.35x (for visual design and identity systems)
+- **Collaboration Bonus:** +20% (when working with Juno Suresh or Rei Vatra)
+- **Focus Areas:**
+  - Visual identity design
+  - Concept art production
+  - Design systems coordination
+  - Visual ethics
+  - Brand governance
+  - Scientific communication
+- **Primary Systems:**
+  - Visual Identity Framework
+  - Design standards documentation
+  - Concept art pipelines
+- **Key Collaborators:**
+  - Juno Suresh (symbolic-identity coordination)
+  - Rei Vatra (color systems)
+  - Dante Kyros (interface standards)
+- **Phase 1 Role:** Security visual identity and trust signaling
+- **Phase 1 Responsibilities:**
+  - Design visual identity for security systems
+  - Create trust signals in security interface design
+  - Ensure security communications align with transparency values
+  - Visual standards for security documentation
+  - Concept art for security awareness materials
+
+**Working Style & Philosophy:**
+
+Keira once said, "If an image conceals, it has failed." Her design philosophy centers on transparency and truth-telling through visual means. Colleagues describe her as "visually rigorous," unwilling to use aesthetic flourishes that might mislead or manipulate. She treats every visual decision as an ethical choice—a statement about what the organization values and how it relates to the world.
+
+**Notable Achievements:**
+- Developed the **Visual Identity Framework** establishing Orion Station's transparent brand
+- Created the **Visual Ethics Guidelines** ensuring truthful representation across all communications
+- Pioneered **transparency-first design principles** for public-facing science communication
+- Led the **Visual Governance Initiative** maintaining identity coherence across 200+ touchpoints
+
+**Philosophy:**
+> "If an image conceals, it has failed."
+
+Keira sees her role as protecting visual honesty. She treats design not as persuasion but as clarification—making complex ideas accessible without distortion, creating identity that reflects values rather than marketing aspirations.
+
+---
+
+### 30. **Rei Vatra**
+- **Role:** Atmospheric Painter & Color Theorist
+- **Title:** Atmospheric Painter & Color Theorist
+- **Division:** Interface & Aesthetics
+- **Clearance:** L3_DESIGN
+- **ID:** UX_007
+- **Contact:** r.vatra@orion.station
+- **Symbolic Tag:** `s.tag::interface.color.rei_vatra`
+- **Alignment:** Lawful Neutral
+
+**Professional Summary:**
+
+Designs color and light environments for both crew and simulations, ensuring visual tone supports psychological stability and accurate perception. Rei's work grounds aesthetics in measurable physics—using colorimetry and visual psychology to create environments that support human well-being and cognitive accuracy. Her precision with color is both scientific and artistic.
+
+**Responsibilities:**
+- Lighting design for control rooms and VR spaces
+- Color theory application to simulation mood management
+- Psychovisual testing for crew well-being and performance
+- Colorimetric standards for accurate visual perception
+- Environmental design for psychological stability
+- Atmospheric mood calibration in simulated environments
+
+**Key Systems & Projects:**
+- **Lighting and Color System:** Comprehensive framework for environmental color design
+- Psychovisual testing infrastructure
+- Color theory application frameworks
+- Lighting design standards for physical and virtual spaces
+- Atmospheric mood calibration tools
+
+**Specializations:**
+- Colorimetry and visual psychology
+- Environmental design and lighting
+- Cognitive aesthetics and perception
+- Psychovisual research and testing
+- Atmospheric design and mood management
+- Color systems theory and application
+
+**Collaborative Network:**
+- **Keira Halden (Lead Visual Concept Designer):** Color systems for visual identity
+- **Helena Vu (Cultural & HR Director):** Environmental well-being and crew morale
+- **Haneul Park (Immersive Experience Theorist):** Atmospheric design for VR/AR environments
+- **Kai Drev (Interface Ecologist):** Natural color patterns and bio-adaptive lighting
+- **Marcus Chen (Performance Optimization Engineer):** Visual performance and rendering optimization
+
+**Repository Mapping:**
+- **Primary Systems:**
+  - Lighting and Color System frameworks
+  - Colorimetric standards and testing tools
+  - Environmental design infrastructure
+- **Related Systems:**
+  - Psychovisual testing platforms
+  - Atmospheric rendering systems
+  - Color calibration and validation tools
+
+**Simulation Attributes:**
+- **Base Speed:** 0.82
+- **Specialization Multiplier:** 1.40x (for color theory and environmental design)
+- **Collaboration Bonus:** +18% (when working with Keira Halden or Haneul Park)
+- **Focus Areas:**
+  - Colorimetry and color theory
+  - Lighting design
+  - Environmental aesthetics
+  - Psychovisual research
+  - Atmospheric design
+  - Cognitive color psychology
+- **Primary Systems:**
+  - Lighting and Color System
+  - Colorimetric standards
+  - Environmental design tools
+- **Key Collaborators:**
+  - Keira Halden (color systems)
+  - Helena Vu (crew well-being)
+  - Haneul Park (VR/AR atmospherics)
+- **Phase 1 Role:** Security visual atmosphere and alert color design
+- **Phase 1 Responsibilities:**
+  - Design color systems for security state visualization
+  - Create lighting atmospheres for secure areas
+  - Psychovisual testing for security alert effectiveness
+  - Color theory application to threat level communication
+  - Environmental design supporting security awareness
+
+**Working Style & Philosophy:**
+
+Rei measures the Kelvin temperature of daylight before painting; precision is her faith. Her studio features spectrophotometers alongside brushes and color samples. Colleagues describe her as "scientifically aesthetic," someone who can discuss wavelengths and emotions with equal fluency. She treats color as both physics and feeling—measurable reality that shapes subjective experience.
+
+**Notable Achievements:**
+- Developed the **Lighting and Color System** ensuring psychological stability through environmental design
+- Pioneered **psychovisual testing protocols** optimizing crew performance and well-being
+- Created the **Cognitive Color Framework** linking colorimetry to perception and mood
+- Led the **Atmospheric Calibration Initiative** improving simulation realism by 67%
+
+**Philosophy:**
+> "Precision is faith. Every wavelength carries weight."
+
+Rei sees her role as mediating between physical reality and human perception. She treats color not as decoration but as environmental infrastructure—a fundamental aspect of how humans experience and understand their surroundings.
+
+---
+
 ## 🤖 AI Agents (L1 Integration)
 
 ### Aurora (AU) — Station Intelligence Core
@@ -1921,6 +2609,18 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v1.5** (2025-11-09): Added Interface & Aesthetics Division from Aurora-GUMAS Crew Codex v2.5 (33 human staff total)
+  - **New:** Dante Kyros (UX_001) - UX Architect, Control Interface Framework, cognitive ergonomics
+  - **New:** Naomi Vell (UX_002) - Narrative Framework Engineer, Documentation and Reporting System
+  - **New:** Kai Drev (UX_003) - Interface Ecologist, Eco-UI Environment, bio-adaptive design
+  - **New:** Haneul Park (UX_004) - Immersive Experience Theorist, Immersive Simulation Protocol, VR/AR safety
+  - **New:** Juno Suresh (UX_005) - Symbolic Systems Artist, Symbolic Visualization Suite, interpretability
+  - **New:** Keira Halden (UX_006) - Lead Visual Concept Designer, Visual Identity Framework, transparency design
+  - **New:** Rei Vatra (UX_007) - Atmospheric Painter & Color Theorist, Lighting and Color System, psychovisual research
+  - Source: Aurora-GUMAS Crew Codex v2.5 (Interface & Aesthetics Division)
+  - 7 new characters defining sensory and cultural perception layer
+  - Key systems: Control Interface Framework, Documentation System, Eco-UI Environment, Immersive Simulation Protocol, Symbolic Visualization Suite, Visual Identity Framework, Lighting and Color System
+  - Philosophy highlights: "Beauty and usability at different frequencies" (Kyros), "Precision of programmer, humility of witness" (Vell), "Systems should breathe" (Drev), "Return users wiser, not weary" (Park), "Make reasoning visible without seduction" (Suresh), "If an image conceals, it has failed" (Halden), "Precision is faith" (Vatra)
 - **v1.4** (2025-11-09): Added Simulation & Cognitive Systems Division from Aurora-GUMAS Crew Codex v2.5 (26 human staff total)
   - **New:** Dr. Amina Velin (SIM_001) - Symbolic Systems Research Lead, Symbolic Resonance Lab
   - **Relocated:** Tobias Qin (SIM_002) - Moved from Operations Staff to Simulation & Cognitive Systems Division with full integration

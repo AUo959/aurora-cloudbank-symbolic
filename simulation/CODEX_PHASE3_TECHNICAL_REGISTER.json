@@ -326,27 +326,58 @@
             {
                 "character": "Tobias Qin",
                 "connections": 6,
-                "collaborators": ["Emily Roberts", "Prof. Sorensen", "Dr. Velin", "Maren Koss", "RIVERTHREAD_808", "STARLING_AU"]
+                "collaborators": [
+                    "Emily Roberts",
+                    "Prof. Sorensen",
+                    "Dr. Velin",
+                    "Maren Koss",
+                    "RIVERTHREAD_808",
+                    "STARLING_AU"
+                ]
             },
             {
                 "character": "Dr. Amina Velin",
                 "connections": 5,
-                "collaborators": ["Tobias Qin", "Dr. Noor", "Aurora Core", "Prof. Sorensen", "Dr. Zhao"]
+                "collaborators": [
+                    "Tobias Qin",
+                    "Dr. Noor",
+                    "Aurora Core",
+                    "Prof. Sorensen",
+                    "Dr. Zhao"
+                ]
             },
             {
                 "character": "Emily Roberts",
                 "connections": 5,
-                "collaborators": ["Tobias Qin", "Carmen Rivas", "Aurora Core", "Jessica Martinez", "Marcus Chen"]
+                "collaborators": [
+                    "Tobias Qin",
+                    "Carmen Rivas",
+                    "Aurora Core",
+                    "Jessica Martinez",
+                    "Marcus Chen"
+                ]
             },
             {
                 "character": "Carmen Rivas",
                 "connections": 5,
-                "collaborators": ["Vincent Kale", "Maren Koss", "HALO Relay", "Emily Roberts", "Dr. Zhao"]
+                "collaborators": [
+                    "Vincent Kale",
+                    "Maren Koss",
+                    "HALO Relay",
+                    "Emily Roberts",
+                    "Dr. Zhao"
+                ]
             },
             {
                 "character": "Maren Koss",
                 "connections": 5,
-                "collaborators": ["Carmen Rivas", "Dr. Velin", "Aurora Core", "Tobias Qin", "HALO Relay"]
+                "collaborators": [
+                    "Carmen Rivas",
+                    "Dr. Velin",
+                    "Aurora Core",
+                    "Tobias Qin",
+                    "HALO Relay"
+                ]
             }
         ],
         "key_partnerships": [

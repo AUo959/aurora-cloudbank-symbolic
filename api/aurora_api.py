@@ -283,7 +283,8 @@ class AgentSessionRequest(BaseModel):
     state_data: Optional[Dict[str, Any]] = None
 
 
-@app.post(  # verify_csrf inside"/geometric/vector", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/geometric/vector", dependencies=[Depends(security)])
 def create_vector(req: VectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     verify_csrf_token(token)
     v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
@@ -291,7 +292,8 @@ def create_vector(req: VectorRequest, token: HTTPAuthorizationCredentials = Depe
     return {"vector": str(v)}
 
 
-@app.post(  # verify_csrf inside"/geometric/mult", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/geometric/mult", dependencies=[Depends(security)])
 def geometric_product(req: MultivectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     verify_csrf_token(token)
     try:
@@ -307,7 +309,8 @@ def geometric_product(req: MultivectorRequest, token: HTTPAuthorizationCredentia
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.post(  # verify_csrf inside"/sonnet4/enable", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/sonnet4/enable", dependencies=[Depends(security)])
 async def enable_sonnet4(req: Sonnet4EnableRequest = None, token: HTTPAuthorizationCredentials = Depends(security)):
     """Enable Claude Sonnet 4 for all clients or specific client"""
     verify_csrf_token(token)
@@ -405,7 +408,8 @@ async def get_agent_tools():
         raise HTTPException(status_code=500, detail=f"Failed to discover tools: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/agent/execute", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/agent/execute", dependencies=[Depends(security)])
 async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Execute agent tool with validated parameters and Aurora symbolic anchoring
@@ -427,7 +431,8 @@ async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorization
         raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/agent/session", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/agent/session", dependencies=[Depends(security)])
 async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Manage agent session state and context persistence
@@ -608,7 +613,8 @@ async def get_gemini_agent_tools():
         raise HTTPException(status_code=500, detail=f"Failed to discover Gemini tools: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/agent/gemini/execute", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/agent/gemini/execute", dependencies=[Depends(security)])
 async def execute_gemini_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Execute a Gemini agent tool, respecting the Symbolic Sandbox Protocol (SSP).
@@ -675,7 +681,8 @@ class HandshakeRequest(BaseModel):
     thread_id: str
 
 
-@app.post(  # verify_csrf inside"/api/thread-bridge/handshake", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/thread-bridge/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def thread_bridge_handshake_endpoint(
     request: HandshakeRequest,
@@ -726,7 +733,8 @@ class ValidateRequest(BaseModel):
     target: str
 
 
-@app.post(  # verify_csrf inside"/api/thread-bridge/validate", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/thread-bridge/validate", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
 async def thread_bridge_validate_endpoint(
     request: ValidateRequest,
@@ -799,7 +807,8 @@ class TransferRequest(BaseModel):
     context_data: Dict[str, Any]
 
 
-@app.post(  # verify_csrf inside"/api/thread-bridge/transfer", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/thread-bridge/transfer", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def thread_bridge_transfer_endpoint(
     request: TransferRequest,
@@ -898,7 +907,8 @@ class RepositoryRegisterRequest(BaseModel):
 # Phase 1: Distributed Node Management (6 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post(  # verify_csrf inside"/api/v2/nodes/register", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/nodes/register", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
 async def v2_register_node(
     node_request: NodeRegisterRequest,
@@ -1085,7 +1095,8 @@ async def v2_get_cluster_health(request: Request):
         raise HTTPException(status_code=500, detail=f"Cluster health error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/consensus/elect", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/consensus/elect", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredentials = Depends(security)):
     """
@@ -1111,7 +1122,8 @@ async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredenti
 # Phase 2: Cross-Repository Sync (4 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post(  # verify_csrf inside"/api/v2/repos/register", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/repos/register", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
 async def v2_register_repository(
     request: RepositoryRegisterRequest,
@@ -1152,7 +1164,8 @@ async def v2_register_repository(
         raise HTTPException(status_code=500, detail=f"Repository registration error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/repos/{repo_id}/sync", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/repos/{repo_id}/sync", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_sync_repository(
     repo_id: str,
@@ -1198,7 +1211,8 @@ async def v2_sync_repository(
         raise HTTPException(status_code=500, detail=f"Repository sync error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/bridges/cross-repo", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/bridges/cross-repo", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_create_cross_repo_bridge(
     source_repo: str,
@@ -1244,7 +1258,8 @@ async def v2_create_cross_repo_bridge(
         raise HTTPException(status_code=500, detail=f"Cross-repo bridge error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/bridges/{bridge_id}/handshake", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/bridges/{bridge_id}/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_execute_cross_repo_handshake(
     bridge_id: str,
@@ -1283,7 +1298,8 @@ async def v2_execute_cross_repo_handshake(
 # Phase 3: Drift Prediction (5 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post(  # verify_csrf inside"/api/v2/drift/predict", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/drift/predict", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
 async def v2_predict_drift(
     drift_request: DriftPredictionRequest,
@@ -1370,7 +1386,8 @@ async def v2_analyze_patterns(request: Request):
         raise HTTPException(status_code=500, detail=f"Pattern analysis error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/drift/observe", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/drift/observe", dependencies=[Depends(security)])
 @limiter.limit("60/minute")
 async def v2_record_observation(
     drift: float,
@@ -1431,7 +1448,8 @@ async def v2_get_prediction_accuracy(request: Request):
         raise HTTPException(status_code=500, detail=f"Accuracy metrics error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/corrections/apply", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/corrections/apply", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_apply_correction(
     thread_id: str,
@@ -1484,7 +1502,8 @@ async def v2_apply_correction(
 # Phase 4: Layer Management (6 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post(  # verify_csrf inside"/api/v2/layers/bridge", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/layers/bridge", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
 async def v2_create_layer_bridge(
     layer_request: LayerBridgeRequest,
@@ -1545,7 +1564,8 @@ async def v2_create_layer_bridge(
         raise HTTPException(status_code=500, detail=f"Layer bridge creation error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/layers/{bridge_id}/handshake", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/layers/{bridge_id}/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
 async def v2_execute_layered_handshake(
     bridge_id: str,
@@ -1580,7 +1600,8 @@ async def v2_execute_layered_handshake(
         raise HTTPException(status_code=500, detail=f"Layered handshake error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/layers/validate", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/layers/validate", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
 async def v2_validate_hierarchy(
     thread_id: str,
@@ -1708,7 +1729,8 @@ async def v2_get_layer_statistics(request: Request):
         raise HTTPException(status_code=500, detail=f"Layer statistics error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/v2/layers/cascade-validate", dependencies=[Depends(security)])
+# verify_csrf inside
+@app.post("/api/v2/layers/cascade-validate", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
 async def v2_cascade_validate(
     thread_id: str,

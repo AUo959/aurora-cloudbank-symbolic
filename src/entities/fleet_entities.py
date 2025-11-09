@@ -532,3 +532,27 @@ def get_archimedes_daedalus() -> AuroraSubCore:
             vessel_id="ORS-03"
         )
     return _archimedes_daedalus
+
+
+# Global instances for Pioneer
+_pioneer_oppy: Optional[OPPYNavigator] = None
+_pioneer_mercury: Optional[AuroraSubCore] = None
+
+
+def get_pioneer_oppy() -> OPPYNavigator:
+    """Get OPPY Logistics Core for Pioneer utility & logistics shuttle"""
+    global _pioneer_oppy
+    if _pioneer_oppy is None:
+        _pioneer_oppy = OPPYNavigator(vessel_id="ORS-04")
+    return _pioneer_oppy
+
+
+def get_pioneer_mercury() -> AuroraSubCore:
+    """Get Aurora Sub-Node F ('Mercury') for Pioneer utility & logistics shuttle"""
+    global _pioneer_mercury
+    if _pioneer_mercury is None:
+        _pioneer_mercury = AuroraSubCore(
+            subcore_id="AURORA_SUB_MERCURY",
+            vessel_id="ORS-04"
+        )
+    return _pioneer_mercury

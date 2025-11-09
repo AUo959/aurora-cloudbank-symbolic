@@ -556,3 +556,27 @@ def get_pioneer_mercury() -> AuroraSubCore:
             vessel_id="ORS-04"
         )
     return _pioneer_mercury
+
+
+# Global instances for Lacewing
+_lacewing_oppy: Optional[OPPYNavigator] = None
+_lacewing_lyra: Optional[AuroraSubCore] = None
+
+
+def get_lacewing_oppy() -> OPPYNavigator:
+    """Get OPPY Expedition Core for Lacewing exploration & diplomatic shuttle"""
+    global _lacewing_oppy
+    if _lacewing_oppy is None:
+        _lacewing_oppy = OPPYNavigator(vessel_id="ORS-05")
+    return _lacewing_oppy
+
+
+def get_lacewing_lyra() -> AuroraSubCore:
+    """Get Aurora Sub-Node G ('Lyra') for Lacewing exploration & diplomatic shuttle"""
+    global _lacewing_lyra
+    if _lacewing_lyra is None:
+        _lacewing_lyra = AuroraSubCore(
+            subcore_id="AURORA_SUB_LYRA",
+            vessel_id="ORS-05"
+        )
+    return _lacewing_lyra

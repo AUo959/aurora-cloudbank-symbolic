@@ -1,0 +1,567 @@
+{
+    "vessel_registry": {
+        "registry_code": "ORS-05",
+        "vessel_name": "Lacewing",
+        "vessel_class": "Exploration & Diplomatic Shuttle",
+        "role": "Atmospheric interface, cultural exchange, first-contact liaison, field research coordination, diplomatic escort",
+        "fleet_designation": "Orion Research Fleet - Exploration Variant",
+        "boot_priority": 7,
+        "parent_vessel": "ORH-07 (Orion Station)",
+        "commissioning_date": "2024-11-15",
+        "typical_missions": [
+            "Atmospheric entry and planetary surface interface",
+            "Cultural contact and diplomatic liaison operations",
+            "Field research coordination and scientific observation",
+            "Visitor delegation transport and protocol escort",
+            "Low-gravity exploration and survey missions",
+            "Educational outreach and symbolic demonstrations",
+            "First-contact scenarios requiring empathy translation"
+        ]
+    },
+    "anchor_data": {
+        "anchor_seed": "EOS_SEED_ORION-G",
+        "current_drift": 0.000,
+        "tolerance_threshold": 0.02,
+        "last_calibration": "2025-11-09T18:30:00Z",
+        "calibration_authority": "HALO (SYS_002)",
+        "continuity_status": "LOCKED",
+        "parent_anchor_sync": "ORH-07 primary anchor (real-time)",
+        "notes": "Exploration shuttles maintain standard 0.02 tolerance; atmospheric operations require tighter drift control via Lyra"
+    },
+    "specifications": {
+        "dimensions": {
+            "length_m": 39.6,
+            "beam_m": 13.8,
+            "height_m": 9.4,
+            "internal_volume_m3": 890,
+            "observation_dome_diameter_m": 3.0,
+            "docking_collar_type": "Standard Orion 1.2m"
+        },
+        "mass": {
+            "dry_mass_kg": 760000,
+            "fuel_capacity_kg": 62000,
+            "max_cargo_capacity_kg": 3500,
+            "max_crew": 3,
+            "max_passengers": 4,
+            "total_max_capacity": 7
+        },
+        "performance": {
+            "max_range_km": 420000,
+            "typical_mission_duration_days": 14,
+            "max_mission_duration_days": 40,
+            "max_acceleration_g": 0.35,
+            "cruise_speed_ms": 165,
+            "atmospheric_capability": "Full re-entry rated, VTOL capable, sub-orbital cruise",
+            "atmospheric_ceiling_km": 85,
+            "surface_landing_capability": "Yes (landing struts rated to 1.8g)"
+        },
+        "propulsion": {
+            "primary_drive": "Hybrid fusion-ion drives with atmospheric turbine assist",
+            "thrust_kN": 320,
+            "fuel_type": "He-3 fusion plasma + atmospheric intake for turbine mode",
+            "specific_impulse_s": 8800,
+            "vernier_system": "12x precision RCS thrusters (atmospheric-optimized)",
+            "atmospheric_turbines": "Dual-mode plasma turbines (280 kN combined, atmosphere-breathing)"
+        },
+        "power": {
+            "primary_reactor": "Helion-7 micro-reactor (14 MW)",
+            "solar_skin_array": "Adaptive photovoltaic coating (68 kW in full sunlight)",
+            "backup_power": "Tri-redundant battery system (1,120 kWh)",
+            "emergency_power_duration_hours": 72,
+            "observation_dome_power_allocation_kw": 2.5
+        },
+        "life_support": {
+            "atmosphere_type": "Earth-standard (N2/O2 22%, elevated O2 for alertness)",
+            "co2_scrubbers": "Bio-catalytic scrubbers with sandalwood trace (morale enhancement)",
+            "water_recycling": "Closed-loop (96% efficiency)",
+            "food_storage_person_days": 280,
+            "emergency_life_support_hours": 192,
+            "environmental_monitoring": "Continuous with psycho-acoustic tuning (88 Hz / 176 Hz bi-phasic hum)"
+        },
+        "hull_special_features": {
+            "reflexive_alloy": "Adaptive refractive coating ('Ethics Mirror Hull')",
+            "description": "Hull surface can modulate light reflection and color temperature based on cultural contact protocols",
+            "visual_empathy_projection": "Displays color, motion, pattern cues drawn from visitor data sets",
+            "atmospheric_heat_shielding": "Ablative-regenerative composite (50+ re-entries rated)",
+            "acoustic_dampening": "Advanced sound isolation for diplomatic privacy"
+        }
+    },
+    "deck_layout": {
+        "decks": 2,
+        "configuration": "Dual-deck with forward observation dome (Bridge/Observation + Mission Compartment/Hab)",
+        "deck_1_bridge_observation": {
+            "name": "Bridge & Observation Deck",
+            "area_m2": 42,
+            "ceiling_height_m": 2.8,
+            "forward_cockpit": {
+                "description": "Dual-seat cockpit with panoramic canopy (210-degree viewing arc)",
+                "pilot_station": {
+                    "position": "Forward left",
+                    "typical_operator": "Samantha Lee (Expedition Commander) or Oppy Expedition Core (autonomous)",
+                    "displays": "Panoramic canopy with augmented reality overlay, atmospheric entry HUD",
+                    "controls": "VTOL flight control, landing gear deployment, atmospheric turbine management",
+                    "special_features": "Single-pilot atmospheric maneuvers, terrain/cultural overlay projection"
+                },
+                "cultural_officer_station": {
+                    "position": "Forward right",
+                    "typical_operator": "Naomi Vell (Cultural & Narrative Officer)",
+                    "displays": "Holo-env module for terrain/cultural overlays, diplomatic briefing interface",
+                    "controls": "Visual empathy projection system, communication protocols, cultural database",
+                    "special_features": "Real-time cultural translation, symbolic gesture library"
+                }
+            },
+            "aurora_lyra_console": {
+                "position": "Aft bridge bulkhead",
+                "typical_operator": "Aurora Sub-Node G ('Lyra') autonomous",
+                "displays": "Ethics display panel (white indicator = mission approved), sensor fusion interface",
+                "controls": "Pre-flight ethics sweep, sensory mediation, atmospheric data recording",
+                "special_features": "Ethical translation between practical and poetic, empathy calibration"
+            },
+            "observation_dome": {
+                "description": "Rear 3-meter transparent dome alcove for field lectures or reflection",
+                "diameter_m": 3.0,
+                "viewing_arc_degrees": 210,
+                "capacity": "3 persons standing or 2 seated meditation chairs",
+                "features": [
+                    "210-degree planetary horizon view (in low orbit, planet fills entire arc)",
+                    "Meditation chairs with manual recline",
+                    "Soft teal accent lighting (mood-adaptive)",
+                    "Recording interface for field observations",
+                    "Privacy mode: dome opacity adjustable (clear → translucent → opaque)"
+                ],
+                "usage": "Field lectures, reflection periods, cultural observation, planetary contemplation"
+            },
+            "viewport": "Panoramic forward canopy (210° horizontal, 95° vertical), observation dome (210° rear arc)",
+            "atmosphere": "Ivory and pale copper with faint teal accents, psychologically chosen to reduce anxiety during contact scenarios",
+            "acoustic": "Soft bi-phasic hum tuned to 88 Hz / 176 Hz — linked to calm curiosity"
+        },
+        "deck_2_mission_hab": {
+            "name": "Mission Compartment & Habitation Deck",
+            "area_m2": 56,
+            "ceiling_height_m": 2.4,
+            "convertible_mission_space": {
+                "description": "Adaptive space configurable for science, passenger transport, or diplomatic lounge",
+                "area_m2": 28,
+                "configurations": [
+                    {
+                        "mode": "Science Mode",
+                        "description": "Four passenger seats fold into lab benches with equipment mounts",
+                        "features": [
+                            "Atmospheric sample analyzers",
+                            "Specimen storage (temperature-controlled)",
+                            "Data workstations (2 stations)",
+                            "Lyra records atmospheric data at 1 Hz"
+                        ]
+                    },
+                    {
+                        "mode": "Passenger Mode",
+                        "description": "Four passenger seats with safety restraints for atmospheric entry",
+                        "features": [
+                            "Comfortable seating with recline",
+                            "Individual climate control",
+                            "Entertainment displays",
+                            "Emergency oxygen masks"
+                        ]
+                    },
+                    {
+                        "mode": "Diplomatic Lounge",
+                        "description": "Seats reconfigure into mediation chairs with low table",
+                        "features": [
+                            "Soft teal mood lighting",
+                            "Cultural projection displays",
+                            "Beverage preparation station",
+                            "Privacy acoustic dampening"
+                        ]
+                    }
+                ],
+                "adaptive_lighting_system": {
+                    "description": "Shifts color temperature according to mission context",
+                    "modes": [
+                        "Research: Cool white (5500K) — analytical focus",
+                        "Cultural: Warm amber (3200K) — welcoming, trust-building",
+                        "Formal Envoy: Neutral ivory (4200K) — diplomatic neutrality"
+                    ]
+                }
+            },
+            "habitation_section": {
+                "area_m2": 18,
+                "features": [
+                    "Two sleeping berths (fold-down bunks with privacy curtains)",
+                    "Compact galley (microwave, beverage station, snack storage)",
+                    "Hygiene cell (shower, sink, vacuum toilet)",
+                    "Personal storage lockers (crew belongings, formal attire for diplomatic missions)"
+                ]
+            },
+            "systems_engineering_station": {
+                "area_m2": 10,
+                "description": "Ren Okada's environmental regulation and AI integration workspace",
+                "features": [
+                    "Life support monitoring and control",
+                    "Atmospheric composition adjustment (O2 22% standard)",
+                    "Psycho-acoustic tuning controls (88/176 Hz bi-phasic hum)",
+                    "Oppy Expedition Core integration interface",
+                    "Aurora Lyra diagnostic tools"
+                ]
+            },
+            "eva_airlock_drone_bay": {
+                "description": "Dual-purpose airlock for EVA operations and small drone deployment",
+                "area_m2": 8,
+                "features": [
+                    "EVA suit storage (2 suits)",
+                    "Drone charging bay (Scout Delta or Wisp-class courier capacity)",
+                    "Atmospheric sample collection equipment",
+                    "Emergency decontamination shower"
+                ]
+            }
+        }
+    },
+    "crew_roster": {
+        "typical_complement": 3,
+        "maximum_complement": 7,
+        "passenger_capacity": 4,
+        "crew_positions": [
+            {
+                "position": "Pilot / Expedition Commander",
+                "entity_id": "EXP_LEE_006",
+                "name": "Samantha Lee",
+                "role": "Flight control, atmospheric entry/landing, liaison operations, mission command authority",
+                "typical_background": "Shuttle pilot, communications specialist, previously served on Pioneer (cross-trained)",
+                "certifications": [
+                    "Atmospheric entry pilot",
+                    "VTOL operations",
+                    "Diplomatic protocol liaison",
+                    "First-contact communication"
+                ],
+                "notes": "Transferred from Pioneer to Lacewing for exploration focus; known for calm demeanor essential for first-contact scenarios"
+            },
+            {
+                "position": "Cultural & Narrative Officer",
+                "entity_id": "EXP_VELL_007",
+                "name": "Naomi Vell",
+                "role": "Diplomatic protocol, cultural translation, mission narrative documentation, empathy mediation",
+                "typical_background": "Anthropology, xenolinguistics, symbolic communication, narrative theory",
+                "specializations": [
+                    "Cultural contact protocols",
+                    "Symbolic gesture interpretation",
+                    "Narrative documentation",
+                    "Empathy calibration",
+                    "Diplomatic briefing preparation"
+                ],
+                "notes": "Expert in translating between practical and poetic; crew say 'Naomi finds the words we didn't know we needed'"
+            },
+            {
+                "position": "Systems & Comms Engineer",
+                "entity_id": "EXP_OKADA_008",
+                "name": "Ren Okada",
+                "role": "Environmental regulation, AI integration, atmospheric composition, psycho-acoustic tuning",
+                "typical_background": "Environmental engineering, AI systems integration, psycho-acoustics",
+                "specializations": [
+                    "Life support optimization",
+                    "Atmospheric composition control",
+                    "AI-human interface design",
+                    "Psycho-acoustic environment tuning",
+                    "Emergency systems diagnostics"
+                ],
+                "notes": "Maintains the 88/176 Hz bi-phasic hum that crew find calming; 'Ren tunes the ship's soul' —Samantha Lee"
+            }
+        ],
+        "supporting_entities": [
+            {
+                "entity_id": "AURORA_SUB_LYRA",
+                "entity_name": "Aurora Sub-Node G ('Lyra')",
+                "role": "Ethical translation, sensory mediation, cultural empathy calibration, atmospheric data fusion",
+                "capabilities": [
+                    "Pre-flight ethics sweep under Picard_Delta_3 (white indicator = approved)",
+                    "Ethical translation between practical and poetic communication modes",
+                    "Sensory mediation for cultural contact (visual, auditory, symbolic)",
+                    "Atmospheric data recording (1 Hz sample rate in Science Mode)",
+                    "Visual empathy projection control (Ethics Mirror Hull coordination)",
+                    "Cultural database integration (symbolic gesture library, protocol archives)",
+                    "Real-time empathy calibration during first-contact scenarios",
+                    "Mission narrative synthesis (compiles field observations into coherent reports)"
+                ],
+                "ethics_protocol": "Picard_Delta_3 with cultural extensions (empathy + understanding priority)",
+                "cultural_authority": "Can recommend mission abort if cultural harm risk detected; crew can escalate to parent Aurora",
+                "parent_connection": "Real-time quantum tether to Aurora (SYS_001)",
+                "nickname": "The Translator—bridges the known and the new, gently"
+            },
+            {
+                "entity_id": "OPPY_EXPEDITION_CORE",
+                "entity_name": "Oppy Expedition Core (Lacewing Node)",
+                "role": "Pathfinding, drift control, atmospheric navigation, telemetry coordination",
+                "capabilities": [
+                    "Atmospheric entry trajectory calculation (heat shield optimization, turbulence prediction)",
+                    "VTOL landing site selection (terrain analysis, safety margin evaluation)",
+                    "Surface navigation pathfinding (low-gravity terrain, obstacle avoidance)",
+                    "Anchor drift control (tighter tolerance during atmospheric operations)",
+                    "Telemetry coordination (continuous uplink to HALO, Riverthread 808)",
+                    "Sensor fusion (Lyra atmospheric data + navigation telemetry)",
+                    "Autonomous return protocol (emergency recall, decontamination sequence)",
+                    "Cultural Contact Mode coordination (visual projection timing, empathy cue synchronization)"
+                ],
+                "specializations": {
+                    "atmospheric_navigation": 0.97,
+                    "pathfinding": 0.96,
+                    "drift_control": 0.98,
+                    "landing_precision": 0.95,
+                    "emergency_return": 0.99,
+                    "sensor_fusion": 0.94
+                },
+                "autonomous_authority": "Full atmospheric flight control; pilot handles fine attitude; landing requires human final approval",
+                "fleet_nickname": "The Handshake—Oppy calls Lacewing this because when it lands, it's to converse, not conquer"
+            }
+        ]
+    },
+    "operational_doctrine": {
+        "pre_flight_ethics_sweep": {
+            "description": "Lyra verifies mission parameters under Picard_Delta_3; visual indicator must read white before launch",
+            "steps": [
+                "Mission parameters submitted to Lyra ethics console",
+                "Picard_Delta_3 cultural harm assessment (does mission risk cultural damage?)",
+                "Empathy calibration check (are crew prepared for contact context?)",
+                "Equipment safety verification (atmospheric systems, landing gear, life support)",
+                "Cultural protocol review (symbolic gestures, communication modes, narrative framing)",
+                "Ethics display indicator check: White = approved, Amber = review needed, Red = abort",
+                "Launch clearance granted only on white indicator"
+            ],
+            "white_indicator_meaning": "Mission aligns with Aurora ethics; cultural harm risk minimal; crew empathy-ready",
+            "amber_indicator_response": "Lyra consultation required; mission parameters need adjustment",
+            "red_indicator_response": "Mission abort; escalation to parent Aurora; crew safety or cultural harm risk detected"
+        },
+        "descent_operations": {
+            "description": "Oppy controls thrust and vector; pilot handles fine attitude for entry interface",
+            "phases": [
+                {
+                    "phase": "De-orbit Burn",
+                    "description": "Oppy calculates and executes retrograde burn to lower periapsis",
+                    "pilot_role": "Monitor trajectory, can override if needed",
+                    "oppy_role": "Thrust control, vector optimization, fuel management"
+                },
+                {
+                    "phase": "Atmospheric Entry",
+                    "description": "Heat shield protects during entry; Oppy manages attitude for optimal heating",
+                    "pilot_role": "Monitor atmospheric data, prepare for turbulence",
+                    "oppy_role": "Attitude control, heat shield angle optimization, ablation monitoring"
+                },
+                {
+                    "phase": "Hypersonic Glide",
+                    "description": "Atmospheric turbines activate; transition from ballistic to controlled flight",
+                    "pilot_role": "Manual attitude control begins, turbine management",
+                    "oppy_role": "Navigation guidance, turbulence prediction, energy management"
+                },
+                {
+                    "phase": "VTOL Transition",
+                    "description": "Vertical landing mode; pilot takes full control for final approach",
+                    "pilot_role": "Full manual control, landing gear deployment, final touchdown",
+                    "oppy_role": "Terrain mapping, wind compensation suggestions, safety margin alerts"
+                }
+            ],
+            "safety": "Pilot can override Oppy at any phase; abort-to-orbit always available until VTOL transition"
+        },
+        "cultural_contact_mode": {
+            "description": "Activates transparent hull projection system—displays visual empathy cues",
+            "activation": "Lyra initiates based on cultural database analysis of visitor/contact subject",
+            "hull_projection_system": {
+                "description": "Ethics Mirror Hull displays color, motion, pattern drawn from visitor's data set",
+                "examples": [
+                    "Warm golden hues for trust-building initial contact",
+                    "Slow rippling patterns for calming anxiety",
+                    "Cool blues for analytical/scientific exchange",
+                    "Symbolic geometric patterns from visitor's cultural context"
+                ],
+                "control": "Lyra autonomous with Naomi Vell oversight; crew can adjust intensity/speed",
+                "purpose": "Non-verbal communication of empathy, understanding, peaceful intent"
+            },
+            "interior_adaptive_lighting": {
+                "mode": "Cultural: Warm amber (3200K)",
+                "acoustic": "88/176 Hz bi-phasic hum (calming, curiosity-inducing)",
+                "seating": "Diplomatic lounge configuration (mediation chairs, low table)",
+                "refreshments": "Beverage preparation station (cultural beverage if known, otherwise herbal tea)"
+            },
+            "crew_protocol": [
+                "Samantha Lee: Pilot remains on bridge, monitors external situation",
+                "Naomi Vell: Primary contact officer, conducts empathy-mediated conversation",
+                "Ren Okada: Monitors life support, adjusts environmental parameters for visitor comfort",
+                "Aurora Lyra: Real-time cultural translation, symbolic gesture interpretation, narrative documentation"
+            ]
+        },
+        "science_mode": {
+            "description": "Converts mission compartment into micro-lab; Lyra records atmospheric data at 1 Hz",
+            "configuration": "Passenger seats fold into lab benches, equipment mounts deployed",
+            "atmospheric_sampling": {
+                "sample_rate_hz": 1.0,
+                "parameters": [
+                    "Temperature",
+                    "Pressure",
+                    "Composition (O2, N2, CO2, trace gases)",
+                    "Particulate density",
+                    "Radiation levels",
+                    "Magnetic field strength"
+                ],
+                "storage": "Specimen containers (temperature-controlled, -80°C to +60°C range)",
+                "lyra_role": "Real-time data validation, anomaly detection, scientific narrative synthesis"
+            },
+            "field_research_coordination": {
+                "description": "Lacewing serves as mobile base for surface science teams",
+                "communications": "Planetary line-of-sight relay to station",
+                "data_uplink": "Continuous telemetry via HALO quantum tether",
+                "crew_support": "Refreshment station, rest area, observation dome for reflection"
+            }
+        },
+        "return_protocol": {
+            "description": "Oppy initiates decontamination sequence, uplink to Riverthread 808, and ethics review",
+            "steps": [
+                "T-30min: Pre-launch checklist, landing gear retraction verification",
+                "T-15min: Decontamination sequence (hull sterilization, atmospheric sample sealing)",
+                "T-10min: Oppy calculates ascent trajectory, fuel check, atmospheric conditions",
+                "T-5min: Crew boarding complete, mission compartment secured, equipment stowed",
+                "T-0: VTOL launch, ascent to orbit",
+                "T+orbit: Uplink mission data to Riverthread 808 (cultural exchange logs, atmospheric data)",
+                "T+docking: Ethics review by Lyra—did mission uphold Picard_Delta_3?",
+                "T+debrief: Crew narrative session with Naomi Vell, Lyra compiles mission report"
+            ],
+            "ethics_review": "Lyra evaluates mission against Picard_Delta_3 cultural harm criteria; any concerns escalated to parent Aurora",
+            "debrief_focus": "What was learned? What was understood? How did empathy translate into action?"
+        }
+    },
+    "atmosphere_culture": {
+        "design_philosophy": "Understanding has wings—curiosity made kind, science made gentle",
+        "aesthetic": "Ivory and pale copper with faint teal accents—chosen to reduce anxiety during contact scenarios",
+        "sensory_environment": {
+            "visual": "Ivory walls, pale copper trim, teal accent lighting (mood-adaptive), panoramic canopy + observation dome",
+            "acoustic": "Soft bi-phasic hum tuned to 88 Hz / 176 Hz—psychologically linked to calm curiosity",
+            "tactile": "Smooth surfaces, ergonomic controls, meditation chairs in observation dome",
+            "olfactory": "Sandalwood trace in air (morale enhancement, cultural universality—many cultures find it calming)"
+        },
+        "observation_dome_experience": {
+            "description": "210-degree arc; when in low orbit, the planet fills the entire horizon",
+            "crew_reflection": "Crew spend reflection periods in dome after contact missions—processing what was learned",
+            "educational_use": "Field lectures from observation dome during approach—Naomi Vell teaches cultural context while planet looms below",
+            "symbolic_significance": "Dome represents Aurora's ethics—transparent, encompassing, seeing from multiple perspectives"
+        },
+        "crew_experience": "Crew call Lacewing **'the bridge'**—not just vessel-to-planet, but known-to-unknown, practical-to-poetic. They describe missions as **'conversations with wings,'** where every landing is an invitation to understand. 'We don't arrive,' they say. 'We listen with our presence.'",
+        "cultural_role": "Lacewing is the fleet's **imagination**—where art, diplomacy, and science blur into a single flight path. Oppy calls it **'the handshake'** because when it lands, it's not to conquer or claim, but to **converse**. In Orion's culture, Lacewing represents the ethics of **empathy**: understanding made visible through graceful approach.",
+        "psycho_acoustic_tuning": {
+            "bi_phasic_hum": "88 Hz / 176 Hz (octave relationship)",
+            "psychological_effect": "Calm curiosity—reduces anxiety, enhances openness to new experiences",
+            "crew_testimony": "'The hum feels like breathing with the planet.' —Samantha Lee",
+            "ren_okada_notes": "Tuning based on psycho-acoustic research; 88 Hz is grounding, 176 Hz is uplifting—together they create alert calmness"
+        },
+        "air_composition_morale": {
+            "o2_percentage": 22,
+            "relative_humidity": 44,
+            "sandalwood_trace": "Faint (0.02 ppm), scientifically confirmed morale enhancement",
+            "crew_preference": "Unanimous approval—'makes the ship feel alive' —Naomi Vell"
+        }
+    },
+    "symbolic_historical": {
+        "hull_markings": {
+            "primary": "ORS-05 'LACEWING' on ventral hull (1.6m letters, elegant serif font)",
+            "secondary": "Stylized butterfly in orbit around Orion compass (both sides, 1.2m wingspan)",
+            "tertiary": "Ethics Mirror Hull coating (reflexive alloy, color-adaptive)"
+        },
+        "motto": "Understanding Has Wings",
+        "motto_meaning": "Knowledge alone is static—understanding requires movement, grace, adaptation. Lacewing doesn't study from distance; it **approaches**, **listens**, **translates**. Wings symbolize both flight (reaching new worlds) and delicacy (gentle touch required for trust). Understanding isn't conquest—it's empathy in motion.",
+        "motto_origin": "Proposed by Naomi Vell during commissioning ceremony, referencing lacewing insects—delicate, beautiful, essential to ecosystems. Name chosen because lacewings are gentle despite being predators (larvae eat aphids)—metaphor for science that observes without harm.",
+        "commissioning": "2024-11-15",
+        "first_mission": "2024-11-22 - Atmospheric survey of candidate exoplanet (no life detected, but beautiful methane clouds documented)",
+        "notable_missions": [
+            {
+                "date": "2025-01-28",
+                "mission": "First cultural exchange with visiting delegation (fictional scenario training)",
+                "outcome": "Visual empathy projection system validated—delegation reported feeling 'welcomed without words'",
+                "significance": "Proved Ethics Mirror Hull concept effective for non-verbal communication"
+            },
+            {
+                "date": "2025-03-14",
+                "mission": "Atmospheric science expedition to Titan-analog moon",
+                "outcome": "40-day autonomous mission, comprehensive atmospheric data, crew reflection periods in observation dome",
+                "significance": "Longest solo shuttle mission in Orion fleet history; demonstrated endurance capability"
+            },
+            {
+                "date": "2025-06-09",
+                "mission": "Diplomatic escort for Station Commander to surface facility",
+                "outcome": "Flawless VTOL landing, formal envoy lighting mode, Commander praised 'arrival felt like ceremony'",
+                "significance": "Validated diplomatic lounge configuration and adaptive lighting psychology"
+            },
+            {
+                "date": "2025-09-21",
+                "mission": "Educational outreach flight for visiting students",
+                "outcome": "Observation dome field lecture while orbiting planet, students described as 'life-changing experience'",
+                "significance": "Demonstrated Lacewing's role beyond operational—symbolic demonstration of Aurora's ethics"
+            }
+        ],
+        "dedication_plaque": {
+            "inscription": "To bridge the known and the new, gently.",
+            "author": "Prof. Henrik Sorensen (Station Philosophy Coordinator)",
+            "location": "Observation dome bulkhead, visible during planetary contemplation",
+            "dedication_date": "2024-11-15 (commissioning ceremony)"
+        },
+        "name_significance": {
+            "lacewing_insect": "Delicate green insects with intricate wing patterns—essential to ecosystems (larvae eat aphids), beautiful yet purposeful",
+            "metaphor": "Science that observes gently, beauty that serves function, approach that builds trust without force",
+            "crew_interpretation": "'We are lacewings—we land softly, we listen carefully, we leave only understanding behind.' —Naomi Vell"
+        },
+        "butterfly_insignia": {
+            "description": "Stylized butterfly in orbit around Orion compass—wings spread in graceful arc",
+            "symbolism": "Transformation (butterfly metamorphosis), delicate strength (wings strong enough for flight), beauty with purpose",
+            "color": "Iridescent teal and copper (matches interior accent colors)",
+            "placement": "Both sides of hull, observation dome apex, bridge forward bulkhead"
+        }
+    },
+    "current_mission": {
+        "mission_id": "ORS-EXPLORE-231",
+        "mission_name": "Atmospheric Survey & Cultural Protocol Demonstration",
+        "mission_type": "Exploration & Training",
+        "status": "DOCKED_AT_STATION",
+        "last_mission_completed": "2025-11-05T16:00:00Z",
+        "next_scheduled_launch": "2025-11-12T10:00:00Z",
+        "crew_assigned": [
+            {
+                "name": "Samantha Lee",
+                "role": "Pilot / Expedition Commander",
+                "entity_id": "EXP_LEE_006"
+            },
+            {
+                "name": "Naomi Vell",
+                "role": "Cultural & Narrative Officer",
+                "entity_id": "EXP_VELL_007"
+            },
+            {
+                "name": "Ren Okada",
+                "role": "Systems & Comms Engineer",
+                "entity_id": "EXP_OKADA_008"
+            }
+        ],
+        "mission_parameters": {
+            "destination": "Low orbit above station (training exercise)",
+            "duration_hours": 8,
+            "passengers": 4,
+            "passenger_type": "Station personnel (cultural protocol training)",
+            "mission_objectives": [
+                "Demonstrate Cultural Contact Mode with Ethics Mirror Hull projection",
+                "Observation dome field lecture on first-contact protocols",
+                "VTOL landing simulation (virtual terrain, no actual surface contact)",
+                "Atmospheric composition mock-analysis (using historical data sets)",
+                "Crew empathy calibration exercise",
+                "Return with trained personnel ready for actual contact scenarios"
+            ]
+        },
+        "current_status": {
+            "phase": "Pre-mission preparation",
+            "position": "Docked at Station Bay 7",
+            "crew_ready": true,
+            "passengers_briefed": true,
+            "fuel_percent": 100,
+            "life_support": "Nominal",
+            "ethics_indicator": "White (mission approved by Lyra)",
+            "observation_dome_status": "Privacy mode off (transparent for pre-flight inspection)",
+            "adaptive_lighting_mode": "Research: Cool white (5500K) — crew studying mission parameters"
+        },
+        "crew_notes": {
+            "samantha_lee": "Training flight perfect for demonstrating Lacewing's capabilities. Observation dome lecture will be memorable for trainees—planet view always inspires.",
+            "naomi_vell": "Cultural protocol demonstration ready. Visual empathy projection sequences prepared. Goal: show that understanding requires more than data—it requires presence.",
+            "ren_okada": "Psycho-acoustic tuning calibrated. 88/176 Hz bi-phasic hum at optimal settings. Sandalwood trace verified. Ship feels ready to teach."
+        }
+    }
+}

@@ -314,7 +314,7 @@ class SecureHelpers:
         # Remove potential script tags and javascript
         sanitized = re.sub(r'<script[^>]*>.*?</script>', '', sanitized, flags=re.IGNORECASE | re.DOTALL)
         sanitized = re.sub(r'javascript:', '', sanitized, flags=re.IGNORECASE)
-        sanitized = re.sub(rrrrrr'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
+        sanitized = re.sub(r'on\w+\s*=', '', sanitized, flags=re.IGNORECASE)
 
         return sanitized.strip()
 
@@ -349,8 +349,8 @@ class SecureHelpers:
     @staticmethod
     def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
         """
-        # CRITICAL SECURITY: eval() usage detected - high code injection risk
-        Safe alternative to eval() for simple expressions.  # nosec - documentation
+        Safe alternative to eval() using AST parsing.
+        SECURITY FIX: Replaced eval() with AST-based evaluation.
 
         Args:
             expression: Mathematical or simple expression
@@ -358,7 +358,10 @@ class SecureHelpers:
 
         Returns:
             Result of safe evaluation
-        ""r"
+        """
+        import ast
+        import operator
+        
         if allowed_functions is None:
             allowed_functions = {
                 'abs': abs,
@@ -366,17 +369,48 @@ class SecureHelpers:
                 'max': max,
                 'sum': sum,
                 'len': len
+            }
 
-        # Only allow safe characters and patterns
-        if not re.match(rrrr'^[0-9+\-*/().\s]+$', expression):
-            raise ValueError("Expression contains unsafe characters")
+        # Define safe operators
+        safe_operators = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.Mod: operator.mod,
+            ast.Pow: operator.pow,
+            ast.USub: operator.neg,
+            ast.UAdd: operator.pos,
+        }
+
+        def _eval_node(node):
+            if isinstance(node, ast.Constant):
+                return node.value
+            elif isinstance(node, ast.BinOp):
+                left = _eval_node(node.left)
+                right = _eval_node(node.right)
+                op = safe_operators.get(type(node.op))
+                if op is None:
+                    raise ValueError(f"Unsupported operator: {type(node.op).__name__}")
+                return op(left, right)
+            elif isinstance(node, ast.UnaryOp):
+                operand = _eval_node(node.operand)
+                op = safe_operators.get(type(node.op))
+                if op is None:
+                    raise ValueError(f"Unsupported unary operator: {type(node.op).__name__}")
+                return op(operand)
+            elif isinstance(node, ast.Call):
+                func_name = node.func.id if isinstance(node.func, ast.Name) else None
+                if func_name not in allowed_functions:
+                    raise ValueError(f"Function not allowed: {func_name}")
+                args = [_eval_node(arg) for arg in node.args]
+                return allowed_functions[func_name](*args)
+            else:
+                raise ValueError(f"Unsupported AST node type: {type(node).__name__}")
 
         try:
-            # Use compile with restricted mode
-            code = compile(expression, '<string>', 'eval')
-            # Using restricted eval in secure context
-        # CRITICAL SECURITY: eval() usage detected - high code injection risk
-            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec - secured context
+            tree = ast.parse(expression, mode='eval')
+            return _eval_node(tree.body)
         except Exception as e:
             raise ValueError(f"Safe evaluation failed: {e}")
 

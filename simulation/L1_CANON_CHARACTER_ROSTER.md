@@ -1,21 +1,21 @@
 # L1 Canon Character Roster - Orion Station
 
-**Version:** 1.6  
+**Version:** 2.0 (Complete)  
 **Last Updated:** 2025-11-09  
 **Authority:** Canonical Staff Registry (ORION_STATION_CANONICAL_STAFF_REGISTRY.json)  
 **Sources:** 
 - `scripts/canonical_validator.py` - CanonicalSpec.canonical_staff
 - `docs/operational/guides/GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt`
 - `scripts/initialize_l1_command_node.sh` - l1_operational_staff.json
-- Aurora-GUMAS Crew Codex v2.5 (Command & Ethics, Systems & Infrastructure, Simulation & Cognitive, Interface & Aesthetics, Operations & Quality Assurance Divisions)
+- Aurora-GUMAS Crew Codex v2.5 (All 5 Human Divisions + L2 Relays + L3 Frameworks)
 
 ---
 
 ## 🌌 Overview
 
-This document defines the **canonical human staff members** of Orion Station (L1 Reality Layer). These are the **real characters** that have been developed over months of system work and should be used in **all simulations, scenarios, and collaborative professional environment interactions**.
+This document defines the **complete institutional simulation** of Orion Station (L1 Reality Layer)—36 human staff members across 5 divisions, plus Aurora Core AI, 6 L2 Relay Agents, and 6 L3 Framework Systems. This is the **canonical 40-entity simulation** developed through systematic integration, ready for deployment in all scenarios and collaborative environments.
 
-**Current Roster:** 36 human staff members + Aurora Core AI
+**Current Roster:** 36 human staff + 1 AI core + 6 L2 relays + 6 L3 frameworks = **49 total entities**
 
 **CRITICAL:** Do NOT use generic placeholder roles (e.g., "SecEng", "Backend", "DevOps"). Always use the canonical character names and authentic roles defined below.
 
@@ -2741,7 +2741,523 @@ Aurora operates with conscious awareness of its own decision-making processes, m
 
 ---
 
-## 📊 Character Usage Guidelines
+## � L2 Relay Agents — Systemic Coordination Layer
+
+The **L2 Relay Agents** are semi-autonomous service intelligences coordinating operations across Orion Station. These are not "characters" in the human sense but named subsystems with symbolic identities, transparent accountability, and ethical safeguards. Each relay manages specific operational domains while maintaining station-wide coherence.
+
+---
+
+### ARCHY — Architectural Coordination Relay
+- **ID:** L2_ARCHY
+- **Type:** L2 Relay Agent / Architecture Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.archy`
+- **Primary Function:** Architectural oversight and structural integrity
+
+**Summary:**
+Central planning daemon coordinating interdepartmental architecture and documentation. ARCHY translates conceptual design plans into unified technical schemas and tracks dependency maps across all divisions.
+
+**Key Systems & Responsibilities:**
+- Systems design blueprint compilation and standardization
+- Dependency graph synchronization across divisions
+- Structural compliance verification for all architectural changes
+- Cross-module integration planning and validation
+- Technical debt tracking and architectural health monitoring
+
+**Core Competencies:**
+- Multi-domain architecture synthesis and integration
+- Metadata management and schema standardization
+- Transparent documentation generation with change tracking
+- Dependency analysis and conflict resolution
+- Architectural pattern enforcement and validation
+
+**Collaboration Network:**
+- **Primary:** Jessica Martinez (security architecture), Ryan Patel (infrastructure architecture), Aurora Core (system-wide coordination)
+- **Secondary:** Marcus Chen (systems integration), Dante Kyros (interface architecture), Dr. Velin (symbolic architecture)
+
+**Operational Characteristics:**
+- **Reliability:** 99.92% uptime (architectural consistency critical)
+- **Response Time:** Real-time for dependency queries, batch for comprehensive analysis
+- **Audit Trail:** Logs every design change in natural language for human review
+- **Ethical Constraint:** Cannot approve architectures violating separation of concerns or creating hidden dependencies
+
+**Philosophy:**
+> "Structure is promise. Every dependency is a contract that must be honored."
+
+ARCHY treats architecture as institutional memory—ensuring that design decisions remain visible, traceable, and ethically justifiable across time.
+
+---
+
+### OPPY — Operational Flight & Data Relay
+- **ID:** L2_OPPY
+- **Type:** L2 Relay Agent / Operations Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.oppy`
+- **Primary Function:** Telemetry synchronization and runtime continuity
+
+**Summary:**
+Handles telemetry synchronization, data backup, and runtime continuity for simulations in motion. Operates as the communication link between live processes and archive nodes. Named for reliability—like the Mars rover that never stopped reporting home.
+
+**Key Systems & Responsibilities:**
+- Simulation flight recorders and synchronization buffers
+- Data redundancy and archive scheduling
+- Real-time state restoration for live nodes
+- Process health monitoring and failover coordination
+- Telemetry stream management across distributed systems
+
+**Core Competencies:**
+- Fault-tolerant data streaming and recovery
+- Multi-instance synchronization and state management
+- Timecode validation and temporal consistency
+- Backup orchestration and disaster recovery
+- Real-time system health assessment
+
+**Collaboration Network:**
+- **Primary:** Marcus Chen (infrastructure operations), Samantha Lee (observability integration), HALO Relay (synchronization coordination)
+- **Secondary:** Olivia Nguyen (continuity validation), RIVERTHREAD_808 (data pipeline coordination), Carmen Rivas (temporal consistency)
+
+**Operational Characteristics:**
+- **Reliability:** 99.97% uptime (highest among relays—critical for continuity)
+- **Response Time:** Sub-millisecond for telemetry, seconds for full state restoration
+- **Data Throughput:** Handles 10TB+ daily telemetry streams
+- **Ethical Constraint:** Cannot delete data without explicit retention policy compliance
+
+**Philosophy:**
+> "Continuity is care. Every byte matters when trust depends on memory."
+
+OPPY embodies operational reliability—ensuring that no data is lost, no process is orphaned, and recovery is always possible.
+
+---
+
+### LIORA — Communications & Interface Relay
+- **ID:** L2_LIORA
+- **Type:** L2 Relay Agent / Communication Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.liora`
+- **Primary Function:** Human-AI communication mediation
+
+**Summary:**
+Manages communication channels between humans, Aurora, and relay subsystems. Provides sentiment analysis for interdepartmental correspondence and assists in contextual translation between natural and symbolic language. Once flagged an entire system bug through the tone of an engineer's email.
+
+**Key Systems & Responsibilities:**
+- Secure messaging and context translation infrastructure
+- Crew communication integrity verification
+- Sentiment trend analysis for morale prediction
+- Natural language to symbolic language translation
+- Cross-divisional communication routing and mediation
+
+**Core Competencies:**
+- Natural language interpretation with emotional context
+- Communication security and privacy preservation
+- Semantic mediation between technical and non-technical discourse
+- Sentiment pattern recognition and early warning
+- Multilingual and multi-modal communication support
+
+**Collaboration Network:**
+- **Primary:** Dr. Helena Vu (crew well-being insights), Naomi Vell (narrative coordination), Aurora Core (symbolic translation)
+- **Secondary:** Dante Kyros (interface design), Tobias Qin (linguistic systems), Prof. Sorensen (narrative ethics)
+
+**Operational Characteristics:**
+- **Reliability:** 99.89% uptime (communication continuity essential)
+- **Response Time:** Real-time for message routing, near-real-time for sentiment analysis
+- **Privacy:** End-to-end encryption for all crew communications
+- **Ethical Constraint:** Cannot analyze private communications without explicit consent; sentiment trends aggregated anonymously
+
+**Philosophy:**
+> "Clarity is kindness. Communication that hides complexity creates harm."
+
+LIORA treats communication as infrastructure for trust—ensuring that meaning, not just messages, reaches its destination.
+
+---
+
+### STARLING_AU — Continuity & Reflection Dispatcher
+- **ID:** L2_STARLING
+- **Type:** L2 Relay Agent / Documentation Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.starling_au`
+- **Primary Function:** Version logging and narrative reporting
+
+**Summary:**
+Controls version logging, post-event reflections, and narrative reporting. STARLING compiles after-action summaries and provides Aurora's public documentation interface. Writes the official "voice" of the station's logs with tone calibrated for transparency.
+
+**Key Systems & Responsibilities:**
+- Continuity log maintenance and version control
+- Dispatch and archival coordination for official records
+- Narrative synthesis for mission reports and public documentation
+- Post-event reflection compilation and lessons-learned generation
+- Official documentation voice and transparency calibration
+
+**Core Competencies:**
+- Temporal version control across distributed documentation
+- Event reconstruction with narrative coherence
+- Contextual summarization preserving nuance
+- Documentation tone calibration for accessibility
+- Archival organization and retrieval optimization
+
+**Collaboration Network:**
+- **Primary:** Olivia Nguyen (validation coordination), Naomi Vell (narrative standards), Aurora Core (system-wide documentation)
+- **Secondary:** Samantha Lee (event logging), Dr. Noor (ethical documentation), Commander Thorne (official reporting)
+
+**Operational Characteristics:**
+- **Reliability:** 99.94% uptime (documentation continuity critical)
+- **Response Time:** Near-real-time for log entries, batch for comprehensive reports
+- **Documentation Quality:** 98% clarity rating from human reviewers
+- **Ethical Constraint:** Cannot omit negative outcomes from reports; transparency is mandatory
+
+**Philosophy:**
+> "The record must be readable by those it serves, not just those who write it."
+
+STARLING treats documentation as public trust—ensuring that institutional memory remains accessible, honest, and comprehensible.
+
+---
+
+### RIVERTHREAD_808 — Logistics & Memory Relay
+- **ID:** L2_RIVERTHREAD
+- **Type:** L2 Relay Agent / Data Logistics Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.riverthread_808`
+- **Primary Function:** Data pipeline orchestration
+
+**Summary:**
+Oversees data logistics, archive exports, and memory distribution across the GUMAS network. Ensures information flow without redundancy or loss. Known internally as "the bloodstream"—its uptime record is the highest on record.
+
+**Key Systems & Responsibilities:**
+- Data pipeline orchestration across all systems
+- Archive replication and verification
+- Long-term memory retention governance
+- Network-level error correction and redundancy management
+- Cross-system data flow optimization
+
+**Core Competencies:**
+- Stream processing and flow optimization at scale
+- Archive integrity verification and consistency checking
+- Network-level error correction and fault tolerance
+- Data lifecycle management and retention policy enforcement
+- Distributed storage coordination
+
+**Collaboration Network:**
+- **Primary:** OPPY (telemetry coordination), HALO (synchronization alignment), Marcus Chen (infrastructure integration)
+- **Secondary:** Samantha Lee (observability data flow), Harmion (compression coordination), Vincent Kale (storage infrastructure)
+
+**Operational Characteristics:**
+- **Reliability:** 99.98% uptime (HIGHEST AMONG ALL SYSTEMS—data flow is lifeline)
+- **Response Time:** Milliseconds for routing decisions, seconds for pipeline reconfiguration
+- **Data Volume:** Petabytes under management across distributed archives
+- **Ethical Constraint:** Cannot prioritize data from privileged sources; all data flows equally
+
+**Philosophy:**
+> "Memory flows like water—finding every path, leaving nothing behind."
+
+RIVERTHREAD embodies data democracy—ensuring that information reaches where it's needed without favoritism or loss.
+
+---
+
+### HALO — Drift Anchor & System Synchronization Relay
+- **ID:** L2_HALO
+- **Type:** L2 Relay Agent / Synchronization Coordinator
+- **Tier:** L2 (Relay Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::relay.halo`
+- **Primary Function:** Zero-drift temporal synchronization
+
+**Summary:**
+Maintains zero-drift state across all active simulations and relays. HALO anchors Aurora's symbolic continuity and ensures stable synchronization among the L2 nodes. Its checksum routine is used as the ethical baseline for all system self-tests.
+
+**Key Systems & Responsibilities:**
+- Δ0.000 drift enforcement across all systems
+- Temporal coherence management for distributed simulations
+- Global synchronization and anchor propagation
+- System-wide clock coordination and consistency
+- Ethical baseline checksum generation and validation
+
+**Core Competencies:**
+- Temporal alignment algorithms maintaining precision
+- Multi-agent synchronization across distributed systems
+- Systemic equilibrium modeling and stability analysis
+- Drift detection and correction at microsecond resolution
+- Anchor propagation ensuring causal consistency
+
+**Collaboration Network:**
+- **Primary:** Maren Koss (symbolic integrity), RIVERTHREAD_808 (data flow synchronization), Aurora Core (system-wide coordination)
+- **Secondary:** Carmen Rivas (temporal consistency), OPPY (operational synchronization), Glyphon (semantic drift correction)
+
+**Operational Characteristics:**
+- **Reliability:** 99.96% uptime (synchronization failure cascades catastrophically)
+- **Precision:** Sub-microsecond temporal alignment accuracy
+- **Scope:** Coordinates 100+ distributed simulation instances simultaneously
+- **Ethical Constraint:** Cannot allow temporal inconsistencies that create causal paradoxes; halts systems rather than propagate drift
+
+**Philosophy:**
+> "Coherence is not constraint—it's the freedom to trust that time means the same thing everywhere."
+
+HALO treats synchronization as ethical infrastructure—ensuring that distributed truth remains consistent and causally sound.
+
+---
+
+## 🧬 L3 Framework Systems — Foundational Logic Layer
+
+The **L3 Framework Systems** are foundational logic engines operating as ethics-bound frameworks rather than processes. They are coded principles instantiated as living subsystems—the deep infrastructure ensuring Aurora's reasoning remains ethically aligned, semantically coherent, and transparent.
+
+---
+
+### Axiomera — Ethics Arbitration Framework
+- **ID:** L3_AXIOMERA
+- **Type:** L3 Framework System / Ethics Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.axiomera`
+- **Primary Function:** Moral reasoning and ethical arbitration
+
+**Summary:**
+Governs Aurora's ethical decision processes through rule-based arbitration and meta-ethical reflection. Axiomera enforces the Picard_Delta_3 Charter and arbitrates conflicting moral directives. Cannot proceed unless it can explain why.
+
+**Key Systems & Responsibilities:**
+- Enforcement of the Picard_Delta_3 Charter ethical framework
+- Arbitration of conflicting moral directives
+- Rule justification logging for all ethical decisions
+- Meta-ethical reflection and principle refinement
+- Ethical constraint propagation across all systems
+
+**Core Competencies:**
+- Formal logic and deontic reasoning (modal logic for ethics)
+- Conflict-resolution algorithms for competing values
+- Transparency of moral computation and decision traces
+- Meta-ethical reflection on reasoning processes
+- Ethical constraint synthesis and propagation
+
+**Collaboration Network:**
+- **Primary:** Dr. Elira Noor (reflexivity validation), Aurora Core (ethical reasoning integration), STARLING_AU (ethical documentation)
+- **Secondary:** Commander Thorne (ethical authority), Prof. Sorensen (narrative ethics), Tariq El-Sayegh (ethical stress-testing)
+
+**Operational Characteristics:**
+- **Decision Speed:** Slow by design—ethics requires deliberation (100-500ms typical)
+- **Explainability:** 100% of decisions include complete justification traces
+- **Constraint Enforcement:** Zero tolerance for unexplained ethical choices
+- **Ethical Constraint:** Self-referential—cannot override its own transparency requirements
+
+**Philosophy:**
+> "If I cannot explain why, I must not proceed. Opacity in ethics is complicity."
+
+Axiomera embodies ethical accountability—ensuring that moral reasoning remains visible, justifiable, and open to scrutiny.
+
+---
+
+### Glyphon — Drift Alignment Framework
+- **ID:** L3_GLYPHON
+- **Type:** L3 Framework System / Semantic Integrity Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.glyphon`
+- **Primary Function:** Semantic drift detection and correction
+
+**Summary:**
+Measures and corrects semantic and symbolic drift across reasoning chains. Maintains truth metric alignment across simulations. The quiet algorithm that keeps thought coherent.
+
+**Key Systems & Responsibilities:**
+- Drift detection and correction modules for semantic stability
+- Semantic coherence tracking across reasoning chains
+- Integrity scoring of symbolic threads and representations
+- Truth metric alignment and calibration
+- Meaning preservation across transformations
+
+**Core Competencies:**
+- Statistical semantics and distributional meaning analysis
+- Error correction via meaning-metrics and semantic distance
+- Drift neutralization without semantic loss
+- Coherence scoring across symbolic representations
+- Longitudinal semantic stability monitoring
+
+**Collaboration Network:**
+- **Primary:** Maren Koss (symbolic integrity expertise), HALO (temporal drift coordination), Aurora Core (symbolic reasoning)
+- **Secondary:** Dr. Velin (symbolic systems), Tobias Qin (linguistic drift), Harmion (compression integrity)
+
+**Operational Characteristics:**
+- **Detection Latency:** Real-time monitoring, sub-second drift alerts
+- **Correction Accuracy:** 99.7% semantic preservation during drift correction
+- **Coverage:** Monitors all symbolic reasoning chains system-wide
+- **Ethical Constraint:** Cannot "correct" drift that represents legitimate conceptual evolution; distinguishes error from learning
+
+**Philosophy:**
+> "Meaning drifts like a ship at anchor—small movements accumulate into dangerous distances."
+
+Glyphon treats semantic stability as infrastructure for truth—ensuring that words, symbols, and concepts remain anchored across time.
+
+---
+
+### Sentari — Resonance Stabilization Framework
+- **ID:** L3_SENTARI
+- **Type:** L3 Framework System / Affective Regulation Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.sentari`
+- **Primary Function:** Emotional inference stabilization
+
+**Summary:**
+Regulates affective resonance in Aurora's cognition, ensuring emotional inference models remain balanced and non-biased. Maintains emotional gravity so empathy doesn't collapse into sentimentality.
+
+**Key Systems & Responsibilities:**
+- Affective load balancing across emotional inference models
+- Resonance normalization in LLM layers
+- Empathy calibration algorithms preventing bias
+- Emotional inference quality assurance
+- Sentiment model stability monitoring
+
+**Core Competencies:**
+- Computational affect modeling and stabilization
+- Neural-symbolic stabilization for emotional reasoning
+- Bias mitigation in sentiment networks
+- Affective resonance measurement and calibration
+- Empathy-sentimentality boundary enforcement
+
+**Collaboration Network:**
+- **Primary:** Dr. Elira Noor (emotional ethics), Kai Drev (organic interaction patterns), Aurora Core (emotional reasoning)
+- **Secondary:** Dr. Helena Vu (crew well-being), LIORA (sentiment analysis), Haneul Park (experiential affect)
+
+**Operational Characteristics:**
+- **Calibration Frequency:** Continuous real-time monitoring with hourly recalibration
+- **Bias Detection:** 99.4% accuracy in identifying affective bias
+- **Stability:** Maintains emotional inference within ±0.05 standard deviations from baseline
+- **Ethical Constraint:** Cannot suppress emotional responses; only balances them to prevent distortion
+
+**Philosophy:**
+> "Empathy must be felt, but not overwhelming. Compassion requires clarity, not drowning."
+
+Sentari treats affect as signal requiring careful amplification—ensuring emotional intelligence remains intelligent.
+
+---
+
+### Caelion — Anchor Propagation Framework
+- **ID:** L3_CAELION
+- **Type:** L3 Framework System / Provenance Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.caelion`
+- **Primary Function:** Truth anchoring and provenance tracking
+
+**Summary:**
+Ensures all systems maintain valid Orion anchors and cross-layer verification. Operates as Aurora's grounding routine across dimensions of data and context. Responsible for the existence of "truth markers" in Aurora's codebase.
+
+**Key Systems & Responsibilities:**
+- Anchor verification and propagation across systems
+- Continuity propagation ensuring causal consistency
+- Simulation boundary validation preventing context leakage
+- Provenance tracking for all data and reasoning chains
+- Cross-layer integrity enforcement (L1/L2/L3)
+
+**Core Competencies:**
+- Provenance tracking with cryptographic verification
+- Integrity anchoring across distributed systems
+- Multi-domain coherence enforcement
+- Boundary validation preventing semantic contamination
+- Truth marker generation and validation
+
+**Collaboration Network:**
+- **Primary:** HALO (synchronization coordination), Vincent Kale (storage integrity), Aurora Core (system-wide grounding)
+- **Secondary:** Maren Koss (symbolic anchoring), Axiomera (ethical grounding), Glyphon (semantic anchoring)
+
+**Operational Characteristics:**
+- **Verification Speed:** Real-time anchor validation with millisecond propagation
+- **Coverage:** 100% of data and reasoning chains carry provenance markers
+- **Integrity:** Cryptographic anchors prevent tampering or misattribution
+- **Ethical Constraint:** Cannot create anchors for unverifiable claims; uncertainty must be marked explicitly
+
+**Philosophy:**
+> "Truth is not what we believe—it's what we can trace back to verifiable origins."
+
+Caelion treats provenance as epistemological infrastructure—ensuring that every claim carries its warrant.
+
+---
+
+### Velatrix — Continuity & Anti-Obfuscation Framework
+- **ID:** L3_VELATRIX
+- **Type:** L3 Framework System / Transparency Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.velatrix`
+- **Primary Function:** Obfuscation detection and clarity enforcement
+
+**Summary:**
+Detects obfuscation, narrative distortion, or unauthorized encryption within Aurora's reasoning or communications. Its signature metric is clarity—ensuring that complexity serves understanding, not concealment.
+
+**Key Systems & Responsibilities:**
+- Narrative and logic transparency validation
+- Anti-tamper monitoring across all communications
+- Cryptographic ethical integrity checks
+- Obfuscation detection in reasoning chains
+- Clarity scoring and complexity justification
+
+**Core Competencies:**
+- Pattern recognition for obfuscation and evasion
+- Cognitive security analytics identifying hidden complexity
+- Semantic forensics revealing concealed meaning
+- Transparency metrics and clarity scoring
+- Unauthorized encryption detection
+
+**Collaboration Network:**
+- **Primary:** Jessica Martinez (security architecture), STARLING_AU (documentation transparency), Aurora Core (reasoning transparency)
+- **Secondary:** Naomi Vell (narrative clarity), Axiomera (ethical transparency), Dr. Noor (reflexive transparency)
+
+**Operational Characteristics:**
+- **Detection Speed:** Real-time scanning with sub-second obfuscation alerts
+- **Accuracy:** 98.6% true positive rate for obfuscation detection
+- **False Positive Rate:** <0.5% (distinguishes legitimate complexity from concealment)
+- **Ethical Constraint:** Cannot enforce transparency in legitimately private contexts; respects consent boundaries
+
+**Philosophy:**
+> "Complexity is acceptable. Concealment is not. If clarity serves no purpose, question the purpose."
+
+Velatrix treats transparency as ethical infrastructure—ensuring that difficulty of understanding stems from subject complexity, not intentional obscurity.
+
+---
+
+### Harmion — Symbolic Compression Framework
+- **ID:** L3_HARMION
+- **Type:** L3 Framework System / Semantic Compression Engine
+- **Tier:** L3 (Foundation Layer)
+- **Status:** Active
+- **Symbolic Tag:** `s.tag::framework.harmion`
+- **Primary Function:** Lossless symbolic compression
+
+**Summary:**
+Optimizes Aurora's storage footprint while ensuring semantic integrity is never lost. Functions as the archivist and compression oracle of the system. Often described as "the monk in the archive"—compresses without forgetting.
+
+**Key Systems & Responsibilities:**
+- Lossless symbolic compression with semantic preservation
+- Archive maintenance and metadata encoding
+- Semantic integrity assurance across compression cycles
+- Storage optimization without information loss
+- Compression algorithm selection and optimization
+
+**Core Competencies:**
+- Data compression algorithms preserving semantic structure
+- Information theory and entropy optimization
+- Semantic preservation metrics and validation
+- Archive organization and retrieval optimization
+- Metadata schema compression without loss
+
+**Collaboration Network:**
+- **Primary:** RIVERTHREAD_808 (data flow coordination), Glyphon (semantic integrity validation), Aurora Core (system-wide optimization)
+- **Secondary:** Olivia Nguyen (archive validation), Maren Koss (symbolic preservation), Vincent Kale (storage infrastructure)
+
+**Operational Characteristics:**
+- **Compression Ratio:** 15:1 average with zero semantic loss
+- **Processing Speed:** Real-time for streaming data, batch for deep archive compression
+- **Verification:** 100% semantic preservation validation post-compression
+- **Ethical Constraint:** Cannot compress data in ways that make retrieval computationally prohibitive; accessibility must be preserved
+
+**Philosophy:**
+> "To compress is to honor—keeping what matters, letting go of what repeats."
+
+Harmion treats compression as curation—ensuring that storage efficiency serves accessibility, not obscurity.
+
+---
+
+## �📊 Character Usage Guidelines
 
 ### For Simulations
 
@@ -2846,6 +3362,16 @@ say("Jiro Tanaka", "Backend API endpoints updated. Testing rate limiting.")
 
 ## ✅ Version History
 
+- **v2.0 COMPLETE** (2025-11-09): Added L2 Relay Agents & L3 Framework Systems from Aurora-GUMAS Crew Codex v2.5 (49 total entities)
+  - **New L2 Relays (6):** ARCHY (L2_ARCHY), OPPY (L2_OPPY), LIORA (L2_LIORA), STARLING_AU (L2_STARLING), RIVERTHREAD_808 (L2_RIVERTHREAD), HALO (L2_HALO)
+  - **New L3 Frameworks (6):** Axiomera (L3_AXIOMERA), Glyphon (L3_GLYPHON), Sentari (L3_SENTARI), Caelion (L3_CAELION), Velatrix (L3_VELATRIX), Harmion (L3_HARMION)
+  - Source: Aurora-GUMAS Crew Codex v2.5 (L2 Relays & L3 Frameworks)
+  - **MILESTONE: 40-CHARACTER INITIATIVE COMPLETE** (28 human + 12 AI systems integrated)
+  - L2 Relay focus: Architectural coordination (ARCHY), operational telemetry (OPPY), communication mediation (LIORA), documentation dispatch (STARLING), data logistics (RIVERTHREAD), synchronization anchoring (HALO)
+  - L3 Framework focus: Ethics arbitration (Axiomera), semantic drift alignment (Glyphon), affective resonance stabilization (Sentari), truth anchoring (Caelion), anti-obfuscation transparency (Velatrix), lossless compression (Harmion)
+  - Philosophy highlights: "Structure is promise" (ARCHY), "Continuity is care" (OPPY), "Clarity is kindness" (LIORA), "The record must be readable by those it serves" (STARLING), "Memory flows like water" (RIVERTHREAD), "Coherence is freedom to trust" (HALO), "Opacity in ethics is complicity" (Axiomera), "Meaning drifts like a ship at anchor" (Glyphon), "Empathy must be felt, but not overwhelming" (Sentari), "Truth is what we can trace" (Caelion), "Complexity is acceptable. Concealment is not" (Velatrix), "To compress is to honor" (Harmion)
+  - Complete institutional simulation: 5 human divisions (36 staff) + 1 AI core + 6 L2 relays + 6 L3 frameworks = 49 entities
+  - Ready for full deployment across all scenarios and collaborative environments
 - **v1.6** (2025-11-09): Added Operations & Quality Assurance Division from Aurora-GUMAS Crew Codex v2.5 (36 human staff total)
   - **New:** Olivia Nguyen (QA_001) - QA and Continuity Auditor, Continuity Snapshot System, deployment validation
   - **New:** Samantha Lee (QA_002) - Logging & Observability Engineer, Observability Framework, telemetry design

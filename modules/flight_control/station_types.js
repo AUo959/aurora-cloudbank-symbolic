@@ -1,4 +1,4 @@
-"use strict";
+// ESM module: station types
 /**
  * JSDoc typedefs for flight control data models.
  * These mirror the design spec for DockBay, CraftProfile, TrafficSlot, MissionPlan, FuelLedger, MaintenanceTask, StationState.
@@ -99,7 +99,7 @@
  */
 
 // Simple factory for initial state
-function createInitialStationState() {
+export function createInitialStationState() {
   return {
     stationId: "ORION_STATION_ALPHA",
     time: Date.now(),
@@ -115,4 +115,3 @@ function createInitialStationState() {
   };
 }
 
-module.exports = { createInitialStationState };

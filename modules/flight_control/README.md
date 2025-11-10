@@ -3,16 +3,17 @@
 Provides a minimal station flight control core for OPPY integration.
 
 ## Components
-- `station_operations_service.js` – Clearance & basic resource operations, emits telemetry frames.
-- `station_types.js` – JSDoc typedefs + factory for initial station state.
-- `demo_station_ops.js` – Runnable harness showing dock, fuel reserve, launch request.
+- `station_operations_service.js` – Clearance & basic resource operations, emits telemetry frames. **ESM module with lightweight scheduler loop (15s cadence).**
+- `station_types.js` – JSDoc typedefs + factory for initial station state. **ESM module.**
+- `demo_station_ops.js` – Runnable harness showing dock, fuel reserve, launch request. **ESM demo with clean shutdown.**
 
 ## Event Channels
-- dock:* (request, assigned, denied)
-- launch:* (request, window, armed, go)
-- resource:* (fuel:reserve, fuel:commit, fuel:denied)
-- ethics:check (verdict frame)
-- ops:blocked (ethics rejection)
+- **dock:** `request`, `assigned`, `denied`, `approach`
+- **launch:** `request`, `window`, `armed`, `go`, `telemetry:init`
+- **resource:** `fuel:reserve`, `fuel:commit`, `fuel:denied`
+- **traffic:** `slot:expired`, `schedule:tick`
+- **ethics:** `check` (verdict frame)
+- **ops:** `blocked` (ethics rejection), `scheduler:error`
 
 ## Usage
 ```bash
@@ -25,7 +26,8 @@ node modules/flight_control/demo_station_ops.js
 - Extend `_onLaunchRequest` and `_onDockRequest` for full safety/corridor logic.
 
 ## Next Steps
-1. Add scheduling & slot compaction.
+1. ~~Add scheduling & slot compaction.~~ ✅ Minimal scheduler with slot expiration implemented.
 2. Persist station snapshots + DLP manifests.
 3. Bridge Python fleet registries to `stationState.craft`.
 4. Expand maintenance & turnaround orchestration.
+5. Add docking sequence phases (approach → corridor clear → final lock) with safety checks.

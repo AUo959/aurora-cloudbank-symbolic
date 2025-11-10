@@ -1,12 +1,20 @@
-"use strict";
-// Demo harness wiring StationOperationsService with a state instance & bus.
-
-const { StationOperationsService } = require("./station_operations_service.js");
-const { createInitialStationState } = require("./station_types.js");
-const EventEmitter = require("events");
+// ESM demo harness wiring StationOperationsService with a state instance & bus.
+import { StationOperationsService } from "./station_operations_service.js";
+import { createInitialStationState } from "./station_types.js";
+import { EventEmitter } from "events";
 
 // Use global bus if v2.1 augmentation present
-const bus = (global.OPPY_V21_BUS && global.OPPY_V21_BUS.emitFrame) ? global.OPPY_V21_BUS : new (class extends EventEmitter { emitFrame(type, data) { const frame = { type, t: Date.now(), ...data }; this.emit(type, frame); this.emit("frame:*", frame); console.log(`[BUS] ${type}`, frame); return frame; } })();
+const bus = (globalThis.OPPY_V21_BUS && globalThis.OPPY_V21_BUS.emitFrame)
+  ? globalThis.OPPY_V21_BUS
+  : new (class extends EventEmitter {
+      emitFrame(type, data) {
+        const frame = { type, t: Date.now(), ...data };
+        this.emit(type, frame);
+        this.emit("frame:*", frame);
+        console.log(`[BUS] ${type}`, frame);
+        return frame;
+      }
+    })();
 
 // Minimal ethics fallback
 const ethics = {
@@ -24,7 +32,7 @@ const setState = (s) => { stationState = s; };
 
 const ops = new StationOperationsService({ bus, ethics, getState, setState });
 
-async function demo() {
+export async function demo() {
   console.log("=== Station Ops Demo ===");
   // Seed docks & craft
   stationState.docks.push({
@@ -52,12 +60,22 @@ async function demo() {
   bus.emitFrame("resource:fuel:reserve", { craftId: "STARLING_AU", kg: 1200, fuelType: "LH2", context: { anchor: "EOS_SEED_ORION" } });
   bus.emitFrame("launch:request", { craftId: "STARLING_AU", window: { start: Date.now() + 3600000, end: Date.now() + 3700000 }, context: { anchor: "EOS_SEED_ORION" } });
 
-  console.log("Final station state:");
+  console.log("\nFinal station state:");
   console.log(JSON.stringify(stationState, null, 2));
+  
+  // Stop the scheduler to allow demo to exit cleanly
+  if (ops._scheduleTimer) {
+    clearInterval(ops._scheduleTimer);
+    console.log("\n✅ Demo completed, scheduler stopped.");
+  }
 }
 
-if (require.main === module) {
-  demo();
+// Execute when run directly: node modules/flight_control/demo_station_ops.js
+if (process.argv[1]) {
+  const thisPath = new URL(import.meta.url).pathname;
+  const invokedPath = process.argv[1];
+  if (thisPath === invokedPath || invokedPath.endsWith("demo_station_ops.js")) {
+    // top-level await is supported in ESM on Node 18+
+    await demo();
+  }
 }
-
-module.exports = { demo };

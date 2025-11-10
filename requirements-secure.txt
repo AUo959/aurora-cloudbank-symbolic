@@ -7,7 +7,7 @@ uvicorn[standard]==0.38.0           # Production ASGI server
 pydantic==2.5.0                     # Data validation with security fixes
 
 # Quantum Computing (Verified Secure)
-qiskit==1.4.2                      # IBM Quantum SDK - latest stable
+qiskit==2.2.3                      # IBM Quantum SDK - latest stable
 qiskit-aer==0.13.0                  # Quantum simulators
 numpy==1.24.3                       # Numerical computing - security patched
 

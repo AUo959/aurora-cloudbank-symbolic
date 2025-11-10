@@ -40,7 +40,7 @@ python-json-logger==2.0.7           # JSON logging format
 
 # Environment & Configuration
 python-dotenv==1.2.1                # Environment variable management
-pyyaml==6.0.1                       # YAML parsing - security patched
+pyyaml==6.0.3                       # YAML parsing - security patched
 toml==0.10.2                        # Configuration file parsing
 
 # Security Scanning & Validation

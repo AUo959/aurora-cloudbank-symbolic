@@ -160,64 +160,62 @@ class OPPYNavigator:
         return plan
     
     async def execute_maneuver(self, plan: NavigationPlan) -> Dict[str, Any]:
+        """Execute navigation maneuver through Triplex Handshake.
+
+        Orchestrates L3 (Aurora sub-core), L2 (HALO drift), and L1 (human consent)
+        evaluations using helper methods for clarity and reduced complexity.
         """
-        Execute navigation maneuver through Triplex Handshake.
-        
-        Full L3→L2→L1 evaluation:
-        - L3: Aurora sub-core ethical evaluation
-        - L2: HALO drift verification, ARCHY pattern check
-        - L1: Human navigator consent (if risk > threshold)
-        
-        Args:
-            plan: NavigationPlan from plan_maneuver()
-        
-        Returns:
-            Execution result with Triplex evaluations
-        """
-        # L3 Evaluation (via Aurora Sub-Core on vessel)
-        # (Would call Aurora sub-core's evaluate_for_triplex)
-        l3_assessment = {
+        l3_assessment = self._evaluate_l3(plan)
+        l2_assessment = self._evaluate_l2(plan)
+        l1_assessment = self._evaluate_l1(plan)
+
+        if l1_assessment["decision"] == "REQUIRES_APPROVAL":
+            return {
+                "status": "PENDING_APPROVAL",
+                "plan": plan,
+                "triplex": {"l3": l3_assessment, "l2": l2_assessment, "l1": l1_assessment}
+            }
+
+        execution_result = self._perform_execution(plan)
+
+        return {
+            "status": "COMPLETE",
+            "execution": execution_result,
+            "triplex": {"l3": l3_assessment, "l2": l2_assessment, "l1": l1_assessment}
+        }
+
+    # --- Triplex Helper Methods (extracted for complexity reduction) ---
+    def _evaluate_l3(self, plan: NavigationPlan) -> Dict[str, Any]:
+        """Aurora sub-core ethical evaluation (L3)."""
+        return {
             "layer": "L3_AURORA_SUBCORE",
             "recommendation": "APPROVE" if plan.risk_assessment < 0.5 else "REVIEW",
             "reasoning": f"Navigation maneuver risk {plan.risk_assessment:.2f}"
         }
-        
-        # L2 Verification (HALO drift check)
-        # (Would call HALO's evaluate_for_triplex remotely)
-        l2_assessment = {
+
+    def _evaluate_l2(self, plan: NavigationPlan) -> Dict[str, Any]:
+        """HALO drift verification (L2)."""
+        return {
             "layer": "L2_HALO_REMOTE",
             "recommendation": "APPROVE" if plan.anchor_impact < 0.02 else "CAUTION",
             "reasoning": f"Anchor drift impact {plan.anchor_impact:.4f}"
         }
-        
-        # L1 Human Consent
-        # (For high-risk maneuvers, requires explicit approval)
+
+    def _evaluate_l1(self, plan: NavigationPlan) -> Dict[str, Any]:
+        """Human navigator consent logic (L1)."""
         if plan.risk_assessment > 0.6:
-            l1_decision = "REQUIRES_APPROVAL"
+            decision = "REQUIRES_APPROVAL"
             reasoning = f"High-risk maneuver ({plan.risk_assessment:.2f}) requires navigator consent"
         else:
-            l1_decision = "AUTO_APPROVED"
+            decision = "AUTO_APPROVED"
             reasoning = "Risk within autonomous operation parameters"
-        
-        # Check if approved
-        if l1_decision == "REQUIRES_APPROVAL":
-            # Would trigger approval request to human navigator
-            # For now, simulate pending
-            return {
-                "status": "PENDING_APPROVAL",
-                "plan": plan,
-                "triplex": {
-                    "l3": l3_assessment,
-                    "l2": l2_assessment,
-                    "l1": l1_decision
-                }
-            }
-        
-        # Execute maneuver
+        return {"layer": "L1_HUMAN_CONSENT", "decision": decision, "reasoning": reasoning}
+
+    def _perform_execution(self, plan: NavigationPlan) -> Dict[str, Any]:
+        """Execute maneuver and update internal metrics."""
         self.active_maneuver = True
         self.current_plan = plan
-        
-        # (In real implementation, would control propulsion systems)
+
         execution_result = {
             "status": "EXECUTED",
             "plan_id": plan.plan_id,
@@ -226,27 +224,16 @@ class OPPYNavigator:
             "fuel_consumed": plan.fuel_cost_kg,
             "anchor_drift_result": plan.anchor_impact
         }
-        
-        # Update metrics
+
         self.maneuvers_executed += 1
         fuel_efficiency = 1.0 - (execution_result["fuel_consumed"] / (plan.fuel_cost_kg * 1.1))
         self.fuel_efficiency_history.append(fuel_efficiency)
-        
         if plan.anchor_impact > 0.01:
             self.drift_corrections_applied += 1
-        
+
         self.active_maneuver = False
         self.current_plan = None
-        
-        return {
-            "status": "COMPLETE",
-            "execution": execution_result,
-            "triplex": {
-                "l3": l3_assessment,
-                "l2": l2_assessment,
-                "l1": l1_decision
-            }
-        }
+        return execution_result
     
     def _calculate_delta_v(self, target_state: Dict[str, float]) -> float:
         """Calculate required delta-v for target state"""
@@ -628,3 +615,99 @@ def get_beta_array_icarus() -> AuroraSubCore:
             vessel_id="ORP-2"
         )
     return _beta_array_icarus
+
+
+# Global instances for ORD-1 Gamma Swarm
+_gamma_swarm_oppy: Optional[OPPYNavigator] = None
+_gamma_swarm_janus: Optional[AuroraSubCore] = None
+
+
+def get_gamma_swarm_oppy() -> OPPYNavigator:
+    """Get OPPY Swarm Kernel for ORD-1 Gamma Swarm maintenance drones"""
+    global _gamma_swarm_oppy
+    if _gamma_swarm_oppy is None:
+        _gamma_swarm_oppy = OPPYNavigator(vessel_id="ORD-1")
+    return _gamma_swarm_oppy
+
+
+def get_gamma_swarm_janus() -> AuroraSubCore:
+    """Get Aurora Sub-Node J (Janus 'The Gatekeeper') for ORD-1 Gamma Swarm"""
+    global _gamma_swarm_janus
+    if _gamma_swarm_janus is None:
+        _gamma_swarm_janus = AuroraSubCore(
+            subcore_id="AURORA_SUB_JANUS",
+            vessel_id="ORD-1"
+        )
+    return _gamma_swarm_janus
+
+
+# Global instances for ORD-2 Delta Scout
+_delta_scout_oppy: Optional[OPPYNavigator] = None
+_delta_scout_kepler: Optional[AuroraSubCore] = None
+
+
+def get_delta_scout_oppy() -> OPPYNavigator:
+    """Get OPPY Recon Node for ORD-2 Delta Scout reconnaissance drone"""
+    global _delta_scout_oppy
+    if _delta_scout_oppy is None:
+        _delta_scout_oppy = OPPYNavigator(vessel_id="ORD-2")
+    return _delta_scout_oppy
+
+
+def get_delta_scout_kepler() -> AuroraSubCore:
+    """Get Aurora Sub-Node K (Kepler 'The Observer') for ORD-2 Delta Scout"""
+    global _delta_scout_kepler
+    if _delta_scout_kepler is None:
+        _delta_scout_kepler = AuroraSubCore(
+            subcore_id="AURORA_SUB_KEPLER",
+            vessel_id="ORD-2"
+        )
+    return _delta_scout_kepler
+
+
+# Global instances for ORD-3 Shadowfax
+_shadowfax_oppy: Optional[OPPYNavigator] = None
+_shadowfax_lucent: Optional[AuroraSubCore] = None
+
+
+def get_shadowfax_oppy() -> OPPYNavigator:
+    """Get OPPY Audit Kernel for ORD-3 Shadowfax audit drone"""
+    global _shadowfax_oppy
+    if _shadowfax_oppy is None:
+        _shadowfax_oppy = OPPYNavigator(vessel_id="ORD-3")
+    return _shadowfax_oppy
+
+
+def get_shadowfax_lucent() -> AuroraSubCore:
+    """Get Aurora Sub-Node L (Lucent 'The Illuminator') for ORD-3 Shadowfax"""
+    global _shadowfax_lucent
+    if _shadowfax_lucent is None:
+        _shadowfax_lucent = AuroraSubCore(
+            subcore_id="AURORA_SUB_LUCENT",
+            vessel_id="ORD-3"
+        )
+    return _shadowfax_lucent
+
+
+# Global instances for ORD-4 Wisp
+_wisp_oppy: Optional[OPPYNavigator] = None
+_wisp_mira: Optional[AuroraSubCore] = None
+
+
+def get_wisp_oppy() -> OPPYNavigator:
+    """Get OPPY Courier Core for ORD-4 Wisp courier drone"""
+    global _wisp_oppy
+    if _wisp_oppy is None:
+        _wisp_oppy = OPPYNavigator(vessel_id="ORD-4")
+    return _wisp_oppy
+
+
+def get_wisp_mira() -> AuroraSubCore:
+    """Get Aurora Sub-Node M (Mira 'The Messenger') for ORD-4 Wisp"""
+    global _wisp_mira
+    if _wisp_mira is None:
+        _wisp_mira = AuroraSubCore(
+            subcore_id="AURORA_SUB_MIRA",
+            vessel_id="ORD-4"
+        )
+    return _wisp_mira

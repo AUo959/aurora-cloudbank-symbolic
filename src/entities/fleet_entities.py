@@ -588,7 +588,7 @@ _alpha_surveyor_hermes: Optional[AuroraSubCore] = None
 
 
 def get_alpha_surveyor_oppy() -> OPPYNavigator:
-    """Get OPPY Deep-Survey Core for Alpha Surveyor reconnaissance probe"""
+    """Get OPPY Deep-Survey Core for Alpha Surveyor autonomous probe"""
     global _alpha_surveyor_oppy
     if _alpha_surveyor_oppy is None:
         _alpha_surveyor_oppy = OPPYNavigator(vessel_id="ORP-1")
@@ -596,7 +596,7 @@ def get_alpha_surveyor_oppy() -> OPPYNavigator:
 
 
 def get_alpha_surveyor_hermes() -> AuroraSubCore:
-    """Get Aurora Sub-Node H ('Hermes') for Alpha Surveyor reconnaissance probe"""
+    """Get Aurora Sub-Node H (Hermes 'The Messenger') for Alpha Surveyor probe"""
     global _alpha_surveyor_hermes
     if _alpha_surveyor_hermes is None:
         _alpha_surveyor_hermes = AuroraSubCore(
@@ -604,3 +604,27 @@ def get_alpha_surveyor_hermes() -> AuroraSubCore:
             vessel_id="ORP-1"
         )
     return _alpha_surveyor_hermes
+
+
+# Global instances for Beta Array
+_beta_array_oppy: Optional[OPPYNavigator] = None
+_beta_array_icarus: Optional[AuroraSubCore] = None
+
+
+def get_beta_array_oppy() -> OPPYNavigator:
+    """Get OPPY Quantum Relay Core for Beta Array quantum-field probe"""
+    global _beta_array_oppy
+    if _beta_array_oppy is None:
+        _beta_array_oppy = OPPYNavigator(vessel_id="ORP-2")
+    return _beta_array_oppy
+
+
+def get_beta_array_icarus() -> AuroraSubCore:
+    """Get Aurora Sub-Node I (Icarus 'The Listener') for Beta Array quantum-field probe"""
+    global _beta_array_icarus
+    if _beta_array_icarus is None:
+        _beta_array_icarus = AuroraSubCore(
+            subcore_id="AURORA_SUB_ICARUS",
+            vessel_id="ORP-2"
+        )
+    return _beta_array_icarus

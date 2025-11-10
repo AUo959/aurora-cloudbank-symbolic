@@ -222,6 +222,17 @@ if FLEET_BRIDGE_AVAILABLE and FLEET_BRIDGE_ROUTER:
         logger.error("Failed to integrate Fleet Bridge API routes: %s", e)
         FLEET_BRIDGE_AVAILABLE = False
 
+# Include Synergy Dashboard API routes
+try:
+    from src.synergy import synergy_router, dashboard_router
+    app.include_router(synergy_router)
+    app.include_router(dashboard_router)
+    logger.info("Synergy Dashboard API routes integrated successfully")
+except ImportError as e:
+    logger.warning("Synergy Dashboard not available: %s", e)
+except Exception as e:
+    logger.error("Failed to integrate Synergy Dashboard API routes: %s", e)
+
 ga = GeometricAlgebra()
 
 

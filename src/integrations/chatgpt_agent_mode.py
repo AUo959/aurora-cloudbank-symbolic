@@ -9,6 +9,8 @@ This module implements advanced integration capabilities for ChatGPT's new agent
 building upon Aurora's existing symbolic governance and quantum-enhanced processing.
 """
 
+
+import logging
 import hashlib
 import json
 import os
@@ -62,7 +64,7 @@ def load_agent_config():
             config = json.load(f)
         return config["agent_mode_config"]
     except Exception as e:
-        print(f"⚠️  Could not load agent config: {e}")
+        logging.getLogger("aurora.agent_mode").warning("Could not load agent config: %s", e)
         # Graceful fallback with minimal configuration
         return {
             "version": "1.0.0",
@@ -196,9 +198,16 @@ class ChatGPTAgentModeIntegration:
         """
         Execute agent tool with validated parameters and Aurora symbolic anchoring
         Returns structured response instead of raising exceptions for better agent compatibility
+        Structured security logging for suppressed exceptions.
         """
+        logger = logging.getLogger("aurora.agent_tool_execution")
+        def _sanitize_id(val):
+            if not val:
+                return None
+            return str(val)[:32].replace("\n", "").replace("\r", "")
+
         if tool_name not in self.tools_registry:
-            # Align behavior with tests: raise an exception for unknown tools
+            logger.warning("Tool not found: %r (session_id=%s)", tool_name, _sanitize_id(session_id))
             raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
 
         tool_def = self.tools_registry[tool_name]
@@ -206,8 +215,10 @@ class ChatGPTAgentModeIntegration:
         # Validate parameters against schema
         try:
             self._validate_parameters(parameters, tool_def["parameters"])
-        except Exception:
-            # Optionally log exception server-side here
+        except Exception as e:
+            logger.warning(
+                f"Parameter validation failed for tool={tool_name!r} session_id={_sanitize_id(session_id)}: {e}"
+            )
             return {
                 "success": False,
                 "error": "Parameter validation failed.",
@@ -239,11 +250,12 @@ class ChatGPTAgentModeIntegration:
                 "dlp_level": "DLP_L1_OK",
                 "memory_seal": self._compute_memory_seal(),
             }
-
-            # Optionally log exception server-side here
             return response
 
-        except Exception:
+        except Exception as e:
+            logger.error(
+                f"Tool execution failed: tool={tool_name!r} session_id={_sanitize_id(session_id)} error={e}"
+            )
             error_response = {
                 "success": False,
                 "error": "Tool execution failed.",

@@ -8,6 +8,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 
 from typing import Any, Dict, Optional
 
+import logging
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
@@ -28,7 +29,15 @@ except ImportError:
     GEMINI_AGENT_AVAILABLE = False
 
 # Import centralized security configuration
-from src.middleware.fastapi_security import limiter, require_auth, secure_compare, security
+from src.middleware.fastapi_security import (
+    limiter,
+    security,
+    verify_csrf_token,
+    verify_ws_token,
+    validate_ws_tool,
+    sanitize_request_id,
+    sanitize_session_id
+)
 
 # Import AuMemManager API integration
 try:
@@ -75,9 +84,7 @@ except ImportError:
 # Import Thread Transfer Bridge integration
 try:
     from modules.reflective_autonomy.thread_transfer import (
-        ThreadTransferBridge,
-        get_bridge_instance,
-        initialize_bridge
+        get_bridge_instance
     )
     THREAD_BRIDGE_AVAILABLE = True
 except ImportError:
@@ -115,6 +122,16 @@ except ImportError:
     EVENT_COORDINATION_AVAILABLE = False
     EVENT_COORDINATION_ROUTER = None
 
+# Import Fleet Bridge API integration
+try:
+    from src.integrations.fleet_bridge import router as fleet_bridge_router
+    FLEET_BRIDGE_AVAILABLE = True
+    FLEET_BRIDGE_ROUTER = fleet_bridge_router
+except ImportError:
+    print("Fleet Bridge not available - Python-JS fleet sync features disabled")
+    FLEET_BRIDGE_AVAILABLE = False
+    FLEET_BRIDGE_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -123,100 +140,117 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Structured logger (avoids f-string interpolation for security)
+logger = logging.getLogger("aurora_api")
+
 # Include AuMemManager API routes if available
 if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
     try:
         app.include_router(AUMEMMANAGER_ROUTER)
-        print("✅ AuMemManager API routes integrated successfully")
+        logger.info("AuMemManager API routes integrated successfully")
     except Exception as e:
-        print(f"❌ Failed to integrate AuMemManager API routes: {e}")
+        logger.error("Failed to integrate AuMemManager API routes: %s", e)
         AUMEMMANAGER_AVAILABLE = False
 
 # Include Data Guardian API routes if available
 if DATA_GUARDIAN_AVAILABLE and DATA_GUARDIAN_ROUTER:
     try:
         app.include_router(DATA_GUARDIAN_ROUTER)
-        print("✅ Data Guardian API routes integrated successfully")
+        logger.info("Data Guardian API routes integrated successfully")
     except Exception as e:
-        print(f"❌ Failed to integrate Data Guardian API routes: {e}")
+        logger.error("Failed to integrate Data Guardian API routes: %s", e)
         DATA_GUARDIAN_AVAILABLE = False
 
 # Include Insight Ledger API routes if available
 if INSIGHT_LEDGER_AVAILABLE and INSIGHT_LEDGER_ROUTER:
     try:
         app.include_router(INSIGHT_LEDGER_ROUTER)
-        # Initialize ledger with default storage path
         if initialize_ledger:
             initialize_ledger(storage_path="./data/insight_ledger")
-        print("✅ Insight Ledger API routes integrated successfully")
+        logger.info("Insight Ledger API routes integrated successfully")
     except Exception as e:
-        print(f"❌ Failed to integrate Insight Ledger API routes: {e}")
+        logger.error("Failed to integrate Insight Ledger API routes: %s", e)
         INSIGHT_LEDGER_AVAILABLE = False
 
 # Include Quantum Simulator API routes if available
 if QUANTUM_SIMULATOR_AVAILABLE and QUANTUM_SIMULATOR_ROUTER:
     try:
         app.include_router(QUANTUM_SIMULATOR_ROUTER)
-        print("✅ Quantum Simulator API routes integrated successfully")
+        logger.info("Quantum Simulator API routes integrated successfully")
     except Exception as e:
-        print(f"❌ Failed to integrate Quantum Simulator API routes: {e}")
+        logger.error("Failed to integrate Quantum Simulator API routes: %s", e)
         QUANTUM_SIMULATOR_AVAILABLE = False
 
 # Include Cross-Repo Collaboration API routes
 try:
     from src.collab.api_routes import router as collab_router
     app.include_router(collab_router)
-    print("✅ Cross-Repo Collaboration API routes integrated successfully")
+    logger.info("Cross-Repo Collaboration API routes integrated successfully")
 except ImportError as e:
-    print(f"⚠️  Cross-Repo Collaboration not available: {e}")
+    logger.warning("Cross-Repo Collaboration not available: %s", e)
 except Exception as e:
-    print(f"❌ Failed to integrate Cross-Repo Collaboration API routes: {e}")
+    logger.error("Failed to integrate Cross-Repo Collaboration API routes: %s", e)
 
 # Include Subroutine API routes
 try:
     from src.subroutines.api import router as subroutine_router
     app.include_router(subroutine_router)
-    print("✅ Subroutine API routes integrated successfully")
+    logger.info("Subroutine API routes integrated successfully")
     SUBROUTINE_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️  Subroutine system not available: {e}")
+    logger.warning("Subroutine system not available: %s", e)
     SUBROUTINE_AVAILABLE = False
 except Exception as e:
-    print(f"❌ Failed to integrate Subroutine API routes: {e}")
+    logger.error("Failed to integrate Subroutine API routes: %s", e)
     SUBROUTINE_AVAILABLE = False
 
 # Include Event Coordination API routes if available
 if EVENT_COORDINATION_AVAILABLE and EVENT_COORDINATION_ROUTER:
     try:
         app.include_router(EVENT_COORDINATION_ROUTER)
-        print("✅ Event Coordination API routes integrated successfully")
+        logger.info("Event Coordination API routes integrated successfully")
     except Exception as e:
-        print(f"❌ Failed to integrate Event Coordination API routes: {e}")
+        logger.error("Failed to integrate Event Coordination API routes: %s", e)
         EVENT_COORDINATION_AVAILABLE = False
+
+# Include Fleet Bridge API routes if available
+if FLEET_BRIDGE_AVAILABLE and FLEET_BRIDGE_ROUTER:
+    try:
+        app.include_router(FLEET_BRIDGE_ROUTER)
+        logger.info("Fleet Bridge API routes integrated successfully")
+    except Exception as e:
+        logger.error("Failed to integrate Fleet Bridge API routes: %s", e)
+        FLEET_BRIDGE_AVAILABLE = False
 
 ga = GeometricAlgebra()
 
 
 def parse_multivector(expression: str, blades: dict):
-    """Safely parse a multivector expression."""
-    allowed_symbols = set(blades.keys())
+    """Safely parse a multivector expression.
 
-    tokens = expression.split()
+    Complexity reduction: Split validation and accumulation into helpers.
+    """
+    def _tokenize(expr: str) -> list[str]:
+        return expr.split()
 
-    for token in tokens:
-        if token not in allowed_symbols and not token.isnumeric():
-            raise ValueError(f"Invalid token in expression: {token}")
-    # Construct the multivector using the blades dictionary
-    result = None
+    def _validate(tokens: list[str], allowed: set[str]) -> None:
+        for token in tokens:
+            if token not in allowed and not token.isnumeric():
+                raise ValueError(f"Invalid token in expression: {token}")
 
-    for token in tokens:
-        if token in blades:
-            result = blades[token] if result is None else result + blades[token]
+    def _accumulate(tokens: list[str]) -> any:
+        result = None
+        for token in tokens:
+            if token in blades:
+                result = blades[token] if result is None else result + blades[token]
+            elif token.isnumeric():
+                numeric = float(token)
+                result = numeric if result is None else result + numeric
+        return result
 
-        elif token.isnumeric():
-            result = float(token) if result is None else result + float(token)
-
-    return result
+    tokens = _tokenize(expression)
+    _validate(tokens, set(blades.keys()))
+    return _accumulate(tokens)
 
 
 def _sanitize_tools_info(info: Dict[str, Any]) -> Dict[str, Any]:
@@ -268,15 +302,19 @@ class AgentSessionRequest(BaseModel):
     state_data: Optional[Dict[str, Any]] = None
 
 
-@app.post("/geometric/vector")
-def create_vector(req: VectorRequest):
+# verify_csrf inside
+@app.post("/geometric/vector", dependencies=[Depends(security)])
+def create_vector(req: VectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    verify_csrf_token(token)
     v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
 
     return {"vector": str(v)}
 
 
-@app.post("/geometric/mult")
-def geometric_product(req: MultivectorRequest):
+# verify_csrf inside
+@app.post("/geometric/mult", dependencies=[Depends(security)])
+def geometric_product(req: MultivectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    verify_csrf_token(token)
     try:
         a = parse_multivector(req.a, ga.blades)
 
@@ -290,12 +328,11 @@ def geometric_product(req: MultivectorRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.post("/sonnet4/enable")
+# verify_csrf inside
+@app.post("/sonnet4/enable", dependencies=[Depends(security)])
 async def enable_sonnet4(req: Sonnet4EnableRequest = None, token: HTTPAuthorizationCredentials = Depends(security)):
     """Enable Claude Sonnet 4 for all clients or specific client"""
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    verify_csrf_token(token)
 
     try:
         if req and req.enable_all:
@@ -390,15 +427,15 @@ async def get_agent_tools():
         raise HTTPException(status_code=500, detail=f"Failed to discover tools: {str(e)}")
 
 
-@app.post("/agent/execute")
+# verify_csrf inside
+@app.post("/agent/execute", dependencies=[Depends(security)])
 async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Execute agent tool with validated parameters and Aurora symbolic anchoring
     Supports all registered tools: symbolic_processing, geometric_algebra, session_management, system_status
     """
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    bound_session_id = sanitize_session_id(request.session_id)
+    verify_csrf_token(token, session_id=bound_session_id)
 
     try:
         result = await chatgpt_agent_integration.execute_tool(
@@ -413,15 +450,14 @@ async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorization
         raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
 
 
-@app.post("/agent/session")
+# verify_csrf inside
+@app.post("/agent/session", dependencies=[Depends(security)])
 async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Manage agent session state and context persistence
     Actions: create, update, get, delete
     """
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
+    verify_csrf_token(token, session_id=sanitize_session_id(request.session_id))
 
     try:
         result = await chatgpt_agent_integration.execute_tool(
@@ -432,6 +468,8 @@ async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthoriz
                 "state_data": request.state_data or {}
             }
         )
+        # Helper: sanitize recovery suggestions (internal only)
+
         def sanitize_recovery_suggestions(suggestions):
             sanitized = []
             for s in suggestions:
@@ -462,7 +500,8 @@ async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthoriz
         return JSONResponse(content=result)
     except HTTPException as e:
         raise e
-    except Exception as e:
+    except Exception:
+        # Intentionally avoid leaking internal exception details
         raise HTTPException(status_code=500, detail="Session management failed.")
 
 
@@ -481,53 +520,98 @@ async def agent_websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time agent communication
     Supports streaming responses and persistent connections
+
+    SECURITY: Requires authentication token in query params
     """
+    # SECURITY FIX: Require authentication before accepting connection
+    token = websocket.query_params.get("token")
+    client_id = verify_ws_token(token) if token else None
+
+    if not client_id:
+        await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
+        return
+
+    # Accept connection only after authentication
     await websocket.accept()
 
-    try:
-        # Send initial connection confirmation with Aurora symbolic anchoring
-        initial_message = {
+    def _initial_ws_message(cid: str) -> dict:
+        return {
             "type": "connection_established",
             "timestamp": "2025-01-01T00:00:00Z",
             "symbolic_anchor": "EOS_SEED_ORION",
             "ethics_protocol": "Picard_Delta_3",
             "agent_mode": "chatgpt_agent_mode",
-            "context_tag": "websocket_agent_stream"
+            "context_tag": "websocket_agent_stream",
+            "client_id": cid,
         }
-        await websocket.send_json(initial_message)
+
+    async def _handle_tool_execution(websocket: WebSocket, data: dict, request_id: str) -> None:
+        tool_name = data.get("tool_name", "").strip()
+        if not validate_ws_tool(tool_name):
+            await websocket.send_json({
+                "type": "error",
+                "error": f"Tool '{tool_name}' is not allowed via WebSocket",
+                "request_id": request_id,
+            })
+            return
+
+        parameters = data.get("parameters", {})
+        if not isinstance(parameters, dict):
+            await websocket.send_json({
+                "type": "error",
+                "error": "Invalid parameters format (must be object)",
+                "request_id": request_id,
+            })
+            return
+
+        try:
+            result = await chatgpt_agent_integration.execute_tool(
+                tool_name=tool_name,
+                parameters=parameters,
+                session_id=sanitize_session_id(data.get("session_id")),
+            )
+            await websocket.send_json({
+                "type": "tool_result",
+                "result": result,
+                "request_id": request_id,
+            })
+        except Exception:
+            await websocket.send_json({
+                "type": "error",
+                "error": "Tool execution failed",
+                "request_id": request_id,
+            })
+
+    async def _handle_ping(websocket: WebSocket, request_id: str) -> None:
+        await websocket.send_json({
+            "type": "pong",
+            "timestamp": "2025-01-01T00:00:00Z",
+            "request_id": request_id,
+        })
+
+    try:
+        await websocket.send_json(_initial_ws_message(client_id))
+
         while True:
-            # Wait for messages from client
             data = await websocket.receive_json()
-            # Process agent requests through WebSocket
-            if data.get("type") == "tool_execution":
-                try:
-                    result = await chatgpt_agent_integration.execute_tool(
-                        tool_name=data.get("tool_name"),
-                        parameters=data.get("parameters", {}),
-                        session_id=data.get("session_id")
-                    )
-                    await websocket.send_json({
-                        "type": "tool_result",
-                        "result": result,
-                        "request_id": data.get("request_id")
-                    })
-                except Exception as e:
-                    await websocket.send_json({
-                        "type": "error",
-                        "error": str(e),
-                        "request_id": data.get("request_id"),
-                    })
-            elif data.get("type") == "ping":
-                await websocket.send_json({"type": "pong", "timestamp": "2025-01-01T00:00:00Z"})
+            request_id = sanitize_request_id(data.get("request_id"))
+            msg_type = data.get("type")
+
+            if msg_type == "tool_execution":
+                await _handle_tool_execution(websocket, data, request_id)
+            elif msg_type == "ping":
+                await _handle_ping(websocket, request_id)
+
             else:
                 await websocket.send_json({
                     "type": "error",
                     "error": "Unknown message type",
                     "supported_types": ["tool_execution", "ping"],
+                    "request_id": request_id,
                 })
 
-    except Exception as e:
-        await websocket.close(code=1000, reason=f"WebSocket error: {str(e)}")
+    except Exception:
+        await websocket.close(code=1011, reason="Internal error")
 
 
 # ================================
@@ -548,18 +632,16 @@ async def get_gemini_agent_tools():
         raise HTTPException(status_code=500, detail=f"Failed to discover Gemini tools: {str(e)}")
 
 
-@app.post("/agent/gemini/execute")
+# verify_csrf inside
+@app.post("/agent/gemini/execute", dependencies=[Depends(security)])
 async def execute_gemini_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Execute a Gemini agent tool, respecting the Symbolic Sandbox Protocol (SSP).
     A 'dry_run' parameter is used to get an impact report before committing.
     """
+    verify_csrf_token(token)
     if not GEMINI_AGENT_AVAILABLE:
         raise HTTPException(status_code=503, detail="Gemini Agent not available")
-
-    # CSRF Token validation
-    if not token or len(token.credentials) < 10:
-        raise HTTPException(status_code=403, detail='Invalid CSRF token')
 
     try:
         result = await gemini_agent_integration.handle_tool_call(
@@ -618,15 +700,20 @@ class HandshakeRequest(BaseModel):
     thread_id: str
 
 
-@app.post("/api/thread-bridge/handshake")
+# verify_csrf inside
+@app.post("/api/thread-bridge/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def thread_bridge_handshake_endpoint(request: HandshakeRequest):
+async def thread_bridge_handshake_endpoint(
+    request: HandshakeRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Initiate handshake sequence with a companion thread
     
     Executes the 5-stage handshake: INIT → VERIFY_ANCHOR → LOCK_DRIFT →
     ALIGN_ETHICS → SYNC_COMPLETE
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -665,14 +752,19 @@ class ValidateRequest(BaseModel):
     target: str
 
 
-@app.post("/api/thread-bridge/validate")
+# verify_csrf inside
+@app.post("/api/thread-bridge/validate", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
-async def thread_bridge_validate_endpoint(request: ValidateRequest):
+async def thread_bridge_validate_endpoint(
+    request: ValidateRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Validate continuity between two threads before transfer
     
     Checks anchor alignment, drift levels, and ethics compatibility.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -734,15 +826,20 @@ class TransferRequest(BaseModel):
     context_data: Dict[str, Any]
 
 
-@app.post("/api/thread-bridge/transfer")
+# verify_csrf inside
+@app.post("/api/thread-bridge/transfer", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def thread_bridge_transfer_endpoint(request: TransferRequest):
+async def thread_bridge_transfer_endpoint(
+    request: TransferRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Transfer context from source thread to target thread
     
     Performs full validation, ethics checks, and secure state transfer
     between companion threads.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -829,15 +926,21 @@ class RepositoryRegisterRequest(BaseModel):
 # Phase 1: Distributed Node Management (6 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post("/api/v2/nodes/register")
+# verify_csrf inside
+@app.post("/api/v2/nodes/register", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
-async def v2_register_node(node_request: NodeRegisterRequest, request: Request):
+async def v2_register_node(
+    node_request: NodeRegisterRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Register a new bridge node in the distributed constellation.
     
     Requires: hostname, port, region, capacity, version
     Returns: Node metadata with unique node_id
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1011,14 +1114,16 @@ async def v2_get_cluster_health(request: Request):
         raise HTTPException(status_code=500, detail=f"Cluster health error: {str(e)}")
 
 
-@app.post("/api/v2/consensus/elect")
+# verify_csrf inside
+@app.post("/api/v2/consensus/elect", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_trigger_election(request: Request):
+async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Trigger a Raft consensus leader election.
     
     WARNING: Use only for testing or emergency recovery.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1036,14 +1141,19 @@ async def v2_trigger_election(request: Request):
 # Phase 2: Cross-Repository Sync (4 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post("/api/v2/repos/register")
+# verify_csrf inside
+@app.post("/api/v2/repos/register", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
-async def v2_register_repository(request: RepositoryRegisterRequest):
+async def v2_register_repository(
+    request: RepositoryRegisterRequest,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Register a Git repository for cross-repo synchronization.
     
     Enables anchor propagation and thread continuity across repos.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1073,15 +1183,22 @@ async def v2_register_repository(request: RepositoryRegisterRequest):
         raise HTTPException(status_code=500, detail=f"Repository registration error: {str(e)}")
 
 
-@app.post("/api/v2/repos/{repo_id}/sync")
+# verify_csrf inside
+@app.post("/api/v2/repos/{repo_id}/sync", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_sync_repository(repo_id: str, direction: str = "bidirectional", request: Request = None):
+async def v2_sync_repository(
+    repo_id: str,
+    direction: str = "bidirectional",
+    request: Request = None,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Synchronize a registered repository.
     
     Pulls latest changes and pushes local anchors.
     Direction: push, pull, or bidirectional
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1113,14 +1230,22 @@ async def v2_sync_repository(repo_id: str, direction: str = "bidirectional", req
         raise HTTPException(status_code=500, detail=f"Repository sync error: {str(e)}")
 
 
-@app.post("/api/v2/bridges/cross-repo")
+# verify_csrf inside
+@app.post("/api/v2/bridges/cross-repo", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_create_cross_repo_bridge(source_repo: str, target_repo: str, thread_id: str, request: Request):
+async def v2_create_cross_repo_bridge(
+    source_repo: str,
+    target_repo: str,
+    thread_id: str,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Create a cross-repository bridge for thread continuity.
     
     Initiates 7-stage handshake between repositories.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1129,16 +1254,20 @@ async def v2_create_cross_repo_bridge(source_repo: str, target_repo: str, thread
     
     try:
         cross_repo_bridge = get_cross_repository_bridge()
-        
-        result = await cross_repo_bridge.create_bridge(
+        # Generate a unique bridge id for this cross-repo bridge
+        import uuid as _uuid
+        new_bridge_id = _uuid.uuid4().hex
+
+        bridge_obj = await cross_repo_bridge.create_bridge(
+            bridge_id=new_bridge_id,
             source_repo_id=source_repo,
             target_repo_id=target_repo,
             thread_id=thread_id
         )
-        
+
         return {
-            "success": result["success"],
-            "bridge_id": result.get("bridge_id"),
+            "success": True,
+            "bridge_id": bridge_obj.bridge_id if hasattr(bridge_obj, "bridge_id") else new_bridge_id,
             "source_repo": source_repo,
             "target_repo": target_repo,
             "thread_id": thread_id,
@@ -1148,14 +1277,20 @@ async def v2_create_cross_repo_bridge(source_repo: str, target_repo: str, thread
         raise HTTPException(status_code=500, detail=f"Cross-repo bridge error: {str(e)}")
 
 
-@app.post("/api/v2/bridges/{bridge_id}/handshake")
+# verify_csrf inside
+@app.post("/api/v2/bridges/{bridge_id}/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_execute_cross_repo_handshake(bridge_id: str, request: Request):
+async def v2_execute_cross_repo_handshake(
+    bridge_id: str,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Execute 7-stage cross-repository handshake.
     
     Completes thread transfer between repositories with full validation.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1182,14 +1317,20 @@ async def v2_execute_cross_repo_handshake(bridge_id: str, request: Request):
 # Phase 3: Drift Prediction (5 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post("/api/v2/drift/predict")
+# verify_csrf inside
+@app.post("/api/v2/drift/predict", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
-async def v2_predict_drift(drift_request: DriftPredictionRequest, request: Request):
+async def v2_predict_drift(
+    drift_request: DriftPredictionRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Predict future drift based on current features.
     
     Uses LSTM model with 11-feature input for 24-hour prediction.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1264,14 +1405,20 @@ async def v2_analyze_patterns(request: Request):
         raise HTTPException(status_code=500, detail=f"Pattern analysis error: {str(e)}")
 
 
-@app.post("/api/v2/drift/observe")
+# verify_csrf inside
+@app.post("/api/v2/drift/observe", dependencies=[Depends(security)])
 @limiter.limit("60/minute")
-async def v2_record_observation(drift: float, request: Request):
+async def v2_record_observation(
+    drift: float,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Record a drift observation for pattern analysis.
     
     Adds data point to historical drift tracking.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1320,14 +1467,22 @@ async def v2_get_prediction_accuracy(request: Request):
         raise HTTPException(status_code=500, detail=f"Accuracy metrics error: {str(e)}")
 
 
-@app.post("/api/v2/corrections/apply")
+# verify_csrf inside
+@app.post("/api/v2/corrections/apply", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_apply_correction(thread_id: str, predicted_drift: float, current_drift: float, request: Request):
+async def v2_apply_correction(
+    thread_id: str,
+    predicted_drift: float,
+    current_drift: float,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Apply auto-correction actions based on drift prediction.
     
     Evaluates correction strategies and executes if drift exceeds threshold.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1366,9 +1521,14 @@ async def v2_apply_correction(thread_id: str, predicted_drift: float, current_dr
 # Phase 4: Layer Management (6 endpoints)
 # ------------------------------------------------------------------------
 
-@app.post("/api/v2/layers/bridge")
+# verify_csrf inside
+@app.post("/api/v2/layers/bridge", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
-async def v2_create_layer_bridge(layer_request: LayerBridgeRequest, request: Request):
+async def v2_create_layer_bridge(
+    layer_request: LayerBridgeRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Create a multi-layer bridge (L1/L2/L3).
     
@@ -1376,6 +1536,7 @@ async def v2_create_layer_bridge(layer_request: LayerBridgeRequest, request: Req
     L2: Repo-to-repo (7 stages, 0.1% max drift)
     L3: Cluster-to-cluster (9 stages, 0.5% max drift, PKI required)
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1422,14 +1583,20 @@ async def v2_create_layer_bridge(layer_request: LayerBridgeRequest, request: Req
         raise HTTPException(status_code=500, detail=f"Layer bridge creation error: {str(e)}")
 
 
-@app.post("/api/v2/layers/{bridge_id}/handshake")
+# verify_csrf inside
+@app.post("/api/v2/layers/{bridge_id}/handshake", dependencies=[Depends(security)])
 @limiter.limit("10/minute")
-async def v2_execute_layered_handshake(bridge_id: str, request: Request):
+async def v2_execute_layered_handshake(
+    bridge_id: str,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Execute layer-specific handshake protocol.
     
     Completes all stages for the bridge's layer with proper validation.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1452,14 +1619,21 @@ async def v2_execute_layered_handshake(bridge_id: str, request: Request):
         raise HTTPException(status_code=500, detail=f"Layered handshake error: {str(e)}")
 
 
-@app.post("/api/v2/layers/validate")
+# verify_csrf inside
+@app.post("/api/v2/layers/validate", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
-async def v2_validate_hierarchy(thread_id: str, strict_mode: bool = False, request: Request = None):
+async def v2_validate_hierarchy(
+    thread_id: str,
+    strict_mode: bool = False,
+    request: Request = None,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Validate multi-layer hierarchy for a thread.
     
     Checks: layer completion, drift tolerance, PKI (L3), dependencies
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1574,14 +1748,20 @@ async def v2_get_layer_statistics(request: Request):
         raise HTTPException(status_code=500, detail=f"Layer statistics error: {str(e)}")
 
 
-@app.post("/api/v2/layers/cascade-validate")
+# verify_csrf inside
+@app.post("/api/v2/layers/cascade-validate", dependencies=[Depends(security)])
 @limiter.limit("20/minute")
-async def v2_cascade_validate(thread_id: str, request: Request):
+async def v2_cascade_validate(
+    thread_id: str,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Perform cascading validation across all layers for a thread.
     
     Validates L1 → L2 → L3 dependencies and cross-layer consistency.
     """
+    verify_csrf_token(token)
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
@@ -1621,8 +1801,8 @@ async def v2_cascade_validate(thread_id: str, request: Request):
 
 
 # Example quantum endpoint (stub)
-# @app.post("/quantum/vsa")
-# @app.post("/quantum/vsa")
+# @app.post(  # verify_csrf inside"/quantum/vsa")
+# @app.post(  # verify_csrf inside"/quantum/vsa")
 
 # def quantum_vsa_endpoint(...):
 #     ...

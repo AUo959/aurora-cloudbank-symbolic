@@ -1,79 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-10-30T01:56:45.782680",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 3,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/modules/memory_retrieval/store.py",
-        "/workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py",
-        "/workspaces/aurora-cloudbank-symbolic/mrm_bootstrap.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 130: f-string logging - logger.error(f\"Webhook channel '{self.name}' missing URL configuration\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/resilience_sentinel/notifications.py: Line 135: f-string logging - logger.info(f\"[WEBHOOK] Sending alert to {webhook_url}\")\n  \u274c /workspaces/aurora-..."
-    },
-    {
-      "timestamp": "2025-10-30T02:11:39.682327",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 2,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/test_dlp_auto_tracker.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 237: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to initialize Insight Ledger: {e}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/middleware/dlp_auto_tracker.py: Line 275: f-string print (potential log output) - print(f\"\u26a0\ufe0f  Failed to record to Insight Ledger: {e}\")\n\n\ud83d\udca1 Fix: Use parameteri..."
-    },
-    {
-      "timestamp": "2025-11-02T23:04:27.000123",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 12,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/constellation.config.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/bridges/aurora-os/bridge.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/bridges/quantum-en/bridge.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/bridges/zip-wizard/bridge.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/constellation/health-check.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/constellation/seal-state.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/constellation/start.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/core/orchestrator.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/core/service-registry.ts",
-        "/workspaces/aurora-cloudbank-symbolic/src/index.ts",
-        "/workspaces/aurora-cloudbank-symbolic/test-constellation.js",
-        "/workspaces/aurora-cloudbank-symbolic/tests/test_constellation.spec.ts"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/index.ts: Line 220: POST endpoint without CSRF token validation - app.post('/api/tasks', (req: Request, res: Response) => {\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/index.ts: Line 300: POST endpoi..."
-    },
-    {
-      "timestamp": "2025-11-02T23:53:44.160054",
-      "status": "PASSED",
-      "files_scanned": 1,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/src/improvement/api.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
-      "timestamp": "2025-11-03T00:21:43.889621",
-      "status": "PASSED",
-      "files_scanned": 3,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/api.py",
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/ledger_core.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/modules/test_insight_ledger_security.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
-      "timestamp": "2025-11-03T01:05:38.502618",
-      "status": "PASSED",
-      "files_scanned": 4,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/src/core/logging_security.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/improvement/engine.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/synergy/component_registry.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/core/test_logging_security.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-03T22:30:37.194238",
       "status": "ISSUES_FOUND",
       "files_scanned": 17,
@@ -267,6 +194,384 @@
         "/workspaces/aurora-cloudbank-symbolic/.security/log_injection_validator.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-08T02:45:31.035638",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u274c XSS/Code Injection: FAILED\n\ud83d\udea8 XSS/INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 98: eval() call - code injection risk - \"\"\"Safely evaluate a validated AST node without using eval().\"\"\"\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 326: eval() call - code injection risk - Safe alternative to eval() for sim..."
+    },
+    {
+      "timestamp": "2025-11-08T02:51:06.976367",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 536: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:00:16.984628",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:06:16.730302",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 543: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:11:43.973715",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u274c XSS/Code Injection: FAILED\n\ud83d\udea8 XSS/INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 121: eval() call - code injection risk - \"\"\"Safely evaluate a validated AST node without using eval().\"\"\"\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 349: eval() call - code injection risk - Safe alternative to eval() for si..."
+    },
+    {
+      "timestamp": "2025-11-08T03:26:55.638551",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py",
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 134: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T03:55:27.363118",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 4,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py",
+        "/workspaces/aurora-cloudbank-symbolic/conftest.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_dlp_auto_tracker.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_security_middleware.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 184: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 590: POS..."
+    },
+    {
+      "timestamp": "2025-11-08T05:33:39.771774",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-08T18:40:20.766489",
+      "status": "PASSED",
+      "files_scanned": 9,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py",
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api_server.py",
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py",
+        "/workspaces/aurora-cloudbank-symbolic/conftest.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/opal2/api/opal2_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/integrations/chatgpt_agent_mode.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/middleware/fastapi_security.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/servers/l2_integration_server.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T01:03:24.482564",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line 287: POST endpoint without CSRF token validation - @app.post(\"/geometric/vector\", dependencies=[Depends(security)])\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line..."
+    },
+    {
+      "timestamp": "2025-11-09T01:41:44.523468",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_orion_simulation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 377: f-string print (potential log output) - print(f\"Ticks elapsed: {result['ticks']}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 378: f-string print (potential log output) - print(f\"Completed all: {result['completed']}\")\n  \u274c /workspaces/aurora-cloudbank-..."
+    },
+    {
+      "timestamp": "2025-11-09T01:47:11.705661",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py: Line 35: f-string print (potential log output) - print(f\"\u274c SECURITY ISSUE: {message}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/automation/security/security_remediation.py: Line 40: f-string print (potential log output) - print(f\"\ud83d\udd27 FIXED: {message}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/automa..."
+    },
+    {
+      "timestamp": "2025-11-09T01:53:26.132022",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py: Line 30: f-string print (potential log output) - print(f\"   {name:15} {status} | Task: {task:25} | Energy: [{fatigue_bar}]\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/interactive_collab_demo.py: Line 34: f-string print (potential log output) - print(f\"\\n{'\u2501'*70}\")\n  \u274c /workspaces/aurora-cloudba..."
+    },
+    {
+      "timestamp": "2025-11-09T02:07:47.827143",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 408: f-string print (potential log output) - print(f\"Ticks elapsed: {result['ticks']}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/orion_station_simulation.py: Line 409: f-string print (potential log output) - print(f\"Completed all: {result['completed']}\")\n  \u274c /workspaces/aurora-cloudbank-..."
+    },
+    {
+      "timestamp": "2025-11-09T18:09:12.487361",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/simulation/triplex_handshake_simulation.py",
+        "/workspaces/aurora-cloudbank-symbolic/simulation/triplex_handshake_simulator.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/triplex_handshake_simulation.py: Line 462: f-string print (potential log output) - print(f\"Visualization saved to: {save_path}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/simulation/triplex_handshake_simulation.py: Line 477: f-string print (potential log output) - print(f\"  Steps: {N_STEPS} (one station day)\")\n  \u274c /workspaces/aurora..."
+    },
+    {
+      "timestamp": "2025-11-09T19:20:21.265442",
+      "status": "PASSED",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/core/event_system.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/aurora_agent.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T19:21:17.516146",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/api/living_computation_example.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/api/living_computation_example.py: Line 9: POST endpoint without CSRF token validation - @app.post(\"/api/analyze\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/src/api/living_computation_example.py: Line ..."
+    },
+    {
+      "timestamp": "2025-11-09T19:36:29.614872",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/framework_agents.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T19:37:18.516771",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/relay_agents.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T19:42:49.486019",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/core/symbolic_space.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T19:49:55.317474",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/scripts/validate_phase1.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/validate_phase1.py: Line 33: f-string print (potential log output) - print(f\"   Initialized: {space.station_initialized_at.isoformat()}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/validate_phase1.py: Line 41: f-string print (potential log output) - print(f\"   \u2022 {entity.entity_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scri..."
+    },
+    {
+      "timestamp": "2025-11-09T20:06:49.248501",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T20:21:45.952088",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T20:32:29.015578",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T20:50:15.015633",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T21:47:12.301878",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T22:05:08.014512",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-09T22:18:40.092398",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T00:57:39.946479",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T02:14:38.287844",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T02:40:08.647672",
+      "status": "PASSED",
+      "files_scanned": 8,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/aurora_subcore.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/oppy.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/registry_drones.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/registry_probes.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/registry_vessels.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet/types.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/entities/fleet_entities.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T03:26:57.326923",
+      "status": "PASSED",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_station_ops.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/station_operations_service.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/station_types.js"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T04:05:27.476998",
+      "status": "PASSED",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_station_ops.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/station_operations_service.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/station_types.js"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T04:16:25.878765",
+      "status": "PASSED",
+      "files_scanned": 5,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_fleet_bridge.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_station_ops.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/fleet_bridge_client.js",
+        "/workspaces/aurora-cloudbank-symbolic/src/integrations/fleet_bridge.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_fleet_bridge_integration.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T04:16:35.952765",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line 306: POST endpoint without CSRF token validation - @app.post(\"/geometric/vector\", dependencies=[Depends(security)])\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line..."
+    },
+    {
+      "timestamp": "2025-11-10T04:44:57.075036",
+      "status": "PASSED",
+      "files_scanned": 5,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_infrastructure.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/dlp_manifest_generator.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/docking_sequence_manager.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/maintenance_orchestrator.js",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_flight_control_infrastructure.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T04:50:33.209923",
+      "status": "PASSED",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_fleet_bridge.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_infrastructure.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/dlp_manifest_generator.js"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T05:04:53.012540",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/scripts/interactive_review_311.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u274c Log Injection: FAILED\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/interactive_review_311.py: Line 23: f-string print (potential log output) - print(f\"\\n{BOLD}{CYAN}{'=' * 70}{RESET}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/interactive_review_311.py: Line 24: f-string print (potential log output) - print(f\"{BOLD}{CYAN}{text.center(70)}{RESET}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scri..."
     }
   ]
 }

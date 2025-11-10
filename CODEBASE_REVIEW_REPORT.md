@@ -1013,7 +1013,7 @@ Add to CI/CD:
    - Migration guides
 
 2. **Code Documentation**
-   - Type hints in all new modules; legacy code still being migrated
+    - Type hints in all new modules; legacy code still being migrated
    - Docstrings with DLP anchors
    - Inline comments for complex logic
 
@@ -1513,9 +1513,9 @@ Before production deployment:
 - Dependency Analysis: `/home/user/aurora_analysis_report.md`
 
 **Tools & References:**
-- OWASP Top 10: https://owasp.org/www-project-top-ten/
-- CVSS Calculator: https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator
-- CWE Database: https://cwe.mitre.org/
+- OWASP Top 10: <a href="https://owasp.org/www-project-top-ten/">https://owasp.org/www-project-top-ten/</a>
+- CVSS Calculator: <a href="https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator">https://nvd.nist.gov/vuln-metrics/cvss/v3-calculator</a>
+- CWE Database: <a href="https://cwe.mitre.org/">https://cwe.mitre.org/</a>
 
 ---
 

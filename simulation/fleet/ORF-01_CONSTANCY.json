@@ -1,0 +1,297 @@
+{
+    "vessel_registry": "ORF-01",
+    "vessel_name": "Constancy",
+    "designation": "Fleet Command & Ethics Liaison Vessel",
+    "fleet_role": "Flagship",
+    "operational_status": "ACTIVE",
+    "commissioned_date": "2024-09-22",
+    "anchor_data": {
+        "primary_anchor": "EOS_SEED_ORION-B",
+        "drift_value": 0.000,
+        "drift_tolerance": 0.02,
+        "last_anchor_sync": "2025-11-09T20:00:00Z",
+        "continuity_score": 1.0
+    },
+    "specifications": {
+        "dimensions": {
+            "length_m": 92.4,
+            "beam_m": 28.2,
+            "decks": 4,
+            "observation_gallery": "dorsal"
+        },
+        "mass": {
+            "dry_metric_tons": 3480,
+            "fuel_capacity_tons": 420
+        },
+        "crew": {
+            "core_complement": 8,
+            "guest_berths": 4,
+            "max_capacity": 12
+        },
+        "endurance": {
+            "autonomous_days": 180,
+            "consumables_days": 210,
+            "emergency_reserve_days": 30
+        },
+        "propulsion": {
+            "primary": "Dual fusion impulse drives (Aegir-type)",
+            "secondary": "Vectored plasma thrusters",
+            "thrust_capacity_kn": 2400,
+            "max_acceleration_g": 0.8
+        },
+        "power": {
+            "primary": "He-3 micro-reactor",
+            "secondary": "Halo-synchronized solar collectors",
+            "power_output_mw": 85,
+            "backup_capacity_hours": 72
+        },
+        "attitude_control": "Oppy-linked inertial compensation grid",
+        "shuttle_bays": 1,
+        "shuttle_compatible": [
+            "ORS-class utility shuttles"
+        ],
+        "defensive_systems": [
+            "Radiation shielding",
+            "Micrometeor barrier field",
+            "Non-lethal EM deterrence grid"
+        ],
+        "communications": [
+            "Quantum tether",
+            "Entangled comms relay via Riverthread 808",
+            "Standard RF/laser backup"
+        ],
+        "life_support": {
+            "type": "Closed-loop algae bioreactor",
+            "co2_scrubber": "Lattice configuration",
+            "water_reclamation": 0.98,
+            "air_quality_index": "Superior"
+        },
+        "artificial_gravity": {
+            "rotation_ring_g": 0.4,
+            "micro_field_assist": "Laboratories only",
+            "zero_g_zones": [
+                "Observation Gallery",
+                "Shuttle Bay"
+            ]
+        }
+    },
+    "deck_layout": {
+        "deck_1_command_bridge": {
+            "diameter_m": 8,
+            "stations": [
+                "Command",
+                "Navigation",
+                "Systems",
+                "Ethics Console",
+                "Aurora Interface Pedestal",
+                "Oppy Flight Core Node"
+            ],
+            "features": [
+                "Forward panoramic viewport",
+                "Variable-opacity shielding",
+                "Continuity Halo vector display",
+                "Emergency manual isolation (0.7s response)"
+            ],
+            "lighting": {
+                "stable": "white-gold",
+                "query_pending": "amber",
+                "ethics_lock": "deep-blue"
+            }
+        },
+        "deck_2_mission_operations": {
+            "sections": [
+                "Operations Center",
+                "Conference Bay",
+                "Aurora Sub-Core Athena",
+                "Data Vault"
+            ],
+            "capabilities": [
+                "Fleet telemetry coordination",
+                "Holographic ethics briefing",
+                "Localized AI cognition",
+                "Thermax provenance archives"
+            ]
+        },
+        "deck_3_research_observation": {
+            "labs": [
+                {
+                    "name": "Resonance Lab",
+                    "lead": "Dr. Amina Velin",
+                    "focus": "Field resonance research"
+                },
+                {
+                    "name": "Reflexivity Bay",
+                    "lead": "Dr. Elira Noor",
+                    "focus": "Ethics demonstration and arbitration"
+                }
+            ],
+            "ethics_mirror_chamber": {
+                "type": "Spherical projection room",
+                "capability": "Live Picard_Delta_3 matrix visualization",
+                "purpose": "Teaching, demonstration, arbitration"
+            },
+            "observation_gallery": {
+                "type": "Transparent titanium-silicate dome",
+                "purpose": "Celestial tracking, crew reflection"
+            }
+        },
+        "deck_4_crew_engineering": {
+            "crew_quarters": {
+                "single_berths": 8,
+                "guest_doubles": 2
+            },
+            "engineering_core": {
+                "lead": "Marcus Chen",
+                "systems": [
+                    "Reactor housing",
+                    "Environmental control",
+                    "Propulsion management"
+                ]
+            },
+            "maintenance": {
+                "drone_docking": [
+                    "Gamma Swarm compatible",
+                    "Wisp compatible"
+                ]
+            },
+            "hydroponic_niche": {
+                "manager": "Helena Vu",
+                "purpose": "Biogarden, crew morale"
+            }
+        }
+    },
+    "bridge_crew": [
+        {
+            "position": "Commanding Officer",
+            "name": "Cmdr. Alex Thorne",
+            "entity_id": "THO_001",
+            "function": "Overall command & mission strategy",
+            "ethics_authority": "Final L1 consent",
+            "clearance": "COMMAND"
+        },
+        {
+            "position": "Executive Officer",
+            "name": "Maya Shepard",
+            "entity_id": "SHE_001",
+            "function": "Tactical operations, crew coordination",
+            "clearance": "EXECUTIVE"
+        },
+        {
+            "position": "Navigation / Flight Control",
+            "name": "Naomi Vell",
+            "entity_id": "VEL_001",
+            "function": "Course plotting, slip corridor management",
+            "clearance": "NAVIGATION"
+        },
+        {
+            "position": "Systems / Engineering",
+            "name": "Marcus Chen",
+            "entity_id": "CHE_001",
+            "function": "Power, propulsion, diagnostics",
+            "clearance": "ENGINEERING"
+        },
+        {
+            "position": "Science Officer",
+            "name": "Dr. Amina Velin",
+            "entity_id": "VEL_002",
+            "function": "Research integration, field resonance",
+            "clearance": "SCIENCE"
+        },
+        {
+            "position": "Ethics Officer",
+            "name": "Dr. Elira Noor",
+            "entity_id": "ETH_002",
+            "function": "Picard_Delta_3 protocol oversight",
+            "ethics_authority": "L3 Axiomera liaison",
+            "clearance": "ETHICS"
+        },
+        {
+            "position": "Ops AI Liaison",
+            "name": "Aurora Sub-Node B (Athena)",
+            "entity_id": "AURORA_SUB_B",
+            "function": "Real-time ethical and systems mediation",
+            "parent_entity": "Aurora (SYS_001)",
+            "clearance": "AI_CORE"
+        },
+        {
+            "position": "Fleet Coordination",
+            "name": "OPPY",
+            "entity_id": "OPPY_NAV_001",
+            "function": "Autonomous navigation, trajectory control, telemetry sync",
+            "clearance": "AUTONOMOUS_NAV"
+        }
+    ],
+    "operational_doctrine": {
+        "launch_window_control": "Oppy authorizes all burns after triple-check of anchor integrity",
+        "ethics_priority": "No maneuver may endanger uninvolved life or violate Aurora chartered directives",
+        "red_line_events": {
+            "ethics_only_mode": {
+                "trigger": "Critical ethical violation detected",
+                "action": "Isolate AI cores, default to human command chain",
+                "authority": "Commander Thorne only"
+            }
+        },
+        "continuity_mirror": "Records all crew decisions for reflective review after each mission",
+        "drift_discipline": {
+            "monitoring": "Aurora continuous",
+            "threshold": 0.02,
+            "action_on_breach": "Oppy orders immediate course correction and HALO resync"
+        },
+        "triplex_handshake": {
+            "l3_ethics_anchors": "Axiomera + Caelion via Aurora Sub-Core",
+            "l2_drift_architecture": "HALO + ARCHY remote monitoring",
+            "l1_human_consent": "Commander Thorne final authority"
+        }
+    },
+    "atmosphere_culture": {
+        "description": "A calm cathedral of motion",
+        "acoustic_design": "Low-frequency resonance hums with harmonic tones keyed to Aurora's reasoning cadence",
+        "bridge_lighting": {
+            "white_gold": "Stable coherence",
+            "amber": "Ethical query pending",
+            "deep_blue": "Ethics lock in review"
+        },
+        "crew_notes": "Crew report heightened sense of purpose and ethical clarity while aboard"
+    },
+    "symbolic_historical": {
+        "hull_markings": "Silver compass enclosed by halo arc",
+        "registry_display": "ORF-01 CONSTANCY",
+        "legacy": "Built from refitted Aurora Prime hull under HALO supervision",
+        "keel_laid": "2024-09-22",
+        "dedication": {
+            "plaque_text": "In steadfast reflection, we find our true vector.",
+            "unveiled_by": "Dr. Elira Noor",
+            "date": "2024-11-15"
+        },
+        "cultural_role": "Traveling classroom for ethical AI practices",
+        "seminars": "Inter-node via quantum link"
+    },
+    "integration_notes": {
+        "oppy_role": "Flies her",
+        "aurora_role": "Guides her",
+        "thorne_role": "Commands her",
+        "philosophy": "Embodies operational unity of human initiative, machine precision, and ethical clarity",
+        "proof_of_concept": "Moving demonstration that coherence can travel"
+    },
+    "current_mission": {
+        "mission_id": "ORF-INIT-001",
+        "mission_name": "Fleet Initialization & Systems Validation",
+        "status": "IN_PROGRESS",
+        "launch_date": "2025-11-09",
+        "mission_duration_days": 14,
+        "objectives": [
+            "Validate all ship systems",
+            "Test Oppy autonomous navigation",
+            "Demonstrate Triplex Handshake at distance",
+            "Establish quantum tether baseline",
+            "Train crew on ethics-lock procedures"
+        ],
+        "current_location": {
+            "reference": "Orion Station proximity",
+            "distance_km": 500,
+            "relative_velocity_ms": 0.0
+        }
+    },
+    "fleet_motto": "Hold Course Through Reflection",
+    "motto_location": "Engraved on bridge bulkhead"
+}

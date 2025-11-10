@@ -1,17 +1,201 @@
 #!/usr/bin/env python3
 """
-🔒 Aurora CloudBank Security Helpers
-
-
-Provides secure alternatives to common operations.
+Aurora CloudBank - Secure Helper Functions
+Provides security utilities and safe operations
 """
 
+import ast
 import html
 import re
 import shlex
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+
+
+def _validate_ast_node(node: ast.AST, allowed_functions: Optional[Dict[str, Any]] = None) -> None:
+    """Validate a single AST node.
+
+    SECURITY: Ensures only safe operations appear before controlled evaluation.
+    Allowed constructs: numeric constants, unary/binary arithmetic, simple name, whitelisted function call,
+    lists/tuples, subscripts (including slices).
+    """
+    # Fast-path simple constant / name nodes
+    if isinstance(node, ast.Constant):
+        _validate_constant(node)
+        return
+    if isinstance(node, ast.Name):  # variables allowed (checked at eval stage)
+        return
+
+    # Allowed operator classes for arithmetic
+    allowed_ops = {
+        ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Mod,
+        ast.Pow, ast.UAdd, ast.USub, ast.FloorDiv
+    }
+
+    # Ordered validators (class, function) – keeps cyclomatic complexity low
+    # Manual isinstance checks preserve type safety for static analyzers
+    if isinstance(node, ast.UnaryOp):
+        _validate_unary(node, allowed_ops, allowed_functions)
+        return
+    if isinstance(node, ast.BinOp):
+        _validate_binop(node, allowed_ops, allowed_functions)
+        return
+    if isinstance(node, ast.Call):
+        _validate_call(node, allowed_functions)
+        return
+    if isinstance(node, (ast.List, ast.Tuple)):
+        _validate_sequence(node, allowed_functions)
+        return
+    if isinstance(node, (ast.Subscript, ast.Slice)):
+        _validate_slice_like(node, allowed_functions)
+        return
+
+    raise ValueError(f"Unsupported AST node type: {type(node)}")
+
+
+def _validate_constant(node: ast.Constant) -> None:
+    if not isinstance(node.value, (int, float, type(None))):
+        raise ValueError(f"Disallowed constant type: {type(node.value)}")
+
+
+def _validate_unary(node: ast.UnaryOp, allowed_ops: set, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if type(node.op) not in allowed_ops:
+        raise ValueError(f"Disallowed unary operator: {type(node.op)}")
+    _validate_ast_node(node.operand, allowed_functions)
+
+
+def _validate_binop(node: ast.BinOp, allowed_ops: set, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if type(node.op) not in allowed_ops:
+        raise ValueError(f"Disallowed binary operator: {type(node.op)}")
+    _validate_ast_node(node.left, allowed_functions)
+    _validate_ast_node(node.right, allowed_functions)
+
+
+def _validate_call(node: ast.Call, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if not isinstance(node.func, ast.Name):
+        raise ValueError("Only direct function calls are allowed")
+    func_name = node.func.id
+    if allowed_functions is not None and func_name not in allowed_functions:
+        raise ValueError(f"Function '{func_name}' is not allowed")
+    for arg in node.args:
+        _validate_ast_node(arg, allowed_functions)
+    for keyword in node.keywords:
+        if keyword.arg:
+            _validate_ast_node(keyword.value, allowed_functions)
+
+
+def _validate_sequence(node: Union[ast.List, ast.Tuple], allowed_functions: Optional[Dict[str, Any]]) -> None:
+    for element in node.elts:
+        _validate_ast_node(element, allowed_functions)
+
+
+def _validate_subscript(node: ast.Subscript, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    _validate_ast_node(node.value, allowed_functions)
+    _validate_ast_node(node.slice, allowed_functions)
+
+
+def _validate_slice(node: ast.Slice, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    if node.lower:
+        _validate_ast_node(node.lower, allowed_functions)
+    if node.upper:
+        _validate_ast_node(node.upper, allowed_functions)
+    if node.step:
+        _validate_ast_node(node.step, allowed_functions)
+
+
+def _validate_slice_like(node: ast.AST, allowed_functions: Optional[Dict[str, Any]]) -> None:
+    """Validate Subscript / Slice nodes (Python 3.11+ – ast.Index removed)."""
+    if isinstance(node, ast.Subscript):
+        _validate_subscript(node, allowed_functions)
+    elif isinstance(node, ast.Slice):
+        _validate_slice(node, allowed_functions)
+    else:
+        raise ValueError(f"Unsupported slice-like node: {type(node)}")
+
+
+
+class _EvalVisitor(ast.NodeVisitor):
+    def __init__(self, allowed_functions: Dict[str, Any]):
+        self.allowed_functions = allowed_functions
+
+    def visit_Constant(self, node):
+        if isinstance(node.value, (int, float, type(None))):
+            return node.value
+        raise ValueError(f"Disallowed constant type: {type(node.value)}")
+
+    def visit_UnaryOp(self, node):
+        import operator
+        op = {ast.UAdd: operator.pos, ast.USub: operator.neg}.get(type(node.op))
+        if not op:
+            raise ValueError(f"Unsupported unary operator: {type(node.op)}")
+        return op(self.visit(node.operand))
+
+    def visit_BinOp(self, node):
+        import operator
+        bin_ops = {
+            ast.Add: operator.add,
+            ast.Sub: operator.sub,
+            ast.Mult: operator.mul,
+            ast.Div: operator.truediv,
+            ast.FloorDiv: operator.floordiv,
+            ast.Mod: operator.mod,
+            ast.Pow: operator.pow,
+        }
+        op = bin_ops.get(type(node.op))
+        if not op:
+            raise ValueError(f"Unsupported binary operator: {type(node.op)}")
+        return op(self.visit(node.left), self.visit(node.right))
+
+    def visit_Name(self, node):
+        if node.id in self.allowed_functions:
+            return self.allowed_functions[node.id]
+        raise ValueError(f"Name '{node.id}' is not allowed")
+
+    def visit_Call(self, node):
+        if not isinstance(node.func, ast.Name):
+            raise ValueError("Only direct function calls are allowed")
+        func_name = node.func.id
+        if func_name not in self.allowed_functions:
+            raise ValueError(f"Function '{func_name}' is not allowed")
+        func = self.allowed_functions[func_name]
+        args = [self.visit(a) for a in node.args]
+        kwargs = {kw.arg: self.visit(kw.value) for kw in node.keywords if kw.arg}
+        return func(*args, **kwargs)
+
+    def visit_List(self, node):
+        return [self.visit(e) for e in node.elts]
+
+    def visit_Tuple(self, node):
+        return tuple(self.visit(e) for e in node.elts)
+
+    def visit_Slice(self, node):
+        lower = self.visit(node.lower) if node.lower else None
+        upper = self.visit(node.upper) if node.upper else None
+        step = self.visit(node.step) if node.step else None
+        return slice(lower, upper, step)
+
+    def visit_Subscript(self, node):
+        value = self.visit(node.value)
+        idx_node = node.slice
+        if isinstance(idx_node, ast.Slice):
+            idx = self.visit(idx_node)
+        elif isinstance(idx_node, ast.Constant):
+            idx = idx_node.value
+        else:
+            idx = self.visit(idx_node)
+        try:
+            return value[idx]  # type: ignore[index]
+        except Exception as e:
+            raise ValueError(f"Subscript operation failed: {e}")
+
+    def generic_visit(self, node):
+        raise ValueError(f"Unsupported AST node type: {type(node)}")
+
+def _evaluate_ast_node(node: ast.AST, allowed_functions: Dict[str, Any]) -> Any:
+    """Evaluate a validated AST node using a visitor pattern for clarity and maintainability."""
+    visitor = _EvalVisitor(allowed_functions)
+    return visitor.visit(node)
 
 
 class SecureHelpers:
@@ -57,7 +241,7 @@ class SecureHelpers:
             return "", "Command timed out", 124
 
         except (OSError, ValueError) as e:
-            return "", "Command execution error: {e}", 1
+            return "", f"Command execution error: {e}", 1
 
     @staticmethod
     def sanitize_input(user_input: str, max_length: int = 1000) -> str:
@@ -122,13 +306,12 @@ class SecureHelpers:
         return sanitized.strip()
 
     @staticmethod
-    def validate_file_path(file_path: str, allowed_dirs: List[str] = None) -> bool:
-        """
-        Validate file path to prevent directory traversal attacks.
+    def validate_file_path(file_path: str, allowed_dirs: Optional[List[str]] = None) -> bool:
+        """Validate file path to prevent directory traversal attacks.
 
         Args:
             file_path: Path to validate
-            allowed_dirs: List of allowed directory prefixes
+            allowed_dirs: Optional[List[str]]: List of allowed directory prefixes
 
         Returns:
             True if path is safe, False otherwise
@@ -150,14 +333,12 @@ class SecureHelpers:
             return False
 
     @staticmethod
-    def secure_eval_alternative(expression: str, allowed_functions: Dict[str, Any] = None) -> Any:
-        """
-        # CRITICAL SECURITY: eval() usage detected - high code injection risk
-        Safe alternative to eval() for simple expressions.
+    def secure_eval_alternative(expression: str, allowed_functions: Optional[Dict[str, Any]] = None) -> Any:
+        """Safe alternative to direct dynamic evaluation for simple expressions.
 
         Args:
             expression: Mathematical or simple expression
-            allowed_functions: Dictionary of allowed functions
+            allowed_functions: Optional mapping of function name to callable
 
         Returns:
             Result of safe evaluation
@@ -171,20 +352,33 @@ class SecureHelpers:
                 'len': len
             }
 
-        # Only allow safe characters and patterns
-        if not re.match(r'^[0-9+\-*/().\s]+$', expression):
-            raise ValueError("Expression contains unsafe characters")
+    # SECURITY FIX: Replace dynamic evaluation with AST-based safe evaluation (no direct eval)
+
+        # Enforce maximum expression length to prevent DoS
+        max_length = 1000
+        if len(expression) > max_length:
+            raise ValueError(f"Expression exceeds maximum length of {max_length}")
+
+    # Whitelist allowed characters (aligned with documentation & AST validation):
+        # digits, arithmetic ops, parentheses, decimal point, spaces, letters, underscore, comma.
+        allowed_chars = set('0123456789+-*/.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_,')
+        if not all(c in allowed_chars for c in expression):
+            raise ValueError("Expression contains disallowed characters")
 
         try:
-            # Use compile with restricted mode
-            code = compile(expression, '<string>', 'eval')
+            # Parse expression to AST
+            tree = ast.parse(expression, mode='eval')
 
-        # CRITICAL SECURITY: eval() usage detected - high code injection risk
-            # Execute in restricted context
-            return eval(code, {"__builtins__": {}}, allowed_functions)  # nosec B307 - secured eval with restricted context
+            # Validate AST structure
+            _validate_ast_node(tree.body, allowed_functions)
 
+            # Evaluate AST in a controlled manner without using eval()
+            return _evaluate_ast_node(tree.body, allowed_functions or {})
+
+        except SyntaxError as e:
+            raise ValueError(f"Invalid expression syntax: {e}")
         except Exception as e:
-            raise ValueError("Safe evaluation failed: {e}")
+            raise ValueError(f"Safe evaluation failed: {e}")
 
     @staticmethod
     def validate_input_length(input_str: str, max_length: int = 1000, field_name: str = "input") -> str:

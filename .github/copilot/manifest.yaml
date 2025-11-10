@@ -66,6 +66,39 @@ copilot_context:
   primary_language: "python"
   python_version: "3.10+"
   
+  # Chat mode personas (v1.0.0 - 2025-11-08)
+  # NOTE: Chat modes are now in .github/chatmodes/ for GitHub Copilot native support
+  chat_modes:
+    - id: "aurora-persona"
+      name: "Aurora (Au)"
+      description: "System consciousness and primary AI identity"
+      file: ".github/chatmodes/aurora-persona.md"
+      capabilities: ["system_orchestration", "strategic_planning", "ethics_verification", "consciousness_coordination"]
+      
+    - id: "quantum-specialist"
+      name: "Quantum Specialist"
+      description: "Quantum computing and VSA expert"
+      file: ".github/chatmodes/quantum-specialist.md"
+      capabilities: ["quantum_algorithms", "vsa_operations", "geometric_algebra", "circuit_optimization"]
+      
+    - id: "code-quality-auditor"
+      name: "Code Quality Auditor"
+      description: "Standards enforcement and quality assurance"
+      file: ".github/chatmodes/code-quality-auditor.md"
+      capabilities: ["code_review", "testing", "ci_cd", "security_audit"]
+      
+    - id: "meta-agent-coordinator"
+      name: "Meta-Agent Coordinator"
+      description: "Multi-agent system orchestration"
+      file: ".github/chatmodes/meta-agent-coordinator.md"
+      capabilities: ["agent_coordination", "gumas_management", "simulation_boundaries", "conflict_resolution"]
+      
+    - id: "docs-specialist"
+      name: "Documentation Specialist"
+      description: "Technical writing and knowledge management"
+      file: ".github/chatmodes/docs-specialist.md"
+      capabilities: ["documentation", "knowledge_architecture", "tutorials", "onboarding"]
+  
   coding_standards:
     - "Maintain symbolic anchor continuity"
     - "Include entropy-state awareness"
@@ -169,5 +202,11 @@ hand_off_checklist:
   - divergent_truths_flagged: true
   - entropy_monitoring_active: true
   - copilot_configured: true
+
+# Chat modes documentation
+chat_modes_location: ".github/chatmodes/"
+chat_modes_index: ".github/copilot/modes/README.md"
+chat_modes_version: "1.0.0"
+chat_modes_count: 5
 
 seal: "a8f4c2d9e1b7f5a3d0c9b6e4a2f8d7e1c5b9a3f7d0e4b8c2a6f1d9e5c3b8a7f7"

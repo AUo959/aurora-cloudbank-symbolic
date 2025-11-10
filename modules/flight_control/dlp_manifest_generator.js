@@ -2,8 +2,8 @@
 // Generates DLP-compliant manifests for station snapshots with T1/SRB anchors
 
 import { createHash } from "crypto";
-import { writeFile, mkdir } from "fs/promises";
-import { join, dirname } from "path";
+import { mkdir, writeFile } from "fs/promises";
+import { join } from "path";
 
 /**
  * @typedef {import('./station_types.js').StationState} StationState

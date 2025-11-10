@@ -1,10 +1,10 @@
 // Complete Infrastructure Demo: DLP persistence + Maintenance + Enhanced docking
+import { EventEmitter } from "events";
+import { DLPManifestGenerator } from "./dlp_manifest_generator.js";
+import { DockingSequenceManager } from "./docking_sequence_manager.js";
+import { MaintenanceOrchestrator } from "./maintenance_orchestrator.js";
 import { StationOperationsService } from "./station_operations_service.js";
 import { createInitialStationState } from "./station_types.js";
-import { DLPManifestGenerator } from "./dlp_manifest_generator.js";
-import { MaintenanceOrchestrator } from "./maintenance_orchestrator.js";
-import { DockingSequenceManager } from "./docking_sequence_manager.js";
-import { EventEmitter } from "events";
 
 // Telemetry bus
 const bus = new (class extends EventEmitter {

@@ -1,8 +1,8 @@
 // Fleet Bridge Demo: Shows Python fleet sync with JS flight control
+import { EventEmitter } from "events";
+import { FleetBridgeClient } from "./fleet_bridge_client.js";
 import { StationOperationsService } from "./station_operations_service.js";
 import { createInitialStationState } from "./station_types.js";
-import { FleetBridgeClient } from "./fleet_bridge_client.js";
-import { EventEmitter } from "events";
 
 // Telemetry bus
 const bus = new (class extends EventEmitter {

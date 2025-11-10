@@ -247,3 +247,4 @@ auth_config.json
 .github/instructions/codacy.instructions.md
 .devcontainer/hooks/
 .rebuild_degraded_state.json
+station_manifests/

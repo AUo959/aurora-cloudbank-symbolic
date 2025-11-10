@@ -122,6 +122,16 @@ except ImportError:
     EVENT_COORDINATION_AVAILABLE = False
     EVENT_COORDINATION_ROUTER = None
 
+# Import Fleet Bridge API integration
+try:
+    from src.integrations.fleet_bridge import router as fleet_bridge_router
+    FLEET_BRIDGE_AVAILABLE = True
+    FLEET_BRIDGE_ROUTER = fleet_bridge_router
+except ImportError:
+    print("Fleet Bridge not available - Python-JS fleet sync features disabled")
+    FLEET_BRIDGE_AVAILABLE = False
+    FLEET_BRIDGE_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -202,6 +212,15 @@ if EVENT_COORDINATION_AVAILABLE and EVENT_COORDINATION_ROUTER:
     except Exception as e:
         logger.error("Failed to integrate Event Coordination API routes: %s", e)
         EVENT_COORDINATION_AVAILABLE = False
+
+# Include Fleet Bridge API routes if available
+if FLEET_BRIDGE_AVAILABLE and FLEET_BRIDGE_ROUTER:
+    try:
+        app.include_router(FLEET_BRIDGE_ROUTER)
+        logger.info("Fleet Bridge API routes integrated successfully")
+    except Exception as e:
+        logger.error("Failed to integrate Fleet Bridge API routes: %s", e)
+        FLEET_BRIDGE_AVAILABLE = False
 
 ga = GeometricAlgebra()
 

@@ -1,7 +1,7 @@
 // ESM demo harness wiring StationOperationsService with a state instance & bus.
+import { EventEmitter } from "events";
 import { StationOperationsService } from "./station_operations_service.js";
 import { createInitialStationState } from "./station_types.js";
-import { EventEmitter } from "events";
 
 // Use global bus if v2.1 augmentation present
 const bus = (globalThis.OPPY_V21_BUS && globalThis.OPPY_V21_BUS.emitFrame)

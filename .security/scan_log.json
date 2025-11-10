@@ -1,17 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-03T00:21:43.889621",
-      "status": "PASSED",
-      "files_scanned": 3,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/api.py",
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/ledger_core.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/modules/test_insight_ledger_security.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-03T01:05:38.502618",
       "status": "PASSED",
       "files_scanned": 4,
@@ -573,6 +562,17 @@
         "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/docking_sequence_manager.js",
         "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/maintenance_orchestrator.js",
         "/workspaces/aurora-cloudbank-symbolic/tests/test_flight_control_infrastructure.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
+    },
+    {
+      "timestamp": "2025-11-10T04:50:33.209923",
+      "status": "PASSED",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_fleet_bridge.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/demo_infrastructure.js",
+        "/workspaces/aurora-cloudbank-symbolic/modules/flight_control/dlp_manifest_generator.js"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
     }

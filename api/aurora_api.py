@@ -1004,14 +1004,23 @@ async def v2_register_node(
         raise HTTPException(status_code=500, detail=f"Node registration error: {str(e)}")
 
 
-@app.delete("/api/v2/nodes/{node_id}")
+@app.delete("/api/v2/nodes/{node_id}", dependencies=[Depends(security)])
 @limiter.limit("30/minute")
-async def v2_unregister_node(node_id: str, request: Request):
+async def v2_unregister_node(
+    node_id: str,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Unregister a bridge node from the constellation.
     
     Gracefully removes node from registry and load balancing pool.
+    
+    SECURITY: CSRF protection via token validation (HIGH-4 remediation)
     """
+    # HIGH-4: Verify CSRF token before node deletion
+    verify_csrf_token(token)
+    
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,

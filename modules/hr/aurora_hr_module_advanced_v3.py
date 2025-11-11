@@ -1191,7 +1191,7 @@ def main():
     print("-" * 80)
     assessment = hr_module.assess_psychological_safety("Helena Vu")
     print("Member: %s" % (assessment['member'],))
-    print("Overall Score: %s/4.00" % (assessment['overall_score']:.2f,))
+    print("Overall Score: %.2f/4.00" % (assessment['overall_score'],))
     print("Safety Level: %s" % (assessment['level'].name,))
     print("Intervention Required: %s" % (assessment['intervention_required'],))
     if assessment['recommendations']:
@@ -1241,7 +1241,7 @@ def main():
     print("-" * 80)
     cultural_report = hr_module.assess_cultural_health(TeamLayer.REAL_WORLD)
     print("Report ID: %s" % (cultural_report.report_id,))
-    print("Overall Cultural Health Score: %s" % (cultural_report.overall_score:.2f,))
+    print("Overall Cultural Health Score: %.2f" % (cultural_report.overall_score,))
     print("Intervention Required: %s" % (cultural_report.intervention_required,))
     print("\nStrengths (%s):" % (len(cultural_report.strengths),))
     for strength in cultural_report.strengths[:3]:
@@ -1261,7 +1261,7 @@ def main():
     print("  Active Members: %s" % (report['sections']['team_overview']['active_members'],))
     print("  Departments: %s" % (report['sections']['team_overview']['departments'],))
     print(f"\nPsychological Safety:")
-    print("  Average Score: %s" % (report['sections']['psychological_safety']['average_score']:.2f,))
+    print("  Average Score: %.2f" % (report['sections']['psychological_safety']['average_score'],))
     print("  At Risk: %s" % (report['sections']['psychological_safety']['at_risk_count'],))
     print("  Optimal: %s" % (report['sections']['psychological_safety']['optimal_count'],))
     print(f"\nConflict Management:")

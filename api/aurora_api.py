@@ -26,7 +26,7 @@ try:
     from src.integrations.gemini_agent_integration import gemini_agent_integration
     GEMINI_AGENT_AVAILABLE = True
 except ImportError:
-    print("Gemini Agent not available - Gemini features disabled")
+    logging.getLogger("aurora_api").warning("Gemini Agent not available - Gemini features disabled")
     GEMINI_AGENT_AVAILABLE = False
 
 # Import centralized security configuration
@@ -46,7 +46,7 @@ try:
     AUMEMMANAGER_AVAILABLE = True
     AUMEMMANAGER_ROUTER = aumemmanager_router
 except ImportError:
-    print("AuMemManager not available - some memory features disabled")
+    logging.getLogger("aurora_api").warning("AuMemManager not available - some memory features disabled")
     AUMEMMANAGER_AVAILABLE = False
     AUMEMMANAGER_ROUTER = None
 
@@ -56,7 +56,7 @@ try:
     DATA_GUARDIAN_AVAILABLE = True
     DATA_GUARDIAN_ROUTER = data_guardian_router
 except ImportError:
-    print("Data Guardian not available - PII detection/redaction features disabled")
+    logging.getLogger("aurora_api").warning("Data Guardian not available - PII detection/redaction features disabled")
     DATA_GUARDIAN_AVAILABLE = False
     DATA_GUARDIAN_ROUTER = None
 
@@ -67,7 +67,7 @@ try:
     INSIGHT_LEDGER_AVAILABLE = True
     INSIGHT_LEDGER_ROUTER = insight_ledger_router
 except ImportError:
-    print("Insight Ledger not available - audit trail features disabled")
+    logging.getLogger("aurora_api").warning("Insight Ledger not available - audit trail features disabled")
     INSIGHT_LEDGER_AVAILABLE = False
     INSIGHT_LEDGER_ROUTER = None
     initialize_ledger = None
@@ -78,7 +78,7 @@ try:
     QUANTUM_SIMULATOR_AVAILABLE = True
     QUANTUM_SIMULATOR_ROUTER = quantum_simulator_router
 except ImportError:
-    print("Quantum Simulator not available - quantum simulation features disabled")
+    logging.getLogger("aurora_api").warning("Quantum Simulator not available - quantum simulation features disabled")
     QUANTUM_SIMULATOR_AVAILABLE = False
     QUANTUM_SIMULATOR_ROUTER = None
 
@@ -89,7 +89,9 @@ try:
     )
     THREAD_BRIDGE_AVAILABLE = True
 except ImportError:
-    print("Thread Transfer Bridge not available - cross-thread continuity features disabled")
+    logging.getLogger("aurora_api").warning(
+        "Thread Transfer Bridge not available - cross-thread continuity features disabled"
+    )
     THREAD_BRIDGE_AVAILABLE = False
     get_bridge_instance = None
     initialize_bridge = None
@@ -110,7 +112,9 @@ try:
     )
     THREAD_BRIDGE_V2_AVAILABLE = True
 except ImportError:
-    print("Thread Transfer Bridge v2 not available - distributed/predictive features disabled")
+    logging.getLogger("aurora_api").warning(
+        "Thread Transfer Bridge v2 not available - distributed/predictive features disabled"
+    )
     THREAD_BRIDGE_V2_AVAILABLE = False
 
 # Import Event Coordination Registry API integration
@@ -119,7 +123,9 @@ try:
     EVENT_COORDINATION_AVAILABLE = True
     EVENT_COORDINATION_ROUTER = event_coordination_router
 except ImportError:
-    print("Event Coordination not available - multi-agent coordination features disabled")
+    logging.getLogger("aurora_api").warning(
+        "Event Coordination not available - multi-agent coordination features disabled"
+    )
     EVENT_COORDINATION_AVAILABLE = False
     EVENT_COORDINATION_ROUTER = None
 
@@ -129,7 +135,7 @@ try:
     FLEET_BRIDGE_AVAILABLE = True
     FLEET_BRIDGE_ROUTER = fleet_bridge_router
 except ImportError:
-    print("Fleet Bridge not available - Python-JS fleet sync features disabled")
+    logging.getLogger("aurora_api").warning("Fleet Bridge not available - Python-JS fleet sync features disabled")
     FLEET_BRIDGE_AVAILABLE = False
     FLEET_BRIDGE_ROUTER = None
 

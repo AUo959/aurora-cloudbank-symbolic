@@ -23,16 +23,16 @@ from collections import defaultdict
 import logging
 
 # Aurora CloudBank Integration Imports
+# Configure logging (early initialization for import error logging)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 try:
     from src.core.native_dlp_export import NativeDLPTracker
     AURORA_DLP_AVAILABLE = True
 except ImportError:
     AURORA_DLP_AVAILABLE = False
-    print("Aurora DLP not available - running in standalone mode")
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+    logger.warning("Aurora DLP not available - running in standalone mode")
 
 # Constants
 SUMMARY_MAX_LENGTH = 100  # Maximum length for content summaries in logs

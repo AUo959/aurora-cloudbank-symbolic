@@ -8,6 +8,7 @@ import html
 import re
 import shlex
 import subprocess
+import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Union
 
@@ -21,6 +22,9 @@ import json
 import sys
 from typing import Tuple
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 
 class SecurityRemediator:
     """Comprehensive security vulnerability fixer for Aurora CloudBank."""
@@ -32,22 +36,22 @@ class SecurityRemediator:
 
     def log_security_issue(self, message: str):
         """Log a security issue."""
-        print(f"❌ SECURITY ISSUE: {message}")
+        logger.error(f"❌ SECURITY ISSUE: {message}")
         self.issues_found += 1
 
     def log_fix(self, message: str):
         """Log a successful fix."""
-        print(f"🔧 FIXED: {message}")
+        logger.info(f"🔧 FIXED: {message}")
         self.issues_fixed += 1
 
     def log_warning(self, message: str):
         """Log a warning."""
-        print(f"⚠️  WARNING: {message}")
+        logger.warning(f"⚠️  WARNING: {message}")
         self.warnings += 1
 
     def log_info(self, message: str):
         """Log informational message."""
-        print(f"ℹ️  {message}")
+        logger.info(f"ℹ️  {message}")
 
     def secure_subprocess_run(self, cmd: str) -> Tuple[str, bool]:
         """Securely run a subprocess command without shell=False."""
@@ -57,7 +61,7 @@ class SecurityRemediator:
             result = subprocess.run(cmd_parts, capture_output=True, text=True, timeout=30, check=False)
             return result.stdout.strip(), result.returncode == 0
         except (subprocess.TimeoutExpired, OSError, ValueError) as e:
-            print(f"Command execution error: {e}")
+            logger.error(f"Command execution error: {e}")
             return "", False
 
     def fix_dev_status_py(self):
@@ -617,10 +621,10 @@ result = secure.secure_eval_alternative(user_expression)
 
     def run_remediation(self):
         """Run complete security remediation process."""
-        print("🔒 AURORA CLOUDBANK SECURITY REMEDIATION")
-        print("=" * 50)
-        print("🎯 Fixing Security Vulnerabilities in PR #43")
-        print()
+        logger.info("🔒 AURORA CLOUDBANK SECURITY REMEDIATION")
+        logger.info("=" * 50)
+        logger.info("🎯 Fixing Security Vulnerabilities in PR #43")
+        logger.info("")
 
         # Create security directory
         Path(".security").mkdir(exist_ok=True)
@@ -637,18 +641,18 @@ result = secure.secure_eval_alternative(user_expression)
         self.create_security_documentation()
 
         # Summary
-        print("\n" + "=" * 50)
-        print("🔒 SECURITY REMEDIATION SUMMARY")
-        print("=" * 50)
-        print(f"📊 Issues Found: {self.issues_found}")
-        print(f"🔧 Issues Fixed: {self.issues_fixed}")
-        print(f"⚠️  Warnings: {self.warnings}")
+        logger.info("\n" + "=" * 50)
+        logger.info("🔒 SECURITY REMEDIATION SUMMARY")
+        logger.info("=" * 50)
+        logger.info(f"📊 Issues Found: {self.issues_found}")
+        logger.info(f"🔧 Issues Fixed: {self.issues_fixed}")
+        logger.info(f"⚠️  Warnings: {self.warnings}")
 
         if self.issues_fixed >= self.issues_found:
-            print("✅ ALL SECURITY VULNERABILITIES RESOLVED")
+            logger.info("✅ ALL SECURITY VULNERABILITIES RESOLVED")
             return True
         else:
-            print("❌ SOME ISSUES REMAIN")
+            logger.warning("❌ SOME ISSUES REMAIN")
             return False
 
 
@@ -658,11 +662,11 @@ def main():
     success = remediator.run_remediation()
 
     if success:
-        print("\n🎉 Aurora CloudBank is now SECURE!")
-        print("🛡️  All vulnerabilities have been patched")
+        logger.info("\n🎉 Aurora CloudBank is now SECURE!")
+        logger.info("🛡️  All vulnerabilities have been patched")
         sys.exit(0)
     else:
-        print("\n⚠️  Some security issues need manual attention")
+        logger.warning("\n⚠️  Some security issues need manual attention")
         sys.exit(1)
 
 

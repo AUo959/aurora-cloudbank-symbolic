@@ -144,6 +144,51 @@ app = FastAPI(
 # Structured logger (avoids f-string interpolation for security)
 logger = logging.getLogger("aurora_api")
 
+
+# HIGH-5: NoSQL Injection Prevention - Input Validation Helper
+def validate_identifier(identifier: str, param_name: str) -> str:
+    """
+    Validate identifiers (node_id, repo_id, bridge_id, etc.) to prevent injection attacks.
+    
+    HIGH-5: NoSQL injection prevention pattern
+    - Alphanumeric + hyphens/underscores only
+    - Max length: 64 characters
+    - No path traversal sequences
+    - No special characters that could enable injection
+    
+    Args:
+        identifier: The identifier string to validate
+        param_name: Name of the parameter (for error messages)
+    
+    Returns:
+        Validated identifier string
+    
+    Raises:
+        HTTPException: If identifier is invalid (400 Bad Request)
+    """
+    import re
+    
+    if not identifier or len(identifier) > 64:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {param_name}: must be 1-64 characters"
+        )
+    
+    if not re.match(r'^[a-zA-Z0-9_-]+$', identifier):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {param_name}: alphanumeric, hyphens, underscores only"
+        )
+    
+    # Block path traversal attempts
+    if '..' in identifier or '/' in identifier or '\\' in identifier:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid {param_name}: path traversal detected"
+        )
+    
+    return identifier
+
 # Include AuMemManager API routes if available
 if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
     try:
@@ -1020,6 +1065,9 @@ async def v2_unregister_node(
     """
     # HIGH-4: Verify CSRF token before node deletion
     verify_csrf_token(token)
+    
+    # HIGH-5: Validate node_id parameter to prevent injection
+    node_id = validate_identifier(node_id, "node_id")
     
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(

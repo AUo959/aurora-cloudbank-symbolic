@@ -13,6 +13,7 @@ This module provides enterprise-grade memory management with:
 import json
 import time
 import uuid
+import re
 import numpy as np
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict, field
@@ -390,6 +391,23 @@ class HierarchicalMemoryManager:
                          include_quantum: bool = True,
                          cultural_filter: Optional[float] = None) -> List[MemoryItem]:
         """Advanced memory retrieval with Aurora CloudBank enhancements"""
+        
+        # INPUT VALIDATION: HIGH-5 NoSQL Injection Prevention
+        # Validate query length and prevent injection
+        if not query or len(query) > 500:
+            raise ValueError("Query must be 1-500 characters")
+        
+        # Sanitize owner parameter (alphanumeric + underscore/hyphen only)
+        if owner and not re.match(r'^[a-zA-Z0-9_-]+$', owner):
+            raise ValueError("Invalid owner identifier format (alphanumeric, underscore, hyphen only)")
+        
+        # Validate top_k range to prevent resource exhaustion
+        if not (1 <= top_k <= 100):
+            raise ValueError("top_k must be between 1 and 100")
+        
+        # Validate cultural_filter range
+        if cultural_filter is not None and not (0.0 <= cultural_filter <= 1.0):
+            raise ValueError("cultural_filter must be between 0.0 and 1.0")
         
         with self.lock:
             self.metrics['retrieval_count'] += 1

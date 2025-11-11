@@ -33,12 +33,32 @@ class MemoryCreateRequest(BaseModel):
     cultural_score: float = Field(0.0, ge=0.0, le=1.0, description="CASK cultural relevance score")
 
 class MemoryRetrievalRequest(BaseModel):
-    query: str = Field(..., description="Search query")
-    owner: Optional[str] = Field(default=None, description="Filter by owner")
+    query: str = Field(
+        ...,
+        min_length=1,
+        max_length=500,
+        description="Search query (1-500 characters, HIGH-5 validated)"
+    )
+    owner: Optional[str] = Field(
+        default=None,
+        regex=r'^[a-zA-Z0-9_-]+$',
+        max_length=64,
+        description="Filter by owner (alphanumeric, HIGH-5 validated)"
+    )
     memory_type: Optional[str] = Field(default=None, description="Filter by memory type")
-    top_k: int = Field(5, ge=1, le=50, description="Number of results to return")
+    top_k: int = Field(
+        5,
+        ge=1,
+        le=100,
+        description="Number of results to return (1-100, HIGH-5 range expanded)"
+    )
     include_quantum: bool = Field(True, description="Include quantum vector data")
-    cultural_filter: Optional[float] = Field(default=None, description="Minimum cultural score filter")
+    cultural_filter: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Minimum cultural score filter (0.0-1.0, HIGH-5 validated)"
+    )
 
 class QuantumVectorRequest(BaseModel):
     vector_id: str = Field(..., description="Quantum vector identifier")

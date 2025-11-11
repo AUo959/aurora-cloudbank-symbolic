@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 
 import logging
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
+from src.middleware.exception_handler import validation_handler
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -304,7 +305,8 @@ class AgentSessionRequest(BaseModel):
 
 # verify_csrf inside
 @app.post("/geometric/vector", dependencies=[Depends(security)])
-def create_vector(req: VectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("60/minute")  # Computational operation
+def create_vector(req: VectorRequest, request: Request, token: HTTPAuthorizationCredentials = Depends(security)):
     verify_csrf_token(token)
     v = ga.blades["e1"] * req.x + ga.blades["e2"] * req.y + ga.blades["e3"] * req.z
 
@@ -313,24 +315,28 @@ def create_vector(req: VectorRequest, token: HTTPAuthorizationCredentials = Depe
 
 # verify_csrf inside
 @app.post("/geometric/mult", dependencies=[Depends(security)])
-def geometric_product(req: MultivectorRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("60/minute")  # Computational operation
+@validation_handler()
+def geometric_product(
+    req: MultivectorRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     verify_csrf_token(token)
-    try:
-        a = parse_multivector(req.a, ga.blades)
-
-        b = parse_multivector(req.b, ga.blades)
-
-        result = ga.mult(a, b)
-
-        return {"result": str(result)}
-
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    a = parse_multivector(req.a, ga.blades)
+    b = parse_multivector(req.b, ga.blades)
+    result = ga.mult(a, b)
+    return {"result": str(result)}
 
 
 # verify_csrf inside
 @app.post("/sonnet4/enable", dependencies=[Depends(security)])
-async def enable_sonnet4(req: Sonnet4EnableRequest = None, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("10/minute")  # State-changing operation
+async def enable_sonnet4(
+    req: Sonnet4EnableRequest = None,
+    request: Request = None,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """Enable Claude Sonnet 4 for all clients or specific client"""
     verify_csrf_token(token)
 
@@ -366,12 +372,13 @@ async def enable_sonnet4(req: Sonnet4EnableRequest = None, token: HTTPAuthorizat
                 "global_status": sonnet4_hub.get_global_status(),
             }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to enable Sonnet 4: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to enable Sonnet 4")
 
 
 @app.get("/sonnet4/status")
-def get_sonnet4_status():
+@limiter.limit("200/minute")  # Read-only operation
+def get_sonnet4_status(request: Request):
     """Get Claude Sonnet 4 status"""
     return {
         "global_status": sonnet4_hub.get_global_status(),
@@ -386,13 +393,15 @@ def get_sonnet4_status():
 
 
 @app.get("/sonnet4/clients/{client_id}")
-def get_client_sonnet4_status(client_id: str):
+@limiter.limit("200/minute")  # Read-only operation - client status
+def get_client_sonnet4_status(client_id: str, request: Request):
     """Get Claude Sonnet 4 status for specific client"""
     return sonnet4_hub.get_client_status(client_id)
 
 
 @app.get("/health")
-def health_check():
+@limiter.limit("300/minute")  # Health check - frequent monitoring
+def health_check(request: Request):
     """Health check endpoint"""
     return {
         "status": "healthy",
@@ -405,8 +414,9 @@ def health_check():
 
 # Compatibility alias for Docker healthcheck (docker-compose points to /api/health)
 @app.get("/api/health")
-def health_check_api():
-    return health_check()
+@limiter.limit("300/minute")  # Health check - frequent monitoring
+def health_check_api(request: Request):
+    return health_check(request)
 
 
 # ================================
@@ -414,7 +424,8 @@ def health_check_api():
 # ================================
 
 @app.get("/agent/tools")
-async def get_agent_tools():
+@limiter.limit("30/minute")  # Agent tools - moderate rate for tool discovery
+async def get_agent_tools(request: Request):
     """
     Discover available agent tools and capabilities for ChatGPT Agent Mode
     Returns OpenAPI-compatible tool definitions
@@ -429,19 +440,24 @@ async def get_agent_tools():
 
 # verify_csrf inside
 @app.post("/agent/execute", dependencies=[Depends(security)])
-async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("30/minute")  # Agent tools - execution rate matches discovery
+async def execute_agent_tool(
+    req: AgentToolRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Execute agent tool with validated parameters and Aurora symbolic anchoring
     Supports all registered tools: symbolic_processing, geometric_algebra, session_management, system_status
     """
-    bound_session_id = sanitize_session_id(request.session_id)
+    bound_session_id = sanitize_session_id(req.session_id)
     verify_csrf_token(token, session_id=bound_session_id)
 
     try:
         result = await chatgpt_agent_integration.execute_tool(
-            tool_name=request.tool_name,
-            parameters=request.parameters,
-            session_id=request.session_id
+            tool_name=req.tool_name,
+            parameters=req.parameters,
+            session_id=req.session_id
         )
         return JSONResponse(content=result)
     except HTTPException as e:
@@ -452,20 +468,25 @@ async def execute_agent_tool(request: AgentToolRequest, token: HTTPAuthorization
 
 # verify_csrf inside
 @app.post("/agent/session", dependencies=[Depends(security)])
-async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("10/minute")  # State-changing operation - session management
+async def manage_agent_session(
+    req: AgentSessionRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Manage agent session state and context persistence
     Actions: create, update, get, delete
     """
-    verify_csrf_token(token, session_id=sanitize_session_id(request.session_id))
+    verify_csrf_token(token, session_id=sanitize_session_id(req.session_id))
 
     try:
         result = await chatgpt_agent_integration.execute_tool(
             tool_name="session_management",
             parameters={
-                "action": request.action,
-                "session_id": request.session_id,
-                "state_data": request.state_data or {}
+                "action": req.action,
+                "session_id": req.session_id,
+                "state_data": req.state_data or {}
             }
         )
         # Helper: sanitize recovery suggestions (internal only)
@@ -506,7 +527,8 @@ async def manage_agent_session(request: AgentSessionRequest, token: HTTPAuthoriz
 
 
 @app.get("/agent/status")
-async def get_agent_status():
+@limiter.limit("200/minute")  # Read-only operation - agent status
+async def get_agent_status(request: Request):
     """Get current agent system status and health information"""
     try:
         status = await chatgpt_agent_integration.get_agent_status()
@@ -619,7 +641,8 @@ async def agent_websocket_endpoint(websocket: WebSocket):
 # ================================
 
 @app.get("/agent/gemini/tools")
-async def get_gemini_agent_tools():
+@limiter.limit("30/minute")  # Agent tools - Gemini tool discovery
+async def get_gemini_agent_tools(request: Request):
     """
     Discover available agent tools for Gemini Agent Mode.
     """
@@ -628,13 +651,18 @@ async def get_gemini_agent_tools():
     try:
         tools_info = gemini_agent_integration.list_tools()
         return JSONResponse(content={"tools": tools_info})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to discover Gemini tools: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to discover Gemini tools")
 
 
 # verify_csrf inside
 @app.post("/agent/gemini/execute", dependencies=[Depends(security)])
-async def execute_gemini_agent_tool(request: AgentToolRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@limiter.limit("30/minute")  # Agent tools - Gemini tool execution
+async def execute_gemini_agent_tool(
+    req: AgentToolRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Execute a Gemini agent tool, respecting the Symbolic Sandbox Protocol (SSP).
     A 'dry_run' parameter is used to get an impact report before committing.
@@ -645,14 +673,14 @@ async def execute_gemini_agent_tool(request: AgentToolRequest, token: HTTPAuthor
 
     try:
         result = await gemini_agent_integration.handle_tool_call(
-            tool_name=request.tool_name,
-            params=request.parameters
+            tool_name=req.tool_name,
+            params=req.parameters
         )
         return JSONResponse(content=result)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gemini tool execution failed: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Gemini tool execution failed")
 
 
 # ==============================================================================

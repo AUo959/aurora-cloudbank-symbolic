@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+from src.middleware.exception_handler import processing_handler, integration_handler
 
 from src.coordination.event_models import (
     ConflictReport,
@@ -127,7 +128,7 @@ async def publish_event(request: PublishEventRequest) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error publishing event: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Event publication failed")
 
 
 # Subscription Endpoints
@@ -169,7 +170,7 @@ async def subscribe_to_events(request: SubscribeRequest) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error subscribing to events: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Subscription failed")
 
 
 @router.delete("/subscriptions/{subscription_id}")
@@ -192,7 +193,7 @@ async def unsubscribe_from_events(subscription_id: str) -> Dict[str, Any]:
         raise
     except Exception as e:
         logger.error(f"Error unsubscribing: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Unsubscribe failed")
 
 
 @router.get("/subscriptions/{agent_id}")
@@ -210,7 +211,7 @@ async def get_agent_subscriptions(agent_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving subscriptions: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to retrieve subscriptions")
 
 
 # Event Discovery and Replay
@@ -241,7 +242,7 @@ async def discover_events(
 
     except Exception as e:
         logger.error(f"Error discovering events: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Event discovery failed")
 
 
 @router.get("/events/replay/{agent_id}")
@@ -264,11 +265,11 @@ async def replay_events(
 
         return {"success": True, "agent_id": agent_id, "events": events, "count": len(events)}
 
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid datetime format: {e}")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid datetime format")
     except Exception as e:
         logger.error(f"Error replaying events: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Event replay failed")
 
 
 # Conflict Detection and Resolution
@@ -308,7 +309,7 @@ async def detect_conflict(request: ConflictDetectionRequest) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error detecting conflict: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Conflict detection failed")
 
 
 @router.post("/conflicts/resolve")
@@ -341,7 +342,7 @@ async def resolve_conflict(request: ConflictResolutionRequest) -> Dict[str, Any]
         raise
     except Exception as e:
         logger.error(f"Error resolving conflict: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Conflict resolution failed")
 
 
 # Resource Locking
@@ -376,7 +377,7 @@ async def acquire_lock(request: LockRequest) -> Dict[str, Any]:
         raise
     except Exception as e:
         logger.error(f"Error acquiring lock: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Lock acquisition failed")
 
 
 @router.delete("/locks/{resource_id}")
@@ -406,7 +407,7 @@ async def release_lock(resource_id: str, agent_id: str = Query(...)) -> Dict[str
         raise
     except Exception as e:
         logger.error(f"Error releasing lock: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Lock release failed")
 
 
 # Workflow Orchestration
@@ -441,7 +442,7 @@ async def create_workflow(workflow: WorkflowDefinition) -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error creating workflow: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Workflow creation failed")
 
 
 @router.get("/workflows/{workflow_id}")
@@ -465,7 +466,7 @@ async def get_workflow_status(workflow_id: str) -> Dict[str, Any]:
         raise
     except Exception as e:
         logger.error(f"Error retrieving workflow status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Workflow status retrieval failed")
 
 
 # Monitoring and Metrics
@@ -484,7 +485,7 @@ async def get_registry_metrics() -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving metrics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Metrics retrieval failed")
 
 
 @router.get("/status")
@@ -502,7 +503,7 @@ async def get_registry_status() -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Status retrieval failed")
 
 
 # Event type discovery endpoint
@@ -527,7 +528,7 @@ async def get_event_types() -> Dict[str, Any]:
 
     except Exception as e:
         logger.error(f"Error retrieving event types: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Event types retrieval failed")
 
 
 def _get_event_type_description(event_type: EventType) -> str:

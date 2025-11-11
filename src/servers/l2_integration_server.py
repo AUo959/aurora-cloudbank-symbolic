@@ -281,7 +281,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
         except Exception as e:
             # Secure logging to prevent log injection
             logger.error("Aurora command failed: %s", str(e)[:100])
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Aurora command processing failed")
 
     @app.get("/api/aurora/status")
     async def aurora_custom_gpt_status():
@@ -301,7 +301,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             }
         except Exception as e:
             logger.error("Aurora status request failed: %s", str(str(e))[:100])
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Aurora status retrieval failed")
 
     @app.post(  # verify_csrf inside"/api/aurora/initialize")
     async def initialize_aurora_integration(token: HTTPAuthorizationCredentials = Depends(security)):
@@ -326,7 +326,7 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
 
         except Exception as e:
             logger.error("Aurora initialization failed: %s", str(str(e))[:100])
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Aurora initialization failed")
 
 else:
 

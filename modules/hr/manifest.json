@@ -1,0 +1,38 @@
+{
+  "anchor_seed": "HR-HELIOS-V3-20251111",
+  "module_name": "Aurora HR Module",
+  "version": "3.0.0",
+  "codename": "Helios",
+  "symbolic_anchors": {
+    "primary": "T1-HR-CORE",
+    "config": "T2-HR-CONFIG",
+    "docs": "T3-HR-DOCS",
+    "deploy": "T4-HR-DEPLOY",
+    "state": "T5-HR-STATE",
+    "exec": "T6-HR-EXEC",
+    "test": "T7-HR-TEST",
+    "resume": "T8-HR-RESUME"
+  },
+  "ethics_protocol": "Picard_Delta_3",
+  "memory_seal": "SHA256:a7b9c2d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+  "dlp_classification": "INTERNAL",
+  "continuity_checkpoints": [
+    "CP-HR-V3-INITIAL",
+    "CP-HR-V3-TEST",
+    "CP-HR-V3-DEPLOY"
+  ],
+  "entropy_monitors": {
+    "psychological_safety_drift": 0.15,
+    "cultural_health_variance": 0.20,
+    "conflict_escalation_rate": 0.25,
+    "onboarding_completion_variance": 0.10
+  },
+  "integration_points": [
+    "aurora.core.routing",
+    "threadcore.memory",
+    "ethics.enforcement",
+    "gumas.simulation"
+  ],
+  "hand_off_ready": true,
+  "thread_resumable": true
+}

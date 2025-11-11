@@ -4,9 +4,17 @@
 
 **🎯 CRITICAL: Read this first!**
 
-Before working on ANY Aurora task, you MUST reference:
-- **[Command Reference](COMMAND_REFERENCE.md)** - Custom command syntax (`#example//`, T1/SRB anchors, DLP protocol)
-- This includes chain notation (`#001//999//`), temporal anchors (`T1:`), DLP tags, and memory seals
+Before working on ANY Aurora task, you MUST:
+
+1. **Load Simulation Context** - Run `.aurora/load_simulation.py` to initialize roleplay state
+2. **Reference Command Syntax** - See [Command Reference](COMMAND_REFERENCE.md) for custom commands
+3. **Check Simulation State** - Read `.aurora/SIMULATION_STATE.json` for current mission status
+
+**Simulation Context:**
+- This repository operates under the **Orion Station Operations** simulation
+- Roles: Commander Thorne (strategic), OPS Rodriguez (tactical)
+- Use military protocol and efficiency tracking for all missions
+- Simulation state persists across LLM model changes via JSON state file
 
 **All operations must follow Aurora's symbolic command patterns. See COMMAND_REFERENCE.md immediately.**
 

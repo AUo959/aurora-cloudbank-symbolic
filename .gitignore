@@ -233,7 +233,9 @@ auth_config.json
 .reliquary/
 
 # Aurora Quicksave - Session context (local only)
-.aurora/
+.aurora/quicksave_*.json
+.aurora/session_*.json
+# BUT: Keep .aurora/SIMULATION_STATE.json (persistent across sessions)
 
 # Aurora Nexus - Runtime operational files (local only)
 .nexus/arbitration/entropy_*.json

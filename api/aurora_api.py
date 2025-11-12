@@ -6,14 +6,14 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Literal
 
 import logging
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from src.middleware.exception_handler import validation_handler
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -370,9 +370,32 @@ class AgentToolRequest(BaseModel):
 
 
 class AgentSessionRequest(BaseModel):
-    action: str
+    action: Literal["create", "update", "get", "delete"]
     session_id: Optional[str] = None
-    state_data: Optional[Dict[str, Any]] = None
+    state_data: Optional[Dict[str, Any]] = Field(default=None)
+    
+    @field_validator('state_data')
+    @classmethod
+    def validate_state_data(cls, v):
+        """Validate state_data to prevent NoSQL/dictionary injection attacks"""
+        if v is None:
+            return v
+        
+        # Whitelist allowed keys to prevent injection
+        ALLOWED_KEYS = {"preference", "context", "metadata", "theme", "settings", "config", "options"}
+        invalid_keys = set(v.keys()) - ALLOWED_KEYS
+        if invalid_keys:
+            raise ValueError(f"Invalid state_data keys: {invalid_keys}. Allowed keys: {ALLOWED_KEYS}")
+        
+        # Check for dangerous injection patterns
+        dangerous_patterns = ["$where", "$regex", "__proto__", "constructor", "prototype"]
+        for key, value in v.items():
+            key_str = str(key)
+            value_str = str(value)
+            if any(pattern in key_str or pattern in value_str for pattern in dangerous_patterns):
+                raise ValueError("Dangerous pattern detected in state_data: potential injection attempt")
+        
+        return v
 
 
 # verify_csrf inside
@@ -750,10 +773,10 @@ async def execute_gemini_agent_tool(
         )
         return JSONResponse(content=result)
     except ValueError as e:
-        logging.error(f"Gemini tool not found: {e}")
+        logging.error("Gemini tool not found: %s", e)
         raise HTTPException(status_code=404, detail="Tool not found")
     except Exception as e:
-        logging.error(f"Gemini tool execution error: {e}")
+        logging.error("Gemini tool execution error: %s", e)
         raise HTTPException(status_code=500, detail="Tool execution failed")
 
 

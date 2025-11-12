@@ -17,6 +17,10 @@ Features:
     - Creates backup before modifications
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import os
@@ -44,7 +48,7 @@ class ReadmeUpdater:
     def get_current_version(self) -> str:
         """Read version from VERSION file"""
         if not self.version_path.exists():
-            print(f"⚠️  VERSION file not found at {self.version_path}")
+            logger.warning("VERSION file not found at {self.version_path}")
             return "1.0.0"
 
         version = self.version_path.read_text().strip()
@@ -99,9 +103,9 @@ class ReadmeUpdater:
         # Check if AI modules exist
         ai_core = self.repo_root / "modules" / "ai_core"
         if ai_core.exists():
-            print("✅ AI Core modules detected")
+            logger.info("AI Core modules detected")
         else:
-            print("⚠️  AI Core modules not found")
+            logger.warning("AI Core modules not found")
 
         return status
 
@@ -143,7 +147,7 @@ class ReadmeUpdater:
         insertion_marker = "## 🎯 **Quick Start**"
 
         if insertion_marker not in content:
-            print("⚠️  Could not find insertion point for AI section")
+            logger.warning("Could not find insertion point for AI section")
             return content
 
         ai_section = f"""
@@ -215,7 +219,7 @@ code = await gpt5_hub.execute_code_generation(
         print("🔄 Starting README.md update...")
 
         if not self.readme_path.exists():
-            print(f"❌ README.md not found at {self.readme_path}")
+            logger.error("README.md not found at {self.readme_path}")
             return False
 
         # Get current version

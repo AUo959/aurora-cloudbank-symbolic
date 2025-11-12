@@ -3,6 +3,10 @@
 Fix Git merge conflict markers in Python files
 Automatically resolves conflicts by keeping the HEAD version (current changes)
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 from typing import List, Tuple
 
@@ -84,7 +88,7 @@ def main():
     conflict_files = find_conflict_files()
 
     if not conflict_files:
-        print("✅ No merge conflicts found!")
+        logger.info("No merge conflicts found!")
         return
 
     print(f"\n📋 Found {len(conflict_files)} files with merge conflicts\n")
@@ -101,13 +105,13 @@ def main():
                 file_path.write_text(fixed_content, encoding='utf-8')
                 fixed_files += 1
                 total_conflicts += num_conflicts
-                print(f"✅ {file_path.relative_to(Path.cwd())}: Fixed {num_conflicts} conflict(s)")
+                logger.info("{file_path.relative_to(Path.cwd())}: Fixed {num_conflicts} conflict(s)")
 
         except Exception as e:
-            print(f"❌ {file_path.relative_to(Path.cwd())}: {e}")
+            logger.error("{file_path.relative_to(Path.cwd())}: {e}")
 
     print(f"\n{'='*60}")
-    print(f"✅ Fixed {fixed_files} files ({total_conflicts} total conflicts)")
+    logger.info("Fixed {fixed_files} files ({total_conflicts} total conflicts)")
     print(f"{'='*60}\n")
 
 

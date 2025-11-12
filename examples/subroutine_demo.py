@@ -8,6 +8,10 @@ Usage:
     python examples/subroutine_demo.py
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 from src.subroutines.reality_sim_monitor import RealitySimMonitor
 from src.subroutines.registry import get_subroutine_registry
 
@@ -137,7 +141,7 @@ def main():
         demo_subroutine_registry()
         
         print("\n" + "=" * 70)
-        print("✅ Demo Complete!")
+        logger.info("Demo Complete!")
         print("=" * 70)
         print("\nFor more information, see: docs/SUBROUTINE_SYSTEM.md")
         

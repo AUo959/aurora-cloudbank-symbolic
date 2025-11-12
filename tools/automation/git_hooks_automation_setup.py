@@ -4,6 +4,10 @@ Aurora Git Hooks Automation Setup
 Intelligent Git hooks for quality assurance and workflow optimization
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import shutil
 import stat
@@ -481,7 +485,7 @@ For issues with Git hooks:
             ],
         }
 
-        print(f"✅ Installed {report['total_hooks']} intelligent Git hooks:")
+        logger.info("Installed {report["total_hooks']} intelligent Git hooks:")
         for hook in report["hooks_installed"]:
             print(f"   • {hook}")
 
@@ -510,9 +514,9 @@ def main():
 
     # Test installation
     if setup.test_hooks():
-        print("✅ All hooks installed and working correctly!")
+        logger.info("All hooks installed and working correctly!")
     else:
-        print("⚠️  Some hooks may have installation issues")
+        logger.warning("Some hooks may have installation issues")
 
     # Generate documentation
     setup.generate_hooks_documentation()

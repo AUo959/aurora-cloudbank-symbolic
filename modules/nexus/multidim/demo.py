@@ -5,6 +5,10 @@ NEXUS Phase 11: Multi-Dimensional Consciousness Demo
 Simplified version for demonstration without NumPy dependency
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 from datetime import datetime
 from enum import Enum
@@ -59,7 +63,7 @@ class SimplifiedOrchestrator:
             )
             self.dimensions[axis] = state
         
-        print(f"✅ Initialized {len(self.dimensions)} dimensions")
+        logger.info("Initialized {len(self.dimensions)} dimensions")
         return {"dimensions_initialized": len(self.dimensions)}
     
     async def evolve_dimensions(self, cycles: int = 5) -> AsyncGenerator[Dict, None]:

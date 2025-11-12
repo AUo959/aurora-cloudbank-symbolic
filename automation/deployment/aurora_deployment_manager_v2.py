@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import subprocess
@@ -59,7 +63,7 @@ class DeploymentManager:
     def execute_deployment(self):
         """Execute the deployment sequence."""
         if not self.safety_checks_passed:
-            print("❌ Safety checks failed - deployment aborted")
+            logger.error("Safety checks failed - deployment aborted")
             return False
 
         print("🚀 Executing deployment sequence...")
@@ -69,7 +73,7 @@ class DeploymentManager:
             {"timestamp": datetime.now().isoformat(), "status": "initiated", "safety_checks": "passed"}
         )
 
-        print("✅ Deployment sequence completed")
+        logger.info("Deployment sequence completed")
         return True
 
 
@@ -84,7 +88,7 @@ def main():
         success = manager.execute_deployment()
         sys.exit(0 if success else 1)
     else:
-        print("❌ Deployment aborted due to safety check failures")
+        logger.error("Deployment aborted due to safety check failures")
         sys.exit(1)
 
 

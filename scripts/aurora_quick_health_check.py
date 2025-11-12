@@ -7,6 +7,10 @@ from pathlib import Path
 
 def quick_health_check():
     """Quick health check of dependencies"""
+import logging
+
+logger = logging.getLogger(__name__)
+
     issues = []
     
     # Check pip is working
@@ -31,8 +35,8 @@ def quick_health_check():
 if __name__ == "__main__":
     healthy, issues = quick_health_check()
     if healthy:
-        print("✅ Dependencies healthy")
+        logger.info("Dependencies healthy")
         sys.exit(0)
     else:
-        print("❌ Issues found: %s", ', '.join(issues))
+        logger.error("Issues found: %s", ', '.join(issues))
         sys.exit(1)

@@ -521,7 +521,7 @@ async def create_component_concept():
         "design_approved": True
     }
     
-    print(f"✅ Concept created: {concept.component_id}")
+    logger.info("Concept created: {concept.component_id}")
     
     # Advance to prototype
     prototype_code = '''

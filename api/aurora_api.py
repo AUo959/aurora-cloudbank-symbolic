@@ -750,9 +750,11 @@ async def execute_gemini_agent_tool(
         )
         return JSONResponse(content=result)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception:
-        raise HTTPException(status_code=500, detail="Gemini tool execution failed")
+        logging.error(f"Gemini tool not found: {e}")
+        raise HTTPException(status_code=404, detail="Tool not found")
+    except Exception as e:
+        logging.error(f"Gemini tool execution error: {e}")
+        raise HTTPException(status_code=500, detail="Tool execution failed")
 
 
 # ==============================================================================

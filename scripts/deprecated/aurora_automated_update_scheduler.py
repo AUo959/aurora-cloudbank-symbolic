@@ -454,7 +454,7 @@ def main():
         print(scheduler.generate_scheduler_status())
     elif args.setup:
         scheduler._save_config()
-        print("✅ Scheduler configuration saved")
+        logger.info("Scheduler configuration saved")
     else:
         print(scheduler.generate_scheduler_status())
 

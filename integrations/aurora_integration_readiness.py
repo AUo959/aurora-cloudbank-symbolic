@@ -4,6 +4,10 @@ Aurora Integration Readiness Assessment
 Using enhanced GitWiz and Health Monitor tools to prepare for Aurora integration
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import shlex
 import subprocess
 
@@ -58,9 +62,9 @@ def main():
     print("📋 Git Status Check...")
     git_status = run_command("git status --porcelain")
     if git_status:
-        print(f"⚠️  Uncommitted changes: {len(git_status.split(chr(10)))} files")
+        logger.warning("Uncommitted changes: {len(git_status.split(chr(10)))} files")
     else:
-        print("✅ Working directory clean")
+        logger.info("Working directory clean")
 
     # Current branch
     current_branch = run_command("git branch --show-current")
@@ -84,9 +88,9 @@ def main():
 
     for file_path in aurora_files:
         if Path(file_path).exists():
-            print(f"✅ {file_path}")
+            logger.info("{file_path}")
         else:
-            print(f"❌ {file_path} - MISSING")
+            logger.error("{file_path} - MISSING")
     print()
 
     # 5. Dependencies Check
@@ -94,20 +98,20 @@ def main():
 
     # Check package.json
     if Path("package.json").exists():
-        print("✅ package.json exists")
+        logger.info("package.json exists")
         # Check if node_modules exists
         if Path("node_modules").exists():
-            print("✅ node_modules installed")
+            logger.info("node_modules installed")
         else:
-            print("⚠️  node_modules missing - run 'npm install'")
+            logger.warning("node_modules missing - run "npm install'")
     else:
-        print("❌ package.json missing")
+        logger.error("package.json missing")
 
     # Check Python requirements
     if Path("requirements.txt").exists():
-        print("✅ requirements.txt exists")
+        logger.info("requirements.txt exists")
     else:
-        print("⚠️  requirements.txt missing")
+        logger.warning("requirements.txt missing")
     print()
 
     # 6. Integration Readiness Score

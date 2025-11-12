@@ -9,6 +9,10 @@ Version: 8.1.0
 Complete reference for all CLI commands and usage patterns
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import asyncio
 from pathlib import Path
@@ -147,7 +151,7 @@ def print_complete_cli_reference():
     print("   curl -X POST http://localhost:8000/gumas/status -H 'Content-Type: application/json'")
     print()
     
-    print("⚠️  TROUBLESHOOTING:")
+    logger.warning("TROUBLESHOOTING:")
     print("   # If module not found:")
     print("   export PYTHONPATH=/workspaces/aurora-cloudbank-symbolic:$PYTHONPATH")
     print()

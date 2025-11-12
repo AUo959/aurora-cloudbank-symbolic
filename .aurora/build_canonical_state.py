@@ -3,6 +3,10 @@
 Build the expanded canonical simulation state from v1 backup plus complete station infrastructure.
 Incorporates: departments, fleet, systems, quantum architecture from canonical data files.
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 from pathlib import Path
 from datetime import datetime, timezone
@@ -11,7 +15,7 @@ def load_canonical_file(filename):
     """Load a canonical data file from .aurora/canonical/ directory."""
     canonical_path = Path(__file__).parent / "canonical" / filename
     if not canonical_path.exists():
-        print(f"⚠️  Warning: {filename} not found, skipping...")
+        logger.warning("Warning: {filename} not found, skipping...")
         return {}
     with open(canonical_path, 'r') as f:
         return json.load(f)
@@ -196,7 +200,7 @@ with open(output_path, 'w') as f:
 print("=" * 80)
 print("🎯 AURORA CLOUDBANK ORION STATION - CANONICAL STATE V2 BUILDER")
 print("=" * 80)
-print(f"✅ Built v2 canonical state with {len(canonical_state)} top-level keys")
+logger.info("Built v2 canonical state with {len(canonical_state)} top-level keys")
 print("\n📦 V1 DATA PRESERVED:")
 print("   - Simulation metadata")
 print("   - Roles (Commander Thorne, OPS Rodriguez)")

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import json
 import os
@@ -170,11 +174,11 @@ class AuroraSystemValidator:
                 success, message = validator()
                 if success:
                     total_score += 1
-                    print(f"✅ {name}: {message}")
+                    logger.info("{name}: {message}")
                 else:
-                    print(f"❌ {name}: {message}")
+                    logger.error("{name}: {message}")
             except Exception as e:
-                print(f"❌ {name}: Error during validation - {str(e)}")
+                logger.error("{name}: Error during validation - {str(e)}")
 
         print()
         print("=" * 60)
@@ -200,7 +204,7 @@ class AuroraSystemValidator:
             print("  • Advanced feature development")
         else:
             print()
-            print("⚠️  RECOMMENDED ACTIONS:")
+            logger.warning("RECOMMENDED ACTIONS:")
             print("  • Address validation failures")
             print("  • Complete missing configurations")
             print("  • Update documentation")

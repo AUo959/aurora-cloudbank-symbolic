@@ -4,6 +4,10 @@ Aurora CloudBank - Issue Analysis & Closure Recommendations
 Analyzes completed work to identify which issues can be closed
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 from pathlib import Path
@@ -31,7 +35,7 @@ class IssueAnalyzer:
         print(f"📅 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()
         
-        print("✅ COMPLETED WORK SUMMARY:")
+        logger.info("COMPLETED WORK SUMMARY:")
         print("-" * 30)
         
         if self.completed_work["security_hardening"]:
@@ -197,7 +201,7 @@ class IssueAnalyzer:
         print("🎊 SUMMARY & NEXT STEPS:")
         print("-" * 30)
         
-        print(f"✅ Completed Fixes: {len(self.completed_fixes)}")
+        logger.info("Completed Fixes: {len(self.completed_fixes)}")
         for fix in self.completed_fixes:
             print(f"   • {fix}")
             

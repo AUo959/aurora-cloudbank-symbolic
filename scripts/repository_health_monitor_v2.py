@@ -855,7 +855,7 @@ def main():
 
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
-            print("✅ Health Check Complete")
+            logger.info("Health Check Complete")
             print("📊 Health Score: %s", metrics.health_score)
             print("📁 Files: %s", metrics.file_count)
             print("💾 Size: %sMB", metrics.repository_size_mb)

@@ -535,9 +535,9 @@ async def main():
     processor_mounted = await chassis.mount_component(symbolic_processor, "symbolic_01")
     
     if renderer_mounted:
-        print("✅ Quantum renderer mounted successfully")
+        logger.info("Quantum renderer mounted successfully")
     if processor_mounted:
-        print("✅ Symbolic processor mounted successfully")
+        logger.info("Symbolic processor mounted successfully")
     
     # Get chassis status
     status = await chassis.get_chassis_status()

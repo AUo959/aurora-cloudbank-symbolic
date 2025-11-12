@@ -612,7 +612,7 @@ def main():
         
     elif args.command == "analyze":
         if not args.branch:
-            print("❌ --branch required for analyze command")
+            logger.error("--branch required for analyze command")
             sys.exit(1)
         
         analysis = engine.analyze_branch_for_easy_wins(args.branch)
@@ -632,7 +632,7 @@ def main():
             
         else:
             if not args.branch:
-                print("❌ --branch required for automate command (or use --batch)")
+                logger.error("--branch required for automate command (or use --batch)")
                 sys.exit(1)
             
             result = engine.execute_easy_win_automation(args.branch, dry_run=args.dry_run)

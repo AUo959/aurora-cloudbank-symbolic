@@ -36,10 +36,10 @@ async def main():
         results = await enable_sonnet4_globally()
 
         if "error" not in results:
-            print("✅ Claude Sonnet 4 successfully enabled for all clients!")
+            logger.info("Claude Sonnet 4 successfully enabled for all clients!")
             print(f"📈 Results: {results}")
         else:
-            print(f"❌ Error: {results}")
+            logger.error("Error: {results}")
             return False
 
         # Show updated status
@@ -61,7 +61,7 @@ async def main():
 
     except Exception as e:
         logger.error("Failed to enable Sonnet 4: %s", e)
-        print(f"❌ Failed to enable Claude Sonnet 4: {e}")
+        logger.error("Failed to enable Claude Sonnet 4: {e}")
         return False
 
 

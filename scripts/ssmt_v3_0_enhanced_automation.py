@@ -364,7 +364,7 @@ def main():
     elif args.command == "validate":
         branches = args.branches or []
         if not branches:
-            print("❌ No branches specified for validation")
+            logger.error("No branches specified for validation")
             sys.exit(1)
         
         for branch in branches:

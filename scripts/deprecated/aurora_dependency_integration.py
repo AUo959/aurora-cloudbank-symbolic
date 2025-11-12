@@ -405,10 +405,10 @@ def quick_health_check():
 if __name__ == "__main__":
     healthy, issues = quick_health_check()
     if healthy:
-        print("✅ Dependencies healthy")
+        logger.info("Dependencies healthy")
         sys.exit(0)
     else:
-        print("❌ Issues found: {%s}", ', '.join(issues))
+        logger.error("Issues found: {%s}", ', '.join(issues))
         sys.exit(1)
 '''
 
@@ -484,9 +484,9 @@ def run_maintenance():
     print("🔧 Running Aurora CloudBank maintenance...")
     
     if run_health_check():
-        print("✅ Health check passed")
+        logger.info("Health check passed")
     else:
-        print("⚠️  Health check failed, consider manual review")
+        logger.warning("Health check failed, consider manual review")
         
     # Try to use existing GitWiz if available
     gitwiz_path = Path(__file__).parent / "gitwiz_dependency_updater.py"

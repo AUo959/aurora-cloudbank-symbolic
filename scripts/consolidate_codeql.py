@@ -5,6 +5,10 @@ Symbolic Anchor: T1-CONSOLIDATE-2025
 Resolves duplicate workflow conflicts
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import yaml
 from pathlib import Path
@@ -160,7 +164,7 @@ paths-ignore:
         with open(unified_path, "w") as f:
             yaml.dump(unified_workflow, f, default_flow_style=False, sort_keys=False)
             
-        print(f"✅ Created unified workflow: {unified_path}")
+        logger.info("Created unified workflow: {unified_path}")
         return str(unified_path)
     
     def remove_conflicting_workflows(self, backup_manifest):

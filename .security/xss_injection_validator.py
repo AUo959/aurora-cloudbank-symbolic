@@ -3,6 +3,10 @@
 🔒 Aurora CloudBank XSS/Injection Validator  
 Pre-commit hook for preventing XSS and injection vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -66,7 +70,7 @@ def main():
         print("\n💡 Fix: Use parameterized queries, escape user input, avoid eval/exec")
         sys.exit(1)
     
-    print("✅ XSS/Injection validation passed")
+    logger.info("XSS/Injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

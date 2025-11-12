@@ -10,6 +10,10 @@ Primary functions:
 - Export manifest generation with SHA256 sealing
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import hashlib
 import json
@@ -471,7 +475,7 @@ def main():
                 try:
                     since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                 except ValueError:
-                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                    logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
         anchors = tracker.scan_repository(extensions=exts, since=since_dt, pattern=args.pattern)
         if args.json:
             payload = {
@@ -491,7 +495,7 @@ def main():
 
     elif args.command == "resolve":
         if not args.anchor:
-            print("❌ --anchor required for resolve command")
+            logger.error("--anchor required for resolve command")
             return
 
         # Populate anchors first (respect optional --since)
@@ -503,7 +507,7 @@ def main():
                 try:
                     since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                 except ValueError:
-                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                    logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
         tracker.scan_repository(since=since_dt)
         anchor = tracker.resolve_anchor(args.anchor)
 
@@ -517,7 +521,7 @@ def main():
                 print(f"  Context: {anchor.context}")
                 print(f"  Hash: {anchor.sha256_hash}")
         else:
-            print(f"❌ Anchor {args.anchor} not found")
+            logger.error("Anchor {args.anchor} not found")
 
     elif args.command == "lineage":
         print("🔗 Building lineage map...")
@@ -529,7 +533,7 @@ def main():
                 try:
                     since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                 except ValueError:
-                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                    logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
         tracker.scan_repository(since=since_dt, pattern=args.pattern)
         lineages = tracker.build_lineage_map()
 
@@ -545,7 +549,7 @@ def main():
                     print(f"  Descendants: {lineage.descendants}")
                     print(f"  Lineage Hash: {lineage.lineage_hash}")
             else:
-                print(f"❌ No lineage found for {args.anchor}")
+                logger.error("No lineage found for {args.anchor}")
         else:
             if args.json:
                 payload = {aid: asdict(lin) for aid, lin in lineages.items()}
@@ -571,7 +575,7 @@ def main():
                 try:
                     since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                 except ValueError:
-                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                    logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
         tracker.scan_repository(since=since_dt, pattern=args.pattern)
         tracker.build_lineage_map()
         drift_issues = tracker.detect_drift()
@@ -584,7 +588,7 @@ def main():
                     for issue in issues:
                         print(f"  - {issue}")
             if not any(drift_issues.values()):
-                print("✅ No drift issues detected")
+                logger.info("No drift issues detected")
 
     elif args.command == "manifest":
         print("📄 Generating export manifest...")
@@ -596,7 +600,7 @@ def main():
                 try:
                     since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                 except ValueError:
-                    print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                    logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
         tracker.scan_repository(since=since_dt, pattern=args.pattern)
         tracker.build_lineage_map()
 
@@ -613,12 +617,12 @@ def main():
                     json.dump(dlp_manifest, f, indent=2)
                 print(f"🧬 DLP manifest saved to: {args.dlp_manifest_out}")
             except Exception as e:
-                print(f"⚠️  Failed to export DLP manifest: {e}")
+                logger.warning("Failed to export DLP manifest: {e}")
 
         if args.json:
             print(json.dumps({"manifest_path": output_path, "manifest": manifest}, indent=2))
         else:
-            print(f"✅ Manifest saved to: {output_path}")
+            logger.info("Manifest saved to: {output_path}")
             print(f"Memory seal: {manifest['memory_seal']}")
 
 

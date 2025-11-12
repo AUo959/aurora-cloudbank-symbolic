@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 from fastapi import FastAPI
 from datetime import datetime
 from pathlib import Path
@@ -100,7 +104,7 @@ class AuroraContextUpdater:
     def update_instructions(self):
         """Update custom instructions with current context"""
         if not self.instructions_file.exists():
-            print("❌ Custom instructions file not found")
+            logger.error("Custom instructions file not found")
             return
 
         status = self.get_current_status()
@@ -126,10 +130,10 @@ class AuroraContextUpdater:
             with open(self.instructions_file, "w") as f:
                 f.write(new_content)
 
-            print("✅ Custom instructions updated")
+            logger.info("Custom instructions updated")
             return True
         else:
-            print("⚠️  Could not find status section markers")
+            logger.warning("Could not find status section markers")
             return False
 
     def generate_status_section(self, status):
@@ -174,7 +178,7 @@ def main():
 
     # Update instructions
     if updater.update_instructions():
-        print("✅ Custom instructions updated successfully")
+        logger.info("Custom instructions updated successfully")
 
     # Export context log
     updater.export_context_log()

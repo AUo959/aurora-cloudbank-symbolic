@@ -9,6 +9,10 @@ automated resolution suggestions for Python dependencies.
 Addresses Issue #243: Cross-repo dependency mapping (Phase 1 - Single Repo)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import re
 import subprocess
@@ -449,7 +453,7 @@ def main():
         
         dry_run = not args.apply
         if dry_run:
-            print("⚠️  DRY RUN MODE - No changes will be applied")
+            logger.warning("DRY RUN MODE - No changes will be applied")
             print("   Use --fix --apply to actually apply changes\n")
             
         fixes = detector.apply_automatic_fixes(dry_run=dry_run)

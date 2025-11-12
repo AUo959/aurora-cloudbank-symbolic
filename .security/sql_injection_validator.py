@@ -3,6 +3,10 @@
 🔍 Aurora CloudBank SQL Injection Validator
 Advanced security validator for SQL injection vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -64,7 +68,7 @@ def main():
         print("\n💡 Fix: Use parameterized queries: cursor.execute('SELECT * FROM table WHERE id = ?', (user_id,))")
         sys.exit(1)
     
-    print("✅ SQL injection validation passed")
+    logger.info("SQL injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

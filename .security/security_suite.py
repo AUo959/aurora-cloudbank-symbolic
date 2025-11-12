@@ -3,6 +3,10 @@
 🛡️ Aurora CloudBank Pre-Commit Security Suite
 Orchestrates all security validators for comprehensive protection
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import subprocess
 import os
@@ -28,7 +32,7 @@ class SecurityValidationSuite:
         validator_path = self.security_dir / validator_script
         
         if not validator_path.exists():
-            print(f"⚠️  Warning: {validator_script} not found")
+            logger.warning("Warning: {validator_script} not found")
             return True
             
         try:
@@ -36,15 +40,15 @@ class SecurityValidationSuite:
             result = subprocess.run(cmd, capture_output=True, text=True)
             
             if result.returncode == 0:
-                print(f"✅ {description}: PASSED")
+                logger.info("{description}: PASSED")
                 return True
             else:
-                print(f"❌ {description}: FAILED")
+                logger.error("{description}: FAILED")
                 print(result.stdout)
                 return False
                 
         except Exception as e:
-            print(f"⚠️  Error running {description} validator: {e}")
+            logger.warning("Error running {description} validator: {e}")
             return False
     
     def validate_all(self, files):
@@ -57,7 +61,7 @@ class SecurityValidationSuite:
             if os.path.exists(file):
                 existing_files.append(file)
             else:
-                print(f"⚠️  Skipping non-existent file: {file}")
+                logger.warning("Skipping non-existent file: {file}")
         
         if not existing_files:
             print("ℹ️  No existing files to validate")

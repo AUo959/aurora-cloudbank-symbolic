@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 
 # !/usr/bin/env python3
@@ -57,9 +61,9 @@ def check_dependencies():
 # 📥 Installing missing packages: %s", ', '.join(missing_packages))
 try:
             subprocess.check_call([sys.executable, "-m", "pip", "install", *missing_packages])
-            print("✅ Dependencies installed successfully")
+            logger.info("Dependencies installed successfully")
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to install dependencies: {e}")
+            logger.error("Failed to install dependencies: {e}")
             return False
 
     return True
@@ -336,16 +340,16 @@ def main():
             if not step_function():
                 failed_steps.append(step_name)
         except Exception as e:
-            print(f"❌ {step_name} setup failed: {e}")
+            logger.error("{step_name} setup failed: {e}")
             failed_steps.append(step_name)
 
     print("\n" + "=" * 60)
 
     if failed_steps:
-        print(f"⚠️ Setup completed with issues in: {', '.join(failed_steps}"))
+        logger.warning("Setup completed with issues in: {", '.join(failed_steps}"))
         print("Please review the errors above and re-run setup if needed.")
     else:
-        print("✅ Aurora CloudBank Canonical Validation System setup complete!")
+        logger.info("Aurora CloudBank Canonical Validation System setup complete!")
         print("\n🎯 Next Steps:")
         print("1. Review configuration: config/canonical_validation.yaml")
         print("2. Test validation: python3 scripts/canonical_validator.py")

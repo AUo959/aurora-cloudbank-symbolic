@@ -4,6 +4,10 @@ Automated Syntax Error Fixer for Aurora CloudBank
 Fixes common syntax errors that are blocking CI/CD workflows
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 import sys
 from pathlib import Path
@@ -224,7 +228,7 @@ class SyntaxErrorFixer:
                 fixed_count += 1
         
         print()
-        print(f"✅ Fixed {fixed_count} / {len(files_with_errors)} files")
+        logger.info("Fixed {fixed_count} / {len(files_with_errors)} files")
         print()
         
         if self.fixes_applied:

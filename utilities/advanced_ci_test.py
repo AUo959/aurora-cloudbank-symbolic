@@ -3,6 +3,10 @@
 Advanced CI Pipeline Simulation Test
 Tests the kinds of checks that GitHub Actions and Codacy would run
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -13,17 +17,17 @@ def test_requirements_txt():
     print("🔍 Testing requirements.txt...")
     req_file = Path("requirements.txt")
     if req_file.exists():
-        print("✅ requirements.txt exists")
+        logger.info("requirements.txt exists")
         try:
             with open("requirements.txt", "r") as f:
                 lines = f.readlines()
-            print(f"✅ Found {len(lines)} requirements")
+            logger.info("Found {len(lines)} requirements")
             return True
         except Exception as e:
-            print(f"❌ Error reading requirements.txt: {e}")
+            logger.error("Error reading requirements.txt: {e}")
             return False
     else:
-        print("⚠️  requirements.txt not found (may not be required)")
+        logger.warning("requirements.txt not found (may not be required)")
         return True
 
 def test_package_json():
@@ -31,17 +35,17 @@ def test_package_json():
     print("🔍 Testing package.json...")
     pkg_file = Path("package.json")
     if pkg_file.exists():
-        print("✅ package.json exists")
+        logger.info("package.json exists")
         try:
             with open("package.json", "r") as f:
                 data = json.load(f)
-            print(f"✅ Valid JSON with {len(data)} top-level keys")
+            logger.info("Valid JSON with {len(data)} top-level keys")
             return True
         except Exception as e:
-            print(f"❌ Error reading package.json: {e}")
+            logger.error("Error reading package.json: {e}")
             return False
     else:
-        print("⚠️  package.json not found")
+        logger.warning("package.json not found")
         return True
 
 def test_github_workflows():
@@ -50,10 +54,10 @@ def test_github_workflows():
     workflow_dir = Path(".github/workflows")
     if workflow_dir.exists():
         workflows = list(workflow_dir.glob("*.yml"))
-        print(f"✅ Found {len(workflows)} workflow files")
+        logger.info("Found {len(workflows)} workflow files")
         return True
     else:
-        print("⚠️  No GitHub workflows found")
+        logger.warning("No GitHub workflows found")
         return True
 
 def test_flake8_basic():
@@ -66,16 +70,16 @@ def test_flake8_basic():
         ], capture_output=True, text=True, timeout=30)
         
         if result.returncode == 0:
-            print("✅ Python compilation works")
+            logger.info("Python compilation works")
             return True
         else:
-            print(f"❌ Python compilation failed: {result.stderr}")
+            logger.error("Python compilation failed: {result.stderr}")
             return False
     except subprocess.TimeoutExpired:
         print("⏰ Python compilation timeout")
         return False
     except Exception as e:
-        print(f"❌ Python compilation error: {e}")
+        logger.error("Python compilation error: {e}")
         return False
 
 def test_module_structure():
@@ -88,11 +92,11 @@ def test_module_structure():
         dir_path = Path(dir_name)
         if dir_path.exists() and dir_path.is_dir():
             found_dirs.append(dir_name)
-            print(f"✅ Found {dir_name}/")
+            logger.info("Found {dir_name}/")
         else:
-            print(f"⚠️  Missing {dir_name}/")
+            logger.warning("Missing {dir_name}/")
     
-    print(f"✅ Found {len(found_dirs)}/{len(expected_dirs)} expected directories")
+    logger.info("Found {len(found_dirs)}/{len(expected_dirs)} expected directories")
     return len(found_dirs) >= 2  # At least 2 core directories
 
 def test_basic_security():
@@ -101,15 +105,15 @@ def test_basic_security():
     try:
         # Check for basic security file
         if Path("security_verification.py").exists():
-            print("✅ Security verification script exists")
+            logger.info("Security verification script exists")
             
         # Check for .security directory (our security suite)
         if Path(".security").exists():
-            print("✅ Security suite directory exists")
+            logger.info("Security suite directory exists")
             
         return True
     except Exception as e:
-        print(f"❌ Security check error: {e}")
+        logger.error("Security check error: {e}")
         return False
 
 def main():
@@ -135,7 +139,7 @@ def main():
                 passed += 1
                 print()
         except Exception as e:
-            print(f"❌ Test {test.__name__} failed with exception: {e}")
+            logger.error("Test {test.__name__} failed with exception: {e}")
             print()
     
     print("=" * 60)
@@ -146,7 +150,7 @@ def main():
         print("🚀 Ready for GitHub Actions and Codacy analysis")
         return 0
     else:
-        print("⚠️  Some issues detected - CI may have problems")
+        logger.warning("Some issues detected - CI may have problems")
         print("💡 Fix the issues above for optimal CI performance")
         return 1
 

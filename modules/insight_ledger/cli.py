@@ -6,6 +6,10 @@ Command-line interface for managing the Insight Ledger.
 Anchor: T1-TIL-004
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import sys
 from typing import Optional
@@ -40,7 +44,7 @@ def record_insight_cli(
         try:
             itype = InsightType(insight_type)
         except ValueError:
-            print(f"❌ Invalid insight type: {insight_type}")
+            logger.error("Invalid insight type: {insight_type}")
             print(f"Valid types: {', '.join([t.value for t in InsightType])}")
             sys.exit(1)
 
@@ -53,7 +57,7 @@ def record_insight_cli(
             try:
                 context_dict = json.loads(context)
             except json.JSONDecodeError:
-                print(f"❌ Invalid JSON context: {context}")
+                logger.error("Invalid JSON context: {context}")
                 sys.exit(1)
 
         # Create ledger and record
@@ -70,13 +74,13 @@ def record_insight_cli(
 
         entry = ledger.record_insight(insight)
 
-        print("✅ Insight recorded successfully")
+        logger.info("Insight recorded successfully")
         print(f"   Entry ID: {entry.entry_id}")
         print(f"   Hash: {entry.entry_hash[:16]}...")
         print(f"   Signature: {entry.signature[:16]}...")
 
     except Exception as e:
-        print(f"❌ Failed to record insight: {e}")
+        logger.error("Failed to record insight: {e}")
         sys.exit(1)
 
 
@@ -98,11 +102,11 @@ def verify_integrity_cli(storage_path: str, limit: Optional[int] = None) -> None
         report = ledger.verify_integrity(limit=limit)
 
         if report["chain_intact"]:
-            print(f"✅ Ledger integrity verified")
+            logger.info("Ledger integrity verified")
             print(f"   Entries verified: {report['verified_entries']}/{report['total_entries']}")
             print(f"   Verification time: {report['verification_time_ms']:.1f}ms")
         else:
-            print(f"❌ Integrity compromised!")
+            logger.error("Integrity compromised!")
             print(f"   Verified: {report['verified_entries']}/{report['total_entries']}")
             print(f"   Failed entries: {len(report['failed_entries'])}")
             if report["errors"]:
@@ -112,7 +116,7 @@ def verify_integrity_cli(storage_path: str, limit: Optional[int] = None) -> None
             sys.exit(1)
 
     except Exception as e:
-        print(f"❌ Verification failed: {e}")
+        logger.error("Verification failed: {e}")
         sys.exit(1)
 
 
@@ -147,7 +151,7 @@ def query_history_cli(
             try:
                 query.insight_types = [InsightType(insight_type)]
             except ValueError:
-                print(f"❌ Invalid insight type: {insight_type}")
+                logger.error("Invalid insight type: {insight_type}")
                 sys.exit(1)
 
         if source:
@@ -201,7 +205,7 @@ def query_history_cli(
                 )
 
     except Exception as e:
-        print(f"❌ Query failed: {e}")
+        logger.error("Query failed: {e}")
         sys.exit(1)
 
 
@@ -234,7 +238,7 @@ def get_stats_cli(storage_path: str) -> None:
                 print(f"   {source:<30} {count:>6}")
 
     except Exception as e:
-        print(f"❌ Failed to get stats: {e}")
+        logger.error("Failed to get stats: {e}")
         sys.exit(1)
 
 
@@ -256,12 +260,12 @@ def export_ledger_cli(
 
         count = ledger.export_ledger(output_path, include_genesis=include_genesis)
 
-        print(f"✅ Export completed successfully")
+        logger.info("Export completed successfully")
         print(f"   Entries exported: {count}")
         print(f"   Output file: {output_path}")
 
     except Exception as e:
-        print(f"❌ Export failed: {e}")
+        logger.error("Export failed: {e}")
         sys.exit(1)
 
 

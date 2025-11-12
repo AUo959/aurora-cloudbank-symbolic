@@ -7,6 +7,10 @@
 Fixes critical syntax errors that are preventing CodeQL analysis
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 import re
@@ -41,9 +45,9 @@ def fix_critical_syntax_errors():
                 )
                 
                 if result.returncode == 0:
-                    print(f"✅ {file_path} - No syntax errors")
+                    logger.info("{file_path} - No syntax errors")
                 else:
-                    print(f"❌ {file_path} - Has syntax errors")
+                    logger.error("{file_path} - Has syntax errors")
                     print(f"   Error: {result.stderr.strip()}")
                     
                     # Apply basic fixes
@@ -52,7 +56,7 @@ def fix_critical_syntax_errors():
                         print(f"🔧 Applied fixes to {file_path}")
                     
             except Exception as e:
-                print(f"⚠️ Could not check {file_path}: {e}")
+                logger.warning("Could not check {file_path}: {e}")
     
     print(f"\n📊 Summary: {fixes_applied} files fixed")
     return fixes_applied > 0
@@ -156,9 +160,9 @@ def main():
     )
     
     if result.returncode == 0:
-        print("✅ Python environment validation passed")
+        logger.info("Python environment validation passed")
     else:
-        print("❌ Python environment validation failed")
+        logger.error("Python environment validation failed")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,10 @@ GitHub API Integration for Aurora CloudBank Issue Management
 Real GitHub API implementation for searching and closing issues
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import json
 import requests
@@ -25,9 +29,9 @@ class GitHubAPIManager:
         self.token = os.getenv('GITHUB_TOKEN')
         if self.token:
             self.headers["Authorization"] = f"token {self.token}"
-            print("✅ GitHub token found - API calls will be authenticated")
+            logger.info("GitHub token found - API calls will be authenticated")
         else:
-            print("⚠️  No GitHub token found - using unauthenticated API (rate limited)")
+            logger.warning("No GitHub token found - using unauthenticated API (rate limited)")
         
         self.issue_patterns = {
             "security": {
@@ -299,7 +303,7 @@ Repository health tracking system monitors continued stability. Any regression w
         closed_count = len([p for p in all_processed if p['action'] in ['closed', 'would_close']])
         
         if closed_count > 0:
-            print(f"✅ Issues Processed: {closed_count}")
+            logger.info("Issues Processed: {closed_count}")
             
             # Group by pattern
             by_pattern = {}
@@ -360,7 +364,7 @@ def main():
         if response in ['y', 'yes']:
             print("\n🚀 Running LIVE issue closure...")
             live_results = manager.run_comprehensive_issue_closure(dry_run=False)
-            print(f"✅ LIVE run completed - {len(live_results)} issues processed")
+            logger.info("LIVE run completed - {len(live_results)} issues processed")
         else:
             print("   ℹ️  Live run cancelled - only dry run results saved")
     else:

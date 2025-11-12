@@ -11,6 +11,10 @@ Verifies repository sync integrity and prepares next phase initialization
 with full symbolic anchor traceability and entropy monitoring
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import hashlib
 import json
 import subprocess
@@ -417,11 +421,11 @@ def main():
     sync_result = verifier.verify_repository_sync()
     
     if sync_result["sync_integrity"]["synchronized"]:
-        print("✅ Repository fully synchronized with origin/main")
+        logger.info("Repository fully synchronized with origin/main")
         print(f"   Local:  {sync_result['sync_integrity']['local_main']}")
         print(f"   Origin: {sync_result['sync_integrity']['origin_main']}")
     else:
-        print("⚠️ Repository not fully synchronized")
+        logger.warning("Repository not fully synchronized")
         
     # Verify thread continuity
     thread_continuity = sync_result.get("thread_continuity", {})

@@ -3,6 +3,10 @@
 Quick Fix for Critical Syntax Errors
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 from pathlib import Path
 
@@ -51,11 +55,11 @@ def quick_fix_file(file_path):
         with open(file_path, 'w', encoding='utf-8') as f:
             f.writelines(fixed_lines)
         
-        print(f"✅ Quick-fixed {file_path}")
+        logger.info("Quick-fixed {file_path}")
         return True
         
     except Exception as e:
-        print(f"❌ Error fixing {file_path}: {e}")
+        logger.error("Error fixing {file_path}: {e}")
         return False
 
 
@@ -87,7 +91,7 @@ def main():
             Path("critical_issue_resolver.py").unlink()
             print("🗑️ Removed problematic critical_issue_resolver.py")
         except Exception as e:
-            print(f"❌ Could not remove critical_issue_resolver.py: {e}")
+            logger.error("Could not remove critical_issue_resolver.py: {e}")
     
     return True
 

@@ -28,6 +28,10 @@ Aurora Codex v2.5 Standardization:
   - Operations: #seal//., #deploy//., #test//.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import hashlib
 import re
 from dataclasses import dataclass
@@ -345,12 +349,12 @@ def demo():
         result = parser.parse(test_input)
         
         if result.commands:
-            print(f"✅ Valid Commands Found: {len(result.commands)}")
+            logger.info("Valid Commands Found: {len(result.commands)}")
             for cmd in result.commands:
                 print(f"   • {cmd.raw} → {cmd.name}")
         
         if result.naked_commands:
-            print(f"⚠️  Naked Commands Found: {len(result.naked_commands)}")
+            logger.warning("Naked Commands Found: {len(result.naked_commands)}")
             for cmd in result.naked_commands:
                 print(cmd.error_message)
         

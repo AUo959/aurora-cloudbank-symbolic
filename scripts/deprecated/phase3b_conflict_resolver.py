@@ -10,6 +10,10 @@ Created: 2025-09-24
 Phase: 3B (Conflict Resolution)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -64,14 +68,14 @@ class Phase3BConflictResolver:
             )
             
             if check_return and result.returncode != 0:
-                print(f"❌ Command failed: {command}")
+                logger.error("Command failed: {command}")
                 if result.stderr:
                     print(f"Error: {result.stderr}")
                 return None
                 
             return result
         except Exception as e:
-            print(f"❌ Exception running command: {command}")
+            logger.error("Exception running command: {command}")
             print(f"Error: {e}")
             return None
 
@@ -132,7 +136,7 @@ class Phase3BConflictResolver:
         merge_result = self.run_command(f"git merge origin/{branch_name} --no-commit", False)
         
         if merge_result and merge_result.returncode == 0:
-            print("✅ No conflicts detected in practice - completing merge")
+            logger.info("No conflicts detected in practice - completing merge")
             commit_result = self.run_command(f"git commit -m 'Resolve {branch_name} - clean merge'")
             return resolution_branch if commit_result else None
         
@@ -200,7 +204,7 @@ class Phase3BConflictResolver:
                     continue
         
         if resolved_files:
-            print("✅ Auto-resolved %s files:", len(resolved_files))
+            logger.info("Auto-resolved %s files:", len(resolved_files))
             for file in resolved_files[:3]:
                 print("   • %s", file)
             if len(resolved_files) > 3:
@@ -263,7 +267,7 @@ print(f"   Description: {candidate['description']}")
                     test_result = self.run_command("python3 -m pytest tests/ -x", False)
                     
                     if test_result and test_result.returncode == 0:
-                        print("✅ Tests pass! Merging to main...")
+                        logger.info("Tests pass! Merging to main...")
                         
                         # Merge to main
                         self.run_command("git checkout main")
@@ -272,16 +276,16 @@ print(f"   Description: {candidate['description']}")
                         if merge_main:
                             resolution_record["status"] = "success"
                             resolution_record["merged_to_main"] = True
-                            print("✅ Successfully resolved and integrated %s", branch_name)
+                            logger.info("Successfully resolved and integrated %s", branch_name)
                         else:
                             resolution_record["status"] = "main_merge_failed"
                     else:
                         resolution_record["status"] = "test_failed"
-                        print("❌ Tests failed after auto-resolution")
+                        logger.error("Tests failed after auto-resolution")
                 else:
                     resolution_record["status"] = "commit_failed"
             else:
-                print("⚠️  Automatic resolution incomplete")
+                logger.warning("Automatic resolution incomplete")
                 resolution_record["status"] = "manual_resolution_needed"
                 resolution_record["guidance"] = self.generate_manual_resolution_guidance(analysis)
             
@@ -291,7 +295,7 @@ print(f"   Description: {candidate['description']}")
         except Exception as e:
             resolution_record["status"] = "error"
             resolution_record["error"] = str(e)
-            print(f"❌ Exception during resolution: {e}")
+            logger.error("Exception during resolution: {e}")
             self.run_command("git checkout main", False)
             
         resolution_record["end_time"] = datetime.now().isoformat()
@@ -340,9 +344,9 @@ print(f"   Description: {candidate['description']}")
             
             if resolution_result["status"] == "success":
                 successful_resolutions += 1
-                print("✅ Resolution #%s completed", successful_resolutions)
+                logger.info("Resolution #%s completed", successful_resolutions)
             else:
-                print(f"⚠️  Resolution status: {resolution_result['status']}")
+                logger.warning("Resolution status: {resolution_result["status']}")
         
         # Final summary
         print(f"\n🎯 PHASE 3B SUMMARY:")
@@ -354,10 +358,10 @@ print(f"   Description: {candidate['description']}")
             final_test = self.run_command("python3 -m pytest tests/ -v", False)
             
             if final_test and final_test.returncode == 0:
-                print("✅ All tests pass after Phase 3B resolution!")
+                logger.info("All tests pass after Phase 3B resolution!")
                 self.results["final_test_status"] = "passed"
             else:
-                print("❌ Final tests failed!")
+                logger.error("Final tests failed!")
                 self.results["final_test_status"] = "failed"
         
         # Save results

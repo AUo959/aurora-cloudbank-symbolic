@@ -3,6 +3,10 @@
 Fix all remaining 53 syntax errors
 Comprehensive fixer for test files, unterminated strings, missing except/finally, undefined names, and indentation
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 import subprocess
 from pathlib import Path
@@ -397,7 +401,7 @@ def main():
     errors_by_file = run_flake8()
     
     if not errors_by_file:
-        print("✅ No errors found!")
+        logger.info("No errors found!")
         return
     
     print(f"📋 Found errors in {len(errors_by_file)} files\n")
@@ -424,7 +428,7 @@ def main():
         print()
     
     print(f"{'='*60}")
-    print(f"✅ Fixed {total_files_fixed} files ({total_changes} total changes)")
+    logger.info("Fixed {total_files_fixed} files ({total_changes} total changes)")
     print(f"{'='*60}\n")
     
     # Re-check errors

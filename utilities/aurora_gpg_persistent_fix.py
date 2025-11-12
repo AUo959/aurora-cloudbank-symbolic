@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import subprocess
 import sys
@@ -38,7 +42,7 @@ class GPGPersistentFix:
             return user_name, user_email, gpg_sign
 
         except Exception as e:
-            print(f"❌ Error checking Git config: {e}")
+            logger.error("Error checking Git config: {e}")
             return None, None, None
 
     def disable_gpg_signing(self):
@@ -56,11 +60,11 @@ class GPGPersistentFix:
             subprocess.run(["git", "config", "--global", "tag.gpgsign", "false"], check=True)
             subprocess.run(["git", "config", "tag.gpgsign", "false"], check=True)
 
-            print("✅ GPG signing disabled successfully")
+            logger.info("GPG signing disabled successfully")
             return True
 
         except Exception as e:
-            print(f"❌ Error disabling GPG signing: {e}")
+            logger.error("Error disabling GPG signing: {e}")
             return False
 
     def configure_git_user(self):
@@ -76,11 +80,11 @@ class GPGPersistentFix:
             subprocess.run(["git", "config", "user.name", "Aurora CloudBank"], check=True)
             subprocess.run(["git", "config", "user.email", "aurora@cloudbank.dev"], check=True)
 
-            print("✅ Git user configured successfully")
+            logger.info("Git user configured successfully")
             return True
 
         except Exception as e:
-            print(f"❌ Error configuring Git user: {e}")
+            logger.error("Error configuring Git user: {e}")
             return False
 
     def fix_commit_author_issues(self):
@@ -100,11 +104,11 @@ class GPGPersistentFix:
             # Disable interactive rebase editor issues
             subprocess.run(["git", "config", "--global", "core.editor", "nano"], check=True)
 
-            print("✅ Commit author format fixed")
+            logger.info("Commit author format fixed")
             return True
 
         except Exception as e:
-            print(f"❌ Error fixing commit author: {e}")
+            logger.error("Error fixing commit author: {e}")
             return False
 
     def create_gitconfig_backup(self):
@@ -118,14 +122,14 @@ class GPGPersistentFix:
 
             if gitconfig_path.exists():
                 subprocess.run(["cp", str(gitconfig_path), str(backup_path)], check=True)
-                print(f"✅ Backup created: {backup_path}")
+                logger.info("Backup created: {backup_path}")
             else:
                 print("ℹ️ No existing .gitconfig found")
 
             return True
 
         except Exception as e:
-            print(f"❌ Error creating backup: {e}")
+            logger.error("Error creating backup: {e}")
             return False
 
     def apply_persistent_fix(self):
@@ -169,11 +173,11 @@ class GPGPersistentFix:
             subprocess.run(["git", "rm", "gpg_test_file.txt"], check=True)
             subprocess.run(["git", "commit", "-m", "Clean up GPG test file"], check=True)
 
-            print("✅ Test commits successful - GPG fix working!")
+            logger.info("Test commits successful - GPG fix working!")
             return True
 
         except Exception as e:
-            print(f"❌ Test commit failed: {e}")
+            logger.error("Test commit failed: {e}")
             return False
 
     def create_persistent_script(self):
@@ -235,14 +239,14 @@ def main():
             fixer.create_persistent_script()
 
             print("\n🎉 GPG PERSISTENT FIX COMPLETE!")
-            print("✅ 403 author invalid errors should be resolved")
+            logger.info("403 author invalid errors should be resolved")
             print("🔧 All commits will now work without GPG signing")
             print("📜 Script 'aurora_gpg_fix.sh' created for future use")
 
         return success
 
     except Exception as e:
-        print(f"❌ Critical error in GPG fix: {e}")
+        logger.error("Critical error in GPG fix: {e}")
         return False
 
 

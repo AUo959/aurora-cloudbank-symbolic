@@ -11,6 +11,10 @@ Complete verification of all 5 phases with thread continuity manifest
 for safe handoff and future resumption
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import hashlib
 import json
 from datetime import datetime
@@ -474,7 +478,7 @@ def main():
     
     # Final summary
     print("\n" + "="*70)
-    print("✅ NEXUS Phase 5 Verification Complete!")
+    logger.info("NEXUS Phase 5 Verification Complete!")
     print(f"📁 Manifests saved to: .nexus/manifests/")
     print(f"📦 Handoff materials: .nexus/handoff/")
     print(f"🎴 Glyphcard saved: .nexus/glyphcards/")

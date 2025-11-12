@@ -2,6 +2,10 @@
 """
 Quick CI compatibility test to verify basic Python functionality
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import subprocess
 
@@ -26,10 +30,10 @@ def test_basic_imports():
             result = subprocess.run([sys.executable, '-m', 'py_compile', file], 
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                print(f"✅ {file}")
+                logger.info("{file}")
                 passed += 1
             else:
-                print(f"❌ {file}: {result.stderr.strip()}")
+                logger.error("{file}: {result.stderr.strip()}")
                 failed += 1
         except subprocess.TimeoutExpired:
             print(f"⏰ {file}: Timeout")
@@ -49,16 +53,16 @@ def test_basic_functionality():
         # Test basic Python operations
         result = 2 + 2
         assert result == 4, "Basic math failed"
-        print("✅ Basic math works")
+        logger.info("Basic math works")
         
         # Test subprocess
         result = subprocess.run(['python3', '--version'], capture_output=True, text=True)
         assert result.returncode == 0, "Python version check failed"
-        print("✅ Python subprocess works")
+        logger.info("Python subprocess works")
         
         return True
     except Exception as e:
-        print(f"❌ Basic functionality test failed: {e}")
+        logger.error("Basic functionality test failed: {e}")
         return False
 
 def main():

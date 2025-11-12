@@ -13,6 +13,10 @@ This hook runs before each commit and:
 3. Blocks commits with critical violations
 4. Provides clear feedback and remediation guidance
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import subprocess
 import os
@@ -27,7 +31,7 @@ sys.path.insert(0, str(script_dir))
 try:
     from canonical_validator import CanonicalValidator
 except ImportError:
-    print("❌ Error: Could not import canonical_validator")
+    logger.error("Error: Could not import canonical_validator")
     print("   Ensure scripts/canonical_validator.py exists")
     sys.exit(1)
 
@@ -94,7 +98,7 @@ def main():
     staged_files = get_staged_files()
 
     if not staged_files:
-        print("✅ No files to validate")
+        logger.info("No files to validate")
         return 0
 
     # Filter for files we can validate
@@ -105,7 +109,7 @@ def main():
     ]
 
     if not files_to_validate:
-        print("✅ No validatable files in commit")
+        logger.info("No validatable files in commit")
         return 0
 
     print(f"📁 Validating {len(files_to_validate)} files...")
@@ -120,7 +124,7 @@ def main():
             results = validator.validate_file(file_path)
             all_results.extend(results)
         except Exception as e:
-            print(f"❌ Error validating {file_path}: {e}")
+            logger.error("Error validating {file_path}: {e}")
             return 1
 
     # Print validation summary

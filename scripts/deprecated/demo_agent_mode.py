@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 import os
 import sys
@@ -79,7 +83,7 @@ async def demo_session_management(agent):
 
     if create_result['success']:
         session_id = create_result['result']['session_id']
-        print(f"✅ Session created: {session_id[:8]}...")
+        logger.info("Session created: {session_id[:8]}...")
 
         # Update session
         print("Updating session state...")
@@ -90,7 +94,7 @@ async def demo_session_management(agent):
         )
 
         if update_result['success']:
-            print("✅ Session updated")
+            logger.info("Session updated")
 
             # Get session
             print("Retrieving session state...")
@@ -110,7 +114,7 @@ async def demo_session_management(agent):
                 )
 
                 if delete_result['success']:
-                    print("✅ Session deleted")
+                    logger.info("Session deleted")
     print()
 
 async def demo_symbolic_processing(agent):
@@ -166,7 +170,7 @@ Status level: %s", level)
 
 async def demo_error_handling(agent):
     """Demonstrate error handling and recovery"""
-    print("⚠️  Demo 6: Error Handling")
+    logger.warning("Demo 6: Error Handling")
     print("-" * 30)
 
     # Test invalid tool

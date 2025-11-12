@@ -4,6 +4,10 @@ Aurora CloudBank - Consolidated Branch Cleanup Script
 Performs automated branch consolidation based on analysis results.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import argparse
 import json
@@ -25,10 +29,10 @@ class ConsolidatedBranchCleanup:
             with open(analysis_file, 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"❌ Analysis file not found: {analysis_file}")
+            logger.error("Analysis file not found: {analysis_file}")
             return {}
         except json.JSONDecodeError:
-            print(f"❌ Invalid JSON in analysis file: {analysis_file}")
+            logger.error("Invalid JSON in analysis file: {analysis_file}")
             return {}
 
     def delete_merged_branches(self, branches: List[Dict]) -> Dict:
@@ -249,7 +253,7 @@ def main():
     # Load analysis
     analysis = cleanup.load_analysis(args.analysis)
     if not analysis:
-        print("❌ Cannot proceed without valid analysis data")
+        logger.error("Cannot proceed without valid analysis data")
         sys.exit(1)
     
     # Execute consolidation

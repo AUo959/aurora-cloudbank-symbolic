@@ -15,6 +15,10 @@ Created: 2025-09-24
 Phase: SSMT v2.3 (Intelligence-Driven)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import subprocess
 import sys
@@ -46,7 +50,7 @@ class SSMTIntelligentIntegrator:
             with open("SSMT_v2_2_ARCHITECTURAL_ANALYSIS.json", 'r') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"⚠️ Could not load architectural analysis: {e}")
+            logger.warning("Could not load architectural analysis: {e}")
             return {}
 
     def select_integration_candidates(self) -> List[Dict]:
@@ -54,7 +58,7 @@ class SSMTIntelligentIntegrator:
         candidates = []
         
         if not self.architectural_data.get("enhanced_branch_assessments"):
-            print("⚠️ No architectural data available - using fallback candidates")
+            logger.warning("No architectural data available - using fallback candidates")
             return []
         
         for assessment in self.architectural_data["enhanced_branch_assessments"]:
@@ -320,7 +324,7 @@ class {Path(critical_file).stem.title()}Enhancements:
         print(f"📊 Integration candidates: {len(self.integration_candidates)}")
         
         if not self.integration_candidates:
-            print("⚠️ No suitable integration candidates identified")
+            logger.warning("No suitable integration candidates identified")
             return False
         
         self.results["status"] = "running"
@@ -338,19 +342,19 @@ class {Path(critical_file).stem.title()}Enhancements:
             
             if integration_result.get("status") == "success":
                 successful_integrations += 1
-                print(f"✅ Integration successful!")
+                logger.info("Integration successful!")
             else:
-                print(f"⚠️ Integration status: {integration_result.get('status', 'unknown')}")
+                logger.warning("Integration status: {integration_result.get("status', 'unknown')}")
         
         # Final validation
         print("\n🧪 Running system validation...")
         test_result = self.run_command("python3 -m pytest tests/ -x --tb=short", False)
         
         if test_result and test_result.returncode == 0:
-            print("✅ All tests pass after SSMT v2.3 integration!")
+            logger.info("All tests pass after SSMT v2.3 integration!")
             self.results["final_test_status"] = "passed"
         else:
-            print("❌ Tests failed after integration!")
+            logger.error("Tests failed after integration!")
             self.results["final_test_status"] = "failed"
         
         # Summary

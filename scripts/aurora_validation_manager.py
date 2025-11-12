@@ -14,6 +14,10 @@ Version: 1.0.0
 Date: July 14, 2025
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import os
@@ -145,7 +149,7 @@ class ValidationManager:
                 f.write("\n".join(lines_to_add))
                 f.write("\n")
 
-            print("✅ Updated .gitignore with %s validation exclusions", len(lines_to_add))
+            logger.info("Updated .gitignore with %s validation exclusions", len(lines_to_add))
 
     def create_post_commit_hook(self):
         """Create post-commit hook to update validation files after commit"""
@@ -173,7 +177,7 @@ echo "✅ Post-commit validation update complete"
 
         # Make executable
         os.chmod(post_commit_hook, 0o700)
-        print("✅ Created post-commit hook for validation updates")
+        logger.info("Created post-commit hook for validation updates")
 
     def cleanup_old_reports(self):
         """Clean up old validation reports based on config"""
@@ -202,7 +206,7 @@ echo "✅ Post-commit validation update complete"
 
         if strategy == "smart_exclusion":
             self.setup_pre_commit_exclusion()
-            print("✅ Implemented smart exclusion strategy")
+            logger.info("Implemented smart exclusion strategy")
             print("   - Validation files excluded from commits via .gitignore")
             print("   - Reports generated but not committed")
 
@@ -210,7 +214,7 @@ echo "✅ Post-commit validation update complete"
             validation_dir = self.repo_root / self.config["validation_dir"]
             validation_dir.mkdir(exist_ok=True)
             self.setup_pre_commit_exclusion()
-            print("✅ Implemented timestamped strategy")
+            logger.info("Implemented timestamped strategy")
             print("   - Reports saved to %s", validation_dir)
             print("   - Unique filenames prevent conflicts")
 
@@ -218,12 +222,12 @@ echo "✅ Post-commit validation update complete"
             validation_dir = self.repo_root / self.config["validation_dir"]
             validation_dir.mkdir(exist_ok=True)
             self.create_post_commit_hook()
-            print("✅ Implemented post-commit strategy")
+            logger.info("Implemented post-commit strategy")
             print("   - Validation files updated after commit")
             print("   - Separate commit for validation updates")
 
         elif strategy == "memory_only":
-            print("✅ Implemented memory-only strategy")
+            logger.info("Implemented memory-only strategy")
             print("   - Validation runs but no files written")
             print("   - Console output only during commits")
 

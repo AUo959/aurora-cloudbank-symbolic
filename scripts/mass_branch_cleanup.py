@@ -4,6 +4,10 @@
 Systematically removes redundant and superseded branches to achieve zero open PRs.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 from typing import List, Dict
@@ -28,7 +32,7 @@ class BranchCleanupManager:
             )
             
             if result.returncode == 0:
-                print("✅ Deleted: {branch_name} - %s", reason)
+                logger.info("Deleted: {branch_name} - %s", reason)
                 self.deleted_count += 1
                 return True
             else:
@@ -105,8 +109,8 @@ class BranchCleanupManager:
         print("\n" + "=" * 50)
         print("📊 PHASE 2 CLEANUP RESULTS")
         print("=" * 50)
-        print("✅ Branches deleted: %s", self.deleted_count)
-        print("❌ Errors encountered: %s", len(self.errors))
+        logger.info("Branches deleted: %s", self.deleted_count)
+        logger.error("Errors encountered: %s", len(self.errors))
         
         if self.errors:
             print("\n⚠️ Errors Details:")

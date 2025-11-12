@@ -6,6 +6,10 @@ Performance Comparison: Heavy Dependencies vs Native Implementation
 Demonstrates the performance improvements achieved by eliminating heavy dependencies
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import math
 import sys
 import time
@@ -225,13 +229,13 @@ def main():
     # Performance summary
     print("\n🎯 Performance Optimization Summary")
     print("=" * 40)
-    print("✅ Zero Dependencies: True")
-    print("✅ Native Algorithms: True")
-    print("✅ Symbolic Patterns Preserved: True (T1/SRB anchors)")
-    print("✅ DLP Tagging: True")
-    print("✅ Export Manifests: True")
-    print("✅ Continuity Preservation: True")
-    print("✅ CLI Chaining: True (001//999//.)")
+    logger.info("Zero Dependencies: True")
+    logger.info("Native Algorithms: True")
+    logger.info("Symbolic Patterns Preserved: True (T1/SRB anchors)")
+    logger.info("DLP Tagging: True")
+    logger.info("Export Manifests: True")
+    logger.info("Continuity Preservation: True")
+    logger.info("CLI Chaining: True (001//999//.)")
 
     print("\n⚡ Performance Gains:")
     print(f"  🚀 Startup time improvement: {import_overhead / 0.001:.0f}x faster")

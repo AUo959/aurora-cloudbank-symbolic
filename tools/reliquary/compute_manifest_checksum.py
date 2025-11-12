@@ -9,6 +9,10 @@ Team: AUo959-team
 Version: v0.1.0
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import sys
@@ -61,7 +65,7 @@ def main():
     manifest_path = Path(args.manifest)
     
     if not manifest_path.exists():
-        print(f"❌ Manifest not found: {manifest_path}")
+        logger.error("Manifest not found: {manifest_path}")
         return 1
     
     checksum = compute_and_update_checksum(manifest_path, write=args.write)

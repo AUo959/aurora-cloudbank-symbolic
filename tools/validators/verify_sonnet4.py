@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import sys
 """
@@ -88,7 +92,7 @@ async def main():
         print("🎉 SUCCESS: Claude Sonnet 4 is fully enabled for all clients!")
         print("🚀 Status: OPERATIONAL")
     else:
-        print("⚠️  WARNING: Some verification checks failed")
+        logger.warning("WARNING: Some verification checks failed")
         print("🔧 Status: NEEDS ATTENTION")
 
     print("\n🔗 Available Endpoints (when API is running):")

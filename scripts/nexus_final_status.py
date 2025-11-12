@@ -9,6 +9,10 @@ Comprehensive final status report for the complete NEXUS system
 with all phases, achievements, and operational metrics.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import hashlib
 from datetime import datetime
@@ -37,7 +41,7 @@ def generate_final_status_report():
     print()
     
     # Phase Summary
-    print("✅ COMPLETED PHASES (8):")
+    logger.info("COMPLETED PHASES (8):")
     phases_completed = [
         ("Phase 1", "Symbolic Memory Manager", "NEXUS-BOOTSTRAP-2025", 0.150),
         ("Phase 2", "Multi-Agent Communication", "T2-MULTIAGENT-2025", 0.275),

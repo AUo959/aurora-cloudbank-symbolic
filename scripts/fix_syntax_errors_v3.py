@@ -4,6 +4,10 @@ Fix remaining syntax errors in Aurora CloudBank project.
 Targets the 55 remaining E9 errors in scripts and test files.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 import sys
@@ -125,7 +129,7 @@ def fix_file(filepath):
         return False, 0
     
     except Exception as e:
-        print(f"❌ Error processing {filepath}: {e}")
+        logger.error("Error processing {filepath}: {e}")
         return False, 0
 
 def main():
@@ -164,7 +168,7 @@ def main():
             print(f"  ⏭️  No automatic fix available")
     
     print(f"\n{'='*60}")
-    print(f"✅ Fixed {fixed_count} files ({total_changes} total changes)")
+    logger.info("Fixed {fixed_count} files ({total_changes} total changes)")
     print(f"{'='*60}\n")
     
     # Re-run flake8 to see remaining errors

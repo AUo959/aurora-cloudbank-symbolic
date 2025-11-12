@@ -14,6 +14,10 @@ Usage:
 Author: Aurora/ORION Core
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import shutil
@@ -189,7 +193,7 @@ class CIEnvironmentValidator:
     def fix_missing_tools(self) -> None:
         """Attempt to install missing tools."""
         if not self.results["missing_tools"]:
-            print("✅ No missing tools to install")
+            logger.info("No missing tools to install")
             return
 
         print("🔧 Attempting to install missing tools...")
@@ -201,17 +205,17 @@ class CIEnvironmentValidator:
             print("Installing Python tools: %s", ' '.join(python_missing))
             try:
                 subprocess.run([sys.executable, "-m", "pip", "install"] + python_missing, check=True)
-                print("✅ Python tools installed successfully")
+                logger.info("Python tools installed successfully")
             except subprocess.CalledProcessError as e:
-                print("❌ Failed to install Python tools: %s", e)
+                logger.error("Failed to install Python tools: %s", e)
 
         if node_missing and shutil.which("npm"):
             print("Installing Node.js tools: %s", ' '.join(node_missing))
             try:
                 subprocess.run(["npm", "install", "-g"] + node_missing, check=True)
-                print("✅ Node.js tools installed successfully")
+                logger.info("Node.js tools installed successfully")
             except subprocess.CalledProcessError as e:
-                print("❌ Failed to install Node.js tools: %s", e)
+                logger.error("Failed to install Node.js tools: %s", e)
 
 
 def main():

@@ -4,6 +4,10 @@ Base Plugin Indentation Fixer
 Fixes the systematic indentation issues in base_plugin.py
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 
 
@@ -73,11 +77,11 @@ def fix_base_plugin_file():
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
         
-        print(f"✅ Fixed indentation in {file_path}")
+        logger.info("Fixed indentation in {file_path}")
         return True
         
     except Exception as e:
-        print(f"❌ Error fixing {file_path}: {e}")
+        logger.error("Error fixing {file_path}: {e}")
         return False
 
 

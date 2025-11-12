@@ -6,6 +6,10 @@ Anchor: T1-DLP-AUTO-001
 Context: R-2 Synergy Audit - Opportunity #2 Implementation
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import time
 from typing import Callable, Optional, Set
 from fastapi import Request, Response
@@ -234,7 +238,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
             try:
                 self.insight_ledger = get_ledger()
             except Exception as e:
-                print(f"⚠️  Failed to initialize Insight Ledger: {e}")
+                logger.warning("Failed to initialize Insight Ledger: {e}")
                 self.enable_ledger = False
                 return
         
@@ -272,7 +276,7 @@ class DLPAutoTrackingMiddleware(BaseHTTPMiddleware):
             
         except Exception as e:
             # Don't fail the request if ledger recording fails
-            print(f"⚠️  Failed to record to Insight Ledger: {e}")
+            logger.warning("Failed to record to Insight Ledger: {e}")
     
     def get_statistics(self) -> dict:
         """Get middleware statistics"""

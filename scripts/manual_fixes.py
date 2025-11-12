@@ -3,6 +3,10 @@
 Manual fix for the 11 most problematic files
 These need contextual understanding beyond automation
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 from pathlib import Path
 
@@ -80,7 +84,7 @@ def fix_test_runner():
     if broken_main in content:
         content = content.replace(broken_main, fixed_main)
         file_path.write_text(content)
-        print("✅ Fixed test_runner.py")
+        logger.info("Fixed test_runner.py")
         return True
     else:
         print("⏭️  test_runner.py - pattern not found")
@@ -103,10 +107,10 @@ def fix_validate_aurora():
         all_exist = True
     for doc in docs:
         if os.path.exists(doc):
-            print(f"✅ {doc} exists")
+            logger.info("{doc} exists")
         
         else:
-            print(f"❌ {doc} missing")
+            logger.error("{doc} missing")
         all_exist = False
 
     return all_exist"""
@@ -122,9 +126,9 @@ def fix_validate_aurora():
     all_exist = True
     for doc in docs:
         if os.path.exists(doc):
-            print(f"✅ {doc} exists")
+            logger.info("{doc} exists")
         else:
-            print(f"❌ {doc} missing")
+            logger.error("{doc} missing")
             all_exist = False
     
     return all_exist"""
@@ -132,7 +136,7 @@ def fix_validate_aurora():
     if broken_func in content:
         content = content.replace(broken_func, fixed_func)
         file_path.write_text(content)
-        print("✅ Fixed validate_aurora_system.py")
+        logger.info("Fixed validate_aurora_system.py")
         return True
     
     # Try alternative fix - just clean up the indentation globally
@@ -154,7 +158,7 @@ def fix_validate_aurora():
         i += 1
     
     file_path.write_text('\n'.join(fixed_lines))
-    print("✅ Fixed validate_aurora_system.py (alternative method)")
+    logger.info("Fixed validate_aurora_system.py (alternative method)")
     return True
 
 
@@ -170,7 +174,7 @@ def fix_aurora_workflow_config():
         if not lines[172].startswith('            '):
             lines[172] = '            ' + lines[172].lstrip()
             file_path.write_text('\n'.join(lines))
-            print("✅ Fixed aurora_workflow_config.py")
+            logger.info("Fixed aurora_workflow_config.py")
             return True
     
     print("⏭️  aurora_workflow_config.py - already correct or pattern changed")

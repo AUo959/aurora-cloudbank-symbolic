@@ -4,6 +4,10 @@ SSMT v3.0 Weekly Automation Scheduler
 Schedules and manages automated repository maintenance
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -101,16 +105,16 @@ class WeeklyAutomationScheduler:
                 print(result.stdout)
                 
                 if result.stderr:
-                    print("⚠️ Warnings/Errors:")
+                    logger.warning("Warnings/Errors:")
                     print(result.stderr)
                 
                 return result.returncode == 0
                 
             except Exception as e:
-                print(f"❌ Failed to run maintenance pipeline: {e}")
+                logger.error("Failed to run maintenance pipeline: {e}")
                 return False
         else:
-            print(f"❌ Maintenance pipeline not found: {maintenance_script}")
+            logger.error("Maintenance pipeline not found: {maintenance_script}")
             return False
     
     def manual_maintenance_trigger(self):
@@ -259,7 +263,7 @@ def main():
     elif len(sys.argv) > 1 and sys.argv[1] == "--setup":
         # Setup monitoring files
         scheduler.setup_continuous_monitoring()
-        print("✅ Continuous monitoring setup complete!")
+        logger.info("Continuous monitoring setup complete!")
     
     elif scheduler.should_run_now():
         # Scheduled run

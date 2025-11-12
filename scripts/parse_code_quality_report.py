@@ -5,6 +5,10 @@ Used by GitHub Actions workflow to reduce duplication.
 Part of Issue #258 implementation.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import sys
 from pathlib import Path
@@ -20,7 +24,7 @@ def parse_and_display_summary(report_path: str) -> None:
     report_file = Path(report_path)
     
     if not report_file.exists():
-        print("⚠️ No code quality report generated")
+        logger.warning("No code quality report generated")
         return
     
     with open(report_file) as f:
@@ -55,7 +59,7 @@ def check_quality_gate(report_path: str) -> int:
     report_file = Path(report_path)
     
     if not report_file.exists():
-        print("⚠️ No report to evaluate")
+        logger.warning("No report to evaluate")
         return 1
     
     with open(report_file) as f:
@@ -64,10 +68,10 @@ def check_quality_gate(report_path: str) -> int:
     passed = report.get('analysis_summary', {}).get('passed', False)
     
     if not passed:
-        print('❌ Quality gate FAILED - Critical violations detected')
+        logger.error("Quality gate FAILED - Critical violations detected")
         return 1
     else:
-        print('✅ Quality gate PASSED')
+        logger.info("Quality gate PASSED")
         return 0
 
 

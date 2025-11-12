@@ -4,6 +4,10 @@ Comprehensive Syntax Error Fixer for Aurora CloudBank
 Targets the remaining 30+ syntax errors systematically.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import ast
 import sys
 from pathlib import Path
@@ -88,17 +92,17 @@ def fix_file_systematically(file_path):
             # If successful, write back
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed {file_path}")
+            logger.info("Fixed {file_path}")
             return True
         except SyntaxError as e:
-            print(f"⚠️ Partial fix for {file_path}: {e}")
+            logger.warning("Partial fix for {file_path}: {e}")
             # Write back anyway - some progress is better than none
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             return False
             
     except Exception as e:
-        print(f"❌ Error fixing {file_path}: {e}")
+        logger.error("Error fixing {file_path}: {e}")
         return False
 
 
@@ -128,7 +132,7 @@ def disable_problematic_files():
                 print(f"🔒 Disabled {file_path} -> {disabled_path}")
                 disabled_count += 1
             except Exception as e:
-                print(f"❌ Could not disable {file_path}: {e}")
+                logger.error("Could not disable {file_path}: {e}")
     
     return disabled_count
 
@@ -190,7 +194,7 @@ def main():
             pass
     
     print("=" * 50)
-    print(f"✅ Fixed {fixed_count} files")
+    logger.info("Fixed {fixed_count} files")
     print(f"🔒 Disabled {disabled_count} problematic files")
     print(f"📊 Remaining syntax errors: {syntax_errors}")
     

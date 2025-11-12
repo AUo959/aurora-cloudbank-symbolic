@@ -11,6 +11,10 @@ Demonstrates revolutionary reality fork management capabilities with
 branch-based reality management, consensus protocols, and quantum coherence.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import sys
 from pathlib import Path
@@ -90,7 +94,7 @@ class Phase5Demonstrator:
         
         forks = [exploratory_fork, quantum_fork, experimental_fork, consensus_fork]
         
-        print(f"✅ Created {len(forks)} reality forks:")
+        logger.info("Created {len(forks)} reality forks:")
         for fork in forks:
             print(f"  🔀 {fork.fork_id} ({fork.fork_type.value})")
             print(f"     Coherence: {fork.quantum_coherence:.3f}")
@@ -305,10 +309,10 @@ class Phase5Demonstrator:
                 
                 return merged_fork
             else:
-                print(f"❌ Merge failed")
+                logger.error("Merge failed")
                 return None
         else:
-            print("⚠️ No suitable merge candidates found")
+            logger.warning("No suitable merge candidates found")
             return None
             
     async def demonstrate_reality_persistence(self):
@@ -379,13 +383,13 @@ class Phase5Demonstrator:
         # Final summary
         print("\n🎯 Phase 5 Demonstration Summary")
         print("=" * 60)
-        print(f"✅ Fork Creation: {len(forks)} reality forks created")
-        print(f"✅ Agent Participation: {sum(len(results) for _, results in participation)} assignments")
-        print(f"✅ Reality Modifications: {len(modifications)} fork states updated")
-        print(f"✅ Consensus Measurement: {consensus.convergence_probability:.3f} convergence probability")
+        logger.info("Fork Creation: {len(forks)} reality forks created")
+        logger.info("Agent Participation: {sum(len(results) for _, results in participation)} assignments")
+        logger.info("Reality Modifications: {len(modifications)} fork states updated")
+        logger.info("Consensus Measurement: {consensus.convergence_probability:.3f} convergence probability")
         merge_status = "successful" if merged_fork else "no suitable candidates"
-        print(f"✅ Reality Merging: {merge_status}")
-        print(f"✅ Persistence: Complete system state preserved")
+        logger.info("Reality Merging: {merge_status}")
+        logger.info("Persistence: Complete system state preserved")
         
         print(f"\n🚀 Phase 5 Status: REALITY FORK MANAGER OPERATIONAL")
         print(f"Next: Phase 6 Consciousness Emergence Protocol")

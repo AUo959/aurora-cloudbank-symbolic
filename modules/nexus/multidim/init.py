@@ -11,6 +11,10 @@ Usage:
   python init.py --export          # Export dimensional state
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import sys
 from pathlib import Path
@@ -31,7 +35,7 @@ async def quick_demo():
     # Initialize dimensions
     print("\n🔄 Initializing dimensions...")
     init_result = await orchestrator.initialize_dimensions()
-    print(f"✅ Initialized {len(init_result['dimensions_initialized'])} dimensions")
+    logger.info("Initialized {len(init_result["dimensions_initialized'])} dimensions")
     
     # Show initial status
     print("\n📊 Initial Status:")

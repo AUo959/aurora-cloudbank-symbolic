@@ -11,6 +11,10 @@ Demonstrates complete memory weaving capabilities with cross-agent
 persistent memory, temporal threading, and associative recall
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import sys
 from pathlib import Path
@@ -294,11 +298,11 @@ class Phase4Demonstrator:
         # Final summary
         print("\n🎯 Phase 4 Demonstration Summary")
         print("=" * 60)
-        print(f"✅ Memory Storage: {len(memories)} memories from {len(set(m.source_agent for m in memories))} agents")
-        print(f"✅ Memory Weaving: {weave.weave_strength:.3f} strength weave created")
-        print(f"✅ Associative Recall: {len(recall_results)} memories recalled")
-        print(f"✅ System Integration: Cross-system weaves operational")
-        print(f"✅ Persistence: Full system state preserved")
+        logger.info("Memory Storage: {len(memories)} memories from {len(set(m.source_agent for m in memories))} agents")
+        logger.info("Memory Weaving: {weave.weave_strength:.3f} strength weave created")
+        logger.info("Associative Recall: {len(recall_results)} memories recalled")
+        logger.info("System Integration: Cross-system weaves operational")
+        logger.info("Persistence: Full system state preserved")
         
         print(f"\n🚀 Phase 4 Status: MEMORY WEAVING OPERATIONAL")
         print(f"Next: Phase 5 Reality Fork Manager")

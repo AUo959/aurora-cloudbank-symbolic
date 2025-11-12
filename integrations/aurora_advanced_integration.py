@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 from datetime import datetime
 from pathlib import Path
@@ -684,15 +688,15 @@ class AuroraMasterInterface:
         for system_name, module_file in systems_to_init:
             try:
                 if Path(module_file).exists():
-                    print(f"✅ {system_name} module found")
+                    logger.info("{system_name} module found")
                     self.initialized_systems[system_name] = True
                     self.integration_status[system_name] = "ready"
                 else:
-                    print(f"⚠️ {system_name} module not found: {module_file}")
+                    logger.warning("{system_name} module not found: {module_file}")
                     self.initialized_systems[system_name] = False
                     self.integration_status[system_name] = "missing"
             except Exception as e:
-                print(f"❌ Error initializing {system_name}: {e}")
+                logger.error("Error initializing {system_name}: {e}")
                 self.initialized_systems[system_name] = False
                 self.integration_status[system_name] = f"error: {e}"
 
@@ -712,13 +716,13 @@ class AuroraMasterInterface:
                 ], capture_output=True, text=True, timeout=30)
 
                 if result.returncode == 0:
-                    print("✅ Quantum processing test passed")
+                    logger.info("Quantum processing test passed")
                     demo_results["quantum_processing"] = "success"
                 else:
-                    print(f"⚠️ Quantum processing test issues: {result.stderr}")
+                    logger.warning("Quantum processing test issues: {result.stderr}")
                     demo_results["quantum_processing"] = "warning"
             except Exception as e:
-                print(f"❌ Quantum processing test failed: {e}")
+                logger.error("Quantum processing test failed: {e}")
                 demo_results["quantum_processing"] = "failed"
 
         # Test consciousness simulation if available
@@ -729,13 +733,13 @@ class AuroraMasterInterface:
                 ], capture_output=True, text=True, timeout=30)
 
                 if result.returncode == 0:
-                    print("✅ Consciousness simulation test passed")
+                    logger.info("Consciousness simulation test passed")
                     demo_results["consciousness_simulation"] = "success"
                 else:
-                    print(f"⚠️ Consciousness simulation test issues: {result.stderr}")
+                    logger.warning("Consciousness simulation test issues: {result.stderr}")
                     demo_results["consciousness_simulation"] = "warning"
             except Exception as e:
-                print(f"❌ Consciousness simulation test failed: {e}")
+                logger.error("Consciousness simulation test failed: {e}")
                 demo_results["consciousness_simulation"] = "failed"
 
         # Test adaptive learning if available
@@ -746,13 +750,13 @@ class AuroraMasterInterface:
                 ], capture_output=True, text=True, timeout=30)
 
                 if result.returncode == 0:
-                    print("✅ Adaptive learning test passed")
+                    logger.info("Adaptive learning test passed")
                     demo_results["adaptive_learning"] = "success"
                 else:
-                    print(f"⚠️ Adaptive learning test issues: {result.stderr}")
+                    logger.warning("Adaptive learning test issues: {result.stderr}")
                     demo_results["adaptive_learning"] = "warning"
             except Exception as e:
-                print(f"❌ Adaptive learning test failed: {e}")
+                logger.error("Adaptive learning test failed: {e}")
                 demo_results["adaptive_learning"] = "failed"
 
         return demo_results

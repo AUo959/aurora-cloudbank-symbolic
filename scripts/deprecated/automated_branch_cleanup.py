@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import argparse
@@ -163,7 +167,7 @@ class BranchCleanupManager:
 
         # Limit cleanup per run for safety
         if len(cleanup_candidates) > max_per_run:
-            print("⚠️  Limiting cleanup to %s branches per run for safety", max_per_run)
+            logger.warning("Limiting cleanup to %s branches per run for safety", max_per_run)
         cleanup_candidates = cleanup_candidates[:max_per_run]
 
         for branch in cleanup_candidates:
@@ -183,14 +187,14 @@ class BranchCleanupManager:
         if success:
                         results[action].append(branch["name"])
                         
-        print(f"✅ {action.title()} branch: {branch['name']}")
+        logger.info("{action.title()} branch: {branch["name']}")
         
         else:
                         results["errors"].append({"branch": branch["name"], "action": action})
 
             
         except (OSError, ValueError, RuntimeError) as e:
-                print("❌ Error processing %s: {e}", branch['name'])
+                logger.error("Error processing %s: {e}", branch['name'])
                 
         results["errors"].append({"branch": branch["name"], "error": str(e)})
 
@@ -333,7 +337,7 @@ def main():
     
         if not branches:
             pass  # Placeholder
-        print("❌ Failed to analyze branches")
+        logger.error("Failed to analyze branches")
         
         sys.exit(1)
 

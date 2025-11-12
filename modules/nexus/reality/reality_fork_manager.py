@@ -11,6 +11,10 @@ Revolutionary reality fork management system for branch-based reality
 management with consensus protocols and quantum coherence preservation.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import uuid
 from typing import Dict, List, Optional, Set, Tuple, Any
@@ -278,7 +282,7 @@ class RealityForkManager:
         forks_to_merge = []
         for fork_id in fork_ids:
             if fork_id not in self.active_forks:
-                print(f"❌ Fork {fork_id} not found for merge")
+                logger.error("Fork {fork_id} not found for merge")
                 return None
             forks_to_merge.append(self.active_forks[fork_id])
             
@@ -286,7 +290,7 @@ class RealityForkManager:
         consensus = await self.measure_consensus(fork_ids)
         
         if consensus.convergence_probability < self.consensus_threshold:
-            print(f"⚠️ Convergence probability {consensus.convergence_probability:.3f} below threshold {self.consensus_threshold}")
+            logger.warning("Convergence probability {consensus.convergence_probability:.3f} below threshold {self.consensus_threshold}")
             # Option to force merge or abort
             
         # Create merged reality fork

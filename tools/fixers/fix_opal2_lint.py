@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 """
 Simple lint fixer for Opal2 files
@@ -29,11 +33,11 @@ def fix_file(file_path):
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
 
-        print(f"✅ Fixed {file_path}")
+        logger.info("Fixed {file_path}")
         return True
 
     except Exception as e:
-        print(f"❌ Error fixing {file_path}: {e}")
+        logger.error("Error fixing {file_path}: {e}")
         return False
 
 
@@ -53,7 +57,7 @@ def main():
         if os.path.exists(file_path):
             fix_file(file_path)
         else:
-            print(f"⚠️  File not found: {file_path}")
+            logger.warning("File not found: {file_path}")
 
     print("🎉 Basic lint fixes complete!")
 

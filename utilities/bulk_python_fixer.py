@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 """
 Bulk Python Code Fixer
@@ -66,10 +70,10 @@ def fix_file(filepath):
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(fixed_content)
 
-        print("✅ Fixed {filepath}")
+        logger.info("Fixed {filepath}")
 
     except Exception as e:
-        print("❌ Error fixing {filepath}: {e}")
+        logger.error("Error fixing {filepath}: {e}")
 
 
 def main():

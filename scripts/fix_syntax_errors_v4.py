@@ -3,6 +3,10 @@
 Fix remaining syntax errors - V4 Enhanced
 Handles indentation, malformed print statements, and broken code blocks
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 import subprocess
 from pathlib import Path
@@ -242,7 +246,7 @@ def main():
             print(f"  ⏭️  No automatic fixes available")
     
     print(f"\n{'='*60}")
-    print(f"✅ Fixed {fixed_files} files ({total_fixes} total changes)")
+    logger.info("Fixed {fixed_files} files ({total_fixes} total changes)")
     print(f"{'='*60}\n")
     
     # Re-check error count

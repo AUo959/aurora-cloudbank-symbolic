@@ -3,6 +3,10 @@
 🛤️ Aurora CloudBank Path Traversal Validator
 Security validator for path traversal vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -66,7 +70,7 @@ def main():
         print("\n💡 Fix: Validate and sanitize file paths, use Path.resolve() and check against allowed directories")
         sys.exit(1)
     
-    print("✅ Path traversal validation passed")
+    logger.info("Path traversal validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

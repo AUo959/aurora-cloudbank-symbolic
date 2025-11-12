@@ -3,6 +3,10 @@
 🔒 Aurora CloudBank Cryptography Validator
 Security validator for cryptographic vulnerabilities and weak encryption
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -89,7 +93,7 @@ def main():
               "secure random generators (secrets module), proper key management")
         sys.exit(1)
 
-    print("✅ Cryptography validation passed")
+    logger.info("Cryptography validation passed")
     sys.exit(0)
 
 

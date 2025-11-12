@@ -6,6 +6,10 @@ Final validation and monitoring script that provides a comprehensive overview
 of the dependency management system status and ensures everything is working correctly.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -309,7 +313,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 validation = self.validate_all_systems()
                 
                 if validation['overall_health'] in ['critical', 'partial']:
-                    print("⚠️  %s - Dependency issues detected!", datetime.now().strftime('%H:%M:%S'))
+                    logger.warning("%s - Dependency issues detected!", datetime.now().strftime('%H:%M:%S'))
                     print("   Status: %s", validation['overall_health'])
                     
                     # Try automatic recovery
@@ -320,10 +324,10 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                             str(self.project_root / "scripts" / "aurora_minimal_automation.py")
                         ], timeout=120)
                     except:
-                        print("❌ Automatic recovery failed")
+                        logger.error("Automatic recovery failed")
                         
                 else:
-                    print("✅ %s - All systems healthy", datetime.now().strftime('%H:%M:%S'))
+                    logger.info("%s - All systems healthy", datetime.now().strftime('%H:%M:%S'))
                     
                 time.sleep(interval_minutes * 60)
                 
@@ -331,7 +335,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 print("\n🛑 Monitoring stopped by user")
                 break
             except Exception as e:
-                print("❌ Monitoring error: %s", e)
+                logger.error("Monitoring error: %s", e)
                 time.sleep(300)  # Wait 5 minutes before retrying
 
 def main():

@@ -3,6 +3,10 @@
 🎯 Aurora CloudBank Phase 5 Final Security Optimizer
 Final push to achieve <50 GitHub alerts with advanced optimization
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 import subprocess
@@ -648,7 +652,7 @@ Memory Seal: {self.dlp_tracker['memory_seal']}
         print(f"\n🎉 Phase 5 Final Optimization Complete!")
         print(f"📊 Total Fixes Applied: {self.fixes_applied}")
         print(f"📁 Files Processed: {self.files_processed}")
-        print(f"✅ Success Rate: {success_rate:.1f}%")
+        logger.info("Success Rate: {success_rate:.1f}%")
         print(f"🎯 Estimated Remaining Alerts: ~{estimated_remaining}")
         print(f"🏆 Target Achievement: {'🎉 ACHIEVED!' if estimated_remaining <= 50 else 'In Progress'}")
         

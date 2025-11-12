@@ -4,6 +4,10 @@ Manifest Generator - Auto-manifest creation for symbolic exports
 Part of T71 Symbolic Infrastructure Genesis
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import hashlib
 import json
 from datetime import datetime
@@ -155,6 +159,6 @@ if __name__ == "__main__":
     suite_manifest = generator.generate_suite_manifest()
     suite_path = generator.save_manifest(suite_manifest, "T71_SUITE_MANIFEST.json")
 
-    print(f"✅ Suite manifest generated: {suite_path}")
+    logger.info("Suite manifest generated: {suite_path}")
     print(f"🔐 Memory seal: {suite_manifest['memory_seal']}")
     print(f"📊 Components: {len(suite_manifest['suite_components'])}")

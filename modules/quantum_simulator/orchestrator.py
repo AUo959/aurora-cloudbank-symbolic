@@ -6,6 +6,10 @@ Async quantum API integration with multiple backend support and mock provider.
 Anchor: T1-QSS-001
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import time
 from abc import ABC, abstractmethod
@@ -359,9 +363,9 @@ class QuantumOrchestrator:
                 is_available = await provider.check_availability()
                 provider.is_available = is_available
                 if is_available:
-                    print(f"✅ Quantum backend initialized: {backend.value}")
+                    logger.info("Quantum backend initialized: {backend.value}")
             else:
-                print(f"⚠️  Quantum backend not configured: {backend.value}")
+                logger.warning("Quantum backend not configured: {backend.value}")
 
     def get_provider(self, backend: QuantumBackend) -> Optional[QuantumProvider]:
         """

@@ -4,6 +4,10 @@ Final Security Validation & Merge Preparation
 Comprehensive pre-merge security check
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 import sys
@@ -91,7 +95,7 @@ def run_final_security_checks():
         # Test critical imports
         result = subprocess.run([
             sys.executable, '-c', 
-            'from fastapi import FastAPI, Depends; from typing import List; print("✅ FastAPI imports OK")'
+            'from fastapi import FastAPI, Depends; from typing import List; logger.info("FastAPI imports OK")'
         ], capture_output=True, text=True, timeout=10)
         
         if result.returncode == 0:
@@ -136,7 +140,7 @@ def run_final_security_checks():
     print(f"🎯 Security Validation Results: {checks_passed}/{total_checks} checks passed")
     
     if checks_passed >= 5:
-        print("✅ SECURITY STATUS: EXCELLENT - Safe to merge!")
+        logger.info("SECURITY STATUS: EXCELLENT - Safe to merge!")
         print("🚀 Recommendation: Proceed with merge to main")
         security_score = (checks_passed / total_checks) * 100
         print(f"📊 Security Score: {security_score:.1f}%")
@@ -145,10 +149,10 @@ def run_final_security_checks():
             print("🏆 PERFECT SECURITY SCORE!")
             
     elif checks_passed >= 4:
-        print("✅ SECURITY STATUS: GOOD - Safe to merge with minor notes")
+        logger.info("SECURITY STATUS: GOOD - Safe to merge with minor notes")
         print("🚀 Recommendation: Proceed with merge")
     else:
-        print("⚠️  SECURITY STATUS: NEEDS ATTENTION")
+        logger.warning("SECURITY STATUS: NEEDS ATTENTION")
         print("🛑 Recommendation: Review issues before merge")
     
     print("\n🔒 Final Security Notes:")

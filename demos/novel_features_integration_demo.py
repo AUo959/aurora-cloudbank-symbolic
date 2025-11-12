@@ -12,6 +12,10 @@ Features demonstrated:
 3. Integration workflow - Complete development scenario
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 from datetime import datetime
 from tools.pattern_mutation_engine import PatternMutationEngine
@@ -72,7 +76,7 @@ def demo_complete_workflow():
         fitness_fn="balance"
     )
     
-    print("✅ Evolution Complete!")
+    logger.info("Evolution Complete!")
     print(f"   Initial Pattern: {results['initial_pattern']}")
     print(f"   Best Pattern:    {results['best_pattern']['sequence']}")
     print(f"   Fitness Score:   {results['best_pattern']['fitness_score']:.4f}")
@@ -145,7 +149,7 @@ def deploy_with_chain():
         sensitivity=0.85
     )
     
-    print("✅ Security Scan Complete!")
+    logger.info("Security Scan Complete!")
     print()
     print("📊 Scan Summary:")
     summary = scan_results['summary']
@@ -168,7 +172,7 @@ def deploy_with_chain():
             print(f"      Fix: {detection['remediation']}")
             print()
     else:
-        print("✅ No critical security issues found!")
+        logger.info("No critical security issues found!")
         print()
     
     # ========================================================================
@@ -210,7 +214,7 @@ def deploy_with_chain():
         }
     }
     
-    print("✅ DLP Compliance Report Generated")
+    logger.info("DLP Compliance Report Generated")
     print()
     print("📊 Pattern Evolution Tracking:")
     print(f"   Anchor Seed:  {combined_report['pattern_evolution']['anchor_seed']}")
@@ -244,7 +248,7 @@ def deploy_with_chain():
     if compliance == "PASSED" and cultural_rating in ["EXCELLENT", "GOOD"]:
         print("🎉 APPROVED FOR DEPLOYMENT")
         print()
-        print("✅ All checks passed:")
+        logger.info("All checks passed:")
         print("   • Pattern optimization: SUCCESSFUL")
         print("   • Security scan:        NO CRITICAL ISSUES")
         print("   • Cultural validation:  PASSED")
@@ -256,9 +260,9 @@ def deploy_with_chain():
         print(f"   Security Status:  VERIFIED")
         print(f"   Audit Trail:      COMPLETE")
     else:
-        print("⚠️  DEPLOYMENT BLOCKED")
+        logger.warning("DEPLOYMENT BLOCKED")
         print()
-        print("❌ Issues found:")
+        logger.error("Issues found:")
         if compliance != "PASSED":
             print(f"   • Critical security issues: {summary['critical_issues']}")
         if cultural_rating not in ["EXCELLENT", "GOOD"]:
@@ -282,7 +286,7 @@ def deploy_with_chain():
     with open(report_filename, 'w') as f:
         json.dump(combined_report, f, indent=2)
     
-    print(f"✅ Audit report saved: {report_filename}")
+    logger.info("Audit report saved: {report_filename}")
     print()
     print("📋 Report includes:")
     print("   • Complete pattern evolution history")

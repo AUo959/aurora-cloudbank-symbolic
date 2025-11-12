@@ -274,7 +274,8 @@ def create_project(request: Request, body: CreateProjectRequest) -> Dict[str, An
             "context_tag": "rd_create_project",
         }
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logging.error(f"Invalid project data: {e}")
+        raise HTTPException(status_code=400, detail="Invalid project data")
 
 
 @router.post(
@@ -292,7 +293,8 @@ def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest) 
             "context_tag": "rd_advance_stage",
         }
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logging.error(f"Invalid project stage: {e}")
+        raise HTTPException(status_code=404, detail="Project or stage not found")
 
 
 @router.post(
@@ -348,7 +350,8 @@ def update_readiness(request: Request, project_id: str, body: ReadinessRequest) 
             "inquiry_prompts": inquiry
         }
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        logging.error(f"Invalid readiness update: {e}")
+        raise HTTPException(status_code=400, detail="Invalid readiness data")
 
 
 @router.post(
@@ -407,7 +410,8 @@ def update_coherence(request: Request, project_id: str, body: CoherenceRequest):
             )
         }
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        logging.error(f"Invalid coherence request: {e}")
+        raise HTTPException(status_code=404, detail="Project not found")
 
 
 @router.get("/capacity/{team_member}")

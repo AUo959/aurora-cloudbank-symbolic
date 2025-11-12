@@ -13,6 +13,10 @@ Returns:
     Prints simulation briefing to stdout
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import sys
 from pathlib import Path
@@ -23,7 +27,7 @@ def load_simulation_state():
     state_file = Path(__file__).parent / "SIMULATION_STATE.json"
     
     if not state_file.exists():
-        print("❌ ERROR: Simulation state file not found!")
+        logger.error("ERROR: Simulation state file not found!")
         sys.exit(1)
     
     with open(state_file, 'r') as f:
@@ -72,7 +76,7 @@ def print_simulation_briefing(state):
     
     # Known issues
     if state['known_issues']:
-        print("⚠️  KNOWN ISSUES:")
+        logger.warning("KNOWN ISSUES:")
         for issue in state['known_issues']:
             severity_icon = "🔴" if issue['severity'] == "HIGH" else "🟡" if issue['severity'] == "MEDIUM" else "🟢"
             print(f"   {severity_icon} {issue['id']}: {issue['description']}")
@@ -90,7 +94,7 @@ def print_simulation_briefing(state):
         print()
     
     print("=" * 80)
-    print("✅ SIMULATION CONTEXT LOADED - ORION STATION OPERATIONAL")
+    logger.info("SIMULATION CONTEXT LOADED - ORION STATION OPERATIONAL")
     print("=" * 80)
     print()
     print("🎖️  AWAITING ORDERS FROM COMMANDER THORNE...")
@@ -104,7 +108,7 @@ def main():
         print_simulation_briefing(state)
         return 0
     except Exception as e:
-        print(f"❌ ERROR: Failed to load simulation: {e}")
+        logger.error("ERROR: Failed to load simulation: {e}")
         return 1
 
 

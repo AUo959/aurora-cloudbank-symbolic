@@ -4,6 +4,10 @@ Aurora CloudBank - Git Performance Optimization
 Safe git configuration optimizations for large repository performance
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import os
 from pathlib import Path
@@ -276,7 +280,7 @@ Thumbs.db binary
         print("📊 Git Performance Optimization Report")
         print("=" * 45)
         
-        print(f"✅ Configuration Optimizations Applied: {len(self.optimizations_applied)}")
+        logger.info("Configuration Optimizations Applied: {len(self.optimizations_applied)}")
         for opt in self.optimizations_applied:
             print(f"   • {opt['config']}: {opt['value']}")
         
@@ -320,7 +324,7 @@ def main():
     
     if config_improvements > 0 or gitattributes_created:
         print(f"\n🎯 QUICK WIN ACHIEVED!")
-        print(f"✅ Git performance optimizations applied")
+        logger.info("Git performance optimizations applied")
         print(f"📈 Expected Health Score Gain: +1.5 points")
         print(f"🚀 Repository operations should be noticeably faster")
     else:

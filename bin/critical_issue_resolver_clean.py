@@ -4,6 +4,10 @@ Critical Issue Resolver for Aurora CloudBank
 Fixes syntax errors and critical issues in the codebase.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 import sys
 from pathlib import Path
@@ -30,11 +34,11 @@ def fix_critical_syntax_errors():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed {file_path}")
+            logger.info("Fixed {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     # Fix gitwiz_precommit_audit.py
     file_path = Path("gitwiz_precommit_audit.py")
@@ -51,11 +55,11 @@ def fix_critical_syntax_errors():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed {file_path}")
+            logger.info("Fixed {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     # Fix fix_all_syntax_errors.py
     file_path = Path("fix_all_syntax_errors.py")
@@ -72,11 +76,11 @@ def fix_critical_syntax_errors():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed {file_path}")
+            logger.info("Fixed {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     return fixes_applied
 
@@ -110,11 +114,11 @@ def fix_undefined_imports():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed imports in {file_path}")
+            logger.info("Fixed imports in {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     # Fix tools/symbolic/memory_sealer.py
     file_path = Path("tools/symbolic/memory_sealer.py")
@@ -132,11 +136,11 @@ def fix_undefined_imports():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed imports in {file_path}")
+            logger.info("Fixed imports in {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     return fixes_applied
 
@@ -163,11 +167,11 @@ def fix_unterminated_strings():
             
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
-            print(f"✅ Fixed unterminated strings in {file_path}")
+            logger.info("Fixed unterminated strings in {file_path}")
             fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     # Fix tools/symbolic/anchor_tracker.py
     file_path = Path("tools/symbolic/anchor_tracker.py")
@@ -204,11 +208,11 @@ def fix_unterminated_strings():
                 
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(content)
-                print(f"✅ Fixed unterminated triple quotes in {file_path}")
+                logger.info("Fixed unterminated triple quotes in {file_path}")
                 fixes_applied += 1
             
         except Exception as e:
-            print(f"❌ Error fixing {file_path}: {e}")
+            logger.error("Error fixing {file_path}: {e}")
     
     return fixes_applied
 
@@ -227,7 +231,7 @@ def main():
         total_fixes += fix_unterminated_strings()
         
         print("=" * 50)
-        print(f"✅ Applied {total_fixes} fixes successfully!")
+        logger.info("Applied {total_fixes} fixes successfully!")
         
         if total_fixes > 0:
             print("\n🔍 Recommended next steps:")
@@ -238,7 +242,7 @@ def main():
         return True
         
     except Exception as e:
-        print(f"❌ Critical error: {e}")
+        logger.error("Critical error: {e}")
         return False
 
 

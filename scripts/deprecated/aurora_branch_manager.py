@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 import argparse
 import subprocess
@@ -387,7 +391,7 @@ def main():
 
 
         if not branches:
-            print("❌ No branches found or error occurred")
+            logger.error("No branches found or error occurred")
 
         return 1
 

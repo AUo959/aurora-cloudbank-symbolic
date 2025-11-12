@@ -9,6 +9,10 @@ Targets:
 - Batch processing with validation
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 import subprocess
@@ -308,7 +312,7 @@ class Phase2SecurityRemediator:
         print(f"🧪 Tests validation: {'✅ PASS' if tests_passing else '⚠️ ISSUES'}")
         
         if self.errors:
-            print(f"⚠️ Errors encountered: {len(self.errors)}")
+            logger.warning("Errors encountered: {len(self.errors)}")
             for error in self.errors[:5]:  # Show first 5 errors
                 print(f"  - {error}")
 

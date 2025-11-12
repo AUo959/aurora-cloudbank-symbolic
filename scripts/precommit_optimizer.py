@@ -4,6 +4,10 @@ Aurora CloudBank Pre-commit Hook Optimizer
 Intelligent pre-commit hook configuration and optimization
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import os
 import subprocess
@@ -423,9 +427,9 @@ def main():
 
         if "total_time" in benchmarks:
             print("⏱️ Total execution time: %s seconds", benchmarks['total_time'])
-            print("✅ Success: %s", benchmarks['success'])
+            logger.info("Success: %s", benchmarks['success'])
         elif "error" in benchmarks:
-            print("❌ Benchmark failed: %s", benchmarks['error'])
+            logger.error("Benchmark failed: %s", benchmarks['error'])
 
     if args.report:
         report = optimizer.generate_optimization_report()
@@ -442,10 +446,10 @@ def main():
         success = optimizer.apply_optimized_config(config_type)
 
         if success:
-            print("✅ Pre-commit configuration optimized successfully!")
+            logger.info("Pre-commit configuration optimized successfully!")
             print("🔄 Run 'pre-commit run --all-files' to test the new configuration")
         else:
-            print("❌ Failed to optimize pre-commit configuration")
+            logger.error("Failed to optimize pre-commit configuration")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,10 @@ Version: 1.0.0
 Entropy State: Monitoring Active
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import subprocess
 import hashlib
@@ -17,7 +21,7 @@ from typing import Dict, List, Optional, Tuple
 try:
     import yaml
 except ImportError:
-    print("⚠️ PyYAML not available, using basic YAML parsing")
+    logger.warning("PyYAML not available, using basic YAML parsing")
     yaml = None
 
 class CodeQLSymbolicDiagnostic:
@@ -89,7 +93,7 @@ class CodeQLSymbolicDiagnostic:
                             "anchor_tag": f"WF-{workflow_file.stem.upper()}"
                         })
                 except Exception as e:
-                    print(f"⚠️ Error parsing {workflow_file}: {e}")
+                    logger.warning("Error parsing {workflow_file}: {e}")
         
         # Also check for generic workflow files that might contain CodeQL
         for workflow_file in workflows_path.glob("*.yml"):

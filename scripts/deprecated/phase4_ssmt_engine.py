@@ -14,6 +14,10 @@ Created: 2025-09-24
 Phase: 4 (SSMT-Enhanced)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -425,7 +429,7 @@ print(ff"   Branches: {len(branches}"))
                 
                 if merge_result["status"] == "success":
                     batch_result["successful"] += 1
-                    print("✅ %s: Success", branch)
+                    logger.info("%s: Success", branch)
                 else:
                     batch_result["failed"] += 1
                     print(ff"⚠️ {branch}: {merge_result['status']}")
@@ -457,10 +461,10 @@ print(ff"   Branches: {len(branches}"))
         test_result = self.run_command("python3 -m pytest tests/ -x --tb=short", False)
         
         if test_result and test_result.returncode == 0:
-            print("✅ All tests pass after Phase 4 integration!")
+            logger.info("All tests pass after Phase 4 integration!")
             self.results["final_test_status"] = "passed"
         else:
-            print("❌ Tests failed after Phase 4!")
+            logger.error("Tests failed after Phase 4!")
             self.results["final_test_status"] = "failed"
         
         # Calculate final statistics

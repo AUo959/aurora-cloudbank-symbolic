@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -23,7 +27,7 @@ def test_holographic_interface():
     print("🌟 Testing Holographic Interface Orchestrator...")
     orchestrator_path = "src/orchestrators/holographic_interface_orchestrator.js"
     if not os.path.exists(orchestrator_path):
-        print(f"❌ {orchestrator_path} not found")
+        logger.error("{orchestrator_path} not found")
         
         return False
 
@@ -31,13 +35,13 @@ def test_holographic_interface():
     try:
         result = subprocess.run(["node", "-c", orchestrator_path], capture_output=True, text=True)        
         if result.returncode == 0:
-            print(f"✅ {orchestrator_path} - Valid Node.js syntax")
+            logger.info("{orchestrator_path} - Valid Node.js syntax")
             return True
         else:
-            print(f"❌ {orchestrator_path} - Syntax error: {result.stderr}")
+            logger.error("{orchestrator_path} - Syntax error: {result.stderr}")
             return False
     except Exception as e:
-        print(f"⚠️  Could not test Node.js syntax: {e}")
+        logger.warning("Could not test Node.js syntax: {e}")
         
         return True  # Assume OK if Node.js not available
 
@@ -47,10 +51,10 @@ def test_aurora_custom_gpt_bridge():
     print("🔗 Testing Aurora Custom GPT Bridge...")
     bridge_path = "src/integrations/aurora_custom_gpt_bridge.js"
     if os.path.exists(bridge_path):
-        print(f"✅ {bridge_path} exists")
+        logger.info("{bridge_path} exists")
         return True
     else:
-        print(f"⚠️  {bridge_path} not found (may be in different location)")
+        logger.warning("{bridge_path} not found (may be in different location)")
         return True  # Not critical for core tests
 
 
@@ -59,10 +63,10 @@ def test_orion_core_config():
     print("🛰️ Testing ORION Core Configuration...")
     config_path = "src/config/orion_core_config.js"
     if os.path.exists(config_path):
-        print(f"✅ {config_path} exists")
+        logger.info("{config_path} exists")
         return True
     else:
-        print(f"⚠️  {config_path} not found")
+        logger.warning("{config_path} not found")
         return True  # Not critical
 
 
@@ -77,9 +81,9 @@ def test_core_documentation():
     all_exist = True
     for doc in docs:
         if os.path.exists(doc):
-            print(f"✅ {doc} exists")
+            logger.info("{doc} exists")
         else:
-            print(f"❌ {doc} missing")
+            logger.error("{doc} missing")
             all_exist = False
     
     return all_exist
@@ -97,19 +101,19 @@ def test_git_repository_status():
             uncommitted = result.stdout.strip()
             
             if uncommitted:
-                print("⚠️  Uncommitted changes found:")
+                logger.warning("Uncommitted changes found:")
                 for line in uncommitted.split("\n"):
                     print(f"   {line}")
             else:
-                print("✅ Repository is clean")
+                logger.info("Repository is clean")
             
             return True
         else:
-            print("❌ Not in a git repository")
+            logger.error("Not in a git repository")
             return False
 
     except Exception as e:
-        print(f"❌ Git error: {e}")
+        logger.error("Git error: {e}")
         return False
 
 
@@ -123,9 +127,9 @@ def test_system_integration():
     for file_path in key_files:
         if os.path.exists(file_path):
             integration_score += 1
-            print(f"✅ {file_path} exists")
+            logger.info("{file_path} exists")
         else:
-            print(f"❌ {file_path} missing")
+            logger.error("{file_path} missing")
     
     success_rate = (integration_score / len(key_files)) * 100
     print(f"📊 Integration Score: {success_rate}%")
@@ -163,7 +167,7 @@ def generate_validation_report():
     print("\n" + "=" * 60)
     print("🎯 VALIDATION SUMMARY")
     print("=" * 60)
-    print(f"✅ Tests Passed: {passed}/{total}")
+    logger.info("Tests Passed: {passed}/{total}")
     print(f"📊 Success Rate: {(passed / total) * 100}%")
 
     if passed == total:
@@ -173,7 +177,7 @@ def generate_validation_report():
         print("⚡ MOSTLY READY - Minor issues detected")
         status = "MOSTLY_READY"
     else:
-        print("⚠️  NEEDS ATTENTION - Major issues detected")
+        logger.warning("NEEDS ATTENTION - Major issues detected")
         status = "NEEDS_ATTENTION"
 
     # Save validation report

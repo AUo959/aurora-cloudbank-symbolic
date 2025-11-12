@@ -548,16 +548,16 @@ def main():
         print("🔧 Installing all dependencies...")
         results = hub.install_all_dependencies()
         if results['overall_success']:
-            print("✅ Dependency installation completed successfully!")
+            logger.info("Dependency installation completed successfully!")
         else:
-            print("⚠️  Dependency installation completed with some issues")
+            logger.warning("Dependency installation completed with some issues")
             
     elif args.setup_automation:
         print("⚙️ Setting up automated systems...")
         if hub.setup_automated_systems():
-            print("✅ Automated systems configured successfully!")
+            logger.info("Automated systems configured successfully!")
         else:
-            print("⚠️  Some automated systems failed to configure")
+            logger.warning("Some automated systems failed to configure")
             
     elif args.health_check:
         health = hub.health_check()

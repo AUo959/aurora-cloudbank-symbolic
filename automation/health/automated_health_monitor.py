@@ -6,6 +6,10 @@
 Runs periodic health checks and generates alerts for score degradation.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import json
@@ -97,7 +101,7 @@ except:
             return score
             
         except Exception as e:
-            print(f"❌ Health check failed: {e}")
+            logger.error("Health check failed: {e}")
             return None
     
     def generate_trend_report(self):

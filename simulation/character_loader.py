@@ -305,7 +305,7 @@ def demo_load():
         for issue in issues:
             print(f"  ⚠️  {issue}")
     else:
-        print("✅ All validation checks passed")
+        logger.info("All validation checks passed")
     
     # Show character examples
     print("\n--- Character Examples ---")
@@ -322,14 +322,14 @@ def demo_load():
     print("\n--- Tobias Qin Check ---")
     tobias = loader.get_character("Tobias Qin")
     if tobias:
-        print(f"✅ Tobias Qin loaded successfully")
+        logger.info("Tobias Qin loaded successfully")
         print(f"  ID: {tobias.character_id}")
         print(f"  Role: {tobias.role}")
         print(f"  Primary Systems: {', '.join(tobias.primary_systems[:2])}")
         print(f"  Base Speed: {tobias.base_speed}")
         print(f"  Specialization: {tobias.specialization_multiplier}x")
     else:
-        print("❌ Tobias Qin not found in roster")
+        logger.error("Tobias Qin not found in roster")
 
 
 if __name__ == "__main__":

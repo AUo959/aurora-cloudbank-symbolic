@@ -5,6 +5,10 @@ Opal2 Staging Dashboard
 Interactive dashboard for managing staged components
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 from datetime import datetime
 from pathlib import Path
@@ -77,12 +81,12 @@ class StagingDashboard:
         
         component_id = input("Component ID: ").strip()
         if not component_id:
-            print("❌ Component ID required")
+            logger.error("Component ID required")
             return
         
         name = input("Component Name: ").strip()
         if not name:
-            print("❌ Component name required")
+            logger.error("Component name required")
             return
         
         description = input("Description: ").strip()
@@ -96,12 +100,12 @@ class StagingDashboard:
             component = await self.staging_system.create_concept(
                 component_id, name, description, author, concept_notes
             )
-            print(f"✅ Component concept '{component.name}' created successfully!")
+            logger.info("Component concept "{component.name}' created successfully!")
             print(f"   ID: {component.component_id}")
             print(f"   Stage: {component.stage.value}")
             print(f"   Version: {component.version}")
         except Exception as e:
-            print(f"❌ Failed to create concept: {e}")
+            logger.error("Failed to create concept: {e}")
     
     async def view_component_details(self, component_id: str = None):
         """View detailed component information"""
@@ -109,7 +113,7 @@ class StagingDashboard:
             component_id = input("Enter component ID: ").strip()
         
         if component_id not in self.staging_system.staged_components:
-            print(f"❌ Component '{component_id}' not found")
+            logger.error("Component "{component_id}' not found")
             return
         
         component = self.staging_system.staged_components[component_id]
@@ -149,7 +153,7 @@ class StagingDashboard:
             print()
         
         if component.blocking_issues:
-            print("⚠️ Blocking Issues:")
+            logger.warning("Blocking Issues:")
             for issue in component.blocking_issues:
                 print(f"  • {issue}")
             print()
@@ -206,7 +210,7 @@ class StagingDashboard:
             elif choice == "6":
                 continue
             else:
-                print("❌ Invalid command")
+                logger.error("Invalid command")
             
             input("\nPress Enter to continue...")
     
@@ -215,7 +219,7 @@ class StagingDashboard:
         component_id = input("Component ID to test: ").strip()
         
         if component_id not in self.staging_system.staged_components:
-            print(f"❌ Component '{component_id}' not found")
+            logger.error("Component "{component_id}' not found")
             return
         
         test_suite = {
@@ -226,7 +230,7 @@ class StagingDashboard:
         print(f"🧪 Running tests for {component_id}...")
         results = await self.staging_system.run_component_tests(component_id, test_suite)
         
-        print(f"✅ Test results:")
+        logger.info("Test results:")
         print(f"   Passed: {results['tests_passed']}")
         print(f"   Failed: {results['tests_failed']}")
         print(f"   Coverage: {results['coverage']:.1f}%")
@@ -241,13 +245,13 @@ class StagingDashboard:
         component_id = input("Component ID to validate: ").strip()
         
         if component_id not in self.staging_system.staged_components:
-            print(f"❌ Component '{component_id}' not found")
+            logger.error("Component "{component_id}' not found")
             return
         
         print(f"🔍 Validating {component_id}...")
         validation = await self.staging_system.validate_component(component_id)
         
-        print(f"✅ Validation results:")
+        logger.info("Validation results:")
         print(f"   Overall Score: {validation['overall_score']:.1f}%")
         print(f"   Chassis Ready: {validation['chassis_ready']}")
         
@@ -262,7 +266,7 @@ class StagingDashboard:
         dashboard = self.staging_system.get_component_dashboard()
         
         if not dashboard['top_candidates']:
-            print("❌ No chassis candidates available")
+            logger.error("No chassis candidates available")
             return
         
         print("🏗️ Available chassis candidates:")
@@ -281,18 +285,18 @@ class StagingDashboard:
                 chassis_spec = await self.staging_system.generate_chassis_component(component_id)
                 
                 if chassis_spec:
-                    print("✅ Chassis component generated!")
+                    logger.info("Chassis component generated!")
                     print(f"   Chassis ID: {chassis_spec['component_id']}")
                     print(f"   Type: {chassis_spec['component_type']}")
                     print(f"   Power: {chassis_spec['power_requirement']}")
                     print(f"   Data: {chassis_spec['data_requirement']}")
                     print(f"   Quantum: {chassis_spec['quantum_required']}")
                 else:
-                    print("❌ Failed to generate chassis component")
+                    logger.error("Failed to generate chassis component")
             else:
-                print("❌ Invalid selection")
+                logger.error("Invalid selection")
         except ValueError:
-            print("❌ Invalid input")
+            logger.error("Invalid input")
 
 if __name__ == "__main__":
     dashboard = StagingDashboard()

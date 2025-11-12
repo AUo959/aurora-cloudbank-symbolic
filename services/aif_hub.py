@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import secrets
 from typing import List
@@ -17,7 +21,7 @@ if not AIF_TOKEN or AIF_TOKEN == "change-me":
     AIF_TOKEN = secrets.token_urlsafe(32)
     logger.warning("No secure AIF_TOKEN provided. Generated random token for this session.")
     logger.info("Generated AIF_TOKEN: %s", AIF_TOKEN[:8] + "..." + AIF_TOKEN[-4:])  # Only log partial token for security
-    print(f"⚠️  WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
+    logger.warning("WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
     print("   Set AIF_TOKEN environment variable for production use.")
 
 

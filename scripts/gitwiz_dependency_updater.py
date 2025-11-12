@@ -4,6 +4,10 @@ GITWiz Dependency Auto-Updater
 Comprehensive dependency management and auto-updating system.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import subprocess
@@ -39,10 +43,10 @@ class DependencyAutoUpdater:
                 capture_output=True,
             )
 
-            print("✅ Safety backup created: %s", self.backup_branch)
+            logger.info("Safety backup created: %s", self.backup_branch)
             return True
         except subprocess.CalledProcessError as e:
-            print("❌ Failed to create backup: %s", e)
+            logger.error("Failed to create backup: %s", e)
             return False
 
     def scan_python_dependencies(self) -> Dict[str, Any]:
@@ -86,7 +90,7 @@ class DependencyAutoUpdater:
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
-                print("❌ Python dependency scan failed: %s", e)
+                logger.error("Python dependency scan failed: %s", e)
 
         return scan_result
 
@@ -125,7 +129,7 @@ class DependencyAutoUpdater:
 
             except (OSError, ValueError, RuntimeError) as e:
                 scan_result["error"] = str(e)
-                print("❌ Node.js dependency scan failed: %s", e)
+                logger.error("Node.js dependency scan failed: %s", e)
 
         return scan_result
 
@@ -162,13 +166,13 @@ class DependencyAutoUpdater:
             )
 
             if result.returncode == 0:
-                print("✅ Python dependencies updated successfully")
+                logger.info("Python dependencies updated successfully")
                 update_result["success"] = True
             else:
-                print("❌ Python dependency update failed: %s", result.stderr)
+                logger.error("Python dependency update failed: %s", result.stderr)
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("❌ Python dependency update error: %s", e)
+            logger.error("Python dependency update error: %s", e)
 
         return update_result
 
@@ -197,13 +201,13 @@ class DependencyAutoUpdater:
             )
 
             if result.returncode == 0:
-                print("✅ Node.js dependencies updated successfully")
+                logger.info("Node.js dependencies updated successfully")
                 update_result["success"] = True
             else:
-                print("❌ Node.js dependency update failed: %s", result.stderr)
+                logger.error("Node.js dependency update failed: %s", result.stderr)
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("❌ Node.js dependency update error: %s", e)
+            logger.error("Node.js dependency update error: %s", e)
 
         return update_result
 
@@ -239,7 +243,7 @@ class DependencyAutoUpdater:
 
                 if audit_cmd.returncode == 0:
                     audit_result["python_audit"] = json.loads(audit_cmd.stdout)
-                    print("✅ Python security audit completed")
+                    logger.info("Python security audit completed")
         except (OSError, ValueError, RuntimeError) as e:
             print("ℹ️  Python security audit not available: %s", e)
 
@@ -258,7 +262,7 @@ class DependencyAutoUpdater:
 
                 if result.stdout:
                     audit_result["node_audit"] = json.loads(result.stdout)
-                    print("✅ Node.js security audit completed")
+                    logger.info("Node.js security audit completed")
 
             except (OSError, ValueError, RuntimeError) as e:
                 print("ℹ️  Node.js security audit failed: %s", e)
@@ -314,9 +318,9 @@ class DependencyAutoUpdater:
 
         print("\n" + "=" * 60)
         if workflow_result["success"]:
-            print("✅ Dependency update workflow completed successfully!")
+            logger.info("Dependency update workflow completed successfully!")
         else:
-            print("⚠️  Dependency update workflow completed with issues")
+            logger.warning("Dependency update workflow completed with issues")
 
         return workflow_result
 

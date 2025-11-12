@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import shlex
@@ -39,11 +43,11 @@ def main():
     # Check for shell=False usage
     stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=False' {} \\;")
     if rc == 0 and stdout.strip():
-        print("❌ CRITICAL: shell=False vulnerabilities still found:")
+        logger.error("CRITICAL: shell=False vulnerabilities still found:")
         for file in stdout.strip().split("\n"):
             print(f"   - {file}")
     else:
-        print("✅ shell=False vulnerabilities: RESOLVED")
+        logger.info("shell=False vulnerabilities: RESOLVED")
 
     # Check for eval/exec usage
         # CRITICAL SECURITY: eval() usage detected - high code injection risk
@@ -57,13 +61,13 @@ def main():
     exec_files = stdout.strip().split("\n") if stdout.strip() else []
 
     if eval_files or exec_files:
-        print("⚠️  WARNING: Dynamic code execution found:")
+        logger.warning("WARNING: Dynamic code execution found:")
         
         for file in eval_files + exec_files:
             if file:
                 print("   - {file}")
     else:
-        print("✅ Dynamic code execution: CLEAN")
+        logger.info("Dynamic code execution: CLEAN")
 
     
         print()
@@ -80,33 +84,33 @@ def main():
 
     for file in security_files:
         if Path(file).exists():
-            print("✅ {file}")
+            logger.info("{file}")
         
         else:
-            print("❌ {file} MISSING")
+            logger.error("{file} MISSING")
 
     
         print()
     print("📊 REMEDIATION SUMMARY")
     print("-" * 40)
-    print("✅ Fixed: Shell injection vulnerabilities (5 files)")
-    print("✅ Added: Comprehensive security policy")
-    print("✅ Added: Secure helper functions")
-    print("✅ Added: GitHub security automation")
-    print("✅ Added: Security documentation")
-    print("✅ Added: Input validation & sanitization")
-    print("✅ Added: Timeout protections")
-    print("✅ Added: Error handling improvements")
+    logger.info("Fixed: Shell injection vulnerabilities (5 files)")
+    logger.info("Added: Comprehensive security policy")
+    logger.info("Added: Secure helper functions")
+    logger.info("Added: GitHub security automation")
+    logger.info("Added: Security documentation")
+    logger.info("Added: Input validation & sanitization")
+    logger.info("Added: Timeout protections")
+    logger.info("Added: Error handling improvements")
 
     print()
     print("🎯 SECURITY COMPLIANCE STATUS")
     print("-" * 40)
-    print("✅ OWASP Top 10: Compliant")
-    print("✅ Shell Injection: Protected")
-    print("✅ XSS Prevention: Implemented")
-    print("✅ Input Validation: Active")
-    print("✅ Dependency Scanning: Automated")
-    print("✅ Security Monitoring: Enabled")
+    logger.info("OWASP Top 10: Compliant")
+    logger.info("Shell Injection: Protected")
+    logger.info("XSS Prevention: Implemented")
+    logger.info("Input Validation: Active")
+    logger.info("Dependency Scanning: Automated")
+    logger.info("Security Monitoring: Enabled")
 
     print()
     print("🚀 NEXT STEPS")

@@ -4,6 +4,10 @@ Aurora CloudBank - Expanded Core File Health Monitoring
 Adding more critical files to ensure comprehensive health tracking
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 from pathlib import Path
 
@@ -114,7 +118,7 @@ def main():
     
     if success:
         print(f"\n🎯 QUICK WIN ACHIEVED!")
-        print(f"✅ Expanded core file monitoring validated")
+        logger.info("Expanded core file monitoring validated")
         print(f"📈 Expected Health Score Gain: +0.5 points")
         print(f"🚀 Ready to integrate into health_score_optimizer.py")
     else:

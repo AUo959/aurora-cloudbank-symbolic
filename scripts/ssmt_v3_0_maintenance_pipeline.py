@@ -4,6 +4,10 @@ SSMT v3.0 Maintenance Automation Pipeline
 Maintains the 57% branch reduction achievement through continuous monitoring
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import json
 import os
@@ -349,7 +353,7 @@ def main():
             print(f"\n⚠️ Repository needs attention to maintain optimal health.")
     
     else:
-        print("❌ Maintenance scan failed - check logs for details")
+        logger.error("Maintenance scan failed - check logs for details")
 
 if __name__ == "__main__":
     main()

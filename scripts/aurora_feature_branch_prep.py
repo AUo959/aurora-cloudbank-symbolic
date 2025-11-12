@@ -7,6 +7,10 @@
 Interactive tool for creating new feature branches with Aurora CloudBank conventions
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 from datetime import datetime
@@ -47,7 +51,7 @@ class AuroraFeatureBranchPrep:
                               capture_output=True, text=True)
         
         if result.stdout.strip():
-            print("⚠️  Warning: Working directory has uncommitted changes:")
+            logger.warning("Warning: Working directory has uncommitted changes:")
             print(result.stdout)
             return False
         
@@ -60,14 +64,14 @@ class AuroraFeatureBranchPrep:
         result = subprocess.run(["git", "status", "-uno"], 
                               capture_output=True, text=True)
         
-        print(f"✅ Current branch: {current_branch}")
-        print(f"✅ Working directory: Clean")
+        logger.info("Current branch: {current_branch}")
+        logger.info("Working directory: Clean")
         
         if "up to date" in result.stdout:
-            print("✅ Branch is up to date with origin")
+            logger.info("Branch is up to date with origin")
             return True
         else:
-            print("⚠️  Branch may not be up to date with origin")
+            logger.warning("Branch may not be up to date with origin")
             return True
 
     def generate_branch_name(self, branch_type, description):
@@ -127,10 +131,10 @@ class AuroraFeatureBranchPrep:
                     branch_type, description = branch_types_list[choice_num - 1]
                     return branch_type, description
                 else:
-                    print("❌ Invalid choice. Please select 1-10 or 0.")
+                    logger.error("Invalid choice. Please select 1-10 or 0.")
                     
             except ValueError:
-                print("❌ Please enter a valid number.")
+                logger.error("Please enter a valid number.")
 
     def get_branch_description(self):
         """Get feature description from user"""
@@ -138,7 +142,7 @@ class AuroraFeatureBranchPrep:
         description = input("Description: ").strip()
         
         if not description:
-            print("❌ Description cannot be empty")
+            logger.error("Description cannot be empty")
             return self.get_branch_description()
         
         return description
@@ -166,11 +170,11 @@ class AuroraFeatureBranchPrep:
             result = subprocess.run(["git", "checkout", "-b", branch_name], 
                                   capture_output=True, text=True, check=True)
             
-            print(f"✅ Successfully created and switched to branch: {branch_name}")
+            logger.info("Successfully created and switched to branch: {branch_name}")
             return True
             
         except subprocess.CalledProcessError as e:
-            print(f"❌ Failed to create branch: {e.stderr}")
+            logger.error("Failed to create branch: {e.stderr}")
             return False
 
     def create_branch_readme(self, branch_type, description, branch_name, anchor):
@@ -242,7 +246,7 @@ class AuroraFeatureBranchPrep:
         
         # Check repository status
         if not self.get_current_status():
-            print("❌ Please commit or stash changes before creating a new branch")
+            logger.error("Please commit or stash changes before creating a new branch")
             sys.exit(1)
         
         # Get branch type
@@ -257,7 +261,7 @@ class AuroraFeatureBranchPrep:
         
         # Preview and confirm
         if not self.preview_branch_plan(branch_type, description, branch_name, anchor):
-            print("❌ Branch creation cancelled")
+            logger.error("Branch creation cancelled")
             sys.exit(0)
         
         # Create branch
@@ -270,7 +274,7 @@ class AuroraFeatureBranchPrep:
             print(f"🌱 EOS seed continuity: Maintained")
             print(f"\n🔄 Next: Start implementing your feature and commit with symbolic anchors")
         else:
-            print("❌ Failed to create branch")
+            logger.error("Failed to create branch")
             sys.exit(1)
 
 

@@ -303,11 +303,11 @@ def main():
         branches = EASY_WIN_BRANCHES if args.easy_wins else (args.branches or [])
         
         if not branches:
-            print("❌ No branches specified. Use --easy-wins or --branches")
+            logger.error("No branches specified. Use --easy-wins or --branches")
             sys.exit(1)
         
         print("🚀 Executing live automation on %s branches...", len(branches))
-        print("⚠️  This will make real changes to the repository!")
+        logger.warning("This will make real changes to the repository!")
         
         confirmation = input("Type 'EXECUTE' to proceed: ")
         if confirmation != "EXECUTE":
@@ -321,7 +321,7 @@ def main():
         branches = EASY_WIN_BRANCHES if args.easy_wins else (args.branches or [])
         
         if not branches:
-            print("❌ No branches specified")
+            logger.error("No branches specified")
             sys.exit(1)
         
         for branch in branches:

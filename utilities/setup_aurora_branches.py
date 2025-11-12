@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import json
@@ -116,7 +120,7 @@ class AuroraBranchManager:
         with open(self.config_file, "w") as f:
             json.dump(self.default_config, f, indent=2)
 
-        print("✅ Configuration saved to: {self.config_file}")
+        logger.info("Configuration saved to: {self.config_file}")
 
     def get_current_branch(self):
         """Get current git branch"""
@@ -141,18 +145,18 @@ class AuroraBranchManager:
             result = subprocess.run(["git", "show-ref", "--verify", "--quiet", "refs/heads/develop"], cwd=self.repo_path)
 
             if result.returncode == 0:
-                print("✅ develop branch already exists")
+                logger.info("develop branch already exists")
             else:
                 # Create develop branch from main
                 subprocess.run(["git", "checkout", "-b", "develop"], cwd=self.repo_path, check=True)
-                print("✅ Created develop branch from main")
+                logger.info("Created develop branch from main")
 
                 # Switch back to original branch
                 if current_branch != "develop":
                     subprocess.run(["git", "checkout", current_branch], cwd=self.repo_path)
         
         except subprocess.CalledProcessError as e:
-            print(f"❌ Error creating develop branch: {e}")
+            logger.error("Error creating develop branch: {e}")
 
     def setup_branch_protection(self):
         """Set up branch protection rules (GitHub-specific)"""
@@ -229,7 +233,7 @@ jobs:
             f.write(workflow_content)
 
         
-        print("✅ Branch protection workflow created: {branch_protection_workflow}")
+        logger.info("Branch protection workflow created: {branch_protection_workflow}")
 
     
     def create_gitflow_aliases(self):
@@ -247,9 +251,9 @@ jobs:
         for alias, command in aliases.items():
             try:
                 subprocess.run(["git", "config", "--local", f"alias.{alias}", command], cwd=self.repo_path, check=True)
-                print(f"✅ Added alias: git {alias}")
+                logger.info("Added alias: git {alias}")
             except subprocess.CalledProcessError:
-                print(f"⚠️  Could not add alias: {alias}")
+                logger.warning("Could not add alias: {alias}")
 
     def generate_branch_status_report(self):
         """Generate current branch status report"""
@@ -283,7 +287,7 @@ jobs:
             with open(report_file, "w") as f:
                 json.dump(report, f, indent=2)
 
-            print(f"✅ Branch status report saved: {report_file}")
+            logger.info("Branch status report saved: {report_file}")
 
             # Display summary
             print("\n📋 Current Status:")
@@ -292,7 +296,7 @@ jobs:
             print(f"   🔄 Aurora Version: {self.default_config['version']}")
 
         except Exception as e:
-            print(f"❌ Error generating report: {e}")
+            logger.error("Error generating report: {e}")
 
     def setup_complete_branch_system(self):
         """Set up the complete Aurora CloudBank branch management system"""

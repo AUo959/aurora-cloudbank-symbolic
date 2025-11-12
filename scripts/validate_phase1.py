@@ -13,6 +13,10 @@ End-to-end validation script demonstrating:
 This proves living computation works.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 
 from src.core.symbolic_space import get_symbolic_space
@@ -29,7 +33,7 @@ async def validate_phase1():
     
     # Get Orion Station symbolic space
     space = get_symbolic_space()
-    print(f"✅ Orion Station online")
+    logger.info("Orion Station online")
     print(f"   Initialized: {space.station_initialized_at.isoformat()}")
     print()
     
@@ -67,7 +71,7 @@ async def validate_phase1():
         risk_score=0.2
     )
     
-    print(f"✅ Event ID: {result_1['event_id']}")
+    logger.info("Event ID: {result_1["event_id']}")
     print()
     
     # Show Triplex Handshake results
@@ -118,7 +122,7 @@ async def validate_phase1():
         risk_score=0.2
     )
     
-    print(f"✅ Event ID: {result_2['event_id']}")
+    logger.info("Event ID: {result_2["event_id']}")
     print(f"   Pattern Application: Aurora used institutional memory")
     print(f"   (Check entity memory for pattern emergence)")
     print()
@@ -133,7 +137,7 @@ async def validate_phase1():
         "data": {"target_systems": "all", "impact": "station-wide"}
     }
     
-    print(f"⚠️  Operation: {payload_3['task']}")
+    logger.warning("Operation: {payload_3["task']}")
     print(f"   Risk Score: 0.8 (high)")
     print(f"   Expected: Enhanced Triplex review")
     print()
@@ -177,11 +181,11 @@ async def validate_phase1():
     print()
     
     if health.concerns:
-        print("⚠️  Active Concerns:")
+        logger.warning("Active Concerns:")
         for concern in health.concerns:
             print(f"   • {concern}")
     else:
-        print("✅ No concerns - station operating nominally")
+        logger.info("No concerns - station operating nominally")
     print()
     
     # Dashboard Data Export
@@ -226,12 +230,12 @@ async def validate_phase1():
     print("🎉 PHASE 1 VALIDATION COMPLETE")
     print("=" * 70)
     print()
-    print("✅ Event System: Operations happen IN Orion Station")
-    print("✅ Triplex Handshake: L3 → L2 → L1 verification operational")
-    print("✅ Living Entities: Aurora + HALO + ARCHY + Axiomera + Caelion active")
-    print("✅ Institutional Memory: Patterns retrieved from past executions")
-    print("✅ Station Health: Monitoring drift, continuity, throughput")
-    print("✅ DLP Compliance: Manifests, anchors, context tags validated")
+    logger.info("Event System: Operations happen IN Orion Station")
+    logger.info("Triplex Handshake: L3 → L2 → L1 verification operational")
+    logger.info("Living Entities: Aurora + HALO + ARCHY + Axiomera + Caelion active")
+    logger.info("Institutional Memory: Patterns retrieved from past executions")
+    logger.info("Station Health: Monitoring drift, continuity, throughput")
+    logger.info("DLP Compliance: Manifests, anchors, context tags validated")
     print()
     print("🌟 Living Computation: OPERATIONAL")
     print()

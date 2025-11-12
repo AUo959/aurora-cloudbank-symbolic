@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 import json
 import os
@@ -38,11 +42,11 @@ async def validate_agent_integration():
         from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
 
         agent = ChatGPTAgentModeIntegration()
-        print("✅ Agent integration initialized: %s", agent.agent_status)
+        logger.info("Agent integration initialized: %s", agent.agent_status)
 
         # Test tool discovery
         tools_info = await agent.discover_tools()
-        print("✅ Tool discovery: %s tools available", len(tools_info['tools']))
+        logger.info("Tool discovery: %s tools available", len(tools_info['tools']))
 
         # List available tools
         for tool_name, tool_info in tools_info['tools'].items():
@@ -51,17 +55,17 @@ async def validate_agent_integration():
         # Test system status
         status_result = await agent.execute_tool("system_status", {"detail_level": "basic"})
         if status_result['success']:
-            print("✅ System status check: HEALTHY")
+            logger.info("System status check: HEALTHY")
         else:
-            print("⚠️  System status check: Issues detected")
+            logger.warning("System status check: Issues detected")
 
         # Test session management
         session_result = await agent.execute_tool("session_management", {"action": "create"})
         if session_result['success']:
             session_id = session_result['result']['session_id']
-            print("✅ Session management: Working (test session: %s...)", session_id[:8])
+            logger.info("Session management: Working (test session: %s...)", session_id[:8])
         else:
-            print("⚠️  Session management: Issues detected")
+            logger.warning("Session management: Issues detected")
 
         # Test symbolic processing
         symbolic_result = await agent.execute_tool("symbolic_processing", {
@@ -69,9 +73,9 @@ async def validate_agent_integration():
             "data": {"timestamp": datetime.now().isoformat()}
         })
         if symbolic_result['success']:
-            print("✅ Symbolic processing: Working")
+            logger.info("Symbolic processing: Working")
         else:
-            print("⚠️  Symbolic processing: Issues detected")
+            logger.warning("Symbolic processing: Issues detected")
 
         # Test geometric algebra
         geo_result = await agent.execute_tool("geometric_algebra", {
@@ -80,14 +84,14 @@ async def validate_agent_integration():
             "operation": "mult"
         })
         if geo_result['success']:
-            print("✅ Geometric algebra: Working")
+            logger.info("Geometric algebra: Working")
         else:
-            print("⚠️  Geometric algebra: Issues detected")
+            logger.warning("Geometric algebra: Issues detected")
 
         return True
 
     except Exception as e:
-        print("❌ Agent integration failed: %s", str(e))
+        logger.error("Agent integration failed: %s", str(e))
         return False
 
 def validate_api_endpoints():
@@ -102,7 +106,7 @@ def validate_api_endpoints():
                 config = json.load(f)
 
             endpoints = config.get('integration_endpoints', {})
-            print("✅ Configuration loaded: %s endpoints defined", len(endpoints))
+            logger.info("Configuration loaded: %s endpoints defined", len(endpoints))
 
             for endpoint, info in endpoints.items():
                 method = info.get('method', 'GET')
@@ -111,11 +115,11 @@ def validate_api_endpoints():
 
             return True
         else:
-            print("⚠️  Agent mode configuration not found")
+            logger.warning("Agent mode configuration not found")
             return False
 
     except Exception as e:
-        print("❌ API validation failed: %s", str(e))
+        logger.error("API validation failed: %s", str(e))
         return False
 
 def check_aurora_dependencies():
@@ -134,9 +138,9 @@ def check_aurora_dependencies():
     all_good = True
     for path, name in dependencies:
         if os.path.exists(path):
-            print("✅ %s: Available", name)
+            logger.info("%s: Available", name)
         else:
-            print("⚠️  {name}: Not found at %s", path)
+            logger.warning("{name}: Not found at %s", path)
             all_good = False
 
     return all_good

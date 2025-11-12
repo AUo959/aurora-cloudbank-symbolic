@@ -15,6 +15,10 @@ Usage:
 
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import subprocess
 import sys
@@ -88,7 +92,7 @@ class SeniorOfficerReview:
                 ).strip()
             }
         except subprocess.CalledProcessError as e:
-            print(f"⚠️  Warning: Could not get git info: {e}")
+            logger.warning("Warning: Could not get git info: {e}")
             return {"branch": "unknown", "pr_number": self.args.pr}
 
     def print_banner(self):
@@ -146,12 +150,12 @@ class SeniorOfficerReview:
                 timeout=60
             )
             if result.returncode == 0:
-                print("✅ Security tests passing")
+                logger.info("Security tests passing")
             else:
-                print("⚠️  Security test failures detected")
+                logger.warning("Security test failures detected")
             return result.returncode == 0
         except Exception as e:
-            print(f"⚠️  Could not run security scan: {e}")
+            logger.warning("Could not run security scan: {e}")
             return None
 
     def run_quick_tests(self):
@@ -165,12 +169,12 @@ class SeniorOfficerReview:
                 timeout=120
             )
             if result.returncode == 0:
-                print("✅ Tests passing")
+                logger.info("Tests passing")
             else:
-                print("⚠️  Test failures detected")
+                logger.warning("Test failures detected")
             return result.returncode == 0
         except Exception as e:
-            print(f"⚠️  Could not run tests: {e}")
+            logger.warning("Could not run tests: {e}")
             return None
 
     def generate_briefing(self):
@@ -248,7 +252,7 @@ Please review this PR from your respective areas of expertise:
 
         briefing_path.parent.mkdir(parents=True, exist_ok=True)
         briefing_path.write_text(briefing_content)
-        print(f"✅ Briefing generated: {briefing_path}")
+        logger.info("Briefing generated: {briefing_path}")
         return briefing_path
 
     def _generate_officer_assignments(self):
@@ -282,7 +286,7 @@ Please review this PR from your respective areas of expertise:
 
         print()
         print("=" * 70)
-        print("✅ PROTOCOL ACTIVATED")
+        logger.info("PROTOCOL ACTIVATED")
         print("=" * 70)
         print()
         print("📋 Next Steps:")
@@ -354,7 +358,7 @@ For full documentation, see: docs/SENIOR_OFFICER_REVIEW_PROTOCOL.md
         valid_codes = set(SeniorOfficerReview.OFFICERS.keys())
         invalid = [code for code in officer_codes if code not in valid_codes]
         if invalid:
-            print(f"❌ Invalid officer codes: {', '.join(invalid)}")
+            logger.error("Invalid officer codes: {", '.join(invalid)}")
             print(f"   Valid codes: {', '.join(valid_codes)}")
             return 1
 

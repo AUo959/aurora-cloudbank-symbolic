@@ -4,6 +4,10 @@ Aurora CloudBank Symbolic Anchor Workflow Integration
 Integrates T1/SRB anchors, DLP tracking, and memory sealing into CI/CD
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -309,9 +313,9 @@ else:
 # 🌟 Aurora Validation Status: %s", validation_status.upper())
         
         if validation_status == "fully_operational":
-            print("✅ All Aurora symbolic systems operational")
+            logger.info("All Aurora symbolic systems operational")
         elif validation_status == "partially_operational":
-            print("⚠️ Some Aurora systems operational, others degraded")
+            logger.warning("Some Aurora systems operational, others degraded")
         else:
             print("🔧 Aurora systems require attention")
         

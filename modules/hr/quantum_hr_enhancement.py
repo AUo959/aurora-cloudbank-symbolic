@@ -592,7 +592,7 @@ async def demo_quantum_hr():
     print("Simulation Mode: %s" % result.get("simulation_mode", "quantum"))
     print()
     
-    print("✅ Quantum HR Enhancement demonstration complete!")
+    logger.info("Quantum HR Enhancement demonstration complete!")
     print("="*80 + "\n")
 
 

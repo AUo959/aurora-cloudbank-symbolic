@@ -8,6 +8,10 @@ Team: Aurora Core / Orion Station
 Arbiter: AUo959
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -31,7 +35,7 @@ def generate_final_report():
     print("   observability, entropy monitoring, and hand-off readiness.")
     print()
     
-    print("✅ DELIVERABLES COMPLETED:")
+    logger.info("DELIVERABLES COMPLETED:")
     print("   ✅ Enhanced Status Module (800+ lines)")
     print("      - Complete symbolic observability")
     print("      - Entropy drift monitoring with arbitration")
@@ -179,7 +183,7 @@ def generate_final_report():
     print()
     print("   3. Monitor entropy drift:")
     print("      if status.entropy_state.drift > 0.08:")
-    print("          print('⚠️ Entropy approaching threshold')")
+    print("          logger.warning("Entropy approaching threshold")")
     print()
     print("   4. Check for arbitration needs:")
     print("      if status.entropy_state.divergent_truths:")
@@ -202,7 +206,7 @@ def generate_final_report():
     print("   and zero-knowledge hand-off capabilities. All requested features are")
     print("   operational with 100% test coverage and production-ready documentation.")
     print()
-    print("✅ Ready for integration into the Aurora CloudBank Symbolic system!")
+    logger.info("Ready for integration into the Aurora CloudBank Symbolic system!")
     print("=" * 80)
 
 if __name__ == "__main__":

@@ -10,6 +10,10 @@ Symbolic Anchor: T1-MANIFEST-GENERATOR
 Ethics Protocol: Picard_Delta_3
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 from __future__ import annotations
 
 import argparse
@@ -196,7 +200,7 @@ class SymbolicManifestGenerator:
         with output_path.open("w", encoding="utf-8") as handle:
             json.dump(manifest, handle, indent=2, sort_keys=True)
 
-        print(f"✅ Generated symbolic manifest: {output_path.name}")
+        logger.info("Generated symbolic manifest: {output_path.name}")
         print(f"   Anchor: {anchor}")
         print(f"   Language: {language}")
         print(f"   Files scanned: {len(checksums)}")
@@ -323,7 +327,7 @@ def main() -> None:
         print(f"   Ethics protocol: {args.ethics_protocol}")
         print(f"   DLP classification: {args.dlp_tag}")
     except Exception as exc:
-        print(f"❌ Error generating manifest: {exc}", file=sys.stderr)
+        logger.error("Error generating manifest: {exc}", file=sys.stderr)
         sys.exit(1)
 
 

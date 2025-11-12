@@ -189,7 +189,7 @@ def main():
         
     elif args.command == "analyze":
         if not args.branch:
-            print("❌ --branch required for analyze command")
+            logger.error("--branch required for analyze command")
             sys.exit(1)
         
         analysis = analyze_dependabot_branch(args.branch, args.repo_path)
@@ -197,7 +197,7 @@ def main():
         
     elif args.command == "merge":
         if not args.branch:
-            print("❌ --branch required for merge command") 
+            logger.error("--branch required for merge command") 
             sys.exit(1)
         
         result = execute_safe_demo_merge(args.branch, args.repo_path, dry_run=True)

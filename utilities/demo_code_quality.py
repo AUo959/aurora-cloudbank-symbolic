@@ -5,6 +5,10 @@ Shows how to use the code quality analysis system locally.
 Part of Issue #258 implementation.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 from pathlib import Path
 
@@ -54,7 +58,7 @@ def main():
     
     # Show critical violations if any
     if report.critical_count > 0:
-        print("⚠️  Critical Violations (require immediate attention):")
+        logger.warning("Critical Violations (require immediate attention):")
         print()
         critical = analyzer.get_critical_violations(report)
         for i, violation in enumerate(critical[:5], 1):  # Show first 5
@@ -84,10 +88,10 @@ def main():
     # Summary
     print("=" * 70)
     if report.passed:
-        print("✅ Analysis completed successfully!")
+        logger.info("Analysis completed successfully!")
         print("   No critical violations found.")
     else:
-        print("❌ Analysis found critical violations!")
+        logger.error("Analysis found critical violations!")
         print("   Please review and fix before committing.")
     print("=" * 70)
     

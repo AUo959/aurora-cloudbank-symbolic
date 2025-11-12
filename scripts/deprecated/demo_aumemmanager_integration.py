@@ -4,6 +4,10 @@ AuMemManager Integration Demonstration
 Test and showcase the quantum-symbolic memory management capabilities
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import json
 import time
@@ -109,7 +113,7 @@ def demonstrate_aumemmanager_integration():
         cultural_score=0.2
     )
     
-    print("✅ Created %s enhanced memories", memory_manager.metrics['total_memories'])
+    logger.info("Created %s enhanced memories", memory_manager.metrics['total_memories'])
     
     # Demonstrate quantum entanglement with Aurora enhancements
     print("\n🔗 Creating Quantum Entanglement Network...")
@@ -279,7 +283,7 @@ print(ff"   Cultural Coherence: {cultural_trajectory[-1].get('cultural_coherence
     with open('aumemmanager_demo_export.json', 'w') as f:
         json.dump(exported_state, f, indent=2, default=str)
     
-    print(f"✅ System state exported to: aumemmanager_demo_export.json")
+    logger.info("System state exported to: aumemmanager_demo_export.json")
     print(ff"   Export timestamp: {exported_state['export_timestamp']}")
     print(ff"   Aurora integration version: {exported_state['aurora_integration_version']}")
     

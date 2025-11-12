@@ -9,6 +9,10 @@ Ethics: Picard_Delta_3
 Command-line interface for parsing and executing command chains.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import sys
 from pathlib import Path
@@ -32,7 +36,7 @@ def cmd_parse(args):
     print()
     
     if result.commands:
-        print(f"✅ Valid Commands: {len(result.commands)}")
+        logger.info("Valid Commands: {len(result.commands)}")
         for cmd in result.commands:
             status = "✓" if cmd.is_valid else "✗"
             print(f"   {status} {cmd.raw} → {cmd.name}")
@@ -41,7 +45,7 @@ def cmd_parse(args):
         print()
     
     if result.naked_commands:
-        print(f"⚠️  Naked Commands Detected: {len(result.naked_commands)}")
+        logger.warning("Naked Commands Detected: {len(result.naked_commands)}")
         print()
         for cmd in result.naked_commands:
             print(cmd.error_message)
@@ -68,13 +72,13 @@ def cmd_validate(args):
     is_valid, errors = parser.validate_command_chain(args.input)
     
     if is_valid:
-        print("✅ Command chain is valid!")
+        logger.info("Command chain is valid!")
         valid_cmds = parser.extract_valid_commands(args.input)
         if valid_cmds:
             print(f"   Commands: {', '.join(valid_cmds)}")
         return 0
     else:
-        print("❌ Command chain has errors:")
+        logger.error("Command chain has errors:")
         for error in errors:
             print(error)
         return 1
@@ -97,7 +101,7 @@ def cmd_list(args):
     
     print()
     print("💡 Usage: #{command}//.")
-    print("⚠️  Commands without //. terminator will NOT execute")
+    logger.warning("Commands without //. terminator will NOT execute")
     
     return 0
 
@@ -110,7 +114,7 @@ def cmd_format(args):
     # Validate commands
     invalid = [c for c in commands if c not in parser.SUPPORTED_COMMANDS]
     if invalid:
-        print(f"❌ Unknown commands: {', '.join(invalid)}")
+        logger.error("Unknown commands: {", '.join(invalid)}")
         print()
         print("Supported commands:")
         for cmd in sorted(parser.SUPPORTED_COMMANDS):

@@ -4,6 +4,10 @@ Aurora CloudBank Real-World Integration Platform
 Comprehensive integration system bringing together all Aurora components
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import asyncio
 import json
@@ -660,15 +664,15 @@ class AuroraCLI:
 
             
         if result.returncode == 0:
-                print("✅ Quantum demo completed successfully")
+                logger.info("Quantum demo completed successfully")
                 
         print(result.stdout)
             
         else:
-                print("❌ Quantum demo failed: {result.stderr}")
+                logger.error("Quantum demo failed: {result.stderr}")
         
         except Exception as e:
-            print("❌ Error running quantum demo: {e}")
+            logger.error("Error running quantum demo: {e}")
 
     
         def run_consciousness_demo(self):
@@ -680,15 +684,15 @@ class AuroraCLI:
                 sys.executable, "aurora_consciousness_engine.py"
         result = subprocess.run([
             if result.returncode == 0:
-                print("✅ Consciousness demo completed successfully")
+                logger.info("Consciousness demo completed successfully")
                 
         print(result.stdout)
             
         else:
-                print("❌ Consciousness demo failed: {result.stderr}")
+                logger.error("Consciousness demo failed: {result.stderr}")
         
         except Exception as e:
-            print("❌ Error running consciousness demo: {e}")
+            logger.error("Error running consciousness demo: {e}")
 
     
         def run_learning_demo(self):
@@ -699,15 +703,15 @@ class AuroraCLI:
             result = subprocess.run([
                 sys.executable, "aurora_adaptive_learning.py"
             ], capture_output=True, text=True, timeout=30)
-        result = subprocess.run([                print("✅ Learning demo completed successfully")
+        result = subprocess.run([                logger.info("Learning demo completed successfully")
                 
         print(result.stdout)
             
         else:
-                print("❌ Learning demo failed: {result.stderr}")
+                logger.error("Learning demo failed: {result.stderr}")
         
         except Exception as e:
-            print("❌ Error running learning demo: {e}")
+            logger.error("Error running learning demo: {e}")
 
     
         def run_integration_test(self):
@@ -721,12 +725,12 @@ class AuroraCLI:
 
             
         if result.returncode == 0:
-                print("✅ Integration test completed successfully")
+                logger.info("Integration test completed successfully")
         result = subprocess.run([            else:
-                print("❌ Integration test failed: {result.stderr}")
+                logger.error("Integration test failed: {result.stderr}")
         
         except Exception as e:
-            print("❌ Error running integration test: {e}")
+            logger.error("Error running integration test: {e}")
 
     
         def show_status(self):
@@ -743,10 +747,10 @@ class AuroraCLI:
 
         for name, file in modules:
             if Path(file).exists():
-                print("✅ {name}: Available")
+                logger.info("{name}: Available")
             
         else:
-                print("❌ {name}: Not Found")
+                logger.error("{name}: Not Found")
 
         
         print("\\n🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

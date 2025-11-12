@@ -4,6 +4,10 @@ Aurora CloudBank Dependency Validation Script
 Informational check for dependency compatibility - non-blocking in dev containers.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 from pathlib import Path
@@ -22,15 +26,15 @@ def check_dependency_conflicts(requirements_file: str) -> bool:
         )
         
         if result.returncode != 0:
-            print(f"⚠️ Dependency conflicts in installed packages:\\n{result.stdout}{result.stderr}")
+            logger.warning("Dependency conflicts in installed packages:\\n{result.stdout}{result.stderr}")
             print("ℹ️ This is informational - conflicts may not affect Aurora operation")
             return True  # Don't block in dev containers
         else:
-            print("✅ No dependency conflicts detected")
+            logger.info("No dependency conflicts detected")
             return True
             
     except Exception as e:
-        print(f"⚠️ Validation error: {e}")
+        logger.warning("Validation error: {e}")
         return True  # Don't block on validation errors
 
 
@@ -50,7 +54,7 @@ def validate_critical_versions() -> bool:
         for package, version_spec in critical_deps.items():
             try:
                 version = importlib.metadata.version(package)
-                print(f"✅ {package}: {version}")
+                logger.info("{package}: {version}")
             except importlib.metadata.PackageNotFoundError:
                 print(f"ℹ️ {package}: not installed (optional)")
         return True

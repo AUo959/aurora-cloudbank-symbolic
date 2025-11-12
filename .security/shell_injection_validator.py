@@ -3,6 +3,10 @@
 🔍 Aurora CloudBank Shell Injection Validator
 Pre-commit hook for preventing shell injection vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -50,7 +54,7 @@ def main():
         print("\n💡 Fix: Use shell=False and array arguments: subprocess.run(['cmd', 'arg1', 'arg2'])")
         sys.exit(1)
     
-    print("✅ Shell injection validation passed")
+    logger.info("Shell injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

@@ -4,6 +4,10 @@ Aurora CloudBank Intelligent Test Selection
 Analyzes file changes and selects relevant tests for optimal CI/CD performance
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -80,11 +84,11 @@ class IntelligentTestSelector:
             if result.returncode == 0:
                 return set(result.stdout.strip().split('\n')) if result.stdout.strip() else set()
             else:
-                print(f"⚠️ Git diff failed: {result.stderr}")
+                logger.warning("Git diff failed: {result.stderr}")
                 return set()
                 
         except Exception as e:
-            print(f"⚠️ Error getting changed files: {e}")
+            logger.warning("Error getting changed files: {e}")
             return set()
     
     def _path_matches_pattern(self, file_path: str, pattern: str) -> bool:
@@ -157,7 +161,7 @@ class IntelligentTestSelector:
         # If no tests selected, run at least unit tests
         if not include:
             include = [{"test-group": "unit"}]
-            print("⚠️ No tests selected, defaulting to unit tests")
+            logger.warning("No tests selected, defaulting to unit tests")
         
         matrix = {"include": include}
         

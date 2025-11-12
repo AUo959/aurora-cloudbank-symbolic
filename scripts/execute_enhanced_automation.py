@@ -4,6 +4,10 @@ Execute SSMT v3.0 Enhanced Automation - Live Production Run
 Based on validated high-confidence branches with merge simulation success
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 from pathlib import Path
@@ -25,7 +29,7 @@ def execute_enhanced_automation():
         print("  {i}. %s (Safety Score: 130/100)", branch)
     
     print("\n⚠️  This will execute REAL merges on validated branches!")
-    print("✅ All branches passed: freshness check, merge simulation, safety validation")
+    logger.info("All branches passed: freshness check, merge simulation, safety validation")
     
     confirmation = input("\nType 'EXECUTE-ENHANCED' to proceed: ")
     if confirmation != "EXECUTE-ENHANCED":
@@ -48,10 +52,10 @@ def execute_enhanced_automation():
     
     try:
         result = subprocess.run(cmd, cwd=".", check=True)
-        print("✅ Enhanced automation completed successfully!")
+        logger.info("Enhanced automation completed successfully!")
         return True
     except subprocess.CalledProcessError as e:
-        print("❌ Enhanced automation failed: %s", e)
+        logger.error("Enhanced automation failed: %s", e)
         return False
 
 if __name__ == "__main__":

@@ -25,6 +25,10 @@ AUTHOR: Aurora-GUMAS Simulation Team
 VERIFIED BY: STARLING_AU (RELAY_004)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import random
 import math
 import json
@@ -37,7 +41,7 @@ try:
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
-    print("⚠️  matplotlib not available - visualization disabled")
+    logger.warning("matplotlib not available - visualization disabled")
 
 # ============================================================================
 # SIMULATION PARAMETERS
@@ -398,7 +402,7 @@ def plot_results(results: Dict[str, Any], show: bool = True, save_path: str = No
         save_path: Optional path to save figure
     """
     if not HAS_MATPLOTLIB:
-        print("⚠️  matplotlib not available - skipping visualization")
+        logger.warning("matplotlib not available - skipping visualization")
         return
     
     log = results["log"]
@@ -448,7 +452,7 @@ def plot_results(results: Dict[str, Any], show: bool = True, save_path: str = No
     
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"✅ Visualization saved to: {save_path}")
+        logger.info("Visualization saved to: {save_path}")
     
     if show:
         plt.show()
@@ -512,7 +516,7 @@ def main():
         print("📊 Generating visualization...")
         plot_results(results, show=True)
     else:
-        print("⚠️  Install matplotlib for visualization: pip install matplotlib")
+        logger.warning("Install matplotlib for visualization: pip install matplotlib")
     
     print()
     print("=" * 70)

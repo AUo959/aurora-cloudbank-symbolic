@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 import argparse
 import subprocess
@@ -209,7 +213,7 @@ class AutomatedBranchManager:
             try:
                 # Double-check it's merged before deletion
                 if not self._is_branch_merged(branch.name):
-                    print("⚠️  Skipping %s - not confirmed merged", branch.name)
+                    logger.warning("Skipping %s - not confirmed merged", branch.name)
                     
         results["skipped"].append(branch.name)
         
@@ -220,13 +224,13 @@ class AutomatedBranchManager:
         subprocess.run(cmd, check=True, capture_output=True)
 
                 
-        print(f"✅ Deleted branch: {branch.name}")
+        logger.info("Deleted branch: {branch.name}")
         
         results["deleted"].append(branch.name)
 
             
         except subprocess.CalledProcessError as e:
-                print(f"❌ Failed to delete {branch.name}: {e}")
+                logger.error("Failed to delete {branch.name}: {e}")
                 
         results["failed"].append(branch.name)
 
@@ -332,7 +336,7 @@ def main():
     
         if not branches:
             pass  # Placeholder
-        print("❌ No branches found or error occurred")
+        logger.error("No branches found or error occurred")
         
         return
 
@@ -341,8 +345,8 @@ def main():
 
     
         print("📈 Found %s branches total", analysis['total_branches'])
-    print(f"✅ Safe to delete: {len(analysis['candidates']['safe_to_delete']}"))
-    print(f"⚠️  Requires review: {len(analysis['candidates']['requires_review']}"))
+    logger.info("Safe to delete: {len(analysis["candidates']['safe_to_delete']}"))
+    logger.warning("Requires review: {len(analysis["candidates']['requires_review']}"))
     print(f"🔒 Protected: {len(analysis['candidates']['protected']}"))
 
     # Execute cleanup if requested

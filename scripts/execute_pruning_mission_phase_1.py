@@ -5,6 +5,10 @@ Focus: Python dependencies with validated 75% success rate
 Mission: Consolidate PRs, close issues, trim branch sappers
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 
@@ -61,7 +65,7 @@ def execute_pruning_mission_phase_1():
     
     try:
         result = subprocess.run(cmd, cwd=".", check=True)
-        print("✅ Phase 1 pruning mission completed!")
+        logger.info("Phase 1 pruning mission completed!")
         
         print("\n🎯 Pruning Mission Phase 1 - COMPLETE")
         print("📊 Results:")
@@ -72,7 +76,7 @@ def execute_pruning_mission_phase_1():
         
         return True
     except subprocess.CalledProcessError as e:
-        print("❌ Phase 1 pruning mission encountered issues: %s", e)
+        logger.error("Phase 1 pruning mission encountered issues: %s", e)
         print("🛡️ Safety systems activated - repository protected")
         return False
 

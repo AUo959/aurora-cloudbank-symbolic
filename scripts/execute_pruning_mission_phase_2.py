@@ -5,6 +5,10 @@ Mission: Safe deletion of stale branches (60+ days old)
 Focus: Repository health improvement through targeted branch cleanup
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -151,11 +155,11 @@ def execute_safe_branch_deletion(branches: list, dry_run: bool = True) -> dict:
                     cwd=".", check=True
                 )
                 deleted_branches.append(branch)
-                print("✅ Deleted: %s", branch)
+                logger.info("Deleted: %s", branch)
                 
             except subprocess.CalledProcessError as e:
                 failed_deletions.append({"branch": branch, "error": str(e)})
-                print("❌ Failed to delete {branch}: %s", e)
+                logger.error("Failed to delete {branch}: %s", e)
         
         result.update({
             "executed": True,

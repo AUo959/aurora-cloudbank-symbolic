@@ -4,6 +4,10 @@ Aurora CloudBank Rebuild Failure Prevention System
 Comprehensive protection against DevContainer rebuild issues.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import hashlib
 import json
 import os
@@ -46,7 +50,7 @@ class RebuildFailurePrevention:
         
         # Check Python availability
         if not shutil.which("python3"):
-            print("❌ Python 3 not available")
+            logger.error("Python 3 not available")
             return False
         
         # Determine which Python to use (venv or system)
@@ -66,16 +70,16 @@ class RebuildFailurePrevention:
             ], capture_output=True, text=True, timeout=10)
             
             if result.returncode != 0:
-                print("❌ Python environment is not functional")
+                logger.error("Python environment is not functional")
                 return False
         except (subprocess.TimeoutExpired, FileNotFoundError):
-            print("❌ Python environment check failed")
+            logger.error("Python environment check failed")
             return False
         
         # Check critical dependencies (only if not skipped and venv exists)
         if not skip_dependencies:
             if not venv_python.exists():
-                print("⚠️  Virtual environment not found, skipping dependency check")
+                logger.warning("Virtual environment not found, skipping dependency check")
                 return True
             
             try:
@@ -85,17 +89,17 @@ class RebuildFailurePrevention:
                 ], capture_output=True, text=True, timeout=10)
                 
                 if result.returncode != 0:
-                    print("❌ Critical dependencies missing or broken")
+                    logger.error("Critical dependencies missing or broken")
                     print(f"   Error: {result.stderr}")
                     return False
-                print(f"✅ {result.stdout.strip()}")
+                logger.info("{result.stdout.strip()}")
             except (subprocess.TimeoutExpired, FileNotFoundError):
-                print("❌ Dependency check failed")
+                logger.error("Dependency check failed")
                 return False
         else:
-            print("⚠️  Skipping dependency check (pre-rebuild mode)")
+            logger.warning("Skipping dependency check (pre-rebuild mode)")
         
-        print("✅ Environment health check passed")
+        logger.info("Environment health check passed")
         return True
     
     def create_pre_rebuild_backup(self):
@@ -133,7 +137,7 @@ class RebuildFailurePrevention:
                         f.write(result.stdout)
                     print("📦 Backed up pip freeze")
             except subprocess.TimeoutExpired:
-                print("⚠️ Pip freeze backup timed out")
+                logger.warning("Pip freeze backup timed out")
         
         # Create rebuild recovery script
         recovery_script = backup_subdir / "emergency_recovery.sh"
@@ -233,18 +237,18 @@ echo "✅ Pre-rebuild protection completed"
         
         if all_passed:
             self.log_status("validation_passed", "All validation checks passed")
-            print("✅ All validation checks passed")
+            logger.info("All validation checks passed")
         else:
             failed_checks = [k for k, v in validation_results.items() if not v]
             self.log_status("validation_failed", f"Failed checks: {', '.join(failed_checks)}")
-            print(f"❌ Validation failed: {', '.join(failed_checks)}")
+            logger.error("Validation failed: {", '.join(failed_checks)}")
         
         return all_passed, validation_results
     
     def validate_dependencies(self) -> bool:
         """Validate dependency configuration."""
         if not (self.workspace_root / "requirements-lock.txt").exists():
-            print("❌ requirements-lock.txt not found")
+            logger.error("requirements-lock.txt not found")
             return False
         
         # Check for critical dependencies
@@ -255,10 +259,10 @@ echo "✅ Pre-rebuild protection completed"
         missing_deps = [dep for dep in critical_deps if dep not in content]
         
         if missing_deps:
-            print(f"❌ Missing critical dependencies: {', '.join(missing_deps)}")
+            logger.error("Missing critical dependencies: {", '.join(missing_deps)}")
             return False
         
-        print("✅ Dependency validation passed")
+        logger.info("Dependency validation passed")
         return True
     
     def check_script_integrity(self) -> bool:
@@ -272,20 +276,20 @@ echo "✅ Pre-rebuild protection completed"
         for script_path in critical_scripts:
             full_path = self.workspace_root / script_path
             if not full_path.exists():
-                print(f"❌ Critical script missing: {script_path}")
+                logger.error("Critical script missing: {script_path}")
                 return False
             
             if not os.access(full_path, os.X_OK):
-                print(f"❌ Critical script not executable: {script_path}")
+                logger.error("Critical script not executable: {script_path}")
                 return False
         
-        print("✅ Script integrity check passed")
+        logger.info("Script integrity check passed")
         return True
     
     def check_backup_systems(self) -> bool:
         """Check backup system availability (validation only - does not create directories)."""
         if not self.backup_dir.exists():
-            print("⚠️  Backup directory not found")
+            logger.warning("Backup directory not found")
             return False
 
         # Check if we have recent backups (look in subdirectories too)
@@ -295,10 +299,10 @@ echo "✅ Pre-rebuild protection completed"
         )
 
         if not backup_files:
-            print("⚠️  No backup files found yet")
+            logger.warning("No backup files found yet")
             return False
 
-        print(f"✅ Backup system check passed ({len(backup_files)} backup files found)")
+        logger.info("Backup system check passed ({len(backup_files)} backup files found)")
         return True
 
 
@@ -330,7 +334,7 @@ def main():
                 "timestamp": datetime.now().isoformat()
             }
             
-            print(f"⚠️  Pre-rebuild validation degraded state detected:")
+            logger.warning("Pre-rebuild validation degraded state detected:")
             print(f"   Context: {degraded_state['context_tag']}")
             print(f"   Failed checks: {', '.join(failed_checks)}")
             print(f"   Symbolic hash: {degraded_state['symbolic_hash']}")
@@ -346,7 +350,7 @@ def main():
             with open(degraded_state_file, 'w') as f:
                 json.dump(degraded_state, f, indent=2)
             
-            print("⚠️  Continuing with degraded state (pre-rebuild phase)...")
+            logger.warning("Continuing with degraded state (pre-rebuild phase)...")
         
         preventer.log_status("pre_rebuild_completed", "Pre-rebuild protection completed")
     else:

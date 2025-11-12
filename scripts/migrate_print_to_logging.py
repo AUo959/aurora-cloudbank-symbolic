@@ -5,9 +5,9 @@ Part of: Issue #320 Phase 1 Code Quality Sprint
 
 Systematically replaces print statements with proper logging calls.
 Patterns handled:
-- print("✅ Success") → logger.info("Success")
-- print("❌ Error") → logger.error("Error")
-- print("⚠️ Warning") → logger.warning("Warning")
+- logger.info("Success") → logger.info("Success")
+- logger.error("Error") → logger.error("Error")
+- logger.warning("Warning") → logger.warning("Warning")
 - print(f"Debug: {var}") → logger.debug(f"Debug: {var}")
 
 Usage:
@@ -198,7 +198,7 @@ class PrintToLoggingMigrator:
         for file_path in python_files:
             if self.migrate_file(file_path):
                 rel_path = file_path.relative_to(self.workspace_root)
-                print(f"✅ Modified: {rel_path}")
+                logger.info("Modified: {rel_path}")
         
         # Print summary
         print()
@@ -224,7 +224,7 @@ class PrintToLoggingMigrator:
         if self.dry_run:
             print("ℹ️  This was a dry run. Run without --dry-run to apply changes.")
         else:
-            print("✅ Migration complete!")
+            logger.info("Migration complete!")
 
 
 def main():
@@ -257,7 +257,7 @@ def main():
         print("\n⚠️  Migration interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ Migration failed: {e}")
+        logger.error("Migration failed: {e}")
         sys.exit(1)
 
 

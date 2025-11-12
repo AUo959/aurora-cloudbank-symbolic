@@ -19,6 +19,10 @@ Thread: T71→ONBOARDING→GENESIS
 DLP: context_tag=onboarding_wizard, symbolic_hash=DEVELOPER_EXPERIENCE_v1
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import subprocess
 import json
@@ -86,19 +90,19 @@ Let's get started! 🚀
             )
 
             if check and result.returncode != 0:
-                print(f"❌ Command failed with exit code {result.returncode}")
+                logger.error("Command failed with exit code {result.returncode}")
                 if result.stderr:
                     print(f"Error output:\n{result.stderr[:500]}")
                 return False, result.stderr
 
-            print(f"✅ {description} completed")
+            logger.info("{description} completed")
             return True, result.stdout
 
         except subprocess.TimeoutExpired:
             print("⏰ Command timed out after 300 seconds")
             return False, "Timeout"
         except Exception as e:
-            print(f"❌ Error running command: {e}")
+            logger.error("Error running command: {e}")
             return False, str(e)
 
     def step_health_check(self):
@@ -209,7 +213,7 @@ common development tasks. Let's explore what's available.
 
                 self.has_completed_steps.add("makefile")
             else:
-                print("⚠️  Could not fetch commands. Try running 'make help' manually.")
+                logger.warning("Could not fetch commands. Try running "make help' manually.")
         else:
             print("⏭️  Skipping - you can run 'make help' anytime")
 
@@ -250,7 +254,7 @@ The Aurora Developer CLI helps you:
 
                 self.has_completed_steps.add("anchors")
             else:
-                print("⚠️  Anchor tracking demo encountered an issue.")
+                logger.warning("Anchor tracking demo encountered an issue.")
         else:
             print("⏭️  Skipping anchor tracking demo")
 
@@ -342,7 +346,7 @@ Think of it as a save point for your development session!
                     print(output)
                     self.has_completed_steps.add("quicksave")
                 else:
-                    print("⚠️  Could not list quicksaves. They may not exist yet.")
+                    logger.warning("Could not list quicksaves. They may not exist yet.")
 
             print("\n💡 Tip: Create your first quicksave with:")
             print('   make quicksave DESC="Completed onboarding wizard"')
@@ -385,7 +389,7 @@ Aurora CloudBank provides several ways to explore the system:
                 print(output)
                 self.has_completed_steps.add("demos")
             else:
-                print("⚠️  Could not fetch status. Some dependencies may need setup.")
+                logger.warning("Could not fetch status. Some dependencies may need setup.")
 
         print("\n💡 Try these when ready:")
         print("   python aurora_cli.py --quantum")

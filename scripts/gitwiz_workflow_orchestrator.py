@@ -4,6 +4,10 @@ GITWiz Optimized Workflow Orchestrator
 Comprehensive automation for repository stewardship, optimization, and maintenance.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import datetime
 import json
@@ -407,7 +411,7 @@ class GITWizWorkflowOrchestrator:
         workflow_result["execution_time"] = execution_time
 
         print("\n" + "=" * 70)
-        print("✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
+        logger.info("Enhanced Quality Workflow completed in {execution_time:.2f}s")
         print("Success rate: {successful_stages}/{total_stages} stages")
         if workflow_result["recommendations"]:
             print("🎯 Key Recommendations:")
@@ -678,7 +682,7 @@ class GITWizWorkflowOrchestrator:
             print("3. Test the changes thoroughly")
             print("4. Commit and push the optimizations")
         else:
-            print("✅ OPTIMIZATION COMPLETE!")
+            logger.info("OPTIMIZATION COMPLETE!")
             print("-" * 40)
             print("All optimizations have been applied successfully.")
             print("Consider running tests and committing the changes.")

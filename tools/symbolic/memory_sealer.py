@@ -10,6 +10,10 @@ Primary functions:
 - Memory drift detection and correction protocols
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import fnmatch
 import hashlib
@@ -593,7 +597,7 @@ def main():
 
     if args.command == "seal":
         if not args.target:
-            print("❌ Target required for seal command")
+            logger.error("Target required for seal command")
             return
 
         target_path = Path(args.target)
@@ -613,21 +617,21 @@ def main():
 
     elif args.command == "verify":
         if not args.seal_id:
-            print("❌ --seal-id required for verify command")
+            logger.error("--seal-id required for verify command")
             return
 
         result = engine.verify_seal(args.seal_id)
 
         if result["status"] == "valid":
-            print(f"✅ Seal {args.seal_id} is valid")
+            logger.info("Seal {args.seal_id} is valid")
         else:
-            print(f"❌ Seal {args.seal_id} is invalid:")
+            logger.error("Seal {args.seal_id} is invalid:")
             for issue in result["issues"]:
                 print(f"   - {issue}")
 
     elif args.command == "restore":
         if not args.seal_id:
-            print("❌ --seal-id required for restore command")
+            logger.error("--seal-id required for restore command")
             return
 
         result = engine.restore_sealed_state(args.seal_id, args.restore_path, args.dry_run)

@@ -3,6 +3,10 @@
 🔍 Aurora CloudBank Log Injection Validator
 Pre-commit hook for preventing log injection vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 from pathlib import Path
@@ -55,7 +59,7 @@ def main():
         print("\n💡 Fix: Use parameterized logging: logger.info('Message: %s', variable)")
         sys.exit(1)
     
-    print("✅ Log injection validation passed")
+    logger.info("Log injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

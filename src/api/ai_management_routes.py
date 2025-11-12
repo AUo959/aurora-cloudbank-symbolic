@@ -5,6 +5,7 @@ Provides runtime control over AI model selection, capabilities inspection,
 and fallback configuration.
 """
 
+import logging
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -132,7 +133,8 @@ async def get_model_capabilities(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"AI capability query error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/select-model", summary="Select preferred AI model")
@@ -179,7 +181,8 @@ async def select_model(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"AI model selection error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/enable-claude-45", summary="Enable Claude 4.5 Opus")
@@ -207,10 +210,11 @@ async def enable_claude_45(token: HTTPAuthorizationCredentials = Depends(securit
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Claude 4.5 enablement error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post("/enable-gpt5", summary="Enable GPT-5")
+@router.post(\"/enable-gpt5\", summary=\"Enable GPT-5\")
 async def enable_gpt5(token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Enable GPT-5 when it becomes available
@@ -235,7 +239,8 @@ async def enable_gpt5(token: HTTPAuthorizationCredentials = Depends(security)):
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"AI management error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/enable-gpt5-codex", summary="Enable GPT-5 Codex")
@@ -263,7 +268,8 @@ async def enable_gpt5_codex(token: HTTPAuthorizationCredentials = Depends(securi
             }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"AI management error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/available-models", summary="List available AI models")
@@ -297,4 +303,5 @@ async def list_available_models(token: HTTPAuthorizationCredentials = Depends(se
         return {"available_models": models, "total": len(models)}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Available models query error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")

@@ -4,6 +4,10 @@ Aurora CloudBank - Automated Branch Cleanup System
 Intelligently identifies and manages stale branches based on configurable rules.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import datetime
 import re
@@ -203,19 +207,19 @@ class BranchCleanupManager:
         for branch in categories["force_delete"]:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
-                print("✅ Deleted: {branch['name']}")
+                logger.info("Deleted: {branch["name']}")
             else:
                 results["errors"] += 1
-                print("❌ Failed to delete: {branch['name']}")
+                logger.error("Failed to delete: {branch["name']}")
 
         # Delete stale merged branches
         for branch in categories["stale_merged"]:
             if self.delete_branch(branch["name"]):
                 results["deleted"] += 1
-                print("✅ Deleted stale merged: {branch['name']}")
+                logger.info("Deleted stale merged: {branch["name']}")
             else:
                 results["errors"] += 1
-                print("❌ Failed to delete: {branch['name']}")
+                logger.error("Failed to delete: {branch["name']}")
 
         return results
 
@@ -244,7 +248,7 @@ class BranchCleanupManager:
 
         branches = self.get_branch_info()
         if not branches:
-            print("❌ No branches found or error occurred")
+            logger.error("No branches found or error occurred")
             return {}
 
         categories = self.categorize_branches(branches)

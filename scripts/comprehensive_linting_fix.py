@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 """
@@ -197,7 +201,7 @@ def main():
 
     print("")
 # ✅ Fixed: %s files", fixed_count)
-    print("❌ Errors: %s files", error_count)
+    logger.error("Errors: %s files", error_count)
 
     # Run final validation
     print("\n🔍 Running final validation...")
@@ -219,10 +223,10 @@ def main():
         )
 
         if result.returncode == 0:
-            print("✅ All linting issues resolved!")
+            logger.info("All linting issues resolved!")
         else:
             remaining_issues = result.stdout.count("\n") if result.stdout else 0
-            print("⚠️ %s issues remaining", remaining_issues)
+            logger.warning("%s issues remaining", remaining_issues)
             if result.stdout:
                 print("Remaining issues:")
                 print(result.stdout[:1000])  # Show first 1000 chars

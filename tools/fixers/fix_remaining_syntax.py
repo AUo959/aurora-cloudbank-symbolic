@@ -2,6 +2,10 @@
 """
 Quick syntax fixer for remaining critical Python files
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 
@@ -43,12 +47,12 @@ def fix_file(filepath):
         if content != original_content:
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(content)
-            print(f"✅ Fixed: {filepath}")
+            logger.info("Fixed: {filepath}")
             return True
         return False
         
     except Exception as e:
-        print(f"❌ Error fixing {filepath}: {e}")
+        logger.error("Error fixing {filepath}: {e}")
         return False
 
 def main():
@@ -60,7 +64,7 @@ def main():
                           capture_output=True, text=True)
     
     if result.returncode != 0:
-        print("❌ Could not find Python files")
+        logger.error("Could not find Python files")
         return
     
     files_to_check = result.stdout.strip().split('\n')[:20]  # Check first 20 files

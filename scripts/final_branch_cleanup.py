@@ -4,6 +4,10 @@ Aurora CloudBank - Final Branch Cleanup Script
 Completes ZERO PR strategy by cleaning remaining branches
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -42,12 +46,12 @@ class FinalBranchCleanup:
             )
             
             self.deleted_branches.append(clean_branch)
-            print("✅ Successfully deleted: %s", clean_branch)
+            logger.info("Successfully deleted: %s", clean_branch)
             return True
             
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.strip() if e.stderr else "Unknown error"
-            print("❌ Failed to delete {clean_branch}: %s", error_msg)
+            logger.error("Failed to delete {clean_branch}: %s", error_msg)
             self.failed_branches.append({
                 "branch": clean_branch,
                 "error": error_msg
@@ -86,8 +90,8 @@ class FinalBranchCleanup:
         print("\n" + "=" * 60)
         print("🎯 ZERO PR STRATEGY - COMPLETION REPORT")
         print("=" * 60)
-        print("✅ Successfully deleted: %s branches", len(self.deleted_branches))
-        print("❌ Failed deletions: %s branches", len(self.failed_branches))
+        logger.info("Successfully deleted: %s branches", len(self.deleted_branches))
+        logger.error("Failed deletions: %s branches", len(self.failed_branches))
         
         if self.deleted_branches:
             print(f"\n🗑️  Deleted branches:")

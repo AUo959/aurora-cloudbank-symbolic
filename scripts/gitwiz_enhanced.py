@@ -820,7 +820,7 @@ def main():
 
         elif args.action == "report":
             report = gitwiz.generate_report()
-            print("✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
+            logger.info("Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
             print("📊 Health Status: {report['summary']['health_status']}")
             print("🗂️  Files: {report['summary']['total_files']}")
             print("💾 Size: {report['summary']['total_size_mb']:.1f}MB")

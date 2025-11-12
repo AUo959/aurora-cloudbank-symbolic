@@ -5,6 +5,10 @@ Aurora Diff Integration Layer - Opal2 Modular Framework
 Integration bridge between Aurora Diff Optimizer and Opal2 components
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import json
 from datetime import datetime
@@ -66,16 +70,16 @@ class AuroraDiffIntegration:
             
             self.integration_active = True
             
-            print("✅ Aurora Diff Optimizer initialized")
-            print("✅ Opal2 components initialized")
-            print("✅ Plugin registration complete")
-            print("✅ Integration callbacks configured")
+            logger.info("Aurora Diff Optimizer initialized")
+            logger.info("Opal2 components initialized")
+            logger.info("Plugin registration complete")
+            logger.info("Integration callbacks configured")
             print("🎉 Integration ready!")
             
             return True
             
         except Exception as e:
-            print(f"❌ Integration failed: {e}")
+            logger.error("Integration failed: {e}")
             return False
     
     async def optimize_glyph_diff(self, source_glyph: Dict[str, Any], 
@@ -106,7 +110,7 @@ class AuroraDiffIntegration:
         # Cache result for future use
         await self._cache_optimization_result("glyph", enhanced_result)
         
-        print("✅ Glyph diff optimization complete")
+        logger.info("Glyph diff optimization complete")
         return enhanced_result
     
     async def optimize_render_diff(self, source_render: Dict[str, Any], 
@@ -137,7 +141,7 @@ class AuroraDiffIntegration:
         # Cache result for future use
         await self._cache_optimization_result("render", enhanced_result)
         
-        print("✅ Render diff optimization complete")
+        logger.info("Render diff optimization complete")
         return enhanced_result
     
     async def optimize_plugin_diff(self, source_plugin: Dict[str, Any], 
@@ -168,7 +172,7 @@ class AuroraDiffIntegration:
         # Cache result for future use
         await self._cache_optimization_result("plugin", enhanced_result)
         
-        print("✅ Plugin diff optimization complete")
+        logger.info("Plugin diff optimization complete")
         return enhanced_result
     
     async def get_optimization_metrics(self) -> Dict[str, Any]:
@@ -372,7 +376,7 @@ async def demonstrate_aurora_diff_integration():
     success = await integration.initialize_integration(config)
     
     if not success:
-        print("❌ Integration failed!")
+        logger.error("Integration failed!")
         return
     
     # Demo glyph diff optimization

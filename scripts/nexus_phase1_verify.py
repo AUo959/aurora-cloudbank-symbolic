@@ -8,6 +8,10 @@ Version: 1.1.0
 DLP Tag: VERIFICATION_CRITICAL
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import hashlib
 from pathlib import Path
@@ -205,12 +209,12 @@ def main():
     continuity_intact, continuity = verifier.check_thread_continuity()
     
     if continuity_intact:
-        print("✅ Thread continuity intact")
+        logger.info("Thread continuity intact")
         print(f"  Thread: {continuity['thread_id']}")
         print(f"  Entities: {len(continuity['entities'])}")
         print(f"  Checkpoints: {len(continuity['checkpoints'])}")
     else:
-        print("⚠️ Thread continuity issues detected")
+        logger.warning("Thread continuity issues detected")
         
     # Generate Phase 2 manifest
     print("\n🚀 Generating Phase 2 Manifest...")

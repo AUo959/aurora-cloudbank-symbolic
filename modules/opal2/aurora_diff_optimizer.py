@@ -5,6 +5,10 @@ Aurora Diff Optimization System - Opal2 Modular Framework
 State-of-the-art proprietary diff optimization with quantum enhancement
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import hashlib
 import json
@@ -150,9 +154,9 @@ class AuroraDiffOptimizer:
         if self.config.quantum_enhancement:
             self.quantum_state = await self._initialize_quantum_state()
             
-        print("✅ Aurora components initialized")
-        print("✅ Quantum state prepared")
-        print("✅ Adaptive model loaded")
+        logger.info("Aurora components initialized")
+        logger.info("Quantum state prepared")
+        logger.info("Adaptive model loaded")
     
     async def _phase_analysis(self, source_data: Any, target_data: Any) -> Dict[str, Any]:
         """Phase 2: Advanced analysis with Aurora algorithms"""
@@ -180,10 +184,10 @@ class AuroraDiffOptimizer:
         # Combine results with Aurora fusion algorithm
         combined_analysis = await self._aurora_fusion_algorithm(analysis_results)
         
-        print(f"✅ Hash analysis complete")
-        print(f"✅ Structural analysis complete")
-        print(f"✅ Similarity analysis complete")
-        print(f"✅ Semantic analysis complete")
+        logger.info("Hash analysis complete")
+        logger.info("Structural analysis complete")
+        logger.info("Similarity analysis complete")
+        logger.info("Semantic analysis complete")
         
         return combined_analysis
     
@@ -210,9 +214,9 @@ class AuroraDiffOptimizer:
         # Calculate quantum metrics
         self.metrics.quantum_coherence = await self._calculate_quantum_coherence()
         
-        print(f"✅ Quantum coherence applied ({self.metrics.quantum_coherence:.2f})")
-        print(f"✅ Entanglement optimization complete")
-        print(f"✅ Superposition analysis complete")
+        logger.info("Quantum coherence applied ({self.metrics.quantum_coherence:.2f})")
+        logger.info("Entanglement optimization complete")
+        logger.info("Superposition analysis complete")
         
         return superposition_result
     
@@ -236,10 +240,10 @@ class AuroraDiffOptimizer:
         # Calculate memory efficiency
         self.metrics.memory_efficiency = await self._calculate_memory_efficiency(cached_data)
         
-        print(f"✅ Memory compression complete")
-        print(f"✅ Deduplication complete")
-        print(f"✅ Cache optimization complete")
-        print(f"✅ Memory efficiency: {self.metrics.memory_efficiency:.2%}")
+        logger.info("Memory compression complete")
+        logger.info("Deduplication complete")
+        logger.info("Cache optimization complete")
+        logger.info("Memory efficiency: {self.metrics.memory_efficiency:.2%}")
         
         return cached_data
     
@@ -265,10 +269,10 @@ class AuroraDiffOptimizer:
         else:
             adaptive_integrated = plugin_integrated
             
-        print(f"✅ Glyph system integration complete")
-        print(f"✅ Quantum renderer integration complete")
-        print(f"✅ Plugin system integration complete")
-        print(f"✅ Adaptive learning applied")
+        logger.info("Glyph system integration complete")
+        logger.info("Quantum renderer integration complete")
+        logger.info("Plugin system integration complete")
+        logger.info("Adaptive learning applied")
         
         return adaptive_integrated
     
@@ -299,10 +303,10 @@ class AuroraDiffOptimizer:
             }
         }
         
-        print(f"✅ Integrity validation: {'PASS' if integrity_valid else 'FAIL'}")
-        print(f"✅ Performance validation: {'PASS' if performance_valid else 'FAIL'}")
-        print(f"✅ Signature validation: {'PASS' if signature_valid else 'FAIL'}")
-        print(f"✅ Accuracy score: {self.metrics.accuracy_score:.2%}")
+        logger.info("Integrity validation: {"PASS' if integrity_valid else 'FAIL'}")
+        logger.info("Performance validation: {"PASS' if performance_valid else 'FAIL'}")
+        logger.info("Signature validation: {"PASS' if signature_valid else 'FAIL'}")
+        logger.info("Accuracy score: {self.metrics.accuracy_score:.2%}")
         
         # Store optimization history for adaptive learning
         if self.config.adaptive_learning:

@@ -12,6 +12,10 @@ Thread: T1→T8→T9→INFINITE
 DLP: context_tag=quicksave_system, symbolic_hash=CONTEXT_PRESERVATION_v1
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import os
 import subprocess
@@ -88,7 +92,7 @@ class QuicksaveManager:
         archive_path = self.archive_dir / archive_name
         self._write_quicksave(archive_path, quicksave)
         
-        print(f"✅ Quicksave created: {self.current_save}")
+        logger.info("Quicksave created: {self.current_save}")
         print(f"📦 Archived as: {archive_name}")
         print()
         
@@ -211,7 +215,7 @@ class QuicksaveManager:
             print("COMPLETED THIS SESSION")
             print("=" * 80)
             for task in todo["completed"]:
-                print(f"✅ {task}")
+                logger.info("{task}")
             print()
         
         # Next steps
@@ -227,7 +231,7 @@ class QuicksaveManager:
         git = quicksave["git_state"]
         if git["uncommitted_changes"]:
             print("=" * 80)
-            print("⚠️  UNCOMMITTED CHANGES")
+            logger.warning("UNCOMMITTED CHANGES")
             print("=" * 80)
             print(f"Modified: {len(git['modified_files'])} files")
             print(f"Untracked: {len(git['untracked_files'])} files")
@@ -409,7 +413,7 @@ class QuicksaveManager:
             print(f"Focus Areas: {len(quicksave['work_state']['focus_areas'])}")
         
         if quicksave['git_state']['uncommitted_changes']:
-            print(f"⚠️  Uncommitted changes: {len(quicksave['git_state']['modified_files'])} modified")
+            logger.warning("Uncommitted changes: {len(quicksave["git_state']['modified_files'])} modified")
         
         print()
 

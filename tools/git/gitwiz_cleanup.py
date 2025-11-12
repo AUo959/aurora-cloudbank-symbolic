@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import argparse
@@ -294,7 +298,7 @@ class GITWizCleanup:
                 json.dump(report, f, indent=2)
             print(f"📄 Report saved to: {report_file}")
         except (OSError, PermissionError):
-            print("⚠️ Could not save report file")
+            logger.warning("Could not save report file")
 
         return report
 
@@ -336,7 +340,7 @@ def main():
         print("\n⚠️ Cleanup interrupted by user")
         sys.exit(1)
     except (OSError, subprocess.SubprocessError) as e:
-        print(f"❌ Error during cleanup: {e}")
+        logger.error("Error during cleanup: {e}")
         sys.exit(1)
 
 

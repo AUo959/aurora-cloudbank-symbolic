@@ -4,6 +4,10 @@ Aurora CloudBank - Repository Health Monitoring System
 Continuous monitoring with alerts and automated remediation
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import os
@@ -482,7 +486,7 @@ def main():
                 print("\n👋 Monitoring stopped by user")
                 break
             except (OSError, ValueError, RuntimeError) as e:
-                print("❌ Error in monitoring cycle: %s", e)
+                logger.error("Error in monitoring cycle: %s", e)
                 time.sleep(60)  # Wait 1 minute before retrying
     else:
         # Single run

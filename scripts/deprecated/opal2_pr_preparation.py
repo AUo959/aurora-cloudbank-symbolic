@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 from fastapi import FastAPI
 
@@ -115,11 +119,11 @@ class Opal2PRPreparation:
 
 
         if missing_files:
-            print(f"❌ Missing files: {', '.join(missing_files)}")
+            logger.error("Missing files: {", '.join(missing_files)}")
 
         return False
 
-        print("✅ All required files present")
+        logger.info("All required files present")
 
         return True
 
@@ -482,7 +486,7 @@ No migration required - This is a new system addition.
         if all_ready:
             print("\n🎉 PR is ready for submission!")
 
-        print("✅ All checks passed")
+        logger.info("All checks passed")
 
         print("\n🚀 Next steps:")
 
@@ -495,7 +499,7 @@ No migration required - This is a new system addition.
         else:
             print("\n⚠️ PR needs attention before submission")
 
-        print("❌ Some checks failed - please review and fix")
+        logger.error("Some checks failed - please review and fix")
 
 
         def create_git_branch(self, branch_name: str = "feature/opal2-expansion"):
@@ -510,14 +514,14 @@ No migration required - This is a new system addition.
                 # Create new branch
                 subprocess.run(["git", "checkout", "-b", branch_name])
 
-        print(f"✅ Created new branch: {branch_name}")
+        logger.info("Created new branch: {branch_name}")
 
         else:
-                print(f"⚠️ Branch {branch_name} already exists")
+                logger.warning("Branch {branch_name} already exists")
 
 
         except Exception as e:
-            print(f"❌ Failed to create branch: {e}")
+            logger.error("Failed to create branch: {e}")
 
 
         def add_and_commit_files(self):
@@ -547,11 +551,11 @@ No migration required - This is a new system addition.
 
         subprocess.run(["git", "commit", "-m", commit_message])
 
-        print("✅ Files committed successfully")
+        logger.info("Files committed successfully")
 
 
         except Exception as e:
-            print(f"❌ Failed to commit files: {e}")
+            logger.error("Failed to commit files: {e}")
 
 
 def main():

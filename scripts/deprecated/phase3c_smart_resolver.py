@@ -10,6 +10,10 @@ Created: 2025-09-24
 Phase: 3C (Smart Resolution)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -39,14 +43,14 @@ class Phase3CSmartResolver:
             )
             
             if check_return and result.returncode != 0:
-                print(f"❌ Command failed: {command}")
+                logger.error("Command failed: {command}")
                 if result.stderr:
                     print(f"Error: {result.stderr}")
                 return None
                 
             return result
         except Exception as e:
-            print(f"❌ Exception running command: {command}")
+            logger.error("Exception running command: {command}")
             print(f"Error: {e}")
             return None
 
@@ -61,7 +65,7 @@ class Phase3CSmartResolver:
             shutil.rmtree(backup_dir)
         
         shutil.copytree(opal2_dir, backup_dir)
-        print(f"✅ Backup created: {backup_dir}")
+        logger.info("Backup created: {backup_dir}")
         return backup_dir
 
     def extract_valuable_changes(self, branch_name):
@@ -140,7 +144,7 @@ class Phase3CSmartResolver:
                         applied_files.append(file_path)
                         
             except Exception as e:
-                print(f"⚠️  Failed to apply {file_path}: {e}")
+                logger.warning("Failed to apply {file_path}: {e}")
                 continue
         
         if applied_files:
@@ -148,7 +152,7 @@ class Phase3CSmartResolver:
             commit_result = self.run_command(f"git commit -m '{commit_msg}'")
             
             if commit_result:
-                print("✅ Applied %s changes successfully", len(applied_files))
+                logger.info("Applied %s changes successfully", len(applied_files))
                 return work_branch
         else:
             print("ℹ️  No changes successfully applied")
@@ -218,7 +222,7 @@ __all__ = ["EnhancedPluginManager"]
 '''
 
             enhancement_file.write_text(enhancement_content)
-            print(f"✅ Created enhancement layer: {enhancement_file}")
+            logger.info("Created enhancement layer: {enhancement_file}")
             return str(enhancement_file)
         
         return None
@@ -251,7 +255,7 @@ __all__ = ["EnhancedPluginManager"]
                 test_result = self.run_command("python3 -m pytest tests/ -x", False)
                 
                 if test_result and test_result.returncode == 0:
-                    print("✅ Selective merge tests pass!")
+                    logger.info("Selective merge tests pass!")
                     
                     # Merge to main
                     self.run_command("git checkout main")
@@ -260,12 +264,12 @@ __all__ = ["EnhancedPluginManager"]
                     if merge_result:
                         resolution_record["status"] = "success"
                         resolution_record["merged_to_main"] = True
-                        print("✅ Smart resolution successful for %s", branch_name)
+                        logger.info("Smart resolution successful for %s", branch_name)
                     else:
                         resolution_record["status"] = "main_merge_failed"
                 else:
                     resolution_record["status"] = "test_failed"
-                    print("❌ Selective merge failed tests")
+                    logger.error("Selective merge failed tests")
                     
                 # Cleanup work branch
                 self.run_command("git checkout main", False)
@@ -286,7 +290,7 @@ __all__ = ["EnhancedPluginManager"]
         except Exception as e:
             resolution_record["status"] = "error"
             resolution_record["error"] = str(e)
-            print(f"❌ Smart resolution error: {e}")
+            logger.error("Smart resolution error: {e}")
             
         resolution_record["end_time"] = datetime.now().isoformat()
         return resolution_record
@@ -324,10 +328,10 @@ __all__ = ["EnhancedPluginManager"]
             final_test = self.run_command("python3 -m pytest tests/ -v", False)
             
             if final_test and final_test.returncode == 0:
-                print("✅ All tests pass after smart resolution!")
+                logger.info("All tests pass after smart resolution!")
                 self.results["final_test_status"] = "passed"
             else:
-                print("⚠️  Some tests failed - system partially integrated")
+                logger.warning("Some tests failed - system partially integrated")
                 self.results["final_test_status"] = "partial"
         
         # Save results

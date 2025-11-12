@@ -3,6 +3,10 @@
 📊 Aurora CloudBank Security Dashboard
 Real-time security metrics and vulnerability tracking
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import sys
 import subprocess
@@ -172,7 +176,7 @@ class SecurityDashboard:
         metrics = self.get_security_metrics()
         print(f"🛡️  Overall Status: {metrics['overall_status']}")
         print(f"📁 Files Scanned: {metrics['files_scanned']}")
-        print(f"⚠️  Total Violations: {metrics['total_violations']}")
+        logger.warning("Total Violations: {metrics["total_violations']}")
         print(f"🕐 Last Scan: {metrics.get('last_scan', 'Never')}")
         
         print("\n🔍 Validator Results:")
@@ -221,7 +225,7 @@ class SecurityDashboard:
         if metrics['overall_status'] == 'SECURE':
             print("🎉 SECURITY STATUS: ALL VALIDATIONS PASSED!")
         else:
-            print("⚠️  SECURITY STATUS: Issues detected - see validator results above")
+            logger.warning("SECURITY STATUS: Issues detected - see validator results above")
         
         print(f"📅 Dashboard generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         

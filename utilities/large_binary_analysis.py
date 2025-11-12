@@ -4,6 +4,10 @@ Aurora CloudBank - Large Binary File Cleanup Analysis
 Comprehensive analysis and safe removal recommendations
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 import json
@@ -87,7 +91,7 @@ class LargeBinaryAnalyzer:
             self.safe_to_remove.append(pdf_path)
         
         print()
-        print("✅ KEEP (Essential Files):")
+        logger.info("KEEP (Essential Files):")
         for file in keep_files:
             if os.path.exists(file):
                 size = self._get_file_size(file)

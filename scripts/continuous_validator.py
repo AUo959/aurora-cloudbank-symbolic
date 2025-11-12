@@ -11,6 +11,10 @@ This monitor:
 5. Maintains continuous canonical compliance
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 from watchdog.observers import Observer
 from pathlib import Path
@@ -31,7 +35,7 @@ sys.path.insert(0, str(script_dir))
 try:
     from canonical_validator import CanonicalValidator
 except ImportError:
-    print("❌ Error: Could not import canonical_validator")
+    logger.error("Error: Could not import canonical_validator")
     sys.exit(1)
 
 
@@ -273,7 +277,7 @@ class ContinuousValidator:
             self.observer.stop()
             self.observer.join()
             self.running = False
-            print("✅ Monitor stopped")
+            logger.info("Monitor stopped")
 
     def validate_workspace_once(self):
         """Run one-time validation of entire workspace"""
@@ -324,5 +328,5 @@ if __name__ == "__main__":
         print("\n👋 Goodbye!")
         sys.exit(0)
     except Exception as e:
-        print("❌ Error: {e}")
+        logger.error("Error: {e}")
         sys.exit(1)

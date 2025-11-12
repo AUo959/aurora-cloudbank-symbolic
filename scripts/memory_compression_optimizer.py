@@ -8,6 +8,10 @@ Advanced repository optimization with intelligent compression and deduplication
 """
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 from collections import defaultdict
 from datetime import datetime
@@ -203,15 +207,15 @@ class MemoryCompressionOptimizer:
                     results["compressed_files"].append(str(file_path))
                     results["total_savings_mb"] += actual_savings / (1024 * 1024)
 
-                    print("✅ Compressed: {file_path} (%sKB saved)", actual_savings / 1024)
+                    logger.info("Compressed: {file_path} (%sKB saved)", actual_savings / 1024)
                 else:
                     # Poor compression, remove compressed version
                     compressed_path.unlink()
-                    print("⚠️  Skipped: %s (poor compression ratio)", file_path)
+                    logger.warning("Skipped: %s (poor compression ratio)", file_path)
 
             except (OSError, PermissionError) as e:
                 results["failed_compressions"].append({"path": str(file_path), "error": str(e)})
-                print("❌ Failed to compress: {file_path} - %s", e)
+                logger.error("Failed to compress: {file_path} - %s", e)
 
         return results
 
@@ -246,11 +250,11 @@ class MemoryCompressionOptimizer:
                     file_path.unlink()
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / (1024)
-                    print(f"✅ Removed duplicate: {file_path}")
+                    logger.info("Removed duplicate: {file_path}")
 
                 except (OSError, PermissionError) as e:
                     results["failed_removals"].append({"path": str(file_path), "error": str(e)})
-                    print("❌ Failed to remove: {file_path} - %s", e)
+                    logger.error("Failed to remove: {file_path} - %s", e)
 
         return results
 
@@ -323,11 +327,11 @@ class MemoryCompressionOptimizer:
 
                 results["removed_files"].append(str(file_path))
                 results["total_savings_mb"] += file_info["size_kb"] / 1024
-                print(f"✅ Removed cache: {file_path}")
+                logger.info("Removed cache: {file_path}")
 
             except (OSError, PermissionError) as e:
                 results["failed_removals"].append({"path": str(file_path), "error": str(e)})
-                print("❌ Failed to remove cache: {file_path} - %s", e)
+                logger.error("Failed to remove cache: {file_path} - %s", e)
 
         return results
 

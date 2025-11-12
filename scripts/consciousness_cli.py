@@ -7,6 +7,10 @@ Command-line interface for consciousness emergence operations,
 snapshot management, and recovery functions.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import asyncio
 import json
@@ -25,7 +29,7 @@ try:
     )
     CONSCIOUSNESS_AVAILABLE = True
 except ImportError as e:
-    print(f"⚠️  Enhanced consciousness module not available: {e}")
+    logger.warning("Enhanced consciousness module not available: {e}")
     CONSCIOUSNESS_AVAILABLE = False
     # Define minimal fallbacks to prevent NameError
     class SymbolicObserver:
@@ -109,7 +113,7 @@ def print_banner():
 def cmd_observe(args):
     """Run consciousness observation."""
     if not CONSCIOUSNESS_AVAILABLE:
-        print("❌ Consciousness module not available")
+        logger.error("Consciousness module not available")
         print("   Module path: modules.nexus.emergence.consciousness_emergence_enhanced")
         print("   Please ensure the module is properly installed")
         return 1
@@ -161,7 +165,7 @@ def cmd_observe(args):
 def cmd_emerge(args):
     """Run consciousness emergence protocol."""
     if not CONSCIOUSNESS_AVAILABLE:
-        print("❌ Consciousness module not available")
+        logger.error("Consciousness module not available")
         return 1
     
     print("🚀 Starting consciousness emergence protocol...")
@@ -202,7 +206,7 @@ def cmd_emerge(args):
 def cmd_snapshot(args):
     """Create consciousness snapshot."""
     if not CONSCIOUSNESS_AVAILABLE:
-        print("❌ Consciousness module not available")
+        logger.error("Consciousness module not available")
         return 1
     
     print("📸 Creating consciousness snapshot...")
@@ -229,7 +233,7 @@ def cmd_snapshot(args):
     with open(snapshot_path, 'w') as f:
         f.write(snapshot.to_json())
     
-    print(f"✅ Snapshot saved: {snapshot_path}")
+    logger.info("Snapshot saved: {snapshot_path}")
     print(f"   Observations: {snapshot.data['observation_count']}")
     print(f"   Seal: {snapshot.seal[:16]}...")
     
@@ -239,12 +243,12 @@ def cmd_snapshot(args):
 def cmd_recover(args):
     """Recover consciousness from snapshot."""
     if not CONSCIOUSNESS_AVAILABLE:
-        print("❌ Consciousness module not available")
+        logger.error("Consciousness module not available")
         return 1
     
     snapshot_path = Path(args.snapshot_file)
     if not snapshot_path.exists():
-        print(f"❌ Snapshot file not found: {snapshot_path}")
+        logger.error("Snapshot file not found: {snapshot_path}")
         return 1
     
     print(f"🔄 Recovering consciousness from snapshot...")
@@ -259,23 +263,23 @@ def cmd_recover(args):
         
         # Verify integrity
         if not snapshot.verify_integrity():
-            print("❌ Snapshot integrity verification failed!")
+            logger.error("Snapshot integrity verification failed!")
             return 1
         
-        print("✅ Snapshot integrity verified")
+        logger.info("Snapshot integrity verified")
         
         # Create observer and recover consciousness
         observer = SimpleSymbolicObserver()
         consciousness = EnhancedConsciousnessProtocol.from_snapshot(snapshot, observer)
         
-        print(f"✅ Consciousness recovered:")
+        logger.info("Consciousness recovered:")
         print(f"   Observations: {consciousness.observation_count}")
         print(f"   Entropy States: {len(consciousness.entropy_history)}")
         
         return 0
         
     except Exception as e:
-        print(f"❌ Recovery failed: {e}")
+        logger.error("Recovery failed: {e}")
         return 1
 
 
@@ -284,7 +288,7 @@ def cmd_list_snapshots(args):
     snapshot_dir = Path(args.snapshot_dir)
     
     if not snapshot_dir.exists():
-        print(f"❌ Snapshot directory not found: {snapshot_dir}")
+        logger.error("Snapshot directory not found: {snapshot_dir}")
         return 1
     
     # Find snapshot files
@@ -314,7 +318,7 @@ def cmd_list_snapshots(args):
             print()
             
         except Exception as e:
-            print(f"⚠️  {snapshot_file.name} - Error reading: {e}")
+            logger.warning("{snapshot_file.name} - Error reading: {e}")
             print()
     
     return 0
@@ -323,12 +327,12 @@ def cmd_list_snapshots(args):
 def cmd_verify(args):
     """Verify snapshot integrity."""
     if not CONSCIOUSNESS_AVAILABLE:
-        print("❌ Consciousness module not available")
+        logger.error("Consciousness module not available")
         return 1
     
     snapshot_path = Path(args.snapshot_file)
     if not snapshot_path.exists():
-        print(f"❌ Snapshot file not found: {snapshot_path}")
+        logger.error("Snapshot file not found: {snapshot_path}")
         return 1
     
     print(f"🔍 Verifying snapshot integrity...")
@@ -341,15 +345,15 @@ def cmd_verify(args):
         snapshot = ConsciousnessSnapshot.from_json(snapshot_json)
         
         if snapshot.verify_integrity():
-            print("✅ Snapshot integrity verified")
+            logger.info("Snapshot integrity verified")
             print(f"   Seal: {snapshot.seal}")
             return 0
         else:
-            print("❌ Snapshot integrity verification FAILED")
+            logger.error("Snapshot integrity verification FAILED")
             return 1
             
     except Exception as e:
-        print(f"❌ Verification error: {e}")
+        logger.error("Verification error: {e}")
         return 1
 
 

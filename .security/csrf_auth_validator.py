@@ -3,6 +3,10 @@
 🔐 Aurora CloudBank CSRF & Authentication Validator
 Security validator for CSRF, authentication, and session vulnerabilities
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import re
 
@@ -76,7 +80,7 @@ def main():
         print("\n💡 Fix: Implement CSRF tokens, use secure session management, hash passwords with bcrypt")
         sys.exit(1)
     
-    print("✅ CSRF/Authentication validation passed")
+    logger.info("CSRF/Authentication validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":

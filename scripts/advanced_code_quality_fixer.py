@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import subprocess
 """
@@ -353,9 +357,9 @@ class AdvancedCodeQualityFixer:
             )
 
             if result.returncode == 0:
-                print("✅ All linting issues resolved!")
+                logger.info("All linting issues resolved!")
             else:
-                print("⚠️ Remaining issues found:")
+                logger.warning("Remaining issues found:")
                 print(result.stdout[-1000:])  # Last 1000 chars to avoid spam
 
         except Exception as e:

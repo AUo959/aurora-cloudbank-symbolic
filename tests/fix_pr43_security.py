@@ -15,6 +15,10 @@ CODE QUALITY FIXES:
 - Clean up imports
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import re
 import sys
 from pathlib import Path
@@ -25,7 +29,7 @@ def fix_symbolic_logic():
     file_path = Path("modules/opal2/symbolic_logic.py")
 
     if not file_path.exists():
-        print(f"❌ {file_path} not found")
+        logger.error("{file_path} not found")
         return False
 
     print(f"🔒 Fixing security issues in {file_path}...")
@@ -43,7 +47,7 @@ def fix_symbolic_logic():
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print(f"✅ Fixed missing ast import in {file_path}")
+    logger.info("Fixed missing ast import in {file_path}")
     return True
 
 
@@ -52,7 +56,7 @@ def fix_api_security():
     file_path = Path("modules/opal2/api/opal2_api.py")
 
     if not file_path.exists():
-        print(f"❌ {file_path} not found")
+        logger.error("{file_path} not found")
         return False
 
     print(f"🔒 Fixing security issues in {file_path}...")
@@ -133,7 +137,7 @@ def fix_api_security():
     with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print(f"✅ Fixed security and code quality issues in {file_path}")
+    logger.info("Fixed security and code quality issues in {file_path}")
     return True
 
 
@@ -149,7 +153,7 @@ def add_missing_dependencies():
 
     for dep_path in missing_deps:
         if not Path(dep_path).exists():
-            print(f"⚠️  Missing dependency: {dep_path}")
+            logger.warning("Missing dependency: {dep_path}")
 
     return True
 
@@ -174,7 +178,7 @@ safety==3.6.2
     with open("requirements.txt", 'w', encoding='utf-8') as f:
         f.write(requirements_content)
 
-    print("✅ Created secure requirements.txt")
+    logger.info("Created secure requirements.txt")
     return True
 
 
@@ -199,11 +203,11 @@ def main():
         try:
             if fix_func():
                 success_count += 1
-                print(f"✅ {description} completed")
+                logger.info("{description} completed")
             else:
-                print(f"❌ {description} failed")
+                logger.error("{description} failed")
         except Exception as e:
-            print(f"❌ {description} failed: {e}")
+            logger.error("{description} failed: {e}")
 
     print("\n" + "=" * 60)
     print(f"🔒 Security Fix Summary: {success_count}/{total_fixes} fixes applied")
@@ -213,7 +217,7 @@ def main():
         print("🛡️  PR #43 is now ready for security review")
         return True
     else:
-        print("⚠️  Some fixes failed - manual review required")
+        logger.warning("Some fixes failed - manual review required")
         return False
 
 

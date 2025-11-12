@@ -4,6 +4,10 @@ Aurora CloudBank - Scheduled Maintenance System
 Automated repository maintenance with intelligent scheduling
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import os
@@ -519,7 +523,7 @@ class ScheduledMaintenanceSystem:
     def run_task_now(self, task_name: str):
         """Run a specific task immediately"""
         if task_name not in self.tasks:
-            print(f"❌ Unknown task: {task_name}")
+            logger.error("Unknown task: {task_name}")
             return False
 
         return self._run_task(task_name)
@@ -565,9 +569,9 @@ def main():
         print(f"🔧 Running task: {args.run_task}")
         success = maintenance.run_task_now(args.run_task)
         if success:
-            print("✅ Task completed successfully")
+            logger.info("Task completed successfully")
         else:
-            print("❌ Task failed")
+            logger.error("Task failed")
 
     elif args.daemon:
         maintenance.run_scheduler()

@@ -9,6 +9,10 @@ Demonstrates key features:
 - Workflow orchestration
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import sys
 from datetime import datetime
@@ -274,7 +278,7 @@ async def main():
         await demo_metrics()
 
         print("\n" + "=" * 60)
-        print("✅ All demos completed successfully!")
+        logger.info("All demos completed successfully!")
         print("=" * 60 + "\n")
 
     except Exception as e:

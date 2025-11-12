@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import subprocess
 import sys
@@ -39,12 +43,12 @@ class AuroraCLI:
             )
 
             if result.returncode == 0:
-                print("✅ Quantum demo completed successfully")
+                logger.info("Quantum demo completed successfully")
                 print(result.stdout)
             else:
-                print(f"❌ Quantum demo failed: {result.stderr}")
+                logger.error("Quantum demo failed: {result.stderr}")
         except Exception as e:
-            print(f"❌ Error running quantum demo: {e}")
+            logger.error("Error running quantum demo: {e}")
 
     def run_consciousness_demo(self):
         """Run consciousness simulation demonstration"""
@@ -55,12 +59,12 @@ class AuroraCLI:
             )
 
             if result.returncode == 0:
-                print("✅ Consciousness demo completed successfully")
+                logger.info("Consciousness demo completed successfully")
                 print(result.stdout)
             else:
-                print(f"❌ Consciousness demo failed: {result.stderr}")
+                logger.error("Consciousness demo failed: {result.stderr}")
         except Exception as e:
-            print(f"❌ Error running consciousness demo: {e}")
+            logger.error("Error running consciousness demo: {e}")
 
     def run_learning_demo(self):
         """Run adaptive learning demonstration"""
@@ -71,12 +75,12 @@ class AuroraCLI:
             )
 
             if result.returncode == 0:
-                print("✅ Learning demo completed successfully")
+                logger.info("Learning demo completed successfully")
                 print(result.stdout)
             else:
-                print(f"❌ Learning demo failed: {result.stderr}")
+                logger.error("Learning demo failed: {result.stderr}")
         except Exception as e:
-            print(f"❌ Error running learning demo: {e}")
+            logger.error("Error running learning demo: {e}")
 
     def run_integration_test(self):
         """Run comprehensive integration test"""
@@ -87,12 +91,12 @@ class AuroraCLI:
             )
 
             if result.returncode == 0:
-                print("✅ Integration test completed successfully")
+                logger.info("Integration test completed successfully")
                 print(result.stdout)
             else:
-                print(f"❌ Integration test failed: {result.stderr}")
+                logger.error("Integration test failed: {result.stderr}")
         except Exception as e:
-            print(f"❌ Error running integration test: {e}")
+            logger.error("Error running integration test: {e}")
 
     def run_data_guardian_command(self, command: str):
         """Run Data Guardian command (data:scan, data:redact, etc.)"""
@@ -142,7 +146,7 @@ class AuroraCLI:
                 result = cli.scan_file(file_path, confidence, region, output_format)
 
                 if "error" in result:
-                    print(f"❌ Error: {result['error']}")
+                    logger.error("Error: {result["error']}")
                     return
 
                 import json
@@ -192,7 +196,7 @@ class AuroraCLI:
                 result = cli.redact_file(file_path, output_path, strategy, confidence, region, in_place)
 
                 if "error" in result:
-                    print(f"❌ Error: {result['error']}")
+                    logger.error("Error: {result["error']}")
                     return
 
                 print(f"📄 File: {result['file']}")
@@ -222,10 +226,10 @@ class AuroraCLI:
                 print("Available: scan, redact, strategies, pii-types")
 
         except ImportError:
-            print("❌ Data Guardian module not available")
+            logger.error("Data Guardian module not available")
             print("Install with: pip install -e .")
         except Exception as e:
-            print(f"❌ Error running Data Guardian command: {e}")
+            logger.error("Error running Data Guardian command: {e}")
 
     def run_quantum_simulator_command(self, subcommand: str):
         """Run Quantum Simulator command (run, list, stats, etc.)"""
@@ -269,7 +273,7 @@ class AuroraCLI:
 
                 result = asyncio.run(run_sim())
 
-                print(f"✅ Simulation completed: {result.simulation_id}")
+                logger.info("Simulation completed: {result.simulation_id}")
                 print(f"   Status: {result.status}")
                 print(f"   Execution time: {result.execution_time_seconds:.2f}s")
                 if result.optimization_result:
@@ -319,17 +323,17 @@ class AuroraCLI:
                 # Clear cache
                 cache = get_cache()
                 count = cache.clear_all()
-                print(f"✅ Cleared {count} cached simulations")
+                logger.info("Cleared {count} cached simulations")
 
             else:
                 print(f"❓ Unknown Quantum Simulator command: {subcommand}")
                 print("Available: run, list, stats, backends, clear")
 
         except ImportError as e:
-            print("❌ Quantum Simulator module not available")
+            logger.error("Quantum Simulator module not available")
             print(f"Error: {e}")
         except Exception as e:
-            print(f"❌ Error running Quantum Simulator command: {e}")
+            logger.error("Error running Quantum Simulator command: {e}")
 
     def show_status(self):
         """Show system status"""
@@ -345,9 +349,9 @@ class AuroraCLI:
 
         for name, file in modules:
             if Path(file).exists():
-                print(f"✅ {name}: Available")
+                logger.info("{name}: Available")
             else:
-                print(f"❌ {name}: Not Found")
+                logger.error("{name}: Not Found")
 
         print(f"\n🕒 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"🔢 Version: {self.version}")

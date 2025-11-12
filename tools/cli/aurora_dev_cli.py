@@ -10,6 +10,10 @@ Primary functions:
 - State snapshot and restore commands
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import sys
 import json
 import argparse
@@ -59,7 +63,7 @@ class AuroraDeveloperCLI:
         elif args.anchor_cmd == "seal":
             return self._anchor_seal(args)
         else:
-            print(f"❌ Unknown anchor command: {args.anchor_cmd}")
+            logger.error("Unknown anchor command: {args.anchor_cmd}")
             return 1
 
     def _anchor_track(self, args) -> int:
@@ -78,7 +82,7 @@ class AuroraDeveloperCLI:
                     try:
                         since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                     except ValueError:
-                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                        logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
             found_anchors = self.anchor_tracker.scan_repository(
                 extensions=exts, since=since_dt, pattern=getattr(args, "pattern", None)
             )
@@ -119,13 +123,13 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error tracking anchors: {e}")
+            logger.error("Error tracking anchors: {e}")
             return 1
 
     def _anchor_resolve(self, args) -> int:
         """Resolve specific anchor lineage"""
         if not args.anchor_id:
-            print("❌ --anchor required for resolve command")
+            logger.error("--anchor required for resolve command")
             return 1
 
         if not getattr(args, "json", False):
@@ -141,7 +145,7 @@ class AuroraDeveloperCLI:
                     try:
                         since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                     except ValueError:
-                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                        logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
             self.anchor_tracker.scan_repository(since=since_dt)
 
             # Resolve the specific anchor
@@ -176,19 +180,19 @@ class AuroraDeveloperCLI:
                     else:
                         print("  No lineage information available")
             else:
-                print(f"❌ Anchor {args.anchor_id} not found")
+                logger.error("Anchor {args.anchor_id} not found")
                 return 1
 
             return 0
 
         except Exception as e:
-            print(f"❌ Error resolving anchor: {e}")
+            logger.error("Error resolving anchor: {e}")
             return 1
 
     def _anchor_seal(self, args) -> int:
         """Seal anchor thread with memory protection"""
         if not args.anchor_id:
-            print("❌ --anchor required for seal command")
+            logger.error("--anchor required for seal command")
             return 1
 
         print(f"🔐 Sealing anchor thread: {args.anchor_id}")
@@ -197,7 +201,7 @@ class AuroraDeveloperCLI:
             description = f"Thread seal for {args.anchor_id}"
             seal = self.memory_sealer.seal_thread(args.anchor_id, description)
 
-            print("✅ Thread sealed successfully:")
+            logger.info("Thread sealed successfully:")
             print(f"  Seal ID: {seal.seal_id}")
             print(f"  Hash: {seal.sha256_hash}")
             print(f"  Files: {seal.recovery_data.get('file_count', 'Unknown')}")
@@ -206,13 +210,13 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error sealing anchor thread: {e}")
+            logger.error("Error sealing anchor thread: {e}")
             return 1
 
     def cmd_seal(self, args) -> int:
         """Handle memory sealing commands"""
         if not args.target:
-            print("❌ Target required for seal command")
+            logger.error("Target required for seal command")
             return 1
 
         try:
@@ -221,15 +225,15 @@ class AuroraDeveloperCLI:
             if args.verify:
                 # Verify existing seal
                 if not args.seal_id:
-                    print("❌ --seal-id required for verification")
+                    logger.error("--seal-id required for verification")
                     return 1
 
                 result = self.memory_sealer.verify_seal(args.seal_id)
 
                 if result["status"] == "valid":
-                    print(f"✅ Seal {args.seal_id} is valid")
+                    logger.info("Seal {args.seal_id} is valid")
                 else:
-                    print(f"❌ Seal {args.seal_id} is invalid:")
+                    logger.error("Seal {args.seal_id} is invalid:")
                     for issue in result["issues"]:
                         print(f"   - {issue}")
 
@@ -240,14 +244,14 @@ class AuroraDeveloperCLI:
 
                 if target_path.is_file():
                     seal = self.memory_sealer.seal_file(target_path, args.seal_id)
-                    print(f"✅ File sealed: {seal.seal_id}")
+                    logger.info("File sealed: {seal.seal_id}")
                 elif target_path.is_dir():
                     seal = self.memory_sealer.seal_directory(target_path, args.seal_id)
-                    print(f"✅ Directory sealed: {seal.seal_id}")
+                    logger.info("Directory sealed: {seal.seal_id}")
                 else:
                     # Assume it's a thread anchor
                     seal = self.memory_sealer.seal_thread(args.target, f"Manual seal of {args.target}")
-                    print(f"✅ Thread sealed: {seal.seal_id}")
+                    logger.info("Thread sealed: {seal.seal_id}")
 
                 print(f"   Hash: {seal.sha256_hash}")
                 print(f"   Timestamp: {seal.timestamp}")
@@ -255,13 +259,13 @@ class AuroraDeveloperCLI:
                 return 0
 
         except Exception as e:
-            print(f"❌ Error in seal operation: {e}")
+            logger.error("Error in seal operation: {e}")
             return 1
 
     def cmd_restore(self, args) -> int:
         """Handle state restoration"""
         if not args.anchor_or_seal_id:
-            print("❌ Anchor or seal ID required for restore command")
+            logger.error("Anchor or seal ID required for restore command")
             return 1
 
         try:
@@ -276,9 +280,9 @@ class AuroraDeveloperCLI:
             if result["status"] == "dry_run_complete":
                 print("🔍 Dry run - would perform these actions:")
             elif result["status"] == "restored":
-                print("✅ State restored successfully:")
+                logger.info("State restored successfully:")
             elif result["status"] == "error":
-                print("❌ Restore failed:")
+                logger.error("Restore failed:")
                 print(f"   Error: {result.get('error', 'Unknown error')}")
                 return 1
 
@@ -288,7 +292,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error restoring state: {e}")
+            logger.error("Error restoring state: {e}")
             return 1
 
     def cmd_manifest(self, args) -> int:
@@ -306,7 +310,7 @@ class AuroraDeveloperCLI:
                     try:
                         since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                     except ValueError:
-                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                        logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
             self.anchor_tracker.scan_repository(
                 since=since_dt,
                 pattern=getattr(args, "pattern", None),
@@ -319,12 +323,12 @@ class AuroraDeveloperCLI:
                 # Generate manifest for specific anchor
                 manifest = self.anchor_tracker.generate_export_manifest(args.target)
                 if not getattr(args, "json", False):
-                    print(f"✅ Manifest generated for anchor: {args.target}")
+                    logger.info("Manifest generated for anchor: {args.target}")
             else:
                 # Generate repository-wide manifest
                 manifest = self.anchor_tracker.generate_export_manifest()
                 if not getattr(args, "json", False):
-                    print("✅ Repository manifest generated")
+                    logger.info("Repository manifest generated")
 
             # Save manifest
             output_path = args.output or f"T71_MANIFEST_{datetime.now().strftime('%Y%m%dT%H%M%SZ')}.json"
@@ -341,7 +345,7 @@ class AuroraDeveloperCLI:
                     dlp_path.write_text(json.dumps(dlp_manifest, indent=2), encoding="utf-8")
                     dlp_saved = str(dlp_path)
                 except Exception as e:
-                    print(f"⚠️  Failed to export DLP manifest: {e}")
+                    logger.warning("Failed to export DLP manifest: {e}")
 
             if getattr(args, "json", False):
                 print(
@@ -366,13 +370,13 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error generating manifest: {e}")
+            logger.error("Error generating manifest: {e}")
             return 1
 
     def cmd_diff(self, args) -> int:
         """Compare states between anchors"""
         if not args.anchor1 or not args.anchor2:
-            print("❌ Two anchors required for diff command")
+            logger.error("Two anchors required for diff command")
             return 1
 
         try:
@@ -386,11 +390,11 @@ class AuroraDeveloperCLI:
             anchor2 = self.anchor_tracker.resolve_anchor(args.anchor2)
 
             if not anchor1:
-                print(f"❌ Anchor not found: {args.anchor1}")
+                logger.error("Anchor not found: {args.anchor1}")
                 return 1
 
             if not anchor2:
-                print(f"❌ Anchor not found: {args.anchor2}")
+                logger.error("Anchor not found: {args.anchor2}")
                 return 1
 
             # Compare basic properties
@@ -428,7 +432,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error comparing anchors: {e}")
+            logger.error("Error comparing anchors: {e}")
             return 1
 
     def cmd_status(self, args) -> int:
@@ -448,7 +452,7 @@ class AuroraDeveloperCLI:
                     try:
                         since_dt = datetime.strptime(args.since, "%Y-%m-%d")
                     except ValueError:
-                        print("⚠️  Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
+                        logger.warning("Invalid --since format. Use ISO 8601 or YYYY-MM-DD.")
             anchors = self.anchor_tracker.scan_repository(
                 extensions=exts,
                 since=since_dt,
@@ -481,9 +485,9 @@ class AuroraDeveloperCLI:
                 print(json.dumps(payload, separators=(",", ":")))
             else:
                 if drift_count == 0:
-                    print("✅ Drift Status: No issues detected")
+                    logger.info("Drift Status: No issues detected")
                 else:
-                    print(f"⚠️  Drift Status: {drift_count} issues detected")
+                    logger.warning("Drift Status: {drift_count} issues detected")
                     for issue_type, issues in drift_issues.items():
                         if issues:
                             print(f"   {issue_type}: {len(issues)}")
@@ -500,7 +504,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception as e:
-            print(f"❌ Error getting status: {e}")
+            logger.error("Error getting status: {e}")
             return 1
 
 
@@ -632,7 +636,7 @@ def main():
     elif args.command == "status":
         return cli.cmd_status(args)
     else:
-        print(f"❌ Unknown command: {args.command}")
+        logger.error("Unknown command: {args.command}")
         return 1
 
 

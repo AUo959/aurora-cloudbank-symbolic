@@ -3,6 +3,10 @@
 🔄 Aurora CloudBank Continuous Security Scanner
 Post-commit hook for ongoing security monitoring
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -62,11 +66,11 @@ class ContinuousSecurityScanner:
             )
             
             if result.returncode == 0:
-                print("✅ Post-commit security scan passed")
+                logger.info("Post-commit security scan passed")
                 self.log_scan_result("PASSED", files, result.stdout)
                 return True
             else:
-                print("⚠️  Post-commit security scan found issues:")
+                logger.warning("Post-commit security scan found issues:")
                 print(result.stdout)
                 self.log_scan_result("ISSUES_FOUND", files, result.stdout)
                 return False

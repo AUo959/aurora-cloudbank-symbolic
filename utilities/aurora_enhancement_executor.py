@@ -4,6 +4,10 @@
 Implements the next phase of optimal staging deployment.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import subprocess
 import sys
@@ -175,7 +179,7 @@ class DeploymentManager:
     def execute_deployment(self):
         """Execute the deployment sequence."""
         if not self.safety_checks_passed:
-            print("❌ Safety checks failed - deployment aborted")
+            logger.error("Safety checks failed - deployment aborted")
             return False
 
         print("🚀 Executing deployment sequence...")
@@ -187,7 +191,7 @@ class DeploymentManager:
             "safety_checks": "passed"
         })
 
-        print("✅ Deployment sequence completed")
+        logger.info("Deployment sequence completed")
         return True
 
 def main():
@@ -201,7 +205,7 @@ def main():
         success = manager.execute_deployment()
         sys.exit(0 if success else 1)
     else:
-        print("❌ Deployment aborted due to safety check failures")
+        logger.error("Deployment aborted due to safety check failures")
         sys.exit(1)
 
 if __name__ == "__main__":
@@ -280,9 +284,9 @@ if __name__ == "__main__":
             # Summary
             print("\n🎉 Enhancement Sequence Execution Complete!")
             print("=" * 50)
-            print("✅ Automation pipeline created")
-            print("✅ Deployment manager implemented")
-            print("✅ Status report generated")
+            logger.info("Automation pipeline created")
+            logger.info("Deployment manager implemented")
+            logger.info("Status report generated")
             print("🛡️ Security: 100% maintained")
             print("⚡ Ready for next phase deployment")
 
@@ -295,7 +299,7 @@ if __name__ == "__main__":
             }
 
         except Exception as e:
-            print(f"❌ Enhancement sequence error: {e}")
+            logger.error("Enhancement sequence error: {e}")
             return {"success": False, "error": str(e)}
 
 

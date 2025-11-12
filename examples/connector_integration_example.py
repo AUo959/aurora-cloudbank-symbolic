@@ -5,6 +5,10 @@ This example demonstrates how to expose external tool connectors
 to ChatGPT agents through Aurora's agent mode integration.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 from typing import Any, Dict
 
@@ -112,7 +116,7 @@ async def register_connector_tools(agent_integration: ChatGPTAgentModeIntegratio
         "handler": github_list_pull_requests
     }
 
-    print("✅ GitHub connector tools registered with ChatGPT Agent Mode")
+    logger.info("GitHub connector tools registered with ChatGPT Agent Mode")
     return github_connector
 
 
@@ -146,10 +150,10 @@ async def example_usage():
     })
 
     if result["success"]:
-        print(f"✅ Repository retrieved: {result['result'].get('full_name', 'N/A')}")
+        logger.info("Repository retrieved: {result["result'].get('full_name', 'N/A')}")
         print(f"📊 DLP tracking: {result['context_tag']}")
     else:
-        print(f"❌ Error: {result.get('error')}")
+        logger.error("Error: {result.get("error')}")
 
     # Example: List issues
     print("\n🤖 Agent executing: github_list_issues")
@@ -161,9 +165,9 @@ async def example_usage():
 
     if issues_result["success"]:
         issues = issues_result["result"]
-        print(f"✅ Found {len(issues)} open issues")
+        logger.info("Found {len(issues)} open issues")
     else:
-        print(f"❌ Error: {issues_result.get('error')}")
+        logger.error("Error: {issues_result.get("error')}")
 
     # Cleanup
     await github_connector.disconnect()
@@ -201,7 +205,7 @@ async def example_multi_connector():
     # - AWS connector for cloud resources
     # - etc.
 
-    print(f"✅ Registered {len(connectors)} connectors")
+    logger.info("Registered {len(connectors)} connectors")
 
     # Check overall health
     from src.integrations.connectors.health import HealthMonitor
@@ -275,5 +279,5 @@ if __name__ == "__main__":
     asyncio.run(example_connector_discovery())
 
     print("\n" + "=" * 60)
-    print("✅ Examples completed successfully")
+    logger.info("Examples completed successfully")
     print("=" * 60)

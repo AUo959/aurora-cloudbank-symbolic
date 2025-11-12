@@ -8,6 +8,10 @@ Version: 3.0.0
 DLP Tag: QUANTUM_CRITICAL
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 import numpy as np
 import sys
@@ -261,11 +265,11 @@ async def main():
     
     print(f"\n🎯 Phase 3 Initialization Summary")
     print("=" * 60)
-    print(f"✅ Quantum-Symbolic Bridge: OPERATIONAL")
-    print(f"✅ Entanglement Protocols: FUNCTIONAL") 
-    print(f"✅ Multi-Agent Integration: COMPLETE")
-    print(f"✅ Fidelity Stress Test: {stress_results['success_rate']:.1%} success")
-    print(f"✅ Phase 3 Manifest: EXPORTED")
+    logger.info("Quantum-Symbolic Bridge: OPERATIONAL")
+    logger.info("Entanglement Protocols: FUNCTIONAL") 
+    logger.info("Multi-Agent Integration: COMPLETE")
+    logger.info("Fidelity Stress Test: {stress_results["success_rate']:.1%} success")
+    logger.info("Phase 3 Manifest: EXPORTED")
     
     print(f"\n🚀 Ready for Phase 3 Full Development!")
     print(f"Next: Memory Weaving & Reality Fork Manager")

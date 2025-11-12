@@ -13,6 +13,10 @@ Created: 2025-09-24
 Phase: 4B (Value Extraction)
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import subprocess
 import sys
 import json
@@ -327,12 +331,12 @@ class SSMTValueExtractor:
             extraction_result["status"] = "completed"
             extraction_result["end_time"] = datetime.now().isoformat()
             
-            print("✅ Extraction complete: %s operations", summary['extraction_count'])
+            logger.info("Extraction complete: %s operations", summary['extraction_count'])
             
         except Exception as e:
             extraction_result["status"] = "error"
             extraction_result["error"] = str(e)
-            print("❌ Extraction error: %s", e)
+            logger.error("Extraction error: %s", e)
         
         return extraction_result
 

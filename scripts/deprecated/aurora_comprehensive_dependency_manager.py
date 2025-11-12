@@ -631,15 +631,15 @@ def main():
     if args.install:
         print("🔧 Installing dependencies...")
         results = manager.install_requirements()
-        print(f"✅ Installed %s/{results[", len(results['installed']))
+        logger.info("Installed %s/{results[", len(results['installed']))
         
     elif args.update:
         print("⬆️ Updating dependencies...")
         results = manager.execute_comprehensive_update(dry_run=args.dry_run)
         if results['success']:
-            print("✅ Update completed successfully!")
+            logger.info("Update completed successfully!")
         else:
-            print("❌ Update completed with errors")
+            logger.error("Update completed with errors")
             for error in results['errors']:
                 print(f"   Error: {error}")
                 

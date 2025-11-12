@@ -8,6 +8,10 @@ Ethics: Picard_Delta_3
 Complete overview of NEXUS Phases 1-8+ with development roadmap and system status
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -251,7 +255,7 @@ def display_roadmap_summary():
     print("   🛡️  System Integrity: 1.001 (Optimal)")
     print()
     
-    print("✅ COMPLETED PHASES:")
+    logger.info("COMPLETED PHASES:")
     phases = [
         "Phase 1: Symbolic Memory Manager",
         "Phase 2: Multi-Agent Communication", 

@@ -4,6 +4,10 @@ Aurora CloudBank - Final Security Hardening Pass
 Comprehensive security improvements before merge
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 import sys
@@ -43,13 +47,13 @@ class SecurityHardener:
                         vulnerable_packages.append(f"{name}=={version}")
                         
                 if vulnerable_packages:
-                    print(f"⚠️  Found potentially vulnerable packages: {vulnerable_packages}")
+                    logger.warning("Found potentially vulnerable packages: {vulnerable_packages}")
                     self.vulnerabilities_found.extend(vulnerable_packages)
                 else:
-                    print("✅ Python dependencies look good")
+                    logger.info("Python dependencies look good")
                     
         except Exception as e:
-            print(f"⚠️  Could not check Python dependencies: {e}")
+            logger.warning("Could not check Python dependencies: {e}")
     
     def harden_fastapi_imports(self):
         """Ensure secure FastAPI configurations"""
@@ -89,7 +93,7 @@ class SecurityHardener:
                 if modified:
                     with open(filename, 'w') as f:
                         f.write(content)
-                    print(f"✅ Hardened {filename}")
+                    logger.info("Hardened {filename}")
     
     def sanitize_shell_commands(self):
         """Check for unsafe shell command usage"""
@@ -195,7 +199,7 @@ class SecurityHardener:
         self.update_gitignore_security()
         
         print("\n📊 Security Hardening Summary:")
-        print(f"✅ Fixes applied: {len(self.fixes_applied)}")
+        logger.info("Fixes applied: {len(self.fixes_applied)}")
         for fix in self.fixes_applied:
             print(f"   • {fix}")
             

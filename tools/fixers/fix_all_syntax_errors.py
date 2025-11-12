@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import subprocess
 import sys
@@ -97,7 +101,7 @@ def find_and_fix_python_files():
         is_valid, error_msg = check_syntax(file_path)
 
         if not is_valid:
-            print(f"❌ Syntax error in {file_path}")
+            logger.error("Syntax error in {file_path}")
             syntax_errors.append((file_path, error_msg))
 
             # Try to fix common issues
@@ -109,12 +113,12 @@ def find_and_fix_python_files():
                 is_valid_after, _ = check_syntax(file_path)
                 
                 if is_valid_after:
-                    print(f"✅ Fixed syntax errors in {file_path}")
+                    logger.info("Fixed syntax errors in {file_path}")
                     files_fixed += 1
                     # Remove from error list
                     syntax_errors = [(f, e) for f, e in syntax_errors if f != file_path]
                 else:
-                    print(f"⚠️  Could not automatically fix {file_path}")
+                    logger.warning("Could not automatically fix {file_path}")
 
     print("\n📊 Summary:")
     print(f"   ✅ Files fixed: {files_fixed}")

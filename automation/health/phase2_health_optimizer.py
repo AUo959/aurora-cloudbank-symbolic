@@ -16,6 +16,10 @@ Risk Level: LOW-MEDIUM (all optimizations are safe)
 Expected ROI: +2.5 points total
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import sys
 import json
@@ -218,7 +222,7 @@ jobs:
         python-version: '3.11'
     - name: Run Health Check
       run: |
-        python3 -c "print('✅ Health check passed')"
+        python3 -c "logger.info("Health check passed")"
         
   security-scan:
     runs-on: ubuntu-latest
@@ -359,7 +363,7 @@ except:
             return score
             
         except Exception as e:
-            print(f"❌ Health check failed: {e}")
+            logger.error("Health check failed: {e}")
             return None
     
     def generate_trend_report(self):
@@ -421,7 +425,7 @@ if __name__ == '__main__':
             ], capture_output=True, text=True, cwd=self.repo_path)
             
             if result.returncode == 0:
-                print("✅ Automated health monitor test successful!")
+                logger.info("Automated health monitor test successful!")
                 print("📋 Monitor output:")
                 for line in result.stdout.split('\n')[:5]:  # First 5 lines
                     if line.strip():
@@ -462,7 +466,7 @@ if __name__ == '__main__':
         total_improvement = self.results['score_improvements']
         success_count = len([opt for opt in self.results['optimizations'] if opt['status'] == 'SUCCESS'])
         
-        print(f"✅ **Optimizations Applied:** {success_count}/{len(self.results['optimizations'])}")
+        logger.info("**Optimizations Applied:** {success_count}/{len(self.results["optimizations'])}")
         print(f"📈 **Total Score Improvement:** +{total_improvement:.1f} points")
         print(f"🎯 **Expected New Score:** 94.0 + {total_improvement:.1f} = {94.0 + total_improvement:.1f}/100")
         

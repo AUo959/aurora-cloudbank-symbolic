@@ -9,6 +9,10 @@ Version: 1.0.0
 Date: July 13, 2025
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import re
 import subprocess
@@ -383,9 +387,9 @@ class CanonicalValidator:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(corrected_content)
             self.auto_fixes_applied += 1
-            print("✅ AUTO-FIX APPLIED: {file_path}")
+            logger.info("AUTO-FIX APPLIED: {file_path}")
         except Exception as e:
-            print("❌ AUTO-FIX FAILED: {file_path} - {e}")
+            logger.error("AUTO-FIX FAILED: {file_path} - {e}")
 
     def _apply_json_fix(self, file_path: Path, corrected_data: dict):
         """Apply automatic fix to JSON file"""
@@ -393,9 +397,9 @@ class CanonicalValidator:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(corrected_data, f, indent=2)
             self.auto_fixes_applied += 1
-            print("✅ AUTO-FIX APPLIED: {file_path}")
+            logger.info("AUTO-FIX APPLIED: {file_path}")
         except Exception as e:
-            print("❌ AUTO-FIX FAILED: {file_path} - {e}")
+            logger.error("AUTO-FIX FAILED: {file_path} - {e}")
 
     def validate_workspace(self, file_patterns: Optional[List[str]] = None) -> List[ValidationResult]:
         """Validate entire workspace against canonical specifications"""

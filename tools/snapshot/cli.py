@@ -11,6 +11,10 @@ Usage:
     python -m tools.snapshot.cli compute-manifest-checksum --manifest manifest.json --write
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import argparse
 import json
 import sys
@@ -48,7 +52,7 @@ def cmd_seal(args):
     # Save snapshot
     save_snapshot(snapshot, output_path)
 
-    print(f"✅ Snapshot sealed successfully!")
+    logger.info("Snapshot sealed successfully!")
     print(f"📦 Output: {output_path}")
     print(f"🔒 State hash: {snapshot['state_hash'][:16]}...")
     print(f"🔐 Manifest checksum: {snapshot['manifest']['checksum'][:16]}...")
@@ -62,7 +66,7 @@ def cmd_verify(args):
     snapshot_path = Path(args.snapshot)
     
     if not snapshot_path.exists():
-        print(f"❌ Snapshot not found: {snapshot_path}")
+        logger.error("Snapshot not found: {snapshot_path}")
         return 1
 
     # Load snapshot
@@ -73,7 +77,7 @@ def cmd_verify(args):
     is_valid, issues = sealer.verify_snapshot(snapshot)
 
     if is_valid:
-        print(f"✅ Snapshot verification PASSED")
+        logger.info("Snapshot verification PASSED")
         print(f"📦 File: {snapshot_path}")
         print(f"🔒 State hash: {snapshot['state_hash'][:16]}...")
         print(f"🔐 Manifest checksum: {snapshot['manifest']['checksum'][:16]}...")
@@ -81,7 +85,7 @@ def cmd_verify(args):
         print(f"📅 Sealed: {snapshot['metadata'].get('sealed_at', 'unknown')}")
         return 0
     else:
-        print(f"❌ Snapshot verification FAILED")
+        logger.error("Snapshot verification FAILED")
         print(f"📦 File: {snapshot_path}")
         print(f"\n🚨 Issues found:")
         for i, issue in enumerate(issues, 1):
@@ -94,7 +98,7 @@ def cmd_restore(args):
     snapshot_path = Path(args.snapshot)
     
     if not snapshot_path.exists():
-        print(f"❌ Snapshot not found: {snapshot_path}")
+        logger.error("Snapshot not found: {snapshot_path}")
         return 1
 
     # Load snapshot
@@ -111,14 +115,14 @@ def cmd_restore(args):
         with open(output_path, 'w') as f:
             json.dump(state, f, indent=2)
 
-        print(f"✅ State restored successfully!")
+        logger.info("State restored successfully!")
         print(f"📦 Source: {snapshot_path}")
         print(f"💾 Output: {output_path}")
         print(f"🏷️  Module: {snapshot['manifest'].get('module', 'unknown')}")
         return 0
 
     except ValueError as e:
-        print(f"❌ Restore failed: {e}")
+        logger.error("Restore failed: {e}")
         return 1
 
 

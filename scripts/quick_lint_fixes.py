@@ -4,6 +4,10 @@ Aurora CloudBank Quick Lint Fixes
 Automated script to fix common ESLint and Python lint issues
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 import subprocess
@@ -38,7 +42,7 @@ def fix_unused_js_vars():
             for pattern, replacement in patterns:
                 content = re.sub(pattern, replacement, content)
             filepath.write_text(content)
-            print("✅ Fixed unused variables in %s", file)
+            logger.info("Fixed unused variables in %s", file)
 
 def run_quick_linting():
     """Run quick linting and report status"""
@@ -50,9 +54,9 @@ def run_quick_linting():
                           capture_output=True, text=True)
     
     if result.returncode == 0:
-        print("✅ Python modules: No critical issues")
+        logger.info("Python modules: No critical issues")
     else:
-        print("⚠️  Python modules: Issues found")
+        logger.warning("Python modules: Issues found")
         print(result.stdout)
     
     # JavaScript linting 

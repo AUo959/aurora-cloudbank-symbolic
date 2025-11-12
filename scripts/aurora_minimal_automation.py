@@ -8,6 +8,10 @@ from pathlib import Path
 
 def run_health_check():
     """Run quick health check"""
+import logging
+
+logger = logging.getLogger(__name__)
+
     try:
         result = subprocess.run([
             sys.executable, 
@@ -22,9 +26,9 @@ def run_maintenance():
     print("🔧 Running Aurora CloudBank maintenance...")
     
     if run_health_check():
-        print("✅ Health check passed")
+        logger.info("Health check passed")
     else:
-        print("⚠️  Health check failed, consider manual review")
+        logger.warning("Health check failed, consider manual review")
         
     # Try to use existing GitWiz if available
     gitwiz_path = Path(__file__).parent / "gitwiz_dependency_updater.py"

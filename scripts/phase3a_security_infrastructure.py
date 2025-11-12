@@ -170,7 +170,7 @@ def main():
         print("\\n💡 Fix: Use parameterized logging: logger.info('Message: %s', variable)")
         sys.exit(1)
     
-    print("✅ Log injection validation passed")
+    logger.info("Log injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -238,7 +238,7 @@ def main():
         print("\\n💡 Fix: Use shell=False and array arguments: subprocess.run(['cmd', 'arg1', 'arg2'])")
         sys.exit(1)
     
-    print("✅ Shell injection validation passed")
+    logger.info("Shell injection validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -325,7 +325,7 @@ def main():
         print("\\n💡 Fix: Use safe alternatives like ast.literal_eval() or JSON parsing")
         sys.exit(1)
     
-    print("✅ Eval/exec pattern validation passed")
+    logger.info("Eval/exec pattern validation passed")
     sys.exit(0)
 
 if __name__ == "__main__":
@@ -429,10 +429,10 @@ def main():
     # Check for critical issues
     npm_result = results["scans"].get("npm", {})
     if isinstance(npm_result, dict) and npm_result.get("high_critical", 0) > 0:
-        print("⚠️ Found %s high/critical npm vulnerabilities", npm_result['high_critical'])
+        logger.warning("Found %s high/critical npm vulnerabilities", npm_result['high_critical'])
         return 1
     
-    print("✅ No critical dependency vulnerabilities found")
+    logger.info("No critical dependency vulnerabilities found")
     return 0
 
 if __name__ == "__main__":

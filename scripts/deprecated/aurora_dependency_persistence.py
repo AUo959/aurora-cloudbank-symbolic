@@ -377,25 +377,25 @@ def main():
         print("📸 Creating dependency snapshot...")
         snapshot = manager.create_dependency_snapshot()
         snapshot_file = manager.save_snapshot(snapshot)
-        print(f"✅ Snapshot saved: {snapshot_file}")
+        logger.info("Snapshot saved: {snapshot_file}")
         
     elif args.restore_from_latest:
         print("🔄 Restoring dependencies from latest snapshot...")
         if manager.restore_dependencies_from_snapshot():
-            print("✅ Dependencies restored successfully")
+            logger.info("Dependencies restored successfully")
         else:
-            print("❌ Failed to restore dependencies")
+            logger.error("Failed to restore dependencies")
             sys.exit(1)
             
     elif args.setup_persistence:
         print("⚙️ Setting up automatic dependency persistence...")
         manager.setup_automatic_persistence()
-        print("✅ Automatic persistence configured")
+        logger.info("Automatic persistence configured")
         
     elif args.cleanup_backups:
         print("🧹 Cleaning up old backup snapshots...")
         manager.cleanup_old_backups()
-        print("✅ Backup cleanup complete")
+        logger.info("Backup cleanup complete")
         
     elif args.status:
         print(manager.generate_persistence_report())

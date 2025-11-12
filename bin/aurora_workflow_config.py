@@ -318,20 +318,20 @@ def main():
 
     if args.validate:
         if config_manager.validate_config():
-            print("✅ Configuration validation passed")
+            logger.info("Configuration validation passed")
         else:
-            print("❌ Configuration validation failed")
+            logger.error("Configuration validation failed")
             exit(1)
 
     if args.save:
         config_manager.save_config(args.save)
-        print(f"✅ Configuration saved to {args.save}")
+        logger.info("Configuration saved to {args.save}")
 
     if args.generate_docker:
         compose_config = config_manager.generate_docker_compose()
         with open("docker-compose.yml", "w") as f:
             f.write(compose_config)
-        print("✅ Docker Compose configuration generated")
+        logger.info("Docker Compose configuration generated")
 
     if args.generate_k8s:
         manifests = config_manager.generate_kubernetes_manifests()
@@ -339,11 +339,11 @@ def main():
         for filename, content in manifests.items():
             with open(f"k8s/{filename}", "w") as f:
                 f.write(content)
-        print(f"✅ Generated {len(manifests)} Kubernetes manifests")
+        logger.info("Generated {len(manifests)} Kubernetes manifests")
 
     if args.create_env:
         config_manager.create_environment_template(args.create_env)
-        print(f"✅ Created environment template for {args.create_env}")
+        logger.info("Created environment template for {args.create_env}")
 
 
 if __name__ == "__main__":

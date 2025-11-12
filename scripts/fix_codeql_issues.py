@@ -5,6 +5,10 @@ Symbolic Anchor: T1-SECURITY-FIX-2025
 Automatically fixes common security patterns flagged by CodeQL
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import os
 import re
 import ast
@@ -73,7 +77,7 @@ class CodeQLSecurityFixer:
                     print(f"🔧 Fixed yaml.load() in: {py_file}")
                     
             except Exception as e:
-                print(f"⚠️ Error processing {py_file}: {e}")
+                logger.warning("Error processing {py_file}: {e}")
                 
         return fixes
     
@@ -128,7 +132,7 @@ class CodeQLSecurityFixer:
                         break  # Only process once per file
                         
             except Exception as e:
-                print(f"⚠️ Error processing {py_file}: {e}")
+                logger.warning("Error processing {py_file}: {e}")
                 
         return fixes
     
@@ -184,7 +188,7 @@ class CodeQLSecurityFixer:
                     print(f"🔧 Added credential warning in: {py_file}")
                     
             except Exception as e:
-                print(f"⚠️ Error processing {py_file}: {e}")
+                logger.warning("Error processing {py_file}: {e}")
                 
         return fixes
     
@@ -242,7 +246,7 @@ class CodeQLSecurityFixer:
                     print(f"🔧 Added dangerous function warning in: {py_file}")
                     
             except Exception as e:
-                print(f"⚠️ Error processing {py_file}: {e}")
+                logger.warning("Error processing {py_file}: {e}")
                 
         return fixes
     

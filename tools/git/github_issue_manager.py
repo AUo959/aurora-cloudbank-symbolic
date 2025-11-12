@@ -4,6 +4,10 @@ GitHub Issue Management Tool for Aurora CloudBank
 Systematically closes issues based on completed work analysis
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 import json
 import subprocess
 import re
@@ -276,7 +280,7 @@ Closing as resolved. Please reopen if any related issues persist after the lates
             print("   ℹ️  No issues were closed")
             return
         
-        print(f"✅ Issues Closed: {len(self.closed_issues)}")
+        logger.info("Issues Closed: {len(self.closed_issues)}")
         print()
         
         # Group by pattern

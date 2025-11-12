@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 import os
 import shutil
@@ -71,7 +75,7 @@ rm -rf syntax_errors_archive/
     with open(archive_dir / "README.md", "w") as f:
         f.write(readme_content)
 
-    print(f"✅ Archived {len(moved_files)} problematic files")
+    logger.info("Archived {len(moved_files)} problematic files")
     print(f"📄 Archive documentation: {archive_dir}/README.md")
 
     return len(moved_files)
@@ -84,7 +88,7 @@ if __name__ == "__main__":
     moved_count = create_syntax_errors_archive()
 
     print("\n🎯 Summary:")
-    print(f"✅ Files archived: {moved_count}")
+    logger.info("Files archived: {moved_count}")
     print("🔍 CodeQL scanning should now work properly")
     print("🚀 Core Aurora CloudBank functionality preserved")
 

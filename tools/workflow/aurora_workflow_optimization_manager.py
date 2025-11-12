@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import logging
+
+logger = logging.getLogger(__name__)
+
 from datetime import datetime
 from pathlib import Path
 import argparse
@@ -665,7 +669,7 @@ esac
         summary = results["summary"]
         perf = results["performance_improvements"]
 
-        print(f"✅ Optimizations Applied: {summary['optimizations_applied']}/{summary['total_optimizations']}")
+        logger.info("Optimizations Applied: {summary["optimizations_applied']}/{summary['total_optimizations']}")
         print(f"⚡ Success Rate: {summary['success_rate']:.1f}%")
         print(f"⏱️  Execution Time: {summary['execution_time_seconds']:.1f}s")
 

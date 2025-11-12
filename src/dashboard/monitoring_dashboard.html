@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora R-2 Agent Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info { color: #3498db; }
+        .warning { color: #f39c12; }
+        .critical { color: #e74c3c; }
+        .success { color: #2ecc71; }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .alert-list, .violation-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .alert-item, .violation-item {
+            border-left: 4px solid;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .alert-item.info { border-color: #3498db; }
+        .alert-item.warning { border-color: #f39c12; }
+        .alert-item.critical { border-color: #e74c3c; }
+        
+        .violation-item.low { border-color: #95a5a6; }
+        .violation-item.medium { border-color: #f39c12; }
+        .violation-item.high { border-color: #e67e22; }
+        .violation-item.critical { border-color: #e74c3c; }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .item-title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .item-time {
+            color: #999;
+            font-size: 0.85em;
+        }
+        
+        .item-description {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge.info { background: #3498db; color: white; }
+        .badge.warning { background: #f39c12; color: white; }
+        .badge.critical { background: #e74c3c; color: white; }
+        .badge.success { background: #2ecc71; color: white; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        select, input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        .refresh-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border-radius: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>🛡️ Aurora R-2 Agent Monitoring</h1>
+            <p class="subtitle">Real-time Drift Detection & Ethics Compliance Dashboard</p>
+        </header>
+        
+        <div id="error-container"></div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Agents Monitored</div>
+                <div class="stat-value success" id="agents-count">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Alerts (24h)</div>
+                <div class="stat-value warning" id="alerts-count">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Violations (24h)</div>
+                <div class="stat-value critical" id="violations-count">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Interventions (24h)</div>
+                <div class="stat-value info" id="interventions-count">-</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📊 Recent Drift Alerts</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Agent ID</label>
+                    <input type="text" id="alert-agent-filter" placeholder="All agents">
+                </div>
+                <div class="filter-group">
+                    <label>Alert Level</label>
+                    <select id="alert-level-filter">
+                        <option value="">All Levels</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Time Range</label>
+                    <select id="alert-time-filter">
+                        <option value="1">Last Hour</option>
+                        <option value="24" selected>Last 24 Hours</option>
+                        <option value="168">Last Week</option>
+                    </select>
+                </div>
+                <button onclick="loadAlerts()">Apply Filters</button>
+            </div>
+            <div id="alerts-container" class="alert-list">
+                <div class="loading">Loading alerts...</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>⚖️ Ethics Violations</h2>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Agent ID</label>
+                    <input type="text" id="violation-agent-filter" placeholder="All agents">
+                </div>
+                <div class="filter-group">
+                    <label>Severity</label>
+                    <select id="violation-severity-filter">
+                        <option value="">All Severities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Time Range</label>
+                    <select id="violation-time-filter">
+                        <option value="1">Last Hour</option>
+                        <option value="24" selected>Last 24 Hours</option>
+                        <option value="168">Last Week</option>
+                    </select>
+                </div>
+                <button onclick="loadViolations()">Apply Filters</button>
+            </div>
+            <div id="violations-container" class="violation-list">
+                <div class="loading">Loading violations...</div>
+            </div>
+        </div>
+        
+        <button class="refresh-button" onclick="refreshDashboard()">🔄 Refresh</button>
+    </div>
+    
+    <script>
+        const API_BASE = '/monitoring';
+        
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                showError(`Failed to load data: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('error-container');
+            container.innerHTML = `<div class="error">⚠️ ${message}</div>`;
+            setTimeout(() => { container.innerHTML = ''; }, 5000);
+        }
+        
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return `${diff}s ago`;
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return date.toLocaleString();
+        }
+        
+        async function loadStats() {
+            try {
+                const stats = await fetchAPI('/dashboard/stats');
+                
+                document.getElementById('agents-count').textContent = stats.agents_monitored;
+                document.getElementById('alerts-count').textContent = stats.alerts_24h;
+                document.getElementById('violations-count').textContent = stats.violations_24h;
+                document.getElementById('interventions-count').textContent = stats.interventions_24h;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+        
+        async function loadAlerts() {
+            const agentId = document.getElementById('alert-agent-filter').value;
+            const level = document.getElementById('alert-level-filter').value;
+            const sinceHours = document.getElementById('alert-time-filter').value;
+            
+            const params = new URLSearchParams();
+            if (agentId) params.append('agent_id', agentId);
+            if (level) params.append('level', level);
+            params.append('since_hours', sinceHours);
+            
+            try {
+                const data = await fetchAPI(`/alerts?${params}`);
+                const container = document.getElementById('alerts-container');
+                
+                if (data.alerts.length === 0) {
+                    container.innerHTML = '<div class="loading">No alerts found</div>';
+                    return;
+                }
+                
+                container.innerHTML = data.alerts.map(alert => `
+                    <div class="alert-item ${alert.level}">
+                        <div class="item-header">
+                            <div class="item-title">
+                                <span class="badge ${alert.level}">${alert.level}</span>
+                                ${alert.agent_id} - ${alert.metric_name}
+                            </div>
+                            <div class="item-time">${formatTimestamp(alert.timestamp)}</div>
+                        </div>
+                        <div class="item-description">
+                            ${alert.description}
+                            <br>
+                            <small>Current: ${alert.current_value.toFixed(2)} | Baseline: ${alert.baseline_value.toFixed(2)} | Deviation: ${(alert.deviation * 100).toFixed(1)}%</small>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load alerts:', error);
+            }
+        }
+        
+        async function loadViolations() {
+            const agentId = document.getElementById('violation-agent-filter').value;
+            const severity = document.getElementById('violation-severity-filter').value;
+            const sinceHours = document.getElementById('violation-time-filter').value;
+            
+            const params = new URLSearchParams();
+            if (agentId) params.append('agent_id', agentId);
+            if (severity) params.append('severity', severity);
+            params.append('since_hours', sinceHours);
+            
+            try {
+                const data = await fetchAPI(`/violations?${params}`);
+                const container = document.getElementById('violations-container');
+                
+                if (data.violations.length === 0) {
+                    container.innerHTML = '<div class="loading">No violations found</div>';
+                    return;
+                }
+                
+                container.innerHTML = data.violations.map(violation => `
+                    <div class="violation-item ${violation.severity}">
+                        <div class="item-header">
+                            <div class="item-title">
+                                <span class="badge ${violation.severity}">${violation.severity}</span>
+                                ${violation.rule_name}
+                            </div>
+                            <div class="item-time">${formatTimestamp(violation.timestamp)}</div>
+                        </div>
+                        <div class="item-description">
+                            <strong>Agent:</strong> ${violation.agent_id}<br>
+                            <strong>Rule:</strong> ${violation.rule_id} (${violation.category})<br>
+                            <strong>Status:</strong> ${violation.blocked ? '🚫 Blocked' : '⚠️ Logged'}<br>
+                            ${violation.description}
+                            ${violation.remediation ? `<br><strong>Remediation:</strong> ${violation.remediation}` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load violations:', error);
+            }
+        }
+        
+        async function refreshDashboard() {
+            await loadStats();
+            await loadAlerts();
+            await loadViolations();
+        }
+        
+        // Initial load
+        refreshDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(refreshDashboard, 30000);
+    </script>
+</body>
+</html>

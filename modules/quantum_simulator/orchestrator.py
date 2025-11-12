@@ -351,10 +351,36 @@ class QuantumOrchestrator:
             QuantumBackend.SIMULATOR: SimulatorQuantumProvider(),
         }
 
-        # Placeholder for real quantum backends (would be initialized if available)
-        self.providers[QuantumBackend.IBMQ] = None
-        self.providers[QuantumBackend.AZURE_QUANTUM] = None
-        self.providers[QuantumBackend.AWS_BRAKET] = None
+        # Initialize cloud quantum backends (with graceful degradation)
+        self._initialize_cloud_providers()
+
+    def _initialize_cloud_providers(self):
+        """
+        Initialize cloud quantum providers with graceful degradation.
+
+        Attempts to import and instantiate IBM Quantum, Azure Quantum, and AWS Braket
+        providers. If dependencies are not available, providers remain None.
+        """
+        # IBM Quantum
+        try:
+            from .cloud_providers import IBMQuantumProvider
+            self.providers[QuantumBackend.IBMQ] = IBMQuantumProvider()
+        except ImportError:
+            self.providers[QuantumBackend.IBMQ] = None
+
+        # Azure Quantum
+        try:
+            from .cloud_providers import AzureQuantumProvider
+            self.providers[QuantumBackend.AZURE_QUANTUM] = AzureQuantumProvider()
+        except ImportError:
+            self.providers[QuantumBackend.AZURE_QUANTUM] = None
+
+        # AWS Braket
+        try:
+            from .cloud_providers import AWSBraketProvider
+            self.providers[QuantumBackend.AWS_BRAKET] = AWSBraketProvider()
+        except ImportError:
+            self.providers[QuantumBackend.AWS_BRAKET] = None
 
     async def initialize(self):
         """Initialize and check availability of all providers."""

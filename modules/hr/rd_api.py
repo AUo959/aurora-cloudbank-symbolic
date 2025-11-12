@@ -26,8 +26,6 @@ All numeric scores are constrained to 0.0-1.0. Errors return structured
 HTTPException responses with context tags for DLP lineage.
 """
 
-from __future__ import annotations
-
 from typing import Any, Dict, List, Tuple
 from dataclasses import asdict
 import json
@@ -36,7 +34,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Depends, Request
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from modules.hr.rd_productization import (
     RDProductizationPipeline,
@@ -55,10 +53,13 @@ except Exception:  # pragma: no cover - fallback path
     security = DummySec()  # type: ignore
     def verify_csrf_token(*args, **kwargs):  # type: ignore
         return True
-    def limiter(limit: str):  # type: ignore
-        def _decorator(func):
-            return func
-        return _decorator
+    class DummyLimiter:  # minimal placeholder
+        @staticmethod
+        def limit(limit_str: str):
+            def _decorator(func):
+                return func
+            return _decorator
+    limiter = DummyLimiter()  # type: ignore
 
 logger = logging.getLogger("rd_api")
 
@@ -76,10 +77,12 @@ class CreateProjectRequest(BaseModel):
     team_members: List[str] = Field(default_factory=list)
     key_technologies: List[str] = Field(default_factory=list)
 
-    @validator("team_members", each_item=True)
-    def _validate_member(cls, v: str) -> str:  # noqa: N805
-        if not v or len(v) > 64:
-            raise ValueError("Invalid team member id length")
+    @field_validator("team_members", mode="before")
+    @classmethod
+    def _validate_member(cls, v: List[str]) -> List[str]:
+        for member in v:
+            if not member or len(member) > 64:
+                raise ValueError("Invalid team member id length")
         return v
 
 
@@ -89,24 +92,19 @@ class AdvanceStageRequest(BaseModel):
 
 
 class ReadinessRequest(BaseModel):
-    code_quality: float
-    documentation: float
-    test_coverage: float
-    performance: float
-    security: float
-
-    @validator("code_quality", "documentation", "test_coverage", "performance", "security")
-    def _score_range(cls, v: float) -> float:  # noqa: N805
-        if not (0.0 <= v <= 1.0):
-            raise ValueError("Scores must be between 0.0 and 1.0")
-        return v
+    code_quality: float = Field(..., ge=0.0, le=1.0)
+    documentation: float = Field(..., ge=0.0, le=1.0)
+    test_coverage: float = Field(..., ge=0.0, le=1.0)
+    performance: float = Field(..., ge=0.0, le=1.0)
+    security: float = Field(..., ge=0.0, le=1.0)
 
 
 class CoherenceRequest(BaseModel):
     team_vectors: Dict[str, List[float]]
 
-    @validator("team_vectors")
-    def _validate_vectors(cls, v: Dict[str, List[float]]) -> Dict[str, List[float]]:  # noqa: N805
+    @field_validator("team_vectors")
+    @classmethod
+    def _validate_vectors(cls, v: Dict[str, List[float]]) -> Dict[str, List[float]]:
         for member, vec in v.items():
             if not isinstance(vec, list) or not vec:
                 raise ValueError(f"Vector for {member} must be a non-empty list")
@@ -257,11 +255,9 @@ def list_projects(request: Request) -> Dict[str, Any]:
     }
 
 
-@router.post("/projects", dependencies=[Depends(security)] if SECURITY_AVAILABLE else [])
+@router.post("/projects", dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else [])
 @limiter.limit("30/minute")
 def create_project(req: CreateProjectRequest, request: Request):
-    if SECURITY_AVAILABLE:
-        verify_csrf_token(request.state.token if hasattr(request.state, "token") else None)  # type: ignore
     try:
         project = pipeline.create_project(
             project_id=req.project_id,
@@ -280,11 +276,12 @@ def create_project(req: CreateProjectRequest, request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/projects/{project_id}/advance", dependencies=[Depends(security)] if SECURITY_AVAILABLE else [])
+@router.post(
+    "/projects/{project_id}/advance",
+    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+)
 @limiter.limit("30/minute")
 def advance_stage(project_id: str, req: AdvanceStageRequest, request: Request):
-    if SECURITY_AVAILABLE:
-        verify_csrf_token(request.state.token if hasattr(request.state, "token") else None)  # type: ignore
     try:
         project = pipeline.advance_stage(project_id, req.new_stage, req.milestone)
         return {
@@ -296,11 +293,12 @@ def advance_stage(project_id: str, req: AdvanceStageRequest, request: Request):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/projects/{project_id}/readiness", dependencies=[Depends(security)] if SECURITY_AVAILABLE else [])
+@router.post(
+    "/projects/{project_id}/readiness",
+    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+)
 @limiter.limit("45/minute")
 def update_readiness(project_id: str, req: ReadinessRequest, request: Request):
-    if SECURITY_AVAILABLE:
-        verify_csrf_token(request.state.token if hasattr(request.state, "token") else None)  # type: ignore
     try:
         score = pipeline.calculate_production_readiness(
             project_id,
@@ -319,11 +317,12 @@ def update_readiness(project_id: str, req: ReadinessRequest, request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/projects/{project_id}/coherence", dependencies=[Depends(security)] if SECURITY_AVAILABLE else [])
+@router.post(
+    "/projects/{project_id}/coherence",
+    dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
+)
 @limiter.limit("45/minute")
 def update_coherence(project_id: str, req: CoherenceRequest, request: Request):
-    if SECURITY_AVAILABLE:
-        verify_csrf_token(request.state.token if hasattr(request.state, "token") else None)  # type: ignore
     # Merge provided vectors with senior baseline if available
     merged = dict(_SENIOR_VECTORS)
     merged.update(req.team_vectors)

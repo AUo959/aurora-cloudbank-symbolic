@@ -2,6 +2,23 @@ from fastapi.testclient import TestClient
 
 from api.aurora_api import app
 
+# Mock security dependencies for testing
+from src.middleware.fastapi_security import security, verify_csrf_token
+
+
+def override_security():
+    """Mock security dependency - always allow access in tests."""
+    return {"sub": "test_user"}
+
+
+def override_csrf():
+    """Mock CSRF verification - always pass in tests."""
+    return True
+
+
+# Override security dependencies for test client
+app.dependency_overrides[security] = override_security
+app.dependency_overrides[verify_csrf_token] = override_csrf
 
 client = TestClient(app)
 

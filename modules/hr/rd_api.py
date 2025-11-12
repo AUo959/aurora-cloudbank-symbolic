@@ -257,7 +257,7 @@ def list_projects(request: Request) -> Dict[str, Any]:
 
 @router.post("/projects", dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else [])
 @limiter.limit("30/minute")
-def create_project(request: Request, body: CreateProjectRequest):
+def create_project(request: Request, body: CreateProjectRequest) -> Dict[str, Any]:
     """Create new R&D project with DLP tracking."""
     try:
         project = pipeline.create_project(
@@ -282,7 +282,7 @@ def create_project(request: Request, body: CreateProjectRequest):
     dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("30/minute")
-def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest):
+def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest) -> Dict[str, Any]:
     """Advance project to next stage with milestone tracking."""
     try:
         project = pipeline.advance_stage(project_id, body.new_stage, body.milestone)
@@ -300,7 +300,7 @@ def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest):
     dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("45/minute")
-def update_readiness(request: Request, project_id: str, body: ReadinessRequest):
+def update_readiness(request: Request, project_id: str, body: ReadinessRequest) -> Dict[str, Any]:
     """Calculate production readiness score for project."""
     try:
         score = pipeline.calculate_production_readiness(

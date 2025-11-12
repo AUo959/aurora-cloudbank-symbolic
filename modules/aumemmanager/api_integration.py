@@ -41,7 +41,7 @@ class MemoryRetrievalRequest(BaseModel):
     )
     owner: Optional[str] = Field(
         default=None,
-        regex=r'^[a-zA-Z0-9_-]+$',
+        pattern=r'^[a-zA-Z0-9_-]+$',
         max_length=64,
         description="Filter by owner (alphanumeric, HIGH-5 validated)"
     )

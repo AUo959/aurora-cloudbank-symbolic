@@ -42,6 +42,8 @@ class SymbolicEngine:
         self.t1 = T1Anchor()
         self.srb = SRBAnchor()
         self.chains = {}
+        # Optional registered VSA vectors (e.g., senior leadership profiles)
+        self.vsa_vectors = {}
 
     def execute_chain(self, start, end):
         """Execute symbolic chain notation (001//999//)"""
@@ -66,5 +68,20 @@ class SymbolicEngine:
             "t1_anchor": self.t1.export(),
             "srb_anchor": self.srb.export(),
             "chains": self.chains,
+            "registered_vsa_vectors": list(self.vsa_vectors.keys()),
             "timestamp": "2025-07-12T03:06:08Z",
         }
+
+    def register_vsa_vectors(self, vectors):
+        """Register VSA vectors for coherence operations.
+
+        Args:
+            vectors: dict mapping identifier -> list[float]
+        """
+        if not isinstance(vectors, dict):
+            raise ValueError("vectors must be a dict")
+        for k, v in vectors.items():
+            if not isinstance(v, list) or not all(isinstance(x, (int, float)) for x in v):
+                raise ValueError(f"Invalid vector format for {k}")
+        self.vsa_vectors.update(vectors)
+        return len(self.vsa_vectors)

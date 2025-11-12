@@ -14,6 +14,7 @@ from .component_registry import (
     reset_registry
 )
 from .api import router as synergy_router
+from .dashboard_api import router as dashboard_router
 
 __all__ = [
     'ComponentRegistry',
@@ -24,4 +25,5 @@ __all__ = [
     'get_registry',
     'reset_registry',
     'synergy_router',
+    'dashboard_router',
 ]

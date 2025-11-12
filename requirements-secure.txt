@@ -36,7 +36,7 @@ httpx==0.25.2                       # HTTP client with security features
 # Monitoring & Logging (Security Enhanced)
 structlog==23.2.0                   # Structured logging
 prometheus-client==0.19.0           # Metrics collection
-python-json-logger==2.0.7           # JSON logging format
+python-json-logger==4.0.0           # JSON logging format
 
 # Environment & Configuration
 python-dotenv==1.2.1                # Environment variable management

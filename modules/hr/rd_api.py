@@ -257,15 +257,16 @@ def list_projects(request: Request) -> Dict[str, Any]:
 
 @router.post("/projects", dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else [])
 @limiter.limit("30/minute")
-def create_project(req: CreateProjectRequest, request: Request):
+def create_project(request: Request, body: CreateProjectRequest):
+    """Create new R&D project with DLP tracking."""
     try:
         project = pipeline.create_project(
-            project_id=req.project_id,
-            name=req.name,
-            project_type=req.project_type,
-            lead_researcher=req.lead_researcher,
-            team_members=req.team_members,
-            key_technologies=req.key_technologies,
+            project_id=body.project_id,
+            name=body.name,
+            project_type=body.project_type,
+            lead_researcher=body.lead_researcher,
+            team_members=body.team_members,
+            key_technologies=body.key_technologies,
         )
         return {
             "success": True,
@@ -281,9 +282,10 @@ def create_project(req: CreateProjectRequest, request: Request):
     dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("30/minute")
-def advance_stage(project_id: str, req: AdvanceStageRequest, request: Request):
+def advance_stage(request: Request, project_id: str, body: AdvanceStageRequest):
+    """Advance project to next stage with milestone tracking."""
     try:
-        project = pipeline.advance_stage(project_id, req.new_stage, req.milestone)
+        project = pipeline.advance_stage(project_id, body.new_stage, body.milestone)
         return {
             "success": True,
             "project": asdict(project),
@@ -298,15 +300,16 @@ def advance_stage(project_id: str, req: AdvanceStageRequest, request: Request):
     dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("45/minute")
-def update_readiness(project_id: str, req: ReadinessRequest, request: Request):
+def update_readiness(request: Request, project_id: str, body: ReadinessRequest):
+    """Calculate production readiness score for project."""
     try:
         score = pipeline.calculate_production_readiness(
             project_id,
-            code_quality=req.code_quality,
-            documentation=req.documentation,
-            test_coverage=req.test_coverage,
-            performance=req.performance,
-            security=req.security,
+            code_quality=body.code_quality,
+            documentation=body.documentation,
+            test_coverage=body.test_coverage,
+            performance=body.performance,
+            security=body.security,
         )
         return {
             "success": True,
@@ -322,10 +325,11 @@ def update_readiness(project_id: str, req: ReadinessRequest, request: Request):
     dependencies=[Depends(security), Depends(verify_csrf_token)] if SECURITY_AVAILABLE else []
 )
 @limiter.limit("45/minute")
-def update_coherence(project_id: str, req: CoherenceRequest, request: Request):
+def update_coherence(request: Request, project_id: str, body: CoherenceRequest):
+    """Calculate team coherence score using VSA vectors."""
     # Merge provided vectors with senior baseline if available
     merged = dict(_SENIOR_VECTORS)
-    merged.update(req.team_vectors)
+    merged.update(body.team_vectors)
     try:
         coherence = pipeline.calculate_team_coherence(project_id, merged)
         return {

@@ -85,6 +85,12 @@ class RDProductizationPipeline:
         self.active_projects: Dict[str, ResearchProject] = {}
         self.completed_projects: List[ResearchProject] = []
 
+    def _require_project(self, project_id: str) -> ResearchProject:
+        """Internal helper to fetch project or raise ValueError if not found."""
+        if project_id not in self.active_projects:
+            raise ValueError(f"Project '{project_id}' not found")
+        return self.active_projects[project_id]
+
     # ----------------------
     # Project lifecycle
     # ----------------------

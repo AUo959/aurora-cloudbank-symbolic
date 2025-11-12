@@ -49,12 +49,12 @@ def test_create_and_advance_project():
         "team_members": ["alpha", "beta"],
         "key_technologies": ["python"],
     }
-    # Creation (security dependency may be absent in test context; endpoint tolerates fallback)
-    r_create = client.post("/rd/projects", json=payload)
+    # Creation - FastAPI embeds body when Request parameter present
+    r_create = client.post("/rd/projects", json={"body": payload})
     assert r_create.status_code == 200, r_create.text
     r_adv = client.post(
         "/rd/projects/rdp-test-api/advance",
-        json={"new_stage": "proof_of_concept", "milestone": "Initial POC"},
+        json={"body": {"new_stage": "proof_of_concept", "milestone": "Initial POC"}},
     )
     assert r_adv.status_code == 200, r_adv.text
     data = r_adv.json()
@@ -62,27 +62,27 @@ def test_create_and_advance_project():
 
 
 def test_update_readiness_and_coherence():
-    # Ensure project exists
+    # Ensure project exists - embedded body format
     client.post(
         "/rd/projects",
-        json={
+        json={"body": {
             "project_id": "rdp-readiness",
             "name": "Readiness Project",
             "project_type": "module",
             "lead_researcher": "lead_x",
             "team_members": ["member_a", "member_b"],
             "key_technologies": ["fastapi"],
-        },
+        }},
     )
     r_ready = client.post(
         "/rd/projects/rdp-readiness/readiness",
-        json={
+        json={"body": {
             "code_quality": 0.9,
             "documentation": 0.8,
             "test_coverage": 0.85,
             "performance": 0.75,
             "security": 0.88,
-        },
+        }},
     )
     assert r_ready.status_code == 200
     readiness_score = r_ready.json()["production_readiness"]
@@ -90,13 +90,13 @@ def test_update_readiness_and_coherence():
 
     r_coh = client.post(
         "/rd/projects/rdp-readiness/coherence",
-        json={
+        json={"body": {
             "team_vectors": {
                 "lead_x": [0.2, 0.3, 0.5],
                 "member_a": [0.21, 0.29, 0.52],
                 "member_b": [0.19, 0.31, 0.49],
             }
-        },
+        }},
     )
     assert r_coh.status_code == 200
     coherence = r_coh.json()["team_coherence"]

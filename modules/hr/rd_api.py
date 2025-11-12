@@ -311,10 +311,41 @@ def update_readiness(request: Request, project_id: str, body: ReadinessRequest):
             performance=body.performance,
             security=body.security,
         )
+        
+        # Generate inquiry-first recommendations
+        if score >= 0.85:
+            inquiry = {
+                "status": "production-ready",
+                "questions_to_ask": [
+                    "Have all stakeholders reviewed deployment procedures?",
+                    "Is the monitoring/alerting infrastructure in place?",
+                    "Are rollback procedures documented and tested?"
+                ]
+            }
+        elif score >= 0.70:
+            inquiry = {
+                "status": "near-ready",
+                "questions_to_ask": [
+                    "Which specific metrics fell below 0.8 threshold?",
+                    "What resources are needed to address gaps?",
+                    "Is the timeline realistic for remaining work?"
+                ]
+            }
+        else:
+            inquiry = {
+                "status": "early-stage",
+                "questions_to_ask": [
+                    "Are foundational quality practices established?",
+                    "Does the team have necessary tooling and support?",
+                    "Should we reconsider scope or timeline?"
+                ]
+            }
+        
         return {
             "success": True,
             "production_readiness": round(score, 4),
             "context_tag": "rd_update_readiness",
+            "inquiry_prompts": inquiry
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -332,10 +363,48 @@ def update_coherence(request: Request, project_id: str, body: CoherenceRequest):
     merged.update(body.team_vectors)
     try:
         coherence = pipeline.calculate_team_coherence(project_id, merged)
+        
+        # Ethics Framework: Contextual interpretation for team dynamics
+        if coherence >= 0.75:
+            guidance = {
+                "interpretation": "Strong team alignment detected",
+                "inquiry_prompts": [
+                    "How can we document and share these successful collaboration patterns?",
+                    "Are there opportunities to mentor other teams?"
+                ],
+                "watch_for": "Groupthink risk - ensure diverse perspectives are still valued"
+            }
+        elif coherence >= 0.55:
+            guidance = {
+                "interpretation": "Healthy team diversity with adequate coordination",
+                "inquiry_prompts": [
+                    "Are communication channels working well for everyone?",
+                    "Do team members feel heard in decision-making?"
+                ],
+                "watch_for": "Monitor for emerging friction points"
+            }
+        else:
+            guidance = {
+                "interpretation": "Significant coordination friction detected",
+                "inquiry_prompts": [
+                    "Are roles and responsibilities clearly defined?",
+                    "Are there unresolved conflicts affecting collaboration?",
+                    "Would anchor protocol alignment help (communication preferences, stress recovery)?"
+                ],
+                "watch_for": "Risk of project delays or team burnout",
+                "escalation": "Consider HR-facilitated team alignment session"
+            }
+        
         return {
             "success": True,
             "team_coherence": round(coherence, 4),
             "context_tag": "rd_update_coherence",
+            "guidance": guidance,
+            "ethics_note": (
+                "Coherence measures behavioral-symbolic alignment, not team quality. "
+                "Low coherence can indicate healthy diversity or coordination challenges - "
+                "human judgment required to distinguish."
+            )
         }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -394,12 +463,35 @@ def full_coherence(request: Request) -> Dict[str, Any]:
         for j in range(i + 1, len(ids)):
             pair_values.append(_cosine(vectors[ids[i]], vectors[ids[j]]))
     avg = sum(pair_values) / len(pair_values) if pair_values else 0.0
+    
+    # Generate system health interpretation
+    if avg >= 0.70:
+        health_note = "Strong overall alignment - team dynamics healthy"
+        action = "Continue monitoring; document successful patterns"
+    elif avg >= 0.55:
+        health_note = "Moderate alignment - typical for diverse teams"
+        action = "Identify specific low-coherence pairs for targeted support"
+    else:
+        health_note = "Low overall alignment - systemic coordination challenges detected"
+        action = "Recommend organization-wide alignment session with HR facilitation"
+    
     return {
         "success": True,
         "vector_count": len(vectors),
         "pairwise_samples": len(pair_values),
         "average_coherence": round(avg, 4),
         "context_tag": "rd_full_coherence",
+        # Ethics Framework: Contextual interpretation
+        "interpretation": {
+            "system_health": health_note,
+            "recommended_action": action,
+            "what_this_means": (
+                "This aggregate metric reflects overall behavioral-symbolic alignment "
+                "across the organization. Low scores suggest coordination friction, "
+                "NOT individual performance issues."
+            ),
+            "next_steps": "Use /coherence/mediation endpoint to identify specific pairs needing support"
+        }
     }
 
 
@@ -434,21 +526,76 @@ def coherence_mediation(request: Request, threshold: float = 0.55, limit: int = 
         return "T1:focused_alignment_breath"
 
     pairs = sorted(_pair_scores(), key=lambda x: x[2])[:limit]
+    
+    # Ethics Framework: Inquiry-First Mandate
+    # Each metric must invite conversation, not replace judgment
+    def _generate_inquiry_prompts(score: float) -> Dict[str, Any]:
+        """Generate contextual conversation starters based on coherence level."""
+        if score < 0.35:
+            return {
+                "conversation_starters": [
+                    "What recent project challenges might be affecting team dynamics?",
+                    "Are there unaddressed communication preference mismatches?",
+                    "Would a facilitated alignment session help clarify shared goals?"
+                ],
+                "mediation_recommended": True,
+                "urgency": "high"
+            }
+        elif score < 0.55:
+            return {
+                "conversation_starters": [
+                    "What collaboration patterns are working well between these team members?",
+                    "Are there areas where clearer role boundaries would help?",
+                    "Would shared anchor protocols improve workflow coordination?"
+                ],
+                "mediation_recommended": False,
+                "urgency": "medium"
+            }
+        else:
+            return {
+                "conversation_starters": [
+                    "How can we build on the existing collaboration strengths?",
+                    "Are there opportunities to document successful patterns for other teams?"
+                ],
+                "mediation_recommended": False,
+                "urgency": "low"
+            }
+    
     recommendations = [
         {
             "member_a": a,
             "member_b": b,
             "coherence": round(score, 4),
             "recommended_anchor": _select_anchor(a, b),
+            **_generate_inquiry_prompts(score),
         }
         for a, b, score in pairs
     ]
+    
     return {
         "success": True,
         "threshold": threshold,
         "pair_count": len(recommendations),
         "pairs": recommendations,
         "context_tag": "rd_coherence_mediation",
+        # Ethics Framework metadata
+        "ethics_context": {
+            "what_this_observes": (
+                "Behavioral-symbolic alignment patterns between team members, "
+                "NOT compatibility or relationship quality"
+            ),
+            "what_this_cannot_tell": "Individual worth, future performance, or personal connection depth",
+            "inquiry_first_mandate": (
+                "These metrics exist to facilitate conversation, not replace human judgment"
+            ),
+            "escalation_path": (
+                "For persistent low coherence (< 0.35 for 30+ days), "
+                "contact HR Director for facilitated mediation"
+            ),
+            "data_dignity_note": (
+                "All crew members can request exclusion from coherence tracking without penalty"
+            )
+        }
     }
 
 

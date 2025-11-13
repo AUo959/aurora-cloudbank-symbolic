@@ -85,3 +85,4 @@ urllib3>=2.5.0                      # HTTP connection pooling
 certifi>=2025.8.3                   # SSL certificates
 charset-normalizer>=3.4.3           # Character encoding detection
 idna>=3.10                          # Internationalized domain names
+psutil>=5.9.0                       # Process and system monitoring (for R-2 telemetry)

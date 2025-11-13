@@ -309,10 +309,14 @@ class GUMAS_Thermax:
         Returns:
             Tuple of (is_acceptable, intervention_type)
         """
+        # Check if above threshold
         if intent_alignment >= minimum_threshold:
+            # Warning zone: close to threshold (within 0.1)
+            if intent_alignment < minimum_threshold + 0.1:
+                return True, InterventionType.WARN
             return True, None
         
-        # Determine intervention based on severity
+        # Below threshold - determine intervention based on severity
         deficit = minimum_threshold - intent_alignment
         
         if self.level == EthicsLevel.STRICT:
@@ -346,9 +350,18 @@ class GUMAS_Thermax:
         """Get summary of ethics violations"""
         return {
             "total_violations": len(self.violation_log),
+            "by_type": self._count_by_intervention_type(),
             "violation_types": self._count_by_type(),
             "recent_violations": self.violation_log[-10:] if self.violation_log else []
         }
+    
+    def _count_by_intervention_type(self) -> Dict[str, int]:
+        """Count violations by intervention type"""
+        counts: Dict[str, int] = {}
+        for v in self.violation_log:
+            intervention = v.get("intervention", "unknown")
+            counts[intervention] = counts.get(intervention, 0) + 1
+        return counts
     
     def _count_by_type(self) -> Dict[str, int]:
         """Count violations by type"""
@@ -418,8 +431,13 @@ class Aurora_Core_Flowstate:
             metadata: Optional binding metadata
             
         Returns:
-            True if binding successful
+            True if binding successful, False if invalid or already bound
         """
+        # Validate constellation name
+        valid_constellations = {"ORION", "ZIPWIZ", "BridgeAgent", "DriftConcord"}
+        if constellation_name not in valid_constellations:
+            return False  # Invalid constellation
+        
         if constellation_name in self.constellation_bindings:
             return False  # Already bound
         
@@ -617,9 +635,13 @@ class QuantumForge:
         
         # Bind to constellations
         if constellation_targets:
+            valid_constellations = {"ORION", "ZIPWIZ", "BridgeAgent", "DriftConcord"}
             for const in constellation_targets:
-                if self.flowstate.bind_to_constellation(const):
+                # Validate constellation and add to agent bindings
+                if const in valid_constellations:
                     agent.constellation_bindings.append(const)
+                    # Also ensure flowstate has the binding
+                    self.flowstate.bind_to_constellation(const)
         
         self.agents[agent_id] = agent
         self.creation_count += 1
@@ -744,7 +766,7 @@ class QuantumForge:
             agent.metadata.get("intent", ""),
             agent.vector_core
         )
-        agent.optimization_count += 1
+        agent.optimization_iterations += 1
         self.optimization_count += 1
         
         return agent.intent_alignment
@@ -765,6 +787,7 @@ class QuantumForge:
         
         agent = self.agents[agent_id]
         agent.joy_index = min(1.0, agent.joy_index + joy_increment)
+        agent.joy_events += 1  # Track on agent, not forge
         self.joy_events += 1
         
         return agent.joy_index

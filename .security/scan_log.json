@@ -1,16 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-03T22:41:26.169611",
-      "status": "PASSED",
-      "files_scanned": 2,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/tests/test_agent_mode.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/test_opal2_integration.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-04T00:45:59.211212",
       "status": "PASSED",
       "files_scanned": 3,
@@ -674,6 +664,20 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_session_validation.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-13T01:22:50.089106",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 6,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/vector_gen/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/vector_gen/vector_gen_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_forge_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_vector_gen_v2.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 917: f-string print (potential log output) - print(f\"   \u2713 Agent Created: {agent.agent_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 918: f-string print (potential log output) - print(f\"   \u2713 Intent Alignment: {agent.intent_alignment:.3f}\")\n  \u274c /workspaces/aurora-cloudbank..."
     }
   ]
 }

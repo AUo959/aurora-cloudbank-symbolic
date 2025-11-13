@@ -275,7 +275,7 @@ class VectorGen:
         
         vec_a.metadata["entangled_with"] = vec_b.vector_id
         
-        self.generation_count += 2
+        self.generation_count += 1  # Only count vec_b, vec_a already counted
         return vec_a, vec_b
     
     def _normalize_vector(self, data):

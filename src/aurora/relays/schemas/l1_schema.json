@@ -50,5 +50,5 @@
       "description": "Unique request identifier for tracing"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

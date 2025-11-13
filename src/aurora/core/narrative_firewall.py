@@ -168,14 +168,20 @@ class NarrativeFirewall:
                 "event_type": concrete_event,
                 "parameters": self._extract_parameters(message, context),
                 "context_tag": message.get("context_tag", "translated_from_l3"),
-                "anchor_id": message.get("anchor_id"),
-                "lore_id": self._extract_lore_id(message),
                 "translation_metadata": {
                     "original_content_type": message.get("content_type"),
                     "symbolic_text": text,
                     "translation_applied": True
                 }
             }
+
+            # Only add optional fields if they exist
+            if message.get("anchor_id"):
+                l2_message["anchor_id"] = message["anchor_id"]
+
+            lore_id = self._extract_lore_id(message)
+            if lore_id:
+                l2_message["lore_id"] = lore_id
 
             logger.info(f"Translated L3 message to L2: {text[:50]} -> {concrete_event}")
             return l2_message
@@ -211,17 +217,25 @@ class NarrativeFirewall:
         """Repackage literal message as L2 format"""
         payload = message.get("payload", {})
 
-        return {
+        result = {
             "schema_version": message.get("schema_version", "1.0.0"),
             "message_type": "l2_simulation_event",
             "event_type": "symbolic_computation",  # Default event type
             "parameters": payload if isinstance(payload, dict) else {"data": payload},
-            "context_tag": message.get("context_tag", "literal_from_l3"),
-            "anchor_id": message.get("anchor_id"),
-            "timestamp": message.get("timestamp"),
-            "request_id": message.get("request_id"),
-            "relay_metadata": message.get("relay_metadata")
+            "context_tag": message.get("context_tag", "literal_from_l3")
         }
+
+        # Only add optional fields if they exist
+        if message.get("anchor_id"):
+            result["anchor_id"] = message["anchor_id"]
+        if message.get("timestamp"):
+            result["timestamp"] = message["timestamp"]
+        if message.get("request_id"):
+            result["request_id"] = message["request_id"]
+        if message.get("relay_metadata"):
+            result["relay_metadata"] = message["relay_metadata"]
+
+        return result
 
     def _extract_parameters(
         self,

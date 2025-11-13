@@ -2113,6 +2113,267 @@ async def v2_cascade_validate(
 #     ...
 
 
+# ------------------------------------------------------------------------
+# PatchWeaver: Ethics-Gated State Patching (Admin Only)
+# ------------------------------------------------------------------------
+
+# Import PatchWeaver components
+try:
+    from src.aurora.patching.patchweaver import PatchWeaver, PatchResult
+    from src.core.native_dlp_export import NativeDLPTracker
+    from src.monitoring.ethics_engine import EthicsEngine
+    import json
+    from pathlib import Path
+    
+    PATCHWEAVER_AVAILABLE = True
+    
+    # Initialize PatchWeaver state backend (file-based for v1)
+    PATCHWEAVER_STATE_FILE = Path("./data/patchweaver_state.json")
+    PATCHWEAVER_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    
+    def _load_patchweaver_state() -> Dict[str, Any]:
+        """Load PatchWeaver state from JSON file"""
+        if PATCHWEAVER_STATE_FILE.exists():
+            try:
+                return json.loads(PATCHWEAVER_STATE_FILE.read_text())
+            except Exception as e:
+                logger.error("Failed to load PatchWeaver state: %s", e)
+                return {}
+        return {}
+    
+    def _save_patchweaver_state(state: Dict[str, Any]) -> None:
+        """Save PatchWeaver state to JSON file"""
+        try:
+            PATCHWEAVER_STATE_FILE.write_text(json.dumps(state, indent=2))
+        except Exception as e:
+            logger.error("Failed to save PatchWeaver state: %s", e)
+            raise
+    
+    # Initialize PatchWeaver instance with ethics gate
+    _patchweaver_ethics = EthicsEngine()
+    _patchweaver_dlp = NativeDLPTracker()
+    _patchweaver = PatchWeaver(
+        load_state=_load_patchweaver_state,
+        save_state=_save_patchweaver_state,
+        ethics_gate=_patchweaver_ethics,
+        dlp_tracker=_patchweaver_dlp
+    )
+    
+    logger.info("PatchWeaver initialized successfully")
+    
+except ImportError as e:
+    logger.warning("PatchWeaver not available: %s", e)
+    PATCHWEAVER_AVAILABLE = False
+except Exception as e:
+    logger.error("Failed to initialize PatchWeaver: %s", e)
+    PATCHWEAVER_AVAILABLE = False
+
+
+class PatchWeaverRequest(BaseModel):
+    """Request model for PatchWeaver operations"""
+    patch: Dict[str, Any] = Field(
+        ...,
+        description="Patch operations with 'set' and/or 'delete' keys"
+    )
+    context: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Context for ethics validation and DLP tracking"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "patch": {
+                    "set": {
+                        "config/setting": "value",
+                        "simulation/status": "active"
+                    },
+                    "delete": [
+                        "deprecated_key"
+                    ]
+                },
+                "context": {
+                    "agent_id": "admin_user",
+                    "context_tag": "config_update",
+                    "reason": "Update production configuration"
+                }
+            }
+        }
+
+
+@app.post("/admin/patchweaver/apply", dependencies=[Depends(security), Depends(verify_csrf_token)])
+@limiter.limit("5/minute")  # Strict rate limiting for admin operations
+async def apply_patchweaver_patch(
+    req: PatchWeaverRequest,
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+    Apply a state patch with ethics validation and DLP tracking.
+    
+    **Admin-only endpoint** - Requires authentication, CSRF token, and strict rate limiting.
+    
+    Patch format:
+    - `set`: Dictionary of path/value pairs to set (creates nested structures)
+    - `delete`: List of paths to delete (idempotent)
+    
+    Path format: Use `/` to separate nested keys, e.g., `"config/setting"` → `state["config"]["setting"]`
+    
+    Returns:
+    - `applied`: Whether patch was successfully applied
+    - `reason`: "ok" or error/block reason
+    - `before_hash`: State hash before patch
+    - `after_hash`: State hash after patch
+    - `modified_paths`: List of paths that were modified
+    - `timestamp`: ISO timestamp of operation
+    
+    Security:
+    - All patches validated by ethics gate
+    - Full DLP audit trail with anchors (T1/SRB, EOS_SEED_ORION, Picard_Delta_3)
+    - CSRF protection required
+    - Strict rate limiting (5 requests/minute)
+    """
+    verify_csrf_token(token)
+    
+    if not PATCHWEAVER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="PatchWeaver service not available"
+        )
+    
+    try:
+        # Ensure agent_id is in context for ethics validation
+        if "agent_id" not in req.context:
+            req.context["agent_id"] = "api_user"
+        
+        # Apply patch via PatchWeaver
+        result = _patchweaver.apply_patch(
+            patch=req.patch,
+            context=req.context
+        )
+        
+        # Return result as JSON
+        return {
+            "success": result.applied,
+            **result.to_dict()
+        }
+        
+    except Exception as e:
+        logger.error("PatchWeaver operation failed: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Patch operation failed: {str(e)}"
+        )
+
+
+@app.get("/admin/patchweaver/history", dependencies=[Depends(security), Depends(verify_csrf_token)])
+@limiter.limit("10/minute")
+async def get_patchweaver_history(
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security),
+    limit: Optional[int] = 20
+):
+    """
+    Get history of PatchWeaver operations.
+    
+    **Admin-only endpoint** - Returns recent patch operations with full DLP metadata.
+    
+    Query parameters:
+    - `limit`: Maximum number of operations to return (default: 20)
+    
+    Returns list of patch operations with:
+    - Operation metadata
+    - DLP tags and anchors
+    - Modified paths
+    - Hashes before/after
+    - Timestamps
+    """
+    verify_csrf_token(token)
+    
+    if not PATCHWEAVER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="PatchWeaver service not available"
+        )
+    
+    try:
+        history = _patchweaver.get_patch_history()
+        
+        # Apply limit
+        if limit:
+            history = history[-limit:]
+        
+        return {
+            "success": True,
+            "count": len(history),
+            "operations": history
+        }
+        
+    except Exception as e:
+        logger.error("Failed to retrieve PatchWeaver history: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"History retrieval failed: {str(e)}"
+        )
+
+
+@app.post("/admin/patchweaver/verify", dependencies=[Depends(security), Depends(verify_csrf_token)])
+@limiter.limit("20/minute")
+async def verify_patchweaver_state(
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security),
+    expected_hash: str = None
+):
+    """
+    Verify current state hash against expected value.
+    
+    **Admin-only endpoint** - Validates state integrity.
+    
+    Request body:
+    - `expected_hash`: SHA256 hash to verify against
+    
+    Returns:
+    - `valid`: Whether current state matches expected hash
+    - `current_hash`: Current state hash
+    - `expected_hash`: Hash that was checked
+    """
+    verify_csrf_token(token)
+    
+    if not PATCHWEAVER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="PatchWeaver service not available"
+        )
+    
+    if not expected_hash:
+        raise HTTPException(
+            status_code=400,
+            detail="expected_hash parameter required"
+        )
+    
+    try:
+        # Verify hash
+        valid = _patchweaver.verify_state_hash(expected_hash)
+        
+        # Get current hash
+        current_state = _patchweaver.load_state()
+        current_hash = _patchweaver._compute_hash(current_state)
+        
+        return {
+            "success": True,
+            "valid": valid,
+            "current_hash": current_hash,
+            "expected_hash": expected_hash
+        }
+        
+    except Exception as e:
+        logger.error("State verification failed: %s", e)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Verification failed: {str(e)}"
+        )
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

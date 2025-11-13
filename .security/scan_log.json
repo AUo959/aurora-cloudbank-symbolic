@@ -1,16 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-04T01:38:22.622833",
-      "status": "PASSED",
-      "files_scanned": 2,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/ledger_core.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/modules/test_insight_ledger_security.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-04T05:06:05.596588",
       "status": "PASSED",
       "files_scanned": 2,
@@ -678,6 +668,23 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_forge_v2.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 940: f-string print (potential log output) - print(f\"   \u2713 Agent Created: {agent.agent_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 941: f-string print (potential log output) - print(f\"   \u2713 Intent Alignment: {agent.intent_alignment:.3f}\")\n  \u274c /workspaces/aurora-cloudbank..."
+    },
+    {
+      "timestamp": "2025-11-13T03:39:18.245738",
+      "status": "PASSED",
+      "files_scanned": 9,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/.security/log_injection_validator.py",
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/gumas/api/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/gumas/api/routes.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/hr_system/api/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/hr_system/api/hr_routes.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/synergy/dashboard_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_gumas_ethics.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n"
     }
   ]
 }

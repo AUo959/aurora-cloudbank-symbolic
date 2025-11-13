@@ -213,7 +213,7 @@ common development tasks. Let's explore what's available.
 
                 self.has_completed_steps.add("makefile")
             else:
-                logger.warning("Could not fetch commands. Try running "make help' manually.")
+                logger.warning("Could not fetch commands. Try running 'make help' manually.")
         else:
             print("⏭️  Skipping - you can run 'make help' anytime")
 

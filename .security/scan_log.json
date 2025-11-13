@@ -1,17 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-04T00:45:59.211212",
-      "status": "PASSED",
-      "files_scanned": 3,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/ledger_core.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/improvement/api.py",
-        "/workspaces/aurora-cloudbank-symbolic/tests/test_improvement_api.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-04T01:38:22.622833",
       "status": "PASSED",
       "files_scanned": 2,
@@ -678,6 +667,17 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_vector_gen_v2.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 917: f-string print (potential log output) - print(f\"   \u2713 Agent Created: {agent.agent_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 918: f-string print (potential log output) - print(f\"   \u2713 Intent Alignment: {agent.intent_alignment:.3f}\")\n  \u274c /workspaces/aurora-cloudbank..."
+    },
+    {
+      "timestamp": "2025-11-13T01:52:03.589998",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 3,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/vector_gen/vector_gen_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_forge_v2.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 940: f-string print (potential log output) - print(f\"   \u2713 Agent Created: {agent.agent_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py: Line 941: f-string print (potential log output) - print(f\"   \u2713 Intent Alignment: {agent.intent_alignment:.3f}\")\n  \u274c /workspaces/aurora-cloudbank..."
     }
   ]
 }

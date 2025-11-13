@@ -68,9 +68,9 @@ This repository models a quantum-symbolic governance stack where every feature m
 ## Repository Structure
 
 ### Key Entry Points
-- **`api/aurora_api.py`** - Main FastAPI application server (1,615 lines, 27+ routes)
+- **`api/aurora_api.py`** - Main FastAPI application server (1,985 lines, 172 routes)
   - NOT `aurora_api.py` in root (that's a legacy reference)
-  - Handles all module router injection (AuMemManager, Data Guardian, Insight Ledger, Quantum Simulator)
+  - Handles all module router injection (AuMemManager, Data Guardian, Insight Ledger, Quantum Simulator, Resilience Sentinel, Monitoring Dashboard, HR System)
   - Security via `src/middleware/fastapi_security.py` (rate limiting, CSRF, auth)
 - **`aurora_cli.py`** - Command-line interface (may not exist, check `api/` folder)
 - **`Makefile`** - Primary task automation (50+ targets including `setup`, `check`, `test`)
@@ -123,7 +123,11 @@ This repository models a quantum-symbolic governance stack where every feature m
 ### Service Endpoints
 - **Health Check:** `/health` and `/api/health`
 - **Agent Tools:** `/agent/tools` - Discover available ChatGPT agent tools
-- **API Routes:** 27 total endpoints (16 core + 11 AuMemManager)
+- **Monitoring:** `/sentinel/*` (16 endpoints) - Resilience Sentinel monitoring and alerts
+- **Dashboard:** `/monitoring/*` (12 endpoints) - Behavioral drift detection and ethics validation
+- **HR System:** `/hr_system/*` (4 endpoints) - Staffing analysis and character generation
+- **Ethics:** `/gumas/*` (11 endpoints) - GUMAS ethics validation and compliance checking
+- **API Routes:** 183 total endpoints across 17+ routers
 
 ### Maintenance Automation
 - **`make maintenance-scan`** - Run SSMT v3.0 automated maintenance pipeline
@@ -377,6 +381,91 @@ result = await orchestrator.run_scenario(
     context_tag="simulation_001"  # Required for DLP
 )
 ```
+
+### Resilience Sentinel (Monitoring)
+**Import Pattern:**
+```python
+from modules.resilience_sentinel.api import router as sentinel_router
+```
+
+**API Routes:** `/sentinel/*` (16 endpoints)
+- GET `/sentinel/health` - System health check
+- GET `/sentinel/metrics` - All metrics
+- GET `/sentinel/alerts` - Get alerts
+- POST `/sentinel/health/check` - Execute health check
+- WS `/sentinel/ws` - WebSocket streaming
+
+**Features:**
+- Real-time monitoring with WebSocket support
+- Alert management with severity levels
+- Historical metrics and health check history
+- Configurable thresholds for alerts
+
+### Monitoring Dashboard (Behavioral Drift & Ethics)
+**Import Pattern:**
+```python
+from src.monitoring.dashboard_api import create_monitoring_router
+```
+
+**API Routes:** `/monitoring/*` (12 endpoints)
+- GET `/monitoring/health` - Dashboard health check
+- POST `/monitoring/baseline` - Establish behavioral baseline
+- POST `/monitoring/behavior/record` - Record behavior metrics
+- GET `/monitoring/behavior/check` - Check for drift
+- POST `/monitoring/action/evaluate` - Ethics validation
+- GET `/monitoring/alerts` - Get alerts
+- GET `/monitoring/audit/log` - Audit log
+
+**Features:**
+- Behavioral drift detection (z-score based)
+- Ethics validation engine (7 rules)
+- Alert configuration and management
+- Audit logging with integrity verification
+
+### HR System (Staffing & Character Generation)
+**Import Pattern:**
+```python
+from modules.hr_system.api.hr_routes import router as hr_system_router
+```
+
+**API Routes:** `/hr_system/*` (4 endpoints)
+- GET `/hr_system/health` - Health check
+- POST `/hr_system/analyze_staffing` - Staffing need analysis
+- POST `/hr_system/generate_character` - Character profile generation
+- GET `/hr_system/organizational_intel` - Organizational capacity analysis
+
+**Features:**
+- Autonomous staffing need identification
+- Quantum-symbolic character generation
+- Organizational capacity planning
+- Graceful degradation with mock data
+
+**Note:** Complementary to `modules/hr/` (R&D Pipeline). Both created Nov 11, 2025.
+
+### GUMAS Ethics (Ethics Validation)
+**Import Pattern:**
+```python
+from modules.gumas.api import router as gumas_router
+```
+
+**API Routes:** `/gumas/*` (11 endpoints)
+- POST `/gumas/evaluate` - Evaluate action against ethics rules
+- POST `/gumas/violations` - Query violations with filtering
+- GET `/gumas/rules` - Get all ethics rules  
+- GET `/gumas/rules/{rule_id}` - Get specific rule
+- POST `/gumas/rules` - Add custom rule
+- DELETE `/gumas/rules/{rule_id}` - Delete rule
+- DELETE `/gumas/violations` - Clear old violations
+- GET `/gumas/categories` - Get rule categories
+- GET `/gumas/severities` - Get severity levels
+- GET `/gumas/health` - Health check
+
+**Features:**
+- Rule-based ethics evaluation (5 default rules)
+- Multi-level severity classification (low/medium/high/critical)
+- Automated blocking of critical violations
+- Custom rule registration
+- Violation tracking and querying
 
 ## CI/CD Integration
 

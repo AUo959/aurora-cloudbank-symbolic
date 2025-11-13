@@ -261,10 +261,9 @@ async def get_components(
         ))
     
     # Track with DLP
-    dlp_tracker.create_export(
-        data={"component_count": len(statuses)},
-        context_tag="synergy_dashboard_components",
-        symbolic_validation=True
+    dlp_tracker.create_tag(
+        operation="synergy_dashboard_components",
+        data={"component_count": len(statuses)}
     )
     
     return statuses
@@ -328,10 +327,9 @@ async def get_topology() -> ComponentTopology:
     )
     
     # Track with DLP
-    dlp_tracker.create_export(
-        data={"node_count": len(nodes), "edge_count": len(edges)},
-        context_tag="synergy_dashboard_topology",
-        symbolic_validation=True
+    dlp_tracker.create_tag(
+        operation="synergy_dashboard_topology",
+        data={"node_count": len(nodes), "edge_count": len(edges)}
     )
     
     return topology
@@ -366,10 +364,9 @@ async def get_interactions(
         ))
     
     # Track with DLP
-    dlp_tracker.create_export(
-        data={"interaction_count": len(interactions)},
-        context_tag="synergy_dashboard_interactions",
-        symbolic_validation=True
+    dlp_tracker.create_tag(
+        operation="synergy_dashboard_interactions",
+        data={"interaction_count": len(interactions)}
     )
     
     return interactions
@@ -424,10 +421,9 @@ async def get_synergy_scores() -> List[SynergyScore]:
         ))
     
     # Track with DLP
-    dlp_tracker.create_export(
-        data={"synergy_pair_count": len(scores)},
-        context_tag="synergy_dashboard_synergy_scores",
-        symbolic_validation=True
+    dlp_tracker.create_tag(
+        operation="synergy_dashboard_synergy_scores",
+        data={"synergy_pair_count": len(scores)}
     )
     
     return scores
@@ -471,10 +467,9 @@ async def get_metrics() -> DashboardMetrics:
     )
     
     # Track with DLP
-    dlp_tracker.create_export(
-        data=metrics.model_dump(),
-        context_tag="synergy_dashboard_metrics",
-        symbolic_validation=True
+    dlp_tracker.create_tag(
+        operation="synergy_dashboard_metrics",
+        data=metrics.model_dump()
     )
     
     return metrics

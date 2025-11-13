@@ -16,7 +16,8 @@ def validate_log_statements(file_path):
     violations = []
 
     # Skip security validators themselves (they use print for reporting)
-    if 'validator.py' in file_path or '.security/' in file_path:
+    # Also skip CLI tools where print is the intended user interface
+    if 'validator.py' in file_path or '.security/' in file_path or '/cli/' in file_path:
         return []
 
     try:

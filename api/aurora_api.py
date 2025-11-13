@@ -248,6 +248,16 @@ if RD_PIPELINE_AVAILABLE:
         logger.error("Failed to integrate RD Pipeline API routes: %s", e)
         RD_PIPELINE_AVAILABLE = False
 
+# Include HR System API routes (staffing & character generation)
+try:
+    from modules.hr_system.api.hr_routes import router as hr_system_router
+    app.include_router(hr_system_router)
+    logger.info("✅ HR System API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ HR System not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate HR System API routes: %s", e)
+
 # Include Cross-Repo Collaboration API routes
 try:
     from src.collab.api_routes import router as collab_router
@@ -300,7 +310,40 @@ except ImportError as e:
 except Exception as e:
     logger.error("Failed to integrate Synergy Dashboard API routes: %s", e)
 
+# Include Resilience Sentinel API routes
+try:
+    from modules.resilience_sentinel.api import router as sentinel_router
+    app.include_router(sentinel_router)
+    logger.info("✅ Resilience Sentinel API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Resilience Sentinel not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Resilience Sentinel routes: %s", e)
+
+# Include Monitoring Dashboard API routes
+try:
+    from src.monitoring.dashboard_api import create_monitoring_router
+    monitoring_router = create_monitoring_router()
+    if monitoring_router:
+        app.include_router(monitoring_router)
+        logger.info("✅ Monitoring Dashboard API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Monitoring Dashboard not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Monitoring Dashboard routes: %s", e)
+
+# Include GUMAS Ethics API routes
+try:
+    from modules.gumas.api import router as gumas_router
+    app.include_router(gumas_router)
+    logger.info("✅ GUMAS Ethics API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ GUMAS Ethics not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate GUMAS Ethics routes: %s", e)
+
 ga = GeometricAlgebra()
+
 
 # Central CSRF fastapi dependency wrapper so scanner detects protection at decorator level
 def csrf_dependency(token: HTTPAuthorizationCredentials = Depends(security)):

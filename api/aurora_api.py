@@ -361,6 +361,24 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate GUMAS Ethics routes: %s", e)
 
+# Initialize Ethics Gate for high-impact operations
+try:
+    from src.aurora.ethics import EthicsGate, GUMASEthicsClient
+    ethics_gate = EthicsGate(
+        client=GUMASEthicsClient(base_url="http://localhost:8000"),
+        threshold=0.7
+    )
+    ETHICS_GATE_AVAILABLE = True
+    logger.info("✅ Ethics Gate initialized successfully")
+except ImportError as e:
+    logger.warning("⚠️ Ethics Gate not available: %s", e)
+    ETHICS_GATE_AVAILABLE = False
+    ethics_gate = None
+except Exception as e:
+    logger.error("❌ Failed to initialize Ethics Gate: %s", e)
+    ETHICS_GATE_AVAILABLE = False
+    ethics_gate = None
+
 ga = GeometricAlgebra()
 
 
@@ -1187,6 +1205,7 @@ async def v2_unregister_node(
     Gracefully removes node from registry and load balancing pool.
     
     SECURITY: CSRF protection via token validation (HIGH-4 remediation)
+    ETHICS: Ethics gate evaluation before node deletion
     """
     # HIGH-4: Verify CSRF token before node deletion
     verify_csrf_token(token)
@@ -1199,6 +1218,82 @@ async def v2_unregister_node(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
+    
+    # Ethics Gate: Evaluate node deletion action
+    if ETHICS_GATE_AVAILABLE and ethics_gate:
+        try:
+            from src.aurora.ethics import EthicsViolation
+            
+            action = {
+                "type": "delete_node",
+                "node_id": node_id,
+                "resource": "bridge_node",
+                "operation": "unregister"
+            }
+            
+            context = {
+                "agent_id": "api_user",
+                "route": f"/api/v2/nodes/{node_id}",
+                "source": "api_endpoint",
+                "method": "DELETE"
+            }
+            
+            verdict = await ethics_gate.evaluate(action, context)
+            
+            if not verdict.allowed:
+                # Log detailed reason server-side
+                logger.warning(
+                    "Ethics gate blocked node deletion: %s (score=%.2f, node_id=%s)",
+                    verdict.reason,
+                    verdict.score,
+                    node_id,
+                    extra={
+                        "node_id": node_id,
+                        "verdict": verdict.to_dict(),
+                        "aurora_module": "api_v2_nodes"
+                    }
+                )
+                # Return generic error to client
+                raise HTTPException(
+                    status_code=403,
+                    detail="Node deletion not permitted by ethics policy"
+                )
+            
+            # Log approval
+            logger.info(
+                "Ethics gate approved node deletion: node_id=%s (score=%.2f)",
+                node_id,
+                verdict.score,
+                extra={
+                    "node_id": node_id,
+                    "verdict": verdict.to_dict(),
+                    "aurora_module": "api_v2_nodes"
+                }
+            )
+            
+        except EthicsViolation as e:
+            # Block on ethics violation
+            logger.warning(
+                "Ethics violation on node deletion: %s",
+                e.message,
+                extra={
+                    "node_id": node_id,
+                    "verdict": e.verdict.to_dict() if e.verdict else {},
+                    "aurora_module": "api_v2_nodes"
+                }
+            )
+            raise HTTPException(
+                status_code=403,
+                detail="Node deletion not permitted by ethics policy"
+            )
+        except Exception as e:
+            # Log but don't block on evaluation errors (already handled in ethics_gate)
+            logger.error(
+                "Ethics evaluation error for node deletion: %s",
+                e,
+                extra={"node_id": node_id, "aurora_module": "api_v2_nodes"},
+                exc_info=True
+            )
     
     try:
         registry = get_node_registry()

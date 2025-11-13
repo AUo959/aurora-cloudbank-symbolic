@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class RelayMessage:
     """
     Cross-layer relay message.
-    
+
     Attributes:
         message_id: Unique message identifier
         source_layer: Source layer (e.g., "L1", "L2", "L3")
@@ -45,7 +45,7 @@ class RelayMessage:
     requires_ethics_check: bool = False
     context_tag: Optional[str] = None
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
@@ -63,15 +63,15 @@ class RelayMessage:
 class RelayManager:
     """
     Cross-layer relay manager with ethics gate integration.
-    
+
     This manager handles message passing between system layers (L1/L2/L3)
     and enforces ethics checks for state-changing operations.
-    
+
     Integration replaces placeholder EthicsAdapter from PR #340.
-    
+
     Usage:
         manager = RelayManager(ethics_gate=ethics_gate)
-        
+
         message = RelayMessage(
             message_id="msg_001",
             source_layer="L1",
@@ -80,10 +80,10 @@ class RelayManager:
             payload={"action": "update_config", "key": "threshold", "value": 0.8},
             requires_ethics_check=True
         )
-        
+
         result = await manager.send_message(message)
     """
-    
+
     def __init__(
         self,
         ethics_gate: Optional[EthicsGate] = None,
@@ -91,7 +91,7 @@ class RelayManager:
     ):
         """
         Initialize relay manager.
-        
+
         Args:
             ethics_gate: Ethics gate for evaluation (creates default if None)
             base_url: Base URL for GUMAS API
@@ -101,10 +101,10 @@ class RelayManager:
             self.ethics_gate = EthicsGate(client=client, threshold=0.7)
         else:
             self.ethics_gate = ethics_gate
-        
+
         self.messages_processed = 0
         self.messages_blocked = 0
-        
+
         logger.info(
             "Relay manager initialized with ethics gate",
             extra={
@@ -112,25 +112,25 @@ class RelayManager:
                 "aurora_module": "relay_manager"
             }
         )
-    
+
     async def send_message(self, message: RelayMessage) -> Dict[str, Any]:
         """
         Send cross-layer message with ethics check if required.
-        
+
         If the message requires ethics check and is state-changing,
         evaluates through ethics gate before allowing transmission.
-        
+
         Args:
             message: Relay message to send
-        
+
         Returns:
             Result dictionary with success, message, verdict, etc.
-        
+
         Raises:
             EthicsViolation: If message is blocked by ethics evaluation
         """
         self.messages_processed += 1
-        
+
         logger.info(
             "Processing relay message: %s (%s -> %s)",
             message.message_id,
@@ -141,7 +141,7 @@ class RelayManager:
                 "aurora_module": "relay_manager"
             }
         )
-        
+
         # Check if ethics evaluation is required
         if message.requires_ethics_check:
             try:
@@ -152,21 +152,21 @@ class RelayManager:
                     "target_layer": message.target_layer,
                     "payload": message.payload
                 }
-                
+
                 context = {
                     "agent_id": "relay_manager",
                     "source": "relay_system",
                     "message_id": message.message_id,
                     "context_tag": message.context_tag
                 }
-                
+
                 # Evaluate through ethics gate
                 verdict = await self.ethics_gate.evaluate(action, context)
-                
+
                 # Block if not allowed
                 if not verdict.allowed:
                     self.messages_blocked += 1
-                    
+
                     logger.warning(
                         "Relay message blocked by ethics gate: %s (score=%.2f, reason=%s)",
                         message.message_id,
@@ -178,12 +178,12 @@ class RelayManager:
                             "aurora_module": "relay_manager"
                         }
                     )
-                    
+
                     raise EthicsViolation(
                         f"Relay message blocked: {verdict.reason}",
                         verdict
                     )
-                
+
                 logger.info(
                     "Relay message passed ethics check: %s (score=%.2f)",
                     message.message_id,
@@ -194,7 +194,7 @@ class RelayManager:
                         "aurora_module": "relay_manager"
                     }
                 )
-                
+
             except EthicsViolation:
                 raise
             except Exception as e:
@@ -213,7 +213,7 @@ class RelayManager:
                     f"Ethics evaluation error: {str(e)}",
                     None
                 )
-        
+
         # Message passed (or didn't require ethics check)
         # In real implementation, would actually transmit message here
         result = {
@@ -222,7 +222,7 @@ class RelayManager:
             "status": "delivered",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
-        
+
         logger.info(
             "Relay message delivered: %s",
             message.message_id,
@@ -231,13 +231,13 @@ class RelayManager:
                 "aurora_module": "relay_manager"
             }
         )
-        
+
         return result
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """
         Get relay manager statistics.
-        
+
         Returns:
             Statistics dictionary
         """

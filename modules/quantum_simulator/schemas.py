@@ -67,8 +67,8 @@ class ForecastConfig(BaseModel):
             raise ValueError("At least one variable required")
         return list(set(var.strip() for var in v if var.strip()))
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "time_steps": 24,
                 "variables": ["demand", "supply", "cost"],
@@ -77,6 +77,7 @@ class ForecastConfig(BaseModel):
                 "uncertainty_level": 0.15,
             }
         }
+    }
 
 
 class ScenarioRequest(BaseModel):
@@ -99,7 +100,7 @@ class ScenarioRequest(BaseModel):
     seed: Optional[int] = Field(None, ge=0, description="Random seed for reproducibility")
     max_iterations: int = Field(default=100, ge=1, le=10000, description="Max optimization iterations")
     timeout_seconds: int = Field(default=300, ge=1, le=3600, description="Timeout in seconds")
-    tags: Optional[List[str]] = Field(default=None, max_items=20, description="Classification tags")
+    tags: Optional[List[str]] = Field(default=None, max_length=20, description="Classification tags")
 
     @field_validator("tags")
     @classmethod
@@ -109,8 +110,8 @@ class ScenarioRequest(BaseModel):
             return None
         return list(set(tag.strip() for tag in v if tag.strip()))
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "scenario_type": "supply_chain",
                 "name": "Q1 Supply Chain Optimization",
@@ -123,6 +124,7 @@ class ScenarioRequest(BaseModel):
                 "tags": ["supply-chain", "q1-2025"],
             }
         }
+    }
 
 
 class StateVector(BaseModel):
@@ -164,8 +166,8 @@ class MeasurementResult(BaseModel):
     total_shots: int = Field(..., ge=1, description="Total number of shots")
     execution_time_ms: float = Field(..., ge=0, description="Execution time in milliseconds")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "counts": {"00": 487, "01": 23, "10": 31, "11": 459},
                 "probabilities": {"00": 0.487, "01": 0.023, "10": 0.031, "11": 0.459},
@@ -173,6 +175,7 @@ class MeasurementResult(BaseModel):
                 "execution_time_ms": 125.4,
             }
         }
+    }
 
 
 class OptimizationResult(BaseModel):
@@ -186,8 +189,8 @@ class OptimizationResult(BaseModel):
         None, description="Objective value history"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "optimal_solution": {"x1": 5.0, "x2": 3.0, "x3": 2.0},
                 "objective_value": 42.5,
@@ -196,6 +199,7 @@ class OptimizationResult(BaseModel):
                 "convergence_history": [100.0, 75.3, 52.1, 45.8, 42.5],
             }
         }
+    }
 
 
 class ForecastResult(BaseModel):
@@ -212,8 +216,8 @@ class ForecastResult(BaseModel):
         None, ge=0.0, le=1.0, description="Accuracy score (if validation data available)"
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "forecast_values": {
                     "demand": [100.0, 105.2, 103.8, 108.5],
@@ -226,6 +230,7 @@ class ForecastResult(BaseModel):
                 "forecast_accuracy": 0.92,
             }
         }
+    }
 
 
 class SimulationResult(BaseModel):
@@ -257,8 +262,8 @@ class SimulationResult(BaseModel):
     error_message: Optional[str] = Field(None, description="Error message if failed")
     tags: Optional[List[str]] = Field(None, description="Classification tags")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "simulation_id": "sim_20250126_120000_abc123",
                 "scenario_name": "Q1 Supply Chain Optimization",
@@ -278,6 +283,7 @@ class SimulationResult(BaseModel):
                 "tags": ["supply-chain", "q1-2025"],
             }
         }
+    }
 
 
 class SimulationStatus(BaseModel):
@@ -292,8 +298,8 @@ class SimulationStatus(BaseModel):
     )
     message: Optional[str] = Field(None, description="Status message")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "simulation_id": "sim_20250126_120000_abc123",
                 "status": "running",
@@ -303,6 +309,7 @@ class SimulationStatus(BaseModel):
                 "message": "Iteration 67 of 100",
             }
         }
+    }
 
 
 class ScenarioListItem(BaseModel):
@@ -316,8 +323,8 @@ class ScenarioListItem(BaseModel):
     execution_time_seconds: Optional[float] = None
     tags: Optional[List[str]] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "simulation_id": "sim_20250126_120000_abc123",
                 "scenario_name": "Q1 Supply Chain",
@@ -328,3 +335,4 @@ class ScenarioListItem(BaseModel):
                 "tags": ["supply-chain"],
             }
         }
+    }

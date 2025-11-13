@@ -1,16 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-04T05:06:05.596588",
-      "status": "PASSED",
-      "files_scanned": 2,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/.security/crypto_validator.py",
-        "/workspaces/aurora-cloudbank-symbolic/.security/log_injection_validator.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
       "timestamp": "2025-11-08T02:45:31.035638",
       "status": "ISSUES_FOUND",
       "files_scanned": 1,
@@ -683,6 +673,15 @@
         "/workspaces/aurora-cloudbank-symbolic/src/synergy/dashboard_api.py",
         "/workspaces/aurora-cloudbank-symbolic/tests/test_gumas_ethics.py",
         "/workspaces/aurora-cloudbank-symbolic/tools/cli/onboarding_wizard.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-13T03:51:24.751240",
+      "status": "PASSED",
+      "files_scanned": 1,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/scripts/generate_api_catalog.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
     }

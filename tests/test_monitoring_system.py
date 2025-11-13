@@ -5,7 +5,7 @@ Tests for Integrated Monitoring System
 import pytest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.monitoring.monitoring_system import (
     MonitoringSystem,
     AlertConfig,
@@ -195,7 +195,7 @@ class TestMonitoringSystem:
             
             # Generate report
             report = monitoring.generate_compliance_report(
-                since=datetime.utcnow() - timedelta(hours=1),
+                since=datetime.now(timezone.utc) - timedelta(hours=1),
                 agent_id="test-agent"
             )
             

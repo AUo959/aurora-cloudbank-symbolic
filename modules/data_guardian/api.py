@@ -27,8 +27,8 @@ class ScanRequest(BaseModel):
     )
     region: str = Field("US", description="Region for detection rules (US, EU, etc.)")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "data": {
                     "user_email": "john.doe@example.com",
@@ -39,6 +39,7 @@ class ScanRequest(BaseModel):
                 "region": "US"
             }
         }
+    }
 
 
 class RedactRequest(BaseModel):
@@ -56,8 +57,8 @@ class RedactRequest(BaseModel):
     )
     region: str = Field("US", description="Region for detection rules")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "data": {
                     "user_email": "john.doe@example.com",
@@ -68,6 +69,7 @@ class RedactRequest(BaseModel):
                 "region": "US"
             }
         }
+    }
 
 
 class PIIDetection(BaseModel):
@@ -88,8 +90,8 @@ class ScanResponse(BaseModel):
     detections: List[PIIDetection] = Field(..., description="Detailed detection results")
     detector_stats: Dict[str, Any] = Field(..., description="Detector statistics")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "pii_detected": True,
                 "total_detections": 3,
@@ -114,6 +116,7 @@ class ScanResponse(BaseModel):
                 }
             }
         }
+    }
 
 
 class RedactResponse(BaseModel):
@@ -123,8 +126,8 @@ class RedactResponse(BaseModel):
     redaction_count: int = Field(..., description="Number of fields redacted")
     audit_trail: Dict[str, Any] = Field(..., description="Audit information")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "redacted": True,
                 "redacted_data": {
@@ -138,6 +141,7 @@ class RedactResponse(BaseModel):
                 }
             }
         }
+    }
 
 
 # Create router

@@ -9,7 +9,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Set required environment variables for FastAPI security
 os.environ["CSRF_SECRET_KEY"] = "dev-secret-for-catalog-generation"
@@ -37,7 +37,7 @@ def generate_api_catalog():
         "title": schema.get("info", {}).get("title", "Aurora CloudBank API"),
         "version": schema.get("info", {}).get("version", "1.0.0"),
         "description": schema.get("info", {}).get("description", ""),
-        "generated": datetime.utcnow().isoformat(),
+        "generated": datetime.now(timezone.utc).isoformat(),
         "total_routes": len(schema.get("paths", {})),
         "routes": []
     }

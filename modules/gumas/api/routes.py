@@ -8,7 +8,7 @@ T1: Initial implementation
 """
 
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from fastapi import APIRouter, HTTPException, Query
@@ -105,7 +105,7 @@ async def health_check() -> HealthResponse:
             service="gumas_ethics_api",
             rules_loaded=len(ethics_engine.rules),
             violations_recorded=len(ethics_engine.violations),
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat()
         )
     except Exception as e:
         logger.error("Health check failed: %s", e)
@@ -154,7 +154,7 @@ async def evaluate_action(request: EvaluateActionRequest) -> EvaluateActionRespo
             compliant=len(violations) == 0,
             should_block=should_block,
             violations=violations_data,
-            evaluation_timestamp=datetime.utcnow().isoformat(),
+            evaluation_timestamp=datetime.now(timezone.utc).isoformat(),
             context_tag=request.context_tag
         )
         

@@ -35,7 +35,7 @@ class InsightRecord(BaseModel):
         default=None, description="Contextual metadata (model, params, etc.)"
     )
     source: str = Field(..., min_length=1, max_length=256, description="Source system or component")
-    tags: Optional[List[str]] = Field(default=None, max_items=20, description="Classification tags")
+    tags: Optional[List[str]] = Field(default=None, max_length=20, description="Classification tags")
     severity: Optional[str] = Field(
         default="info", pattern="^(info|warning|error|critical)$", description="Severity level"
     )
@@ -51,8 +51,8 @@ class InsightRecord(BaseModel):
             return None
         return list(set(tag.strip() for tag in v if tag.strip()))
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "insight_type": "decision",
                 "content": "Approved user request based on policy compliance check",
@@ -63,6 +63,7 @@ class InsightRecord(BaseModel):
                 "related_anchor": "T1-ACC-003",
             }
         }
+    }
 
 
 class AuditQuery(BaseModel):
@@ -73,11 +74,11 @@ class AuditQuery(BaseModel):
     insight_types: Optional[List[InsightType]] = Field(
         default=None, description="Filter by insight types"
     )
-    sources: Optional[List[str]] = Field(default=None, max_items=50, description="Filter by sources")
+    sources: Optional[List[str]] = Field(default=None, max_length=50, description="Filter by sources")
     tags: Optional[List[str]] = Field(
-        default=None, max_items=20, description="Filter by tags (OR logic)"
+        default=None, max_length=20, description="Filter by tags (OR logic)"
     )
-    severity: Optional[List[str]] = Field(default=None, max_items=4, description="Filter by severity")
+    severity: Optional[List[str]] = Field(default=None, max_length=4, description="Filter by severity")
     search_text: Optional[str] = Field(
         default=None, min_length=1, max_length=256, description="Full-text search in content"
     )
@@ -111,8 +112,8 @@ class LedgerEntry(BaseModel):
     previous_hash: Optional[str] = Field(default=None, description="Previous entry hash (chain)")
     entry_hash: str = Field(..., description="This entry's hash")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "entry_id": "insight_20240101_120000_abc123",
                 "timestamp": "2024-01-01T12:00:00Z",
@@ -128,6 +129,7 @@ class LedgerEntry(BaseModel):
                 "entry_hash": "1a2b3c4d...",
             }
         }
+    }
 
 
 class LedgerStats(BaseModel):
@@ -145,8 +147,8 @@ class LedgerStats(BaseModel):
     integrity_verified: bool = Field(..., description="Whether chain integrity is intact")
     ledger_size_bytes: int = Field(..., ge=0, description="Approximate storage size")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "total_entries": 1250,
                 "first_entry_time": "2024-01-01T00:00:00Z",
@@ -157,6 +159,7 @@ class LedgerStats(BaseModel):
                 "ledger_size_bytes": 2458000,
             }
         }
+    }
 
 
 class VerificationReport(BaseModel):
@@ -169,8 +172,8 @@ class VerificationReport(BaseModel):
     verification_time_ms: float = Field(..., ge=0, description="Time taken to verify")
     errors: List[str] = Field(default_factory=list, description="Verification errors")
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "total_entries": 1250,
                 "verified_entries": 1250,
@@ -180,3 +183,4 @@ class VerificationReport(BaseModel):
                 "errors": [],
             }
         }
+    }

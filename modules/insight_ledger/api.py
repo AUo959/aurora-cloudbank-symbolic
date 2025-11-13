@@ -1,18 +1,11 @@
-"""
-Insight Ledger API
+"""Insight Ledger API
 
 FastAPI endpoints for the immutable insight ledger.
 
 Anchor: T1-TIL-API-001
 """
 
-from datetime import datetime
-from typing import List, Optional
-
-from fastapi import APIRouter, HTTPException, Query, status
-from pydantic import BaseModel, Field
-
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -352,14 +345,14 @@ async def health_check() -> Dict[str, Any]:
             "ledger_initialized": True,
             "total_entries": stats.total_entries,
             "integrity_verified": stats.integrity_verified,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
     except Exception as e:
         return {
             "status": "unhealthy",
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 

@@ -106,7 +106,7 @@ class Event(BaseModel):
     last_delivery_attempt: Optional[datetime] = None
     delivered_to: List[str] = Field(default_factory=list)
 
-    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
+    model_config = ConfigDict()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary"""

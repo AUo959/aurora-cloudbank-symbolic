@@ -9,7 +9,7 @@ T1: Initial implementation
 """
 
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from fastapi import APIRouter, HTTPException, Query
@@ -229,7 +229,7 @@ async def get_components(
     DLP: synergy_dashboard_components
     """
     components = get_component_registry()
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     
     statuses = []
     for comp in components:
@@ -323,7 +323,7 @@ async def get_topology() -> ComponentTopology:
         nodes=nodes,
         edges=edges,
         clusters=clusters,
-        timestamp=datetime.utcnow().isoformat()
+        timestamp=datetime.now(timezone.utc).isoformat()
     )
     
     # Track with DLP
@@ -345,7 +345,7 @@ async def get_interactions(
     DLP: synergy_dashboard_interactions
     """
     interactions_data = get_component_interactions()
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     
     interactions = []
     for inter in interactions_data:
@@ -463,7 +463,7 @@ async def get_metrics() -> DashboardMetrics:
         total_interactions=len(interactions),
         average_synergy_score=avg_synergy,
         system_health=system_health,
-        timestamp=datetime.utcnow().isoformat()
+        timestamp=datetime.now(timezone.utc).isoformat()
     )
     
     # Track with DLP
@@ -481,6 +481,6 @@ async def health_check() -> Dict[str, Any]:
     return {
         "status": "healthy",
         "service": "synergy_dashboard_api",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "1.0.0"
     }

@@ -23,7 +23,7 @@ import logging
 import time
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional, Set
+from typing import Callable, Dict, List, Optional
 
 from src.core.native_dlp_export import NativeDLPTag, NativeDLPTracker
 from src.core.logging_security import sanitize_for_logging
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class MeshMessage:
     """
     Structured message for glyph mesh communication.
-    
+
     Attributes:
         sender: Name of the sending agent
         recipient: Name of the receiving agent or "ALL" for broadcast
@@ -62,17 +62,17 @@ def build_message(
 ) -> MeshMessage:
     """
     Build a standardized MeshMessage with automatic timestamping.
-    
+
     Args:
         sender: Name of the sending agent
         recipient: Name of the receiving agent or "ALL" for broadcast
         performative: Message type (e.g., "inform", "request", "propose")
         content: Message payload as a dictionary
         layer_context: Layer context (default: "L1")
-        
+
     Returns:
         MeshMessage with ISO-8601 timestamp
-        
+
     Example:
         >>> msg = build_message("Glyphon", "Caelion", "inform", {"status": "ready"})
         >>> msg.sender
@@ -91,31 +91,31 @@ def build_message(
 class GlyphMeshController:
     """
     Controller for multi-agent symbolic coordination via structured messaging.
-    
+
     Provides:
     - Agent subscription management
     - Message publishing with DLP tagging
     - Broadcast and direct message routing
     - Exception handling for robust delivery
     - Structured logging with security sanitization
-    
+
     Example:
         >>> controller = GlyphMeshController()
-        >>> 
+        >>>
         >>> def handle_message(msg: MeshMessage):
         ...     print(f"Received: {msg.content}")
-        >>> 
+        >>>
         >>> controller.subscribe("Glyphon", handle_message)
         >>> msg = build_message("Caelion", "Glyphon", "inform", {"data": "test"})
         >>> controller.publish(msg)
     """
-    
+
     def __init__(self):
         """Initialize the Glyph Mesh Controller."""
         self._subscribers: Dict[str, List[Callable[[MeshMessage], None]]] = {}
         self._dlp_tracker = NativeDLPTracker()
         self._message_counter = 0
-        
+
         logger.info(
             "Glyph Mesh Controller initialized",
             extra={
@@ -124,15 +124,15 @@ class GlyphMeshController:
                 "anchors": ["T1", "SRB", "EOS_SEED_ORION"]
             }
         )
-    
+
     def subscribe(self, agent_name: str, handler: Callable[[MeshMessage], None]) -> None:
         """
         Subscribe an agent handler to receive messages.
-        
+
         Args:
             agent_name: Name of the agent subscribing
             handler: Callable that accepts a MeshMessage
-            
+
         Example:
             >>> controller = GlyphMeshController()
             >>> def my_handler(msg): pass
@@ -140,10 +140,10 @@ class GlyphMeshController:
         """
         if agent_name not in self._subscribers:
             self._subscribers[agent_name] = []
-        
+
         if handler not in self._subscribers[agent_name]:
             self._subscribers[agent_name].append(handler)
-            
+
             logger.info(
                 f"Agent subscribed to mesh: {sanitize_for_logging(agent_name)}",
                 extra={
@@ -153,15 +153,15 @@ class GlyphMeshController:
                     "handler_count": len(self._subscribers[agent_name])
                 }
             )
-    
+
     def unsubscribe(self, agent_name: str, handler: Callable[[MeshMessage], None]) -> None:
         """
         Unsubscribe an agent handler from receiving messages.
-        
+
         Args:
             agent_name: Name of the agent unsubscribing
             handler: The handler callable to remove
-            
+
         Example:
             >>> controller = GlyphMeshController()
             >>> def my_handler(msg): pass
@@ -171,7 +171,7 @@ class GlyphMeshController:
         if agent_name in self._subscribers:
             if handler in self._subscribers[agent_name]:
                 self._subscribers[agent_name].remove(handler)
-                
+
                 logger.info(
                     f"Agent unsubscribed from mesh: {sanitize_for_logging(agent_name)}",
                     extra={
@@ -181,37 +181,37 @@ class GlyphMeshController:
                         "handler_count": len(self._subscribers[agent_name])
                     }
                 )
-                
+
                 # Clean up empty subscriber lists
                 if not self._subscribers[agent_name]:
                     del self._subscribers[agent_name]
-    
+
     def publish(self, message: MeshMessage) -> None:
         """
         Publish a message to the mesh with DLP tagging and structured logging.
-        
+
         Messages are delivered to:
         - All subscribers if recipient == "ALL" (broadcast)
         - Only the named recipient's handlers otherwise
-        
+
         Handler exceptions are caught and logged without failing the entire publish.
-        
+
         Args:
             message: MeshMessage to publish
-            
+
         Example:
             >>> controller = GlyphMeshController()
             >>> msg = build_message("Glyphon", "ALL", "inform", {"status": "online"})
             >>> controller.publish(msg)
         """
         self._message_counter += 1
-        
+
         # Create DLP tag for this message
         dlp_tag = self._create_dlp_tag(message)
-        
+
         # Log the message with DLP tag
         self._log_message(message, dlp_tag)
-        
+
         # Determine recipients
         if message.recipient == "ALL":
             # Broadcast to all subscribers
@@ -232,14 +232,14 @@ class GlyphMeshController:
                 }
             )
             recipients = []
-        
+
         # Deliver to all relevant handlers
         delivery_count = 0
         error_count = 0
-        
+
         for recipient_name in recipients:
             handlers = self._subscribers.get(recipient_name, [])
-            
+
             for handler in handlers:
                 try:
                     handler(message)
@@ -258,7 +258,7 @@ class GlyphMeshController:
                         },
                         exc_info=True
                     )
-        
+
         logger.info(
             f"Message published: {delivery_count} deliveries, {error_count} errors",
             extra={
@@ -269,24 +269,24 @@ class GlyphMeshController:
                 "dlp_tag_id": dlp_tag.tag_id
             }
         )
-    
+
     def _create_dlp_tag(self, message: MeshMessage) -> NativeDLPTag:
         """
         Create a DLP tag for a glyph mesh message.
-        
+
         Args:
             message: MeshMessage to tag
-            
+
         Returns:
             NativeDLPTag with proper anchors and symbolic patterns
         """
         # Create tag ID
         tag_id = f"glyph::{message.sender}->{message.recipient}::{self._message_counter}"
-        
+
         # Create data hash
         message_str = json.dumps(asdict(message), sort_keys=True)
         data_hash = hashlib.sha256(message_str.encode()).hexdigest()
-        
+
         # Create DLP tag
         dlp_tag = NativeDLPTag(
             tag_id=tag_id,
@@ -294,14 +294,14 @@ class GlyphMeshController:
             data_hash=data_hash,
             timestamp=time.time()
         )
-        
+
         # Add anchor protocols
         dlp_tag.add_anchor_protocol("EOS_SEED_ORION")
-        
+
         # Add T1/SRB anchors
         dlp_tag.add_t1_srb_anchor("T1")
         dlp_tag.add_t1_srb_anchor("SRB")
-        
+
         # Add symbolic patterns
         dlp_tag.set_symbolic_pattern("glyph_message", {
             "sender": message.sender,
@@ -310,16 +310,16 @@ class GlyphMeshController:
             "layer_context": message.layer_context,
             "timestamp": message.timestamp
         })
-        
+
         # Store in tracker
         self._dlp_tracker.tags[tag_id] = dlp_tag
-        
+
         return dlp_tag
-    
+
     def _log_message(self, message: MeshMessage, dlp_tag: NativeDLPTag) -> None:
         """
         Log a message with structured fields and DLP tag.
-        
+
         Args:
             message: MeshMessage to log
             dlp_tag: Associated DLP tag
@@ -340,14 +340,14 @@ class GlyphMeshController:
                 "message_counter": self._message_counter
             }
         )
-    
+
     def get_stats(self) -> Dict:
         """
         Get statistics about the mesh controller.
-        
+
         Returns:
             Dictionary with subscriber counts and message statistics
-            
+
         Example:
             >>> controller = GlyphMeshController()
             >>> stats = controller.get_stats()
@@ -363,14 +363,14 @@ class GlyphMeshController:
                 for agent, handlers in self._subscribers.items()
             }
         }
-    
+
     def get_dlp_manifest(self) -> Dict:
         """
         Get DLP manifest for all mesh messages.
-        
+
         Returns:
             DLP export manifest with all message tags
-            
+
         Example:
             >>> controller = GlyphMeshController()
             >>> manifest = controller.get_dlp_manifest()
@@ -387,10 +387,10 @@ _global_controller: Optional[GlyphMeshController] = None
 def get_glyph_mesh_controller() -> GlyphMeshController:
     """
     Get or create the global GlyphMeshController singleton.
-    
+
     Returns:
         Global GlyphMeshController instance
-        
+
     Example:
         >>> controller1 = get_glyph_mesh_controller()
         >>> controller2 = get_glyph_mesh_controller()

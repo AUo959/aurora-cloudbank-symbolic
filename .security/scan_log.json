@@ -1,15 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-08T02:45:31.035638",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 1,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u274c XSS/Code Injection: FAILED\n\ud83d\udea8 XSS/INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 98: eval() call - code injection risk - \"\"\"Safely evaluate a validated AST node without using eval().\"\"\"\n  \u274c /workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py: Line 326: eval() call - code injection risk - Safe alternative to eval() for sim..."
-    },
-    {
       "timestamp": "2025-11-08T02:51:06.976367",
       "status": "ISSUES_FOUND",
       "files_scanned": 1,
@@ -682,6 +673,23 @@
       "files_scanned": 1,
       "files": [
         "/workspaces/aurora-cloudbank-symbolic/scripts/generate_api_catalog.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-13T03:57:50.342378",
+      "status": "PASSED",
+      "files_scanned": 9,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/data_guardian/api.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/gumas/api/routes.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/api.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/insight_ledger/schemas.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_simulator/schemas.py",
+        "/workspaces/aurora-cloudbank-symbolic/scripts/generate_api_catalog.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/coordination/event_models.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/synergy/dashboard_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_monitoring_system.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
     }

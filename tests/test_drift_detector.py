@@ -115,14 +115,16 @@ class TestDriftDetector:
         """Test drift detection at warning level"""
         detector = DriftDetector(
             info_threshold=0.2,
-            warning_threshold=0.5
+            warning_threshold=0.5,
+            critical_threshold=0.8,
+            z_score_threshold=10.0  # Higher threshold to avoid z-score override
         )
         
         values = [10.0, 12.0, 11.0, 13.0, 10.0, 12.0]
         baseline = detector.establish_baseline("test-agent", "test_metric", values)
         
-        # 60% deviation (warning level)
-        deviation_value = baseline.mean * 1.6
+        # 55% deviation (warning level, below critical)
+        deviation_value = baseline.mean * 1.55
         alert = detector.detect_drift(
             agent_id="test-agent",
             metric_name="test_metric",

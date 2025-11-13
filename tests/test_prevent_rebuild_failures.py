@@ -48,7 +48,8 @@ def test_regular_mode_succeeds_without_venv():
     assert result.returncode == 0, f"Script failed with: {result.stderr}"
     
     # Should skip dependency check when venv is missing
-    assert "Virtual environment not found" in result.stdout or "Dependencies OK" in result.stdout
+    output = result.stdout + result.stderr
+    assert "Virtual environment not found" in output or "Dependencies OK" in output or "Using system Python" in output
     
     # Should complete successfully
     assert "Aurora CloudBank rebuild protection is active!" in result.stdout

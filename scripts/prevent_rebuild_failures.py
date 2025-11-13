@@ -236,12 +236,11 @@ echo "✅ Pre-rebuild protection completed"
         all_passed = all(validation_results.values())
         
         if all_passed:
-            self.log_status("validation_passed", "All validation checks passed")
             logger.info("All validation checks passed")
         else:
             failed_checks = [k for k, v in validation_results.items() if not v]
             self.log_status("validation_failed", f"Failed checks: {', '.join(failed_checks)}")
-            logger.error("Validation failed: {", '.join(failed_checks)}")
+            logger.error("Validation failed: %s", ', '.join(failed_checks))
         
         return all_passed, validation_results
     
@@ -259,7 +258,7 @@ echo "✅ Pre-rebuild protection completed"
         missing_deps = [dep for dep in critical_deps if dep not in content]
         
         if missing_deps:
-            logger.error("Missing critical dependencies: {", '.join(missing_deps)}")
+            logger.error("Missing critical dependencies: %s", ', '.join(missing_deps))
             return False
         
         logger.info("Dependency validation passed")

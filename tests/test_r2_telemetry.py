@@ -197,6 +197,8 @@ def test_anomaly_detector_duration():
         success=True
     )
     
+    # Must update metrics first to maintain history
+    detector.update_metrics(anomalous_metrics)
     anomalies = detector.detect_anomalies(anomalous_metrics)
     
     assert len(anomalies) > 0

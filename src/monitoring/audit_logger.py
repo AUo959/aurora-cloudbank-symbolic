@@ -10,7 +10,7 @@ import hmac
 import json
 import logging
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -416,13 +416,13 @@ class AuditLogger:
         if since:
             entries = [
                 e for e in entries
-                if datetime.fromisoformat(e.timestamp) >= since
+                if datetime.fromisoformat(e.timestamp).replace(tzinfo=timezone.utc) >= since
             ]
         
         if until:
             entries = [
                 e for e in entries
-                if datetime.fromisoformat(e.timestamp) <= until
+                if datetime.fromisoformat(e.timestamp).replace(tzinfo=timezone.utc) <= until
             ]
         
         return entries

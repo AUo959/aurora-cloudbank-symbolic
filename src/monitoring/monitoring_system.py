@@ -7,7 +7,7 @@ and alerting for comprehensive agent oversight.
 
 import logging
 from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
@@ -451,7 +451,7 @@ class MonitoringSystem:
         Returns:
             Comprehensive compliance report
         """
-        since = since or datetime.utcnow() - timedelta(days=7)
+        since = since or datetime.now(timezone.utc) - timedelta(days=7)
         
         # Get violations
         violations = self.ethics_engine.get_violations(
@@ -469,7 +469,7 @@ class MonitoringSystem:
         interventions = [
             i for i in self.interventions
             if (not agent_id or i.agent_id == agent_id) and
-            datetime.fromisoformat(i.timestamp) >= since
+            datetime.fromisoformat(i.timestamp).replace(tzinfo=timezone.utc) >= since
         ]
         
         # Get audit entries

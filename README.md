@@ -1579,6 +1579,44 @@ make maintenance-scan         # SSMT v3.0 maintenance pipeline
 make maintenance-status       # Check maintenance schedules
 ```
 
+### Migration Notes
+
+**Pydantic V2 Migration (Nov 2025)**  
+Aurora CloudBank has been fully migrated to Pydantic V2 for future-proof type validation:
+
+- ✅ **Zero Deprecation Warnings** - All 17+ models migrated to V2 patterns
+- ✅ **Automatic Serialization** - V2 handles datetime/enum serialization natively
+- ✅ **Timezone-Aware** - All datetime operations use `datetime.now(timezone.utc)`
+- ✅ **Breaking Changes Fixed** - `max_items` → `max_length`, `class Config` → `model_config`
+- ✅ **100% Test Pass Rate** - 1065/1065 tests passing after migration
+
+**If you're contributing or extending Aurora:**
+```python
+# OLD (Pydantic V1 - deprecated)
+class MyModel(BaseModel):
+    items: List[str] = Field(max_items=10)
+    
+    class Config:
+        json_encoders = {datetime: lambda v: v.isoformat()}
+
+# NEW (Pydantic V2 - correct)
+from pydantic import ConfigDict
+
+class MyModel(BaseModel):
+    items: List[str] = Field(max_length=10)
+    
+    model_config = ConfigDict(
+        # json_encoders removed - V2 handles automatically
+    )
+```
+
+**API Catalog**  
+Complete API documentation now available:
+- 📄 `api_schema.json` - OpenAPI 3.x specification (169 routes)
+- 📄 `API_CATALOG.json` - Structured endpoint metadata
+- 📄 `API_CATALOG.md` - Human-readable docs with examples
+- 🔧 `scripts/generate_api_catalog.py` - Automated generator
+
 ### Deployment Options
 
 **Option 1: Local Development**

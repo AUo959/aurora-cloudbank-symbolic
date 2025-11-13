@@ -8,7 +8,7 @@ Detects deviations from baseline patterns using multiple algorithms.
 import json
 import logging
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Any
 import statistics
@@ -145,7 +145,7 @@ class DriftDetector:
             min_value=min(values),
             max_value=max(values),
             sample_count=len(values),
-            last_updated=datetime.utcnow().isoformat(),
+            last_updated=datetime.now(timezone.utc).isoformat(),
             moving_average=mean,
             moving_window=list(values[-self.moving_avg_window:])
         )
@@ -269,7 +269,7 @@ class DriftDetector:
             deviation = abs(current_value - baseline.mean) / baseline.mean
         
         return DriftAlert(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=datetime.now(timezone.utc).isoformat(),
             agent_id=agent_id,
             metric_name=metric_name,
             level=level,

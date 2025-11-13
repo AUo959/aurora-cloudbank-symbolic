@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 try:
-    import jsonschema
     from jsonschema import validate, ValidationError as JsonSchemaValidationError
     JSONSCHEMA_AVAILABLE = True
 except ImportError:

@@ -10,13 +10,12 @@ Anchors: T1, SRB
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from src.aurora.relays.relay_manager import (
     get_relay_manager,
     SchemaViolation,
-    AnchorViolation,
     EthicsViolation,
     RelayUnavailable
 )
@@ -106,11 +105,11 @@ async def health_check() -> HealthResponse:
     DLP: relay_manager_health_check
     """
     from datetime import datetime, timezone
-    
+
     try:
         relay = get_relay_manager()
         available = relay is not None
-        
+
         return HealthResponse(
             status="healthy" if available else "unavailable",
             service="Relay Manager",
@@ -139,16 +138,16 @@ async def send_cross_layer_message(request: SendMessageRequest) -> SendMessageRe
     """
     try:
         relay = get_relay_manager()
-        
+
         result = relay.send_cross_layer_message(
             source_layer=request.source_layer,
             target_layer=request.target_layer,
             payload=request.payload,
             context=request.context
         )
-        
+
         return SendMessageResponse(**result)
-        
+
     except SchemaViolation as e:
         logger.warning(f"Schema violation: {e.message}")
         raise HTTPException(
@@ -192,9 +191,9 @@ async def get_statistics() -> StatisticsResponse:
     try:
         relay = get_relay_manager()
         stats = relay.get_statistics()
-        
+
         return StatisticsResponse(**stats)
-        
+
     except Exception as e:
         logger.error(f"Failed to get statistics: {e}")
         raise HTTPException(
@@ -215,9 +214,9 @@ async def export_manifest(manifest_name: Optional[str] = None) -> ManifestRespon
     try:
         relay = get_relay_manager()
         manifest = relay.export_relay_manifest(manifest_name)
-        
+
         return ManifestResponse(**manifest)
-        
+
     except Exception as e:
         logger.error(f"Failed to export manifest: {e}")
         raise HTTPException(
@@ -238,7 +237,7 @@ async def get_translation_rules() -> Dict[str, Any]:
     try:
         relay = get_relay_manager()
         rules = relay.firewall.get_translation_rules()
-        
+
         return {
             "success": True,
             "total_rules": len(rules),
@@ -247,7 +246,7 @@ async def get_translation_rules() -> Dict[str, Any]:
                 for metaphor, event in rules.items()
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get translation rules: {e}")
         raise HTTPException(
@@ -269,12 +268,12 @@ async def add_translation_rule(request: AddTranslationRuleRequest) -> Dict[str, 
             request.metaphor,
             request.concrete_event
         )
-        
+
         return {
             "success": True,
             "message": f"Translation rule added: '{request.metaphor}' -> '{request.concrete_event}'"
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to add translation rule: {e}")
         raise HTTPException(
@@ -295,13 +294,13 @@ async def get_quarantined_messages() -> Dict[str, Any]:
     try:
         relay = get_relay_manager()
         quarantined = relay.firewall.get_quarantined_messages()
-        
+
         return {
             "success": True,
             "total_quarantined": len(quarantined),
             "messages": quarantined
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get quarantined messages: {e}")
         raise HTTPException(
@@ -320,12 +319,12 @@ async def clear_quarantine() -> Dict[str, Any]:
     try:
         relay = get_relay_manager()
         relay.firewall.clear_quarantine()
-        
+
         return {
             "success": True,
             "message": "Quarantine cleared successfully"
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to clear quarantine: {e}")
         raise HTTPException(
@@ -347,19 +346,19 @@ async def get_layer_schema(layer: str) -> Dict[str, Any]:
     try:
         relay = get_relay_manager()
         schema = relay.validator.get_schema(layer.upper())
-        
+
         if schema is None:
             raise HTTPException(
                 status_code=404,
                 detail=f"Schema not found for layer: {layer}"
             )
-        
+
         return {
             "success": True,
             "layer": layer.upper(),
             "schema": schema
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -380,13 +379,13 @@ async def list_available_schemas() -> Dict[str, Any]:
     try:
         relay = get_relay_manager()
         layers = relay.validator.get_available_layers()
-        
+
         return {
             "success": True,
             "available_layers": layers,
             "total_schemas": len(layers)
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to list schemas: {e}")
         raise HTTPException(

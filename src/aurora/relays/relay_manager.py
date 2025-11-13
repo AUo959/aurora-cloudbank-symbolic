@@ -16,7 +16,7 @@ from typing import Any, Dict, Optional
 
 from src.aurora.core.schema_validation import get_validator, SchemaValidationError
 from src.aurora.core.narrative_firewall import get_firewall, MetaphorTranslationError
-from src.core.native_dlp_export import NativeDLPTracker, NativeDLPTag
+from src.core.native_dlp_export import NativeDLPTracker
 
 # Try to import ethics engine
 try:
@@ -221,7 +221,7 @@ class RelayManager:
                 {"metaphor": e.metaphor, "reason": e.reason}
             )
 
-        except EthicsViolation as e:
+        except EthicsViolation:
             self.messages_blocked += 1
             self._log_operation("ethics_violation", source_layer, target_layer, request_id, payload, None)
             raise
@@ -433,9 +433,9 @@ class RelayManager:
         except EthicsViolation:
             # Re-raise ethics violations
             raise
-        except Exception as e:
+        except Exception:
             # Log other errors but don't block operation
-            logger.error(f"Ethics check error: {e}", exc_info=True)
+            logger.error("Ethics check error", exc_info=True)
 
     def _create_dlp_tag(
         self,

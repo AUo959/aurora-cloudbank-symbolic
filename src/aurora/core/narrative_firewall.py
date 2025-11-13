@@ -115,7 +115,7 @@ class NarrativeFirewall:
             if any(indicator in text.lower() for indicator in symbolic_indicators):
                 return "mixed"
 
-        # If content_type is lore_fragment or similar non-symbolic types, 
+        # If content_type is lore_fragment or similar non-symbolic types,
         # and no symbolic content detected, classify as literal
         literal_types = ["lore_fragment", "ethics_consideration", "axiom_evaluation"]
         if content_type in literal_types:
@@ -210,7 +210,7 @@ class NarrativeFirewall:
     def _repackage_as_l2(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Repackage literal message as L2 format"""
         payload = message.get("payload", {})
-        
+
         return {
             "schema_version": message.get("schema_version", "1.0.0"),
             "message_type": "l2_simulation_event",

@@ -1,0 +1,70 @@
+{
+  "module": "aurora.continuity.halo_pas",
+  "version": "1.0.0",
+  "description": "HALO/PAS Drift Controller for continuous timeline monitoring",
+  "export_time": "2025-11-13T23:31:43Z",
+  "dlp_tag": "halo_pas_drift_controller_v1",
+  "anchor_protocols": [
+    "EOS_SEED_ORION"
+  ],
+  "t1_srb_anchors": [
+    "T1",
+    "SRB"
+  ],
+  "symbolic_tags": [
+    "HALO_PAS_DRIFT",
+    "CONTINUITY_MONITOR",
+    "TIMELINE_COHESION"
+  ],
+  "components": {
+    "HALOPASController": {
+      "description": "Main controller for drift monitoring",
+      "features": [
+        "Multi-layer timeline sampling (L1, L2, L3)",
+        "Drift vector computation",
+        "DLP tagging and lineage tracking",
+        "Structured logging",
+        "Status export for dashboards"
+      ],
+      "default_interval": 0.25,
+      "max_samples_memory": 1000
+    },
+    "DriftSample": {
+      "description": "Data structure for drift measurements",
+      "fields": [
+        "timestamp",
+        "l1_time",
+        "l2_time",
+        "l3_time",
+        "drift_l2",
+        "drift_l3",
+        "sample_id"
+      ]
+    }
+  },
+  "integration": {
+    "api_endpoint": "/continuity/halo_pas/status",
+    "dlp_tracker": "NativeDLPTracker",
+    "logger": "aurora.continuity.halo_pas"
+  },
+  "dependencies": {
+    "src.core.native_dlp_export": ["NativeDLPTag", "NativeDLPTracker"],
+    "asyncio": "background task management",
+    "logging": "structured logging"
+  },
+  "future_enhancements": [
+    "Glyphon predictive drift forecasting",
+    "Adaptive sampling rates",
+    "Automatic drift correction",
+    "Multi-instance coordination",
+    "Persistent drift history"
+  ],
+  "test_coverage": {
+    "unit_tests": "tests/test_halo_pas_controller.py",
+    "markers": ["unit", "integration", "aurora", "critical"]
+  },
+  "documentation": {
+    "readme": "modules/continuity/README.md",
+    "manifest": "src/aurora/continuity/halo_pas_manifest.json"
+  }
+}

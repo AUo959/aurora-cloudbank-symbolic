@@ -49,6 +49,12 @@ class TestQuantumIntegration:
             intent_query="Test quantum integration capabilities",
             constellation_targets=["ORION"]
         )
+    
+    @pytest.fixture
+    def quantum_integration(self, quantum_forge):
+        """Create integration using same forge as test_agent"""
+        from modules.quantum_forge import QuantumForgeIntegration
+        return QuantumForgeIntegration(forge=quantum_forge)
         
     def test_quantum_integration_initialization(self):
         """Test QuantumForgeIntegration initialization"""
@@ -62,11 +68,9 @@ class TestQuantumIntegration:
         integration2 = get_quantum_integration()
         assert integration2 is not None
         
-    def test_agent_to_quantum_conversion(self, test_agent):
+    def test_agent_to_quantum_conversion(self, test_agent, quantum_integration):
         """Test converting agent to quantum state"""
-        from modules.quantum_forge import get_quantum_integration
-        
-        integration = get_quantum_integration()
+        integration = quantum_integration
         quantum_state = integration.agent_to_quantum(test_agent)
         
         assert quantum_state is not None
@@ -75,11 +79,9 @@ class TestQuantumIntegration:
         assert 0.0 <= quantum_state.fidelity <= 1.0
         assert quantum_state.fidelity >= integration.fidelity_threshold
         
-    def test_quantum_to_agent_conversion(self, test_agent):
+    def test_quantum_to_agent_conversion(self, test_agent, quantum_integration):
         """Test converting quantum state back to agent"""
-        from modules.quantum_forge import get_quantum_integration
-        
-        integration = get_quantum_integration()
+        integration = quantum_integration
         quantum_state = integration.agent_to_quantum(test_agent)
         restored_agent = integration.quantum_to_agent(quantum_state)
         
@@ -89,29 +91,27 @@ class TestQuantumIntegration:
         assert abs(restored_agent.joy_index - test_agent.joy_index) < 0.1
         assert abs(restored_agent.intent_alignment - test_agent.intent_alignment) < 0.1
         
-    def test_coherence_tracking(self, test_agent):
+    def test_coherence_tracking(self, test_agent, quantum_integration):
         """Test coherence time tracking"""
-        from modules.quantum_forge import get_quantum_integration
         import time
         
-        integration = get_quantum_integration()
+        integration = quantum_integration
         quantum_state = integration.agent_to_quantum(test_agent)
         
-        # Check initial coherence
-        coherent = integration.check_coherence(quantum_state)
-        assert coherent is True
+        # Check initial coherence using agent_id
+        coherence_status = integration.check_coherence(test_agent.agent_id)
+        assert coherence_status["has_quantum_state"] is True
+        assert coherence_status["coherent"] is True
         
-        # Simulate decoherence (reduce remaining time)
-        quantum_state.coherence_remaining = 0.1
-        coherent = integration.check_coherence(quantum_state)
-        # Should still be coherent (>0)
-        assert coherent is True or coherent is False  # Depends on threshold
+        # Simulate decoherence by setting last_update to past
+        quantum_state.last_update = time.time() - quantum_state.coherence_time - 1
+        coherence_status = integration.check_coherence(test_agent.agent_id)
+        # Should be decoherent now
+        assert coherence_status["coherent"] is False
         
-    def test_optimize_agent_quantum(self, test_agent):
+    def test_optimize_agent_quantum(self, test_agent, quantum_integration):
         """Test quantum optimization of agent"""
-        from modules.quantum_forge import get_quantum_integration
-        
-        integration = get_quantum_integration()
+        integration = quantum_integration
         optimized = integration.optimize_agent_quantum(test_agent)
         
         assert optimized is not None

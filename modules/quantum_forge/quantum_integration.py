@@ -62,12 +62,14 @@ class AgentQuantumState:
         agent_id: str,
         quantum_state: QuantumState,
         fidelity: float,
-        coherence_time: float
+        coherence_time: float,
+        num_qubits: int = 8
     ):
         self.agent_id = agent_id
         self.quantum_state = quantum_state
         self.fidelity = fidelity
         self.coherence_time = coherence_time
+        self.num_qubits = num_qubits
         self.last_update = time.time()
         self.decoherence_rate = 0.0
         
@@ -185,7 +187,8 @@ class QuantumForgeIntegration:
                 agent_id=agent.agent_id,
                 quantum_state=quantum_state,
                 fidelity=quantum_state.fidelity,
-                coherence_time=self.default_coherence_time
+                coherence_time=self.default_coherence_time,
+                num_qubits=num_qubits
             )
             
             # Calculate decoherence rate based on vector complexity
@@ -224,7 +227,7 @@ class QuantumForgeIntegration:
             
         except Exception as e:
             self.metrics["failed_conversions"] += 1
-            logger.error(f"❌ Agent → Quantum conversion failed: {e}")
+            logger.error("❌ Quantum → Agent conversion failed: %s", str(e))
             raise QuantumIntegrationError(f"Conversion failed: {e}") from e
             
     def quantum_to_agent(
@@ -411,14 +414,14 @@ class QuantumForgeIntegration:
             
         agent = self.forge.agents[agent_id]
         
-        logger.info(f"🔄 Refreshing quantum coherence: {agent_id[:8]}...")
-        
+        logger.info("🔄 Refreshing quantum coherence: %s...", agent_id[:8])
         # Reconvert to quantum (creates fresh coherent state)
         agent_qstate = self.agent_to_quantum(agent)
         
         logger.info(
-            f"✅ Coherence refreshed: {agent_id[:8]}... "
-            f"(fidelity: {agent_qstate.fidelity:.4f})"
+            "✅ Coherence refreshed: %s... (fidelity: %.4f)",
+            agent_id[:8],
+            agent_qstate.fidelity
         )
         
         return agent_qstate

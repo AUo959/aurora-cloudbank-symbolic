@@ -1,0 +1,17 @@
+{
+  "seal_id": "FILE_test_t71_tools_20251114T145519",
+  "target_path": "tests/test_t71_tools.py",
+  "seal_type": "file",
+  "timestamp": "2025-11-14T14:55:19.186049",
+  "sha256_hash": "0de1bdc3dbf0842a32a6d1f617aa0bcbc3a55f669386c8af19c18d37438b3d4f",
+  "metadata_hash": "13281ccdcc58d4266d1924be98fe3da94cb046a097af28818eccddc3a41019c4",
+  "audit_trail": [
+    "Created seal for file: test_t71_tools.py"
+  ],
+  "recovery_data": {
+    "size": 2755,
+    "modified": "2025-11-14T14:12:23.266370",
+    "permissions": "666",
+    "relative_path": "tests/test_t71_tools.py"
+  }
+}

@@ -1,0 +1,6127 @@
+{
+  "title": "Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
+  "version": "1.0.0",
+  "description": "Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
+  "generated": "2025-11-13T03:50:42.013302",
+  "total_routes": 169,
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/agent/execute",
+      "summary": "Execute Agent Tool",
+      "description": "Execute agent tool with validated parameters and Aurora symbolic anchoring\nSupports all registered tools: symbolic_processing, geometric_algebra, session_management, system_status",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/agent/gemini/execute",
+      "summary": "Execute Gemini Agent Tool",
+      "description": "Execute a Gemini agent tool, respecting the Symbolic Sandbox Protocol (SSP).\nA 'dry_run' parameter is used to get an impact report before committing.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/agent/gemini/tools",
+      "summary": "Get Gemini Agent Tools",
+      "description": "Discover available agent tools for Gemini Agent Mode.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/agent/session",
+      "summary": "Manage Agent Session",
+      "description": "Manage agent session state and context persistence\nActions: create, update, get, delete",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/agent/status",
+      "summary": "Get Agent Status",
+      "description": "Get current agent system status and health information",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/agent/tools",
+      "summary": "Get Agent Tools",
+      "description": "Discover available agent tools and capabilities for ChatGPT Agent Mode\nReturns OpenAPI-compatible tool definitions",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/conflicts/detect",
+      "summary": "Detect Conflict",
+      "description": "Detect potential conflicts with other agents\n\n**Example:**\n```json\n{\n    \"agent_id\": \"r2-agent-001\",\n    \"resource_id\": \"dataset-123\",\n    \"resource_type\": \"dataset\",\n    \"operation\": \"write\"\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/conflicts/resolve",
+      "summary": "Resolve Conflict",
+      "description": "Mark conflict as resolved\n\n**Example:**\n```json\n{\n    \"conflict_id\": \"conflict-123\",\n    \"strategy\": \"priority_based\",\n    \"resolved_by\": \"r2-agent-001\"\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/event-types",
+      "summary": "Get Event Types",
+      "description": "Get list of available event types\n\n**Example:** GET /api/coordination/event-types",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/events/discover",
+      "summary": "Discover Events",
+      "description": "Discover available events based on filter criteria\n\n**Example:** GET /api/coordination/events/discover?event_types=task.created&priorities=high",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "event_types",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EventType"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Types"
+          }
+        },
+        {
+          "name": "priorities",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EventPriority"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priorities"
+          }
+        },
+        {
+          "name": "source_agent_ids",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Agent Ids"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/events/publish",
+      "summary": "Publish Event",
+      "description": "Publish event to coordination registry\n\n**Example:**\n```json\n{\n    \"event_type\": \"task.created\",\n    \"priority\": \"normal\",\n    \"source_agent_id\": \"r2-agent-001\",\n    \"payload\": {\n        \"task_id\": \"task-123\",\n        \"description\": \"Process data\"\n    }\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/events/replay/{agent_id}",
+      "summary": "Replay Events",
+      "description": "Replay historical events for audit or recovery\n\n**Example:** GET /api/coordination/events/replay/r2-agent-001?start_time=2024-01-01T00:00:00Z",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "start_time",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          }
+        },
+        {
+          "name": "end_time",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/locks/acquire",
+      "summary": "Acquire Lock",
+      "description": "Acquire exclusive lock on resource\n\n**Example:**\n```json\n{\n    \"agent_id\": \"r2-agent-001\",\n    \"resource_id\": \"dataset-123\",\n    \"resource_type\": \"dataset\",\n    \"ttl_seconds\": 300\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/coordination/locks/{resource_id}",
+      "summary": "Release Lock",
+      "description": "Release lock on resource\n\n**Example:** DELETE /api/coordination/locks/dataset-123?agent_id=r2-agent-001",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "resource_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Resource Id"
+          }
+        },
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/metrics",
+      "summary": "Get Registry Metrics",
+      "description": "Get coordination registry metrics and statistics\n\n**Example:** GET /api/coordination/metrics",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/status",
+      "summary": "Get Registry Status",
+      "description": "Get coordination registry health status\n\n**Example:** GET /api/coordination/status",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/subscriptions/subscribe",
+      "summary": "Subscribe To Events",
+      "description": "Subscribe to events matching filter criteria\n\n**Example:**\n```json\n{\n    \"agent_id\": \"r2-agent-001\",\n    \"event_types\": [\"task.created\", \"task.assigned\"],\n    \"priorities\": [\"high\", \"critical\"]\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/subscriptions/{agent_id}",
+      "summary": "Get Agent Subscriptions",
+      "description": "Get all active subscriptions for an agent\n\n**Example:** GET /api/coordination/subscriptions/r2-agent-001",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/coordination/subscriptions/{subscription_id}",
+      "summary": "Unsubscribe From Events",
+      "description": "Unsubscribe from events\n\n**Example:** DELETE /api/coordination/subscriptions/abc-123",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "subscription_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Subscription Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/coordination/workflows/create",
+      "summary": "Create Workflow",
+      "description": "Create multi-agent workflow\n\n**Example:**\n```json\n{\n    \"name\": \"Data Processing Pipeline\",\n    \"description\": \"Multi-stage data processing\",\n    \"steps\": [\n        {\"step_id\": \"step1\", \"action\": \"fetch_data\"},\n        {\"step_id\": \"step2\", \"action\": \"process_data\"}\n    ],\n    \"agent_assignments\": {\n        \"step1\": \"r2-agent-001\",\n        \"step2\": \"r2-agent-002\"\n    },\n    \"created_by\": \"orchestrator\"\n}\n```",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/coordination/workflows/{workflow_id}",
+      "summary": "Get Workflow Status",
+      "description": "Get workflow status\n\n**Example:** GET /api/coordination/workflows/workflow-123",
+      "tags": [
+        "Event Coordination"
+      ],
+      "parameters": [
+        {
+          "name": "workflow_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Workflow Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet/craft",
+      "summary": "Get All Craft",
+      "description": "Get all registered craft profiles.\n\nReturns craft data compatible with JS station_types.js CraftProfile schema.",
+      "tags": [
+        "fleet-bridge"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet/craft/{craft_id}",
+      "summary": "Get Craft By Id",
+      "description": "Get specific craft profile by ID.",
+      "tags": [
+        "fleet-bridge"
+      ],
+      "parameters": [
+        {
+          "name": "craft_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Craft Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/fleet/status",
+      "summary": "Get Fleet Status",
+      "description": "Get overall fleet status summary.",
+      "tags": [
+        "fleet-bridge"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "summary": "Health Check Api",
+      "description": "",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/components",
+      "summary": "Get Components",
+      "description": "Get all registered R-2 components with real-time status\n\nDLP: synergy_dashboard_components",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [
+        {
+          "name": "status_filter",
+          "in": "query",
+          "required": false,
+          "description": "Filter by status: active|degraded|offline",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by status: active|degraded|offline",
+            "title": "Status Filter"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/health",
+      "summary": "Health Check",
+      "description": "Health check endpoint for synergy dashboard API",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/interactions",
+      "summary": "Get Interactions",
+      "description": "Get component interaction flows with metrics\n\nDLP: synergy_dashboard_interactions",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [
+        {
+          "name": "component_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by component ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by component ID",
+            "title": "Component Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/metrics",
+      "summary": "Get Metrics",
+      "description": "Get aggregated dashboard metrics and system health\n\nDLP: synergy_dashboard_metrics",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/synergy-scores",
+      "summary": "Get Synergy Scores",
+      "description": "Get synergy scores for component pairs with optimization opportunities\n\nDLP: synergy_dashboard_synergy_scores",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/synergy/topology",
+      "summary": "Get Topology",
+      "description": "Get complete component topology with nodes, edges, and clusters\n\nDLP: synergy_dashboard_topology",
+      "tags": [
+        "synergy"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/thread-bridge/companions",
+      "summary": "Thread Bridge Companions Endpoint",
+      "description": "Get list of all companion threads with their status\n\nReturns detailed information about each companion thread including\nalignment status, drift levels, and last sync timestamp.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/thread-bridge/handshake",
+      "summary": "Thread Bridge Handshake Endpoint",
+      "description": "Initiate handshake sequence with a companion thread\n\nExecutes the 5-stage handshake: INIT \u2192 VERIFY_ANCHOR \u2192 LOCK_DRIFT \u2192\nALIGN_ETHICS \u2192 SYNC_COMPLETE",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/thread-bridge/status",
+      "summary": "Thread Bridge Status Endpoint",
+      "description": "Get Thread Transfer Bridge status\n\nReturns current bridge status, drift metrics, and companion thread health.",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/thread-bridge/transfer",
+      "summary": "Thread Bridge Transfer Endpoint",
+      "description": "Transfer context from source thread to target thread\n\nPerforms full validation, ethics checks, and secure state transfer\nbetween companion threads.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/thread-bridge/validate",
+      "summary": "Thread Bridge Validate Endpoint",
+      "description": "Validate continuity between two threads before transfer\n\nChecks anchor alignment, drift levels, and ethics compatibility.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/bridges/cross-repo",
+      "summary": "V2 Create Cross Repo Bridge",
+      "description": "Create a cross-repository bridge for thread continuity.\n\nInitiates 7-stage handshake between repositories.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "source_repo",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Source Repo"
+          }
+        },
+        {
+          "name": "target_repo",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Target Repo"
+          }
+        },
+        {
+          "name": "thread_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/bridges/{bridge_id}/handshake",
+      "summary": "V2 Execute Cross Repo Handshake",
+      "description": "Execute 7-stage cross-repository handshake.\n\nCompletes thread transfer between repositories with full validation.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "bridge_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Bridge Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/cluster/health",
+      "summary": "V2 Get Cluster Health",
+      "description": "Get overall cluster health status.\n\nReturns: Aggregate metrics across all nodes",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/consensus/elect",
+      "summary": "V2 Trigger Election",
+      "description": "Trigger a Raft consensus leader election.\n\nWARNING: Use only for testing or emergency recovery.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/corrections/apply",
+      "summary": "V2 Apply Correction",
+      "description": "Apply auto-correction actions based on drift prediction.\n\nEvaluates correction strategies and executes if drift exceeds threshold.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "thread_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "predicted_drift",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "number",
+            "title": "Predicted Drift"
+          }
+        },
+        {
+          "name": "current_drift",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "number",
+            "title": "Current Drift"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/drift/accuracy",
+      "summary": "V2 Get Prediction Accuracy",
+      "description": "Get prediction accuracy metrics.\n\nReturns: Historical accuracy statistics for drift predictions",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/drift/observe",
+      "summary": "V2 Record Observation",
+      "description": "Record a drift observation for pattern analysis.\n\nAdds data point to historical drift tracking.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "drift",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "number",
+            "title": "Drift"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/drift/patterns",
+      "summary": "V2 Analyze Patterns",
+      "description": "Analyze historical drift patterns.\n\nReturns detected patterns: stable, trending, cyclical, volatile, anomalous",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/drift/predict",
+      "summary": "V2 Predict Drift",
+      "description": "Predict future drift based on current features.\n\nUses LSTM model with 11-feature input for 24-hour prediction.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/layers/bridge",
+      "summary": "V2 Create Layer Bridge",
+      "description": "Create a multi-layer bridge (L1/L2/L3).\n\nL1: Thread-to-thread (5 stages, 0.0% max drift)\nL2: Repo-to-repo (7 stages, 0.1% max drift)\nL3: Cluster-to-cluster (9 stages, 0.5% max drift, PKI required)",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/layers/bridges",
+      "summary": "V2 List Layer Bridges",
+      "description": "List all layer bridges, optionally filtered by thread_id or layer.\n\nReturns array of bridge metadata with current status.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "thread_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "layer",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Layer"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/layers/cascade-validate",
+      "summary": "V2 Cascade Validate",
+      "description": "Perform cascading validation across all layers for a thread.\n\nValidates L1 \u2192 L2 \u2192 L3 dependencies and cross-layer consistency.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "thread_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/layers/statistics",
+      "summary": "V2 Get Layer Statistics",
+      "description": "Get layer management statistics.\n\nReturns: Counts by layer, status, and aggregate metrics",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/layers/validate",
+      "summary": "V2 Validate Hierarchy",
+      "description": "Validate multi-layer hierarchy for a thread.\n\nChecks: layer completion, drift tolerance, PKI (L3), dependencies",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "thread_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Thread Id"
+          }
+        },
+        {
+          "name": "strict_mode",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "boolean",
+            "default": false,
+            "title": "Strict Mode"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/layers/{bridge_id}/handshake",
+      "summary": "V2 Execute Layered Handshake",
+      "description": "Execute layer-specific handshake protocol.\n\nCompletes all stages for the bridge's layer with proper validation.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "bridge_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Bridge Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/nodes",
+      "summary": "V2 List Nodes",
+      "description": "List all registered bridge nodes.\n\nReturns: Array of node metadata with current status and load",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/nodes/register",
+      "summary": "V2 Register Node",
+      "description": "Register a new bridge node in the distributed constellation.\n\nRequires: hostname, port, region, capacity, version\nReturns: Node metadata with unique node_id",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v2/nodes/{node_id}",
+      "summary": "V2 Unregister Node",
+      "description": "Unregister a bridge node from the constellation.\n\nGracefully removes node from registry and load balancing pool.\n\nSECURITY: CSRF protection via token validation (HIGH-4 remediation)",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "node_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Node Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v2/nodes/{node_id}/health",
+      "summary": "V2 Get Node Health",
+      "description": "Get detailed health status for a specific node.\n\nReturns: 4-metric health check (heartbeat, API, anchor, drift)",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "node_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Node Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/repos/register",
+      "summary": "V2 Register Repository",
+      "description": "Register a Git repository for cross-repo synchronization.\n\nEnables anchor propagation and thread continuity across repos.",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v2/repos/{repo_id}/sync",
+      "summary": "V2 Sync Repository",
+      "description": "Synchronize a registered repository.\n\nPulls latest changes and pushes local anchors.\nDirection: push, pull, or bidirectional",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "repo_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Repo Id"
+          }
+        },
+        {
+          "name": "direction",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "default": "bidirectional",
+            "title": "Direction"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/agents/sync",
+      "summary": "Sync Agent Status",
+      "description": "Synchronize agent status across repositories.\n\nFlags missing agents or alignment drift, returns change log.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/context/export",
+      "summary": "Export Context",
+      "description": "Export signed capsule context for external repository.\n\nCreates a multi-repo capsule with linked repository info, shared anchors,\nand agent roster. Logs export with DLP tracking.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/context/import",
+      "summary": "Import Context",
+      "description": "Import and validate capsule from external repository.\n\nValidates seals/anchors, runs ethics checks, and returns activation report.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/drift/diff",
+      "summary": "Compute Capsule Diff",
+      "description": "Compute difference between capsule states before/after an operation.\n\nReturns detailed diff showing changes in drift, agents, repos, and anchors.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/collab/drift/events",
+      "summary": "Get Drift Events",
+      "description": "Get drift events with optional filtering.\n\nQuery Parameters:\n    - level: Filter by drift level (green, yellow, red)\n    - event_type: Filter by event type\n    - limit: Maximum number of events to return (default: 50, max: 200)",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [
+        {
+          "name": "level",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          }
+        },
+        {
+          "name": "event_type",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Type"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "default": 50,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": {
+        "required": false,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/collab/drift/statistics",
+      "summary": "Get Drift Statistics",
+      "description": "Get detailed drift statistics and trends.\n\nReturns comprehensive drift metrics, event counts, and trend analysis.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": false,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/invite",
+      "summary": "Repo Linking Invite",
+      "description": "Initiate repository linking invitation.\n\nExchanges anchors, permissions, and establishes trust chain.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/collab/status",
+      "summary": "Get Collab Status",
+      "description": "Get current cross-repo collaboration system status.\n\nReturns active capsules, agent roster, drift metrics.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": false,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/collab/workflow/trigger",
+      "summary": "Trigger Workflow",
+      "description": "Trigger build/test workflow in external repository.\n\nSupports event chaining for multi-repo sync.\nNote: Requires GitHub API credentials for actual workflow triggering.",
+      "tags": [
+        "cross-repo-collaboration"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "404": {
+          "description": "Not found",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/data/health",
+      "summary": "Health check for Data Guardian service",
+      "description": "Check if Data Guardian service is operational",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/data/pii-types",
+      "summary": "List detectable PII types",
+      "description": "Get list of PII types that can be detected",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/data/redact",
+      "summary": "Redact PII from data",
+      "description": "Detect and redact PII from provided data using specified strategy",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/data/regions",
+      "summary": "List supported regions",
+      "description": "Get list of supported regions for PII detection rules",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/data/scan",
+      "summary": "Scan data for PII",
+      "description": "Scan provided data structure for personally identifiable information (PII)",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/data/strategies",
+      "summary": "List available redaction strategies",
+      "description": "Get list of available PII redaction strategies",
+      "tags": [
+        "Data Guardian"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/geometric/mult",
+      "summary": "Geometric Product",
+      "description": "",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/geometric/vector",
+      "summary": "Create Vector",
+      "description": "",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/gumas/categories",
+      "summary": "Get Categories",
+      "description": "Get all available rule categories\n\nDLP: gumas_categories",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/gumas/evaluate",
+      "summary": "Evaluate Action",
+      "description": "Evaluate an action against ethics rules\n\nReturns list of violations (if any) and whether action should be blocked.\n\nDLP: gumas_evaluate_action",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/gumas/health",
+      "summary": "Health Check",
+      "description": "Health check endpoint for GUMAS Ethics API\n\nDLP: gumas_health",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/gumas/rules",
+      "summary": "Get Rules",
+      "description": "Get all configured ethics rules\n\nDLP: gumas_rules_list",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/gumas/rules",
+      "summary": "Add Rule",
+      "description": "Add a new ethics rule\n\nDLP: gumas_add_rule",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/gumas/rules/{rule_id}",
+      "summary": "Get Rule",
+      "description": "Get specific rule by ID\n\nDLP: gumas_rule_detail",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [
+        {
+          "name": "rule_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Rule Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/gumas/rules/{rule_id}",
+      "summary": "Delete Rule",
+      "description": "Delete an ethics rule\n\nDLP: gumas_delete_rule",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [
+        {
+          "name": "rule_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Rule Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Successful Response",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/gumas/rules/{rule_id}/register-evaluator",
+      "summary": "Register Custom Evaluator",
+      "description": "Register a custom condition evaluator for a rule\n\nNote: This endpoint is for documentation purposes. Custom evaluators\nmust be registered programmatically via the EthicsEngine API.\n\nDLP: gumas_register_evaluator",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [
+        {
+          "name": "rule_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Rule Id"
+          }
+        },
+        {
+          "name": "condition",
+          "in": "query",
+          "required": true,
+          "description": "Condition pattern to register evaluator for",
+          "schema": {
+            "type": "string",
+            "description": "Condition pattern to register evaluator for",
+            "title": "Condition"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/gumas/severities",
+      "summary": "Get Severities",
+      "description": "Get all available violation severity levels\n\nDLP: gumas_severities",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/gumas/violations",
+      "summary": "Get Violations",
+      "description": "Get violations with optional filtering\n\nDLP: gumas_violations_query",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/gumas/violations",
+      "summary": "Clear Violations",
+      "description": "Clear old violations\n\nDLP: gumas_clear_violations",
+      "tags": [
+        "GUMAS Ethics"
+      ],
+      "parameters": [
+        {
+          "name": "before",
+          "in": "query",
+          "required": false,
+          "description": "Clear violations before this ISO timestamp",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Clear violations before this ISO timestamp",
+            "title": "Before"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Successful Response",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "summary": "Health Check",
+      "description": "Health check endpoint",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/hr_system/analyze_staffing",
+      "summary": "Analyze Staffing Needs",
+      "description": "Analyze staffing needs for a department\n\nReturns staffing gap analysis and recommendations.",
+      "tags": [
+        "HR System"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/hr_system/generate_character",
+      "summary": "Generate Character",
+      "description": "Generate a quantum-symbolic character profile\n\nCreates crew member profile with skills, background, and personality.",
+      "tags": [
+        "HR System"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hr_system/health",
+      "summary": "Health Check",
+      "description": "Health check endpoint for HR System module",
+      "tags": [
+        "HR System"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hr_system/organizational_intel",
+      "summary": "Get Organizational Intelligence",
+      "description": "Get organizational intelligence and capacity planning\n\nReturns department structure, capacity, and staffing insights.",
+      "tags": [
+        "HR System"
+      ],
+      "parameters": [
+        {
+          "name": "department",
+          "in": "query",
+          "required": false,
+          "description": "Filter by department",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by department",
+            "title": "Department"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ledger/entry/{entry_id}",
+      "summary": "Get Entry by ID",
+      "description": "Retrieve a specific ledger entry by its unique identifier",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [
+        {
+          "name": "entry_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Entry Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/ledger/export",
+      "summary": "Export Ledger",
+      "description": "Export complete ledger to JSON file for backup or analysis",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [
+        {
+          "name": "output_path",
+          "in": "query",
+          "required": true,
+          "description": "Output file path",
+          "schema": {
+            "type": "string",
+            "description": "Output file path",
+            "title": "Output Path"
+          }
+        },
+        {
+          "name": "include_genesis",
+          "in": "query",
+          "required": false,
+          "description": "Include genesis entry in export",
+          "schema": {
+            "type": "boolean",
+            "description": "Include genesis entry in export",
+            "default": true,
+            "title": "Include Genesis"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ledger/health",
+      "summary": "Ledger Health Check",
+      "description": "Quick health check for ledger service",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/ledger/history",
+      "summary": "Query Ledger History",
+      "description": "Query ledger entries with flexible filters (time, type, source, tags, etc.)",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": false,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/ledger/insight",
+      "summary": "Record New Insight",
+      "description": "Record a new insight in the immutable ledger with cryptographic signature",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ledger/stats",
+      "summary": "Get Ledger Statistics",
+      "description": "Retrieve ledger health metrics, entry counts, and integrity status",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ledger/verify",
+      "summary": "Verify Ledger Integrity",
+      "description": "Cryptographically verify the integrity of the entire ledger or a subset",
+      "tags": [
+        "Insight Ledger"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Max entries to verify (None=all)",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100000,
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Max entries to verify (None=all)",
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/compress",
+      "summary": "Compress Memories",
+      "description": "Manually trigger memory compression",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [
+        {
+          "name": "compression_ratio",
+          "in": "query",
+          "required": false,
+          "description": "Compression ratio",
+          "schema": {
+            "type": "number",
+            "maximum": 0.9,
+            "minimum": 0.1,
+            "description": "Compression ratio",
+            "default": 0.5,
+            "title": "Compression Ratio"
+          }
+        },
+        {
+          "name": "importance_threshold",
+          "in": "query",
+          "required": false,
+          "description": "Importance threshold",
+          "schema": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "description": "Importance threshold",
+            "default": 5.0,
+            "title": "Importance Threshold"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/create",
+      "summary": "Create Memory",
+      "description": "Create a new memory item with quantum-symbolic capabilities",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/memory/export",
+      "summary": "Export System State",
+      "description": "Export complete system state",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/memory/health",
+      "summary": "Health Check",
+      "description": "Health check for AuMemManager system",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/lifecycle/batch_process",
+      "summary": "Batch Process Lifecycle",
+      "description": "Process memory lifecycle operations (decay, compression, cleanup)",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/memory/metrics",
+      "summary": "Get System Metrics",
+      "description": "Get comprehensive system metrics",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/quantum/create_vector",
+      "summary": "Create Quantum Vector",
+      "description": "Create a quantum-symbolic vector for memory management",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/quantum/entangle",
+      "summary": "Entangle Vectors",
+      "description": "Create quantum entanglement between two vectors",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [
+        {
+          "name": "vector1_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Vector1 Id"
+          }
+        },
+        {
+          "name": "vector2_id",
+          "in": "query",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Vector2 Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/memory/quantum/network_analysis",
+      "summary": "Get Quantum Network Analysis",
+      "description": "Get detailed quantum entanglement network analysis",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/quantum/trajectory",
+      "summary": "Compute Trajectory",
+      "description": "Compute quantum vector trajectory using flight control",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/memory/retrieve",
+      "summary": "Retrieve Memories",
+      "description": "Retrieve memories using attention-based scoring",
+      "tags": [
+        "AuMemManager"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/monitoring/action/evaluate",
+      "summary": "Evaluate Action",
+      "description": "Evaluate action against ethics rules",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/agent/{agent_id}/status",
+      "summary": "Get Agent Status",
+      "description": "Get comprehensive status for an agent",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/alerts",
+      "summary": "Get Alerts",
+      "description": "Get drift alerts",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by agent ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by agent ID",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "level",
+          "in": "query",
+          "required": false,
+          "description": "Filter by alert level",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by alert level",
+            "title": "Level"
+          }
+        },
+        {
+          "name": "since_hours",
+          "in": "query",
+          "required": false,
+          "description": "Hours to look back",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hours to look back",
+            "default": 24,
+            "title": "Since Hours"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/audit",
+      "summary": "Get Audit Log",
+      "description": "Get audit log entries",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by agent ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by agent ID",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "event_type",
+          "in": "query",
+          "required": false,
+          "description": "Filter by event type",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by event type",
+            "title": "Event Type"
+          }
+        },
+        {
+          "name": "since_hours",
+          "in": "query",
+          "required": false,
+          "description": "Hours to look back",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hours to look back",
+            "default": 24,
+            "title": "Since Hours"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/monitoring/baseline",
+      "summary": "Establish Baseline",
+      "description": "Establish behavioral baseline for an agent",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/monitoring/behavior/check",
+      "summary": "Check Behavior",
+      "description": "Check agent behavior for drift",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": true,
+          "description": "Agent identifier",
+          "schema": {
+            "type": "string",
+            "description": "Agent identifier",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "context_tag",
+          "in": "query",
+          "required": false,
+          "description": "DLP context tag",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "DLP context tag",
+            "title": "Context Tag"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/monitoring/behavior/record",
+      "summary": "Record Behavior",
+      "description": "Record behavioral metrics for an agent",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/compliance/report",
+      "summary": "Get Compliance Report",
+      "description": "Generate compliance report",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "since_hours",
+          "in": "query",
+          "required": false,
+          "description": "Hours to look back",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hours to look back",
+            "default": 168,
+            "title": "Since Hours"
+          }
+        },
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Specific agent ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Specific agent ID",
+            "title": "Agent Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/dashboard/stats",
+      "summary": "Get Dashboard Stats",
+      "description": "Get overall dashboard statistics",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/export",
+      "summary": "Export State",
+      "description": "Export full monitoring system state",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/health",
+      "summary": "Health Check",
+      "description": "Health check for monitoring system",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/monitoring/violations",
+      "summary": "Get Violations",
+      "description": "Get ethics violations",
+      "tags": [
+        "monitoring"
+      ],
+      "parameters": [
+        {
+          "name": "agent_id",
+          "in": "query",
+          "required": false,
+          "description": "Filter by agent ID",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by agent ID",
+            "title": "Agent Id"
+          }
+        },
+        {
+          "name": "severity",
+          "in": "query",
+          "required": false,
+          "description": "Filter by severity",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by severity",
+            "title": "Severity"
+          }
+        },
+        {
+          "name": "since_hours",
+          "in": "query",
+          "required": false,
+          "description": "Hours to look back",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hours to look back",
+            "default": 24,
+            "title": "Since Hours"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/capacity/{team_member}",
+      "summary": "Capacity",
+      "description": "",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "team_member",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Team Member"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/coherence/full",
+      "summary": "Full Coherence",
+      "description": "",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/coherence/mediation",
+      "summary": "Coherence Mediation",
+      "description": "Return low-coherence pairs with anchor suggestions.\n\nComplexity kept low via small dedicated helper steps.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "threshold",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "number",
+            "default": 0.55,
+            "title": "Threshold"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "type": "integer",
+            "default": 25,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/health",
+      "summary": "Rd Health",
+      "description": "",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/projects",
+      "summary": "List Projects",
+      "description": "List all active R&D projects with basic metadata.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rd/projects",
+      "summary": "Create Project",
+      "description": "Create new R&D project with DLP tracking.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rd/projects/{project_id}/advance",
+      "summary": "Advance Stage",
+      "description": "Advance project to next stage with milestone tracking.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Project Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rd/projects/{project_id}/coherence",
+      "summary": "Update Coherence",
+      "description": "Calculate team coherence score using VSA vectors.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Project Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rd/projects/{project_id}/readiness",
+      "summary": "Update Readiness",
+      "description": "Calculate production readiness score for project.",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [
+        {
+          "name": "project_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Project Id"
+          }
+        },
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rd/report",
+      "summary": "Report",
+      "description": "",
+      "tags": [
+        "rd-pipeline"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/alerts",
+      "summary": "Get Alerts",
+      "description": "Get alerts with optional filtering.\n\nArgs:\n    active_only: Only return unresolved alerts\n    severity: Filter by severity (info/warning/error/critical)\n\nReturns:\n    Alert list and statistics",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [
+        {
+          "name": "active_only",
+          "in": "query",
+          "required": false,
+          "description": "Filter to active alerts only",
+          "schema": {
+            "type": "boolean",
+            "description": "Filter to active alerts only",
+            "default": true,
+            "title": "Active Only"
+          }
+        },
+        {
+          "name": "severity",
+          "in": "query",
+          "required": false,
+          "description": "Filter by severity",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by severity",
+            "title": "Severity"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sentinel/alerts/acknowledge",
+      "summary": "Acknowledge Alert",
+      "description": "Acknowledge an alert.\n\nArgs:\n    request: Alert acknowledgment request with alert_id\n\nReturns:\n    Success status",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sentinel/alerts/resolve",
+      "summary": "Resolve Alert",
+      "description": "Resolve an alert.\n\nArgs:\n    request: Alert resolution request with alert_id\n\nReturns:\n    Success status",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/alerts/rules",
+      "summary": "Get Alert Rules",
+      "description": "Get all configured alert rules.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sentinel/alerts/rules",
+      "summary": "Create Alert Rule",
+      "description": "Create a new alert rule.\n\nArgs:\n    rule_request: Alert rule configuration\n\nReturns:\n    Created rule details",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/sentinel/alerts/rules/{rule_name}",
+      "summary": "Delete Alert Rule",
+      "description": "Delete an alert rule.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [
+        {
+          "name": "rule_name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Rule Name"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/dashboard",
+      "summary": "Get Dashboard",
+      "description": "Get comprehensive dashboard data.\n\nReturns health, metrics, alerts, and system info in single response.\nIdeal for dashboard UI that needs all data at once.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/health",
+      "summary": "Get Health",
+      "description": "Get comprehensive health report.\n\nReturns overall system health status with individual checks for CPU,\nmemory, and disk usage, plus active alert counts.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/metrics",
+      "summary": "Get Metrics Summary",
+      "description": "Get summary of all collected metrics.\n\nReturns metric names, data point counts, collection info, and stats\nfor key system metrics (CPU, memory, disk).",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sentinel/metrics/collect",
+      "summary": "Trigger Collection",
+      "description": "Manually trigger metric collection.\n\nUseful for testing or forcing immediate data refresh.\n\nReturns:\n    Collection results with metrics collected and alerts triggered",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/metrics/{metric_name}",
+      "summary": "Get Metric Stats",
+      "description": "Get detailed statistics for a specific metric.\n\nArgs:\n    metric_name: Name of metric to query\n\nReturns:\n    Statistics including avg, min, max, trend, latest value",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [
+        {
+          "name": "metric_name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Metric Name"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/metrics/{metric_name}/history",
+      "summary": "Get Metric History",
+      "description": "Get historical values for a metric.\n\nArgs:\n    metric_name: Name of metric to query\n    count: Number of recent values to return (1-1000)\n\nReturns:\n    List of recent metric values",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [
+        {
+          "name": "metric_name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Metric Name"
+          }
+        },
+        {
+          "name": "count",
+          "in": "query",
+          "required": false,
+          "description": "Number of recent values",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "description": "Number of recent values",
+            "default": 100,
+            "title": "Count"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/notifications/channels",
+      "summary": "List Notification Channels",
+      "description": "List all registered notification channels.\n\nReturns channel names, types, and status.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/notifications/history",
+      "summary": "Get Notification History",
+      "description": "Get notification history.\n\nArgs:\n    limit: Number of recent notifications to return (1-1000)\n\nReturns:\n    List of notification records with alert ID, channel, success status",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Number of records to return",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "description": "Number of records to return",
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sentinel/notifications/status",
+      "summary": "Get Notification Status",
+      "description": "Get notification system status.\n\nReturns enabled channels, configuration, and recent notification history.",
+      "tags": [
+        "monitoring",
+        "resilience"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/backends",
+      "summary": "List Available Backends",
+      "description": "List available quantum backends.\n\nReturns:\n    Dict with list of available backend names\n\nExample Response:\n    ```json\n    {\n        \"available_backends\": [\"mock\", \"simulator\"],\n        \"total_count\": 2\n    }\n    ```",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/simulate/cache/clear",
+      "summary": "Clear Cache",
+      "description": "Clear simulation cache.\n\nArgs:\n    expired_only: If True, only remove expired entries. If False, clear all.\n\nReturns:\n    204 No Content on success",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "expired_only",
+          "in": "query",
+          "required": false,
+          "description": "Clear only expired entries",
+          "schema": {
+            "type": "boolean",
+            "description": "Clear only expired entries",
+            "default": false,
+            "title": "Expired Only"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Successful Response",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/cache/stats",
+      "summary": "Get Cache Stats",
+      "description": "Get cache statistics and metrics.\n\nReturns:\n    Dict with cache performance metrics:\n    - total_entries: Total cached simulations\n    - active_entries: Non-expired entries\n    - expired_entries: Expired entries pending cleanup\n    - cache_utilization: Percentage of cache capacity used\n    - symbolic_nodes: Number of scenario genealogy relationships\n\nExample Response:\n    ```json\n    {\n        \"total_entries\": 156,\n        \"active_entries\": 142,\n        \"expired_entries\": 14,\n        \"total_accesses\": 1847,\n        \"avg_access_count\": 13.0,\n        \"cache_utilization\": 0.156,\n        \"symbolic_nodes\": 23\n    }\n    ```",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/simulate/forecast",
+      "summary": "Run Forecast",
+      "description": "Run quantum-enhanced forecasting simulation.\n\nSpecialized endpoint for supply chain and energy grid forecasting scenarios.\nValidates that forecast_config is provided.\n\nArgs:\n    request: Scenario configuration with forecast parameters\n\nReturns:\n    SimulationResult with forecast time series\n\nRaises:\n    HTTPException: 400 if forecast_config is missing",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "202": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/genealogy/{simulation_id}",
+      "summary": "Get Scenario Genealogy",
+      "description": "Get scenario genealogy (parent chain).\n\nReturns the chain of parent simulations that led to this scenario,\nuseful for tracking scenario evolution and parameter optimization.\n\nArgs:\n    simulation_id: Simulation identifier\n\nReturns:\n    Dict with genealogy information:\n    - simulation_id: Current simulation ID\n    - parents: List of parent simulation IDs (oldest first)\n\nExample Response:\n    ```json\n    {\n        \"simulation_id\": \"sim_20251026_120000_abc123\",\n        \"parents\": [\"sim_20251025_100000_xyz789\", \"sim_20251024_140000_def456\"]\n    }\n    ```",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "simulation_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Simulation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/health",
+      "summary": "Quantum Simulator Health",
+      "description": "Health check for quantum simulator service.\n\nReturns:\n    Dict with service health status\n\nExample Response:\n    ```json\n    {\n        \"status\": \"healthy\",\n        \"orchestrator_initialized\": true,\n        \"available_backends\": 2,\n        \"cache_active_entries\": 142,\n        \"message\": \"Quantum simulator operational\"\n    }\n    ```",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/results/{simulation_id}",
+      "summary": "Get Simulation Result",
+      "description": "Retrieve simulation result by ID.\n\nChecks cache first, returns cached result if available and not expired.\n\nArgs:\n    simulation_id: Unique simulation identifier\n\nReturns:\n    SimulationResult if found\n\nRaises:\n    HTTPException: 404 if simulation not found or expired",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "simulation_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Simulation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/simulate/results/{simulation_id}",
+      "summary": "Delete Simulation Result",
+      "description": "Delete cached simulation result.\n\nArgs:\n    simulation_id: Simulation identifier\n\nRaises:\n    HTTPException: 404 if simulation not found",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "simulation_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Simulation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "description": "Successful Response",
+          "content": []
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/simulate/scenario",
+      "summary": "Run Simulation",
+      "description": "Run quantum-classical hybrid simulation scenario.\n\nExecutes simulation asynchronously and returns result. For long-running\nsimulations, use the progress WebSocket endpoint to track status.\n\nArgs:\n    request: Scenario configuration and parameters\n\nReturns:\n    SimulationResult with measurement, optimization, and/or forecast results\n\nExample:\n    ```json\n    {\n        \"name\": \"Q1 Supply Chain Optimization\",\n        \"scenario_type\": \"supply_chain\",\n        \"backend\": \"mock\",\n        \"optimization_method\": \"qaoa\",\n        \"parameters\": {\"max_iterations\": 100},\n        \"forecast_config\": {\n            \"time_steps\": 30,\n            \"variables\": [\"inventory\", \"demand\", \"cost\"]\n        },\n        \"seed\": 42,\n        \"tags\": [\"supply-chain\", \"q1-2025\"]\n    }\n    ```",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "202": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/scenarios",
+      "summary": "List Scenarios",
+      "description": "List cached simulation scenarios with optional filtering.\n\nArgs:\n    scenario_type: Filter by scenario type (supply_chain, energy_grid, etc.)\n    status: Filter by status (completed, running, failed)\n    limit: Maximum number of results (1-1000)\n\nReturns:\n    List of scenario summaries, sorted by start time (most recent first)\n\nExample:\n    GET /simulate/scenarios?scenario_type=supply_chain&status=completed&limit=50",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "scenario_type",
+          "in": "query",
+          "required": false,
+          "description": "Filter by scenario type",
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScenarioType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by scenario type",
+            "title": "Scenario Type"
+          }
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "Filter by status",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by status",
+            "title": "Status"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "description": "Maximum results",
+          "schema": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1,
+            "description": "Maximum results",
+            "default": 100,
+            "title": "Limit"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/simulate/status/{simulation_id}",
+      "summary": "Get Simulation Status",
+      "description": "Get current status of running simulation.\n\nArgs:\n    simulation_id: Simulation identifier\n\nReturns:\n    SimulationStatus with progress and estimated time remaining\n\nRaises:\n    HTTPException: 404 if simulation not found",
+      "tags": [
+        "quantum-simulator"
+      ],
+      "parameters": [
+        {
+          "name": "simulation_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Simulation Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sonnet4/clients/{client_id}",
+      "summary": "Get Client Sonnet4 Status",
+      "description": "Get Claude Sonnet 4 status for specific client",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "client_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Client Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sonnet4/enable",
+      "summary": "Enable Sonnet4",
+      "description": "Enable Claude Sonnet 4 for all clients or specific client",
+      "tags": [],
+      "parameters": [
+        {
+          "name": "session_id",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sonnet4/status",
+      "summary": "Get Sonnet4 Status",
+      "description": "Get Claude Sonnet 4 status",
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/execute",
+      "summary": "Execute Subroutine",
+      "description": "Execute a subroutine with provided inputs.\n\nArgs:\n    request: Execution request with subroutine ID and inputs\n    \nReturns:\n    Execution result",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/export",
+      "summary": "Export Registry",
+      "description": "Export full registry state.\n\nReturns:\n    Complete registry export with all subroutines",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/get/{subroutine_id}",
+      "summary": "Get Subroutine",
+      "description": "Get details for a specific subroutine.\n\nArgs:\n    subroutine_id: Subroutine unique ID\n    \nReturns:\n    Subroutine details",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [
+        {
+          "name": "subroutine_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Subroutine Id"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/health",
+      "summary": "Health Check",
+      "description": "Health check for subroutine system.\n\nReturns:\n    Health status",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/list",
+      "summary": "List Subroutines",
+      "description": "List all registered subroutines with optional filters.\n\nArgs:\n    category: Filter by category\n    status_filter: Filter by status\n    \nReturns:\n    List of subroutines",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          }
+        },
+        {
+          "name": "status_filter",
+          "in": "query",
+          "required": false,
+          "description": "",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Filter"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/register",
+      "summary": "Register Subroutine",
+      "description": "Register a new subroutine in the system.\n\nReturns:\n    Registered subroutine details",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/subroutines/search",
+      "summary": "Search Subroutines",
+      "description": "Search subroutines by query, category, status, or tags.\n\nReturns:\n    List of matching subroutines",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/subroutines/stats",
+      "summary": "Get Registry Stats",
+      "description": "Get registry statistics.\n\nReturns:\n    Registry statistics including counts by category and status",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/subroutines/status/{subroutine_id}",
+      "summary": "Update Subroutine Status",
+      "description": "Update subroutine status.\n\nArgs:\n    subroutine_id: Subroutine ID\n    request: New status\n    \nReturns:\n    Updated subroutine",
+      "tags": [
+        "subroutines"
+      ],
+      "parameters": [
+        {
+          "name": "subroutine_id",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Subroutine Id"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/components",
+      "summary": "List Components",
+      "description": "List all registered components\n\nReturns list of components, optionally filtered by status.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "description": "Filter by status",
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ComponentStatusEnum"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by status",
+            "title": "Status"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/synergy/components",
+      "summary": "Register Component",
+      "description": "Register a new component in the registry\n\nCreates or updates component registration with dependencies.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "201": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/components/{name}",
+      "summary": "Get Component",
+      "description": "Get details for a specific component\n\nReturns component metadata including dependencies and status.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Name"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/synergy/components/{name}/status",
+      "summary": "Update Component Status",
+      "description": "Update component health status\n\nUpdates the operational status of a registered component.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Name"
+          }
+        }
+      ],
+      "request_body": {
+        "required": true,
+        "content": [
+          "application/json"
+        ]
+      },
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/conflicts",
+      "summary": "Detect Conflicts",
+      "description": "Detect dependency conflicts in the registry\n\nIdentifies circular dependencies, missing dependencies, and version conflicts.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/dependencies/{name}",
+      "summary": "Get Dependencies",
+      "description": "Get dependencies for a component\n\nReturns direct dependencies or full transitive dependency tree.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [
+        {
+          "name": "name",
+          "in": "path",
+          "required": true,
+          "description": "",
+          "schema": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        {
+          "name": "recursive",
+          "in": "query",
+          "required": false,
+          "description": "Include transitive dependencies",
+          "schema": {
+            "type": "boolean",
+            "description": "Include transitive dependencies",
+            "default": false,
+            "title": "Recursive"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/export",
+      "summary": "Export Registry",
+      "description": "Export complete registry state\n\nReturns all registry data for backup, analysis, or integration.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [
+        {
+          "name": "context_tag",
+          "in": "query",
+          "required": false,
+          "description": "DLP context tag",
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "DLP context tag",
+            "title": "Context Tag"
+          }
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        },
+        "422": {
+          "description": "Validation Error",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/synergy/health",
+      "summary": "Registry Health",
+      "description": "Get registry health status\n\nReturns metrics about registry state and component health distribution.",
+      "tags": [
+        "Synergy Dashboard"
+      ],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "description": "Successful Response",
+          "content": [
+            "application/json"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "mission": "SSMT_v3_0_Phase_2_Deletion",
+  "timestamp": "2025-09-24T05:46:56.119474",
+  "branches_deleted": [],
+  "deletion_results": [
+    {
+      "branch": "AUo959-patch-2",
+      "status": "failed",
+      "message": "error: unable to delete 'AUo959-patch-2': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "AUo959-patch-3",
+      "status": "failed",
+      "message": "error: unable to delete 'AUo959-patch-3': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "alert-autofix-34",
+      "status": "failed",
+      "message": "error: unable to delete 'alert-autofix-34': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "copilot/fix-304c3a01-1eab-427a-8ff6-102ec9cf8114",
+      "status": "failed",
+      "message": "error: unable to delete 'copilot/fix-304c3a01-1eab-427a-8ff6-102ec9cf8114': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "copilot/fix-51",
+      "status": "failed",
+      "message": "error: unable to delete 'copilot/fix-51': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "dependabot/npm_and_yarn/dotenv-17.1.0",
+      "status": "failed",
+      "message": "error: unable to delete 'dependabot/npm_and_yarn/dotenv-17.1.0': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "dependabot/npm_and_yarn/eslint-9.30.1",
+      "status": "failed",
+      "message": "error: unable to delete 'dependabot/npm_and_yarn/eslint-9.30.1': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    },
+    {
+      "branch": "dependabot/pip/pandas-2.3.1",
+      "status": "failed",
+      "message": "error: unable to delete 'dependabot/pip/pandas-2.3.1': remote ref does not exist\nerror: failed to push some refs to 'https://github.com/AUo959/aurora-cloudbank-symbolic'"
+    }
+  ],
+  "safety_verified": true,
+  "auto_executed": true,
+  "successful_deletions": 0,
+  "total_attempted": 8
+}

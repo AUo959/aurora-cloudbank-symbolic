@@ -1,0 +1,2536 @@
+{
+  "anchor": "T1-SECURITY-FIX-2025",
+  "timestamp": "2025-09-25T02:44:40.482512",
+  "total_fixes": 360,
+  "fixes_by_type": {
+    "yaml_load": 0,
+    "subprocess_shell": 343,
+    "hardcoded_creds": 1,
+    "eval_exec": 16
+  },
+  "fixes_applied": [
+    {
+      "file": "security_hardening_final.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_hardening_final.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SECURITY_HARDENING_FINAL"
+    },
+    {
+      "file": "setup_aurora_branches.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/setup_aurora_branches.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SETUP_AURORA_BRANCHES"
+    },
+    {
+      "file": "aurora_adaptive_learning.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_adaptive_learning.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_ADAPTIVE_LEARNING"
+    },
+    {
+      "file": "security_remediation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_remediation.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SECURITY_REMEDIATION"
+    },
+    {
+      "file": "enable_sonnet4.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/enable_sonnet4.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ENABLE_SONNET4"
+    },
+    {
+      "file": "advanced_issue_resolver.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/advanced_issue_resolver.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ADVANCED_ISSUE_RESOLVER"
+    },
+    {
+      "file": "encrypto_bot_keymgr.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/encrypto_bot_keymgr.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ENCRYPTO_BOT_KEYMGR"
+    },
+    {
+      "file": "fix_remaining_syntax.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_remaining_syntax.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_REMAINING_SYNTAX"
+    },
+    {
+      "file": "security_verification.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_verification.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SECURITY_VERIFICATION"
+    },
+    {
+      "file": "bulk_python_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/bulk_python_fixer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BULK_PYTHON_FIXER"
+    },
+    {
+      "file": "robust_git_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/robust_git_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ROBUST_GIT_MANAGER"
+    },
+    {
+      "file": "git_performance_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/git_performance_optimizer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GIT_PERFORMANCE_OPTIMIZER"
+    },
+    {
+      "file": "aurora_quantum_processor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_quantum_processor.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_QUANTUM_PROCESSOR"
+    },
+    {
+      "file": "critical_issue_resolver_clean.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/critical_issue_resolver_clean.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CRITICAL_ISSUE_RESOLVER_CLEAN"
+    },
+    {
+      "file": "test_basic_functionality.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_basic_functionality.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_BASIC_FUNCTIONALITY"
+    },
+    {
+      "file": "aurora_integration_readiness.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_integration_readiness.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_INTEGRATION_READINESS"
+    },
+    {
+      "file": "test_gitwiz.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_gitwiz.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_GITWIZ"
+    },
+    {
+      "file": "simple_git_operations.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/simple_git_operations.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SIMPLE_GIT_OPERATIONS"
+    },
+    {
+      "file": "aurora_enhancement_executor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_enhancement_executor.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_ENHANCEMENT_EXECUTOR"
+    },
+    {
+      "file": "aurora_realworld_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_realworld_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_REALWORLD_INTEGRATION"
+    },
+    {
+      "file": "resolve_codeql_issues.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/resolve_codeql_issues.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-RESOLVE_CODEQL_ISSUES"
+    },
+    {
+      "file": "aurora_gui_cloudhub_fastapi.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_gui_cloudhub_fastapi.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_GUI_CLOUDHUB_FASTAPI"
+    },
+    {
+      "file": "github_issue_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/github_issue_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GITHUB_ISSUE_MANAGER"
+    },
+    {
+      "file": "systematic_import_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/systematic_import_fixer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SYSTEMATIC_IMPORT_FIXER"
+    },
+    {
+      "file": "gitwiz_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_cleanup.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GITWIZ_CLEANUP"
+    },
+    {
+      "file": "fix_braces.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_braces.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_BRACES"
+    },
+    {
+      "file": "comprehensive_syntax_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/comprehensive_syntax_fixer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-COMPREHENSIVE_SYNTAX_FIXER"
+    },
+    {
+      "file": "demo_opal2_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/demo_opal2_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-DEMO_OPAL2_INTEGRATION"
+    },
+    {
+      "file": "fix_base_plugin_indentation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_base_plugin_indentation.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_BASE_PLUGIN_INDENTATION"
+    },
+    {
+      "file": "aurora_enhanced_security.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_enhanced_security.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_ENHANCED_SECURITY"
+    },
+    {
+      "file": "geometric_algebra.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/geometric_algebra.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GEOMETRIC_ALGEBRA"
+    },
+    {
+      "file": "health_score_maximizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/health_score_maximizer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-HEALTH_SCORE_MAXIMIZER"
+    },
+    {
+      "file": "advanced_ci_test.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/advanced_ci_test.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ADVANCED_CI_TEST"
+    },
+    {
+      "file": "test_code_quality.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_code_quality.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CODE_QUALITY"
+    },
+    {
+      "file": "aurora_context_updater.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_context_updater.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_CONTEXT_UPDATER"
+    },
+    {
+      "file": "test_runner.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_runner.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_RUNNER"
+    },
+    {
+      "file": "automated_health_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/automated_health_monitor.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AUTOMATED_HEALTH_MONITOR"
+    },
+    {
+      "file": "github_api_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/github_api_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GITHUB_API_MANAGER"
+    },
+    {
+      "file": "aurora_gpg_persistent_fix.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_gpg_persistent_fix.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_GPG_PERSISTENT_FIX"
+    },
+    {
+      "file": "comprehensive_codebase_diagnostic.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/comprehensive_codebase_diagnostic.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-COMPREHENSIVE_CODEBASE_DIAGNOSTIC"
+    },
+    {
+      "file": "hdeplusplus.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/hdeplusplus.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-HDEPLUSPLUS"
+    },
+    {
+      "file": "aurora_security_validation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_security_validation.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_SECURITY_VALIDATION"
+    },
+    {
+      "file": "security_monitoring_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_monitoring_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SECURITY_MONITORING_SYSTEM"
+    },
+    {
+      "file": "fix_opal2_lint.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_opal2_lint.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_OPAL2_LINT"
+    },
+    {
+      "file": "fix_pr43_security.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_pr43_security.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_PR43_SECURITY"
+    },
+    {
+      "file": "repository_health_tracker.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/repository_health_tracker.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-REPOSITORY_HEALTH_TRACKER"
+    },
+    {
+      "file": "final_syntax_fix.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_syntax_fix.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FINAL_SYNTAX_FIX"
+    },
+    {
+      "file": "test_opal2_simple.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_opal2_simple.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_OPAL2_SIMPLE"
+    },
+    {
+      "file": "quick_syntax_fix.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quick_syntax_fix.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUICK_SYNTAX_FIX"
+    },
+    {
+      "file": "aurora_opal2_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_opal2_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_OPAL2_INTEGRATION"
+    },
+    {
+      "file": "aurora_api_server.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_api_server.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_API_SERVER"
+    },
+    {
+      "file": "verify_sonnet4.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/verify_sonnet4.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-VERIFY_SONNET4"
+    },
+    {
+      "file": "aurora_cli.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_cli.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_CLI"
+    },
+    {
+      "file": "issue_closure_analysis.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/issue_closure_analysis.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ISSUE_CLOSURE_ANALYSIS"
+    },
+    {
+      "file": "aurora_system_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_system_validator.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_SYSTEM_VALIDATOR"
+    },
+    {
+      "file": "aurora_deployment_manager_v2.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_deployment_manager_v2.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_DEPLOYMENT_MANAGER_V2"
+    },
+    {
+      "file": "test_aurora_opal2_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_aurora_opal2_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_AURORA_OPAL2_INTEGRATION"
+    },
+    {
+      "file": "security_score_enhancer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_score_enhancer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SECURITY_SCORE_ENHANCER"
+    },
+    {
+      "file": "performance_benchmark.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/performance_benchmark.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PERFORMANCE_BENCHMARK"
+    },
+    {
+      "file": "test_t71_tools.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_t71_tools.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_T71_TOOLS"
+    },
+    {
+      "file": "phase2_health_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase2_health_optimizer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PHASE2_HEALTH_OPTIMIZER"
+    },
+    {
+      "file": "test_opal2_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_opal2_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_OPAL2_INTEGRATION"
+    },
+    {
+      "file": "aurora_advanced_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_advanced_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_ADVANCED_INTEGRATION"
+    },
+    {
+      "file": "aurora_api.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_api.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_API"
+    },
+    {
+      "file": "expanded_core_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/expanded_core_monitor.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-EXPANDED_CORE_MONITOR"
+    },
+    {
+      "file": "demo_aumemmanager_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/demo_aumemmanager_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-DEMO_AUMEMMANAGER_INTEGRATION"
+    },
+    {
+      "file": "test_gitwiz_functionality.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_gitwiz_functionality.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_GITWIZ_FUNCTIONALITY"
+    },
+    {
+      "file": "aurora_workflow_config.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_workflow_config.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_WORKFLOW_CONFIG"
+    },
+    {
+      "file": "validate_aurora_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/validate_aurora_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-VALIDATE_AURORA_SYSTEM"
+    },
+    {
+      "file": "health_score_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/health_score_optimizer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-HEALTH_SCORE_OPTIMIZER"
+    },
+    {
+      "file": "aurora_master_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_master_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_MASTER_INTEGRATION"
+    },
+    {
+      "file": "ci_compatibility_test.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ci_compatibility_test.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CI_COMPATIBILITY_TEST"
+    },
+    {
+      "file": "devcontainer_resolution_summary.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/devcontainer_resolution_summary.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-DEVCONTAINER_RESOLUTION_SUMMARY"
+    },
+    {
+      "file": "final_security_validation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_security_validation.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FINAL_SECURITY_VALIDATION"
+    },
+    {
+      "file": "test_simple.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_simple.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_SIMPLE"
+    },
+    {
+      "file": "aurora_consciousness_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_consciousness_engine.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA_CONSCIOUSNESS_ENGINE"
+    },
+    {
+      "file": "large_binary_analysis.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/large_binary_analysis.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-LARGE_BINARY_ANALYSIS"
+    },
+    {
+      "file": "opal2_pr_preparation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/opal2_pr_preparation.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-OPAL2_PR_PREPARATION"
+    },
+    {
+      "file": "conftest.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/conftest.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CONFTEST"
+    },
+    {
+      "file": "test_critical_issue_resolver.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_critical_issue_resolver.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CRITICAL_ISSUE_RESOLVER"
+    },
+    {
+      "file": "direct_security_fix_application.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/direct_security_fix_application.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-DIRECT_SECURITY_FIX_APPLICATION"
+    },
+    {
+      "file": "gitwiz_enhanced_demo.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_enhanced_demo.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GITWIZ_ENHANCED_DEMO"
+    },
+    {
+      "file": "sonnet4_summary.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_summary.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_SUMMARY"
+    },
+    {
+      "file": "fix_all_syntax_errors.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_all_syntax_errors.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-FIX_ALL_SYNTAX_ERRORS"
+    },
+    {
+      "file": "setup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/setup.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SETUP"
+    },
+    {
+      "file": "tests/test_cask_tool.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_cask_tool.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CASK_TOOL"
+    },
+    {
+      "file": "tests/test_agent_mode.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_agent_mode.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_AGENT_MODE"
+    },
+    {
+      "file": "tests/test_native_implementations.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_native_implementations.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_NATIVE_IMPLEMENTATIONS"
+    },
+    {
+      "file": "tests/test_hash_seal_artifact.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_hash_seal_artifact.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_HASH_SEAL_ARTIFACT"
+    },
+    {
+      "file": "tests/test_cli_status_json.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_cli_status_json.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CLI_STATUS_JSON"
+    },
+    {
+      "file": "tests/test_sonnet4_enhancements.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_sonnet4_enhancements.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_SONNET4_ENHANCEMENTS"
+    },
+    {
+      "file": "tests/test_symbolic_solver_plugin.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_symbolic_solver_plugin.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_SYMBOLIC_SOLVER_PLUGIN"
+    },
+    {
+      "file": "tests/test_anchor_tracker_tool.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_anchor_tracker_tool.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_ANCHOR_TRACKER_TOOL"
+    },
+    {
+      "file": "tests/test_threadcore_tagging.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_threadcore_tagging.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_THREADCORE_TAGGING"
+    },
+    {
+      "file": "tests/test_aurora_symbolic.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_aurora_symbolic.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_AURORA_SYMBOLIC"
+    },
+    {
+      "file": "tests/test_drop_in_thread_agent_v2.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_drop_in_thread_agent_v2.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_DROP_IN_THREAD_AGENT_V2"
+    },
+    {
+      "file": "tests/test_glyph_agent.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_glyph_agent.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_GLYPH_AGENT"
+    },
+    {
+      "file": "tests/test_vsa.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_vsa.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_VSA"
+    },
+    {
+      "file": "tests/test_module_integrator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_module_integrator.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_MODULE_INTEGRATOR"
+    },
+    {
+      "file": "tests/test_chatgpt_agent_mode.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_chatgpt_agent_mode.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CHATGPT_AGENT_MODE"
+    },
+    {
+      "file": "tests/test_opal2_glyph_core.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_opal2_glyph_core.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_OPAL2_GLYPH_CORE"
+    },
+    {
+      "file": "tests/test_quantum_vsa.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_quantum_vsa.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_QUANTUM_VSA"
+    },
+    {
+      "file": "tests/test_aif_hub.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_aif_hub.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_AIF_HUB"
+    },
+    {
+      "file": "tests/test_cask_analysis.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_cask_analysis.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CASK_ANALYSIS"
+    },
+    {
+      "file": "tests/test_cli_anchor_manifest.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_cli_anchor_manifest.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_CLI_ANCHOR_MANIFEST"
+    },
+    {
+      "file": "tests/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "tests/test_geometric_algebra.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_geometric_algebra.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_GEOMETRIC_ALGEBRA"
+    },
+    {
+      "file": "tests/test_opal2_glyph_cache.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_opal2_glyph_cache.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_OPAL2_GLYPH_CACHE"
+    },
+    {
+      "file": "tests/test_opal2_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_opal2_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_OPAL2_SYSTEM"
+    },
+    {
+      "file": "tests/test_symbolic_tagging_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_symbolic_tagging_engine.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TEST_SYMBOLIC_TAGGING_ENGINE"
+    },
+    {
+      "file": "services/aif_hub.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aif_hub.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AIF_HUB"
+    },
+    {
+      "file": ".github/scripts/intelligent-test-selector.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/intelligent-test-selector.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-INTELLIGENT-TEST-SELECTOR"
+    },
+    {
+      "file": ".github/scripts/aurora-symbolic-validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora-symbolic-validator.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AURORA-SYMBOLIC-VALIDATOR"
+    },
+    {
+      "file": "extracted_aumemmanager/chart_script.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/chart_script.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CHART_SCRIPT"
+    },
+    {
+      "file": "extracted_aumemmanager/script.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/script.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SCRIPT"
+    },
+    {
+      "file": "extracted_aumemmanager/chart_script_1.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/chart_script_1.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CHART_SCRIPT_1"
+    },
+    {
+      "file": "modules/telemetry_logger.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/telemetry_logger.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-TELEMETRY_LOGGER"
+    },
+    {
+      "file": "modules/cask_tool.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/cask_tool.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CASK_TOOL"
+    },
+    {
+      "file": "modules/reflective_autonomy/reflective_autonomy_loop.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/reflective_autonomy_loop.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-REFLECTIVE_AUTONOMY_LOOP"
+    },
+    {
+      "file": "modules/reflective_autonomy/threadcore_tagging.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/threadcore_tagging.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-THREADCORE_TAGGING"
+    },
+    {
+      "file": "modules/reflective_autonomy/symbolic_tagging_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolic_tagging_engine.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SYMBOLIC_TAGGING_ENGINE"
+    },
+    {
+      "file": "modules/reflective_autonomy/sonnet4_reflective_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_reflective_engine.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_REFLECTIVE_ENGINE"
+    },
+    {
+      "file": "modules/reflective_autonomy/reflective_monitor_core.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/reflective_monitor_core.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-REFLECTIVE_MONITOR_CORE"
+    },
+    {
+      "file": "modules/reflective_autonomy/autonomic_correction_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/autonomic_correction_engine.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-AUTONOMIC_CORRECTION_ENGINE"
+    },
+    {
+      "file": "modules/reflective_autonomy/continuity_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/continuity_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CONTINUITY_MANAGER"
+    },
+    {
+      "file": "modules/reflective_autonomy/capsule_linter.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/capsule_linter.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CAPSULE_LINTER"
+    },
+    {
+      "file": "modules/reflective_autonomy/glyph_agent.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/glyph_agent.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GLYPH_AGENT"
+    },
+    {
+      "file": "modules/reflective_autonomy/logging_example.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/logging_example.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-LOGGING_EXAMPLE"
+    },
+    {
+      "file": "modules/reflective_autonomy/integration_capsule_threadcore_classifier.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/integration_capsule_threadcore_classifier.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-INTEGRATION_CAPSULE_THREADCORE_CLASSIFIER"
+    },
+    {
+      "file": "modules/reflective_autonomy/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/reflective_autonomy/loom_restore_script.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/loom_restore_script.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-LOOM_RESTORE_SCRIPT"
+    },
+    {
+      "file": "modules/compatibility/codex_implement-opal2-core-and-regex-generation-engine_plugin_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/codex_implement-opal2-core-and-regex-generation-engine_plugin_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CODEX_IMPLEMENT-OPAL2-CORE-AND-REGEX-GENERATION-ENGINE_PLUGIN_SYSTEM"
+    },
+    {
+      "file": "modules/compatibility/codex_implement-opal2-core-and-regex-generation-engine_aurora_api.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/codex_implement-opal2-core-and-regex-generation-engine_aurora_api.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CODEX_IMPLEMENT-OPAL2-CORE-AND-REGEX-GENERATION-ENGINE_AURORA_API"
+    },
+    {
+      "file": "modules/instance_bridge/bridge_server.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/bridge_server.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BRIDGE_SERVER"
+    },
+    {
+      "file": "modules/instance_bridge/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/instance_bridge/bridge_client.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/bridge_client.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BRIDGE_CLIENT"
+    },
+    {
+      "file": "modules/symbolic_core/sonnet4_ethics_security.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_ethics_security.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_ETHICS_SECURITY"
+    },
+    {
+      "file": "modules/symbolic_core/symbolic_solver_plugin.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolic_solver_plugin.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SYMBOLIC_SOLVER_PLUGIN"
+    },
+    {
+      "file": "modules/symbolic_core/mcp_security.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/mcp_security.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-MCP_SECURITY"
+    },
+    {
+      "file": "modules/symbolic_core/quantum_vsa.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_vsa.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_VSA"
+    },
+    {
+      "file": "modules/symbolic_core/mcp_command_router.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/mcp_command_router.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-MCP_COMMAND_ROUTER"
+    },
+    {
+      "file": "modules/symbolic_core/geometric_algebra.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/geometric_algebra.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GEOMETRIC_ALGEBRA"
+    },
+    {
+      "file": "modules/symbolic_core/vsa.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/vsa.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-VSA"
+    },
+    {
+      "file": "modules/symbolic_core/sonnet4_quantum_bridge.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_quantum_bridge.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_QUANTUM_BRIDGE"
+    },
+    {
+      "file": "modules/symbolic_core/sonnet4_symbolic_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_symbolic_validator.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_SYMBOLIC_VALIDATOR"
+    },
+    {
+      "file": "modules/symbolic_core/plugin.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/plugin.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PLUGIN"
+    },
+    {
+      "file": "modules/symbolic_core/sonnet4_integration_hub.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sonnet4_integration_hub.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SONNET4_INTEGRATION_HUB"
+    },
+    {
+      "file": "modules/symbolic_core/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/opal2_backup_main/plugin_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/plugin_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PLUGIN_SYSTEM"
+    },
+    {
+      "file": "modules/opal2_backup_main/quantum_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_RENDERER"
+    },
+    {
+      "file": "modules/opal2_backup_main/glyph_core.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/glyph_core.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GLYPH_CORE"
+    },
+    {
+      "file": "modules/opal2_backup_main/config_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/config_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CONFIG_MANAGER"
+    },
+    {
+      "file": "modules/opal2_backup_main/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/opal2_backup_main/glyph_cache.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/glyph_cache.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GLYPH_CACHE"
+    },
+    {
+      "file": "modules/opal2_backup_main/api/opal2_api.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/opal2_api.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-OPAL2_API"
+    },
+    {
+      "file": "modules/opal2_backup_main/plugins/base_plugin.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/base_plugin.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BASE_PLUGIN"
+    },
+    {
+      "file": "modules/opal2_backup_main/plugins/webgl_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/webgl_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-WEBGL_RENDERER"
+    },
+    {
+      "file": "modules/opal2_backup_main/engines/quantum_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_RENDERER"
+    },
+    {
+      "file": "modules/aumemmanager/quantum_flight_control.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_flight_control.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_FLIGHT_CONTROL"
+    },
+    {
+      "file": "modules/aumemmanager/hierarchical_memory.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/hierarchical_memory.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-HIERARCHICAL_MEMORY"
+    },
+    {
+      "file": "modules/aumemmanager/api_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/api_integration.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-API_INTEGRATION"
+    },
+    {
+      "file": "modules/aumemmanager/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/opal2/plugin_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/plugin_system.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PLUGIN_SYSTEM"
+    },
+    {
+      "file": "modules/opal2/base_component.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/base_component.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BASE_COMPONENT"
+    },
+    {
+      "file": "modules/opal2/symbolic_logic.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolic_logic.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-SYMBOLIC_LOGIC"
+    },
+    {
+      "file": "modules/opal2/quantum_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_RENDERER"
+    },
+    {
+      "file": "modules/opal2/plugin_enhancements.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/plugin_enhancements.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-PLUGIN_ENHANCEMENTS"
+    },
+    {
+      "file": "modules/opal2/glyph_core.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/glyph_core.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GLYPH_CORE"
+    },
+    {
+      "file": "modules/opal2/config_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/config_manager.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CONFIG_MANAGER"
+    },
+    {
+      "file": "modules/opal2/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/opal2/glyph_cache.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/glyph_cache.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-GLYPH_CACHE"
+    },
+    {
+      "file": "modules/opal2/api/opal2_api.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/opal2_api.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-OPAL2_API"
+    },
+    {
+      "file": "modules/opal2/plugins/base_plugin.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/base_plugin.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-BASE_PLUGIN"
+    },
+    {
+      "file": "modules/opal2/plugins/webgl_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/webgl_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-WEBGL_RENDERER"
+    },
+    {
+      "file": "modules/opal2/engines/quantum_renderer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_renderer.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-QUANTUM_RENDERER"
+    },
+    {
+      "file": "modules/cask/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "modules/cask/analysis.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/analysis.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-ANALYSIS"
+    },
+    {
+      "file": "modules/cask/charts.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/charts.py_20250925_024437.bak",
+      "anchor": "FIX-SHELL-CHARTS"
+    },
+    {
+      "file": "deployment/monitoring/aurora_monitoring.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_monitoring.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_MONITORING"
+    },
+    {
+      "file": "src/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/servers/l2_integration_server.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/l2_integration_server.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-L2_INTEGRATION_SERVER"
+    },
+    {
+      "file": "src/interaction/multi_modal_interaction_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/multi_modal_interaction_system.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MULTI_MODAL_INTERACTION_SYSTEM"
+    },
+    {
+      "file": "src/core/native_quantum.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/native_quantum.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-NATIVE_QUANTUM"
+    },
+    {
+      "file": "src/core/native_symbolic_anchor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/native_symbolic_anchor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-NATIVE_SYMBOLIC_ANCHOR"
+    },
+    {
+      "file": "src/core/native_dlp_export.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/native_dlp_export.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-NATIVE_DLP_EXPORT"
+    },
+    {
+      "file": "src/core/native_vsa.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/native_vsa.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-NATIVE_VSA"
+    },
+    {
+      "file": "src/web_infrastructure/quantum_enhanced_backend.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_enhanced_backend.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUANTUM_ENHANCED_BACKEND"
+    },
+    {
+      "file": "src/output/multi_modal_output_coordination.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/multi_modal_output_coordination.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MULTI_MODAL_OUTPUT_COORDINATION"
+    },
+    {
+      "file": "src/audio/immersive_audio_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/immersive_audio_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-IMMERSIVE_AUDIO_ENGINE"
+    },
+    {
+      "file": "src/quantum_core/quantum_processing_layer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_processing_layer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUANTUM_PROCESSING_LAYER"
+    },
+    {
+      "file": "src/quantum_core/symbolic_cpu_anchor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolic_cpu_anchor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SYMBOLIC_CPU_ANCHOR"
+    },
+    {
+      "file": "src/interface/dynamic_interface_adapter_fixed.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/dynamic_interface_adapter_fixed.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DYNAMIC_INTERFACE_ADAPTER_FIXED"
+    },
+    {
+      "file": "src/interface/dynamic_interface_adapter.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/dynamic_interface_adapter.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DYNAMIC_INTERFACE_ADAPTER"
+    },
+    {
+      "file": "src/integrations/chatgpt_agent_mode.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/chatgpt_agent_mode.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CHATGPT_AGENT_MODE"
+    },
+    {
+      "file": "src/integrations/chatgpt_agent_mode/chatgpt_agent_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/chatgpt_agent_integration.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CHATGPT_AGENT_INTEGRATION"
+    },
+    {
+      "file": "src/integrations/chatgpt_agent_mode/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/research/quantum_research_acceleration_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantum_research_acceleration_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUANTUM_RESEARCH_ACCELERATION_ENGINE"
+    },
+    {
+      "file": "src/aurora/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/aurora/cli/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/aurora/core/symbolic_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolic_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SYMBOLIC_ENGINE"
+    },
+    {
+      "file": "src/aurora/core/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/aurora/utils/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/coordination/hybrid_coordination_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/hybrid_coordination_system.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-HYBRID_COORDINATION_SYSTEM"
+    },
+    {
+      "file": "src/bridges/l2_meta_agent_bridge.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/l2_meta_agent_bridge.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-L2_META_AGENT_BRIDGE"
+    },
+    {
+      "file": "src/handlers/voiceinteractionhandler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/voiceinteractionhandler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-VOICEINTERACTIONHANDLER"
+    },
+    {
+      "file": "src/handlers/interactionfusionengine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/interactionfusionengine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-INTERACTIONFUSIONENGINE"
+    },
+    {
+      "file": "src/handlers/symbolicinputhandler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/symbolicinputhandler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SYMBOLICINPUTHANDLER"
+    },
+    {
+      "file": "src/handlers/gesturerecognitionhandler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gesturerecognitionhandler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GESTURERECOGNITIONHANDLER"
+    },
+    {
+      "file": "src/handlers/neuralinterfacehandler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/neuralinterfacehandler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-NEURALINTERFACEHANDLER"
+    },
+    {
+      "file": "src/handlers/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "src/handlers/quantummanipulationhandler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quantummanipulationhandler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUANTUMMANIPULATIONHANDLER"
+    },
+    {
+      "file": "src/prediction/predictive_analytics_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/predictive_analytics_system.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PREDICTIVE_ANALYTICS_SYSTEM"
+    },
+    {
+      "file": "node_modules/flatted/python/flatted.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/flatted.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FLATTED"
+    },
+    {
+      "file": "node_modules/shell-quote/print.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/print.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PRINT"
+    },
+    {
+      "file": "scripts/archive_large_files.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/archive_large_files.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ARCHIVE_LARGE_FILES"
+    },
+    {
+      "file": "scripts/aurora_dependency_persistence.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_dependency_persistence.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_DEPENDENCY_PERSISTENCE"
+    },
+    {
+      "file": "scripts/phase4_security_finalizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase4_security_finalizer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE4_SECURITY_FINALIZER"
+    },
+    {
+      "file": "scripts/hash_seal_artifact.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/hash_seal_artifact.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-HASH_SEAL_ARTIFACT"
+    },
+    {
+      "file": "scripts/phase4_ssmt_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase4_ssmt_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE4_SSMT_ENGINE"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase3a_security_infrastructure.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE3A_SECURITY_INFRASTRUCTURE"
+    },
+    {
+      "file": "scripts/branch_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/branch_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-BRANCH_MANAGER"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_live_automation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_live_automation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_LIVE_AUTOMATION"
+    },
+    {
+      "file": "scripts/final_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FINAL_CLEANUP"
+    },
+    {
+      "file": "scripts/mass_branch_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/mass_branch_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MASS_BRANCH_CLEANUP"
+    },
+    {
+      "file": "scripts/phase3c_smart_resolver.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase3c_smart_resolver.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE3C_SMART_RESOLVER"
+    },
+    {
+      "file": "scripts/cask_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/cask_integration.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CASK_INTEGRATION"
+    },
+    {
+      "file": "scripts/infallible_codespace_init.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/infallible_codespace_init.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-INFALLIBLE_CODESPACE_INIT"
+    },
+    {
+      "file": "scripts/git_pre_commit_hook.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/git_pre_commit_hook.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GIT_PRE_COMMIT_HOOK"
+    },
+    {
+      "file": "scripts/lint_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/lint_fixer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-LINT_FIXER"
+    },
+    {
+      "file": "scripts/consolidated_branch_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/consolidated_branch_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CONSOLIDATED_BRANCH_CLEANUP"
+    },
+    {
+      "file": "scripts/module_integrator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/module_integrator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MODULE_INTEGRATOR"
+    },
+    {
+      "file": "scripts/critical_error_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/critical_error_fixer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CRITICAL_ERROR_FIXER"
+    },
+    {
+      "file": "scripts/repository_audit.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/repository_audit.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-REPOSITORY_AUDIT"
+    },
+    {
+      "file": "scripts/aurora_validation_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_validation_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_VALIDATION_MANAGER"
+    },
+    {
+      "file": "scripts/quick_health_check.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quick_health_check.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUICK_HEALTH_CHECK"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_enhanced_automation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_enhanced_automation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_ENHANCED_AUTOMATION"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_codeql_diagnostics.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_CODEQL_DIAGNOSTICS"
+    },
+    {
+      "file": "scripts/health_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/health_monitor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-HEALTH_MONITOR"
+    },
+    {
+      "file": "scripts/aurora_health_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_health_monitor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_HEALTH_MONITOR"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/fix_codeql_issues.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FIX_CODEQL_ISSUES"
+    },
+    {
+      "file": "scripts/comprehensive_linting_fix.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/comprehensive_linting_fix.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-COMPREHENSIVE_LINTING_FIX"
+    },
+    {
+      "file": "scripts/aurora_maintenance_scheduler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_maintenance_scheduler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_MAINTENANCE_SCHEDULER"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_security_scanner.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_SECURITY_SCANNER"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_branch_pruner.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_branch_pruner.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_BRANCH_PRUNER"
+    },
+    {
+      "file": "scripts/generate_ci_summary.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/generate_ci_summary.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GENERATE_CI_SUMMARY"
+    },
+    {
+      "file": "scripts/maintenance_scheduler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/maintenance_scheduler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MAINTENANCE_SCHEDULER"
+    },
+    {
+      "file": "scripts/quick_lint_fixes.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/quick_lint_fixes.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-QUICK_LINT_FIXES"
+    },
+    {
+      "file": "scripts/aurora_automated_update_scheduler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_automated_update_scheduler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_AUTOMATED_UPDATE_SCHEDULER"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_easy_wins_demo.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_easy_wins_demo.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_EASY_WINS_DEMO"
+    },
+    {
+      "file": "scripts/whitespace_cleaner.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/whitespace_cleaner.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-WHITESPACE_CLEANER"
+    },
+    {
+      "file": "scripts/execute_phase_2_direct.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/execute_phase_2_direct.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-EXECUTE_PHASE_2_DIRECT"
+    },
+    {
+      "file": "scripts/gitwiz_scheduler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_scheduler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_SCHEDULER"
+    },
+    {
+      "file": "scripts/pr_cleanup_priority_from_plan.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/pr_cleanup_priority_from_plan.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PR_CLEANUP_PRIORITY_FROM_PLAN"
+    },
+    {
+      "file": "scripts/ssmt_v2_3_intelligent_integrator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v2_3_intelligent_integrator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V2_3_INTELLIGENT_INTEGRATOR"
+    },
+    {
+      "file": "scripts/orion_backup_sync.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/orion_backup_sync.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ORION_BACKUP_SYNC"
+    },
+    {
+      "file": "scripts/final_blank_line_formatter.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_blank_line_formatter.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FINAL_BLANK_LINE_FORMATTER"
+    },
+    {
+      "file": "scripts/auto_file_sorter.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/auto_file_sorter.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AUTO_FILE_SORTER"
+    },
+    {
+      "file": "scripts/staff_node_ci_helper.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/staff_node_ci_helper.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-STAFF_NODE_CI_HELPER"
+    },
+    {
+      "file": "scripts/canonical_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/canonical_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CANONICAL_VALIDATOR"
+    },
+    {
+      "file": "scripts/branch_cleanup_automation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/branch_cleanup_automation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-BRANCH_CLEANUP_AUTOMATION"
+    },
+    {
+      "file": "scripts/repository_health_monitor_enhanced.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/repository_health_monitor_enhanced.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-REPOSITORY_HEALTH_MONITOR_ENHANCED"
+    },
+    {
+      "file": "scripts/repository_health_monitor_v2.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/repository_health_monitor_v2.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-REPOSITORY_HEALTH_MONITOR_V2"
+    },
+    {
+      "file": "scripts/aurora_quick_health_check.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_quick_health_check.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_QUICK_HEALTH_CHECK"
+    },
+    {
+      "file": "scripts/automated_branch_cleanup_enhanced.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/automated_branch_cleanup_enhanced.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AUTOMATED_BRANCH_CLEANUP_ENHANCED"
+    },
+    {
+      "file": "scripts/consolidate_codeql.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/consolidate_codeql.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CONSOLIDATE_CODEQL"
+    },
+    {
+      "file": "scripts/phase4b_value_extractor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase4b_value_extractor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE4B_VALUE_EXTRACTOR"
+    },
+    {
+      "file": "scripts/zipwiz.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/zipwiz.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ZIPWIZ"
+    },
+    {
+      "file": "scripts/demo_agent_mode.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/demo_agent_mode.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DEMO_AGENT_MODE"
+    },
+    {
+      "file": "scripts/precommit_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/precommit_optimizer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PRECOMMIT_OPTIMIZER"
+    },
+    {
+      "file": "scripts/test_pre_commit_hook.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/test_pre_commit_hook.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-TEST_PRE_COMMIT_HOOK"
+    },
+    {
+      "file": "scripts/validate_agent_mode.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/validate_agent_mode.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-VALIDATE_AGENT_MODE"
+    },
+    {
+      "file": "scripts/final_branch_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_branch_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FINAL_BRANCH_CLEANUP"
+    },
+    {
+      "file": "scripts/branch_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/branch_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-BRANCH_CLEANUP"
+    },
+    {
+      "file": "scripts/aurora_maintenance.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_maintenance.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_MAINTENANCE"
+    },
+    {
+      "file": "scripts/aurora_comprehensive_dependency_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_comprehensive_dependency_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_COMPREHENSIVE_DEPENDENCY_MANAGER"
+    },
+    {
+      "file": "scripts/missing_imports_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/missing_imports_fixer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MISSING_IMPORTS_FIXER"
+    },
+    {
+      "file": "scripts/gitwiz_dependency_updater.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_dependency_updater.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_DEPENDENCY_UPDATER"
+    },
+    {
+      "file": "scripts/threadcore_classifier.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/threadcore_classifier.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-THREADCORE_CLASSIFIER"
+    },
+    {
+      "file": "scripts/advanced_code_quality_fixer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/advanced_code_quality_fixer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ADVANCED_CODE_QUALITY_FIXER"
+    },
+    {
+      "file": "scripts/phase3b_conflict_resolver.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase3b_conflict_resolver.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE3B_CONFLICT_RESOLVER"
+    },
+    {
+      "file": "scripts/gitwiz_integrated_command.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_integrated_command.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_INTEGRATED_COMMAND"
+    },
+    {
+      "file": "scripts/aurora_dependency_integration.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_dependency_integration.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_DEPENDENCY_INTEGRATION"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_easy_wins_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_easy_wins_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_EASY_WINS_ENGINE"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_maintenance_pipeline.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_maintenance_pipeline.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_MAINTENANCE_PIPELINE"
+    },
+    {
+      "file": "scripts/whitespace_fix_stage1.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/whitespace_fix_stage1.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-WHITESPACE_FIX_STAGE1"
+    },
+    {
+      "file": "scripts/aurora_branch_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_branch_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_BRANCH_MANAGER"
+    },
+    {
+      "file": "scripts/validate_ci_environment.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/validate_ci_environment.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-VALIDATE_CI_ENVIRONMENT"
+    },
+    {
+      "file": "scripts/gitwiz_simple.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_simple.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_SIMPLE"
+    },
+    {
+      "file": "scripts/gitwiz_enhanced.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_enhanced.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_ENHANCED"
+    },
+    {
+      "file": "scripts/repo_health_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/repo_health_monitor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-REPO_HEALTH_MONITOR"
+    },
+    {
+      "file": "scripts/ssmt_v3_0_automated_safety.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v3_0_automated_safety.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V3_0_AUTOMATED_SAFETY"
+    },
+    {
+      "file": "scripts/setup_canonical_validation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/setup_canonical_validation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SETUP_CANONICAL_VALIDATION"
+    },
+    {
+      "file": "scripts/aurora_dependency_hub.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_dependency_hub.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_DEPENDENCY_HUB"
+    },
+    {
+      "file": "scripts/cask_tool.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/cask_tool.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CASK_TOOL"
+    },
+    {
+      "file": "scripts/gitwiz_lint_cleanup_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_lint_cleanup_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_LINT_CLEANUP_MANAGER"
+    },
+    {
+      "file": "scripts/scheduled_maintenance_enhanced.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/scheduled_maintenance_enhanced.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SCHEDULED_MAINTENANCE_ENHANCED"
+    },
+    {
+      "file": "scripts/phase2_security_remediator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase2_security_remediator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE2_SECURITY_REMEDIATOR"
+    },
+    {
+      "file": "scripts/aurora_memory_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_memory_optimizer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_MEMORY_OPTIMIZER"
+    },
+    {
+      "file": "scripts/memory_compression_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/memory_compression_optimizer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MEMORY_COMPRESSION_OPTIMIZER"
+    },
+    {
+      "file": "scripts/final_code_quality_polisher.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/final_code_quality_polisher.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-FINAL_CODE_QUALITY_POLISHER"
+    },
+    {
+      "file": "scripts/dev-status.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/dev-status.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DEV-STATUS"
+    },
+    {
+      "file": "scripts/execute_pruning_mission_phase_1.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/execute_pruning_mission_phase_1.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-EXECUTE_PRUNING_MISSION_PHASE_1"
+    },
+    {
+      "file": "scripts/gitwiz_workflow_orchestrator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz_workflow_orchestrator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ_WORKFLOW_ORCHESTRATOR"
+    },
+    {
+      "file": "scripts/aurora_minimal_automation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_minimal_automation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_MINIMAL_AUTOMATION"
+    },
+    {
+      "file": "scripts/execute_pruning_mission_phase_2.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/execute_pruning_mission_phase_2.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-EXECUTE_PRUNING_MISSION_PHASE_2"
+    },
+    {
+      "file": "scripts/ssmt_v2_2_architectural_sonar.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ssmt_v2_2_architectural_sonar.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SSMT_V2_2_ARCHITECTURAL_SONAR"
+    },
+    {
+      "file": "scripts/execute_enhanced_automation.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/execute_enhanced_automation.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-EXECUTE_ENHANCED_AUTOMATION"
+    },
+    {
+      "file": "scripts/automated_branch_cleanup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/automated_branch_cleanup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AUTOMATED_BRANCH_CLEANUP"
+    },
+    {
+      "file": "scripts/drop_in_thread_agent_v2.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/drop_in_thread_agent_v2.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DROP_IN_THREAD_AGENT_V2"
+    },
+    {
+      "file": "scripts/aurora_dependency_monitor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_dependency_monitor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_DEPENDENCY_MONITOR"
+    },
+    {
+      "file": "scripts/phase5_final_optimizer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase5_final_optimizer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE5_FINAL_OPTIMIZER"
+    },
+    {
+      "file": "scripts/weekly_automation_scheduler.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/weekly_automation_scheduler.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-WEEKLY_AUTOMATION_SCHEDULER"
+    },
+    {
+      "file": "scripts/security_remediation_engine.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_remediation_engine.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SECURITY_REMEDIATION_ENGINE"
+    },
+    {
+      "file": "scripts/gitwiz.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/gitwiz.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GITWIZ"
+    },
+    {
+      "file": "scripts/combine_package_versions.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/combine_package_versions.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-COMBINE_PACKAGE_VERSIONS"
+    },
+    {
+      "file": "scripts/phase3b_security_remediator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/phase3b_security_remediator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PHASE3B_SECURITY_REMEDIATOR"
+    },
+    {
+      "file": "scripts/continuous_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/continuous_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CONTINUOUS_VALIDATOR"
+    },
+    {
+      "file": ".security/security_dashboard.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_dashboard.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SECURITY_DASHBOARD"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/secure_helpers.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SECURE_HELPERS"
+    },
+    {
+      "file": ".security/security_suite.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/security_suite.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SECURITY_SUITE"
+    },
+    {
+      "file": ".security/crypto_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/crypto_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CRYPTO_VALIDATOR"
+    },
+    {
+      "file": ".security/path_traversal_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/path_traversal_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-PATH_TRAVERSAL_VALIDATOR"
+    },
+    {
+      "file": ".security/log_injection_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/log_injection_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-LOG_INJECTION_VALIDATOR"
+    },
+    {
+      "file": ".security/sql_injection_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/sql_injection_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SQL_INJECTION_VALIDATOR"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/xss_injection_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-XSS_INJECTION_VALIDATOR"
+    },
+    {
+      "file": ".security/continuous_scanner.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/continuous_scanner.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CONTINUOUS_SCANNER"
+    },
+    {
+      "file": ".security/csrf_auth_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/csrf_auth_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CSRF_AUTH_VALIDATOR"
+    },
+    {
+      "file": ".security/shell_injection_validator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/shell_injection_validator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-SHELL_INJECTION_VALIDATOR"
+    },
+    {
+      "file": "extractions/feature_digital-ghost-dlp-sonar/scripts/architectural_sonar.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/architectural_sonar.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ARCHITECTURAL_SONAR"
+    },
+    {
+      "file": "tools/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "tools/cli/aurora_dev_cli.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_dev_cli.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_DEV_CLI"
+    },
+    {
+      "file": "tools/cli/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "tools/integration/ci_helpers.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/ci_helpers.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-CI_HELPERS"
+    },
+    {
+      "file": "tools/symbolic/manifest_generator.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/manifest_generator.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MANIFEST_GENERATOR"
+    },
+    {
+      "file": "tools/symbolic/memory_sealer.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/memory_sealer.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-MEMORY_SEALER"
+    },
+    {
+      "file": "tools/symbolic/__init__.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/__init__.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-__INIT__"
+    },
+    {
+      "file": "tools/symbolic/anchor_tracker.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/anchor_tracker.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-ANCHOR_TRACKER"
+    },
+    {
+      "file": "tools/security/dependency_vulnerability_resolver.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/dependency_vulnerability_resolver.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-DEPENDENCY_VULNERABILITY_RESOLVER"
+    },
+    {
+      "file": "tools/workflow/workflow_consolidation_implementor.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/workflow_consolidation_implementor.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-WORKFLOW_CONSOLIDATION_IMPLEMENTOR"
+    },
+    {
+      "file": "tools/workflow/aurora_intelligent_workflow_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_intelligent_workflow_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_INTELLIGENT_WORKFLOW_MANAGER"
+    },
+    {
+      "file": "tools/workflow/aurora_failure_prevention_system.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_failure_prevention_system.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_FAILURE_PREVENTION_SYSTEM"
+    },
+    {
+      "file": "tools/workflow/aurora_workflow_optimization_manager.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/aurora_workflow_optimization_manager.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-AURORA_WORKFLOW_OPTIMIZATION_MANAGER"
+    },
+    {
+      "file": "tools/automation/git_hooks_automation_setup.py",
+      "issue": "subprocess shell=True usage",
+      "fix": "Added security warning comment",
+      "backup": "security_fixes_backup/git_hooks_automation_setup.py_20250925_024438.bak",
+      "anchor": "FIX-SHELL-GIT_HOOKS_AUTOMATION_SETUP"
+    },
+    {
+      "file": "test_opal2_integration.py",
+      "issue": "Potential hardcoded credentials",
+      "fix": "Added security review comment",
+      "backup": "security_fixes_backup/test_opal2_integration.py_20250925_024438.bak",
+      "anchor": "FIX-CREDS-TEST_OPAL2_INTEGRATION"
+    },
+    {
+      "file": "security_remediation.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/security_remediation.py_20250925_024439.bak",
+      "anchor": "FIX-DANGEROUS-SECURITY_REMEDIATION"
+    },
+    {
+      "file": "security_remediation.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/security_remediation.py_20250925_024439.bak",
+      "anchor": "FIX-DANGEROUS-SECURITY_REMEDIATION"
+    },
+    {
+      "file": "security_verification.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/security_verification.py_20250925_024439.bak",
+      "anchor": "FIX-DANGEROUS-SECURITY_VERIFICATION"
+    },
+    {
+      "file": "security_verification.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/security_verification.py_20250925_024439.bak",
+      "anchor": "FIX-DANGEROUS-SECURITY_VERIFICATION"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/phase3a_security_infrastructure.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-PHASE3A_SECURITY_INFRASTRUCTURE"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/phase3a_security_infrastructure.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-PHASE3A_SECURITY_INFRASTRUCTURE"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/aurora_codeql_diagnostics.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-AURORA_CODEQL_DIAGNOSTICS"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/aurora_codeql_diagnostics.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-AURORA_CODEQL_DIAGNOSTICS"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/fix_codeql_issues.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-FIX_CODEQL_ISSUES"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/fix_codeql_issues.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-FIX_CODEQL_ISSUES"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/aurora_security_scanner.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-AURORA_SECURITY_SCANNER"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/aurora_security_scanner.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-AURORA_SECURITY_SCANNER"
+    },
+    {
+      "file": "scripts/test_pre_commit_hook.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/test_pre_commit_hook.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-TEST_PRE_COMMIT_HOOK"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/secure_helpers.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-SECURE_HELPERS"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "issue": "eval() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/xss_injection_validator.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-XSS_INJECTION_VALIDATOR"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "issue": "exec() usage",
+      "fix": "Added critical security warning",
+      "backup": "security_fixes_backup/xss_injection_validator.py_20250925_024440.bak",
+      "anchor": "FIX-DANGEROUS-XSS_INJECTION_VALIDATOR"
+    }
+  ],
+  "backup_directory": "security_fixes_backup",
+  "dlp_tag": "SECURITY_FIXES",
+  "thread_seal": "fe938c6eb2e866c250da50a6552d576250f28f543973880311f67d01909b825c"
+}

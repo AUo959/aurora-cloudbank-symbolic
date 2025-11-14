@@ -1,0 +1,29 @@
+{
+  "branch_protection": {
+    "main": {
+      "required_status_checks": {
+        "strict": true,
+        "contexts": [
+          "continuous-integration",
+          "health-check",
+          "security-scan"
+        ]
+      },
+      "enforce_admins": false,
+      "required_pull_request_reviews": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews": true,
+        "require_code_owner_reviews": false
+      },
+      "restrictions": null,
+      "allow_force_pushes": false,
+      "allow_deletions": false
+    }
+  },
+  "repository_settings": {
+    "allow_merge_commits": true,
+    "allow_squash_merging": true,
+    "allow_rebase_merging": false,
+    "delete_branch_on_merge": true
+  }
+}

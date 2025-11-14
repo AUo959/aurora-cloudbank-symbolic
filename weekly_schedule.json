@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "schedule_day": "monday",
+  "last_run": null,
+  "next_run": "2025-09-29T09:00:00",
+  "auto_actions": {
+    "dependency_processing": true,
+    "stale_branch_analysis": true,
+    "health_reporting": true,
+    "safe_deletions": false
+  },
+  "thresholds": {
+    "branch_count_warning": 35,
+    "branch_count_critical": 45,
+    "stale_days_aggressive": 30,
+    "stale_days_conservative": 60
+  }
+}

@@ -1,0 +1,120 @@
+name: Aurora CloudBank Dependency Validation
+
+on:
+  push:
+    paths:
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/dependency-validation.yml'
+  pull_request:
+    paths:
+      - 'requirements*.txt'
+      - 'pyproject.toml'
+
+jobs:
+  validate-dependencies:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+    
+    - name: Create virtual environment
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install --upgrade pip wheel setuptools
+    
+    - name: Test dependency resolution (dry run)
+      continue-on-error: true
+      run: |
+        source .venv/bin/activate
+        echo "🧪 Testing dependency resolution..."
+        if [[ -f "requirements-lock.txt" ]]; then
+          pip install -r requirements-lock.txt --dry-run --report dependency_report.json || echo "⚠️ Dependency resolution check failed (non-blocking)"
+        elif [[ -f "requirements.txt" ]]; then
+          pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
+        fi
+    
+    - name: Install dependencies
+      run: |
+        source .venv/bin/activate
+        if [[ -f "requirements-lock.txt" ]]; then
+          pip install -r requirements-lock.txt
+        elif [[ -f "requirements.txt" ]]; then
+          pip install -r requirements.txt
+        fi
+    
+    - name: Validate dependency compatibility
+      run: |
+        source .venv/bin/activate
+        echo "🔍 Checking for dependency conflicts..."
+        pip check
+    
+    - name: Run Aurora dependency validator
+      run: |
+        source .venv/bin/activate
+        if [[ -f "scripts/validate_dependencies.py" ]]; then
+          python scripts/validate_dependencies.py
+        else
+          echo "⚠️ Dependency validator not found, skipping Aurora-specific validation"
+        fi
+    
+    - name: Run Aurora dependency conflict detector
+      run: |
+        source .venv/bin/activate
+        if [[ -f "scripts/dependency_conflict_detector.py" ]]; then
+          echo "🔍 Running Aurora dependency conflict detector..."
+          python scripts/dependency_conflict_detector.py --scan --export dependency_conflicts.json
+        else
+          echo "⚠️ Conflict detector not found, skipping conflict detection"
+        fi
+    
+    - name: Test critical imports
+      continue-on-error: true
+      run: |
+        source .venv/bin/activate
+        echo "🔍 Testing critical imports..."
+        python -c "import fastapi, httpx, httpcore, h11; print('✅ All imports successful')" || echo "⚠️ Import test failed (non-blocking)"
+    
+    - name: Upload dependency report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-report-python-${{ matrix.python-version }}
+        path: |
+          dependency_report.json
+          dependency_conflicts.json
+          .backup/requirements/dependency_report_*.json
+          .venv/lib/python*/site-packages/*/METADATA
+        retention-days: 7
+    
+    - name: Dependency security check
+      run: |
+        source .venv/bin/activate
+        pip install safety bandit
+        echo "🔒 Running security checks..."
+        safety check --json --output safety-report.json || echo "⚠️ Safety check completed with warnings"
+        
+    - name: Upload security report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report-python-${{ matrix.python-version }}
+        path: safety-report.json
+        retention-days: 7

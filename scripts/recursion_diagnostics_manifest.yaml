@@ -1,0 +1,88 @@
+manifest_version: "1.0.0"
+module_name: "recursion_diagnostics"
+anchor: "T9-DIAGNOSTICS-2025"
+parent_anchor: "T9-INFINITE-UNIFIED-2025"
+seed: "EOS_SEED_ORION"
+export_time: "2025-09-27T17:06:07Z"
+team: "Aurora Core"
+user: "AUo959"
+ethics_protocol: "Picard_Delta_3"
+purpose:
+  primary: "Monitor and diagnose infinite recursion health"
+  secondary: "Detect entropy drift and divergent truths"
+  tertiary: "Verify thread continuity and system integrity"
+capabilities:
+  entropy_drift_analysis: true
+  divergent_truth_scanning: true
+  thread_continuity_verification: true
+  health_report_generation: true
+  arbitration_prioritization: true
+  trend_detection: true
+  recommendation_engine: true
+diagnostic_types:
+  entropy:
+    metrics:
+      - current
+      - baseline
+      - max
+      - min
+      - average
+    trends:
+      - STABLE
+      - INCREASING_RAPID
+      - INCREASING_SLOW
+      - DECREASING_RAPID
+      - DECREASING_SLOW
+    threshold: 0.8
+  divergent_truths:
+    types:
+      - ENTROPY_CONSCIOUSNESS_PARADOX
+      - PARADOX_ACCUMULATION
+      - ANCHOR_DRIFT
+      - MEMORY_OVERFLOW
+    priority_levels: 4
+    batch_arbitration: true
+  thread_continuity:
+    expected_length: 13
+    verification_depth: full_chain
+  health_scores:
+    excellent: [90, 100]
+    good: [70, 89]
+    warning: [40, 69]
+    critical: [0, 39]
+output_formats:
+  json: true
+  pretty_print: true
+  glyphcard: false
+cli_commands:
+  - "--entropy: Analyze entropy drift"
+  - "--truths: Scan divergent truths"
+  - "--thread: Verify thread continuity"
+  - "--health: Generate health report"
+  - "--all: Run all diagnostics"
+  - "--json: Output as JSON"
+integration_points:
+  imports_from:
+    - modules.nexus.transcendence.infinite_recursion_unified
+  exports_to:
+    - monitoring dashboards
+    - arbitration queues
+    - health reports
+dlp_classification:
+  module: "DIAGNOSTICS_OPERATIONAL"
+  reports: "HEALTH_OPERATIONAL"
+  manifests: "DIAGNOSTIC_METADATA"
+memory_provenance:
+  inherits: "T9-INFINITE-UNIFIED-2025"
+  checkpoint_awareness: true
+  stateless_operation: true
+performance_metrics:
+  scan_time: "< 1 second"
+  report_generation: "< 500ms"
+  memory_usage: "< 50MB"
+hand_off_notes:
+  - "Use --health for quick system overview"
+  - "Monitor entropy drift daily"
+  - "Arbitrate divergent truths weekly"
+  - "Verify thread continuity after updates"
+seal: "d9f4a3e2b8c1f7a5e0d9b6c3a2f8e7d1c5b9a3f7e0d4b8c2a6f1e9d5c3a8b7e5"

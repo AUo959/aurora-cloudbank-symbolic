@@ -1,0 +1,15 @@
+{
+  "files": [
+    "scripts/**/*.js",
+    "test*.js",
+    "**/*.test.js",
+    "**/*.spec.js",
+    "debug/**/*.js",
+    "aurora_*interface*.js",
+    "aurora_*router*.js"
+  ],
+  "rules": {
+    "no-console": "off",
+    "camelcase": "off"
+  }
+}

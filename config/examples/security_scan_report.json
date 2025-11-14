@@ -1,0 +1,2181 @@
+{
+  "scan_timestamp": "Sat Sep 27 22:43:58 UTC 2025",
+  "total_issues": 271,
+  "severity_breakdown": {
+    "CRITICAL": 0,
+    "HIGH": 72,
+    "MEDIUM": 5,
+    "LOW": 194
+  },
+  "issues": [
+    {
+      "file": "tests/web/test-web-components.js",
+      "line": 79,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "// Create a safe evaluation environment instead of using eval()"
+    },
+    {
+      "file": "tests/web/test-web-components.js",
+      "line": 165,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "// Create a safe evaluation environment instead of using eval()"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 49,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 50,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "find_eval_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\\\;\"  # nosec - grep pattern"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 54,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_verification.py",
+      "line": 55,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "find_exec_cmd = \"find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\\\;\"  # nosec - grep pattern"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 203,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 205,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 207,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 209,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 352,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 353,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions.  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 378,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 379,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 492,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 494,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 522,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 523,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# result = eval(user_expression)  # nosec - commented example"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 204,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 205,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"description\": \"Dynamic code execution via eval() or exec()\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 208,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 209,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"mitigation\": \"Avoid eval() and exec(), use safe alternatives\",  # nosec - documentation"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 493,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "security_remediation.py",
+      "line": 494,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "- Avoid `eval()` and `exec()` functions  # nosec - documentation"
+    },
+    {
+      "file": ".security/shell_injection_validator.py",
+      "line": 22,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "(r'os\\.system\\s*\\(', 'os.system() call'),"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "line": 21,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "line": 22,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "(r'eval\\s*\\(', 'eval() call - code injection risk'),"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "line": 23,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": ".security/xss_injection_validator.py",
+      "line": 24,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "(r'exec\\s*\\(', 'exec() call - code injection risk'),"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 123,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 124,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Safe alternative to eval() for simple expressions."
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 150,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": ".security/secure_helpers.py",
+      "line": 151,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "return eval(code, {\"__builtins__\": {}}, allowed_functions)  # nosec - secured context"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 48,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 49,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 99,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 100,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "'eval': (r'\\beval\\s*\\(', 'HIGH', 'Use of eval() can execute arbitrary code'),  # nosec - pattern definition"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 101,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 102,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "'exec': (r'\\bexec\\s*\\(', 'HIGH', 'Use of exec() can execute arbitrary code'),  # nosec - pattern definition"
+    },
+    {
+      "file": "scripts/aurora_security_scanner.py",
+      "line": 108,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "'os_system': (r'os\\.system\\s*\\(', 'HIGH', 'os.system() can enable command injection'),  # nosec - pattern"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 259,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 261,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "Pre-commit hook for detecting dangerous eval() and exec() patterns"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 267,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 269,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"\"\"Detect eval() and exec() usage patterns\"\"\""
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 280,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 281,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "(r'\\\\beval\\\\s*\\\\(', 'eval() usage'),"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 288,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 289,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "(r'\\\\beval\\\\s*\\\\(', 'JavaScript eval() usage'),"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 478,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 479,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "\"eval(\","
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 260,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 261,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "Pre-commit hook for detecting dangerous eval() and exec() patterns"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 268,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 269,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"\"\"Detect eval() and exec() usage patterns\"\"\""
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 282,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 283,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "(r'\\\\bexec\\\\s*\\\\(', 'exec() usage'),"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 480,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 481,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "\"exec(\","
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 210,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "(r'os\\\\.system\\\\s*\\\\(', 'os.system() call'),"
+    },
+    {
+      "file": "scripts/phase3a_security_infrastructure.py",
+      "line": 470,
+      "type": "os_system",
+      "severity": "HIGH",
+      "message": "os.system() can enable command injection",
+      "code": "\"os.system(\","
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 205,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 206,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "(r'\\beval\\s*\\(', \"eval() usage\"),"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 207,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 208,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "(r'\\bexec\\s*\\(', \"exec() usage\")"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 92,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=False can enable command injection",
+      "code": "# Look for subprocess.call/run with shell=True"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 158,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: eval() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 159,
+      "type": "eval",
+      "severity": "HIGH",
+      "message": "Use of eval() can execute arbitrary code",
+      "code": "(\"Eval usage\", \"find . -name '*.py' -exec grep -l 'eval(' {} \\\\;\", \"HIGH\"),"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 160,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 161,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "(\"Exec usage\", \"find . -name '*.py' -exec grep -l 'exec(' {} \\\\;\", \"HIGH\"),"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 167,
+      "type": "subprocess_shell",
+      "severity": "HIGH",
+      "message": "subprocess with shell=False can enable command injection",
+      "code": "result = subprocess.run(command, shell=True, capture_output=True, text=True)"
+    },
+    {
+      "file": "scripts/test_pre_commit_hook.py",
+      "line": 54,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "# CRITICAL SECURITY: exec() usage detected - high code injection risk"
+    },
+    {
+      "file": "scripts/test_pre_commit_hook.py",
+      "line": 55,
+      "type": "exec",
+      "severity": "HIGH",
+      "message": "Use of exec() can execute arbitrary code",
+      "code": "exec(compile(code, str(src), 'exec'), ns)"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 36,
+      "type": "yaml_unsafe",
+      "severity": "MEDIUM",
+      "message": "yaml.load without safe loader can execute code",
+      "code": "\"\"\"Fix unsafe yaml.load() calls\"\"\""
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 64,
+      "type": "yaml_unsafe",
+      "severity": "MEDIUM",
+      "message": "yaml.load without safe loader can execute code",
+      "code": "\"issue\": \"Unsafe yaml.load()\","
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 73,
+      "type": "yaml_unsafe",
+      "severity": "MEDIUM",
+      "message": "yaml.load without safe loader can execute code",
+      "code": "print(f\"\ud83d\udd27 Fixed yaml.load() in: {py_file}\")"
+    },
+    {
+      "file": "scripts/fix_codeql_issues.py",
+      "line": 257,
+      "type": "yaml_unsafe",
+      "severity": "MEDIUM",
+      "message": "yaml.load without safe loader can execute code",
+      "code": "print(\"\\n\ud83d\udd27 Step 1: Fixing unsafe yaml.load() calls...\")"
+    },
+    {
+      "file": "scripts/aurora_codeql_diagnostics.py",
+      "line": 154,
+      "type": "yaml_unsafe",
+      "severity": "MEDIUM",
+      "message": "yaml.load without safe loader can execute code",
+      "code": "(\"yaml.load without Loader\", \"find . -name '*.py' -exec grep -l 'yaml.load(' {} \\\\;\", \"HIGH\"),"
+    },
+    {
+      "file": "./codeql_diagnostic_manifest.json",
+      "line": 11,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"duplicate_workflows_hash\": \"93e111360b177209ce85e13d5c922f9330474dac50e8927b2fe9e7c8aeda895f\","
+    },
+    {
+      "file": "./codeql_diagnostic_manifest.json",
+      "line": 107,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"thread_seal\": \"3bfb7a4b95e09ebd01d17f2e21ffb92cddba7886b7cd198285600bbca5d870aa\""
+    },
+    {
+      "file": "./security_fixes_manifest.json",
+      "line": 2535,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"thread_seal\": \"fe938c6eb2e866c250da50a6552d576250f28f543973880311f67d01909b825c\""
+    },
+    {
+      "file": "./consolidation_manifest.json",
+      "line": 4,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"backup_seal\": \"ef0f77da0d18adc8a3479e8b7c958a2dc4d922ff32fae1f98bb9d5499ead6246\","
+    },
+    {
+      "file": "./consolidation_manifest.json",
+      "line": 22,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"thread_seal\": \"ba50c1bec2ca80a7609bb1b4d218b25a5bcca5df012d1b4b72ec53db239cd4c5\""
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3301,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"763fd6b16116c06401f21626c34d2afaa759c2ff\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3342,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"ca4fa0de1dbd2c71081e3b2d04e0910e581be881\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3375,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"1acdd2dc06b2b53a5188fcc8d2d8a66f69882e06\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3408,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"cd8756abb2189c78b1a6680d2701eb45f0a796a4\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3450,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"90ae42b39bff01b1a115e340f3eaf8b82f405e85\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3492,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"cc78693979580a896c1956b1b6002b4ff14b1628\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3532,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"9c0f0295fc171ea974b9ba8fdb9bc4f7d82256ab\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3574,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"bc12ddf12ce9cbe688b52fafd86458037e3573b1\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3648,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"ea0f62987cf07a5e0d271defcb3b0fea2f7eee24\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3685,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"4419bc81fe603f70d1a6734dcf1ac022c5fba61f\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3749,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"fe67225f26b9c0cef4497f9fc6965adb0e158ff2\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3789,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"f4af5b77862131f7790880d539daa7e421fb1476\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3829,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"dc340bb7d60b4315eca32ef3bd853a998b6d282d\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3871,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"f1cabceeb512386dee14f0f0b895859438fbbf52\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 3920,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"684b94c92cd83ed55bbb51c97ee6f3895937796b\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4074,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"830421b8923429260239b56e1eed4731f0bc8ce0\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4156,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"1d77b8ee749eb4c5ec1be9713b389a8b68797df7\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4230,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"48cdcbe0444c7d6d9713942190cb2e16cdf417bb\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4340,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"2e530091c0cbbb1245c9f65184c7e7186f5bed94\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4416,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"7584e4e714e1e81034a6e2188e6faef45fcfdfac\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4488,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"46fcefd1751864b125a77e3688c06ac8c317fd1e\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 4562,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"a0539543ba48c97f790d828daff8133535ff014e\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 5010,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"db7476af8aa5d30117ffe8e845cc52e362378727\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 5065,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"f7bce7913de11bbeb143c07505c151b69a0a8d20\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 5114,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"7c75605778f07892735ce2824d6ca996f97e07ba\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 5181,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"b89eccdc5cf33bf02640026971635b636445d8e6\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6446,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"7e9b027edf4932d2c480c935e9b0e921f9eb1e4a\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6487,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"18fd83a879030ee7119cc50fd5adf6f5c5185929\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6522,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"a340d8a371db70ab82d588f3dccc71f9e00d5a70\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6599,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"aa52bd4d729eb4b8ce624dac265df4a6dbb8f12e\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6645,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"8c6cabdc2381b37f48fe7805932a884a44ee32f2\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6702,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"78aa0e65e122f5f9b071e9bc74aa457d9ae1c218\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 6745,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"d8d2599c341b372a2ee0e7d71a43730baa499572\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7102,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"fdea686021429b1da2ff146decc943f4edbd4793\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7147,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"46253ab8ddf415f9bbdb82ed667f9adfa95865ca\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7194,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"5681f15eaa79670c662c8bdcd721b65af81a590f\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7233,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"1cc4b70c9dc07d1682b043ec2fd4fb62450ed9c6\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7268,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"14c835bcfc0ce711aa5a6be18d3cea7fe04be35b\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7303,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"eb9f426ea72b2f4a995ea25bebb92b675b637820\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7338,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"e36d2dac806e008821d2d49ad9ccef9effb8fcfa\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7373,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"a1aa205ba7f07e983c212895c491129bbdb0fbb2\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7408,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"03c4b6ec293d7f83eaa58f42f96005d8c1d9be2e\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7443,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"3ec93b91cc628b29fa8567961d5cc75021790e1a\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7478,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"15bfa7d858ed4878746695115295c852ee40f650\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7513,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"61611997efb91bfc8ecbed44fabb6f4b570e72d2\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7548,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"96c6b33ae76609366f591ae0e29b768f9bc94be9\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7581,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"1aea5b55041b9d66a14bced53f3205c7d33a4c81\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7614,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"99a9ccf06f84db2c4881e70babca1ba7b47721fe\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7647,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"ecda4208146d0a73990ba1df0a8bfeee493776bb\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7680,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"c0e8787de8874d51926917dc8032918b1131dd04\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7713,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"c9bf4d58df3a70555f0cb882836c9eab914ba9a2\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7746,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"263a16fc917437811924ce5d6a557372bc60c095\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7779,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"830424cb9e8cbca3a6ea78ad1022ed286cd39f64\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7812,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"587485452fc51b45de9a128ca6f68ff6823bc137\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7845,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"2b7670a5e0bf9d2362a0b9df98f1e3102ea5cd14\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7878,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"425367ac4bd778e5afaf4c25c621892f39ef1694\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7911,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"5bd03ea3376c90ff44331a44d196be5108bea28b\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7944,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"2e1d1a1b797ea84ae8d7d81e5bd9c9358258ff7b\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 7977,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"414a0b9f85fa447d5181f390e933bef489504eb3\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8010,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"673f997389cb36aa5dd6276e2c3c99f4f021d2e6\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8051,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"abc1f701190fa12be38fa5913eec20113655d40d\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8093,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"fa2d7cd23412067a5cae22404527de565746d8bb\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8136,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"0c6ff4544ac83b23be026a8bbc348019e1f1e3ce\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8278,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"326e4d21026d6c201599c4ab287ef699cd311a5b\","
+    },
+    {
+      "file": "./SSMT_v3_0_EASY_WINS_REPORT_20250924_051240.json",
+      "line": 8372,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"last_commit_hash\": \"228bb0fa349e5f062f547b8a0a76e638d2303168\","
+    },
+    {
+      "file": "./scripts/recursion_diagnostics_manifest.yaml",
+      "line": 88,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"d9f4a3e2b8c1f7a5e0d9b6c3a2f8e7d1c5b9a3f7e0d4b8c2a6f1e9d5c3a8b7e5\""
+    },
+    {
+      "file": "./scripts/deployment_manifest.yaml",
+      "line": 82,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"e8a4b2d9c1f7a5e3d0b9c6a4f2e8d7c1b5a9f3e7d0c4b8a2f6e1d9c5a3b8e7f4\""
+    },
+    {
+      "file": "./.nexus/reality/manifest_20250925_054804.json",
+      "line": 57,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"dcca9a9aea4f53c0af562b9406f8657cb5c8515f81f7b831270dfa4816354c0a\""
+    },
+    {
+      "file": "./.nexus/verification/phase1_20250925_042959.json",
+      "line": 50,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0eb76f12bae17197f590e082c9047aacc21576a11bb0616ef2efe0449cde6036\""
+    },
+    {
+      "file": "./.nexus/verification/thread_20250926_050943.json",
+      "line": 418,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"7087c64d272d89c5e3081b8f2715f07d4f298349df023e9cb4672cecb990dfb7\""
+    },
+    {
+      "file": "./.nexus/recursion/checkpoints/checkpoint_0.json",
+      "line": 9,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"6028e8662ce3c35e8b3358c63d8b37d156359cf430badd689f5e0d47d5dd3bcf\","
+    },
+    {
+      "file": "./.nexus/recursion/checkpoints/checkpoint_0.json",
+      "line": 43,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"65575e736bf998ff9549720ca3adbf85be1d49f8de7b0b9ac4fb044b550b0d94\""
+    },
+    {
+      "file": "./.nexus/emergence/protocols/PROT-1758781014.405975.json",
+      "line": 141,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"4675078d804cb8d0ac85c032fb65f891a72c32048042e0a7809448217ec7a219\""
+    },
+    {
+      "file": "./.nexus/entities/quantum_processor_1758773109.102967.json",
+      "line": 16,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"8bf56bc4c11857d70aa5ad6f171d21f4da203ca0e6483637cfa3756009228103\""
+    },
+    {
+      "file": "./.nexus/entities/ai_agent_1758773104.334186.json",
+      "line": 16,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"ec37e1116339322e2fc563c2d9fa4d3a1ff152eb38b8544e4e1b3dd5484ba122\""
+    },
+    {
+      "file": "./.nexus/entities/hybrid_augmented_1758773263.507154.json",
+      "line": 16,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"ab039a878cb937ce87c840c4cd6007cc1f0606e133e6f82f026c9f0d0d98cd9d\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.372477.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"fb14f77c9b508cdb21191da3d5862b6b200f13f15378424a35a96b06af05e521\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.407737.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"fff6283149a82bd74db6a41853d5dfc92d5819d693a16b79bf47e53cb8491360\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.383663.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"e8901fde88f81d4aeba49ea7b975e762fb03e0816ea2727935a77aae3327bd2c\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.39964.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"89ebf8b502820193b6eb38a729c59952444cc7abe6f8ff280d8e89bbd1c405c8\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.55161.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"53c5f0c49736a100f21cdded6bccc4819b19ff0b9aebaab700b06fa6587a7a64\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.494754.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"2415560946f2780295bc3f1f77cbeca551906e77042ebc6a70f01da35f167223\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.562925.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0f530852e33c13706ceb1bc6724893e7e2b5e2d77ba6da4ca21c31a741c611a7\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.491411.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"18c1af662b9703b8dd806c34f04dc86f72be9f92a9e56520f2cab0e56cc601a5\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.404696.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"dbbcbcfa474f33615d6c5124f8b86c9f0fb053839756b6ecc7818422240d6626\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.494191.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"1e43df414e8a6403e9ff93a8fc897c61c47eec0dbefdfff1912030d01e166701\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.401328.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0cc0f63a3d256088455abc8d0ec6064f45a3dac217aa9d5d4b4942cba51c5739\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.37469.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"224773cc2e8513b127e9fa1b739b0b65797b8a5ec56f57fb012472d8040e7fdf\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.398759.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"aaa195973f7577f337475415c6d2b7d1a12e29bee3b6151a8f68a2d2b2601d36\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.560545.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"f29de753ee0ef5c8a2131466bc8e549b3c0244658d5a475e043ea07e94cca0b3\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.562131.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"ad9072831b82ac72747cee9d4034c445fabdc85da19e5491104020ece2703f9f\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.400445.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"9f1f38336ab35357b8df168facbe0636da556c823aa4913cc671c18783b3fe40\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.353014.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"6b94281cc384cc1b9837205814311f86abde203a6eedaa8cf3d66887d244f90d\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.563299.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b052e4edcd75f75fe1896456488678cef103a0d337c944636289e13ae51037aa\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.402083.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"7a45c3f88ff4f96a88d13923d485b8138df502274556320a1df647b464d476ae\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.36385.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b2886fcdd7101a9c3b6eef1f2c310c6eb014cae181bdd8bba71fe6edec897997\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.489723.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"6f0ae459c9d93c1098a27980fde7d75be1ab812bb458809685e363cd501a5001\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.403812.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b2ed61209157ef9011fdf6dbbccdce54b4a2dedeba53cd45c26f07c235e04767\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868547.866492.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"44c4ef071cd5a8fe57ec401f30abc13cdc4263431f346b7ab18f7b1bc54ec78a\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.501132.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"54e9920ca472e34a0f60b61e63f9f64f1b03c8c8a894f2e2bed1af462037dfcc\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.366465.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"f7d661954173d16a2b71a52e7936e0e55c74d93768f815a5602b45c1ed81f70e\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.561735.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"307c9f2e4d4f3887b575d2900d4aea3634117f36a1ae8fb970de876a8ccc8c6f\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.365688.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"fe5b487780b15d4ed659d9b2a7b20c619d05503fc7f9952a35755d29ebdc30e0\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.495539.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"5eb93027c15b98a6cbb79d65d3b9828681984760e02cfe2d8f6010165c70b2c5\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.368725.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"8cec3f3a997ffdc8f4604e038459e19799efb378edc777b901e0ce824bc1a1b6\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.564103.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"dab2251bfae54356361ee46c26124101d77a677db13161de8fa6c29208e08a79\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.563651.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"bf0b95e3ff470399463e91f12adf1d45bcea25551334c917c29199ad6d7132fd\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.362899.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"88b55980a6495a7eeec756c31c94b7731eacb05f9601887180f1de2fb2cffcf6\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.384947.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"3828637333d8cc753e1fb0e49ba45a247a3f3703918e40c89cf8200786055732\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.492499.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"6b38e8b4fe6f7acd2d47c54f0103583941f9b702e1eeec1aed43cd92cd05444a\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.358237.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"eb8cd664038ff50105de2c56cca6c221db6966c578d85ff8a2c8b52a003c15bb\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.359372.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"566c8261662e22334f77407f84dde1cc3e6684fcbb0c38b93efa803d40f40306\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.36475.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"cd86f2f9ed9f3c8b41baa9e9896d651378075483fdb7c41c09423bc32f24b16e\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.560921.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"fb5d3985e5b090dd2838cad28de9ffcb382c877bdaa86044871a38c2bc1429f9\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.553028.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"eaa743bc6f4e5fada625ec6f4fd3f6766eab0f24851480330af752457094d921\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.397158.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"072a6a10161a70c68fdddad685011c86946ae08eb87fd747013a0da146740140\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.360376.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"bd5fc2d7a3b37690d40e7fa8814f5da24f57132163067145563317f6159f75c7\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.498276.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b753ec8c5960f0d2effaa49aa06d71cd5559e5aa4cb1c78a41c477ab47f9b5a7\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.37832.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"28300b8de0648752b71607d4d405d94afc6c051f41b1948325a98299520e212f\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.566446.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"8c4285719adf59c34e752c83ccbc742e476697c71d16379cbfadc27e31ad7c0f\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.496809.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"831df81f54db7443838d7f1f2b1b5583cb6924bd75c71f9a9cce3fb3832c0a99\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.356812.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"414c994f45e0958938c69878a88fed5c13a27dbef687b511d5bed53371aed5ae\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.499691.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0bf65c3ba07ba06c7d2f4795b17d0f7e06b00fa56f2cdd63a46b1ce4388da142\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.562537.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"5c8777fb44e38c19b06d6f5b27ce013fc4e48868b4e05cc7c04245afd8fb523f\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.492135.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"f6c5f25c25891b6da24b5dcc1a7a02d5e15c33901ed3ef73906439c4228fd513\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.493836.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"7b62dfcfd780495e16bad3dad7da1418d7fd04c6def5a08391d02c80df6fb973\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.491797.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"9997c2b257cc0f0b9ec9fe260ee4f77845da2f08b090d888548a858c15ee764a\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.495143.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"e8a77f57defb80fccd663e5a4a82ecc87c7893223f9a11ff2225dd8e79d584d7\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.561324.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"bff85179fd742b8c13470ea62f4ca1354aca4001d641f0c3c46504768ae17486\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.356048.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"3a17680c3ab5d952af7fdbac28827e60b078d690835573bdf20799f4a1ce6656\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.402973.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"1308a360a56b57e697e15ae7f1b7bfd5ae68a97b5bd8fb7eef5441409500bc75\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868517.49105.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"38bbd13b2a272105a2276ac02327915c8167e25f11e1c339f21ac5068adeceed\""
+    },
+    {
+      "file": "./.nexus/arbitration/entropy_1758868554.397915.json",
+      "line": 12,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b4631d0895c895d1f93647ccb129c07c419712461ba848daf6425f26b48507e9\""
+    },
+    {
+      "file": "./.nexus/thread_states/state_20250925_054245.json",
+      "line": 70,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"f398d577ed45bc5396f5b9f5c3f103bf5be8e361c14f7417e6148f35512cf1ee\""
+    },
+    {
+      "file": "./.nexus/divergences/secure_key_1758772990.857644.json",
+      "line": 3,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"expected_seal\": \"fa8a7fccedd5e318a21fca4ec89b49eddf58c40372068a81b75ef3a2552b7566\","
+    },
+    {
+      "file": "./.nexus/divergences/secure_key_1758772990.857644.json",
+      "line": 4,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"actual_seal\": \"c070ea134c3b7f0b1e61df3a3ae330394d10b391fda18b501c6ceadae849e394\","
+    },
+    {
+      "file": "./.nexus/divergences/secure_key_1758984305.78596.json",
+      "line": 3,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"expected_seal\": \"dde3367bf3ac388a737aa028c15bd309d09767972caaeb01cf58e8d377de381c\","
+    },
+    {
+      "file": "./.nexus/divergences/secure_key_1758984305.78596.json",
+      "line": 4,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"actual_seal\": \"8a938820d7da117d166028a2d47bae435283be42f37f8d140ae8ce9fb2d4a70b\","
+    },
+    {
+      "file": "./.nexus/sync/verification_20250925_054245.json",
+      "line": 67,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"e83cfc9670b5fd19944ab1ce37dd452bd239cf22ba14896d1f2ba438e54d7a97\""
+    },
+    {
+      "file": "./.nexus/demonstrations/phase2_complete.json",
+      "line": 35,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"17dfb68a4b3f8d2fd68c6b2bc7c0ff6ca9af27d41e553e722509e1d4d2c0c1d6\""
+    },
+    {
+      "file": "./.nexus/resumption/metadata_20250925_054245.json",
+      "line": 58,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"07d11328ddf7e08fe4652eb26caadc4c22a07ef861505c630dfaee9022d0d954\""
+    },
+    {
+      "file": "./.nexus/exports/EXPORT-1758866063.074677.json",
+      "line": 53,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0f2b8e6db7116652fad90945ae10da0c4f7eb83fbedc9becf62da8f0eab97ca8\""
+    },
+    {
+      "file": "./.nexus/exports/EXPORT-1758866211.077351.json",
+      "line": 53,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"9d0c303d1b0b950fd61174fad459b2e81961ed2169db921b2dbf6a703114f633\""
+    },
+    {
+      "file": "./.nexus/exports/EXPORT-1758867158.007887.json",
+      "line": 53,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"2fad00981d87e7535e36d2ac3dd5c319fe84c6d4ce318286d96294170898f2b7\""
+    },
+    {
+      "file": "./.nexus/scans/gumas_scan.json",
+      "line": 11303,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"d88012156bc4ca7a00416586cdac35f7235843a7fcad246c6460c6fdda60fc46\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 16,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"477a3fdd5c18eb7e5a97a71d3275b8cd973c78ca56576145b3822a68d6834038\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 32,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"ad7b9160689d73622b6c08c4bc3133facbe06d4a0e464559a190724fcc3fb053\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 48,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0712e2baa7785ef22c3329c9cac6e2717c40df3369380573b3364cdc152cd323\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 64,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"9c0fd36092387859a995dc57470571084d3fa4b1f40a76b6c1f5c0d2549c7979\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 80,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"242f14985047ae679b9831e679352d24cdf1a71bfa3b277c5309a08ebe18b87a\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 96,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"f7f151a14e62b8bc04a7b6279ad42d700adcd93faeda1f2f3606092e3073f753\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 112,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"0dd6506c71d74d34a210fd56d7d5ed295fbac5c86336959acd70ff1a2d0d9aff\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 126,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"3c0277f8d49c5839228d908061df964a86095e21dac35ccd93a7a5b79d14abf0\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 140,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"04bb5e1e6f2fd7008062b2e8318274345ca39b8b6f70bc23e1b5557a26d84f2c\""
+    },
+    {
+      "file": "./.nexus/coordination/agents.json",
+      "line": 154,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"32f570de0acba4e2bc93ab5ecbedfd08d95132b554ff3eec834c2f070b75ba48\""
+    },
+    {
+      "file": "./.nexus/audit/AUDIT-1758781025.632622.json",
+      "line": 119,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"c063b9cafc1209c8f6332d7fde0ca2dbde01317b4a05a799fd7b4210211a6d26\""
+    },
+    {
+      "file": "./.nexus/status/final_status_report.json",
+      "line": 10,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"cryptographic_seal\": \"65abdd0b20e5881a83fdd3be7ff5d7d1183cfff51d1c8f8165886ce20d69189e\""
+    },
+    {
+      "file": "./.nexus/status/phase7_status_20250926_051333.json",
+      "line": 89,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"2dbb8c6c31938509e0b1e891dfe587295a7a84f6e329e4fa0c52018cfda0efbc\""
+    },
+    {
+      "file": "./.nexus/reviews/phase2_review_20250925_044912.json",
+      "line": 51,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"3e3e41948401965769f15ac8341bfb784024925603b38ba0cfe553a90cd78f1b\""
+    },
+    {
+      "file": "./.nexus/reviews/phase2_review_20250925_044912.json",
+      "line": 63,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"bc2130e680a4c80f6f8c01e442b2a46882e3452f83eea92f8b1d5daa7290fca3\""
+    },
+    {
+      "file": "./.nexus/reviews/phase2_review_20250925_044912.json",
+      "line": 87,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"d3f6086549c24c5558a5225394937765f52192668ec2225c7f5786d6f6a3cb46\""
+    },
+    {
+      "file": "./.nexus/reviews/phase2_review_20250925_044912.json",
+      "line": 138,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"2b025a57c69a136978b5beccf01a364140eed99e7088331270385b05adfbf76a\""
+    },
+    {
+      "file": "./.nexus/memory/manifest_20250925_054512.json",
+      "line": 18,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"9c181306e77b48b353939fe7e3234cb60cd1df945e4981ce182cf5068e8560cc\""
+    },
+    {
+      "file": "./.nexus/thread_resume/phase5_complete.json",
+      "line": 94,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"7f3a9b2c5e8d1a4f7b0e3c6a9d2f5b8e1c4a7d0f3b6e9c2a5d8f1b4e7c0a3d6\""
+    },
+    {
+      "file": "./.nexus/handoff/manifest_20250925_060137.json",
+      "line": 78,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"61508b1ea56533fc74ff18b718007aa9cb31867939419003e9630d3c4eaaa78e\""
+    },
+    {
+      "file": "./.nexus/validation/implementation_complete.json",
+      "line": 92,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"validation_seal\": \"e282b822f58a20227f8c9b70b9c6e36f569edc78eea4cb2b5e8e73c1ac7824c5\""
+    },
+    {
+      "file": "./.nexus/manifests/phase3_manifest_20250925_045123.json",
+      "line": 26,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"b4b506a79c0b74d53d56f56ab815b681a8ac438274aa124b5cc8546e24874870\""
+    },
+    {
+      "file": "./.nexus/manifests/phase2_manifest.json",
+      "line": 35,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"c4fa29d8fe859cf64a939efe82229a3fc31d32a0cd55d5fc4fe6282240cff168\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 50,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"fc4b955489b8a0ba4f32f9087664681c5c13dda0131686ec6a319775daeac996\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 80,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"aa4100c90d1926a0e262c1f6d2a0ccaa4881cc8770b8e3880886c1c29e197717\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 101,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"508986595a4c06b485ae4789069672c59c93bdd3261cbe459951219308e29f7c\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 122,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"be23f709e2b48f114caf2012ffd5a67abdeba8719146f50342c570491ddd98fc\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 148,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"55381e14629ff53463ab534b12442db5fa92dbf44eb06e655acc64569c1ed9f8\""
+    },
+    {
+      "file": "./.nexus/manifests/complete_verification_20250925_060137.json",
+      "line": 192,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"manifest_seal\": \"af9450395ba8a659531e468baa29f383effd56b292f9049e8b606ba0a974aa4d\""
+    },
+    {
+      "file": "./.backup/security/safety_report.json",
+      "line": 37,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"commit\": \"76275e5c7ee99e43f162f31c0082b3ad2d96a33a\","
+    },
+    {
+      "file": "./.ssmt_backups/automation_results_20250924_053420.json",
+      "line": 8,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"8e0ce57b39a1b1a8cf60dd990f448de9b3000b25\","
+    },
+    {
+      "file": "./.ssmt_backups/automation_results_20250924_052259.json",
+      "line": 8,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"8e0ce57b39a1b1a8cf60dd990f448de9b3000b25\","
+    },
+    {
+      "file": "./.ssmt_backups/backup_20250924_053420.json",
+      "line": 5,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"8e0ce57b39a1b1a8cf60dd990f448de9b3000b25\","
+    },
+    {
+      "file": "./.ssmt_backups/automation_results_20250924_051923.json",
+      "line": 8,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"2325df4a1015dfd9bc9b6565ca802cb1f7221276\","
+    },
+    {
+      "file": "./.ssmt_backups/backup_20250924_051923.json",
+      "line": 5,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"2325df4a1015dfd9bc9b6565ca802cb1f7221276\","
+    },
+    {
+      "file": "./.ssmt_backups/backup_20250924_052259.json",
+      "line": 5,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"current_commit\": \"8e0ce57b39a1b1a8cf60dd990f448de9b3000b25\","
+    },
+    {
+      "file": "./.repohealth/artifacts_manifest.json",
+      "line": 4,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"sha256\": \"6c97167ed6b9c2339b63428cdd06ac5f507e7c87ce347bb0631d0484b87eb26d\","
+    },
+    {
+      "file": "./modules/nexus/integration_manifest.yaml",
+      "line": 136,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"a8f4d2e9c1b5a3f7e0d8b6c4a2e9f5d1b7c3a8f0e4d2b9c6a3e0f8b5c2a1d7e4\""
+    },
+    {
+      "file": "./modules/nexus/gumas/manifest_v2.yaml",
+      "line": 157,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"a7f3d9b2e8c1a5f6d0b4e7c9a3f2d8e1b6c5a9f3d7e0b4c8a2f6e9d1c5a8b3e7\""
+    },
+    {
+      "file": "./modules/nexus/gumas/manifest.yaml",
+      "line": 106,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"f8a3d2e7b1c9a5f4e0d8b2c6a9f3e7d1b5c9a3f7e1d5b9c2a6f0e4b8c1a5d9e3\""
+    },
+    {
+      "file": "./modules/nexus/emergence/manifest.json",
+      "line": 108,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "\"seal\": \"8a4d7f2e9b1c5a3f8e0d4b7c2a5e9f1d6b3c8a0e5f2d7b4c1a9e6d3f0b8c5a2e\""
+    },
+    {
+      "file": "./modules/nexus/emergence/module_manifest.yaml",
+      "line": 83,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"9f3b8a2e7d1c5f4a8b0e3d6c9a2f5e8b1d4c7a0f3e6b9d2c5a8e1f4b7d0c3a6e\""
+    },
+    {
+      "file": "./modules/nexus/transcendence/unified_manifest.yaml",
+      "line": 134,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"c8f3a9d2e1b7f5c4a0e9d6b3f2a8e7d1c5b9f3a7e0d4b8c2a6f1e9d5c3a8b7e4\""
+    },
+    {
+      "file": "./modules/nexus/transcendence/manifest.yaml",
+      "line": 142,
+      "type": "HARDCODED_SECRET",
+      "severity": "LOW",
+      "message": "Possible hardcoded credential",
+      "code": "seal: \"b9f4e2a8d1c7f3b5e0a9d6c2f8e4b1a7c9d5f2e8b6a3d0c7f1e9b4a8d2c6f5e3\""
+    }
+  ],
+  "fixes_applied": []
+}

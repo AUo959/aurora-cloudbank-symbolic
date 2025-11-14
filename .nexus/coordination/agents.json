@@ -1,0 +1,156 @@
+{
+  "claude": {
+    "id": "claude",
+    "type": "ai_agent",
+    "capabilities": [
+      "reasoning",
+      "synthesis",
+      "analysis"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:32:49.561120",
+    "anchor": "AGENT-CLAUDE",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "477a3fdd5c18eb7e5a97a71d3275b8cd973c78ca56576145b3822a68d6834038"
+  },
+  "gpt4": {
+    "id": "gpt4",
+    "type": "ai_agent",
+    "capabilities": [
+      "generation",
+      "planning",
+      "coding"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:33:00.522105",
+    "anchor": "AGENT-GPT4",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "ad7b9160689d73622b6c08c4bc3133facbe06d4a0e464559a190724fcc3fb053"
+  },
+  "quantum1": {
+    "id": "quantum1",
+    "type": "quantum_processor",
+    "capabilities": [
+      "superposition",
+      "entanglement",
+      "measurement"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:33:58.244125",
+    "anchor": "AGENT-QUANTUM1",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "0712e2baa7785ef22c3329c9cac6e2717c40df3369380573b3364cdc152cd323"
+  },
+  "alpha_ai": {
+    "id": "alpha_ai",
+    "type": "ai_agent",
+    "capabilities": [
+      "reasoning",
+      "planning",
+      "synthesis"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:38:13.580954",
+    "anchor": "AGENT-ALPHA_AI",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "9c0fd36092387859a995dc57470571084d3fa4b1f40a76b6c1f5c0d2549c7979"
+  },
+  "beta_ai": {
+    "id": "beta_ai",
+    "type": "ai_agent",
+    "capabilities": [
+      "analysis",
+      "prediction",
+      "optimization"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:38:13.581488",
+    "anchor": "AGENT-BETA_AI",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "242f14985047ae679b9831e679352d24cdf1a71bfa3b277c5309a08ebe18b87a"
+  },
+  "quantum_core": {
+    "id": "quantum_core",
+    "type": "quantum_processor",
+    "capabilities": [
+      "superposition",
+      "entanglement",
+      "measurement"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:38:13.583074",
+    "anchor": "AGENT-QUANTUM_CORE",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "f7f151a14e62b8bc04a7b6279ad42d700adcd93faeda1f2f3606092e3073f753"
+  },
+  "hybrid_mind": {
+    "id": "hybrid_mind",
+    "type": "hybrid_entity",
+    "capabilities": [
+      "intuition",
+      "creativity",
+      "adaptation"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:38:13.584233",
+    "anchor": "AGENT-HYBRID_MIND",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "0dd6506c71d74d34a210fd56d7d5ed295fbac5c86336959acd70ff1a2d0d9aff"
+  },
+  "quantum_processor": {
+    "id": "quantum_processor",
+    "type": "quantum_agent",
+    "capabilities": [
+      "quantum_computation"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.859546",
+    "anchor": "AGENT-QUANTUM_PROCESSOR",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "3c0277f8d49c5839228d908061df964a86095e21dac35ccd93a7a5b79d14abf0"
+  },
+  "symbolic_reasoner": {
+    "id": "symbolic_reasoner",
+    "type": "symbolic_agent",
+    "capabilities": [
+      "symbolic_logic"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.861096",
+    "anchor": "AGENT-SYMBOLIC_REASONER",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "04bb5e1e6f2fd7008062b2e8318274345ca39b8b6f70bc23e1b5557a26d84f2c"
+  },
+  "bridge_monitor": {
+    "id": "bridge_monitor",
+    "type": "monitor_agent",
+    "capabilities": [
+      "fidelity_tracking"
+    ],
+    "status": "active",
+    "registered_at": "2025-09-25T04:51:08.862112",
+    "anchor": "AGENT-BRIDGE_MONITOR",
+    "message_count": 0,
+    "consensus_weight": 1.0,
+    "entropy_contribution": 0.0,
+    "seal": "32f570de0acba4e2bc93ab5ecbedfd08d95132b554ff3eec834c2f070b75ba48"
+  }
+}

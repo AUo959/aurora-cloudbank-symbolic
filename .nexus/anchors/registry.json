@@ -1,0 +1,27 @@
+{
+    "registry_version": "1.0.0",
+    "primary_anchor": "NEXUS-BOOTSTRAP-2025",
+    "seed": "EOS_SEED_ORION",
+    "created": "2025-09-25T03:59:18Z",
+    "arbiter": "AUo959",
+    "anchors": [
+        {
+            "id": "NEXUS-BOOTSTRAP-2025",
+            "type": "primary",
+            "created": "2025-09-25T03:59:18Z",
+            "status": "active"
+        },
+        {
+            "id": "T1-NEXUS-INIT-20250925",
+            "type": "thread",
+            "created": "2025-09-25T03:59:18Z",
+            "status": "active"
+        }
+    ],
+    "entropy_state": {
+        "level": "nominal",
+        "drift": 0.0,
+        "last_measurement": "2025-09-25T03:59:18Z"
+    },
+    "dlp_classification": "INTERNAL_DEVELOPMENT"
+}

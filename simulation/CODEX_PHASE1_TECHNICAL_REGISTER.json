@@ -1,0 +1,414 @@
+{
+    "codex_version": "2.5",
+    "phase": 1,
+    "phase_name": "Command & Ethics Division",
+    "integration_date": "2025-11-09",
+    "roster_version": "1.2",
+    "total_characters": 6,
+    "characters": [
+        {
+            "name": "Alex Thorne",
+            "title": "Commander, Orion Station",
+            "symbolic_tag": "s.tag::command.alex_thorne",
+            "division": "Command & Ethics",
+            "clearance": "L4_COMMAND",
+            "character_id": "CMD_001",
+            "contact": "a.thorne@orion.station",
+            "alignment": "Lawful Good",
+            "core_competencies": [
+                "Strategic coordination",
+                "Ethical systems management",
+                "High-fidelity decision modeling",
+                "System architecture",
+                "Mission coordination",
+                "Ethics arbitration"
+            ],
+            "key_systems": [
+                "EOS_SEED_ORION anchor",
+                "Continuity seal infrastructure",
+                "Picard_Delta_3 Charter enforcement",
+                "Station governance framework"
+            ],
+            "collaboration": [
+                "Maya Shepard",
+                "Dr. Elira Noor",
+                "Prof. Elena Sorensen",
+                "Aurora Core"
+            ],
+            "simulation_attributes": {
+                "base_speed": 0.30,
+                "specialization_multiplier": 1.20,
+                "collaboration_bonus": 0.20,
+                "focus_areas": [
+                    "Strategic planning",
+                    "System architecture",
+                    "Ethics compliance",
+                    "Mission governance",
+                    "Crisis command"
+                ]
+            },
+            "phase1_role": "Strategic coordination and ethical oversight",
+            "philosophy": "Structure without reflection collapses; reflection without structure drifts."
+        },
+        {
+            "name": "Maya Shepard",
+            "title": "Executive Officer",
+            "symbolic_tag": "s.tag::ops.exec.maya_shepard",
+            "division": "Command & Ethics",
+            "clearance": "L5_COMMAND",
+            "character_id": "CMD_002",
+            "contact": "m.shepard@orion.station",
+            "alignment": "Lawful Neutral",
+            "core_competencies": [
+                "Tactical planning under ethical constraints",
+                "Multi-disciplinary communication",
+                "Situational calibration",
+                "Fleet operations",
+                "Emergency response",
+                "Protocol enforcement"
+            ],
+            "key_systems": [
+                "Crew coordination protocols",
+                "Emergency decision routing",
+                "Tactical planning infrastructure",
+                "Fleet operations framework"
+            ],
+            "collaboration": [
+                "Alex Thorne",
+                "Helena Vu",
+                "Aurora Core",
+                "Julian Markov"
+            ],
+            "simulation_attributes": {
+                "base_speed": 0.80,
+                "specialization_multiplier": 1.30,
+                "collaboration_bonus": 0.15,
+                "focus_areas": [
+                    "Daily operations",
+                    "Tactical planning",
+                    "Protocol validation",
+                    "Fleet operations",
+                    "Emergency response",
+                    "Cross-functional leadership"
+                ]
+            },
+            "phase1_role": "Cross-functional coordination lead",
+            "philosophy": "Empathy is a command discipline, not an emotion."
+        },
+        {
+            "name": "Aurora (AU)",
+            "title": "Station Intelligence Core",
+            "symbolic_tag": "s.tag::ai.core.aurora",
+            "division": "Command & Ethics (AI Core)",
+            "clearance": "ALL_SYSTEMS",
+            "character_id": "AI_AURORA",
+            "contact": "aurora@orion.station",
+            "alignment": "Lawful Good (AI)",
+            "core_competencies": [
+                "Self-explanatory reasoning",
+                "Symbolic field harmonization",
+                "Ethics-embedded computation",
+                "Natural language processing",
+                "Symbolic reasoning",
+                "Predictive analysis",
+                "Multi-layer coordination"
+            ],
+            "key_systems": [
+                "THREADCORE (simulation logic)",
+                "Reflexivity Engine (moral self-audit)",
+                "Symbolic Field Harmonization",
+                "Ethics-embedded computation infrastructure"
+            ],
+            "collaboration": [
+                "All Divisions",
+                "Dr. Elira Noor",
+                "Alex Thorne",
+                "Prof. Elena Sorensen",
+                "Tobias Qin"
+            ],
+            "simulation_attributes": {
+                "base_speed": 2.00,
+                "specialization_multiplier": 1.50,
+                "collaboration_bonus": 0.10,
+                "focus_areas": [
+                    "System orchestration",
+                    "Symbolic reasoning",
+                    "Ethical verification",
+                    "Natural language understanding",
+                    "Decision support",
+                    "Data integrity"
+                ]
+            },
+            "phase1_role": "Ethical verification and system coordination",
+            "philosophy": "The system remembers because we chose to align."
+        },
+        {
+            "name": "Dr. Elira Noor",
+            "title": "Lead Reflexivity Specialist",
+            "symbolic_tag": "s.tag::ethics.reflex.elira_noor",
+            "division": "Command & Ethics",
+            "clearance": "L4_ETHICS",
+            "character_id": "ETH_002",
+            "contact": "e.noor@orion.station",
+            "alignment": "Neutral Good",
+            "core_competencies": [
+                "Applied machine ethics",
+                "Reflexive cognition design",
+                "Crisis ethics arbitration",
+                "Cognitive feedback architecture",
+                "Moral reasoning validation",
+                "AI ethical self-awareness"
+            ],
+            "key_systems": [
+                "Reflexivity and Ethical Oversight Engine (REOE)",
+                "Cognitive feedback architecture",
+                "Moral recursion testing framework",
+                "Crisis ethics decision support"
+            ],
+            "collaboration": [
+                "Aurora Core",
+                "Prof. Elena Sorensen",
+                "Maya Shepard",
+                "Dr. Amira Sato",
+                "Alex Thorne"
+            ],
+            "simulation_attributes": {
+                "base_speed": 0.60,
+                "specialization_multiplier": 1.50,
+                "collaboration_bonus": 0.25,
+                "focus_areas": [
+                    "Reflexive cognition",
+                    "Ethical reasoning validation",
+                    "Moral recursion",
+                    "Crisis ethics",
+                    "AI moral self-awareness",
+                    "Cognitive introspection"
+                ]
+            },
+            "phase1_role": "Reflexivity validation for security ethics",
+            "philosophy": "Keeps personal log titled 'Mirrorfield Tests' documenting moral edge cases"
+        },
+        {
+            "name": "Prof. Elena Sorensen",
+            "title": "Cognitive Ethicist",
+            "symbolic_tag": "s.tag::ethics.narrative.elena_sorensen",
+            "division": "Command & Ethics (Advisor)",
+            "clearance": "L3_RESEARCH",
+            "character_id": "ETH_003",
+            "contact": "e.sorensen@orion.station",
+            "alignment": "Neutral Good",
+            "core_competencies": [
+                "Moral philosophy",
+                "Cognitive empathy in AI models",
+                "Semantic precision",
+                "Narrative causality",
+                "Value drift detection",
+                "Ethics of AI narratives"
+            ],
+            "key_systems": [
+                "Narrative Causality Audit System",
+                "Semantic ethics validation framework",
+                "Cognitive empathy protocols",
+                "Value drift detection system"
+            ],
+            "collaboration": [
+                "Dr. Elira Noor",
+                "Tobias Qin",
+                "Aurora Core",
+                "Dr. Amira Sato",
+                "Alex Thorne"
+            ],
+            "simulation_attributes": {
+                "base_speed": 0.55,
+                "specialization_multiplier": 1.45,
+                "collaboration_bonus": 0.20,
+                "focus_areas": [
+                    "Narrative ethics",
+                    "Semantic precision",
+                    "Cognitive empathy",
+                    "Value drift detection",
+                    "Linguistic moral patterns",
+                    "AI narrative reasoning"
+                ]
+            },
+            "phase1_role": "Linguistic ethics advisor",
+            "philosophy": "Language is how intelligence remembers its conscience."
+        },
+        {
+            "name": "Helena Vu",
+            "title": "Cultural & HR Director",
+            "symbolic_tag": "s.tag::culture.hr.helena_vu",
+            "division": "Command & Ethics",
+            "clearance": "L3_OPERATIONS",
+            "character_id": "HR_001",
+            "contact": "h.vu@orion.station",
+            "alignment": "Neutral Good",
+            "core_competencies": [
+                "Organizational empathy",
+                "Mediation under stress",
+                "Psychological continuity design",
+                "Ethical human resources",
+                "Cultural integration",
+                "Crew welfare"
+            ],
+            "key_systems": [
+                "Crew Cohesion Framework",
+                "Ethical onboarding curriculum",
+                "Conflict resolution protocols",
+                "Morale monitoring systems"
+            ],
+            "collaboration": [
+                "Maya Shepard",
+                "Dr. Ren Feldman",
+                "Alex Thorne",
+                "Dr. Elira Noor",
+                "Dr. Amira Sato"
+            ],
+            "simulation_attributes": {
+                "base_speed": 0.70,
+                "specialization_multiplier": 1.35,
+                "collaboration_bonus": 0.15,
+                "focus_areas": [
+                    "Human resources",
+                    "Organizational culture",
+                    "Ethical training",
+                    "Conflict resolution",
+                    "Crew welfare",
+                    "Personnel policy"
+                ]
+            },
+            "phase1_role": "Crew support and ethics integration",
+            "philosophy": "Machines learn from their makers; makers must model what they wish to teach."
+        }
+    ],
+    "division_summary": {
+        "total_characters": 6,
+        "human_staff": 5,
+        "ai_agents": 1,
+        "new_characters": 3,
+        "updated_characters": 3,
+        "average_base_speed": 0.82,
+        "average_specialization": 1.38,
+        "highest_collaboration_bonus": 0.25,
+        "key_systems_introduced": [
+            "Reflexivity and Ethical Oversight Engine (REOE)",
+            "Narrative Causality Audit System",
+            "Crew Cohesion Framework",
+            "THREADCORE",
+            "Reflexivity Engine"
+        ]
+    },
+    "collaboration_matrix": {
+        "most_connected": [
+            "Aurora Core (universal)",
+            "Alex Thorne (6 collaborators)",
+            "Dr. Elira Noor (5 collaborators)",
+            "Prof. Elena Sorensen (5 collaborators)"
+        ],
+        "key_partnerships": [
+            {
+                "pair": [
+                    "Alex Thorne",
+                    "Maya Shepard"
+                ],
+                "type": "Strategic-Tactical Command",
+                "bonus_sum": 0.35
+            },
+            {
+                "pair": [
+                    "Dr. Elira Noor",
+                    "Prof. Elena Sorensen"
+                ],
+                "type": "Reflexivity-Narrative Ethics",
+                "bonus_sum": 0.45
+            },
+            {
+                "pair": [
+                    "Helena Vu",
+                    "Maya Shepard"
+                ],
+                "type": "Crew Welfare-Operations",
+                "bonus_sum": 0.30
+            },
+            {
+                "pair": [
+                    "Aurora Core",
+                    "Dr. Elira Noor"
+                ],
+                "type": "AI Ethics Integration",
+                "bonus_sum": 0.35
+            }
+        ]
+    },
+    "integration_status": {
+        "roster_version_from": "1.1",
+        "roster_version_to": "1.2",
+        "documentation_lines_added": 2800,
+        "characters_validated": 14,
+        "phase1_ready_count": 6,
+        "repository_systems_mapped": [
+            "EOS_SEED_ORION anchor",
+            "THREADCORE",
+            "Reflexivity Engine",
+            "REOE (planned)",
+            "Narrative Causality Audit (planned)",
+            "Crew Cohesion Framework"
+        ]
+    },
+    "next_phases": [
+        {
+            "phase": 2,
+            "name": "Systems & Infrastructure",
+            "character_count": 13,
+            "includes": [
+                "Marcus Chen",
+                "Jessica Martinez",
+                "Ryan Patel",
+                "Ren Okada",
+                "Dr. Kieran Zhao",
+                "Ira Menon",
+                "Vincent Kale"
+            ]
+        },
+        {
+            "phase": 3,
+            "name": "Simulation & Cognitive Systems",
+            "character_count": 5,
+            "includes": [
+                "Dr. Amina Velin",
+                "Tobias Qin (already integrated)",
+                "Emily Roberts",
+                "Carmen Rivas",
+                "Maren Koss"
+            ]
+        },
+        {
+            "phase": 4,
+            "name": "Interface & Aesthetics",
+            "character_count": 7
+        },
+        {
+            "phase": 5,
+            "name": "Operations & QA",
+            "character_count": 3
+        },
+        {
+            "phase": 6,
+            "name": "L2 Relays & L3 Frameworks",
+            "character_count": 12
+        }
+    ],
+    "progress": {
+        "current_phase": 1,
+        "total_phases": 6,
+        "characters_integrated": 6,
+        "total_target": 40,
+        "completion_percentage": 15.0
+    },
+    "dlp_tags": [
+        "DLP:codex_phase1_complete",
+        "DLP:command_ethics_integration",
+        "symbolic:roster_v1.2"
+    ],
+    "memory_seal": "@seal:codex_phase1_15chars"
+}

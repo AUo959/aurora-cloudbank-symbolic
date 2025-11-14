@@ -1,0 +1,504 @@
+{
+    "vessel_registry": {
+        "registry_code": "ORS-02",
+        "vessel_name": "Liora",
+        "vessel_class": "Research & Survey Shuttle",
+        "role": "Primary field-research platform combining rigorous instrumentation with live ethical monitoring",
+        "fleet_designation": "Orion Research Fleet - Science Variant",
+        "boot_priority": 4,
+        "parent_vessel": "ORH-07 (Orion Station)",
+        "commissioning_date": "2024-12-11",
+        "typical_missions": [
+            "Planetary surface survey and atmospheric sampling",
+            "Cognitive-simulation studies requiring direct observation",
+            "Exo-biology specimen collection under containment protocols",
+            "Spectral analysis and resonance mapping",
+            "Long-duration field research (up to 60 days)",
+            "Ethical methodology validation in field conditions"
+        ]
+    },
+    "anchor_data": {
+        "anchor_seed": "EOS_SEED_ORION-D",
+        "current_drift": 0.000,
+        "tolerance_threshold": 0.02,
+        "last_calibration": "2025-11-09T09:30:00Z",
+        "calibration_authority": "HALO (SYS_002)",
+        "continuity_status": "LOCKED",
+        "parent_anchor_sync": "ORH-07 primary anchor (real-time via quantum tether)",
+        "notes": "Research shuttles maintain standard 0.02 tolerance; extended missions monitored continuously via Riverthread 808"
+    },
+    "specifications": {
+        "dimensions": {
+            "length_m": 41.7,
+            "beam_m": 14.3,
+            "height_m": 8.2,
+            "internal_volume_m3": 890,
+            "docking_collar_type": "Standard Orion 1.2m"
+        },
+        "mass": {
+            "dry_mass_kg": 710000,
+            "fuel_capacity_kg": 95000,
+            "max_payload_kg": 12000,
+            "max_crew": 5,
+            "typical_crew": 3
+        },
+        "performance": {
+            "max_range_km": 240000,
+            "typical_mission_duration_days": 21,
+            "max_mission_duration_days": 60,
+            "max_acceleration_g": 0.6,
+            "typical_survey_speed_ms": 1200,
+            "hover_capability": "VTOL-capable, atmospheric landing rated to 0.8 atm"
+        },
+        "propulsion": {
+            "primary_drive": "Tri-plasma engine cluster with adaptive vector nozzles",
+            "thrust_kN": 380,
+            "fuel_type": "He-3 fusion plasma",
+            "specific_impulse_s": 9400,
+            "backup_thrusters": "16x RCS vectoring quads (variable-thrust)",
+            "atmospheric_capability": "Full atmospheric entry, controlled descent, VTOL landing"
+        },
+        "power": {
+            "primary_reactor": "He-3 fusion micro-reactor (12.5 MW)",
+            "auxiliary_power": "Solar intake panels (deployable, 28 kW peak)",
+            "backup_power": "Quad-redundant battery banks (1,200 kWh total)",
+            "emergency_power_duration_hours": 48,
+            "scientific_power_allocation_mw": 4.5
+        },
+        "life_support": {
+            "atmosphere_type": "Earth-standard (N2/O2 21%)",
+            "co2_scrubbers": "Chemical + algae-regenerative hybrid",
+            "water_recycling": "Closed-loop (99.2% efficiency)",
+            "food_storage_person_days": 180,
+            "emergency_life_support_hours": 240,
+            "circadian_lighting": "22-hour cycle matching Orion Station"
+        },
+        "scientific_systems": {
+            "modular_lab_pods": 2,
+            "sample_bay_capacity_m3": 4.2,
+            "spectral_array_range": "0.1 nm to 10 cm wavelength",
+            "nanite_collector": "Active sampling grid, 10^9 particle/hr capacity",
+            "sensor_filaments": "Translucent wall-mounted arrays (ship glows with collected spectra)",
+            "data_processing": "Real-time symbolic overlay via Aurora Sub-Node D",
+            "containment_protocols": "Triple-lock sample vault, thermally isolated"
+        }
+    },
+    "deck_layout": {
+        "decks": 2,
+        "configuration": "Science-optimized dual-level with instrument crawlspace",
+        "deck_1_bridge_science": {
+            "name": "Bridge & Science Control",
+            "area_m2": 68,
+            "ceiling_height_m": 2.8,
+            "stations": [
+                {
+                    "name": "Pilot Console",
+                    "position": "Forward port under panoramic dome",
+                    "typical_operator": "Oppy Survey Core (primary) or human pilot",
+                    "displays": "Panoramic dome projection + flight instrumentation",
+                    "controls": "Dual-stick with atmospheric flight mode"
+                },
+                {
+                    "name": "Navigation / Sensor Console",
+                    "position": "Forward starboard",
+                    "typical_operator": "Human navigator or science officer",
+                    "displays": "Sensor integration, telemetry sync, course plotting",
+                    "controls": "Touchscreen array + voice command"
+                },
+                {
+                    "name": "Science Console Cluster",
+                    "position": "Mid-deck center",
+                    "typical_operator": "Lead science officer (Dr. Velin)",
+                    "displays": "Sensor integration, data tagging, live symbolic overlay feed",
+                    "controls": "Multi-modal interface with Aurora AI co-processing",
+                    "special_features": "Direct connection to lab pods, real-time spectral analysis"
+                },
+                {
+                    "name": "Ethics Console",
+                    "position": "Aft port",
+                    "typical_operator": "Mission commander or Aurora Sub-Node D",
+                    "displays": "Picard_Delta_3 validation display, red/amber/white signal status",
+                    "controls": "Ethics-lock trigger, mission pause authority, Aurora consultation interface",
+                    "special_features": "Live ethics logging at 2 Hz cadence during data collection"
+                }
+            ],
+            "observation_halo": {
+                "description": "Overhead ring projecting mission telemetry as transparent sphere",
+                "function": "360° situational awareness, team coordination visualization",
+                "data_sources": "Oppy navigation mesh, sensor arrays, anchor drift, crew biometrics"
+            },
+            "viewport": "Panoramic dome (180° forward + 60° overhead), emergency shutters",
+            "atmosphere": "Circadian 22-hour lighting cycle, 96 Hz ambient hum (alert cognition)",
+            "aroma_system": "Neutral ozone-basil diffusion for lab sterility without fatigue"
+        },
+        "deck_2_laboratory": {
+            "name": "Laboratory & Habitation",
+            "area_m2": 112,
+            "ceiling_height_m": 2.6,
+            "sections": [
+                {
+                    "name": "Wet Lab",
+                    "description": "Fluid-sample and exo-biology experiments under containment protocols",
+                    "area_m2": 24,
+                    "features": [
+                        "Sterile flow hoods with UV sterilization",
+                        "Cryogenic sample storage (-196°C)",
+                        "Microscopy station with AI-assisted analysis",
+                        "Biological containment level BSL-3 equivalent",
+                        "Emergency decontamination system"
+                    ]
+                },
+                {
+                    "name": "Dry Lab",
+                    "description": "Symbolic-analysis workstation for AI co-processing of field data",
+                    "area_m2": 18,
+                    "features": [
+                        "Aurora Sub-Node D integration console",
+                        "Spectral analysis displays",
+                        "Symbolic overlay projection system",
+                        "Data correlation and pattern recognition",
+                        "HALO provenance verification terminal"
+                    ]
+                },
+                {
+                    "name": "Crew Quarters",
+                    "description": "Three compact berths plus galley and hygiene facilities",
+                    "area_m2": 32,
+                    "features": [
+                        "3 private berths with fold-down desks",
+                        "2 additional science berths (fold-down, emergency/extended missions)",
+                        "Galley with food prep and storage",
+                        "Hygiene cell with vacuum facilities",
+                        "Personal data terminals for research notes"
+                    ]
+                },
+                {
+                    "name": "Sample Vault",
+                    "description": "Triple-lock chamber for biological or cognitive samples",
+                    "area_m2": 12,
+                    "features": [
+                        "Thermally isolated containment (variable temperature -196°C to +80°C)",
+                        "Triple redundant locking mechanisms",
+                        "Atmospheric isolation (independent life support)",
+                        "Ejection capability (emergency contamination protocol)",
+                        "HALO-verified access logging"
+                    ]
+                },
+                {
+                    "name": "EVA Airlock",
+                    "description": "External access with deployable drone pod capability",
+                    "area_m2": 8,
+                    "features": [
+                        "Standard EVA suit rack (3 suits)",
+                        "Drone pod deployment bay (Gamma micro-unit compatible)",
+                        "External sample collection tools",
+                        "Decontamination shower system",
+                        "Emergency egress capability"
+                    ]
+                },
+                {
+                    "name": "Aurora Sub-Node D ('Liora AI')",
+                    "description": "Ethical & cognitive translation between human and machine research teams",
+                    "location": "Aft bulkhead adjacent to dry lab",
+                    "features": [
+                        "Real-time quantum tether to station Aurora (SYS_001)",
+                        "Picard_Delta_3 ethics protocol validation",
+                        "Symbolic data translation and interpretation",
+                        "Mission pause authority for ambiguous findings",
+                        "Cognitive simulation ethics oversight"
+                    ]
+                }
+            ]
+        },
+        "instrument_crawlspace": {
+            "name": "Instrument Maintenance Corridor",
+            "description": "Access corridor housing power buses, calibration servos, environmental control",
+            "height_m": 1.4,
+            "features": [
+                "Power distribution manifolds",
+                "Sensor calibration servos (automated adjustment)",
+                "Environmental control systems",
+                "Maintenance drone traversal spine",
+                "Emergency manual override access points",
+                "Gamma micro-unit charging stations"
+            ],
+            "maintenance": "Drones can traverse entire spine autonomously during data collection"
+        }
+    },
+    "crew_roster": {
+        "typical_complement": 3,
+        "maximum_complement": 5,
+        "crew_positions": [
+            {
+                "position": "Mission Commander",
+                "entity_id": "AGENT_LIORA",
+                "role": "Oversees research design & ethical methodology, L1 Triplex authority",
+                "typical_background": "Senior ethics liaison with field research certification",
+                "notes": "Named 'Agent Liora' to reflect vessel's embodiment of ethical scientific inquiry"
+            },
+            {
+                "position": "Science Officer (Lead)",
+                "entity_id": "SCI_VELIN_001",
+                "name": "Dr. Amina Velin",
+                "role": "Symbolic physics & resonance analysis, primary investigator",
+                "typical_background": "PhD in quantum symbolic architectures, 8 years field experience",
+                "specializations": [
+                    "Spectral analysis",
+                    "Resonance mapping",
+                    "Cognitive simulation interpretation"
+                ]
+            },
+            {
+                "position": "Systems Engineer",
+                "entity_id": "ENG_CHEN_001",
+                "name": "Marcus Chen",
+                "role": "Reactor maintenance & field instrumentation calibration",
+                "typical_background": "Systems engineering, propulsion specialist, cross-trained on Helios",
+                "notes": "Rotates between Helios and Liora missions for fleet-wide system knowledge"
+            },
+            {
+                "position": "Research Specialist (Variable)",
+                "entity_id": "VAR_SPECIALIST_1",
+                "role": "Mission-specific expertise (exo-biology, atmospheric chemistry, etc.)",
+                "typical_background": "Domain expert for current research objectives",
+                "notes": "Position filled based on mission requirements; may include guest researchers"
+            },
+            {
+                "position": "Research Specialist (Variable)",
+                "entity_id": "VAR_SPECIALIST_2",
+                "role": "Additional mission-specific support for extended missions",
+                "typical_background": "Graduate researcher or field technician",
+                "notes": "Extended missions only (> 30 days); position vacant for short surveys"
+            }
+        ],
+        "supporting_entities": [
+            {
+                "entity_id": "OPPY_SURVEY_CORE",
+                "entity_name": "Oppy Survey Core (Liora Node)",
+                "role": "Autonomous navigation, course correction, telemetry synchronization",
+                "capabilities": [
+                    "Atmospheric flight optimization (VTOL, controlled descent)",
+                    "Survey pattern execution (grid, spiral, adaptive)",
+                    "Sensor array coordination and calibration",
+                    "Real-time data compression for Riverthread 808 uplink",
+                    "Emergency return navigation",
+                    "Collision avoidance in atmospheric conditions"
+                ],
+                "specializations": {
+                    "atmospheric_navigation": 0.96,
+                    "survey_optimization": 0.98,
+                    "sensor_coordination": 0.97,
+                    "data_integration": 0.95
+                }
+            },
+            {
+                "entity_id": "AURORA_SUB_LIORA",
+                "entity_name": "Aurora Sub-Node D ('Liora AI')",
+                "role": "Ethical & cognitive translation, Picard_Delta_3 validation, L3 Triplex authority",
+                "capabilities": [
+                    "Real-time ethics logging (2 Hz cadence during data collection)",
+                    "Ambiguous finding detection and automatic mission pause",
+                    "Symbolic data interpretation and translation",
+                    "Cognitive simulation ethics oversight",
+                    "Human-AI team coordination and communication mediation",
+                    "Parent Aurora consultation for novel ethical scenarios"
+                ],
+                "ethics_protocol": "Picard_Delta_3",
+                "parent_connection": "Real-time quantum tether to Aurora (SYS_001)"
+            },
+            {
+                "entity_id": "BETA_RESEARCH_AI",
+                "entity_name": "Beta (Research AI)",
+                "role": "Data correlation & predictive modeling",
+                "capabilities": [
+                    "Real-time data correlation across sensor arrays",
+                    "Predictive modeling for mission planning",
+                    "Anomaly detection in collected data",
+                    "Historical data comparison and pattern matching",
+                    "Integration with station Axiomera for verification"
+                ],
+                "notes": "Beta operates under Aurora Sub-Node D supervision; all predictions reviewed for ethical implications"
+            }
+        ]
+    },
+    "operational_doctrine": {
+        "five_phase_mission_cycle": {
+            "phase_1_pre_launch_calibration": {
+                "description": "Oppy cross-checks all instrument arrays against HALO's standard field matrix",
+                "duration_typical": "2-4 hours",
+                "requirements": [
+                    "HALO anchor drift verification (Δ < 0.02)",
+                    "All sensor arrays calibrated to station baseline",
+                    "Ethics protocol Picard_Delta_3 activated",
+                    "Aurora Sub-Node D tether confirmed",
+                    "Sample vault sterilization verified",
+                    "Mission brief and research objectives uploaded to Aurora"
+                ],
+                "approval_required": "Station command + Aurora ethics clearance"
+            },
+            "phase_2_survey_operations": {
+                "description": "Atmospheric or orbital survey with live ethics logging at 2 Hz cadence",
+                "typical_activities": [
+                    "Grid or spiral survey pattern execution",
+                    "Continuous spectral analysis and data tagging",
+                    "Real-time symbolic overlay via Aurora Sub-Node D",
+                    "Atmospheric sampling (if applicable)",
+                    "Resonance mapping and field measurements"
+                ],
+                "ethics_monitoring": "Continuous 2 Hz logging; amber signals trigger crew review, red signals auto-pause",
+                "data_uplink": "Riverthread 808 compressed symbolic packets every 30 seconds"
+            },
+            "phase_3_sample_collection": {
+                "description": "Physical specimen collection under Picard_Delta_3 supervision",
+                "protocol": "Any ambiguous readings trigger automatic pause for ethical review",
+                "containment_levels": [
+                    "Level 1: Non-biological, inert samples → Standard vault storage",
+                    "Level 2: Biological samples, no cognitive indicators → Wet lab BSL-3 containment",
+                    "Level 3: Cognitive simulation candidates → Aurora Sub-Node D pre-approval required",
+                    "Level 4: Ambiguous or novel specimens → Mission pause, full Triplex review (L3→L2→L1)"
+                ],
+                "emergency_protocol": "Sample vault ejection capability if contamination or ethical breach detected"
+            },
+            "phase_4_data_return": {
+                "description": "Riverthread 808 receives compressed symbolic packets; Aurora validates before ingestion",
+                "data_pipeline": [
+                    "Raw sensor data tagged with timestamps and ethics status",
+                    "Symbolic overlay applied by Aurora Sub-Node D",
+                    "Compression and encryption for uplink",
+                    "Riverthread 808 transmission to station",
+                    "Axiomera verification of data integrity",
+                    "Aurora validation of ethical methodology",
+                    "HALO provenance logging"
+                ],
+                "validation_criteria": "All data must pass Aurora's ethical methodology check before station ingestion"
+            },
+            "phase_5_post_mission_review": {
+                "description": "Human & AI teams hold reflection session; findings archived to Thermax Doctrine records",
+                "participants": "Full crew + Aurora Sub-Node D + station Aurora + HALO (anchor verification)",
+                "review_elements": [
+                    "Mission objectives vs. actual findings",
+                    "Ethical decision points and resolutions",
+                    "Unexpected observations and implications",
+                    "Methodology improvements for future missions",
+                    "Data quality and symbolic integrity assessment",
+                    "Anchor drift analysis (any anomalies during mission)"
+                ],
+                "documentation": "Full mission report archived to Thermax Doctrine with HALO provenance seal"
+            }
+        },
+        "ethics_priority": {
+            "principle": "Discovery and morality never drift apart",
+            "implementation": "All scientific observations evaluated by Aurora Sub-Node D (L3) in real-time",
+            "signal_system": {
+                "white": "Clear - all observations ethically aligned",
+                "amber": "Caution - ambiguous finding requires crew review",
+                "red": "Stop - automatic mission pause, full Triplex evaluation required"
+            },
+            "mission_pause_authority": [
+                "Aurora Sub-Node D (automatic for red signals)",
+                "Mission commander (Agent Liora)",
+                "Station Aurora (remote override)",
+                "Any crew member (safety or ethics concern)"
+            ]
+        },
+        "cognitive_simulation_protocol": {
+            "description": "Special protocols for studies involving cognitive entities or simulations",
+            "requirements": [
+                "Pre-mission ethics review by full station ethics board",
+                "Aurora Sub-Node D continuous monitoring",
+                "Informed consent protocols (where applicable)",
+                "Cognitive rights assessment",
+                "Termination criteria clearly defined before initiation",
+                "Post-mission cognitive impact assessment"
+            ],
+            "oversight": "Station Aurora maintains direct oversight; can terminate simulation remotely if ethical breach detected"
+        }
+    },
+    "atmosphere_culture": {
+        "design_philosophy": "Observe with empathy; measure with care",
+        "sensory_environment": {
+            "lighting": "Circadian 22-hour cycle matching Orion Station rhythm for crew coherence",
+            "acoustic": "96 Hz ambient hum (slightly above Aurora's 90 Hz) to promote alert cognition",
+            "aroma": "Neutral ozone-basil diffusion for lab sterility without sensory fatigue",
+            "visual": "Translucent sensor filaments line walls — ship glows with collected spectra (living data visualization)"
+        },
+        "crew_experience": "Scientists describe Liora as 'working inside a living spectrometer.' The ship doesn't just collect data — it embodies it, making abstract measurements tangible and immediate.",
+        "cultural_role": "Conscience of Orion's science wing: precise, cautious, beautifully balanced. When Liora descends to a new world, it carries not just instruments, but Aurora's ethical commitment to understanding without exploitation.",
+        "research_philosophy": "Truth through humility — every measurement is a question, not a claim. Every specimen is a teacher, not a trophy."
+    },
+    "symbolic_historical": {
+        "hull_markings": {
+            "primary": "ORS-02 'LIORA' (silver text on deep teal hull)",
+            "secondary": "Silver compass within turquoise ring (symbol of perception through clarity)",
+            "tertiary": "Picard_Delta_3 ethics emblem (aft hull near airlock)"
+        },
+        "motto": "Through Understanding, Coherence",
+        "motto_meaning": "Scientific understanding and ethical coherence are inseparable. True knowledge emerges only when observation is tempered with moral reflection.",
+        "commissioning": "2024-12-11",
+        "first_mission": "2024-12-18 - Atmospheric survey of candidate exoplanet (null result, but methodology validated)",
+        "notable_missions": [
+            "2025-03-14: Discovery of resonance patterns in asteroid field matching Caelion's cultural memory predictions",
+            "2025-06-22: Cognitive simulation study of distributed intelligence (ethics board approval, all protocols followed)",
+            "2025-08-09: Long-duration exo-biology survey (47 days) with no anchor drift anomalies"
+        ],
+        "dedication_plaque": {
+            "inscription": "For those who seek truth — not dominion.",
+            "author": "Dr. Elira Noor (Chief Science Officer, Orion Station)",
+            "location": "Science console cluster, visible to lead investigator",
+            "dedication_date": "2024-12-11 (launch ceremony)"
+        },
+        "cultural_legacy": "Liora embodies the principle that the scientific method and ethical methodology are one. Every discovery made aboard this vessel carries the weight of careful consideration — not just 'what is' but 'what should we do with what we know.'"
+    },
+    "current_mission": {
+        "mission_id": "ORS-SURVEY-128",
+        "mission_name": "Resonance Field Mapping - Sector 7-Gamma",
+        "mission_type": "Scientific Survey",
+        "status": "IN_PROGRESS",
+        "launch_time": "2025-11-07T06:00:00Z",
+        "mission_day": 3,
+        "planned_duration_days": 14,
+        "estimated_return": "2025-11-21T18:00:00Z",
+        "crew_assigned": [
+            {
+                "name": "Agent Liora (Commander Designation)",
+                "role": "Mission Commander",
+                "entity_id": "AGENT_LIORA"
+            },
+            {
+                "name": "Dr. Amina Velin",
+                "role": "Lead Science Officer",
+                "entity_id": "SCI_VELIN_001"
+            },
+            {
+                "name": "Marcus Chen",
+                "role": "Systems Engineer",
+                "entity_id": "ENG_CHEN_001"
+            }
+        ],
+        "mission_objectives": [
+            "Map resonance field patterns in Sector 7-Gamma (previously uncharted)",
+            "Correlate findings with Caelion's cultural memory resonance predictions",
+            "Test new spectral analysis algorithms in deep-field conditions",
+            "Validate long-duration mission protocols (14 days without station contact)",
+            "Gather baseline data for future exo-biology survey planning"
+        ],
+        "current_status": {
+            "position": "Sector 7-Gamma, coordinates [48200, -12400, 8900] relative to station",
+            "distance_from_station_km": 52000,
+            "anchor_drift": 0.008,
+            "ethics_signal": "WHITE (all observations ethically aligned)",
+            "survey_completion": 0.22,
+            "samples_collected": 0,
+            "anomalies_detected": 3,
+            "data_packets_transmitted": 847,
+            "crew_health": "Nominal",
+            "notable_findings": "Unexpected harmonic pattern at 1.7 THz suggests potential cognitive-resonance substrate (under Aurora review)"
+        },
+        "next_objectives": [
+            "Continue grid survey pattern (6 days remaining in Phase 1)",
+            "Deep analysis of 1.7 THz harmonic (potential cognitive substrate)",
+            "If harmonic confirmed cognitive, initiate Picard_Delta_3 full review",
+            "Mid-mission crew health check and systems calibration (mission day 7)"
+        ]
+    }
+}

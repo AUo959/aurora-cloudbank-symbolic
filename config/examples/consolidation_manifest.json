@@ -1,0 +1,23 @@
+{
+  "anchor": "T1-CONSOLIDATE-2025",
+  "timestamp": "2025-09-25T02:44:28.770117",
+  "backup_seal": "ef0f77da0d18adc8a3479e8b7c958a2dc4d922ff32fae1f98bb9d5499ead6246",
+  "unified_workflow": ".github/workflows/codeql-unified.yml",
+  "removed_workflows": [
+    ".github/workflows/codeql-enhanced.yml",
+    ".github/workflows/codeql.yml",
+    ".github/workflows/codeql-simple.yml",
+    ".github/workflows/security-audit.yml",
+    ".github/workflows/security-integration.yml",
+    ".github/workflows/security-scanning.yml"
+  ],
+  "disable_script": "scripts/disable_default_codeql.sh",
+  "next_steps": [
+    "Run: bash scripts/disable_default_codeql.sh",
+    "Commit changes: git add . && git commit -m 'fix: consolidate CodeQL workflows [T1-CONSOLIDATE-2025]'",
+    "Push to trigger new workflow: git push origin main",
+    "Monitor GitHub Actions tab for unified workflow execution"
+  ],
+  "dlp_tag": "CONFIGURATION_CHANGE",
+  "thread_seal": "ba50c1bec2ca80a7609bb1b4d218b25a5bcca5df012d1b4b72ec53db239cd4c5"
+}

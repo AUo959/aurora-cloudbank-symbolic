@@ -1,0 +1,48 @@
+{
+    "scripts": {
+    "test": "AES_KEY_256_HEX=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef node tests/test_crypto.js && node tests/test_pas.js",
+    "start-command-node": "node src/core/command_node.js",
+    "start-api-bridge": "node src/bridge/api_bridge_server.js",
+    "start-drift-sync": "node src/system/lattice_sync.js",
+    "start-archy": "node src/nodes/archy_bridge.js",
+    "start-liora": "node src/nodes/liora_handshake.js",
+    "start-oppy": "node src/nodes/oppy_vector_loader.js",
+    "run-glyph-engine": "node ./src/core/glyph_engine.js",
+    "verify-ethics": "node ./src/core/ethics_layer.js",
+    "zip-bundle": "node ./src/core/zipcomm.js",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:md": "markdownlint --fix **/*.md",
+    "format:check": "prettier --check .",
+    "pre-commit": "lint-staged",
+    "prepare": "husky install"ora-cloudbank-symbolic",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "AES_KEY_256_HEX=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef node tests/test_crypto.js && node tests/test_pas.js",
+    "start-command-node": "node src/core/command_node.js",
+    "start-api-bridge": "node src/bridge/api_bridge_server.js",
+    "start-drift-sync": "node src/system/lattice_sync.js",
+    "start-archy": "node src/nodes/archy_bridge.js",
+    "start-liora": "node src/nodes/liora_handshake.js",
+    "start-oppy": "node src/nodes/oppy_vector_loader.js",
+    "run-glyph-engine": "node ./src/core/glyph_engine.js",
+    "verify-ethics": "node ./src/core/ethics_layer.js",
+    "zip-bundle": "node ./src/core/zipcomm.js",
+    "lint": "eslint src/**/*.js --fix || echo 'Linting completed with warnings'",
+    "bundle-symbolic-core": "zip -r symbolic_core_bundle.zip src/core/",
+    "verify-bundle": "node scripts/hash_bundle.js symbolic_core_bundle.zip"
+  },
+  "dependencies": {
+    "dompurify": "^3.2.6",
+    "dotenv": "^17.0.0",
+    "jsdom": "^26.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "markdownlint-cli": "^0.37.0",
+    "prettier": "^3.0.0"
+  }
+}

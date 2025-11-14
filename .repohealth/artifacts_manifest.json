@@ -1,0 +1,15 @@
+[
+  {
+    "artifact": "releases/SRB_SHADOWFAX_Stillness_v1.0.zip",
+    "sha256": "6c97167ed6b9c2339b63428cdd06ac5f507e7c87ce347bb0631d0484b87eb26d",
+    "size_bytes": 7595909,
+    "size_mb": 7.24,
+    "created": "2025-08-17T13:57:44Z",
+    "purpose": "Governance/anchor manifests for SHADOWFAX (paradox/stillness overseer). Not loaded at runtime.",
+    "doc_refs": [
+      "docs/operational/reports/REPOSITORY_HEALTH_CHECK_REPORT.md",
+      "docs/operational/reports/GITWIZ_HEALTH_CHECK_FINAL*.md",
+      "docs/operational/reports/REPOSITORY_AUDIT_REPORT.json"
+    ]
+  }
+]

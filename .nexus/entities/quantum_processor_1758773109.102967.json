@@ -1,0 +1,17 @@
+{
+  "entity_id": "quantum_processor_1758773109.102967",
+  "entity_type": "quantum_processor",
+  "anchor": "ENTITY-QUANTUM_PROCESSOR-563f3462",
+  "state": "active",
+  "capabilities": [
+    "superposition",
+    "entanglement"
+  ],
+  "entanglements": [],
+  "memory_keys": [],
+  "metadata": {},
+  "created_at": "2025-09-25T04:05:09.102985",
+  "last_heartbeat": "2025-09-25T04:05:09.103233",
+  "dlp_tag": "QUANTUM",
+  "seal": "8bf56bc4c11857d70aa5ad6f171d21f4da203ca0e6483637cfa3756009228103"
+}

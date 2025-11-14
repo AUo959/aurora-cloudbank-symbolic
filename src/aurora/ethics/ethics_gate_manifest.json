@@ -1,0 +1,157 @@
+{
+  "module": "aurora.ethics.ethics_gate",
+  "version": "1.0.0",
+  "description": "Central ethics gate for evaluating actions and commands with GUMAS integration",
+  "anchors": [
+    "T1",
+    "SRB",
+    "EOS_SEED_ORION",
+    "Picard_Delta_3"
+  ],
+  "symbolic_tags": [
+    "ETHICS_GATE_CORE",
+    "GUMAS_INTEGRATION",
+    "PICARD_DELTA_3_READY"
+  ],
+  "dlp": {
+    "tag_id": "ethics_gate_core_v1",
+    "tracking_enabled": true,
+    "log_only": true,
+    "description": "Ethics evaluations touch critical decision data but are log-only in this version (no disk persistence)",
+    "tag_format": "ethics::gate::evaluation::{timestamp}",
+    "required_fields": [
+      "anchor_protocols",
+      "t1_srb_anchors",
+      "symbolic_patterns.ethics_context"
+    ]
+  },
+  "components": {
+    "EthicsVerdict": {
+      "type": "dataclass",
+      "description": "Normalized ethics evaluation verdict",
+      "fields": [
+        "allowed",
+        "score",
+        "reason",
+        "engine",
+        "timestamp",
+        "dlp_tag_id"
+      ]
+    },
+    "GUMASEthicsClient": {
+      "type": "class",
+      "description": "HTTP adapter for GUMAS Ethics API",
+      "methods": [
+        "evaluate"
+      ],
+      "dependencies": [
+        "httpx"
+      ]
+    },
+    "EthicsGate": {
+      "type": "class",
+      "description": "Main ethics gate with evaluation logic",
+      "methods": [
+        "evaluate"
+      ],
+      "dependencies": [
+        "GUMASEthicsClient",
+        "NativeDLPTracker"
+      ]
+    },
+    "EthicsViolation": {
+      "type": "exception",
+      "description": "Exception raised when action is blocked by ethics evaluation",
+      "fields": [
+        "message",
+        "verdict"
+      ]
+    }
+  },
+  "integration_points": {
+    "relay_manager": {
+      "module": "src.aurora.relays.relay_manager",
+      "description": "Cross-layer relay with ethics gate integration (PR #340)",
+      "status": "implemented"
+    },
+    "api_endpoint": {
+      "module": "api.aurora_api",
+      "description": "High-impact API endpoint with ethics gate check",
+      "status": "planned"
+    },
+    "patchweaver": {
+      "module": "future",
+      "description": "Automated patching system with ethics checks",
+      "status": "future"
+    },
+    "admin_tools": {
+      "module": "future",
+      "description": "Administrative tools with ethics enforcement",
+      "status": "future"
+    }
+  },
+  "configuration": {
+    "default_threshold": 0.7,
+    "threshold_range": [0.0, 1.0],
+    "score_mapping": {
+      "compliant": 1.0,
+      "low_violation": 0.7,
+      "medium_violation": 0.5,
+      "high_violation": 0.3,
+      "critical_violation": 0.0
+    },
+    "default_base_url": "http://localhost:8000",
+    "fail_safe": "deny_on_error"
+  },
+  "testing": {
+    "test_file": "tests/test_ethics_gate.py",
+    "test_count": 15,
+    "coverage_targets": [
+      "src.aurora.ethics.ethics_gate",
+      "src.aurora.relays.relay_manager"
+    ]
+  },
+  "logging": {
+    "structured": true,
+    "anchor_references": true,
+    "log_levels": {
+      "initialization": "INFO",
+      "evaluation": "INFO",
+      "block": "WARNING",
+      "error": "ERROR"
+    },
+    "extra_fields": [
+      "anchors",
+      "aurora_module",
+      "ethics_verdict",
+      "action_type",
+      "context",
+      "relay_message",
+      "verdict"
+    ]
+  },
+  "security": {
+    "fail_safe_mode": "deny",
+    "graceful_degradation": true,
+    "detailed_logging": "server_side_only",
+    "client_error_messages": "generic"
+  },
+  "future_engines": {
+    "picard_delta_3": {
+      "status": "prepared",
+      "integration_effort": "minimal",
+      "changes_required": [
+        "Implement PicardDelta3Client with evaluate() method",
+        "Swap client in EthicsGate constructor",
+        "Update engine field in verdict"
+      ]
+    }
+  },
+  "exported_at": "2025-11-13T23:45:00.000Z",
+  "metadata": {
+    "author": "Aurora Development Team",
+    "repository": "AUo959/aurora-cloudbank-symbolic",
+    "issue": "Implement Ethics Gate Module",
+    "pr_branch": "copilot/implement-ethics-gate-module"
+  }
+}

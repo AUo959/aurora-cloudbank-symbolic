@@ -1,0 +1,155 @@
+# Prometheus Alerting Rules for R-2 Agent Production Telemetry
+# 
+# These rules define alerts for critical R-2 agent operational issues
+# Configure in prometheus.yml under rule_files
+
+groups:
+  - name: r2_agent_critical
+    interval: 30s
+    rules:
+      - alert: R2AgentHighFailureRate
+        expr: |
+          (
+            rate(r2_agent_operations_errors[5m]) 
+            / 
+            rate(r2_agent_operations_total[5m])
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: critical
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent high failure rate detected"
+          description: "R-2 agent failure rate is {{ $value | humanizePercentage }} over the last 5 minutes (threshold: 20%)"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Troubleshooting"
+
+      - alert: R2AgentOperationsStalled
+        expr: |
+          rate(r2_agent_operations_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: critical
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent operations have stalled"
+          description: "No R-2 agent operations recorded in the last 10 minutes"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Troubleshooting"
+
+      - alert: R2AgentAnomalyDetected
+        expr: |
+          increase(r2_agent_anomalies_detected[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent anomaly detected"
+          description: "{{ $value }} anomalies detected in R-2 agent operations in the last 5 minutes"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Anomaly-Response"
+
+      - alert: R2AgentSlowOperations
+        expr: |
+          histogram_quantile(0.95, rate(r2_agent_operation_duration_bucket[5m])) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent operations are slow"
+          description: "95th percentile operation duration is {{ $value | humanizeDuration }} (threshold: 5s)"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Performance"
+
+  - name: r2_agent_resource
+    interval: 1m
+    rules:
+      - alert: R2AgentHighCPU
+        expr: |
+          r2_agent_resource_cpu > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: r2-agent
+          resource: cpu
+        annotations:
+          summary: "R-2 Agent high CPU usage"
+          description: "R-2 agent CPU usage is {{ $value }}% (threshold: 80%)"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Resources"
+
+      - alert: R2AgentHighMemory
+        expr: |
+          r2_agent_resource_memory > 1024
+        for: 5m
+        labels:
+          severity: warning
+          component: r2-agent
+          resource: memory
+        annotations:
+          summary: "R-2 Agent high memory usage"
+          description: "R-2 agent memory usage is {{ $value | humanize }}MB (threshold: 1GB)"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Resources"
+
+  - name: r2_agent_degradation
+    interval: 1m
+    rules:
+      - alert: R2AgentPerformanceDegradation
+        expr: |
+          (
+            avg_over_time(r2_agent_operation_duration[30m])
+            /
+            avg_over_time(r2_agent_operation_duration[24h])
+          ) > 1.5
+        for: 15m
+        labels:
+          severity: warning
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent performance degradation detected"
+          description: "Average operation duration has increased by {{ $value | humanizePercentage }} compared to 24h baseline"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Performance"
+
+      - alert: R2AgentMultipleAnomalies
+        expr: |
+          increase(r2_agent_anomalies_detected[1h]) > 10
+        for: 5m
+        labels:
+          severity: critical
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent multiple anomalies detected"
+          description: "{{ $value }} anomalies detected in the last hour, indicating systemic issues"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Anomaly-Response"
+
+  - name: r2_agent_health
+    interval: 1m
+    rules:
+      - alert: R2AgentHealthDegraded
+        expr: |
+          (
+            rate(r2_agent_operations_success[5m])
+            /
+            rate(r2_agent_operations_total[5m])
+          ) < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent health degraded"
+          description: "R-2 agent success rate is {{ $value | humanizePercentage }} (threshold: 80%)"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Health"
+
+      - alert: R2AgentHealthCritical
+        expr: |
+          (
+            rate(r2_agent_operations_success[5m])
+            /
+            rate(r2_agent_operations_total[5m])
+          ) < 0.5
+        for: 5m
+        labels:
+          severity: critical
+          component: r2-agent
+        annotations:
+          summary: "R-2 Agent health critical"
+          description: "R-2 agent success rate is {{ $value | humanizePercentage }} - immediate investigation required"
+          runbook_url: "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Agent-Health"

@@ -1,0 +1,94 @@
+{
+  "manifest_name": "demo_guardian_export",
+  "manifest_id": "manifest_1761514482433",
+  "creation_timestamp": 1761514482.4333982,
+  "creation_datetime": "2025-10-26T21:34:42.433398",
+  "total_tags": 2,
+  "aurora_version": "3.5.2-optimized",
+  "zero_dependencies": true,
+  "tags": [
+    {
+      "tag_id": "demo-guardian-pii-scan-9facc31f",
+      "operation": "pii_detection",
+      "data_hash": "c38715cf2a39eb9572ee8b5f92ab06c91403297c10c622ca0ead23b150b7ad5f",
+      "timestamp": 1761514482.4331996,
+      "datetime": "2025-10-26T21:34:42.433200",
+      "dependencies": [],
+      "metadata": {
+        "detection_count": 5,
+        "pii_types": [
+          "ip_address",
+          "ssn",
+          "phone",
+          "email"
+        ],
+        "confidence_threshold": 0.7,
+        "region": "US",
+        "data_size": 182
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1-EDG-004"
+      ],
+      "symbolic_patterns": {}
+    },
+    {
+      "tag_id": "demo-guardian-pii-redact-ec040dd2",
+      "operation": "pii_redaction",
+      "data_hash": "91eda93029dc0bce169cbd164379ac047267a661f458f6b3ed1159587df904de",
+      "timestamp": 1761514482.4333038,
+      "datetime": "2025-10-26T21:34:42.433304",
+      "dependencies": [
+        "demo-guardian-pii-scan-9facc31f"
+      ],
+      "metadata": {
+        "original_hash": "c38715cf2a39eb9572ee8b5f92ab06c91403297c10c622ca0ead23b150b7ad5f",
+        "redacted_hash": "91eda93029dc0bce169cbd164379ac047267a661f458f6b3ed1159587df904de",
+        "strategy": "mask",
+        "redaction_count": 2,
+        "confidence_threshold": 0.7,
+        "region": "US"
+      },
+      "anchor_protocols": [],
+      "t1_srb_anchors": [
+        "T1-EDG-004"
+      ],
+      "symbolic_patterns": {}
+    }
+  ],
+  "aurora_metadata": {
+    "anchor_protocols": [],
+    "t1_srb_anchors": [
+      "T1-EDG-004"
+    ],
+    "symbolic_patterns": {},
+    "continuity_preserved": true,
+    "performance_optimized": true
+  },
+  "export_path": "demo_guardian_export.json",
+  "data_guardian_version": "0.1.0",
+  "anchor": "T1-EDG-004",
+  "region": "US",
+  "pii_types_supported": [
+    "email",
+    "phone",
+    "ssn",
+    "credit_card",
+    "ip_address",
+    "date_of_birth",
+    "passport",
+    "driver_license",
+    "bank_account",
+    "full_name",
+    "address",
+    "custom"
+  ],
+  "redaction_strategies": [
+    "mask",
+    "hash",
+    "remove",
+    "partial",
+    "token",
+    "synthetic"
+  ]
+}

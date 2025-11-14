@@ -1,0 +1,150 @@
+# Aurora CloudBank Symbolic - GUI CloudHub Kubernetes Service
+# Kubernetes service manifest for exposing the Aurora FastAPI application
+#
+# Ethics Protocol: Picard_Delta_3 - Secure network exposure with zero-trust
+# T1: Service creation timestamp
+# SRB: K8S_SERVICE_v1
+# Chain Notation: #K8S//SERVICE//AURORA_GUI_CLOUDHUB//
+#
+# Features:
+# - LoadBalancer type for external access (use ClusterIP for internal only)
+# - Session affinity for VSA continuity
+# - Health check port for monitoring
+# - Annotations for cloud provider load balancer configuration
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-gui-cloudhub
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+    ethics-protocol: picard-delta-3
+  annotations:
+    # Aurora metadata
+    aurora.io/chain-notation: "#K8S//SERVICE//AURORA_GUI_CLOUDHUB//"
+    aurora.io/srb: "K8S_SERVICE_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+    # Service mesh annotations (if using Istio/Linkerd)
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "false"
+    # Cloud provider annotations (customize for AWS/GCP/Azure)
+    # service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    # service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+    # cloud.google.com/load-balancer-type: "Internal"
+spec:
+  # Service type - LoadBalancer exposes externally
+  # Options: ClusterIP (internal only), NodePort, LoadBalancer
+  type: LoadBalancer
+  
+  # Selector to match pods
+  selector:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+  
+  # Session affinity for VSA continuity
+  # ClientIP ensures same client goes to same pod (important for WebSocket)
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+  
+  # Port configuration
+  ports:
+  # Main HTTP port
+  - name: http
+    protocol: TCP
+    port: 80          # External port (load balancer)
+    targetPort: 8000  # Container port
+    # nodePort: 30080 # Uncomment for NodePort type (30000-32767 range)
+  
+  # HTTPS port (if TLS termination at pod level)
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 8443
+  
+  # Health check port
+  - name: health
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  
+  # WebSocket port (if separate)
+  - name: websocket
+    protocol: TCP
+    port: 8080
+    targetPort: 8000
+  
+  # External traffic policy
+  # Local: Preserves client source IP but may cause imbalanced traffic
+  # Cluster: Better load distribution but loses source IP
+  externalTrafficPolicy: Local
+  
+  # IP families for dual-stack (IPv4 + IPv6)
+  ipFamilies:
+  - IPv4
+  # - IPv6  # Uncomment for dual-stack
+  ipFamilyPolicy: SingleStack
+  
+  # Health check node port (for LoadBalancer type with Local traffic policy)
+  # Automatically assigned if not specified
+  # healthCheckNodePort: 32000
+
+---
+# Headless Service for StatefulSet or direct pod access (optional)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-gui-cloudhub-headless
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+    service-type: headless
+  annotations:
+    aurora.io/chain-notation: "#K8S//SERVICE//HEADLESS//"
+    aurora.io/srb: "K8S_SERVICE_HEADLESS_v1"
+spec:
+  type: ClusterIP
+  clusterIP: None  # Headless service - returns pod IPs directly
+  selector:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  publishNotReadyAddresses: false  # Only ready pods in DNS
+
+---
+# Internal ClusterIP Service for inter-service communication
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-gui-cloudhub-internal
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+    service-type: internal
+  annotations:
+    aurora.io/chain-notation: "#K8S//SERVICE//INTERNAL//"
+    aurora.io/srb: "K8S_SERVICE_INTERNAL_v1"
+    aurora.io/purpose: "Inter-service communication within cluster"
+spec:
+  type: ClusterIP
+  selector:
+    app: aurora-gui-cloudhub
+    component: fastapi-service
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+  - name: health
+    protocol: TCP
+    port: 8001
+    targetPort: 8000
+  sessionAffinity: None  # No affinity for internal load balancing

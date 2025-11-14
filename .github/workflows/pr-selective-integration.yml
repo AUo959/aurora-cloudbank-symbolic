@@ -1,0 +1,328 @@
+name: PR Selective Integration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  evaluate-and-integrate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0  # Need full history for git operations
+        
+    - name: Checkout base branch for comparison
+      run: |
+        git fetch origin ${{ github.event.pull_request.base.ref }}
+        
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest flake8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run PR Evaluation
+      id: evaluate
+      env:
+        PR_BRANCH: ${{ github.head_ref }}
+      run: |
+        echo "🌟 Running Aurora PR Evaluation..."
+        python3 tools/pr_evaluator.py \
+          --branch "$PR_BRANCH" \
+          --output eval.json
+        
+        # Store exit code but continue
+        EXIT_CODE=$?
+        echo "evaluation_exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+        
+        # Extract score for later use
+        SCORE=$(python3 -c "import json; data=json.load(open('eval.json')); print(data['overall_score'])")
+        echo "evaluation_score=$SCORE" >> $GITHUB_OUTPUT
+        
+        exit 0  # Don't fail the job yet
+      continue-on-error: true
+    
+    - name: Run Selective Integration Analysis
+      id: integration
+      env:
+        PR_BRANCH: ${{ github.head_ref }}
+      run: |
+        echo "🔧 Analyzing integration strategy..."
+        python3 tools/selective_integrator.py \
+          "$PR_BRANCH" \
+          --evaluation eval.json \
+          --output integration_plan.json
+        
+        # Extract strategy for later use
+        STRATEGY=$(python3 -c "import json; data=json.load(open('integration_plan.json')); print(data['strategy'])")
+        echo "integration_strategy=$STRATEGY" >> $GITHUB_OUTPUT
+        
+        CONFIDENCE=$(python3 -c "import json; data=json.load(open('integration_plan.json')); print(data['confidence'])")
+        echo "integration_confidence=$CONFIDENCE" >> $GITHUB_OUTPUT
+      continue-on-error: true
+    
+    - name: Upload evaluation artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-evaluation-artifacts
+        path: |
+          eval.json
+          integration_plan.json
+        retention-days: 30
+    
+    - name: Post Integration Analysis Comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Load evaluation results
+          let evaluation, integrationPlan;
+          try {
+            evaluation = JSON.parse(fs.readFileSync('eval.json', 'utf8'));
+            integrationPlan = JSON.parse(fs.readFileSync('integration_plan.json', 'utf8'));
+          } catch (error) {
+            console.error('Failed to load results:', error);
+            return;
+          }
+          
+          // Generate emoji for score
+          const score = evaluation.overall_score;
+          let scoreEmoji = '🔴';
+          if (score >= 0.9) scoreEmoji = '🟢';
+          else if (score >= 0.7) scoreEmoji = '🟡';
+          else if (score >= 0.5) scoreEmoji = '🟠';
+          
+          // Generate emoji for strategy
+          const strategyEmojis = {
+            'direct_merge': '✅',
+            'compatibility_layer': '🔄',
+            'value_extraction': '⚡',
+            'decline': '❌'
+          };
+          const strategyEmoji = strategyEmojis[integrationPlan.strategy] || '❓';
+          
+          // Build comment
+          let comment = `## 🌟 Aurora CloudBank - Selective Integration Analysis\n\n`;
+          
+          // Evaluation Summary
+          comment += `### ${scoreEmoji} Evaluation Score: ${score.toFixed(2)}/1.00\n\n`;
+          comment += `**Status:** ${evaluation.passed ? '✅ APPROVED' : '⚠️ NEEDS WORK'}\n\n`;
+          
+          // Integration Strategy
+          comment += `### ${strategyEmoji} Recommended Integration Strategy\n\n`;
+          comment += `**Strategy:** \`${integrationPlan.strategy.toUpperCase()}\`\n`;
+          comment += `**Confidence:** ${(integrationPlan.confidence * 100).toFixed(0)}%\n\n`;
+          
+          comment += `#### Reasoning\n${integrationPlan.reasoning}\n\n`;
+          
+          // Strategy Explanation
+          comment += `<details>\n<summary><b>What does "${integrationPlan.strategy}" mean?</b></summary>\n\n`;
+          
+          if (integrationPlan.strategy === 'direct_merge') {
+            comment += `This PR demonstrates excellent technical quality and conceptual alignment with Aurora's philosophy. It can be merged directly into the main codebase without modifications.\n\n`;
+            comment += `**Next Steps:** Review, approve, and merge when ready.\n`;
+          } else if (integrationPlan.strategy === 'compatibility_layer') {
+            comment += `This PR contains valuable technical contributions but approaches Aurora from a different philosophical perspective. We can integrate it through a compatibility layer that preserves Aurora's core identity while accepting the contribution.\n\n`;
+            comment += `**Next Steps:** Maintainers will create a wrapper module that adapts this code to Aurora's patterns.\n`;
+          } else if (integrationPlan.strategy === 'value_extraction') {
+            comment += `This PR contains some valuable elements (bug fixes, tests, documentation) but also includes changes that don't align with Aurora's conceptual foundation. We'll extract and integrate the valuable parts.\n\n`;
+            comment += `**Next Steps:** Maintainers will cherry-pick specific improvements and provide feedback on the rest.\n`;
+          } else {
+            comment += `This PR doesn't align with Aurora's core philosophy and identity. Rather than force-fit misaligned code, we recommend revisiting the conceptual foundation.\n\n`;
+            comment += `**Next Steps:** Review Aurora's documentation and consider a fresh approach aligned with the system's identity.\n`;
+          }
+          
+          comment += `</details>\n\n`;
+          
+          // Detailed Evaluation Results
+          comment += `### 📊 Detailed Evaluation\n\n`;
+          
+          for (const result of evaluation.results) {
+            const icon = result.passed ? '✅' : '⚠️';
+            const percentage = (result.score * 100).toFixed(0);
+            comment += `${icon} **${result.category}**: ${percentage}% (${result.score.toFixed(2)}/1.00)\n`;
+            
+            if (result.findings && result.findings.length > 0) {
+              comment += `\n<details>\n<summary>Findings</summary>\n\n`;
+              for (const finding of result.findings) {
+                comment += `- ${finding}\n`;
+              }
+              comment += `</details>\n`;
+            }
+            
+            if (result.recommendations && result.recommendations.length > 0) {
+              comment += `\n<details>\n<summary>Recommendations</summary>\n\n`;
+              for (const rec of result.recommendations) {
+                comment += `- ${rec}\n`;
+              }
+              comment += `</details>\n`;
+            }
+            
+            comment += `\n`;
+          }
+          
+          // Integration Actions
+          if (integrationPlan.actions && integrationPlan.actions.length > 0) {
+            comment += `### 🎯 Integration Actions\n\n`;
+            for (let i = 0; i < integrationPlan.actions.length; i++) {
+              comment += `${i + 1}. ${integrationPlan.actions[i]}\n`;
+            }
+            comment += `\n`;
+          }
+          
+          // Safeguards
+          if (integrationPlan.safeguards && integrationPlan.safeguards.length > 0) {
+            comment += `<details>\n<summary><b>🛡️ Integration Safeguards</b></summary>\n\n`;
+            for (const safeguard of integrationPlan.safeguards) {
+              comment += `- ${safeguard}\n`;
+            }
+            comment += `</details>\n\n`;
+          }
+          
+          // Risks
+          if (integrationPlan.risks && integrationPlan.risks.length > 0) {
+            comment += `<details>\n<summary><b>⚠️ Integration Risks</b></summary>\n\n`;
+            for (const risk of integrationPlan.risks) {
+              comment += `- ${risk}\n`;
+            }
+            comment += `</details>\n\n`;
+          }
+          
+          // Resources
+          comment += `---\n\n`;
+          comment += `### 📚 Resources\n\n`;
+          comment += `- [PR Evaluation Guide](../blob/main/docs/PR_EVALUATION_GUIDE.md)\n`;
+          comment += `- [Selective Integration Documentation](../blob/main/docs/SELECTIVE_INTEGRATION.md)\n`;
+          comment += `- [Aurora Philosophy](../blob/main/seeds/aurora_seed_prompt.md)\n`;
+          comment += `- [Geometric Ethics Architecture](../blob/main/docs/GEOMETRIC_ETHICS_ARCHITECTURE.md)\n\n`;
+          
+          comment += `*This analysis combines technical evaluation with conceptual alignment assessment.*\n`;
+          comment += `*Aurora isn't just a codebase - it's a living system with specific philosophical commitments.*\n`;
+          
+          // Write comment to file
+          const fs = require('fs');
+          fs.writeFileSync('/tmp/integration_analysis.md', comment);
+          
+          console.log('✅ Integration analysis prepared');
+    
+    - name: Post Integration Analysis Comment
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Use smart comment handler to update existing comment
+        bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "INTEGRATION_ANALYSIS" /tmp/integration_analysis.md
+    
+    - name: Add Strategy Label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const strategy = '${{ steps.integration.outputs.integration_strategy }}';
+          const labelMap = {
+            'direct_merge': 'integration: direct-merge',
+            'compatibility_layer': 'integration: compatibility-layer',
+            'value_extraction': 'integration: value-extraction',
+            'decline': 'integration: decline'
+          };
+          
+          const label = labelMap[strategy];
+          if (label) {
+            try {
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: [label]
+              });
+              console.log(`✅ Added label: ${label}`);
+            } catch (error) {
+              console.log(`⚠️ Could not add label (may not exist): ${error.message}`);
+            }
+          }
+    
+    - name: Add Score Label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const score = parseFloat('${{ steps.evaluate.outputs.evaluation_score }}');
+          let scoreLabel = 'score: needs-work';
+          
+          if (score >= 0.9) scoreLabel = 'score: excellent';
+          else if (score >= 0.7) scoreLabel = 'score: good';
+          else if (score >= 0.5) scoreLabel = 'score: fair';
+          
+          try {
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: [scoreLabel]
+            });
+            console.log(`✅ Added label: ${scoreLabel}`);
+          } catch (error) {
+            console.log(`⚠️ Could not add label (may not exist): ${error.message}`);
+          }
+    
+    - name: Check for Auto-Merge Eligibility
+      if: steps.integration.outputs.integration_strategy == 'direct_merge' && steps.evaluate.outputs.evaluation_score >= 0.9
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Prepare auto-merge candidate comment
+          const comment = `🎉 **This PR is eligible for auto-merge!**\n\n` +
+            `With an excellent score of ${{ steps.evaluate.outputs.evaluation_score }} and direct merge strategy, ` +
+            `this contribution can be integrated immediately once approved by a maintainer.\n\n` +
+            `Maintainers: Review and approve to enable auto-merge.`;
+          
+          // Write to file
+          const fs = require('fs');
+          fs.writeFileSync('/tmp/auto_merge_eligible.md', comment);
+    
+    - name: Post Auto-Merge Eligibility Comment
+      if: steps.integration.outputs.integration_strategy == 'direct_merge' && steps.evaluate.outputs.evaluation_score >= 0.9
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Use smart comment handler
+        bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "AUTO_MERGE_ELIGIBLE" /tmp/auto_merge_eligible.md
+    
+    - name: Add Ready-to-Merge Label
+      if: steps.integration.outputs.integration_strategy == 'direct_merge' && steps.evaluate.outputs.evaluation_score >= 0.9
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['ready-to-merge']
+            });
+          } catch (error) {
+            console.log('⚠️ Could not add ready-to-merge label');
+          }
+    
+    - name: Summary
+      run: |
+        echo "## 🌟 Aurora Selective Integration Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Evaluation Score:** ${{ steps.evaluate.outputs.evaluation_score }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Integration Strategy:** ${{ steps.integration.outputs.integration_strategy }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Confidence:** ${{ steps.integration.outputs.integration_confidence }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "See PR comment for detailed analysis and next steps." >> $GITHUB_STEP_SUMMARY

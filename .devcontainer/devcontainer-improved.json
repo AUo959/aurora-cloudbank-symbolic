@@ -1,0 +1,58 @@
+{
+    "name": "Aurora CloudBank Symbolic (Rebuild-Protected)",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "18"
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.flake8",
+                "ms-python.black-formatter",
+                "ms-toolsai.jupyter",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "ms-vscode.vscode-json"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "./.venv/bin/python",
+                "python.terminal.activateEnvironment": true,
+                "python.formatting.provider": "black",
+                "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
+                "files.autoSave": "afterDelay",
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
+        }
+    },
+    "onCreateCommand": "python3 scripts/prevent_rebuild_failures.py --pre-rebuild || echo 'Pre-rebuild protection failed, continuing with fallback'",
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "postStartCommand": "python3 scripts/prevent_rebuild_failures.py || echo 'Post-start validation completed with warnings'",
+    "mounts": [
+        "source=aurora-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
+    ],
+    "forwardPorts": [8000, 3000, 5000],
+    "portsAttributes": {
+        "8000": {
+            "label": "Aurora API Server",
+            "onAutoForward": "notify"
+        },
+        "3000": {
+            "label": "Frontend Dev Server",
+            "onAutoForward": "silent"
+        }
+    },
+    "remoteUser": "vscode",
+    "containerEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}",
+        "AURORA_ENVIRONMENT": "development",
+        "REBUILD_PROTECTION": "enabled"
+    },
+    "initializeCommand": "echo 'Initializing Aurora CloudBank with rebuild protection...'",
+    "shutdownAction": "stopContainer"
+}

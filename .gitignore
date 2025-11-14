@@ -1,9 +1,14 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -15,78 +20,218 @@ lib64/
 parts/
 sdist/
 var/
-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-*.coverage
-.coverage
-.coverage.*
+
+# Logs and data
+logs/
+data/
+*.log
+
+# Backup files (timestamped dependency snapshots)
+.backup/**/*.20*
+
+# Security and temporary files
+security_scan_report.json
+test_security_fixes.py
+/tmp/
+.security_temp/
+
+# Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
 .pytest_cache/
-.mypy_cache/
-.dmypy.json
-dmypy.json
 
-# Virtual environments
-venv/
-ENV/
-env/
-.venv/
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# IDEs
+# VS Code
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
 
-# OS
+# Mac
 .DS_Store
+
+# Environment variables
+.env
+!.env.example
+.env.*
+
+# System files
 Thumbs.db
 
-# Node
-node_modules/
-npm-debug.log
-yarn-error.log
-package-lock.json
+keyring/
+*.enc
+*.zip
+*.stub.txt
 
-# Logs
-*.log
-logs/
-
-# Environment
-.env
-.env.local
-.env.*.local
-
-# Test and coverage
-test_results.log
-coverage.xml
-htmlcov/
-
-# Build artifacts
+# Large/binary files
 *.zip
 *.tar.gz
-*.jar
+*.7z
+*.rar
+.venv/
 
-# Aurora-specific
-.aurora/seals/
-.backup/
-.deployment/
-.gitwiz/
-.nexus/
-.nexus_schematics/
-.reliquary/
+# GITWiz Auto-generated cleanup patterns
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+# Build artifacts
+*.dylib
+*.dll
+# IDE files
+.vscode/settings.json
+.idea/
+# OS generated files
+# Temporary files
+*.tmp
+*.temp
+# Large archives (consider external storage)
+# Exclude essential deployment packages
+!deploykit_*.zip
+!aurora_core_*.zip
+
+# GitWiz runtime/state files (continuously updated)
+.gitwiz/memory.db
+.gitwiz/last_commit_status.json
+.gitwiz/scheduler.log
+
+# GitWiz temporary files
+.gitwiz/*.tmp
+.gitwiz/*.lock
+
+# Node.js dependencies and artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
+.grunt
+
+# Bower dependency directory (https://bower.io/)
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Local validation reports (not for version control)
+PRE_COMMIT_VALIDATION_ISSUES.md
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Aurora Validation Manager - Auto-generated
+PRE_COMMIT_VALIDATION_ISSUES.md
+CANONICAL_VALIDATION_REPORT.md
+AURORA_VALIDATION_SUMMARY.md
+.aurora_validation/
+.aurora_validation_config.json
+
+# Aurora CI/CD generated manifests (do not commit)
+aurora_ci_validation_manifest.json
+aurora_deployment_manifest.json
+
+# Security files
+*.key
+*.pem
+*.p12
+.env.local
+secrets/
+private/
+*.secret
+auth_config.json
+
+# Aurora Snapshot & Reliquary Tools
 .snapshots/
-archives/
-automation_audit_report.json
-data/
-emergency_recovery_*.log
-examples/
-live_threads/
-station_manifests/
-uploads/
-ssmt_maintenance.log
+.glyphcards/
+.glyphdiffs/
+.reliquary/
+
+# Aurora Quicksave - Session context (local only)
+.aurora/
+
+# Aurora Nexus - Runtime operational files (local only)
+.nexus/arbitration/entropy_*.json
+.nexus/divergences/secure_key_*.json
+.nexus/recursion/checkpoints/*.json
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

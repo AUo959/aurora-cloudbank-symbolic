@@ -1,24 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-08T02:51:06.976367",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 1,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 536: POS..."
-    },
-    {
-      "timestamp": "2025-11-08T03:00:16.984628",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 1,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 133: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
-    },
-    {
       "timestamp": "2025-11-08T03:06:16.730302",
       "status": "ISSUES_FOUND",
       "files_scanned": 1,
@@ -692,6 +674,33 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_monitoring_system.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-13T16:11:27.405477",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 9,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/constellation_topology_mapper.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/entanglement_network.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/ethics_quantum_gates.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/joy_evolution_engine.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_integration.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_memory_enhancer.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/system_flow_orchestrator.py",
+        "/workspaces/aurora-cloudbank-symbolic/tests/test_quantum_forge_v3.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/constellation_topology_mapper.py: Line 117: f-string logging - logger.info(f\"\ud83d\uddfa\ufe0f  Constellation Topology Mapper initialized\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/constellation_topology_mapper.py: Line 118: f-string logging - logger.info(f\"   Optimization metric: {optimization_metric.value}\")\n  \u274c /workspaces/aurora-clou..."
+    },
+    {
+      "timestamp": "2025-11-14T01:09:35.882788",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/examples/quantum_forge_v3_complete_demo.py",
+        "/workspaces/aurora-cloudbank-symbolic/scripts/verify_quantum_forge_v3.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/quantum_forge_v3_complete_demo.py: Line 54: f-string print (potential log output) - print(f\"\\n{'=' * 80}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/quantum_forge_v3_complete_demo.py: Line 55: f-string print (potential log output) - print(f\"\ud83c\udf1f {title}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/examples/quantum_forge_v3_complete_demo.py: Line 73: f-s..."
     }
   ]
 }

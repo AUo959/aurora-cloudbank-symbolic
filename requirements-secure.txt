@@ -2,7 +2,7 @@
 # Version-pinned for security compliance and reproducible builds
 
 # Core Framework Dependencies (Security Validated)
-fastapi==0.104.1                    # Latest stable with security patches
+fastapi==0.121.2                    # Latest stable with security patches
 uvicorn[standard]==0.38.0           # Production ASGI server
 pydantic==2.5.0                     # Data validation with security fixes
 

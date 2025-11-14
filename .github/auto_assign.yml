@@ -1,6 +1,0 @@
-addReviewers: true
-addAssignees: author
-reviewers:
-  - AUo959
-numberOfReviewers: 1
-skipKeywords: ["WIP", "DRAFT"]

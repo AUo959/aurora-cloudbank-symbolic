@@ -1,0 +1,69 @@
+# Vercel Deployment Ignore File
+# Exclude files/directories that shouldn't be uploaded to Vercel
+
+# Development and testing
+tests/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.pyc
+__pycache__/
+
+# Documentation
+docs/
+*.md
+!README.md
+!VERCEL_DEPLOYMENT.md
+
+# Git and version control
+.git/
+.github/
+.gitignore
+
+# Environment and secrets (configured in Vercel Dashboard)
+.env
+.env.*
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archived and backup files
+.archived_requirements/
+*.backup
+*.bak
+
+# Large optional dependencies
+modules/quantum_forge/
+modules/hr/
+
+# Development utilities
+scripts/dev-status.py
+scripts/validate_dependencies.py
+Makefile
+
+# CI/CD files
+.security/
+maintenance_report_*.json
+automation_audit_report.json
+
+# Demo and example files
+demo_*.js
+demo_*.cjs
+aurora_*.html
+index.html
+
+# Configuration files not needed in production
+conftest.py
+eslint.config.js
+constellation.config.ts
+docker-compose*.yml
+Dockerfile*

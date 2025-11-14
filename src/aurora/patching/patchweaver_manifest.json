@@ -1,0 +1,55 @@
+{
+  "module": "aurora.patching.patchweaver",
+  "version": "1.0.0",
+  "description": "PatchWeaver - Controlled, DLP-aware, ethics-gated state patching engine for L2/L3 simulation and narrative state modifications",
+  "anchors": [
+    "T1",
+    "SRB",
+    "EOS_SEED_ORION",
+    "Picard_Delta_3"
+  ],
+  "symbolic_tags": [
+    "PATCHWEAVER_CORE",
+    "STATE_PATCHING",
+    "ETHICS_GATED_PATCH"
+  ],
+  "features": [
+    "Structured patch operations (set/delete)",
+    "Hash-sealed state snapshots (before/after)",
+    "DLP tagging with full anchor protocols",
+    "Ethics gate validation",
+    "Flexible state backends via dependency injection",
+    "Idempotent operations",
+    "Comprehensive audit trail"
+  ],
+  "dlp": {
+    "note": "State patches may contain sensitive simulation data and must be carefully controlled",
+    "requirements": [
+      "All operations tagged with context_tag",
+      "Ethics validation required before apply",
+      "Full audit trail via DLP tracker",
+      "Hash verification for state integrity"
+    ],
+    "sensitive_data_types": [
+      "simulation_state",
+      "narrative_state",
+      "L2_context",
+      "L3_context"
+    ]
+  },
+  "security": {
+    "admin_only": true,
+    "csrf_protection": true,
+    "rate_limiting": "strict",
+    "authentication_required": true
+  },
+  "exported_at": "2025-11-13T00:00:00Z",
+  "compatibility": {
+    "aurora_version": "3.5.2-optimized",
+    "python_version": "3.11+",
+    "required_modules": [
+      "src.core.native_dlp_export",
+      "src.monitoring.ethics_engine"
+    ]
+  }
+}

@@ -36,7 +36,7 @@ class TestQuantumIntegration:
     def quantum_forge(self):
         """Mock QuantumForge instance"""
         from modules.quantum_forge import QuantumForge, EthicsLevel
-        forge = QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        forge = QuantumForge(ethics_level=EthicsLevel.BALANCED)
         return forge
         
     @pytest.fixture
@@ -127,7 +127,7 @@ class TestEntanglementNetwork:
     def quantum_forge(self):
         """Mock QuantumForge instance"""
         from modules.quantum_forge import QuantumForge, EthicsLevel
-        return QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        return QuantumForge(ethics_level=EthicsLevel.BALANCED)
         
     @pytest.fixture
     def test_agents(self, quantum_forge):
@@ -135,7 +135,7 @@ class TestEntanglementNetwork:
         agents = []
         for i in range(3):
             agent = quantum_forge.generate_agent(
-                intent_query=f"Test entanglement agent {i}",
+                intent_query="Test entanglement agent " + str(i),
                 constellation_targets=["ORION"]
             )
             agents.append(agent)
@@ -415,7 +415,7 @@ class TestEthicsQuantumGates:
         from modules.quantum_forge import EthicsAwareQuantumGate
         from modules.quantum_forge import QuantumForge, EthicsLevel
         
-        forge = QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        forge = QuantumForge(ethics_level=EthicsLevel.BALANCED)
         gate = EthicsAwareQuantumGate(forge)
         return gate
         
@@ -528,7 +528,7 @@ class TestJoyEvolutionEngine:
     def quantum_forge(self):
         """Mock QuantumForge instance"""
         from modules.quantum_forge import QuantumForge, EthicsLevel
-        return QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        return QuantumForge(ethics_level=EthicsLevel.BALANCED)
         
     @pytest.fixture
     def evolution_engine(self, quantum_forge):
@@ -610,7 +610,7 @@ class TestQuantumForgeV3Integration:
         )
         
         # Initialize forge
-        forge = QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        forge = QuantumForge(ethics_level=EthicsLevel.BALANCED)
         
         # Phase 1: Create and convert agent
         agent = forge.generate_agent(
@@ -647,19 +647,19 @@ class TestQuantumForgeV3Performance:
         import time
         from modules.quantum_forge import QuantumForge, EthicsLevel
         
-        forge = QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        forge = QuantumForge(ethics_level=EthicsLevel.BALANCED)
         
         start = time.time()
         for i in range(10):
             agent = forge.generate_agent(
-                intent_query=f"Performance test {i}",
+                intent_query="Performance test " + str(i),
                 constellation_targets=["ORION"]
             )
         elapsed = time.time() - start
         
         # Should create 10 agents in < 5 seconds
         assert elapsed < 5.0
-        logger.info(f"Created 10 agents in {elapsed:.2f}s")
+        logger.info("Created 10 agents in %.2fs", elapsed)
         
     @pytest.mark.slow
     def test_quantum_conversion_performance(self):
@@ -667,7 +667,7 @@ class TestQuantumForgeV3Performance:
         import time
         from modules.quantum_forge import QuantumForge, EthicsLevel, get_quantum_integration
         
-        forge = QuantumForge(default_ethics_level=EthicsLevel.BALANCED)
+        forge = QuantumForge(ethics_level=EthicsLevel.BALANCED)
         integration = get_quantum_integration()
         
         # Create test agents
@@ -684,4 +684,4 @@ class TestQuantumForgeV3Performance:
         
         # Should convert 5 agents in < 3 seconds
         assert elapsed < 3.0
-        logger.info(f"Converted 5 agents in {elapsed:.2f}s")
+        logger.info("Converted 5 agents in %.2fs", elapsed)

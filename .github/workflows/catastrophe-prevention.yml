@@ -1,0 +1,94 @@
+name: Catastrophe Prevention
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-changes:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history
+    
+    - name: Check for mass deletions
+      run: |
+        echo "🔍 Checking for catastrophic changes..."
+        
+        # Count deletions in this push
+        DELETED=$(git diff --name-status ${{ github.event.before }}..${{ github.sha }} | grep -c "^D" || true)
+        TOTAL=$(git diff --name-status ${{ github.event.before }}..${{ github.sha }} | wc -l || echo "0")
+        
+        echo "📊 Changes in this push:"
+        echo "   Deleted: $DELETED files"
+        echo "   Total:   $TOTAL files"
+        
+        # Block mass deletions
+        if [ "$DELETED" -gt 100 ]; then
+          echo "❌ CATASTROPHE DETECTED: $DELETED files deleted!"
+          echo ""
+          echo "This push deletes $DELETED files, similar to the Nov 14, 2025 incident."
+          echo "This is blocked by catastrophe prevention."
+          echo ""
+          echo "If this is intentional, contact repository admin."
+          exit 1
+        fi
+        
+        # Warn for significant deletions
+        if [ "$DELETED" -gt 10 ]; then
+          echo "⚠️  Warning: $DELETED files deleted in this push"
+          git diff --name-status ${{ github.event.before }}..${{ github.sha }} | grep "^D"
+        fi
+        
+        echo "✅ No catastrophic changes detected"
+    
+    - name: Verify critical files exist
+      run: |
+        echo "🔑 Verifying critical files..."
+        
+        CRITICAL_FILES=(
+          "README.md"
+          "package.json"
+          "requirements.txt"
+          "pyproject.toml"
+          "setup.py"
+          "Makefile"
+        )
+        
+        MISSING=0
+        for file in "${CRITICAL_FILES[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ CRITICAL: $file is missing!"
+            MISSING=1
+          else
+            echo "✅ $file exists"
+          fi
+        done
+        
+        if [ "$MISSING" -eq 1 ]; then
+          echo ""
+          echo "❌ Critical files are missing! This may indicate catastrophic deletion."
+          exit 1
+        fi
+        
+        echo "✅ All critical files present"
+    
+    - name: Count repository files
+      run: |
+        echo "📊 Repository file count..."
+        
+        TOTAL_FILES=$(git ls-tree -r HEAD --name-only | wc -l)
+        echo "Total tracked files: $TOTAL_FILES"
+        
+        if [ "$TOTAL_FILES" -lt 500 ]; then
+          echo "❌ WARNING: Only $TOTAL_FILES files in repository!"
+          echo "Expected: ~2,000+ files"
+          echo "This indicates potential mass deletion."
+          exit 1
+        fi
+        
+        echo "✅ File count healthy: $TOTAL_FILES files"

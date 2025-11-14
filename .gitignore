@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.coverage
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test and coverage
+test_results.log
+coverage.xml
+htmlcov/
+
+# Build artifacts
+*.zip
+*.tar.gz
+*.jar
+
+# Aurora-specific
+.aurora/seals/
+.backup/
+.deployment/
+.gitwiz/
+.nexus/
+.nexus_schematics/
+.reliquary/
+.snapshots/
+archives/
+automation_audit_report.json
+data/
+emergency_recovery_*.log
+examples/
+live_threads/
+station_manifests/
+uploads/
+ssmt_maintenance.log

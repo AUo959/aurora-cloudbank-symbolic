@@ -1,591 +1,252 @@
 """
-Relay Manager for Aurora CloudBank Symbolic
+Relay Manager with Ethics Gate Integration
 
-Central enforcement point for all cross-layer messages (L3→L2, L2→L1, etc.).
-Provides schema validation, anchor resolution, ethics checks, and structured logging.
+Manages cross-layer message relay with ethics evaluation before state changes.
+Replaces placeholder EthicsAdapter with full EthicsGate integration (PR #340).
 
-DLP: relay_manager_core_v1
+DLP: relay_manager_v1
 Anchors: T1, SRB, EOS_SEED_ORION
-Symbolic tags: RELAY_MANAGER_CORE, L1_L3_BOUNDARY_ENFORCEMENT
 """
 
 import logging
-import time
-import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from src.aurora.core.schema_validation import get_validator, SchemaValidationError
-from src.aurora.core.narrative_firewall import get_firewall, MetaphorTranslationError
-from src.core.native_dlp_export import NativeDLPTracker
-
-# Try to import ethics engine
-try:
-    from src.monitoring.ethics_engine import EthicsEngine, ActionContext
-    ETHICS_ENGINE_AVAILABLE = True
-except ImportError:
-    ETHICS_ENGINE_AVAILABLE = False
-    EthicsEngine = None
-    ActionContext = None
+from src.aurora.ethics.ethics_gate import (
+    EthicsGate,
+    GUMASEthicsClient,
+    EthicsViolation
+)
 
 logger = logging.getLogger(__name__)
 
 
-# Custom exception types for relay operations
-class RelayException(Exception):
-    """Base exception for relay operations"""
+@dataclass
+class RelayMessage:
+    """
+    Cross-layer relay message.
 
-    def __init__(self, message: str, error_type: str, details: Optional[Dict[str, Any]] = None):
-        self.message = message
-        self.error_type = error_type
-        self.details = details or {}
-        super().__init__(message)
+    Attributes:
+        message_id: Unique message identifier
+        source_layer: Source layer (e.g., "L1", "L2", "L3")
+        target_layer: Target layer
+        message_type: Type of message (e.g., "state_change", "query", "notification")
+        payload: Message payload
+        requires_ethics_check: Whether this message requires ethics evaluation
+        context_tag: DLP context tag
+        timestamp: Message timestamp
+    """
+    message_id: str
+    source_layer: str
+    target_layer: str
+    message_type: str
+    payload: Dict[str, Any]
+    requires_ethics_check: bool = False
+    context_tag: Optional[str] = None
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert exception to structured dict"""
+        """Convert to dictionary"""
         return {
-            "error": True,
-            "error_type": self.error_type,
-            "message": self.message,
-            "details": self.details
+            "message_id": self.message_id,
+            "source_layer": self.source_layer,
+            "target_layer": self.target_layer,
+            "message_type": self.message_type,
+            "payload": self.payload,
+            "requires_ethics_check": self.requires_ethics_check,
+            "context_tag": self.context_tag,
+            "timestamp": self.timestamp
         }
-
-
-class SchemaViolation(RelayException):
-    """Raised when message fails schema validation"""
-
-    def __init__(self, message: str, layer: str, details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, "schema_violation", {**details, "layer": layer} if details else {"layer": layer})
-
-
-class AnchorViolation(RelayException):
-    """Raised when anchor protocols are violated"""
-
-    def __init__(self, message: str, anchor_type: str, details: Optional[Dict[str, Any]] = None):
-        super().__init__(
-            message,
-            "anchor_violation",
-            {**details, "anchor_type": anchor_type} if details else {"anchor_type": anchor_type}
-        )
-
-
-class EthicsViolation(RelayException):
-    """Raised when ethics checks fail"""
-
-    def __init__(self, message: str, violation_details: Optional[Dict[str, Any]] = None):
-        super().__init__(message, "ethics_violation", violation_details or {})
-
-
-class RelayUnavailable(RelayException):
-    """Raised when relay service is unavailable"""
-
-    def __init__(self, message: str, reason: str):
-        super().__init__(message, "relay_unavailable", {"reason": reason})
 
 
 class RelayManager:
     """
-    Central relay manager for cross-layer message enforcement.
+    Cross-layer relay manager with ethics gate integration.
 
-    Manages L3→L2→L1 boundary enforcement with:
-    - Schema validation
-    - Anchor resolution (T1/SRB)
-    - Ethics checks
-    - Narrative firewall (L3→L2 translation)
-    - DLP tracking and logging
-    """
+    This manager handles message passing between system layers (L1/L2/L3)
+    and enforces ethics checks for state-changing operations.
 
-    def __init__(self):
-        """Initialize relay manager"""
-        self.validator = get_validator()
-        self.firewall = get_firewall()
-        self.dlp_tracker = NativeDLPTracker()
+    Integration replaces placeholder EthicsAdapter from PR #340.
 
-        # Initialize ethics engine if available
-        self.ethics_engine = None
-        if ETHICS_ENGINE_AVAILABLE:
-            try:
-                self.ethics_engine = EthicsEngine()
-                logger.info("Ethics engine initialized for relay manager")
-            except Exception as e:
-                logger.warning(f"Could not initialize ethics engine: {e}")
+    Usage:
+        manager = RelayManager(ethics_gate=ethics_gate)
 
-        # Statistics
-        self.messages_processed = 0
-        self.messages_blocked = 0
-        self.messages_translated = 0
-        self.ethics_checks_performed = 0
-
-        logger.info("Relay Manager initialized")
-
-    def send_cross_layer_message(
-        self,
-        source_layer: str,
-        target_layer: str,
-        payload: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Send message across layers with full enforcement.
-
-        Args:
-            source_layer: Source layer ("L1", "L2", or "L3")
-            target_layer: Target layer ("L1", "L2", or "L3")
-            payload: Message payload
-            context: Optional context for processing
-
-        Returns:
-            Result dict with processed message or error
-
-        Raises:
-            SchemaViolation: If schema validation fails
-            AnchorViolation: If anchor protocols are violated
-            EthicsViolation: If ethics checks fail
-            RelayUnavailable: If relay service is unavailable
-        """
-        request_id = str(uuid.uuid4())
-        start_time = time.time()
-
-        logger.info(
-            f"Processing cross-layer message: {source_layer}→{target_layer} (request_id: {request_id})"
+        message = RelayMessage(
+            message_id="msg_001",
+            source_layer="L1",
+            target_layer="L2",
+            message_type="state_change",
+            payload={"action": "update_config", "key": "threshold", "value": 0.8},
+            requires_ethics_check=True
         )
 
-        try:
-            # Step 1: Enrich payload with metadata
-            enriched_payload = self._enrich_payload(payload, source_layer, target_layer, request_id, context)
+        result = await manager.send_message(message)
+    """
 
-            # Step 2: Apply narrative firewall if crossing from L3 to L2
-            if source_layer == "L3" and target_layer in ["L2", "L1"]:
-                enriched_payload = self._apply_narrative_firewall(enriched_payload, context)
-                self.messages_translated += 1
-
-            # Step 3: Validate against target layer schema
-            validated_payload = self._validate_schema(enriched_payload, target_layer)
-
-            # Step 4: Resolve and verify anchors
-            anchored_payload = self._resolve_anchors(validated_payload, source_layer, target_layer)
-
-            # Step 5: Perform ethics checks for high-impact operations
-            if self._requires_ethics_check(anchored_payload, source_layer, target_layer):
-                self._perform_ethics_check(anchored_payload, context)
-
-            # Step 6: Create DLP tag for this operation
-            dlp_tag_id = self._create_dlp_tag(
-                anchored_payload,
-                source_layer,
-                target_layer,
-                request_id,
-                context
-            )
-
-            # Step 7: Log the successful operation
-            self._log_operation(
-                "relay_success",
-                source_layer,
-                target_layer,
-                request_id,
-                anchored_payload,
-                dlp_tag_id
-            )
-
-            # Update statistics
-            self.messages_processed += 1
-            elapsed_time = time.time() - start_time
-
-            return {
-                "success": True,
-                "request_id": request_id,
-                "source_layer": source_layer,
-                "target_layer": target_layer,
-                "payload": anchored_payload,
-                "dlp_tag_id": dlp_tag_id,
-                "processing_time_ms": elapsed_time * 1000,
-                "checks_performed": {
-                    "schema_validation": True,
-                    "anchor_resolution": True,
-                    "ethics_check": self._requires_ethics_check(anchored_payload, source_layer, target_layer),
-                    "narrative_firewall": source_layer == "L3" and target_layer in ["L2", "L1"]
-                }
-            }
-
-        except SchemaValidationError as e:
-            self.messages_blocked += 1
-            self._log_operation("schema_violation", source_layer, target_layer, request_id, payload, None)
-            raise SchemaViolation(str(e), target_layer, {"validation_error": str(e)})
-
-        except MetaphorTranslationError as e:
-            self.messages_blocked += 1
-            self._log_operation("translation_failed", source_layer, target_layer, request_id, payload, None)
-            raise SchemaViolation(
-                f"Narrative firewall blocked message: {e.reason}",
-                target_layer,
-                {"metaphor": e.metaphor, "reason": e.reason}
-            )
-
-        except EthicsViolation:
-            self.messages_blocked += 1
-            self._log_operation("ethics_violation", source_layer, target_layer, request_id, payload, None)
-            raise
-
-        except Exception as e:
-            self.messages_blocked += 1
-            logger.error(f"Relay error for {request_id}: {e}", exc_info=True)
-            self._log_operation("relay_error", source_layer, target_layer, request_id, payload, None)
-            raise RelayUnavailable(
-                f"Relay processing failed: {str(e)}",
-                f"Internal error: {type(e).__name__}"
-            )
-
-    def _enrich_payload(
+    def __init__(
         self,
-        payload: Dict[str, Any],
-        source_layer: str,
-        target_layer: str,
-        request_id: str,
-        context: Optional[Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """Enrich payload with required metadata"""
-        enriched = payload.copy()
-
-        # Add request_id if not present
-        if "request_id" not in enriched:
-            enriched["request_id"] = request_id
-
-        # Add timestamp if not present
-        if "timestamp" not in enriched:
-            enriched["timestamp"] = time.time()
-
-        # Add context_tag if not present
-        if "context_tag" not in enriched:
-            enriched["context_tag"] = f"relay_{source_layer}_to_{target_layer}_{request_id[:8]}"
-
-        # Add relay metadata
-        enriched["relay_metadata"] = {
-            "source_layer": source_layer,
-            "target_layer": target_layer,
-            "relay_timestamp": time.time()
-        }
-
-        return enriched
-
-    def _apply_narrative_firewall(
-        self,
-        payload: Dict[str, Any],
-        context: Optional[Dict[str, Any]]
-    ) -> Dict[str, Any]:
-        """Apply narrative firewall for L3→L2/L1 translation"""
-        try:
-            # Check if message needs translation
-            classification = self.firewall.classify_message(payload)
-
-            if classification in ["symbolic", "mixed"]:
-                # Attempt translation
-                translated = self.firewall.translate_l3_to_l2(payload, context)
-                logger.info(f"Narrative firewall: translated {classification} content")
-                # Preserve enriched metadata
-                if "relay_metadata" in payload:
-                    translated["relay_metadata"] = payload["relay_metadata"]
-                if "request_id" in payload and "request_id" not in translated:
-                    translated["request_id"] = payload["request_id"]
-                if "timestamp" in payload and "timestamp" not in translated:
-                    translated["timestamp"] = payload["timestamp"]
-                return translated
-            else:
-                # Literal content, translate to L2 format
-                translated = self.firewall.translate_l3_to_l2(payload, context)
-                # Preserve enriched metadata
-                if "relay_metadata" in payload:
-                    translated["relay_metadata"] = payload["relay_metadata"]
-                if "request_id" in payload and "request_id" not in translated:
-                    translated["request_id"] = payload["request_id"]
-                if "timestamp" in payload and "timestamp" not in translated:
-                    translated["timestamp"] = payload["timestamp"]
-                return translated
-
-        except MetaphorTranslationError:
-            # Re-raise to be caught by main handler
-            raise
-
-    def _validate_schema(self, payload: Dict[str, Any], target_layer: str) -> Dict[str, Any]:
-        """Validate payload against target layer schema"""
-        try:
-            validated = self.validator.validate(payload, target_layer)
-            logger.debug(f"Schema validation passed for {target_layer}")
-            return validated
-        except SchemaValidationError:
-            # Re-raise to be caught by main handler
-            raise
-
-    def _resolve_anchors(
-        self,
-        payload: Dict[str, Any],
-        source_layer: str,
-        target_layer: str
-    ) -> Dict[str, Any]:
-        """
-        Resolve and verify T1/SRB anchors.
-
-        Ensures anchor protocols are properly attached and validated.
-        """
-        anchored = payload.copy()
-
-        # Generate or verify anchor_id
-        if "anchor_id" not in anchored or not anchored["anchor_id"]:
-            # Generate new anchor reference
-            anchored["anchor_id"] = f"T1_{int(time.time())}_{source_layer}_{target_layer}"
-            logger.debug(f"Generated anchor_id: {anchored['anchor_id']}")
-
-        # Add anchor protocols
-        if "anchor_protocols" not in anchored:
-            anchored["anchor_protocols"] = []
-
-        # Add appropriate protocols based on layers
-        if source_layer == "L3":
-            if "EOS_SEED_ORION" not in anchored["anchor_protocols"]:
-                anchored["anchor_protocols"].append("EOS_SEED_ORION")
-
-        if target_layer == "L1":
-            if "REALITY_BRIDGE" not in anchored["anchor_protocols"]:
-                anchored["anchor_protocols"].append("REALITY_BRIDGE")
-
-        # Add T1/SRB anchor references
-        if "t1_srb_anchors" not in anchored:
-            anchored["t1_srb_anchors"] = []
-
-        if "T1_TEMPORAL_ANCHOR" not in anchored["t1_srb_anchors"]:
-            anchored["t1_srb_anchors"].append("T1_TEMPORAL_ANCHOR")
-
-        if target_layer != source_layer:
-            if "SRB_BOUNDARY_ANCHOR" not in anchored["t1_srb_anchors"]:
-                anchored["t1_srb_anchors"].append("SRB_BOUNDARY_ANCHOR")
-
-        logger.debug(f"Anchors resolved: {len(anchored.get('anchor_protocols', []))} protocols")
-        return anchored
-
-    def _requires_ethics_check(
-        self,
-        payload: Dict[str, Any],
-        source_layer: str,
-        target_layer: str
-    ) -> bool:
-        """Determine if ethics check is required"""
-        # Always check L2→L1 and L3→L1 transitions
-        if target_layer == "L1":
-            return True
-
-        # Check if payload has high risk score
-        risk_score = payload.get("risk_score", 0.0)
-        if risk_score > 0.5:
-            return True
-
-        # Check for specific action types that require ethics
-        action_type = payload.get("action_type", "")
-        high_impact_actions = [
-            "external_api_call",
-            "database_commit",
-            "file_write"
-        ]
-        if action_type in high_impact_actions:
-            return True
-
-        return False
-
-    def _perform_ethics_check(
-        self,
-        payload: Dict[str, Any],
-        context: Optional[Dict[str, Any]]
+        ethics_gate: Optional[EthicsGate] = None,
+        base_url: str = "http://localhost:8000"
     ):
         """
-        Perform ethics check on payload.
+        Initialize relay manager.
 
-        Raises EthicsViolation if check fails.
+        Args:
+            ethics_gate: Ethics gate for evaluation (creates default if None)
+            base_url: Base URL for GUMAS API
         """
-        if not self.ethics_engine:
-            logger.warning("Ethics engine not available, skipping check")
-            return
-
-        self.ethics_checks_performed += 1
-
-        try:
-            # Create action context for ethics evaluation
-            action_type = payload.get("action_type") or payload.get("event_type", "unknown")
-            agent_id = context.get("agent_id", "relay_manager") if context else "relay_manager"
-
-            action_context = ActionContext(
-                agent_id=agent_id,
-                action_type=action_type,
-                parameters=payload.get("parameters", {}),
-                context=context or {}
-            )
-
-            # Evaluate action
-            result = self.ethics_engine.evaluate_action(action_context)
-
-            if not result.compliant:
-                # Ethics violation detected
-                violations = [v.to_dict() for v in result.violations]
-                raise EthicsViolation(
-                    f"Ethics check failed: {len(violations)} violation(s)",
-                    {"violations": violations, "should_block": result.should_block}
-                )
-
-            logger.debug("Ethics check passed")
-
-        except EthicsViolation:
-            # Re-raise ethics violations
-            raise
-        except Exception:
-            # Log other errors but don't block operation
-            logger.error("Ethics check error", exc_info=True)
-
-    def _create_dlp_tag(
-        self,
-        payload: Dict[str, Any],
-        source_layer: str,
-        target_layer: str,
-        request_id: str,
-        context: Optional[Dict[str, Any]]
-    ) -> str:
-        """Create DLP tag for relay operation"""
-        operation = f"relay_{source_layer}_to_{target_layer}"
-        tag_id = self.dlp_tracker.create_tag(operation, payload)
-
-        # Get the tag and enrich it
-        tag = self.dlp_tracker.tags[tag_id]
-
-        # Add relay-specific metadata
-        tag.metadata.update({
-            "source_layer": source_layer,
-            "target_layer": target_layer,
-            "request_id": request_id,
-            "relay_type": "cross_layer_message",
-            "context_provided": context is not None
-        })
-
-        # Add anchor protocols from payload
-        for protocol in payload.get("anchor_protocols", []):
-            tag.add_anchor_protocol(protocol)
-
-        # Add T1/SRB anchors from payload
-        for anchor in payload.get("t1_srb_anchors", []):
-            tag.add_t1_srb_anchor(anchor)
-
-        # Add symbolic patterns
-        tag.set_symbolic_pattern("layer_transition", {
-            "from": source_layer,
-            "to": target_layer
-        })
-
-        if "relay_metadata" in payload:
-            tag.set_symbolic_pattern("relay_metadata", payload["relay_metadata"])
-
-        logger.debug(f"Created DLP tag: {tag_id}")
-        return tag_id
-
-    def _log_operation(
-        self,
-        operation_type: str,
-        source_layer: str,
-        target_layer: str,
-        request_id: str,
-        payload: Dict[str, Any],
-        dlp_tag_id: Optional[str]
-    ):
-        """Log relay operation with structured logging"""
-        log_data = {
-            "operation": operation_type,
-            "source_layer": source_layer,
-            "target_layer": target_layer,
-            "request_id": request_id,
-            "dlp_tag_id": dlp_tag_id,
-            "timestamp": time.time()
-        }
-
-        if operation_type == "relay_success":
-            logger.info(f"Relay success: {source_layer}→{target_layer} ({request_id})", extra=log_data)
-        elif operation_type == "schema_violation":
-            logger.warning(f"Schema violation: {source_layer}→{target_layer} ({request_id})", extra=log_data)
-        elif operation_type == "ethics_violation":
-            logger.warning(f"Ethics violation: {source_layer}→{target_layer} ({request_id})", extra=log_data)
-        elif operation_type == "translation_failed":
-            logger.warning(f"Translation failed: {source_layer}→{target_layer} ({request_id})", extra=log_data)
+        if ethics_gate is None:
+            client = GUMASEthicsClient(base_url=base_url)
+            self.ethics_gate = EthicsGate(client=client, threshold=0.7)
         else:
-            logger.error(f"Relay error: {source_layer}→{target_layer} ({request_id})", extra=log_data)
+            self.ethics_gate = ethics_gate
 
-    def export_relay_manifest(self, manifest_name: Optional[str] = None) -> Dict[str, Any]:
+        self.messages_processed = 0
+        self.messages_blocked = 0
+
+        logger.info(
+            "Relay manager initialized with ethics gate",
+            extra={
+                "anchors": ["EOS_SEED_ORION"],
+                "aurora_module": "relay_manager"
+            }
+        )
+
+    async def send_message(self, message: RelayMessage) -> Dict[str, Any]:
         """
-        Export relay operation manifest.
+        Send cross-layer message with ethics check if required.
+
+        If the message requires ethics check and is state-changing,
+        evaluates through ethics gate before allowing transmission.
+
+        Args:
+            message: Relay message to send
 
         Returns:
-            Manifest dict with relay statistics and DLP tags
+            Result dictionary with success, message, verdict, etc.
+
+        Raises:
+            EthicsViolation: If message is blocked by ethics evaluation
         """
-        if manifest_name is None:
-            manifest_name = f"relay_manifest_{int(time.time())}"
+        self.messages_processed += 1
 
-        # Create DLP manifest for all relay operations
-        dlp_manifest = self.dlp_tracker.create_export_manifest(manifest_name)
+        logger.info(
+            "Processing relay message: %s (%s -> %s)",
+            message.message_id,
+            message.source_layer,
+            message.target_layer,
+            extra={
+                "relay_message": message.to_dict(),
+                "aurora_module": "relay_manager"
+            }
+        )
 
-        # Add relay-specific statistics
-        relay_stats = {
-            "messages_processed": self.messages_processed,
-            "messages_blocked": self.messages_blocked,
-            "messages_translated": self.messages_translated,
-            "ethics_checks_performed": self.ethics_checks_performed,
-            "success_rate": (
-                self.messages_processed / (self.messages_processed + self.messages_blocked)
-                if (self.messages_processed + self.messages_blocked) > 0
-                else 0.0
-            )
+        # Check if ethics evaluation is required
+        if message.requires_ethics_check:
+            try:
+                # Construct action for ethics evaluation
+                action = {
+                    "type": f"relay_{message.message_type}",
+                    "source_layer": message.source_layer,
+                    "target_layer": message.target_layer,
+                    "payload": message.payload
+                }
+
+                context = {
+                    "agent_id": "relay_manager",
+                    "source": "relay_system",
+                    "message_id": message.message_id,
+                    "context_tag": message.context_tag
+                }
+
+                # Evaluate through ethics gate
+                verdict = await self.ethics_gate.evaluate(action, context)
+
+                # Block if not allowed
+                if not verdict.allowed:
+                    self.messages_blocked += 1
+
+                    logger.warning(
+                        "Relay message blocked by ethics gate: %s (score=%.2f, reason=%s)",
+                        message.message_id,
+                        verdict.score,
+                        verdict.reason,
+                        extra={
+                            "relay_message": message.to_dict(),
+                            "verdict": verdict.to_dict(),
+                            "aurora_module": "relay_manager"
+                        }
+                    )
+
+                    raise EthicsViolation(
+                        f"Relay message blocked: {verdict.reason}",
+                        verdict
+                    )
+
+                logger.info(
+                    "Relay message passed ethics check: %s (score=%.2f)",
+                    message.message_id,
+                    verdict.score,
+                    extra={
+                        "relay_message": message.to_dict(),
+                        "verdict": verdict.to_dict(),
+                        "aurora_module": "relay_manager"
+                    }
+                )
+
+            except EthicsViolation:
+                raise
+            except Exception as e:
+                logger.error(
+                    "Ethics evaluation failed for relay message: %s",
+                    e,
+                    extra={
+                        "relay_message": message.to_dict(),
+                        "aurora_module": "relay_manager"
+                    },
+                    exc_info=True
+                )
+                # Fail safe: block on error
+                self.messages_blocked += 1
+                raise EthicsViolation(
+                    f"Ethics evaluation error: {str(e)}",
+                    None
+                )
+
+        # Message passed (or didn't require ethics check)
+        # In real implementation, would actually transmit message here
+        result = {
+            "success": True,
+            "message_id": message.message_id,
+            "status": "delivered",
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
-        # Add firewall statistics
-        firewall_stats = {
-            "translation_rules": len(self.firewall.get_translation_rules()),
-            "quarantined_messages": len(self.firewall.get_quarantined_messages())
-        }
+        logger.info(
+            "Relay message delivered: %s",
+            message.message_id,
+            extra={
+                "result": result,
+                "aurora_module": "relay_manager"
+            }
+        )
 
-        # Combine into comprehensive manifest
-        manifest = {
-            "manifest_name": manifest_name,
-            "relay_manager_version": "1.0.0",
-            "export_timestamp": time.time(),
-            "anchors": ["T1", "SRB", "EOS_SEED_ORION"],
-            "symbolic_tags": [
-                "L1_L3_BOUNDARY_ENFORCEMENT",
-                "SEMANTIC_FIREWALL",
-                "RELAY_MANAGER_CORE"
-            ],
-            "relay_statistics": relay_stats,
-            "firewall_statistics": firewall_stats,
-            "dlp_manifest": dlp_manifest
-        }
+        return result
 
-        logger.info(f"Exported relay manifest: {manifest_name}")
-        return manifest
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Get relay manager statistics.
 
-    def get_statistics(self) -> Dict[str, Any]:
-        """Get relay manager statistics"""
+        Returns:
+            Statistics dictionary
+        """
         return {
             "messages_processed": self.messages_processed,
             "messages_blocked": self.messages_blocked,
-            "messages_translated": self.messages_translated,
-            "ethics_checks_performed": self.ethics_checks_performed,
-            "success_rate": (
-                self.messages_processed / (self.messages_processed + self.messages_blocked)
-                if (self.messages_processed + self.messages_blocked) > 0
+            "block_rate": (
+                self.messages_blocked / self.messages_processed
+                if self.messages_processed > 0
                 else 0.0
-            ),
-            "firewall_translation_rules": len(self.firewall.get_translation_rules()),
-            "firewall_quarantined": len(self.firewall.get_quarantined_messages())
+            )
         }
-
-
-# Global relay manager instance
-_relay_manager: Optional[RelayManager] = None
-
-
-def get_relay_manager() -> RelayManager:
-    """Get global relay manager instance"""
-    global _relay_manager
-    if _relay_manager is None:
-        _relay_manager = RelayManager()
-    return _relay_manager

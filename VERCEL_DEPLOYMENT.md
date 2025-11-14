@@ -13,6 +13,24 @@ Your repository is now configured for Vercel deployment with the following files
    - Routes all traffic to `api/index.py`
    - Set memory to 3008 MB and max duration to 60s
 
+### 3. **`requirements.txt`** - Lightweight Dependencies for Vercel
+   - **PRODUCTION DEPLOYMENT ONLY** - excludes heavy packages (qiskit, scipy, pandas, plotly, redis)
+   - Optimized for Vercel's 50MB deployment size limit
+   - All excluded packages gracefully degrade with mock implementations
+
+### 4. **`requirements-full.txt`** - Complete Dependencies for Local Development
+   - **LOCAL DEVELOPMENT** - includes ALL packages
+   - Use this for local setup: `pip install -r requirements-full.txt`
+   - Includes quantum computing (qiskit), scientific computing (scipy), data analysis (pandas)
+
+## 🏗️ Dependency Strategy
+
+**Two-Tier Approach:**
+- **Vercel (Production):** Uses `requirements.txt` (lightweight, ~40MB)
+- **Local Dev:** Uses `requirements-full.txt` (complete, ~150MB)
+
+This allows full-featured local development while keeping deployments within Vercel limits.
+
 ## 🔧 Environment Variables Required
 
 Before deploying, you **must** add these environment variables in your Vercel project settings:

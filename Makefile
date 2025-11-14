@@ -17,6 +17,11 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: security clean deps-fix deps-fix-apply
 
 install:
+	@echo "📦 Installing FULL dependencies for local development..."
+	pip install -r requirements-full.txt
+
+install-vercel:
+	@echo "📦 Installing lightweight dependencies (Vercel-compatible)..."
 	pip install -r requirements.txt
 
 # New dependency management targets

@@ -145,6 +145,16 @@ except ImportError:
     FLEET_BRIDGE_AVAILABLE = False
     FLEET_BRIDGE_ROUTER = None
 
+# Import Relay Manager API integration
+try:
+    from src.aurora.relays.api_routes import router as relay_manager_router
+    RELAY_MANAGER_AVAILABLE = True
+    RELAY_MANAGER_ROUTER = relay_manager_router
+except ImportError:
+    logging.getLogger("aurora_api").warning("Relay Manager not available - L1-L3 boundary enforcement disabled")
+    RELAY_MANAGER_AVAILABLE = False
+    RELAY_MANAGER_ROUTER = None
+
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
 app = FastAPI(
@@ -298,6 +308,15 @@ if FLEET_BRIDGE_AVAILABLE and FLEET_BRIDGE_ROUTER:
     except Exception as e:
         logger.error("Failed to integrate Fleet Bridge API routes: %s", e)
         FLEET_BRIDGE_AVAILABLE = False
+
+# Include Relay Manager API routes if available
+if RELAY_MANAGER_AVAILABLE and RELAY_MANAGER_ROUTER:
+    try:
+        app.include_router(RELAY_MANAGER_ROUTER)
+        logger.info("Relay Manager API routes integrated successfully")
+    except Exception as e:
+        logger.error("Failed to integrate Relay Manager API routes: %s", e)
+        RELAY_MANAGER_AVAILABLE = False
 
 # Include Synergy Dashboard API routes
 try:

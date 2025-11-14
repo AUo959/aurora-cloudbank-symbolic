@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "L1 Real-World Action Schema",
+  "description": "Schema for L1 layer messages - restricted to real-world actions with no symbolic/metaphorical content",
+  "type": "object",
+  "required": ["schema_version", "message_type", "action_type", "parameters", "context_tag"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Schema version in semver format"
+    },
+    "message_type": {
+      "type": "string",
+      "const": "l1_action",
+      "description": "Must be 'l1_action' for L1 layer"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "system_output",
+        "api_response",
+        "data_export",
+        "file_write",
+        "database_commit",
+        "external_api_call",
+        "notification_send"
+      ],
+      "description": "Type of real-world action to perform"
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Action-specific parameters (validated per action_type)"
+    },
+    "context_tag": {
+      "type": "string",
+      "minLength": 1,
+      "description": "DLP context tag for data lineage tracking"
+    },
+    "anchor_id": {
+      "type": "string",
+      "description": "T1/SRB anchor reference"
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "Unix timestamp of message creation"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Unique request identifier for tracing"
+    }
+  },
+  "additionalProperties": true
+}

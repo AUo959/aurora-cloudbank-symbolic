@@ -267,9 +267,10 @@ class TestPerformanceProfiler:
             return "done"
         
         result = await profiler.profile_operation(
-            operation_name="test_op",
-            operation_func=test_operation
+            operation_name="test_op"
         )
+        # Call the test operation separately
+        await test_operation()
         
         assert isinstance(result, dict)
         assert 'execution_time_ms' in result

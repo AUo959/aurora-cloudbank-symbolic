@@ -17,6 +17,9 @@ Date: 2025-11-13
 
 import pytest
 from unittest.mock import Mock, MagicMock, patch
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Test markers
 pytestmark = [
@@ -182,7 +185,7 @@ class TestEntanglementNetwork:
         agent1.joy_index = 0.95
         
         # Propagate state
-        network.propagate_state_update(agent1.agent_id)
+        network.propagate_state_update(agent1.agent_id, {"joy_index": agent1.joy_index})
         
         # Check if agent2 was affected (correlation should cause some change)
         # Note: This is a simplified check, real implementation may vary
@@ -196,8 +199,7 @@ class TestEntanglementNetwork:
         
         cluster = network.create_cluster(
             test_agents,
-            topology=NetworkTopology.MESH,
-            strength=0.85
+            topology=NetworkTopology.MESH
         )
         
         assert cluster is not None

@@ -167,6 +167,54 @@ app = FastAPI(
 logger = logging.getLogger("aurora_api")
 
 
+# ================================
+# Initialize HALO/PAS Drift Controller
+# ================================
+HALO_PAS_CONTROLLER = None
+HALO_PAS_AVAILABLE = False
+try:
+    from src.aurora.continuity import HALOPASController
+    HALO_PAS_CONTROLLER = HALOPASController(interval=0.25)
+    HALO_PAS_AVAILABLE = True
+    logger.info("✅ HALO/PAS Drift Controller initialized successfully")
+except ImportError as e:
+    logger.warning("⚠️ HALO/PAS Controller not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to initialize HALO/PAS Controller: %s", e)
+
+
+# ================================
+# Application Lifecycle Management
+# ================================
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize background services on application startup"""
+    logger.info("Aurora API starting up...")
+    
+    # Start HALO/PAS drift controller if available
+    if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
+        try:
+            await HALO_PAS_CONTROLLER.start()
+            logger.info("✅ HALO/PAS Drift Controller started")
+        except Exception as e:
+            logger.error(f"❌ Failed to start HALO/PAS Controller: {e}")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup background services on application shutdown"""
+    logger.info("Aurora API shutting down...")
+    
+    # Stop HALO/PAS drift controller if running
+    if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
+        try:
+            await HALO_PAS_CONTROLLER.stop()
+            logger.info("✅ HALO/PAS Drift Controller stopped")
+        except Exception as e:
+            logger.error(f"❌ Failed to stop HALO/PAS Controller: {e}")
+
+
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper
 def validate_identifier(identifier: str, param_name: str) -> str:
     """
@@ -603,6 +651,37 @@ def health_check(request: Request):
 @limiter.limit("300/minute")  # Health check - frequent monitoring
 def health_check_api(request: Request):
     return health_check(request)
+
+
+# ================================
+# HALO/PAS Continuity Endpoints
+# ================================
+
+@app.get("/continuity/halo_pas/status")
+@limiter.limit("60/minute")  # Status check - moderate monitoring
+async def get_halo_pas_status(request: Request):
+    """
+    Get HALO/PAS drift controller status with drift statistics.
+    
+    Returns real-time drift measurements across L1/L2/L3 timeline layers.
+    DLP: halo_pas_drift_controller_v1
+    Anchors: T1, SRB, EOS_SEED_ORION
+    """
+    if not HALO_PAS_AVAILABLE or HALO_PAS_CONTROLLER is None:
+        raise HTTPException(
+            status_code=503,
+            detail="HALO/PAS Drift Controller not available"
+        )
+    
+    try:
+        status = HALO_PAS_CONTROLLER.export_status()
+        return JSONResponse(content=status)
+    except Exception as e:
+        logger.error(f"Failed to get HALO/PAS status: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get HALO/PAS status: {str(e)}"
+        )
 
 
 # ================================

@@ -15,9 +15,17 @@ from .character_generator import (
     ExperienceLevel,
     Department
 )
+from .staffing_analyzer import (
+    StaffingAnalyzer,
+    StaffingMetrics,
+    StaffingRecommendation
+)
 
 __all__ = [
     "CharacterGenerator",
+    "StaffingAnalyzer",
+    "StaffingMetrics",
+    "StaffingRecommendation",
     "CharacterProfile",
     "QuantumProfile",
     "Rank",

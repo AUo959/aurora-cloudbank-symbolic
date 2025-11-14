@@ -198,7 +198,7 @@ async def startup_event():
             await HALO_PAS_CONTROLLER.start()
             logger.info("✅ HALO/PAS Drift Controller started")
         except Exception as e:
-            logger.error(f"❌ Failed to start HALO/PAS Controller: {e}")
+            logger.error("❌ Failed to start HALO/PAS Controller: %s", e)
 
 
 @app.on_event("shutdown")
@@ -212,7 +212,7 @@ async def shutdown_event():
             await HALO_PAS_CONTROLLER.stop()
             logger.info("✅ HALO/PAS Drift Controller stopped")
         except Exception as e:
-            logger.error(f"❌ Failed to stop HALO/PAS Controller: {e}")
+            logger.error("❌ Failed to stop HALO/PAS Controller: %s", e)
 
 
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper
@@ -329,8 +329,10 @@ except Exception as e:
 # Include Subroutine API routes
 try:
     from src.subroutines.api import router as subroutine_router
+    from src.subroutines.api_enhanced import router as subroutine_enhanced_router
     app.include_router(subroutine_router)
-    logger.info("Subroutine API routes integrated successfully")
+    app.include_router(subroutine_enhanced_router)
+    logger.info("Subroutine API routes integrated successfully (base + enhanced)")
     SUBROUTINE_AVAILABLE = True
 except ImportError as e:
     logger.warning("Subroutine system not available: %s", e)
@@ -677,7 +679,7 @@ async def get_halo_pas_status(request: Request):
         status = HALO_PAS_CONTROLLER.export_status()
         return JSONResponse(content=status)
     except Exception as e:
-        logger.error(f"Failed to get HALO/PAS status: {e}")
+        logger.error("Failed to get HALO/PAS status: %s", e)
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get HALO/PAS status: {str(e)}"

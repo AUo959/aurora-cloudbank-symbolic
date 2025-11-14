@@ -28,7 +28,8 @@ if not os.getenv("AES_KEY_256_HEX"):
     os.environ["AES_KEY_256_HEX"] = "BUILD_PHASE_PLACEHOLDER_" + "0" * 48
 
 # Now import the app (will use placeholders during build, real values at runtime)
-from api.aurora_api import app
+# Import directly from aurora_api since Vercel runs from the api/ directory context
+from aurora_api import app
 
 # Export the FastAPI app instance for Vercel
 __all__ = ["app"]

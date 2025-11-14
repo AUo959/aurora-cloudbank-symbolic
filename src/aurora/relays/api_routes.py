@@ -1,27 +1,37 @@
 """
-Relay Manager API Routes
+Relay Manager API Routes (Updated for Ethics Gate Integration)
 
-Provides HTTP endpoints for the Relay Manager and semantic firewall.
+Provides HTTP endpoints for the Relay Manager with ethics gate integration.
+Compatible with merged RelayManager from PR #342.
 
-DLP: relay_manager_api_routes_v1
-Anchors: T1, SRB
+DLP: relay_manager_api_routes_v2
+Anchors: T1, SRB, EOS_SEED_ORION
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from src.aurora.relays.relay_manager import (
-    get_relay_manager,
-    SchemaViolation,
-    EthicsViolation,
-    RelayUnavailable
-)
+from src.aurora.relays.relay_manager import RelayManager, RelayMessage
+from src.aurora.ethics.ethics_gate import EthicsViolation
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/relay", tags=["Relay Manager"])
+router = APIRouter(prefix="/relay", tags=["relay-manager"])
+
+# Singleton relay manager instance
+_relay_manager_instance: Optional[RelayManager] = None
+
+
+def get_relay_manager() -> RelayManager:
+    """Get or create singleton relay manager instance"""
+    global _relay_manager_instance
+    if _relay_manager_instance is None:
+        _relay_manager_instance = RelayManager()
+    return _relay_manager_instance
 
 
 # Pydantic models for API requests/responses
@@ -30,6 +40,10 @@ class SendMessageRequest(BaseModel):
     source_layer: str = Field(..., description="Source layer (L1, L2, or L3)")
     target_layer: str = Field(..., description="Target layer (L1, L2, or L3)")
     payload: Dict[str, Any] = Field(..., description="Message payload")
+    message_type: str = Field(default="api_relay", description="Message type")
+    requires_ethics_check: bool = Field(
+        default=False, description="Whether ethics check is required"
+    )
     context: Optional[Dict[str, Any]] = Field(None, description="Optional context")
 
 
@@ -39,24 +53,15 @@ class SendMessageResponse(BaseModel):
     request_id: str
     source_layer: str
     target_layer: str
-    payload: Dict[str, Any]
-    dlp_tag_id: str
+    message_type: str
+    verdict: Optional[Dict[str, Any]] = None
     processing_time_ms: float
-    checks_performed: Dict[str, bool]
-
-
-class ErrorResponse(BaseModel):
-    """Error response"""
-    error: bool
-    error_type: str
-    message: str
-    details: Dict[str, Any]
 
 
 class HealthResponse(BaseModel):
     """Health check response"""
     status: str
-    service: str
+    service: str = "Relay Manager"
     available: bool
     timestamp: str
 
@@ -65,35 +70,8 @@ class StatisticsResponse(BaseModel):
     """Relay manager statistics"""
     messages_processed: int
     messages_blocked: int
-    messages_translated: int
-    ethics_checks_performed: int
     success_rate: float
-    firewall_translation_rules: int
-    firewall_quarantined: int
-
-
-class TranslationRule(BaseModel):
-    """Translation rule for narrative firewall"""
-    metaphor: str = Field(..., description="Symbolic/metaphorical phrase")
-    concrete_event: str = Field(..., description="Concrete L2 event_type")
-
-
-class AddTranslationRuleRequest(BaseModel):
-    """Request to add translation rule"""
-    metaphor: str
-    concrete_event: str
-
-
-class ManifestResponse(BaseModel):
-    """Relay manifest export response"""
-    manifest_name: str
-    relay_manager_version: str
-    export_timestamp: float
-    anchors: List[str]
-    symbolic_tags: List[str]
-    relay_statistics: Dict[str, Any]
-    firewall_statistics: Dict[str, Any]
-    dlp_manifest: Dict[str, Any]
+    ethics_checks_performed: int
 
 
 # API routes
@@ -104,291 +82,132 @@ async def health_check() -> HealthResponse:
 
     DLP: relay_manager_health_check
     """
-    from datetime import datetime, timezone
-
     try:
         relay = get_relay_manager()
         available = relay is not None
 
         return HealthResponse(
             status="healthy" if available else "unavailable",
-            service="Relay Manager",
             available=available,
             timestamp=datetime.now(timezone.utc).isoformat()
         )
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
+        logger.error("Health check failed: %s", e)
         return HealthResponse(
             status="unhealthy",
-            service="Relay Manager",
             available=False,
             timestamp=datetime.now(timezone.utc).isoformat()
         )
 
 
 @router.post("/send", response_model=SendMessageResponse)
-async def send_cross_layer_message(request: SendMessageRequest) -> SendMessageResponse:
+async def send_cross_layer_message(
+    request: SendMessageRequest
+) -> SendMessageResponse:
     """
-    Send a message across layers with full enforcement.
-
-    Validates schema, resolves anchors, performs ethics checks, and applies
-    narrative firewall as needed.
+    Send a message across layers with ethics evaluation.
 
     DLP: relay_send_message
+    Anchors: T1, SRB
     """
-    try:
-        relay = get_relay_manager()
+    import time
 
-        result = relay.send_cross_layer_message(
+    start = time.time()
+    relay = get_relay_manager()
+
+    try:
+        # Create RelayMessage from request
+        message = RelayMessage(
+            message_id=f"msg_{uuid.uuid4().hex[:8]}",
             source_layer=request.source_layer,
             target_layer=request.target_layer,
+            message_type=request.message_type,
             payload=request.payload,
-            context=request.context
+            requires_ethics_check=request.requires_ethics_check,
+            context_tag=f"api_{request.source_layer}_to_{request.target_layer}"
         )
 
-        return SendMessageResponse(**result)
+        # Send message through relay manager
+        result = await relay.send_message(message)
 
-    except SchemaViolation as e:
-        logger.warning(f"Schema violation: {e.message}")
-        raise HTTPException(
-            status_code=400,
-            detail=e.to_dict()
+        processing_time = (time.time() - start) * 1000
+
+        return SendMessageResponse(
+            success=result.get("success", True),
+            request_id=message.message_id,
+            source_layer=message.source_layer,
+            target_layer=message.target_layer,
+            message_type=message.message_type,
+            verdict=result.get("verdict"),
+            processing_time_ms=processing_time
         )
+
     except EthicsViolation as e:
-        logger.warning(f"Ethics violation: {e.message}")
+        logger.warning("Ethics violation: %s", str(e))
         raise HTTPException(
             status_code=403,
-            detail=e.to_dict()
-        )
-    except RelayUnavailable as e:
-        logger.error(f"Relay unavailable: {e.message}")
-        raise HTTPException(
-            status_code=503,
-            detail=e.to_dict()
+            detail={
+                "error": True,
+                "error_type": "EthicsViolation",
+                "message": str(e),
+                "details": {}
+            }
         )
     except Exception as e:
-        logger.error(f"Unexpected error in relay: {e}", exc_info=True)
+        logger.error("Unexpected error in relay: %s", e, exc_info=True)
         raise HTTPException(
             status_code=500,
             detail={
                 "error": True,
-                "error_type": "internal_error",
+                "error_type": "InternalError",
                 "message": str(e),
                 "details": {}
             }
         )
 
 
-@router.get("/statistics", response_model=StatisticsResponse)
+@router.get("/stats", response_model=StatisticsResponse)
 async def get_statistics() -> StatisticsResponse:
     """
     Get relay manager statistics.
-
-    Returns counts of messages processed, blocked, translated, and success rate.
 
     DLP: relay_statistics
     """
     try:
         relay = get_relay_manager()
-        stats = relay.get_statistics()
 
-        return StatisticsResponse(**stats)
+        # Calculate success rate
+        total = max(relay.messages_processed, 1)
+        success_rate = 1.0 - (relay.messages_blocked / total)
 
-    except Exception as e:
-        logger.error(f"Failed to get statistics: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve statistics: {str(e)}"
+        return StatisticsResponse(
+            messages_processed=relay.messages_processed,
+            messages_blocked=relay.messages_blocked,
+            success_rate=success_rate,
+            ethics_checks_performed=relay.messages_blocked
         )
+    except Exception as e:
+        logger.error("Failed to get statistics: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/manifest")
-async def export_manifest(manifest_name: Optional[str] = None) -> ManifestResponse:
+@router.get("/status")
+async def get_status() -> Dict[str, Any]:
     """
-    Export relay operations manifest.
+    Get detailed relay manager status.
 
-    Includes relay statistics, firewall statistics, and DLP manifest.
-
-    DLP: relay_manifest_export
+    DLP: relay_status
     """
     try:
         relay = get_relay_manager()
-        manifest = relay.export_relay_manifest(manifest_name)
-
-        return ManifestResponse(**manifest)
-
-    except Exception as e:
-        logger.error(f"Failed to export manifest: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to export manifest: {str(e)}"
-        )
-
-
-@router.get("/firewall/rules")
-async def get_translation_rules() -> Dict[str, Any]:
-    """
-    Get all narrative firewall translation rules.
-
-    Returns mapping of metaphors to concrete L2 events.
-
-    DLP: firewall_rules_list
-    """
-    try:
-        relay = get_relay_manager()
-        rules = relay.firewall.get_translation_rules()
 
         return {
-            "success": True,
-            "total_rules": len(rules),
-            "rules": [
-                {"metaphor": metaphor, "concrete_event": event}
-                for metaphor, event in rules.items()
-            ]
+            "status": "operational",
+            "messages_processed": relay.messages_processed,
+            "messages_blocked": relay.messages_blocked,
+            "ethics_gate_active": relay.ethics_gate is not None,
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
-
     except Exception as e:
-        logger.error(f"Failed to get translation rules: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve translation rules: {str(e)}"
-        )
-
-
-@router.post("/firewall/rules")
-async def add_translation_rule(request: AddTranslationRuleRequest) -> Dict[str, Any]:
-    """
-    Add a new translation rule to the narrative firewall.
-
-    DLP: firewall_rule_add
-    """
-    try:
-        relay = get_relay_manager()
-        relay.firewall.add_translation_rule(
-            request.metaphor,
-            request.concrete_event
-        )
-
-        return {
-            "success": True,
-            "message": f"Translation rule added: '{request.metaphor}' -> '{request.concrete_event}'"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to add translation rule: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to add translation rule: {str(e)}"
-        )
-
-
-@router.get("/firewall/quarantined")
-async def get_quarantined_messages() -> Dict[str, Any]:
-    """
-    Get quarantined messages from narrative firewall.
-
-    Returns messages that could not be translated from L3 to L2.
-
-    DLP: firewall_quarantine_list
-    """
-    try:
-        relay = get_relay_manager()
-        quarantined = relay.firewall.get_quarantined_messages()
-
-        return {
-            "success": True,
-            "total_quarantined": len(quarantined),
-            "messages": quarantined
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to get quarantined messages: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve quarantined messages: {str(e)}"
-        )
-
-
-@router.delete("/firewall/quarantined")
-async def clear_quarantine() -> Dict[str, Any]:
-    """
-    Clear all quarantined messages.
-
-    DLP: firewall_quarantine_clear
-    """
-    try:
-        relay = get_relay_manager()
-        relay.firewall.clear_quarantine()
-
-        return {
-            "success": True,
-            "message": "Quarantine cleared successfully"
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to clear quarantine: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to clear quarantine: {str(e)}"
-        )
-
-
-@router.get("/schemas/{layer}")
-async def get_layer_schema(layer: str) -> Dict[str, Any]:
-    """
-    Get schema definition for a specific layer.
-
-    Args:
-        layer: Layer identifier (L1, L2, or L3)
-
-    DLP: schema_definition_retrieve
-    """
-    try:
-        relay = get_relay_manager()
-        schema = relay.validator.get_schema(layer.upper())
-
-        if schema is None:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Schema not found for layer: {layer}"
-            )
-
-        return {
-            "success": True,
-            "layer": layer.upper(),
-            "schema": schema
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get schema: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve schema: {str(e)}"
-        )
-
-
-@router.get("/schemas")
-async def list_available_schemas() -> Dict[str, Any]:
-    """
-    List all available layer schemas.
-
-    DLP: schemas_list
-    """
-    try:
-        relay = get_relay_manager()
-        layers = relay.validator.get_available_layers()
-
-        return {
-            "success": True,
-            "available_layers": layers,
-            "total_schemas": len(layers)
-        }
-
-    except Exception as e:
-        logger.error(f"Failed to list schemas: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to list schemas: {str(e)}"
-        )
+        logger.error("Failed to get status: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))

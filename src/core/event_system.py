@@ -199,6 +199,60 @@ class Event:
         }
 
 
+REDACTED_MARKER = "[REDACTED]"
+
+
+def serialize_event(event: Event, redact_sensitive: bool = False) -> Dict[str, Any]:
+    """Serialize an event with optional redaction for sensitive fields."""
+
+    event_dict = event.to_dict()
+    if not redact_sensitive:
+        return event_dict
+
+    payload = event_dict.get("payload") or {}
+    event_dict["payload"] = {
+        "redacted": True,
+        "entries": len(payload)
+    }
+
+    entity_context = event_dict.get("entity_context", {})
+    if entity_context.get("human"):
+        entity_context["human"] = REDACTED_MARKER
+
+    memory_context = event_dict.get("memory_context", {})
+    references = memory_context.get("references") or []
+    patterns = memory_context.get("patterns") or []
+    network = memory_context.get("network") or {}
+
+    memory_context["references"] = {
+        "redacted": True,
+        "count": len(references)
+    }
+    memory_context["patterns"] = {
+        "redacted": True,
+        "count": len(patterns)
+    }
+    memory_context["network"] = {
+        "redacted": True,
+        "connections": len(network)
+    }
+
+    result = event_dict.get("result")
+    if result:
+        result_summary = {
+            "redacted": True,
+            "entries": len(result),
+            "keys": sorted(result.keys())
+        }
+        if isinstance(result, dict) and "status" in result:
+            result_summary["status"] = result["status"]
+        event_dict["result"] = result_summary
+    else:
+        event_dict["result"] = None
+
+    return event_dict
+
+
 class EventSystem:
     """
     Living event management system for Aurora-Orion computational reality.
@@ -364,10 +418,10 @@ class EventSystem:
         
         return filtered[-limit:]
     
-    def export_manifest(self) -> Dict[str, Any]:
+    def export_manifest(self, *, redact_sensitive: bool = False) -> Dict[str, Any]:
         """
         Export complete event system state (DLP compliance).
-        
+
         Returns:
             Comprehensive manifest of all events and system state
         """
@@ -386,8 +440,14 @@ class EventSystem:
                     for et in EventType
                 }
             },
-            "timeline": [event.to_dict() for event in self.timeline],
-            "active_events": [event.to_dict() for event in self.active_events.values()]
+            "timeline": [
+                serialize_event(event, redact_sensitive=redact_sensitive)
+                for event in self.timeline
+            ],
+            "active_events": [
+                serialize_event(event, redact_sensitive=redact_sensitive)
+                for event in self.active_events.values()
+            ]
         }
 
 

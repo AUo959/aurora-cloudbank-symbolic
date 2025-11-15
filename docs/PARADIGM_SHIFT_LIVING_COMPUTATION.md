@@ -487,6 +487,22 @@ if similar_past_work := memory_manager.find_similar_by_others(data):
    - Rate limiting per entity
    - Error recovery protocols
    - Load balancing across deck resources
+   - Living computation endpoints (`/api/living/aurora/state`, `/api/living/events/history`, `/api/living/system/manifest`) now require the FastAPI security handshake (`Depends(security)` + `verify_csrf_token)`. Anonymous calls receive a 403 so only verified entities can inspect institutional memory.
+   - History and manifest exports ship a redacted view: payload/result bodies become summaries like `{ "redacted": true, "entries": N }`, human context is masked to `[REDACTED]`, and memory networks collapse to connection counts while preserving T1 anchors and symbolic hashes.
+   - Redacted manifest excerpt:
+
+```json
+{
+  "payload": {"redacted": true, "entries": 2},
+  "entity_context": {"primary": "Aurora (SYS_001)", "human": "[REDACTED]"},
+  "result": {"redacted": true, "status": "ok", "keys": ["analysis", "status"]},
+  "memory_context": {
+    "references": {"redacted": true, "count": 3},
+    "patterns": {"redacted": true, "count": 2},
+    "network": {"redacted": true, "connections": 1}
+  }
+}
+```
 
 2. **Documentation**
    - "How to work with Aurora" guide

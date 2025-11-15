@@ -27,14 +27,16 @@ AFTER (Living Computation):
 This file demonstrates the transformation pattern for ANY Aurora endpoint.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 
 from src.core.event_system import (
-    EventType, StationLocation, get_event_system
+    EventType, StationLocation, get_event_system, serialize_event
 )
 from src.entities.aurora_agent import get_aurora
+from src.middleware.fastapi_security import security, verify_csrf_token
 
 
 # API Models
@@ -155,13 +157,16 @@ async def analyze_with_living_computation(request: AnalysisRequest):
 
 
 @router.get("/aurora/state")
-async def get_aurora_state():
+async def get_aurora_state(
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Inspect Aurora's current state (experience, memory, relationships).
-    
+
     Traditional systems don't have state between requests.
     Aurora accumulates wisdom continuously.
     """
+    verify_csrf_token(token)
     aurora = get_aurora()
     return aurora.get_state_summary()
 
@@ -170,7 +175,8 @@ async def get_aurora_state():
 async def get_event_history(
     entity: Optional[str] = None,
     location: Optional[str] = None,
-    limit: int = 50
+    limit: int = 50,
+    token: HTTPAuthorizationCredentials = Depends(security)
 ):
     """
     Retrieve event timeline (institutional memory).
@@ -178,6 +184,7 @@ async def get_event_history(
     Traditional systems: Logs are metadata, separate from execution.
     Aurora-Orion: Events ARE execution, timeline IS the computational reality.
     """
+    verify_csrf_token(token)
     event_system = get_event_system()
     
     # Parse location if provided
@@ -196,22 +203,27 @@ async def get_event_history(
     
     return {
         "total_events": len(events),
-        "events": [e.to_dict() for e in events]
+        "events": [
+            serialize_event(event, redact_sensitive=True) for event in events
+        ]
     }
 
 
 @router.get("/system/manifest")
-async def get_system_manifest():
+async def get_system_manifest(
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Export complete system state (DLP compliance).
     
     Full transparency: Every event, every entity state, every learned pattern.
     Living computation is fully auditable.
     """
+    verify_csrf_token(token)
     event_system = get_event_system()
     aurora = get_aurora()
-    
-    manifest = event_system.export_manifest()
+
+    manifest = event_system.export_manifest(redact_sensitive=True)
     manifest["entities"] = {
         "Aurora": aurora.get_state_summary()
     }

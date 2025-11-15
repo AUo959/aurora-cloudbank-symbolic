@@ -118,9 +118,9 @@ class EthicsAwareQuantumGate:
         # Audit log
         self.audit_log.append(result)
         
-        # Track violation if blocked or throttled
+        # Track violation if blocked or throttled using GUMAS API
         if intervention in [InterventionType.BLOCK, InterventionType.THROTTLE]:
-            self.gumas.violation_log.append({
+            self.gumas._log_violation({
                 "type": "quantum_gate",
                 "gate": gate_type,
                 "intervention": intervention.value,

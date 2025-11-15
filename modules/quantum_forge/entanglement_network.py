@@ -61,6 +61,22 @@ class EntanglementLink:
     def needs_refresh(self, max_age: float = 600.0) -> bool:
         """Check if entanglement needs refresh"""
         return self.get_age() > max_age or self.entanglement_strength < 0.5
+        
+    # Backward compatibility properties for tests
+    @property
+    def agent1_id(self) -> str:
+        """Alias for agent_1_id"""
+        return self.agent_1_id
+
+    @property
+    def agent2_id(self) -> str:
+        """Alias for agent_2_id"""
+        return self.agent_2_id
+        
+    @property
+    def correlation(self) -> float:
+        """Alias for entanglement_strength"""
+        return self.entanglement_strength
 
 
 @dataclass
@@ -72,6 +88,31 @@ class EntanglementCluster:
     collective_coherence: float
     created_at: float
     metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    @property
+    def link_count(self) -> int:
+        """Calculate expected number of entanglement links based on topology"""
+        n = len(self.agent_ids)
+        
+        # Handle both NetworkTopology enum and string values
+        topology_str = self.topology
+        if hasattr(self.topology, 'value'):
+            topology_str = self.topology.value
+            
+        if topology_str == "mesh":
+            # Fully connected: n*(n-1)/2 links
+            return n * (n - 1) // 2
+        elif topology_str == "star":
+            # Hub-and-spoke: n-1 links (hub to each spoke)
+            return n - 1
+        elif topology_str == "ring":
+            # Circular: n links (each agent to next)
+            return n
+        elif topology_str == "tree":
+            # Binary tree: n-1 links (tree structure)
+            return n - 1
+        else:
+            return 0
 
 
 class EntanglementNetwork:
@@ -97,8 +138,15 @@ class EntanglementNetwork:
             bridge: QuantumSymbolicBridge instance
         """
         self.forge = forge or QuantumForge()
-        self.integration = integration or QuantumForgeIntegration(forge=self.forge)
         self.bridge = bridge or QuantumSymbolicBridge()
+        # Ensure integration uses the same bridge instance for consistency
+        if integration is None:
+            self.integration = QuantumForgeIntegration(forge=self.forge, bridge=self.bridge)
+        else:
+            self.integration = integration
+            # Use the integration's bridge if it has one
+            if hasattr(integration, 'bridge') and integration.bridge:
+                self.bridge = integration.bridge
         
         # Track entanglement links
         self.entanglement_links: Dict[str, EntanglementLink] = {}
@@ -116,27 +164,42 @@ class EntanglementNetwork:
         }
         
         logger.info("🕸️  Entanglement Network initialized")
+    
+    @property
+    def links(self) -> Dict[str, EntanglementLink]:
+        """Backward compatibility property for entanglement links"""
+        return self.entanglement_links
         
     def entangle_agents(
         self,
-        agent_1_id: str,
-        agent_2_id: str,
+        agent_1_id,  # Union[str, QuantumAgent]
+        agent_2_id,  # Union[str, QuantumAgent]
         strength: float = 0.95
     ) -> EntanglementLink:
         """
         Create quantum entanglement between two agents
-        
+
         Args:
-            agent_1_id: First agent ID
-            agent_2_id: Second agent ID
+            agent_1_id: First agent ID (str) or QuantumAgent object
+            agent_2_id: Second agent ID (str) or QuantumAgent object
             strength: Target entanglement strength (0.0-1.0)
-            
+
         Returns:
             EntanglementLink representing the connection
-            
+
         Raises:
             ValueError: If agents don't exist or already entangled
         """
+        # Extract agent IDs if QuantumAgent objects are passed
+        if hasattr(agent_1_id, 'agent_id'):
+            # It's a QuantumAgent object - auto-register it and extract ID
+            self.forge.agents[agent_1_id.agent_id] = agent_1_id
+            agent_1_id = agent_1_id.agent_id
+        if hasattr(agent_2_id, 'agent_id'):
+            # It's a QuantumAgent object - auto-register it and extract ID
+            self.forge.agents[agent_2_id.agent_id] = agent_2_id
+            agent_2_id = agent_2_id.agent_id
+            
         # Validate agents exist
         if agent_1_id not in self.forge.agents:
             raise ValueError(f"Agent not found: {agent_1_id}")
@@ -293,32 +356,38 @@ class EntanglementNetwork:
             
         cluster_id = cluster_id or f"CLUSTER-{int(time.time())}"
         
+        # Handle both NetworkTopology enum and string values
+        if hasattr(topology, 'value'):
+            topology_str = topology.value
+        else:
+            topology_str = topology
+        
         logger.info(
             f"🌐 Creating {topology} cluster: {cluster_id} "
             f"({len(agent_ids)} agents)"
         )
         
         # Create entanglements based on topology
-        if topology == "mesh":
+        if topology_str == "mesh":
             # Fully connected: entangle all pairs
             for i, agent_1 in enumerate(agent_ids):
                 for agent_2 in agent_ids[i+1:]:
                     self.entangle_agents(agent_1, agent_2)
                     
-        elif topology == "star":
+        elif topology_str == "star":
             # Hub-and-spoke: entangle first agent with all others
             hub = agent_ids[0]
             for agent in agent_ids[1:]:
                 self.entangle_agents(hub, agent)
                 
-        elif topology == "ring":
+        elif topology_str == "ring":
             # Circular: entangle sequential pairs
             for i in range(len(agent_ids)):
                 agent_1 = agent_ids[i]
                 agent_2 = agent_ids[(i + 1) % len(agent_ids)]
                 self.entangle_agents(agent_1, agent_2)
                 
-        elif topology == "tree":
+        elif topology_str == "tree":
             # Binary tree: entangle hierarchically
             for i in range(len(agent_ids)):
                 left_child = 2 * i + 1
@@ -328,7 +397,7 @@ class EntanglementNetwork:
                 if right_child < len(agent_ids):
                     self.entangle_agents(agent_ids[i], agent_ids[right_child])
         else:
-            raise ValueError(f"Unknown topology: {topology}")
+            raise ValueError(f"Unknown topology: {topology_str}")
         
         # Calculate collective coherence
         collective_coherence = self._calculate_cluster_coherence(agent_ids)

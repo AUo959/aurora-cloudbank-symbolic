@@ -130,6 +130,16 @@ class QuantumAgent:
     quantum_state: str = "coherent"  # Track quantum coherence
     symbolic_layer: int = 1  # Default to SURFACE layer
     
+    def __hash__(self) -> int:
+        """Make QuantumAgent hashable by using agent_id"""
+        return hash(self.agent_id)
+    
+    def __eq__(self, other) -> bool:
+        """Equality based on agent_id"""
+        if not isinstance(other, QuantumAgent):
+            return False
+        return self.agent_id == other.agent_id
+    
     def to_dict(self) -> Dict[str, Any]:
         """Export agent to dictionary for persistence"""
         return {

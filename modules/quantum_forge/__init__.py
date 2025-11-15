@@ -18,6 +18,17 @@ SRB: MODULE_BOUNDARY_QUANTUM_ENHANCED
 DLP: context_tag=qf_init_v3, symbolic_hash=QF_INIT_v3
 """
 
+from enum import Enum
+
+
+class NetworkTopology(Enum):
+    """Network topology types for quantum entanglement networks"""
+    STAR = "star"
+    MESH = "mesh"
+    RING = "ring"
+    TREE = "tree"
+
+
 # Core v2.0 components
 from modules.quantum_forge.quantum_forge_v2 import (
     QuantumForge,
@@ -58,6 +69,9 @@ from modules.quantum_forge.quantum_memory_enhancer import (
     reset_quantum_memory_enhancer
 )
 
+# Aliases for backward compatibility
+get_memory_enhancer = get_quantum_memory_enhancer
+
 # System Flow Orchestration (Phase 4)
 from modules.quantum_forge.system_flow_orchestrator import (
     SystemFlowOrchestrator,
@@ -66,6 +80,9 @@ from modules.quantum_forge.system_flow_orchestrator import (
     SystemFlowMetrics,
     get_system_flow_orchestrator,
 )
+
+# Aliases for backward compatibility
+get_system_orchestrator = get_system_flow_orchestrator
 
 # Ethics-Aware Quantum Operations (Phase 5)
 from modules.quantum_forge.ethics_quantum_gates import (
@@ -84,6 +101,8 @@ from modules.quantum_forge.constellation_topology_mapper import (
     TopologyMetric,
     get_topology_mapper,
 )
+
+# NetworkTopology enum defined above - no need for alias
 
 # Joy-Infused Evolution (Phase 7)
 from modules.quantum_forge.joy_evolution_engine import (
@@ -128,6 +147,7 @@ __all__ = [
     "QuantumMemoryMetadata",
     "get_quantum_memory_enhancer",
     "reset_quantum_memory_enhancer",
+    "get_memory_enhancer",  # Alias
     
     
     # System Orchestration
@@ -136,6 +156,7 @@ __all__ = [
     "ModuleFlowState",
     "SystemFlowMetrics",
     "get_system_flow_orchestrator",
+    "get_system_orchestrator",  # Alias
     
     # Ethics Operations
     "EthicsAwareQuantumGate",
@@ -150,6 +171,7 @@ __all__ = [
     "TopologyMapping",
     "TopologyMetric",
     "get_topology_mapper",
+    "NetworkTopology",  # Alias
     
     # Joy Evolution
     "JoyEvolutionEngine",

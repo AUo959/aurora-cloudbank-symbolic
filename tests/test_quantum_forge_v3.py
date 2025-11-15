@@ -237,6 +237,9 @@ class TestEntanglementNetwork:
 class TestQuantumMemoryEnhancer:
     """Tests for quantum-enhanced memory system"""
     
+    # Test constant for embedding dimensions
+    EMBEDDING_DIM = 128
+    
     @pytest.fixture
     def memory_enhancer(self):
         """Create memory enhancer instance"""
@@ -259,7 +262,7 @@ class TestQuantumMemoryEnhancer:
         test_memory = SymbolicMemoryNode(
             node_id="mem_001",
             content={"text": "Test memory content"},
-            embedding=[0.1] * 128,  # Simple embedding
+            embedding=[0.1] * self.EMBEDDING_DIM,
             intent_alignment=0.8,
             created_at=datetime.datetime.now().timestamp()
         )
@@ -281,7 +284,7 @@ class TestQuantumMemoryEnhancer:
             memory = SymbolicMemoryNode(
                 node_id=f"mem_{i}",
                 content={"text": f"Content {i}"},
-                embedding=[0.1 + i * 0.01] * 128,
+                embedding=[0.1 + i * 0.01] * self.EMBEDDING_DIM,
                 intent_alignment=0.5 + i * 0.1,  # Increasing alignment
                 created_at=time.time()
             )
@@ -305,21 +308,21 @@ class TestQuantumMemoryEnhancer:
         mem1 = SymbolicMemoryNode(
             node_id="mem_1",
             content={"text": "quantum computing"},
-            embedding=[0.9, 0.8] + [0.1] * 126,  # Similar pattern
+            embedding=[0.9, 0.8] + [0.1] * (self.EMBEDDING_DIM - 2),  # Similar pattern
             intent_alignment=0.8,
             created_at=time.time()
         )
         mem2 = SymbolicMemoryNode(
             node_id="mem_2",
             content={"text": "quantum physics"},
-            embedding=[0.85, 0.75] + [0.15] * 126,  # Similar to mem1
+            embedding=[0.85, 0.75] + [0.15] * (self.EMBEDDING_DIM - 2),  # Similar to mem1
             intent_alignment=0.8,
             created_at=time.time()
         )
         mem3 = SymbolicMemoryNode(
             node_id="mem_3",
             content={"text": "classical computing"},
-            embedding=[0.1, 0.2] + [0.9] * 126,  # Different pattern
+            embedding=[0.1, 0.2] + [0.9] * (self.EMBEDDING_DIM - 2),  # Different pattern
             intent_alignment=0.6,
             created_at=time.time()
         )
@@ -341,7 +344,7 @@ class TestQuantumMemoryEnhancer:
         memory = SymbolicMemoryNode(
             node_id="mem_test",
             content={"text": "Test"},
-            embedding=[0.5] * 128,
+            embedding=[0.5] * self.EMBEDDING_DIM,
             intent_alignment=0.7,
             created_at=time.time()
         )

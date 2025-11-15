@@ -154,7 +154,7 @@ class CommandChainFlow:
             parse_result = self.executor.parser.parse(cmd)
             if parse_result.has_errors:
                 # Create failed result
-                from datetime import datetime
+                from datetime import datetime, UTC
                 return ChainExecutionResult(
                     chain_hash='',
                     results=[],
@@ -163,7 +163,7 @@ class CommandChainFlow:
                     successful_commands=0,
                     failed_commands=len(commands),
                     execution_time_ms=0.0,
-                    timestamp=datetime.utcnow().isoformat()
+                    timestamp=datetime.now(UTC).isoformat()
                 )
         
         # Execute all commands

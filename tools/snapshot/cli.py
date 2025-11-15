@@ -44,7 +44,7 @@ def cmd_seal(args):
     snapshot = sealer.seal_snapshot(manifest, state, context_tag=args.context_tag)
 
     # Generate output filename
-    timestamp = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    timestamp = datetime.now(datetime.UTC).strftime('%Y%m%dT%H%M%SZ')
     module_name = manifest.get('module', 'unknown')
     filename = f"snapshot_{module_name}_{timestamp}.json"
     output_path = Path(args.out_dir) / filename

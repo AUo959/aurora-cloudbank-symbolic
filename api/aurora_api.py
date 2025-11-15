@@ -7,13 +7,14 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
 from typing import Any, Dict, Optional, Literal
+from contextlib import asynccontextmanager
 
 import logging
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
 from src.middleware.exception_handler import validation_handler
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -157,12 +158,6 @@ except ImportError:
 
 # from modules.symbolic_core.quantum_vsa import QuantumVSA  # Uncomment if available
 
-app = FastAPI(
-    title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
-    description="Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
-    version="1.0.0"
-)
-
 # Structured logger (avoids f-string interpolation for security)
 logger = logging.getLogger("aurora_api")
 
@@ -187,9 +182,10 @@ except Exception as e:
 # Application Lifecycle Management
 # ================================
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize background services on application startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifecycle with startup and shutdown logic"""
+    # Startup
     logger.info("Aurora API starting up...")
     
     # Start HALO/PAS drift controller if available
@@ -199,11 +195,10 @@ async def startup_event():
             logger.info("✅ HALO/PAS Drift Controller started")
         except Exception as e:
             logger.error("❌ Failed to start HALO/PAS Controller: %s", e)
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup background services on application shutdown"""
+    
+    yield
+    
+    # Shutdown
     logger.info("Aurora API shutting down...")
     
     # Stop HALO/PAS drift controller if running
@@ -213,6 +208,15 @@ async def shutdown_event():
             logger.info("✅ HALO/PAS Drift Controller stopped")
         except Exception as e:
             logger.error("❌ Failed to stop HALO/PAS Controller: %s", e)
+
+
+# Create FastAPI app with lifespan context manager
+app = FastAPI(
+    title="Aurora CloudBank Symbolic API - Sonnet 4 Enhanced",
+    description="Quantum-enhanced symbolic governance system with ChatGPT Agent Mode integration",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper
@@ -258,6 +262,7 @@ def validate_identifier(identifier: str, param_name: str) -> str:
         )
     
     return identifier
+
 
 # Include AuMemManager API routes if available
 if AUMEMMANAGER_AVAILABLE and AUMEMMANAGER_ROUTER:
@@ -2261,8 +2266,8 @@ class PatchWeaverRequest(BaseModel):
         description="Context for ethics validation and DLP tracking"
     )
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "patch": {
                     "set": {
@@ -2280,6 +2285,7 @@ class PatchWeaverRequest(BaseModel):
                 }
             }
         }
+    )
 
 
 @app.post("/admin/patchweaver/apply", dependencies=[Depends(security), Depends(verify_csrf_token)])

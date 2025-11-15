@@ -98,7 +98,7 @@ class SnapshotSealer:
             
             # Metadata section
             'metadata': {
-                'sealed_at': datetime.utcnow().isoformat() + 'Z',
+                'sealed_at': datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z'),
                 'anchor_seed': manifest.get('anchor_seed', self.anchor_seed),
                 'team': manifest.get('team', self.team),
                 'version': manifest.get('version', self.version),

@@ -362,5 +362,61 @@
     "seal_id": "FILE_test_t71_tools_20251115T193226",
     "description": "Verification status: valid",
     "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T20:24:15.126643",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20251115T202415",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T20:24:15.129751",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20251115T202415",
+    "description": "Verification status: valid",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T20:31:51.130027",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20251115T203151",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T20:31:51.130619",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20251115T203151",
+    "description": "Verification status: valid",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T21:13:30.989951",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20251115T211330",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T21:13:30.990556",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20251115T211330",
+    "description": "Verification status: valid",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T21:39:23.809176",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20251115T213923",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T21:39:23.809815",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20251115T213923",
+    "description": "Verification status: valid",
+    "user": "vscode"
   }
 ]

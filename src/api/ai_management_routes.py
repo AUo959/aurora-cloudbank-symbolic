@@ -9,8 +9,11 @@ import logging
 from typing import Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
+
+from src.middleware.fastapi_security import security as shared_security
+from src.middleware.fastapi_security import verify_csrf_token
 
 try:
     from modules.ai_core import AIModel, claude_hub, gpt5_hub, unified_ai
@@ -22,7 +25,7 @@ except ImportError:
     unified_ai = None
 
 # Security
-security = HTTPBearer()
+security = shared_security
 
 # Router
 router = APIRouter(prefix="/ai", tags=["AI Model Management"])
@@ -69,6 +72,7 @@ async def get_ai_status(token: HTTPAuthorizationCredentials = Depends(security))
     """
     Get comprehensive AI integration status including model availability
     """
+    verify_csrf_token(token)
     if not unified_ai:
         raise HTTPException(status_code=503, detail="AI integration not available")
 
@@ -95,6 +99,7 @@ async def get_model_capabilities(
     """
     Get detailed capabilities for a specific AI model
     """
+    verify_csrf_token(token)
     if not unified_ai or not AIModel:
         raise HTTPException(status_code=503, detail="AI integration not available")
 
@@ -146,6 +151,8 @@ async def select_model(
     
     This sets the default model preference but maintains fallback chains
     """
+    verify_csrf_token(token)
+
     if not unified_ai or not AIModel:
         raise HTTPException(status_code=503, detail="AI integration not available")
 
@@ -190,6 +197,7 @@ async def enable_claude_45(token: HTTPAuthorizationCredentials = Depends(securit
     """
     Enable Claude 4.5 Opus when it becomes available
     """
+    verify_csrf_token(token)
     if not claude_hub:
         raise HTTPException(status_code=503, detail="Claude integration not available")
 
@@ -214,11 +222,12 @@ async def enable_claude_45(token: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.post(\"/enable-gpt5\", summary=\"Enable GPT-5\")
+@router.post("/enable-gpt5", summary="Enable GPT-5")
 async def enable_gpt5(token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Enable GPT-5 when it becomes available
     """
+    verify_csrf_token(token)
     if not gpt5_hub:
         raise HTTPException(status_code=503, detail="GPT integration not available")
 
@@ -248,6 +257,7 @@ async def enable_gpt5_codex(token: HTTPAuthorizationCredentials = Depends(securi
     """
     Enable GPT-5 Codex when it becomes available
     """
+    verify_csrf_token(token)
     if not gpt5_hub:
         raise HTTPException(status_code=503, detail="GPT integration not available")
 
@@ -277,6 +287,7 @@ async def list_available_models(token: HTTPAuthorizationCredentials = Depends(se
     """
     Get list of currently available AI models with basic info
     """
+    verify_csrf_token(token)
     if not unified_ai or not AIModel:
         raise HTTPException(status_code=503, detail="AI integration not available")
 

@@ -3,18 +3,22 @@
  * Emergency deployment for Agent Constellation communication
  */
 
-const http = require('http');
-const AgentSynchronizer = require('../system/agent_synchronizer');
+import http from 'http';
+import { AgentSynchronizer } from '../system/agent_synchronizer.js';
 
 class ApiBridgeServer {
-  constructor(port = 3838) {
+  constructor(port = 3838, synchronizer = new AgentSynchronizer()) {
     this.port = port;
     this.server = null;
-    this.synchronizer = new AgentSynchronizer();
+    this.synchronizer = synchronizer;
     this.status = 'INITIALIZING';
   }
 
   start() {
+    if (this.server) {
+      return this.server;
+    }
+
     this.server = http.createServer((req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,6 +39,8 @@ class ApiBridgeServer {
       this.status = 'OPERATIONAL';
       process.stdout.write(`🌐 [API_BRIDGE] Server running on port ${this.port}\n`);
     });
+
+    return this.server;
   }
 
   async handleAgentStatus(req, res) {
@@ -73,15 +79,16 @@ class ApiBridgeServer {
   stop() {
     if (this.server) {
       this.server.close();
+      this.server = null;
       this.status = 'STOPPED';
     }
   }
 }
 
-module.exports = ApiBridgeServer;
+export default ApiBridgeServer;
 
 // Emergency deployment
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const bridge = new ApiBridgeServer();
   bridge.start();
 

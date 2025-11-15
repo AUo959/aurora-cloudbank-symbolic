@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "npm run test:node && npm run test:web",
-    "test:node": "node --test tests/node",
+    "test:node": "node --test tests/node/*.test.js",
     "test:web": "node --test tests/web",
     "test:unit": "npm run test:node",
     "test:integration": "npm run test:web",

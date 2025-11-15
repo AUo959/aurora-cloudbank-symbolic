@@ -296,12 +296,41 @@ class EventSystem:
         # Move to timeline (persistent history)
         self.timeline.append(event)
         del self.active_events[event_id]
-        
+
         # Advance spatial-relational boundary (SRB)
         self.srb_state = int(hashlib.sha256(
             f"{self.srb_state}||{event.symbolic_hash}".encode()
         ).hexdigest()[:8], 16) % 10000
-    
+
+    def abort_event(
+        self,
+        event_id: str,
+        reason: str,
+        audit_metadata: Optional[Dict[str, Any]] = None
+    ):
+        """Abort an in-flight event while preserving an audit trail."""
+
+        if event_id not in self.active_events:
+            raise ValueError(f"Event {event_id} not found in active events")
+
+        event = self.active_events[event_id]
+        event.result = {
+            "status": "denied",
+            "reason": reason,
+            "audit": audit_metadata or {},
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+        event.memory_references = []
+        event.pattern_connections = []
+        event.collaboration_network = {}
+
+        self.timeline.append(event)
+        del self.active_events[event_id]
+
+        self.srb_state = int(hashlib.sha256(
+            f"{self.srb_state}||{event.symbolic_hash}||denied".encode()
+        ).hexdigest()[:8], 16) % 10000
+
     def get_event_history(
         self,
         entity: Optional[str] = None,

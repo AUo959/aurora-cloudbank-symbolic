@@ -13,13 +13,14 @@ This is NOT traditional logging. Events ARE the computational reality.
 Functions don't execute - Entities experience events.
 """
 
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Optional, Dict, Any, List
-import uuid
+from typing import Any, Dict, List, Optional
 import hashlib
 import json
+import uuid
 
 
 class EventType(Enum):
@@ -288,10 +289,10 @@ class EventSystem:
             raise ValueError(f"Event {event_id} not found in active events")
         
         event = self.active_events[event_id]
-        event.result = result
-        event.memory_references = memory_references or []
-        event.pattern_connections = pattern_connections or []
-        event.collaboration_network = collaboration_network or {}
+        event.result = deepcopy(result)
+        event.memory_references = deepcopy(memory_references or [])
+        event.pattern_connections = deepcopy(pattern_connections or [])
+        event.collaboration_network = deepcopy(collaboration_network or {})
         
         # Move to timeline (persistent history)
         self.timeline.append(event)

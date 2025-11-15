@@ -30,6 +30,11 @@ export class ResonanceToken {
       summary: Object.keys(this.payload),
     };
   }
+
+  getActiveThreads() {
+    // Returns count of payload keys as proxy for "active threads"
+    return this.payload ? Object.keys(this.payload).length : 0;
+  }
 }
 
 // Usage: const token = new ResonanceToken(memoryData).relay(agent);

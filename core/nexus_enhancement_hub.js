@@ -3,11 +3,11 @@
 // Thread Anchor: T6-EMERGENCE-2025
 // DLP: WAVE3_NEXUS_ENHANCEMENT
 
-const DriftAwareAgent = require('./drift-aware-agent.js');
-const EthicalCheckpoint = require('./ethical-checkpoint.js');
-const ResonanceToken = require('./resonance-token.js');
-const SymbolicForecastEngine = require('./symbolic-forecast-engine.js');
-const Tether = require('./tether.js');
+import { DriftAwareAgent } from './drift-aware-agent.js';
+import { EthicalCheckpoint } from './ethical-checkpoint.js';
+import { ResonanceToken } from './resonance-token.js';
+import { SymbolicForecastEngine } from './symbolic-forecast-engine.js';
+import { Tether } from './tether.js';
 
 /**
  * NEXUS Enhancement Hub
@@ -40,10 +40,12 @@ class NexusEnhancementHub {
   async initialize() {
     try {
       // 1. Drift Monitoring (extends NEXUS entropy system)
-      this.driftMonitor = new DriftAwareAgent({
-        entropyThreshold: 0.1,
-        symbolicHashFn: () => this.nexusCore.getSymbolicState()
-      });
+      const memoryModule = this.nexusCore.getMemoryModule ? this.nexusCore.getMemoryModule() : { anchorHash: () => 'ANCHOR_DEFAULT' };
+      this.driftMonitor = new DriftAwareAgent(
+        'NEXUS_DRIFT_MONITOR',
+        memoryModule,
+        0.1 // threshold
+      );
       this.status.driftMonitoring = true;
 
       // 2. Ethics Validation (complements NEXUS consciousness)
@@ -53,7 +55,7 @@ class NexusEnhancementHub {
 
       // 3. Memory Relay (enhances NEXUS memory weaving)
       this.memoryRelay = new ResonanceToken(
-        this.nexusCore.getMemoryWeaver()
+        { memoryWeaver: this.nexusCore.getMemoryWeaver() }
       );
       this.status.memoryRelay = true;
 
@@ -97,13 +99,13 @@ class NexusEnhancementHub {
 
     // Drift monitoring status
     if (this.driftMonitor) {
-      const driftState = this.driftMonitor.assessDrift(
+      const driftLevel = this.driftMonitor.assessDrift(
         this.nexusCore.getSymbolicState()
       );
       results.enhancements.drift = {
         active: true,
-        driftLevel: driftState.level,
-        threshold: driftState.threshold
+        driftLevel: driftLevel,
+        threshold: this.driftMonitor.driftThreshold
       };
     }
 
@@ -162,4 +164,4 @@ class NexusEnhancementHub {
   }
 }
 
-module.exports = NexusEnhancementHub;
+export default NexusEnhancementHub;

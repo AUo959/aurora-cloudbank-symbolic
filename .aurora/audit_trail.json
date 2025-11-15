@@ -334,5 +334,19 @@
     "seal_id": "FILE_test_t71_tools_20251115T115906",
     "description": "Verification status: valid",
     "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T15:53:00.002453",
+    "event_type": "seal_created",
+    "seal_id": "FILE_test_t71_tools_20251115T155300",
+    "description": "File sealed: test_t71_tools.py",
+    "user": "vscode"
+  },
+  {
+    "timestamp": "2025-11-15T15:53:00.003049",
+    "event_type": "seal_verified",
+    "seal_id": "FILE_test_t71_tools_20251115T155300",
+    "description": "Verification status: valid",
+    "user": "vscode"
   }
 ]

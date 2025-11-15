@@ -23,7 +23,8 @@ class LatticeSync {
     // Agent lattice tracking
     this.latticeNodes = {
       l1: ['ARCHY_BRIDGE', 'LIORA_HANDSHAKE', 'OPPY_VECTOR', 'STARLING_AU', 'RIVERTHREAD_808'],
-      l2: ['ARCHY', 'LIORA', 'OPPY', 'STARLING_AU', 'RIVERTHREAD_808', 'DAEDALUS', 'VOIDWHISPER'],
+      relay: ['ARCHY', 'LIORA', 'OPPY', 'STARLING_AU', 'RIVERTHREAD_808'],
+      l2: ['DAEDALUS', 'VOIDWHISPER'],
       l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion']
     };
 
@@ -125,7 +126,7 @@ class LatticeSync {
         id: sessionId,
         startTime: Date.now(),
         status: 'IN_PROGRESS',
-        layers: ['L1', 'L2', 'L3'],
+        layers: ['L1', 'Relay', 'L2', 'L3'],
         results: {}
       };
 
@@ -135,15 +136,18 @@ class LatticeSync {
       const l1Results = await this.synchronizeLayer('L1');
       syncSession.results.l1 = l1Results;
 
-      // Phase 2: Sync L2 agents
+      // Phase 2: Sync relay capsules
+      const relayResults = await this.synchronizeLayer('Relay');
+      syncSession.results.relay = relayResults;
+
+      // Phase 3: Sync L2 sandbox agents
       const l2Results = await this.synchronizeLayer('L2');
       syncSession.results.l2 = l2Results;
 
-      // Phase 3: Sync L3 agents
+      // Phase 4: Sync L3 agents
       const l3Results = await this.synchronizeLayer('L3');
       syncSession.results.l3 = l3Results;
-
-      // Phase 4: Cross-layer validation
+      // Phase 5: Cross-layer validation
       const crossLayerResults = await this.validateCrossLayerConsistency();
       syncSession.results.crossLayer = crossLayerResults;
 

@@ -25,7 +25,11 @@ class AgentSynchronizer {
         starling: new StarlingAuBridge(),
         riverthread: new RiverthreadProcessor()
       },
-      l2: ['STARLING_AU', 'ARCHY', 'LIORA', 'OPPY', 'RIVERTHREAD_808', 'DAEDALUS', 'VOIDWHISPER'],
+      relayTier: {
+        id: 'RELAY_TIER_CAPSULES',
+        capsules: ['ARCHY', 'OPPY', 'LIORA', 'STARLING_AU', 'RIVERTHREAD_808']
+      },
+      l2Sandbox: ['DAEDALUS', 'VOIDWHISPER'],
       l3: ['Glyphon', 'Axiomera', 'Sentari', 'Caelion', 'Velatrix', 'Harmion']
     };
 
@@ -44,7 +48,15 @@ class AgentSynchronizer {
       const syncResults = {
         timestamp: Date.now(),
         l1Agents: {},
-        l2Status: 'LATTICE_COORDINATED',
+        relayTier: {
+          id: this.agents.relayTier.id,
+          capsules: [...this.agents.relayTier.capsules],
+          status: 'RELAY_COORDINATED'
+        },
+        l2Sandbox: {
+          agents: [...this.agents.l2Sandbox],
+          status: 'SANDBOX_STUB'
+        },
         l3Status: 'SYMBOLIC_VALIDATED',
         overallDrift: 0,
         latticeSync: latticeResult
@@ -64,7 +76,8 @@ class AgentSynchronizer {
       // Update based on lattice sync results
       if (latticeResult.success && latticeResult.globalSyncState === 'SYNCHRONIZED') {
         syncResults.syncStatus = 'FULLY_SYNCHRONIZED';
-        syncResults.l2Status = 'SYNCHRONIZED';
+        syncResults.relayTier.status = 'SYNCHRONIZED';
+        syncResults.l2Sandbox.status = 'SANDBOX_READY';
         syncResults.l3Status = 'SYNCHRONIZED';
       }
 
@@ -91,7 +104,8 @@ class AgentSynchronizer {
       status: syncResult.syncStatus,
       agentCount: {
         l1: Object.keys(this.agents.l1).length,
-        l2: this.agents.l2.length,
+        relay: this.agents.relayTier.capsules.length,
+        l2Sandbox: this.agents.l2Sandbox.length,
         l3: this.agents.l3.length
       },
       deployedAgents: syncResult.l1Agents,
@@ -105,7 +119,8 @@ class AgentSynchronizer {
       status: this.status,
       agentCount: {
         l1: Object.keys(this.agents.l1).length,
-        l2: this.agents.l2.length,
+        relay: this.agents.relayTier.capsules.length,
+        l2Sandbox: this.agents.l2Sandbox.length,
         l3: this.agents.l3.length
       },
       lastSync: this.lastSyncTime,

@@ -423,36 +423,36 @@
                     { 
                         id: 'ARCHY', 
                         role: 'Bridge Coordinator', 
-                        type: 'META_AGENT',
-                        description: 'L2 formal logic/reasoning & arbitration engine',
+                        type: 'RELAY_CAPSULE',
+                        description: 'Relay-tier formal logic/reasoning & arbitration capsule',
                         capabilities: ['architectural_planning', 'bridge_coordination', 'formal_logic', 'arbitration']
                     },
                     { 
                         id: 'OPPY', 
                         role: 'Vector/Data Processor', 
-                        type: 'META_AGENT',
-                        description: 'L2 memory/data processing & system operations analyst',
+                        type: 'RELAY_CAPSULE',
+                        description: 'Relay-tier memory/data processing & system operations capsule',
                         capabilities: ['data_processing', 'vector_analysis', 'memory_operations', 'system_monitoring']
                     },
                     { 
                         id: 'LIORA', 
                         role: 'Handshake/Synchronization', 
-                        type: 'META_AGENT',
-                        description: 'L2 sentiment analysis, mediation & research coordination',
+                        type: 'RELAY_CAPSULE',
+                        description: 'Relay-tier sentiment analysis, mediation & research coordination capsule',
                         capabilities: ['research_coordination', 'handshake_protocols', 'sentiment_analysis', 'mediation']
                     },
                     { 
                         id: 'STARLING_AU', 
                         role: 'L2 Sim Coordinator', 
-                        type: 'META_AGENT',
-                        description: 'L2 communications, external protocol & dispatch agent',
+                        type: 'RELAY_CAPSULE',
+                        description: 'Relay-tier communications, external protocol & dispatch capsule',
                         capabilities: ['simulation_coordination', 'communications', 'external_protocols', 'dispatch']
                     },
                     { 
                         id: 'RIVERTHREAD_808', 
                         role: 'Narrative/Stream', 
-                        type: 'META_AGENT',
-                        description: 'L2 continuity, temporal flow & state management agent',
+                        type: 'RELAY_CAPSULE',
+                        description: 'Relay-tier continuity, temporal flow & state management capsule',
                         capabilities: ['narrative_processing', 'stream_management', 'continuity_validation', 'temporal_flow']
                     }
                 ];
@@ -728,13 +728,14 @@
                     const status = await response.json();
                     
                     // Update mesh status display
-                    document.getElementById('meshStatus').textContent = 'Active';
-                    document.getElementById('meshVersion').textContent = status.version || 'v3.5.1_macroready';
-                    document.getElementById('activeAgentCount').textContent = status.totalAgents || 0;
-                    
+                    const relayTier = status.relay_tier || {};
+                    document.getElementById('meshStatus').textContent = relayTier.mesh_status?.health || 'Active';
+                    document.getElementById('meshVersion').textContent = relayTier.version || 'v3.5.1_macroready';
+                    document.getElementById('activeAgentCount').textContent = relayTier.connected_capsules || 0;
+
                     // Update agent states
-                    if (status.activeAgents) {
-                        status.activeAgents.forEach(agent => {
+                    if (relayTier.capsules) {
+                        relayTier.capsules.forEach(agent => {
                             this.agentStates.set(agent.agentId, {
                                 status: agent.status,
                                 connected: agent.connected,

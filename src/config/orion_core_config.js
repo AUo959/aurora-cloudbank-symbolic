@@ -32,15 +32,22 @@ const ORION_CORE = {
   ],
 
   // Agent Configuration
-  agent_constellation: "L2_META_AGENTS",
+  agent_constellation: "RELAY_TIER_CAPSULES",
   total_agents: 5,
   constellation_agents: [
     "ARCHY", "OPPY", "LIORA", "STARLING_AU", "RIVERTHREAD_808"
   ],
+  relay_capsule_collection: {
+    id: "RELAY_TIER_CAPSULES",
+    capsules: [
+      "ARCHY", "OPPY", "LIORA", "STARLING_AU", "RIVERTHREAD_808"
+    ],
+    l2_sandbox_inventory: []
+  },
 
   // System Status
   system_status: {
-    agent_constellation: "All active & integrated",
+    agent_constellation: "Relay tier capsules active & isolated from L2 sandbox",
     relay_sync: "Anchor-aligned (Δ = 0.000)",
     ethics: "Picard_Delta_3 + Thermax enforced",
     symbolic_logic: "THREADCORE v3.5.1 stable",

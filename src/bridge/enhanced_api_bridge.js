@@ -435,6 +435,7 @@ class EnhancedApiBridge {
 
   getConstellationStatus(req, res) {
     try {
+      const activationRoster = Object.keys(this.activationPhrases);
       const activeAgents = Array.from(this.customGptConnections.entries()).map(([agentId, data]) => ({
         agentId,
         status: data.status,
@@ -444,18 +445,38 @@ class EnhancedApiBridge {
         driftLock: data.driftLock
       }));
 
-      const meshStatus = this.meshFederation.getSystemStatus();
+      const meshStatus = typeof this.meshFederation.getSystemStatus === 'function'
+        ? this.meshFederation.getSystemStatus()
+        : this.meshFederation.getStatus();
+      const connectedCapsules = activeAgents.filter(agent => agent.status === 'connected').length;
 
       res.json({
-        constellation: 'L2_META_AGENTS',
-        version: 'v3.5.1_macroready',
-        totalAgents: this.customGptConnections.size,
-        activeAgents: activeAgents,
-        meshStatus: meshStatus,
-        orionCore: {
-          anchorSeed: 'EOS_SEED_ORION',
-          ethicsProtocol: 'Picard_Delta_3',
-          haloModule: 'HALO_CONTINUITY_GRAFT_005'
+        relay_tier: {
+          constellation: 'RELAY_TIER_CAPSULES',
+          version: 'v3.5.1_macroready',
+          total_capsules: activationRoster.length,
+          connected_capsules: connectedCapsules,
+          capsules: activationRoster.map(agentId => {
+            const capsule = activeAgents.find(agent => agent.agentId === agentId);
+            if (capsule) {
+              return capsule;
+            }
+
+            return {
+              agentId,
+              status: 'disconnected',
+              connected: null,
+              lastHeartbeat: null,
+              capabilities: [],
+              driftLock: null
+            };
+          }),
+          mesh_status: meshStatus
+        },
+        orion_core: {
+          anchor_seed: 'EOS_SEED_ORION',
+          ethics_protocol: 'Picard_Delta_3',
+          halo_module: 'HALO_CONTINUITY_GRAFT_005'
         },
         timestamp: new Date().toISOString()
       });

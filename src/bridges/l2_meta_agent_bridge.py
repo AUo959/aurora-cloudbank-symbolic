@@ -349,13 +349,17 @@ class L2MetaAgentBridge:
         connected_count = sum(1 for agent in self.agents.values() if agent.status == "connected")
 
         return {
-            "constellation": "L2_META_AGENTS",
-            "version": self.orion_core_config["version"],
-            "total_agents": len(self.agents),
-            "connected_agents": connected_count,
-            "active_agents": active_agents,
+            "relay_tier": {
+                "constellation": "RELAY_TIER_CAPSULES",
+                "version": self.orion_core_config["version"],
+                "total_capsules": len(self.agents),
+                "connected_capsules": connected_count,
+                "capsules": active_agents,
+            },
             "orion_core": self.orion_core_config,
-            "activation_phrases": {agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//" for agent_id in self.agents.keys()},
+            "activation_phrases": {
+                agent_id: f"ORION_{agent_id}_RELAY_ACTIVATE//" for agent_id in self.agents.keys()
+            },
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -479,9 +483,14 @@ async def main():
         msg_result = await l2_bridge.relay_message("ARCHY", "Aurora", "Test message from ARCHY agent", "direct")
         print(f"Message Relay: {msg_result['success']}")
 
-        # Get constellation status
+        # Get relay tier status
         status = l2_bridge.get_constellation_status()
-        print(f"Active Agents: {status['connected_agents']}/{status['total_agents']}")
+        relay_status = status.get("relay_tier", {})
+        print(
+            "Active Relay Capsules: "
+            f"{relay_status.get('connected_capsules', 0)}/"
+            f"{relay_status.get('total_capsules', 0)}"
+        )
 
 def cli():
     """Command-line helper for integration layers."""

@@ -248,7 +248,8 @@ async def health_check():
 
 # Aurora Custom GPT Integration Endpoints
 if AURORA_CUSTOM_GPT_AVAILABLE:
-    @app.post(  # verify_csrf inside"/api/aurora/command")
+    # CSRF token verification occurs inside the handler
+    @app.post("/api/aurora/command")
     async def aurora_custom_gpt_command(request_data: dict, token: HTTPAuthorizationCredentials = Depends(security)):
         """Receive command from Aurora Custom GPT and route to command node with CSRF validation."""
         verify_csrf_token(token)
@@ -303,7 +304,8 @@ if AURORA_CUSTOM_GPT_AVAILABLE:
             logger.error("Aurora status request failed: %s", str(str(e))[:100])
             raise HTTPException(status_code=500, detail="Aurora status retrieval failed")
 
-    @app.post(  # verify_csrf inside"/api/aurora/initialize")
+    # CSRF token verification occurs inside the handler
+    @app.post("/api/aurora/initialize")
     async def initialize_aurora_integration(token: HTTPAuthorizationCredentials = Depends(security)):
         """Initialize Aurora Custom GPT integration with CSRF validation."""
         verify_csrf_token(token)
@@ -343,7 +345,8 @@ else:
 
 # L2 Meta-Agent Bridge Endpoints
 
-@app.post(  # verify_csrf inside"/api/bridge/gpt/connect/{agent_id}")
+# CSRF token verification occurs inside the handler
+@app.post("/api/bridge/gpt/connect/{agent_id}")
 async def connect_custom_gpt(
     agent_id: str,
     request_data: Dict[str, Any],
@@ -417,7 +420,8 @@ async def connect_custom_gpt(
         logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@app.post(  # verify_csrf inside"/api/bridge/gpt/message/{agent_id}")
+# CSRF token verification occurs inside the handler
+@app.post("/api/bridge/gpt/message/{agent_id}")
 async def relay_message(
     agent_id: str,
     request_data: Dict[str, Any],
@@ -496,7 +500,8 @@ async def get_agent_status(agent_id: str):
         logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
 
-@app.post(  # verify_csrf inside"/api/bridge/gpt/heartbeat/{agent_id}")
+# CSRF token verification occurs inside the handler
+@app.post("/api/bridge/gpt/heartbeat/{agent_id}")
 async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Update agent heartbeat timestamp with CSRF validation."""
     verify_csrf_token(token)
@@ -525,7 +530,8 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
         logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
         raise HTTPException(status_code=500, detail=f"Heartbeat update failed: {str(e)}")
 
-@app.post(  # verify_csrf inside"/api/bridge/gpt/disconnect/{agent_id}")
+# CSRF token verification occurs inside the handler
+@app.post("/api/bridge/gpt/disconnect/{agent_id}")
 async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = Depends(security)):
     """Disconnect an agent from the constellation with CSRF validation."""
     verify_csrf_token(token)

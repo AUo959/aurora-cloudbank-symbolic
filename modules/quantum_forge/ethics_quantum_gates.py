@@ -117,7 +117,16 @@ class EthicsAwareQuantumGate:
             
         # Audit log
         self.audit_log.append(result)
-        self.gumas.log_intervention(intervention, f"Quantum gate: {gate_type}", intent_score)
+        
+        # Track violation if blocked or throttled using GUMAS API
+        if intervention in [InterventionType.BLOCK, InterventionType.THROTTLE]:
+            self.gumas._log_violation({
+                "type": "quantum_gate",
+                "gate": gate_type,
+                "intervention": intervention.value,
+                "intent_score": intent_score,
+                "timestamp": result["timestamp"]
+            })
         
         return result
         

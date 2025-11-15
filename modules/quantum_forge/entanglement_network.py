@@ -138,15 +138,18 @@ class EntanglementNetwork:
             bridge: QuantumSymbolicBridge instance
         """
         self.forge = forge or QuantumForge()
-        self.bridge = bridge or QuantumSymbolicBridge()
-        # Ensure integration uses the same bridge instance for consistency
-        if integration is None:
-            self.integration = QuantumForgeIntegration(forge=self.forge, bridge=self.bridge)
+        
+        # Initialize integration first (it may create its own bridge)
+        self.integration = integration or QuantumForgeIntegration(forge=self.forge)
+        
+        # Use provided bridge, or integration's bridge, or create new one
+        # Priority: provided bridge > integration's bridge > new bridge
+        if bridge:
+            self.bridge = bridge
+        elif hasattr(self.integration, 'bridge') and self.integration.bridge:
+            self.bridge = self.integration.bridge
         else:
-            self.integration = integration
-            # Use the integration's bridge if it has one
-            if hasattr(integration, 'bridge') and integration.bridge:
-                self.bridge = integration.bridge
+            self.bridge = QuantumSymbolicBridge()
         
         # Track entanglement links
         self.entanglement_links: Dict[str, EntanglementLink] = {}

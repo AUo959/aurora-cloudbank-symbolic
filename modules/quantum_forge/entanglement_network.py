@@ -98,7 +98,8 @@ class EntanglementNetwork:
         """
         self.forge = forge or QuantumForge()
         self.integration = integration or QuantumForgeIntegration(forge=self.forge)
-        self.bridge = bridge or QuantumSymbolicBridge()
+        # Use the integration's bridge to ensure states are registered correctly
+        self.bridge = bridge or self.integration.bridge
         
         # Track entanglement links
         self.entanglement_links: Dict[str, EntanglementLink] = {}

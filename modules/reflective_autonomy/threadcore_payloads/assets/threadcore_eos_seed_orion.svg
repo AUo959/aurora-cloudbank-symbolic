@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400">
-  <style>
-    .label { font: bold 14px sans-serif; fill: #222; }
-    .node { fill: #48f; stroke: #000; stroke-width: 1; }
-    .link { stroke: #888; stroke-width: 2; }
-  </style>
-  <circle cx="300" cy="200" r="40" class="node" />
-  <text x="300" y="205" class="label" text-anchor="middle">EOS_SEED_ORION</text>
-  <line x1="300" y1="240" x2="300" y2="280" class="link" />
-  <text x="300" y="295" class="label" text-anchor="middle">Linked Threads</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><style>.label{font:700 14px sans-serif;fill:#222}.node{fill:#48f;stroke:#000;stroke-width:1}.link{stroke:#888;stroke-width:2}</style><circle cx="300" cy="200" r="40" class="node"/><text x="300" y="205" class="label" text-anchor="middle">EOS_SEED_ORION</text><line x1="300" x2="300" y1="240" y2="280" class="link"/><text x="300" y="295" class="label" text-anchor="middle">Linked Threads</text></svg>

@@ -195,7 +195,7 @@ class GITWizDemo:
         report.append("=" * 80)
         report.append("🚀 GITWIZ ENHANCED - COMPREHENSIVE REPOSITORY ANALYSIS")
         report.append("=" * 80)
-        report.append(f"Generated: {datetime.utcnow().isoformat()}")
+        report.append(f"Generated: {datetime.now(datetime.UTC).isoformat()}")
         report.append(f"Repository: {self.project_root}")
         report.append("")
 

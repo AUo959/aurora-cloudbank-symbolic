@@ -64,7 +64,7 @@ def index_manifests(root_dir: Path, output_file: Path) -> dict:
     print(f"🔍 Found {len(manifests)} manifest.json files")
     
     index = {
-        'generated_at': datetime.utcnow().isoformat() + 'Z',
+        'generated_at': datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z'),
         'anchor_seed': 'EOS_SEED_ORION',
         'team': 'AUo959-team',
         'version': 'v0.1.0',

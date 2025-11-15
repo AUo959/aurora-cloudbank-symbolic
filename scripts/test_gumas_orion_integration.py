@@ -36,8 +36,8 @@ async def comprehensive_test():
     """Comprehensive test of GUMAS/Orion integration"""
     
     test_results = {
-        "test_id": f"TEST-{datetime.utcnow().timestamp()}",
-        "timestamp": datetime.utcnow().isoformat(),
+        "test_id": f"TEST-{datetime.now(datetime.UTC).timestamp()}",
+        "timestamp": datetime.now(datetime.UTC).isoformat(),
         "phases": []
     }
     

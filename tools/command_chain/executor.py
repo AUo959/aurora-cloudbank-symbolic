@@ -17,7 +17,7 @@ Pattern:
 import hashlib
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -38,7 +38,7 @@ class ExecutionResult:
 
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow().isoformat()
+            self.timestamp = datetime.now(UTC).isoformat()
 
 
 @dataclass
@@ -195,7 +195,7 @@ class CommandExecutor:
         Returns:
             ChainExecutionResult with execution details
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         # Parse commands
         parse_result = self.parser.parse(input_text)
@@ -210,7 +210,7 @@ class CommandExecutor:
                 successful_commands=0,
                 failed_commands=0,
                 execution_time_ms=0.0,
-                timestamp=datetime.utcnow().isoformat()
+                timestamp=datetime.now(UTC).isoformat()
             )
         
         # Execute each command
@@ -220,7 +220,7 @@ class CommandExecutor:
             results.append(exec_result)
         
         # Calculate metrics
-        end_time = datetime.utcnow()
+        end_time = datetime.now(UTC)
         execution_time = (end_time - start_time).total_seconds() * 1000
         
         successful = sum(1 for r in results if r.success)
@@ -248,7 +248,7 @@ class CommandExecutor:
     
     def _execute_single(self, cmd: Command) -> ExecutionResult:
         """Execute a single command"""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         
         # Find handler
         handler = self.handlers.get(cmd.name)
@@ -265,7 +265,7 @@ class CommandExecutor:
         # Execute handler
         try:
             output = handler()
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             exec_time = (end_time - start_time).total_seconds() * 1000
             
             return ExecutionResult(
@@ -277,7 +277,7 @@ class CommandExecutor:
                 execution_time_ms=exec_time
             )
         except Exception as e:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(UTC)
             exec_time = (end_time - start_time).total_seconds() * 1000
             
             return ExecutionResult(
@@ -291,7 +291,7 @@ class CommandExecutor:
     
     def _generate_execution_hash(self, command: str) -> str:
         """Generate DLP hash for execution tracking"""
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         data = f"{command}:{timestamp}"
         return hashlib.sha256(data.encode()).hexdigest()
     
@@ -414,7 +414,7 @@ class CommandExecutor:
         Philosophy: "Quickly sort pending changes with consistent high quality"
         Not scheduled - on-demand, anytime you need it.
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(UTC)
         results = {}
         success = True
         
@@ -441,7 +441,7 @@ class CommandExecutor:
             test_result = self._handle_testfast()
             results['phase_5_validate'] = test_result
             
-            total_time = (datetime.utcnow() - start_time).total_seconds()
+            total_time = (datetime.now(UTC) - start_time).total_seconds()
             
             return {
                 'status': 'executed',
@@ -501,7 +501,7 @@ class CommandExecutor:
             }
         
         # Phase 6: Calculate final metrics
-        total_time = (datetime.utcnow() - start_time).total_seconds()
+        total_time = (datetime.now(UTC) - start_time).total_seconds()
         
         return {
             'status': 'executed',
@@ -856,7 +856,7 @@ class CommandExecutor:
             'status': 'executed',
             'action': 'checkpoint_save',
             'message': 'Work state checkpointed (git + metadata)',
-            'checkpoint_id': hashlib.sha256(str(datetime.utcnow()).encode()).hexdigest()[:8]
+            'checkpoint_id': hashlib.sha256(str(datetime.now(UTC)).encode()).hexdigest()[:8]
         }
     
     def _handle_load(self) -> Dict[str, Any]:

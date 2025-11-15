@@ -74,14 +74,15 @@ class EnhancedApiBridge {
       // Validate activation phrase
       const expectedPhrase = this.activationPhrases[agentId];
       if (activationPhrase !== expectedPhrase) {
-        bridgeLogger.error(`Invalid activation phrase for ${agentId}`, {
+        bridgeLogger.error(`Invalid activation attempt for ${agentId}`, {
           agentId,
-          expected: expectedPhrase,
-          received: activationPhrase
+          validation: 'activation_phrase_failed',
+          phraseRedacted: true
         });
         return res.status(401).json({
           error: 'Invalid activation phrase',
-          hint: 'Use ORION_[AGENT]_RELAY_ACTIVATE//'
+          agentId,
+          guidance: 'Activation validation failed. Contact Aurora operations to reauthorize.'
         });
       }
 

@@ -282,7 +282,8 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       activationVerification: {
         method: 'sha256',
         digest: activationDigest
-      }
+      },
+      activationPhraseStatus: 'validated'
     });
 
     res.json({

@@ -273,7 +273,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
     bridgeLogger.bridge(`🚀 [MESH_API] Agent ${agentId} activated`, {
       agentId: agentId,
       status: agent.status,
-      activationPhrase: expectedPhrase
+      activationPhraseStatus: 'validated'
     });
 
     res.json({

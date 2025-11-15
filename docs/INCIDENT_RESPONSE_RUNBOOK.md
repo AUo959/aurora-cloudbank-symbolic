@@ -174,6 +174,10 @@ grep "DENIED" /var/log/aurora/access.log
    - Create tracking issue in GitHub
    - Schedule patch in next sprint
 
+**Activation Phrase Redaction:**
+- Bridge activation failures are now automatically redacted in logs and responses.
+- If any activation phrase appears in telemetry or incident notes, escalate to CSO Chen immediately and purge/redact the artifact.
+
 ---
 
 ### INCIDENT 4: Performance Degradation

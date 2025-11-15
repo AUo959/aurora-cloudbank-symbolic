@@ -254,7 +254,7 @@ class MeshAgent {
       status: this.status,
       role: this.role,
       constellation: MESH_CONFIG.constellation,
-      activationPhrase: this.activationPhrase
+      activationPhraseStatus: 'validated'
     });
   }
 

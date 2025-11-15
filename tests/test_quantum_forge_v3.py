@@ -254,14 +254,14 @@ class TestQuantumMemoryEnhancer:
     def test_enhance_memory(self, memory_enhancer):
         """Test enhancing memory with quantum metadata"""
         from modules.quantum_forge import SymbolicMemoryNode
-        import time
+        import datetime
         
         test_memory = SymbolicMemoryNode(
             node_id="mem_001",
             content={"text": "Test memory content"},
             embedding=[0.1] * 128,  # Simple embedding
             intent_alignment=0.8,
-            created_at=time.time()
+            created_at=datetime.datetime.now().timestamp()
         )
         
         metadata = memory_enhancer.enhance_memory(test_memory)

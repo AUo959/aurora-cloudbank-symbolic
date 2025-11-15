@@ -1,16 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-08T03:26:55.638551",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 2,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py",
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 134: POST endpoint without CSRF token validation - @app.post(\"/upload/\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py: Line 538: POS..."
-    },
-    {
       "timestamp": "2025-11-08T03:55:27.363118",
       "status": "ISSUES_FOUND",
       "files_scanned": 4,
@@ -712,6 +702,19 @@
         "/workspaces/aurora-cloudbank-symbolic/tests/test_subroutines_quick.py"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-15T13:48:33.097225",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 5,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/__init__.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/entanglement_network.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_forge_v2.py",
+        "/workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/quantum_memory_enhancer.py",
+        "/workspaces/aurora-cloudbank-symbolic/src/subroutines/functionality_protection_guardian.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/entanglement_network.py: Line 212: f-string logging - logger.info(f\"\u26a0\ufe0f  Agents already entangled, refreshing: {existing_link.link_id}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/modules/quantum_forge/entanglement_network.py: Line 215: f-string logging - logger.info(f\"\ud83d\udd17 Creating entanglement: {agent_1_id[:8]}... \u2194 {agent_2_id[:8]}...\")\n  \u274c /works..."
     }
   ]
 }

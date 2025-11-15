@@ -12,14 +12,19 @@ import os
 import zipfile
 from io import StringIO
 
-import pandas as pd
+# Optional dependency: pandas. Degrade gracefully if unavailable.
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    pd = None  # type: ignore[assignment]
 
 # Optional dependency: Plotly. Degrade gracefully if unavailable.
 try:  # pragma: no cover - environment dependent
     import plotly.graph_objects as go
 except Exception:  # pragma: no cover - fallback path
     go = None  # type: ignore[assignment]
-
 
 
 ASSET_ZIP = "CASK_Assets.zip"
@@ -40,20 +45,35 @@ def _open_asset(name: str) -> str:
             return file.read().decode("utf-8")
 
 
-def load_specifications() -> pd.DataFrame:
+def load_specifications():
     """Load the CASK technical specifications table."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK data loading. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     data = _open_asset("cask_technical_specifications.csv")
     return pd.read_csv(StringIO(data))
 
 
-def load_risk_assessment() -> pd.DataFrame:
+def load_risk_assessment():
     """Load the CASK risk assessment table."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK data loading. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     data = _open_asset("cask_risk_assessment.csv")
     return pd.read_csv(StringIO(data))
 
 
-def load_vs_sota() -> pd.DataFrame:
+def load_vs_sota():
     """Load the comparison against state of the art table."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK data loading. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     data = _open_asset("cask_vs_sota_comparison.csv")
     return pd.read_csv(StringIO(data))
 

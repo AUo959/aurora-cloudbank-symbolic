@@ -1,10 +1,20 @@
 """CASK data generation utilities."""
 
-import pandas as pd
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    pd = None  # type: ignore[assignment]
 
 
-def generate_technical_specifications(output_csv: str | None = None) -> pd.DataFrame:
+def generate_technical_specifications(output_csv: str | None = None):
     """Return CASK technical specifications as a DataFrame and optionally save CSV."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK analysis features. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     data = {
         "Component": [
             "Global Cross-Linguistic Database",
@@ -61,8 +71,13 @@ def generate_technical_specifications(output_csv: str | None = None) -> pd.DataF
     return df
 
 
-def generate_vs_sota_comparison(output_csv: str | None = None) -> pd.DataFrame:
+def generate_vs_sota_comparison(output_csv: str | None = None):
     """Return comparison of CASK against state of the art and optionally save CSV."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK analysis features. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     comparison_data = {
         "Technical_Domain": [
             "Cultural AI Systems",
@@ -131,8 +146,13 @@ def generate_vs_sota_comparison(output_csv: str | None = None) -> pd.DataFrame:
     return df
 
 
-def generate_risk_assessment(output_csv: str | None = None) -> pd.DataFrame:
+def generate_risk_assessment(output_csv: str | None = None):
     """Return CASK project risk assessment DataFrame and optionally save CSV."""
+    if not PANDAS_AVAILABLE:
+        raise ImportError(
+            "pandas is required for CASK analysis features. "
+            "Install with: pip install pandas>=2.1.0"
+        )
     risk_data = {
         "Risk_Category": [
             "Cultural Bias Introduction",

@@ -100,6 +100,16 @@ async def analyze_with_living_computation(request: AnalysisRequest):
     # 2. ETHICAL EVALUATION (Simplified - full Triplex Handshake in production)
     # In production: Axiomera (L3) → HALO (L2) → Human (L1)
     if event.risk_score > 0.8:
+        event_system.abort_event(
+            event_id=event.event_id,
+            reason="High-risk operation requires explicit Command authorization",
+            audit_metadata={
+                "risk_score": event.risk_score,
+                "trigger": "living_computation_high_risk_gate",
+                "user_context": request.user_context,
+                "t1_anchor": event.t1_anchor,
+            }
+        )
         raise HTTPException(
             status_code=403,
             detail="High-risk operation requires explicit Command authorization"

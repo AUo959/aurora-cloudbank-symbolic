@@ -422,7 +422,7 @@ class TestSystemFlowOrchestrator:
         
         # Simulate drift
         orchestrator.update_module_status(module_name, drift_detected=True)
-        result = orchestrator.respond_to_drift(module_name)
+        orchestrator.respond_to_drift(module_name)
         
         # Should transition to METAMORPHIC
         state = orchestrator.modules.get(module_name)

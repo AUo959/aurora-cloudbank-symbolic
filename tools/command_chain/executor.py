@@ -23,6 +23,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from .parser import Command, CommandChainParser
 from .real_implementations import RealCommandImplementations
+from .artifact_manager import ArtifactManager
 
 
 @dataclass
@@ -57,7 +58,7 @@ class ChainExecutionResult:
 class CommandExecutor:
     """
     Executes parsed command chains.
-    
+
     Features:
     - Command handler registry
     - Execution pipeline with logging
@@ -65,17 +66,20 @@ class CommandExecutor:
     - Error handling and recovery
     - Extensible handler system
     """
-    
+
     def __init__(self, workspace_root: Optional[str] = None):
         self.parser = CommandChainParser()
         self.handlers: Dict[str, Callable] = {}
         self.execution_history: List[ChainExecutionResult] = []
         self.real_impl = RealCommandImplementations(workspace_root)
+        self.artifact_manager = ArtifactManager(
+            workspace_path=Path(workspace_root) if workspace_root else None
+        )
         self._register_default_handlers()
-    
+
     def _register_default_handlers(self):
         """Register default command handlers"""
-        
+
         # Numeric aliases (001-999)
         self.register_handler('001', self._handle_suggestion_1)
         self.register_handler('002', self._handle_suggestion_2)
@@ -91,7 +95,7 @@ class CommandExecutor:
         self.register_handler('717', self._handle_capsule_ready)
         self.register_handler('808', self._handle_light_in_darkness)
         self.register_handler('999', self._handle_continuity_accept)
-        
+
         # System verbs
         self.register_handler('BUP', self._handle_boot_up_protocol)
         self.register_handler('RESUME', self._handle_resume)
@@ -101,7 +105,7 @@ class CommandExecutor:
         self.register_handler('CLEANDEPLOY', self._handle_cleandeploy)
         self.register_handler('SANDDROP', self._handle_sanddrop)
         self.register_handler('THREADWAKE', self._handle_threadwake)
-        
+
         # Standard operations
         self.register_handler('seal', self._handle_seal)
         self.register_handler('verify', self._handle_verify)
@@ -180,26 +184,26 @@ class CommandExecutor:
         self.register_handler('POLISH', self._handle_polish)
         self.register_handler('VALIDATE', self._handle_validate)
         self.register_handler('BUILDTEST', self._handle_buildtest)
-    
+
     def register_handler(self, command_name: str, handler: Callable):
         """Register a command handler"""
         self.handlers[command_name] = handler
-    
+
     def execute(self, input_text: str) -> ChainExecutionResult:
         """
         Execute command chain from input text.
-        
+
         Args:
             input_text: Text containing commands
-            
+
         Returns:
             ChainExecutionResult with execution details
         """
         start_time = datetime.now(UTC)
-        
+
         # Parse commands
         parse_result = self.parser.parse(input_text)
-        
+
         # Check for errors
         if parse_result.has_errors:
             return ChainExecutionResult(
@@ -212,24 +216,24 @@ class CommandExecutor:
                 execution_time_ms=0.0,
                 timestamp=datetime.now(UTC).isoformat()
             )
-        
+
         # Execute each command
         results = []
         for cmd in parse_result.commands:
             exec_result = self._execute_single(cmd)
             results.append(exec_result)
-        
+
         # Calculate metrics
         end_time = datetime.now(UTC)
         execution_time = (end_time - start_time).total_seconds() * 1000
-        
+
         successful = sum(1 for r in results if r.success)
         failed = len(results) - successful
-        
+
         # Generate chain hash
         command_names = [cmd.name for cmd in parse_result.commands]
         chain_hash = self.parser.generate_command_hash(command_names)
-        
+
         chain_result = ChainExecutionResult(
             chain_hash=chain_hash,
             results=results,
@@ -240,19 +244,19 @@ class CommandExecutor:
             execution_time_ms=execution_time,
             timestamp=start_time.isoformat()
         )
-        
+
         # Add to history
         self.execution_history.append(chain_result)
-        
+
         return chain_result
-    
+
     def _execute_single(self, cmd: Command) -> ExecutionResult:
         """Execute a single command"""
         start_time = datetime.now(UTC)
-        
+
         # Find handler
         handler = self.handlers.get(cmd.name)
-        
+
         if handler is None:
             return ExecutionResult(
                 command=cmd.name,
@@ -261,13 +265,13 @@ class CommandExecutor:
                 error=f"No handler registered for command: {cmd.name}",
                 dlp_hash=self._generate_execution_hash(cmd.name)
             )
-        
+
         # Execute handler
         try:
             output = handler()
             end_time = datetime.now(UTC)
             exec_time = (end_time - start_time).total_seconds() * 1000
-            
+
             return ExecutionResult(
                 command=cmd.name,
                 success=True,
@@ -279,7 +283,7 @@ class CommandExecutor:
         except Exception as e:
             end_time = datetime.now(UTC)
             exec_time = (end_time - start_time).total_seconds() * 1000
-            
+
             return ExecutionResult(
                 command=cmd.name,
                 success=False,
@@ -288,15 +292,15 @@ class CommandExecutor:
                 dlp_hash=self._generate_execution_hash(cmd.name),
                 execution_time_ms=exec_time
             )
-    
+
     def _generate_execution_hash(self, command: str) -> str:
         """Generate DLP hash for execution tracking"""
         timestamp = datetime.now(UTC).isoformat()
         data = f"{command}:{timestamp}"
         return hashlib.sha256(data.encode()).hexdigest()
-    
+
     # ========== Command Handlers ==========
-    
+
     # Numeric Aliases (User-Defined Macros)
     def _handle_suggestion_1(self) -> Dict[str, Any]:
         """Handle #001//. - Implement suggestion 1"""
@@ -306,7 +310,7 @@ class CommandExecutor:
             'message': 'Implementing suggestion 1',
             'description': 'Execute the first suggestion from the current context'
         }
-    
+
     def _handle_suggestion_2(self) -> Dict[str, Any]:
         """Handle #002//. - Implement suggestion 2"""
         return {
@@ -315,7 +319,7 @@ class CommandExecutor:
             'message': 'Implementing suggestion 2',
             'description': 'Execute the second suggestion from the current context'
         }
-    
+
     def _handle_suggestion_3(self) -> Dict[str, Any]:
         """Handle #003//. - Implement suggestion 3"""
         return {
@@ -324,7 +328,7 @@ class CommandExecutor:
             'message': 'Implementing suggestion 3',
             'description': 'Execute the third suggestion from the current context'
         }
-    
+
     def _handle_suggestion_4(self) -> Dict[str, Any]:
         """Handle #004//. - Implement suggestion 4"""
         return {
@@ -333,7 +337,7 @@ class CommandExecutor:
             'message': 'Implementing suggestion 4',
             'description': 'Execute the fourth suggestion from the current context'
         }
-    
+
     def _handle_suggestion_5(self) -> Dict[str, Any]:
         """Handle #005//. - Implement all suggestions (IMLO - In Most Logical Order)"""
         return {
@@ -343,7 +347,7 @@ class CommandExecutor:
             'mode': 'IMLO',
             'description': 'Execute all suggestions optimally sequenced for best results'
         }
-    
+
     def _handle_yes_please(self) -> Dict[str, Any]:
         """Handle #007//. - Yes please (affirmative response)"""
         return {
@@ -353,7 +357,7 @@ class CommandExecutor:
             'response': 'affirmative',
             'description': 'Approve and execute the most recently suggested command or action'
         }
-    
+
     def _handle_no_thank_you(self) -> Dict[str, Any]:
         """Handle #008//. - No thank you (negative response)"""
         return {
@@ -363,7 +367,7 @@ class CommandExecutor:
             'response': 'negative',
             'description': 'Decline the most recently suggested command or action'
         }
-    
+
     def _handle_structure_thread(self) -> Dict[str, Any]:
         """Handle #006//. - Structure thread"""
         return {
@@ -371,7 +375,7 @@ class CommandExecutor:
             'action': 'structure_thread',
             'message': 'Thread structure deployed'
         }
-    
+
     def _handle_optiseed(self) -> Dict[str, Any]:
         """Handle #025//. - Optiseed sequence"""
         return {
@@ -379,7 +383,7 @@ class CommandExecutor:
             'action': 'optiseed_sequence',
             'message': 'Symbolic actions executed in logical and optimal sequence'
         }
-    
+
     def _handle_pulsewalk(self) -> Dict[str, Any]:
         """Handle #080//. - Pulsewalk"""
         return {
@@ -388,13 +392,13 @@ class CommandExecutor:
             'message': 'Advanced by one symbolic cycle (48h default)',
             'cycle_advancement': '48h'
         }
-    
+
     def _handle_comprehensive_sync(self) -> Dict[str, Any]:
         """Handle #321//. - Comprehensive Sync & Validate
-        
+
         Universal "clean the working tree" command - use anytime you have
         pending changes and want them sorted quickly with high quality.
-        
+
         Complete workflow for syncing all changes to main with validation:
         1. Check for pending changes (git status, untracked files)
         2. Stage changes intelligently (selective staging by file type)
@@ -402,7 +406,7 @@ class CommandExecutor:
         4. Sync to main (pull --rebase, push)
         5. Run quick validation check (lint, tests, health)
         6. Verify optimal performance (timing, success metrics)
-        
+
         Use when:
         - RIGHT NOW - You have pending changes, want them sorted
         - Mid-development - Save progress checkpoint
@@ -410,18 +414,18 @@ class CommandExecutor:
         - End of session - Final sync before closing
         - Regular checkpoints - Keep work backed up (30-60 min intervals)
         - Anytime sync - Whenever you want a clean working tree
-        
+
         Philosophy: "Quickly sort pending changes with consistent high quality"
         Not scheduled - on-demand, anytime you need it.
         """
         start_time = datetime.now(UTC)
         results = {}
         success = True
-        
+
         # Phase 1: Check for pending changes
         status_result = self._handle_status()
         results['phase_1_check'] = status_result
-        
+
         if not status_result.get('success'):
             return {
                 'status': 'failed',
@@ -430,19 +434,19 @@ class CommandExecutor:
                 'results': results,
                 'error': status_result.get('error')
             }
-        
+
         # Check if there are any changes to commit
         if status_result.get('clean'):
             # Phase 4: Just sync (no commit needed)
             sync_result = self._handle_sync()
             results['phase_4_sync'] = sync_result
-            
+
             # Phase 5: Quick validation
             test_result = self._handle_testfast()
             results['phase_5_validate'] = test_result
-            
+
             total_time = (datetime.now(UTC) - start_time).total_seconds()
-            
+
             return {
                 'status': 'executed',
                 'action': 'comprehensive_sync_validate',
@@ -453,11 +457,11 @@ class CommandExecutor:
                 'success': sync_result.get('success') and test_result.get('success'),
                 'total_time': total_time
             }
-        
+
         # Phase 2-3: Stage and commit changes
         commit_result = self._handle_commit()
         results['phase_2_3_stage_commit'] = commit_result
-        
+
         if not commit_result.get('success'):
             success = False
             return {
@@ -467,27 +471,32 @@ class CommandExecutor:
                 'results': results,
                 'error': commit_result.get('error')
             }
-        
-        # Phase 4: Sync to main
-        sync_result = self._handle_sync()
+
+        # Phase 3.5-4: Detect/stash artifacts, sync, then restore
+        # Post-commit hooks may generate files that interfere with rebase
+        sync_result, artifact_info = self.artifact_manager.handle_sync_artifacts(
+            lambda: self._handle_sync()
+        )
+        if artifact_info['artifacts_detected'] > 0:
+            results['artifact_management'] = artifact_info
         results['phase_4_sync'] = sync_result
-        
+
         if not sync_result.get('success'):
             success = False
             # Note: Commit succeeded but push failed
             return {
                 'status': 'partial',
                 'action': 'comprehensive_sync_validate',
-                'message': '⚠️ #321//. Partial: Committed locally but sync failed',
+                'message': '⚠️  #321//. Partial: Committed locally but sync failed',
                 'results': results,
                 'error': sync_result.get('error'),
                 'recovery': 'Changes are committed locally. Run #SYNC//. when network is available.'
             }
-        
+
         # Phase 5: Quick validation
         test_result = self._handle_testfast()
         results['phase_5_validate'] = test_result
-        
+
         if not test_result.get('success'):
             success = False
             # Note: Everything synced but tests failed
@@ -499,10 +508,10 @@ class CommandExecutor:
                 'warning': 'Changes are synced but tests failed. Consider fixing.',
                 'test_failures': test_result.get('failures', [])
             }
-        
+
         # Phase 6: Calculate final metrics
         total_time = (datetime.now(UTC) - start_time).total_seconds()
-        
+
         return {
             'status': 'executed',
             'action': 'comprehensive_sync_validate',
@@ -521,7 +530,7 @@ class CommandExecutor:
             },
             'philosophy': 'Complete, intelligent, validated synchronization'
         }
-    
+
     def _handle_capsule_ready(self) -> Dict[str, Any]:
         """Handle #717//. - Capsule-Ready"""
         return {
@@ -529,27 +538,27 @@ class CommandExecutor:
             'action': 'capsule_ready',
             'message': 'Threads prepared for capsule export'
         }
-    
+
     def _handle_light_in_darkness(self) -> Dict[str, Any]:
         """Handle #808//. - Light in the Darkness (Optimizing Pulse)
-        
+
         An amplification wave that finds the best path forward when no clear solution exists.
         Analyzes all context, identifies optimal strategy, and executes automatically.
-        
+
         The ultimate meta-command for uncertain situations:
         - Evaluates current state (repo, code quality, tests, docs, git status)
         - Considers conversation context and user intent
         - Identifies bottlenecks, blockers, and opportunities
         - Determines the most impactful next action
         - Executes the optimal path without requiring explicit direction
-        
+
         Use when:
         - Stuck on what to do next
         - Multiple competing priorities
         - Unclear how to proceed
         - Need intelligent triage
         - Want system to optimize autonomously
-        
+
         Examples:
         - Failing tests → Analyzes failures, fixes root cause, re-runs
         - Messy code → Formats, lints, optimizes imports, updates docs
@@ -567,10 +576,10 @@ class CommandExecutor:
             'dependencies': self._analyze_dependencies(),
             'conversation_context': self._analyze_conversation_context()
         }
-        
+
         # Intelligent path determination
         optimal_path = self._determine_optimal_path(analysis)
-        
+
         # Execute the optimal strategy
         execution_plan = {
             'status': 'executed',
@@ -592,9 +601,9 @@ class CommandExecutor:
             'description': 'Amplification wave - finds and executes optimal path forward',
             'philosophy': 'Light in the darkness when no clear path presents itself'
         }
-        
+
         return execution_plan
-    
+
     def _analyze_repo_state(self) -> Dict[str, Any]:
         """Analyze repository state for #808 optimization"""
         # Mock implementation - will be replaced with real subprocess calls
@@ -603,7 +612,7 @@ class CommandExecutor:
             'clean_working_tree': True,
             'branch_status': 'up-to-date'
         }
-    
+
     def _analyze_code_quality(self) -> Dict[str, Any]:
         """Analyze code quality metrics for #808 optimization"""
         return {
@@ -611,7 +620,7 @@ class CommandExecutor:
             'lint_errors': 0,
             'format_issues': 0
         }
-    
+
     def _analyze_test_status(self) -> Dict[str, Any]:
         """Analyze test suite status for #808 optimization"""
         return {
@@ -619,14 +628,14 @@ class CommandExecutor:
             'failing_tests': 0,
             'coverage': 'adequate'
         }
-    
+
     def _analyze_documentation(self) -> Dict[str, Any]:
         """Analyze documentation completeness for #808 optimization"""
         return {
             'needs_attention': False,
             'outdated_docs': 0
         }
-    
+
     def _analyze_git_status(self) -> Dict[str, Any]:
         """Analyze git status for #808 optimization"""
         return {
@@ -634,7 +643,7 @@ class CommandExecutor:
             'uncommitted_changes': 0,
             'unpushed_commits': 0
         }
-    
+
     def _analyze_dependencies(self) -> Dict[str, Any]:
         """Analyze dependencies for #808 optimization"""
         return {
@@ -642,7 +651,7 @@ class CommandExecutor:
             'outdated': 0,
             'vulnerabilities': 0
         }
-    
+
     def _analyze_conversation_context(self) -> Dict[str, Any]:
         """Analyze conversation context for #808 optimization"""
         return {
@@ -650,12 +659,12 @@ class CommandExecutor:
             'user_blocked': False,
             'awaiting_decision': False
         }
-    
+
     def _determine_optimal_path(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
         """Determine optimal path forward based on analysis"""
         # Intelligent triage logic
         attention_needed = [k for k, v in analysis.items() if v.get('needs_attention')]
-        
+
         if not attention_needed:
             # Everything looks good - focus on enhancement
             return {
@@ -667,7 +676,7 @@ class CommandExecutor:
                 'parallel_safe': True,
                 'requires_approval': False
             }
-        
+
         # Prioritize based on what needs attention
         if 'test_status' in attention_needed:
             return {
@@ -677,7 +686,7 @@ class CommandExecutor:
                 'confidence': 0.88,
                 'impact': 'critical'
             }
-        
+
         if 'code_quality' in attention_needed:
             return {
                 'strategy': 'Code Quality - Formatting and linting',
@@ -686,7 +695,7 @@ class CommandExecutor:
                 'confidence': 0.92,
                 'impact': 'high'
             }
-        
+
         if 'git_status' in attention_needed:
             return {
                 'strategy': 'Git Cleanup - Syncing and organizing',
@@ -696,7 +705,7 @@ class CommandExecutor:
                 'impact': 'medium',
                 'requires_approval': True
             }
-        
+
         # Default: comprehensive check and optimize
         return {
             'strategy': 'Comprehensive Optimization - Full system check',
@@ -705,7 +714,7 @@ class CommandExecutor:
             'confidence': 0.80,
             'impact': 'medium'
         }
-    
+
     def _handle_continuity_accept(self) -> Dict[str, Any]:
         """Handle #999//. - Continuity Accept"""
         return {
@@ -713,7 +722,7 @@ class CommandExecutor:
             'action': 'continuity_accept',
             'message': 'Thread phase locked and continuity sealed'
         }
-    
+
     # System Verbs
     def _handle_boot_up_protocol(self) -> Dict[str, Any]:
         """Handle #BUP//. - Boot-Up Protocol"""
@@ -723,7 +732,7 @@ class CommandExecutor:
             'message': 'Full system stack reinitialized',
             'components': ['HALO', 'relays', 'THREADCORE', 'ethics', 'anchor_continuity']
         }
-    
+
     def _handle_resume(self) -> Dict[str, Any]:
         """Handle #RESUME//. - Resume from snapshot"""
         return {
@@ -731,7 +740,7 @@ class CommandExecutor:
             'action': 'resume_state',
             'message': 'Restored from last valid state snapshot'
         }
-    
+
     def _handle_threadsync(self) -> Dict[str, Any]:
         """Handle #THREADSYNC//. - Reconnect symbolic links"""
         return {
@@ -739,7 +748,7 @@ class CommandExecutor:
             'action': 'thread_sync',
             'message': 'Symbolic links reconnected across suspended threads'
         }
-    
+
     def _handle_lockmem(self) -> Dict[str, Any]:
         """Handle #LOCKMEM//. - Freeze memory state"""
         return {
@@ -747,7 +756,7 @@ class CommandExecutor:
             'action': 'lock_memory',
             'message': 'Current memory state frozen for export/recovery'
         }
-    
+
     def _handle_exportthread(self) -> Dict[str, Any]:
         """Handle #EXPORTTHREAD//. - Archive simulation thread"""
         return {
@@ -755,7 +764,7 @@ class CommandExecutor:
             'action': 'export_thread',
             'message': 'Active simulation thread and overlays archived'
         }
-    
+
     def _handle_cleandeploy(self) -> Dict[str, Any]:
         """Handle #CLEANDEPLOY//. - Launch minimal sandbox"""
         return {
@@ -763,7 +772,7 @@ class CommandExecutor:
             'action': 'clean_deploy',
             'message': 'Minimal symbolic-only sandbox deployed'
         }
-    
+
     def _handle_sanddrop(self) -> Dict[str, Any]:
         """Handle #SANDDROP//. - Deploy full simulation"""
         return {
@@ -771,7 +780,7 @@ class CommandExecutor:
             'action': 'sand_drop',
             'message': 'Full simulation thread kit deployed with anchor binding'
         }
-    
+
     def _handle_threadwake(self) -> Dict[str, Any]:
         """Handle #THREADWAKE//. - Resume suspended thread"""
         return {
@@ -779,7 +788,7 @@ class CommandExecutor:
             'action': 'thread_wake',
             'message': 'Suspended thread resumed in sandbox'
         }
-    
+
     # Standard Operations
     def _handle_seal(self) -> Dict[str, Any]:
         """Handle #seal//. - Seal state"""
@@ -788,7 +797,7 @@ class CommandExecutor:
             'action': 'seal_state',
             'message': 'State sealed successfully'
         }
-    
+
     def _handle_verify(self) -> Dict[str, Any]:
         """Handle #verify//. - Verify integrity"""
         return {
@@ -797,7 +806,7 @@ class CommandExecutor:
             'message': 'Integrity verification completed',
             'result': 'valid'
         }
-    
+
     def _handle_deploy(self) -> Dict[str, Any]:
         """Handle #deploy//. - Deploy system"""
         return {
@@ -805,7 +814,7 @@ class CommandExecutor:
             'action': 'deploy_system',
             'message': 'System deployed successfully'
         }
-    
+
     def _handle_test(self) -> Dict[str, Any]:
         """Handle #test//. - Run tests"""
         return {
@@ -814,7 +823,7 @@ class CommandExecutor:
             'message': 'Test suite executed',
             'results': 'all_passing'
         }
-    
+
     def _handle_build(self) -> Dict[str, Any]:
         """Handle #build//. - Build artifacts"""
         return {
@@ -822,7 +831,7 @@ class CommandExecutor:
             'action': 'build_artifacts',
             'message': 'Build completed successfully'
         }
-    
+
     def _handle_snapshot(self) -> Dict[str, Any]:
         """Handle #snapshot//. - Create snapshot"""
         return {
@@ -830,7 +839,7 @@ class CommandExecutor:
             'action': 'create_snapshot',
             'message': 'Snapshot created successfully'
         }
-    
+
     def _handle_restore(self) -> Dict[str, Any]:
         """Handle #restore//. - Restore from snapshot"""
         return {
@@ -840,7 +849,7 @@ class CommandExecutor:
         }
 
     # Tier 1: Immediate Impact Command Handlers
-    
+
     def _handle_context(self) -> Dict[str, Any]:
         """Handle #CONTEXT//. - Full context dump"""
         return {
@@ -849,7 +858,7 @@ class CommandExecutor:
             'message': 'Context captured: repo state, todos, recent changes',
             'components': ['git_status', 'todo_list', 'recent_commits', 'open_files']
         }
-    
+
     def _handle_save(self) -> Dict[str, Any]:
         """Handle #SAVE//. - Checkpoint current work state"""
         return {
@@ -858,7 +867,7 @@ class CommandExecutor:
             'message': 'Work state checkpointed (git + metadata)',
             'checkpoint_id': hashlib.sha256(str(datetime.now(UTC)).encode()).hexdigest()[:8]
         }
-    
+
     def _handle_load(self) -> Dict[str, Any]:
         """Handle #LOAD//. - Restore from last checkpoint"""
         return {
@@ -866,7 +875,7 @@ class CommandExecutor:
             'action': 'checkpoint_restore',
             'message': 'Restored from last checkpoint'
         }
-    
+
     def _handle_summary(self) -> Dict[str, Any]:
         """Handle #SUMMARY//. - Generate session summary"""
         return {
@@ -875,7 +884,7 @@ class CommandExecutor:
             'message': 'Session summary generated',
             'activities': ['commands_executed', 'files_modified', 'tests_run']
         }
-    
+
     def _handle_plan(self) -> Dict[str, Any]:
         """Handle #PLAN//. - Analyze next steps"""
         return {
@@ -884,7 +893,7 @@ class CommandExecutor:
             'message': 'Action plan created based on current state',
             'next_steps': ['analyze_context', 'identify_priorities', 'create_tasks']
         }
-    
+
     def _handle_run(self) -> Dict[str, Any]:
         """Handle #RUN//. - Run the most logical next action"""
         return {
@@ -893,7 +902,7 @@ class CommandExecutor:
             'message': 'Executed most logical next action',
             'determined_action': 'contextual_analysis'
         }
-    
+
     def _handle_fix(self) -> Dict[str, Any]:
         """Handle #FIX//. - Auto-fix linting/formatting errors"""
         return {
@@ -902,7 +911,7 @@ class CommandExecutor:
             'message': 'All linting and formatting errors fixed',
             'fixes_applied': ['lint_errors', 'format_issues', 'import_organization']
         }
-    
+
     def _handle_check(self) -> Dict[str, Any]:
         """Handle #CHECK//. - Full health check"""
         return {
@@ -912,12 +921,12 @@ class CommandExecutor:
             'checks': ['tests', 'lint', 'security', 'dependencies'],
             'result': 'passed'
         }
-    
+
     def _handle_commit(self) -> Dict[str, Any]:
         """Handle #COMMIT//. - Smart commit with auto-generated message"""
         # First, stage files intelligently
         add_result = self.real_impl.git_add_intelligent()
-        
+
         if not add_result.get('success'):
             return {
                 'status': 'executed',
@@ -926,10 +935,10 @@ class CommandExecutor:
                 'message': 'Failed to stage files',
                 'error': add_result.get('error')
             }
-        
+
         # Then commit with auto-generated message
         commit_result = self.real_impl.git_commit()
-        
+
         return {
             'status': 'executed',
             'action': 'smart_commit',
@@ -942,7 +951,7 @@ class CommandExecutor:
                       f"{commit_result.get('commit_hash', 'unknown')}",
             'error': commit_result.get('error')
         }
-    
+
     def _handle_push(self) -> Dict[str, Any]:
         """Handle #PUSH//. - Commit + Push"""
         return {
@@ -951,7 +960,7 @@ class CommandExecutor:
             'message': 'Changes committed and pushed to remote',
             'branch': 'main'
         }
-    
+
     def _handle_refactor(self) -> Dict[str, Any]:
         """Handle #REFACTOR//. - Suggest refactoring opportunities"""
         return {
@@ -960,7 +969,7 @@ class CommandExecutor:
             'message': 'Refactoring opportunities identified',
             'suggestions': ['extract_method', 'simplify_conditional', 'remove_duplication']
         }
-    
+
     def _handle_optimize(self) -> Dict[str, Any]:
         """Handle #OPTIMIZE//. - Find and fix performance issues"""
         return {
@@ -969,7 +978,7 @@ class CommandExecutor:
             'message': 'Performance issues identified and fixed',
             'optimizations': ['algorithm_improvement', 'cache_addition', 'query_optimization']
         }
-    
+
     def _handle_document(self) -> Dict[str, Any]:
         """Handle #DOCUMENT//. - Generate missing documentation"""
         return {
@@ -978,7 +987,7 @@ class CommandExecutor:
             'message': 'Missing documentation generated',
             'generated': ['docstrings', 'readme_sections', 'inline_comments']
         }
-    
+
     def _handle_security(self) -> Dict[str, Any]:
         """Handle #SECURITY//. - Security audit"""
         return {
@@ -988,7 +997,7 @@ class CommandExecutor:
             'scans': ['vulnerability_check', 'dependency_audit', 'code_analysis'],
             'issues_found': 0
         }
-    
+
     def _handle_analyze(self) -> Dict[str, Any]:
         """Handle #ANALYZE//. - Deep analysis"""
         return {
@@ -997,7 +1006,7 @@ class CommandExecutor:
             'message': 'Deep analysis completed',
             'analysis': ['complexity', 'dependencies', 'patterns', 'metrics']
         }
-    
+
     def _handle_search(self) -> Dict[str, Any]:
         """Handle #SEARCH//. - Semantic search"""
         return {
@@ -1006,7 +1015,7 @@ class CommandExecutor:
             'message': 'Semantic search completed across codebase',
             'search_method': 'vector_similarity'
         }
-    
+
     def _handle_trace(self) -> Dict[str, Any]:
         """Handle #TRACE//. - Trace function calls"""
         return {
@@ -1015,7 +1024,7 @@ class CommandExecutor:
             'message': 'Function call trace generated',
             'trace_depth': 'full'
         }
-    
+
     def _handle_diff(self) -> Dict[str, Any]:
         """Handle #DIFF//. - Show changes since checkpoint"""
         return {
@@ -1026,11 +1035,11 @@ class CommandExecutor:
         }
 
     # ==================== TIER 2: WORKFLOW ACCELERATORS ====================
-    
+
     def _handle_testfast(self) -> Dict[str, Any]:
         """Handle #TESTFAST//. - Run fast unit tests only"""
         test_result = self.real_impl.run_tests_fast()
-        
+
         return {
             'status': 'executed',
             'action': 'test_fast',
@@ -1045,7 +1054,7 @@ class CommandExecutor:
             'command': 'pytest -m unit -x',
             'error': test_result.get('error')
         }
-    
+
     def _handle_testunit(self) -> Dict[str, Any]:
         """Handle #TESTUNIT//. - Run unit test markers"""
         return {
@@ -1055,7 +1064,7 @@ class CommandExecutor:
             'command': 'pytest -m unit -v',
             'markers': ['unit']
         }
-    
+
     def _handle_testwatch(self) -> Dict[str, Any]:
         """Handle #TESTWATCH//. - Watch mode for tests"""
         return {
@@ -1066,7 +1075,7 @@ class CommandExecutor:
             'watching': ['*.py files'],
             'auto_rerun': True
         }
-    
+
     def _handle_testlast(self) -> Dict[str, Any]:
         """Handle #TESTLAST//. - Re-run last failed tests"""
         return {
@@ -1076,11 +1085,11 @@ class CommandExecutor:
             'command': 'pytest --lf -v',
             'scope': 'failed_tests_only'
         }
-    
+
     def _handle_fmt(self) -> Dict[str, Any]:
         """Handle #FMT//. - Format code with black/isort"""
         fmt_result = self.real_impl.format_code()
-        
+
         return {
             'status': 'executed',
             'action': 'format_code',
@@ -1093,11 +1102,11 @@ class CommandExecutor:
             'tools': ['black', 'isort'],
             'error': fmt_result.get('error')
         }
-    
+
     def _handle_lintfix(self) -> Dict[str, Any]:
         """Handle #LINTFIX//. - Auto-fix linting errors"""
         lint_result = self.real_impl.lint_code()
-        
+
         return {
             'status': 'executed',
             'action': 'lint_check',
@@ -1111,7 +1120,7 @@ class CommandExecutor:
             'command': 'flake8 --extend-ignore=E203,W503 --max-line-length=120',
             'error': lint_result.get('error')
         }
-    
+
     def _handle_lintcheck(self) -> Dict[str, Any]:
         """Handle #LINTCHECK//. - Check linting without fixing"""
         return {
@@ -1121,14 +1130,14 @@ class CommandExecutor:
             'command': 'make lint-tools',
             'scope': 'tools/symbolic, tools/cli'
         }
-    
+
     def _handle_status(self) -> Dict[str, Any]:
         """Handle #STATUS//. - Git status with enhanced info"""
         status_data = self.real_impl.git_status()
-        
+
         branch = status_data.get('branch', 'unknown')
         changes = status_data.get('total_changes', 0)
-        
+
         return {
             'status': 'executed',
             'action': 'git_status_enhanced',
@@ -1144,11 +1153,11 @@ class CommandExecutor:
             'message': f"Branch: {branch} | Changes: {changes}",
             'error': status_data.get('error')
         }
-    
+
     def _handle_sync(self) -> Dict[str, Any]:
         """Handle #SYNC//. - Fetch and sync with remote"""
         sync_result = self.real_impl.git_pull_push()
-        
+
         return {
             'status': 'executed',
             'action': 'git_sync',
@@ -1162,7 +1171,7 @@ class CommandExecutor:
             'command': 'git pull --rebase && git push',
             'error': sync_result.get('error')
         }
-    
+
     def _handle_branch(self) -> Dict[str, Any]:
         """Handle #BRANCH//. - List branches with status"""
         return {
@@ -1172,7 +1181,7 @@ class CommandExecutor:
             'branches': ['local', 'remote'],
             'current_branch': 'highlighted'
         }
-    
+
     def _handle_stash(self) -> Dict[str, Any]:
         """Handle #STASH//. - Stash changes with message"""
         return {
@@ -1182,7 +1191,7 @@ class CommandExecutor:
             'stash_name': 'auto_generated_timestamp',
             'files_stashed': 'all_modified'
         }
-    
+
     def _handle_rebase(self) -> Dict[str, Any]:
         """Handle #REBASE//. - Rebase current branch"""
         return {
@@ -1192,7 +1201,7 @@ class CommandExecutor:
             'target': 'origin/main',
             'conflicts': []
         }
-    
+
     def _handle_venv(self) -> Dict[str, Any]:
         """Handle #VENV//. - Create/activate virtual environment"""
         return {
@@ -1202,7 +1211,7 @@ class CommandExecutor:
             'venv_path': '.venv',
             'python_version': 'detected'
         }
-    
+
     def _handle_install(self) -> Dict[str, Any]:
         """Handle #INSTALL//. - Install dependencies from requirements"""
         return {
@@ -1212,7 +1221,7 @@ class CommandExecutor:
             'source': 'requirements.txt',
             'packages_installed': 'all_listed'
         }
-    
+
     def _handle_freeze(self) -> Dict[str, Any]:
         """Handle #FREEZE//. - Freeze current dependencies"""
         return {
@@ -1222,7 +1231,7 @@ class CommandExecutor:
             'output': 'requirements-lock.txt',
             'packages': 'all_installed'
         }
-    
+
     def _handle_server(self) -> Dict[str, Any]:
         """Handle #SERVER//. - Start API development server"""
         return {
@@ -1233,7 +1242,7 @@ class CommandExecutor:
             'port': 8000,
             'reload': True
         }
-    
+
     def _handle_restart(self) -> Dict[str, Any]:
         """Handle #RESTART//. - Restart development server"""
         return {
@@ -1243,7 +1252,7 @@ class CommandExecutor:
             'graceful': True,
             'reload': 'auto'
         }
-    
+
     def _handle_logs(self) -> Dict[str, Any]:
         """Handle #LOGS//. - Tail server/application logs"""
         return {
@@ -1253,7 +1262,7 @@ class CommandExecutor:
             'lines': 50,
             'follow': True
         }
-    
+
     def _handle_routes(self) -> Dict[str, Any]:
         """Handle #ROUTES//. - List all API routes"""
         return {
@@ -1263,7 +1272,7 @@ class CommandExecutor:
             'total_routes': 27,
             'sources': ['aurora_api.py', 'aumemmanager_router']
         }
-    
+
     def _handle_find(self) -> Dict[str, Any]:
         """Handle #FIND//. - Find files by name/pattern"""
         return {
@@ -1273,7 +1282,7 @@ class CommandExecutor:
             'search_type': 'glob_pattern',
             'locations': ['src', 'modules', 'tests']
         }
-    
+
     def _handle_grep(self) -> Dict[str, Any]:
         """Handle #GREP//. - Search code content"""
         return {
@@ -1283,7 +1292,7 @@ class CommandExecutor:
             'search_type': 'regex',
             'context_lines': 3
         }
-    
+
     def _handle_tree(self) -> Dict[str, Any]:
         """Handle #TREE//. - Display directory tree"""
         return {
@@ -1293,7 +1302,7 @@ class CommandExecutor:
             'depth': 3,
             'filter': 'exclude_venv_node_modules'
         }
-    
+
     def _handle_imports(self) -> Dict[str, Any]:
         """Handle #IMPORTS//. - Analyze import dependencies"""
         return {
@@ -1305,7 +1314,7 @@ class CommandExecutor:
         }
 
     # ==================== TIER 3: ADVANCED OPERATIONS ====================
-    
+
     def _handle_feature(self) -> Dict[str, Any]:
         """Handle #FEATURE//. - Create new feature branch"""
         return {
@@ -1315,7 +1324,7 @@ class CommandExecutor:
             'branch_name': 'feature/auto_generated',
             'based_on': 'main'
         }
-    
+
     def _handle_pr(self) -> Dict[str, Any]:
         """Handle #PR//. - Prepare pull request"""
         return {
@@ -1325,7 +1334,7 @@ class CommandExecutor:
             'checks': ['tests', 'lint', 'security'],
             'pr_body': 'auto_generated'
         }
-    
+
     def _handle_merge(self) -> Dict[str, Any]:
         """Handle #MERGE//. - Smart merge with checks"""
         return {
@@ -1335,7 +1344,7 @@ class CommandExecutor:
             'pre_merge_checks': ['tests_pass', 'no_conflicts', 'up_to_date'],
             'merge_strategy': 'squash'
         }
-    
+
     def _handle_testgen(self) -> Dict[str, Any]:
         """Handle #TESTGEN//. - Generate missing tests"""
         return {
@@ -1345,7 +1354,7 @@ class CommandExecutor:
             'coverage_target': '80%',
             'test_types': ['unit', 'integration']
         }
-    
+
     def _handle_debug(self) -> Dict[str, Any]:
         """Handle #DEBUG//. - Interactive debugging session"""
         return {
@@ -1355,7 +1364,7 @@ class CommandExecutor:
             'debugger': 'pdb',
             'breakpoints': 'auto_set'
         }
-    
+
     def _handle_env(self) -> Dict[str, Any]:
         """Handle #ENV//. - Check environment variables"""
         return {
@@ -1365,7 +1374,7 @@ class CommandExecutor:
             'required_vars': ['all_present'],
             'optional_vars': ['noted']
         }
-    
+
     def _handle_clean(self) -> Dict[str, Any]:
         """Handle #CLEAN//. - Clean build artifacts"""
         return {
@@ -1375,9 +1384,9 @@ class CommandExecutor:
             'removed': ['__pycache__', '*.pyc', '.pytest_cache', 'htmlcov'],
             'space_freed': 'calculated'
         }
-    
-    def _handle_deploy(self) -> Dict[str, Any]:
-        """Handle #DEPLOY//. - Deploy to environment"""
+
+    def _handle_deploy_to_environment(self) -> Dict[str, Any]:
+        """Handle #DEPLOY_ENV//. - Deploy to environment"""
         return {
             'status': 'executed',
             'action': 'deployment',
@@ -1385,7 +1394,7 @@ class CommandExecutor:
             'environment': 'detected_from_context',
             'health_check': 'passed'
         }
-    
+
     def _handle_monitor(self) -> Dict[str, Any]:
         """Handle #MONITOR//. - Start monitoring dashboard"""
         return {
@@ -1395,7 +1404,7 @@ class CommandExecutor:
             'metrics': ['cpu', 'memory', 'requests', 'errors'],
             'refresh_rate': '5s'
         }
-    
+
     def _handle_readme(self) -> Dict[str, Any]:
         """Handle #README//. - Generate/update README"""
         return {
@@ -1405,7 +1414,7 @@ class CommandExecutor:
             'sections': ['overview', 'installation', 'usage', 'api', 'contributing'],
             'auto_generated': True
         }
-    
+
     def _handle_changelog(self) -> Dict[str, Any]:
         """Handle #CHANGELOG//. - Generate changelog from commits"""
         return {
@@ -1415,7 +1424,7 @@ class CommandExecutor:
             'source': 'git_commits',
             'format': 'keep_a_changelog'
         }
-    
+
     def _handle_docstring(self) -> Dict[str, Any]:
         """Handle #DOCSTRING//. - Generate missing docstrings"""
         return {
@@ -1427,7 +1436,7 @@ class CommandExecutor:
         }
 
     # ==================== TIER 4: COMPOUND COMMANDS ====================
-    
+
     def _handle_quickfix(self) -> Dict[str, Any]:
         """Handle #QUICKFIX//. - Format, lint, test in one go"""
         return {
@@ -1437,7 +1446,7 @@ class CommandExecutor:
             'steps': ['format', 'lint_fix', 'test_fast'],
             'all_passed': True
         }
-    
+
     def _handle_shipit(self) -> Dict[str, Any]:
         """Handle #SHIPIT//. - Full CI pipeline locally"""
         return {
@@ -1447,7 +1456,7 @@ class CommandExecutor:
             'steps': ['test_all', 'lint', 'security', 'build', 'validate'],
             'ready_to_merge': True
         }
-    
+
     def _handle_cleanup(self) -> Dict[str, Any]:
         """Handle #CLEANUP//. - Comprehensive cleanup"""
         return {
@@ -1457,7 +1466,7 @@ class CommandExecutor:
             'actions': ['clean_artifacts', 'prune_branches', 'optimize_imports', 'remove_unused'],
             'space_saved': 'calculated'
         }
-    
+
     def _handle_hotfix(self) -> Dict[str, Any]:
         """Handle #HOTFIX//. - Emergency hotfix workflow"""
         return {
@@ -1468,7 +1477,7 @@ class CommandExecutor:
             'based_on': 'production',
             'fast_track': True
         }
-    
+
     def _handle_audit(self) -> Dict[str, Any]:
         """Handle #AUDIT//. - Security + dependency audit"""
         return {
@@ -1478,7 +1487,7 @@ class CommandExecutor:
             'scans': ['safety', 'bandit', 'dependency_check', 'code_quality'],
             'report': 'generated'
         }
-    
+
     def _handle_polish(self) -> Dict[str, Any]:
         """Handle #POLISH//. - Format, docs, optimize all"""
         return {
@@ -1488,7 +1497,7 @@ class CommandExecutor:
             'improvements': ['format', 'docstrings', 'imports', 'comments', 'type_hints'],
             'quality_score': 'improved'
         }
-    
+
     def _handle_validate(self) -> Dict[str, Any]:
         """Handle #VALIDATE//. - Validate everything before commit"""
         return {
@@ -1498,7 +1507,7 @@ class CommandExecutor:
             'checks': ['syntax', 'tests', 'lint', 'type_check', 'security'],
             'ready_to_commit': True
         }
-    
+
     def _handle_buildtest(self) -> Dict[str, Any]:
         """Handle #BUILDTEST//. - Build and test in one command"""
         return {
@@ -1513,7 +1522,7 @@ class CommandExecutor:
     def get_execution_history(self) -> List[ChainExecutionResult]:
         """Get command execution history"""
         return self.execution_history
-    
+
     def export_history(self, filepath: str):
         """Export execution history to JSON"""
         history_data = [
@@ -1539,30 +1548,30 @@ class CommandExecutor:
             }
             for result in self.execution_history
         ]
-        
+
         Path(filepath).write_text(json.dumps(history_data, indent=2))
 
 
 def demo():
     """Demonstration of command execution"""
     executor = CommandExecutor()
-    
+
     print("╔══════════════════════════════════════════════════════════╗")
     print("║  Command Chain Executor - Demonstration                 ║")
     print("╚══════════════════════════════════════════════════════════╝")
     print()
-    
+
     test_commands = [
         "#005//.",
         "#seal//. #verify//. #deploy//.",
         "#BUP//. #RESUME//.",
         "#001//. #002//. #003//.",
     ]
-    
+
     for cmd_text in test_commands:
         print(f"Executing: {cmd_text}")
         result = executor.execute(cmd_text)
-        
+
         print(f"  Success: {result.success}")
         print(f"  Commands: {result.successful_commands}/{result.total_commands}")
         print(f"  Time: {result.execution_time_ms:.2f}ms")

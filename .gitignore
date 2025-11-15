@@ -38,6 +38,7 @@ security_scan_report.json
 test_security_fixes.py
 /tmp/
 .security_temp/
+.security/scan_log.json
 
 # Unit test / coverage reports
 htmlcov/
@@ -236,6 +237,10 @@ auth_config.json
 .aurora/quicksave_*.json
 .aurora/session_*.json
 # BUT: Keep .aurora/SIMULATION_STATE.json (persistent across sessions)
+
+# Aurora generated audit/log artifacts (local only)
+.aurora/audit_trail.json
+.rebuild_prevention_status.json
 
 # Aurora Nexus - Runtime operational files (local only)
 .nexus/arbitration/entropy_*.json

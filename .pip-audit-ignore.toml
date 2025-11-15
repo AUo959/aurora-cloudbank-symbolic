@@ -1,0 +1,37 @@
+# pip-audit Vulnerability Ignore Configuration
+# Aurora CloudBank Symbolic - Security Exception Handling
+#
+# This file documents accepted security risks that have been
+# reviewed and determined to pose acceptable risk given:
+# - No available fixes
+# - Mitigating controls in place
+# - Low practical exploitability
+#
+# Review quarterly or when security posture changes
+
+[[tool.pip-audit.ignore-vuln]]
+# Minerva timing attack on python-ecdsa P-256 curve
+# Transitive dependency: python-jose → ecdsa
+#
+# JUSTIFICATION:
+# - No fix available (project considers side-channel attacks out of scope)
+# - python-jose essential for JWT authentication
+# - Mitigating factors: TLS protection, time-limited tokens, no direct API usage
+# - Signature verification (our primary use) unaffected
+#
+# RISK LEVEL: LOW-MEDIUM (accepted for production)
+# REVIEW DATE: 2025-11-15
+# NEXT REVIEW: 2026-02-15 (quarterly)
+# ACTION ITEMS:
+# - Monitor python-jose for alternative crypto backends
+# - Consider RSA-based JWT signing migration
+# - Track ecdsa project for eventual fix
+vulnerability-id = "GHSA-wj6h-64fc-37mp"
+reason = "No fix available; JWT usage mitigated by TLS, token expiry, and limited attack surface"
+expires = "2026-02-15"
+
+# Template for future exceptions:
+# [[tool.pip-audit.ignore-vuln]]
+# vulnerability-id = "CVE-YYYY-NNNNN"
+# reason = "Justification with mitigating controls"
+# expires = "YYYY-MM-DD"

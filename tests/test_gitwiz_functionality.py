@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
+"""
+Quick test script for GITWiz Enhanced functionality.
+
+Note: This is a manual smoke script and not a pytest suite. To avoid
+pytest collecting it as a test (which causes fixture errors), the module
+is skipped during test collection.
+"""
 import subprocess
 import sys
 from pathlib import Path
+import pytest
 
-"""
-Quick test script for GITWiz Enhanced functionality
-"""
-
-import subprocess
-import sys
-from pathlib import Path
+# Skip this module during pytest collection; it's a manual runner.
+pytest.skip("Manual GITWiz smoke script; excluded from pytest suite", allow_module_level=True)
 
 
 def test_command(cmd, description):
@@ -85,8 +88,6 @@ def main():
             ],
             "HDE++ Recommendation",
         )
-
-    
         print("\n" + "=" * 60)
     print("🎯 Test Suite Complete!")
     print("If all tests show ✅ SUCCESS, GITWiz Enhanced is fully operational!")

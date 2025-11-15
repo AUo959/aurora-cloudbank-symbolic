@@ -1,32 +1,6 @@
 {
   "scans": [
     {
-      "timestamp": "2025-11-08T18:40:20.766489",
-      "status": "PASSED",
-      "files_scanned": 9,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/.security/secure_helpers.py",
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py",
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api_server.py",
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_gui_cloudhub_fastapi.py",
-        "/workspaces/aurora-cloudbank-symbolic/conftest.py",
-        "/workspaces/aurora-cloudbank-symbolic/modules/opal2/api/opal2_api.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/integrations/chatgpt_agent_mode.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/middleware/fastapi_security.py",
-        "/workspaces/aurora-cloudbank-symbolic/src/servers/l2_integration_server.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u2705 CSRF/Authentication: PASSED\n\u2705 Cryptography: PASSED\n"
-    },
-    {
-      "timestamp": "2025-11-09T01:03:24.482564",
-      "status": "ISSUES_FOUND",
-      "files_scanned": 1,
-      "files": [
-        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py"
-      ],
-      "output": "\ufffd Running comprehensive security validation...\n\u2705 Log Injection: PASSED\n\u2705 Shell Injection: PASSED\n\u2705 XSS/Code Injection: PASSED\n\u2705 SQL Injection: PASSED\n\u2705 Path Traversal: PASSED\n\u274c CSRF/Authentication: FAILED\n\ud83d\udea8 CSRF/AUTHENTICATION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line 287: POST endpoint without CSRF token validation - @app.post(\"/geometric/vector\", dependencies=[Depends(security)])\n  \u274c /workspaces/aurora-cloudbank-symbolic/api/aurora_api.py: Line..."
-    },
-    {
       "timestamp": "2025-11-09T01:41:44.523468",
       "status": "ISSUES_FOUND",
       "files_scanned": 2,
@@ -713,6 +687,33 @@
         "/workspaces/aurora-cloudbank-symbolic/core/nexus_enhancement_hub.js"
       ],
       "output": "\ufffd Running comprehensive security validation...\n"
+    },
+    {
+      "timestamp": "2025-11-15T21:29:11.446948",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 2,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/tools/command_chain/cli.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/quicksave.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/command_chain/cli.py: Line 35: f-string print (potential log output) - print(f\"Input: {result.raw_input}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/command_chain/cli.py: Line 42: f-string print (potential log output) - print(f\"   {status} {cmd.raw} \u2192 {cmd.name}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/tools/command_chain/cli.py: Line 44: f-string prin..."
+    },
+    {
+      "timestamp": "2025-11-15T21:41:46.692054",
+      "status": "ISSUES_FOUND",
+      "files_scanned": 9,
+      "files": [
+        "/workspaces/aurora-cloudbank-symbolic/api/aurora_api.py",
+        "/workspaces/aurora-cloudbank-symbolic/scripts/nexus_phase5_demo.py",
+        "/workspaces/aurora-cloudbank-symbolic/scripts/test_gumas_orion_integration.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/command_chain/chain_flow.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/command_chain/executor.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/git/gitwiz_enhanced_demo.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/reliquary/indexer.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/snapshot/cli.py",
+        "/workspaces/aurora-cloudbank-symbolic/tools/snapshot/snapshot.py"
+      ],
+      "output": "\ufffd Running comprehensive security validation...\n\ud83d\udea8 LOG INJECTION VULNERABILITIES DETECTED:\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/nexus_phase5_demo.py: Line 99: f-string print (potential log output) - print(f\"  \ud83d\udd00 {fork.fork_id} ({fork.fork_type.value})\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/nexus_phase5_demo.py: Line 100: f-string print (potential log output) - print(f\"     Coherence: {fork.quantum_coherence:.3f}\")\n  \u274c /workspaces/aurora-cloudbank-symbolic/scripts/nexus_pha..."
     }
   ]
 }

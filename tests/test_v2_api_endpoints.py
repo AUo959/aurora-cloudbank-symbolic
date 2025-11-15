@@ -7,13 +7,15 @@ Thread: T1→BRIDGE_V2→API_TESTING
 DLP: context_tag=bridge_v2_api_manual_test
 Anchor: EOS_SEED_ORION_v2
 """
-
 import asyncio
 import httpx
-from datetime import datetime
+import pytest
 
 BASE_URL = "http://localhost:8000"
 TIMEOUT = 30.0
+
+# Exclude this manual runner from pytest's automated suite
+pytest.skip("Manual v2 API tester; excluded from pytest suite", allow_module_level=True)
 
 class Colors:
     GREEN = '\033[92m'

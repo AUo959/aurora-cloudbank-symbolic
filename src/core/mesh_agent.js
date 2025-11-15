@@ -431,12 +431,47 @@ class MeshAgent {
 // Add collaboration chamber specific methods to MeshAgent class
 class CollaborationMeshAgent extends MeshAgent {
   constructor(agentId, config = {}) {
-    super();
-    this.agentId = agentId;
-    this.config = { ...MESH_CONFIG, ...config };
+    const mergedConfig = { ...MESH_CONFIG, ...config };
+
+    mergedConfig.activationPhrases = {
+      ...MESH_CONFIG.activationPhrases,
+      ...(config.activationPhrases || {})
+    };
+
+    mergedConfig.relayApiEndpoints = {
+      ...MESH_CONFIG.relayApiEndpoints,
+      ...(config.relayApiEndpoints || {})
+    };
+
+    const canonicalAgent = Array.isArray(mergedConfig.agents)
+      ? mergedConfig.agents.find(agent => agent.id === agentId)
+      : undefined;
+
+    const resolvedAgentId = typeof agentId === 'string' && agentId.trim().length > 0
+      ? agentId.trim()
+      : (typeof config.agentId === 'string' && config.agentId.trim().length > 0
+        ? config.agentId.trim()
+        : 'AURORA_COLLAB_AGENT');
+
+    const derivedRole = config.role
+      || (canonicalAgent && canonicalAgent.role)
+      || 'Collaborative Mesh Agent';
+
+    const derivedEndpoint = config.apiEndpoint
+      || (mergedConfig.relayApiEndpoints && mergedConfig.relayApiEndpoints[resolvedAgentId])
+      || `/api/relay/${resolvedAgentId.toLowerCase()}`;
+
+    const derivedActivationPhrase = config.activationPhrase
+      || (mergedConfig.activationPhrases && mergedConfig.activationPhrases[resolvedAgentId])
+      || `ORION_${resolvedAgentId}_RELAY_ACTIVATE//`;
+
+    super(resolvedAgentId, derivedRole, derivedEndpoint, derivedActivationPhrase);
+
+    this.agentId = this.id;
+    this.config = mergedConfig;
     this.messageHistory = [];
     this.collaborationState = 'active';
-    this.specialization = this.getAgentSpecialization(agentId);
+    this.specialization = this.getAgentSpecialization(this.agentId);
   }
 
   getAgentSpecialization(agentId) {
@@ -668,7 +703,7 @@ class CollaborationMeshAgent extends MeshAgent {
 
   async activateAgent(agentId) {
     // Create and return agent instance
-    const agent = new CollaborationMeshAgent(agentId);
+    const agent = new CollaborationMeshAgent(agentId, this.config);
     await agent.initializeFederation();
     return agent;
   }

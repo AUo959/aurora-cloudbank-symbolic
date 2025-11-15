@@ -316,7 +316,7 @@ class AuroraCustomGptBridge {
   }
 
   /**
-   * Sync with Meta-Agent Constellation
+   * Sync with relay-tier constellation capsules.
    */
   async syncWithMetaAgentConstellation() {
     try {
@@ -327,21 +327,23 @@ class AuroraCustomGptBridge {
         throw new Error('Meta-agent constellation status unavailable');
       }
 
-      const totalAgents = constellationStatus.total_agents || 0;
-      const connectedAgents = constellationStatus.connected_agents || 0;
-      const allAgentsConnected =
-        totalAgents > 0 ? connectedAgents === totalAgents : true;
+      const relayTier = constellationStatus.relay_tier || {};
+      const totalCapsules = relayTier.total_capsules || 0;
+      const connectedCapsules = relayTier.connected_capsules || 0;
+      const allCapsulesOnline =
+        totalCapsules > 0 ? connectedCapsules === totalCapsules : true;
 
       const sync = {
-        totalAgents,
-        connectedAgents,
-        constellation: constellationStatus.constellation || [],
-        allAgentsConnected,
+        totalCapsules,
+        connectedCapsules,
+        relayConstellation: relayTier.constellation || 'RELAY_TIER_CAPSULES',
+        capsuleRoster: relayTier.capsules || [],
+        allCapsulesOnline,
         synchronized: true,
         timestamp: new Date().toISOString()
       };
 
-      bridgeLogger.bridge('Meta-agent constellation sync', {
+      bridgeLogger.bridge('Relay tier constellation sync', {
         sync,
         constellationStatus
       });
@@ -349,7 +351,7 @@ class AuroraCustomGptBridge {
       return sync;
 
     } catch (error) {
-      bridgeLogger.error('Meta-agent constellation sync failed', {
+      bridgeLogger.error('Relay tier constellation sync failed', {
         error: error.message
       });
       return { synchronized: false, error: error.message };

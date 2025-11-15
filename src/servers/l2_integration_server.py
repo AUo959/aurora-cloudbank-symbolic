@@ -115,7 +115,14 @@ except ImportError:
             Returns:
                 Dict with constellation name and zero agents
             """
-            return {"constellation": "L2_META_AGENTS", "totalAgents": 0}
+            return {
+                "relay_tier": {
+                    "constellation": "RELAY_TIER_CAPSULES",
+                    "total_capsules": 0,
+                    "connected_capsules": 0,
+                    "capsules": []
+                }
+            }
         
         async def relay_message(self, agent_id, target, message, message_type):
             """

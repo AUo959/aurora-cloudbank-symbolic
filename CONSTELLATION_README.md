@@ -45,6 +45,13 @@ Centralized topology definition for all repositories with:
 
 ### Bridge Architecture
 
+#### Relay Capsule Tier (`RELAY_TIER_CAPSULES`)
+
+The custom GPT relay capsules (ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808) now live in a
+dedicated relay-tier constellation. This keeps the command relays clearly separated from the true
+L2 sandbox inventory, allowing sandbox agents to evolve independently while preserving the
+established ZIPWIZ activation rituals and symbolic anchors (Picard_Delta_3, EOS_SEED_ORION).
+
 #### AuroraOS Bridge (`src/bridges/aurora-os/bridge.ts`)
 WebSocket-based bridge for:
 - Module and agent execution

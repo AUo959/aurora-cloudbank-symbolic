@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const crypto = require('crypto');
 const { MESH_CONFIG, MeshFederation } = require('../core/mesh_agent.js');
 const { systemLogger, bridgeLogger } = require('../utils/aurora_logger.js');
 
@@ -270,10 +271,18 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       await agent.handshake();
     }
 
+    const activationDigest = crypto
+      .createHash('sha256')
+      .update(expectedPhrase)
+      .digest('hex');
+
     bridgeLogger.bridge(`🚀 [MESH_API] Agent ${agentId} activated`, {
       agentId: agentId,
       status: agent.status,
-      activationPhrase: expectedPhrase
+      activationVerification: {
+        method: 'sha256',
+        digest: activationDigest
+      }
     });
 
     res.json({

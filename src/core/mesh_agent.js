@@ -7,6 +7,8 @@
  * activation control, and threadcore monitoring.
  */
 
+const crypto = require('crypto');
+
 const { systemLogger, bridgeLogger, ethicsLogger } = require('../utils/aurora_logger.js');
 
 // Core Mesh Configuration
@@ -250,12 +252,38 @@ class MeshAgent {
     this.status = 'LIVE';
     this.meshConnected = true;
 
+    const activationLogMetadata = this.getActivationLogMetadata();
+
     bridgeLogger.bridge(`🌟 [MESH] Agent ${this.id} now live in constellation`, {
       status: this.status,
       role: this.role,
       constellation: MESH_CONFIG.constellation,
-      activationPhraseStatus: 'validated'
+      activationPhraseStatus: 'validated',
+      activation: activationLogMetadata
     });
+  }
+
+  /**
+   * Produce sanitized activation logging metadata.
+   * Returns only non-sensitive confirmation data.
+   */
+  getActivationLogMetadata() {
+    if (!this.activationPhrase) {
+      return {
+        hasActivationPhrase: false
+      };
+    }
+
+    const activationHash = crypto
+      .createHash('sha256')
+      .update(this.activationPhrase)
+      .digest('hex');
+
+    return {
+      hasActivationPhrase: true,
+      hashAlgorithm: 'sha256',
+      activationHashPreview: activationHash.slice(0, 16)
+    };
   }
 
   /**

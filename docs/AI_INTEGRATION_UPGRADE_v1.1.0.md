@@ -112,6 +112,9 @@ GPT-4o → Claude 3.5 Sonnet → GPT-5 → Claude 4.5 Opus
 
 All endpoints under `/ai/` prefix with CSRF protection:
 
+> **Authentication header:** Each request must include `Authorization: Bearer <CSRF token>`.
+> Tokens are minted via the shared security middleware (`src/middleware/fastapi_security.py`).
+
 ### Status & Discovery
 
 - `GET /ai/status` - Overall AI system status

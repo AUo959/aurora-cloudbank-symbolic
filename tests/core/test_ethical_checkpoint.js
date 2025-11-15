@@ -1,8 +1,8 @@
 // Test Suite: Ethical Checkpoint Module
 // Validates doctrine-based system state verification (Picard_Delta_3 protocol)
 
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import { EthicalCheckpoint } from '../../core/ethical-checkpoint.js';
 
 describe('EthicalCheckpoint - Doctrine-Based Verification', () => {

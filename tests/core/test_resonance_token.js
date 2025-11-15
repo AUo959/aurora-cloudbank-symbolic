@@ -1,8 +1,8 @@
 // Test Suite: Resonance Token System
 // Validates symbolic memory thread encapsulation and inter-agent handoffs
 
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import { ResonanceToken } from '../../core/resonance-token.js';
 
 describe('ResonanceToken - Memory Bundle Transmission', () => {

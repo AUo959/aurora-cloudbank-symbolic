@@ -1,8 +1,8 @@
 // Test Suite: Symbolic Forecast Engine
 // Validates predictive symbolic state modeling and quantum-symbolic bridge integration
 
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import { SymbolicForecastEngine } from '../../core/symbolic-forecast-engine.js';
 
 describe('SymbolicForecastEngine - Predictive State Modeling', () => {

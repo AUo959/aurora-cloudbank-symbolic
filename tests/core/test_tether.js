@@ -8,8 +8,8 @@
  * DLP: TEST_TETHER_WAVE3
  */
 
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import { Tether } from '../../core/tether.js';
 
 describe('Tether - HARMION Memory Bridge', () => {

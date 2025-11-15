@@ -1,8 +1,8 @@
 // Test Suite: Drift-Aware Symbolic Agent
 // Validates real-time symbolic state drift monitoring and adaptive responses
 
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import { DriftAwareAgent } from '../../core/drift-aware-agent.js';
 
 describe('DriftAwareAgent - Real-Time Drift Monitoring', () => {

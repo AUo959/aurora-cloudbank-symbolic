@@ -1,5 +1,5 @@
-import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { beforeEach, describe, it } from 'node:test';
 import NexusEnhancementHub from '../../core/nexus_enhancement_hub.js';
 
 // Mock NEXUS core system for testing

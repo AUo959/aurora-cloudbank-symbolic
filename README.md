@@ -6,7 +6,22 @@
 
 > A **production-grade platform** combining quantum computing simulation, vector symbolic architectures, quantum memory management, and AI observability. Built for enterprises deploying advanced AI systems with quantum-inspired cognitive capabilities, comprehensive monitoring, and ethical guardrails.
 
-🌐 **[Live Demo](https://auo959.github.io/aurora-cloudbank-symbolic)** | 📚 **[Documentation](docs/)** | 🚀 **[Quick Start](#quick-start-5-minutes)** | 🤝 **[Contributing](CONTRIBUTING.md)**
+📚 Documentation is now hosted in the GitHub Wiki for a cleaner, unified experience:
+- Home: https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Home
+- Architecture Overview: https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Architecture-Overview
+- API Catalog: https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog
+
+Quick start (5 minutes):
+```bash
+make setup
+make check
+make run          # or: python api/aurora_api.py
+```
+
+More links:
+- Live Demo: https://auo959.github.io/aurora-cloudbank-symbolic
+- Wiki (full documentation): https://github.com/AUo959/aurora-cloudbank-symbolic/wiki
+- Contributing: CONTRIBUTING.md
 
 ---
 

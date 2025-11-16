@@ -60,7 +60,7 @@
 
 ```
 aurora-cloudbank-symbolic/
-├── api/                    # FastAPI server and routes (1,962 lines)
+├── api/                    # FastAPI server and routes (2,467 lines)
 ├── modules/                # Core feature modules (30+ modules, 302 files)
 ├── src/                    # Implementation layer (observability, monitoring, integrations)
 ├── tests/                  # Test suite (109 files, 1,030+ tests)

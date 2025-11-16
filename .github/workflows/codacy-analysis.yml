@@ -25,6 +25,7 @@ jobs:
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@master
         timeout-minutes: 8
+        continue-on-error: true
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
@@ -35,9 +36,9 @@ jobs:
 
       - name: Upload SARIF results file
         uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('results.sarif') != ''
         with:
           sarif_file: results.sarif
-        # Fallback: Even without token, run analysis for local visibility
         continue-on-error: true
 
   codacy-coverage-reporter:

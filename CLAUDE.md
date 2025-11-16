@@ -286,7 +286,7 @@ Aurora uses an extensive Makefile for development automation:
 - `make clean` - Clean up build artifacts and temp files
 
 #### Code Quality
-- `make lint` - Lint modernized code (matches CI scope)
+- `make lint` - Lint `modules/reflective_autonomy` only (scoped lint)
 - `make lint-tools` - Lint tools/symbolic and tools/cli
 - `make lint-all` - Comprehensive linting (src, modules, tests, tools)
 - `make check` - Fast stability check (lint + full tests)

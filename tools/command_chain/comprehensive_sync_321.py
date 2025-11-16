@@ -25,7 +25,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +33,16 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SyncConfig:
     """Configuration for #321//. command execution"""
-    
+
     # Commit message generation
     commit_message_template: str = "{type}({scope}): {summary}"
     default_commit_type: str = "chore"
-    
+
     # Validation settings
     validation_level: str = "fast"  # fast, thorough, complete
     skip_validation_on_docs_only: bool = True
     skip_tests_on_config_only: bool = True
-    
+
     # Staging patterns (priority order)
     auto_stage_patterns: List[str] = field(default_factory=lambda: [
         "src/**/*.py",
@@ -55,25 +55,25 @@ class SyncConfig:
         "*.yaml",
         "*.toml"
     ])
-    
+
     # Performance targets
     performance_target_seconds: int = 45
     timeout_seconds: int = 300
-    
+
     # Conflict resolution
     conflict_resolution_strategy: str = "prompt"  # prompt, abort, auto
-    
+
     # Sync behavior
     use_rebase: bool = True
     auto_push: bool = True
     verify_remote_sync: bool = True
-    
+
     # Validation selectors
     lint_command: str = "flake8 src/ api/ modules/ --max-line-length=120 --select=E,F --statistics"
     test_command: str = "pytest -m unit -x --tb=short -q"
     fast_test_markers: str = "unit"
     thorough_test_markers: str = "unit or integration"
-    
+
     @classmethod
     def load(cls, config_path: Optional[Path] = None) -> "SyncConfig":
         """Load configuration from file or use defaults"""
@@ -86,7 +86,7 @@ class SyncConfig:
                 logger.warning(f"Failed to load config from {config_path}: {e}")
                 logger.info("Using default configuration")
         return cls()
-    
+
     def save(self, config_path: Path):
         """Save configuration to file"""
         config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -115,11 +115,11 @@ class SyncResult:
     commit_sha: Optional[str] = None
     files_changed: int = 0
     summary_message: str = ""
-    
+
     def format_report(self) -> str:
         """Generate human-readable completion report"""
         status_emoji = "✅" if self.success else "❌"
-        
+
         report_lines = [
             "━" * 60,
             f"{status_emoji} #321//. {'COMPLETE' if self.success else 'FAILED'} - "
@@ -130,18 +130,18 @@ class SyncResult:
             f"   Total Time: {self.total_duration:.1f}s",
             f"   Changes: {self.files_changed} files",
         ]
-        
+
         if self.commit_sha:
             report_lines.append(f"   Commit: {self.commit_sha[:8]}")
-        
+
         if self.summary_message:
             report_lines.append(f"   Message: {self.summary_message}")
-        
+
         report_lines.extend([
             "",
             "🎯 PHASE STATUS:",
         ])
-        
+
         for phase in self.phases:
             phase_emoji = "✅" if phase.success else "❌"
             report_lines.append(
@@ -151,19 +151,19 @@ class SyncResult:
             if phase.warnings:
                 for warning in phase.warnings:
                     report_lines.append(f"      ⚠️  {warning}")
-        
+
         report_lines.extend([
             "",
             "━" * 60,
         ])
-        
+
         return "\n".join(report_lines)
 
 
 class ComprehensiveSync:
     """
     Implements #321//. - Universal working tree cleanup with intelligence
-    
+
     Key Features:
     - Context-aware change detection
     - Intelligent staging by file type
@@ -172,76 +172,76 @@ class ComprehensiveSync:
     - Optimized validation (speed vs thoroughness)
     - Performance tracking and reporting
     """
-    
+
     def __init__(self, config: Optional[SyncConfig] = None, workspace_path: Optional[Path] = None):
         self.config = config or SyncConfig()
         self.workspace = workspace_path or Path.cwd()
         self.start_time = time.time()
         self.phases: List[PhaseResult] = []
-    
+
     def execute(self) -> SyncResult:
         """Execute all 6 phases of comprehensive sync"""
         logger.info("Starting #321//. - Comprehensive Sync & Validate")
-        
+
         try:
             # Phase 1: Check for pending changes
             phase1 = self._phase1_check_changes()
             self.phases.append(phase1)
             if not phase1.success:
                 return self._build_result(success=False)
-            
+
             # Early exit if no changes
             if phase1.details.get('files_changed', 0) == 0:
                 logger.info("No changes detected - working tree already clean")
                 return self._build_result(success=True)
-            
+
             # Phase 2: Intelligent staging
             phase2 = self._phase2_intelligent_staging(phase1.details)
             self.phases.append(phase2)
             if not phase2.success:
                 return self._build_result(success=False)
-            
+
             # Phase 3: Generate & commit
             phase3 = self._phase3_generate_commit(phase1.details, phase2.details)
             self.phases.append(phase3)
             if not phase3.success:
                 return self._build_result(success=False)
-            
+
             # Phase 4: Sync to main
             phase4 = self._phase4_sync_to_main()
             self.phases.append(phase4)
             if not phase4.success:
                 return self._build_result(success=False)
-            
+
             # Phase 5: Quick validation
             phase5 = self._phase5_quick_validation(phase1.details)
             self.phases.append(phase5)
             if not phase5.success:
                 return self._build_result(success=False)
-            
+
             # Phase 6: Performance verification
             phase6 = self._phase6_performance_verification()
             self.phases.append(phase6)
-            
+
             return self._build_result(
                 success=True,
                 commit_sha=phase3.details.get('commit_sha'),
                 files_changed=phase1.details.get('files_changed', 0),
                 summary_message=phase3.details.get('commit_message', '')
             )
-            
+
         except KeyboardInterrupt:
             logger.warning("Execution interrupted by user")
             return self._build_result(success=False)
         except Exception as e:
             logger.error(f"Unexpected error during execution: {e}", exc_info=True)
             return self._build_result(success=False)
-    
+
     def _phase1_check_changes(self) -> PhaseResult:
         """Phase 1: Comprehensive change detection with context awareness"""
         phase_start = time.time()
         logger.info("Phase 1: Checking for pending changes...")
-        
+
         try:
             # Get git status in machine-readable format
             status_result = self._run_command(['git', 'status', '--porcelain'])
@@ -253,13 +253,13 @@ class ComprehensiveSync:
                     duration_seconds=time.time() - phase_start,
                     message="Failed to check git status"
                 )
-            
+
             status_lines = status_result.stdout.strip().split('\n') if status_result.stdout.strip() else []
-            
+
             # Categorize changes
             categories = self._categorize_changes(status_lines)
             total_files = sum(len(files) for files in categories.values())
-            
+
             if total_files == 0:
                 return PhaseResult(
                     phase_number=1,
@@ -269,18 +269,24 @@ class ComprehensiveSync:
                     message="No changes detected",
                     details={'files_changed': 0}
                 )
-            
+
             # Get diff statistics
             diff_result = self._run_command(['git', 'diff', '--stat'])
-            
+
             details = {
                 'files_changed': total_files,
                 'categories': categories,
                 'diff_stat': diff_result.stdout if diff_result.returncode == 0 else "",
-                'is_docs_only': len(categories.get('docs', [])) > 0 and total_files == len(categories.get('docs', [])),
-                'is_config_only': len(categories.get('config', [])) > 0 and total_files == len(categories.get('config', []))
+                'is_docs_only': (
+                    len(categories.get('docs', [])) > 0 and
+                    total_files == len(categories.get('docs', []))
+                ),
+                'is_config_only': (
+                    len(categories.get('config', [])) > 0 and
+                    total_files == len(categories.get('config', []))
+                )
             }
-            
+
             return PhaseResult(
                 phase_number=1,
                 phase_name="Check Changes",
@@ -289,7 +295,7 @@ class ComprehensiveSync:
                 message=f"Detected {total_files} files changed across {len(categories)} categories",
                 details=details
             )
-            
+
         except Exception as e:
             return PhaseResult(
                 phase_number=1,
@@ -298,7 +304,7 @@ class ComprehensiveSync:
                 duration_seconds=time.time() - phase_start,
                 message=f"Error checking changes: {e}"
             )
-    
+
     def _categorize_changes(self, status_lines: List[str]) -> Dict[str, List[str]]:
         """Categorize changed files by type for intelligent staging"""
         categories = {
@@ -309,18 +315,18 @@ class ComprehensiveSync:
             'workflows': [],
             'other': []
         }
-        
+
         for line in status_lines:
             if not line.strip():
                 continue
-            
+
             # Parse git status format: XY filename
             parts = line.split(maxsplit=1)
             if len(parts) < 2:
                 continue
-            
+
             filepath = parts[1]
-            
+
             # Categorize by path patterns
             if filepath.startswith(('src/', 'api/', 'modules/')) and filepath.endswith('.py'):
                 categories['source'].append(filepath)
@@ -334,33 +340,33 @@ class ComprehensiveSync:
                 categories['config'].append(filepath)
             else:
                 categories['other'].append(filepath)
-        
+
         # Remove empty categories
         return {k: v for k, v in categories.items() if v}
-    
+
     def _phase2_intelligent_staging(self, phase1_details: Dict) -> PhaseResult:
         """Phase 2: Smart staging based on file categories"""
         phase_start = time.time()
         logger.info("Phase 2: Staging files intelligently...")
-        
+
         try:
             categories = phase1_details.get('categories', {})
-            
+
             # Stage in priority order
             priority_order = ['source', 'tests', 'workflows', 'docs', 'config', 'other']
             staged_count = 0
-            
+
             for category in priority_order:
                 files = categories.get(category, [])
                 if not files:
                     continue
-                
+
                 logger.debug(f"Staging {len(files)} {category} files")
                 for filepath in files:
                     result = self._run_command(['git', 'add', filepath])
                     if result.returncode == 0:
                         staged_count += 1
-            
+
             return PhaseResult(
                 phase_number=2,
                 phase_name="Intelligent Staging",
@@ -369,7 +375,7 @@ class ComprehensiveSync:
                 message=f"Staged {staged_count} files by category",
                 details={'staged_count': staged_count, 'categories': list(categories.keys())}
             )
-            
+
         except Exception as e:
             return PhaseResult(
                 phase_number=2,
@@ -378,16 +384,16 @@ class ComprehensiveSync:
                 duration_seconds=time.time() - phase_start,
                 message=f"Error during staging: {e}"
             )
-    
+
     def _phase3_generate_commit(self, phase1_details: Dict, phase2_details: Dict) -> PhaseResult:
         """Phase 3: Generate semantic commit message and commit"""
         phase_start = time.time()
         logger.info("Phase 3: Generating commit...")
-        
+
         try:
             # Generate semantic commit message
             commit_message = self._generate_commit_message(phase1_details)
-            
+
             # Create commit
             result = self._run_command(['git', 'commit', '-m', commit_message])
             if result.returncode != 0:
@@ -398,11 +404,11 @@ class ComprehensiveSync:
                     duration_seconds=time.time() - phase_start,
                     message="Failed to create commit"
                 )
-            
+
             # Get commit SHA
             sha_result = self._run_command(['git', 'rev-parse', 'HEAD'])
             commit_sha = sha_result.stdout.strip() if sha_result.returncode == 0 else None
-            
+
             return PhaseResult(
                 phase_number=3,
                 phase_name="Generate & Commit",
@@ -411,7 +417,7 @@ class ComprehensiveSync:
                 message=f"Commit created: {commit_sha[:8] if commit_sha else 'unknown'}",
                 details={'commit_sha': commit_sha, 'commit_message': commit_message}
             )
-            
+
         except Exception as e:
             return PhaseResult(
                 phase_number=3,
@@ -420,12 +426,12 @@ class ComprehensiveSync:
                 duration_seconds=time.time() - phase_start,
                 message=f"Error creating commit: {e}"
             )
-    
+
     def _generate_commit_message(self, phase1_details: Dict) -> str:
         """Generate semantic commit message based on changes"""
         categories = phase1_details.get('categories', {})
         files_changed = phase1_details.get('files_changed', 0)
-        
+
         # Determine commit type based on predominant category
         if categories.get('source') and len(categories['source']) > len(categories.get('tests', [])):
             commit_type = "feat" if files_changed > 5 else "refactor"
@@ -445,36 +451,36 @@ class ComprehensiveSync:
         else:
             commit_type = self.config.default_commit_type
             scope = "project"
-        
+
         # Generate summary
         category_summary = ", ".join([f"{len(v)} {k}" for k, v in categories.items()])
         summary = f"Update {files_changed} files ({category_summary})"
-        
+
         # Use template
         commit_message = self.config.commit_message_template.format(
             type=commit_type,
             scope=scope,
             summary=summary
         )
-        
+
         # Add DLP tag
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         commit_message += f"\n\nDLP: CMD-CHAIN-SYNC-321-{timestamp}"
-        
+
         return commit_message
-    
+
     def _phase4_sync_to_main(self) -> PhaseResult:
         """Phase 4: Safe synchronization with remote"""
         phase_start = time.time()
         logger.info("Phase 4: Syncing to main...")
-        
+
         try:
             # Pull with rebase if configured
             if self.config.use_rebase:
                 pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
             else:
                 pull_result = self._run_command(['git', 'pull', 'origin', 'main'])
-            
+
             if pull_result.returncode != 0:
                 return PhaseResult(
                     phase_number=4,
@@ -484,7 +490,7 @@ class ComprehensiveSync:
                     message="Failed to pull from remote",
                     warnings=["Check for conflicts or network issues"]
                 )
-            
+
             # Push if auto_push enabled
             if self.config.auto_push:
                 push_result = self._run_command(['git', 'push', 'origin', 'main'])
@@ -496,7 +502,7 @@ class ComprehensiveSync:
                         duration_seconds=time.time() - phase_start,
                         message="Failed to push to remote"
                     )
-            
+
             return PhaseResult(
                 phase_number=4,
                 phase_name="Sync to Main",
@@ -504,7 +510,7 @@ class ComprehensiveSync:
                 duration_seconds=time.time() - phase_start,
                 message="Successfully synced with remote"
             )
-            
+
         except Exception as e:
             return PhaseResult(
                 phase_number=4,
@@ -513,15 +519,15 @@ class ComprehensiveSync:
                 duration_seconds=time.time() - phase_start,
                 message=f"Error during sync: {e}"
             )
-    
+
     def _phase5_quick_validation(self, phase1_details: Dict) -> PhaseResult:
         """Phase 5: Context-aware validation (optimized for speed)"""
         phase_start = time.time()
         logger.info("Phase 5: Running validation...")
-        
+
         try:
             warnings = []
-            
+
             # Skip validation for docs-only changes if configured
             if self.config.skip_validation_on_docs_only and phase1_details.get('is_docs_only'):
                 return PhaseResult(
@@ -532,12 +538,12 @@ class ComprehensiveSync:
                     message="Skipped validation (docs-only changes)",
                     warnings=["Validation skipped per configuration"]
                 )
-            
+
             # Run lint check
             lint_result = self._run_command(self.config.lint_command.split())
             if lint_result.returncode != 0:
                 warnings.append("Lint check found issues (non-blocking)")
-            
+
             # Run tests based on validation level
             if not (self.config.skip_tests_on_config_only and phase1_details.get('is_config_only')):
                 if self.config.validation_level == "fast":
@@ -547,10 +553,10 @@ class ComprehensiveSync:
                     test_result = self._run_command(test_cmd.split())
                 else:  # complete
                     test_result = self._run_command(['pytest', '-x', '--tb=short', '-q'])
-                
+
                 if test_result.returncode != 0:
                     warnings.append("Some tests failed (non-blocking)")
-            
+
             return PhaseResult(
                 phase_number=5,
                 phase_name="Quick Validation",
@@ -559,7 +565,7 @@ class ComprehensiveSync:
                 message="Validation complete",
                 warnings=warnings
             )
-            
+
         except Exception as e:
             return PhaseResult(
                 phase_number=5,
@@ -569,27 +575,27 @@ class ComprehensiveSync:
                 message=f"Validation completed with errors: {e}",
                 warnings=["Validation errors are non-blocking"]
             )
-    
+
     def _phase6_performance_verification(self) -> PhaseResult:
         """Phase 6: Performance metrics and final verification"""
         phase_start = time.time()
         logger.info("Phase 6: Verifying performance...")
-        
+
         total_duration = time.time() - self.start_time
-        
+
         # Check if within performance target
         within_target = total_duration <= self.config.performance_target_seconds
-        
+
         # Verify working tree is clean
         status_result = self._run_command(['git', 'status', '--porcelain'])
         is_clean = status_result.returncode == 0 and not status_result.stdout.strip()
-        
+
         warnings = []
         if not within_target:
             warnings.append(f"Execution took {total_duration:.1f}s (target: {self.config.performance_target_seconds}s)")
         if not is_clean:
             warnings.append("Working tree not completely clean")
-        
+
         return PhaseResult(
             phase_number=6,
             phase_name="Performance Verification",
@@ -599,7 +605,7 @@ class ComprehensiveSync:
             details={'total_duration': total_duration, 'is_clean': is_clean},
             warnings=warnings
         )
-    
+
     def _run_command(self, cmd: List[str], timeout: Optional[int] = None) -> subprocess.CompletedProcess:
         """Execute shell command with timeout"""
         timeout = timeout or self.config.timeout_seconds
@@ -615,9 +621,9 @@ class ComprehensiveSync:
         except subprocess.TimeoutExpired:
             logger.error(f"Command timed out after {timeout}s: {' '.join(cmd)}")
             raise
-    
+
     def _build_result(self, success: bool, commit_sha: Optional[str] = None,
-                     files_changed: int = 0, summary_message: str = "") -> SyncResult:
+                      files_changed: int = 0, summary_message: str = "") -> SyncResult:
         """Build final sync result"""
         total_duration = time.time() - self.start_time
         return SyncResult(
@@ -633,14 +639,14 @@ class ComprehensiveSync:
 def execute_321(config_path: Optional[str] = None, workspace_path: Optional[str] = None) -> SyncResult:
     """
     Execute #321//. command - Comprehensive Sync & Validate
-    
+
     Args:
         config_path: Optional path to JSON configuration file
         workspace_path: Optional workspace directory (defaults to current)
-    
+
     Returns:
         SyncResult with execution details and completion report
-    
+
     Example:
         >>> result = execute_321()
         >>> print(result.format_report())
@@ -649,21 +655,21 @@ def execute_321(config_path: Optional[str] = None, workspace_path: Optional[str]
     """
     config = SyncConfig.load(Path(config_path) if config_path else None)
     workspace = Path(workspace_path) if workspace_path else None
-    
+
     sync = ComprehensiveSync(config=config, workspace_path=workspace)
     result = sync.execute()
-    
+
     # Print completion report
     print(result.format_report())
-    
+
     return result
 
 
 if __name__ == '__main__':
     # Command-line execution
     import sys
-    
+
     config_path = sys.argv[1] if len(sys.argv) > 1 else None
     result = execute_321(config_path=config_path)
-    
+
     sys.exit(0 if result.success else 1)

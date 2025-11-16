@@ -65,46 +65,46 @@ class CommandSuggestion:
 class ContextAwareSuggester:
     """
     Intelligent command suggestion and auto-execution system.
-    
+
     Monitors conversation context and repo state to:
     - Auto-execute optimal commands behind the scenes
     - Suggest command chains when user would benefit
     - Use symbolic aliases for clarity
     - Route smartly based on operation type
     """
-    
+
     def __init__(self):
         self.conversation_history = []
         self.repo_state = {}
         self.last_commands_executed = []
         self.suggestion_history = []
-        
+
         # Define which commands should auto-execute vs suggest
         self.auto_execute_commands = {
             'CONTEXT', 'STATUS', 'ANALYZE', 'CHECK',  # Read-only operations
             'FIND', 'GREP', 'TREE', 'IMPORTS',        # Discovery operations
             'DIFF', 'TRACE', 'SEARCH',                # Analysis operations
         }
-        
+
         self.suggest_only_commands = {
             'COMMIT', 'PUSH', 'DEPLOY', 'MERGE',      # Critical operations
             'CLEAN', 'REBASE', 'HOTFIX',              # Destructive operations
             'SHIPIT', 'AUDIT', 'POLISH',              # Major workflows
         }
-        
+
         self.ask_permission_commands = {
             'REBASE', 'MERGE', 'DEPLOY', 'HOTFIX',    # Risky operations
         }
-    
+
     def analyze_user_intent(self, user_message: str) -> List[CommandSuggestion]:
         """
         Analyze user's message and suggest optimal commands.
-        
+
         Returns list of suggestions with symbolic aliases.
         """
         suggestions = []
         message_lower = user_message.lower()
-        
+
         # Pattern 1: Testing intent
         if any(word in message_lower for word in ['test', 'run tests', 'check tests']):
             if 'fast' in message_lower or 'quick' in message_lower:
@@ -140,7 +140,7 @@ class ContextAwareSuggester:
                     expected_outcome='Run all unit tests with verbose output',
                     estimated_time='< 60s'
                 ))
-        
+
         # Pattern 2: Code quality intent
         if any(word in message_lower for word in ['format', 'lint', 'clean up', 'fix style']):
             suggestions.append(CommandSuggestion(
@@ -153,7 +153,7 @@ class ContextAwareSuggester:
                 expected_outcome='Auto-format with black+isort, fix linting',
                 estimated_time='< 5s'
             ))
-        
+
         # Pattern 3: Git status intent
         if any(word in message_lower for word in ['status', 'what changed', 'git', 'changes']):
             suggestions.append(CommandSuggestion(
@@ -166,7 +166,7 @@ class ContextAwareSuggester:
                 expected_outcome='Show git status with tracking info',
                 estimated_time='< 1s'
             ))
-        
+
         # Pattern 4: Ready to commit
         if any(word in message_lower for word in ['ready to commit', 'commit', 'save changes']):
             # Check if we should run validation first
@@ -180,7 +180,7 @@ class ContextAwareSuggester:
                 expected_outcome='Run pre-commit checks then commit',
                 estimated_time='< 30s'
             ))
-        
+
         # Pattern 5: Ready to deploy
         if any(word in message_lower for word in ['deploy', 'ship', 'release', 'publish']):
             suggestions.append(CommandSuggestion(
@@ -193,7 +193,7 @@ class ContextAwareSuggester:
                 expected_outcome='Run complete CI: test + lint + security + build + validate',
                 estimated_time='< 2min'
             ))
-        
+
         # Pattern 6: Security/audit intent
         if any(word in message_lower for word in ['security', 'audit', 'vulnerabilities', 'safe']):
             suggestions.append(CommandSuggestion(
@@ -206,7 +206,7 @@ class ContextAwareSuggester:
                 expected_outcome='Run safety + bandit + dependency checks',
                 estimated_time='< 1min'
             ))
-        
+
         # Pattern 7: Documentation intent
         if any(word in message_lower for word in ['document', 'readme', 'docs', 'documentation']):
             suggestions.append(CommandSuggestion(
@@ -219,7 +219,7 @@ class ContextAwareSuggester:
                 expected_outcome='Auto-generate README sections',
                 estimated_time='< 10s'
             ))
-        
+
         # Pattern 8: Finding/searching intent
         if any(word in message_lower for word in ['find', 'search', 'where is', 'locate']):
             if 'file' in message_lower:
@@ -244,7 +244,7 @@ class ContextAwareSuggester:
                     expected_outcome='Search code with regex + context',
                     estimated_time='< 3s'
                 ))
-        
+
         # Pattern 9: Before committing workflow
         if any(word in message_lower for word in ['before commit', 'pre-commit', 'ready to commit']):
             suggestions.append(CommandSuggestion(
@@ -257,17 +257,17 @@ class ContextAwareSuggester:
                 expected_outcome='Format + lint fix + fast tests',
                 estimated_time='< 15s'
             ))
-        
+
         return suggestions
-    
+
     def detect_repo_state_triggers(self) -> List[CommandSuggestion]:
         """
         Analyze current repo state and suggest proactive commands.
-        
+
         This runs automatically to detect optimization opportunities.
         """
         suggestions = []
-        
+
         # Check if there are uncommitted changes
         # (In real implementation, would check actual git status)
         if self.repo_state.get('has_uncommitted_changes'):
@@ -281,7 +281,7 @@ class ContextAwareSuggester:
                 expected_outcome='Show current changes',
                 estimated_time='< 1s'
             ))
-        
+
         # Check if tests are failing
         if self.repo_state.get('tests_failing'):
             suggestions.append(CommandSuggestion(
@@ -294,7 +294,7 @@ class ContextAwareSuggester:
                 expected_outcome='Re-run failed tests to verify fixes',
                 estimated_time='< 30s'
             ))
-        
+
         # Check if formatting issues exist
         if self.repo_state.get('format_issues'):
             suggestions.append(CommandSuggestion(
@@ -307,13 +307,13 @@ class ContextAwareSuggester:
                 expected_outcome='Auto-format all Python files',
                 estimated_time='< 5s'
             ))
-        
+
         return suggestions
-    
+
     def format_suggestion_for_user(self, suggestion: CommandSuggestion) -> str:
         """
         Format a suggestion as user-friendly text with symbolic alias.
-        
+
         Returns string like:
         "💡 I can run #QUICKFIX//. to format + lint + test (< 15s)"
         """
@@ -323,22 +323,28 @@ class ContextAwareSuggester:
             ExecutionMode.ASK_PERMISSION: "🤔",
             ExecutionMode.BOTH: "✨"
         }
-        
+
         emoji = emoji_map.get(suggestion.execution_mode, "💡")
-        
+
         if suggestion.execution_mode == ExecutionMode.AUTO_BEHIND_SCENES:
             return f"{emoji} Running {suggestion.symbolic_alias} behind the scenes: {suggestion.expected_outcome}"
         elif suggestion.execution_mode == ExecutionMode.SUGGEST_TO_USER:
-            return f"{emoji} Suggested: {suggestion.symbolic_alias} - {suggestion.reason}\n   → {suggestion.expected_outcome} ({suggestion.estimated_time})"
+            return (
+                f"{emoji} Suggested: {suggestion.symbolic_alias} - {suggestion.reason}\n"
+                f"   → {suggestion.expected_outcome} ({suggestion.estimated_time})"
+            )
         elif suggestion.execution_mode == ExecutionMode.ASK_PERMISSION:
-            return f"{emoji} Should I run {suggestion.symbolic_alias}? {suggestion.reason}\n   → {suggestion.expected_outcome} ({suggestion.estimated_time})"
+            return (
+                f"{emoji} Should I run {suggestion.symbolic_alias}? {suggestion.reason}\n"
+                f"   → {suggestion.expected_outcome} ({suggestion.estimated_time})"
+            )
         else:
             return f"{emoji} {suggestion.symbolic_alias}: {suggestion.expected_outcome}"
-    
+
     def should_auto_execute(self, suggestion: CommandSuggestion) -> bool:
         """
         Determine if command should auto-execute behind the scenes.
-        
+
         Criteria:
         - High confidence (> 0.8)
         - Non-destructive operation
@@ -347,21 +353,21 @@ class ContextAwareSuggester:
         """
         if suggestion.execution_mode == ExecutionMode.SUGGEST_TO_USER:
             return False
-        
+
         if suggestion.execution_mode == ExecutionMode.ASK_PERMISSION:
             return False
-        
+
         if suggestion.confidence < 0.8:
             return False
-        
+
         # Check if any commands are in suggest-only list
         for cmd in suggestion.commands:
             cmd_name = cmd.replace('#', '').replace('//.', '').strip()
             if cmd_name in self.suggest_only_commands:
                 return False
-        
+
         return suggestion.execution_mode == ExecutionMode.AUTO_BEHIND_SCENES
-    
+
     def generate_command_chain_suggestion(
         self,
         user_intent: str,
@@ -369,14 +375,14 @@ class ContextAwareSuggester:
     ) -> Optional[CommandSuggestion]:
         """
         Generate optimal command chain based on user's intent.
-        
+
         Example:
         Intent: "make sure everything is good before deploying"
         Chain: #TESTUNIT//. #LINTCHECK//. #SECURITY//. #AUDIT//.
         Alias: #SHIPIT//.
         """
         intent_lower = user_intent.lower()
-        
+
         # Map common intents to command chains
         intent_chains = {
             'quick fix': (['#FMT//.', '#LINTFIX//.', '#TESTFAST//.'], '#QUICKFIX//.'),
@@ -385,7 +391,7 @@ class ContextAwareSuggester:
             'full check': (['#CHECK//.', '#TESTUNIT//.', '#SECURITY//.'], '#VALIDATE//.'),
             'audit security': (['#SECURITY//.', '#AUDIT//.'], '#AUDIT//.'),
         }
-        
+
         for intent_key, (chain, alias) in intent_chains.items():
             if intent_key in intent_lower:
                 return CommandSuggestion(
@@ -398,9 +404,9 @@ class ContextAwareSuggester:
                     expected_outcome=f'Execute {len(chain)}-step workflow',
                     estimated_time='< 2min'
                 )
-        
+
         return None
-    
+
     def track_execution(self, command: str, success: bool, output: str):
         """Track command execution for learning and optimization"""
         self.last_commands_executed.append({
@@ -409,42 +415,42 @@ class ContextAwareSuggester:
             'output': output,
             'timestamp': 'now'  # Would use actual timestamp
         })
-    
+
     def get_suggestion_prompt(self, suggestions: List[CommandSuggestion]) -> str:
         """
         Generate user-facing prompt with command suggestions.
-        
+
         Returns formatted text with symbolic aliases and options.
         """
         if not suggestions:
             return ""
-        
+
         lines = ["\n💡 Command Suggestions:"]
-        
+
         for i, sugg in enumerate(suggestions, 1):
             if sugg.execution_mode == ExecutionMode.AUTO_BEHIND_SCENES:
                 lines.append(f"   ⚡ Auto-executing {sugg.symbolic_alias}: {sugg.expected_outcome}")
             else:
                 lines.append(f"   {i}. {sugg.symbolic_alias} - {sugg.reason}")
                 lines.append(f"      → {sugg.expected_outcome} ({sugg.estimated_time})")
-        
+
         lines.append("\nYou can:")
         lines.append("- Reference by alias: 'Run #QUICKFIX//.'")
         lines.append("- Reference by number: 'Run option 1'")
         lines.append("- Compose chains: '#FMT//. #TESTFAST//. #COMMIT//.'")
-        
+
         return "\n".join(lines)
 
 
 def demo():
     """Demonstration of context-aware suggestion system"""
     suggester = ContextAwareSuggester()
-    
+
     print("╔══════════════════════════════════════════════════════════╗")
     print("║  Context-Aware Command Suggester - Demo                 ║")
     print("╚══════════════════════════════════════════════════════════╝")
     print()
-    
+
     test_messages = [
         "Let's run tests quickly",
         "I want to format and lint the code",
@@ -453,16 +459,16 @@ def demo():
         "Can you check for security issues?",
         "I need to find a specific file",
     ]
-    
+
     for msg in test_messages:
         print(f"User: '{msg}'")
         suggestions = suggester.analyze_user_intent(msg)
-        
+
         if suggestions:
             for sugg in suggestions:
                 print(f"  {suggester.format_suggestion_for_user(sugg)}")
                 if suggester.should_auto_execute(sugg):
-                    print(f"    [Auto-executing behind the scenes...]")
+                    print("    [Auto-executing behind the scenes...]")
         else:
             print("  [No specific command suggestions]")
         print()

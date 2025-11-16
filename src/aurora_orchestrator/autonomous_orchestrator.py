@@ -264,6 +264,10 @@ class AuroraOrchestrator:
             self.stats['total_decisions'],
             self.stats['total_optimizations']
         )
+
+    async def _initialize_components(self):
+        """Initialize orchestration components"""
+        self.logger.info("🔧 Initializing orchestration components...")
         try:
             from src.aurora_orchestrator.system_observer import SystemObserver
             self.system_observer = SystemObserver(config=self.config)
@@ -662,7 +666,9 @@ class AuroraOrchestrator:
         """Execute optimization decision"""
         if self.optimization_executor:
             try:
-                return await self.optimization_executor.execute_optimization(decision)
+                from dataclasses import asdict
+                outcome = await self.optimization_executor.execute_optimization(decision)
+                return asdict(outcome)  # Convert dataclass to dict
             except Exception as e:
                 self.logger.error("❌ Optimization execution error: %s", e)
                 return None

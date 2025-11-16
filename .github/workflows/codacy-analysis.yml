@@ -16,6 +16,7 @@ jobs:
   codacy-security-scan:
     name: Codacy Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
       - name: Checkout code
@@ -23,6 +24,7 @@ jobs:
 
       - name: Run Codacy Analysis CLI
         uses: codacy/codacy-analysis-cli-action@master
+        timeout-minutes: 8
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
@@ -41,6 +43,7 @@ jobs:
   codacy-coverage-reporter:
     name: Codacy Coverage Report
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: codacy-security-scan
     if: always()
     
@@ -73,6 +76,7 @@ jobs:
   quality-gate:
     name: Quality Gate Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [codacy-security-scan, codacy-coverage-reporter]
     if: always()
     

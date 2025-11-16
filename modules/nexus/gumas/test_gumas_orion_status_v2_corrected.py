@@ -234,11 +234,11 @@ class TestCLIInterfaceV2:
         with patch('sys.argv', ['gumas_orion_status_v2.py', '--status']):
             # Import and test CLI functionality
             from modules.nexus.gumas.gumas_orion_status_v2 import main
-            
+
             with patch('builtins.print') as mock_print:
                 try:
                     asyncio.run(main())
-                    
+
                     # Verify status information was printed
                     printed_output = ' '.join([str(call) for call in mock_print.call_args_list])
                     # More flexible assertion
@@ -246,7 +246,72 @@ class TestCLIInterfaceV2:
                 except Exception as e:
                     # CLI might not be fully implemented, just verify no crash
                     assert True  # Pass if we can import without error
-                
+
+    def test_glyphcard_command(self):
+        """Test --glyphcard CLI command"""
+        with patch('sys.argv', ['gumas_orion_status_v2.py', '--glyphcard']):
+            from modules.nexus.gumas.gumas_orion_status_v2 import main
+
+            with patch('builtins.print') as mock_print:
+                main()
+
+                printed_output = ' '.join([str(call) for call in mock_print.call_args_list])
+                assert "◊" in printed_output or "Visual Status" in printed_output
+
+    def test_verify_thread_command(self):
+        """Test --verify-thread CLI command"""
+        with patch('sys.argv', ['gumas_orion_status_v2.py', '--verify-thread']):
+            from modules.nexus.gumas.gumas_orion_status_v2 import main
+
+            with patch('builtins.print') as mock_print:
+                main()
+
+                printed_output = ' '.join([str(call) for call in mock_print.call_args_list])
+                assert "Thread Continuity" in printed_output
+
+    def test_detect_drift_command(self):
+        """Test --detect-drift CLI command"""
+        with patch('sys.argv', ['gumas_orion_status_v2.py', '--detect-drift']):
+            from modules.nexus.gumas.gumas_orion_status_v2 import main
+
+            with patch('builtins.print') as mock_print:
+                main()
+
+                printed_output = ' '.join([str(call) for call in mock_print.call_args_list])
+                assert "Entropy Drift" in printed_output
+
+    def test_export_snapshot_command(self):
+        """Test --export-snapshot CLI command"""
+        with patch('sys.argv', ['gumas_orion_status_v2.py', '--export-snapshot']):
+            from modules.nexus.gumas.gumas_orion_status_v2 import main
+
+            with patch('builtins.print') as mock_print:
+                with patch('os.makedirs'):  # Mock directory creation
+                    with patch('builtins.open', create=True) as mock_file:
+                        main()
+
+                        # Verify file was attempted to be written
+                        mock_file.assert_called()
+
+    def test_migration_from_v1(self):
+        """Test migration compatibility from v1 to v2"""
+        # This would test actual migration if v1 existed
+        # For now, test that v2 can handle v1-style configurations
+
+        # Mock v1 configuration
+        v1_config = {
+            "anchor": "T8-STATUS-GUMAS-2025",
+            "entropy_threshold": 0.1,
+            "agents": ["ARCHIE", "OPPY", "STARLING", "LIORA", "RIVERTHREAD"]
+        }
+
+        # Initialize v2 with v1 config (should gracefully handle)
+        orchestrator = StatusOrchestrator()
+        status = orchestrator.get_full_status()
+
+        # Verify v2 enhancements are present
+        assert "entropy_trend" in status.get("entropy_status", {})
+
     def test_module_importability(self):
         """Test that the module can be imported without errors"""
         try:

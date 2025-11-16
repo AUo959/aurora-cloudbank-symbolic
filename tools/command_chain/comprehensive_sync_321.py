@@ -469,6 +469,57 @@ class ComprehensiveSync:
 
         return commit_message
 
+    def _handle_conflict_prompt(self, phase_start: float) -> PhaseResult:
+        """Handle conflicts with prompt strategy - provide guidance"""
+        # Get list of conflicted files
+        status_result = self._run_command(['git', 'status', '--porcelain'])
+        conflicted_files = []
+        if status_result.returncode == 0 and status_result.stdout:
+            for line in status_result.stdout.split('\n'):
+                if line.startswith('UU') or line.startswith('AA') or line.startswith('DD'):
+                    conflicted_files.append(line[3:].strip())
+        
+        conflict_msg = "Merge conflicts detected"
+        if conflicted_files:
+            conflict_msg += f" in {len(conflicted_files)} file(s)"
+        
+        return PhaseResult(
+            phase_number=4,
+            phase_name="Sync to Main",
+            success=False,
+            duration_seconds=time.time() - phase_start,
+            message=conflict_msg,
+            details={'conflicted_files': conflicted_files},
+            warnings=[
+                "Manual resolution required:",
+                "1. Edit conflicted files to resolve markers",
+                "2. Run: git add <resolved-files>",
+                "3. Run: git rebase --continue",
+                "4. Retry sync with #SYNC//. or #321//."
+            ]
+        )
+    
+    def _handle_conflict_abort(self, phase_start: float) -> PhaseResult:
+        """Handle conflicts with abort strategy - preserve work"""
+        # Abort the rebase/merge
+        self._run_command(['git', 'rebase', '--abort'])
+        
+        return PhaseResult(
+            phase_number=4,
+            phase_name="Sync to Main",
+            success=False,
+            duration_seconds=time.time() - phase_start,
+            message="Conflicts detected - aborted to preserve work",
+            warnings=[
+                "Rebase aborted to protect local changes",
+                "To resolve manually:",
+                "1. Run: git pull origin main",
+                "2. Resolve conflicts in affected files",
+                "3. Commit resolved changes",
+                "4. Retry #321//. or #SYNC//."
+            ]
+        )
+
     def _phase4_sync_to_main(self) -> PhaseResult:
         """Phase 4: Safe synchronization with remote"""
         phase_start = time.time()
@@ -482,13 +533,27 @@ class ComprehensiveSync:
                 pull_result = self._run_command(['git', 'pull', 'origin', 'main'])
 
             if pull_result.returncode != 0:
+                # Enhanced conflict detection
+                conflict_indicators = ['CONFLICT', 'conflict', 'Merge conflict']
+                error_output = pull_result.stderr.lower() if pull_result.stderr else ""
+                has_conflict = any(indicator.lower() in error_output for indicator in conflict_indicators)
+                
+                if has_conflict:
+                    # Handle conflict based on strategy
+                    if self.config.conflict_resolution_strategy == "prompt":
+                        return self._handle_conflict_prompt(phase_start)
+                    elif self.config.conflict_resolution_strategy == "abort":
+                        return self._handle_conflict_abort(phase_start)
+                    else:
+                        return self._handle_conflict_prompt(phase_start)  # Default to prompt
+                
                 return PhaseResult(
                     phase_number=4,
                     phase_name="Sync to Main",
                     success=False,
                     duration_seconds=time.time() - phase_start,
                     message="Failed to pull from remote",
-                    warnings=["Check for conflicts or network issues"]
+                    warnings=["Check for network issues or repository access"]
                 )
 
             # Push if auto_push enabled

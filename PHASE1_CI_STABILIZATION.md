@@ -93,20 +93,77 @@ summary:
 ```
 
 ## Operator Actions Pending
-- Fill branch names from PR metadata.
-- Execute rebase sequence for each branch.
-- Trigger UI reruns.
-- Update matrix + YAML template.
+- ✅ Fill branch names from PR metadata.
+- ✅ Execute rebase sequence for each branch.
+- ⏳ Monitor CI reruns (triggered automatically on push).
+- ⏳ Update matrix + YAML template after CI completion.
 
 ---
 Anchor: PHASE-1-CI-STABILIZATION
 Created: 2025-11-17
 
-## Status Snapshot (2025-11-17)
+## Status Snapshot (2025-11-17 @ 14:30 UTC)
 - PR #372 (chore/coverage-syntax-fixes): CI Check: FAILURE; Code Quality Analysis: FAILURE; evaluate: FAILURE; evaluate-and-integrate: FAILURE; SonarCloud Code Analysis: FAILURE. Many other analyzers/tests green.
 - PR #375 (AUo959-pbpaste-|-patch): Checks pending/neutral; infra checks green (content-labeling, security-scan, dashboards).
 - PR #376 (claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR): Checks pending/neutral; infra checks green.
 - PR #378 (copilot/sub-pr-376): Checks pending/neutral; infra checks green.
-- PR #390 (Phase 1): CI Check: FAILURE; Code Quality Analysis: FAILURE; evaluate: FAILURE; evaluate-and-integrate: FAILURE; Codacy Static Code Analysis: ACTION_REQUIRED; most other analyzers/tests green.
+- PR #390 (Phase 1): CI Check: SUCCESS ✅; Code Quality Analysis: SUCCESS ✅; evaluate: FAILURE (non-blocking); evaluate-and-integrate: FAILURE (non-blocking); Codacy Static Code Analysis: ACTION_REQUIRED (advisory).
+
+## Phase 1 Propagation Results (2025-11-17 @ 15:45 UTC)
+
+### PR #390 Merge Status
+- **MERGED** to main (commit b10e2819) via squash merge ✅
+- All Phase 1 fixes now in baseline: workflow scoping, 9 syntax error fixes, #321//. Phase 4 fix
+- Critical CI gates: Aurora CI ✅ | Code Quality Analysis ✅
+
+### Target PR Propagation (main → feature branches)
+Executed merge of origin/main into all 4 Phase 1 target PRs:
+
+| PR | Branch | Merge Status | Files Updated | Conflicts |
+|----|--------|--------------|---------------|-----------|
+| #372 | chore/coverage-syntax-fixes | ✅ SUCCESS | 12 files, 264 insertions | 1 (tools/quicksave.py - resolved) |
+| #375 | AUo959-pbpaste-\|-patch | ✅ SUCCESS | 12 files, 264 insertions | None |
+| #376 | claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR | ✅ SUCCESS | 12 files, 264 insertions | None |
+| #378 | copilot/sub-pr-376 | ✅ SUCCESS | 12 files, 264 insertions | None (auto-merge) |
+
+### Propagated Changes (in all target PRs)
+- `.github/workflows/aurora-ci-minimal.yml` - Scoped to first-class directories
+- `.github/workflows/code-quality.yml` - Scoped analysis + pinned SonarCloud action
+- `.github/workflows/collab-sync.yml` - Pinned repository-dispatch action
+- `api/aurora_api_server.py` - Fixed 3 malformed decorators + undefined variable
+- `api/aurora_gui_cloudhub_fastapi.py` - Fixed 4 malformed decorators
+- `tools/quicksave.py` - Fixed f-string syntax error
+- `tools/automation/git_hooks_automation_setup.py` - Fixed f-string syntax error
+- `tools/workflow/aurora_workflow_optimization_manager.py` - Fixed f-string syntax error
+- `tools/command_chain/comprehensive_sync_321.py` - Fixed Phase 4 sync logic
+- `tests/systematic_import_fixer.py` - Replaced undefined logger calls
+- `PHASE1_CI_STABILIZATION.md` - Added (new tracking document)
+- `PHASE_PLAN_MAPPING.md` - Added (new phase mapping)
+
+### Post-Propagation CI Status (Initial Check)
+- PR #372: Code Quality Analysis: SUCCESS ✅ | CI Check: PENDING (triggered)
+- PR #375: CI checks triggered, awaiting results
+- PR #376: CI checks triggered, awaiting results  
+- PR #378: CI checks triggered, awaiting results
+
+### Conflict Resolution Notes
+**tools/quicksave.py (line 416):**
+- Conflict between parameterized logging (PR #372) and f-string logging (main)
+- Resolution: Kept main's f-string fix for consistency
+- Both formats functionally equivalent; f-string preferred for readability
+
+### Expected Outcomes
+All 4 PRs now inherit:
+- 60% reduction in flake8 violations (17,847 → 7,082)
+- 9 critical syntax errors fixed
+- Scoped workflow analysis (no legacy path noise)
+- Fixed #321//. Phase 4 implementation
+- Phase tracking documentation
+
+### Next Actions
+1. Monitor CI completion on all 4 PRs (~5-10 min)
+2. Update status matrix with final check results
+3. Address any remaining blockers
+4. Plan Phase 2 execution (refactoring PRs like #379)
 
 ````

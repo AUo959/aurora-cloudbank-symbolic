@@ -43,6 +43,11 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Legacy references detector (non-blocking)
+        continue-on-error: true
+        run: |
+          bash scripts/verify_removed_paths_unused.sh
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

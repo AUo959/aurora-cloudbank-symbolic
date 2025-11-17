@@ -5,6 +5,12 @@ on:
     branches: [ main, develop, refactor/** ]
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'api/**'
+      - 'src/**'
+      - 'modules/**'
+      - 'tools/**'
+      - 'tests/**'
   workflow_dispatch:
 
 permissions:
@@ -84,23 +90,44 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect first-class directory changes (gate)
+        id: detect
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.sha }}"
+          echo "Comparing $BASE_SHA...$HEAD_SHA"
+          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true)
+          echo "Changed files:\n$changed"
+          should_run=false
+          echo "$changed" | grep -E '^(api/|src/|tools/|tests/|modules/(hr_system|resilience_sentinel|gumas|symbolic_core|aumemmanager)/)' && should_run=true || true
+          echo "should_run=$should_run" >> $GITHUB_OUTPUT
+          if [ "$should_run" != "true" ]; then
+            echo "No first-class directory changes detected; quality gate will be skipped."
+          fi
 
       - name: Set up Python
+        if: steps.detect.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Install analysis tools
+        if: steps.detect.outputs.should_run == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install flake8 pylint
 
       - name: Run Flake8
+        if: steps.detect.outputs.should_run == 'true'
         run: |
           flake8 tools/command_chain/ tests/test_artifact_manager.py --max-line-length=120 --statistics
         continue-on-error: false
 
       - name: Quality Gate Summary
+        if: steps.detect.outputs.should_run == 'true'
         run: |
           echo "## 🎯 Quality Gate Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -109,3 +136,8 @@ jobs:
           echo "✅ Flake8 validation passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status:** PASS" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip summary
+        if: steps.detect.outputs.should_run != 'true'
+        run: |
+          echo "No first-class changes detected; Quality Gate skipped." >> $GITHUB_STEP_SUMMARY

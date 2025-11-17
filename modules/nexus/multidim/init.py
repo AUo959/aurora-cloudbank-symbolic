@@ -35,7 +35,7 @@ async def quick_demo():
     # Initialize dimensions
     print("\n🔄 Initializing dimensions...")
     init_result = await orchestrator.initialize_dimensions()
-    logger.info("Initialized {len(init_result["dimensions_initialized'])} dimensions")
+    logger.info(f"Initialized {len(init_result['dimensions_initialized'])} dimensions")
     
     # Show initial status
     print("\n📊 Initial Status:")

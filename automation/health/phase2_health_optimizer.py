@@ -466,7 +466,7 @@ if __name__ == '__main__':
         total_improvement = self.results['score_improvements']
         success_count = len([opt for opt in self.results['optimizations'] if opt['status'] == 'SUCCESS'])
         
-        logger.info("**Optimizations Applied:** {success_count}/{len(self.results["optimizations'])}")
+        logger.info(f"**Optimizations Applied:** {success_count}/{len(self.results['optimizations'])}")
         print(f"📈 **Total Score Improvement:** +{total_improvement:.1f} points")
         print(f"🎯 **Expected New Score:** 94.0 + {total_improvement:.1f} = {94.0 + total_improvement:.1f}/100")
         

@@ -146,7 +146,7 @@ class AuroraCLI:
                 result = cli.scan_file(file_path, confidence, region, output_format)
 
                 if "error" in result:
-                    logger.error("Error: {result["error']}")
+                    logger.error(f"Error: {result['error']}")
                     return
 
                 import json
@@ -196,7 +196,7 @@ class AuroraCLI:
                 result = cli.redact_file(file_path, output_path, strategy, confidence, region, in_place)
 
                 if "error" in result:
-                    logger.error("Error: {result["error']}")
+                    logger.error(f"Error: {result['error']}")
                     return
 
                 print(f"📄 File: {result['file']}")

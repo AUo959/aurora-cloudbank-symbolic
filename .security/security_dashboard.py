@@ -176,7 +176,7 @@ class SecurityDashboard:
         metrics = self.get_security_metrics()
         print(f"🛡️  Overall Status: {metrics['overall_status']}")
         print(f"📁 Files Scanned: {metrics['files_scanned']}")
-        logger.warning("Total Violations: {metrics["total_violations']}")
+        logger.warning(f"Total Violations: {metrics['total_violations']}")
         print(f"🕐 Last Scan: {metrics.get('last_scan', 'Never')}")
         
         print("\n🔍 Validator Results:")

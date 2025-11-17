@@ -26,8 +26,9 @@ def test_parse_requirements_file():
     print("🧪 Testing requirements file parsing...")
     
     detector = DependencyConflictDetector()
+    # Use requirements.txt instead of requirements-lock.txt (moved to .backup)
     packages = detector.parse_requirements_file(
-        Path(__file__).parent.parent / 'requirements-lock.txt'
+        Path(__file__).parent.parent / 'requirements.txt'
     )
     
     assert len(packages) > 0, "Should parse at least one package"

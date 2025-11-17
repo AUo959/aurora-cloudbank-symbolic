@@ -150,10 +150,10 @@ async def example_usage():
     })
 
     if result["success"]:
-        logger.info("Repository retrieved: {result["result'].get('full_name', 'N/A')}")
+        logger.info(f"Repository retrieved: {result['result'].get('full_name', 'N/A')}")
         print(f"📊 DLP tracking: {result['context_tag']}")
     else:
-        logger.error("Error: {result.get("error')}")
+        logger.error(f"Error: {result.get('error')}")
 
     # Example: List issues
     print("\n🤖 Agent executing: github_list_issues")
@@ -165,9 +165,9 @@ async def example_usage():
 
     if issues_result["success"]:
         issues = issues_result["result"]
-        logger.info("Found {len(issues)} open issues")
+        logger.info(f"Found {len(issues)} open issues")
     else:
-        logger.error("Error: {issues_result.get("error')}")
+        logger.error(f"Error: {issues_result.get('error')}")
 
     # Cleanup
     await github_connector.disconnect()

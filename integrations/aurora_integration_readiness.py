@@ -103,7 +103,7 @@ def main():
         if Path("node_modules").exists():
             logger.info("node_modules installed")
         else:
-            logger.warning("node_modules missing - run "npm install'")
+            logger.warning('node_modules missing - run "npm install"')
     else:
         logger.error("package.json missing")
 

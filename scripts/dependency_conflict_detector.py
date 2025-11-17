@@ -72,10 +72,10 @@ class DependencyConflictDetector:
                 if not line or line.startswith('#'):
                     continue
                     
-                # Handle package==version format
-                match = re.match(r'([a-zA-Z0-9_-]+)==([0-9.]+(?:[a-z0-9._-]*)?)', line)
+                # Handle package==version or package>=version format
+                match = re.match(r'([a-zA-Z0-9_-]+)(==|>=)([0-9.]+(?:[a-z0-9._-]*)?)', line)
                 if match:
-                    packages[match.group(1).lower()] = match.group(2)
+                    packages[match.group(1).lower()] = match.group(3)
                     
         return packages
         
@@ -247,8 +247,11 @@ class DependencyConflictDetector:
         """Generate comprehensive dependency conflict report"""
         conflicts = self.detect_conflicts()
         
-        # Count packages
-        lock_packages = self.parse_requirements_file(self.requirements_files['lock'])
+        # Count packages - use main requirements if lock doesn't exist
+        lock_file = self.requirements_files['lock']
+        if not lock_file.exists():
+            lock_file = self.requirements_files['main']
+        lock_packages = self.parse_requirements_file(lock_file)
         total_packages = len(lock_packages)
         
         # Generate resolution suggestions

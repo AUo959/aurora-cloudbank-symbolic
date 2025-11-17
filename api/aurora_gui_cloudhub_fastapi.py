@@ -25,6 +25,33 @@ from modules.symbolic_core.quantum_vsa import (
     quantum_symbolic_vector,
 )
 
+# Integration modules (graceful degradation). Use direct logging.getLogger to avoid undefined logger.
+_early_logger = logging.getLogger(__name__)
+try:
+    from src.entities.fleet import OPPYNavigator
+    OPPY_AVAILABLE = True
+except ImportError:
+    OPPY_AVAILABLE = False
+    _early_logger.warning("OPPY Navigator not available")
+
+try:
+    from modules.hr import AuroraHRModule, TeamLayer
+    HR_MODULE_AVAILABLE = True
+except ImportError:
+    HR_MODULE_AVAILABLE = False
+    _early_logger.warning("HR Module v3.0 not available")
+
+try:
+    from modules.quantum_forge import (
+        QuantumForge,
+        EthicsLevel,
+        FlowstateMode
+    )
+    QUANTUM_FORGE_AVAILABLE = True
+except ImportError:
+    QUANTUM_FORGE_AVAILABLE = False
+    _early_logger.warning("Quantum Forge not available")
+
 # Initialize RNG after all imports to satisfy linting rules
 _rng = np.random.default_rng()
 
@@ -185,7 +212,7 @@ def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
                     qc.cx(q, q + 1)
 
 
-@app.post("/upload/")  # verify_csrf inside
+@app.post("/upload/", dependencies=[Depends(security)])  # verify_csrf inside
 async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCredentials = Depends(security)):
     """Upload a bundle file with CSRF validation."""
     verify_csrf_token(token)
@@ -249,6 +276,68 @@ class GeometricProductRequest(BaseModel):
 class QuantumSymbolicVectorRequest(BaseModel):
     symbol: str
     dim: Optional[int] = 8
+
+
+# === OPPY Navigator Models ===
+class OPPYManeuverRequest(BaseModel):
+    vessel_id: str
+    maneuver_type: str
+    target_state: Dict[str, float]
+
+
+class OPPYExecuteRequest(BaseModel):
+    vessel_id: str
+    plan_id: str
+    delta_v_ms: float
+    burn_duration_s: float
+    fuel_cost_kg: float
+    anchor_impact: float
+    risk_assessment: float
+
+
+# === HR Module Models ===
+class HRPsychSafetyRequest(BaseModel):
+    member_name: str
+
+
+class HRConflictRequest(BaseModel):
+    indicators: Dict[str, Any]
+
+
+class HROnboardingRequest(BaseModel):
+    member_name: str
+    title: str
+    department: str
+    manager: str
+
+
+class HRCulturalHealthRequest(BaseModel):
+    layer: str  # "real_world", "simulation", or "governance"
+
+
+# === Quantum Forge Models ===
+class QFCreateAgentRequest(BaseModel):
+    agent_id: str
+    capabilities: List[str]
+    ethics_level: str = "balanced"
+    flowstate_mode: str = "generative"
+    symbolic_depth: int = 2
+
+
+class QFStoreMemoryRequest(BaseModel):
+    content: Dict[str, Any]
+    intent_alignment: float
+    tags: List[str] = []
+
+
+class QFReactivateRequest(BaseModel):
+    node_id: str
+    intent_query: str
+
+
+class QFEthicsCheckRequest(BaseModel):
+    action_vector: List[float]
+    baseline_vector: List[float]
 
 
 @app.post(  # verify_csrf inside
@@ -391,7 +480,18 @@ def mcp_bridge_health_check():
         functions_count = len(core_functions)
         external_hooks = mcp_data.get("external_hooks", {})
         mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
-        return _build_response(mcp_data, sec, functions_count, mesh_sync_active)
+        
+        # Include registered capsule information
+        router = MCPCommandRouter()
+        capsules = router.list_capsules()
+        
+        response = _build_response(mcp_data, sec, functions_count, mesh_sync_active)
+        response["registered_capsules"] = {
+            "count": len(capsules),
+            "capsules": capsules,
+            "status": "OPERATIONAL"
+        }
+        return response
     except Exception as e:  # pragma: no cover - defensive fallback
         logger.error("MCP health check failed: %s", str(e))
         return JSONResponse(
@@ -596,7 +696,7 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 @app.post(
     "/api/vsa/generate",
     summary="Generate Quantum VSA Vector",
-    dependencies=[Depends(security)],
+    dependencies=[Depends(security)]
 )  # verify_csrf inside
 def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Generate a quantum symbolic vector for a given symbol."""
@@ -617,12 +717,8 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
 
 
-@app.post(
-    "/api/vsa/bind",
-    summary="Bind two VSA vectors",
-    dependencies=[Depends(security)],
-)  # verify_csrf inside
-def bind_vsa_vectors(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])  # verify_csrf inside
+def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Bind two symbolic vectors using element-wise multiplication (XOR for bipolar)."""
     verify_csrf_token(token)
     try:
@@ -667,9 +763,9 @@ def bind_vsa_vectors(req: VSAOperationRequest, token: HTTPAuthorizationCredentia
 @app.post(
     "/api/vsa/similarity",
     summary="Calculate VSA similarity",
-    dependencies=[Depends(security)],
+    dependencies=[Depends(security)]
 )  # verify_csrf inside
-def calculate_vsa_similarity(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Calculate cosine similarity between two VSA vectors."""
     verify_csrf_token(token)
     try:
@@ -763,12 +859,9 @@ def advanced_geometric_operations(
 @app.post(
     "/api/quantum/circuit",
     summary="Generate Quantum Circuit",
-    dependencies=[Depends(security)],
+    dependencies=[Depends(security)]
 )  # verify_csrf inside
-async def generate_quantum_circuit_api(
-    req: QuantumCircuitRequest,
-    token: HTTPAuthorizationCredentials = Depends(security),
-):
+def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Generate and analyze a quantum circuit for symbolic operations."""
     verify_csrf_token(token)
 
@@ -852,6 +945,587 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
         connections.remove(websocket)
     except Exception as e:
         logger.error("WebSocket collab handler error: %s (ws_id=%s)", str(e)[:100], id(websocket))
+
+
+# ============================================================================
+# OPPY NAVIGATOR ENDPOINTS
+# ============================================================================
+
+@app.post(
+    "/oppy/plan_maneuver",
+    summary="Plan Navigation Maneuver",
+    response_description="Navigation plan with risk assessment",
+    tags=["oppy"],
+    dependencies=[Depends(security)]
+)
+def oppy_plan_maneuver(req: OPPYManeuverRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Plan a navigation maneuver for a vessel using OPPY Navigator.
+    
+    T1: OPPY_PLAN_MANEUVER
+    SRB: NAVIGATION_PLANNING
+    DLP: context_tag=oppy_plan_maneuver
+    """
+    verify_csrf_token(token)
+    
+    if not OPPY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="OPPY Navigator not available")
+    
+    try:
+        navigator = OPPYNavigator(vessel_id=req.vessel_id)
+        plan = navigator.plan_maneuver(req.maneuver_type, req.target_state)
+        
+        return {
+            "status": "success",
+            "plan": {
+                "plan_id": plan.plan_id,
+                "vessel_id": plan.vessel_id,
+                "maneuver_type": plan.maneuver_type,
+                "delta_v_ms": plan.delta_v_ms,
+                "burn_duration_s": plan.burn_duration_s,
+                "fuel_cost_kg": plan.fuel_cost_kg,
+                "anchor_impact": plan.anchor_impact,
+                "risk_assessment": plan.risk_assessment,
+            },
+            "context_tag": "oppy_plan_maneuver",
+            "anchor": "T1:OPPY_PLAN"
+        }
+    except Exception as e:
+        logger.error("OPPY plan maneuver error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to plan maneuver: {str(e)[:100]}")
+
+
+@app.post(
+    "/oppy/execute_maneuver",
+    summary="Execute Navigation Maneuver",
+    response_description="Maneuver execution result with triplex evaluation",
+    tags=["oppy"],
+    dependencies=[Depends(security)]
+)
+def oppy_execute_maneuver(req: OPPYExecuteRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Execute a planned navigation maneuver with triplex governance evaluation.
+    
+    T1: OPPY_EXECUTE_MANEUVER
+    SRB: NAVIGATION_EXECUTION
+    DLP: context_tag=oppy_execute_maneuver
+    """
+    verify_csrf_token(token)
+    
+    if not OPPY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="OPPY Navigator not available")
+    
+    try:
+        from src.entities.fleet.types import NavigationPlan
+        
+        navigator = OPPYNavigator(vessel_id=req.vessel_id)
+        
+        # Reconstruct the plan from request
+        plan = NavigationPlan(
+            plan_id=req.plan_id,
+            vessel_id=req.vessel_id,
+            maneuver_type="execute",
+            delta_v_ms=req.delta_v_ms,
+            burn_duration_s=req.burn_duration_s,
+            fuel_cost_kg=req.fuel_cost_kg,
+            anchor_impact=req.anchor_impact,
+            risk_assessment=req.risk_assessment,
+            triplex_status={}
+        )
+        
+        result = navigator.execute_maneuver(plan)
+        
+        return {
+            "status": "success",
+            "result": result,
+            "context_tag": "oppy_execute_maneuver",
+            "anchor": "T1:OPPY_EXECUTE"
+        }
+    except Exception as e:
+        logger.error("OPPY execute maneuver error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to execute maneuver: {str(e)[:100]}")
+
+
+@app.get(
+    "/oppy/telemetry/{vessel_id}",
+    summary="Get Vessel Telemetry",
+    response_description="Current vessel telemetry data",
+    tags=["oppy"]
+)
+def oppy_get_telemetry(vessel_id: str):
+    """
+    Get current telemetry data for a vessel.
+    
+    T1: OPPY_TELEMETRY
+    SRB: TELEMETRY_READ
+    DLP: context_tag=oppy_telemetry
+    """
+    if not OPPY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="OPPY Navigator not available")
+    
+    try:
+        navigator = OPPYNavigator(vessel_id=vessel_id)
+        telemetry = navigator.get_telemetry()
+        
+        return {
+            "status": "success",
+            "telemetry": {
+                "vessel_id": telemetry.vessel_id,
+                "timestamp": telemetry.timestamp.isoformat(),
+                "position": telemetry.position,
+                "velocity": telemetry.velocity,
+                "acceleration": telemetry.acceleration,
+                "anchor_drift": telemetry.anchor_drift,
+                "power_status": telemetry.power_status,
+                "life_support_status": telemetry.life_support_status,
+                "crew_status": telemetry.crew_status,
+            },
+            "context_tag": "oppy_telemetry",
+            "anchor": "T1:OPPY_TELEMETRY"
+        }
+    except Exception as e:
+        logger.error("OPPY get telemetry error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to get telemetry: {str(e)[:100]}")
+
+
+@app.get(
+    "/oppy/state/{vessel_id}",
+    summary="Get Navigator State",
+    response_description="Navigator state summary with performance metrics",
+    tags=["oppy"]
+)
+def oppy_get_state(vessel_id: str):
+    """
+    Get OPPY Navigator state summary including performance metrics.
+    
+    T1: OPPY_STATE
+    SRB: STATE_READ
+    DLP: context_tag=oppy_state
+    """
+    if not OPPY_AVAILABLE:
+        raise HTTPException(status_code=503, detail="OPPY Navigator not available")
+    
+    try:
+        navigator = OPPYNavigator(vessel_id=vessel_id)
+        state = navigator.get_state_summary()
+        
+        return {
+            "status": "success",
+            "state": state,
+            "context_tag": "oppy_state",
+            "anchor": "T1:OPPY_STATE"
+        }
+    except Exception as e:
+        logger.error("OPPY get state error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to get state: {str(e)[:100]}")
+
+
+# ============================================================================
+# HR MODULE ENDPOINTS
+# ============================================================================
+
+@app.post(
+    "/hr/assess_psychological_safety",
+    summary="Assess Psychological Safety",
+    response_description="Psychological safety assessment for team member",
+    tags=["hr"],
+    dependencies=[Depends(security)]
+)
+def hr_assess_psychological_safety(req: HRPsychSafetyRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Assess psychological safety level for a team member.
+    
+    T1: HR_PSYCH_SAFETY_ASSESSMENT
+    SRB: HR_SAFETY_EVAL
+    DLP: context_tag=hr_psych_safety
+    Protocol: Picard_Delta_3
+    """
+    verify_csrf_token(token)
+    
+    if not HR_MODULE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
+    
+    try:
+        hr_module = AuroraHRModule()
+        assessment = hr_module.assess_psychological_safety(req.member_name)
+        
+        return {
+            "status": "success",
+            "assessment": assessment,
+            "context_tag": "hr_psych_safety",
+            "anchor": "T1:HR_SAFETY",
+            "ethics_protocol": "Picard_Delta_3"
+        }
+    except Exception as e:
+        logger.error("HR assess psychological safety error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to assess safety: {str(e)[:100]}")
+
+
+@app.post(
+    "/hr/detect_conflict",
+    summary="Detect and Track Conflict",
+    response_description="Conflict detection result with resolution recommendations",
+    tags=["hr"],
+    dependencies=[Depends(security)]
+)
+def hr_detect_conflict(req: HRConflictRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Detect and track organizational conflicts with AI-powered analysis.
+    
+    T1: HR_CONFLICT_DETECTION
+    SRB: HR_CONFLICT_TRACKING
+    DLP: context_tag=hr_conflict_detect
+    Protocol: Picard_Delta_3
+    """
+    verify_csrf_token(token)
+    
+    if not HR_MODULE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
+    
+    try:
+        hr_module = AuroraHRModule()
+        conflict = hr_module.detect_conflict(req.indicators)
+        
+        if conflict:
+            return {
+                "status": "success",
+                "conflict_detected": True,
+                "conflict": {
+                    "conflict_id": conflict.conflict_id,
+                    "severity": conflict.severity.name,
+                    "category": conflict.category,
+                    "parties_involved": conflict.parties_involved,
+                    "resolution_strategy": conflict.resolution_strategy,
+                },
+                "context_tag": "hr_conflict_detect",
+                "anchor": "T1:HR_CONFLICT",
+                "ethics_protocol": "Picard_Delta_3"
+            }
+        else:
+            return {
+                "status": "success",
+                "conflict_detected": False,
+                "context_tag": "hr_conflict_detect",
+                "anchor": "T1:HR_CONFLICT"
+            }
+    except Exception as e:
+        logger.error("HR detect conflict error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to detect conflict: {str(e)[:100]}")
+
+
+@app.post(
+    "/hr/initiate_onboarding",
+    summary="Initiate Onboarding Journey",
+    response_description="Onboarding journey with phases and tasks",
+    tags=["hr"],
+    dependencies=[Depends(security)]
+)
+def hr_initiate_onboarding(req: HROnboardingRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Initiate comprehensive onboarding journey for new team member.
+    
+    T1: HR_ONBOARDING_INIT
+    SRB: HR_ONBOARDING_JOURNEY
+    DLP: context_tag=hr_onboarding
+    Protocol: Picard_Delta_3
+    """
+    verify_csrf_token(token)
+    
+    if not HR_MODULE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
+    
+    try:
+        hr_module = AuroraHRModule()
+        journey = hr_module.initiate_onboarding(
+            req.member_name,
+            req.title,
+            req.department,
+            req.manager
+        )
+        
+        return {
+            "status": "success",
+            "journey": {
+                "member_name": journey.member_name,
+                "start_date": journey.start_date,
+                "current_phase": journey.current_phase.value,
+                "completion_percentage": journey.completion_percentage,
+                "buddy_assigned": journey.buddy_assigned,
+                "manager": journey.manager,
+                "pending_tasks": journey.pending_tasks,
+                "check_in_schedule": journey.check_in_schedule,
+            },
+            "context_tag": "hr_onboarding",
+            "anchor": "T1:HR_ONBOARD",
+            "ethics_protocol": "Picard_Delta_3"
+        }
+    except Exception as e:
+        logger.error("HR initiate onboarding error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to initiate onboarding: {str(e)[:100]}")
+
+
+@app.post(
+    "/hr/cultural_health",
+    summary="Assess Cultural Health",
+    response_description="Cultural health report with metrics and recommendations",
+    tags=["hr"],
+    dependencies=[Depends(security)]
+)
+def hr_cultural_health(req: HRCulturalHealthRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Assess cultural health for a specific organizational layer.
+    
+    T1: HR_CULTURAL_HEALTH
+    SRB: HR_CULTURE_ASSESSMENT
+    DLP: context_tag=hr_cultural_health
+    Protocol: Picard_Delta_3
+    """
+    verify_csrf_token(token)
+    
+    if not HR_MODULE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="HR Module v3.0 not available")
+    
+    try:
+        # Map string to TeamLayer enum
+        layer_map = {
+            "real_world": TeamLayer.REAL_WORLD,
+            "simulation": TeamLayer.SIMULATION,
+            "governance": TeamLayer.GOVERNANCE
+        }
+        layer = layer_map.get(req.layer.lower(), TeamLayer.REAL_WORLD)
+        
+        hr_module = AuroraHRModule()
+        report = hr_module.assess_cultural_health(layer)
+        
+        return {
+            "status": "success",
+            "report": {
+                "report_id": report.report_id,
+                "timestamp": report.timestamp,
+                "overall_score": report.overall_score,
+                "layer": report.layer.value,
+                "metric_scores": report.metric_scores,
+                "strengths": report.strengths,
+                "concerns": report.concerns,
+                "recommendations": report.recommendations,
+                "intervention_required": report.intervention_required,
+            },
+            "context_tag": "hr_cultural_health",
+            "anchor": "T1:HR_CULTURE",
+            "ethics_protocol": "Picard_Delta_3"
+        }
+    except Exception as e:
+        logger.error("HR cultural health error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to assess cultural health: {str(e)[:100]}")
+
+
+# ============================================================================
+# QUANTUM FORGE ENDPOINTS
+# ============================================================================
+
+@app.post(
+    "/quantum_forge/create_agent",
+    summary="Create Quantum Agent",
+    response_description="Generated quantum agent with vector cores",
+    tags=["quantum_forge"],
+    dependencies=[Depends(security)]
+)
+def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Generate a quantum-symbolic agent with ethics enforcement.
+    
+    T1: QUANTUM_FORGE_AGENT_CREATE
+    SRB: AGENT_GENERATION
+    DLP: context_tag=qf_create_agent
+    Ethics: GUMAS_Thermax, Picard_Delta_3
+    """
+    verify_csrf_token(token)
+    
+    if not QUANTUM_FORGE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Quantum Forge not available")
+    
+    try:
+        # Map string to enum
+        ethics_map = {
+            "strict": EthicsLevel.STRICT,
+            "balanced": EthicsLevel.BALANCED,
+            "exploratory": EthicsLevel.EXPLORATORY,
+            "emergency": EthicsLevel.EMERGENCY
+        }
+        flowstate_map = {
+            "generative": FlowstateMode.GENERATIVE,
+            "resonant": FlowstateMode.RESONANT,
+            "metamorphic": FlowstateMode.METAMORPHIC,
+            "quiescent": FlowstateMode.QUIESCENT
+        }
+        
+        ethics_level = ethics_map.get(req.ethics_level.lower(), EthicsLevel.BALANCED)
+        flowstate_mode = flowstate_map.get(req.flowstate_mode.lower(), FlowstateMode.GENERATIVE)
+        
+        forge = QuantumForge(ethics_level=ethics_level, flowstate_mode=flowstate_mode)
+        agent = forge.generate_agent(
+            agent_id=req.agent_id,
+            capabilities=req.capabilities,
+            symbolic_depth=req.symbolic_depth
+        )
+        
+        return {
+            "status": "success",
+            "agent": {
+                "agent_id": agent.agent_id,
+                "capabilities": agent.capabilities,
+                "quantum_state": agent.quantum_state.value,
+                "symbolic_depth": agent.symbolic_depth,
+                "ethics_compliance": agent.ethics_compliance,
+                "flowstate_resonance": agent.flowstate_resonance,
+                "creation_timestamp": agent.creation_timestamp,
+            },
+            "context_tag": "qf_create_agent",
+            "anchor": "T1:QF_AGENT_CREATE",
+            "ethics_protocol": "GUMAS_Thermax"
+        }
+    except Exception as e:
+        logger.error("Quantum Forge create agent error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to create agent: {str(e)[:100]}")
+
+
+@app.post(
+    "/quantum_forge/store_memory",
+    summary="Store Symbolic Memory",
+    response_description="Memory node storage confirmation",
+    tags=["quantum_forge"],
+    dependencies=[Depends(security)]
+)
+def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Store a symbolic memory node with intent alignment.
+    
+    T1: QUANTUM_FORGE_MEMORY_STORE
+    SRB: MEMORY_STORAGE
+    DLP: context_tag=qf_store_memory
+    """
+    verify_csrf_token(token)
+    
+    if not QUANTUM_FORGE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Quantum Forge not available")
+    
+    try:
+        forge = QuantumForge()
+        node = forge.store_memory(
+            content=req.content,
+            intent_alignment=req.intent_alignment,
+            tags=req.tags
+        )
+        
+        return {
+            "status": "success",
+            "node": {
+                "node_id": node.node_id,
+                "intent_alignment": node.intent_alignment,
+                "created_at": node.created_at,
+                "tags": node.tags,
+            },
+            "context_tag": "qf_store_memory",
+            "anchor": "T1:QF_MEMORY_STORE"
+        }
+    except Exception as e:
+        logger.error("Quantum Forge store memory error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to store memory: {str(e)[:100]}")
+
+
+@app.post(
+    "/quantum_forge/reactivate",
+    summary="Reactivate Agent",
+    response_description="Agent reactivation with intent alignment",
+    tags=["quantum_forge"],
+    dependencies=[Depends(security)]
+)
+def qf_reactivate_agent(req: QFReactivateRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Reactivate a stored agent based on intent query.
+    
+    T1: QUANTUM_FORGE_REACTIVATE
+    SRB: AGENT_REACTIVATION
+    DLP: context_tag=qf_reactivate
+    """
+    verify_csrf_token(token)
+    
+    if not QUANTUM_FORGE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Quantum Forge not available")
+    
+    try:
+        forge = QuantumForge()
+        agent = forge.reactivate_agent(req.node_id, req.intent_query)
+        
+        if agent:
+            return {
+                "status": "success",
+                "reactivated": True,
+                "agent": {
+                    "agent_id": agent.agent_id,
+                    "capabilities": agent.capabilities,
+                    "quantum_state": agent.quantum_state.value,
+                    "ethics_compliance": agent.ethics_compliance,
+                },
+                "context_tag": "qf_reactivate",
+                "anchor": "T1:QF_REACTIVATE"
+            }
+        else:
+            return {
+                "status": "success",
+                "reactivated": False,
+                "message": "No matching agent found or intent alignment too low",
+                "context_tag": "qf_reactivate",
+                "anchor": "T1:QF_REACTIVATE"
+            }
+    except Exception as e:
+        logger.error("Quantum Forge reactivate error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to reactivate agent: {str(e)[:100]}")
+
+
+@app.post(
+    "/quantum_forge/ethics_check",
+    summary="Ethics Drift Check",
+    response_description="Ethics validation result with drift detection",
+    tags=["quantum_forge"],
+    dependencies=[Depends(security)]
+)
+def qf_ethics_check(req: QFEthicsCheckRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Perform GUMAS_Thermax ethics drift check on action vectors.
+    
+    T1: QUANTUM_FORGE_ETHICS_CHECK
+    SRB: ETHICS_VALIDATION
+    DLP: context_tag=qf_ethics_check
+    Ethics: GUMAS_Thermax
+    """
+    verify_csrf_token(token)
+    
+    if not QUANTUM_FORGE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Quantum Forge not available")
+    
+    try:
+        from modules.quantum_forge import GUMAS_Thermax
+        
+        ethics = GUMAS_Thermax(level=EthicsLevel.BALANCED)
+        is_acceptable, drift = ethics.check_drift(req.action_vector, req.baseline_vector)
+        
+        return {
+            "status": "success",
+            "ethics_check": {
+                "is_acceptable": is_acceptable,
+                "drift_value": drift,
+                "threshold": ethics.drift_threshold,
+                "verdict": "APPROVED" if is_acceptable else "REJECTED",
+            },
+            "context_tag": "qf_ethics_check",
+            "anchor": "T1:QF_ETHICS",
+            "ethics_protocol": "GUMAS_Thermax"
+        }
+    except Exception as e:
+        logger.error("Quantum Forge ethics check error: %s", str(e)[:200])
+        raise HTTPException(status_code=500, detail=f"Failed to perform ethics check: {str(e)[:100]}")
+
 
 if __name__ == "__main__":
 

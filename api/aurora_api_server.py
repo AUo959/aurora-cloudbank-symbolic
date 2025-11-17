@@ -138,7 +138,9 @@ async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthori
 
 
 @app.post("/api/learning/pattern")  # verify_csrf inside
-async def detect_learning_pattern(request: LearningPatternRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+async def detect_learning_pattern(
+    request: LearningRequest, token: HTTPAuthorizationCredentials = Depends(security)
+):
     """Process learning pattern"""
     verify_csrf_token(token)
 

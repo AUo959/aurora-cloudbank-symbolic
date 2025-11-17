@@ -344,7 +344,7 @@ class ImportFixer:
                     results["total_imports_added"] += len(result["added"])
                     results["total_names_fixed"] += len(result["fixed_names"])
                     
-                    logger.info("{file_path.relative_to(self.repo_path)}: "
+                    print(f"{file_path.relative_to(self.repo_path)}: "
                           f"Added {len(result['added'])} imports, "
                           f"fixed {len(result['fixed_names'])} names")
                 
@@ -352,7 +352,7 @@ class ImportFixer:
                     print(f"✓ {file_path.relative_to(self.repo_path)}: No issues")
                 
                 elif result["status"] == "no_mappings":
-                    logger.warning("{file_path.relative_to(self.repo_path)}: "
+                    print(f"⚠ {file_path.relative_to(self.repo_path)}: "
                           f"Unknown imports needed: {result['undefined']}")
                     results["files_with_issues"].append({
                         "file": str(file_path.relative_to(self.repo_path)),
@@ -360,10 +360,10 @@ class ImportFixer:
                     })
                 
                 else:
-                    logger.error("{file_path.relative_to(self.repo_path)}: Failed to fix")
+                    print(f"✗ {file_path.relative_to(self.repo_path)}: Failed to fix")
                     
             except Exception as e:
-                logger.error("{file_path.relative_to(self.repo_path)}: Error - {e}")
+                print(f"✗ {file_path.relative_to(self.repo_path)}: Error - {e}")
         
         return results
 

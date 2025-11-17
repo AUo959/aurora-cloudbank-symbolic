@@ -57,6 +57,12 @@ jobs:
         name: pr-evaluation-results
         path: pr_results.json
     
+    - name: Install Node.js dependencies
+      if: steps.detect.outputs.should_run == 'true'
+      run: |
+        npm install js-yaml
+    
+    
     - name: Comment on PR
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/github-script@v7

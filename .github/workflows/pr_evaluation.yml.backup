@@ -57,12 +57,19 @@ jobs:
         name: pr-evaluation-results
         path: pr_results.json
     
+    - name: Install Node.js dependencies
+      if: steps.detect.outputs.should_run == 'true'
+      run: |
+        npm install js-yaml
+    
+    
     - name: Comment on PR
       if: steps.detect.outputs.should_run == 'true'
       uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs');
+          const AuroraBot = require('./.github/scripts/bot-helper.cjs');
           
           if (!fs.existsSync('pr_results.json')) {
             console.log('No evaluation results found, skipping comment');
@@ -70,17 +77,21 @@ jobs:
           }
           
           const results = JSON.parse(fs.readFileSync('pr_results.json', 'utf8'));
-          const scoreThreshold = 0.7;
+          const bot = new AuroraBot(github, context);
           
+          // Check if score is below threshold before commenting
+          const scoreThreshold = bot.config.pr_evaluation?.comments?.score_threshold || 0.7;
           if (results.overall_score >= 0.9) {
             console.log(`Score ${results.overall_score.toFixed(2)} is excellent, skipping verbose comment`);
             
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `✅ **PR Evaluation: PASSED** (Score: ${results.overall_score.toFixed(2)}/1.00)`
-            });
+            // Just add a minimal success comment
+            await bot.postComment(context.issue.number, 
+              `✅ **PR Evaluation: PASSED** (Score: ${results.overall_score.toFixed(2)}/1.00)`,
+              { 
+                identifier: 'pr-evaluation',
+                updateExisting: true 
+              }
+            );
             return;
           }
           
@@ -94,42 +105,33 @@ jobs:
           
           for (const result of results.results) {
             if (!result.passed && result.score < 0.7) {
-              if (result.findings && result.findings.length > 0) {
+              if (result.findings.length > 0) {
                 criticalIssues.push(`**${result.category}**: ${result.findings[0]}`);
               }
-              if (result.recommendations && result.recommendations.length > 0) {
+              if (result.recommendations.length > 0) {
                 recommendations.push(...result.recommendations.slice(0, 2));
               }
             }
           }
           
-          // Build comment body
-          let commentBody = `## ${statusEmoji} PR Evaluation: ${status}\n\n`;
-          commentBody += `**Overall Score:** ${results.overall_score.toFixed(2)}/1.00\n\n`;
-          commentBody += `**Recommendation:** ${results.recommendation}\n\n`;
+          const commentData = {
+            title: 'PR Evaluation',
+            status: `${status} (${results.overall_score.toFixed(2)}/1.00)`,
+            statusEmoji,
+            summary: results.recommendation,
+            criticalIssues,
+            recommendations: recommendations.slice(0, 5),
+            nextSteps: criticalIssues.length > 0 ? 
+              'Address the critical issues above before merging.' :
+              'Review recommendations to improve code quality.'
+          };
           
-          if (criticalIssues.length > 0) {
-            commentBody += `### Critical Issues\n\n`;
-            criticalIssues.forEach(issue => commentBody += `- ${issue}\n`);
-            commentBody += `\n`;
-          }
+          const commentBody = bot.formatComment(commentData, 'actionable');
           
-          if (recommendations.length > 0) {
-            commentBody += `### Recommendations\n\n`;
-            recommendations.slice(0, 5).forEach(rec => commentBody += `- ${rec}\n`);
-            commentBody += `\n`;
-          }
-          
-          const nextSteps = criticalIssues.length > 0 ? 
-            'Address the critical issues above before merging.' :
-            'Review recommendations to improve code quality.';
-          commentBody += `**Next Steps:** ${nextSteps}\n`;
-          
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: commentBody
+          await bot.postComment(context.issue.number, commentBody, {
+            identifier: 'pr-evaluation',
+            updateExisting: true,
+            onlyOnIssues: bot.config.pr_evaluation?.comments?.only_on_issues ?? true
           });
     
     - name: Check evaluation status

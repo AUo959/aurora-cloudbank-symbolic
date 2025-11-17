@@ -1,3 +1,16 @@
+# DEPRECATED STUB – retained for legacy compatibility
+#
+# This file previously contained a backup of dependency locks.
+# It now exists only to avoid breaking legacy scripts that may
+# reference `.backup/requirements/requirements-lock.txt.backup`.
+#
+# Do not rely on this file. The canonical dependency management
+# for this repository is:
+#   - Makefile target: `make setup`
+#   - Locked dependencies: `requirements-lock.txt`
+#
+# If you are seeing this file referenced in a script, please
+# update that script to use the canonical locations above.
 # Aurora CloudBank Symbolic System Dependencies
 # Locked versions for reproducible builds
 #

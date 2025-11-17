@@ -413,7 +413,7 @@ class QuicksaveManager:
             print(f"Focus Areas: {len(quicksave['work_state']['focus_areas'])}")
         
         if quicksave['git_state']['uncommitted_changes']:
-            logger.warning("Uncommitted changes: %d modified", len(quicksave["git_state"]["modified_files"]))
+            logger.warning(f"Uncommitted changes: {len(quicksave['git_state']['modified_files'])} modified")
         
         print()
 

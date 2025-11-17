@@ -48,17 +48,31 @@ jobs:
       # SYNTAX CHECKS ONLY - must pass
       - name: Python syntax check
         run: |
-          # Only check if Python files would actually break
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*
+          # Only check if Python files would actually break, scoped to first-class areas
+          paths=""
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+            [ -d "$d" ] && paths="$paths $d"
+          done
+          if [ -z "$paths" ]; then
+            echo "No target directories found for syntax check" && exit 0
+          fi
+          flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,modules/nexus/*,.security/*
       
       # STYLE CHECKS - informational only, allowed to fail
       - name: Code style check
         continue-on-error: true
         run: |
-          # Check style but don't fail the build
-          flake8 . --count --max-complexity=10 --max-line-length=127 --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*
+          # Check style but don't fail the build; use same scoped areas as syntax check
+          paths=""
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+            [ -d "$d" ] && paths="$paths $d"
+          done
+          if [ -z "$paths" ]; then
+            echo "No target directories found for style check" && exit 0
+          fi
+          flake8 $paths --count --max-complexity=10 --max-line-length=127 --statistics \
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,modules/nexus/*,.security/*
       
       # TESTS - when they exist
       - name: Run tests

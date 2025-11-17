@@ -39,7 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Dispatch downstream workflow
-        uses: peter-evans/repository-dispatch@v3
+        # Pinned for supply-chain security
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0
         with:
           token: ${{ secrets.R2_TOKEN }}
           repository: ${{ inputs.repository || 'AUo959/aurora-cloudbank-runtime' }}

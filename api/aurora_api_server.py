@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 # Import centralized security configuration
-from src.middleware.fastapi_security import security, setup_cors_middleware, verify_csrf_token, sanitize_session_id
+from src.middleware.fastapi_security import security, setup_cors_middleware, verify_csrf_token
 
 
 class QuantumVectorRequest(BaseModel):

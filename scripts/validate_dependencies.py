@@ -16,7 +16,7 @@ from pathlib import Path
 def check_dependency_conflicts(requirements_file: str) -> bool:
     """Check for dependency conflicts using pip's dependency resolver."""
     print("🔍 Validating dependency compatibility...")
-    
+
     try:
         # Use pip check to validate installed packages
         result = subprocess.run(
@@ -24,17 +24,17 @@ def check_dependency_conflicts(requirements_file: str) -> bool:
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode != 0:
-            logger.warning("Dependency conflicts in installed packages:\\n{result.stdout}{result.stderr}")
+            logger.warning(f"Dependency conflicts in installed packages:\n{result.stdout}{result.stderr}")
             print("ℹ️ This is informational - conflicts may not affect Aurora operation")
             return True  # Don't block in dev containers
         else:
             logger.info("No dependency conflicts detected")
             return True
-            
+
     except Exception as e:
-        logger.warning("Validation error: {e}")
+        logger.warning(f"Validation error: {e}")
         return True  # Don't block on validation errors
 
 
@@ -46,15 +46,15 @@ def validate_critical_versions() -> bool:
         "h11": ">=0.16.0",
         "fastapi": ">=0.100.0",
     }
-    
+
     print("🔧 Checking critical Aurora dependencies...")
-    
+
     try:
         import importlib.metadata
         for package, version_spec in critical_deps.items():
             try:
                 version = importlib.metadata.version(package)
-                logger.info("{package}: {version}")
+                logger.info(f"{package}: {version}")
             except importlib.metadata.PackageNotFoundError:
                 print(f"ℹ️ {package}: not installed (optional)")
         return True
@@ -70,10 +70,10 @@ def backup_requirements():
         "requirements-lock.txt",
         "pyproject.toml"
     ]
-    
+
     backup_dir = Path(".backup/requirements")
     backup_dir.mkdir(parents=True, exist_ok=True)
-    
+
     for req_file in requirements_files:
         if Path(req_file).exists():
             backup_path = backup_dir / f"{req_file}.backup"
@@ -85,21 +85,21 @@ def main():
     """Main validation workflow."""
     print("🌟 Aurora CloudBank Dependency Validator")
     print("=" * 50)
-    
+
     # Backup current state
     backup_requirements()
-    
+
     # Check installed packages
     if not check_dependency_conflicts("requirements.txt"):
-        print("\\n⚠️ Dependency validation completed with warnings")
+        print("\n⚠️ Dependency validation completed with warnings")
         return True  # Non-blocking
-    
+
     # Validate critical versions if packages are installed
     if not validate_critical_versions():
-        print("\\n⚠️ Some critical dependencies missing or outdated")
+        print("\n⚠️ Some critical dependencies missing or outdated")
         return True  # Non-blocking
-    
-    print("\\n✅ Dependency validation passed!")
+
+    print("\n✅ Dependency validation passed!")
     return True
 
 

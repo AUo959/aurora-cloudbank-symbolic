@@ -127,6 +127,12 @@ install_dependencies() {
     
     source "$VENV_DIR/bin/activate"
     
+    # Fallback to requirements.txt when lock file is missing
+    if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
+        log_warning "Lock file $REQUIREMENTS_FILE not found; falling back to requirements.txt"
+        REQUIREMENTS_FILE="requirements.txt"
+    fi
+    
     # Test dependency resolution first
     if pip install -r "$REQUIREMENTS_FILE" --dry-run; then
         log_success "Dependency resolution test passed"
@@ -137,6 +143,12 @@ install_dependencies() {
     
     # Install dependencies
     pip install -r "$REQUIREMENTS_FILE"
+    
+    # Optionally install development/testing dependencies
+    if [[ -f "requirements-dev.txt" ]]; then
+        log_info "Installing development dependencies from requirements-dev.txt..."
+        pip install -r requirements-dev.txt || log_warning "Development dependency installation encountered issues"
+    fi
     
     # Verify installation
     pip check

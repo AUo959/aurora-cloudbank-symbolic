@@ -5,13 +5,12 @@ Intelligent Git hooks for quality assurance and workflow optimization
 """
 
 import logging
-
-logger = logging.getLogger(__name__)
-
 import os
 import shutil
 import stat
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 class GitHooksAutomationSetup:

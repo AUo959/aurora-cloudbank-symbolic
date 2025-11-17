@@ -37,7 +37,7 @@ def cmd_parse(args):
     print()
 
     if result.commands:
-        logger.info("Valid Commands: {len(result.commands)}")
+        logger.info("Valid Commands: %d", len(result.commands))
         for cmd in result.commands:
             status = "✓" if cmd.is_valid else "✗"
             print(f"   {status} {cmd.raw} → {cmd.name}")
@@ -46,7 +46,7 @@ def cmd_parse(args):
         print()
 
     if result.naked_commands:
-        logger.warning("Naked Commands Detected: {len(result.naked_commands)}")
+        logger.warning("Naked Commands Detected: %d", len(result.naked_commands))
         print()
         for cmd in result.naked_commands:
             print(cmd.error_message)

@@ -29,7 +29,7 @@ flake8==6.1.0                       # Linting with security rules
 bandit==1.8.6                       # Security vulnerability scanner
 
 # Web Security
-python-multipart==0.0.18             # File upload handling
+python-multipart==0.0.20             # File upload handling
 python-jose[cryptography]==3.5.0    # JWT and JWS implementation
 httpx==0.25.2                       # HTTP client with security features
 

@@ -52,7 +52,7 @@ except ImportError:
     QUANTUM_FORGE_AVAILABLE = False
     _early_logger.warning("Quantum Forge not available")
 
-# Initialize RNG after all imports to satisfy linting rules
+# Initialize RNG after all imports to satisfy linting rules (needed for _apply_symbolic_gates)
 _rng = np.random.default_rng()
 
 try:
@@ -331,8 +331,8 @@ class QFStoreMemoryRequest(BaseModel):
 
 
 class QFReactivateRequest(BaseModel):
-    node_id: str
     intent_query: str
+    top_k: int = 5
 
 
 class QFEthicsCheckRequest(BaseModel):
@@ -1363,22 +1363,35 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
         flowstate_mode = flowstate_map.get(req.flowstate_mode.lower(), FlowstateMode.GENERATIVE)
         
         forge = QuantumForge(ethics_level=ethics_level, flowstate_mode=flowstate_mode)
+        
+        # Actual API: generate_agent(intent_query, constellation_targets, metadata)
+        # Create intent from agent_id and capabilities
+        intent_query = f"Generate agent {req.agent_id} with capabilities: {', '.join(req.capabilities)}"
+        metadata = {
+            "agent_id": req.agent_id,
+            "capabilities": req.capabilities,
+            "symbolic_depth": req.symbolic_depth
+        }
+        
         agent = forge.generate_agent(
-            agent_id=req.agent_id,
-            capabilities=req.capabilities,
-            symbolic_depth=req.symbolic_depth
+            intent_query=intent_query,
+            constellation_targets=None,
+            metadata=metadata
         )
         
         return {
             "status": "success",
             "agent": {
                 "agent_id": agent.agent_id,
-                "capabilities": agent.capabilities,
-                "quantum_state": agent.quantum_state.value,
-                "symbolic_depth": agent.symbolic_depth,
-                "ethics_compliance": agent.ethics_compliance,
-                "flowstate_resonance": agent.flowstate_resonance,
-                "creation_timestamp": agent.creation_timestamp,
+                "intent_alignment": agent.intent_alignment,
+                "quantum_state": agent.quantum_state,
+                "symbolic_layer": agent.symbolic_layer,
+                "flowstate_mode": agent.flowstate_mode,
+                "joy_index": agent.joy_index,
+                "ethics_violations": agent.ethics_violations,
+                "constellation_bindings": agent.constellation_bindings,
+                "metadata": agent.metadata,
+                "created_at": agent.created_at,
             },
             "context_tag": "qf_create_agent",
             "anchor": "T1:QF_AGENT_CREATE",
@@ -1398,7 +1411,7 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
 )
 def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
-    Store a symbolic memory node with intent alignment.
+    Store a symbolic memory node.
     
     T1: QUANTUM_FORGE_MEMORY_STORE
     SRB: MEMORY_STORAGE
@@ -1411,9 +1424,11 @@ def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentia
     
     try:
         forge = QuantumForge()
-        node = forge.store_memory(
+        
+        # Actual API: create_memory_node(content, tags)
+        # Note: intent_alignment is calculated internally based on content
+        node = forge.create_memory_node(
             content=req.content,
-            intent_alignment=req.intent_alignment,
             tags=req.tags
         )
         
@@ -1435,17 +1450,17 @@ def qf_store_memory(req: QFStoreMemoryRequest, token: HTTPAuthorizationCredentia
 
 @app.post(
     "/quantum_forge/reactivate",
-    summary="Reactivate Agent",
-    response_description="Agent reactivation with intent alignment",
+    summary="Reactivate Memory Nodes",
+    response_description="Memory node reactivation with intent alignment",
     tags=["quantum_forge"],
     dependencies=[Depends(security)]
 )
-def qf_reactivate_agent(req: QFReactivateRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+def qf_reactivate_memories(req: QFReactivateRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """
-    Reactivate a stored agent based on intent query.
+    Reactivate memory nodes based on intent query.
     
     T1: QUANTUM_FORGE_REACTIVATE
-    SRB: AGENT_REACTIVATION
+    SRB: MEMORY_REACTIVATION
     DLP: context_tag=qf_reactivate
     """
     verify_csrf_token(token)
@@ -1455,18 +1470,25 @@ def qf_reactivate_agent(req: QFReactivateRequest, token: HTTPAuthorizationCreden
     
     try:
         forge = QuantumForge()
-        agent = forge.reactivate_agent(req.node_id, req.intent_query)
         
-        if agent:
+        # Actual API: reactivate_by_intent(intent_query, top_k)
+        # Returns list of memory nodes, not agents
+        nodes = forge.reactivate_by_intent(req.intent_query, top_k=5)
+        
+        if nodes:
             return {
                 "status": "success",
                 "reactivated": True,
-                "agent": {
-                    "agent_id": agent.agent_id,
-                    "capabilities": agent.capabilities,
-                    "quantum_state": agent.quantum_state.value,
-                    "ethics_compliance": agent.ethics_compliance,
-                },
+                "count": len(nodes),
+                "nodes": [
+                    {
+                        "node_id": node.node_id,
+                        "intent_alignment": node.intent_alignment,
+                        "created_at": node.created_at,
+                        "tags": node.tags,
+                    }
+                    for node in nodes
+                ],
                 "context_tag": "qf_reactivate",
                 "anchor": "T1:QF_REACTIVATE"
             }
@@ -1474,13 +1496,14 @@ def qf_reactivate_agent(req: QFReactivateRequest, token: HTTPAuthorizationCreden
             return {
                 "status": "success",
                 "reactivated": False,
-                "message": "No matching agent found or intent alignment too low",
+                "count": 0,
+                "message": "No matching memory nodes found or intent alignment too low",
                 "context_tag": "qf_reactivate",
                 "anchor": "T1:QF_REACTIVATE"
             }
     except Exception as e:
         logger.error("Quantum Forge reactivate error: %s", str(e)[:200])
-        raise HTTPException(status_code=500, detail=f"Failed to reactivate agent: {str(e)[:100]}")
+        raise HTTPException(status_code=500, detail=f"Failed to reactivate memories: {str(e)[:100]}")
 
 
 @app.post(

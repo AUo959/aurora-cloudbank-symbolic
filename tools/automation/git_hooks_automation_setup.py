@@ -485,7 +485,7 @@ For issues with Git hooks:
             ],
         }
 
-        logger.info("Installed {report["total_hooks']} intelligent Git hooks:")
+        logger.info(f"Installed {report['total_hooks']} intelligent Git hooks:")
         for hook in report["hooks_installed"]:
             print(f"   • {hook}")
 

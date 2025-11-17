@@ -23,23 +23,24 @@ jobs:
           script: |
             core.setOutput('ok', true)
       - name: R-2 context sync
-        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-context-sync@main
+        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-context-sync@770a1dffd91e4597c6aa0e26a3c921e8c414ca1d
         with:
-          allowlist: ${{ toJson(fromJson(env.R2_ALLOWLIST)) }}
+          allowlist: ${{ env.R2_ALLOWLIST != '' && env.R2_ALLOWLIST || '[]' }}
   r2-status-sync:
     if: github.event.action == 'r2.status-sync'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: R-2 status propagation
-        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-status-sync@main
+        uses: AUo959/aurora-cloudbank-symbolic/.github/actions/r2-status-sync@770a1dffd91e4597c6aa0e26a3c921e8c414ca1d
   r2-workflow-trigger:
     if: github.event.action == 'r2.workflow-trigger'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Dispatch downstream workflow
-        uses: peter-evans/repository-dispatch@v3
+        # Pinned for supply-chain security
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0
         with:
           token: ${{ secrets.R2_TOKEN }}
           repository: ${{ inputs.repository || 'AUo959/aurora-cloudbank-runtime' }}

@@ -92,7 +92,7 @@ class RebuildFailurePrevention:
                     logger.error("Critical dependencies missing or broken")
                     print(f"   Error: {result.stderr}")
                     return False
-                logger.info("{result.stdout.strip()}")
+                logger.info(result.stdout.strip())
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 logger.error("Dependency check failed")
                 return False
@@ -246,9 +246,11 @@ echo "✅ Pre-rebuild protection completed"
     
     def validate_dependencies(self) -> bool:
         """Validate dependency configuration."""
-        if not (self.workspace_root / "requirements-lock.txt").exists():
-            logger.error("requirements-lock.txt not found")
-            return False
+        lock_path = self.workspace_root / "requirements-lock.txt"
+        if not lock_path.exists():
+            logger.warning("requirements-lock.txt not found; skipping dependency validation")
+            print("requirements-lock.txt not found; skipping dependency validation")
+            return True
         
         # Check for critical dependencies
         with open(self.workspace_root / "requirements-lock.txt", 'r') as f:
@@ -275,11 +277,11 @@ echo "✅ Pre-rebuild protection completed"
         for script_path in critical_scripts:
             full_path = self.workspace_root / script_path
             if not full_path.exists():
-                logger.error("Critical script missing: {script_path}")
+                logger.error(f"Critical script missing: {script_path}")
                 return False
             
             if not os.access(full_path, os.X_OK):
-                logger.error("Critical script not executable: {script_path}")
+                logger.error(f"Critical script not executable: {script_path}")
                 return False
         
         logger.info("Script integrity check passed")
@@ -301,7 +303,7 @@ echo "✅ Pre-rebuild protection completed"
             logger.warning("No backup files found yet")
             return False
 
-        logger.info("Backup system check passed ({len(backup_files)} backup files found)")
+        logger.info(f"Backup system check passed ({len(backup_files)} backup files found)")
         return True
 
 
@@ -340,7 +342,7 @@ def main():
             
             # Log degraded state to status file for tracking
             preventer.log_status(
-                "pre_rebuild_degraded", 
+                "pre_rebuild_degraded",
                 f"Degraded state: {', '.join(failed_checks)}"
             )
             

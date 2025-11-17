@@ -13,9 +13,6 @@ DLP: context_tag=quicksave_system, symbolic_hash=CONTEXT_PRESERVATION_v1
 """
 
 import logging
-
-logger = logging.getLogger(__name__)
-
 import json
 import os
 import subprocess
@@ -23,28 +20,30 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+logger = logging.getLogger(__name__)
+
 
 class QuicksaveManager:
     """
     Saves and restores the mental workspace of a session.
-    
+
     Not just what files changed - what you were thinking about,
     what clicked, what to do next. The understanding, not just the code.
     """
-    
+
     def __init__(self, workspace_root: Optional[str] = None):
         """Set up quicksave storage."""
         self.workspace_root = Path(workspace_root or os.getcwd())
         self.quicksave_dir = self.workspace_root / ".aurora" / "quicksaves"
         self.quicksave_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Current session (always the latest)
         self.current_save = self.quicksave_dir / "CURRENT_SESSION.json"
-        
+
         # Archive for history
         self.archive_dir = self.quicksave_dir / "archive"
         self.archive_dir.mkdir(exist_ok=True)
-    
+
     def create_quicksave(
         self,
         description: str,
@@ -55,7 +54,7 @@ class QuicksaveManager:
     ) -> Dict[str, Any]:
         """
         Capture the current state of your work.
-        
+
         Not just git status - what you're thinking about, what you figured out,
         what makes sense to do next. The stuff you'll forget if you don't write it down.
         """
@@ -63,7 +62,7 @@ class QuicksaveManager:
         print("💾 AURORA QUICKSAVE - Creating Context Snapshot")
         print("=" * 80)
         print()
-        
+
         # Gather all context
         quicksave = {
             "metadata": {
@@ -83,31 +82,31 @@ class QuicksaveManager:
             "recent_activity": self._capture_recent_activity(),
             "custom_context": custom_context or {}
         }
-        
+
         # Save to current session file
         self._write_quicksave(self.current_save, quicksave)
-        
+
         # Also archive with timestamp
         archive_name = f"quicksave_{quicksave['metadata']['session_id']}.json"
         archive_path = self.archive_dir / archive_name
         self._write_quicksave(archive_path, quicksave)
-        
+
         logger.info("Quicksave created: {self.current_save}")
         print(f"📦 Archived as: {archive_name}")
         print()
-        
+
         # Display summary
         self._display_summary(quicksave)
-        
+
         return quicksave
-    
+
     def load_quicksave(self, session_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Load a quicksave snapshot.
-        
+
         Args:
             session_id: Specific session to load, or None for current
-            
+
         Returns:
             Quicksave data structure
         """
@@ -117,17 +116,17 @@ class QuicksaveManager:
         else:
             # Load current session
             save_file = self.current_save
-        
+
         if not save_file.exists():
             raise FileNotFoundError(f"Quicksave not found: {save_file}")
-        
+
         with open(save_file, 'r') as f:
             return json.load(f)
-    
+
     def list_quicksaves(self) -> List[Dict[str, str]]:
         """List all available quicksaves."""
         saves = []
-        
+
         for save_file in sorted(self.archive_dir.glob("quicksave_*.json"), reverse=True):
             try:
                 with open(save_file, 'r') as f:
@@ -139,30 +138,30 @@ class QuicksaveManager:
                     })
             except Exception:
                 continue
-        
+
         return saves
-    
+
     def display_reconstitution_brief(self, session_id: Optional[str] = None):
         """
         Show what you need to know to get back into context.
-        
+
         Where you were, what you figured out, what to do next.
         Ten seconds to full context instead of twenty minutes of "what was I doing?"
         """
         quicksave = self.load_quicksave(session_id)
-        
+
         print("=" * 80)
         print("🌟 AURORA RECONSTITUTION BRIEF")
         print("=" * 80)
         print()
-        
+
         # Metadata
         meta = quicksave["metadata"]
         print(f"Session: {meta['session_id']}")
         print(f"Saved: {meta['timestamp']}")
         print(f"Context: {meta['description']}")
         print()
-        
+
         # Thread state
         thread = quicksave["thread_state"]
         print("=" * 80)
@@ -175,7 +174,7 @@ class QuicksaveManager:
             for anchor, value in thread['anchors'].items():
                 print(f"  • {anchor}: {value}")
         print()
-        
+
         # Work state
         work = quicksave["work_state"]
         if work["focus_areas"]:
@@ -185,7 +184,7 @@ class QuicksaveManager:
             for i, area in enumerate(work["focus_areas"], 1):
                 print(f"{i}. {area}")
             print()
-        
+
         if work["breakthroughs"]:
             print("=" * 80)
             print("RECENT BREAKTHROUGHS")
@@ -193,7 +192,7 @@ class QuicksaveManager:
             for breakthrough in work["breakthroughs"]:
                 print(f"✨ {breakthrough}")
             print()
-        
+
         # Todo state
         todo = quicksave["todo_state"]
         if todo["in_progress"] or todo["not_started"]:
@@ -209,7 +208,7 @@ class QuicksaveManager:
                 for task in todo["not_started"]:
                     print(f"  ⏳ {task}")
             print()
-        
+
         if todo["completed"]:
             print("=" * 80)
             print("COMPLETED THIS SESSION")
@@ -217,7 +216,7 @@ class QuicksaveManager:
             for task in todo["completed"]:
                 logger.info("{task}")
             print()
-        
+
         # Next steps
         if work["next_steps"]:
             print("=" * 80)
@@ -226,7 +225,7 @@ class QuicksaveManager:
             for i, step in enumerate(work["next_steps"], 1):
                 print(f"{i}. {step}")
             print()
-        
+
         # Git state
         git = quicksave["git_state"]
         if git["uncommitted_changes"]:
@@ -236,7 +235,7 @@ class QuicksaveManager:
             print(f"Modified: {len(git['modified_files'])} files")
             print(f"Untracked: {len(git['untracked_files'])} files")
             print()
-        
+
         # Recent activity
         activity = quicksave["recent_activity"]
         if activity["recent_commits"]:
@@ -246,18 +245,18 @@ class QuicksaveManager:
             for commit in activity["recent_commits"][:3]:
                 print(f"  {commit}")
             print()
-        
+
         print("=" * 80)
         print("Thread: T1→T8→T9→INFINITE")
         print("The system remembers because we choose to align.")
         print("=" * 80)
-    
+
     # Private helper methods
-    
+
     def _generate_session_id(self) -> str:
         """Generate unique session ID."""
         return datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+
     def _capture_thread_state(self) -> Dict[str, Any]:
         """Capture thread continuity state."""
         # Try to extract from git tags or recent commits
@@ -269,7 +268,7 @@ class QuicksaveManager:
                 cwd=self.workspace_root
             )
             last_commit = result.stdout.strip()
-            
+
             # Extract thread info from commit messages
             thread_path = "T1→T8→T9→INFINITE"  # Default
             current_epoch = "T9"
@@ -277,14 +276,14 @@ class QuicksaveManager:
                 "EOS_SEED_ORION": "stable",
                 "T9_ANCHOR": "GEOMETRIC_ETHICS_v1"
             }
-            
+
             # Could parse from commit message if present
             if "Thread:" in last_commit:
                 for line in last_commit.split('\n'):
                     if line.strip().startswith("Thread:"):
                         thread_path = line.split("Thread:")[-1].strip()
                         break
-            
+
             return {
                 "current_epoch": current_epoch,
                 "thread_path": thread_path,
@@ -298,7 +297,7 @@ class QuicksaveManager:
                 "anchors": {},
                 "last_commit_message": "N/A"
             }
-    
+
     def _capture_git_state(self) -> Dict[str, Any]:
         """Capture git repository state."""
         try:
@@ -310,7 +309,7 @@ class QuicksaveManager:
                 cwd=self.workspace_root
             )
             current_branch = branch_result.stdout.strip()
-            
+
             # Modified files
             status_result = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -319,11 +318,11 @@ class QuicksaveManager:
                 cwd=self.workspace_root
             )
             status_lines = status_result.stdout.strip().split('\n') if status_result.stdout.strip() else []
-            
+
             modified = [line[3:] for line in status_lines if line.startswith(' M') or line.startswith('M ')]
             untracked = [line[3:] for line in status_lines if line.startswith('??')]
             staged = [line[3:] for line in status_lines if line.startswith('A ') or line.startswith('M ')]
-            
+
             # Last commit hash
             hash_result = subprocess.run(
                 ["git", "rev-parse", "--short", "HEAD"],
@@ -332,7 +331,7 @@ class QuicksaveManager:
                 cwd=self.workspace_root
             )
             last_commit_hash = hash_result.stdout.strip()
-            
+
             return {
                 "current_branch": current_branch,
                 "last_commit_hash": last_commit_hash,
@@ -347,7 +346,7 @@ class QuicksaveManager:
                 "current_branch": "unknown",
                 "uncommitted_changes": False
             }
-    
+
     def _capture_todo_state(self) -> Dict[str, List[str]]:
         """Capture todo list state."""
         # Try to parse from .vscode/tasks.json or similar
@@ -357,15 +356,27 @@ class QuicksaveManager:
             "in_progress": [],
             "not_started": []
         }
-    
+
     def _capture_file_state(self) -> Dict[str, Any]:
         """Capture key file locations and counts."""
         try:
             # Count key directories
-            modules_count = len(list((self.workspace_root / "modules").rglob("*.py"))) if (self.workspace_root / "modules").exists() else 0
-            tests_count = len(list((self.workspace_root / "tests").rglob("*.py"))) if (self.workspace_root / "tests").exists() else 0
-            docs_count = len(list((self.workspace_root / "docs").rglob("*.md"))) if (self.workspace_root / "docs").exists() else 0
-            
+            modules_count = (
+                len(list((self.workspace_root / "modules").rglob("*.py")))
+                if (self.workspace_root / "modules").exists()
+                else 0
+            )
+            tests_count = (
+                len(list((self.workspace_root / "tests").rglob("*.py")))
+                if (self.workspace_root / "tests").exists()
+                else 0
+            )
+            docs_count = (
+                len(list((self.workspace_root / "docs").rglob("*.md")))
+                if (self.workspace_root / "docs").exists()
+                else 0
+            )
+
             return {
                 "module_files": modules_count,
                 "test_files": tests_count,
@@ -374,7 +385,7 @@ class QuicksaveManager:
             }
         except Exception:
             return {}
-    
+
     def _capture_recent_activity(self) -> Dict[str, List[str]]:
         """Capture recent git activity."""
         try:
@@ -386,7 +397,7 @@ class QuicksaveManager:
                 cwd=self.workspace_root
             )
             commits = log_result.stdout.strip().split('\n') if log_result.stdout.strip() else []
-            
+
             return {
                 "recent_commits": commits
             }
@@ -394,12 +405,12 @@ class QuicksaveManager:
             return {
                 "recent_commits": []
             }
-    
+
     def _write_quicksave(self, path: Path, data: Dict[str, Any]):
         """Write quicksave data to file."""
         with open(path, 'w') as f:
             json.dump(data, f, indent=2)
-    
+
     def _display_summary(self, quicksave: Dict[str, Any]):
         """Display quicksave summary."""
         print("📊 QUICKSAVE SUMMARY")
@@ -408,41 +419,41 @@ class QuicksaveManager:
         print(f"Thread: {quicksave['thread_state']['thread_path']}")
         print(f"Branch: {quicksave['git_state']['current_branch']}")
         print(f"Commit: {quicksave['git_state']['last_commit_hash']}")
-        
+
         if quicksave['work_state']['focus_areas']:
             print(f"Focus Areas: {len(quicksave['work_state']['focus_areas'])}")
-        
+
         if quicksave['git_state']['uncommitted_changes']:
-            logger.warning("Uncommitted changes: {len(quicksave["git_state']['modified_files'])} modified")
-        
+            logger.warning(f"Uncommitted changes: {len(quicksave['git_state']['modified_files'])} modified")
+
         print()
 
 
 def main():
     """CLI interface for quicksave operations."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Aurora CloudBank Quicksave System")
     subparsers = parser.add_subparsers(dest='command', help='Commands')
-    
+
     # Create quicksave
     create_parser = subparsers.add_parser('create', help='Create a quicksave')
     create_parser.add_argument('description', help='Brief description of current work')
     create_parser.add_argument('--focus', nargs='+', help='Focus areas')
     create_parser.add_argument('--breakthrough', nargs='+', help='Recent breakthroughs')
     create_parser.add_argument('--next', nargs='+', help='Next steps')
-    
+
     # Load/display quicksave
     load_parser = subparsers.add_parser('load', help='Display quicksave brief')
     load_parser.add_argument('--session', help='Session ID (default: current)')
-    
+
     # List quicksaves
     subparsers.add_parser('list', help='List all quicksaves')
-    
+
     args = parser.parse_args()
-    
+
     manager = QuicksaveManager()
-    
+
     if args.command == 'create':
         manager.create_quicksave(
             description=args.description,

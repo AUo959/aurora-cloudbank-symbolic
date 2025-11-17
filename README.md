@@ -4,7 +4,7 @@
 
 **Production-Ready Quantum-Symbolic Computing Platform for Enterprise AI**
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/AUo959/aurora-cloudbank-symbolic) 
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/AUo959/aurora-cloudbank-symbolic/releases/tag/v2.1.0) 
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/) 
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) 
 [![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)](#production-status)
@@ -103,10 +103,10 @@ make run
 ```
 
 **🌐 Access Points:**
-- **API Server:** http://localhost:8000
-- **Health Check:** http://localhost:8000/health
-- **API Docs:** http://localhost:8000/docs (Swagger UI)
-- **Metrics:** http://localhost:8000/metrics (Prometheus format)
+- **API Server:** <http://localhost:8000>
+- **Health Check:** <http://localhost:8000/health>
+- **API Docs:** <http://localhost:8000/docs> (Swagger UI)
+- **Metrics:** <http://localhost:8000/metrics> (Prometheus format)
 
 **📖 Next Steps:**
 - Explore [API Catalog](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog) (50+ endpoints)
@@ -114,6 +114,28 @@ make run
 - Run [quantum simulation example](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Quantum-Simulator)
 
 ---
+
+## 🆕 What's New in v2.1.0
+
+**Released: November 17, 2025** • [Full Changelog](CHANGELOG.md#210---2025-11-17) • [Release Notes](https://github.com/AUo959/aurora-cloudbank-symbolic/releases/tag/v2.1.0)
+
+### 🚀 Major Feature Expansion
+
+**5 New Coordination Modules:**
+- 🛡️ **Ethics Gate & Relay Manager** - L1-L3 boundary enforcement with semantic firewall
+- 🕸️ **Glyph Mesh Controller** - Multi-agent symbolic coordination system
+- 📡 **HALO/PAS Drift Controller** - Continuous timeline integrity monitoring
+- 🔧 **PatchWeaver Engine** - Ethics-gated state patching with DLP tracking
+- ⚛️ **Quantum Forge v3.0** - Production-hardened quantum simulation suite
+
+**Infrastructure Improvements:**
+- 🎯 **CI Gating System** - Selective workflow execution for `api/`, `src/`, `tools/`, `tests/`, `modules/`
+- ☁️ **Vercel Deployment** - Production-ready serverless configuration
+- 📦 **System Cleanup** - Removed 18.5K lines of dead code (PR #379)
+- 🔄 **Pydantic V2 Migration** - Zero deprecation warnings
+- ✅ **100% Test Coverage** - 1065+ tests passing
+
+**Impact:** +46,777 net lines across 426 files • Fully backwards compatible
 
 ---
 
@@ -724,6 +746,7 @@ usage = ai.get_token_usage_summary()
 ```
 
 **Supported Models:**
+
 | Model | Context | Best For | Status |
 |-------|---------|----------|--------|
 | Claude 3.5 Sonnet | 200K | Reasoning, Code | ✅ Available |
@@ -1030,8 +1053,6 @@ async def safety_overview():
 
 ## 🏗️ Complete Architecture
 
-
-
 ### Project Structure
 
 ```
@@ -1161,7 +1182,6 @@ Immutable Audit Log
 ---
 
 ## 🚀 Quick Start (5 Minutes)
-
 
 ## 🚀 Quick Start (5 Minutes)
 
@@ -1673,7 +1693,6 @@ asyncio.run(run_safety_monitoring())
 ---
 
 ## 📊 Production Status
-
 
 ## 📊 Production Status
 
@@ -2266,4 +2285,4 @@ Aurora CloudBank Symbolic is built on three principles:
 
 ---
 
-*Last Updated: November 12, 2025 | [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)*
+_Last Updated: November 17, 2025 | [Changelog](CHANGELOG.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)_

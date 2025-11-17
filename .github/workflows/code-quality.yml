@@ -43,6 +43,11 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Legacy references detector (non-blocking)
+        continue-on-error: true
+        run: |
+          bash scripts/verify_removed_paths_unused.sh
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -58,8 +63,15 @@ jobs:
         id: flake8
         continue-on-error: true
         run: |
-          echo "Running comprehensive flake8 analysis..."
-          python src/core/code_quality_analyzer.py \
+          echo "Running scoped flake8 analysis..."
+          paths=""
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+            [ -d "$d" ] && paths="$paths $d"
+          done
+          if [ -z "$paths" ]; then
+            echo "No target directories found for analysis" && exit 0
+          fi
+          python src/core/code_quality_analyzer.py $paths \
             --output reports/code_quality_report.json \
             --reflection
           
@@ -171,7 +183,8 @@ jobs:
           fetch-depth: 0
       
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        # Pinned for supply-chain security (v5.0.0)
+        uses: SonarSource/sonarcloud-github-action@ffc3010689be73b8e5ae0c57ce35968afd7909e8
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

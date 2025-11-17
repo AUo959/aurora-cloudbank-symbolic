@@ -5,13 +5,12 @@ Intelligent Git hooks for quality assurance and workflow optimization
 """
 
 import logging
-
-logger = logging.getLogger(__name__)
-
 import os
 import shutil
 import stat
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 class GitHooksAutomationSetup:
@@ -485,7 +484,7 @@ For issues with Git hooks:
             ],
         }
 
-        logger.info("Installed {report["total_hooks']} intelligent Git hooks:")
+        logger.info(f"Installed {report['total_hooks']} intelligent Git hooks:")
         for hook in report["hooks_installed"]:
             print(f"   • {hook}")
 

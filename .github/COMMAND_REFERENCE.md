@@ -22,16 +22,18 @@
 **Quick Access:** Frequently used command codes with direct documentation links.
 
 ### Predefined Workflows
-- **[#321//.](../tools/command_chain/COMPREHENSIVE_SYNC_321.md)** - **Comprehensive Sync & Validate**
-    - Universal "clean working tree" command
-    - Stages, commits, syncs with remote, validates all changes
-    - **Use anytime:** You want pending changes sorted with high quality
-    - **Phases:** 6 (status → stage → commit → sync → validate → report)
-    - **Runtime:** ~30-60 seconds
+- **[#321//.](../tools/command_chain/COMPREHENSIVE_SYNC_321.md)** - **Comprehensive Sync & Validate (Enhanced v4.0)**
+  - Universal "clean working tree" command with intelligent automation
+  - Stages, commits, syncs with remote, validates all changes
+  - **✨ NEW:** Automatically updates VERSION → README badges and syncs wiki submodule
+  - **Use anytime:** You want pending changes sorted with high quality + smart doc updates
+  - **Phases:** 7 (status → **doc intelligence** → stage → commit → **wiki sync** → remote sync → validate)
+  - **Runtime:** ~30-60 seconds
+  - **Run:** `bash scripts/sync_321_enhanced.sh`
 
 - **[#808//.](../tools/command_chain/OPTIMIZING_PULSE_808.md)** - **Optimizing Pulse** (if exists)
-    - Finds optimal path through complex workflows
-    - Performance analysis and recommendations
+  - Finds optimal path through complex workflows
+  - Performance analysis and recommendations
 
 ### System Commands
 - **#001//.** through **#999//.** - Numeric aliases for system operations

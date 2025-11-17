@@ -8,8 +8,7 @@ from typing import Dict, List, Optional, Any
 
 import aiofiles
 import numpy as np
-_rng = np.random.default_rng()
-from fastapi import FastAPI, HTTPException, Depends, File, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
 from src.middleware.fastapi_security import security, verify_csrf_token
 from starlette.middleware.cors import CORSMiddleware
@@ -25,6 +24,9 @@ from modules.symbolic_core.quantum_vsa import (
     QuantumSymbolicVector,
     quantum_symbolic_vector,
 )
+
+# Initialize RNG after all imports to satisfy linting rules
+_rng = np.random.default_rng()
 
 try:
     from qiskit import QuantumCircuit
@@ -183,7 +185,7 @@ def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
                     qc.cx(q, q + 1)
 
 
-@app.post(  # verify_csrf inside"/upload/")
+@app.post("/upload/")  # verify_csrf inside
 async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCredentials = Depends(security)):
     """Upload a bundle file with CSRF validation."""
     verify_csrf_token(token)
@@ -665,7 +667,11 @@ def geometric_algebra(req: GeometricAlgebraRequest):
 # === New VSA and Quantum Endpoints ===
 
 
-@app.post(  # verify_csrf inside"/api/vsa/generate", summary="Generate Quantum VSA Vector", dependencies=[Depends(security)])
+@app.post(
+    "/api/vsa/generate",
+    summary="Generate Quantum VSA Vector",
+    dependencies=[Depends(security)],
+)  # verify_csrf inside
 def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Generate a quantum symbolic vector for a given symbol."""
     verify_csrf_token(token)
@@ -685,8 +691,12 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
         raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])
-def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@app.post(
+    "/api/vsa/bind",
+    summary="Bind two VSA vectors",
+    dependencies=[Depends(security)],
+)  # verify_csrf inside
+def bind_vsa_vectors(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Bind two symbolic vectors using element-wise multiplication (XOR for bipolar)."""
     verify_csrf_token(token)
     try:
@@ -728,8 +738,12 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
         raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/vsa/similarity", summary="Calculate VSA similarity", dependencies=[Depends(security)])
-def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@app.post(
+    "/api/vsa/similarity",
+    summary="Calculate VSA similarity",
+    dependencies=[Depends(security)],
+)  # verify_csrf inside
+def calculate_vsa_similarity(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Calculate cosine similarity between two VSA vectors."""
     verify_csrf_token(token)
     try:
@@ -820,8 +834,15 @@ def advanced_geometric_operations(
         raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/quantum/circuit", summary="Generate Quantum Circuit", dependencies=[Depends(security)])
-def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@app.post(
+    "/api/quantum/circuit",
+    summary="Generate Quantum Circuit",
+    dependencies=[Depends(security)],
+)  # verify_csrf inside
+async def generate_quantum_circuit_api(
+    req: QuantumCircuitRequest,
+    token: HTTPAuthorizationCredentials = Depends(security),
+):
     """Generate and analyze a quantum circuit for symbolic operations."""
     verify_csrf_token(token)
 

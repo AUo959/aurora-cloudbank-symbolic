@@ -526,11 +526,45 @@ class ComprehensiveSync:
         logger.info("Phase 4: Syncing to main...")
 
         try:
-            # Pull with rebase if configured
-            if self.config.use_rebase:
-                pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
+            # First, fetch latest from main
+            fetch_result = self._run_command(['git', 'fetch', 'origin', 'main'])
+            if fetch_result.returncode != 0:
+                return PhaseResult(
+                    phase_number=4,
+                    phase_name="Sync to Main",
+                    success=False,
+                    duration_seconds=time.time() - phase_start,
+                    message="Failed to fetch from origin/main"
+                )
+
+            # Check if we're behind main
+            rev_list_result = self._run_command(['git', 'rev-list', '--left-right', '--count', 'origin/main...HEAD'])
+            if rev_list_result.returncode == 0:
+                counts = rev_list_result.stdout.strip().split()
+                behind_count = int(counts[0]) if len(counts) >= 2 else 0
+                
+                if behind_count > 0:
+                    logger.info(f"Branch is {behind_count} commit(s) behind main - syncing...")
+                    
+                    # Merge main into current branch (works for both main and feature branches)
+                    if self.config.use_rebase:
+                        pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
+                    else:
+                        pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
+                else:
+                    logger.info("Branch is up-to-date with main")
+                    pull_result = subprocess.CompletedProcess(
+                        args=['git', 'pull'],
+                        returncode=0,
+                        stdout="Already up to date.\n",
+                        stderr=""
+                    )
             else:
-                pull_result = self._run_command(['git', 'pull', 'origin', 'main'])
+                # Fallback: try to sync anyway
+                if self.config.use_rebase:
+                    pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
+                else:
+                    pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
 
             if pull_result.returncode != 0:
                 # Enhanced conflict detection
@@ -558,14 +592,18 @@ class ComprehensiveSync:
 
             # Push if auto_push enabled
             if self.config.auto_push:
-                push_result = self._run_command(['git', 'push', 'origin', 'main'])
+                # Get current branch name to push to correct remote
+                branch_result = self._run_command(['git', 'branch', '--show-current'])
+                current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else 'main'
+                
+                push_result = self._run_command(['git', 'push', 'origin', current_branch])
                 if push_result.returncode != 0:
                     return PhaseResult(
                         phase_number=4,
                         phase_name="Sync to Main",
                         success=False,
                         duration_seconds=time.time() - phase_start,
-                        message="Failed to push to remote"
+                        message=f"Failed to push to remote branch {current_branch}"
                     )
 
             return PhaseResult(

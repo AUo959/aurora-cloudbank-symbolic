@@ -669,7 +669,7 @@ esac
         summary = results["summary"]
         perf = results["performance_improvements"]
 
-        logger.info("Optimizations Applied: {summary["optimizations_applied']}/{summary['total_optimizations']}")
+        logger.info(f"Optimizations Applied: {summary['optimizations_applied']}/{summary['total_optimizations']}")
         print(f"⚡ Success Rate: {summary['success_rate']:.1f}%")
         print(f"⏱️  Execution Time: {summary['execution_time_seconds']:.1f}s")
 

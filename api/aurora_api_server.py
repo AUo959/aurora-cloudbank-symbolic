@@ -86,7 +86,7 @@ async def get_status():
     }
 
 
-@app.post(  # verify_csrf inside"/api/quantum/vector")
+@app.post("/api/quantum/vector")  # verify_csrf inside
 async def generate_quantum_vector(
     request: QuantumVectorRequest,
     token: HTTPAuthorizationCredentials = Depends(security)
@@ -111,7 +111,7 @@ async def generate_quantum_vector(
         raise HTTPException(status_code=500, detail=f"Quantum processing error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/consciousness/evolve")
+@app.post("/api/consciousness/evolve")  # verify_csrf inside
 async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Evolve consciousness state"""
     verify_csrf_token(token)
@@ -137,8 +137,8 @@ async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthori
         raise HTTPException(status_code=500, detail=f"Consciousness processing error: {str(e)}")
 
 
-@app.post(  # verify_csrf inside"/api/learning/pattern")
-async def process_learning_pattern(request: LearningRequest, token: HTTPAuthorizationCredentials = Depends(security)):
+@app.post("/api/learning/pattern")  # verify_csrf inside
+async def detect_learning_pattern(request: LearningPatternRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Process learning pattern"""
     verify_csrf_token(token)
 

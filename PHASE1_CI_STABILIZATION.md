@@ -101,3 +101,12 @@ summary:
 ---
 Anchor: PHASE-1-CI-STABILIZATION
 Created: 2025-11-17
+
+## Status Snapshot (2025-11-17)
+- PR #372 (chore/coverage-syntax-fixes): CI Check: FAILURE; Code Quality Analysis: FAILURE; evaluate: FAILURE; evaluate-and-integrate: FAILURE; SonarCloud Code Analysis: FAILURE. Many other analyzers/tests green.
+- PR #375 (AUo959-pbpaste-|-patch): Checks pending/neutral; infra checks green (content-labeling, security-scan, dashboards).
+- PR #376 (claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR): Checks pending/neutral; infra checks green.
+- PR #378 (copilot/sub-pr-376): Checks pending/neutral; infra checks green.
+- PR #390 (Phase 1): CI Check: FAILURE; Code Quality Analysis: FAILURE; evaluate: FAILURE; evaluate-and-integrate: FAILURE; Codacy Static Code Analysis: ACTION_REQUIRED; most other analyzers/tests green.
+
+````

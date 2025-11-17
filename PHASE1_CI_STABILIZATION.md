@@ -11,10 +11,10 @@
 ## PR Status Matrix (Pre-Rebase Snapshot – PLACEHOLDERS)
 | PR | Branch | Minimal CI | Vercel | Quality Gate | PR Eval | Selective Integration | Codacy | SonarCloud | Action Required |
 |----|--------|-----------|--------|--------------|---------|-----------------------|--------|-----------|----------------|
-| #372 | TBD | FAIL | FAIL | PENDING | FAIL | FAIL | WARN | FAIL | Yes |
-| #375 | TBD | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | Yes |
-| #376 | TBD | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | Yes |
-| #378 | TBD | FAIL | FAIL | CANCELLED | FAIL | FAIL | WARN | FAIL | Yes |
+| #372 | chore/coverage-syntax-fixes | FAIL | FAIL | PENDING | FAIL | FAIL | WARN | FAIL | Yes |
+| #375 | AUo959-pbpaste-|-patch | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | Yes |
+| #376 | claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | FAIL | Yes |
+| #378 | copilot/sub-pr-376 | FAIL | FAIL | CANCELLED | FAIL | FAIL | WARN | FAIL | Yes |
 
 Replace placeholders after reruns with actual statuses.
 

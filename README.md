@@ -103,10 +103,10 @@ make run
 ```
 
 **🌐 Access Points:**
-- **API Server:** http://localhost:8000
-- **Health Check:** http://localhost:8000/health
-- **API Docs:** http://localhost:8000/docs (Swagger UI)
-- **Metrics:** http://localhost:8000/metrics (Prometheus format)
+- **API Server:** <http://localhost:8000>
+- **Health Check:** <http://localhost:8000/health>
+- **API Docs:** <http://localhost:8000/docs> (Swagger UI)
+- **Metrics:** <http://localhost:8000/metrics> (Prometheus format)
 
 **📖 Next Steps:**
 - Explore [API Catalog](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog) (50+ endpoints)
@@ -746,6 +746,7 @@ usage = ai.get_token_usage_summary()
 ```
 
 **Supported Models:**
+
 | Model | Context | Best For | Status |
 |-------|---------|----------|--------|
 | Claude 3.5 Sonnet | 200K | Reasoning, Code | ✅ Available |
@@ -1052,8 +1053,6 @@ async def safety_overview():
 
 ## 🏗️ Complete Architecture
 
-
-
 ### Project Structure
 
 ```
@@ -1183,7 +1182,6 @@ Immutable Audit Log
 ---
 
 ## 🚀 Quick Start (5 Minutes)
-
 
 ## 🚀 Quick Start (5 Minutes)
 
@@ -1695,7 +1693,6 @@ asyncio.run(run_safety_monitoring())
 ---
 
 ## 📊 Production Status
-
 
 ## 📊 Production Status
 

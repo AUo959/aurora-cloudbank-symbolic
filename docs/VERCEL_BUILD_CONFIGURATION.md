@@ -96,4 +96,3 @@ Result: BUILD REQUIRED ✅
 - [Vercel Ignored Build Step Docs](https://vercel.com/docs/concepts/projects/overview#ignored-build-step)
 - Script location: `scripts/vercel-should-build.sh`
 - Frontend paths: `static/`, `tests/web/`
-

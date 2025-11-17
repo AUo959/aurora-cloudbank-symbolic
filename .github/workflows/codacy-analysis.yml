@@ -5,6 +5,12 @@ on:
     branches: [ main, develop, refactor/** ]
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'api/**'
+      - 'src/**'
+      - 'modules/**'
+      - 'tools/**'
+      - 'tests/**'
   workflow_dispatch:
 
 permissions:

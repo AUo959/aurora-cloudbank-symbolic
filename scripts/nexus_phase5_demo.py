@@ -353,7 +353,7 @@ class Phase5Demonstrator:
                 print(f"     Convergence: {cm['convergence_probability']:.3f}")
                 
         # Save manifest to file
-        manifest_path = Path(f".nexus/reality/manifest_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        manifest_path = Path(f".nexus/reality/manifest_{datetime.now(datetime.UTC).strftime('%Y%m%d_%H%M%S')}.json")
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps(manifest, indent=2, default=str))
         
@@ -369,7 +369,7 @@ class Phase5Demonstrator:
         print("=" * 60)
         print(f"Anchor: {self.anchor}")
         print(f"Seed: {self.seed}")
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {datetime.now(datetime.UTC).isoformat()}")
         print(f"Thread: T4-MEMORY-WEAVE-2025 → T5-REALITY-FORK-2025")
         
         # Run all demonstrations

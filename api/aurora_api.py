@@ -47,6 +47,16 @@ from src.middleware.fastapi_security import (
     sanitize_session_id
 )
 
+# Import RBAC and OAuth2 authentication routes
+try:
+    from src.security.auth_routes import router as auth_router
+    AUTH_ROUTES_AVAILABLE = True
+    AUTH_ROUTER = auth_router
+except ImportError:
+    logging.getLogger("aurora_api").warning("Authentication routes not available - OAuth2/RBAC features disabled")
+    AUTH_ROUTES_AVAILABLE = False
+    AUTH_ROUTER = None
+
 # Import AuMemManager API integration
 try:
     from modules.aumemmanager.api_integration import router as aumemmanager_router
@@ -415,6 +425,15 @@ except ImportError as e:
     logger.warning("⚠️ GUMAS Ethics not available: %s", e)
 except Exception as e:
     logger.error("❌ Failed to integrate GUMAS Ethics routes: %s", e)
+
+# Include Authentication (OAuth2/RBAC) API routes
+if AUTH_ROUTES_AVAILABLE and AUTH_ROUTER:
+    try:
+        app.include_router(AUTH_ROUTER)
+        logger.info("✅ Authentication (OAuth2/RBAC) API routes integrated successfully")
+    except Exception as e:
+        logger.error("❌ Failed to integrate Authentication API routes: %s", e)
+        AUTH_ROUTES_AVAILABLE = False
 
 # Initialize Ethics Gate for high-impact operations
 try:

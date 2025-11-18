@@ -169,14 +169,14 @@ class InstitutionalMemoryIntegrator:
         memory = OrchestrationMemory(
             memory_id=memory_id,
             decision_id=decision.decision_id,
-            execution_id=outcome.get('execution_id', 'unknown'),
+            execution_id=outcome.execution_id,
             timestamp=datetime.now().isoformat(),
             decision=self._serialize_decision(decision),
             outcome=outcome,
             system_state_before=system_state_before,
             system_state_after=system_state_after,
-            success=outcome.get('success', False),
-            improvement=outcome.get('improvement', {})
+            success=outcome.success,
+            improvement=outcome.improvement
         )
 
         # Store in memory

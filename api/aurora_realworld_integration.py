@@ -14,7 +14,7 @@ import json
 import os
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
@@ -447,7 +447,7 @@ async def get_status():
     """Get system status"""
     return {
         "status": "operational",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "systems": system_status,
         "version": "3.5.1",
         "phase": "Phase 4 - Real-World Integration"
@@ -465,7 +465,7 @@ async def generate_quantum_vector(request: QuantumVectorRequest):
             "dimension": request.dimension,
             "quantum_state": request.quantum_state,
             "coherence": random.uniform(0.8, 1.0),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         return JSONResponse(content=result)
@@ -487,7 +487,7 @@ async def evolve_consciousness(request: ConsciousnessRequest):
             },
             "stimulus_processed": request.stimulus,
             "evolution_time": request.duration,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         return JSONResponse(content=result)
@@ -511,7 +511,7 @@ async def process_learning_pattern(request: LearningRequest):
             },
             "learning_applied": request.feedback_score is not None,
             "feedback_score": request.feedback_score,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
         return JSONResponse(content=result)
@@ -555,7 +555,7 @@ async def run_integration_test():
         return {
             "overall_status": "passed" if overall_status else "failed",
             "test_results": test_results,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "test_duration": "2.3s"
         }
     except Exception as e:
@@ -602,7 +602,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "uptime": "operational",
         "version": "3.5.1"
     }

@@ -1,0 +1,128 @@
+{
+  "registry_version": "1.0.0",
+  "canonical_version": "v3.5.1",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "drift_threshold": 0.002,
+  "payloads": {
+    "threadcore_v3.5.1_macroready": {
+      "version": "v3.5.1",
+      "variant": "macroready",
+      "status": "canonical",
+      "file_path": "modules/reflective_autonomy/threadcore_payloads/threadcore_v3.5.1_macroready.json",
+      "description": "Symbolic Constellation Loom + Reflection Module - Primary canonical payload",
+      "role": "Symbolic Constellation Loom + Reflection Module",
+      "priority": "augment",
+      "capabilities": [
+        "drift_monitoring",
+        "anchor_propagation",
+        "reflection_snapshot",
+        "glyph_agent_coordination",
+        "zipwiz_patchweaver_relay",
+        "constellation_alignment"
+      ],
+      "glyph_agents": [
+        "Glyphon",
+        "Axiomera",
+        "Sentari",
+        "Caelion",
+        "Velatrix",
+        "Harmion"
+      ],
+      "compatible_threads": [
+        "HALO",
+        "STARLING",
+        "LIORA",
+        "OPPY",
+        "ARCHY",
+        "RIVERTHREAD"
+      ],
+      "deployment_status": "active",
+      "last_updated": "2025-07-13"
+    },
+    "threadcore_capsule_v3.5.1_macroready": {
+      "version": "v3.5.1",
+      "variant": "capsule",
+      "status": "specialized",
+      "file_path": "modules/reflective_autonomy/threadcore_payloads/threadcore_capsule_v3.5.1_macroready.json",
+      "description": "Capsule variant for encapsulated thread state",
+      "role": "Symbolic Constellation Loom + Reflection Module",
+      "use_case": "State encapsulation and transfer",
+      "parent_payload": "threadcore_v3.5.1_macroready",
+      "deployment_status": "active"
+    },
+    "threadcore_dropcapsule_v3.5.1_macroready": {
+      "version": "v3.5.1",
+      "variant": "dropcapsule",
+      "status": "specialized",
+      "file_path": "modules/reflective_autonomy/threadcore_payloads/threadcore_dropcapsule_v3.5.1_macroready.json",
+      "description": "Drop capsule variant for lightweight state distribution",
+      "role": "Symbolic Constellation Loom + Reflection Module",
+      "use_case": "Lightweight state distribution",
+      "parent_payload": "threadcore_v3.5.1_macroready",
+      "deployment_status": "active"
+    },
+    "threadcore_v3.5.1_driftpulse": {
+      "version": "v3.5.1",
+      "variant": "driftpulse",
+      "status": "specialized",
+      "file_path": "modules/reflective_autonomy/threadcore_payloads/threadcore_v3.5.1_driftpulse.json",
+      "description": "Drift pulse monitoring variant",
+      "role": "Drift monitoring and health checks",
+      "use_case": "Real-time drift monitoring and beacon synchronization",
+      "parent_payload": "threadcore_v3.5.1_macroready",
+      "deployment_status": "active"
+    }
+  },
+  "deprecated_versions": [],
+  "version_history": [
+    {
+      "version": "v3.5.1",
+      "release_date": "2025-07-13",
+      "changes": [
+        "Unified Loom schema across multiple sectors",
+        "Enhanced drift detection and mitigation",
+        "Glyph agent coordination improvements",
+        "ZIPWIZ and PATCHWEAVER integration",
+        "Full constellation alignment support"
+      ],
+      "migration_notes": "First canonical release - no migration required"
+    }
+  ],
+  "validation_rules": {
+    "required_fields": [
+      "augmentation",
+      "version",
+      "role",
+      "threadcore_directives",
+      "anchor_seed",
+      "ethics_protocol"
+    ],
+    "anchor_seed_required": "EOS_SEED_ORION",
+    "ethics_protocol_required": "Picard_Delta_3",
+    "max_drift_threshold": 0.002,
+    "glyph_resonance_layer": "LOOMFIELD_ACTIVE"
+  },
+  "usage_guidelines": {
+    "default_payload": "threadcore_v3.5.1_macroready",
+    "when_to_use_variants": {
+      "capsule": "Use when encapsulating thread state for storage or transfer",
+      "dropcapsule": "Use for lightweight state distribution across threads",
+      "driftpulse": "Use for real-time drift monitoring and health checks"
+    },
+    "extension_guidelines": "To extend ThreadCore, create a new variant based on the canonical payload. All variants must maintain compatibility with the base v3.5.1 specification.",
+    "deprecation_policy": "Deprecated payloads will be marked as such in this registry and archived to modules/reflective_autonomy/threadcore_payloads/deprecated/ with a 90-day grace period before removal."
+  },
+  "integration_points": {
+    "validator": "scripts/canonical_validator.py",
+    "classifier": "scripts/threadcore_classifier.py",
+    "tagging_engine": "modules/reflective_autonomy/threadcore_tagging.py",
+    "tests": "tests/test_threadcore_tagging.py"
+  },
+  "metadata": {
+    "created": "2025-07-13",
+    "last_modified": "2025-07-13",
+    "maintainer": "Aurora CloudBank Development Team",
+    "schema_version": "1.0.0"
+  }
+}

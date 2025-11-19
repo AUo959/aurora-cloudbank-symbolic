@@ -1,0 +1,30 @@
+name: Safety Commit Guard
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v3
+
+      - name: Scan for file deletions
+        run: |
+          deleted=$(git diff --name-status origin/main | grep '^D' | wc -l)
+          if [ "$deleted" -gt 0 ]; then
+            echo "❌ Detected $deleted file(s) marked for deletion in this PR."
+            exit 1
+          else
+            echo "✅ No file deletions detected."
+          fi
+
+      - name: Warn if only markdown files changed
+        run: |
+          non_md=$(git diff --name-only origin/main | grep -vE '\.md$' | wc -l)
+          if [ "$non_md" -eq 0 ]; then
+            echo "⚠️ PR contains only markdown. Consider confirming base tree integrity."
+          fi

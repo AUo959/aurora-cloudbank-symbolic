@@ -1,23 +1,36 @@
 # Intelligent Integration Plan – Command `#932//.`
 
-**Version:** 1.0.0  
-**Purpose:** Automatically survey repository issues & pull requests, derive readiness tasks, and synthesize a phased, checkpointed merge strategy optimized for stability and throughput.
+**Version:** 2.0.0  
+**Purpose:** Generate concrete, phased integration plans with specific execution strategies, context-aware commands, and checkpoint gates based on current repository state.
 
 ---
 ## 🔧 Command Summary
-`#932//.` executes the Intelligent Integration Planner.
+`#932//.` executes the Intelligent Integration Planner v2.
 
-It:
-1. Scans all open issues
-2. Scans all open & draft pull requests
-3. Maps PR ↔ Issue relationships (closing references & inline `#<issue>` mentions)
-4. Evaluates each PR for readiness (draft state, failing checks, missing reviews, missing issue linkage, merge conflicts, incomplete metadata)
-5. Generates a **phased integration plan**:
-   - **Phase 1 (Ready)**: Zero blocking tasks – safe to merge immediately
-   - **Phase 2 (Near-Ready)**: ≤ 2 minor tasks – quick wins to unblock
-   - **Phase 3 (Complex)**: Requires multiple or structural tasks – schedule carefully
-6. Emits both human-readable Markdown and machine-friendly JSON
-7. Provides **checkpoint suggestions** (review gates, batch merge order, rebase pivots)
+**What's New in v2:**
+- **Specific execution strategies** per PR (not generic task lists)
+- **Context-aware commands** based on actual PR state
+- **Phased integration sequence** with checkpoint gates
+- **Decision tree logic** for 6 PR states: immediate, quick_win, rebase_required, fix_required, wait, complex
+
+**Process:**
+1. Scans all open & draft pull requests with detailed state analysis
+2. Evaluates each PR through decision tree:
+   - ✅ **Immediate:** Ready to merge (all checks passed, no blockers)
+   - ⚡ **Quick Win:** Clean draft (just needs "mark ready")
+   - 🔄 **Rebase Required:** Has merge conflicts
+   - 🔧 **Fix Required:** Failing CI checks
+   - ⏳ **Wait:** CI checks pending
+   - 🎯 **Complex:** Needs manual triage
+3. Generates **phased integration sequence** with specific commands:
+   - Phase 1: Immediate Merge Batch
+   - Phase 2: Quick Win Activation
+   - Phase 3: Batch Rebase & Conflict Resolution
+   - Phase 4: CI Failure Remediation
+   - Phase 5: Pending CI Checks
+   - Phase 6: Complex Case Triage
+4. Provides **checkpoint gates** between phases
+5. Outputs both Markdown (human-readable) and JSON (machine-parseable)
 
 ---
 ## 🧠 Evaluation Dimensions
@@ -105,26 +118,67 @@ Each PR is scored across dimensions:
 ---
 ## 🚀 Execution
 
-**Basic (Plan Only):**
+**Full Plan (Markdown + JSON):**
 ```bash
 python scripts/integration_plan_932.py
 ```
 
-**Sequence Integration:**
+**Phases Only (Quick Summary):**
 ```bash
-# Generate plan with next-step commands
-python scripts/integration_plan_932.py --next-commands
+python scripts/integration_plan_932.py --phases
+```
 
-# JSON output only (for piping to other tools)
+**JSON Only (For Automation):**
+```bash
 python scripts/integration_plan_932.py --json-only
+```
 
-# Interactive: Auto-merge Phase 1 after confirmation
-python scripts/integration_plan_932.py --execute
+**Interactive Execution:**
+```bash
+python scripts/integration_plan_932.py --execute  # Future: step-through mode
+```
+
+**Example Output:**
+```
+# 🎯 Phased Integration Plan
+
+## 📊 Summary
+- Total PRs: 15
+- Estimated Total Time: 300min
+- High Risk PRs: 8
+- Phases with Work: 3
+
+## 🚀 Integration Sequence
+
+### Phase 1: 🚀 Immediate Merge Batch
+PRs ready to merge with zero blockers
+- PRs: #123, #456
+- Estimated Time: 6min
+- Checkpoint: ✅ Verify all merged successfully
+
+Commands:
+gh pr view 123  # Final review
+gh pr merge 123 --squash --auto
+gh pr view 456
+gh pr merge 456 --squash --auto
+
+### Phase 2: 🔄 Batch Rebase & Conflict Resolution
+Rebase conflicting PRs on updated main
+- PRs: #407, #400, #401
+- Estimated Time: 60min
+- Checkpoint: ⚠️ Test each rebased PR locally
+
+Commands:
+gh pr checkout 407
+git fetch origin main
+git rebase origin/main
+# Resolve conflicts, then:
+git push --force-with-lease
 ```
 
 **Command Chain Flow:**
 ```
-#932//. → Plan → #933//. (execute Phase 1) → #934//. (validate) → Repeat
+#932//. → Plan → Execute Phase 1 → #932//. (re-scan) → Execute Phase 2 → Repeat
 ```
 
 If integrated into higher command chain automation, `#932//.` will invoke the script and surface output.

@@ -52,33 +52,33 @@ def dispatch_command(
 ) -> Any:
     """
     Dispatch a command by code.
-    
+
     Args:
         command_code: Command code (e.g., '321', 'STATUS', 'COMMIT', 'SYNC')
         config_path: Path to configuration file (optional)
         workspace_path: Path to workspace directory (optional)
         **kwargs: Additional arguments passed to command handler
-    
+
     Returns:
         Command execution result
-    
+
     Raises:
         ValueError: If command code is not registered
     """
     command_code = command_code.upper()
-    
+
     if command_code not in COMMAND_HANDLERS:
         raise ValueError(
             f"Unknown command code: {command_code}\n"
             f"Available commands: {', '.join(sorted(COMMAND_HANDLERS.keys()))}"
         )
-    
+
     handler = COMMAND_HANDLERS[command_code]
-    
+
     # Resolve lazy imports
     if callable(handler) and handler.__name__.startswith('get_execute_'):
         handler = handler()
-    
+
     # Execute command with common parameters
     return handler(
         config_path=config_path,
@@ -90,7 +90,7 @@ def dispatch_command(
 def register_command(command_code: str, handler: Callable):
     """
     Register a new command handler.
-    
+
     Args:
         command_code: Command code (e.g., 'MYCOMMAND')
         handler: Callable that executes the command
@@ -106,7 +106,7 @@ def list_commands() -> list:
 def main():
     """CLI entry point for dispatcher"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description="Command Chain Dispatcher - Execute commands by code",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -125,46 +125,46 @@ Commands:
   SYNC    - Sync to remote (phase 4 only)
         """
     )
-    
+
     parser.add_argument(
         'command',
         nargs='?',
         type=str,
         help='Command code to execute'
     )
-    
+
     parser.add_argument(
         '--list',
         action='store_true',
         help='List available commands'
     )
-    
+
     parser.add_argument(
         '--config',
         type=str,
         help='Path to configuration file'
     )
-    
+
     parser.add_argument(
         '--workspace',
         type=str,
         help='Path to workspace directory'
     )
-    
+
     args = parser.parse_args()
-    
+
     # List commands if requested
     if args.list:
         print("Available commands:")
         for cmd in list_commands():
             print(f"  {cmd}")
         sys.exit(0)
-    
+
     # Require command if not listing
     if not args.command:
         parser.print_help()
         sys.exit(1)
-    
+
     try:
         # Dispatch command
         result = dispatch_command(
@@ -172,13 +172,13 @@ Commands:
             config_path=args.config,
             workspace_path=args.workspace
         )
-        
+
         # Determine success
         if hasattr(result, 'success'):
             sys.exit(0 if result.success else 1)
         else:
             sys.exit(0)
-        
+
     except ValueError as e:
         print(f"❌ {e}")
         sys.exit(1)

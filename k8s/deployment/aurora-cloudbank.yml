@@ -1,0 +1,73 @@
+# Issue Reference: #385 (Critical, Orphan) – Kubernetes CI Deployment Pipeline (Skeleton)
+# Context Tag: DLP:k8s_manifest_v1
+# NOTE: Draft manifest. Do NOT use for production.
+# Future: Helm chart + overlays (dev/stage/prod).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-cloudbank
+  labels:
+    app: aurora-cloudbank
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: aurora-cloudbank
+  template:
+    metadata:
+      labels:
+        app: aurora-cloudbank
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/auo959/aurora-cloudbank-symbolic:latest # Placeholder image
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: AURORA_ENV
+              value: "development"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-cloudbank
+spec:
+  selector:
+    app: aurora-cloudbank
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+---
+# Future ingress, TLS, autoscaling, and secret management will be added in subsequent iterations.

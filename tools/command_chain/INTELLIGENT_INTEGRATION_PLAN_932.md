@@ -1,13 +1,32 @@
 # Intelligent Integration Plan – Command `#932//.`
 
-**Version:** 2.0.0  
-**Purpose:** Generate concrete, phased integration plans with specific execution strategies, context-aware commands, and checkpoint gates based on current repository state.
+**Version:** 2.1.0  
+**Purpose:** Generate mission-focused, phased integration plans with quality gates, issue context, and selective integration logic to ensure optimal merge order and prevent code regression.
 
 ---
 ## 🔧 Command Summary
-`#932//.` executes the Intelligent Integration Planner v2.
+`#932//.` executes the Intelligent Integration Planner v2.1 – **Mission-Focused Edition**
 
-**What's New in v2:**
+**What's New in v2.1 (Mission-Focused):**
+- 🎯 **Mission Scoring:** PRs prioritized by repository improvement value
+  - Critical/high-priority issue resolution: +3/+2 mission score
+  - Code quality improvements: added to mission score
+  - Mission-focused ordering prevents merging inferior code
+- 🔍 **Quality Assessment:** Automated code quality scoring
+  - Positive indicators: code reduction (+2), test coverage (+1), documentation (+1)
+  - Negative indicators: large untested changes (-2), huge single files (-1)
+  - Quality recommendations: merge/verify_tests/review_carefully
+- 📋 **Issue Integration:** Full open issue context with PR mapping
+  - Issues grouped by priority (critical/high/medium/low)
+  - Shows which PRs address each issue
+  - Identifies orphaned issues (no PRs addressing them)
+  - Issue priority influences merge order
+- ⚡ **Selective Integration Logic:** Quality gates prevent mistakes
+  - Each PR validated for code improvement before merge
+  - Mission score ensures critical issues addressed first
+  - Older PRs (lower number) prioritized when mission score equal
+
+**What's Still in v2:**
 - **Specific execution strategies** per PR (not generic task lists)
 - **Context-aware commands** based on actual PR state
 - **Phased integration sequence** with checkpoint gates
@@ -35,18 +54,68 @@
 ---
 ## 🧠 Evaluation Dimensions
 Each PR is scored across dimensions:
-- Draft status
-- Mergeability (`mergeStateStatus`, conflicts)
-- Status checks rollup (passing/failing/pending)
-- Review decision & required approvals
-- Linked issues (direct closing references or body mentions)
-- Task density (derived readiness tasks)
-- Dependency hints (mentions of other PR numbers or feature branches)
-- **Risk scoring** (files changed, code churn)
-- **Dependency graph** (which PRs block others)
-- **Time estimates** (based on size and complexity)
-- **Bottleneck detection** (PRs blocking multiple others)
-- **Critical path** (longest dependency chain)
+- **Mission Alignment:**
+  - Linked to critical issues (+3 mission score)
+  - Linked to high-priority issues (+2 mission score)
+  - Code quality improvements (adds to mission score)
+- **Quality Assessment:**
+  - Code reduction (fewer lines = +2)
+  - Test coverage (test files = +1)
+  - Documentation (docs = +1)
+  - Large untested changes (-2)
+  - Huge single files >500 lines (-1)
+- **Issue Context:**
+  - Which issues the PR addresses
+  - Issue priority level (critical/high/medium/low)
+  - Age of unaddressed issues (escalates priority)
+- **Technical State:**
+  - Draft status
+  - Mergeability (`mergeStateStatus`, conflicts)
+  - Status checks rollup (passing/failing/pending)
+  - Review decision & required approvals
+- **Dependencies & Risk:**
+  - Linked issues (direct closing references or body mentions)
+  - Task density (derived readiness tasks)
+  - Dependency hints (mentions of other PR numbers)
+  - **Risk scoring** (files changed, code churn)
+  - **Dependency graph** (which PRs block others)
+  - **Time estimates** (based on size and complexity)
+
+---
+## 🎯 Mission-Focused Ordering
+
+**Philosophy:** The integration planner prioritizes work that advances repository function, not just executes tasks.
+
+**Ordering Algorithm (Applied to All Phases):**
+1. **Mission Score (Descending):** Higher mission scores first
+   - PRs addressing critical issues (score 3+) have priority
+   - PRs addressing high-priority issues (score 2+) next
+   - Quality improvements add to mission score
+2. **Quality Score (Descending):** Higher quality code first when mission score equal
+   - Code reduction preferred over additions
+   - Test coverage and docs increase score
+3. **PR Number (Ascending):** Older PRs first when mission/quality equal
+   - Lower PR numbers = older work likely more foundational
+
+**Quality Gates:**
+- ⚠️ PRs with negative quality scores get "verify_tests" recommendation
+- 🔴 PRs with score -2 or lower get "review_carefully" recommendation
+- ✅ PRs with score 0+ get "merge" recommendation
+
+**Selective Integration Logic:**
+- Each PR's quality assessed before merge recommendation
+- Mission scoring prevents inferior code from overwriting existing work
+- Critical/high-priority issues always float to top of their phase
+- Quality warnings signal need for careful review
+
+**Example Ordering:**
+```
+Phase: Immediate Merge
+  1. ⭐ PR #404 (mission: 3, quality: 0) - Addresses CRITICAL issue #384
+  2. 🎯 PR #403 (mission: 2, quality: 1) - Addresses HIGH issue #383, has tests
+  3. PR #402 (mission: 0, quality: 2) - Code reduction, good quality
+  4. PR #401 (mission: 0, quality: -1) - Needs review, large untested change
+```
 
 ---
 ## 📊 Output Structure (JSON)
@@ -213,31 +282,71 @@ Future enhancements:
 - Add risk weighting (files touched, churn, test delta)
 
 ---
-## 🧾 Example Markdown Snippet
-```
-# Intelligent Integration Plan (Generated 2025-11-19 14:25 UTC)
+## 🧾 Example Markdown Snippet (v2.1)
+```markdown
+# 🎯 Phased Integration Plan
+Generated: 2025-11-19T14:25:00Z
+Repository: owner/repo
 
-## Summary
-Open PRs: 12
-Phase 1 Ready: 4 | Phase 2 Near-Ready: 5 | Phase 3 Complex: 3
-Estimated Phase 1 Time: 45min
-⚠️  High Risk PRs: 2
+## 📊 Summary
+- **Total PRs:** 15
+- **Estimated Total Time:** 300min
+- **High Risk PRs:** 15
+- **Phases with Work:** 3
 
-## 🎯 Recommendations
-- 3 PRs in draft - marking ready could accelerate Phase 2
-- PR #125 blocks 2 others - prioritize merge
-- 2 high-risk PRs - schedule dedicated review/testing
+### Phase Breakdown
+- **quick_win:** 3 PR(s)
+- **rebase_required:** 10 PR(s)
+- **wait:** 2 PR(s)
 
-## 🚨 Bottlenecks
-- PR #125: Complex refactor (blocks 2 PRs)
-- PR #130: API changes (blocks 1 PR)
+## 🎯 Open Issues Overview
 
-## 🔗 Critical Path
-#125 → #130 → #131
+### 🚨 CRITICAL Priority (5 issues)
+- **Issue #384:** Activate Telemetry and Observability → Addressed by PR(s): #404
+- **Issue #383:** Add RBAC and OAuth2 Authentication → Addressed by PR(s): #403
+- **Issue #387:** Provide Developer Deployment Guide ⚠️ No PRs addressing this issue
+- **Issue #385:** Implement Kubernetes CI Pipeline ⚠️ No PRs addressing this issue
+- **Issue #382:** Consolidate MCP Bridge Logic → Addressed by PR(s): #389
 
-## Phase 1 – Ready (4)
-- PR #123: Add health endpoint (5-15min) ✅
-- ⚠️ PR #130: CI config cleanup (30-60min) ✅
+### ⚠️ Orphaned Issues (No PRs)
+- 🚨 Issue #387: Provide Developer Deployment Guide (critical)
+- 🚨 Issue #385: Implement Kubernetes CI Pipeline (critical)
+
+## 🚀 Integration Sequence
+
+### Phase 1: ⚡ Quick Win Activation
+**Mark clean drafts as ready for review**
+- **PRs:** #404, #408, #410
+- **Count:** 3
+- **Estimated Time:** 24min
+- **Checkpoint:** 📋 Review each before marking ready
+
+## 📋 Detailed PR Strategies
+
+### 🔴 ⭐ PR #404: Activate telemetry and observability infrastructure
+**Phase:** quick_win | **Mission Score:** 3
+**Estimated Time:** 8min
+
+**Addresses Issues:**
+- 🚨 Issue #384: Activate Telemetry and Observability (critical priority)
+
+**Code Quality:** ✅ Score: 2 | Recommendation: merge
+  - Positive: Code reduction, Test coverage
+
+**Risk Factors:**
+- ⭐ Addresses CRITICAL issue
+- High complexity: 4 files, 706 lines
+
+### 🔴 PR #409: chore(deps): bump glob dependency
+**Phase:** rebase_required | **Mission Score:** 0
+**Estimated Time:** 15-30min
+
+**Code Quality:** 🔴 Score: -1 | Recommendation: verify_tests
+  - Warnings: Large single-file change: package-lock.json
+
+**Risk Factors:**
+- ⚠️ Quality concerns - review carefully
+- High complexity: 2 files, 1338 lines
 
 ## Phase 2 – Near-Ready (5)
 - PR #124: Fix tests (15-30min) – Fix failing status checks

@@ -57,7 +57,14 @@ def gh_json(args: List[str]) -> Any:
     try:
         return json.loads(out)
     except json.JSONDecodeError:
-        raise RuntimeError(f"Failed to parse JSON from gh output")
+        raise RuntimeError("Failed to parse JSON from gh output")
+
+
+def fetch_issues() -> List[Dict[str, Any]]:
+    """Fetch all open issues with labels and priorities."""
+    args = ["issue", "list", "--state", "open", "--json",
+            "number,title,labels,milestone,assignees,createdAt,updatedAt,url"]
+    return gh_json(args)
 
 
 def fetch_pull_requests() -> List[Dict[str, Any]]:
@@ -85,10 +92,94 @@ def extract_issue_refs_from_body(body: str) -> List[int]:
     return sorted(refs)
 
 
+def assess_pr_quality(detail: Dict[str, Any]) -> Dict[str, Any]:
+    """Assess if PR improves codebase or risks regression."""
+    files = detail.get("files", [])
+    additions = sum(f.get("additions", 0) for f in files)
+    deletions = sum(f.get("deletions", 0) for f in files)
+    
+    # Quality indicators
+    quality = {
+        "score": 0,
+        "indicators": [],
+        "warnings": [],
+        "recommendation": "merge"
+    }
+    
+    # Positive indicators
+    if deletions > additions * 0.5:  # Net code reduction
+        quality["score"] += 2
+        quality["indicators"].append("Code reduction (simplification)")
+    
+    test_files = [f for f in files if "test" in f.get("filename", "").lower()]
+    if test_files:
+        quality["score"] += 1
+        quality["indicators"].append(f"Test coverage: {len(test_files)} test file(s)")
+    
+    doc_files = [f for f in files if any(ext in f.get("filename", "") for ext in [".md", "README", "CHANGELOG"])]
+    if doc_files:
+        quality["score"] += 1
+        quality["indicators"].append("Documentation updated")
+    
+    # Warning indicators
+    if additions > 1000 and not test_files:
+        quality["score"] -= 2
+        quality["warnings"].append("Large change without test additions")
+    
+    large_single_file = [f for f in files if f.get("additions", 0) > 500]
+    if large_single_file:
+        quality["score"] -= 1
+        quality["warnings"].append(f"Large single-file change: {large_single_file[0].get('filename')}")
+    
+    # Generate recommendation
+    if quality["score"] < -2:
+        quality["recommendation"] = "review_carefully"
+    elif quality["score"] < 0:
+        quality["recommendation"] = "verify_tests"
+    
+    return quality
+
+
+def categorize_issue_priority(issue: Dict[str, Any]) -> str:
+    """Categorize issue priority based on labels and age."""
+    labels = [label.get("name", "").lower() for label in issue.get("labels", [])]
+    
+    # Priority labels
+    if any(label in labels for label in ["critical", "p0", "blocking"]):
+        return "critical"
+    if any(label in labels for label in ["high", "p1", "bug"]):
+        return "high"
+    if any(label in labels for label in ["enhancement", "feature", "p2"]):
+        return "medium"
+    
+    # Age-based priority (older = higher priority)
+    created = issue.get("createdAt", "")
+    if created:
+        try:
+            created_dt = datetime.fromisoformat(created.replace("Z", "+00:00"))
+            age_days = (datetime.now(timezone.utc) - created_dt).days
+            if age_days > 90:
+                return "high"
+            elif age_days > 30:
+                return "medium"
+        except (ValueError, AttributeError):
+            pass
+    
+    return "low"
+
+
 # === Strategy Generation ===
-def generate_pr_strategy(pr_data: Dict[str, Any], detail: Dict[str, Any]) -> Dict[str, Any]:
-    """Generate specific execution strategy for a PR based on its current state."""
+def generate_pr_strategy(pr_data: Dict[str, Any], detail: Dict[str, Any],
+                         issues: List[Dict[str, Any]] = None) -> Dict[str, Any]:  # noqa: B006
+    """Generate specific execution strategy for a PR based on its current state.
+    
+    Args:
+        pr_data: Basic PR metadata
+        detail: Detailed PR info from enrich_pr
+        issues: All open issues for context mapping
+    """
     pr_num = pr_data["number"]
+    issues = issues or []
     
     # Analyze current state
     is_draft = pr_data.get("isDraft", False)
@@ -110,6 +201,22 @@ def generate_pr_strategy(pr_data: Dict[str, Any], detail: Dict[str, Any]) -> Dic
     # Extract dependencies
     pr_refs = [int(m) for m in re.findall(r'#(\d{3,})', detail.get("body", "")) if int(m) != pr_num]
     
+    # Link to issues
+    linked_issues = [ref.get("number") for ref in detail.get("closingIssuesReferences", [])]
+    body_issue_refs = extract_issue_refs_from_body(detail.get("body", ""))
+    all_issue_refs = sorted(set(linked_issues + body_issue_refs))
+    
+    # Map issue priorities
+    issue_map = {issue["number"]: issue for issue in issues}
+    linked_issue_priorities = []
+    for issue_num in all_issue_refs:
+        if issue_num in issue_map:
+            priority = categorize_issue_priority(issue_map[issue_num])
+            linked_issue_priorities.append((issue_num, priority, issue_map[issue_num].get("title", "")))
+    
+    # Assess quality
+    quality = assess_pr_quality(detail)
+    
     strategy = {
         "pr": pr_num,
         "title": pr_data.get("title", ""),
@@ -119,14 +226,37 @@ def generate_pr_strategy(pr_data: Dict[str, Any], detail: Dict[str, Any]) -> Dic
         "checkpoint_required": False,
         "estimated_time": "5-15min",
         "dependencies": pr_refs,
+        "linked_issues": linked_issue_priorities,
+        "quality_assessment": quality,
         "risk_factors": [],
         "files_changed": files_changed,
-        "churn": churn
+        "churn": churn,
+        "mission_score": 0
     }
     
     # Risk assessment
     if files_changed >= RISK_HIGH_FILES or churn >= RISK_HIGH_CHURN:
         strategy["risk_factors"].append(f"High complexity: {files_changed} files, {churn} lines")
+    
+    # Add quality warnings
+    if quality["warnings"]:
+        strategy["risk_factors"].extend(quality["warnings"])
+    
+    # Mission alignment scoring
+    mission_score = 0
+    if any(priority == "critical" for _, priority, _ in linked_issue_priorities):
+        mission_score += 3
+        strategy["risk_factors"].insert(0, "⭐ Addresses CRITICAL issue")
+    elif any(priority == "high" for _, priority, _ in linked_issue_priorities):
+        mission_score += 2
+        strategy["risk_factors"].insert(0, "🎯 Addresses HIGH priority issue")
+    
+    if quality["score"] > 0:
+        mission_score += quality["score"]
+    elif quality["recommendation"] == "review_carefully":
+        strategy["risk_factors"].insert(0, "⚠️  Quality concerns - review carefully")
+    
+    strategy["mission_score"] = mission_score
     
     # === DECISION TREE ===
     
@@ -240,12 +370,29 @@ def generate_pr_strategy(pr_data: Dict[str, Any], detail: Dict[str, Any]) -> Dic
 
 # === Integration Sequence Builder ===
 def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Build phased integration sequence with checkpoints."""
+    """Build phased integration sequence with checkpoints.
+    
+    Orders PRs within phases by:
+    1. Mission score (higher = more critical)
+    2. Quality score (higher = safer to merge)
+    3. PR number (lower = older, higher priority)
+    """
     sequence = []
     seq_num = 1
     
-    # Phase 1: Immediate merges
-    immediate = [s for s in strategies if s["phase"] == "immediate"]
+    # Mission-focused sorting function
+    def mission_sort_key(s: Dict[str, Any]) -> Tuple:
+        return (
+            -s.get("mission_score", 0),  # Higher mission score first
+            -s.get("quality_assessment", {}).get("score", 0),  # Higher quality first
+            s["pr"]  # Lower PR number (older) first
+        )
+    
+    # Phase 1: Immediate merges (mission-sorted)
+    immediate = sorted(
+        [s for s in strategies if s["phase"] == "immediate"],
+        key=mission_sort_key
+    )
     if immediate:
         sequence.append({
             "sequence": seq_num,
@@ -260,8 +407,11 @@ def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[st
         })
         seq_num += 1
     
-    # Phase 2: Quick wins (clean drafts)
-    quick_wins = [s for s in strategies if s["phase"] == "quick_win"]
+    # Phase 2: Quick wins (clean drafts, mission-sorted)
+    quick_wins = sorted(
+        [s for s in strategies if s["phase"] == "quick_win"],
+        key=mission_sort_key
+    )
     if quick_wins:
         sequence.append({
             "sequence": seq_num,
@@ -272,14 +422,19 @@ def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[st
             "strategy": "sequential_activate",
             "estimated_time": f"{len(quick_wins) * 8}min",
             "checkpoint": "📋 Review each before marking ready",
-            "commands": [f"# PR #{s['pr']}: {s['title']}" for s in quick_wins] +
-                       [cmd for s in quick_wins[:1] for cmd in s["commands"]] +
-                       [f"# Repeat for remaining {len(quick_wins)-1} PRs"]
+            "commands": (
+                [f"# PR #{s['pr']}: {s['title']}" for s in quick_wins] +
+                [cmd for s in quick_wins[:1] for cmd in s["commands"]] +
+                [f"# Repeat for remaining {len(quick_wins)-1} PRs"]
+            )
         })
         seq_num += 1
     
-    # Phase 3: Rebase operations
-    rebase_prs = [s for s in strategies if s["phase"] == "rebase_required"]
+    # Phase 3: Rebase operations (mission-sorted)
+    rebase_prs = sorted(
+        [s for s in strategies if s["phase"] == "rebase_required"],
+        key=mission_sort_key
+    )
     if rebase_prs:
         sequence.append({
             "sequence": seq_num,
@@ -290,14 +445,19 @@ def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[st
             "strategy": "one_by_one_rebase",
             "estimated_time": f"{len(rebase_prs) * 20}min",
             "checkpoint": "⚠️  Test each rebased PR locally before pushing",
-            "commands": [f"# PR #{s['pr']}: {s['title']}" for s in rebase_prs] +
-                       [cmd for s in rebase_prs[:1] for cmd in s["commands"]] +
-                       [f"# Repeat rebase for remaining {len(rebase_prs)-1} PRs"]
+            "commands": (
+                [f"# PR #{s['pr']}: {s['title']}" for s in rebase_prs] +
+                [cmd for s in rebase_prs[:1] for cmd in s["commands"]] +
+                [f"# Repeat rebase for remaining {len(rebase_prs)-1} PRs"]
+            )
         })
         seq_num += 1
     
-    # Phase 4: Fix failing checks
-    fix_prs = [s for s in strategies if s["phase"] == "fix_required"]
+    # Phase 4: Fix failing checks (mission-sorted)
+    fix_prs = sorted(
+        [s for s in strategies if s["phase"] == "fix_required"],
+        key=mission_sort_key
+    )
     if fix_prs:
         sequence.append({
             "sequence": seq_num,
@@ -308,13 +468,18 @@ def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[st
             "strategy": "parallel_fix",
             "estimated_time": f"{len(fix_prs) * 40}min",
             "checkpoint": "✅ Verify all checks green before next phase",
-            "commands": [f"# PR #{s['pr']}: {'; '.join(s['risk_factors'])}" for s in fix_prs] +
-                       ["# Coordinate with PR authors to fix issues"]
+            "commands": (
+                [f"# PR #{s['pr']}: {'; '.join(s['risk_factors'])}" for s in fix_prs] +
+                ["# Coordinate with PR authors to fix issues"]
+            )
         })
         seq_num += 1
     
-    # Phase 5: Waiting on CI
-    wait_prs = [s for s in strategies if s["phase"] == "wait"]
+    # Phase 5: Waiting on CI (mission-sorted)
+    wait_prs = sorted(
+        [s for s in strategies if s["phase"] == "wait"],
+        key=mission_sort_key
+    )
     if wait_prs:
         sequence.append({
             "sequence": seq_num,
@@ -329,8 +494,11 @@ def build_integration_sequence(strategies: List[Dict[str, Any]]) -> List[Dict[st
         })
         seq_num += 1
     
-    # Phase 6: Complex cases
-    complex_prs = [s for s in strategies if s["phase"] == "complex"]
+    # Phase 6: Complex cases (mission-sorted)
+    complex_prs = sorted(
+        [s for s in strategies if s["phase"] == "complex"],
+        key=mission_sort_key
+    )
     if complex_prs:
         sequence.append({
             "sequence": seq_num,
@@ -362,6 +530,7 @@ def build_plan() -> Dict[str, Any]:
         }
     
     try:
+        issues = fetch_issues()
         prs = fetch_pull_requests()
     except Exception as e:
         return {
@@ -375,7 +544,7 @@ def build_plan() -> Dict[str, Any]:
     for pr in prs:
         try:
             detail = enrich_pr(pr["number"])
-            strategy = generate_pr_strategy(pr, detail)
+            strategy = generate_pr_strategy(pr, detail, issues)
             strategies.append(strategy)
         except Exception as e:
             strategies.append({
@@ -419,7 +588,8 @@ def build_plan() -> Dict[str, Any]:
             "phases_with_work": len(integration_sequence)
         },
         "integration_sequence": integration_sequence,
-        "strategies": strategies
+        "strategies": strategies,
+        "issues": issues
     }
 
 
@@ -448,6 +618,53 @@ def render_markdown(plan: Dict[str, Any]) -> str:
         if count > 0:
             lines.append(f"- **{phase}:** {count} PR(s)")
     lines.append("")
+    
+    # Open Issues Overview
+    if plan.get('issues'):
+        lines.append("## 🎯 Open Issues Overview")
+        lines.append("")
+        
+        # Group issues by priority
+        priority_groups = {"critical": [], "high": [], "medium": [], "low": []}
+        issue_to_prs = {}  # Map issue number to PRs that address it
+        
+        # Build issue-to-PR mapping
+        for strategy in plan['strategies']:
+            if strategy.get('linked_issues'):
+                for issue_num, priority, issue_title in strategy['linked_issues']:
+                    if issue_num not in issue_to_prs:
+                        issue_to_prs[issue_num] = []
+                    issue_to_prs[issue_num].append(strategy['pr'])
+        
+        # Categorize all issues
+        for issue in plan['issues']:
+            priority = categorize_issue_priority(issue)
+            priority_groups[priority].append(issue)
+        
+        # Render by priority
+        for priority in ["critical", "high", "medium", "low"]:
+            if priority_groups[priority]:
+                priority_emoji = {"critical": "🚨", "high": "⚠️", "medium": "📌", "low": "ℹ️"}[priority]
+                lines.append(f"### {priority_emoji} {priority.upper()} Priority ({len(priority_groups[priority])} issues)")
+                lines.append("")
+                
+                for issue in priority_groups[priority]:
+                    issue_num = issue['number']
+                    addressing_prs = issue_to_prs.get(issue_num, [])
+                    pr_status = f" → Addressed by PR(s): {', '.join(f'#{pr}' for pr in addressing_prs)}" if addressing_prs else " ⚠️ No PRs addressing this issue"
+                    
+                    lines.append(f"- **Issue #{issue_num}:** {issue['title']}{pr_status}")
+                lines.append("")
+        
+        # Show orphaned issues (no PRs addressing them)
+        orphaned = [i for i in plan['issues'] if i['number'] not in issue_to_prs]
+        if orphaned:
+            lines.append("### ⚠️ Orphaned Issues (No PRs)")
+            for issue in orphaned:
+                priority = categorize_issue_priority(issue)
+                priority_emoji = {"critical": "🚨", "high": "⚠️", "medium": "📌", "low": "ℹ️"}[priority]
+                lines.append(f"- {priority_emoji} Issue #{issue['number']}: {issue['title']} ({priority})")
+            lines.append("")
     
     # Integration sequence
     lines.append("## 🚀 Integration Sequence")
@@ -482,12 +699,40 @@ def render_markdown(plan: Dict[str, Any]) -> str:
             continue
         
         risk_indicator = "🔴" if strategy.get('risk_factors') else "✅"
+        
+        # Build PR header with mission/quality indicators
+        header_prefix = ""
+        if strategy.get('mission_score', 0) >= 3:
+            header_prefix = "⭐ "
+        elif strategy.get('mission_score', 0) >= 2:
+            header_prefix = "🎯 "
+        
         lines.extend([
-            f"### {risk_indicator} PR #{strategy['pr']}: {strategy['title']}",
-            f"**Phase:** {strategy['phase']}",
+            f"### {risk_indicator} {header_prefix}PR #{strategy['pr']}: {strategy['title']}",
+            f"**Phase:** {strategy['phase']} | **Mission Score:** {strategy.get('mission_score', 0)}",
             f"**Estimated Time:** {strategy['estimated_time']}",
             ""
         ])
+        
+        # Show linked issues and priorities
+        if strategy.get('linked_issues'):
+            lines.append("**Addresses Issues:**")
+            for issue_num, priority, issue_title in strategy['linked_issues']:
+                priority_emoji = {"critical": "🚨", "high": "⚠️", "medium": "📌", "low": "ℹ️"}.get(priority, "")
+                lines.append(f"- {priority_emoji} Issue #{issue_num}: {issue_title} ({priority} priority)")
+            lines.append("")
+        
+        # Show quality assessment
+        if strategy.get('quality_assessment'):
+            qa = strategy['quality_assessment']
+            quality_emoji = "✅" if qa['score'] >= 2 else "⚠️" if qa['score'] >= 0 else "🔴"
+            lines.append(f"**Code Quality:** {quality_emoji} Score: {qa['score']} | Recommendation: {qa['recommendation']}")
+            
+            if qa['indicators']:
+                lines.append(f"  - Positive: {', '.join(qa['indicators'])}")
+            if qa['warnings']:
+                lines.append(f"  - Warnings: {', '.join(qa['warnings'])}")
+            lines.append("")
         
         if strategy.get('risk_factors'):
             lines.append("**Risk Factors:**")

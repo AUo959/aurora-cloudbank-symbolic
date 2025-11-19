@@ -38,9 +38,9 @@ class RealitySimMonitor:
     """
     Executive subroutine ensuring every simulation, computation, and collaboration
     aligns with the 'reality sim to real-world breakthrough' maxim.
-    
+
     Tracks provenance, system awareness, audit trails, and metric integrity.
-    
+
     Integration Points:
     - registry: Component registry (Synergy Dashboard)
     - telemetry: OpenTelemetry observability system
@@ -57,7 +57,7 @@ class RealitySimMonitor:
     ):
         """
         Initialize Reality Sim Monitor with Aurora system integrations.
-        
+
         Args:
             registry: Component registry object (from Synergy Dashboard)
             telemetry: Telemetry/metrics object (from OpenTelemetry)
@@ -68,7 +68,7 @@ class RealitySimMonitor:
         self.telemetry = telemetry or self._get_default_telemetry()
         self.audit_log = audit_log or self._get_default_audit_log()
         self.config = config or self._get_default_config()
-        
+
         # Track subroutine execution
         self._execution_count = 0
         self._success_count = 0
@@ -118,14 +118,14 @@ class RealitySimMonitor:
     ) -> RealityCheckResult:
         """
         Verify that simulation aligns with reality maxim.
-        
+
         Logs provenance, metrics, audit status, and returns detailed result.
-        
+
         Args:
             sim_id: Unique simulation identifier
             input_data: Input parameters and data for the simulation
             results: Simulation output results
-            
+
         Returns:
             RealityCheckResult with validation details
         """
@@ -133,7 +133,7 @@ class RealitySimMonitor:
         checks_passed = []
         checks_failed = []
         warnings = []
-        
+
         logger.info("Starting reality check for simulation: %s", sim_id)
 
         # 1. Provenance Check: Verify full traceability
@@ -204,16 +204,16 @@ class RealitySimMonitor:
         """Check that input data, model, and code version are fully traceable"""
         try:
             provenance_info = self.registry.get_provenance(sim_id)
-            
+
             if not provenance_info.get('inputs') or not provenance_info.get('model'):
                 logger.error("Missing provenance for simulation: %s", sim_id)
                 return False
-            
+
             # Verify input data matches provenance
             if 'input_hash' in provenance_info:
                 # Could compute hash of input_data and compare
                 pass
-            
+
             return True
         except Exception as e:
             logger.error("Provenance check failed for %s: %s", sim_id, str(e))
@@ -289,14 +289,14 @@ class RealitySimMonitor:
         try:
             audit_trail = self.audit_log.get_provenance_chain(sim_id)
             min_length = self.config.get('min_audit_length', 3)
-            
+
             if not audit_trail or len(audit_trail) < min_length:
                 warning = f"Incomplete audit trail for {sim_id}"
                 logger.warning(warning)
                 warnings.append(warning)
                 # Don't fail on audit warnings unless strict mode
                 return not self.config.get('strict_mode', False)
-            
+
             return True
         except Exception as e:
             logger.warning("Audit check encountered error for %s: %s", sim_id, str(e))
@@ -312,16 +312,16 @@ class RealitySimMonitor:
     ) -> bool:
         """Confirm results not flagged as speculative or uncorroborated"""
         status = results.get('status', 'unknown')
-        
+
         if status in ['speculative', 'uncorroborated']:
             logger.error("Unverified result for simulation: %s (status: %s)", sim_id, status)
             return False
-        
+
         # Check for required verification fields
         if 'verification' not in results and self.config.get('strict_mode', False):
             logger.error("Missing verification data for simulation: %s", sim_id)
             return False
-        
+
         return True
 
     def _update_knowledge_base(
@@ -354,7 +354,7 @@ class RealitySimMonitor:
         try:
             severity = 'info' if success else 'error'
             message = f"Reality check for {sim_id}: {'PASSED' if success else 'FAILED'}"
-            
+
             self.audit_log.record(
                 message,
                 severity=severity,
@@ -383,7 +383,7 @@ class MockRegistry:
     """Mock registry when Synergy Dashboard unavailable"""
     def get_provenance(self, sim_id: str) -> Dict[str, Any]:
         return {'inputs': True, 'model': True, 'mock': True}
-    
+
     def update_knowledge_base(self, sim_id: str, data: Dict[str, Any]):
         logger.debug("Mock knowledge base update for: %s", sim_id)
 
@@ -404,7 +404,7 @@ class MockAuditLog:
     """Mock audit log when DLP tracker unavailable"""
     def get_provenance_chain(self, sim_id: str) -> list:
         return [{'event': 'mock', 'timestamp': datetime.now(UTC).isoformat()}] * 5
-    
+
     def record(self, message: str, severity: str = 'info', metadata: Optional[Dict] = None):
         logger.debug("Mock audit record: %s", message)
 
@@ -413,7 +413,7 @@ class MockAuditLog:
 if __name__ == "__main__":
     # Demo execution
     monitor = RealitySimMonitor()
-    
+
     sim_id = "sim_08231"
     input_data = {'scenario': 'test', 'parameters': {'x': 1, 'y': 2}}
     simulation_results = {
@@ -421,7 +421,7 @@ if __name__ == "__main__":
         'output': {'result': 42},
         'verification': {'method': 'cross_check', 'confidence': 0.95}
     }
-    
+
     result = monitor.enforce_principles(sim_id, input_data, simulation_results)
     print(f"Reality Check: {'PASSED' if result.success else 'FAILED'}")
     print(f"Checks Passed: {result.checks_passed}")

@@ -1,0 +1,193 @@
+# **AURORA CLOUDHUB — CANON PROTOCOL**
+**Orion Station Canonical Authority Specification**  
+**Version 1.0**
+
+---
+
+## **0. Purpose**
+This protocol defines the governing philosophy, structure, and workflow for how canonical truth is created, maintained, and updated within the Aurora Cloudhub / Orion Station universe. Its goal is to ensure clarity, continuity, and coherence as the world expands.
+
+---
+
+## **1. Why Canon Has a Hierarchy**
+A hierarchy of canon prevents contradictions, drift, and fragmentation across drafts, simulations, and development environments. It guarantees that all worldbuilding—no matter where it originates—resolves cleanly into a single, authoritative state.
+
+### **1.1 Primary Canon — Authoritative**
+Primary Canon consists of the binding, version-controlled truth:
+1. Git repository (committed files)
+2. Root-level standards (including this document)
+3. Committed crew manifests
+4. Committed character bios
+5. Committed system, station, and vessel files
+
+If it is committed to Git, it is canon.
+
+### **1.2 Secondary Canon — Pre-Canonical**
+Material created outside the repository, including:
+- simulations
+- scenario runs
+- draft character sheets
+- narrative or structural exploration
+- hour-block logs
+- ChatGPT/Claud output
+
+Secondary Canon is moldable until committed.
+
+### **1.3 Tertiary Canon — Instance-Local**
+These are details produced inside simulations or scenario instances. They only become canon if explicitly promoted.
+
+---
+
+## **2. Promotion Rules**
+Content becomes canon only when:
+1. Added to the repository, and
+2. Committed to Git.
+
+This applies to:
+- characters
+- ships, systems, departments
+- ranks, roles, and duties
+- events and mission outcomes
+- updates to station structure or timeline
+
+If it is not committed, it is not canon.
+
+---
+
+## **3. Reconciliation Workflow**
+To maintain coherent truth across all sources, reconciliation follows a single streamlined process:
+
+**Step 1 — Identify the Conflict**  
+Compare draft or simulation output with existing committed files.
+
+**Step 2 — Defer to Canon**  
+If a contradiction exists, the repository version prevails.
+
+**Step 3 — Adapt the Draft**  
+Revise conflicting Secondary or Tertiary material so it aligns with committed truth.
+
+**Step 4 — Synthesize When Needed**  
+If both versions contain valuable elements, merge them into an updated, unified revision.
+
+**Step 5 — Preserve Timeline Integrity**  
+Committed history is never erased; updates move the universe forward.
+
+---
+
+## **4. Character Continuity Rules**
+### **4.1 Becoming a Canonical Character**
+A character becomes official only when added to:
+```
+/crew/ORION_STATION_CREW_MANIFEST.md
+/crew/bios/<character>.md
+```
+Until then, they remain in Secondary Canon.
+
+### **4.2 Required Fields for Canon Characters**
+- Name
+- Rank / Position
+- Division / Assignment
+- Clearance Level
+- Responsibilities
+- Background summary
+- Links to missions, ships, or systems
+- Origin file (where introduced)
+
+### **4.3 Dual Roles**
+Characters may hold multiple roles if:
+- the primary role is explicitly defined, and
+- secondary roles do not create contradictions.
+
+---
+
+## **5. Simulation → Canon Workflow**
+### **5.1 Intake**
+Simulations may generate:
+- new personnel
+- events or mission outcomes
+- timeline progression
+- system changes
+- relationship dynamics
+
+These begin as Secondary or Tertiary Canon.
+
+### **5.2 Evaluation**
+Before promotion, confirm:
+- alignment with existing canon
+- role/rank consistency
+- compatibility with station architecture
+- absence of structural contradictions
+
+### **5.3 Integration**
+Approved material is incorporated into:
+- crew manifests
+- bios
+- system or vessel files
+- timeline logs
+
+Nothing becomes permanent without a commit.
+
+---
+
+## **6. Drift & Redundancy Handling**
+Drift artifacts must be logged and classified so their origins and resolutions remain clear. A dedicated file (e.g., `DRIFT_LOG.md`) should include:
+- source of drift
+- type (duplicate name, conflicting role, ghost entity, etc.)
+- steps taken to resolve or integrate
+
+Additional expectations:
+- contradictions arising from simulations must be reconciled
+- duplicates and ghost entries must be addressed explicitly
+- the repository remains the stabilizing anchor
+
+---
+
+## **7. File Types & Canon Roles**
+### **7.1 Canon Files**
+- `README.md`
+- `CANON_PROTOCOL.md`
+- crew manifests
+- bios
+- station architecture files
+- systems documentation
+- vessel files
+- timeline documents
+
+### **7.2 Proto-Canon Files**
+- brainstorming notes
+- scenario descriptions
+- hour-block logs
+- simulation exports
+- ChatGPT/Claud sessions
+
+---
+
+## **8. Governance**
+### **8.1 Git as the Memory Spine**
+Git commit history defines the universe’s stabilized memory.
+
+### **8.2 Continuity Enforcement via THREADCORE**
+THREADCORE assists with:
+- drift detection
+- anchor verification
+- continuity checks
+- role/rank mapping
+
+Git, however, remains the final authority.
+
+---
+
+## **9. Guiding Principles**
+1. Stability of world structure
+2. Traceability through version control
+3. Integrity of continuity
+4. Flexibility during draft phases
+5. Ethical coherence via Picard_Delta_3
+6. Consistent evolution of the universe
+
+---
+
+## **10. Activation**
+This protocol becomes binding canon once placed at the repository root and committed.
+
+All future canonical development must adhere to this standard.

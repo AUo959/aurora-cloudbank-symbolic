@@ -295,7 +295,7 @@ class InstitutionalMemoryIntegrator:
 
         pattern_signature = f"{action_type}_{time_period}"
 
-        # Update or create pattern
+        # Update or create pattern (merged duplicate branch)
         if pattern_signature in self.patterns:
             pattern = self.patterns[pattern_signature]
             pattern.sample_size += 1
@@ -323,7 +323,6 @@ class InstitutionalMemoryIntegrator:
             )
             self.patterns[pattern_signature] = pattern
             self.stats['total_patterns'] += 1
-
             self.logger.info(f"🔍 New pattern discovered: {pattern_signature}")
 
     def _classify_action(self, action: str) -> str:

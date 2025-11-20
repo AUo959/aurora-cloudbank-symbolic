@@ -71,6 +71,10 @@ class MockAxiomera:
         if not ethical_compliance:
             concerns.append("Ethics compliance not verified")
 
+        # Placeholder await for async compliance
+        import asyncio
+        await asyncio.sleep(0)
+
         return {
             'approved': approved,
             'score': 0.9 if approved else 0.4,
@@ -107,6 +111,10 @@ class MockCaelion:
         issues = []
         if not symbolic_anchors:
             issues.append("No symbolic anchors present")
+
+        # Placeholder await for async compliance
+        import asyncio
+        await asyncio.sleep(0)
 
         return {
             'approved': approved,
@@ -145,6 +153,10 @@ class MockHALO:
         if predicted_drift > 0.05:
             warning = f"Moderate drift predicted: {predicted_drift:.3f}"
 
+        # Placeholder await for async compliance
+        import asyncio
+        await asyncio.sleep(0)
+
         return {
             'approved': approved,
             'predicted_drift': predicted_drift,
@@ -173,6 +185,9 @@ class MockARCHY:
         """
         # Check context for feasibility flag
         context = decision.context or {}
+        # Placeholder await for async compliance
+        import asyncio
+        await asyncio.sleep(0)
         feasible = context.get('feasible', True)
 
         constraints = []

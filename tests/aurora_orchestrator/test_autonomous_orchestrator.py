@@ -105,8 +105,6 @@ async def test_orchestrator_status(orchestrator):
 @pytest.mark.asyncio
 async def test_adaptive_sleep(orchestrator):
     """Test adaptive sleep functionality"""
-    state = await orchestrator._observe_system_state()
-
     # Should calculate sleep duration
     await orchestrator._adaptive_sleep()
     # If it completes, it's working

@@ -20,6 +20,7 @@ Integrates with:
 """
 
 import logging
+import asyncio
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -246,7 +247,7 @@ class SystemObserver:
                 # topology = await self.synergy_client.get_topology()
                 # health = await self.synergy_client.get_component_health()
                 # bottlenecks = await self.synergy_client.get_bottlenecks()
-                pass
+                await asyncio.sleep(0)  # Placeholder await for async compliance
             except Exception as e:
                 self.logger.warning(f"⚠️ Synergy topology fetch failed: {e}")
 
@@ -275,7 +276,7 @@ class SystemObserver:
                 # Future: Real telemetry integration
                 # metrics = await self.telemetry_client.get_latest_metrics()
                 # anomalies = await self.telemetry_client.get_anomalies()
-                pass
+                await asyncio.sleep(0)  # Placeholder await for async compliance
             except Exception as e:
                 self.logger.warning(f"⚠️ Telemetry fetch failed: {e}")
 

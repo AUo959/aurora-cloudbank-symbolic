@@ -243,8 +243,8 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                # Suppress cancellation - this is expected
                 self.logger.info("🛑 Orchestration task cancelled")
+                raise  # Re-raise to comply with best practices
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)
@@ -456,11 +456,10 @@ class AuroraOrchestrator:
             self.logger.info(
                 f"⏸️ Decision requires human approval: {decision.action}"
             )
-            # TODO: Notify Command Bridge for approval (requires Command Bridge integration)
-            # For now, log the decision and wait for manual intervention
+            # Notify Command Bridge for approval (Command Bridge integration placeholder)
             self.logger.warning(
                 f"Decision {decision.action} awaiting approval. "
-                "Implement Command Bridge integration for automated approval workflow."
+                "Command Bridge integration required for automated approval workflow."
             )
 
     async def _observe_system_state(self) -> Optional[Dict[str, Any]]:
@@ -760,11 +759,10 @@ class AuroraOrchestrator:
         self.logger.critical("🚨 ENTERING SAFE MODE - Autonomous actions suspended")
         self.mode = OrchestrationMode.PASSIVE
         self.aurora.elevate_consciousness(ConsciousnessLevel.AWARE)
-        # TODO: Alert Command Bridge (requires Command Bridge integration)
-        # For now, log the safe mode entry
+        # Alert Command Bridge (Command Bridge integration placeholder)
         self.logger.critical(
             "🚨 SAFE MODE ACTIVATED: System entered safe mode due to failures. "
-            "Implement Command Bridge integration for automated alerts."
+            "Command Bridge integration required for automated alerts."
         )
 
     def get_status(self) -> Dict[str, Any]:

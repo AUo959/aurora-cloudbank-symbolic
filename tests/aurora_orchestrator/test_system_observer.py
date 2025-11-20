@@ -5,9 +5,10 @@ Covers health aggregation, bottleneck/anomaly detection, and integration points.
 """
 
 import pytest
-from datetime import datetime
+import math
+from datetime import datetime, timezone
 from src.aurora_orchestrator.system_observer import SystemState, Bottleneck, Anomaly
-
+  
 @pytest.fixture
 def sample_bottleneck():
     return Bottleneck(
@@ -18,22 +19,22 @@ def sample_bottleneck():
         description="High latency detected in quantum backend.",
         suggested_fix="Switch to backup quantum node."
     )
-
+  
 @pytest.fixture
 def sample_anomaly():
     return Anomaly(
         anomaly_id="anom-42",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         metric_name="drift_level",
         severity="critical",
         description="Drift exceeded critical threshold.",
         z_score=4.2
     )
-
+  
 @pytest.fixture
 def system_state(sample_bottleneck, sample_anomaly):
     return SystemState(
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         synergy_topology={"Quantum Forge": ["AI Interface"]},
         component_health={"Quantum Forge": 0.7, "AI Interface": 0.95},
         bottlenecks=[sample_bottleneck],
@@ -51,7 +52,7 @@ def system_state(sample_bottleneck, sample_anomaly):
         model_selection_efficiency=0.88,
         ethics_compliance_score=0.99
     )
-
+  
 def test_system_state_fields(system_state):
     assert system_state.timestamp
     assert "Quantum Forge" in system_state.synergy_topology
@@ -61,12 +62,12 @@ def test_system_state_fields(system_state):
     assert system_state.drift_level > 0.1
     assert system_state.quantum_coherence > 0.9
     assert system_state.ethics_compliance_score > 0.95
-
+  
 def test_bottleneck_fields(sample_bottleneck):
-    assert sample_bottleneck.severity == 0.8
+    assert math.isclose(sample_bottleneck.severity, 0.8, rel_tol=1e-9)
     assert sample_bottleneck.suggested_fix == "Switch to backup quantum node."
-
+  
 def test_anomaly_fields(sample_anomaly):
     assert sample_anomaly.metric_name == "drift_level"
-    assert sample_anomaly.z_score == 4.2
+    assert math.isclose(sample_anomaly.z_score, 4.2, rel_tol=1e-9)
     assert sample_anomaly.severity == "critical"

@@ -122,24 +122,17 @@ class PatternSynthesizer:
                     'optimization_type': self._extract_optimization_type(memory)
                 })
 
-        # Find optimal hours for different optimization types
-        optimization_types = set()
-        for hour_data in hourly_performance.values():
-            for entry in hour_data:
-                optimization_types.add(entry['optimization_type'])
 
+
+        # Find optimal hours for different optimization types (refactored for lower complexity)
+        optimization_types = set(
+            entry['optimization_type']
+            for hour_data in hourly_performance.values()
+            for entry in hour_data
+        )
+        patterns_discovered = []
         for opt_type in optimization_types:
-            best_hour = None
-            best_improvement = 0.0
-
-            for hour, entries in hourly_performance.items():
-                type_entries = [e for e in entries if e['optimization_type'] == opt_type]
-                if type_entries:
-                    avg_imp = sum(e['improvement'] for e in type_entries) / len(type_entries)
-                    if avg_imp > best_improvement:
-                        best_improvement = avg_imp
-                        best_hour = hour
-
+            best_hour, best_improvement = self._find_best_hour_for_type(hourly_performance, opt_type)
             if best_hour is not None:
                 pattern = {
                     'type': 'temporal',
@@ -149,6 +142,20 @@ class PatternSynthesizer:
                     'recommendation': f"Schedule {opt_type} optimizations around {best_hour}:00"
                 }
                 patterns_discovered.append(pattern)
+        self.logger.info(f"🧬 Discovered {len(patterns_discovered)} temporal patterns")
+        return patterns_discovered
+
+    def _find_best_hour_for_type(self, hourly_performance, opt_type):
+        best_hour = None
+        best_improvement = 0.0
+        for hour, entries in hourly_performance.items():
+            type_entries = [e for e in entries if e['optimization_type'] == opt_type]
+            if type_entries:
+                avg_imp = sum(e['improvement'] for e in type_entries) / len(type_entries)
+                if avg_imp > best_improvement:
+                    best_improvement = avg_imp
+                    best_hour = hour
+        return best_hour, best_improvement
 
         self.logger.info(f"🧬 Discovered {len(patterns_discovered)} temporal patterns")
 

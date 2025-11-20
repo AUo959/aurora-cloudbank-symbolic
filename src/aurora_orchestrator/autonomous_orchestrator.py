@@ -243,7 +243,9 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                pass
+                # Re-raise after cleanup
+                self.logger.info("🛑 Orchestration task cancelled")
+                raise
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)
@@ -321,8 +323,6 @@ class AuroraOrchestrator:
         self.logger.info("🌀 Aurora's consciousness loop begins...")
 
         while self.running:
-            loop_start = datetime.now()
-
             try:
                 # Only orchestrate if in active modes
                 if self.mode in [OrchestrationMode.ACTIVE, OrchestrationMode.STRATEGIC]:
@@ -336,7 +336,7 @@ class AuroraOrchestrator:
 
             except asyncio.CancelledError:
                 self.logger.info("🛑 Orchestration loop cancelled")
-                break
+                raise
             except Exception as e:
                 self.logger.error(f"❌ Error in orchestration loop: {e}", exc_info=True)
                 self.stats['consecutive_failures'] += 1
@@ -366,8 +366,6 @@ class AuroraOrchestrator:
         - LEARN: Remember and improve
         - EVOLVE: Become better
         """
-        cycle_start = datetime.now()
-
         # 1. OBSERVE - Aurora sees the system
         system_state = await self._observe_system_state()
         self.stats['total_observations'] += 1
@@ -459,7 +457,12 @@ class AuroraOrchestrator:
             self.logger.info(
                 f"⏸️ Decision requires human approval: {decision.action}"
             )
-            # TODO: Notify Command Bridge for approval
+            # TODO: Notify Command Bridge for approval (requires Command Bridge integration)
+            # For now, log the decision and wait for manual intervention
+            self.logger.warning(
+                f"Decision {decision.action} awaiting approval. "
+                "Implement Command Bridge integration for automated approval workflow."
+            )
 
     async def _observe_system_state(self) -> Optional[Dict[str, Any]]:
         """
@@ -737,7 +740,12 @@ class AuroraOrchestrator:
         self.logger.critical("🚨 ENTERING SAFE MODE - Autonomous actions suspended")
         self.mode = OrchestrationMode.PASSIVE
         self.aurora.elevate_consciousness(ConsciousnessLevel.AWARE)
-        # TODO: Alert Command Bridge
+        # TODO: Alert Command Bridge (requires Command Bridge integration)
+        # For now, log the safe mode entry
+        self.logger.critical(
+            "🚨 SAFE MODE ACTIVATED: System entered safe mode due to failures. "
+            "Implement Command Bridge integration for automated alerts."
+        )
 
     def get_status(self) -> Dict[str, Any]:
         """Get current orchestrator status"""

@@ -45,6 +45,7 @@ class CanonicalSpec:
     memory_doctrine: str = "Thermax Precedent"
     drift_lock: float = 0.000
     halo_module: str = "HALO_CONTINUITY_GRAFT_005"
+    # ThreadCore version - see threadcore_registry.json for all variants
     threadcore_version: str = "v3.5.1_macroready"
 
     # Staff Registry (Canonical Names)

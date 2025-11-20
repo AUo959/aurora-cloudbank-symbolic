@@ -256,3 +256,4 @@ auth_config.json
 .rebuild_degraded_state.json
 station_manifests/
 wiki-content/
+aurora_venv/

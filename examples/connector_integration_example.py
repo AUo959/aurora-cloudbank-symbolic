@@ -3,13 +3,14 @@ Example: Integrating Connector Framework with ChatGPT Agent Mode
 
 This example demonstrates how to expose external tool connectors
 to ChatGPT agents through Aurora's agent mode integration.
+
+Security Note: All credentials should be loaded from environment variables
+or secure secret management systems in production environments.
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import asyncio
+import logging
+import os
 from typing import Any, Dict
 
 from src.integrations.chatgpt_agent_mode import ChatGPTAgentModeIntegration
@@ -18,6 +19,8 @@ from src.integrations.connectors import (
     connector_registry,
 )
 from src.integrations.connectors.builtin import GitHubConnector
+
+logger = logging.getLogger(__name__)
 
 
 async def register_connector_tools(agent_integration: ChatGPTAgentModeIntegration):
@@ -32,11 +35,18 @@ async def register_connector_tools(agent_integration: ChatGPTAgentModeIntegratio
     connector_registry.register_connector_type("github", GitHubConnector)
 
     # Create GitHub connector configuration
+    # Security: Load token from environment variable in production
+    github_token = os.getenv("GITHUB_TOKEN", "")  # Empty string for example mode
+    if not github_token:
+        # Example mode: Using placeholder (NOT for production use)
+        github_token = ""  # Intentionally empty - configure GITHUB_TOKEN env var
+        logger.warning("No GITHUB_TOKEN found - example will use mock mode")
+    
     github_config = ConnectorConfig(
         name="github_agent",
         version="1.0.0",
         connector_type="github",
-        auth_config={"token": "your_github_token_here"},  # In production: use env vars
+        auth_config={"token": github_token},
         rate_limit_rpm=5000,
         metadata={
             "auth_type": "bearer_token",
@@ -187,12 +197,13 @@ async def example_multi_connector():
     # Register multiple connectors
     connectors = []
 
-    # GitHub connector
+    # GitHub connector - load credentials from environment
+    github_token = os.getenv("GITHUB_TOKEN", "")
     github_config = ConnectorConfig(
         name="github",
         version="1.0.0",
         connector_type="github",
-        auth_config={"token": "github_token"}
+        auth_config={"token": github_token}
     )
     connector_registry.register_connector_type("github", GitHubConnector)
     github = await connector_registry.create_connector("github", github_config)
@@ -205,7 +216,7 @@ async def example_multi_connector():
     # - AWS connector for cloud resources
     # - etc.
 
-    logger.info("Registered {len(connectors)} connectors")
+    logger.info(f"Registered {len(connectors)} connectors")
 
     # Check overall health
     from src.integrations.connectors.health import HealthMonitor
@@ -251,7 +262,7 @@ async def example_connector_discovery():
 
     # Get registry status
     registry_status = connector_registry.get_registry_status()
-    print(f"\n📊 Registry Status:")
+    print("\n📊 Registry Status:")
     print(f"  Total connectors: {registry_status['total_connectors']}")
     print(f"  Total types: {registry_status['total_connector_types']}")
     print(f"  Types: {', '.join(registry_status['registered_types'])}")

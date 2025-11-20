@@ -1,0 +1,106 @@
+# OAuth2 and RBAC Configuration
+# Configuration for authentication and authorization in Aurora CloudBank
+
+# JWT Token Configuration
+jwt:
+  # Secret key for signing tokens (MUST be overridden with environment variable)
+  # Generate with: openssl rand -hex 32
+  secret_key_env: JWT_SECRET_KEY
+  
+  # Token expiration times
+  access_token_expire_minutes: 30
+  refresh_token_expire_days: 7
+  
+  # Algorithm for token signing
+  algorithm: HS256
+
+# OAuth2 Configuration
+oauth2:
+  # Token endpoint URL
+  token_url: /api/auth/token
+  
+  # Supported grant types
+  grant_types:
+    - password
+    - refresh_token
+  
+  # Token type
+  token_type: bearer
+
+# Role-Based Access Control
+rbac:
+  # Available roles (in order of privilege)
+  roles:
+    - observer       # Read-only access with monitoring
+    - relay_operator # Operational access with read/write
+    - admin          # Full system administration
+  
+  # Default role for new users
+  default_role: observer
+  
+  # Role hierarchy (higher roles inherit lower role permissions)
+  hierarchy:
+    admin:
+      - relay_operator
+      - observer
+    relay_operator:
+      - observer
+
+# Security Settings
+security:
+  # Password hashing
+  password_hash_scheme: bcrypt
+  bcrypt_rounds: 12
+  
+  # Rate limiting for auth endpoints
+  rate_limit:
+    login_attempts: 5
+    login_window_minutes: 15
+    lockout_duration_minutes: 30
+  
+  # Token validation
+  validate_token_signature: true
+  require_token_expiry: true
+  
+  # CORS for authentication
+  allowed_origins:
+    - http://localhost:3000
+    - http://localhost:8080
+    - https://aurora.cloudbank.local
+
+# Logging and Audit
+audit:
+  # Log authentication events
+  log_login_attempts: true
+  log_logout_events: true
+  log_token_refresh: true
+  log_permission_denials: true
+  
+  # Audit trail retention
+  retention_days: 90
+
+# Production Considerations
+production:
+  # Use environment variables for secrets
+  require_env_secrets: true
+  
+  # Enforce HTTPS
+  enforce_https: true
+  
+  # Additional security headers
+  security_headers:
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: DENY
+    X-XSS-Protection: "1; mode=block"
+    Strict-Transport-Security: "max-age=31536000; includeSubDomains"
+
+# Development Settings (disable in production)
+development:
+  # Allow insecure HTTP for local development
+  allow_http: true
+  
+  # Demo users (REMOVE IN PRODUCTION)
+  demo_users_enabled: true
+  
+  # Verbose error messages
+  detailed_errors: true

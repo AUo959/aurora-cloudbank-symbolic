@@ -9,22 +9,19 @@ for CodeQL security analysis workflows. Follows Aurora/GUMAS conventions.
 Symbolic Anchor: T1-MANIFEST-GENERATOR
 Ethics Protocol: Picard_Delta_3
 """
-
-import logging
-
-logger = logging.getLogger(__name__)
-
 from __future__ import annotations
 
+import logging
 import argparse
 import hashlib
 import json
-import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 
 class SymbolicManifestGenerator:
@@ -200,7 +197,7 @@ class SymbolicManifestGenerator:
         with output_path.open("w", encoding="utf-8") as handle:
             json.dump(manifest, handle, indent=2, sort_keys=True)
 
-        logger.info("Generated symbolic manifest: {output_path.name}")
+        logger.info(f"Generated symbolic manifest: {output_path.name}")
         print(f"   Anchor: {anchor}")
         print(f"   Language: {language}")
         print(f"   Files scanned: {len(checksums)}")
@@ -327,10 +324,8 @@ def main() -> None:
         print(f"   Ethics protocol: {args.ethics_protocol}")
         print(f"   DLP classification: {args.dlp_tag}")
     except Exception as exc:
-        logger.error("Error generating manifest: {exc}", file=sys.stderr)
+        logger.error(f"Error generating manifest: {exc}")
         sys.exit(1)
-
-
 
 
 if __name__ == "__main__":

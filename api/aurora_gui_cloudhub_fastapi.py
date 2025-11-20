@@ -404,12 +404,15 @@ def mcp_bridge_health_check():
     """
     Kubernetes-compatible health check endpoint for MCP Bridge Core.
 
-    Returns:
-        - status: "healthy" or "degraded"
-        - security_layers: Status of all security layers (drift_lock, guardian_ring, ethics_lock)
+    Returns consolidated information from the centralized mcp_bridge_core.json configuration:
+        - status: "healthy", "degraded", or "unhealthy"
+        - security_layers: Status of all security layers with validation rules
         - governance_layer: Current governance layer
         - core_functions: Available core functions count
         - external_hooks: Status of external integrations
+        - capsules: Status of all configured capsules
+        - anchor_validation: Anchor seed validation configuration
+        - ethics_enforcement: Ethics protocol enforcement configuration
         - timestamp: Current timestamp for monitoring
         - ready: Kubernetes readiness indicator
         - live: Kubernetes liveness indicator
@@ -424,47 +427,111 @@ def mcp_bridge_health_check():
     """
     import time
     from datetime import datetime, timezone
+    from modules.symbolic_core import validate_security_layer
 
-    def _compute_security(security_layers: Dict[str, Any]) -> Dict[str, Any]:
-        drift = security_layers.get("drift_lock") == "ACTIVE"
-        guardian = security_layers.get("guardian_ring") in ("ACTIVE", "STAGED_ACTIVE")
-        ethics = security_layers.get("ethics_lock") == "ENFORCED"
+    def _compute_security(security_layers: Dict[str, Any], validation_rules: Dict[str, Any]) -> Dict[str, Any]:
+        """Compute security status using centralized validation rules."""
+        result = {}
+        all_valid = True
+        
+        for layer_name, layer_value in security_layers.items():
+            is_valid = validate_security_layer(layer_name, layer_value)
+            rules = validation_rules.get(layer_name, {})
+            result[layer_name] = {
+                "status": layer_value,
+                "valid": is_valid,
+                "description": rules.get("description", ""),
+                "required": rules.get("required_state") or rules.get("required_states", [])
+            }
+            if not is_valid:
+                all_valid = False
+        
+        result["all_valid"] = all_valid
+        return result
+
+    def _get_capsule_summary(capsules: Dict[str, Any]) -> Dict[str, Any]:
+        """Get summary of capsule statuses."""
+        total = len(capsules)
+        active = sum(1 for c in capsules.values() if c.get("status") == "ACTIVE")
+        by_security_level = {}
+        for capsule in capsules.values():
+            level = capsule.get("security_level", "UNKNOWN")
+            by_security_level[level] = by_security_level.get(level, 0) + 1
+        
         return {
-            "drift_lock": {"status": security_layers.get("drift_lock", "UNKNOWN"), "active": drift},
-            "guardian_ring": {"status": security_layers.get("guardian_ring", "UNKNOWN"), "active": guardian},
-            "ethics_lock": {"status": security_layers.get("ethics_lock", "UNKNOWN"), "enforced": ethics},
-            "all_active": drift and guardian and ethics,
+            "total": total,
+            "active": active,
+            "inactive": total - active,
+            "by_security_level": by_security_level,
+            "capsule_ids": list(capsules.keys())
         }
 
-    def _derive_status(active: bool, fn_count: int, mesh_active: bool) -> tuple[str, bool, bool]:
-        if active and fn_count >= 7 and mesh_active:
+    def _derive_status(sec_valid: bool, fn_count: int, mesh_active: bool,
+                       health_config: Dict[str, Any]) -> tuple[str, bool, bool]:
+        """Derive overall health status using configuration rules."""
+        required_functions = health_config.get("required_core_functions", 7)
+        security_required = health_config.get("required_security_active", True)
+        mesh_required = health_config.get("mesh_sync_required", True)
+        
+        checks_passed = 0
+        checks_total = 0
+        
+        if security_required:
+            checks_total += 1
+            if sec_valid:
+                checks_passed += 1
+        
+        checks_total += 1
+        if fn_count >= required_functions:
+            checks_passed += 1
+        
+        if mesh_required:
+            checks_total += 1
+            if mesh_active:
+                checks_passed += 1
+        
+        if checks_passed == checks_total:
             return "healthy", True, True
-        if active and fn_count > 0:
+        elif checks_passed > 0:
             return "degraded", True, True
         return "unhealthy", False, True
 
-    def _build_response(mcp: Dict[str, Any], sec: Dict[str, Any], fn_count: int, mesh_active: bool) -> Dict[str, Any]:
-        status, ready, live = _derive_status(sec["all_active"], fn_count, mesh_active)
+    def _build_response(mcp: Dict[str, Any], sec: Dict[str, Any], fn_count: int,
+                        mesh_active: bool, capsule_summary: Dict[str, Any]) -> Dict[str, Any]:
+        """Build comprehensive health response from centralized config."""
+        health_config = mcp.get("health_check", {})
+        status, ready, live = _derive_status(sec["all_valid"], fn_count, mesh_active, health_config)
         current_time = datetime.now(timezone.utc).isoformat()
+        
         return {
             "status": status,
             "module_id": mcp.get("module_id", "UNKNOWN"),
             "version": mcp.get("version", "UNKNOWN"),
             "governance_layer": mcp.get("governance_layer", "UNKNOWN"),
-            "security_layers": {k: v for k, v in sec.items() if k != "all_active"},
-            "core_functions": {"count": fn_count, "required": 7, "available": fn_count >= 7},
+            "security_layers": {k: v for k, v in sec.items() if k != "all_valid"},
+            "security_validation_rules": mcp.get("security_validation_rules", {}),
+            "core_functions": {
+                "count": fn_count,
+                "required": health_config.get("required_core_functions", 7),
+                "available": fn_count >= health_config.get("required_core_functions", 7),
+                "functions": mcp.get("core_functions", [])
+            },
+            "capsules": capsule_summary,
             "external_hooks": {
                 "symbolic_mesh_sync": {
                     "status": mcp.get("external_hooks", {}).get("symbolic_mesh_sync", "UNKNOWN"),
                     "active": mesh_active,
                 },
-                "gpt_parallel_nodes": len(mcp.get("external_hooks", {}).get("gpt_parallel_nodes", [])),
+                "gpt_parallel_nodes": mcp.get("external_hooks", {}).get("gpt_parallel_nodes", []),
             },
+            "anchor_validation": mcp.get("anchor_validation", {}),
+            "ethics_enforcement": mcp.get("ethics_enforcement", {}),
             "ethics_protocol": mcp.get("ethics_protocol", "UNKNOWN"),
             "anchor_seed": mcp.get("anchor_seed", "UNKNOWN"),
             "timestamp": current_time,
             "uptime_seconds": time.time(),
             "kubernetes": {"ready": ready, "live": live},
+            "configuration_source": "mcp_bridge_core.json",
             "aurora_metadata": {
                 "T1": current_time,
                 "SRB": "MCP_HEALTH_CHECK_v1",
@@ -475,23 +542,19 @@ def mcp_bridge_health_check():
     try:
         mcp_data = get_mcp_bridge_core()
         security_layers = mcp_data.get("security_layers", {})
-        sec = _compute_security(security_layers)
+        validation_rules = mcp_data.get("security_validation_rules", {})
+        sec = _compute_security(security_layers, validation_rules)
+        
         core_functions = mcp_data.get("core_functions", [])
         functions_count = len(core_functions)
+        
         external_hooks = mcp_data.get("external_hooks", {})
         mesh_sync_active = external_hooks.get("symbolic_mesh_sync") == "ACTIVE"
         
-        # Include registered capsule information
-        router = MCPCommandRouter()
-        capsules = router.list_capsules()
+        capsules = mcp_data.get("capsules", {})
+        capsule_summary = _get_capsule_summary(capsules)
         
-        response = _build_response(mcp_data, sec, functions_count, mesh_sync_active)
-        response["registered_capsules"] = {
-            "count": len(capsules),
-            "capsules": capsules,
-            "status": "OPERATIONAL"
-        }
-        return response
+        return _build_response(mcp_data, sec, functions_count, mesh_sync_active, capsule_summary)
     except Exception as e:  # pragma: no cover - defensive fallback
         logger.error("MCP health check failed: %s", str(e))
         return JSONResponse(

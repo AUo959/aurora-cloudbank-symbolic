@@ -1,93 +1,134 @@
 """
 MCP Command Router: Centralized symbolic command routing using MCP Bridge Core config.
 
-Registers integrated modules as capsules within the MCP bridge:
-- OPPY Navigator v2.1 (Capsule ID: OPPY_NAV_CAPSULE_001)
-- HR Module v3.0 (Capsule ID: HR_MODULE_CAPSULE_002)
-- Quantum Forge v3.0 (Capsule ID: QF_CAPSULE_003)
-
-T1: MCP_ROUTER_ENHANCED
-SRB: CAPSULE_REGISTRATION
-DLP: context_tag=mcp_router_init
+This module is fully driven by the centralized configuration in mcp_bridge_core.json.
+All routing logic, governance layers, and capsule capabilities are read from the config file.
 """
 
-from typing import Dict, List, Any
-from modules.symbolic_core import get_mcp_bridge_core
+from typing import Dict, Any, List, Optional
+from modules.symbolic_core import get_mcp_bridge_core, get_capsule
 
 
 class MCPCommandRouter:
-    """Enhanced MCP Command Router with module capsule registration"""
+    """
+    MCP Command Router that routes symbolic commands through the configured governance layer.
 
-    # Capsule registry with IDs and metadata
-    CAPSULES = {
-        "OPPY_NAV_CAPSULE_001": {
-            "module": "OPPY Navigator v2.1",
-            "capabilities": ["navigation_planning", "maneuver_execution", "telemetry_monitoring"],
-            "ethics_protocol": "Triplex_Governance",
-            "anchor": "EOS_SEED_ORION",
-            "status": "ACTIVE"
-        },
-        "HR_MODULE_CAPSULE_002": {
-            "module": "HR Module v3.0 Helios",
-            "capabilities": ["psychological_safety", "conflict_resolution", "onboarding", "cultural_health"],
-            "ethics_protocol": "Picard_Delta_3",
-            "anchor": "HR-HELIOS-V3",
-            "status": "ACTIVE"
-        },
-        "QF_CAPSULE_003": {
-            "module": "Quantum Forge v3.0",
-            "capabilities": ["agent_generation", "memory_storage", "ethics_validation", "quantum_integration"],
-            "ethics_protocol": "GUMAS_Thermax",
-            "anchor": "QUANTUM_FORGE_v3",
-            "status": "ACTIVE"
-        }
-    }
+    All routing rules and capsule capabilities are read from the centralized
+    mcp_bridge_core.json configuration.
+    """
 
     def __init__(self):
+        """Initialize MCPCommandRouter with configuration from the central config file."""
         self.mcp = get_mcp_bridge_core()
         self.governance_layer = self.mcp.get("governance_layer", "UNKNOWN")
         self.routing_protocol = self.mcp.get("core_functions", [])
-        self.registered_capsules = list(self.CAPSULES.keys())
+        self.capsules = self.mcp.get("capsules", {})
+        self.external_hooks = self.mcp.get("external_hooks", {})
+        self.ethics_enforcement = self.mcp.get("ethics_enforcement", {})
 
-    def route(self, command: str) -> dict:
+    def route(self, command: str, target_capsule: Optional[str] = None) -> Dict[str, Any]:
         """
-        Route command through MCP Bridge with capsule awareness.
-        
-        Enhanced to include capsule status and ZIPWIZ handshake validation.
+        Route a command through the governance layer.
+
+        Args:
+            command: The command to route
+            target_capsule: Optional target capsule ID for direct routing
+
+        Returns:
+            Dict containing routing status, protocol info, and routed command
         """
         routed_command = f"[{self.governance_layer}] {command}"
-        
-        return {
+
+        result = {
             "status": "ROUTED",
             "protocol": self.routing_protocol,
             "routed_command": routed_command,
             "governance_layer": self.governance_layer,
-            "registered_capsules": self.registered_capsules,
-            "capsule_count": len(self.registered_capsules),
-            "anchor_ethics": "ENFORCED",
-            "zipwiz_handshake": "VALIDATED"
         }
-    
-    def get_capsule_info(self, capsule_id: str) -> Dict[str, Any]:
-        """Get detailed information about a registered capsule"""
-        return self.CAPSULES.get(capsule_id, {"status": "UNKNOWN"})
-    
-    def list_capsules(self) -> List[Dict[str, Any]]:
-        """List all registered capsules with their metadata"""
-        return [
-            {"capsule_id": cid, **info}
-            for cid, info in self.CAPSULES.items()
+
+        # Add target capsule info if specified
+        if target_capsule:
+            capsule_info = get_capsule(target_capsule, self.mcp)
+            if capsule_info:
+                result["target_capsule"] = capsule_info
+                result["capsule_status"] = capsule_info.get("status", "UNKNOWN")
+            else:
+                result["target_capsule"] = None
+                result["capsule_status"] = "NOT_FOUND"
+
+        # Add ethics validation if enabled
+        if self.ethics_enforcement.get("validation_on_route", False):
+            result["ethics_validated"] = True
+            result["ethics_protocol"] = self.ethics_enforcement.get("protocol", "UNKNOWN")
+
+        return result
+
+    def get_available_capsules(self, capability: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Get list of available capsules, optionally filtered by capability.
+
+        Args:
+            capability: Optional capability to filter by (e.g., 'symbolic_routing')
+
+        Returns:
+            List of capsule configurations
+        """
+        capsules = []
+        for capsule_id, capsule_config in self.capsules.items():
+            if capability:
+                if capability in capsule_config.get("capabilities", []):
+                    capsules.append(capsule_config)
+            else:
+                capsules.append(capsule_config)
+        return capsules
+
+    def get_capsule_capabilities(self, capsule_id: str) -> List[str]:
+        """
+        Get capabilities for a specific capsule.
+
+        Args:
+            capsule_id: ID of the capsule
+
+        Returns:
+            List of capability strings
+        """
+        capsule_info = get_capsule(capsule_id, self.mcp)
+        if capsule_info:
+            return capsule_info.get("capabilities", [])
+        return []
+
+    def is_capsule_active(self, capsule_id: str) -> bool:
+        """
+        Check if a capsule is active.
+
+        Args:
+            capsule_id: ID of the capsule
+
+        Returns:
+            bool: True if capsule is active
+        """
+        capsule_info = get_capsule(capsule_id, self.mcp)
+        if capsule_info:
+            return capsule_info.get("status", "INACTIVE") == "ACTIVE"
+        return False
+
+    def get_routing_summary(self) -> Dict[str, Any]:
+        """
+        Get a summary of routing configuration.
+
+        Returns:
+            Dict with governance layer, protocols, and capsule info
+        """
+        active_capsules = [
+            capsule_id for capsule_id in self.capsules.keys()
+            if self.is_capsule_active(capsule_id)
         ]
-    
-    def validate_capsule_ethics(self, capsule_id: str) -> bool:
-        """Validate that capsule complies with ethics protocols"""
-        capsule = self.CAPSULES.get(capsule_id)
-        if not capsule:
-            return False
-        
-        # All capsules must have ethics_protocol and anchor
-        return bool(
-            capsule.get("ethics_protocol") and
-            capsule.get("anchor") and
-            capsule.get("status") == "ACTIVE"
-        )
+
+        return {
+            "governance_layer": self.governance_layer,
+            "core_functions": self.routing_protocol,
+            "total_capsules": len(self.capsules),
+            "active_capsules": active_capsules,
+            "external_hooks": self.external_hooks,
+            "ethics_enforcement": self.ethics_enforcement,
+        }

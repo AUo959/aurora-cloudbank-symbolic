@@ -27,24 +27,71 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from typing import Callable
 
 
 # ================================
 # Rate Limiting Configuration
 # ================================
 
-def get_rate_limiter() -> Limiter:
+def _composite_key_factory(strategy: str) -> Callable:
+    """Return a key function based on strategy.
+
+    Strategies:
+        ip       -> client IP only (default)
+        ip_user  -> client IP + authenticated user (JWT sub) when available
     """
-    Create and configure rate limiter for API endpoints.
-    Uses client IP address as the rate limit key.
+    def key_func(request):  # pragma: no cover - simple deterministic key builder
+        base_ip = get_remote_address(request)
+        if strategy != "ip_user":
+            return base_ip
+        user_part = "anonymous"
+        auth = request.headers.get("Authorization")
+        if auth and auth.startswith("Bearer "):
+            token = auth.split(" ", 1)[1]
+            try:  # decode token for subject
+                from src.security.oauth2 import OAuth2Handler  # local import to avoid circular during startup
+                payload = OAuth2Handler.decode_token(token)
+                sub = payload.get("sub")
+                if sub:
+                    user_part = sub
+            except Exception:
+                pass
+        return f"{base_ip}:{user_part}"
+    return key_func
 
-    Returns:
-        Configured Limiter instance
+
+def get_rate_limiter() -> Limiter | object:
+    """Create and configure rate limiter for API endpoints.
+
+    Environment Variables:
+        RATE_LIMIT_ENABLED (default: true) -> disable limiter entirely if false
+        RATE_LIMIT_KEY_STRATEGY (ip|ip_user) -> key function selection
+        REDIS_URL -> optional Redis backend (e.g., redis://localhost:6379)
     """
-    return Limiter(key_func=get_remote_address)
+    enabled = os.getenv("RATE_LIMIT_ENABLED", "true").lower() == "true"
+    if not enabled:
+        class NoOpLimiter:  # pragma: no cover - trivial passthrough
+            def limit(self, *args, **kwargs):
+                def decorator(func):
+                    return func
+                return decorator
+        return NoOpLimiter()
+
+    strategy = os.getenv("RATE_LIMIT_KEY_STRATEGY", "ip")
+    redis_url = os.getenv("REDIS_URL")
+    key_func = _composite_key_factory(strategy)
+
+    # Attempt Redis-backed limiter if URL provided; fall back to in-memory
+    try:
+        if redis_url:
+            return Limiter(key_func=key_func, storage_uri=redis_url)
+    except Exception:  # pragma: no cover - graceful fallback
+        pass
+    return Limiter(key_func=key_func)
 
 
-# Global rate limiter instance
+# Global rate limiter instance (may be NoOpLimiter)
 limiter = get_rate_limiter()
 
 

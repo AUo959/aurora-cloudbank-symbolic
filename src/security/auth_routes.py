@@ -7,7 +7,7 @@ Provides OAuth2 authentication endpoints for token management.
 from datetime import timedelta
 from typing import Dict
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from src.security.oauth2 import (
@@ -18,6 +18,8 @@ from src.security.oauth2 import (
     get_current_active_user,
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
+from src.middleware.fastapi_security import limiter
+import os
 from src.security.roles import Role, get_all_permissions
 
 
@@ -59,8 +61,13 @@ USERS_DB: Dict[str, UserInDB] = {
 }
 
 
+AUTH_TOKEN_PER_MINUTE = int(os.getenv("RATE_LIMIT_AUTH_TOKEN_PER_MIN", "10"))
+AUTH_REFRESH_PER_MINUTE = int(os.getenv("RATE_LIMIT_AUTH_REFRESH_PER_MIN", "30"))
+
+
 @router.post("/token", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit(f"{AUTH_TOKEN_PER_MINUTE}/minute")
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):  # request required for limiter
     """
     OAuth2 compatible token endpoint.
 
@@ -105,7 +112,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh_token(refresh_token: str):
+@limiter.limit(f"{AUTH_REFRESH_PER_MINUTE}/minute")
+async def refresh_token(request: Request, refresh_token: str):  # request required for limiter
     """
     Refresh an access token using a refresh token.
 

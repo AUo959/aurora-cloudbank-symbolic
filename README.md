@@ -73,6 +73,7 @@ Built for enterprises deploying advanced AI systems with quantum-inspired cognit
 - [Ethics Engine](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Ethics-Engine)
 - [Drift Detection](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Drift-Detection)
 - [AI Safety](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/AI-Safety)
+- [Rate Limiting](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Rate-Limiting)
 
 ### 🔧 **Developer Resources**
 - [API Catalog](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog) (50+ endpoints)
@@ -1915,6 +1916,47 @@ export IBM_QUANTUM_TOKEN="your_ibm_token"
 export PROMETHEUS_ENDPOINT="http://prometheus:9090"
 export GRAFANA_ENDPOINT="http://grafana:3000"
 ```
+
+#### Rate Limiting
+
+Aurora includes production-grade rate limiting via SlowAPI with:
+- Global middleware and per-endpoint guards (auth routes capped by default)
+- Standards-compliant headers on 429: `Retry-After` and `X-RateLimit-Limit`
+- Configurable keying strategy (`ip` or `ip_user` composite with JWT `sub`)
+- Optional Redis backend for distributed limits
+- System-wide toggle for testing and controlled load
+
+Environment variables (in `.env.example`):
+- `RATE_LIMIT_ENABLED` (default `true`): master toggle
+- `RATE_LIMIT_KEY_STRATEGY` (`ip` | `ip_user`): key derivation
+- `REDIS_URL`: enable distributed storage (e.g., `redis://localhost:6379`)
+- `RATE_LIMIT_AUTH_TOKEN_PER_MIN`: per-minute cap for `/api/auth/token`
+- `RATE_LIMIT_AUTH_REFRESH_PER_MIN`: per-minute cap for `/api/auth/refresh`
+
+Quick setups:
+
+Local (in-memory):
+```bash
+export RATE_LIMIT_ENABLED=true
+export RATE_LIMIT_KEY_STRATEGY=ip
+unset REDIS_URL
+export RATE_LIMIT_AUTH_TOKEN_PER_MIN=10
+export RATE_LIMIT_AUTH_REFRESH_PER_MIN=30
+```
+
+Production (Redis + composite key):
+```bash
+export RATE_LIMIT_ENABLED=true
+export RATE_LIMIT_KEY_STRATEGY=ip_user
+export REDIS_URL=redis://aurora-redis:6379
+export RATE_LIMIT_AUTH_TOKEN_PER_MIN=5
+export RATE_LIMIT_AUTH_REFRESH_PER_MIN=20
+```
+
+Notes:
+- Composite `ip_user` is effective after authentication; login requests do not carry `Authorization` and will fall back to IP-only.
+- Behind proxies/load balancers, ensure real client IP is preserved (e.g., `X-Forwarded-For`) and your ASGI server/proxy configuration forwards it.
+- For test suites or load testing, you can temporarily set `RATE_LIMIT_ENABLED=false` or raise the per-minute caps.
 
 ### CI/CD Integration
 

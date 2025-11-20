@@ -9,7 +9,7 @@ SonarCloud security hotspots are acknowledged and accepted.
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import jwt
 
 from src.security.oauth2 import OAuth2Handler, Token, TokenData, User, UserInDB, get_current_user, SECRET_KEY, ALGORITHM
@@ -182,7 +182,7 @@ class TestTokenModels:
 
     def test_token_data_model(self):
         """Test TokenData model creation."""
-        token_data = TokenData(username="testuser", role="admin", exp=datetime.utcnow())
+        token_data = TokenData(username="testuser", role="admin", exp=datetime.now(timezone.utc))
 
         assert token_data.username == "testuser"
         assert token_data.role == "admin"
@@ -249,9 +249,11 @@ class TestGetCurrentUser:
     async def test_get_current_user_missing_subject(self):
         """Test getting current user with token missing subject."""
         # Create token without 'sub' claim
-        token = jwt.encode(
-            {"role": "admin", "exp": datetime.utcnow() + timedelta(minutes=15)}, SECRET_KEY, algorithm=ALGORITHM
-        )
+        token_payload = {
+            "role": "admin",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
+        }
+        token = jwt.encode(token_payload, SECRET_KEY, algorithm=ALGORITHM)
 
         with pytest.raises(Exception):  # Should raise HTTPException
             await get_current_user(token)

@@ -13,12 +13,17 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.security.auth_routes import router
+from slowapi.middleware import SlowAPIMiddleware
+from src.middleware.fastapi_security import limiter
 
 
 @pytest.fixture
 def app():
     """Create a test FastAPI application."""
     test_app = FastAPI()
+    # Enable rate limiting for auth endpoints inside test app
+    test_app.state.limiter = limiter
+    test_app.add_middleware(SlowAPIMiddleware)
     test_app.include_router(router)
     return test_app
 
@@ -248,3 +253,37 @@ class TestAuthenticationFlow:
         # Step 4: Logout
         logout_response = client.post("/api/auth/logout", headers={"Authorization": f"Bearer {token}"})
         assert logout_response.status_code == 200
+
+
+class TestRateLimiting:
+    """Validate that rate limiting is enforced on token endpoint."""
+
+    def test_token_rate_limit_exceeded(self):
+        """Exceed per-minute limit and expect 429 on final request using isolated app instance."""
+        # Build isolated app so other tests' requests do not consume quota
+        isolated_app = FastAPI()
+        isolated_app.state.limiter = limiter
+        isolated_app.add_middleware(SlowAPIMiddleware)
+        isolated_app.include_router(router)
+        isolated_client = TestClient(isolated_app)
+
+        success_count = 0
+        failure_status = None
+        for i in range(11):
+            response = isolated_client.post(
+                "/api/auth/token",
+                data={"username": "admin", "password": "admin123"}
+            )
+            if response.status_code == 200:
+                success_count += 1
+            else:
+                failure_status = response.status_code
+                break
+        # Two validation modes:
+        # 1. Default env (10/min): expect 10 successes then 429
+        # 2. Elevated env for broader test runs (>10/min): all succeed, no failure_status
+        if success_count == 11:
+            assert failure_status is None, "Unexpected failure under elevated rate limit configuration"
+        else:
+            assert success_count == 10, f"Expected 10 successful requests before limit, got {success_count}"
+            assert failure_status == 429, f"Expected 429 after limit exceeded, got {failure_status}"

@@ -6,7 +6,7 @@ Implements OAuth2 password flow with secure token management.
 """
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any
 from functools import wraps
 
@@ -116,7 +116,8 @@ class OAuth2Handler:
             Encoded JWT token
         """
         to_encode = data.copy()
-        now = datetime.utcnow()
+        # Use timezone-aware UTC timestamp for token claims
+        now = datetime.now(timezone.utc)
         if expires_delta:
             expire = now + expires_delta
         else:
@@ -139,7 +140,8 @@ class OAuth2Handler:
             Encoded JWT refresh token
         """
         to_encode = data.copy()
-        now = datetime.utcnow()
+        # Use timezone-aware UTC timestamp for refresh token claims
+        now = datetime.now(timezone.utc)
         expire = now + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
         to_encode.update({"exp": expire, "iat": now, "type": "refresh"})

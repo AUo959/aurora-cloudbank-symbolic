@@ -46,6 +46,9 @@ from src.middleware.fastapi_security import (
     sanitize_request_id,
     sanitize_session_id
 )
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+import os
 
 # Import telemetry and observability
 from src.observability import get_telemetry, get_r2_telemetry
@@ -195,8 +198,11 @@ async def lifespan(app: FastAPI):
     try:
         aurora_telemetry = get_telemetry(service_name="aurora-cloudbank-api")
         r2_telemetry = get_r2_telemetry(service_name="aurora-r2-agent")
-        logger.info("✅ Telemetry systems initialized (Aurora: %s, R2: %s)", 
-                   aurora_telemetry.enabled, r2_telemetry.enabled)
+        logger.info(
+            "✅ Telemetry systems initialized (Aurora: %s, R2: %s)",
+            aurora_telemetry.enabled,
+            r2_telemetry.enabled,
+        )
     except Exception as e:
         logger.warning("⚠️ Failed to initialize telemetry: %s", e)
     
@@ -217,8 +223,11 @@ async def lifespan(app: FastAPI):
     try:
         aurora_telemetry = get_telemetry()
         snapshot = aurora_telemetry.get_metrics_snapshot(context_tag="shutdown_metrics")
-        logger.info("📊 Final telemetry: %d operations, %d features tracked", 
-                   len(snapshot.performance_metrics), len(snapshot.adoption_metrics))
+        logger.info(
+            "📊 Final telemetry: %d operations, %d features tracked",
+            len(snapshot.performance_metrics),
+            len(snapshot.adoption_metrics),
+        )
     except Exception as e:
         logger.debug("Telemetry snapshot failed: %s", e)
     
@@ -238,6 +247,41 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# ================================
+# Rate Limiting Middleware & Handlers
+# ================================
+try:
+    # Attach limiter state and middleware for global rate limiting enforcement
+    app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
+    logger.info("✅ SlowAPI rate limiting middleware enabled")
+except Exception as e:  # pragma: no cover - graceful degradation if slowapi misconfigured
+    logger.warning("⚠️ Failed to enable rate limiting middleware: %s", e)
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):  # pragma: no cover - simple handler
+    """Unified JSON response for rate limit violations with standard headers."""
+    # Default retry window (seconds) for per-minute limits
+    retry_after = 60
+    token_limit = os.getenv("RATE_LIMIT_AUTH_TOKEN_PER_MIN")
+    headers = {"Retry-After": str(retry_after)}
+    if token_limit:
+        headers["X-RateLimit-Limit"] = token_limit
+    return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded", "path": request.url.path}, headers=headers)
+
+
+# Fallback header injection if exception handler not applied (SlowAPI may short-circuit in some contexts)
+@app.middleware("http")
+async def rate_limit_header_middleware(request: Request, call_next):  # pragma: no cover - deterministic
+    response = await call_next(request)
+    if response.status_code == 429 and "Retry-After" not in response.headers:
+        response.headers["Retry-After"] = "60"
+        token_limit = os.getenv("RATE_LIMIT_AUTH_TOKEN_PER_MIN")
+        if token_limit and "X-RateLimit-Limit" not in response.headers:
+            response.headers["X-RateLimit-Limit"] = token_limit
+    return response
 
 
 # ================================
@@ -286,7 +330,8 @@ async def telemetry_middleware(request: Request, call_next):
             
             return response
         except Exception as e:
-            # Error is already recorded by trace_operation context manager
+            # Record error explicitly before re-raising for visibility
+            logger.error("Request processing error: %s", e)
             raise
 
 
@@ -486,6 +531,16 @@ except ImportError as e:
     logger.warning("⚠️ GUMAS Ethics not available: %s", e)
 except Exception as e:
     logger.error("❌ Failed to integrate GUMAS Ethics routes: %s", e)
+
+# Include Authentication (OAuth2/RBAC) API routes
+try:
+    from src.security.auth_routes import router as auth_router
+    app.include_router(auth_router)
+    logger.info("✅ Authentication (OAuth2/RBAC) API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Authentication routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Authentication API routes: %s", e)
 
 # Include R2 Telemetry API routes
 try:

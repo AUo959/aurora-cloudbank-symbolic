@@ -47,6 +47,9 @@ from src.middleware.fastapi_security import (
     sanitize_session_id
 )
 
+# Import telemetry and observability
+from src.observability import get_telemetry, get_r2_telemetry
+
 # Import AuMemManager API integration
 try:
     from modules.aumemmanager.api_integration import router as aumemmanager_router
@@ -188,6 +191,15 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Aurora API starting up...")
     
+    # Initialize telemetry systems
+    try:
+        aurora_telemetry = get_telemetry(service_name="aurora-cloudbank-api")
+        r2_telemetry = get_r2_telemetry(service_name="aurora-r2-agent")
+        logger.info("✅ Telemetry systems initialized (Aurora: %s, R2: %s)", 
+                   aurora_telemetry.enabled, r2_telemetry.enabled)
+    except Exception as e:
+        logger.warning("⚠️ Failed to initialize telemetry: %s", e)
+    
     # Start HALO/PAS drift controller if available
     if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
         try:
@@ -200,6 +212,15 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     logger.info("Aurora API shutting down...")
+    
+    # Export final telemetry snapshot
+    try:
+        aurora_telemetry = get_telemetry()
+        snapshot = aurora_telemetry.get_metrics_snapshot(context_tag="shutdown_metrics")
+        logger.info("📊 Final telemetry: %d operations, %d features tracked", 
+                   len(snapshot.performance_metrics), len(snapshot.adoption_metrics))
+    except Exception as e:
+        logger.debug("Telemetry snapshot failed: %s", e)
     
     # Stop HALO/PAS drift controller if running
     if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
@@ -217,6 +238,56 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+
+# ================================
+# Telemetry Middleware
+# ================================
+
+@app.middleware("http")
+async def telemetry_middleware(request: Request, call_next):
+    """
+    Middleware to automatically trace all HTTP requests with telemetry.
+    
+    Captures:
+    - Request path and method
+    - Response status code
+    - Request duration
+    - Errors during processing
+    
+    DLP: request_tracing_middleware
+    """
+    telemetry = get_telemetry()
+    
+    # Create operation name from method and path
+    operation_name = f"{request.method}_{request.url.path.replace('/', '_').strip('_')}"
+    
+    # Trace the request
+    with telemetry.trace_operation(
+        operation_name,
+        attributes={
+            "http.method": request.method,
+            "http.url": str(request.url.path),
+            "http.client": request.client.host if request.client else "unknown"
+        }
+    ):
+        try:
+            response = await call_next(request)
+            
+            # Record feature usage based on endpoint
+            if request.url.path.startswith("/geometric"):
+                telemetry.record_feature_usage("geometric_algebra_api")
+            elif request.url.path.startswith("/agent"):
+                telemetry.record_feature_usage("agent_mode_api")
+            elif request.url.path.startswith("/memory"):
+                telemetry.record_feature_usage("memory_api")
+            elif request.url.path.startswith("/quantum"):
+                telemetry.record_feature_usage("quantum_api")
+            
+            return response
+        except Exception as e:
+            # Error is already recorded by trace_operation context manager
+            raise
 
 
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper
@@ -415,6 +486,16 @@ except ImportError as e:
     logger.warning("⚠️ GUMAS Ethics not available: %s", e)
 except Exception as e:
     logger.error("❌ Failed to integrate GUMAS Ethics routes: %s", e)
+
+# Include R2 Telemetry API routes
+try:
+    from api.r2_telemetry_routes import router as r2_telemetry_router
+    app.include_router(r2_telemetry_router)
+    logger.info("✅ R2 Telemetry API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ R2 Telemetry routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate R2 Telemetry routes: %s", e)
 
 # Initialize Ethics Gate for high-impact operations
 try:
@@ -658,6 +739,64 @@ def health_check(request: Request):
 @limiter.limit("300/minute")  # Health check - frequent monitoring
 def health_check_api(request: Request):
     return health_check(request)
+
+
+# ================================
+# Telemetry and Observability Endpoints
+# ================================
+
+@app.get("/metrics")
+@limiter.limit("300/minute")  # Prometheus scraping - frequent monitoring
+def prometheus_metrics(request: Request):
+    """
+    Prometheus metrics endpoint for standard telemetry.
+    
+    Returns metrics in Prometheus text exposition format for:
+    - Operation counts and durations
+    - Feature usage statistics
+    - Error counts by type
+    
+    DLP: telemetry_export_metrics
+    """
+    from fastapi.responses import PlainTextResponse
+    try:
+        telemetry = get_telemetry()
+        prometheus_data = telemetry.export_prometheus_format()
+        return PlainTextResponse(content=prometheus_data, media_type="text/plain; version=0.0.4")
+    except Exception as e:
+        logger.error("Failed to export Prometheus metrics: %s", e)
+        raise HTTPException(status_code=500, detail=f"Metrics export failed: {str(e)}")
+
+
+@app.get("/telemetry/snapshot")
+@limiter.limit("60/minute")  # Snapshot retrieval - moderate usage
+def telemetry_snapshot(request: Request, context_tag: Optional[str] = None):
+    """
+    Get current telemetry metrics snapshot.
+    
+    Returns structured metrics including:
+    - Performance statistics (operation times, counts)
+    - Adoption metrics (feature usage)
+    - Error metrics
+    
+    Args:
+        context_tag: Optional DLP context tag for lineage tracking
+    
+    DLP: telemetry_snapshot_export
+    """
+    try:
+        telemetry = get_telemetry()
+        snapshot = telemetry.get_metrics_snapshot(context_tag=context_tag)
+        return {
+            "timestamp": snapshot.timestamp,
+            "performance_metrics": snapshot.performance_metrics,
+            "adoption_metrics": snapshot.adoption_metrics,
+            "error_metrics": snapshot.error_metrics,
+            "context_tag": snapshot.context_tag
+        }
+    except Exception as e:
+        logger.error("Failed to get telemetry snapshot: %s", e)
+        raise HTTPException(status_code=500, detail=f"Snapshot retrieval failed: {str(e)}")
 
 
 # ================================

@@ -22,11 +22,11 @@ from tools.command_chain.comprehensive_sync_321 import (  # noqa: E402
 def execute_status(config_path: Optional[str] = None, workspace_path: Optional[str] = None):
     """
     Execute quick status check (Phase 1 only).
-    
+
     Args:
         config_path: Path to configuration file (optional)
         workspace_path: Path to workspace directory (optional)
-    
+
     Returns:
         Phase 1 result with file categorization
     """
@@ -37,36 +37,36 @@ def execute_status(config_path: Optional[str] = None, workspace_path: Optional[s
         config = SyncConfig.load(Path(".aurora/sync_config.json"))
     else:
         config = SyncConfig()
-    
+
     # Set workspace
     if workspace_path:
         workspace = Path(workspace_path)
     else:
         workspace = Path.cwd()
-    
+
     # Create sync instance
     sync = ComprehensiveSync(config, workspace)
-    
+
     # Execute Phase 1 only
     print("\n🔍 #STATUS//. - Quick Status Check\n")
     print("=" * 60)
-    
+
     phase1_result = sync._phase1_check_changes()
-    
+
     if not phase1_result.success:
         print(f"\n❌ {phase1_result.message}")
         return phase1_result
-    
+
     # Display results
     details = phase1_result.details
-    
+
     if details.get('files_changed', 0) == 0:
         print("\n✅ Working tree is clean - no changes detected")
         print("=" * 60)
         return phase1_result
-    
+
     print(f"\n📊 Changes detected: {details['files_changed']} files\n")
-    
+
     # Show categorized changes
     categories = details.get('categories', {})
     for category, files in categories.items():
@@ -77,23 +77,23 @@ def execute_status(config_path: Optional[str] = None, workspace_path: Optional[s
             if len(files) > 5:
                 print(f"    ... and {len(files) - 5} more")
             print()
-    
+
     # Show special flags
     if details.get('is_docs_only'):
         print("  ℹ️  Changes are documentation-only")
     if details.get('is_config_only'):
         print("  ℹ️  Changes are configuration-only")
-    
+
     print("=" * 60)
     print(f"\n⏱️  Status check completed in {phase1_result.duration_seconds:.2f}s")
-    
+
     return phase1_result
 
 
 def main():
     """CLI entry point."""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
         description="Quick status check - Phase 1 of #321//.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -107,29 +107,29 @@ This command provides a quick overview of pending changes without
 staging, committing, or syncing anything.
         """
     )
-    
+
     parser.add_argument(
         '--config',
         type=str,
         help='Path to configuration file (default: .aurora/sync_config.json)'
     )
-    
+
     parser.add_argument(
         '--workspace',
         type=str,
         help='Path to workspace directory (default: current directory)'
     )
-    
+
     args = parser.parse_args()
-    
+
     try:
         result = execute_status(
             config_path=args.config,
             workspace_path=args.workspace
         )
-        
+
         sys.exit(0 if result.success else 1)
-        
+
     except KeyboardInterrupt:
         print("\n\n⚠️  Status check interrupted")
         sys.exit(130)

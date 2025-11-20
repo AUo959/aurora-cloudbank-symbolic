@@ -2,6 +2,10 @@
 Tests for OAuth2 authentication functionality.
 
 Tests JWT token creation, validation, and OAuth2 flow.
+
+Note: Test credentials and secrets are intentionally hardcoded for testing purposes only.
+These are not production credentials and are safe for test environments.
+SonarCloud security hotspots are acknowledged and accepted.
 """
 
 import pytest

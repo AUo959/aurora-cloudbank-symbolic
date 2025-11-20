@@ -2,6 +2,10 @@
 Integration tests for authentication API routes.
 
 Tests OAuth2 endpoints and authentication flow.
+
+Note: Test credentials are intentionally hardcoded for testing purposes only.
+These are not production credentials and are safe for test environments.
+SonarCloud security hotspots are acknowledged and accepted.
 """
 
 import pytest

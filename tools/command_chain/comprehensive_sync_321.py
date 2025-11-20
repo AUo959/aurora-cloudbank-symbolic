@@ -478,11 +478,11 @@ class ComprehensiveSync:
             for line in status_result.stdout.split('\n'):
                 if line.startswith('UU') or line.startswith('AA') or line.startswith('DD'):
                     conflicted_files.append(line[3:].strip())
-        
+
         conflict_msg = "Merge conflicts detected"
         if conflicted_files:
             conflict_msg += f" in {len(conflicted_files)} file(s)"
-        
+
         return PhaseResult(
             phase_number=4,
             phase_name="Sync to Main",
@@ -498,12 +498,12 @@ class ComprehensiveSync:
                 "4. Retry sync with #SYNC//. or #321//."
             ]
         )
-    
+
     def _handle_conflict_abort(self, phase_start: float) -> PhaseResult:
         """Handle conflicts with abort strategy - preserve work"""
         # Abort the rebase/merge
         self._run_command(['git', 'rebase', '--abort'])
-        
+
         return PhaseResult(
             phase_number=4,
             phase_name="Sync to Main",
@@ -542,10 +542,10 @@ class ComprehensiveSync:
             if rev_list_result.returncode == 0:
                 counts = rev_list_result.stdout.strip().split()
                 behind_count = int(counts[0]) if len(counts) >= 2 else 0
-                
+
                 if behind_count > 0:
                     logger.info(f"Branch is {behind_count} commit(s) behind main - syncing...")
-                    
+
                     # Merge main into current branch (works for both main and feature branches)
                     if self.config.use_rebase:
                         pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
@@ -571,7 +571,7 @@ class ComprehensiveSync:
                 conflict_indicators = ['CONFLICT', 'conflict', 'Merge conflict']
                 error_output = pull_result.stderr.lower() if pull_result.stderr else ""
                 has_conflict = any(indicator.lower() in error_output for indicator in conflict_indicators)
-                
+
                 if has_conflict:
                     # Handle conflict based on strategy
                     if self.config.conflict_resolution_strategy == "prompt":
@@ -580,7 +580,7 @@ class ComprehensiveSync:
                         return self._handle_conflict_abort(phase_start)
                     else:
                         return self._handle_conflict_prompt(phase_start)  # Default to prompt
-                
+
                 return PhaseResult(
                     phase_number=4,
                     phase_name="Sync to Main",
@@ -595,7 +595,7 @@ class ComprehensiveSync:
                 # Get current branch name to push to correct remote
                 branch_result = self._run_command(['git', 'branch', '--show-current'])
                 current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else 'main'
-                
+
                 push_result = self._run_command(['git', 'push', 'origin', current_branch])
                 if push_result.returncode != 0:
                     return PhaseResult(

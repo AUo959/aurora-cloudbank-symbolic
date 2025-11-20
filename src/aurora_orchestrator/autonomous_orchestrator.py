@@ -243,9 +243,8 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                # Re-raise after cleanup
+                # Suppress cancellation - this is expected
                 self.logger.info("🛑 Orchestration task cancelled")
-                raise
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)
@@ -508,41 +507,58 @@ class AuroraOrchestrator:
         }
 
     def _summarize_system_state(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        """Create summary of system state for Aurora's thought"""
+        """Create summary of system state for Aurora's thought
+        Supports both SystemState dataclass and dict (for mocks/legacy)."""
+        def get_val(obj, key, default=None):
+            # Try attribute, then dict, then default
+            if hasattr(obj, key):
+                return getattr(obj, key, default)
+            if isinstance(obj, dict):
+                return obj.get(key, default)
+            return default
+
         return {
-            'overall_health': state.get('overall_health', 0.0),
-            'drift_level': state.get('drift_level', 0.0),
-            'quantum_coherence': state.get('quantum_coherence', 0.0),
-            'bottlenecks_count': len(state.get('bottlenecks', [])),
-            'anomalies_count': len(state.get('anomalies', [])),
-            'requires_attention': state.get('requires_attention', False)
+            'overall_health': get_val(state, 'overall_health', 0.0),
+            'drift_level': get_val(state, 'drift_level', 0.0),
+            'quantum_coherence': get_val(state, 'quantum_coherence', 0.0),
+            'bottlenecks_count': len(get_val(state, 'bottlenecks', [])),
+            'anomalies_count': len(get_val(state, 'anomalies', [])),
+            'requires_attention': get_val(state, 'requires_attention', False)
         }
 
     def _determine_focus_area(self, state: Dict[str, Any]) -> str:
-        """Determine what Aurora should focus on"""
-        if state.get('drift_level', 0) > self.config.drift_warning_threshold:
+        """Determine what Aurora should focus on (supports dict or SystemState)"""
+        def get_val(obj, key, default=None):
+            if hasattr(obj, key):
+                return getattr(obj, key, default)
+            if isinstance(obj, dict):
+                return obj.get(key, default)
+            return default
+
+        if get_val(state, 'drift_level', 0) > self.config.drift_warning_threshold:
             return "drift_management"
-        elif state.get('quantum_coherence', 1.0) < 0.7:
+        elif get_val(state, 'quantum_coherence', 1.0) < 0.7:
             return "quantum_health"
-        elif len(state.get('bottlenecks', [])) > 0:
+        elif len(get_val(state, 'bottlenecks', [])) > 0:
             return "performance_optimization"
-        elif len(state.get('anomalies', [])) > 0:
+        elif len(get_val(state, 'anomalies', [])) > 0:
             return "anomaly_investigation"
         else:
             return "general_monitoring"
 
     def _assess_action_requirement(self, state: Dict[str, Any]) -> bool:
-        """Determine if action is required"""
-        # Action required if:
-        # - Health below warning threshold
-        # - Drift above warning threshold
-        # - Bottlenecks detected
-        # - Critical anomalies present
+        """Determine if action is required (supports dict or SystemState)"""
+        def get_val(obj, key, default=None):
+            if hasattr(obj, key):
+                return getattr(obj, key, default)
+            if isinstance(obj, dict):
+                return obj.get(key, default)
+            return default
 
-        health = state.get('overall_health', 1.0)
-        drift = state.get('drift_level', 0.0)
-        bottlenecks = state.get('bottlenecks', [])
-        anomalies = state.get('anomalies', [])
+        health = get_val(state, 'overall_health', 1.0)
+        drift = get_val(state, 'drift_level', 0.0)
+        bottlenecks = get_val(state, 'bottlenecks', [])
+        anomalies = get_val(state, 'anomalies', [])
 
         if health < self.config.health_warning_threshold:
             return True
@@ -550,9 +566,13 @@ class AuroraOrchestrator:
             return True
         if len(bottlenecks) > 0:
             return True
-        if any(a.get('severity') in ['high', 'critical'] for a in anomalies):
-            return True
-
+        # Anomaly severity: support both dict and dataclass
+        for a in anomalies:
+            sev = getattr(a, 'severity', None)
+            if sev is None and isinstance(a, dict):
+                sev = a.get('severity')
+            if sev in ['high', 'critical']:
+                return True
         return False
 
     def _calculate_urgency(self, state: Dict[str, Any]) -> float:

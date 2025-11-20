@@ -11,7 +11,7 @@ def test_script_runs_and_outputs_phases():
     proc = subprocess.run([sys.executable, str(SCRIPT)], capture_output=True, text=True)
     # Script may exit 1 if gh not authenticated; still validate structure
     output = proc.stdout
-    assert "Intelligent Integration Plan" in output or "Integration Plan Error" in output
+    assert "Phased Integration Plan" in output or "Integration Plan Error" in output
     # Extract JSON after separator ---
     if "---" in output:
         json_part = output.split("---", 1)[-1].strip()

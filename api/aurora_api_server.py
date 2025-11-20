@@ -5,7 +5,7 @@ FastAPI-based REST API for Aurora CloudBank services
 """
 
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import aiofiles
@@ -103,7 +103,7 @@ async def generate_quantum_vector(
             "dimension": request.dimension,
             "quantum_state": request.quantum_state,
             "coherence": random.uniform(0.8, 1.0),
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         return JSONResponse(content=result)
@@ -129,7 +129,7 @@ async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthori
             },
             "stimulus_processed": request.stimulus,
             "evolution_time": request.duration,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         return JSONResponse(content=result)
@@ -160,7 +160,7 @@ async def detect_learning_pattern(
             },
             "learning_applied": request.feedback_score is not None,
             "feedback_score": request.feedback_score,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         return JSONResponse(content=result)
@@ -185,7 +185,7 @@ async def run_integration_test():
         return {
             "overall_status": "passed" if overall_status else "failed",
             "test_results": test_results,
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "test_duration": "2.3s",
         }
     except Exception as e:
@@ -231,7 +231,7 @@ async def get_system_info(system_name: str):
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat(), "uptime": "operational", "version": "1.0.0"}
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat(), "uptime": "operational", "version": "1.0.0"}
 
 
 if __name__ == "__main__":

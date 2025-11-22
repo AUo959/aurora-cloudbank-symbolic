@@ -15,7 +15,8 @@ from .base_agent import (
     AgentRole,
     ClearanceLevel,
     CrewAgentCapability,
-    register_crew_agent
+    register_crew_agent,
+    get_crew_agent
 )
 
 

@@ -56,6 +56,10 @@ from .rivas import Rivas, get_rivas
 from .koss import Koss, get_koss
 from .kyros import Kyros, get_kyros
 from .drev import Drev, get_drev
+from .park import Park, get_park
+from .suresh import Suresh, get_suresh
+from .halden import Halden, get_halden
+from .vatra import Vatra, get_vatra
 
 __all__ = [
     'BaseCrewAgent',
@@ -98,6 +102,10 @@ __all__ = [
     'Koss',
     'Kyros',
     'Drev',
+    'Park',
+    'Suresh',
+    'Halden',
+    'Vatra',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -126,4 +134,8 @@ __all__ = [
     'get_koss',
     'get_kyros',
     'get_drev',
+    'get_park',
+    'get_suresh',
+    'get_halden',
+    'get_vatra',
 ]

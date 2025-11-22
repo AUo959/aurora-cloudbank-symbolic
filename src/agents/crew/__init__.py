@@ -41,6 +41,11 @@ from .vu import Vu, get_vu
 from .sato import Sato, get_sato
 from .vell import Vell, get_vell
 from .porter import Porter, get_porter
+from .tanaka_j import TanakaJ, get_tanaka_j
+from .feldman import Feldman, get_feldman
+from .patel import Patel, get_patel
+from .sorensen import Sorensen, get_sorensen
+from .vasquez import Vasquez, get_vasquez
 
 __all__ = [
     'BaseCrewAgent',
@@ -68,6 +73,11 @@ __all__ = [
     'Sato',
     'Vell',
     'Porter',
+    'TanakaJ',
+    'Feldman',
+    'Patel',
+    'Sorensen',
+    'Vasquez',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -81,4 +91,9 @@ __all__ = [
     'get_sato',
     'get_vell',
     'get_porter',
+    'get_tanaka_j',
+    'get_feldman',
+    'get_patel',
+    'get_sorensen',
+    'get_vasquez',
 ]

@@ -27,11 +27,15 @@ from .base_agent import (
     get_agents_by_division,
 )
 
-# Import example crew agents
+# Import crew agents
 from .thorne import Thorne, get_thorne
 from .markov import Markov, get_markov
 from .roberts import Roberts, get_roberts
 from .qin import Qin, get_qin
+from .chen import Chen, get_chen
+from .noor import Noor, get_noor
+from .velin import Velin, get_velin
+from .shepard import Shepard, get_shepard
 
 __all__ = [
     'BaseCrewAgent',
@@ -45,13 +49,21 @@ __all__ = [
     'get_all_crew_agents',
     'get_agents_by_role',
     'get_agents_by_division',
-    # Example agents
+    # Crew agents
     'Thorne',
     'Markov',
     'Roberts',
     'Qin',
+    'Chen',
+    'Noor',
+    'Velin',
+    'Shepard',
     'get_thorne',
     'get_markov',
     'get_roberts',
     'get_qin',
+    'get_chen',
+    'get_noor',
+    'get_velin',
+    'get_shepard',
 ]

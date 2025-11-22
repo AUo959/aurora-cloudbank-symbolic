@@ -34,9 +34,23 @@ from src.agents.crew import (
     get_markov,
     get_roberts,
     get_qin,
+    get_chen,
+    get_noor,
+    get_velin,
+    get_shepard,
 )
 
 router = APIRouter(prefix="/api/crew", tags=["Crew Agents"])
+
+# Initialize crew agents at module import
+get_thorne()
+get_markov()
+get_roberts()
+get_qin()
+get_chen()
+get_noor()
+get_velin()
+get_shepard()
 
 
 # Pydantic models for requests/responses
@@ -100,16 +114,6 @@ class AgentStatusResponse(BaseModel):
     symbolic_tag: str
     model: str
     uptime_hours: float
-
-
-# Initialize example agents on router startup
-@router.on_event("startup")
-async def initialize_agents():
-    """Initialize example crew agents"""
-    get_thorne()
-    get_markov()
-    get_roberts()
-    get_qin()
 
 
 # API Endpoints

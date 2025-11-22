@@ -11,6 +11,7 @@ from src.agents.crew import (
     get_menon, get_kale, get_rivas, get_koss, get_kyros, get_drev,
     get_park, get_suresh, get_halden, get_vatra,
     get_nguyen, get_lee, get_el_sayegh,
+    get_kim, get_okafor, get_santos,
 )
 
 # Initialize all agents
@@ -22,6 +23,7 @@ for getter in [
     get_menon, get_kale, get_rivas, get_koss, get_kyros, get_drev,
     get_park, get_suresh, get_halden, get_vatra,
     get_nguyen, get_lee, get_el_sayegh,
+    get_kim, get_okafor, get_santos,
 ]:
     getter()
 

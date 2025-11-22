@@ -63,6 +63,9 @@ from .vatra import Vatra, get_vatra
 from .nguyen import Nguyen, get_nguyen
 from .lee import Lee, get_lee
 from .el_sayegh import ElSayegh, get_el_sayegh
+from .kim import Kim, get_kim
+from .okafor import Okafor, get_okafor
+from .santos import Santos, get_santos
 
 __all__ = [
     'BaseCrewAgent',
@@ -112,6 +115,9 @@ __all__ = [
     'Nguyen',
     'Lee',
     'ElSayegh',
+    'Kim',
+    'Okafor',
+    'Santos',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -147,4 +153,7 @@ __all__ = [
     'get_nguyen',
     'get_lee',
     'get_el_sayegh',
+    'get_kim',
+    'get_okafor',
+    'get_santos',
 ]

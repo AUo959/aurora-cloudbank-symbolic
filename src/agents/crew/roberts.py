@@ -4,7 +4,7 @@ Cognitive Architecture Lead / LLM-Simulation Bridge Developer
 
 Agent: Roberts
 Full Name: Emily Roberts
-Crew ID: SYS_001
+Crew ID: SIM_003
 Symbolic Tag: s.tag::language.bridge.emily_roberts
 Location: Bridge Chamber, Deck C
 """
@@ -72,10 +72,10 @@ class Roberts(BaseCrewAgent):
         ]
 
         super().__init__(
-            agent_id="SYS_001",
+            agent_id="SIM_003",
             surname="Roberts",
             full_name="Emily Roberts",
-            role=AgentRole.SYSTEMS,
+            role=AgentRole.SIMULATION,
             clearance=ClearanceLevel.L3_TECHNICAL,
             specializations=[
                 "natural_language_processing",
@@ -86,7 +86,7 @@ class Roberts(BaseCrewAgent):
             ],
             capabilities=capabilities,
             location="Bridge Chamber, Deck C",
-            division="Systems & Infrastructure",
+            division="Simulation & Cognitive Systems",
             symbolic_tag="s.tag::language.bridge.emily_roberts",
             model="claude-sonnet-4-5",  # Language expertise
             relay_liaison="ARCHY",  # L1 relay agent paired with

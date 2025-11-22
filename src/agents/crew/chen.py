@@ -4,7 +4,7 @@ Performance Optimization Engineer / Systems Performance
 
 Agent: Chen
 Full Name: Marcus Chen
-Crew ID: SYS_002
+Crew ID: SYS_001
 Symbolic Tag: s.tag::systems.performance.marcus_chen
 Location: Reactor Bay, Deck H
 """
@@ -72,7 +72,7 @@ class Chen(BaseCrewAgent):
         ]
 
         super().__init__(
-            agent_id="SYS_002",
+            agent_id="SYS_001",
             surname="Chen",
             full_name="Marcus Chen",
             role=AgentRole.SYSTEMS,

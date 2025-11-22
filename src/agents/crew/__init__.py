@@ -60,6 +60,9 @@ from .park import Park, get_park
 from .suresh import Suresh, get_suresh
 from .halden import Halden, get_halden
 from .vatra import Vatra, get_vatra
+from .nguyen import Nguyen, get_nguyen
+from .lee import Lee, get_lee
+from .el_sayegh import ElSayegh, get_el_sayegh
 
 __all__ = [
     'BaseCrewAgent',
@@ -106,6 +109,9 @@ __all__ = [
     'Suresh',
     'Halden',
     'Vatra',
+    'Nguyen',
+    'Lee',
+    'ElSayegh',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -138,4 +144,7 @@ __all__ = [
     'get_suresh',
     'get_halden',
     'get_vatra',
+    'get_nguyen',
+    'get_lee',
+    'get_el_sayegh',
 ]

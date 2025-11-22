@@ -166,7 +166,7 @@ def main():
     if violations:
         print("🚨 LOG INJECTION VULNERABILITIES DETECTED:")
         for violation in violations:
-            print("  ❌ %s", violation)
+            print(f"  ❌ {violation}")
         print("\\n💡 Fix: Use parameterized logging: logger.info('Message: %s', variable)")
         sys.exit(1)
     
@@ -234,7 +234,7 @@ def main():
     if violations:
         print("🚨 SHELL INJECTION VULNERABILITIES DETECTED:")
         for violation in violations:
-            print("  ❌ %s", violation)
+            print(f"  ❌ {violation}")
         print("\\n💡 Fix: Use shell=False and array arguments: subprocess.run(['cmd', 'arg1', 'arg2'])")
         sys.exit(1)
     
@@ -321,7 +321,7 @@ def main():
     if violations:
         print("🚨 DANGEROUS CODE EXECUTION PATTERNS DETECTED:")
         for violation in violations:
-            print("  ❌ %s", violation)
+            print(f"  ❌ {violation}")
         print("\\n💡 Fix: Use safe alternatives like ast.literal_eval() or JSON parsing")
         sys.exit(1)
     
@@ -546,10 +546,10 @@ if __name__ == "__main__":
                 print("  ✅ pre-commit hooks installed")
                 self.infrastructure_deployed.append("pre-commit installation")
             else:
-                print("  ⚠️ pre-commit installation warning: %s", result.stderr)
+                print(f"  ⚠️ pre-commit installation warning: {result.stderr}")
                 
         except Exception as e:
-            print("  ⚠️ pre-commit installation failed: %s", e)
+            print(f"  ⚠️ pre-commit installation failed: {e}")
     
     def scan_remaining_vulnerabilities(self):
         """Scan for remaining vulnerability patterns"""
@@ -667,18 +667,18 @@ if __name__ == "__main__":
         report = self.generate_phase3_report()
         
         print(f"\n🎯 Phase 3A Infrastructure Deployment Complete!")
-        print("📊 Components deployed: %s", len(self.infrastructure_deployed))
-        print("🔍 Remaining vulnerability patterns: %s", report['phase3_infrastructure_deployment']['vulnerability_count'])
+        print(f"📊 Components deployed: {len(self.infrastructure_deployed)}")
+        print(f"🔍 Remaining vulnerability patterns: {report['phase3_infrastructure_deployment']['vulnerability_count']}")
         
         # Summary of what was deployed
         print(f"\n✅ Deployed Components:")
         for component in self.infrastructure_deployed:
-            print("  - %s", component)
+            print(f"  - {component}")
         
         if report['phase3_infrastructure_deployment']['remaining_vulnerabilities']:
             print(f"\n⚠️ Remaining patterns to address in Phase 3B/3C:")
             for pattern, locations in report['phase3_infrastructure_deployment']['remaining_vulnerabilities'].items():
-                print("  - {pattern}: %s occurrences", len(locations))
+                print(f"  - {pattern}: {len(locations)} occurrences")
         
         self.monitoring_active = True
         self.logger.info("Phase 3A infrastructure deployment completed successfully")

@@ -37,7 +37,7 @@ class FinalBranchCleanup:
             # Extract branch name without origin/ prefix
             clean_branch = branch_name.replace("origin/", "")
             
-            print("🗑️  Deleting branch: %s", clean_branch)
+            print(f"🗑️  Deleting branch: {clean_branch}")
             result = subprocess.run(
                 ["git", "push", "origin", "--delete", clean_branch],
                 capture_output=True,
@@ -60,7 +60,7 @@ class FinalBranchCleanup:
     
     def run_cleanup(self):
         """Execute the final branch cleanup"""
-        print("🚀 Starting final branch cleanup - %s branches", len(self.branches_to_delete))
+        print(f"🚀 Starting final branch cleanup - {len(self.branches_to_delete)} branches")
         print("=" * 60)
         
         for branch in self.branches_to_delete:
@@ -96,12 +96,12 @@ class FinalBranchCleanup:
         if self.deleted_branches:
             print(f"\n🗑️  Deleted branches:")
             for branch in self.deleted_branches:
-                print("   - %s", branch)
+                print(f"   - {branch}")
         
         if self.failed_branches:
             print(f"\n⚠️  Failed branches:")
             for failure in self.failed_branches:
-                print("   - %s: {failure[", failure['branch'])
+                print(f"   - {failure['branch']}: {failure[")
         
         print(f"\n📊 Report saved: ZERO_PR_COMPLETION_REPORT.json")
         

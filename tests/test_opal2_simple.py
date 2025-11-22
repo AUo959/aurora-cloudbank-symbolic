@@ -61,9 +61,9 @@ def test_opal2_structure():
     for file in expected_files:
         file_path = opal2_path / file
         if file_path.exists():
-            print("✅ %s exists", file)
+            print(f"✅ {file} exists")
         else:
-            print("❌ %s missing", file)
+            print(f"❌ {file} missing")
 
     api_path = opal2_path / "api" / "opal2_api.py"
     if api_path.exists():

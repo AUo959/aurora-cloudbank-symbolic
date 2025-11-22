@@ -180,7 +180,7 @@ def main():
     for filename in problem_files:
         file_path = scripts_dir / filename
         if file_path.exists():
-            print("Processing %s...", file_path)
+            print(f"Processing {file_path}...")
             file_fixes = process_file_critical(str(file_path))
 
             for fix_type, applied in file_fixes.items():

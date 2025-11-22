@@ -35,7 +35,7 @@ def fix_trailing_whitespace(file_path):
 
         return True
     except Exception as e:
-        print("Error fixing whitespace in {file_path}: %s", e)
+        print(f"Error fixing whitespace in {file_path}: {e}")
         return False
 
 
@@ -76,7 +76,7 @@ def fix_indentation_errors(file_path):
 
         return True
     except Exception as e:
-        print("Error fixing indentation in {file_path}: %s", e)
+        print(f"Error fixing indentation in {file_path}: {e}")
         return False
 
 
@@ -95,7 +95,7 @@ def fix_f_string_issues(file_path):
 
         return True
     except Exception as e:
-        print("Error fixing f-strings in {file_path}: %s", e)
+        print(f"Error fixing f-strings in {file_path}: {e}")
         return False
 
 
@@ -133,7 +133,7 @@ def fix_line_length_issues(file_path):
 
         return True
     except Exception as e:
-        print("Error fixing line lengths in {file_path}: %s", e)
+        print(f"Error fixing line lengths in {file_path}: {e}")
         return False
 
 
@@ -147,16 +147,16 @@ def run_autopep8(file_path):
         )
         return True
     except subprocess.CalledProcessError:
-        print("autopep8 not available for %s", file_path)
+        print(f"autopep8 not available for {file_path}")
         return False
     except Exception as e:
-        print("Error running autopep8 on {file_path}: %s", e)
+        print(f"Error running autopep8 on {file_path}: {e}")
         return False
 
 
 def fix_python_file(file_path):
     """Apply all fixes to a Python file"""
-    print("Fixing %s...", file_path)
+    print(f"Fixing {file_path}...")
 
     success = True
 
@@ -196,7 +196,7 @@ def main():
             else:
                 error_count += 1
         else:
-            print("File not found: %s", file_path)
+            print(f"File not found: {file_path}")
             error_count += 1
 
     print("")
@@ -231,7 +231,7 @@ def main():
                 print("Remaining issues:")
                 print(result.stdout[:1000])  # Show first 1000 chars
     except Exception as e:
-        print("Could not run final validation: %s", e)
+        print(f"Could not run final validation: {e}")
 
 
 if __name__ == "__main__":

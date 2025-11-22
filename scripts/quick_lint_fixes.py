@@ -66,7 +66,7 @@ def run_quick_linting():
     error_count = result.stdout.count('error')
     warning_count = result.stdout.count('warning')
     
-    print("📊 JavaScript: {error_count} errors, %s warnings", warning_count)
+    print(f"📊 JavaScript: {error_count} errors, {warning_count} warnings")
 
 def generate_improvement_report():
     """Generate a comprehensive improvement report"""

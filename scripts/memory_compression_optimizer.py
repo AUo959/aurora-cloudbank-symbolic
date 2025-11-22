@@ -181,7 +181,7 @@ class MemoryCompressionOptimizer:
             file_path = Path(file_info["path"])
 
             if self.dry_run:
-                print("  Would compress: {file_path} (est. %sKB saved)", file_info['estimated_savings_kb'])
+                print(f"  Would compress: {file_path} (est. {file_info['estimated_savings_kb']}KB saved)")
                 results["compressed_files"].append(file_info["path"])
                 results["total_savings_mb"] += file_info["estimated_savings_kb"] / 1024
                 continue
@@ -235,13 +235,13 @@ class MemoryCompressionOptimizer:
             keep_file = files[0]
             remove_files = files[1:]
 
-            print("🔄 Duplicate group (keeping %s):", keep_file['path'])
+            print(f"🔄 Duplicate group (keeping {keep_file['path']}):")
 
             for file_info in remove_files:
                 file_path = Path(file_info["path"])
 
                 if self.dry_run:
-                    print("  Would remove: {file_path} (%sKB)", file_info['size_kb'])
+                    print(f"  Would remove: {file_path} ({file_info['size_kb']}KB)")
                     results["removed_files"].append(str(file_path))
                     results["total_savings_mb"] += file_info["size_kb"] / 1024
                     continue

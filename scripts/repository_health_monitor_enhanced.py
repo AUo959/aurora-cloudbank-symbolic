@@ -339,7 +339,7 @@ class RepositoryHealthMonitor:
         if self.alerts.get("webhook_url"):
             self._send_webhook_alert(alert_message)
 
-        print("🚨 HEALTH ALERT TRIGGERED - Score: %s/10", metrics.health_score)
+        print(f"🚨 HEALTH ALERT TRIGGERED - Score: {metrics.health_score}/10")
         print(alert_message)
 
     def _format_alert_message(self, metrics: HealthMetrics) -> str:
@@ -431,7 +431,7 @@ class RepositoryHealthMonitor:
 
     def run_monitoring_cycle(self):
         """Run a single monitoring cycle"""
-        print("🔍 Starting health check at %s", datetime.datetime.now())
+        print(f"🔍 Starting health check at {datetime.datetime.now()}")
 
         # Collect metrics
         metrics = self.collect_metrics()
@@ -453,8 +453,8 @@ class RepositoryHealthMonitor:
         with open(report_file, "w", encoding="utf-8") as f:
             f.write(report)
 
-        print("📊 Health Score: %s/10", metrics.health_score)
-        print("📄 Report saved to: %s", report_file)
+        print(f"📊 Health Score: {metrics.health_score}/10")
+        print(f"📄 Report saved to: {report_file}")
 
         return metrics
 
@@ -480,7 +480,7 @@ def main():
         while True:
             try:
                 monitor.run_monitoring_cycle()
-                print("💤 Sleeping for %s minutes...", args.interval)
+                print(f"💤 Sleeping for {args.interval} minutes...")
                 time.sleep(args.interval * 60)
             except KeyboardInterrupt:
                 print("\n👋 Monitoring stopped by user")

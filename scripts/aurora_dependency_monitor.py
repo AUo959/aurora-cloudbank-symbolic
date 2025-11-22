@@ -304,7 +304,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         
     def run_continuous_monitoring(self, interval_minutes: int = 60):
         """Run continuous monitoring loop"""
-        print("🔄 Starting continuous dependency monitoring (every %s minutes)", interval_minutes)
+        print(f"🔄 Starting continuous dependency monitoring (every {interval_minutes} minutes)")
         
         import time
         
@@ -314,7 +314,7 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 
                 if validation['overall_health'] in ['critical', 'partial']:
                     logger.warning("%s - Dependency issues detected!", datetime.now().strftime('%H:%M:%S'))
-                    print("   Status: %s", validation['overall_health'])
+                    print(f"   Status: {validation['overall_health']}")
                     
                     # Try automatic recovery
                     print("🔧 Attempting automatic recovery...")
@@ -356,7 +356,7 @@ def main():
         
     elif args.validate:
         validation = monitor.validate_all_systems()
-        print("Validation Status: %s", validation['overall_health'])
+        print(f"Validation Status: {validation['overall_health']}")
         
         if validation['overall_health'] in ['critical', 'partial']:
             sys.exit(1)

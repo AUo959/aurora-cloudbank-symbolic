@@ -115,7 +115,7 @@ class BranchCleanupManager:
         if self.errors:
             print("\n⚠️ Errors Details:")
             for error in self.errors:
-                print("  • %s", error)
+                print(f"  • {error}")
         
         print("")
 # 🎯 Progress toward zero PRs: -%s branches", self.deleted_count)

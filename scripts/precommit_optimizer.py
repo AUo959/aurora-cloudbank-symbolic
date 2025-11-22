@@ -297,7 +297,7 @@ class PreCommitOptimizer:
             return True
 
         except (OSError, ValueError, RuntimeError) as e:
-            print("Failed to apply config: %s", e)
+            print(f"Failed to apply config: {e}")
             return False
 
     def generate_optimization_report(self) -> str:
@@ -413,20 +413,20 @@ def main():
     if args.analyze or args.report:
         analysis = optimizer.analyze_current_config()
         print("Pre-commit analysis:")
-        print("  Config exists: %s", analysis['config_exists'])
-        print("  Total hooks: %s", analysis['hooks_count'])
+        print(f"  Config exists: {analysis['config_exists']}")
+        print(f"  Total hooks: {analysis['hooks_count']}")
 
         if analysis["issues"]:
-            print("  Issues found: %s", len(analysis['issues']))
+            print(f"  Issues found: {len(analysis['issues'])}")
             for issue in analysis["issues"]:
-                print("    - %s", issue)
+                print(f"    - {issue}")
 
     if args.benchmark:
         print("🔧 Benchmarking pre-commit hooks...")
         benchmarks = optimizer.benchmark_hooks()
 
         if "total_time" in benchmarks:
-            print("⏱️ Total execution time: %s seconds", benchmarks['total_time'])
+            print(f"⏱️ Total execution time: {benchmarks['total_time']} seconds")
             logger.info("Success: %s", benchmarks['success'])
         elif "error" in benchmarks:
             logger.error("Benchmark failed: %s", benchmarks['error'])
@@ -441,7 +441,7 @@ def main():
 
     if args.optimize:
         config_type = "conditional" if args.conditional else "optimized"
-        print("🔧 Applying %s pre-commit configuration...", config_type)
+        print(f"🔧 Applying {config_type} pre-commit configuration...")
 
         success = optimizer.apply_optimized_config(config_type)
 

@@ -109,9 +109,9 @@ def main() -> None:
         for _, dest in targets:
             try:
                 restore_path = rollback_file(dest)
-                print("Rolled back {dest} from %s", restore_path)
+                print(f"Rolled back {dest} from {restore_path}")
             except (OSError, ValueError, RuntimeError) as e:
-                print("Rollback failed for {dest}: %s", e)
+                print(f"Rollback failed for {dest}: {e}")
         return
 
     confirm = input("Proceed with backup and synchronization? [y/N] ")
@@ -124,15 +124,15 @@ def main() -> None:
             data = load_yaml(src)
             validate_anchor(data, src)
         except (OSError, ValueError, RuntimeError) as e:
-            print("Validation failed for {src}: %s", e)
+            print(f"Validation failed for {src}: {e}")
             continue
 
         if os.path.exists(dest):
             try:
                 bpath = backup_file(dest)
-                print("Backup created: %s", bpath)
+                print(f"Backup created: {bpath}")
             except (OSError, ValueError, RuntimeError) as e:
-                print("Could not backup {dest}: %s", e)
+                print(f"Could not backup {dest}: {e}")
                 continue
         else:
             os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -141,9 +141,9 @@ def main() -> None:
             sync_file(src, dest)
             dest_data = load_yaml(dest)
             validate_anchor(dest_data, dest)
-            print("Synced {src} -> %s", dest)
+            print(f"Synced {src} -> {dest}")
         except (OSError, ValueError, RuntimeError) as e:
-            print("Error syncing {src} to {dest}: %s", e)
+            print(f"Error syncing {src} to {dest}: {e}")
 
     print("Backup and synchronization complete")
 

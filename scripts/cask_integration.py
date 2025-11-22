@@ -22,7 +22,7 @@ def cmd_summary() -> None:
 
 def cmd_chart(path: str) -> None:
     out = generate_architecture_chart(path)
-    print("Chart written to %s", out)
+    print(f"Chart written to {out}")
 
 
 def main() -> None:

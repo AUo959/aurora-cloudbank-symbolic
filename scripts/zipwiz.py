@@ -432,12 +432,12 @@ def main():
         elif args.extract:
             if args.optimize:
                 result = zipwiz.extract_with_optimization(Path(args.archive), Path(args.extract))
-                print("Optimization complete: %s", result)
+                print(f"Optimization complete: {result}")
             else:
                 # Standard extraction
                 with zipfile.ZipFile(args.archive, "r") as zf:
                     zf.extractall(args.extract)
-                print("Extracted to %s", args.extract)
+                print(f"Extracted to {args.extract}")
         else:
             parser.print_help()
 

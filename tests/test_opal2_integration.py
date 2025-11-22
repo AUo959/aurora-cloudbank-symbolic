@@ -38,11 +38,11 @@ async def test_opal2_integration():
             style_params={"color": "blue", "size": 100},
             quantum_enhancement=True,
         )
-        print("✅ Glyph generated: %s properties", len(glyph_result))
-        print("   - Type: %s", glyph_result.get('type'))
-        print("   - Quantum Enhanced: %s", glyph_result.get('quantum_enhanced'))
+        print(f"✅ Glyph generated: {len(glyph_result)} properties")
+        print(f"   - Type: {glyph_result.get('type')}")
+        print(f"   - Quantum Enhanced: {glyph_result.get('quantum_enhanced')}")
     except Exception as e:
-        print("❌ Glyph Core test failed: %s", e)
+        print(f"❌ Glyph Core test failed: {e}")
         return False
 
     # Test 2: Cache System
@@ -55,13 +55,13 @@ async def test_opal2_integration():
         if cached_result:
             print("✅ Cache store/retrieve successful")
             stats = await glyph_cache.get_stats()
-            print("   - Cache size: %s", stats['cache_size'])
-            print("   - Hit rate: %s%".replace("%s%", "%.1f%%"), stats['hit_rate'])
+            print(f"   - Cache size: {stats['cache_size']}")
+            print(f"   - Hit rate: {stats['hit_rate']:.1f}%")
         else:
             print("❌ Cache retrieve failed")
             return False
     except Exception as e:
-        print("❌ Cache test failed: %s", e)
+        print(f"❌ Cache test failed: {e}")
         return False
 
     # Test 3: Quantum Renderer
@@ -70,12 +70,12 @@ async def test_opal2_integration():
         render_result = await quantum_renderer.test_render()
         if render_result.get("success"):
             print("✅ Quantum Renderer test successful")
-            print("   - Render modes: %s", render_result.get('render_modes', 0))
+            print(f"   - Render modes: {render_result.get('render_modes', 0)}")
         else:
-            print("❌ Quantum Renderer test failed: %s", render_result.get('error'))
+            print(f"❌ Quantum Renderer test failed: {render_result.get('error')}")
             return False
     except Exception as e:
-        print("❌ Quantum Renderer test failed: %s", e)
+        print(f"❌ Quantum Renderer test failed: {e}")
         return False
 
     # Test 4: Plugin System
@@ -83,11 +83,11 @@ async def test_opal2_integration():
     try:
         plugins = plugin_system.list_plugins()
         print("✅ Plugin system operational")
-        print("   - Available plugins: %s", len(plugins))
+        print(f"   - Available plugins: {len(plugins)}")
         for plugin in plugins[:3]:  # Show first 3
-            print("   - %s: {plugin.get(", plugin.get('name', 'unknown'))
+            print(f"   - {plugin.get('name', 'unknown')}: {plugin.get('version', 'unknown')}")
     except Exception as e:
-        print("❌ Plugin System test failed: %s", e)
+        print(f"❌ Plugin System test failed: {e}")
         return False
 
     # Test 5: Full Integration
@@ -109,12 +109,12 @@ async def test_opal2_integration():
         }
 
         print("✅ Full integration test successful")
-        print("   - Generated glyph with %s properties", len(glyph_data))
-        print("   - Cached with key: %s", cache_key)
+        print(f"   - Generated glyph with {len(glyph_data)} properties")
+        print(f"   - Cached with key: {cache_key}")
         print("   - Render context prepared")
 
     except Exception as e:
-        print("❌ Full integration test failed: %s", e)
+        print(f"❌ Full integration test failed: {e}")
         return False
 
     print("\n🎉 All tests passed! Opal2 system is fully operational.")

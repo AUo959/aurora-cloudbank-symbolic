@@ -48,7 +48,7 @@ class Phase3BSecurityRemediator:
             except Exception as e:
                 self.errors.append(f"Error scanning {file_path}: {e}")
         
-        print("📊 Found %s files with SQL injection vulnerabilities", len(vulnerable_files))
+        print(f"📊 Found {len(vulnerable_files)} files with SQL injection vulnerabilities")
         return vulnerable_files
     
     def fix_sql_injection_file(self, file_path):
@@ -72,7 +72,7 @@ class Phase3BSecurityRemediator:
                         r'query = "\1?\3"  # Parameterized - use: cursor.execute(query, (\2,))',
                         line
                     )
-                    print("  🔧 Fixed SQL f-string in line %s", i+1)
+                    print(f"  🔧 Fixed SQL f-string in line {i+1}")
                     self.fixes_applied += 1
                 
                 # Fix execute with f-string
@@ -82,7 +82,7 @@ class Phase3BSecurityRemediator:
                         r'execute("\1?\3", (\2,))  # Parameterized query',
                         line
                     )
-                    print("  🔧 Fixed SQL execute f-string in line %s", i+1)
+                    print(f"  🔧 Fixed SQL execute f-string in line {i+1}")
                     self.fixes_applied += 1
                 
                 # Fix % formatting
@@ -90,7 +90,7 @@ class Phase3BSecurityRemediator:
                     # Add comment about using parameterized queries
                     if '# TODO' not in line:
                         fixed_line = line + "  # TODO: Convert to parameterized query with ? placeholders"
-                        print("  🔧 Marked % formatting for conversion in line %s", i+1)
+                        print(f"  🔧 Marked % formatting for conversion in line {i+1}")
                         self.fixes_applied += 1
                 
                 fixed_lines.append(fixed_line)
@@ -99,7 +99,7 @@ class Phase3BSecurityRemediator:
             if fixed_lines != lines:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(fixed_lines))
-                print("  ✅ Fixed SQL injection in %s", file_path)
+                print(f"  ✅ Fixed SQL injection in {file_path}")
                 self.files_processed += 1
                 
         except Exception as e:
@@ -138,7 +138,7 @@ class Phase3BSecurityRemediator:
             except Exception:
                 pass  # Skip binary or problematic files
         
-        print("📊 Found %s files with potential hardcoded secrets", len(secret_files))
+        print(f"📊 Found {len(secret_files)} files with potential hardcoded secrets")
         return secret_files
     
     def fix_hardcoded_secrets_file(self, file_path):
@@ -157,7 +157,7 @@ class Phase3BSecurityRemediator:
                 if re.search(r'(password|secret_key|api_key)\s*=\s*["\'][^"\']{3,}["\']', line, re.IGNORECASE):
                     if '# SECURITY WARNING' not in line:
                         fixed_line = line + "  # SECURITY WARNING: Use environment variables or secure config"
-                        print("  ⚠️ Flagged hardcoded secret in line %s", i+1)
+                        print(f"  ⚠️ Flagged hardcoded secret in line {i+1}")
                         self.fixes_applied += 1
                 
                 fixed_lines.append(fixed_line)
@@ -166,7 +166,7 @@ class Phase3BSecurityRemediator:
             if fixed_lines != lines:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(fixed_lines))
-                print("  ✅ Added security warnings to %s", file_path)
+                print(f"  ✅ Added security warnings to {file_path}")
                 self.files_processed += 1
                 
         except Exception as e:
@@ -208,7 +208,7 @@ class Phase3BSecurityRemediator:
                 if re.search(r'request\.(get|args|form|json)', line):
                     if '# TODO: Validate input' not in line and 'validate' not in line.lower():
                         fixed_line = line + "  # TODO: Validate input for security"
-                        print("  📝 Added validation reminder in line %s", i+1)
+                        print(f"  📝 Added validation reminder in line {i+1}")
                         self.fixes_applied += 1
                 
                 # Add CSRF protection reminders
@@ -216,7 +216,7 @@ class Phase3BSecurityRemediator:
                     if i + 1 < len(lines) and 'csrf' not in lines[i + 1].lower():
                         fixed_lines.append(fixed_line)
                         fixed_lines.append("    # TODO: Add CSRF protection for POST endpoint")
-                        print("  🛡️ Added CSRF reminder after line %s", i+1)
+                        print(f"  🛡️ Added CSRF reminder after line {i+1}")
                         self.fixes_applied += 1
                         continue
                 
@@ -226,7 +226,7 @@ class Phase3BSecurityRemediator:
             if len(fixed_lines) != len(lines) or fixed_lines != lines:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(fixed_lines))
-                print("  ✅ Enhanced security in %s", file_path)
+                print(f"  ✅ Enhanced security in {file_path}")
                 self.files_processed += 1
                 
         except Exception as e:
@@ -253,7 +253,7 @@ class Phase3BSecurityRemediator:
                 return False
                 
         except Exception as e:
-            print("  ⚠️ Test validation failed: %s", e)
+            print(f"  ⚠️ Test validation failed: {e}")
             return False
     
     def generate_phase3b_report(self):
@@ -304,7 +304,7 @@ class Phase3BSecurityRemediator:
             
             f.write("---\n*Aurora CloudBank Security - Phase 3B Complete*\n")
         
-        print("📄 Phase 3B report generated: %s", report_file)
+        print(f"📄 Phase 3B report generated: {report_file}")
     
     def run_comprehensive_phase3b_remediation(self):
         """Run comprehensive Phase 3B security remediation"""
@@ -332,15 +332,15 @@ class Phase3BSecurityRemediator:
         
         print("=" * 60)
         print(f"📊 Phase 3B Summary:")
-        print("  🔧 Fixes applied: %s", self.fixes_applied)
-        print("  📁 Files processed: %s", self.files_processed)
-        print("  🧪 Security tests: %s", '✅ PASS' if tests_passing else '⚠️ ISSUES')
-        print("  ⚠️ Errors: %s", len(self.errors))
+        print(f"  🔧 Fixes applied: {self.fixes_applied}")
+        print(f"  📁 Files processed: {self.files_processed}")
+        print(f"  🧪 Security tests: {'✅ PASS' if tests_passing else '⚠️ ISSUES'}")
+        print(f"  ⚠️ Errors: {len(self.errors)}")
         
         if self.errors:
             print("\n⚠️ Errors encountered:")
             for error in self.errors:
-                print("  - %s", error)
+                print(f"  - {error}")
         
         print(f"\n🎉 Phase 3B Advanced Security Remediation Complete!")
         print(f"📈 Estimated GitHub alerts reduced by additional ~50-100 alerts")

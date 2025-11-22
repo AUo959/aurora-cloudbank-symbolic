@@ -1,0 +1,110 @@
+{
+  "tool_name": "constellink-bind",
+  "description": "Command-line interface for binding threads into CONSTELLINK mesh artifacts",
+  "version": "1.0.0",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "export_time_utc": "2025-01-15T00:00:00Z",
+  "entrypoint": "cli.constellink_bind:main",
+  "symbolic_tags": [
+    "cli",
+    "mesh-binding",
+    "thread-relay"
+  ],
+  "dlp_tags": [
+    "cross-thread",
+    "symbolic_mesh"
+  ],
+  "inputs": {
+    "format": "JSON",
+    "schema": "ConstellinkMeshRequest",
+    "sources": [
+      "stdin",
+      "file (--input)"
+    ],
+    "required_fields": [
+      "request_id",
+      "threads"
+    ]
+  },
+  "outputs": {
+    "format": "JSON",
+    "schema": "ConstellinkMesh",
+    "destinations": [
+      "stdout",
+      "file (--output)"
+    ],
+    "includes": [
+      "mesh_id",
+      "anchor_seed",
+      "threads",
+      "entropy_summary",
+      "divergent_truths",
+      "mesh_manifest"
+    ]
+  },
+  "options": [
+    {
+      "flag": "--input/-i",
+      "type": "file",
+      "description": "Input file with ConstellinkMeshRequest JSON (default: stdin)"
+    },
+    {
+      "flag": "--output/-o",
+      "type": "file",
+      "description": "Output file for ConstellinkMesh JSON (default: stdout)"
+    },
+    {
+      "flag": "--pretty/-p",
+      "type": "boolean",
+      "description": "Pretty-print JSON output with indentation"
+    },
+    {
+      "flag": "--glyphcard/-g",
+      "type": "boolean",
+      "description": "Print human-readable glyphcard summary to stderr"
+    },
+    {
+      "flag": "--anchor-seed",
+      "type": "string",
+      "description": "Override default anchor seed (EOS_SEED_ORION)"
+    },
+    {
+      "flag": "--ethics-protocol",
+      "type": "string",
+      "description": "Override default ethics protocol (Picard_Delta_3)"
+    },
+    {
+      "flag": "--version/-v",
+      "type": "boolean",
+      "description": "Print CLI version"
+    }
+  ],
+  "usage_examples": [
+    {
+      "description": "From stdin to stdout",
+      "command": "cat request.json | python -m cli.constellink_bind"
+    },
+    {
+      "description": "From file to file with pretty printing",
+      "command": "python -m cli.constellink_bind --input request.json --output mesh.json --pretty"
+    },
+    {
+      "description": "With glyphcard summary to stderr",
+      "command": "python -m cli.constellink_bind --input request.json --glyphcard > mesh.json"
+    },
+    {
+      "description": "Override anchor seed",
+      "command": "python -m cli.constellink_bind --anchor-seed CUSTOM_SEED < request.json"
+    }
+  ],
+  "state_sealing": {
+    "notes": "CLI passes requests to ConstellinkRelay which handles state sealing via SHA256 hashing of mesh payload. The resulting mesh includes a mesh_manifest with state_hash for verification."
+  },
+  "dependencies": {
+    "python": ">=3.11",
+    "modules": [
+      "symbolic.constellink"
+    ]
+  }
+}

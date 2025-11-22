@@ -1,0 +1,57 @@
+{
+  "module_name": "CONSTELLINK",
+  "module_type": "Multi-Thread Relay Beacon",
+  "version": "v1.1.0",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "team": "Aurora Symbolic Core",
+  "export_time_utc": "2025-01-15T00:00:00Z",
+  "language": "Python",
+  "entrypoint": "symbolic.constellink:ConstellinkRelay",
+  "symbolic_tags": [
+    "mesh",
+    "relay",
+    "multi-thread",
+    "anchor-alignment",
+    "dlp-aware",
+    "entropy-tracking"
+  ],
+  "dlp_tags": [
+    "cross-thread",
+    "symbolic_mesh",
+    "metadata_only_by_default"
+  ],
+  "spec_file": "symbolic_specs/Symbolic_Module_Specs_CONSTELLINK_ORACULITH.json",
+  "state_sealing": {
+    "hash_algorithm": "SHA256",
+    "seal_on_bind": true,
+    "manifest_includes_state_hash": true,
+    "hash_excludes_manifest": true,
+    "notes": "The mesh_manifest.state_hash is a SHA256 hash computed over the entire mesh payload excluding the manifest itself. This ensures cryptographic verification of mesh integrity while allowing the manifest to reference the hash."
+  },
+  "dependencies": {
+    "python": ">=3.11",
+    "stdlib": [
+      "hashlib",
+      "json",
+      "dataclasses",
+      "datetime",
+      "pathlib",
+      "typing",
+      "enum"
+    ]
+  },
+  "api": {
+    "primary_class": "ConstellinkRelay",
+    "primary_method": "bind",
+    "helper_functions": [
+      "mesh_request_from_dict",
+      "load_constellink_spec"
+    ]
+  },
+  "observability": {
+    "supports_logging": false,
+    "supports_metrics": false,
+    "notes": "Module is stateless and side-effect free. Observability can be added at integration layer."
+  }
+}

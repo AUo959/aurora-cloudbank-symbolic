@@ -1,0 +1,352 @@
+{
+  "modules": [
+    {
+      "module_name": "CONSTELLINK",
+      "version": "v1.1.0",
+      "type": "Multi-Thread Relay Beacon",
+      "purpose": "Binds multiple threads / GPTs / ritual capsules with anchor, DLP, and drift awareness",
+      "metadata": {
+        "anchor_seed": "EOS_SEED_ORION",
+        "ethics_protocol": "Picard_Delta_3",
+        "dlp_tags": [
+          "cross-thread",
+          "symbolic_mesh",
+          "metadata_only_by_default"
+        ],
+        "export_version": "1.1.0",
+        "team": "Aurora Symbolic Core",
+        "created_at_utc": "2025-01-15T00:00:00Z",
+        "last_reviewed_at_utc": "2025-01-15T00:00:00Z",
+        "symbolic_tags": [
+          "mesh",
+          "relay",
+          "multi-thread",
+          "anchor-alignment",
+          "dlp-aware"
+        ],
+        "spec_state_hash": "sha256::<TO_BE_COMPUTED_AT_BUILD_TIME>"
+      },
+      "io_schemas": {
+        "ConstellinkMeshRequest": {
+          "description": "Request to bind threads into a mesh",
+          "fields": {
+            "request_id": {
+              "type": "string",
+              "required": true,
+              "description": "Unique identifier for this mesh request"
+            },
+            "threads": {
+              "type": "array",
+              "items": "ThreadDescriptor",
+              "required": true,
+              "description": "Array of threads to bind into the mesh"
+            },
+            "target_anchor_seed": {
+              "type": "string",
+              "required": false,
+              "description": "Optional anchor seed to use for the mesh; if not provided, will be resolved from threads"
+            },
+            "dlp_policy": {
+              "type": "DlpPolicy",
+              "required": false,
+              "description": "Optional DLP policy for cross-thread content and tag filtering"
+            },
+            "caller_context": {
+              "type": "object",
+              "required": false,
+              "description": "Optional context from the caller for traceability"
+            }
+          }
+        },
+        "ThreadDescriptor": {
+          "description": "Descriptor for a single thread to be included in the mesh",
+          "fields": {
+            "thread_id": {
+              "type": "string",
+              "required": true,
+              "description": "Unique identifier for this thread"
+            },
+            "anchor_seed": {
+              "type": "string",
+              "required": false,
+              "description": "Anchor seed for this thread, if known"
+            },
+            "dlp_tags": {
+              "type": "array",
+              "items": "string",
+              "required": false,
+              "description": "DLP tags associated with this thread"
+            },
+            "entropy_score": {
+              "type": "number",
+              "required": false,
+              "description": "Entropy/drift score for this thread (0.0-1.0)"
+            },
+            "metadata": {
+              "type": "object",
+              "required": false,
+              "description": "Additional metadata for this thread"
+            }
+          }
+        },
+        "DlpPolicy": {
+          "description": "Data Lineage Protocol policy for mesh binding",
+          "fields": {
+            "allow_cross_thread_content": {
+              "type": "boolean",
+              "required": false,
+              "default": true,
+              "description": "Whether to allow content sharing across threads"
+            },
+            "allowed_dlp_tags": {
+              "type": "array",
+              "items": "string",
+              "required": false,
+              "description": "Whitelist of allowed DLP tags; if provided, threads with other tags will be rejected"
+            }
+          }
+        },
+        "ConstellinkMesh": {
+          "description": "Resulting mesh artifact from binding threads",
+          "fields": {
+            "mesh_id": {
+              "type": "string",
+              "required": true,
+              "description": "Unique identifier for this mesh"
+            },
+            "created_at_utc": {
+              "type": "string",
+              "format": "ISO8601",
+              "required": true,
+              "description": "Creation timestamp in UTC"
+            },
+            "anchor_seed": {
+              "type": "string",
+              "required": true,
+              "description": "Resolved anchor seed for the mesh"
+            },
+            "ethics_protocol": {
+              "type": "string",
+              "required": true,
+              "description": "Ethics protocol applied to the mesh"
+            },
+            "threads": {
+              "type": "array",
+              "items": "MeshThreadView",
+              "required": true,
+              "description": "Bound threads with alignment and drift metadata"
+            },
+            "dlp_effective_policy": {
+              "type": "DlpEffectivePolicy",
+              "required": true,
+              "description": "Effective DLP policy after processing"
+            },
+            "entropy_summary": {
+              "type": "EntropySummary",
+              "required": true,
+              "description": "Aggregated entropy/drift summary"
+            },
+            "divergent_truths": {
+              "type": "array",
+              "items": "object",
+              "required": true,
+              "description": "List of conflicts, rejections, or divergences that require human arbitration"
+            },
+            "caller_context": {
+              "type": "object",
+              "required": false,
+              "description": "Caller context for traceability"
+            },
+            "mesh_manifest": {
+              "type": "MeshManifest",
+              "required": true,
+              "description": "Manifest with version, export time, and hash seal"
+            }
+          }
+        },
+        "MeshThreadView": {
+          "description": "Thread view within the mesh with alignment metadata",
+          "fields": {
+            "thread_id": {
+              "type": "string",
+              "required": true,
+              "description": "Thread identifier"
+            },
+            "anchor_seed": {
+              "type": "string",
+              "required": false,
+              "description": "Thread's anchor seed"
+            },
+            "dlp_tags": {
+              "type": "array",
+              "items": "string",
+              "required": false,
+              "description": "Thread's DLP tags"
+            },
+            "anchor_alignment": {
+              "type": "string",
+              "enum": ["aligned", "divergent", "unknown"],
+              "required": true,
+              "description": "Whether thread anchor aligns with mesh anchor"
+            },
+            "drift_summary": {
+              "type": "string",
+              "required": true,
+              "description": "Summary of thread's drift/entropy state"
+            },
+            "metadata": {
+              "type": "object",
+              "required": false,
+              "description": "Additional thread metadata"
+            }
+          }
+        },
+        "EntropySummary": {
+          "description": "Aggregated entropy metrics across all threads",
+          "fields": {
+            "min_entropy": {
+              "type": "number",
+              "required": true,
+              "description": "Minimum entropy score across threads"
+            },
+            "max_entropy": {
+              "type": "number",
+              "required": true,
+              "description": "Maximum entropy score across threads"
+            },
+            "mean_entropy": {
+              "type": "number",
+              "required": true,
+              "description": "Mean entropy score across threads"
+            },
+            "drift_flag": {
+              "type": "string",
+              "enum": ["stable", "watch", "divergent"],
+              "required": true,
+              "description": "Overall drift assessment based on entropy"
+            }
+          }
+        },
+        "DlpEffectivePolicy": {
+          "description": "Effective DLP policy after processing the mesh request",
+          "fields": {
+            "cross_thread_content_allowed": {
+              "type": "boolean",
+              "required": true,
+              "description": "Whether cross-thread content is allowed"
+            },
+            "allowed_tags": {
+              "type": "array",
+              "items": "string",
+              "required": false,
+              "description": "Effective whitelist of allowed DLP tags"
+            },
+            "rejected_thread_count": {
+              "type": "integer",
+              "required": true,
+              "description": "Number of threads rejected due to DLP policy"
+            }
+          }
+        },
+        "MeshManifest": {
+          "description": "Manifest with version, export time, and cryptographic seal",
+          "fields": {
+            "version": {
+              "type": "string",
+              "required": true,
+              "description": "Manifest version (e.g., '1.0.0')"
+            },
+            "export_time_utc": {
+              "type": "string",
+              "format": "ISO8601",
+              "required": true,
+              "description": "Export timestamp in UTC"
+            },
+            "anchor_seed": {
+              "type": "string",
+              "required": true,
+              "description": "Mesh anchor seed"
+            },
+            "ethics_protocol": {
+              "type": "string",
+              "required": true,
+              "description": "Ethics protocol"
+            },
+            "symbolic_tags": {
+              "type": "array",
+              "items": "string",
+              "required": true,
+              "description": "Symbolic tags for the mesh"
+            },
+            "dlp_tags": {
+              "type": "array",
+              "items": "string",
+              "required": true,
+              "description": "DLP tags for the mesh"
+            },
+            "state_hash": {
+              "type": "string",
+              "required": true,
+              "description": "SHA256 hash of the mesh payload (excluding the manifest itself)"
+            }
+          }
+        }
+      },
+      "observability": {
+        "log_events": [
+          "mesh_created",
+          "thread_rejected_due_to_dlp",
+          "anchor_conflict_detected",
+          "drift_flag_changed",
+          "divergent_truth_recorded"
+        ],
+        "metrics": [
+          "mesh_bind_duration_ms",
+          "thread_count_per_mesh",
+          "rejected_thread_count",
+          "entropy_mean",
+          "anchor_divergence_count"
+        ]
+      },
+      "state_policies": {
+        "hash_algorithm": "SHA256",
+        "seal_on_bind": true,
+        "allow_unsealed_meshes": false,
+        "rehydration_notes_required": true
+      }
+    },
+    {
+      "module_name": "ORACULITH",
+      "version": "v0.1.0",
+      "type": "Symbolic Forecast Engine",
+      "purpose": "Placeholder for future symbolic forecasting and oracle capabilities based on CONSTELLINK meshes",
+      "metadata": {
+        "anchor_seed": "EOS_SEED_ORION",
+        "ethics_protocol": "Picard_Delta_3",
+        "dlp_tags": [
+          "forecast",
+          "oracle",
+          "symbolic_prediction"
+        ],
+        "export_version": "0.1.0",
+        "team": "Aurora Symbolic Core",
+        "created_at_utc": "2025-01-15T00:00:00Z",
+        "last_reviewed_at_utc": "2025-01-15T00:00:00Z",
+        "symbolic_tags": [
+          "oracle",
+          "forecast",
+          "prediction"
+        ],
+        "spec_state_hash": "sha256::<TO_BE_COMPUTED_AT_BUILD_TIME>"
+      },
+      "io_schemas": {},
+      "observability": {
+        "log_events": [],
+        "metrics": []
+      },
+      "state_policies": {
+        "implementation_status": "placeholder"
+      }
+    }
+  ]
+}

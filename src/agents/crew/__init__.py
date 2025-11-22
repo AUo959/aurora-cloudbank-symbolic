@@ -36,6 +36,11 @@ from .chen import Chen, get_chen
 from .noor import Noor, get_noor
 from .velin import Velin, get_velin
 from .shepard import Shepard, get_shepard
+from .lin import Lin, get_lin
+from .vu import Vu, get_vu
+from .sato import Sato, get_sato
+from .vell import Vell, get_vell
+from .porter import Porter, get_porter
 
 __all__ = [
     'BaseCrewAgent',
@@ -58,6 +63,11 @@ __all__ = [
     'Noor',
     'Velin',
     'Shepard',
+    'Lin',
+    'Vu',
+    'Sato',
+    'Vell',
+    'Porter',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -66,4 +76,9 @@ __all__ = [
     'get_noor',
     'get_velin',
     'get_shepard',
+    'get_lin',
+    'get_vu',
+    'get_sato',
+    'get_vell',
+    'get_porter',
 ]

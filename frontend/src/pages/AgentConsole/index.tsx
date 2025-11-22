@@ -1,0 +1,398 @@
+import { useState, useRef, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { auroraAPI } from '@/lib/api/aurora';
+import {
+  Send,
+  Bot,
+  User,
+  Database,
+  Brain,
+  Shield,
+  TrendingUp,
+  AlertTriangle,
+} from 'lucide-react';
+import type { AgentMessage, AgentResponse } from '@/types/aurora';
+import { formatDuration, getImportanceColor } from '@/lib/utils';
+import { toast } from 'sonner';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  metadata?: AgentResponse;
+}
+
+export default function AgentConsole() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content:
+        "Hello! I'm Aurora, your AI research partner. I have access to quantum memory, multi-model AI orchestration, and real-time compliance monitoring. How can I help you today?",
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = useMutation({
+    mutationFn: (message: AgentMessage) => auroraAPI.agent.chat(message),
+    onSuccess: (data: AgentResponse, variables) => {
+      const assistantMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date(),
+        metadata: data,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+      setSelectedMessage(assistantMessage);
+    },
+    onError: (error) => {
+      toast.error('Failed to send message', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      });
+    },
+  });
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+
+    sendMessage.mutate({
+      content: input,
+      role: 'user',
+      use_memory: true,
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div className="flex h-full">
+      {/* Chat Panel - Left */}
+      <div className="flex flex-1 flex-col border-r border-white/10">
+        {/* Header */}
+        <div className="border-b border-white/10 bg-black/20 p-6">
+          <h1 className="text-2xl font-display font-bold text-gradient flex items-center space-x-2">
+            <Bot className="h-6 w-6" />
+            <span>AI Agent Console</span>
+          </h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Chat with Aurora research partner • Full system transparency
+          </p>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 space-y-4 overflow-y-auto p-6">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              onClick={() => message.metadata && setSelectedMessage(message)}
+            >
+              <div
+                className={`flex max-w-[80%] space-x-3 ${message.role === 'assistant' ? 'cursor-pointer hover:opacity-80' : ''}`}
+              >
+                {message.role === 'assistant' && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-500/20">
+                    <Bot className="h-4 w-4 text-primary-400" />
+                  </div>
+                )}
+                <div
+                  className={`rounded-lg px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'bg-primary-500/20 text-white'
+                      : 'glass-morphism text-gray-200'
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
+                  {message.metadata && (
+                    <div className="mt-2 flex items-center space-x-3 text-xs text-gray-500">
+                      <span className="flex items-center space-x-1">
+                        <Brain className="h-3 w-3" />
+                        <span>{message.metadata.model_used}</span>
+                      </span>
+                      <span>•</span>
+                      <span>{formatDuration(message.metadata.generation_time_ms)}</span>
+                      {message.metadata.memory_retrieval && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center space-x-1">
+                            <Database className="h-3 w-3" />
+                            <span>{message.metadata.memory_retrieval.memories_retrieved} memories</span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {message.role === 'user' && (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-500/20">
+                    <User className="h-4 w-4 text-accent-400" />
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {sendMessage.isPending && (
+            <div className="flex justify-start">
+              <div className="flex space-x-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-500/20">
+                  <Bot className="h-4 w-4 text-primary-400 animate-pulse" />
+                </div>
+                <div className="glass-morphism rounded-lg px-4 py-3">
+                  <div className="flex space-x-2">
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500" />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:0.2s]" />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-primary-500 [animation-delay:0.4s]" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-white/10 bg-black/20 p-4">
+          <div className="flex space-x-2">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask Aurora anything..."
+              className="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+              rows={3}
+              disabled={sendMessage.isPending}
+            />
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || sendMessage.isPending}
+              variant="quantum"
+              size="icon"
+              className="h-auto"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* System Internals - Right */}
+      <div className="w-96 overflow-y-auto bg-black/20 p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-200">System Internals</h2>
+
+        {selectedMessage?.metadata ? (
+          <div className="space-y-4">
+            {/* Model Selection */}
+            <Card className="glass-morphism">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center space-x-2 text-sm">
+                  <Brain className="h-4 w-4 text-secondary-500" />
+                  <span>Model Selection</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Selected Model</span>
+                    <span className="text-sm font-mono text-secondary-400">
+                      {selectedMessage.metadata.model_used}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-400">Generation Time</span>
+                    <span className="text-sm font-mono text-accent-400">
+                      {formatDuration(selectedMessage.metadata.generation_time_ms)}
+                    </span>
+                  </div>
+                  {selectedMessage.metadata.token_usage && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Tokens Used</span>
+                      <span className="text-sm font-mono text-primary-400">
+                        {selectedMessage.metadata.token_usage.total_tokens}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Memory Retrieval */}
+            {selectedMessage.metadata.memory_retrieval && (
+              <Card className="glass-morphism">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center space-x-2 text-sm">
+                    <Database className="h-4 w-4 text-primary-500" />
+                    <span>Memory Retrieval</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Memories Retrieved</span>
+                      <span className="text-sm font-mono text-primary-400">
+                        {selectedMessage.metadata.memory_retrieval.memories_retrieved}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Retrieval Time</span>
+                      <span className="text-sm font-mono text-accent-400">
+                        {formatDuration(selectedMessage.metadata.memory_retrieval.retrieval_time_ms)}
+                      </span>
+                    </div>
+                    {selectedMessage.metadata.memory_retrieval.relevant_memories.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-gray-400">Top Memories:</p>
+                        {selectedMessage.metadata.memory_retrieval.relevant_memories
+                          .slice(0, 3)
+                          .map((mem) => (
+                            <div
+                              key={mem.id}
+                              className="rounded border border-white/10 bg-white/5 p-2"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-mono text-gray-400">
+                                  {mem.id.slice(0, 8)}...
+                                </span>
+                                <div
+                                  className="h-2 w-2 rounded-full"
+                                  style={{
+                                    backgroundColor: getImportanceColor(mem.importance),
+                                  }}
+                                />
+                              </div>
+                              <p className="mt-1 text-xs text-gray-500">
+                                {mem.tags.join(', ')}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Ethics & Compliance */}
+            {selectedMessage.metadata.ethics_score && (
+              <Card className="glass-morphism">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center space-x-2 text-sm">
+                    <Shield className="h-4 w-4 text-success" />
+                    <span>Ethics & Compliance</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Alignment Score</span>
+                        <span className="text-success font-semibold">
+                          {(selectedMessage.metadata.ethics_score.alignment_score * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-700">
+                        <div
+                          className="h-full bg-success transition-all"
+                          style={{
+                            width: `${selectedMessage.metadata.ethics_score.alignment_score * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-gray-400">Safety Score</span>
+                        <span className="text-primary-400 font-semibold">
+                          {(selectedMessage.metadata.ethics_score.safety_score * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-gray-700">
+                        <div
+                          className="h-full bg-primary-500 transition-all"
+                          style={{
+                            width: `${selectedMessage.metadata.ethics_score.safety_score * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Transparency Level</span>
+                      <span className="text-sm font-mono text-accent-400 capitalize">
+                        {selectedMessage.metadata.ethics_score.transparency_level}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Drift Detection */}
+            {selectedMessage.metadata.drift_detected !== undefined && (
+              <Card
+                className={`glass-morphism ${selectedMessage.metadata.drift_detected ? 'border-warning' : ''}`}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center space-x-2 text-sm">
+                    <TrendingUp
+                      className={`h-4 w-4 ${selectedMessage.metadata.drift_detected ? 'text-warning' : 'text-success'}`}
+                    />
+                    <span>Drift Detection</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedMessage.metadata.drift_detected ? (
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="h-4 w-4 text-warning" />
+                      <span className="text-sm text-warning">Behavioral drift detected</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <TrendingUp className="h-4 w-4 text-success" />
+                      <span className="text-sm text-success">Operating within baseline</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        ) : (
+          <div className="flex h-64 items-center justify-center">
+            <div className="text-center text-gray-500">
+              <Brain className="mx-auto h-12 w-12 opacity-50" />
+              <p className="mt-4 text-sm">Select a message to view system internals</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

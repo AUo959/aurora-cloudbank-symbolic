@@ -437,6 +437,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate HR System API routes: %s", e)
 
+# Include Crew Agents API routes (multi-agent system for Orion Station crew)
+try:
+    from modules.crew_agents.api import router as crew_agents_router
+    app.include_router(crew_agents_router)
+    logger.info("✅ Crew Agents API routes integrated successfully (multi-agent system)")
+except ImportError as e:
+    logger.warning("⚠️ Crew Agents system not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Crew Agents API routes: %s", e)
+
 # Include Cross-Repo Collaboration API routes
 try:
     from src.collab.api_routes import router as collab_router

@@ -46,6 +46,11 @@ from .feldman import Feldman, get_feldman
 from .patel import Patel, get_patel
 from .sorensen import Sorensen, get_sorensen
 from .vasquez import Vasquez, get_vasquez
+from .martinez import Martinez, get_martinez
+from .patel_ryan import PatelRyan, get_patel_ryan
+from .okada import Okada, get_okada
+from .zhao import Zhao, get_zhao
+from .menon import Menon, get_menon
 
 __all__ = [
     'BaseCrewAgent',
@@ -78,6 +83,11 @@ __all__ = [
     'Patel',
     'Sorensen',
     'Vasquez',
+    'Martinez',
+    'PatelRyan',
+    'Okada',
+    'Zhao',
+    'Menon',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -96,4 +106,9 @@ __all__ = [
     'get_patel',
     'get_sorensen',
     'get_vasquez',
+    'get_martinez',
+    'get_patel_ryan',
+    'get_okada',
+    'get_zhao',
+    'get_menon',
 ]

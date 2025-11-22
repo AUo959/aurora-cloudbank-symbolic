@@ -123,7 +123,7 @@ class ConstellinkMesh:
     def glyphcard(self) -> str:
         """Return a short human-readable summary of the mesh"""
         lines = [
-            f"═══ CONSTELLINK MESH GLYPHCARD ═══",
+            "═══ CONSTELLINK MESH GLYPHCARD ═══",
             f"Mesh ID: {self.mesh_id}",
             f"Anchor: {self.anchor_seed}",
             f"Ethics: {self.ethics_protocol}",
@@ -183,11 +183,16 @@ class ConstellinkRelay:
 
                 if not thread_tags_set.issubset(allowed_tags_set):
                     rejected_threads.append(thread)
+                    rejected_tags_list = list(thread_tags_set - allowed_tags_set)
+                    message = (
+                        f"Thread DLP tags {list(thread_tags_set)} not subset of "
+                        f"allowed {list(allowed_tags_set)}"
+                    )
                     divergent_truths.append({
                         "type": "dlp_rejection",
                         "thread_id": thread.thread_id,
-                        "message": f"Thread DLP tags {list(thread_tags_set)} not subset of allowed {list(allowed_tags_set)}",
-                        "rejected_tags": list(thread_tags_set - allowed_tags_set)
+                        "message": message,
+                        "rejected_tags": rejected_tags_list
                     })
                     continue
 

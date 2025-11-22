@@ -5,10 +5,10 @@ import json
 from pathlib import Path
 import sys
 
-# Add src to path
+# Add src to path  # noqa: E402
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from symbolic.constellink import (
+from symbolic.constellink import (  # noqa: E402
     ConstellinkRelay,
     MeshRequest,
     ThreadDescriptor,

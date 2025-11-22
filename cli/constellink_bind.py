@@ -16,10 +16,10 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-# Add parent directory to path for imports
+# Add parent directory to path for imports  # noqa: E402
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from symbolic.constellink import (
+from symbolic.constellink import (  # noqa: E402
     ConstellinkRelay,
     mesh_request_from_dict,
     DEFAULT_ANCHOR_SEED,

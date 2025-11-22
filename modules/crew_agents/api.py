@@ -53,6 +53,11 @@ from src.agents.crew import (
     get_okada,
     get_zhao,
     get_menon,
+    get_kale,
+    get_rivas,
+    get_koss,
+    get_kyros,
+    get_drev,
 )
 
 router = APIRouter(prefix="/api/crew", tags=["Crew Agents"])
@@ -81,6 +86,11 @@ get_patel_ryan()
 get_okada()
 get_zhao()
 get_menon()
+get_kale()
+get_rivas()
+get_koss()
+get_kyros()
+get_drev()
 
 
 # Pydantic models for requests/responses

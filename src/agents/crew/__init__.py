@@ -51,6 +51,11 @@ from .patel_ryan import PatelRyan, get_patel_ryan
 from .okada import Okada, get_okada
 from .zhao import Zhao, get_zhao
 from .menon import Menon, get_menon
+from .kale import Kale, get_kale
+from .rivas import Rivas, get_rivas
+from .koss import Koss, get_koss
+from .kyros import Kyros, get_kyros
+from .drev import Drev, get_drev
 
 __all__ = [
     'BaseCrewAgent',
@@ -88,6 +93,11 @@ __all__ = [
     'Okada',
     'Zhao',
     'Menon',
+    'Kale',
+    'Rivas',
+    'Koss',
+    'Kyros',
+    'Drev',
     'get_thorne',
     'get_markov',
     'get_roberts',
@@ -111,4 +121,9 @@ __all__ = [
     'get_okada',
     'get_zhao',
     'get_menon',
+    'get_kale',
+    'get_rivas',
+    'get_koss',
+    'get_kyros',
+    'get_drev',
 ]

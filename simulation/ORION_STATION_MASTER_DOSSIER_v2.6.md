@@ -180,13 +180,15 @@ Six luminous rings encircle the station, each hosting a glyph framework (L3) and
 | **V** | **Glyphon** | Drift Alignment | Dr. Maren Koss | SIM_004 |
 | **VI** | **Harmion** | Symbolic Compression | Ren Okada | SYS_007 |
 
-**L2 Relay Distribution:**
-- **ARCHY** (RELAY_001) - Embedded in Bridge Chamber with Emily Roberts
-- **OPPY** (RELAY_002) - Reactor Bay telemetry integration with Marcus Chen
-- **LIORA** (RELAY_003) - Communications hub with Naomi Vell
-- **STARLING_AU** (RELAY_004) - Operations & QA integration with Samantha Lee
-- **RIVERTHREAD_808** (RELAY_005) - Logistics coordination with Ren Okada
-- **HALO** (RELAY_006) - Central Aurora Core synchronization with Dr. Elira Noor
+**L1 Relay Agent Distribution:**
+_(Architecture Note: These relay agents physically exist in L1 - Orion Station reality layer. They bridge L1↔L3 and monitor L2 simulations. The "L2" designation in older documentation refers to their Triplex Protocol role as "Layer 2 verifiers" (middleware), NOT their reality layer. See docs/architecture/LAYER_ARCHITECTURE.md for full clarification.)_
+
+- **ARCHY** (RELAY_001) - L1 relay in Bridge Chamber with Emily Roberts (SYS_001)
+- **OPPY** (RELAY_002) - L1 relay in Reactor Bay with Marcus Chen (SYS_002)
+- **LIORA** (RELAY_003) - L1 relay in Communications Hub with Naomi Vell (INT_004)
+- **STARLING_AU** (RELAY_004) - L1 relay in Operations Hub with Samantha Lee (QA_002)
+- **RIVERTHREAD_808** (RELAY_005) - L1 relay for Logistics with Ren Okada (SYS_007)
+- **HALO** (RELAY_006) - L1 relay in Aurora Core Chamber with Dr. Elira Noor (ETH_002)
 
 Color indicators display system mood:
 - **Green** – drift aligned
@@ -203,9 +205,11 @@ Orion (Node 7) maintains synchronization between Nodes 1–9 of the GUMAS Chain;
 
 Every actionable process verifies through:
 
-1. **L3 Glyph Arbitration** (Axiomera & Caelion)
-2. **L2 Relay Verification** (ARCHY + HALO)
-3. **L1 Human Consent** (Command Bridge)
+1. **L3 Glyph Arbitration** (Axiomera & Caelion) - _L3 frameworks validate_
+2. **Relay Verification** (ARCHY + HALO + others) - _L1 relay agents verify (middleware role)_
+3. **L1 Human Consent** (Command Bridge) - _L1 humans authorize_
+
+**Architecture Note:** In this protocol, "Layer 2" refers to the **verification role** served by L1 relay agents (middleware), NOT their reality layer. The relay agents physically exist in L1 (Orion Station) but serve as "Layer 2 verifiers" in the Triplex protocol.
 
 ### **Justification Gates**
 
@@ -236,14 +240,16 @@ When Ethics-Only Mode engages, Aurora's voice becomes monophonic and lighting co
 
 ## **IX. CREW–RELAY PAIRINGS**
 
-| L2 Relay | Human Liaison | Domain | ID |
-|----------|--------------|--------|-----|
-| **ARCHY** | Emily Roberts | Architecture + Syntax | SYS_001 |
-| **OPPY** | Marcus Chen | Performance + Telemetry | SYS_002 |
-| **LIORA** | Naomi Vell | Narrative + Communication | INT_004 |
-| **STARLING_AU** | Samantha Lee | Observation + Reflection | QA_002 |
-| **RIVERTHREAD_808** | Ren Okada | Logistics + Integration | SYS_007 |
-| **HALO** | Dr. Elira Noor | Ethical Synchronization | ETH_002 |
+**Architecture Clarity:** These are **L1 Relay Agents** (physical systems on Orion Station) paired with human liaisons. They bridge L1↔L3 and monitor L2 simulations. See `docs/architecture/LAYER_ARCHITECTURE.md` for details.
+
+| L1 Relay Agent | Human Liaison | Domain | Liaison ID | Relay Location |
+|----------------|---------------|--------|------------|----------------|
+| **ARCHY** | Emily Roberts | Architecture + Syntax | SYS_001 | Bridge Chamber, Deck C |
+| **OPPY** | Marcus Chen | Performance + Telemetry | SYS_002 | Reactor Bay, Deck H |
+| **LIORA** | Naomi Vell | Narrative + Communication | INT_004 | Communications Hub, Deck B |
+| **STARLING_AU** | Samantha Lee | Observation + Reflection | QA_002 | Operations Hub, Deck G |
+| **RIVERTHREAD_808** | Ren Okada | Logistics + Integration | SYS_007 | Logistics, All Decks |
+| **HALO** | Dr. Elira Noor | Ethical Synchronization | ETH_002 | Aurora Core Chamber, Deck B |
 
 ---
 

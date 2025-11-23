@@ -43,8 +43,29 @@ def _composite_key_factory(strategy: str) -> Callable:
     """
     def key_func(request):  # pragma: no cover - simple deterministic key builder
         base_ip = get_remote_address(request)
+        # Add application instance isolation so new FastAPI app objects (e.g. in tests
+        # creating an isolated app with a shared global limiter) do not inherit prior
+        # request quota consumption. This ensures rate limit tests that build a fresh
+        # app get a clean counter space without leaking previous test state.
+        app_id_part = "noapp"
+        try:
+            if hasattr(request, "app"):
+                app_id_part = hex(id(request.app))
+        except Exception:
+            pass
+        # Per-app namespace UUID to avoid object id reuse across interpreter lifecycle
+        ns = None
+        try:
+            if hasattr(request, "app"):
+                ns = getattr(request.app.state, "rate_limit_namespace", None)
+                if ns is None:
+                    import uuid
+                    ns = uuid.uuid4().hex
+                    request.app.state.rate_limit_namespace = ns
+        except Exception:
+            ns = "nonamespace"
         if strategy != "ip_user":
-            return base_ip
+            return f"{base_ip}:{app_id_part}:{ns}"
         user_part = "anonymous"
         auth = request.headers.get("Authorization")
         if auth and auth.startswith("Bearer "):
@@ -57,7 +78,7 @@ def _composite_key_factory(strategy: str) -> Callable:
                     user_part = sub
             except Exception:
                 pass
-        return f"{base_ip}:{user_part}"
+        return f"{base_ip}:{user_part}:{app_id_part}:{ns}"
     return key_func
 
 
@@ -93,6 +114,45 @@ def get_rate_limiter() -> Limiter | object:
 
 # Global rate limiter instance (may be NoOpLimiter)
 limiter = get_rate_limiter()
+try:
+    # Attach strategy metadata for dynamic resets in tests or runtime config changes
+    setattr(limiter, "_strategy", os.getenv("RATE_LIMIT_KEY_STRATEGY", "ip"))
+except Exception:
+    pass
+
+
+def reset_rate_limiter():  # pragma: no cover - exercised via tests indirectly
+    """Reset global limiter if strategy/env changed; flush counters.
+
+    Intended for test isolation where multiple FastAPI apps share the module-level
+    limiter instance causing bucket leakage. If RATE_LIMIT_KEY_STRATEGY changes, recreate
+    the limiter with a fresh key function and attempt to flush any existing storage.
+    Always attempts storage flush to clear prior counters.
+    """
+    global limiter
+    current_strategy = os.getenv("RATE_LIMIT_KEY_STRATEGY", "ip")
+    existing_strategy = getattr(limiter, "_strategy", None)
+    # Flush existing storage to clear counters regardless of strategy
+    # Attempt deep storage clear for in-memory limits backend
+    try:
+        if hasattr(limiter, "_storage"):
+            for method in ("clear", "reset", "clear_sliding_window"):
+                fn = getattr(limiter._storage, method, None)
+                if callable(fn):
+                    try:
+                        fn()
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+    if existing_strategy != current_strategy:
+        # Recreate limiter with new strategy key function
+        limiter = get_rate_limiter()
+        try:
+            setattr(limiter, "_strategy", current_strategy)
+        except Exception:
+            pass
+    return limiter
 
 
 # ================================
@@ -240,6 +300,7 @@ ALLOWED_WS_TOOLS = {
 
 # Set of allowed tool names for quick membership checks
 ALLOWED_WS_TOOL_NAMES = set(ALLOWED_WS_TOOLS.keys())
+
 
 def generate_ws_token(client_id: str) -> str:
     """

@@ -125,13 +125,20 @@ class Lin(BaseCrewAgent):
     async def _manage_simulation_operations(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Manage L2 GUMAS simulation operations."""
         simulation_scope = context.get('scope', 'standard_research')
+<<<<<<< HEAD
         _parameters = context.get('parameters', {})  # unused; retained for future extension
+=======
+        parameters = context.get('parameters', {})
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
 
         return {
             'task': 'simulation_operations',
             'agent': 'Lin',
             'simulation_scope': simulation_scope,
+<<<<<<< HEAD
             'parameters_received': bool(_parameters),
+=======
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
             'operation_status': 'active',
             'gumas_integration': {
                 'layer': 'L2_simulation_space',

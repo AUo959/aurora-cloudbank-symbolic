@@ -29,10 +29,9 @@ stable extension points without asserting unimplemented capabilities.
 
 Naming Convention: Agents use surnames (e.g., Thorne, Markov, Roberts)
 """
-
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Set
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 import hashlib
 import logging
@@ -99,25 +98,25 @@ class CollaborationRecord:
 
 @dataclass
 class AgentTask:
-        """Active task being processed by agent.
+    """Active task being processed by agent.
 
-        Minimal DLP + anchor placeholders added:
-            - context_tag: lightweight tag identifying operation
-            - symbolic_hash: sha256 hash for integrity (placeholder)
-            - t1_state / srb_resolution: anchor snapshot at task start
-        """
-        task_id: str
-        task_type: str
-        priority: str
-        context: Dict[str, Any]
-        status: str  # "pending", "in_progress", "completed", "failed"
-        started_at: Optional[str] = None
-        completed_at: Optional[str] = None
-        result: Optional[Dict[str, Any]] = None
-        context_tag: Optional[str] = None
-        symbolic_hash: Optional[str] = None
-        t1_state: Optional[int] = None
-        srb_resolution: Optional[int] = None
+    Minimal DLP + anchor placeholders added:
+        - context_tag: lightweight tag identifying operation
+        - symbolic_hash: sha256 hash for integrity (placeholder)
+        - t1_state / srb_resolution: anchor snapshot at task start
+    """
+    task_id: str
+    task_type: str
+    priority: str
+    context: Dict[str, Any]
+    status: str  # "pending", "in_progress", "completed", "failed"
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    result: Optional[Dict[str, Any]] = None
+    context_tag: Optional[str] = None
+    symbolic_hash: Optional[str] = None
+    t1_state: Optional[int] = None
+    srb_resolution: Optional[int] = None
 
 
 class BaseCrewAgent:
@@ -230,15 +229,14 @@ class BaseCrewAgent:
         context = request.get('context', {})
         priority = request.get('priority', 'medium')
 
-        # Generate minimal DLP context tag & symbolic hash (placeholder implementation)
-        context_tag = f"{self.surname.lower()}_{task_type}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        symbolic_source = f"{context_tag}|{priority}|{repr(sorted(context.items()))}"
-        symbolic_hash = hashlib.sha256(symbolic_source.encode()).hexdigest()
+    # Generate minimal DLP context tag & symbolic hash (placeholder implementation)
+    context_tag = f"{self.surname.lower()}_{task_type}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    symbolic_source = f"{context_tag}|{priority}|{repr(sorted(context.items()))}"
+    symbolic_hash = hashlib.sha256(symbolic_source.encode()).hexdigest()
 
-        # Advance placeholder anchors (simple deterministic progression)
-        self._advance_t1(len(symbolic_source))
-        self._resolve_srb(task_type or "unknown_task")
-
+    # Advance placeholder anchors (simple deterministic progression)
+    self._advance_t1(len(symbolic_source))
+    self._resolve_srb(task_type or "unknown_task")
         # Create task record
         task = AgentTask(
             task_id=f"{self.surname}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
@@ -249,73 +247,78 @@ class BaseCrewAgent:
             started_at=datetime.now().isoformat(),
             context_tag=context_tag,
             symbolic_hash=symbolic_hash,
-            t1_state=self.t1_state,
-            srb_resolution=self.srb_resolution
-        )
+            task_type = request.get('task_type')
+            context = request.get('context', {})
+            priority = request.get('priority', 'medium')
 
-        self.active_tasks.append(task)
-        self.status = "busy"
+            # Generate minimal DLP context tag & symbolic hash (placeholder implementation)
+            context_tag = f"{self.surname.lower()}_{task_type}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            symbolic_source = f"{context_tag}|{priority}|{repr(sorted(context.items()))}"
+            symbolic_hash = hashlib.sha256(symbolic_source.encode()).hexdigest()
 
-        try:
-            # Subclasses implement specific task processing
-            result = await self._execute_task(task_type, context)
+            # Advance placeholder anchors (simple deterministic progression)
+            self._advance_t1(len(symbolic_source))
+            self._resolve_srb(task_type or "unknown_task")
 
-            task.status = "completed"
-            task.completed_at = datetime.now().isoformat()
-            task.result = result
+            # Create task record
+            task = AgentTask(
+                task_id=f"{self.surname}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                task_type=task_type,
+                priority=priority,
+                context=context,
+                status="in_progress",
+                started_at=datetime.now().isoformat(),
+                context_tag=context_tag,
+                symbolic_hash=symbolic_hash,
+                t1_state=self.t1_state,
+                srb_resolution=self.srb_resolution
+            )
 
-            self.stats['tasks_completed'] += 1
+            self.active_tasks.append(task)
+            self.status = "busy"
 
-            return {
-                'success': True,
-                'agent': self.surname,
-                'agent_id': self.agent_id,
-                'task_id': task.task_id,
-                'task_type': task_type,
-                'result': result,
-                'completed_at': task.completed_at,
-                'context_tag': task.context_tag,
-                'symbolic_hash': task.symbolic_hash,
-                't1_state': task.t1_state,
-                'srb_resolution': task.srb_resolution
-            }
+            try:
+                result = await self._execute_task(task_type, context)
 
-        except Exception as e:
-            task.status = "failed"
-            task.completed_at = datetime.now().isoformat()
-            task.result = {'error': str(e)}
+                task.status = "completed"
+                task.completed_at = datetime.now().isoformat()
+                task.result = result
+                self.stats['tasks_completed'] += 1
 
-            self.stats['tasks_failed'] += 1
-
-            logger.error(f"❌ Task failed for {self.surname}: {e}")
-
-            return {
-                'success': False,
-                'agent': self.surname,
-                'agent_id': self.agent_id,
-                'task_id': task.task_id,
-                'error': str(e),
-                'context_tag': task.context_tag,
-                'symbolic_hash': task.symbolic_hash,
-                't1_state': task.t1_state,
-                'srb_resolution': task.srb_resolution
-            }
-        finally:
-            self.status = "ready"
-            self.active_tasks.remove(task)
-
-    async def _execute_task(self, task_type: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute specific task type. Subclasses must override this.
-
-        Args:
-            task_type: Type of task to execute
-            context: Task context and parameters
-
-        Returns:
-            Task execution result
-        """
-        raise NotImplementedError(
+                return {
+                    'success': True,
+                    'agent': self.surname,
+                    'agent_id': self.agent_id,
+                    'task_id': task.task_id,
+                    'task_type': task_type,
+                    'result': result,
+                    'completed_at': task.completed_at,
+                    'context_tag': task.context_tag,
+                    'symbolic_hash': task.symbolic_hash,
+                    't1_state': task.t1_state,
+                    'srb_resolution': task.srb_resolution
+                }
+            except Exception as e:
+                task.status = "failed"
+                task.completed_at = datetime.now().isoformat()
+                task.result = {'error': str(e)}
+                self.stats['tasks_failed'] += 1
+                logger.error("Task failed for %s: %s", self.surname, e)
+                return {
+                    'success': False,
+                    'agent': self.surname,
+                    'agent_id': self.agent_id,
+                    'task_id': task.task_id,
+                    'error': str(e),
+                    'context_tag': task.context_tag,
+                    'symbolic_hash': task.symbolic_hash,
+                    't1_state': task.t1_state,
+                    'srb_resolution': task.srb_resolution
+                }
+            finally:
+                self.status = "ready"
+                if task in self.active_tasks:
+                    self.active_tasks.remove(task)
             f"{self.__class__.__name__} must implement _execute_task()"
         )
 
@@ -418,6 +421,9 @@ class BaseCrewAgent:
             'uptime_hours': uptime / 3600,
             't1_state': self.t1_state,
             'srb_resolution': self.srb_resolution
+            'uptime_hours': uptime / 3600,
+            't1_state': self.t1_state,
+            'srb_resolution': self.srb_resolution
         }
 
     # Placeholder anchor progression utilities
@@ -430,7 +436,6 @@ class BaseCrewAgent:
         if not boundary:
             boundary = "undefined"
         self.srb_resolution = int(hashlib.sha256(boundary.encode()).hexdigest(), 16) % 100000
-
     def check_clearance(self, required_clearance: str) -> bool:
         """
         Check if agent has sufficient clearance for an operation.

@@ -124,14 +124,21 @@ class Qin(BaseCrewAgent):
 
     async def _compile_nli(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Compile natural language to executable code."""
+<<<<<<< HEAD
         _natural_language_input = context.get('input', '')  # retained for future semantic diff
+=======
+        natural_language_input = context.get('input', '')
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
         target_language = context.get('target', 'python')
 
         return {
             'task': 'nli_compilation',
             'agent': 'Qin',
             'input_language': 'natural_language',
+<<<<<<< HEAD
             'input_present': bool(_natural_language_input),
+=======
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
             'target_language': target_language,
             'compilation_status': 'success',
             'generated_code': {
@@ -199,7 +206,11 @@ class Qin(BaseCrewAgent):
 
     async def _analyze_ethics(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze semantic structures for ethical implications."""
+<<<<<<< HEAD
         _text_input = context.get('text', '')  # retained for future semantic risk heuristics
+=======
+        text_input = context.get('text', '')
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
         analysis_depth = context.get('depth', 'comprehensive')
 
         return {
@@ -208,7 +219,10 @@ class Qin(BaseCrewAgent):
             'analysis_depth': analysis_depth,
             'ethical_framework': 'Picard_Delta_3',
             'semantic_analysis': {
+<<<<<<< HEAD
                 'input_present': bool(_text_input),
+=======
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
                 'potentially_harmful_patterns': 0,
                 'bias_indicators': 1,
                 'transparency_score': 0.93,
@@ -225,14 +239,21 @@ class Qin(BaseCrewAgent):
 
     async def _integrate_narrative(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Integrate narrative structures with executable code."""
+<<<<<<< HEAD
         _narrative_input = context.get('narrative', '')  # retained for future narrative fidelity checks
+=======
+        narrative_input = context.get('narrative', '')
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
         code_target = context.get('code_target', 'simulation_script')
 
         return {
             'task': 'narrative_integration',
             'agent': 'Qin',
             'narrative_structure': 'analyzed',
+<<<<<<< HEAD
             'narrative_present': bool(_narrative_input),
+=======
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
             'code_target': code_target,
             'integration_status': 'completed',
             'narrative_elements_preserved': {

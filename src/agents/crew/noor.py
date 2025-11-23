@@ -191,13 +191,20 @@ class Noor(BaseCrewAgent):
 
     async def _validate_moral_reasoning(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Validate moral reasoning in decisions."""
+<<<<<<< HEAD
         _decision_context = context.get('decision')  # retained for future extended validation
+=======
+        decision_context = context.get('decision')
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
 
         return {
             'task': 'moral_validation',
             'agent': 'Noor',
             'decision_analyzed': True,
+<<<<<<< HEAD
             'decision_context_provided': _decision_context is not None,
+=======
+>>>>>>> 9b8bfa46 (Crew Agent Framework (Part 2/3) – Orion Station)
             'moral_framework': 'Picard_Delta_3',
             'validation_results': {
                 'consequentialist_analysis': 'acceptable',

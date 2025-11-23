@@ -1,6 +1,6 @@
 # Synergy Dashboard Module
 
-**Last Updated:** 2025-11-20 05:25:40 UTC
+**Last Updated:** 2025-11-23 00:26:59 UTC
 
 ---
 
@@ -8,7 +8,7 @@
 
 This dashboard provides automated tracking of component registry, dependencies, and integration points.
 
-- **Total Python Files Scanned:** 749
+- **Total Python Files Scanned:** 750
 - **Registered Components:** 6
 - **Unique Dependencies:** 394
 
@@ -33,21 +33,21 @@ This dashboard provides automated tracking of component registry, dependencies, 
 
 | Dependency | Usage Frequency (stub) | Priority |
 |------------|------------------------|----------|
-| typing | 367 | High |
-| datetime | 319 | High |
+| typing | 368 | High |
+| datetime | 320 | High |
 | pathlib | 300 | High |
-| logging | 287 | High |
-| json | 249 | High |
-| sys | 163 | High |
-| dataclasses | 149 | High |
+| logging | 288 | High |
+| json | 250 | High |
+| sys | 164 | High |
+| dataclasses | 150 | High |
 | os | 136 | High |
 | subprocess | 128 | High |
 | hashlib | 101 | High |
-| asyncio | 98 | High |
+| asyncio | 99 | High |
 | pytest | 93 | High |
 | enum | 86 | High |
 | time | 76 | High |
-| re | 62 | High |
+| argparse | 63 | High |
 
 ---
 

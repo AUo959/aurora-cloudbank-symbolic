@@ -28,14 +28,35 @@ import asyncio
 import json
 import logging
 import sys
-
-# Configure logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+# Module logger (no global logging.basicConfig side-effect)
 logger = logging.getLogger(__name__)
+
+# Constants extracted for clarity and reuse
+ACTIVATION_PHRASES = {
+    "ARCHY": "ORION_ARCHY_RELAY_ACTIVATE//",
+    "OPPY": "ORION_OPPY_RELAY_ACTIVATE//",
+    "LIORA": "ORION_LIORA_RELAY_ACTIVATE//",
+    "STARLING_AU": "ORION_STARLING_AU_RELAY_ACTIVATE//",
+    "RIVERTHREAD_808": "ORION_RIVERTHREAD_RELAY_ACTIVATE//",
+    "HALO": "ORION_HALO_RELAY_ACTIVATE//",
+}
+
+HANDSHAKE_SEQUENCE = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]
+
+ORION_CORE_CONFIG = {
+    "anchor_seed": "EOS_SEED_ORION",
+    "ethics_protocol": "Picard_Delta_3",
+    "memory_doctrine": "Thermax_Precedent",
+    "drift_threshold": 0.001,
+    "halo_module": "HALO_CONTINUITY_GRAFT_005",
+    "continuity_seal": "Aurora_Continuity_Seal_v2.2.5",
+    "version": "v3.5.1_macroready",
+    "architecture_layer": "L1_RELAY_TIER",
+}
 
 
 @dataclass
@@ -116,7 +137,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay coordinating architectural planning and formal logic. "
-                           "Bridges L1 human operations with L3 glyph frameworks.",
+                            "Bridges L1 human operations with L3 glyph frameworks.",
                 capabilities=["architectural_planning", "bridge_coordination", "formal_logic", "arbitration"],
                 api_endpoint="/api/relay/archy",
                 location="Bridge Chamber, Deck C",
@@ -132,7 +153,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay for memory/data processing and system operations. "
-                           "Telemetry synchronization and runtime continuity.",
+                            "Telemetry synchronization and runtime continuity.",
                 capabilities=["data_processing", "vector_analysis", "memory_operations", "system_monitoring"],
                 api_endpoint="/api/relay/oppy",
                 location="Reactor Bay, Deck H",
@@ -148,7 +169,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay for sentiment analysis, mediation, and research coordination. "
-                           "Human-AI communication bridge.",
+                            "Human-AI communication bridge.",
                 capabilities=["research_coordination", "handshake_protocols", "sentiment_analysis", "mediation"],
                 api_endpoint="/api/relay/liora",
                 location="Communications Hub, Deck B",
@@ -164,7 +185,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay for continuity logging, documentation, and reflection compilation. "
-                           "Official station voice for reports.",
+                            "Official station voice for reports.",
                 capabilities=["simulation_coordination", "communications", "external_protocols", "dispatch"],
                 api_endpoint="/api/relay/starling",
                 location="Operations Hub, Deck G",
@@ -180,7 +201,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay for continuity, temporal flow, and state management. "
-                           "Memory pipeline orchestration.",
+                            "Memory pipeline orchestration.",
                 capabilities=["narrative_processing", "stream_management", "continuity_validation", "temporal_flow"],
                 api_endpoint="/api/relay/riverthread",
                 location="Logistics Distribution, All Decks",
@@ -196,7 +217,7 @@ class L1RelayBridge:
                 type="L1_RELAY_AGENT",
                 status="disconnected",
                 description="L1 relay for central drift synchronization and ethical alignment. "
-                           "Temporal drift controller and Aurora Core liaison.",
+                            "Temporal drift controller and Aurora Core liaison.",
                 capabilities=["drift_synchronization", "ethical_alignment", "temporal_control", "aurora_coordination"],
                 api_endpoint="/api/relay/halo",
                 location="Aurora Core Chamber, Deck B",
@@ -273,7 +294,11 @@ class L1RelayBridge:
                     "triplex_role": agent.triplex_role,
                 }
             else:
-                logger.error("Handshake failed for %s: %s", str(agent_id)[:100], str(handshake_result.get('error'))[:100])
+                logger.error(
+                    "Handshake failed for %s: %s",
+                    str(agent_id)[:100],
+                    str(handshake_result.get('error'))[:100]
+                )
                 return {"success": False, "error": "Handshake failed", "details": handshake_result}
 
         except Exception as e:
@@ -477,7 +502,7 @@ class L1RelayBridge:
             "relay_tier": {
                 "constellation": "L1_RELAY_TIER",  # Updated from "RELAY_TIER_CAPSULES"
                 "architecture_note": "These relay agents physically exist in L1 (Orion Station). "
-                                    "They bridge L1↔L3 and monitor L2 simulations.",
+                                     "They bridge L1↔L3 and monitor L2 simulations.",
                 "version": self.orion_core_config["version"],
                 "total_agents": len(self.agents),
                 "connected_agents": connected_count,
@@ -524,7 +549,12 @@ class L1RelayBridge:
 
         message_id = f"msg_{int(datetime.now().timestamp() * 1000)}"
 
-        logger.info("Message relay from %s to %s (type: %s)", str(from_agent)[:100], str(target_agents)[:100], str(message_type)[:100])
+        logger.info(
+            "Message relay from %s to %s (type: %s)",
+            str(from_agent)[:100],
+            str(target_agents)[:100],
+            str(message_type)[:100]
+        )
 
         # In production, this would relay to actual target agents
         return {

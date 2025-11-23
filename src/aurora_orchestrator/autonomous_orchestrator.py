@@ -243,8 +243,8 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                # Cooperative cancellation swallowed for public API ergonomics
-                self.logger.info("🛑 Orchestration task cancelled")
+                # Graceful shutdown: swallow cooperative cancellation for public API ergonomics
+                self.logger.info("🛑 Orchestration task cancelled (graceful shutdown)")
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)
@@ -256,19 +256,12 @@ class AuroraOrchestrator:
         ).total_seconds()
 
         self.logger.info(
-            f"✅ Aurora orchestration stopped - "
-            f"Uptime: {uptime/3600:.2f}h, "
-            f"Loops: {self.stats['total_loops']}, "
-            f"Decisions: {self.stats['total_decisions']}, "
-            f"Optimizations: {self.stats['total_optimizations']}"
+            "✅ Aurora orchestration stopped - Uptime: %.2fh, Loops: %d, Decisions: %d, Optimizations: %d",
+            uptime / 3600,
+            self.stats['total_loops'],
+            self.stats['total_decisions'],
+            self.stats['total_optimizations']
         )
-
-    async def _initialize_components(self):
-        """Initialize orchestration components"""
-        self.logger.info("🔧 Initializing orchestration components...")
-
-        # Import and initialize components
-        # Note: These will be implemented in separate files
         try:
             from src.aurora_orchestrator.system_observer import SystemObserver
             self.system_observer = SystemObserver(config=self.config)
@@ -337,17 +330,16 @@ class AuroraOrchestrator:
                 self.logger.info("🛑 Orchestration loop cancelled")
                 raise
             except Exception as e:
-                self.logger.error(f"❌ Error in orchestration loop: {e}", exc_info=True)
-                self.stats['consecutive_failures'] += 1
-
-                # Enter safe mode if too many failures
-                if (self.config.safe_mode_on_repeated_failures
-                    and self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode):
+                # Failure handling and optional safe mode escalation
+                self.stats['consecutive_failures'] = self.stats.get('consecutive_failures', 0) + 1
+                self.logger.error("❌ Orchestration loop error: %s", e)
+                if (
+                    self.config.safe_mode_on_repeated_failures and
+                    self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode
+                ):
                     self.logger.critical("🚨 Too many failures - entering SAFE MODE")
                     await self._enter_safe_mode()
-
-                # Brief sleep before retry
-                await asyncio.sleep(10)
+                await asyncio.sleep(10)  # Backoff before retry
 
         self.logger.info("🌙 Aurora's consciousness loop ended")
 

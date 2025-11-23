@@ -49,6 +49,72 @@ from src.middleware.fastapi_security import (
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 import os
+from fastapi import APIRouter
+from src.security.oauth2 import get_current_active_user, User  # authentication dependency
+from src.agents.crew.base_agent import get_crew_agent, get_all_crew_agents
+
+# Crew Agents API Router (Phase 3 minimal implementation)
+crew_router = APIRouter(prefix="/api/crew", tags=["crew"])
+
+
+@crew_router.get("/all")
+async def list_all_crew(user: User = Depends(get_current_active_user)):
+    """List all registered crew agents with condensed status.
+
+    Security: Requires active user (OAuth2 token).
+    """
+    agents = get_all_crew_agents().values()
+    return {
+        "count": len(list(agents)),
+        "agents": [
+            {
+                "surname": a.surname,
+                "role": a.role.value,
+                "status": a.status,
+                "clearance": a.clearance.value,
+                "t1_state": a.t1_state,
+                "srb_resolution": a.srb_resolution,
+            }
+            for a in agents
+        ],
+    }
+
+
+@crew_router.post("/{surname}/process")
+async def process_agent_task(
+    surname: str,
+    task: Dict[str, Any],
+    user: User = Depends(get_current_active_user),
+):
+    """Process a task with a specific crew agent.
+
+    Body: {"task_type": str, "context": {}, "priority": str}
+    Returns task execution including DLP placeholders.
+    """
+    agent = get_crew_agent(surname)
+    if not agent:
+        raise HTTPException(status_code=404, detail=f"Crew agent '{surname}' not found")
+    result = await agent.process_request(task)
+    return result
+
+
+@crew_router.post("/collaborate")
+async def collaborate_agents(
+    payload: Dict[str, Any],
+    user: User = Depends(get_current_active_user),
+):
+    """Collaborate two agents on a task.
+
+    Body: {"primary": "Thorne", "secondary": "Markov", "task": {...}}
+    Returns collaboration result combining contributions.
+    """
+    primary = get_crew_agent(payload.get("primary"))
+    secondary = get_crew_agent(payload.get("secondary"))
+    if not primary or not secondary:
+        raise HTTPException(status_code=404, detail="One or both agents not found")
+    task_def = payload.get("task", {})
+    result = await primary.collaborate_with(secondary, task_def)
+    return result
 
 # Import telemetry and observability
 from src.observability import get_telemetry, get_r2_telemetry
@@ -269,7 +335,11 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):  # pragm
     headers = {"Retry-After": str(retry_after)}
     if token_limit:
         headers["X-RateLimit-Limit"] = token_limit
-    return JSONResponse(status_code=429, content={"detail": "Rate limit exceeded", "path": request.url.path}, headers=headers)
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Rate limit exceeded", "path": request.url.path},
+        headers=headers,
+    )
 
 
 # Fallback header injection if exception handler not applied (SlowAPI may short-circuit in some contexts)
@@ -546,6 +616,9 @@ except Exception as e:
 try:
     from api.r2_telemetry_routes import router as r2_telemetry_router
     app.include_router(r2_telemetry_router)
+
+    # Crew Agents router inclusion (Phase 3)
+    app.include_router(crew_router)
     logger.info("✅ R2 Telemetry API routes integrated successfully")
 except ImportError as e:
     logger.warning("⚠️ R2 Telemetry routes not available: %s", e)

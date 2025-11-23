@@ -1,23 +1,23 @@
 import pytest
 
-from src.agents.crew.thorne import get_thorne
-from src.agents.crew.markov import get_markov
+from src.agents.crew.noor import get_noor
+from src.agents.crew.lin import get_lin
 
 
 @pytest.mark.unit
 def test_clearance_equality():
-    thorne = get_thorne()
-    # Thorne should have its own clearance level satisfied
-    assert thorne.check_clearance(thorne.clearance.value) is True
+    noor = get_noor()
+    # Noor should have its own clearance level satisfied
+    assert noor.check_clearance(noor.clearance.value) is True
 
 @pytest.mark.unit
 def test_clearance_below_required():
-    markov = get_markov()
-    # Markov (security) should satisfy a lower technical clearance
-    assert markov.check_clearance("L3_SECURITY") is True
+    lin_agent = get_lin()
+    # Lin (L3_RESEARCH) should satisfy another L3-level clearance requirement (security)
+    assert lin_agent.check_clearance("L3_SECURITY") is True
 
 @pytest.mark.unit
 def test_clearance_above_required():
-    markov = get_markov()
-    # Markov should NOT satisfy highest command level
-    assert markov.check_clearance("L5_COMMAND") is False
+    lin_agent = get_lin()
+    # Lin should NOT satisfy highest command level
+    assert lin_agent.check_clearance("L5_COMMAND") is False

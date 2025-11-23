@@ -28,7 +28,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from src.core.time_utils import utc_z
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -139,7 +139,7 @@ class VectorChain:
             "name": self.name,
             "topology": self.topology.value,
             "vectors": [v.to_dict() for v in self.vectors],
-            "links": [l.to_dict() for l in self.links],
+            "links": [link.to_dict() for link in self.links],
             "created_at": self.created_at,
             "metadata": self.metadata
         }
@@ -594,7 +594,7 @@ class VectorCapsulePackager:
             "ethics_protocol": "Picard_Delta_3",
             "trust_anchor": "SN1-AS3-TRUSTED",
             "vector_engine": "DriftConcord::Vector",
-            "created_at": datetime.utcnow().isoformat() + "Z",
+            "created_at": utc_z(),
             "chain": chain.to_dict(),
             "deployment": {
                 "target_constellation": system_name,
@@ -639,7 +639,7 @@ class VectorCapsulePackager:
         registry = {
             "registry_version": "2.0.0",
             "registry_id": f"registry::{uuid.uuid4().hex[:12]}",
-            "created_at": datetime.utcnow().isoformat() + "Z",
+            "created_at": utc_z(),
             "capsules": list(capsules_to_include.keys()),
             "statistics": {
                 "total_capsules": len(capsules_to_include),
@@ -694,7 +694,7 @@ class VectorCapsulePackager:
         """Export complete system manifest"""
         return {
             "version": "2.0.0",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": utc_z(),
             "metrics": {
                 "capsules_created": len(self.capsules),
                 "total_vectors": sum(

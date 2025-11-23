@@ -243,8 +243,15 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                # Orchestration loop already re-raises internally; swallow here for public API ergonomics
-                self.logger.info("🛑 Orchestration task cancelled")
+                # Intentional swallow:
+                #   The internal loop re-raises CancelledError to ensure cooperative cancellation semantics
+                #   for any awaiting callers. At the public API boundary (stop_orchestration) we convert
+                #   that into a graceful shutdown so external service managers don't treat it as an error.
+                # Risk Mitigation:
+                #   - Prevents noisy stack traces during routine shutdowns
+                #   - Maintains clear lifecycle logging without masking real exceptions
+                #   - Safe because no cleanup depends on the exception propagation beyond this point
+                self.logger.info("🛑 Orchestration task cancelled (swallowed for API ergonomics)")
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)

@@ -10,11 +10,15 @@ DLP Tag: ENTITY_MANAGEMENT
 
 import json
 import hashlib
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from enum import Enum
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
+
 
 class EntityType(Enum):
     """Types of entities in the NEXUS mesh"""
@@ -25,6 +29,7 @@ class EntityType(Enum):
     SYMBOLIC_ANCHOR = "symbolic_anchor"
     MEMORY_NODE = "memory_node"
 
+ 
 class EntityState(Enum):
     """Entity lifecycle states"""
     INITIALIZING = "initializing"
@@ -34,6 +39,7 @@ class EntityState(Enum):
     SUSPENDED = "suspended"
     TERMINATED = "terminated"
 
+ 
 @dataclass
 class NexusEntity:
     """Represents an entity in the NEXUS consciousness mesh"""
@@ -82,6 +88,7 @@ class NexusEntity:
             dlp_tag=data.get("dlp_tag", "GENERAL")
         )
 
+ 
 class EntityManager:
     """
     Manages entities in the NEXUS consciousness mesh
@@ -99,8 +106,8 @@ class EntityManager:
         # Load existing entities
         self._load_entities()
     
-    def spawn_entity(self, 
-                     entity_type: EntityType, 
+    def spawn_entity(self,
+                     entity_type: EntityType,
                      capabilities: List[str] = None,
                      dlp_tag: str = "GENERAL",
                      metadata: Dict[str, Any] = None) -> NexusEntity:
@@ -139,7 +146,7 @@ class EntityManager:
         """Retrieve entity by ID"""
         return self.entities.get(entity_id)
     
-    def list_entities(self, 
+    def list_entities(self,
                       entity_type: Optional[EntityType] = None,
                       state: Optional[EntityState] = None) -> List[NexusEntity]:
         """List entities with optional filtering"""
@@ -313,14 +320,14 @@ class EntityManager:
                     ).hexdigest()
                     
                     if expected_seal != actual_seal:
-                        print(f"Warning: Entity {entity_file.name} has invalid seal")
+                        logger.warning("Entity %s has invalid seal", entity_file.name)
                         continue
                 
                 entity = NexusEntity.from_dict(entity_data)
                 self.entities[entity.entity_id] = entity
                 
             except Exception as e:
-                print(f"Error loading entity {entity_file.name}: {e}")
+                logger.error("Error loading entity %s: %s", entity_file.name, e)
         
         # Load entanglement registry
         self._load_entanglement_registry()
@@ -337,7 +344,7 @@ class EntityManager:
             try:
                 self.entanglement_registry = json.loads(registry_path.read_text())
             except Exception as e:
-                print(f"Error loading entanglement registry: {e}")
+                logger.error("Error loading entanglement registry: %s", e)
     
     def _log_state_transition(self, entity_id: str, old_state: EntityState, new_state: EntityState):
         """Log entity state transition"""

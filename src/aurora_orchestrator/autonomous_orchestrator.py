@@ -243,15 +243,8 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
-                # Intentional swallow:
-                #   The internal loop re-raises CancelledError to ensure cooperative cancellation semantics
-                #   for any awaiting callers. At the public API boundary (stop_orchestration) we convert
-                #   that into a graceful shutdown so external service managers don't treat it as an error.
-                # Risk Mitigation:
-                #   - Prevents noisy stack traces during routine shutdowns
-                #   - Maintains clear lifecycle logging without masking real exceptions
-                #   - Safe because no cleanup depends on the exception propagation beyond this point
-                self.logger.info("🛑 Orchestration task cancelled (swallowed for API ergonomics)")
+                # Cooperative cancellation swallowed for public API ergonomics
+                self.logger.info("🛑 Orchestration task cancelled")
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)
@@ -348,8 +341,8 @@ class AuroraOrchestrator:
                 self.stats['consecutive_failures'] += 1
 
                 # Enter safe mode if too many failures
-                if (self.config.safe_mode_on_repeated_failures and
-                    self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode):
+                if (self.config.safe_mode_on_repeated_failures
+                    and self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode):
                     self.logger.critical("🚨 Too many failures - entering SAFE MODE")
                     await self._enter_safe_mode()
 
@@ -826,14 +819,14 @@ if __name__ == "__main__":
             elif command == "status":
                 status = orchestrator.get_status()
                 print("\n🌌 Aurora Orchestrator Status")
-                print(f"Running: {status['orchestrator']['running']}")
-                print(f"Mode: {status['orchestrator']['mode']}")
-                print(f"Loops: {status['statistics']['total_loops']}")
-                print(f"Decisions: {status['statistics']['total_decisions']}")
-                print(f"Optimizations: {status['statistics']['total_optimizations']}")
+                orchestrator.logger.info("Running: %s", status['orchestrator']['running'])
+                orchestrator.logger.info("Mode: %s", status['orchestrator']['mode'])
+                orchestrator.logger.info("Loops: %d", status['statistics']['total_loops'])
+                orchestrator.logger.info("Decisions: %d", status['statistics']['total_decisions'])
+                orchestrator.logger.info("Optimizations: %d", status['statistics']['total_optimizations'])
 
             else:
-                print(f"Unknown command: {command}")
+                orchestrator.logger.warning("Unknown command: %s", command)
                 print("Available: start, status")
         else:
             print("Aurora Autonomous Orchestrator")

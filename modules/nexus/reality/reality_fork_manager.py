@@ -12,19 +12,17 @@ management with consensus protocols and quantum coherence preservation.
 """
 
 import logging
+import uuid
+import json
+import hashlib
+from datetime import datetime
+from enum import Enum
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Set, Any
 
 logger = logging.getLogger(__name__)
 
-import asyncio
-import uuid
-from typing import Dict, List, Optional, Set, Tuple, Any
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
-import json
-import hashlib
-from pathlib import Path
-
+ 
 class RealityForkType(Enum):
     """Types of reality forks"""
     EXPLORATORY = "exploratory"      # Safe exploration fork
@@ -34,6 +32,7 @@ class RealityForkType(Enum):
     TEMPORAL = "temporal"            # Temporal experimentation
     ROLLBACK = "rollback"            # Emergency rollback point
 
+ 
 class ForkStatus(Enum):
     """Status of reality forks"""
     INITIALIZING = "initializing"
@@ -43,6 +42,7 @@ class ForkStatus(Enum):
     COLLAPSED = "collapsed"
     QUARANTINED = "quarantined"
 
+ 
 @dataclass
 class RealityFork:
     """Represents a reality fork with quantum coherence"""
@@ -80,6 +80,7 @@ class RealityFork:
             signature_data = f"{self.fork_id}{self.fork_type.value}{self.branch_point.isoformat()}"
             self.quantum_signature = hashlib.sha256(signature_data.encode()).hexdigest()[:24]
 
+ 
 @dataclass
 class ConsensusMeasurement:
     """Represents a consensus measurement across reality forks"""
@@ -92,6 +93,7 @@ class ConsensusMeasurement:
     stability_metric: float
     convergence_probability: float
 
+ 
 class RealityForkManager:
     """Revolutionary reality fork management system"""
     
@@ -116,9 +118,9 @@ class RealityForkManager:
         # Quantum entanglement tracking
         self.entanglement_matrix: Dict[str, Dict[str, float]] = {}
         
-        print(f"🌌 Reality Fork Manager initialized")
-        print(f"   Anchor: {self.anchor}")
-        print(f"   Base Reality: {self.base_reality_id}")
+        logger.info("Reality Fork Manager initialized")
+        logger.info("Anchor: %s", self.anchor)
+        logger.info("Base Reality: %s", self.base_reality_id)
         
     async def create_reality_fork(
         self,
@@ -165,10 +167,10 @@ class RealityForkManager:
         self.active_forks[fork_id] = fork
         fork.status = ForkStatus.ACTIVE
         
-        print(f"🔀 Reality fork created: {fork_id}")
-        print(f"   Type: {fork_type.value}")
-        print(f"   Forked by: {forked_by}")
-        print(f"   Parent: {parent}")
+        logger.info("Reality fork created: %s", fork_id)
+        logger.info("Type: %s", fork_type.value)
+        logger.info("Forked by: %s", forked_by)
+        logger.info("Parent: %s", parent)
         
         return fork
         
@@ -182,7 +184,7 @@ class RealityForkManager:
         fork.participating_agents.add(agent_id)
         fork.last_update = datetime.utcnow()
         
-        print(f"👥 Agent {agent_id} joined fork {fork_id}")
+        logger.info("Agent %s joined fork %s", agent_id, fork_id)
         return True
         
     async def update_fork_state(
@@ -211,9 +213,9 @@ class RealityForkManager:
         
         fork.last_update = datetime.utcnow()
         
-        print(f"🔄 Fork {fork_id} state updated by {agent_id}")
-        print(f"   Quantum coherence: {fork.quantum_coherence:.3f}")
-        print(f"   Stability index: {fork.stability_index:.3f}")
+        logger.info("Fork %s state updated by %s", fork_id, agent_id)
+        logger.info("Quantum coherence: %.3f", fork.quantum_coherence)
+        logger.info("Stability index: %.3f", fork.stability_index)
         
         return True
         
@@ -261,10 +263,10 @@ class RealityForkManager:
         
         self.consensus_measurements.append(measurement)
         
-        print(f"📊 Consensus measured: {measurement_id}")
-        print(f"   Participating forks: {len(participating_forks)}")
-        print(f"   Quantum entanglement: {quantum_entanglement:.3f}")
-        print(f"   Convergence probability: {convergence_probability:.3f}")
+        logger.info("Consensus measured: %s", measurement_id)
+        logger.info("Participating forks: %d", len(participating_forks))
+        logger.info("Quantum entanglement: %.3f", quantum_entanglement)
+        logger.info("Convergence probability: %.3f", convergence_probability)
         
         return measurement
         
@@ -282,7 +284,7 @@ class RealityForkManager:
         forks_to_merge = []
         for fork_id in fork_ids:
             if fork_id not in self.active_forks:
-                logger.error("Fork {fork_id} not found for merge")
+                logger.error("Fork %s not found for merge", fork_id)
                 return None
             forks_to_merge.append(self.active_forks[fork_id])
             
@@ -290,7 +292,8 @@ class RealityForkManager:
         consensus = await self.measure_consensus(fork_ids)
         
         if consensus.convergence_probability < self.consensus_threshold:
-            logger.warning("Convergence probability {consensus.convergence_probability:.3f} below threshold {self.consensus_threshold}")
+            logger.warning("Convergence probability %.3f below threshold %.3f",
+                           consensus.convergence_probability, self.consensus_threshold)
             # Option to force merge or abort
             
         # Create merged reality fork
@@ -323,9 +326,9 @@ class RealityForkManager:
         for fork_id in fork_ids:
             await self.collapse_reality_fork(fork_id, "merged")
             
-        print(f"🔗 Reality forks merged: {merged_fork.fork_id}")
-        print(f"   Source forks: {len(fork_ids)}")
-        print(f"   Participating agents: {len(merged_fork.participating_agents)}")
+        logger.info("Reality forks merged: %s", merged_fork.fork_id)
+        logger.info("Source forks: %d", len(fork_ids))
+        logger.info("Participating agents: %d", len(merged_fork.participating_agents))
         
         return merged_fork
         
@@ -342,7 +345,7 @@ class RealityForkManager:
         self.fork_history.append(fork)
         del self.active_forks[fork_id]
         
-        print(f"💥 Reality fork collapsed: {fork_id} ({reason})")
+        logger.warning("Reality fork collapsed: %s (%s)", fork_id, reason)
         return True
         
     def _calculate_coherence_impact(self, state_updates: Dict[str, Any]) -> float:

@@ -11,12 +11,16 @@ DLP Tag: MONITORING_TOOL
 import asyncio
 import time
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict
 import hashlib
 import math
 import random
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EntropyMonitor:
     """
@@ -62,9 +66,11 @@ class EntropyMonitor:
             time_factor = self._calculate_temporal_entropy()
             
             # Combined entropy metric
-            system_entropy = (avg_entropy * 0.6 + 
-                            complexity_factor * 0.3 + 
-                            time_factor * 0.1)
+            system_entropy = (
+                avg_entropy * 0.6 +
+                complexity_factor * 0.3 +
+                time_factor * 0.1
+            )
             
             return min(1.0, max(0.0, system_entropy))
             
@@ -160,7 +166,7 @@ class EntropyMonitor:
             try:
                 callback(alert)
             except Exception as e:
-                print(f"Alert callback failed: {e}")
+                logger.error("Alert callback failed: %s", e)
     
     def get_current_status(self) -> Dict:
         """Get current entropy status"""
@@ -202,17 +208,16 @@ class EntropyMonitor:
     async def start_monitoring(self, interval: float = 1.0):
         """Start continuous entropy monitoring"""
         self.monitoring_active = True
-        print(f"🔍 Entropy monitoring started (interval: {interval}s)")
+        logger.info("Entropy monitoring started (interval: %.2fs)", interval)
         
         while self.monitoring_active:
             try:
                 status = self.get_current_status()
                 
-                # Print status update
-                print(f"[{datetime.utcnow().strftime('%H:%M:%S')}] "
-                      f"Entropy: {status['current_entropy']:.3f} | "
-                      f"Drift: {status['current_drift']:.3f} | "
-                      f"Alert: {status['alert_level']}")
+                # Status update
+                ts = datetime.utcnow().strftime('%H:%M:%S')
+                logger.info("[%s] Entropy: %.3f | Drift: %.3f | Alert: %s", ts,
+                            status['current_entropy'], status['current_drift'], status['alert_level'])
                 
                 # Wait for next measurement
                 await asyncio.sleep(interval)
@@ -220,10 +225,10 @@ class EntropyMonitor:
             except KeyboardInterrupt:
                 break
             except Exception as e:
-                print(f"Monitoring error: {e}")
+                logger.error("Monitoring error: %s", e)
                 await asyncio.sleep(interval)
         
-        print("🔍 Entropy monitoring stopped")
+        logger.info("Entropy monitoring stopped")
     
     def stop_monitoring(self):
         """Stop entropy monitoring"""
@@ -290,14 +295,15 @@ async def main():
     
     # Add a simple alert callback
     def print_alert(alert):
-        print(f"🚨 ENTROPY ALERT: {alert['level']} - Entropy: {alert['entropy']:.3f}, Drift: {alert['drift']:.3f}")
+        logger.warning("ENTROPY ALERT: %s - Entropy: %.3f, Drift: %.3f",
+                       alert['level'], alert['entropy'], alert['drift'])
     
     monitor.add_alert_callback(print_alert)
     
     try:
         await monitor.start_monitoring(interval=2.0)
     except KeyboardInterrupt:
-        print("\nStopping entropy monitor...")
+        logger.info("Stopping entropy monitor...")
         monitor.stop_monitoring()
 
 if __name__ == "__main__":

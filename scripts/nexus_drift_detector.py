@@ -10,11 +10,15 @@ DLP Tag: MONITORING_CRITICAL
 
 import json
 import hashlib
+import logging
 from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from datetime import datetime
+from typing import Dict
 import subprocess
 
+logger = logging.getLogger(__name__)
+
+ 
 class NEXUSDriftDetector:
     """
     Comprehensive drift detection and audit trail generation
@@ -68,7 +72,7 @@ class NEXUSDriftDetector:
                         if anchor and anchor.startswith(('T', 'NEXUS')):
                             if anchor not in drift_report["found_anchors"]:
                                 drift_report["found_anchors"].append(anchor)
-            except:
+            except Exception:
                 continue
                 
         # Check for missing anchors
@@ -130,7 +134,7 @@ class NEXUSDriftDetector:
                             
                         entropy_report["global_entropy"] += current
                         
-            except:
+            except Exception:
                 continue
                 
         # Calculate average global entropy
@@ -292,24 +296,23 @@ def main():
     
     detector = NEXUSDriftDetector()
     
-    print("🔍 NEXUS Drift Detection & Audit Trail Generation")
-    print("="*60)
+    logger.info("NEXUS Drift Detection & Audit Trail Generation")
+    logger.info("%s", "="*60)
     
     # Generate and display report
     report = detector.generate_drift_report()
-    print(report)
+    logger.info("%s", report)
     
     # Check for critical drift
     if detector.drift_events:
-        print("\n⚠️ DRIFT EVENTS DETECTED:")
+        logger.warning("DRIFT EVENTS DETECTED")
         for event in detector.drift_events:
-            print(f"  - {event['type']}: {event['timestamp']}")
-            
-        print("\n📋 Drift events require arbitration")
+            logger.warning("Event type=%s ts=%s", event['type'], event['timestamp'])
+        logger.info("Drift events require arbitration")
     else:
-        print("\n✅ No drift detected - system stable")
-        
-    print(f"\n📁 Audit trail saved to: .nexus/audit/")
+        logger.info("No drift detected - system stable")
+
+    logger.info("Audit trail saved to: .nexus/audit/")
 
 if __name__ == "__main__":
     main()

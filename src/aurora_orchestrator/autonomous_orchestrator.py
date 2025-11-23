@@ -243,8 +243,8 @@ class AuroraOrchestrator:
             try:
                 await self.orchestration_task
             except asyncio.CancelledError:
+                # Orchestration loop already re-raises internally; swallow here for public API ergonomics
                 self.logger.info("🛑 Orchestration task cancelled")
-                raise  # Re-raise to comply with best practices
 
         # Lower consciousness to dormant
         self.aurora.elevate_consciousness(ConsciousnessLevel.DORMANT)

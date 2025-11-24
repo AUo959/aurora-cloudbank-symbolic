@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 import json
 import hashlib
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
-import sys
+from src.core.time_utils import utc_iso, utc_now
+from typing import Dict, Tuple
 
+ 
 class NEXUSVerification:
     """
     Verify Phase 1 implementation and prepare for Phase 2 transition
@@ -45,7 +45,7 @@ class NEXUSVerification:
         ]
         
         verification_report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "components": {},
             "overall_status": "PASS",
@@ -87,7 +87,7 @@ class NEXUSVerification:
         verification_report["seal"] = report_hash
         
         # Save verification report
-        report_path = Path(f".nexus/verification/phase1_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        report_path = Path(f".nexus/verification/phase1_{utc_now().strftime('%Y%m%d_%H%M%S')}.json")
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(verification_report, indent=2))
         
@@ -118,7 +118,7 @@ class NEXUSVerification:
                         "seal": checkpoint.get("seal", "")[:16],
                         "timestamp": checkpoint.get("timestamp", "")
                     })
-                except:
+                except Exception:
                     continuity_check["continuity_intact"] = False
                     
         # Check for entities
@@ -132,7 +132,7 @@ class NEXUSVerification:
                         "type": entity.get("type", ""),
                         "seal": entity.get("seal", "")[:16]
                     })
-                except:
+                except Exception:
                     continuity_check["continuity_intact"] = False
                     
         return continuity_check["continuity_intact"], continuity_check
@@ -145,7 +145,7 @@ class NEXUSVerification:
             "phase": "NEXUS_PHASE_2",
             "anchor": "NEXUS-PHASE2-2025",
             "seed": "EOS_SEED_ORION",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "arbiter": "AUo959",
             "thread_continuation": "T1-NEXUS-INIT-20250925",
             "phase2_objectives": [
@@ -156,7 +156,7 @@ class NEXUSVerification:
                     "anchor": "T2-MULTIAGENT-2025"
                 },
                 {
-                    "id": "P2-002", 
+                    "id": "P2-002",
                     "name": "Quantum State Bridge",
                     "status": "READY_TO_IMPLEMENT",
                     "anchor": "T2-QUANTUM-2025"
@@ -199,10 +199,10 @@ def main():
     print("\n📋 Verifying Phase 1 Components...")
     verification = verifier.verify_phase1_components()
     
-    print(f"Overall Status: {verification['overall_status']}")
+    logger.info("Overall Status: %s", verification['overall_status'])
     for component, status in verification["components"].items():
         status_icon = "✅" if status["status"] == "VERIFIED" else "❌"
-        print(f"  {status_icon} {component}: {status['status']}")
+        logger.info("Component %s status: %s (%s)", component, status['status'], status_icon)
     
     # Check thread continuity
     print("\n🔗 Checking Thread Continuity...")
@@ -210,9 +210,12 @@ def main():
     
     if continuity_intact:
         logger.info("Thread continuity intact")
-        print(f"  Thread: {continuity['thread_id']}")
-        print(f"  Entities: {len(continuity['entities'])}")
-        print(f"  Checkpoints: {len(continuity['checkpoints'])}")
+        logger.info(
+            "Thread: %s | Entities: %d | Checkpoints: %d",
+            continuity['thread_id'],
+            len(continuity['entities']),
+            len(continuity['checkpoints'])
+        )
     else:
         logger.warning("Thread continuity issues detected")
         
@@ -220,9 +223,12 @@ def main():
     print("\n🚀 Generating Phase 2 Manifest...")
     phase2 = verifier.generate_phase2_manifest()
     
-    print(f"Phase 2 Anchor: {phase2['anchor']}")
-    print(f"Objectives Ready: {len(phase2['phase2_objectives'])}")
-    print(f"Manifest Seal: {phase2['seal'][:32]}...")
+    logger.info(
+        "Phase2 Anchor: %s | Objectives: %d | Seal Prefix: %s",
+        phase2['anchor'],
+        len(phase2['phase2_objectives']),
+        phase2['seal'][:32]
+    )
     
     print("\n✅ Verification Complete - Ready for Phase 2!")
     

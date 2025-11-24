@@ -9,6 +9,7 @@ import json
 import logging
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
+from src.core.time_utils import utc_iso
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
@@ -76,7 +77,7 @@ class ActionContext:
     agent_id: str
     action_type: str
     parameters: Dict[str, Any]
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=utc_iso)
     context_tag: Optional[str] = None
 
 
@@ -283,7 +284,7 @@ class EthicsEngine:
         description = f"{rule.description}. Matched conditions: {', '.join(matched_conditions)}"
         
         violation = EthicsViolation(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=utc_iso(),
             agent_id=context.agent_id,
             rule_id=rule.id,
             rule_name=rule.name,

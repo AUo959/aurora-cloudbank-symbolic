@@ -11,6 +11,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+from src.core.time_utils import utc_now
 
 
 class EventPriority(str, Enum):
@@ -82,7 +83,7 @@ class Event(BaseModel):
     # Event metadata
     source_agent_id: str
     target_agent_ids: Optional[List[str]] = None  # None = broadcast to all subscribers
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = Field(default_factory=utc_now)
     expiry: Optional[datetime] = None
 
     # Event payload
@@ -151,7 +152,7 @@ class Subscription(BaseModel):
     subscription_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     agent_id: str
     filter: EventFilter
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utc_now)
     active: bool = Field(default=True)
 
     # Subscription metadata
@@ -163,7 +164,7 @@ class ConflictReport(BaseModel):
 
     conflict_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     conflict_type: str
-    detected_at: datetime = Field(default_factory=datetime.utcnow)
+    detected_at: datetime = Field(default_factory=utc_now)
 
     # Conflicting agents and resources
     agent_ids: List[str]
@@ -198,7 +199,7 @@ class WorkflowDefinition(BaseModel):
     agent_assignments: Dict[str, str]  # step_id -> agent_id
 
     # Workflow metadata
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=utc_now)
     created_by: str
     status: str = "pending"  # pending, running, completed, failed
 

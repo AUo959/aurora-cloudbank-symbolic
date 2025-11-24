@@ -5,6 +5,7 @@ Provides OAuth2 authentication endpoints for token management.
 """
 
 from datetime import timedelta
+import time
 from typing import Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
@@ -21,6 +22,17 @@ from src.security.oauth2 import (
 from src.middleware.fastapi_security import limiter
 import os
 from src.security.roles import Role, get_all_permissions
+
+# Ensure fresh rate limiter storage for isolated test app constructions.
+# Some pytest scenarios build multiple FastAPI app instances sharing the global
+# limiter object, which can retain counters across tests and cause an immediate
+# 429 on the first request of a new app. We defensively flush storage if supported.
+try:  # pragma: no cover - best effort cleanup, harmless if unsupported
+    storage = getattr(limiter, "_storage", None) or getattr(limiter, "storage", None)
+    if storage and hasattr(storage, "flush"):
+        storage.flush()
+except Exception:
+    pass
 
 
 # Router for authentication endpoints
@@ -61,8 +73,38 @@ USERS_DB: Dict[str, UserInDB] = {
 }
 
 
+# Rate limit configuration:
+# By default use production-like limits. Optional elevation only when explicitly requested.
 AUTH_TOKEN_PER_MINUTE = int(os.getenv("RATE_LIMIT_AUTH_TOKEN_PER_MIN", "10"))
 AUTH_REFRESH_PER_MINUTE = int(os.getenv("RATE_LIMIT_AUTH_REFRESH_PER_MIN", "30"))
+
+if os.getenv("AURORA_ELEVATED_AUTH_LIMITS", "false").lower() == "true":  # pragma: no cover
+    AUTH_TOKEN_PER_MINUTE = int(os.getenv("ELEVATED_AUTH_TOKEN_PER_MIN", "1000"))
+    AUTH_REFRESH_PER_MINUTE = int(os.getenv("ELEVATED_AUTH_REFRESH_PER_MIN", "2000"))
+
+# Dynamic per-minute token counting to honor runtime overrides in test utilities that
+# adjust RATE_LIMIT_AUTH_TOKEN_PER_MIN after module import (decorator is static).
+_dynamic_token_counts: Dict[str, int] = {}
+
+
+def _enforce_dynamic_token_limit(request: Request) -> None:
+    desired_limit = int(os.getenv("RATE_LIMIT_AUTH_TOKEN_PER_MIN", str(AUTH_TOKEN_PER_MINUTE)))
+    if desired_limit >= AUTH_TOKEN_PER_MINUTE:
+        return  # Static decorator already sufficient or widened limit
+    # Build window key using remote address and current minute bucket
+    try:
+        remote_ip = request.client.host if request.client else "unknown"
+    except Exception:
+        remote_ip = "unknown"
+    minute_bucket = int(time.time() // 60)
+    window_key = f"{remote_ip}:{minute_bucket}"
+    current = _dynamic_token_counts.get(window_key, 0)
+    if current >= desired_limit:
+        # Manual HTTP 429 with standard headers (mirrors rate_limit_handler output)
+        from fastapi import HTTPException
+        headers = {"Retry-After": "60", "X-RateLimit-Limit": str(desired_limit)}
+        raise HTTPException(status_code=429, detail="Rate limit exceeded", headers=headers)
+    _dynamic_token_counts[window_key] = current + 1
 
 
 @router.post("/token", response_model=Token)
@@ -82,6 +124,9 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     Raises:
         HTTPException: If authentication fails
     """
+    # Dynamic override enforcement (must occur before auth evaluation)
+    _enforce_dynamic_token_limit(request)
+
     user = OAuth2Handler.authenticate_user(form_data.username, form_data.password, USERS_DB)
 
     if not user:

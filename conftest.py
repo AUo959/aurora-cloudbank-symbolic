@@ -13,6 +13,10 @@ if "CSRF_SECRET_KEY" not in os.environ:
 if "WS_AUTH_SECRET" not in os.environ:
     os.environ["WS_AUTH_SECRET"] = "test-websocket-auth-secret-do-not-use-in-production-val"
 
+# Provide a deterministic JWT secret for tests so authentication components can import safely.
+if "JWT_SECRET_KEY" not in os.environ:
+    os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-do-not-use-in-production-hex32"
+
 import pytest  # noqa: E402 - import must happen after env setup
 from fastapi.testclient import TestClient  # noqa: E402
 

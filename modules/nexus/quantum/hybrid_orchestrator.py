@@ -659,7 +659,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     reports = asyncio.run(_run())
     glyphcard = orchestrator.generate_glyphcard(cycles=len(reports))
-    print(glyphcard)
+    import logging
+    logging.getLogger(__name__).info("%s", glyphcard)
     return 0
 
 

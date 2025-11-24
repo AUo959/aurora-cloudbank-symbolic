@@ -20,6 +20,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 import numpy as np
 from pathlib import Path
+from src.core.time_utils import utc_now
+
 
 class CoordinationMode(Enum):
     """Coordination strategies for multi-agent systems"""
@@ -30,6 +32,7 @@ class CoordinationMode(Enum):
     SWARM = "swarm"                 # Emergent coordination
     QUANTUM = "quantum"              # Superposition until observation
 
+ 
 @dataclass
 class AgentMessage:
     """Message passed between agents"""
@@ -38,11 +41,12 @@ class AgentMessage:
     recipients: List[str]
     content: Any
     symbolic_anchors: List[str]
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=utc_now)
     entropy_cost: float = 0.0
     requires_consensus: bool = False
     seal: Optional[str] = None
 
+ 
 class MultiAgentCoordinator:
     """
     Coordinates multiple AI agents in shared symbolic space
@@ -73,8 +77,12 @@ class MultiAgentCoordinator:
             "alerts": []
         }
         
-    async def register_agent(self, agent_id: str, agent_type: str, 
-                            capabilities: List[str]) -> Dict:
+    async def register_agent(
+        self,
+        agent_id: str,
+        agent_type: str,
+        capabilities: List[str],
+    ) -> Dict:
         """Register an agent in the coordination system"""
         
         if agent_id in self.agents:
@@ -85,7 +93,7 @@ class MultiAgentCoordinator:
             "type": agent_type,
             "capabilities": capabilities,
             "status": "active",
-            "registered_at": datetime.utcnow().isoformat(),
+            "registered_at": utc_now().isoformat(),
             "anchor": f"AGENT-{agent_id.upper()}",
             "message_count": 0,
             "consensus_weight": 1.0,
@@ -112,15 +120,20 @@ class MultiAgentCoordinator:
             "seal": agent_hash[:16]
         }
         
-    async def send_message(self, sender: str, recipients: List[str], 
-                          content: Any, requires_consensus: bool = False) -> str:
+    async def send_message(
+        self,
+        sender: str,
+        recipients: List[str],
+        content: Any,
+        requires_consensus: bool = False,
+    ) -> str:
         """Send message between agents"""
         
         if sender not in self.agents:
             raise ValueError(f"Sender {sender} not registered")
             
         message = AgentMessage(
-            message_id=f"MSG-{datetime.utcnow().timestamp()}",
+            message_id=f"MSG-{utc_now().timestamp()}",
             sender=sender,
             recipients=recipients,
             content=content,
@@ -150,17 +163,20 @@ class MultiAgentCoordinator:
         
         return message.seal
         
-    async def achieve_consensus(self, proposal: Dict, 
-                               participating_agents: List[str]) -> Dict:
+    async def achieve_consensus(
+        self,
+        proposal: Dict,
+        participating_agents: List[str],
+    ) -> Dict:
         """Achieve consensus among multiple agents"""
         
         consensus_session = {
-            "session_id": f"CONSENSUS-{datetime.utcnow().timestamp()}",
+            "session_id": f"CONSENSUS-{utc_now().timestamp()}",
             "proposal": proposal,
             "participants": participating_agents,
             "votes": {},
             "result": None,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "anchor": f"{self.anchor}-CONSENSUS"
         }
         
@@ -218,7 +234,7 @@ class MultiAgentCoordinator:
             "decision": decision,
             "confidence": relevance_score,
             "reasoning": f"Based on capabilities: {agent['capabilities']}",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         }
         
     def _calculate_message_entropy(self, content: Any) -> float:
@@ -253,7 +269,7 @@ class MultiAgentCoordinator:
             alert = {
                 "event": event,
                 "drift": self.entropy_monitor["drift"],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_now().isoformat()
             }
             self.entropy_monitor["alerts"].append(alert)
             
@@ -263,7 +279,7 @@ class MultiAgentCoordinator:
         divergence = {
             "type": truth_type,
             "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "anchor": self.anchor,
             "requires_arbitration": True
         }
@@ -271,7 +287,7 @@ class MultiAgentCoordinator:
         self.divergent_truths.append(divergence)
         
         # Save for arbitration
-        divergence_path = Path(f".nexus/divergences/{truth_type}_{datetime.utcnow().timestamp()}.json")
+        divergence_path = Path(f".nexus/divergences/{truth_type}_{utc_now().timestamp()}.json")
         divergence_path.parent.mkdir(parents=True, exist_ok=True)
         divergence_path.write_text(json.dumps(divergence, indent=2))
         
@@ -286,7 +302,7 @@ class MultiAgentCoordinator:
             "action": action,
             "mode": self.coordination_mode.value,
             "agents": agents,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "results": {}
         }
         
@@ -336,7 +352,7 @@ class MultiAgentCoordinator:
             "agent_id": agent_id,
             "action": action,
             "status": "completed",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         }
         
     async def _swarm_coordinate(self, agents: List[str], action: str) -> Dict:
@@ -371,7 +387,7 @@ class MultiAgentCoordinator:
             "manifest_version": "2.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "team": "Aurora Core",
             "coordination_stats": {
                 "total_agents": len(self.agents),

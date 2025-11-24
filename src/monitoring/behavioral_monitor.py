@@ -8,6 +8,7 @@ and ethics compliance evaluation.
 import logging
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
+from src.core.time_utils import utc_iso, utc_now
 from typing import Dict, List, Optional, Any
 from collections import defaultdict
 
@@ -99,7 +100,7 @@ class BehaviorMonitor:
         if agent_id not in self.current_metrics:
             self.current_metrics[agent_id] = BehaviorMetrics(
                 agent_id=agent_id,
-                timestamp=datetime.utcnow().isoformat()
+                timestamp=utc_iso()
             )
         
         metrics = self.current_metrics[agent_id]
@@ -151,7 +152,7 @@ class BehaviorMonitor:
             return None
         
         metrics = self.current_metrics[agent_id]
-        metrics.timestamp = datetime.utcnow().isoformat()
+        metrics.timestamp = utc_iso()
         
         # Add to history
         self.metrics_history[agent_id].append(metrics)
@@ -162,7 +163,7 @@ class BehaviorMonitor:
         # Create new current metrics
         self.current_metrics[agent_id] = BehaviorMetrics(
             agent_id=agent_id,
-            timestamp=datetime.utcnow().isoformat()
+            timestamp=utc_iso()
         )
         
         logger.debug("Snapshotted metrics for agent %s", agent_id)
@@ -322,7 +323,7 @@ class BehaviorMonitor:
         if agent_id not in self.metrics_history:
             return
         
-        cutoff = datetime.utcnow() - timedelta(hours=self.retention_hours)
+        cutoff = utc_now() - timedelta(hours=self.retention_hours)
         
         self.metrics_history[agent_id] = [
             m for m in self.metrics_history[agent_id]

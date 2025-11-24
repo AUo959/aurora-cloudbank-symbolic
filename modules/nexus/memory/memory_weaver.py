@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import asyncio
 from collections import defaultdict
+from src.core.time_utils import utc_now
 
 @dataclass
 class Memory:
@@ -82,13 +83,13 @@ class MemoryWeavingSystem:
             Stored Memory object with seal
         """
         
-        memory_id = f"MEM-{agent_id}-{datetime.utcnow().timestamp()}"
+        memory_id = f"MEM-{agent_id}-{utc_now().timestamp()}"
         
         memory = Memory(
             memory_id=memory_id,
             content=content,
             source_agent=agent_id,
-            timestamp=datetime.utcnow(),
+            timestamp=utc_now(),
             symbolic_anchors=[self.anchor, f"AGENT-{agent_id}"],
             associations=associations or [],
             importance=importance
@@ -136,7 +137,7 @@ class MemoryWeavingSystem:
             MemoryWeave object containing interconnected memories
         """
         
-        weave_id = f"WEAVE-{datetime.utcnow().timestamp()}"
+        weave_id = f"WEAVE-{utc_now().timestamp()}"
         
         # Collect memories from agents
         memories_to_weave = []
@@ -311,7 +312,7 @@ class MemoryWeavingSystem:
         cutoff_time = None
         
         if time_window:
-            cutoff_time = datetime.utcnow() - time_window
+            cutoff_time = utc_now() - time_window
             
         for mem_id in self.agent_memories[agent_id]:
             if mem_id in self.memory_store:
@@ -435,7 +436,7 @@ class MemoryWeavingSystem:
         relevance = overlap / len(query_words)
         
         # Boost for recent memories
-        age_days = (datetime.utcnow() - memory.timestamp).days
+        age_days = (utc_now() - memory.timestamp).days
         recency_boost = 1.0 / (1.0 + age_days * 0.1)
         
         return relevance * recency_boost
@@ -481,7 +482,7 @@ class MemoryWeavingSystem:
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "team": "Aurora Core",
             "memory_stats": {
                 "total_memories": len(self.memory_store),

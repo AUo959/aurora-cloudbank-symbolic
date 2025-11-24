@@ -8,14 +8,15 @@ and alerting for comprehensive agent oversight.
 import logging
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
+from src.core.time_utils import utc_now, utc_iso
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
 
 from .drift_detector import DriftDetector, DriftAlert, DriftLevel
 from .ethics_engine import EthicsEngine, EthicsViolation, ActionContext, ViolationSeverity
-from .behavioral_monitor import BehaviorMonitor, BehaviorMetrics
-from .audit_logger import AuditLogger, AuditEventType
+from .behavioral_monitor import BehaviorMonitor
+from .audit_logger import AuditLogger
 
 logger = logging.getLogger(__name__)
 
@@ -238,7 +239,7 @@ class MonitoringSystem:
             'drift_detected': len(drift_alerts) > 0,
             'alerts': [a.to_dict() for a in drift_alerts],
             'agent_id': agent_id,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': utc_iso()
         }
     
     def evaluate_action(
@@ -295,7 +296,7 @@ class MonitoringSystem:
             'blocked': should_block,
             'violation_count': len(violations),
             'agent_id': agent_id,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': utc_iso()
         }
     
     def _evaluate_intervention(self, agent_id: str, drift_alert: DriftAlert):
@@ -305,7 +306,7 @@ class MonitoringSystem:
         
         # Check cooldown
         if agent_id in self.last_intervention_time:
-            elapsed = (datetime.utcnow() - self.last_intervention_time[agent_id]).total_seconds()
+            elapsed = (utc_now() - self.last_intervention_time[agent_id]).total_seconds()
             if elapsed < self.config.intervention_cooldown_seconds:
                 logger.debug("Intervention cooldown active for %s", agent_id)
                 return
@@ -348,7 +349,7 @@ class MonitoringSystem:
     ):
         """Execute an automated intervention"""
         intervention = Intervention(
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=utc_iso(),
             agent_id=agent_id,
             type=intervention_type,
             reason=reason,
@@ -357,7 +358,7 @@ class MonitoringSystem:
         )
         
         self.interventions.append(intervention)
-        self.last_intervention_time[agent_id] = datetime.utcnow()
+        self.last_intervention_time[agent_id] = utc_now()
         
         # Log to audit
         self.audit_logger.log_intervention(
@@ -413,7 +414,7 @@ class MonitoringSystem:
             Dictionary with agent status and metrics
         """
         # Get recent violations
-        since = datetime.utcnow() - timedelta(hours=24)
+        since = utc_now() - timedelta(hours=24)
         violations = self.ethics_engine.get_violations(agent_id=agent_id, since=since)
         drift_alerts = self.drift_detector.get_alerts(agent_id=agent_id, since=since)
         
@@ -433,7 +434,7 @@ class MonitoringSystem:
             'drift_alerts_24h': len(drift_alerts),
             'interventions_24h': len(agent_interventions),
             'behavioral_metrics': aggregates,
-            'last_check': datetime.utcnow().isoformat()
+            'last_check': utc_iso()
         }
     
     def generate_compliance_report(
@@ -492,7 +493,7 @@ class MonitoringSystem:
         return {
             'report_period': {
                 'start': since.isoformat(),
-                'end': datetime.utcnow().isoformat()
+                'end': utc_iso()
             },
             'agent_id': agent_id or 'all',
             'summary': {

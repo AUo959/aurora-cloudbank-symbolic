@@ -5,7 +5,7 @@ FastAPI routes for drift/ethics monitoring dashboard.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
@@ -23,6 +23,7 @@ except ImportError:
 
 from .monitoring_system import MonitoringSystem, AlertConfig, AlertLevel
 from .ethics_engine import ActionContext
+from src.core.time_utils import utc_now, utc_iso
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,7 @@ def create_monitoring_router(
         """Health check for monitoring system"""
         return {
             "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "audit_chain_valid": monitoring.audit_logger.verify_chain()
         }
     
@@ -138,7 +139,7 @@ def create_monitoring_router(
                 "success": True,
                 "agent_id": input.agent_id,
                 "metrics_count": len(input.historical_data),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_iso()
             }
         except Exception as e:
             logger.error("Failed to establish baseline: %s", e)
@@ -158,7 +159,7 @@ def create_monitoring_router(
                 "success": True,
                 "agent_id": input.agent_id,
                 "metrics_recorded": len(input.metrics),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_iso()
             }
         except Exception as e:
             logger.error("Failed to record behavior: %s", e)
@@ -215,7 +216,7 @@ def create_monitoring_router(
     ):
         """Get drift alerts"""
         try:
-            since = datetime.utcnow() - timedelta(hours=since_hours)
+            since = utc_now() - timedelta(hours=since_hours)
             
             from .drift_detector import DriftLevel
             drift_level = DriftLevel(level) if level else None
@@ -243,7 +244,7 @@ def create_monitoring_router(
     ):
         """Get ethics violations"""
         try:
-            since = datetime.utcnow() - timedelta(hours=since_hours)
+            since = utc_now() - timedelta(hours=since_hours)
             
             from .ethics_engine import ViolationSeverity
             violation_severity = ViolationSeverity(severity) if severity else None
@@ -271,7 +272,7 @@ def create_monitoring_router(
     ):
         """Get audit log entries"""
         try:
-            since = datetime.utcnow() - timedelta(hours=since_hours)
+            since = utc_now() - timedelta(hours=since_hours)
             
             from .audit_logger import AuditEventType
             audit_type = AuditEventType(event_type) if event_type else None
@@ -299,7 +300,7 @@ def create_monitoring_router(
     ):
         """Generate compliance report"""
         try:
-            since = datetime.utcnow() - timedelta(hours=since_hours)
+            since = utc_now() - timedelta(hours=since_hours)
             
             report = monitoring.generate_compliance_report(
                 since=since,
@@ -326,7 +327,7 @@ def create_monitoring_router(
         """Get overall dashboard statistics"""
         try:
             agent_ids = monitoring.behavior_monitor.get_agent_ids()
-            since_24h = datetime.utcnow() - timedelta(hours=24)
+            since_24h = utc_now() - timedelta(hours=24)
             
             total_alerts = len(monitoring.drift_detector.get_alerts(since=since_24h))
             total_violations = len(monitoring.ethics_engine.get_violations(since=since_24h))
@@ -342,7 +343,7 @@ def create_monitoring_router(
                 "interventions_24h": total_interventions,
                 "audit_entries": len(monitoring.audit_logger.entries),
                 "audit_chain_valid": monitoring.audit_logger.verify_chain(),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_iso()
             }
         except Exception as e:
             logger.error("Failed to get dashboard stats: %s", e)

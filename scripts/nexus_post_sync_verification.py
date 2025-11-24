@@ -19,7 +19,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from typing import Dict, List, Optional, Tuple
 import sys
 
@@ -33,7 +33,7 @@ class NEXUSSyncVerifier:
         self.anchor = "T3-VERIFY-SYNC-2025"
         self.seed = "EOS_SEED_ORION"
         self.arbiter = "AUo959"
-        self.verification_timestamp = datetime.utcnow()
+        self.verification_timestamp = utc_now()
         self.sync_manifest = {}
         self.thread_state = {}
         self.entropy_snapshot = {}
@@ -166,13 +166,13 @@ class NEXUSSyncVerifier:
                     )
                     if result.returncode == 0:
                         return True
-                except:
+                except Exception:
                     # Fallback to Python search
                     for file_path in search_path.rglob("*.py"):
                         try:
                             if anchor in file_path.read_text():
                                 return True
-                        except:
+                        except Exception:
                             continue
                             
         return False
@@ -181,7 +181,7 @@ class NEXUSSyncVerifier:
         """Capture complete thread state for future resumption"""
         
         thread_state = {
-            "capture_timestamp": datetime.utcnow().isoformat(),
+            "capture_timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
@@ -294,7 +294,7 @@ class NEXUSSyncVerifier:
                     agent_registry["agent_types"][agent_type] = \
                         agent_registry["agent_types"].get(agent_type, 0) + 1
                     agent_registry["active_agents"].append(agent_data.get("id", ""))
-                except:
+                except Exception:
                     continue
                     
         return agent_registry
@@ -325,7 +325,7 @@ class NEXUSSyncVerifier:
         
         resumption_metadata = {
             "metadata_version": "3.1.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
@@ -421,9 +421,11 @@ def main():
     sync_result = verifier.verify_repository_sync()
     
     if sync_result["sync_integrity"]["synchronized"]:
-        logger.info("Repository fully synchronized with origin/main")
-        print(f"   Local:  {sync_result['sync_integrity']['local_main']}")
-        print(f"   Origin: {sync_result['sync_integrity']['origin_main']}")
+        logger.info(
+            "Repository fully synchronized with origin/main (local=%s origin=%s)",
+            sync_result['sync_integrity']['local_main'],
+            sync_result['sync_integrity']['origin_main']
+        )
     else:
         logger.warning("Repository not fully synchronized")
         
@@ -431,22 +433,29 @@ def main():
     thread_continuity = sync_result.get("thread_continuity", {})
     if thread_continuity.get("continuity_intact"):
         print("\n✅ Thread continuity verified across all phases")
-        print(f"   Anchors verified: {len(thread_continuity['verified_anchors'])}")
+        logger.info("Anchors verified count: %d", len(thread_continuity['verified_anchors']))
     else:
         print("\n⚠️ Thread continuity issues detected")
         
     # Capture thread state
     print("\n💾 Capturing Thread State...")
     thread_state = verifier.capture_thread_state()
-    print(f"   Components: {sum(len(v) for v in thread_state['component_inventory'].values())} modules")
-    print(f"   Entropy: {thread_state['entropy_snapshot']['current']:.3f} (drift: {thread_state['entropy_snapshot']['drift']:.3f})")
-    print(f"   Agents: {thread_state['agent_registry']['total_agents']} registered")
+    logger.info(
+        "Thread components=%d entropy=%.3f drift=%.3f agents=%d",
+        sum(len(v) for v in thread_state['component_inventory'].values()),
+        thread_state['entropy_snapshot']['current'],
+        thread_state['entropy_snapshot']['drift'],
+        thread_state['agent_registry']['total_agents']
+    )
     
     # Generate resumption metadata
     print("\n📋 Generating Resumption Metadata...")
     resumption = verifier.generate_resumption_metadata()
-    print(f"   Next phase ready: {resumption['next_phase_ready']}")
-    print(f"   Thread chain length: {len(resumption['thread_chain'])}")
+    logger.info(
+        "Resumption: next_phase_ready=%s thread_chain_length=%d",
+        resumption['next_phase_ready'],
+        len(resumption['thread_chain'])
+    )
     
     # Generate glyphcard
     print("\n🎴 Generating Sync Glyphcard...")
@@ -454,10 +463,11 @@ def main():
     print(glyphcard)
     
     print("\n✅ Post-Sync Verification Complete")
-    print(f"📁 Reports saved to: .nexus/sync/")
-    print(f"🔒 Verification Seal: {sync_result['seal'][:32]}...")
-    print(f"🔗 Thread State Seal: {thread_state['seal'][:32]}...")
-    print(f"📌 Resumption Seal: {resumption['seal'][:32]}...")
+    print("📁 Reports saved to: .nexus/sync/")
+    logger.info(
+        "Seals: verification=%s thread_state=%s resumption=%s",
+        sync_result['seal'][:32], thread_state['seal'][:32], resumption['seal'][:32]
+    )
     
     return sync_result, thread_state, resumption
 

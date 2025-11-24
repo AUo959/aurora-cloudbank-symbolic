@@ -15,11 +15,25 @@ def build_isolated_app(limit_token_per_min: int = 2):
     os.environ["RATE_LIMIT_AUTH_TOKEN_PER_MIN"] = str(limit_token_per_min)
     # Ensure limiter enabled & default strategy
     os.environ["RATE_LIMIT_ENABLED"] = "true"
-    os.environ["RATE_LIMIT_KEY_STRATEGY"] = "ip"
+    # Respect externally pre-set composite strategy (e.g., set by a test before calling)
+    if "RATE_LIMIT_KEY_STRATEGY" not in os.environ:
+        os.environ["RATE_LIMIT_KEY_STRATEGY"] = "ip"
 
-    from src.security.auth_routes import router  # import after env set
-    from src.middleware.fastapi_security import limiter
+    from src.middleware.fastapi_security import limiter, reset_rate_limiter
+    # Align limiter with current strategy BEFORE (re)loading auth routes so decorators bind correctly
+    reset_rate_limiter()
+    # Force reload of auth_routes to re-bind rate limit decorators with updated limiter/key strategy
+    import importlib
+    import src.security.auth_routes as auth_routes
+    auth_routes = importlib.reload(auth_routes)
+    router = auth_routes.router
     from api.aurora_api import rate_limit_handler  # reuse global handler for consistency
+
+    # Flush limiter storage to avoid cross-test bucket leakage (global limiter persists across imports)
+    try:
+        limiter.storage.flush()
+    except Exception:
+        pass
 
     app = FastAPI()
     app.state.limiter = limiter

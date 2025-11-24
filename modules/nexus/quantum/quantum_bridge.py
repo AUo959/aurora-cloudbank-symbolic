@@ -19,6 +19,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from pathlib import Path
 import logging
+from src.core.time_utils import utc_now
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +46,7 @@ class SymbolicAnchor:
     quantum_state: Optional[np.ndarray] = None
     classical_data: Dict = field(default_factory=dict)
     entropy_contribution: float = 0.0
-    creation_time: datetime = field(default_factory=datetime.utcnow)
+    creation_time: datetime = field(default_factory=utc_now)
     seal: Optional[str] = None
 
 class QuantumSymbolicBridge:
@@ -102,7 +103,7 @@ class QuantumSymbolicBridge:
         fidelity = self._calculate_conversion_fidelity(state_vector, symbolic_anchor)
         
         if fidelity < self.fidelity_threshold:
-            logger.warning(f"Fidelity {fidelity:.4f} below threshold {self.fidelity_threshold}")
+            logger.warning("Fidelity %.4f below threshold %.4f", fidelity, self.fidelity_threshold)
             self._flag_low_fidelity_conversion(symbolic_anchor, fidelity)
             
         # Seal the anchor
@@ -114,10 +115,10 @@ class QuantumSymbolicBridge:
             "type": "quantum_to_symbolic",
             "anchor_id": anchor_id,
             "fidelity": fidelity,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         })
         
-        logger.info(f"Quantum → Symbolic: {anchor_id[:16]}... (Fidelity: {fidelity:.4f})")
+        logger.info("Quantum → Symbolic: %s... (Fidelity: %.4f)", anchor_id[:16], fidelity)
         
         return symbolic_anchor
         
@@ -171,10 +172,10 @@ class QuantumSymbolicBridge:
             "type": "symbolic_to_quantum",
             "state_id": quantum_state.state_id,
             "fidelity": quantum_state.fidelity,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         })
         
-        logger.info(f"Symbolic → Quantum: {quantum_state.state_id} (Fidelity: {quantum_state.fidelity:.4f})")
+        logger.info("Symbolic → Quantum: %s (Fidelity: %.4f)", quantum_state.state_id, quantum_state.fidelity)
         
         return quantum_state
         
@@ -205,13 +206,13 @@ class QuantumSymbolicBridge:
         entangled_state[-1] = 1/np.sqrt(2)
         
         # Register entanglement
-        entanglement_id = f"ENT-{datetime.utcnow().timestamp()}"
+        entanglement_id = f"ENT-{utc_now().timestamp()}"
         
         entanglement = {
             "id": entanglement_id,
             "states": [state1_id, state2_id],
             "entangled_state": entangled_state,
-            "creation_time": datetime.utcnow().isoformat(),
+            "creation_time": utc_now().isoformat(),
             "bell_fidelity": self._calculate_bell_fidelity(entangled_state),
             "anchor": f"{self.anchor}-ENTANGLEMENT"
         }
@@ -231,7 +232,7 @@ class QuantumSymbolicBridge:
         
         self.entanglement_registry[entanglement_id] = entanglement
         
-        logger.info(f"Entanglement created: {entanglement_id} (Fidelity: {entanglement['bell_fidelity']:.4f})")
+        logger.info("Entanglement created: %s (Fidelity: %.4f)", entanglement_id, entanglement['bell_fidelity'])
         
         return entanglement
         
@@ -392,16 +393,16 @@ class QuantumSymbolicBridge:
             "anchor_id": anchor.anchor_id,
             "fidelity": fidelity,
             "threshold": self.fidelity_threshold,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "requires_arbitration": True
         }
         
         # Save for review
-        flag_path = Path(f".nexus/flags/fidelity_{anchor.anchor_id}_{datetime.utcnow().timestamp()}.json")
+        flag_path = Path(f".nexus/flags/fidelity_{anchor.anchor_id}_{utc_now().timestamp()}.json")
         flag_path.parent.mkdir(parents=True, exist_ok=True)
         flag_path.write_text(json.dumps(flag, indent=2))
         
-        logger.warning(f"LOW FIDELITY: {anchor.anchor_id} requires arbitration")
+        logger.warning("LOW FIDELITY: %s requires arbitration", anchor.anchor_id)
         
     def export_bridge_manifest(self) -> Dict:
         """Export complete quantum bridge manifest"""
@@ -411,7 +412,7 @@ class QuantumSymbolicBridge:
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "team": "Aurora Core",
             "bridge_stats": {
                 "quantum_states": len(self.quantum_states),

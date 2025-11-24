@@ -1,18 +1,39 @@
 """
-Base Crew Agent Framework
+Base Crew Agent Framework (Minimal Integration Layer)
 Aurora CloudBank Symbolic
 
 Provides base class for all Orion Station crew member agents.
 Each crew member is represented as a specialized agent with unique capabilities,
 tools, and domain expertise.
 
+Current Implementation Scope (Phase 2):
+    - Task lifecycle handling (start, completion, failure tracking)
+    - Capability reporting & registry support
+    - Collaboration primitive (dual task execution + synergy flag)
+    - Minimal Data Lineage Protocol placeholders:
+        * context_tag per task
+        * symbolic_hash (sha256 over deterministic source string)
+    - Placeholder symbolic anchors (t1_state, srb_resolution) advanced deterministically
+
+Deferred / Future (Planned for PR #418 and beyond):
+    - Full Symbolic Engine integration (true T1/SRB progression semantics)
+    - Quantum memory manager seals & verification
+    - CASK cultural score integration
+    - Advanced DLP manifest creation & export system
+    - Anchor-aware collaboration synergy computation
+
+Design Note:
+This module intentionally separates foundational mechanics from advanced
+symbolic/quantum features to reduce integration risk. Placeholders provide
+stable extension points without asserting unimplemented capabilities.
+
 Naming Convention: Agents use surnames (e.g., Thorne, Markov, Roberts)
 """
-
-from typing import Dict, Any, List, Optional, Set
+from typing import Dict, Any, List, Optional
 from enum import Enum
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
+import hashlib
 import logging
 
 logger = logging.getLogger(__name__)
@@ -77,7 +98,13 @@ class CollaborationRecord:
 
 @dataclass
 class AgentTask:
-    """Active task being processed by agent"""
+    """Active task being processed by agent.
+
+    Minimal DLP + anchor placeholders added:
+        - context_tag: lightweight tag identifying operation
+        - symbolic_hash: sha256 hash for integrity (placeholder)
+        - t1_state / srb_resolution: anchor snapshot at task start
+    """
     task_id: str
     task_type: str
     priority: str
@@ -86,6 +113,10 @@ class AgentTask:
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
     result: Optional[Dict[str, Any]] = None
+    context_tag: Optional[str] = None
+    symbolic_hash: Optional[str] = None
+    t1_state: Optional[int] = None
+    srb_resolution: Optional[int] = None
 
 
 class BaseCrewAgent:
@@ -155,6 +186,10 @@ class BaseCrewAgent:
         self.collaboration_history: List[CollaborationRecord] = []
         self.status = "ready"  # "ready", "busy", "offline"
 
+        # Placeholder symbolic anchors (future full engine integration in PR #418)
+        self.t1_state: int = 0  # Temporal progression placeholder
+        self.srb_resolution: int = 0  # Spatial-relational boundary placeholder
+
         # Statistics
         self.stats = {
             'tasks_completed': 0,
@@ -167,7 +202,10 @@ class BaseCrewAgent:
         self.created_at = datetime.now()
 
         logger.info(
-            f"✅ Crew agent initialized: {self.surname} ({self.agent_id}) - {self.role.value}"
+            "✅ Crew agent initialized: %s (%s) - %s",
+            self.surname,
+            self.agent_id,
+            self.role.value
         )
 
     async def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -194,6 +232,14 @@ class BaseCrewAgent:
         context = request.get('context', {})
         priority = request.get('priority', 'medium')
 
+        # Generate minimal DLP context tag & symbolic hash (placeholder implementation)
+        context_tag = f"{self.surname.lower()}_{task_type}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        symbolic_source = f"{context_tag}|{priority}|{repr(sorted(context.items()))}"
+        symbolic_hash = hashlib.sha256(symbolic_source.encode()).hexdigest()
+
+        # Advance placeholder anchors (simple deterministic progression)
+        self._advance_t1(len(symbolic_source))
+        self._resolve_srb(task_type or "unknown_task")
         # Create task record
         task = AgentTask(
             task_id=f"{self.surname}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
@@ -201,22 +247,22 @@ class BaseCrewAgent:
             priority=priority,
             context=context,
             status="in_progress",
-            started_at=datetime.now().isoformat()
+            started_at=datetime.now().isoformat(),
+            context_tag=context_tag,
+            symbolic_hash=symbolic_hash,
+            t1_state=self.t1_state,
+            srb_resolution=self.srb_resolution
         )
 
         self.active_tasks.append(task)
         self.status = "busy"
 
         try:
-            # Subclasses implement specific task processing
             result = await self._execute_task(task_type, context)
-
             task.status = "completed"
             task.completed_at = datetime.now().isoformat()
             task.result = result
-
             self.stats['tasks_completed'] += 1
-
             return {
                 'success': True,
                 'agent': self.surname,
@@ -224,43 +270,39 @@ class BaseCrewAgent:
                 'task_id': task.task_id,
                 'task_type': task_type,
                 'result': result,
-                'completed_at': task.completed_at
+                'completed_at': task.completed_at,
+                'context_tag': task.context_tag,
+                'symbolic_hash': task.symbolic_hash,
+                't1_state': task.t1_state,
+                'srb_resolution': task.srb_resolution
             }
-
         except Exception as e:
             task.status = "failed"
             task.completed_at = datetime.now().isoformat()
             task.result = {'error': str(e)}
-
             self.stats['tasks_failed'] += 1
 
-            logger.error(f"❌ Task failed for {self.surname}: {e}")
+            logger.error("❌ Task failed for %s: %s", self.surname, e)
 
             return {
                 'success': False,
                 'agent': self.surname,
                 'agent_id': self.agent_id,
                 'task_id': task.task_id,
-                'error': str(e)
+                'error': str(e),
+                'context_tag': task.context_tag,
+                'symbolic_hash': task.symbolic_hash,
+                't1_state': task.t1_state,
+                'srb_resolution': task.srb_resolution
             }
         finally:
             self.status = "ready"
-            self.active_tasks.remove(task)
+            if task in self.active_tasks:
+                self.active_tasks.remove(task)
 
     async def _execute_task(self, task_type: str, context: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Execute specific task type. Subclasses must override this.
-
-        Args:
-            task_type: Type of task to execute
-            context: Task context and parameters
-
-        Returns:
-            Task execution result
-        """
-        raise NotImplementedError(
-            f"{self.__class__.__name__} must implement _execute_task()"
-        )
+        """Execute specific task type. Subclasses must override this."""
+        raise NotImplementedError(f"{self.__class__.__name__} must implement _execute_task()")
 
     async def collaborate_with(
         self,
@@ -280,7 +322,9 @@ class BaseCrewAgent:
         start_time = datetime.now()
 
         logger.info(
-            f"🤝 Collaboration started: {self.surname} + {other_agent.surname}"
+            "🤝 Collaboration started: %s + %s",
+            self.surname,
+            other_agent.surname
         )
 
         # Both agents process the collaborative task
@@ -358,8 +402,21 @@ class BaseCrewAgent:
             'glyph_liaison': self.glyph_liaison,
             'symbolic_tag': self.symbolic_tag,
             'model': self.model,
-            'uptime_hours': uptime / 3600
+            'uptime_hours': uptime / 3600,
+            't1_state': self.t1_state,
+            'srb_resolution': self.srb_resolution
         }
+
+    # Placeholder anchor progression utilities
+    def _advance_t1(self, increment: int) -> None:
+        """Advance temporal anchor placeholder by deterministic increment."""
+        self.t1_state += max(1, increment)
+
+    def _resolve_srb(self, boundary: str) -> None:
+        """Resolve spatial-relational boundary placeholder using hashed modulus."""
+        if not boundary:
+            boundary = "undefined"
+        self.srb_resolution = int(hashlib.sha256(boundary.encode()).hexdigest(), 16) % 100000
 
     def check_clearance(self, required_clearance: str) -> bool:
         """
@@ -408,7 +465,7 @@ _crew_agent_registry: Dict[str, BaseCrewAgent] = {}
 def register_crew_agent(agent: BaseCrewAgent) -> None:
     """Register a crew agent in the global registry."""
     _crew_agent_registry[agent.surname.lower()] = agent
-    logger.info(f"📋 Registered crew agent: {agent.surname}")
+    logger.info("📋 Registered crew agent: %s", agent.surname)
 
 
 def get_crew_agent(surname: str) -> Optional[BaseCrewAgent]:

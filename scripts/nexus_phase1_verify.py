@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 import json
 import hashlib
 from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
-import sys
+from src.core.time_utils import utc_iso, utc_now
+from typing import Dict, Tuple
 
+ 
 class NEXUSVerification:
     """
     Verify Phase 1 implementation and prepare for Phase 2 transition
@@ -45,7 +45,7 @@ class NEXUSVerification:
         ]
         
         verification_report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "components": {},
             "overall_status": "PASS",
@@ -87,7 +87,7 @@ class NEXUSVerification:
         verification_report["seal"] = report_hash
         
         # Save verification report
-        report_path = Path(f".nexus/verification/phase1_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        report_path = Path(f".nexus/verification/phase1_{utc_now().strftime('%Y%m%d_%H%M%S')}.json")
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(verification_report, indent=2))
         
@@ -118,7 +118,7 @@ class NEXUSVerification:
                         "seal": checkpoint.get("seal", "")[:16],
                         "timestamp": checkpoint.get("timestamp", "")
                     })
-                except:
+                except Exception:
                     continuity_check["continuity_intact"] = False
                     
         # Check for entities
@@ -132,7 +132,7 @@ class NEXUSVerification:
                         "type": entity.get("type", ""),
                         "seal": entity.get("seal", "")[:16]
                     })
-                except:
+                except Exception:
                     continuity_check["continuity_intact"] = False
                     
         return continuity_check["continuity_intact"], continuity_check
@@ -145,7 +145,7 @@ class NEXUSVerification:
             "phase": "NEXUS_PHASE_2",
             "anchor": "NEXUS-PHASE2-2025",
             "seed": "EOS_SEED_ORION",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "arbiter": "AUo959",
             "thread_continuation": "T1-NEXUS-INIT-20250925",
             "phase2_objectives": [
@@ -156,7 +156,7 @@ class NEXUSVerification:
                     "anchor": "T2-MULTIAGENT-2025"
                 },
                 {
-                    "id": "P2-002", 
+                    "id": "P2-002",
                     "name": "Quantum State Bridge",
                     "status": "READY_TO_IMPLEMENT",
                     "anchor": "T2-QUANTUM-2025"

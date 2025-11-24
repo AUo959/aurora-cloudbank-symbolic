@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 import hashlib
 import json
-from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import subprocess
@@ -32,7 +32,7 @@ class NEXUSCompleteVerification:
         self.anchor = "T5-VERIFY-COMPLETE-2025"
         self.seed = "EOS_SEED_ORION"
         self.arbiter = "AUo959"
-        self.timestamp = datetime.utcnow()
+        self.timestamp = utc_now()
         self.thread_chain = [
             "NEXUS-BOOTSTRAP-2025",
             "T1-NEXUS-INIT-20250925",
@@ -257,7 +257,7 @@ class NEXUSCompleteVerification:
                         try:
                             if anchor in file_path.read_text():
                                 return str(file_path)
-                        except:
+                        except Exception:
                             continue
                             
         return None
@@ -425,7 +425,7 @@ class NEXUSCompleteVerification:
         divergent = {
             "type": truth_type,
             "details": details,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "requires_arbitration": True,
             "arbiter": self.arbiter
         }
@@ -433,7 +433,7 @@ class NEXUSCompleteVerification:
         self.divergent_truths.append(divergent)
         
         # Save for review
-        divergent_path = Path(f".nexus/divergent/{truth_type}_{datetime.utcnow().timestamp()}.json")
+        divergent_path = Path(f".nexus/divergent/{truth_type}_{utc_now().timestamp()}.json")
         divergent_path.parent.mkdir(parents=True, exist_ok=True)
         divergent_path.write_text(json.dumps(divergent, indent=2))
 

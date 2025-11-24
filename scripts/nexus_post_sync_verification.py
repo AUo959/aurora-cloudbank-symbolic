@@ -19,7 +19,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from typing import Dict, List, Optional, Tuple
 import sys
 
@@ -33,7 +33,7 @@ class NEXUSSyncVerifier:
         self.anchor = "T3-VERIFY-SYNC-2025"
         self.seed = "EOS_SEED_ORION"
         self.arbiter = "AUo959"
-        self.verification_timestamp = datetime.utcnow()
+        self.verification_timestamp = utc_now()
         self.sync_manifest = {}
         self.thread_state = {}
         self.entropy_snapshot = {}
@@ -166,13 +166,13 @@ class NEXUSSyncVerifier:
                     )
                     if result.returncode == 0:
                         return True
-                except:
+                except Exception:
                     # Fallback to Python search
                     for file_path in search_path.rglob("*.py"):
                         try:
                             if anchor in file_path.read_text():
                                 return True
-                        except:
+                        except Exception:
                             continue
                             
         return False
@@ -181,7 +181,7 @@ class NEXUSSyncVerifier:
         """Capture complete thread state for future resumption"""
         
         thread_state = {
-            "capture_timestamp": datetime.utcnow().isoformat(),
+            "capture_timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
@@ -294,7 +294,7 @@ class NEXUSSyncVerifier:
                     agent_registry["agent_types"][agent_type] = \
                         agent_registry["agent_types"].get(agent_type, 0) + 1
                     agent_registry["active_agents"].append(agent_data.get("id", ""))
-                except:
+                except Exception:
                     continue
                     
         return agent_registry
@@ -325,7 +325,7 @@ class NEXUSSyncVerifier:
         
         resumption_metadata = {
             "metadata_version": "3.1.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,

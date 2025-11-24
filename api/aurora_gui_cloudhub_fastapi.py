@@ -1443,7 +1443,7 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
         # Create intent from agent_id and capabilities
         # Secure construction of intent_query (avoid direct f-string interpolation of arbitrary capability text)
         sanitized_caps = [c.replace("'", "").replace(";", "") for c in req.capabilities]
-        intent_query = "Generate agent %s with capabilities: %s" % (
+        intent_query = "Generate agent {} with capabilities: {}".format(
             req.agent_id,
             ", ".join(sanitized_caps)
         )

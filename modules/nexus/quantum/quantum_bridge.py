@@ -103,7 +103,7 @@ class QuantumSymbolicBridge:
         fidelity = self._calculate_conversion_fidelity(state_vector, symbolic_anchor)
         
         if fidelity < self.fidelity_threshold:
-            logger.warning(f"Fidelity {fidelity:.4f} below threshold {self.fidelity_threshold}")
+            logger.warning("Fidelity %.4f below threshold %.4f", fidelity, self.fidelity_threshold)
             self._flag_low_fidelity_conversion(symbolic_anchor, fidelity)
             
         # Seal the anchor
@@ -118,7 +118,7 @@ class QuantumSymbolicBridge:
             "timestamp": utc_now().isoformat()
         })
         
-        logger.info(f"Quantum → Symbolic: {anchor_id[:16]}... (Fidelity: {fidelity:.4f})")
+        logger.info("Quantum → Symbolic: %s... (Fidelity: %.4f)", anchor_id[:16], fidelity)
         
         return symbolic_anchor
         
@@ -175,7 +175,7 @@ class QuantumSymbolicBridge:
             "timestamp": utc_now().isoformat()
         })
         
-        logger.info(f"Symbolic → Quantum: {quantum_state.state_id} (Fidelity: {quantum_state.fidelity:.4f})")
+        logger.info("Symbolic → Quantum: %s (Fidelity: %.4f)", quantum_state.state_id, quantum_state.fidelity)
         
         return quantum_state
         
@@ -232,7 +232,7 @@ class QuantumSymbolicBridge:
         
         self.entanglement_registry[entanglement_id] = entanglement
         
-        logger.info(f"Entanglement created: {entanglement_id} (Fidelity: {entanglement['bell_fidelity']:.4f})")
+        logger.info("Entanglement created: %s (Fidelity: %.4f)", entanglement_id, entanglement['bell_fidelity'])
         
         return entanglement
         
@@ -402,7 +402,7 @@ class QuantumSymbolicBridge:
         flag_path.parent.mkdir(parents=True, exist_ok=True)
         flag_path.write_text(json.dumps(flag, indent=2))
         
-        logger.warning(f"LOW FIDELITY: {anchor.anchor_id} requires arbitration")
+        logger.warning("LOW FIDELITY: %s requires arbitration", anchor.anchor_id)
         
     def export_bridge_manifest(self) -> Dict:
         """Export complete quantum bridge manifest"""

@@ -1,0 +1,72 @@
+{
+  "request_id": "example_request_001",
+  "mesh": {
+    "mesh_id": "mesh_4389923a2e76",
+    "created_at_utc": "2025-11-24T03:12:56.149782Z",
+    "anchor_seed": "EOS_SEED_ORION",
+    "ethics_protocol": "Picard_Delta_3",
+    "threads": [
+      {
+        "thread_id": "example_t1",
+        "source": "example_analysis",
+        "entropy_hint": 0.3,
+        "tags": [
+          "example",
+          "stable"
+        ],
+        "anchor_alignment": 0.8
+      },
+      {
+        "thread_id": "example_t2",
+        "source": "example_monitor",
+        "entropy_hint": 0.25,
+        "tags": [
+          "example",
+          "verified"
+        ],
+        "anchor_alignment": null
+      }
+    ],
+    "entropy_summary": {
+      "entropy_mean": 0.275,
+      "drift_flag": "stable",
+      "thread_count": 2,
+      "entropy_std": 0.024999999999999994
+    },
+    "mesh_manifest": {
+      "version": "1.0.0",
+      "export_time_utc": "2025-11-24T03:12:56.149870Z",
+      "anchor_seed": "EOS_SEED_ORION",
+      "ethics_protocol": "Picard_Delta_3",
+      "symbolic_tags": [
+        "example",
+        "tutorial"
+      ],
+      "dlp_tags": [
+        "public",
+        "demo"
+      ],
+      "state_hash": "sha256:4d583502f3f253e215eac73e08963f058d0adbe02b91516f84a6978e1d3913dc"
+    }
+  },
+  "echoes": [
+    {
+      "source": "example_echo",
+      "echo_text": "System operating normally",
+      "entropy_hint": 0.2,
+      "tags": [
+        "status",
+        "normal"
+      ]
+    }
+  ],
+  "forecast_horizon": "operational",
+  "forecast_focus": [
+    "stability",
+    "monitoring"
+  ],
+  "dlp_policy": {
+    "allow_explicit_failure_modes": true,
+    "allow_cross_thread_attribution": true
+  }
+}

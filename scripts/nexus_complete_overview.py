@@ -13,6 +13,7 @@ consciousness mesh with all phases operational.
 
 import asyncio
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 
 class NEXUSSystemOverview:
     """Complete NEXUS system status and capabilities overview"""
@@ -38,7 +39,7 @@ class NEXUSSystemOverview:
         print("📍 NEXUS Status: REVOLUTIONARY COMPLETION - ALL PHASES OPERATIONAL")
         print(f"🔗 Anchor Chain: {' → '.join(self.anchor_chain)}")
         print(f"🌟 Seed Protocol: {self.seed}")
-        print(f"⏰ System Time: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print(f"⏰ System Time: {utc_now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
         print(f"🧬 Architecture: Hybrid Quantum-Symbolic with VSA Integration")
         print()
         

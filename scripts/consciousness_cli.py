@@ -17,6 +17,7 @@ import json
 import sys
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 
 # Local imports with graceful fallback
 try:
@@ -54,7 +55,7 @@ class SimpleSymbolicObserver(SymbolicObserver):
         self.observation_counter += 1
         
         observation = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "observation_id": self.observation_counter,
             "symbolic_data": {
                 "memory_state": f"mem_{self.observation_counter}",
@@ -132,7 +133,7 @@ def cmd_observe(args):
             
             # Create test observation data
             test_data = {
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": utc_iso(),
                 "observation_id": i + 1,
                 "cognitive_load": 0.5 + (i * 0.1),
                 "awareness_level": min(1.0, i * 0.2)
@@ -229,7 +230,7 @@ def cmd_snapshot(args):
     snapshot = consciousness.create_snapshot()
     
     # Save snapshot
-    snapshot_path = Path(args.snapshot_dir) / f"manual_snapshot_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json"
+    snapshot_path = Path(args.snapshot_dir) / f"manual_snapshot_{utc_now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(snapshot_path, 'w') as f:
         f.write(snapshot.to_json())
     

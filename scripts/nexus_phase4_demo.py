@@ -19,6 +19,7 @@ import asyncio
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
+from src.core.time_utils import utc_iso, utc_now
 import json
 
 # Add project root to path
@@ -269,7 +270,7 @@ class Phase4Demonstrator:
         print(f"  📏 Max per agent: {manifest['max_memory_per_agent']:,} bytes")
         
         # Save manifest to file
-        manifest_path = Path(f".nexus/memory/manifest_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        manifest_path = Path(f".nexus/memory/manifest_{utc_now().strftime('%Y%m%d_%H%M%S')}.json")
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_text(json.dumps(manifest, indent=2, default=str))
         
@@ -285,7 +286,7 @@ class Phase4Demonstrator:
         print("=" * 60)
         print(f"Anchor: {self.anchor}")
         print(f"Seed: {self.seed}")
-        print(f"Timestamp: {datetime.utcnow().isoformat()}")
+        print(f"Timestamp: {utc_iso()}")
         print(f"Thread: T3-QUANTUM-2025 → T4-MEMORY-WEAVE-2025")
         
         # Run all demonstrations

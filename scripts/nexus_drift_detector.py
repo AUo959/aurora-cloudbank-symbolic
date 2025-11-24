@@ -250,7 +250,7 @@ class NEXUSDriftDetector:
 ╔════════════════════════════════════════════════════════════════════╗
 ║                    🔍 NEXUS DRIFT DETECTION REPORT                 ║
 ║                                                                     ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}                            ║
+║  Timestamp: {utc_now().strftime('%Y-%m-%d %H:%M:%S UTC')}                            ║
 ║  Anchor: {self.anchor}                                ║
 ║  Arbiter: {self.arbiter}                                                ║
 ║                                                                     ║

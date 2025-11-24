@@ -12,6 +12,7 @@ import json
 import hashlib
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from typing import Dict, List, Optional, Tuple
 import sys
 
@@ -25,7 +26,7 @@ class Phase2ReviewValidator:
         self.anchor = "T2-REVIEW-2025"
         self.seed = "EOS_SEED_ORION"
         self.arbiter = "AUo959"
-        self.review_timestamp = datetime.utcnow()
+        self.review_timestamp = utc_now()
         self.validation_results = []
         self.recommendations = []
         

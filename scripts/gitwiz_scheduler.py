@@ -26,6 +26,7 @@ import time
 
 # Configure logging
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Any, Dict
 import threading
@@ -123,7 +124,7 @@ class GitWizScheduler:
         """Save current scheduler status."""
         status = {
             "is_running": self.is_running,
-            "last_update": datetime.utcnow().isoformat(),
+            "last_update": utc_iso(),
             "last_run_times": self.last_run_times,
             "execution_stats": self.execution_stats,
             "next_scheduled_runs": self._get_next_runs(),
@@ -141,7 +142,7 @@ class GitWizScheduler:
 
     def _execute_gitwiz_command(self, command: str) -> Dict[str, Any]:
         """Execute a GitWiz command and return results."""
-        start_time = datetime.utcnow()
+        start_time = utc_now()
 
         try:
             # Construct full command
@@ -162,7 +163,7 @@ class GitWizScheduler:
                 check=False,
             )
 
-            execution_time = (datetime.utcnow() - start_time).total_seconds()
+            execution_time = (utc_now() - start_time).total_seconds()
 
             if result.returncode == 0:
                 logger.info("Command completed successfully in %ss", str(execution_time)[:100])
@@ -194,14 +195,14 @@ class GitWizScheduler:
             return {
                 "success": False,
                 "error": str(e),
-                "execution_time": (datetime.utcnow() - start_time).total_seconds(),
+                "execution_time": (utc_now() - start_time).total_seconds(),
                 "command": command,
             }
 
     def _run_scheduled_job(self, job_name: str, job_config: Dict[str, Any]):
         """Execute a scheduled maintenance job."""
         logger.info("🔄 Starting scheduled job: %s", str(job_name)[:100])
-        job_start = datetime.utcnow()
+        job_start = utc_now()
 
         job_results = {
             "job_name": job_name,
@@ -222,9 +223,9 @@ class GitWizScheduler:
                     break
 
         # Update statistics
-        execution_time = (datetime.utcnow() - job_start).total_seconds()
+        execution_time = (utc_now() - job_start).total_seconds()
         job_results["execution_time"] = execution_time
-        job_results["end_time"] = datetime.utcnow().isoformat()
+        job_results["end_time"] = utc_iso()
 
         self.execution_stats["total_runs"] += 1
         if job_results["overall_success"]:
@@ -237,7 +238,7 @@ class GitWizScheduler:
             self.execution_stats["avg_execution_time"] * (self.execution_stats["total_runs"] - 1) + execution_time
         ) / self.execution_stats["total_runs"]
 
-        self.last_run_times[job_name] = datetime.utcnow().isoformat()
+        self.last_run_times[job_name] = utc_iso()
 
         # Generate report if requested
         if job_config.get("generate_report", False):
@@ -270,7 +271,7 @@ class GitWizScheduler:
         if not self.config["notifications"]["enabled"]:
             return
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = utc_iso()
         notification = {"timestamp": timestamp, "message": message, "details": details}
 
         # Log notification

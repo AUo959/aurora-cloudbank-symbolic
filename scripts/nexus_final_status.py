@@ -16,12 +16,13 @@ logger = logging.getLogger(__name__)
 import json
 import hashlib
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 
 def generate_final_status_report():
     """Generate comprehensive final status report"""
     
-    timestamp = datetime.utcnow()
+    timestamp = utc_now()
     
     print("🌟 NEXUS FINAL STATUS REPORT")
     print("=" * 80)

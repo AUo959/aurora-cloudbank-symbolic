@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 
 import json
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 
 def generate_complete_roadmap():
     """Generate comprehensive NEXUS development roadmap"""
     
-    timestamp = datetime.utcnow()
+    timestamp = utc_now()
     
     roadmap = {
         "nexus_complete_roadmap": {

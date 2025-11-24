@@ -17,6 +17,7 @@ import numpy as np
 import sys
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 
 # Add project root to path
 sys.path.append('/workspaces/aurora-cloudbank-symbolic')
@@ -210,7 +211,7 @@ class Phase3Initializer:
             "version": "3.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "thread_continuity": "T2-MULTIAGENT-2025 → T3-QUANTUM-2025",
             "components": {
                 "quantum_bridge": bridge_manifest,
@@ -232,7 +233,7 @@ class Phase3Initializer:
         }
         
         # Save manifest
-        manifest_path = Path(f".nexus/manifests/phase3_manifest_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+        manifest_path = Path(f".nexus/manifests/phase3_manifest_{utc_now().strftime('%Y%m%d_%H%M%S')}.json")
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         
         import json
@@ -252,7 +253,7 @@ async def main():
     print(f"Anchor: T3-QUANTUM-2025")
     print(f"Seed: EOS_SEED_ORION")
     print(f"Thread: T2-MULTIAGENT-2025 → T3-QUANTUM-2025")
-    print(f"Timestamp: {datetime.utcnow().isoformat()}")
+    print(f"Timestamp: {utc_iso()}")
     
     initializer = Phase3Initializer()
     

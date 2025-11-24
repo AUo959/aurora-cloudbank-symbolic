@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Optional
 from typing import Any
 import datetime as dt
+from src.core.time_utils import utc_iso, utc_now
 import logging
 import json
 from typing import Dict
@@ -217,7 +218,7 @@ class LintCleanupManager:
         Returns:
             Dictionary containing scan results and discovered issues
         """
-        scan_start = dt.datetime.utcnow()
+        scan_start = utc_now()
         logger.info("🔍 Starting comprehensive lint scan...")
 
         if target_paths is None:
@@ -263,7 +264,7 @@ class LintCleanupManager:
         scan_results["summary"] = self._generate_scan_summary()
         scan_results["recommendations"] = self._generate_recommendations()
 
-        execution_time = (dt.datetime.utcnow() - scan_start).total_seconds()
+        execution_time = (utc_now() - scan_start).total_seconds()
         scan_results["execution_time"] = execution_time
 
         logger.info("✅ Lint scan completed in %ss", str(execution_time)[:100])
@@ -281,7 +282,7 @@ class LintCleanupManager:
         Returns:
             Dictionary containing fix results and statistics
         """
-        workflow_start = dt.datetime.utcnow()
+        workflow_start = utc_now()
         logger.info("🔧 Starting automated fix workflow (dry_run=%s)...", str(dry_run)[:100])
 
         workflow_results = {
@@ -338,7 +339,7 @@ class LintCleanupManager:
             if isinstance(stage, dict)
         )
 
-        execution_time = (dt.datetime.utcnow() - workflow_start).total_seconds()
+        execution_time = (utc_now() - workflow_start).total_seconds()
         workflow_results["execution_time"] = execution_time
 
         logger.info("✅ Automated fix workflow completed in %ss", str(execution_time)[:100])
@@ -395,7 +396,7 @@ class LintCleanupManager:
 
         # Header
         report_sections.append("# GitWiz Lint & Cleanup Manager Integration Report")
-        report_sections.append(f"Generated: {dt.datetime.utcnow().isoformat()}")
+        report_sections.append(f"Generated: {utc_iso()}")
         report_sections.append("")
 
         # Tool availability

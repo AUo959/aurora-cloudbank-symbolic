@@ -10,6 +10,7 @@ import asyncio
 import json
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 import sys
 
 # Add module path
@@ -24,7 +25,7 @@ async def demonstrate_phase2():
     print("="*60)
     print(f"Anchor: NEXUS-DEMO-P2-2025")
     print(f"Seed: EOS_SEED_ORION")
-    print(f"Timestamp: {datetime.utcnow().isoformat()}")
+    print(f"Timestamp: {utc_iso()}")
     print(f"Arbiter: AUo959")
     print("="*60)
     
@@ -206,7 +207,7 @@ async def main():
         # Save demonstration results
         demo_results = {
             "demonstration": "NEXUS_Phase_2_Complete",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": "NEXUS-DEMO-P2-2025",
             "status": "SUCCESS",
             "manifest": manifest

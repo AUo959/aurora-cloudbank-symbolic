@@ -12,12 +12,13 @@ logger = logging.getLogger(__name__)
 
 import json
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 
 def generate_implementation_summary():
     """Generate comprehensive implementation summary"""
     
-    timestamp = datetime.utcnow()
+    timestamp = utc_now()
     
     summary = {
         "implementation_summary": {

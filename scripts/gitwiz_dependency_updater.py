@@ -13,6 +13,7 @@ import json
 import subprocess
 import sys
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -272,7 +273,7 @@ class DependencyAutoUpdater:
     def execute_comprehensive_update(self, dry_run: bool = True) -> Dict[str, Any]:
         """Execute comprehensive dependency update workflow."""
         workflow_result = {
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": utc_iso(),
             "backup_created": False,
             "python_scan": {},
             "node_scan": {},
@@ -314,7 +315,7 @@ class DependencyAutoUpdater:
             workflow_result["python_update"]["success"] and workflow_result["node_update"]["success"]
         )
 
-        workflow_result["end_time"] = datetime.utcnow().isoformat()
+        workflow_result["end_time"] = utc_iso()
 
         print("\n" + "=" * 60)
         if workflow_result["success"]:

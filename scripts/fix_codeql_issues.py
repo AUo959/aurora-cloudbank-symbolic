@@ -14,6 +14,7 @@ import re
 import ast
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 import hashlib
 import json
 from typing import List, Dict, Tuple
@@ -26,7 +27,7 @@ class CodeQLSecurityFixer:
         
     def backup_file(self, file_path: Path) -> str:
         """Create backup of file before modification"""
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = utc_now().strftime("%Y%m%d_%H%M%S")
         self.backup_dir.mkdir(exist_ok=True)
         
         backup_path = self.backup_dir / f"{file_path.name}_{timestamp}.bak"
@@ -277,7 +278,7 @@ class CodeQLSecurityFixer:
         # Generate fixes manifest
         fixes_manifest = {
             "anchor": self.anchor,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "total_fixes": len(all_fixes),
             "fixes_by_type": {
                 "yaml_load": len(yaml_fixes),

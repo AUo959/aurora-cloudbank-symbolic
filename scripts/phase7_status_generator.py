@@ -12,13 +12,14 @@ Ethics Protocol: Picard_Delta_3
 import json
 import hashlib
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Dict, List
 
 def generate_phase7_status_report() -> Dict:
     """Generate comprehensive Phase 7 status report"""
     
-    timestamp = datetime.utcnow()
+    timestamp = utc_now()
     
     status = {
         "status_version": "7.1.0",
@@ -217,7 +218,7 @@ def main():
     print(f"🔒 Seal: {status['seal'][:32]}...")
     
     # Save report
-    report_path = Path(f".nexus/status/phase7_status_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.json")
+    report_path = Path(f".nexus/status/phase7_status_{utc_now().strftime('%Y%m%d_%H%M%S')}.json")
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(status, indent=2))
     print(f"📁 Report saved to: {report_path}")

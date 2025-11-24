@@ -13,6 +13,7 @@ import os
 import yaml
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 import hashlib
 import json
 
@@ -24,7 +25,7 @@ class CodeQLConsolidator:
         
     def backup_existing_workflows(self):
         """Create timestamped backup with seal"""
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = utc_now().strftime("%Y%m%d_%H%M%S")
         self.backup_dir.mkdir(exist_ok=True)
         
         backup_manifest = {
@@ -251,7 +252,7 @@ echo "📋 Next: Commit unified workflow and push to trigger new analysis"
         # Step 5: Generate consolidation manifest
         consolidation_manifest = {
             "anchor": self.anchor,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "backup_seal": backup_seal,
             "unified_workflow": unified_path,
             "removed_workflows": removed_files,

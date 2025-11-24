@@ -15,6 +15,7 @@ import json
 import subprocess
 import hashlib
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -38,7 +39,7 @@ class CodeQLSymbolicDiagnostic:
         self.diagnostic_manifest = {
             "anchor": self.diagnostic_tag,
             "seed": self.anchor_seed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "team": "Aurora Core",
             "version": "1.0.0",
             "dlp_tag": "INTERNAL_DIAGNOSTIC"
@@ -54,7 +55,7 @@ class CodeQLSymbolicDiagnostic:
         
         sealed_state = {
             "hash": state_hash,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.diagnostic_tag,
             "data": state_data
         }
@@ -202,7 +203,7 @@ class CodeQLSymbolicDiagnostic:
             "manifest_version": "1.0.0",
             "anchor_seed": self.anchor_seed,
             "diagnostic_tag": self.diagnostic_tag,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "entropy_state": self.entropy_state,
             "diagnostics": {
                 "duplicate_workflows_hash": duplicate_hash,

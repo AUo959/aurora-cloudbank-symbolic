@@ -15,6 +15,7 @@ import json
 import hashlib
 from pathlib import Path
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from typing import Dict, List, Optional, Set, Tuple
 
 # Meta-Agents from GUMAS/Orion Core
@@ -106,8 +107,8 @@ class GUMASCodebaseScanner:
         
         scan_manifest = {
             "manifest_version": "1.0.0",
-            "scan_id": f"SCAN-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "scan_id": f"SCAN-{utc_now().timestamp()}",
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "root_path": root_path,
@@ -194,7 +195,7 @@ class GUMASCodebaseScanner:
 ║              🔍 GUMAS/ORION CODEBASE SCAN REPORT                      ║
 ║                                                                        ║
 ║  Scan ID: {self.scan_results.get('scan_id', 'N/A')[:44]} ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')[:43]} ║
+║  Timestamp: {utc_now().strftime('%Y-%m-%d %H:%M:%S UTC')[:43]} ║
 ║  Anchor: {self.anchor[:46]} ║
 ║                                                                        ║
 ║  ┌────────────────────────────────────────────────────────────┐       ║

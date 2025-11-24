@@ -8,12 +8,13 @@ Seed: EOS_SEED_ORION
 import json
 import hashlib
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 
 def generate_gumas_orion_glyphcard():
     """Generate comprehensive GUMAS/Orion status glyphcard"""
     
-    timestamp = datetime.utcnow()
+    timestamp = utc_now()
     
     # Load test results if available
     results_path = Path(".nexus/tests/gumas_test_results.json")

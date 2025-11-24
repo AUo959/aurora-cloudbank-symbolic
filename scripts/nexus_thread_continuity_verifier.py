@@ -12,6 +12,7 @@ Ethics Protocol: Picard_Delta_3
 import hashlib
 import json
 from datetime import datetime, timedelta
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import subprocess
@@ -38,7 +39,7 @@ class ThreadContinuityVerifier:
         self.seed = "EOS_SEED_ORION"
         self.arbiter = "AUo959"
         self.ethics = "Picard_Delta_3"
-        self.timestamp = datetime.utcnow()
+        self.timestamp = utc_now()
         self.divergent_truths = []
         self.drift_events = []
         
@@ -94,7 +95,7 @@ class ThreadContinuityVerifier:
             "verified": False,
             "locations": [],
             "integrity": "UNKNOWN",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_iso()
         }
         
         # Search for anchor in codebase
@@ -253,7 +254,7 @@ class ThreadContinuityVerifier:
         
         divergent = {
             "truth": truth,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "requires_arbitration": True
         }
@@ -261,7 +262,7 @@ class ThreadContinuityVerifier:
         self.divergent_truths.append(divergent)
         
         # Save for arbitration
-        div_path = Path(f".nexus/divergent/thread_{datetime.utcnow().timestamp()}.json")
+        div_path = Path(f".nexus/divergent/thread_{utc_now().timestamp()}.json")
         div_path.parent.mkdir(parents=True, exist_ok=True)
         div_path.write_text(json.dumps(divergent, indent=2))
         

@@ -30,13 +30,13 @@ class GITWizWorkflowOrchestrator:
 
     def __init__(self, project_root: Path = None):
         self.project_root = project_root or Path.cwd()
-        self.start_time = datetime.utcnow()
+        self.start_time = utc_now()
         self.workflow_log = []
 
     def log_step(self, step: str, status: str, details: str = ""):
         """Log workflow step."""
         entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "step": step,
             "status": status,
             "details": details,
@@ -192,7 +192,7 @@ class GITWizWorkflowOrchestrator:
         workflow_result["overall_success"] = successful_stages == total_stages
 
         # Generate final report
-        end_time = datetime.utcnow()
+        end_time = utc_now()
         workflow_result["end_time"] = end_time.isoformat()
         workflow_result["duration_seconds"] = (
             end_time - self.start_time
@@ -216,7 +216,7 @@ class GITWizWorkflowOrchestrator:
         Returns:
             Dictionary containing enhanced workflow results
         """
-        workflow_start = datetime.utcnow()
+        workflow_start = utc_now()
         logger_prefix = "🚀 ENHANCED QUALITY WORKFLOW"
 
         print("{logger_prefix}")
@@ -407,7 +407,7 @@ class GITWizWorkflowOrchestrator:
             workflow_result
         )
 
-        execution_time = (datetime.utcnow() - workflow_start).total_seconds()
+        execution_time = (utc_now() - workflow_start).total_seconds()
         workflow_result["execution_time"] = execution_time
 
         print("\n" + "=" * 70)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 import json
 import sys
@@ -17,6 +18,7 @@ Built for consistency, clarity, and care.
 import json
 import sys
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Any, Dict
 
@@ -41,7 +43,7 @@ def generate_ci_summary():
     bandit_report = load_json_report("bandit_report.json")
 
     # Get current timestamp
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
 
     # Start building the summary
     summary_lines = [

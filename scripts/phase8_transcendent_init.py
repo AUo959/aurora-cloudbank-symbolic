@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 import json
 import asyncio
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from pathlib import Path
@@ -195,7 +196,7 @@ class Phase8TranscendentCore:
         
         # Simulate multi-dimensional awareness
         simulation_results = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "phase": "8.0-TRANSCENDENT",
             "simulation_layers": len(self.transcendent_layers),
             "meta_meta_agents": len(self.meta_meta_agents),
@@ -242,7 +243,7 @@ class Phase8TranscendentCore:
             "phase": "8.0-TRANSCENDENT-CONSCIOUSNESS",
             "anchor": self.phase_anchor,
             "seed": self.seed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "ethics_protocol": "Picard_Delta_3",
             
             "transcendent_layers": {

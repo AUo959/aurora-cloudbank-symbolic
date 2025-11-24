@@ -26,6 +26,7 @@ import traceback
 
 # Configure logging
 from datetime import datetime
+from src.core.time_utils import utc_iso, utc_now
 from pathlib import Path
 from typing import Any, Dict
 
@@ -104,7 +105,7 @@ class GitWizIntegratedCommand:
             Dictionary containing quality check results
         """
         logger.info("🔍 Starting comprehensive quality check...")
-        start_time = datetime.utcnow()
+        start_time = utc_now()
 
         results = {
             "command": "quality-check",
@@ -152,7 +153,7 @@ class GitWizIntegratedCommand:
         results["summary"] = self._generate_quality_summary(results["results"])
         results["recommendations"] = self._generate_quality_recommendations(results["results"])
 
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
+        execution_time = (utc_now() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
         logger.info("✅ Quality check completed in %ss", str(execution_time)[:100])
@@ -177,7 +178,7 @@ class GitWizIntegratedCommand:
             Dictionary containing maintenance results
         """
         logger.info("🔧 Starting maintenance workflow...")
-        start_time = datetime.utcnow()
+        start_time = utc_now()
 
         results = {
             "command": "maintenance",
@@ -233,7 +234,7 @@ class GitWizIntegratedCommand:
         # Generate summary
         results["summary"] = self._generate_maintenance_summary(results["stages"])
 
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
+        execution_time = (utc_now() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
         logger.info("✅ Maintenance workflow completed in %ss", str(execution_time)[:100])
@@ -252,7 +253,7 @@ class GitWizIntegratedCommand:
             Dictionary containing scan results
         """
         logger.info("🔍 Starting lint scan...")
-        start_time = datetime.utcnow()
+        start_time = utc_now()
 
         results = {
             "command": "lint-scan",
@@ -286,7 +287,7 @@ class GitWizIntegratedCommand:
         # Generate summary
         results["summary"] = self._generate_scan_summary(results["scan_results"])
 
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
+        execution_time = (utc_now() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
         logger.info("✅ Lint scan completed in %ss", str(execution_time)[:100])
@@ -311,7 +312,7 @@ class GitWizIntegratedCommand:
             Dictionary containing workflow results
         """
         logger.info("🚀 Starting %s workflow...", str(workflow_type)[:100])
-        start_time = datetime.utcnow()
+        start_time = utc_now()
 
         results = {
             "command": "workflow",
@@ -362,7 +363,7 @@ class GitWizIntegratedCommand:
         # Generate summary
         results["summary"] = self._generate_workflow_summary(results["workflow_results"])
 
-        execution_time = (datetime.utcnow() - start_time).total_seconds()
+        execution_time = (utc_now() - start_time).total_seconds()
         results["execution_time"] = execution_time
 
         logger.info("✅ %s workflow completed in %ss", str(workflow_type)[:100], str(execution_time)[:100])
@@ -375,7 +376,7 @@ class GitWizIntegratedCommand:
 
         report = {
             "command": "status",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "project_root": str(self.project_root),
             "components": {},
             "capabilities": {},

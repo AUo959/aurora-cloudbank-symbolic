@@ -1,0 +1,65 @@
+{
+  "module_name": "ORACULITH",
+  "module_type": "symbolic_forecast_engine",
+  "version": "1.0.0",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "team": "Aurora CloudBank Symbolic Core",
+  "export_time_utc": "2025-11-24T00:00:00Z",
+  "language": "Python",
+  "entrypoint": "symbolic.oraculith:OraculithEngine",
+  "description": "Anchored, DLP-aware symbolic forecasting over multi-thread CONSTELLINK meshes. Produces structured SymbolicForecast objects with metaphors, risk/entropy analysis, and hash-sealed manifests for reliquary indexing.",
+  "dependencies": {
+    "CONSTELLINK": "1.0.0"
+  },
+  "symbolic_tags": [
+    "oraculith",
+    "symbolic-forecast",
+    "metaphor-generation",
+    "risk-analysis",
+    "entropy-tracking"
+  ],
+  "dlp_tags": [
+    "forecast",
+    "mesh-consumer",
+    "hash-sealed",
+    "anchor-aligned"
+  ],
+  "spec_file": "symbolic_specs/Symbolic_Module_Specs_CONSTELLINK_ORACULITH.json",
+  "state_sealing": {
+    "hash_algorithm": "SHA256",
+    "seal_on_forecast": true,
+    "manifest_field": "forecast_manifest.state_hash",
+    "notes": "Each SymbolicForecast includes a SHA256 state_hash computed over the forecast payload (excluding the manifest itself). This hash ensures integrity and enables reliquary indexing."
+  },
+  "features": [
+    "Consumes ConstellinkMesh instances with entropy summaries",
+    "DLP policy enforcement (cross-thread attribution, explicit failure modes)",
+    "Deterministic metaphor generation based on risk/entropy",
+    "Anchor alignment computation",
+    "Divergent truth detection for inconsistencies",
+    "Hash-sealed forecast manifests",
+    "Human-readable glyphcard output"
+  ],
+  "usage_example": {
+    "python": [
+      "from symbolic.constellink import create_mesh, ThreadDescriptor",
+      "from symbolic.oraculith import OraculithEngine, OraculithForecastContext",
+      "",
+      "# Create a mesh",
+      "threads = [",
+      "    ThreadDescriptor(thread_id='t1', source='analysis', entropy_hint=0.2),",
+      "    ThreadDescriptor(thread_id='t2', source='forecast', entropy_hint=0.3)",
+      "]",
+      "mesh = create_mesh(threads)",
+      "",
+      "# Generate forecast",
+      "engine = OraculithEngine()",
+      "context = OraculithForecastContext(request_id='req1', mesh=mesh)",
+      "forecast = engine.forecast(context)",
+      "",
+      "print(forecast.metaphor)",
+      "print(forecast.glyphcard())"
+    ]
+  }
+}

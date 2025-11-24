@@ -1,0 +1,250 @@
+{
+  "spec_version": "1.0.0",
+  "spec_name": "CONSTELLINK_ORACULITH_Symbolic_Modules",
+  "created_at_utc": "2025-11-24T00:00:00Z",
+  "description": "Combined specification for CONSTELLINK mesh threading system and ORACULITH symbolic forecasting engine",
+  
+  "modules": {
+    "CONSTELLINK": {
+      "module_name": "CONSTELLINK",
+      "version": "1.0.0",
+      "description": "Multi-thread mesh creation and entropy tracking system for symbolic analysis",
+      "anchor_seed": "EOS_SEED_ORION",
+      "ethics_protocol": "Picard_Delta_3",
+      
+      "io_schemas": {
+        "ThreadDescriptor": {
+          "type": "object",
+          "description": "Descriptor for a single logical thread within a mesh",
+          "properties": {
+            "thread_id": {"type": "string", "description": "Unique identifier for this thread"},
+            "source": {"type": "string", "description": "Origin or label for the thread"},
+            "entropy_hint": {"type": "number", "description": "Optional entropy/complexity indicator (0.0-1.0)"},
+            "tags": {"type": "array", "items": {"type": "string"}, "description": "Symbolic tags for categorization"},
+            "anchor_alignment": {"type": "number", "description": "Optional alignment score with anchor protocols"}
+          },
+          "required": ["thread_id", "source"]
+        },
+        
+        "ConstellinkMesh": {
+          "type": "object",
+          "description": "A multi-thread symbolic mesh with entropy tracking and DLP compliance",
+          "properties": {
+            "mesh_id": {"type": "string", "description": "Unique mesh identifier"},
+            "created_at_utc": {"type": "string", "format": "date-time"},
+            "anchor_seed": {"type": "string", "description": "Anchor seed (default: EOS_SEED_ORION)"},
+            "ethics_protocol": {"type": "string", "description": "Ethics protocol (default: Picard_Delta_3)"},
+            "threads": {
+              "type": "array",
+              "items": {"$ref": "#/modules/CONSTELLINK/io_schemas/ThreadDescriptor"},
+              "description": "Collection of threads in this mesh"
+            },
+            "entropy_summary": {
+              "type": "object",
+              "description": "Aggregate entropy and drift metrics",
+              "properties": {
+                "entropy_mean": {"type": "number"},
+                "entropy_std": {"type": "number"},
+                "drift_flag": {"type": "string", "enum": ["stable", "moderate", "divergent", "unknown"]},
+                "thread_count": {"type": "integer"}
+              },
+              "required": ["entropy_mean", "drift_flag", "thread_count"]
+            },
+            "mesh_manifest": {
+              "type": "object",
+              "description": "DLP-aware manifest for mesh identity and integrity",
+              "properties": {
+                "version": {"type": "string"},
+                "export_time_utc": {"type": "string", "format": "date-time"},
+                "anchor_seed": {"type": "string"},
+                "ethics_protocol": {"type": "string"},
+                "symbolic_tags": {"type": "array", "items": {"type": "string"}},
+                "dlp_tags": {"type": "array", "items": {"type": "string"}},
+                "state_hash": {"type": "string", "description": "SHA256 hash of mesh payload"}
+              },
+              "required": ["version", "export_time_utc", "anchor_seed", "ethics_protocol", "state_hash"]
+            }
+          },
+          "required": ["mesh_id", "created_at_utc", "anchor_seed", "ethics_protocol", "threads", "entropy_summary", "mesh_manifest"]
+        }
+      },
+      
+      "metadata": {
+        "anchor_seed": "EOS_SEED_ORION",
+        "ethics_protocol": "Picard_Delta_3",
+        "dlp_tags": ["constellink", "mesh-threading", "entropy-tracking"],
+        "symbolic_tags": ["multi-thread", "mesh-topology", "symbolic-weave"],
+        "spec_state_hash": "sha256:placeholder_will_be_computed_on_finalization"
+      },
+      
+      "state_policies": {
+        "hash_algorithm": "SHA256",
+        "seal_on_creation": true,
+        "allow_unsealed_meshes": false,
+        "rehydration_notes_required": true
+      }
+    },
+    
+    "ORACULITH": {
+      "module_name": "ORACULITH",
+      "version": "1.0.0",
+      "description": "Symbolic forecast engine consuming CONSTELLINK meshes with DLP-aware analysis",
+      "anchor_seed": "EOS_SEED_ORION",
+      "ethics_protocol": "Picard_Delta_3",
+      
+      "io_schemas": {
+        "EchoDescriptor": {
+          "type": "object",
+          "description": "Additional reflective context for forecasting",
+          "properties": {
+            "source": {"type": "string", "description": "Origin of this echo"},
+            "thread_id": {"type": "string", "description": "Optional thread reference"},
+            "echo_text": {"type": "string", "description": "The reflective content"},
+            "entropy_hint": {"type": "number", "description": "Complexity indicator (0.0-1.0)"},
+            "tags": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["source", "echo_text"]
+        },
+        
+        "OraculithDlpPolicy": {
+          "type": "object",
+          "description": "DLP policy controls for forecast generation",
+          "properties": {
+            "allow_explicit_failure_modes": {"type": "boolean", "default": false},
+            "allow_cross_thread_attribution": {"type": "boolean", "default": false},
+            "sensitive_tags": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["allow_explicit_failure_modes", "allow_cross_thread_attribution"]
+        },
+        
+        "OraculithForecastContext": {
+          "type": "object",
+          "description": "Input context for forecast generation",
+          "properties": {
+            "request_id": {"type": "string", "description": "Unique request identifier"},
+            "mesh": {"$ref": "#/modules/CONSTELLINK/io_schemas/ConstellinkMesh"},
+            "echoes": {
+              "type": "array",
+              "items": {"$ref": "#/modules/ORACULITH/io_schemas/EchoDescriptor"},
+              "description": "Optional reflective context"
+            },
+            "forecast_horizon": {"type": "string", "description": "Temporal scope (e.g., 'near-term', 'strategic')"},
+            "forecast_focus": {"type": "array", "items": {"type": "string"}, "description": "Areas of focus"},
+            "dlp_policy": {"$ref": "#/modules/ORACULITH/io_schemas/OraculithDlpPolicy"},
+            "caller_context": {"type": "object", "description": "Optional caller metadata"}
+          },
+          "required": ["request_id", "mesh"]
+        },
+        
+        "SupportingSignals": {
+          "type": "object",
+          "description": "Evidence and signals supporting the forecast",
+          "properties": {
+            "dominant_threads": {"type": "array", "items": {"type": "string"}, "description": "Key thread identifiers"},
+            "dominant_echoes": {"type": "array", "items": {"type": "string"}, "description": "Key echo sources"},
+            "mesh_entropy_snapshot": {
+              "type": "object",
+              "description": "Snapshot of mesh entropy at forecast time",
+              "properties": {
+                "entropy_mean": {"type": "number"},
+                "entropy_std": {"type": "number"},
+                "drift_flag": {"type": "string"},
+                "thread_count": {"type": "integer"}
+              }
+            }
+          },
+          "required": ["mesh_entropy_snapshot"]
+        },
+        
+        "OraculithDlpEffectivePolicy": {
+          "type": "object",
+          "description": "Effective DLP policy applied during forecast",
+          "properties": {
+            "allow_explicit_failure_modes": {"type": "boolean"},
+            "allow_cross_thread_attribution": {"type": "boolean"},
+            "sensitive_tags": {"type": "array", "items": {"type": "string"}},
+            "policy_notes": {"type": "string", "description": "Explanation of policy application"}
+          },
+          "required": ["allow_explicit_failure_modes", "allow_cross_thread_attribution"]
+        },
+        
+        "MeshReference": {
+          "type": "object",
+          "description": "Reference to source mesh with integrity validation",
+          "properties": {
+            "mesh_id": {"type": "string"},
+            "mesh_state_hash": {"type": "string", "description": "SHA256 hash from mesh manifest"},
+            "anchor_seed": {"type": "string"},
+            "drift_flag": {"type": "string"}
+          },
+          "required": ["mesh_id", "mesh_state_hash", "anchor_seed", "drift_flag"]
+        },
+        
+        "ForecastManifest": {
+          "type": "object",
+          "description": "DLP manifest for forecast integrity and traceability",
+          "properties": {
+            "version": {"type": "string"},
+            "export_time_utc": {"type": "string", "format": "date-time"},
+            "anchor_seed": {"type": "string"},
+            "ethics_protocol": {"type": "string"},
+            "symbolic_tags": {"type": "array", "items": {"type": "string"}},
+            "dlp_tags": {"type": "array", "items": {"type": "string"}},
+            "state_hash": {"type": "string", "description": "SHA256 hash of forecast payload"}
+          },
+          "required": ["version", "export_time_utc", "anchor_seed", "ethics_protocol", "state_hash"]
+        },
+        
+        "SymbolicForecast": {
+          "type": "object",
+          "description": "Complete symbolic forecast with DLP compliance and hash sealing",
+          "properties": {
+            "forecast_id": {"type": "string"},
+            "created_at_utc": {"type": "string", "format": "date-time"},
+            "anchor_seed": {"type": "string"},
+            "ethics_protocol": {"type": "string"},
+            "metaphor": {"type": "string", "description": "Central symbolic metaphor"},
+            "summary": {"type": "string", "description": "Optional literal summary"},
+            "risk_level": {"type": "string", "enum": ["low", "medium", "high", "unknown"]},
+            "entropy_trend": {"type": "string", "enum": ["rising", "falling", "stable", "unknown"]},
+            "anchor_alignment": {"type": "number", "description": "Alignment score (0.0-1.0)"},
+            "focus": {"type": "array", "items": {"type": "string"}},
+            "supporting_signals": {"$ref": "#/modules/ORACULITH/io_schemas/SupportingSignals"},
+            "dlp_effective_policy": {"$ref": "#/modules/ORACULITH/io_schemas/OraculithDlpEffectivePolicy"},
+            "divergent_truths": {"type": "array", "items": {"type": "string"}, "description": "Inconsistencies or ambiguities"},
+            "caller_context": {"type": "object"},
+            "mesh_reference": {"$ref": "#/modules/ORACULITH/io_schemas/MeshReference"},
+            "forecast_manifest": {"$ref": "#/modules/ORACULITH/io_schemas/ForecastManifest"}
+          },
+          "required": [
+            "forecast_id", "created_at_utc", "anchor_seed", "ethics_protocol",
+            "metaphor", "risk_level", "entropy_trend", "supporting_signals",
+            "dlp_effective_policy", "mesh_reference", "forecast_manifest"
+          ]
+        }
+      },
+      
+      "metadata": {
+        "anchor_seed": "EOS_SEED_ORION",
+        "ethics_protocol": "Picard_Delta_3",
+        "dlp_tags": ["oraculith", "symbolic-forecast", "mesh-consumer"],
+        "symbolic_tags": ["forecasting", "metaphor-generation", "risk-analysis"],
+        "spec_state_hash": "sha256:placeholder_will_be_computed_on_finalization"
+      },
+      
+      "state_policies": {
+        "hash_algorithm": "SHA256",
+        "seal_on_forecast": true,
+        "allow_unsealed_forecasts": false,
+        "rehydration_notes_required": true
+      }
+    }
+  },
+  
+  "cross_module_dependencies": {
+    "ORACULITH_consumes_CONSTELLINK": {
+      "description": "ORACULITH forecasts require a valid ConstellinkMesh as input",
+      "validation": "OraculithForecastContext.mesh must be a valid ConstellinkMesh with sealed manifest"
+    }
+  }
+}

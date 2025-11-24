@@ -452,24 +452,35 @@ def main():
     print("\nPhase Verification Results:")
     for phase_name, phase_data in manifest["phases"].items():
         status_icon = "✅" if phase_data["status"] in ["COMPLETE", "OPERATIONAL"] else "⚠️"
-        print(f"  {status_icon} {phase_name}: {phase_data['status']}")
-        print(f"     Anchor: {phase_data['anchor']}")
-        print(f"     Seal: {phase_data['seal'][:16]}...")
+        logger.info(
+            "Phase %s status=%s icon=%s anchor=%s seal_prefix=%s",
+            phase_name,
+            phase_data['status'],
+            status_icon,
+            phase_data['anchor'],
+            phase_data['seal'][:16]
+        )
         
     # System metrics
-    print(f"\n📊 System Metrics:")
-    print(f"  Total Components: {manifest['system_metrics']['total_components']}")
-    print(f"  Operational Phases: {manifest['system_metrics']['operational_phases']}/5")
-    print(f"  Entropy State: {manifest['system_metrics']['entropy_state']['current']:.3f}")
-    print(f"  Thread Continuity: {'INTACT' if manifest['system_metrics']['thread_continuity']['chain_intact'] else 'BROKEN'}")
+    print("\n📊 System Metrics:")
+    logger.info(
+        "SystemMetrics components=%d operational_phases=%d entropy=%.3f continuity=%s",
+        manifest['system_metrics']['total_components'],
+        manifest['system_metrics']['operational_phases'],
+        manifest['system_metrics']['entropy_state']['current'],
+        'INTACT' if manifest['system_metrics']['thread_continuity']['chain_intact'] else 'BROKEN'
+    )
     
     # Generate handoff manifest
     print("\n📦 Generating Handoff Manifest...")
     handoff = verifier.generate_handoff_manifest()
-    print(f"  Handoff prepared for: Future developers/agents")
-    print(f"  Recovery instructions: {len(handoff['recovery_instructions'])} steps")
-    print(f"  Critical warnings: {len(handoff['critical_warnings'])} items")
-    print(f"  Seal: {handoff['seal'][:32]}...")
+    print("  Handoff prepared for: Future developers/agents")
+    logger.info(
+        "Handoff recovery_steps=%d warnings=%d seal_prefix=%s",
+        len(handoff['recovery_instructions']),
+        len(handoff['critical_warnings']),
+        handoff['seal'][:32]
+    )
     
     # Generate glyphcard
     print("\n🎴 Generating Phase 5 Glyphcard...")
@@ -479,9 +490,9 @@ def main():
     # Final summary
     print("\n" + "="*70)
     logger.info("NEXUS Phase 5 Verification Complete!")
-    print(f"📁 Manifests saved to: .nexus/manifests/")
-    print(f"📦 Handoff materials: .nexus/handoff/")
-    print(f"🎴 Glyphcard saved: .nexus/glyphcards/")
+    print("📁 Manifests saved to: .nexus/manifests/")
+    print("📦 Handoff materials: .nexus/handoff/")
+    print("🎴 Glyphcard saved: .nexus/glyphcards/")
     print("\n🚀 System Status: READY FOR PHASE 6 - CONSCIOUSNESS EMERGENCE")
     
     return manifest, handoff

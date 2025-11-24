@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from src.core.time_utils import utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -299,7 +300,7 @@ class AuditLogger:
         
         entry = AuditEntry(
             id=f"AUDIT-{self._next_id:08d}",
-            timestamp=datetime.utcnow().isoformat(),
+            timestamp=utc_now().isoformat(),
             event_type=event_type,
             agent_id=agent_id,
             severity=severity,

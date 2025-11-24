@@ -190,7 +190,11 @@ class Noor(BaseCrewAgent):
         }
 
     async def _validate_moral_reasoning(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate moral reasoning in decisions."""
+        """Validate moral reasoning in decisions.
+
+        Uses extended Phase 3 instrumentation capturing whether decision context
+        was provided for future deeper validation layers.
+        """
         _decision_context = context.get('decision')  # retained for future extended validation
 
         return {

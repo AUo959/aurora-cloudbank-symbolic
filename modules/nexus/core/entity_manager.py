@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from enum import Enum
 from dataclasses import dataclass, field
+from src.core.time_utils import utc_now
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +53,8 @@ class NexusEntity:
     entanglements: List[str] = field(default_factory=list)
     memory_keys: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    last_heartbeat: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=utc_now)
+    last_heartbeat: datetime = field(default_factory=utc_now)
     dlp_tag: str = "GENERAL"
     
     def to_dict(self) -> Dict:
@@ -106,15 +108,17 @@ class EntityManager:
         # Load existing entities
         self._load_entities()
     
-    def spawn_entity(self,
-                     entity_type: EntityType,
-                     capabilities: List[str] = None,
-                     dlp_tag: str = "GENERAL",
-                     metadata: Dict[str, Any] = None) -> NexusEntity:
+    def spawn_entity(
+        self,
+        entity_type: EntityType,
+        capabilities: List[str] | None = None,
+        dlp_tag: str = "GENERAL",
+        metadata: Dict[str, Any] | None = None,
+    ) -> NexusEntity:
         """Spawn a new entity in the mesh"""
         
         # Generate unique entity ID
-        timestamp = datetime.utcnow().timestamp()
+        timestamp = utc_now().timestamp()
         entity_id = f"{entity_type.value}_{timestamp}"
         
         # Create symbolic anchor
@@ -146,9 +150,11 @@ class EntityManager:
         """Retrieve entity by ID"""
         return self.entities.get(entity_id)
     
-    def list_entities(self,
-                      entity_type: Optional[EntityType] = None,
-                      state: Optional[EntityState] = None) -> List[NexusEntity]:
+    def list_entities(
+        self,
+        entity_type: Optional[EntityType] = None,
+        state: Optional[EntityState] = None,
+    ) -> List[NexusEntity]:
         """List entities with optional filtering"""
         entities = list(self.entities.values())
         
@@ -168,7 +174,7 @@ class EntityManager:
         entity = self.entities[entity_id]
         old_state = entity.state
         entity.state = new_state
-        entity.last_heartbeat = datetime.utcnow()
+        entity.last_heartbeat = utc_now()
         
         # Log state transition
         self._log_state_transition(entity_id, old_state, new_state)
@@ -178,8 +184,12 @@ class EntityManager:
         
         return True
     
-    def entangle_entities(self, entity_a_id: str, entity_b_id: str, 
-                         entanglement_type: str = "bidirectional") -> Optional[str]:
+    def entangle_entities(
+        self,
+        entity_a_id: str,
+        entity_b_id: str,
+        entanglement_type: str = "bidirectional",
+    ) -> Optional[str]:
         """Create entanglement between two entities"""
         
         if entity_a_id not in self.entities or entity_b_id not in self.entities:
@@ -190,7 +200,7 @@ class EntityManager:
         
         # Generate entanglement ID
         entanglement_id = hashlib.sha256(
-            f"{entity_a_id}_{entity_b_id}_{datetime.utcnow()}".encode()
+            f"{entity_a_id}_{entity_b_id}_{utc_now()}".encode()
         ).hexdigest()[:16]
         
         # Create entanglement record
@@ -199,7 +209,7 @@ class EntityManager:
             "entity_a": entity_a_id,
             "entity_b": entity_b_id,
             "type": entanglement_type,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": utc_now().isoformat(),
             "strength": 1.0,
             "anchor": f"ENTANGLE-{entanglement_id}"
         }
@@ -233,9 +243,11 @@ class EntityManager:
                 entanglement = self.entanglement_registry[entanglement_id]
                 
                 # Find the other entity in the entanglement
-                other_entity_id = (entanglement["entity_b"] if 
-                                 entanglement["entity_a"] == entity_id else 
-                                 entanglement["entity_a"])
+                other_entity_id = (
+                    entanglement["entity_b"]
+                    if entanglement["entity_a"] == entity_id
+                    else entanglement["entity_a"]
+                )
                 
                 if other_entity_id in self.entities:
                     entangled_entities.append(self.entities[other_entity_id])
@@ -247,7 +259,7 @@ class EntityManager:
         if entity_id not in self.entities:
             return False
         
-        self.entities[entity_id].last_heartbeat = datetime.utcnow()
+        self.entities[entity_id].last_heartbeat = utc_now()
         self._save_entity(self.entities[entity_id])
         return True
     
@@ -349,7 +361,7 @@ class EntityManager:
     def _log_state_transition(self, entity_id: str, old_state: EntityState, new_state: EntityState):
         """Log entity state transition"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "entity_id": entity_id,
             "old_state": old_state.value,
             "new_state": new_state.value,
@@ -369,7 +381,7 @@ class EntityManager:
             "manifest_version": "1.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "team": "Aurora Core",
             "total_entities": len(self.entities),
             "active_entities": len([e for e in self.entities.values() if e.state == EntityState.ACTIVE]),

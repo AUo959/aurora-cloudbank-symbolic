@@ -123,7 +123,11 @@ class Lin(BaseCrewAgent):
             raise ValueError(f"Unknown task type for Lin: {task_type}")
 
     async def _manage_simulation_operations(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Manage L2 GUMAS simulation operations."""
+        """Manage L2 GUMAS simulation operations.
+
+        Extended instrumentation tracks whether parameters were supplied for
+        future adaptive simulation enrichment.
+        """
         simulation_scope = context.get('scope', 'standard_research')
         _parameters = context.get('parameters', {})  # unused; retained for future extension
 

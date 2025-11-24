@@ -16,6 +16,7 @@ Functions don't execute - Entities experience events.
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
+from src.core.time_utils import utc_now, utc_iso
 from enum import Enum
 from typing import Any, Dict, List, Optional
 import hashlib
@@ -95,7 +96,7 @@ class Event:
     # Core Identity
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     event_type: EventType = EventType.DATA_ANALYSIS_REQUEST
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=utc_now)
     
     # Spatial Context (WHERE in Orion Station)
     location: StationLocation = StationLocation.RESEARCH_LAB_GAMMA
@@ -373,7 +374,7 @@ class EventSystem:
             "status": "denied",
             "reason": reason,
             "audit": audit_metadata or {},
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
         }
         event.memory_references = []
         event.pattern_connections = []
@@ -427,7 +428,7 @@ class EventSystem:
         """
         return {
             "system_type": "Aurora-Orion Living Event System",
-            "export_timestamp": datetime.utcnow().isoformat(),
+            "export_timestamp": utc_iso(),
             "temporal_state": {
                 "t1_anchor": self.t1_state,
                 "srb_anchor": self.srb_state

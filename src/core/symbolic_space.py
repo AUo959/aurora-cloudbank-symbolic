@@ -17,7 +17,7 @@ Living computation executes IN Orion Station's symbolic space.
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from src.core.time_utils import utc_now
 
 from src.core.event_system import EventSystem, StationLocation
 from src.entities.aurora_agent import get_aurora
@@ -70,7 +70,7 @@ class SymbolicSpace:
         self.caelion = get_caelion()
         
         # Station-wide state
-        self.station_initialized_at = datetime.utcnow()
+        self.station_initialized_at = utc_now()
         self.total_operations = 0
         self.total_collaborations = 0
         
@@ -252,7 +252,7 @@ class SymbolicSpace:
             overall_status = "healthy"
         
         # Calculate event throughput
-        uptime_minutes = (datetime.utcnow() - self.station_initialized_at).total_seconds() / 60.0
+        uptime_minutes = (utc_now() - self.station_initialized_at).total_seconds() / 60.0
         event_throughput = self.total_operations / uptime_minutes if uptime_minutes > 0 else 0.0
         
         return StationHealth(
@@ -290,7 +290,7 @@ class SymbolicSpace:
                 "initialized_at": self.station_initialized_at.isoformat(),
                 "total_operations": self.total_operations,
                 "total_collaborations": self.total_collaborations,
-                "uptime_minutes": (datetime.utcnow() - self.station_initialized_at).total_seconds() / 60.0
+                "uptime_minutes": (utc_now() - self.station_initialized_at).total_seconds() / 60.0
             },
             "anchors": {
                 "t1_anchor": self.global_t1_anchor,
@@ -324,11 +324,11 @@ class SymbolicSpace:
         return {
             "manifest_type": "symbolic_space_state",
             "manifest_version": "1.0.0",
-            "generated_at": datetime.utcnow().isoformat(),
+            "generated_at": utc_now().isoformat(),
             "station_state": self.get_dashboard_data(),
             "event_timeline": self.event_system.get_event_history(),
             "dlp_compliance": {
-                "context_tag": f"symbolic_space_export_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                "context_tag": f"symbolic_space_export_{utc_now().strftime('%Y%m%d_%H%M%S')}",
                 "anchor_state": {
                     "t1": self.global_t1_anchor,
                     "srb": self.global_srb_anchor

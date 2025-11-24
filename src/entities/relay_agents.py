@@ -17,6 +17,7 @@ and autonomous corrections.
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+from src.core.time_utils import utc_now, utc_iso
 
 from src.core.event_system import Event, StationLocation
 
@@ -57,7 +58,7 @@ class ArchitectureViolation:
     location: str
     description: str
     suggestion: str
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=utc_now)
 
 
 class HALOEntity:
@@ -190,7 +191,7 @@ class HALOEntity:
             },
             "suggested_corrections": corrections,
             "l3_considered": l3_assessment is not None,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_iso()
         }
     
     def suggest_correction(self, drift_metrics: DriftMetrics) -> str:
@@ -383,7 +384,7 @@ class ARCHYEntity:
                 for v in violations
             ],
             "l3_considered": l3_assessment is not None,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_iso()
         }
     
     def enforce_pattern(self, pattern_name: str, data: Dict[str, Any]) -> bool:
@@ -484,5 +485,5 @@ async def l2_verification(
         "reasoning": reasoning,
         "halo_assessment": halo_assessment,
         "archy_assessment": archy_assessment,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": utc_iso()
     }

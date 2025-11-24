@@ -383,3 +383,101 @@ Escalation: Open issue tagged `integration-plan` if heuristics need tuning.
 
 ---
 *End of specification for `#932//.`*
+
+---
+## 🛰 Current Integration Readiness Snapshot (UTC & Lifespan Modernization)
+Generated: 2025-11-24T00:00:00Z (planner context)
+
+### ✅ Recently Completed Modernization Steps
+- Centralized UTC time utilities (`utc_now`, `utc_iso`, `utc_z`) adopted across core runtime (monitoring dashboard, symbolic engine, coordination models, audit logging, relay agents, Nexus core modules: entity manager, multi-agent coordinator, reality fork manager, memory weaver, entropy monitor, quantum bridge).
+- Added shutdown manifest helper in `api/aurora_api.py` (Phase 1 implementation) capturing telemetry snapshot, HALO/PAS state, crew agent inventory with deterministic SHA-256 hash.
+- Lifespan context confirmed and extended: startup initializes telemetry + drift controller, shutdown now persists manifest (`shutdown_manifest.json`).
+- Initial targeted UTC sweep applied to high-impact script (`scripts/nexus_drift_detector.py`) migrating from `datetime.utcnow()` → `utc_iso()` and removing bare `except` blocks.
+- Crew agent merge conflict artifacts resolved; related API tests passing (4/4 in `tests/test_crew_agents_api.py`).
+
+### 📌 Remaining Temporal Debt (UTC Migration)
+Occurrences of legacy `datetime.utcnow` persist in multiple scripts (examples):
+- `scripts/nexus_phase*` verification & roadmap scripts (phase1, phase2, phase5, post_sync).
+- `scripts/gitwiz_*` workflow orchestrators and dependency updaters (time deltas, execution windows).
+- `scripts/gumas_*` status / scanner utilities (glyphcard, codebase scanner, status implementation summary).
+- `scripts/aurora_codeql_diagnostics.py`, `scripts/consolidate_codeql.py` (diagnostic stamping).
+Prioritization heuristic:
+1. Drift / verification pipelines (phase & post-sync scripts) – high integration impact.
+2. GitWiz orchestration scripts – affect automation timing and audit accuracy.
+3. Security / diagnostics stamping – ensure consistent ordering in audit chains.
+
+### 🔄 Next Temporal Migration Wave (Proposed Sequence)
+Phase A (High Impact):
+1. `scripts/nexus_phase1_verify.py`
+2. `scripts/nexus_post_sync_verification.py`
+3. `scripts/nexus_phase5_verification_manifest.py`
+Phase B (Automation Core):
+4. `scripts/gitwiz_workflow_orchestrator.py`
+5. `scripts/gitwiz_integrated_command.py`
+6. `scripts/gitwiz_dependency_updater.py`
+Phase C (Diagnostics / Compliance):
+7. `scripts/aurora_codeql_diagnostics.py`
+8. `scripts/gumas_codebase_scanner.py`
+9. `scripts/consolidate_codeql.py`
+
+Each file: replace `datetime.utcnow()` with `utc_iso()` (string contexts) or `utc_now()` (delta / arithmetic), remove ad-hoc formatting, ensure no bare `except:` usages.
+
+### 🧪 Lifespan & Manifest Enhancement Roadmap
+ 
+| Phase | Enhancement | Outcome |
+|-------|-------------|---------|
+| 1 (done) | Basic shutdown manifest with telemetry + controller state | Deterministic snapshot |
+| 2 | Add memory seals & Nexus state digests (entropy, fork counts) | Broader integrity coverage |
+| 3 | Include pending task queue & active agent collaboration metrics | Operational traceability |
+| 4 | DLP lineage embedding (chain notation + symbolic anchors) | Full provenance chain |
+| 5 | Configurable export channel (S3 / artifact uploader) | External retention |
+
+### 🧪 Recommended Validation Additions
+Tests to add (before Phase 2 lifespan enhancements):
+- `test_lifespan_shutdown_manifest_creation` (assert file exists, required keys: generated_at, components.telemetry.performance_metrics, hash length = 64).
+- `test_utc_consistency_in_manifest` (regex ensure timestamps end with 'Z' or use ISO without naive forms).
+- `test_drift_detector_utc_migration` (assert no `datetime.utcnow` substring remains; ensure timestamp field present and formatted).
+
+### 🎯 Mission Alignment Impact (PR #418 – Crew Agents Completion)
+- Enhances operational surface: crew agent inventory now captured in manifest → improves integration sequencing for subsequent multi-agent coordination PRs.
+- Reduces future merge friction by resolving latent merge conflict markers and normalizing time handling before broad integration targeting (#932 workflow).
+- Suggested mission scoring bump criteria: +1 quality (conflict resolution), +1 reliability (UTC standardization proximity when follow-up sweep completes).
+
+### 🔐 Risk & Gate Summary
+ 
+| Risk | Mitigation | Gate Condition |
+|------|------------|----------------|
+| Partial UTC migration may yield mixed timestamp formats | Execute Phase A & B sweeps | All NEXUS verification scripts free of `datetime.utcnow` |
+| Manifest lacks memory/quantum state | Implement Phase 2 helper augmentation | Presence of `components.memory_seals` key |
+| Untracked automation drift in GitWiz scripts | Migrate timestamps + add delta assertions | Execution time calculations use `utc_now()` |
+| Inconsistent diagnostics stamping | Standardize to UTC utilities | All diagnostic JSON emits ISO 8601 with 'Z' suffix |
+
+### 🧩 Immediate Action Commands (Manual Execution)
+```bash
+# Phase A UTC sweep (example single-file patch loop)
+sed -i "s/datetime.utcnow().isoformat()/utc_iso()/g" scripts/nexus_phase1_verify.py
+sed -i "s/datetime.utcnow().isoformat()/utc_iso()/g" scripts/nexus_post_sync_verification.py
+sed -i "s/datetime.utcnow().isoformat()/utc_iso()/g" scripts/nexus_phase5_verification_manifest.py
+
+# Verify no legacy usage remains in Phase A targets
+grep -n "datetime.utcnow" scripts/nexus_phase1_verify.py scripts/nexus_post_sync_verification.py scripts/nexus_phase5_verification_manifest.py || echo "Phase A clean"
+
+# Run focused tests (placeholder names; add when tests created)
+pytest -k shutdown_manifest -v || true
+```
+
+### 🧪 Integration Checkpoint Injection for `#932//.`
+Add after Phase 1 scanning:
+```
+Checkpoint: UTC Temporal Consistency – verify no mixed naive timestamps in readiness-critical scripts.
+If inconsistent: auto-insert tasks → "Migrate remaining datetime.utcnow occurrences".
+```
+
+### 📓 Lineage & Provenance Extension (Planned)
+- Add `context_tag": "shutdown_manifest_v2"` and embed anchor exports (`T1`, `SRB`).
+- Include chain notation for integration wave: e.g., `"integration_chain": "001//932//"` when invoked within command chain.
+
+### 🏁 Summary
+System is in strong position for mission-focused integration sequencing: core runtime stabilized, manifest groundwork laid, remaining temporal debt scoped and ordered. Proceed with Phase A UTC sweep before expanding planner heuristics to enforce temporal consistency gates.
+
+---

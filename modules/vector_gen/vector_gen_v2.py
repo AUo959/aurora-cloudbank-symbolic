@@ -27,6 +27,7 @@ import hashlib
 import json
 import time
 import uuid
+import logging
 from dataclasses import dataclass, field
 from src.core.time_utils import utc_z
 from enum import Enum
@@ -37,7 +38,7 @@ try:
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False
-    print("⚠️  Warning: NumPy not available. Vector operations will use fallback implementation.")
+    logging.getLogger(__name__).warning("NumPy not available. Vector operations will use fallback implementation.")
 
 
 # ============================================================================
@@ -719,8 +720,11 @@ class VectorCapsulePackager:
 # ============================================================================
 
 if __name__ == "__main__":
-    print("\n🔗 VECTOR GEN v2.0 - Advanced Demonstration")
-    print("=" * 70)
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.INFO)
+
+    logger.info("VECTOR GEN v2.0 - Advanced Demonstration")
+    logger.info("%s", "=" * 70)
     
     # Initialize components
     vector_gen = VectorGen(vector_dimension=512, normalization="l2")
@@ -728,64 +732,64 @@ if __name__ == "__main__":
     packager = VectorCapsulePackager()
     
     # 1. Generate Operational Vectors
-    print("\n1. Generating Symbolic Vectors...")
+    logger.info("1. Generating Symbolic Vectors...")
     vectors = [
         vector_gen.generate_vector("🧭", tags=["ops", "navigation"], metadata={"purpose": "BridgeAgent expansion"}),
         vector_gen.generate_vector("🔑", tags=["ops", "access"], metadata={"purpose": "HR skill-matching"}),
         vector_gen.generate_vector("♾️", tags=["eng", "binding"], metadata={"purpose": "ZIPWIZ mitosis"}),
         vector_gen.generate_vector("🪞", tags=["reflex", "philosophy"], metadata={"purpose": "Agent reflection"})
     ]
-    print(f"   ✓ Generated {len(vectors)} operational vectors")
+    logger.info("   ✓ Generated %d operational vectors", len(vectors))
     for v in vectors:
-        print(f"      - {v.symbol} | Magnitude: {v.magnitude:.3f}")
+        logger.info("      - %s | Magnitude: %.3f", v.symbol, v.magnitude)
     
     # 2. Build Sequential Chain
-    print("\n2. Building Sequential Chain...")
+    logger.info("2. Building Sequential Chain...")
     seq_chain = chain_manager.create_chain(
         "ZIPWIZ_Operational_Vector_Chain_v2",
         ChainTopology.SEQUENTIAL,
         vectors
     )
-    print(f"   ✓ Chain Created: {seq_chain.name}")
-    print(f"   ✓ Vectors: {len(seq_chain.vectors)}")
-    print(f"   ✓ Links: {len(seq_chain.links)}")
+    logger.info("   ✓ Chain Created: %s", seq_chain.name)
+    logger.info("   ✓ Vectors: %d", len(seq_chain.vectors))
+    logger.info("   ✓ Links: %d", len(seq_chain.links))
     
     # 3. Create Networked Chain
-    print("\n3. Creating Networked Chain...")
+    logger.info("3. Creating Networked Chain...")
     net_chain = chain_manager.create_chain(
         "BridgeAgent_Network_v2",
         ChainTopology.NETWORKED,
         vectors
     )
-    print(f"   ✓ Networked Chain: {net_chain.name}")
-    print(f"   ✓ Network Links Created: {len(net_chain.links)}")
+    logger.info("   ✓ Networked Chain: %s", net_chain.name)
+    logger.info("   ✓ Network Links Created: %d", len(net_chain.links))
     
     # 4. Generate Entangled Pair
-    print("\n4. Generating Entangled Vector Pair...")
+    logger.info("4. Generating Entangled Vector Pair...")
     vec_a, vec_b = vector_gen.generate_entangled_pair("⚛️", "🔮", entanglement_strength=0.95)
     entangled_chain = chain_manager.create_chain(
         "Quantum_Entangled_Pair_v2",
         ChainTopology.ENTANGLED,
         [vec_a, vec_b]
     )
-    print(f"   ✓ Entanglement: confirmed")
-    print(f"   ✓ Link Strength: {entangled_chain.links[0].strength.value if entangled_chain.links else 'N/A'}")
+    logger.info("   ✓ Entanglement: confirmed")
+    logger.info("   ✓ Link Strength: %s", entangled_chain.links[0].strength.value if entangled_chain.links else "N/A")
     
     # 5. Package Capsules
-    print("\n5. Packaging Capsules...")
+    logger.info("5. Packaging Capsules...")
     zipwiz_capsule = packager.package_capsule(seq_chain, "ZIPWIZ")
     bridge_capsule = packager.package_capsule(net_chain, "BridgeAgent")
     quantum_capsule = packager.package_capsule(entangled_chain, "QuantumForge")
-    print(f"   ✓ ZIPWIZ Capsule: {zipwiz_capsule['capsule_id']}")
-    print(f"   ✓ BridgeAgent Capsule: {bridge_capsule['capsule_id']}")
-    print(f"   ✓ Quantum Capsule: {quantum_capsule['capsule_id']}")
+    logger.info("   ✓ ZIPWIZ Capsule: %s", zipwiz_capsule['capsule_id'])
+    logger.info("   ✓ BridgeAgent Capsule: %s", bridge_capsule['capsule_id'])
+    logger.info("   ✓ Quantum Capsule: %s", quantum_capsule['capsule_id'])
     
     # 6. Create Deployment Registries
-    print("\n6. Creating Deployment Registries...")
+    logger.info("6. Creating Deployment Registries...")
     registry = packager.create_deployment_registry()
-    print(f"   ✓ Registry ID: {registry['registry_id']}")
-    print(f"   ✓ Total Capsules: {registry['statistics']['total_capsules']}")
-    print(f"   ✓ Total Vectors: {registry['statistics']['total_vectors']}")
+    logger.info("   ✓ Registry ID: %s", registry['registry_id'])
+    logger.info("   ✓ Total Capsules: %d", registry['statistics']['total_capsules'])
+    logger.info("   ✓ Total Vectors: %d", registry['statistics']['total_vectors'])
     
-    print("\n✨ Demonstration Complete")
-    print("=" * 70)
+    logger.info("✨ Demonstration Complete")
+    logger.info("%s", "=" * 70)

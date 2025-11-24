@@ -201,7 +201,12 @@ class BaseCrewAgent:
 
         self.created_at = datetime.now()
 
-        logger.info("✅ Crew agent initialized: %s (%s) - %s", self.surname, self.agent_id, self.role.value)
+        logger.info(
+            "✅ Crew agent initialized: %s (%s) - %s",
+            self.surname,
+            self.agent_id,
+            self.role.value
+        )
 
     async def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -276,7 +281,9 @@ class BaseCrewAgent:
             task.completed_at = datetime.now().isoformat()
             task.result = {'error': str(e)}
             self.stats['tasks_failed'] += 1
+
             logger.error("❌ Task failed for %s: %s", self.surname, e)
+
             return {
                 'success': False,
                 'agent': self.surname,
@@ -314,7 +321,11 @@ class BaseCrewAgent:
         """
         start_time = datetime.now()
 
-        logger.info("🤝 Collaboration started: %s + %s", self.surname, other_agent.surname)
+        logger.info(
+            "🤝 Collaboration started: %s + %s",
+            self.surname,
+            other_agent.surname
+        )
 
         # Both agents process the collaborative task
         my_result = await self.process_request(task)

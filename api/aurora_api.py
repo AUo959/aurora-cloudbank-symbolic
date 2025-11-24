@@ -119,6 +119,8 @@ async def collaborate_agents(
 # Import telemetry and observability
 from src.observability import get_telemetry, get_r2_telemetry
 
+# (Moved time/hash imports into helper to satisfy lint ordering)
+
 # Import AuMemManager API integration
 try:
     from modules.aumemmanager.api_integration import router as aumemmanager_router
@@ -304,6 +306,78 @@ async def lifespan(app: FastAPI):
             logger.info("✅ HALO/PAS Drift Controller stopped")
         except Exception as e:
             logger.error("❌ Failed to stop HALO/PAS Controller: %s", e)
+
+    # Build and persist shutdown manifest (Phase 1 implementation)
+    try:
+        import json  # local import to avoid mid-file import lint warnings
+        manifest = build_shutdown_manifest()
+        manifest_path = os.path.join(os.getcwd(), "shutdown_manifest.json")
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        logger.info(
+            "🧾 Shutdown manifest written (%s components, hash=%s)",
+            len(manifest.get("components", {})),
+            manifest.get("hash"),
+        )
+    except Exception as e:
+        logger.warning("⚠️ Failed to generate shutdown manifest: %s", e)
+
+
+def build_shutdown_manifest() -> Dict[str, Any]:
+    """Generate a master shutdown manifest capturing terminal system state.
+
+    Minimal Phase 1 helper – later phases will add memory seals, quantum session
+    flush records, and extended DLP lineage exports.
+    """
+    # Localized imports (lint: keep module-level imports at file head only)
+    from src.core.time_utils import utc_now, utc_iso  # type: ignore
+    import hashlib  # type: ignore
+    import json  # type: ignore
+
+    telemetry_snapshot = {}
+    try:
+        telemetry = get_telemetry()
+        snap = telemetry.get_metrics_snapshot(context_tag="shutdown_manifest")
+        telemetry_snapshot = {
+            "performance_metrics": len(snap.performance_metrics),
+            "adoption_metrics": len(snap.adoption_metrics),
+            "features_tracked": list(snap.adoption_metrics.keys()),
+        }
+    except Exception as e:  # pragma: no cover - graceful degradation
+        telemetry_snapshot = {"error": str(e)}
+
+    halo_pas_state: Dict[str, Any] = {
+        "available": HALO_PAS_AVAILABLE,
+        "active": False,
+    }
+    try:
+        if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
+            halo_pas_state["active"] = HALO_PAS_CONTROLLER.running
+            halo_pas_state["interval"] = getattr(HALO_PAS_CONTROLLER, "interval", None)
+    except Exception as e:  # pragma: no cover
+        halo_pas_state["error"] = str(e)
+
+    crew_summary: Dict[str, Any] = {"count": 0, "agents": []}
+    try:
+        agents = get_all_crew_agents().values()
+        crew_summary["count"] = len(list(agents))
+        crew_summary["agents"] = [a.surname for a in agents]
+    except Exception as e:  # pragma: no cover
+        crew_summary["error"] = str(e)
+
+    manifest: Dict[str, Any] = {
+        "generated_at": utc_iso(),
+        "epoch_ms": int(utc_now().timestamp() * 1000),
+        "components": {
+            "telemetry": telemetry_snapshot,
+            "halo_pas": halo_pas_state,
+            "crew_agents": crew_summary,
+        },
+    }
+    # Deterministic hash
+    serialized = json.dumps(manifest, sort_keys=True).encode("utf-8")
+    manifest["hash"] = hashlib.sha256(serialized).hexdigest()
+    return manifest
 
 
 # Create FastAPI app with lifespan context manager

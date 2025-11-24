@@ -199,10 +199,10 @@ def main():
     print("\n📋 Verifying Phase 1 Components...")
     verification = verifier.verify_phase1_components()
     
-    print(f"Overall Status: {verification['overall_status']}")
+    logger.info("Overall Status: %s", verification['overall_status'])
     for component, status in verification["components"].items():
         status_icon = "✅" if status["status"] == "VERIFIED" else "❌"
-        print(f"  {status_icon} {component}: {status['status']}")
+        logger.info("Component %s status: %s (%s)", component, status['status'], status_icon)
     
     # Check thread continuity
     print("\n🔗 Checking Thread Continuity...")
@@ -210,9 +210,12 @@ def main():
     
     if continuity_intact:
         logger.info("Thread continuity intact")
-        print(f"  Thread: {continuity['thread_id']}")
-        print(f"  Entities: {len(continuity['entities'])}")
-        print(f"  Checkpoints: {len(continuity['checkpoints'])}")
+        logger.info(
+            "Thread: %s | Entities: %d | Checkpoints: %d",
+            continuity['thread_id'],
+            len(continuity['entities']),
+            len(continuity['checkpoints'])
+        )
     else:
         logger.warning("Thread continuity issues detected")
         
@@ -220,9 +223,12 @@ def main():
     print("\n🚀 Generating Phase 2 Manifest...")
     phase2 = verifier.generate_phase2_manifest()
     
-    print(f"Phase 2 Anchor: {phase2['anchor']}")
-    print(f"Objectives Ready: {len(phase2['phase2_objectives'])}")
-    print(f"Manifest Seal: {phase2['seal'][:32]}...")
+    logger.info(
+        "Phase2 Anchor: %s | Objectives: %d | Seal Prefix: %s",
+        phase2['anchor'],
+        len(phase2['phase2_objectives']),
+        phase2['seal'][:32]
+    )
     
     print("\n✅ Verification Complete - Ready for Phase 2!")
     

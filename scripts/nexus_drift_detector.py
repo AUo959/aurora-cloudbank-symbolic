@@ -12,7 +12,8 @@ import json
 import hashlib
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import timedelta
+from src.core.time_utils import utc_iso
 from typing import Dict
 import subprocess
 
@@ -20,11 +21,8 @@ logger = logging.getLogger(__name__)
 
  
 class NEXUSDriftDetector:
-    """
-    Comprehensive drift detection and audit trail generation
-    for the complete NEXUS system
-    """
-    
+    """Comprehensive drift detection and audit trail generation for NEXUS system."""
+
     def __init__(self):
         self.anchor = "T6-DRIFT-DETECT-2025"
         self.seed = "EOS_SEED_ORION"
@@ -46,7 +44,7 @@ class NEXUSDriftDetector:
         ]
         
         drift_report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "expected_anchors": expected_anchors,
             "found_anchors": [],
@@ -91,7 +89,7 @@ class NEXUSDriftDetector:
             self.drift_events.append({
                 "type": "anchor_drift",
                 "details": drift_report,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_iso()
             })
             
         return drift_report
@@ -100,7 +98,7 @@ class NEXUSDriftDetector:
         """Detect entropy drift across all components"""
         
         entropy_report = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_iso(),
             "components": {},
             "global_entropy": 0.0,
             "drift_threshold": 0.1,
@@ -146,7 +144,7 @@ class NEXUSDriftDetector:
             self.drift_events.append({
                 "type": "entropy_drift",
                 "details": entropy_report,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": utc_iso()
             })
             
         return entropy_report
@@ -155,8 +153,8 @@ class NEXUSDriftDetector:
         """Generate comprehensive audit trail for all NEXUS operations"""
         
         audit_trail = {
-            "trail_id": f"AUDIT-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "trail_id": f"AUDIT-{utc_iso()}",
+            "timestamp": utc_iso(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,

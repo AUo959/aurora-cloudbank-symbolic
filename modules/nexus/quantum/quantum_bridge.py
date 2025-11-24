@@ -19,6 +19,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from pathlib import Path
 import logging
+from src.core.time_utils import utc_now
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +46,7 @@ class SymbolicAnchor:
     quantum_state: Optional[np.ndarray] = None
     classical_data: Dict = field(default_factory=dict)
     entropy_contribution: float = 0.0
-    creation_time: datetime = field(default_factory=datetime.utcnow)
+    creation_time: datetime = field(default_factory=utc_now)
     seal: Optional[str] = None
 
 class QuantumSymbolicBridge:
@@ -114,7 +115,7 @@ class QuantumSymbolicBridge:
             "type": "quantum_to_symbolic",
             "anchor_id": anchor_id,
             "fidelity": fidelity,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         })
         
         logger.info(f"Quantum → Symbolic: {anchor_id[:16]}... (Fidelity: {fidelity:.4f})")
@@ -171,7 +172,7 @@ class QuantumSymbolicBridge:
             "type": "symbolic_to_quantum",
             "state_id": quantum_state.state_id,
             "fidelity": quantum_state.fidelity,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": utc_now().isoformat()
         })
         
         logger.info(f"Symbolic → Quantum: {quantum_state.state_id} (Fidelity: {quantum_state.fidelity:.4f})")
@@ -205,13 +206,13 @@ class QuantumSymbolicBridge:
         entangled_state[-1] = 1/np.sqrt(2)
         
         # Register entanglement
-        entanglement_id = f"ENT-{datetime.utcnow().timestamp()}"
+        entanglement_id = f"ENT-{utc_now().timestamp()}"
         
         entanglement = {
             "id": entanglement_id,
             "states": [state1_id, state2_id],
             "entangled_state": entangled_state,
-            "creation_time": datetime.utcnow().isoformat(),
+            "creation_time": utc_now().isoformat(),
             "bell_fidelity": self._calculate_bell_fidelity(entangled_state),
             "anchor": f"{self.anchor}-ENTANGLEMENT"
         }
@@ -392,12 +393,12 @@ class QuantumSymbolicBridge:
             "anchor_id": anchor.anchor_id,
             "fidelity": fidelity,
             "threshold": self.fidelity_threshold,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "requires_arbitration": True
         }
         
         # Save for review
-        flag_path = Path(f".nexus/flags/fidelity_{anchor.anchor_id}_{datetime.utcnow().timestamp()}.json")
+        flag_path = Path(f".nexus/flags/fidelity_{anchor.anchor_id}_{utc_now().timestamp()}.json")
         flag_path.parent.mkdir(parents=True, exist_ok=True)
         flag_path.write_text(json.dumps(flag, indent=2))
         
@@ -411,7 +412,7 @@ class QuantumSymbolicBridge:
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "team": "Aurora Core",
             "bridge_stats": {
                 "quantum_states": len(self.quantum_states),

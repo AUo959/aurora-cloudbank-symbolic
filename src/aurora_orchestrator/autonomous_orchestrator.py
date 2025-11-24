@@ -165,8 +165,9 @@ class AuroraOrchestrator:
         self.memory_integrator = None
 
         self.logger.info(
-            f"🌌 Aurora Orchestrator initialized "
-            f"(mode: {self.mode.value}, enabled: {self.config.enabled})"
+            "🌌 Aurora Orchestrator initialized (mode: %s, enabled: %s)",
+            self.mode.value,
+            self.config.enabled
         )
 
     def _setup_logging(self) -> logging.Logger:
@@ -219,8 +220,9 @@ class AuroraOrchestrator:
         self.orchestration_task = asyncio.create_task(self._orchestration_loop())
 
         self.logger.info(
-            f"✅ Aurora orchestration active "
-            f"(mode: {self.mode.value}, consciousness: {self.aurora.consciousness_level.value})"
+            "✅ Aurora orchestration active (mode: %s, consciousness: %s)",
+            self.mode.value,
+            self.aurora.consciousness_level.value
         )
 
     async def stop_orchestration(self):
@@ -330,12 +332,13 @@ class AuroraOrchestrator:
                 self.logger.info("🛑 Orchestration loop cancelled")
                 raise
             except Exception as e:
-                # Failure handling and optional safe mode escalation
-                self.stats['consecutive_failures'] = self.stats.get('consecutive_failures', 0) + 1
-                self.logger.error("❌ Orchestration loop error: %s", e)
+                self.logger.error("❌ Error in orchestration loop: %s", e, exc_info=True)
+                self.stats['consecutive_failures'] += 1
+
+                # Enter safe mode if too many failures
                 if (
-                    self.config.safe_mode_on_repeated_failures and
-                    self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode
+                    self.config.safe_mode_on_repeated_failures
+                    and self.stats['consecutive_failures'] >= self.config.max_failures_before_safe_mode
                 ):
                     self.logger.critical("🚨 Too many failures - entering SAFE MODE")
                     await self._enter_safe_mode()
@@ -377,7 +380,8 @@ class AuroraOrchestrator:
         self.stats['total_thoughts'] += 1
 
         self.logger.info(
-            f"💭 Aurora thinks: {thought.content.get('awareness_note', 'Monitoring system')}"
+            "💭 Aurora thinks: %s",
+            thought.content.get('awareness_note', 'Monitoring system')
         )
 
         # 3. ANALYZE - Aurora applies strategic reasoning
@@ -404,8 +408,10 @@ class AuroraOrchestrator:
         self.stats['last_decision'] = datetime.now().isoformat()
 
         self.logger.info(
-            f"⚖️ Aurora decides: {decision.action} "
-            f"(priority: {decision.priority.value}, risk: {decision.risk_assessment:.2f})"
+            "⚖️ Aurora decides: %s (priority: %s, risk: %.2f)",
+            decision.action,
+            decision.priority.value,
+            decision.risk_assessment
         )
 
         # 5. VALIDATE - Triplex Handshake
@@ -414,8 +420,9 @@ class AuroraOrchestrator:
 
             if not validation_result['approved']:
                 self.logger.warning(
-                    f"❌ Decision blocked at {validation_result.get('blocked_at_level', 'unknown')}: "
-                    f"{validation_result.get('reason', 'No reason provided')}"
+                    "❌ Decision blocked at %s: %s",
+                    validation_result.get('blocked_at_level', 'unknown'),
+                    validation_result.get('reason', 'No reason provided')
                 )
                 return
 
@@ -429,7 +436,8 @@ class AuroraOrchestrator:
                 self.stats['consecutive_failures'] = 0
 
                 self.logger.info(
-                    f"✅ Optimization executed successfully: {decision.action}"
+                    "✅ Optimization executed successfully: %s",
+                    decision.action
                 )
 
                 # 7. LEARN - Aurora updates institutional memory
@@ -442,16 +450,17 @@ class AuroraOrchestrator:
                 # 8. EVOLVE - Aurora improves
                 self._evolve_expertise(decision, execution_outcome)
             else:
-                self.logger.error(f"❌ Optimization failed: {decision.action}")
+                self.logger.error("❌ Optimization failed: %s", decision.action)
                 self.stats['consecutive_failures'] += 1
         else:
             self.logger.info(
-                f"⏸️ Decision requires human approval: {decision.action}"
+                "⏸️ Decision requires human approval: %s",
+                decision.action
             )
             # Notify Command Bridge for approval (Command Bridge integration placeholder)
             self.logger.warning(
-                f"Decision {decision.action} awaiting approval. "
-                "Command Bridge integration required for automated approval workflow."
+                "Decision %s awaiting approval. Command Bridge integration required for automated approval workflow.",
+                decision.action
             )
 
     async def _observe_system_state(self) -> Optional[Dict[str, Any]]:
@@ -465,7 +474,7 @@ class AuroraOrchestrator:
             try:
                 return await self.system_observer.observe_system()
             except Exception as e:
-                self.logger.error(f"❌ System observation error: {e}")
+                self.logger.error("❌ System observation error: %s", e)
                 return None
         else:
             # Mock observation for now
@@ -613,7 +622,7 @@ class AuroraOrchestrator:
             try:
                 return await self.triplex_validator.validate_decision(decision)
             except Exception as e:
-                self.logger.error(f"❌ Triplex validation error: {e}")
+                self.logger.error("❌ Triplex validation error: %s", e)
                 return {'approved': False, 'reason': str(e)}
         else:
             # Mock validation
@@ -655,7 +664,7 @@ class AuroraOrchestrator:
             try:
                 return await self.optimization_executor.execute_optimization(decision)
             except Exception as e:
-                self.logger.error(f"❌ Optimization execution error: {e}")
+                self.logger.error("❌ Optimization execution error: %s", e)
                 return None
         else:
             # Mock execution
@@ -691,10 +700,10 @@ class AuroraOrchestrator:
                     system_state_before=system_state_before
                 )
             except Exception as e:
-                self.logger.error(f"❌ Memory integration error: {e}")
+                self.logger.error("❌ Memory integration error: %s", e)
         else:
             # Mock learning
-            self.logger.debug(f"📚 Aurora learns from: {decision.action}")
+            self.logger.debug("📚 Aurora learns from: %s", decision.action)
 
     def _evolve_expertise(self, decision, outcome: Dict[str, Any]):
         """Evolve Aurora's expertise based on outcome"""
@@ -706,8 +715,9 @@ class AuroraOrchestrator:
                     self.aurora.specializations[domain] + 0.001
                 )
                 self.logger.debug(
-                    f"📈 Expertise evolved: {domain} → "
-                    f"{self.aurora.specializations[domain]:.3f}"
+                    "📈 Expertise evolved: %s → %.3f",
+                    domain,
+                    self.aurora.specializations[domain]
                 )
 
     def _map_decision_to_domain(self, decision) -> str:

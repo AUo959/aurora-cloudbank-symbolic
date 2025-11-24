@@ -19,10 +19,10 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Any
+from src.core.time_utils import utc_now
 
 logger = logging.getLogger(__name__)
 
- 
 class RealityForkType(Enum):
     """Types of reality forks"""
     EXPLORATORY = "exploratory"      # Safe exploration fork
@@ -32,7 +32,7 @@ class RealityForkType(Enum):
     TEMPORAL = "temporal"            # Temporal experimentation
     ROLLBACK = "rollback"            # Emergency rollback point
 
- 
+
 class ForkStatus(Enum):
     """Status of reality forks"""
     INITIALIZING = "initializing"
@@ -42,7 +42,7 @@ class ForkStatus(Enum):
     COLLAPSED = "collapsed"
     QUARANTINED = "quarantined"
 
- 
+
 @dataclass
 class RealityFork:
     """Represents a reality fork with quantum coherence"""
@@ -67,8 +67,8 @@ class RealityFork:
     # Fork metadata
     description: str = ""
     experiment_parameters: Dict[str, Any] = field(default_factory=dict)
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    last_update: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=utc_now)
+    last_update: datetime = field(default_factory=utc_now)
     
     # Quantum entanglement with other forks
     entangled_forks: Set[str] = field(default_factory=set)
@@ -80,7 +80,7 @@ class RealityFork:
             signature_data = f"{self.fork_id}{self.fork_type.value}{self.branch_point.isoformat()}"
             self.quantum_signature = hashlib.sha256(signature_data.encode()).hexdigest()[:24]
 
- 
+
 @dataclass
 class ConsensusMeasurement:
     """Represents a consensus measurement across reality forks"""
@@ -93,7 +93,7 @@ class ConsensusMeasurement:
     stability_metric: float
     convergence_probability: float
 
- 
+
 class RealityForkManager:
     """Revolutionary reality fork management system"""
     
@@ -143,7 +143,7 @@ class RealityForkManager:
             fork_type=fork_type,
             status=ForkStatus.INITIALIZING,
             parent_reality=parent,
-            branch_point=datetime.utcnow(),
+            branch_point=utc_now(),
             forked_by=forked_by,
             description=description,
             experiment_parameters=experiment_parameters or {}
@@ -182,7 +182,7 @@ class RealityForkManager:
             
         fork = self.active_forks[fork_id]
         fork.participating_agents.add(agent_id)
-        fork.last_update = datetime.utcnow()
+        fork.last_update = utc_now()
         
         logger.info("Agent %s joined fork %s", agent_id, fork_id)
         return True
@@ -211,7 +211,7 @@ class RealityForkManager:
         # Update stability index
         fork.stability_index = self._calculate_stability_index(fork)
         
-        fork.last_update = datetime.utcnow()
+        fork.last_update = utc_now()
         
         logger.info("Fork %s state updated by %s", fork_id, agent_id)
         logger.info("Quantum coherence: %.3f", fork.quantum_coherence)
@@ -253,7 +253,7 @@ class RealityForkManager:
         
         measurement = ConsensusMeasurement(
             measurement_id=measurement_id,
-            measured_at=datetime.utcnow(),
+            measured_at=utc_now(),
             participating_forks=participating_forks,
             consensus_matrix=consensus_matrix,
             quantum_entanglement=quantum_entanglement,
@@ -367,7 +367,7 @@ class RealityForkManager:
         consensus_factor = fork.consensus_level * 0.3
         
         # Factor in time since creation
-        time_factor = max(0.1, 1.0 - (datetime.utcnow() - fork.created_at).total_seconds() / 3600)
+        time_factor = max(0.1, 1.0 - (utc_now() - fork.created_at).total_seconds() / 3600)
         
         return min(1.0, base_stability + consensus_factor * time_factor)
         
@@ -560,7 +560,7 @@ class RealityForkManager:
         manifest = {
             "anchor": self.anchor,
             "seed": self.seed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": utc_now().isoformat(),
             "base_reality": self.base_reality_id,
             "current_reality": self.current_reality,
             

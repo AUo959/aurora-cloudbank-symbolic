@@ -635,37 +635,36 @@ l2_bridge = l1_relay_bridge  # DEPRECATED: Use l1_relay_bridge instead
 
 async def main():
     """Example usage of the L1 Relay Bridge"""
-
-    print("🌟 Aurora L1 Relay Bridge - Example Usage")
-    print("=" * 60)
-    print("ARCHITECTURE: L1 Relay Agents (Orion Station)")
-    print("  - Physical Location: L1 (reality layer)")
-    print("  - Bridges: L1 ↔ L3 (glyph frameworks)")
-    print("  - Monitors: L2 (simulations)")
-    print("=" * 60)
+    logger.info("Aurora L1 Relay Bridge - Example Usage")
+    logger.info("%s", "=" * 60)
+    logger.info("ARCHITECTURE: L1 Relay Agents (Orion Station)")
+    logger.info("  - Physical Location: L1 (reality layer)")
+    logger.info("  - Bridges: L1 ↔ L3 (glyph frameworks)")
+    logger.info("  - Monitors: L2 (simulations)")
+    logger.info("%s", "=" * 60)
 
     # Test activation using global bridge instance
     result = await l1_relay_bridge.activate_agent("ARCHY", "ORION_ARCHY_RELAY_ACTIVATE//")
-    print(f"\nARCHY Activation: {result['success']}")
+    logger.info("ARCHY Activation: %s", result['success'])
     if result['success']:
-        print(f"  Location: {result['location']}")
-        print(f"  Reality Layer: {result['reality_layer']}")
-        print(f"  Triplex Role: {result['triplex_role']}")
+        logger.info("  Location: %s", result['location'])
+        logger.info("  Reality Layer: %s", result['reality_layer'])
+        logger.info("  Triplex Role: %s", result['triplex_role'])
 
     if result["success"]:
         # Test message relay
         msg_result = await l1_relay_bridge.relay_message("ARCHY", "Aurora", "Test message from ARCHY relay", "direct")
-        print(f"\nMessage Relay: {msg_result['success']}")
+        logger.info("Message Relay: %s", msg_result['success'])
 
         # Get relay tier status
         status = l1_relay_bridge.get_constellation_status()
         relay_status = status.get("relay_tier", {})
-        print(
-            f"\nActive L1 Relay Agents: "
-            f"{relay_status.get('connected_agents', 0)}/"
-            f"{relay_status.get('total_agents', 0)}"
+        logger.info(
+            "Active L1 Relay Agents: %d/%d",
+            relay_status.get('connected_agents', 0),
+            relay_status.get('total_agents', 0)
         )
-        print(f"Architecture Note: {relay_status.get('architecture_note', '')}")
+        logger.info("Architecture Note: %s", relay_status.get('architecture_note', ''))
 
 
 def cli():
@@ -684,7 +683,8 @@ def cli():
 
     if args.constellation_status:
         status = l1_relay_bridge.get_constellation_status()
-        print(json.dumps(status, indent=2))
+        logger.info("Constellation Status JSON Emission")
+        logger.info("%s", json.dumps(status, indent=2))
         return 0
 
     asyncio.run(main())

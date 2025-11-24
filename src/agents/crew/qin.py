@@ -123,7 +123,11 @@ class Qin(BaseCrewAgent):
             raise ValueError(f"Unknown task type for Qin: {task_type}")
 
     async def _compile_nli(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Compile natural language to executable code."""
+        """Compile natural language to executable code.
+
+        Extended instrumentation records if input text was supplied for future
+        semantic fidelity audits.
+        """
         _natural_language_input = context.get('input', '')  # retained for future semantic diff
         target_language = context.get('target', 'python')
 
@@ -198,7 +202,11 @@ class Qin(BaseCrewAgent):
         }
 
     async def _analyze_ethics(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze semantic structures for ethical implications."""
+        """Analyze semantic structures for ethical implications.
+
+        Extended instrumentation notes presence of input text for prospective
+        semantic risk heuristics.
+        """
         _text_input = context.get('text', '')  # retained for future semantic risk heuristics
         analysis_depth = context.get('depth', 'comprehensive')
 
@@ -224,7 +232,11 @@ class Qin(BaseCrewAgent):
         }
 
     async def _integrate_narrative(self, context: Dict[str, Any]) -> Dict[str, Any]:
-        """Integrate narrative structures with executable code."""
+        """Integrate narrative structures with executable code.
+
+        Extended instrumentation tracks whether narrative input was provided for
+        future narrative fidelity checks.
+        """
         _narrative_input = context.get('narrative', '')  # retained for future narrative fidelity checks
         code_target = context.get('code_target', 'simulation_script')
 

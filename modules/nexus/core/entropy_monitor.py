@@ -11,13 +11,13 @@ DLP Tag: MONITORING_TOOL
 import asyncio
 import time
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import Dict
 import hashlib
 import math
 import random
 import logging
+from src.core.time_utils import utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class EntropyMonitor:
     
     def record_entropy_measurement(self, entropy: float) -> Dict:
         """Record an entropy measurement"""
-        timestamp = datetime.utcnow()
+        timestamp = utc_now()
         
         measurement = {
             "timestamp": timestamp.isoformat(),
@@ -157,7 +157,7 @@ class EntropyMonitor:
         }
         
         # Save alert to disk
-        alert_path = Path(f".nexus/alerts/entropy_{datetime.utcnow().timestamp()}.json")
+        alert_path = Path(f".nexus/alerts/entropy_{utc_now().timestamp()}.json")
         alert_path.parent.mkdir(parents=True, exist_ok=True)
         alert_path.write_text(json.dumps(alert, indent=2))
         
@@ -214,10 +214,15 @@ class EntropyMonitor:
             try:
                 status = self.get_current_status()
                 
-                # Status update
-                ts = datetime.utcnow().strftime('%H:%M:%S')
-                logger.info("[%s] Entropy: %.3f | Drift: %.3f | Alert: %s", ts,
-                            status['current_entropy'], status['current_drift'], status['alert_level'])
+                # Status update (parameterized logging to avoid injection)
+                ts = utc_now().strftime('%H:%M:%S')
+                logger.info(
+                    "[%s] Entropy: %.3f | Drift: %.3f | Alert: %s",
+                    ts,
+                    status['current_entropy'],
+                    status['current_drift'],
+                    status['alert_level'],
+                )
                 
                 # Wait for next measurement
                 await asyncio.sleep(interval)
@@ -244,7 +249,7 @@ class EntropyMonitor:
             "report_version": "1.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": utc_now().isoformat(),
             "monitoring_status": "ACTIVE" if self.monitoring_active else "INACTIVE",
             "total_measurements": len(self.entropy_history),
             "current_status": self.get_current_status(),

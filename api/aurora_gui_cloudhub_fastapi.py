@@ -1441,7 +1441,12 @@ def qf_create_agent(req: QFCreateAgentRequest, token: HTTPAuthorizationCredentia
         
         # Actual API: generate_agent(intent_query, constellation_targets, metadata)
         # Create intent from agent_id and capabilities
-        intent_query = f"Generate agent {req.agent_id} with capabilities: {', '.join(req.capabilities)}"
+        # Secure construction of intent_query (avoid direct f-string interpolation of arbitrary capability text)
+        sanitized_caps = [c.replace("'", "").replace(";", "") for c in req.capabilities]
+        intent_query = "Generate agent %s with capabilities: %s" % (
+            req.agent_id,
+            ", ".join(sanitized_caps)
+        )
         metadata = {
             "agent_id": req.agent_id,
             "capabilities": req.capabilities,

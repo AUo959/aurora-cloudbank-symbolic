@@ -39,12 +39,13 @@ export default function AgentConsole() {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior: ScrollBehavior = 'auto') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Use auto scroll for better performance on rapid message updates
+    scrollToBottom('auto');
   }, [messages]);
 
   const sendMessage = useMutation({

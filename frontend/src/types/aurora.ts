@@ -99,7 +99,12 @@ export interface AgentMessage {
 
 export interface AgentResponse {
   response: string;
-  model_used: 'claude-3.5-sonnet' | 'claude-4.5-opus' | 'gpt-4o' | 'gpt-5';
+  /**
+   * Model used for generating the response.
+   * Common values: 'claude-3.5-sonnet', 'claude-4.5-opus', 'gpt-4o'
+   * Type is flexible to support future model versions
+   */
+  model_used: string;
   memory_retrieval?: {
     memories_retrieved: number;
     relevant_memories: Memory[];

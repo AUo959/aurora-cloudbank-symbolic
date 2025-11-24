@@ -38,7 +38,18 @@ class APIClient {
         if (error.response?.status === 401) {
           // Handle unauthorized - redirect to login or refresh token
           localStorage.removeItem('aurora_token');
-          window.location.href = '/login';
+          // Check if login page exists before redirecting
+          // This prevents errors in development when auth is not yet implemented
+          if (typeof window !== 'undefined') {
+            // Emit event that can be handled by app router
+            window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+            // Fallback redirect after a delay to allow event handling
+            setTimeout(() => {
+              if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+              }
+            }, 100);
+          }
         }
         return Promise.reject(error);
       }

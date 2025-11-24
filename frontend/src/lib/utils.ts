@@ -186,6 +186,8 @@ export function getImportanceColor(importance: number): string {
 
 /**
  * Calculate percentage
+ * Returns 0 when total is 0 to avoid division by zero.
+ * UI components should handle the zero total case explicitly if needed.
  */
 export function percentage(value: number, total: number): number {
   if (total === 0) return 0;

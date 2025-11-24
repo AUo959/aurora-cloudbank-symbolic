@@ -122,7 +122,10 @@ export default function Dashboard() {
                 className="h-full bg-gradient-to-r from-primary-500 to-accent-500 transition-all"
                 style={{
                   width: memoryMetrics
-                    ? `${percentage(memoryMetrics.active_memories, memoryMetrics.total_memories)}%`
+                    ? `${percentage(
+                        memoryMetrics?.active_memories ?? 0,
+                        memoryMetrics?.total_memories ?? 0
+                      )}%`
                     : '0%',
                 }}
               />

@@ -22,16 +22,16 @@ export const auroraAPI = {
   // ===== AuMemManager =====
   memory: {
     create: (data: MemoryCreateRequest) =>
-      apiClient.post<{ memory_id: string }>('/api/aumem/memory/create', data),
+      apiClient.post<{ memory_id: string }>('/memory/create', data),
 
     retrieve: (data: MemoryRetrieveRequest) =>
-      apiClient.post<MemoryRetrieveResponse>('/api/aumem/retrieve', data),
+      apiClient.post<MemoryRetrieveResponse>('/memory/retrieve', data),
 
     get: (memoryId: string) =>
-      apiClient.get<Memory>(`/api/aumem/memory/${memoryId}`),
+      apiClient.get<Memory>(`/memory/${memoryId}`),
 
     delete: (memoryId: string) =>
-      apiClient.delete(`/api/aumem/memory/${memoryId}`),
+      apiClient.delete(`/memory/${memoryId}`),
 
     metrics: () =>
       apiClient.get<{
@@ -40,7 +40,7 @@ export const auroraAPI = {
         compressed_memories: number;
         archived_memories: number;
         cache_hit_rate: number;
-      }>('/api/aumem/metrics'),
+      }>('/memory/metrics'),
   },
 
   // ===== Quantum Simulator =====

@@ -56,7 +56,7 @@ class SSMTMaintenancePipeline:
         with open(self.log_file, 'a') as f:
             f.write(log_entry)
         
-        print("📝 {action}: %s", details)
+        print(f"📝 {action}: {details}")
     
     def get_current_branches(self):
         """Get current branch status"""
@@ -333,14 +333,14 @@ def main():
     
     if report:
         print("📊 Maintenance Scan Results:")
-        print("   🌳 Current branches: %s", report['repository_health']['branch_count'])
-        print("   🎯 Target branches: %s", report['repository_health']['target_count'])
-        print("   💚 Health status: %s", report['repository_health']['health_status'])
-        print("   📈 Health score: %s/100", report['repository_health']['health_score'])
+        print(f"   🌳 Current branches: {report['repository_health']['branch_count']}")
+        print(f"   🎯 Target branches: {report['repository_health']['target_count']}")
+        print(f"   💚 Health status: {report['repository_health']['health_status']}")
+        print(f"   📈 Health score: {report['repository_health']['health_score']}/100")
         print()
         
         if report['maintenance_actions']['stale_candidates'] > 0:
-            print("   🗑️ Stale candidates found: %s", report['maintenance_actions']['stale_candidates'])
+            print(f"   🗑️ Stale candidates found: {report['maintenance_actions']['stale_candidates']}")
         
         if report['recommendations']:
             print("💡 Recommendations:")

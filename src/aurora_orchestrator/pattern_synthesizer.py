@@ -157,10 +157,6 @@ class PatternSynthesizer:
                     best_hour = hour
         return best_hour, best_improvement
 
-        self.logger.info(f"🧬 Discovered {len(patterns_discovered)} temporal patterns")
-
-        return patterns_discovered
-
     async def identify_optimization_strategies(
         self,
         memories: List[Any]

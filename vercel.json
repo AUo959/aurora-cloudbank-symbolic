@@ -1,22 +1,44 @@
 {
     "version": 2,
+    "buildCommand": "npm ci && npm run build",
+    "outputDirectory": "out",
+    "framework": null,
+    "installCommand": "npm ci",
+    "devCommand": "npm run dev",
     "routes": [
         {
+            "src": "/api/(.*)",
+            "dest": "https://aurora-backend.example.com/api/$1"
+        },
+        {
             "src": "/(.*)",
-            "dest": "api/index.py"
+            "dest": "/$1"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Content-Type-Options",
+                    "value": "nosniff"
+                },
+                {
+                    "key": "X-Frame-Options",
+                    "value": "DENY"
+                },
+                {
+                    "key": "X-XSS-Protection",
+                    "value": "1; mode=block"
+                }
+            ]
         }
     ],
     "env": {
-        "PYTHON_VERSION": "3.12"
+        "NEXT_PUBLIC_API_BASE_URL": "@aurora_backend_url",
+        "NODE_ENV": "production"
     },
     "regions": [
         "iad1"
-    ],
-    "functions": {
-        "api/**/*.py": {
-            "runtime": "python3.12",
-            "maxDuration": 60,
-            "memory": 3008
-        }
-    }
+    ]
 }

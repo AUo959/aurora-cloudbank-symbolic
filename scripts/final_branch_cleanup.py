@@ -60,7 +60,7 @@ class FinalBranchCleanup:
     
     def run_cleanup(self):
         """Execute the final branch cleanup"""
-        print(f"🚀 Starting final branch cleanup - {len(self.branches_to_delete)} branches")
+        print("🚀 Starting final branch cleanup - %s branches", len(self.branches_to_delete))
         print("=" * 60)
         
         for branch in self.branches_to_delete:
@@ -101,7 +101,7 @@ class FinalBranchCleanup:
         if self.failed_branches:
             print(f"\n⚠️  Failed branches:")
             for failure in self.failed_branches:
-                print(f"   - {failure['branch']}: {failure[")
+                print(f"   - {failure['branch']}: {failure['error']}")
         
         print(f"\n📊 Report saved: ZERO_PR_COMPLETION_REPORT.json")
         

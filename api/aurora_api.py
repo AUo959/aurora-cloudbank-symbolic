@@ -699,6 +699,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate R2 Telemetry routes: %s", e)
 
+# Include L2 Meta-Agent Bridge API routes
+try:
+    from src.api.l2_meta_agent_api import router as l2_meta_agent_router
+    app.include_router(l2_meta_agent_router)
+    logger.info("✅ L2 Meta-Agent Bridge API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ L2 Meta-Agent Bridge not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate L2 Meta-Agent Bridge routes: %s", e)
+
 # Initialize Ethics Gate for high-impact operations
 try:
     from src.aurora.ethics import EthicsGate, GUMASEthicsClient

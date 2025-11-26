@@ -133,7 +133,10 @@ class TestL2MetaAgentAPI:
 
     def test_activation_phrases(self, api_client):
         """Test activation phrases endpoint"""
-        response = api_client.get("/api/l2-agents/activation-phrases")
+        response = api_client.get(
+            "/api/l2-agents/activation-phrases",
+            headers={"Authorization": "Bearer test-token"}
+        )
         assert response.status_code == 200
 
         data = response.json()
@@ -315,7 +318,10 @@ class TestL2MetaAgentAPI:
 
     def test_handshake_sequence_complete(self, api_client):
         """Test handshake sequence contains all required steps"""
-        response = api_client.get("/api/l2-agents/activation-phrases")
+        response = api_client.get(
+            "/api/l2-agents/activation-phrases",
+            headers={"Authorization": "Bearer test-token"}
+        )
         data = response.json()
 
         expected_steps = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]

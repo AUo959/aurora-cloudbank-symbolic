@@ -335,10 +335,7 @@ async def get_agent_status(agent_id: str, request: Request):
         if not status.get("success"):
             raise HTTPException(
                 status_code=404,
-                detail={
-                    "error": status.get("error", f"Agent {agent_id} not found"),
-                    "agent_id": agent_id
-                }
+                detail=f"Agent {agent_id} not found: {status.get('error', 'Unknown error')}"
             )
 
         return AgentStatusResponse(**status)
@@ -441,10 +438,7 @@ async def disconnect_agent(
         else:
             raise HTTPException(
                 status_code=404,
-                detail={
-                    "error": result.get("error", f"Agent {agent_id} not found"),
-                    "agent_id": agent_id
-                }
+                detail=f"Agent {agent_id} not found: {result.get('error', 'Unknown error')}"
             )
     except HTTPException:
         raise
@@ -458,18 +452,22 @@ async def disconnect_agent(
 
 @router.get("/activation-phrases")
 @limiter.limit("30/minute")
-async def get_activation_phrases(request: Request):
+async def get_activation_phrases(
+    request: Request,
+    token: HTTPAuthorizationCredentials = Depends(security)
+):
     """
     Get activation phrases for all agents (dev/testing).
 
     Returns a mapping of agent IDs to their activation phrases.
     Useful for development and testing purposes.
 
+    Requires authentication to prevent unauthorized access.
+
     DLP: l2_activation_phrases
     Anchors: EOS_SEED_ORION, Picard_Delta_3
-
-    Note: In production, consider restricting access to this endpoint.
     """
+    verify_csrf_token(token)
     try:
         return {
             "activation_phrases": l2_bridge.activation_phrases,

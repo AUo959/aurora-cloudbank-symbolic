@@ -242,13 +242,19 @@ async def get_baselines() -> Dict[str, Any]:
     try:
         if _drift_detector is None:
             exporter = _get_exporter()
-            return exporter.get_baselines()
+            baselines_data = exporter.get_baselines()
+            return {
+                "success": True,
+                "drift_detector_configured": False,
+                **baselines_data
+            }
 
         # Get baselines from detector
         baselines = _drift_detector.export_baselines()
 
         return {
             "success": True,
+            "drift_detector_configured": True,
             "count": len(baselines),
             "baselines": baselines,
             "context_tag": "drift_metrics_api_v1",

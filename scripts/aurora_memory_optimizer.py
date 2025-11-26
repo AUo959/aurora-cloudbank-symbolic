@@ -482,7 +482,7 @@ def main():
 
             if results["log_compression"]:
                 log_results = results["log_compression"]
-                print(f"📜 Log files: {log_results['compressed']} compressed, {log_results[")
+                print(f"📜 Log files: {log_results['compressed']} compressed, {log_results['space_saved']} bytes saved")
 
         else:
             print("🔍 Analysis complete. Use --execute to run actual optimization.")

@@ -345,7 +345,7 @@ def main():
         if report['recommendations']:
             print("💡 Recommendations:")
             for rec in report['recommendations']:
-                print(f"   {rec['priority']}: {rec[")
+                print(f"   {rec['priority']}: {rec['description']}")
         
         if report['repository_health']['health_status'] == 'EXCELLENT':
             print("\n🏆 Repository health is EXCELLENT! Maintenance gains preserved! 🎉")

@@ -81,7 +81,7 @@ def main():
     with meta_path.open("w") as f:
         json.dump(meta, f, indent=2)
 
-    print("[OK] Seal generated for {artifact} -> %s", seal_path)
+    print(f"[OK] Seal generated for {artifact} -> {seal_path}")
     print(digest)
 
 

@@ -64,7 +64,7 @@ class CIEnvironmentValidator:
                 "error": info if not available else None,
             }
             status = "✅" if available else "❌"
-            print("  {status} {tool}: %s", info)
+            print(f"  {status} {tool}: {info}")
             if not available:
                 self.results["missing_tools"].append(f"python:{tool}")
 
@@ -80,7 +80,7 @@ class CIEnvironmentValidator:
                 self.results["node_tools"][tool] = {"available": False, "version": None, "error": "npm not available"}
             return
 
-        print("  ✅ npm: %s", npm_info)
+        print(f"  ✅ npm: {npm_info}")
 
         for tool in self.required_node_tools:
             available, info = self.check_tool_availability(tool)
@@ -90,7 +90,7 @@ class CIEnvironmentValidator:
                 "error": info if not available else None,
             }
             status = "✅" if available else "❌"
-            print("  {status} {tool}: %s", info)
+            print(f"  {status} {tool}: {info}")
             if not available:
                 self.results["missing_tools"].append(f"node:{tool}")
 
@@ -152,23 +152,23 @@ class CIEnvironmentValidator:
                         capabilities = gitwiz_data.get("capabilities", {}).get("lint_tools", {})
                         working_tools = sum(1 for tool, status in capabilities.items() if status)
                         total_tools = len(capabilities)
-                        print("  📊 GitWiz detects {working_tools}/%s tools available", total_tools)
+                        print(f"  📊 GitWiz detects {working_tools}/{total_tools} tools available")
                         self.results["gitwiz_tools_detected"] = f"{working_tools}/{total_tools}"
                     else:
                         print("  ⚠️  No JSON output found in GitWiz response")
                         self.results["gitwiz_tools_detected"] = "unknown"
                 except (json.JSONDecodeError, IndexError, KeyError) as e:
-                    print("  ⚠️  GitWiz output parsing failed: %s", e)
+                    print(f"  ⚠️  GitWiz output parsing failed: {e}")
                     self.results["gitwiz_tools_detected"] = "parse_error"
             else:
-                print("  ❌ GitWiz status check failed (exit code: %s)", result.returncode)
-                print("  Error: %s", result.stderr)
+                print(f"  ❌ GitWiz status check failed (exit code: {result.returncode})")
+                print(f"  Error: {result.stderr}")
                 self.results["gitwiz_status"] = "failed"
         except subprocess.TimeoutExpired:
             print("  ❌ GitWiz status check timed out")
             self.results["gitwiz_status"] = "timeout"
         except Exception as e:
-            print("  ❌ GitWiz test error: %s", e)
+            print(f"  ❌ GitWiz test error: {e}")
             self.results["gitwiz_status"] = "error"
 
     def validate(self) -> Dict:
@@ -181,12 +181,12 @@ class CIEnvironmentValidator:
         self.generate_recommendations()
 
         print("\n" + "=" * 60)
-        print("📊 Overall Status: %s", self.results['overall_status'].upper())
+        print(f"📊 Overall Status: {self.results['overall_status'].upper()}")
 
         if self.results["recommendations"]:
             print("\n💡 Recommendations:")
             for rec in self.results["recommendations"]:
-                print("  %s", rec)
+                print(f"  {rec}")
 
         return self.results
 
@@ -202,7 +202,7 @@ class CIEnvironmentValidator:
         node_missing = [t.split(":")[1] for t in self.results["missing_tools"] if t.startswith("node:")]
 
         if python_missing:
-            print("Installing Python tools: %s", ' '.join(python_missing))
+            print(f"Installing Python tools: {' '.join(python_missing)}")
             try:
                 subprocess.run([sys.executable, "-m", "pip", "install"] + python_missing, check=True)
                 logger.info("Python tools installed successfully")
@@ -210,7 +210,7 @@ class CIEnvironmentValidator:
                 logger.error("Failed to install Python tools: %s", e)
 
         if node_missing and shutil.which("npm"):
-            print("Installing Node.js tools: %s", ' '.join(node_missing))
+            print(f"Installing Node.js tools: {' '.join(node_missing)}")
             try:
                 subprocess.run(["npm", "install", "-g"] + node_missing, check=True)
                 logger.info("Node.js tools installed successfully")

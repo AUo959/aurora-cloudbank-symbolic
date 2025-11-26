@@ -32,7 +32,7 @@ def main() -> None:
     args = parser.parse_args()
 
     out_path = combine(args.output, args.packages)
-    print("Combined package created at %s", out_path)
+    print(f"Combined package created at {out_path}")
 
 
 if __name__ == "__main__":

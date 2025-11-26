@@ -197,7 +197,7 @@ echo "✅ Post-commit validation update complete"
         if len(reports) > max_reports:
             for old_report in reports[max_reports:]:
                 old_report.unlink()
-                print("🗑️ Cleaned up old report: %s", old_report.name)
+                print(f"🗑️ Cleaned up old report: {old_report.name}")
 
     def implement_strategy(self, strategy: str):
         """Implement a specific validation strategy"""
@@ -215,7 +215,7 @@ echo "✅ Post-commit validation update complete"
             validation_dir.mkdir(exist_ok=True)
             self.setup_pre_commit_exclusion()
             logger.info("Implemented timestamped strategy")
-            print("   - Reports saved to %s", validation_dir)
+            print(f"   - Reports saved to {validation_dir}")
             print("   - Unique filenames prevent conflicts")
 
         elif strategy == "post_commit":
@@ -235,9 +235,9 @@ echo "✅ Post-commit validation update complete"
         """Generate status report of current validation setup"""
         print("\n🛰️ Aurora Validation Manager Status")
         print("=" * 50)
-        print("Strategy: %s", self.config['strategy'])
-        print("Repository Root: %s", self.repo_root)
-        print("Exclude from Commit: %s", self.config['exclude_from_commit'])
+        print(f"Strategy: {self.config['strategy']}")
+        print(f"Repository Root: {self.repo_root}")
+        print(f"Exclude from Commit: {self.config['exclude_from_commit']}")
 
         # Check git hooks
         hooks_dir = self.repo_root / ".git" / "hooks"
@@ -245,8 +245,8 @@ echo "✅ Post-commit validation update complete"
         post_commit = hooks_dir / "post-commit"
 
         print("\nGit Hooks:")
-        print("  Pre-commit: %s", '✅' if pre_commit.exists() else '❌')
-        print("  Post-commit: %s", '✅' if post_commit.exists() else '❌')
+        print(f"  Pre-commit: {'✅' if pre_commit.exists() else '❌'}")
+        print(f"  Post-commit: {'✅' if post_commit.exists() else '❌'}")
 
         # Check validation directory
         validation_dir = self.repo_root / self.config["validation_dir"]
@@ -291,8 +291,8 @@ def main():
         manager.cleanup_old_reports()
     elif args.exclude_file:
         excluded = manager.should_exclude_from_commit(args.exclude_file)
-        print("File: %s", args.exclude_file)
-        print("Exclude from commit: %s", excluded)
+        print(f"File: {args.exclude_file}")
+        print(f"Exclude from commit: {excluded}")
     else:
         parser.print_help()
 

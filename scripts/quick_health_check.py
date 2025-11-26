@@ -19,8 +19,8 @@ def quick_health_check():
                        if b.strip() and not b.startswith('origin/HEAD') and b.strip() != 'origin']
             branch_count = len(branches)
             
-            print("   🌳 Current branches: %s", branch_count)
-            
+            print(f"   🌳 Current branches: {branch_count}")
+
             if branch_count <= 30:
                 print("   💚 Status: EXCELLENT (maintaining gains!)")
             elif branch_count <= 35:
@@ -29,14 +29,14 @@ def quick_health_check():
                 print("   🟠 Status: FAIR (needs attention)")
             else:
                 print("   🔴 Status: CRITICAL (requires immediate action)")
-            
-            print("   📅 Check time: %s", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+            print(f"   📅 Check time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             
         else:
             print("   ❌ Could not retrieve branch information")
             
     except Exception as e:
-        print("   💥 Error: %s", e)
+        print(f"   💥 Error: {e}")
 
 if __name__ == "__main__":
     quick_health_check()

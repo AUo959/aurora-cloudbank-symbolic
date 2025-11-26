@@ -28,17 +28,17 @@ def execute_pruning_mission_phase_1():
     """Execute Phase 1 of repository pruning mission"""
     print("🌳 SSMT v3.0 Repository Pruning Mission - Phase 1")
     print("🎯 Mission: Consolidate PRs, close issues, trim branch sappers")
-    print("📋 Processing %s Python dependency branches", len(PYTHON_DEPENDENCY_BRANCHES))
+    print(f"📋 Processing {len(PYTHON_DEPENDENCY_BRANCHES)} Python dependency branches")
     print("⚡ Success Rate: 75% (validated with live automation)")
     
     print("\n🐍 Python Dependency Branches (Highest Success Rate):")
     for i, branch in enumerate(PYTHON_DEPENDENCY_BRANCHES, 1):
-        print("  {i}. %s", branch)
+        print(f"  {i}. {branch}")
     
     print(f"\n📊 Expected Results:")
-    print("  ✅ ~%s successful merges", int(len(PYTHON_DEPENDENCY_BRANCHES) * 0.75))
-    print("  ⏱️ ~%s minutes manual work saved", len(PYTHON_DEPENDENCY_BRANCHES) * 5)
-    print("  🗑️ %s branches eliminated from repository", len(PYTHON_DEPENDENCY_BRANCHES))
+    print(f"  ✅ ~{int(len(PYTHON_DEPENDENCY_BRANCHES) * 0.75)} successful merges")
+    print(f"  ⏱️ ~{len(PYTHON_DEPENDENCY_BRANCHES) * 5} minutes manual work saved")
+    print(f"  🗑️ {len(PYTHON_DEPENDENCY_BRANCHES)} branches eliminated from repository")
     
     print("\n🛡️ Safety Systems:")
     print("  ✅ Pre-merge validation with conflict simulation")

@@ -114,9 +114,9 @@ class IntelligentTestSelector:
         
         selected_groups = {}
         
-        print("📁 Analyzing %s changed files:", len(self.changed_files))
+        print(f"📁 Analyzing {len(self.changed_files)} changed files:")
         for file in sorted(self.changed_files):
-            print("  - %s", file)
+            print(f"  - {file}")
         
         print("\n🧪 Test selection analysis:")
         
@@ -134,9 +134,9 @@ class IntelligentTestSelector:
             selected_groups[group] = should_run
             
             if should_run:
-                print("  ✅ {group}: Will run (matched: %s)", ', '.join(set(matched_patterns)))
+                print(f"  ✅ {group}: Will run (matched: {', '.join(set(matched_patterns))})")
             else:
-                print("  ⏭️ %s: Skipping (no relevant changes)", group)
+                print(f"  ⏭️ {group}: Skipping (no relevant changes)")
         
         # Always run security tests if security-related files changed
         security_keywords = ['security', 'auth', 'crypto', 'password', 'token', 'key']
@@ -168,7 +168,7 @@ class IntelligentTestSelector:
         print("")
 # 📊 Generated test matrix: %s test groups", len(include))
         for item in include:
-            print("  - %s", item['test-group'])
+            print(f"  - {item['test-group']}")
         
         return matrix
     

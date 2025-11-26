@@ -856,15 +856,15 @@ def main():
         elif args.action == "check":
             metrics = monitor.collect_health_metrics()
             logger.info("Health Check Complete")
-            print("📊 Health Score: %s", metrics.health_score)
-            print("📁 Files: %s", metrics.file_count)
-            print("💾 Size: %sMB", metrics.repository_size_mb)
-            print("🌿 Branches: %s", metrics.branch_count)
+            print(f"📊 Health Score: {metrics.health_score}")
+            print(f"📁 Files: {metrics.file_count}")
+            print(f"💾 Size: {metrics.repository_size_mb}MB")
+            print(f"🌿 Branches: {metrics.branch_count}")
 
             if metrics.alerts:
-                print("🚨 Alerts: %s", len(metrics.alerts))
+                print(f"🚨 Alerts: {len(metrics.alerts)}")
                 for alert in metrics.alerts:
-                    print("  - %s", alert)
+                    print(f"  - {alert}")
 
     except Exception as e:
         logger.error("Health monitor operation failed: %s", str(e)[:100])

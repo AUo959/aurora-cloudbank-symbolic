@@ -41,7 +41,7 @@ class Phase4SecurityFinalizer:
             if self.add_csrf_protection_to_file(file_path):
                 csrf_fixes += 1
         
-        print("📊 CSRF protection added to %s API files", csrf_fixes)
+        print(f"📊 CSRF protection added to {csrf_fixes} API files")
         return csrf_fixes
     
     def add_csrf_protection_to_file(self, file_path):
@@ -101,7 +101,7 @@ class Phase4SecurityFinalizer:
                                     
                                     modified = True
                                     self.fixes_applied += 1
-                                    print("  🔐 Added CSRF protection to %s", func_name)
+                                    print(f"  🔐 Added CSRF protection to {func_name}")
                                     continue
                 
                 enhanced_lines.append(line)
@@ -110,7 +110,7 @@ class Phase4SecurityFinalizer:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(enhanced_lines))
                 
-                print("  ✅ Enhanced CSRF security in %s", file_path)
+                print(f"  ✅ Enhanced CSRF security in {file_path}")
                 self.files_processed += 1
                 return True
                 
@@ -132,7 +132,7 @@ class Phase4SecurityFinalizer:
             if self.clean_logging_in_file(file_path):
                 cleaned_files += 1
         
-        print("📊 Cleaned logging in %s diagnostic files", cleaned_files)
+        print(f"📊 Cleaned logging in {cleaned_files} diagnostic files")
         return cleaned_files
     
     def clean_logging_in_file(self, file_path):
@@ -163,7 +163,7 @@ class Phase4SecurityFinalizer:
                         
                         modified = True
                         self.fixes_applied += 1
-                        print("  🧹 Fixed f-string print in %s", file_path.name)
+                        print(f"  🧹 Fixed f-string print in {file_path.name}")
                 
                 fixed_lines.append(fixed_line)
             
@@ -202,7 +202,7 @@ class Phase4SecurityFinalizer:
             if self.enhance_input_validation_in_file(file_path):
                 enhanced_files += 1
         
-        print("📊 Enhanced input validation in %s files", enhanced_files)
+        print(f"📊 Enhanced input validation in {enhanced_files} files")
         return enhanced_files
     
     def enhance_input_validation_in_file(self, file_path):
@@ -241,7 +241,7 @@ class Phase4SecurityFinalizer:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(enhanced_lines))
                 
-                print("  🔍 Enhanced input validation in %s", file_path.name)
+                print(f"  🔍 Enhanced input validation in {file_path.name}")
                 self.files_processed += 1
                 return True
                 
@@ -271,7 +271,7 @@ class Phase4SecurityFinalizer:
             if self.add_session_security_to_file(file_path):
                 secured_files += 1
         
-        print("📊 Added session security to %s files", secured_files)
+        print(f"📊 Added session security to {secured_files} files")
         return secured_files
     
     def add_session_security_to_file(self, file_path):
@@ -310,7 +310,7 @@ class Phase4SecurityFinalizer:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(secured_lines))
                 
-                print("  🔐 Added session security to %s", file_path.name)
+                print(f"  🔐 Added session security to {file_path.name}")
                 self.files_processed += 1
                 return True
                 
@@ -343,7 +343,7 @@ class Phase4SecurityFinalizer:
             ] + [str(f) for f in existing_files[:10]], # Limit to 10 files to avoid timeout
             capture_output=True, text=True, timeout=60)
             
-            print("  📁 Scanned %s files", len(existing_files[:10]))
+            print(f"  📁 Scanned {len(existing_files[:10])} files")
             
             if result.returncode == 0:
                 print("  ✅ Comprehensive security scan passed!")
@@ -359,7 +359,7 @@ class Phase4SecurityFinalizer:
             print("  ⏱️ Security scan timed out - system may be under heavy load")
             return False
         except Exception as e:
-            print("  ⚠️ Security scan failed: %s", e)
+            print(f"  ⚠️ Security scan failed: {e}")
             return False
     
     def estimate_final_alert_reduction(self):
@@ -384,12 +384,12 @@ class Phase4SecurityFinalizer:
         initial_alerts = 362
         remaining_alerts = max(0, initial_alerts - total_reduction)
         
-        print("  📊 Phase 4 estimated reduction: -%s alerts", phase4_total)
-        print("  📉 Total estimated reduction: -%s alerts", total_reduction)
-        print("  📋 Projected remaining: %s alerts", remaining_alerts)
+        print(f"  📊 Phase 4 estimated reduction: -{phase4_total} alerts")
+        print(f"  📉 Total estimated reduction: -{total_reduction} alerts")
+        print(f"  📋 Projected remaining: {remaining_alerts} alerts")
         
         target_achieved = remaining_alerts < 50
-        print("  🎯 Target <50 alerts: %s", '🎉 ACHIEVED!' if target_achieved else 'In progress...')
+        print(f"  🎯 Target <50 alerts: {'🎉 ACHIEVED!' if target_achieved else 'In progress...'}")
         
         return {
             'phase4_reduction': phase4_total,
@@ -456,7 +456,7 @@ class Phase4SecurityFinalizer:
             
             f.write("\n---\n*Aurora CloudBank Security - Phase 4 Complete*\n")
         
-        print("📄 Phase 4 report generated: %s", report_file)
+        print(f"📄 Phase 4 report generated: {report_file}")
         return report
     
     def run_comprehensive_phase4_finalization(self):
@@ -489,23 +489,23 @@ class Phase4SecurityFinalizer:
         
         print("=" * 55)
         print(f"🎯 Phase 4 Final Summary:")
-        print("  🔧 Total fixes applied: %s", self.fixes_applied)
-        print("  📁 Files processed: %s", self.files_processed)
-        print("  🛡️ Security categories enhanced: %s", len(self.target_categories))
-        print("  📊 Estimated alert reduction: -%s", alert_analysis['phase4_reduction'])
-        print("  📋 Projected remaining alerts: %s", alert_analysis['remaining_alerts'])
+        print(f"  🔧 Total fixes applied: {self.fixes_applied}")
+        print(f"  📁 Files processed: {self.files_processed}")
+        print(f"  🛡️ Security categories enhanced: {len(self.target_categories)}")
+        print(f"  📊 Estimated alert reduction: -{alert_analysis['phase4_reduction']}")
+        print(f"  📋 Projected remaining alerts: {alert_analysis['remaining_alerts']}")
         
         if alert_analysis['target_achieved']:
             print(f"  🎉 TARGET ACHIEVED: <50 alerts reached!")
         else:
-            print("  🎯 Target progress: %s% complete", ((362 - alert_analysis['remaining_alerts']) / 362) * 100)
+            print(f"  🎯 Target progress: {((362 - alert_analysis['remaining_alerts']) / 362) * 100}% complete")
         
-        print("  🧪 Comprehensive scan: %s", '✅ PASSED' if security_scan_passed else '⚠️ ISSUES')
+        print(f"  🧪 Comprehensive scan: {'✅ PASSED' if security_scan_passed else '⚠️ ISSUES'}")
         
         if self.errors:
-            print("  ⚠️ Errors encountered: %s", len(self.errors))
+            print(f"  ⚠️ Errors encountered: {len(self.errors)}")
             for error in self.errors[:3]:  # Show first 3 errors
-                print("    - %s", error)
+                print(f"    - {error}")
         
         print(f"\n🏆 Phase 4 Security Finalization Complete!")
         

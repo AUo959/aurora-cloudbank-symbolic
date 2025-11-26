@@ -306,7 +306,7 @@ def main():
             logger.error("No branches specified. Use --easy-wins or --branches")
             sys.exit(1)
         
-        print("🚀 Executing live automation on %s branches...", len(branches))
+        print(f"🚀 Executing live automation on {len(branches)} branches...")
         logger.warning("This will make real changes to the repository!")
         
         confirmation = input("Type 'EXECUTE' to proceed: ")

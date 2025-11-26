@@ -49,7 +49,7 @@ class Phase2SecurityRemediator:
                             if self.check_file_vulnerable(file_path):
                                 vulnerable_files.append(file_path)
         
-        print("📊 Found %s files with log injection vulnerabilities", len(vulnerable_files))
+        print(f"📊 Found {len(vulnerable_files)} files with log injection vulnerabilities")
         return vulnerable_files
     
     def check_file_vulnerable(self, file_path: str) -> bool:
@@ -88,7 +88,7 @@ class Phase2SecurityRemediator:
                     quote_char = match.group(4)
                     f_string_content = match.group(5)
                     
-                    print("  🔧 Fixing line {i+1}: %s f-string", log_level)
+                    print(f"  🔧 Fixing line {i+1}: {log_level} f-string")
                     
                     # Convert f-string to parameterized logging
                     # Extract variables from {variable} patterns
@@ -114,7 +114,7 @@ class Phase2SecurityRemediator:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(lines))
                 
-                print("  ✅ Fixed %s", file_path)
+                print(f"  ✅ Fixed {file_path}")
                 return True
             
             return False
@@ -144,7 +144,7 @@ class Phase2SecurityRemediator:
                     except:
                         continue
         
-        print("📊 Found %s files with shell=True patterns", len(python_files))
+        print(f"📊 Found {len(python_files)} files with shell=True patterns")
         
         for file_path in python_files[:15]:  # Process first 15 files
             try:
@@ -158,7 +158,7 @@ class Phase2SecurityRemediator:
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(fixed_content)
                     
-                    print("  🔧 Fixed shell injection in %s", file_path)
+                    print(f"  🔧 Fixed shell injection in {file_path}")
                     shell_fixes += 1
                     
             except Exception as e:
@@ -213,7 +213,7 @@ class Phase2SecurityRemediator:
                 with open(web_test_file, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(lines))
                 
-                print("  ✅ Enhanced sanitization in %s", web_test_file)
+                print(f"  ✅ Enhanced sanitization in {web_test_file}")
                 return True
         
         except Exception as e:

@@ -50,7 +50,7 @@ async def validate_agent_integration():
 
         # List available tools
         for tool_name, tool_info in tools_info['tools'].items():
-            print("   🛠️  {tool_name}: %s", tool_info['description'])
+            print(f"   🛠️  {tool_name}: {tool_info['description']}")
 
         # Test system status
         status_result = await agent.execute_tool("system_status", {"detail_level": "basic"})
@@ -111,7 +111,7 @@ def validate_api_endpoints():
             for endpoint, info in endpoints.items():
                 method = info.get('method', 'GET')
                 desc = info.get('description', 'No description')
-                print("   🌐 {method} {endpoint}: %s", desc)
+                print(f"   🌐 {method} {endpoint}: {desc}")
 
             return True
         else:
@@ -184,9 +184,9 @@ async def main():
     agent_integration_ok = await validate_agent_integration()
 
     print("\n📊 Validation Results:")
-    print("   Dependencies: %s", '✅ PASS' if dependencies_ok else '❌ FAIL')
-    print("   API Configuration: %s", '✅ PASS' if api_config_ok else '❌ FAIL')
-    print("   Agent Integration: %s", '✅ PASS' if agent_integration_ok else '❌ FAIL')
+    print(f"   Dependencies: {'✅ PASS' if dependencies_ok else '❌ FAIL'}")
+    print(f"   API Configuration: {'✅ PASS' if api_config_ok else '❌ FAIL'}")
+    print(f"   Agent Integration: {'✅ PASS' if agent_integration_ok else '❌ FAIL'}")
 
     overall_status = dependencies_ok and api_config_ok and agent_integration_ok
 

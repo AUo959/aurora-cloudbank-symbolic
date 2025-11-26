@@ -28,9 +28,9 @@ def execute_branch_deletions():
     print("🧹 Goal: Repository health improvement (60 → 52 branches)")
     print()
     
-    print("🗑️ Executing deletion of %s verified safe branches:", len(safe_branches))
+    print(f"🗑️ Executing deletion of {len(safe_branches)} verified safe branches:")
     for i, branch in enumerate(safe_branches, 1):
-        print("   {i}. %s", branch)
+        print(f"   {i}. {branch}")
     print()
     
     # Create backup record before deletion
@@ -62,7 +62,7 @@ def execute_branch_deletions():
             )
             
             if check_result.returncode != 0:
-                print("   ⚠️ Branch %s not found - may already be deleted", branch)
+                print(f"   ⚠️ Branch {branch} not found - may already be deleted")
                 deletion_results.append({
                     "branch": branch,
                     "status": "not_found",
@@ -79,7 +79,7 @@ def execute_branch_deletions():
             )
             
             if delete_result.returncode == 0:
-                print("   ✅ Successfully deleted: %s", branch)
+                print(f"   ✅ Successfully deleted: {branch}")
                 successful_deletions += 1
                 deletion_results.append({
                     "branch": branch,
@@ -89,7 +89,7 @@ def execute_branch_deletions():
                 backup_record["branches_deleted"].append(branch)
             else:
                 error_msg = delete_result.stderr.strip()
-                print("   ❌ Failed to delete {branch}: %s", error_msg)
+                print(f"   ❌ Failed to delete {branch}: {error_msg}")
                 deletion_results.append({
                     "branch": branch,
                     "status": "failed",
@@ -97,7 +97,7 @@ def execute_branch_deletions():
                 })
                 
         except Exception as e:
-            print("   💥 Exception deleting {branch}: %s", str(e))
+            print(f"   💥 Exception deleting {branch}: {str(e)}")
             deletion_results.append({
                 "branch": branch,
                 "status": "exception", 
@@ -114,14 +114,14 @@ def execute_branch_deletions():
         json.dump(backup_record, f, indent=2)
     
     print(f"\n📊 Phase 2 Deletion Summary:")
-    print("   ✅ Successfully deleted: {successful_deletions}/%s branches", len(safe_branches))
+    print(f"   ✅ Successfully deleted: {successful_deletions}/{len(safe_branches)} branches")
     print(f"   📁 Backup record saved: phase_2_deletion_backup.json")
     
     if successful_deletions > 0:
         print(f"\n🎯 Repository Health Improvement:")
-        print("   📉 Branch count reduced by: %s", successful_deletions)
+        print(f"   📉 Branch count reduced by: {successful_deletions}")
         print(f"   🌳 Repository maintenance burden: REDUCED")
-        print("   ✅ Mission status: %s", 'COMPLETE' if successful_deletions == len(safe_branches) else 'PARTIAL SUCCESS')
+        print(f"   ✅ Mission status: {'COMPLETE' if successful_deletions == len(safe_branches) else 'PARTIAL SUCCESS'}")
     
     # Check final branch count
     try:
@@ -134,7 +134,7 @@ def execute_branch_deletions():
         
         if branch_count_result.returncode == 0:
             remaining_branches = len([b for b in branch_count_result.stdout.strip().split('\n') if b and not b.startswith('origin/HEAD')])
-            print("   📊 Current remote branch count: %s", remaining_branches)
+            print(f"   📊 Current remote branch count: {remaining_branches}")
     except:
         print("   📊 Could not determine final branch count")
     

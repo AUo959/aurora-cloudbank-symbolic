@@ -51,7 +51,7 @@ class HealthMonitor:
                 with open(config_path, encoding="utf-8") as f:
                     return json.load(f)
             except (OSError, ValueError, RuntimeError) as e:
-                print("Error loading config: %s", e)
+                print(f"Error loading config: {e}")
 
         # Default configuration
         return {
@@ -518,16 +518,16 @@ def main():
         print("🔍 Running health check...")
         metrics = monitor.collect_metrics()
 
-        print("📊 Health Score: %s/10", metrics['health_score'])
-        print("💾 Repository Size: %sMB", metrics['repository_size_mb'])
-        print("📁 File Count: %s", metrics['file_count'])
-        print("🌿 Branch Count: %s", metrics['branch_count'])
-        print("📦 ZIP Files: %s", metrics['zip_file_count'])
+        print(f"📊 Health Score: {metrics['health_score']}/10")
+        print(f"💾 Repository Size: {metrics['repository_size_mb']}MB")
+        print(f"📁 File Count: {metrics['file_count']}")
+        print(f"🌿 Branch Count: {metrics['branch_count']}")
+        print(f"📦 ZIP Files: {metrics['zip_file_count']}")
 
         if metrics["issues"]:
             print("\n⚠️ Issues:")
             for issue in metrics["issues"]:
-                print("  - %s", issue)
+                print(f"  - {issue}")
         else:
             print("\n✅ No issues detected")
 
@@ -540,7 +540,7 @@ def main():
         if args.output:
             with open(args.output, "w", encoding="utf-8") as f:
                 f.write(report)
-            print("📄 Report saved to %s", args.output)
+            print(f"📄 Report saved to {args.output}")
         else:
             print(report)
 

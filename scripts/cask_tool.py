@@ -35,7 +35,7 @@ def main() -> None:
     create_research_landscape_chart(landscape_png)
     create_project_gantt_chart(gantt_png)
 
-    print("CASK assets written to %s", args.output_dir)
+    print(f"CASK assets written to {args.output_dir}")
 
 
 if __name__ == "__main__":

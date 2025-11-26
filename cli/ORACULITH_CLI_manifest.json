@@ -1,0 +1,84 @@
+{
+  "tool_name": "oraculith-forecast",
+  "description": "Command-line interface for ORACULITH symbolic forecasting engine. Accepts ConstellinkMesh or full OraculithForecastContext JSON and produces SymbolicForecast with metaphors, risk analysis, and hash-sealed manifests.",
+  "version": "1.0.0",
+  "anchor_seed": "EOS_SEED_ORION",
+  "ethics_protocol": "Picard_Delta_3",
+  "export_time_utc": "2025-11-24T00:00:00Z",
+  "entrypoint": "cli.oraculith_forecast:main",
+  "language": "Python",
+  "symbolic_tags": [
+    "cli-tool",
+    "forecast-generator",
+    "mesh-consumer"
+  ],
+  "dlp_tags": [
+    "command-line",
+    "json-processing",
+    "hash-sealed-output"
+  ],
+  "input_schemas": {
+    "full_context": "OraculithForecastContext (see symbolic_specs/Symbolic_Module_Specs_CONSTELLINK_ORACULITH.json)",
+    "mesh_only": "ConstellinkMesh (auto-wrapped in minimal context)"
+  },
+  "output_schema": "SymbolicForecast (see symbolic_specs/Symbolic_Module_Specs_CONSTELLINK_ORACULITH.json)",
+  "options": [
+    {
+      "flag": "--input, -i",
+      "description": "Input file with OraculithForecastContext JSON (default: stdin)"
+    },
+    {
+      "flag": "--mesh, -m",
+      "description": "Input file with ConstellinkMesh JSON (creates minimal context)"
+    },
+    {
+      "flag": "--output, -o",
+      "description": "Output file for SymbolicForecast JSON (default: stdout)"
+    },
+    {
+      "flag": "--pretty, -p",
+      "description": "Pretty-print JSON output"
+    },
+    {
+      "flag": "--glyphcard, -g",
+      "description": "Print human-readable glyphcard to stderr"
+    },
+    {
+      "flag": "--anchor-seed",
+      "description": "Override anchor seed (default: EOS_SEED_ORION)"
+    },
+    {
+      "flag": "--ethics-protocol",
+      "description": "Override ethics protocol (default: Picard_Delta_3)"
+    },
+    {
+      "flag": "--version, -v",
+      "description": "Print CLI version"
+    }
+  ],
+  "usage_examples": [
+    {
+      "description": "Generate forecast from full context JSON via stdin",
+      "command": "python -m cli.oraculith_forecast < context.json"
+    },
+    {
+      "description": "Generate forecast from context file",
+      "command": "python -m cli.oraculith_forecast --input context.json --output forecast.json"
+    },
+    {
+      "description": "Generate forecast from mesh-only JSON",
+      "command": "python -m cli.oraculith_forecast --mesh mesh.json --output forecast.json --pretty"
+    },
+    {
+      "description": "Display glyphcard to stderr",
+      "command": "python -m cli.oraculith_forecast --mesh mesh.json --glyphcard > forecast.json"
+    },
+    {
+      "description": "Override anchor seed and ethics protocol",
+      "command": "python -m cli.oraculith_forecast --mesh mesh.json --anchor-seed CUSTOM_SEED --ethics-protocol Protocol_Alpha"
+    }
+  ],
+  "state_sealing": {
+    "notes": "All forecasts produced by this CLI include SHA256-sealed manifests for integrity verification and reliquary indexing."
+  }
+}

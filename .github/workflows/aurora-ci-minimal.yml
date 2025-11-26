@@ -2,6 +2,8 @@
 name: Aurora CI (Minimal)
 # Single, robust CI workflow that focuses on what matters
 # Designed to pass reliably while catching real issues
+#
+# For deployment and setup documentation, see: docs/aurora_deployment_reference.md
 on:
   push:
     branches: [main, develop]

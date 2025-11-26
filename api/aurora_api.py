@@ -709,6 +709,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate L2 Meta-Agent Bridge routes: %s", e)
 
+# Include Drift Metrics API routes (Phase 2: Drift Prometheus Exporter)
+try:
+    from src.observability.drift_metrics_api import router as drift_metrics_router
+    app.include_router(drift_metrics_router)
+    logger.info("✅ Drift Metrics API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Drift Metrics routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Drift Metrics routes: %s", e)
+
 # Initialize Ethics Gate for high-impact operations
 try:
     from src.aurora.ethics import EthicsGate, GUMASEthicsClient

@@ -697,9 +697,12 @@ class R2AgentTelemetry:
         
         return summary
     
-    def export_prometheus_metrics(self) -> str:
+    def export_prometheus_metrics(self, include_drift_metrics: bool = True) -> str:
         """
         Export metrics in Prometheus text format
+        
+        Args:
+            include_drift_metrics: Whether to include drift metrics from DriftPrometheusExporter
         
         Returns:
             Prometheus-formatted metrics
@@ -735,8 +738,61 @@ class R2AgentTelemetry:
         lines.append("# TYPE r2_agent_anomalies_detected counter")
         lines.append(f'r2_agent_anomalies_detected {len(self._detected_anomalies)}')
         
+        # Include drift metrics if requested
+        if include_drift_metrics:
+            try:
+                from src.observability.drift_prometheus_exporter import get_drift_exporter
+                drift_exporter = get_drift_exporter()
+                drift_metrics = drift_exporter.export_metrics()
+                lines.append("")
+                lines.append("# Drift metrics from DriftPrometheusExporter")
+                lines.append(drift_metrics.strip())
+            except Exception as e:
+                logger.debug("Drift metrics not available: %s", e)
+        
         return "\n".join(lines) + "\n"
     
+    def record_drift_alert_as_anomaly(self, alert) -> None:
+        """
+        Record a drift alert as an anomaly for unified tracking.
+        
+        Integrates DriftDetector alerts into the R2 anomaly detection pipeline.
+        
+        Args:
+            alert: DriftAlert from DriftDetector
+        """
+        try:
+            anomaly = AnomalyDetectionResult(
+                is_anomalous=True,
+                anomaly_score=alert.deviation,
+                anomaly_type=f"drift_{alert.method.value}",
+                threshold=0.0,  # Threshold was already exceeded in detector
+                baseline_value=alert.baseline_value,
+                current_value=alert.current_value,
+                details={
+                    "agent_id": alert.agent_id,
+                    "metric_name": alert.metric_name,
+                    "level": alert.level.value,
+                    "description": alert.description,
+                    "context_tag": alert.context_tag,
+                }
+            )
+            self._detected_anomalies.append(anomaly)
+            
+            # Record to OpenTelemetry if available
+            if self.enabled and hasattr(self, '_anomaly_counter'):
+                self._anomaly_counter.add(1, attributes={
+                    "anomaly_type": f"drift_{alert.method.value}",
+                    "drift_level": alert.level.value
+                })
+                
+            logger.debug(
+                "Drift alert recorded as anomaly: %s:%s [%s]",
+                alert.agent_id, alert.metric_name, alert.level.value
+            )
+        except Exception as e:
+            logger.warning("Failed to record drift alert as anomaly: %s", e)
+
     def get_recent_operations(
         self,
         limit: int = 10,

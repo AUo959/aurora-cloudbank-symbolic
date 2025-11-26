@@ -354,13 +354,14 @@ class DriftPrometheusExporter:
                 self._baseline_stddevs[key] = baseline.std_dev
                 self._moving_averages[key] = baseline.moving_average
 
-            # Sync alerts
+            # Sync alerts - count alerts by (agent_id, level, method)
+            alert_counts: Dict[tuple, int] = defaultdict(int)
             for alert in self._drift_detector.alerts:
                 alert_key = (alert.agent_id, alert.level.value, alert.method.value)
-                # Only count once per alert
-                if alert_key not in self._alert_counts:
-                    self._alert_counts[alert_key] = 0
-                # Count is managed by record_alert during detection
+                alert_counts[alert_key] += 1
+            # Merge with existing counts (take max to avoid double-counting)
+            for key, count in alert_counts.items():
+                self._alert_counts[key] = max(self._alert_counts.get(key, 0), count)
 
         logger.debug("Synced metrics from DriftDetector")
 

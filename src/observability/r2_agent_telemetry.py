@@ -778,8 +778,8 @@ class R2AgentTelemetry:
                 }
             )
             self._detected_anomalies.append(anomaly)
-            
-            # Record to OpenTelemetry if available
+
+            # Record to OpenTelemetry if available (counter may not exist if OTEL setup failed)
             if self.enabled and hasattr(self, '_anomaly_counter'):
                 self._anomaly_counter.add(1, attributes={
                     "anomaly_type": f"drift_{alert.method.value}",

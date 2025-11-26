@@ -190,6 +190,8 @@ async def get_drift_alerts(
                 "success": True,
                 "alerts": [],
                 "count": 0,
+                "drift_detector_configured": False,
+                "message": "No drift detector configured - alerts unavailable",
                 "context_tag": "drift_metrics_api_v1",
             }
 

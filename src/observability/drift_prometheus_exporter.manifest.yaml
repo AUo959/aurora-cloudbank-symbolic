@@ -1,0 +1,42 @@
+anchor_seed: EOS_SEED_ORION
+ethics_protocol: Picard_Delta_3
+dlp_tag: drift_prometheus_exporter_v1
+version: "1.0.0"
+team: AUo959-team
+symbolic_refs:
+  - HALO_CONTINUITY_GRAFT_005
+  - DRIFT_VALIDATION
+  - Z_SCORE_DETECTION
+  - MOVING_AVERAGE_ANALYSIS
+memory_provenance: DRIFT_OBSERVABILITY
+dependencies:
+  - src/monitoring/drift_detector.py
+  - src/observability/r2_agent_telemetry.py
+prometheus_metrics:
+  - aurora_drift_delta
+  - aurora_drift_baseline_mean
+  - aurora_drift_baseline_stddev
+  - aurora_drift_moving_average
+  - aurora_drift_alerts_total
+  - aurora_drift_detector_info
+api_endpoints:
+  - GET /api/drift/metrics
+  - GET /api/drift/summary
+  - GET /api/drift/alerts
+  - GET /api/drift/baselines
+  - POST /api/drift/baseline
+  - GET /api/drift/health
+description: |
+  Prometheus Exporter for DriftDetector Metrics.
+  
+  Bridges the gap between the fully-implemented DriftDetector
+  (src/monitoring/drift_detector.py) and the R-2 telemetry system
+  (src/observability/r2_agent_telemetry.py).
+  
+  Features:
+  - Z-score based drift detection metrics
+  - Moving average trend analysis metrics
+  - Threshold-based alerting (info/warning/critical levels)
+  - Baseline metadata exposure
+  - Real-time drift delta values per agent/metric
+  - Alert counts by severity level

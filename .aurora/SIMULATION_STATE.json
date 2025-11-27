@@ -3,17 +3,27 @@
   "title": "Aurora CloudBank Orion Station - Canonical Simulation State",
   "description": "Complete quantum-symbolic station infrastructure with dark matter memory architecture. Simulation IS the system.",
   "version": "2.0.0-QUANTUM-CANONICAL",
-  "last_updated": "2025-11-11T18:31:03.261485Z",
+  "last_updated": "2025-11-27T00:00:00Z",
   "simulation": {
     "name": "Aurora CloudBank Orion Station Operations",
     "status": "ACTIVE",
     "version": "1.0.0",
     "initialized": "2025-11-10T00:00:00Z",
-    "last_updated": "2025-11-11T14:50:00Z"
+    "last_updated": "2025-11-27T00:00:00Z",
+    "current_location": {
+      "name": "Command Bridge",
+      "deck": "Deck A",
+      "description": "Circular, panoramic interface surrounding the Aurora Core vault",
+      "primary_agents": [
+        "thorne",
+        "shepard"
+      ],
+      "template": "operational"
+    }
   },
   "roles": {
     "commander": {
-      "name": "Commander Thorne",
+      "name": "Commander Alex Thorne",
       "rank": "Commander",
       "callsign": "COMMAND-ACTUAL",
       "authority": "Mission authorization and strategic oversight",
@@ -134,7 +144,7 @@
   },
   "command_structure": {
     "station_commander": {
-      "name": "Commander Thorne",
+      "name": "Commander Alex Thorne",
       "call_sign": "COMMAND-ACTUAL",
       "rank": "Commander",
       "role": "Strategic Leadership & Mission Authorization",
@@ -365,7 +375,7 @@
         "class": "Command Frigate",
         "registry": "NX-9527",
         "status": "DOCKED_MAIN_BAY",
-        "commander": "Commander Thorne",
+        "commander": "Commander Alex Thorne",
         "crew_complement": 45,
         "capabilities": {
           "quantum_drive": true,
@@ -1014,7 +1024,7 @@
       "REFLECTIVE"
     ],
     "current_active": {
-      "commander_thorne": "CLEAR",
+      "commander_alex_thorne": "CLEAR",
       "ops_rodriguez": "COMPANION"
     },
     "mode_descriptions": {

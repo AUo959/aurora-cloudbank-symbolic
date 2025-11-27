@@ -77,6 +77,7 @@ Built for enterprises deploying advanced AI systems with quantum-inspired cognit
 
 ### 🔧 **Developer Resources**
 - [API Catalog](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog) (50+ endpoints)
+- [Deployment Reference](docs/aurora_deployment_reference.md) - Architecture & deployment guide
 - [Quick Start](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Quick-Start)
 - [Installation](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Installation)
 - [Testing](https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Testing)
@@ -2187,6 +2188,7 @@ This project builds upon research in:
 
 **📖 Documentation:**
 - [Quick Start Guide](#quick-start-5-minutes)
+- [Deployment Reference](docs/aurora_deployment_reference.md) - Architecture, relays & deployment
 - [API Reference](v2_API_REFERENCE.md)
 - [Quantum Cloud Backends](docs/QUANTUM_CLOUD_BACKENDS.md)
 - [R-2 Telemetry Guide](docs/R2_AGENT_TELEMETRY.md)

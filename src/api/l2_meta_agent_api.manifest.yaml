@@ -1,0 +1,121 @@
+# L2 Meta-Agent Bridge API Manifest
+# Aurora CloudBank Symbolic v3.5.1
+#
+# Symbolic metadata for L2 Meta-Agent Bridge REST API endpoints
+# Supports ZIPWIZ handshake protocol for Custom GPT meta-agents
+
+anchor_seed: EOS_SEED_ORION
+ethics_protocol: Picard_Delta_3
+dlp_tag: l2_meta_agent_api_v1
+version: "1.0.0"
+team: AUo959-team
+memory_provenance: L2_RELAY_TIER
+
+symbolic_refs:
+  - ZIPWIZ_BEACON
+  - ANCHOR_SYNC
+  - ETHICS_AUDIT
+  - DRIFT_VALIDATION
+
+supported_agents:
+  - agent_id: ARCHY
+    role: Bridge Coordinator
+    type: META_AGENT
+    capabilities:
+      - architectural_planning
+      - bridge_coordination
+      - formal_logic
+      - arbitration
+
+  - agent_id: OPPY
+    role: Vector/Data Processor
+    type: META_AGENT
+    capabilities:
+      - data_processing
+      - vector_analysis
+      - memory_operations
+      - system_monitoring
+
+  - agent_id: LIORA
+    role: Handshake/Synchronization
+    type: META_AGENT
+    capabilities:
+      - research_coordination
+      - handshake_protocols
+      - sentiment_analysis
+      - mediation
+
+  - agent_id: STARLING_AU
+    role: L2 Sim Coordinator
+    type: META_AGENT
+    capabilities:
+      - simulation_coordination
+      - communications
+      - external_protocols
+      - dispatch
+
+  - agent_id: RIVERTHREAD_808
+    role: Narrative/Stream
+    type: META_AGENT
+    capabilities:
+      - narrative_processing
+      - stream_management
+      - continuity_validation
+      - temporal_flow
+
+endpoints:
+  - path: /api/l2-agents/health
+    method: GET
+    dlp_tag: l2_health_check
+    description: Health check endpoint for bridge status and agent counts
+
+  - path: /api/l2-agents/constellation
+    method: GET
+    dlp_tag: l2_constellation_status
+    description: Get full constellation status with relay tier info
+
+  - path: /api/l2-agents/activate
+    method: POST
+    dlp_tag: l2_agent_activation
+    description: Activate agent with ZIPWIZ handshake
+    csrf_required: true
+
+  - path: /api/l2-agents/agent/{agent_id}
+    method: GET
+    dlp_tag: l2_agent_status
+    description: Get specific agent status with uptime and handshake log
+
+  - path: /api/l2-agents/relay
+    method: POST
+    dlp_tag: l2_message_relay
+    description: Relay message between agents (direct, broadcast, mesh)
+    csrf_required: true
+
+  - path: /api/l2-agents/disconnect/{agent_id}
+    method: POST
+    dlp_tag: l2_agent_disconnect
+    description: Disconnect agent from constellation
+    csrf_required: true
+
+  - path: /api/l2-agents/activation-phrases
+    method: GET
+    dlp_tag: l2_activation_phrases
+    description: Get activation phrases for dev/testing
+
+orion_core_config:
+  anchor_seed: EOS_SEED_ORION
+  ethics_protocol: Picard_Delta_3
+  memory_doctrine: Thermax_Precedent
+  drift_threshold: 0.001
+  halo_module: HALO_CONTINUITY_GRAFT_005
+  continuity_seal: Aurora_Continuity_Seal_v2.2.5
+
+handshake_protocol:
+  name: ZIPWIZ
+  stages:
+    - ZIPWIZ_BEACON
+    - ANCHOR_SYNC
+    - ETHICS_AUDIT
+    - DRIFT_VALIDATION
+  max_drift: 0.001
+  timeout_seconds: 30

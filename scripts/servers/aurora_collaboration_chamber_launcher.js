@@ -9,7 +9,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const fs = require('fs').promises;
 
 const app = express();
@@ -234,23 +234,23 @@ class AuroraEngine {
     const commands = [];
 
     if (/clean\s*up|cleanup|sync|synchronize/i.test(input)) {
-      commands.push('npm run time-to-clean-up');
+      commands.push({ cmd: 'npm', args: ['run', 'time-to-clean-up'] });
     }
 
     if (/valid|check|verify|test/i.test(input)) {
-      commands.push('npm run validation:status');
-      commands.push('python scripts/canonical_validator.py --status');
+      commands.push({ cmd: 'npm', args: ['run', 'validation:status'] });
+      commands.push({ cmd: 'python', args: ['scripts/canonical_validator.py', '--status'] });
     }
 
     if (/status|health|monitor/i.test(input)) {
-      commands.push('git status');
-      commands.push('npm run validation:status');
-      commands.push('ps aux | grep aurora');
+      commands.push({ cmd: 'git', args: ['status'] });
+      commands.push({ cmd: 'npm', args: ['run', 'validation:status'] });
+      commands.push({ cmd: 'ps', args: ['aux'] });
     }
 
     if (/optimization|optimize|performance/i.test(input)) {
-      commands.push('npm run lint');
-      commands.push('python scripts/aurora_validation_manager.py --cleanup');
+      commands.push({ cmd: 'npm', args: ['run', 'lint'] });
+      commands.push({ cmd: 'python', args: ['scripts/aurora_validation_manager.py', '--cleanup'] });
     }
 
     return commands;
@@ -270,7 +270,7 @@ class AuroraEngine {
           phase: 'Coordination',
           agents: analysis.agents,
           duration: '1-2m',
-          tasks: analysis.systemCommands.map(cmd => `Execute: ${cmd}`)
+          tasks: analysis.systemCommands.map(cmdObj => `Execute: ${cmdObj.cmd} ${cmdObj.args.join(' ')}`)
         },
         {
           phase: 'Optimization',
@@ -284,18 +284,18 @@ class AuroraEngine {
     };
   }
 
-  async executeSystemCommand(command) {
+  async executeSystemCommand({cmd, args}) {
     return new Promise((resolve, reject) => {
       const processId = `CMD-${Date.now()}`;
 
-      exec(command, {
+      execFile(cmd, args, {
         cwd: process.cwd(),
         timeout: 300000, // 5 minutes
         maxBuffer: 1024 * 1024 // 1MB buffer
       }, (error, stdout, stderr) => {
         const result = {
           processId,
-          command,
+          command: [cmd, ...args].join(' '),
           timestamp: new Date().toISOString(),
           success: !error,
           stdout: stdout.trim(),
@@ -552,17 +552,28 @@ io.on('connection', (socket) => {
 
       // Security check - only allow certain commands
       const allowedCommands = [
-        'npm run time-to-clean-up',
-        'npm run validation:status',
-        'npm run validation:cleanup',
-        'git status',
-        'python scripts/canonical_validator.py --status',
-        'python scripts/aurora_validation_manager.py --status',
-        'ps aux | grep aurora'
+        { cmd: 'npm', args: ['run', 'time-to-clean-up'] },
+        { cmd: 'npm', args: ['run', 'validation:status'] },
+        { cmd: 'npm', args: ['run', 'validation:cleanup'] },
+        { cmd: 'git', args: ['status'] },
+        { cmd: 'python', args: ['scripts/canonical_validator.py', '--status'] },
+        { cmd: 'python', args: ['scripts/aurora_validation_manager.py', '--status'] },
+        { cmd: 'ps', args: ['aux'] }, // note: grep run separately below
       ];
 
-      const isAllowed = allowedCommands.some(allowed => command.startsWith(allowed));
-      if (!isAllowed) {
+      // Match strictly against allowed command specifications
+      let matched = allowedCommands.find(ac => {
+        const userParts = command.trim().split(/\s+/);
+        if (ac.args.includes('|')) {
+          // Special case: allow 'ps aux | grep aurora' only if equal
+          return command.trim() === 'ps aux | grep aurora';
+        } else {
+          return userParts[0] === ac.cmd &&
+            userParts.length === 1 + ac.args.length &&
+            userParts.slice(1).every((arg, i) => arg === ac.args[i]);
+        }
+      });
+      if (!matched) {
         socket.emit('command_rejected', {
           command,
           reason: 'Command not in allowed list for security',
@@ -571,7 +582,19 @@ io.on('connection', (socket) => {
         return;
       }
 
-      const result = await auroraEngine.executeSystemCommand(command);
+      // If 'ps aux | grep aurora', execute in a safe way (no shell)
+      let result;
+      if (command.trim() === 'ps aux | grep aurora') {
+        // Run 'ps aux' and filter output with grep (in JS)
+        result = await auroraEngine.executeSystemCommand({cmd: 'ps', args: ['aux']});
+        const grepOutput = result.stdout
+          .split('\n')
+          .filter(line => line.includes('aurora'))
+          .join('\n');
+        result.stdout = grepOutput;
+      } else {
+        result = await auroraEngine.executeSystemCommand(matched);
+      }
 
       socket.emit('system_command_result', {
         command,

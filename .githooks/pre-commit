@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Aurora CloudBank Pre-commit Hook
-# Validates dependencies and prevents commits with conflicts
+# Validates dependencies, character consistency, and prevents commits with conflicts
 
 set -e
 
@@ -50,5 +50,33 @@ if git diff --cached --name-only | grep -E "requirements.*\.txt|pyproject\.toml"
     fi
 fi
 
+# ============================================================================
+# Character Consistency Check (Issue #430 Phase 3)
+# Prevents character drift by validating names, genders, and roles
+# ============================================================================
+echo ""
+echo "🎭 Running character consistency check..."
+
+if [[ -f "scripts/check_character_consistency.py" ]]; then
+    # Try to activate venv if it exists
+    if [[ -f ".venv/bin/activate" ]]; then
+        source .venv/bin/activate 2>/dev/null || true
+        python scripts/check_character_consistency.py || {
+            echo "❌ Character consistency check failed!"
+            echo "💡 See .github/copilot-instructions.md for canonical character data"
+            exit 1
+        }
+    elif [[ -n "$REMOTE_CONTAINERS" ]] || [[ -f "/.dockerenv" ]]; then
+        python3 scripts/check_character_consistency.py 2>/dev/null || {
+            echo "ℹ️ Character consistency check skipped (optional in dev container)"
+        }
+    else
+        echo "ℹ️ No virtual environment found, skipping character check"
+    fi
+else
+    echo "ℹ️ Character consistency script not found, skipping"
+fi
+
+echo ""
 echo "✅ Pre-commit validation passed"
 exit 0

@@ -569,8 +569,8 @@ io.on('connection', (socket) => {
           return command.trim() === 'ps aux | grep aurora';
         } else {
           return userParts[0] === ac.cmd &&
-            JSON.stringify(userParts.slice(1)) === JSON.stringify(ac.args) &&
-            userParts.length === 1 + ac.args.length;
+            userParts.length === 1 + ac.args.length &&
+            userParts.slice(1).every((arg, i) => arg === ac.args[i]);
         }
       });
       if (!matched) {

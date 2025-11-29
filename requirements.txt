@@ -28,9 +28,9 @@ aiofiles>=24.1.0                    # Async file operations
 # ===================================================================
 cryptography>=41.0.7                # Cryptographic library
 bcrypt>=4.1.2                       # Password hashing
-pyjwt>=2.8.0                        # JWT tokens
+pyjwt>=2.8.0                        # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4              # Password handling
-python-jose[cryptography]>=3.3.0   # JWT and JWS implementation
+# python-jose removed - see security migration Nov 2025 (ecdsa vulnerability)
 
 # ===================================================================
 # DATA PROCESSING & SCIENTIFIC COMPUTING

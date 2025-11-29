@@ -10,7 +10,7 @@ SonarCloud security hotspots are acknowledged and accepted.
 
 import pytest
 from datetime import datetime, timedelta, timezone
-from jose import jwt
+import jwt
 
 from src.security.oauth2 import OAuth2Handler, Token, TokenData, User, UserInDB, get_current_user, SECRET_KEY, ALGORITHM
 from src.security.roles import Role

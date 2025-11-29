@@ -12,7 +12,8 @@ from functools import wraps
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
+from jwt.exceptions import PyJWTError
 import bcrypt
 from pydantic import BaseModel, Field
 
@@ -161,12 +162,12 @@ class OAuth2Handler:
             Decoded token payload
 
         Raises:
-            JWTError: If token is invalid or expired
+            PyJWTError: If token is invalid or expired
         """
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             return payload
-        except JWTError as e:
+        except PyJWTError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Could not validate credentials: {str(e)}",
@@ -222,7 +223,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
             raise credentials_exception
 
         token_data = TokenData(username=username, role=role_str, exp=payload.get("exp"))
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
 
     # In production, fetch user from database

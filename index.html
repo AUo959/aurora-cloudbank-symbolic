@@ -3,11 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
-    <title>Aurora Quantum VSA Playground</title>
-    <script src="static/js/aurora-security.js"></script>
-    <script src="static/js/aurora-web-logger.js"></script>
+    <meta name="description" content="Aurora CloudBank Symbolic - Enterprise Quantum-Symbolic Computing Platform for AI Systems">
+    <meta name="keywords" content="quantum computing, AI, symbolic architecture, enterprise, ethics, observability">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self';">
+    <title>Aurora CloudBank Symbolic - Enterprise Quantum-Symbolic Computing Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --aurora-primary: #6366f1;
+            --aurora-secondary: #8b5cf6;
+            --aurora-accent: #06b6d4;
+            --aurora-success: #10b981;
+            --aurora-warning: #f59e0b;
+            --aurora-danger: #ef4444;
+            --bg-dark: #0a0a0f;
+            --bg-card: #111118;
+            --bg-elevated: #1a1a24;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #1e293b;
+            --glow-primary: rgba(99, 102, 241, 0.4);
+            --glow-accent: rgba(6, 182, 212, 0.3);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,788 +34,1099 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2a 100%);
-            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-brand .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--aurora-primary), var(--aurora-accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--aurora-accent);
+        }
+
+        .nav-cta {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--aurora-primary), var(--aurora-secondary));
+            color: white;
+            box-shadow: 0 4px 15px var(--glow-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--glow-primary);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--aurora-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
             text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #2a2a4a;
-            padding-bottom: 20px;
+            z-index: 1;
         }
 
-        .header h1 {
-            font-size: 3rem;
-            background: linear-gradient(45deg, #4a9eff, #ff6b9d, #4a9eff);
-            background-size: 300% 300%;
+        .hero-content {
+            max-width: 900px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--aurora-accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--aurora-success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--aurora-accent) 50%, var(--aurora-primary) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease-in-out infinite;
         }
 
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2rem;
         }
 
-        .demo-grid {
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 4rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--aurora-accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 1;
+        }
+
+        section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Capabilities Grid */
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .capability-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .capability-card:hover {
+            border-color: var(--aurora-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .capability-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--aurora-primary), var(--aurora-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .capability-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .capability-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .capability-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .feature-tag {
+            padding: 0.25rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            color: var(--aurora-accent);
+        }
+
+        /* Architecture Section */
+        .architecture-visual {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-top: 2rem;
+        }
+
+        .arch-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .arch-layer {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            border-left: 4px solid var(--aurora-primary);
+        }
+
+        .arch-layer:nth-child(2) { border-left-color: var(--aurora-accent); }
+        .arch-layer:nth-child(3) { border-left-color: var(--aurora-secondary); }
+        .arch-layer:nth-child(4) { border-left-color: var(--aurora-success); }
+
+        .arch-layer-icon {
+            font-size: 1.5rem;
+            min-width: 40px;
+        }
+
+        .arch-layer-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .arch-layer-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Modules Section */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .module-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .module-item:hover {
+            border-color: var(--aurora-accent);
+            background: var(--bg-elevated);
+        }
+
+        .module-item .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .module-item h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .module-item p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Simulation Section */
+        .simulation-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 3rem;
+            align-items: center;
         }
 
-        .demo-panel {
-            background: rgba(42, 42, 74, 0.3);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(74, 158, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+        .simulation-content h3 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
         }
 
-        .demo-panel h2 {
-            color: #4a9eff;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+        .simulation-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
         }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #b0b0d0;
-            font-weight: 500;
-        }
-
-        .input-group input, .input-group select, .input-group textarea {
-            width: 100%;
-            padding: 12px;
-            background: rgba(20, 20, 40, 0.8);
-            border: 1px solid rgba(74, 158, 255, 0.5);
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 14px;
-        }
-
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
-            outline: none;
-            border-color: #4a9eff;
-            box-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #4a9eff, #6b73ff);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(74, 158, 255, 0.4);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(45deg, #ff6b9d, #ff8e6b);
-        }
-
-        .result-area {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-            border-left: 4px solid #4a9eff;
-            font-family: 'Courier New', monospace;
-            min-height: 120px;
-            overflow-y: auto;
-        }
-
-        .vector-viz {
+        .simulation-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-            gap: 5px;
-            margin: 15px 0;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
 
-        .vector-cell {
-            background: rgba(74, 158, 255, 0.2);
-            border: 1px solid rgba(74, 158, 255, 0.5);
-            border-radius: 4px;
-            padding: 8px;
+        .sim-stat {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
             text-align: center;
-            font-size: 12px;
-            transition: all 0.3s ease;
         }
 
-        .vector-cell:hover {
-            background: rgba(74, 158, 255, 0.4);
+        .sim-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--aurora-accent);
         }
 
-        .status-indicator {
-            display: inline-block;
+        .sim-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .crew-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .crew-member {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--aurora-primary);
+        }
+
+        .crew-member h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .crew-member p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* API Section */
+        .api-showcase {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .api-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .api-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            margin-right: 8px;
         }
 
-        .status-indicator.connected {
-            background: #4ade80;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        .api-dot.red { background: #ef4444; }
+        .api-dot.yellow { background: #f59e0b; }
+        .api-dot.green { background: #10b981; }
+
+        .api-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
-        .status-indicator.disconnected {
-            background: #f87171;
+        .api-content {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
         }
 
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
-        .quantum-metrics {
+        .api-endpoints {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
+            gap: 0.5rem;
         }
 
-        .metric-card {
-            background: rgba(20, 20, 40, 0.6);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(74, 158, 255, 0.3);
+        .api-endpoint {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+        }
+
+        .api-method {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 50px;
             text-align: center;
         }
 
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4a9eff;
+        .api-method.get { background: rgba(16, 185, 129, 0.2); color: var(--aurora-success); }
+        .api-method.post { background: rgba(99, 102, 241, 0.2); color: var(--aurora-primary); }
+
+        .api-path { color: var(--text-primary); }
+        .api-desc { color: var(--text-muted); font-size: 0.75rem; }
+
+        /* Footer */
+        footer {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 2rem;
         }
 
-        .metric-label {
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
             font-size: 0.9rem;
-            color: #b0b0d0;
-            margin-top: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--aurora-accent);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .simulation-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-stats {
+                gap: 2rem;
+            }
+            
+            .capabilities-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🌟 Aurora Quantum VSA Playground</h1>
-            <p>Interactive Quantum-Enhanced Symbolic Vector Architecture</p>
-            <p><span class="status-indicator connected"></span>Connected to Aurora CloudBank API</p>
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="nav-brand">
+            <div class="logo">💠</div>
+            Aurora CloudBank
+        </a>
+        <ul class="nav-links">
+            <li><a href="#capabilities">Capabilities</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#modules">Modules</a></li>
+            <li><a href="#simulation">Simulation</a></li>
+            <li><a href="#api">API</a></li>
+        </ul>
+        <div class="nav-cta">
+            <a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki" class="btn btn-secondary">Documentation</a>
+            <a href="https://github.com/AUo959/aurora-cloudbank-symbolic" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
+            </a>
         </div>
+    </nav>
 
-        <div class="demo-grid">
-            <!-- Quantum VSA Generator -->
-            <div class="demo-panel">
-                <h2>🔮 Quantum Symbolic Vector Generator</h2>
-                <div class="input-group">
-                    <label for="symbol-input">Symbol/Concept:</label>
-                    <input type="text" id="symbol-input" placeholder="e.g., love, quantum, aurora" value="aurora">
-                </div>
-                <div class="input-group">
-                    <label for="vector-dim">Vector Dimension:</label>
-                    <select id="vector-dim">
-                        <option value="8">8 (Demo)</option>
-                        <option value="16">16 (Small)</option>
-                        <option value="32">32 (Medium)</option>
-                        <option value="64">64 (Large)</option>
-                    </select>
-                </div>
-                <button class="btn" onclick="generateQuantumVector()">🚀 Generate Quantum Vector</button>
-                <button class="btn secondary" onclick="generateMultipleVectors()">⚡ Batch Generate</button>
-
-                <div id="quantum-result" class="result-area">
-                    <p>🎯 Enter a symbol above and click "Generate Quantum Vector" to see quantum-enhanced symbolic encoding!</p>
-                </div>
-
-                <div id="vector-visualization" class="vector-viz"></div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                v2.1.0 — Production Ready
             </div>
-
-            <!-- Geometric Algebra Operations -->
-            <div class="demo-panel">
-                <h2>🧮 Geometric Algebra Engine</h2>
-                <div class="input-group">
-                    <label for="vector-a">Vector A (coefficients):</label>
-                    <input type="text" id="vector-a" placeholder="e.g., 2, 3, 1" value="2, 3, 1">
-                </div>
-                <div class="input-group">
-                    <label for="vector-b">Vector B (coefficients):</label>
-                    <input type="text" id="vector-b" placeholder="e.g., 1, 2, 4" value="1, 2, 4">
-                </div>
-                <button class="btn" onclick="computeGeometricProduct()">⊗ Geometric Product</button>
-                <button class="btn secondary" onclick="computeMultiple()">🔄 All Operations</button>
-
-                <div id="geometric-result" class="result-area">
-                    <p>🎯 Enter vector coefficients and explore geometric algebra operations!</p>
-                </div>
+            <h1>Enterprise Quantum-Symbolic Computing Platform</h1>
+            <p>
+                Unifying quantum memory, multi-model AI orchestration, ethics monitoring, 
+                and production observability for next-generation AI systems.
+            </p>
+            <div class="hero-buttons">
+                <a href="https://github.com/AUo959/aurora-cloudbank-symbolic#-quick-start-5-minutes" class="btn btn-primary">
+                    🚀 Quick Start
+                </a>
+                <a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog" class="btn btn-secondary">
+                    📚 API Reference
+                </a>
             </div>
-
-            <!-- Symbolic Reasoning -->
-            <div class="demo-panel">
-                <h2>🧠 Symbolic Reasoning Engine</h2>
-                <div class="input-group">
-                    <label for="concept-a">Concept A:</label>
-                    <input type="text" id="concept-a" placeholder="e.g., artificial" value="artificial">
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-value">56K+</div>
+                    <div class="stat-label">Memory Capacity</div>
                 </div>
-                <div class="input-group">
-                    <label for="concept-b">Concept B:</label>
-                    <input type="text" id="concept-b" placeholder="e.g., intelligence" value="intelligence">
+                <div class="stat-item">
+                    <div class="stat-value">183</div>
+                    <div class="stat-label">API Endpoints</div>
                 </div>
-                <div class="input-group">
-                    <label for="operation">Symbolic Operation:</label>
-                    <select id="operation">
-                        <option value="bind">🔗 Bind (Concept Combination)</option>
-                        <option value="similarity">📊 Similarity Measure</option>
-                        <option value="superpose">⚡ Superposition</option>
-                        <option value="analogy">🎯 Analogy Detection</option>
-                    </select>
+                <div class="stat-item">
+                    <div class="stat-value">29</div>
+                    <div class="stat-label">Modules</div>
                 </div>
-                <button class="btn" onclick="performSymbolicReasoning()">🧠 Reason</button>
-                <button class="btn secondary" onclick="exploreRelationships()">🔍 Explore</button>
-
-                <div id="reasoning-result" class="result-area">
-                    <p>🎯 Explore how concepts relate in high-dimensional quantum-symbolic space!</p>
-                </div>
-            </div>
-
-            <!-- Real-time Collaboration -->
-            <div class="demo-panel">
-                <h2>🌐 Real-time Collaboration Hub</h2>
-                <div class="input-group">
-                    <label for="message-input">Share Symbolic Discovery:</label>
-                    <textarea id="message-input" rows="3" placeholder="Describe your quantum VSA experiment..."></textarea>
-                </div>
-                <button class="btn" onclick="shareDiscovery()">📡 Broadcast</button>
-                <button class="btn secondary" onclick="clearCollaboration()">🧹 Clear</button>
-
-                <div id="collaboration-feed" class="result-area">
-                    <p>🎯 Connect with other Aurora researchers in real-time!</p>
+                <div class="stat-item">
+                    <div class="stat-value">49</div>
+                    <div class="stat-label">Simulated Entities</div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Quantum Metrics Dashboard -->
-        <div class="demo-panel full-width">
-            <h2>📊 Quantum Performance Metrics</h2>
-            <div class="quantum-metrics">
-                <div class="metric-card">
-                    <div class="metric-value" id="vectors-generated">0</div>
-                    <div class="metric-label">Vectors Generated</div>
+    <main>
+        <!-- Capabilities Section -->
+        <section id="capabilities">
+            <div class="section-header">
+                <h2>Core Capabilities</h2>
+                <p>Enterprise-grade features for production AI deployments</p>
+            </div>
+            <div class="capabilities-grid">
+                <div class="capability-card">
+                    <div class="capability-icon">🧠</div>
+                    <h3>Quantum Memory System</h3>
+                    <p>AuMemManager provides 56K+ capacity hierarchical memory with sub-millisecond retrieval, attention-based scoring, and quantum entanglement properties.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">3-Tier Architecture</span>
+                        <span class="feature-tag">Memory Sealing</span>
+                        <span class="feature-tag">Auto-Compression</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="operations-performed">0</div>
-                    <div class="metric-label">Operations Performed</div>
+                <div class="capability-card">
+                    <div class="capability-icon">⚛️</div>
+                    <h3>Quantum Computing</h3>
+                    <p>Run quantum algorithms on simulators or cloud backends (AWS Braket, Azure Quantum, IBM, Google) with unified API access.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">Multi-Cloud</span>
+                        <span class="feature-tag">Quantum Forge v3</span>
+                        <span class="feature-tag">Scenario Engine</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="quantum-efficiency">--</div>
-                    <div class="metric-label">Quantum Efficiency</div>
+                <div class="capability-card">
+                    <div class="capability-icon">🛡️</div>
+                    <h3>Ethics & Safety</h3>
+                    <p>Real-time behavioral drift detection, automated compliance (GUMAS), and ethics validation gates for responsible AI deployment.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">Drift Detection</span>
+                        <span class="feature-tag">GUMAS Compliance</span>
+                        <span class="feature-tag">Ethics Gates</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="entanglement-depth">--</div>
-                    <div class="metric-label">Symbolic Entanglement</div>
+                <div class="capability-card">
+                    <div class="capability-icon">📡</div>
+                    <h3>Production Telemetry</h3>
+                    <p>R-2 Telemetry with Prometheus metrics, Grafana dashboards, and OpenTelemetry distributed tracing for full observability.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">Prometheus</span>
+                        <span class="feature-tag">Grafana</span>
+                        <span class="feature-tag">OpenTelemetry</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="coherence-time">--</div>
-                    <div class="metric-label">Coherence Time (ms)</div>
+                <div class="capability-card">
+                    <div class="capability-icon">🤖</div>
+                    <h3>Multi-Model AI</h3>
+                    <p>Unified orchestration for Claude, GPT, and custom models with automatic fallback, load balancing, and response optimization.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">Claude Integration</span>
+                        <span class="feature-tag">GPT Support</span>
+                        <span class="feature-tag">Auto-Fallback</span>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="active-users">1</div>
-                    <div class="metric-label">Active Researchers</div>
+                <div class="capability-card">
+                    <div class="capability-icon">🔐</div>
+                    <h3>Enterprise Security</h3>
+                    <p>JWT authentication, CSRF protection, rate limiting, audit trails (DLP), and role-based access control for secure deployments.</p>
+                    <div class="capability-features">
+                        <span class="feature-tag">OAuth2/JWT</span>
+                        <span class="feature-tag">Rate Limiting</span>
+                        <span class="feature-tag">DLP Audit</span>
+                    </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture">
+            <div class="section-header">
+                <h2>System Architecture</h2>
+                <p>Four-layer cognitive architecture with quantum-symbolic foundations</p>
+            </div>
+            <div class="architecture-visual">
+                <div class="arch-layers">
+                    <div class="arch-layer">
+                        <div class="arch-layer-icon">🎛️</div>
+                        <div class="arch-layer-content">
+                            <h4>L3 — Frameworks & Services</h4>
+                            <p>FastAPI endpoints, observability dashboards, security middleware, rate limiting</p>
+                        </div>
+                    </div>
+                    <div class="arch-layer">
+                        <div class="arch-layer-icon">🔗</div>
+                        <div class="arch-layer-content">
+                            <h4>L2 — Relay Agents & Coordination</h4>
+                            <p>Ethics gates, relay manager, fleet bridge, event coordination, multi-agent orchestration</p>
+                        </div>
+                    </div>
+                    <div class="arch-layer">
+                        <div class="arch-layer-icon">🧮</div>
+                        <div class="arch-layer-content">
+                            <h4>L1 — Symbolic Core</h4>
+                            <p>Vector Symbolic Architecture (10K dim), Geometric Algebra (Clifford), chain notation processor</p>
+                        </div>
+                    </div>
+                    <div class="arch-layer">
+                        <div class="arch-layer-icon">⚛️</div>
+                        <div class="arch-layer-content">
+                            <h4>L0 — Quantum Foundation</h4>
+                            <p>AuMemManager, quantum simulator, entanglement networks, T1/SRB anchors</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modules Section -->
+        <section id="modules">
+            <div class="section-header">
+                <h2>29 Production Modules</h2>
+                <p>Modular architecture for flexible deployment and integration</p>
+            </div>
+            <div class="modules-grid">
+                <div class="module-item">
+                    <div class="icon">🧠</div>
+                    <h4>AuMemManager</h4>
+                    <p>Quantum memory</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">⚛️</div>
+                    <h4>Quantum Simulator</h4>
+                    <p>Quantum algorithms</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">🛡️</div>
+                    <h4>GUMAS</h4>
+                    <p>Ethics validation</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">📊</div>
+                    <h4>Data Guardian</h4>
+                    <p>Data protection</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">📈</div>
+                    <h4>Insight Ledger</h4>
+                    <p>Temporal analytics</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">🎯</div>
+                    <h4>Resilience Sentinel</h4>
+                    <p>Health monitoring</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">🌍</div>
+                    <h4>CASK</h4>
+                    <p>Cultural awareness</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">✈️</div>
+                    <h4>Flight Control</h4>
+                    <p>Vector navigation</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">🔄</div>
+                    <h4>Continuity</h4>
+                    <p>State persistence</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">👥</div>
+                    <h4>Crew Agents</h4>
+                    <p>Agent orchestration</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">⚖️</div>
+                    <h4>Ethics Field</h4>
+                    <p>Compliance engine</p>
+                </div>
+                <div class="module-item">
+                    <div class="icon">📡</div>
+                    <h4>R-2 Telemetry</h4>
+                    <p>Observability</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulation Section -->
+        <section id="simulation">
+            <div class="section-header">
+                <h2>Orion Station Simulation</h2>
+                <p>Complete institutional simulation with 49 autonomous entities</p>
+            </div>
+            <div class="simulation-card">
+                <div class="simulation-content">
+                    <h3>🌌 Enterprise Roleplay Framework</h3>
+                    <p>
+                        Aurora includes a full institutional simulation of Orion Station — 36 human staff 
+                        across 5 divisions, 1 AI core, 6 L2 relay agents, and 6 L3 framework systems. 
+                        Perfect for testing multi-agent coordination, ethics scenarios, and complex workflows.
+                    </p>
+                    <div class="simulation-stats">
+                        <div class="sim-stat">
+                            <div class="sim-stat-value">36</div>
+                            <div class="sim-stat-label">Human Staff</div>
+                        </div>
+                        <div class="sim-stat">
+                            <div class="sim-stat-value">5</div>
+                            <div class="sim-stat-label">Divisions</div>
+                        </div>
+                        <div class="sim-stat">
+                            <div class="sim-stat-value">6</div>
+                            <div class="sim-stat-label">L2 Relays</div>
+                        </div>
+                        <div class="sim-stat">
+                            <div class="sim-stat-value">6</div>
+                            <div class="sim-stat-label">L3 Frameworks</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="crew-grid">
+                    <div class="crew-member">
+                        <h4>Commander Alex Thorne</h4>
+                        <p>Station Commander</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Lt. Cmdr Maya Shepard</h4>
+                        <p>Executive Officer</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Varya Lin</h4>
+                        <p>Chief Science Officer</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Dr. Amira Sato</h4>
+                        <p>Chief Ethics Officer</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Dr. Elira Noor</h4>
+                        <p>Lead Reflexivity Specialist</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Julian Markov</h4>
+                        <p>Chief Security Officer</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Helena Vu</h4>
+                        <p>Cultural & HR Director</p>
+                    </div>
+                    <div class="crew-member">
+                        <h4>Prof. Elena Sorensen</h4>
+                        <p>Cognitive Ethicist</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api">
+            <div class="section-header">
+                <h2>183 API Endpoints</h2>
+                <p>Comprehensive REST API with Swagger documentation</p>
+            </div>
+            <div class="api-showcase">
+                <div class="api-header">
+                    <span class="api-dot red"></span>
+                    <span class="api-dot yellow"></span>
+                    <span class="api-dot green"></span>
+                    <span class="api-title">aurora-api.py — FastAPI Server</span>
+                </div>
+                <div class="api-content">
+                    <div class="api-endpoints">
+                        <div class="api-endpoint">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/aumem/memory/create</span>
+                            <span class="api-desc">Create quantum-enhanced memory</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/aumem/retrieve</span>
+                            <span class="api-desc">Semantic search with attention scoring</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/quantum/simulate</span>
+                            <span class="api-desc">Run quantum simulation</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/gumas/evaluate</span>
+                            <span class="api-desc">Ethics validation check</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method get">GET</span>
+                            <span class="api-path">/sentinel/health</span>
+                            <span class="api-desc">System health monitoring</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method get">GET</span>
+                            <span class="api-path">/monitoring/behavior/check</span>
+                            <span class="api-desc">Behavioral drift detection</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method post">POST</span>
+                            <span class="api-path">/api/auth/token</span>
+                            <span class="api-desc">OAuth2 JWT authentication</span>
+                        </div>
+                        <div class="api-endpoint">
+                            <span class="api-method get">GET</span>
+                            <span class="api-path">/metrics</span>
+                            <span class="api-desc">Prometheus metrics export</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog" class="btn btn-primary">View Full API Catalog</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>💠 Aurora CloudBank Symbolic</h3>
+                <p>Enterprise Quantum-Symbolic Computing Platform for next-generation AI systems.</p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <img src="https://img.shields.io/badge/version-2.1.0-blue" alt="Version">
+                    <img src="https://img.shields.io/badge/python-3.11+-blue" alt="Python">
+                    <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>Documentation</h4>
+                <ul>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki">Wiki</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/API-Catalog">API Reference</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Quick-Start">Quick Start</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Architecture-Overview">Architecture</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Modules</h4>
+                <ul>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/AuMemManager">AuMemManager</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Quantum-Simulator">Quantum Simulator</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/Ethics-Engine">Ethics Engine</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/wiki/R2-Telemetry">R-2 Telemetry</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Community</h4>
+                <ul>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic">GitHub</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/issues">Issues</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/CONTRIBUTING.md">Contributing</a></li>
+                    <li><a href="https://github.com/AUo959/aurora-cloudbank-symbolic/releases">Releases</a></li>
+                </ul>
+            </div>
         </div>
-    </div>
+        <div class="footer-bottom">
+            <p>© 2025 Aurora CloudBank Symbolic. MIT License.</p>
+            <p>Built with ⚛️ quantum-symbolic foundations</p>
+        </div>
+    </footer>
 
     <script>
-        // Aurora Quantum VSA Demo Application
-        const API_BASE = window.location.origin;
-        let metricsData = {
-            vectorsGenerated: 0,
-            operationsPerformed: 0,
-            quantumEfficiency: 0,
-            entanglementDepth: 0,
-            coherenceTime: 0
-        };
-
-        // WebSocket connection for real-time collaboration
-        let ws;
-
-        function initializeWebSocket() {
-            try {
-                ws = new WebSocket(`ws://${window.location.host}/api/ws/collaboration`);
-                ws.onopen = () => {
-                    bridgeLogger.info('WebSocket connected to collaboration hub');
-                    const collaborationFeed = document.getElementById('collaboration-feed');
-                    const connectionMsg = AuroraSecurity.createSafeElement('p', '🌟 Connected to Aurora VSA collaboration network!', {
-                        style: 'color: #4ade80;'
-                    });
-                    collaborationFeed.appendChild(connectionMsg);
-                };
-                ws.onmessage = (event) => {
-                    try {
-                        const rawData = JSON.parse(event.data);
-                        const data = AuroraSecurity.sanitizeWebSocketData(rawData);
-                        const collaborationFeed = document.getElementById('collaboration-feed');
-                        const timestamp = new Date().toLocaleTimeString();
-
-                        if (data.type === 'welcome') {
-                            const welcomeMsg = AuroraSecurity.createSafeElement('p',
-                                `🎯 ${data.message || 'Welcome'} (${data.current_vectors || 0} vectors active)`,
-                                { style: 'color: #4ade80;' }
-                            );
-                            collaborationFeed.appendChild(welcomeMsg);
-                        } else if (data.type === 'vsa_update') {
-                            const updateMsg = AuroraSecurity.createSafeElement('p');
-                            const timestampSpan = AuroraSecurity.createSafeElement('strong', `[${timestamp}] ${data.user || 'Unknown'}:`);
-                            const operationText = document.createTextNode(` ${data.operation || 'Unknown operation'} on "${data.symbol || 'Unknown symbol'}"`);
-                            updateMsg.appendChild(timestampSpan);
-                            updateMsg.appendChild(operationText);
-                            collaborationFeed.appendChild(updateMsg);
-                        } else {
-                            const genericMsg = AuroraSecurity.createSafeElement('p');
-                            const timestampSpan = AuroraSecurity.createSafeElement('strong', `[${timestamp}]`);
-                            const contentText = document.createTextNode(` ${JSON.stringify(data)}`);
-                            genericMsg.appendChild(timestampSpan);
-                            genericMsg.appendChild(contentText);
-                            collaborationFeed.appendChild(genericMsg);
-                        }
-                        collaborationFeed.scrollTop = collaborationFeed.scrollHeight;
-                    } catch (error) {
-                        webLogger.error('Error processing WebSocket message', { error: error.message });
-                    }
-                };
-            } catch (error) {
-                webLogger.warn('WebSocket not available, continuing with HTTP only', { error: error.message });
-            }
-        }
-
-        async function apiCall(endpoint, method = 'GET', body = null) {
-            const options = {
-                method,
-                headers: { 'Content-Type': 'application/json' }
-            };
-            if (body) options.body = JSON.stringify(body);
-
-            try {
-                const response = await fetch(API_BASE + endpoint, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-                return await response.json();
-            } catch (error) {
-                webLogger.error('API call failed', { 
-                    endpoint, 
-                    method, 
-                    error: error.message 
-                });
-                return { error: error.message };
-            }
-        }
-
-        async function generateQuantumVector() {
-            const symbol = document.getElementById('symbol-input').value;
-            const dim = parseInt(document.getElementById('vector-dim').value);
-
-            if (!symbol.trim()) {
-                alert('Please enter a symbol!');
-                return;
-            }
-
-            const startTime = performance.now();
-            const result = await apiCall('/api/vsa/generate', 'POST', {
-                symbol,
-                dimension: dim,
-                operation_type: 'generate'
             });
-            const endTime = performance.now();
+        });
 
-            if (result.error) {
-                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${result.error}`, {
-                    style: 'color: #f87171;'
-                });
-                const resultEl = document.getElementById('quantum-result');
-                resultEl.textContent = '';
-                resultEl.appendChild(errorMsg);
-                return;
-            }
-
-            metricsData.vectorsGenerated++;
-            metricsData.coherenceTime = Math.round(endTime - startTime);
-            metricsData.quantumEfficiency = Math.min(95, metricsData.vectorsGenerated * 3.2);
-            updateMetrics();
-
-            // Broadcast to WebSocket
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                    type: 'vsa_operation',
-                    operation: 'generate',
-                    symbol: symbol,
-                    timestamp: new Date().toISOString(),
-                    user: 'demo_user'
-                }));
-            }
-
-            const resultDiv = document.getElementById('quantum-result');
-            resultDiv.textContent = '';
-
-            const header = AuroraSecurity.createSafeElement('h3', `🌟 Quantum Vector for "${symbol}"`);
-            const dimensionP = AuroraSecurity.createSafeElement('p');
-            dimensionP.textContent = '<strong>Dimension:</strong> ' + AuroraSecurity.escapeHtml(String(result.dimension));
-
-            const vectorTypeP = AuroraSecurity.createSafeElement('p');
-            vectorTypeP.textContent = '<strong>Vector Type:</strong> ' + AuroraSecurity.escapeHtml(result.vector_type || 'bipolar');
-
-            const quantumGenP = AuroraSecurity.createSafeElement('p');
-            quantumGenP.textContent = '<strong>Quantum Generated:</strong> ' + (result.quantum_generated ? '✅' : '❌');
-
-            const timeP = AuroraSecurity.createSafeElement('p');
-            timeP.textContent = '<strong>Generation Time:</strong> ' + AuroraSecurity.escapeHtml(String(metricsData.coherenceTime)) + 'ms';
-
-            const lengthP = AuroraSecurity.createSafeElement('p');
-            lengthP.textContent = '<strong>Full Length:</strong> ' + AuroraSecurity.escapeHtml(String(result.vector_full_length)) + ' elements';
-
-            resultDiv.appendChild(header);
-            resultDiv.appendChild(dimensionP);
-            resultDiv.appendChild(vectorTypeP);
-            resultDiv.appendChild(quantumGenP);
-            resultDiv.appendChild(timeP);
-            resultDiv.appendChild(lengthP);
-            `;
-
-            visualizeVector(result.vector, 'vector-visualization');
-        }
-
-        async function generateMultipleVectors() {
-            const baseSymbol = document.getElementById('symbol-input').value;
-            if (!baseSymbol.trim()) {
-                alert('Please enter a base symbol!');
-                return;
-            }
-
-            const variations = [baseSymbol, baseSymbol + '_quantum', baseSymbol + '_enhanced'];
-
-            for (const symbol of variations) {
-                document.getElementById('symbol-input').value = symbol;
-                await generateQuantumVector();
-                await new Promise(resolve => setTimeout(resolve, 800)); // Delay for effect
-            }
-        }
-
-        async function computeGeometricProduct() {
-            const aStr = document.getElementById('vector-a').value;
-            const bStr = document.getElementById('vector-b').value;
-
-            try {
-                // Enhanced geometric algebra operation
-                const vectors = [
-                    { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
-                    { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
-                ];
-
-                const result = await apiCall('/api/geometric/advanced', 'POST', {
-                    operation: 'product',
-                    vectors: vectors
-                });
-
-                metricsData.operationsPerformed++;
-                metricsData.entanglementDepth = Math.min(10, metricsData.operationsPerformed * 0.5);
-                updateMetrics();
-
-                document.getElementById('geometric-result').innerHTML = AuroraSecurity.sanitizeHTML(`
-                    <h3>⊗ Geometric Product Result</h3>
-                    <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(result.operation)}</p>
-                    <p><strong>Input Vectors:</strong> ${AuroraSecurity.escapeHtml(JSON.stringify(result.input_vectors))}</p>
-                    <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(result.results[0]?.result || 'N/A')}</p>
-                    <p><strong>Mock Mode:</strong> ${result.mock_mode ? '⚠️ Simplified' : '✅ Full Clifford'}</p>
-                `);
-            } catch (error) {
-                const errorMsg = AuroraSecurity.createSafeElement('p', `❌ Error: ${error.message}`, {
-                    style: 'color: #f87171;'
-                });
-                const resultEl = document.getElementById('geometric-result');
-                resultEl.innerHTML = '';
-                resultEl.appendChild(errorMsg);
-            }
-        }
-
-        async function computeMultiple() {
-            await computeGeometricProduct();
-
-            // Also compute commutator
-            const aStr = document.getElementById('vector-a').value;
-            const bStr = document.getElementById('vector-b').value;
-
-            const vectors = [
-                { e1: parseFloat(aStr.split(',')[0]) || 1.0, e2: parseFloat(aStr.split(',')[1]) || 0.0 },
-                { e1: parseFloat(bStr.split(',')[0]) || 1.0, e2: parseFloat(bStr.split(',')[1]) || 0.0 }
-            ];
-
-            const commutatorResult = await apiCall('/api/geometric/advanced', 'POST', {
-                operation: 'commutator',
-                vectors: vectors
-            });
-
-            document.getElementById('geometric-result').innerHTML += AuroraSecurity.sanitizeHTML(`
-                <br><h4>🔄 Commutator [A,B]</h4>
-                <p><strong>Result:</strong> ${AuroraSecurity.escapeHtml(commutatorResult.results[0]?.result || 'N/A')}</p>
-            `);
-
-            metricsData.operationsPerformed += 2;
-            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 3);
-            updateMetrics();
-        }
-
-        async function performSymbolicReasoning() {
-            const conceptA = document.getElementById('concept-a').value;
-            const conceptB = document.getElementById('concept-b').value;
-            const operation = document.getElementById('operation').value;
-
-            if (!conceptA.trim() || !conceptB.trim()) {
-                alert('Please enter both concepts!');
-                return;
-            }
-
-            let resultText = '';
-            let similarity = 0;
-
-            try {
-                if (operation === 'bind') {
-                    // Use the new bind endpoint
-                    const bindResult = await apiCall('/api/vsa/bind', 'POST', {
-                        symbol_a: conceptA,
-                        symbol_b: conceptB,
-                        result_name: `${conceptA}_BIND_${conceptB}`,
-                        dimension: 256
-                    });
-
-                    if (bindResult.error) {
-                        throw new Error(bindResult.error);
-                    }
-
-                    similarity = bindResult.similarity_a;
-                    resultText = `🔗 Concept Binding: "${conceptA}" ⊗ "${conceptB}"<br>
-                                 Result: "${bindResult.result_name}"<br>
-                                 Similarity to A: ${(bindResult.similarity_a * 100).toFixed(1)}%<br>
-                                 Similarity to B: ${(bindResult.similarity_b * 100).toFixed(1)}%<br>
-                                 Dimension: ${bindResult.dimension}D quantum space`;
-
-                    visualizeVector(bindResult.result_vector, 'vector-visualization');
-
-                } else if (operation === 'similarity') {
-                    // Use the similarity endpoint
-                    const simResult = await apiCall('/api/vsa/similarity', 'POST', {
-                        symbol_a: conceptA,
-                        symbol_b: conceptB
-                    });
-
-                    if (simResult.error) {
-                        throw new Error(simResult.error);
-                    }
-
-                    similarity = simResult.cosine_similarity;
-                    resultText = `📊 Semantic Similarity Analysis<br>
-                                 Cosine Similarity: ${similarity.toFixed(3)}<br>
-                                 Hamming Distance: ${simResult.hamming_distance.toFixed(3)}<br>
-                                 Dot Product: ${simResult.dot_product.toFixed(1)}<br>
-                                 Interpretation: ${similarity > 0.5 ? 'Highly related' : similarity > 0 ? 'Moderately related' : 'Weakly related'}`;
-
-                } else {
-                    // Generate quantum circuits for both concepts
-                    const circuitA = await apiCall('/api/quantum/circuit', 'POST', {
-                        symbol: conceptA,
-                        depth: 3,
-                        qubits: 8
-                    });
-
-                    const circuitB = await apiCall('/api/quantum/circuit', 'POST', {
-                        symbol: conceptB,
-                        depth: 3,
-                        qubits: 8
-                    });
-
-                    if (operation === 'superpose') {
-                        resultText = `⚡ Quantum Superposition Analysis<br>
-                                     "${conceptA}": ${circuitA.most_frequent_probability * 100}% → |${circuitA.most_frequent_state}⟩<br>
-                                     "${conceptB}": ${circuitB.most_frequent_probability * 100}% → |${circuitB.most_frequent_state}⟩<br>
-                                     Combined Gates: ${circuitA.circuit_gates + circuitB.circuit_gates}<br>
-                                     Coherence: ${Math.random() * 85 + 10}%`;
-                    } else if (operation === 'analogy') {
-                        resultText = `🎯 Quantum Analogy Detection<br>
-                                     Pattern A (${conceptA}): ${circuitA.circuit_gates} quantum gates<br>
-                                     Pattern B (${conceptB}): ${circuitB.circuit_gates} quantum gates<br>
-                                     Structural similarity: ${Math.abs(circuitA.circuit_gates - circuitB.circuit_gates) < 3 ? 'High' : 'Moderate'}<br>
-                                     Analogy strength: ${Math.random() * 40 + 50}%`;
-                    }
-                }
-
-                metricsData.entanglementDepth = Math.abs(similarity * 10);
-
-            } catch (error) {
-                resultText = `❌ Error: ${error.message}`;
-            }
-
-            document.getElementById('reasoning-result').innerHTML = AuroraSecurity.sanitizeHTML(`
-                <h3>🧠 Symbolic Reasoning Result</h3>
-                <p>${AuroraSecurity.escapeHtml(resultText)}</p>
-                <p><strong>Operation:</strong> ${AuroraSecurity.escapeHtml(operation)}</p>
-                <p><strong>Computation:</strong> Quantum-enhanced VSA</p>
-            `);
-
-            metricsData.operationsPerformed++;
-            updateMetrics();
-        }
-
-        async function exploreRelationships() {
-            await performSymbolicReasoning();
-
-            // Also show stored vectors
-            const vectorList = await apiCall('/api/vsa/list');
-            if (vectorList && vectorList.vectors) {
-                document.getElementById('reasoning-result').innerHTML += AuroraSecurity.sanitizeHTML(`
-                    <br><h4>📦 Vector Store (${vectorList.count} vectors)</h4>
-                    <p>${AuroraSecurity.escapeHtml(vectorList.vectors.map(v => `"${v.symbol}" (${v.dimension}D)`).join(', '))}</p>
-                `);
-            }
-
-            metricsData.operationsPerformed += 2;
-            metricsData.quantumEfficiency = Math.min(98, metricsData.quantumEfficiency + 5);
-            updateMetrics();
-        }
-
-        function shareDiscovery() {
-            const message = document.getElementById('message-input').value;
-            if (!message.trim()) {
-                alert('Please enter a discovery to share!');
-                return;
-            }
-
-            const discoveryData = {
-                type: 'discovery',
-                message: message,
-                timestamp: new Date().toISOString(),
-                metrics: metricsData,
-                user: 'demo_user'
-            };
-
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(discoveryData));
-                document.getElementById('message-input').value = '';
+        // Add scroll effect to nav
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(10, 10, 15, 0.95)';
             } else {
-                // Fallback to local display
-                const collaborationFeed = document.getElementById('collaboration-feed');
-                const timestamp = new Date().toLocaleTimeString();
-                const tempEl = AuroraSecurity.createSafeElement('div');
-                const msgP = AuroraSecurity.createSafeElement('p');
-                const timestampStrong = AuroraSecurity.createSafeElement('strong', `[${timestamp}] You:`);
-                const messageText = document.createTextNode(` ${message}`);
-                msgP.appendChild(timestampStrong);
-                msgP.appendChild(messageText);
-                tempEl.appendChild(msgP);
-                collaborationFeed.appendChild(tempEl);
-                document.getElementById('message-input').value = '';
+                nav.style.background = 'rgba(10, 10, 15, 0.8)';
             }
-        }
-
-        async function clearCollaboration() {
-            document.getElementById('collaboration-feed').innerHTML = AuroraSecurity.sanitizeHTML('<p>🎯 Collaboration feed cleared!</p>');
-
-            // Also clear VSA store
-            try {
-                const result = await apiCall('/api/vsa/clear', 'DELETE');
-                if (result.message) {
-                    const warningMsg = AuroraSecurity.createSafeElement('p', result.message, {
-                        style: 'color: #fbbf24;'
-                    });
-                    document.getElementById('collaboration-feed').appendChild(warningMsg);
-                    metricsData.vectorsGenerated = 0;
-                    updateMetrics();
-                }
-            } catch (error) {
-                console.error('Failed to clear VSA store:', error);
-            }
-        }
-
-        function visualizeVector(vector, containerId) {
-            const container = document.getElementById(containerId);
-            container.textContent = '';
-
-            if (!vector || !Array.isArray(vector)) {
-                container.textContent = '<p>No vector data to display</p>';
-                return;
-            }
-
-            vector.slice(0, Math.min(32, vector.length)).forEach((value, index) => {
-                const cell = document.createElement('div');
-                cell.className = 'vector-cell';
-                cell.textContent = typeof value === 'number' ? value.toFixed(2) : value.toString();
-
-                // Color coding for bipolar vectors
-                if (value > 0) {
-                    cell.style.backgroundColor = 'rgba(74, 222, 128, 0.3)';
-                    cell.style.borderColor = 'rgba(74, 222, 128, 0.6)';
-                } else {
-                    cell.style.backgroundColor = 'rgba(248, 113, 113, 0.3)';
-                    cell.style.borderColor = 'rgba(248, 113, 113, 0.6)';
-                }
-
-                cell.title = `Position ${index}: ${value}`;
-                container.appendChild(cell);
-            });
-
-            if (vector.length > 32) {
-                const moreCell = document.createElement('div');
-                moreCell.className = 'vector-cell';
-                moreCell.textContent = `+${vector.length - 32}`;
-                moreCell.style.backgroundColor = 'rgba(156, 163, 175, 0.3)';
-                moreCell.title = `${vector.length - 32} more elements...`;
-                container.appendChild(moreCell);
-            }
-        }
-
-        function updateMetrics() {
-            document.getElementById('vectors-generated').textContent = metricsData.vectorsGenerated;
-            document.getElementById('operations-performed').textContent = metricsData.operationsPerformed;
-            document.getElementById('quantum-efficiency').textContent = Math.round(metricsData.quantumEfficiency) + '%';
-            document.getElementById('entanglement-depth').textContent = Math.round(metricsData.entanglementDepth * 10) / 10;
-            document.getElementById('coherence-time').textContent = metricsData.coherenceTime + 'ms';
-        }
-
-        // Initialize the demo
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeWebSocket();
-            updateMetrics();
-            webLogger.info('Aurora Quantum VSA Demo initialized');
-
-            // Load initial vector list
-            apiCall('/api/vsa/list').then(result => {
-                if (result && result.count > 0) {
-                    quantumLogger.info(`Found ${result.count} existing VSA vectors`);
-                }
-            });
         });
     </script>
 </body>

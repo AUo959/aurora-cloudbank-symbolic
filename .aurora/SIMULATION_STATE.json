@@ -11,14 +11,15 @@
     "initialized": "2025-11-10T00:00:00Z",
     "last_updated": "2025-11-27T00:00:00Z",
     "current_location": {
-      "name": "Command Bridge",
-      "deck": "Deck A",
-      "description": "Circular, panoramic interface surrounding the Aurora Core vault",
+      "name": "Noor Chamber",
+      "deck": "Deck B",
+      "description": "Ethics reflexivity chamber with Mirrorfield Sphere interface",
       "primary_agents": [
-        "thorne",
-        "shepard"
+        "sato",
+        "noor",
+        "sorensen"
       ],
-      "template": "operational"
+      "template": "ethics"
     }
   },
   "roles": {

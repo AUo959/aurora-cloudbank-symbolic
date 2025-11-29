@@ -234,23 +234,23 @@ class AuroraEngine {
     const commands = [];
 
     if (/clean\s*up|cleanup|sync|synchronize/i.test(input)) {
-      commands.push('npm run time-to-clean-up');
+      commands.push({ cmd: 'npm', args: ['run', 'time-to-clean-up'] });
     }
 
     if (/valid|check|verify|test/i.test(input)) {
-      commands.push('npm run validation:status');
-      commands.push('python scripts/canonical_validator.py --status');
+      commands.push({ cmd: 'npm', args: ['run', 'validation:status'] });
+      commands.push({ cmd: 'python', args: ['scripts/canonical_validator.py', '--status'] });
     }
 
     if (/status|health|monitor/i.test(input)) {
-      commands.push('git status');
-      commands.push('npm run validation:status');
-      commands.push('ps aux | grep aurora');
+      commands.push({ cmd: 'git', args: ['status'] });
+      commands.push({ cmd: 'npm', args: ['run', 'validation:status'] });
+      commands.push({ cmd: 'ps', args: ['aux'] }); // grep aurora handled separately
     }
 
     if (/optimization|optimize|performance/i.test(input)) {
-      commands.push('npm run lint');
-      commands.push('python scripts/aurora_validation_manager.py --cleanup');
+      commands.push({ cmd: 'npm', args: ['run', 'lint'] });
+      commands.push({ cmd: 'python', args: ['scripts/aurora_validation_manager.py', '--cleanup'] });
     }
 
     return commands;
@@ -270,7 +270,7 @@ class AuroraEngine {
           phase: 'Coordination',
           agents: analysis.agents,
           duration: '1-2m',
-          tasks: analysis.systemCommands.map(cmd => `Execute: ${cmd}`)
+          tasks: analysis.systemCommands.map(cmdObj => `Execute: ${cmdObj.cmd} ${cmdObj.args.join(' ')}`)
         },
         {
           phase: 'Optimization',

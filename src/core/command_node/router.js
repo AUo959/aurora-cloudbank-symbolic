@@ -19,7 +19,11 @@ export const CLEARANCE_LEVELS = {
 };
 
 // Default L1 agents (Bridge agents)
+// Note: SHADOWFAX serves dual role as L1 bridge agent and emergency handler
 export const DEFAULT_L1_AGENTS = ['ARCHY', 'LIORA', 'OPPY', 'STARLING_AU', 'RIVERTHREAD_808', 'SHADOWFAX'];
+
+// Emergency handler agent
+export const EMERGENCY_AGENT = 'SHADOWFAX';
 
 // Default L2 agents (Cognitive agents)
 export const DEFAULT_L2_AGENTS = [
@@ -291,10 +295,11 @@ export class CommandRouter {
       this.routingMetrics.failedRoutes++;
     }
 
-    // Update average latency
-    const totalLatency =
-      this.routingMetrics.averageLatency * (this.routingMetrics.totalCommands - 1) + latency;
-    this.routingMetrics.averageLatency = totalLatency / this.routingMetrics.totalCommands;
+    // Update average latency using numerically stable running average
+    // Cap history to avoid precision loss with large command counts
+    const n = Math.min(this.routingMetrics.totalCommands, 10000);
+    const prevAvg = this.routingMetrics.averageLatency;
+    this.routingMetrics.averageLatency = prevAvg + (latency - prevAvg) / n;
   }
 
   /**
@@ -305,8 +310,11 @@ export class CommandRouter {
       const logPath = path.join(this.logsDir, 'aurora_command_routing.log');
       const logEntry = JSON.stringify(command) + '\n';
       fs.appendFileSync(logPath, logEntry);
-    } catch {
-      // Ignore logging errors
+    } catch (err) {
+      // Log critical errors to stderr, but don't throw
+      if (err.code !== 'ENOENT') {
+        console.error(`[CommandRouter] Logging failed: ${err.message}`);
+      }
     }
   }
 

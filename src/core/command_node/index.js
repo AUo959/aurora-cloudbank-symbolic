@@ -15,7 +15,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Import sub-modules
-import { CommandRouter, CLEARANCE_LEVELS } from './router.js';
+import { CommandRouter, CLEARANCE_LEVELS, EMERGENCY_AGENT } from './router.js';
 import { encryptPayload, decryptPayload, isEncryptionAvailable } from './encryption.js';
 import { ethicsCheck, anchorResolve, validateEthics, getDefaultProtocol } from './ethics.js';
 import {
@@ -303,7 +303,7 @@ export class CommandNode {
    */
   async routeEmergency(emergencyRequest) {
     return this.dispatch({
-      agent: 'SHADOWFAX',
+      agent: EMERGENCY_AGENT,
       layer: 'EMERGENCY_PROTOCOL',
       command: emergencyRequest,
       metadata: {
@@ -411,6 +411,7 @@ export class CommandNode {
 export {
   CommandRouter,
   CLEARANCE_LEVELS,
+  EMERGENCY_AGENT,
   encryptPayload,
   decryptPayload,
   isEncryptionAvailable,

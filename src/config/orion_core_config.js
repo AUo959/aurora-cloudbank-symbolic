@@ -56,7 +56,7 @@ const ORION_CORE = {
   },
 
   // Integration Points
-  command_node: "src/core/command_node.js",
+  command_node: "src/core/command_node/", // Unified CommandNode directory
   command_router: "aurora_command_router.js",
   bridge_server: "src/bridge/api_bridge_server.js",
   l2_bridge: "src/bridges/l2_meta_agent_bridge.py",

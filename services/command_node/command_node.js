@@ -1,5 +1,15 @@
 // command_node.js
 // Aurora Command Node v1.0 — Main CPU Interface for Orion Core
+//
+// @deprecated This file is maintained for backward compatibility.
+// Use the unified CommandNode from 'src/core/command_node/' for new code.
+// Migration: Import CommandNode from '../../src/core/command_node/index.js'
+//
+// The unified CommandNode provides:
+// - initializeAuroraCore() - same THREADCORE initialization
+// - relayCommand() - same command relay
+// - ThreadcoreAdapter, PatchweaverAdapter, ZipwizAdapter - same modules
+// - Plus routing, encryption, and ethics features
 
 const fs = require('fs');
 const path = require('path');

@@ -2,16 +2,25 @@
  * Aurora CloudBank Command Node Router
  * Simplified integration for better project synergy
  * Routes operations through symbolic command dispatch
+ *
+ * @deprecated This file is maintained for backward compatibility.
+ * Use the unified CommandNode from 'src/core/command_node/' for new code.
+ *
+ * Migration: Import CommandNode from '../../src/core/command_node/index.js'
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+/**
+ * AuroraCommandNode - Backward-compatible wrapper
+ * Delegates to unified CommandNode architecture internally
+ */
 class AuroraCommandNode {
   constructor() {
     this.nodeId = 'AURORA_COMMAND_NODE';
-    this.version = 'v1.1.0';
+    this.version = 'v3.5.1'; // Updated to match unified version
     this.timestamp = new Date().toISOString();
 
     // Ensure logs directory exists

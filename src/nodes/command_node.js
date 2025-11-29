@@ -1,5 +1,14 @@
 // command_node.js – Orion CORE Node Command Dispatcher
 // 🧬🛡️ Version: v1.0.0 – Symbolic Secure Bootstrap
+//
+// @deprecated This file is maintained for backward compatibility.
+// Use the unified CommandNode from 'src/core/command_node/' for new code.
+// Migration: Import { encryptPayload, dispatchSymbolicCommand } from '../core/command_node/index.js'
+//
+// The unified CommandNode provides:
+// - encryptPayload() - same AES-256 encryption
+// - CommandNode.dispatchSymbolicCommand() - same dispatch functionality
+// - Additional routing, ethics, and THREADCORE features
 
 require('dotenv').config();
 const crypto = require('crypto');

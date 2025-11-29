@@ -245,7 +245,7 @@ class AuroraEngine {
     if (/status|health|monitor/i.test(input)) {
       commands.push({ cmd: 'git', args: ['status'] });
       commands.push({ cmd: 'npm', args: ['run', 'validation:status'] });
-      commands.push({ cmd: 'ps', args: ['aux'] }); // grep aurora handled separately
+      commands.push({ cmd: 'ps', args: ['aux'] });
     }
 
     if (/optimization|optimize|performance/i.test(input)) {

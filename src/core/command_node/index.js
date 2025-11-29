@@ -13,7 +13,6 @@
 
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
 
 // Import sub-modules
 import { CommandRouter, CLEARANCE_LEVELS } from './router.js';
@@ -351,14 +350,14 @@ export class CommandNode {
    */
   relayCommand(command, payload) {
     switch (command) {
-      case 'SEED_ANCHOR':
-        return this.threadcore.seed(payload);
-      case 'UPDATE_THREAD':
-        return this.threadcore.update(payload);
-      case 'REFLECT':
-        return this.threadcore.reflect();
-      default:
-        return { status: 'unknown_command', command };
+    case 'SEED_ANCHOR':
+      return this.threadcore.seed(payload);
+    case 'UPDATE_THREAD':
+      return this.threadcore.update(payload);
+    case 'REFLECT':
+      return this.threadcore.reflect();
+    default:
+      return { status: 'unknown_command', command };
     }
   }
 

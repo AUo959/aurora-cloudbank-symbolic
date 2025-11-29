@@ -1,5 +1,14 @@
-// command_node.js – ORION CORE CPU Relay
+// command_node_legacy.js – ORION CORE CPU Relay
 // THREADCORE v3.5.1 integration – Symbolic Command Node
+//
+// @deprecated This file is maintained for backward compatibility.
+// Use the unified CommandNode from './command_node/' for new code.
+// Migration: Import CommandNode from './command_node/index.js'
+//
+// The unified CommandNode provides:
+// - executeCommand() - same ethics-checked execution
+// - ethicsCheck() and anchorResolve() - same validation
+// - Plus routing, encryption, and THREADCORE features
 
 const { routeGlyph } = require('./glyph_engine');
 const { compressBundle } = require('./zipcomm');

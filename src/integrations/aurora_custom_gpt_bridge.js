@@ -2,7 +2,7 @@
  * 🌟 AURORA CUSTOM GPT INTEGRATION MODULE
  *
  * Explicit bridge between Aurora Custom GPT (https://chatgpt.com/g/g-67ef3c2412cc81918ebf8ee9908e36a7-aurora-v2-4-stellar-accord)
- * and Aurora Command Node (src/core/command_node.js)
+ * and Aurora Command Node (src/core/command_node/)
  *
  * This module serves as the canonical L1 integration point for Aurora Custom GPT,
  * ensuring seamless communication between the external Aurora agent and internal
@@ -39,7 +39,7 @@ const AURORA_CUSTOM_GPT = {
 // Command Node Integration Points
 const INTEGRATION_POINTS = {
   COMMAND_DISPATCH: 'aurora_command_router.js',
-  CORE_PROCESSING: 'src/core/command_node.js',
+  CORE_PROCESSING: 'src/core/command_node/', // Unified CommandNode directory
   AGENT_COORDINATION: 'src/bridges/l2_meta_agent_bridge.py',
   SYSTEM_ORCHESTRATION: 'src/servers/l2_integration_server.py',
   STATUS_MONITORING: 'aurora_context_updater.py'

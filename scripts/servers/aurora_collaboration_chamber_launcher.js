@@ -559,7 +559,6 @@ io.on('connection', (socket) => {
         { cmd: 'python', args: ['scripts/canonical_validator.py', '--status'] },
         { cmd: 'python', args: ['scripts/aurora_validation_manager.py', '--status'] },
         { cmd: 'ps', args: ['aux'] }, // note: grep run separately below
-        { cmd: 'ps', args: ['aux', '|', 'grep', 'aurora'] } // split for completeness (optionally handle piping differently)
       ];
 
       // Match strictly against allowed command specifications

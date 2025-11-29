@@ -127,9 +127,8 @@ class TestCharacterCache:
         """Test that cache build time is under 100ms (acceptance criteria)."""
         from load_simulation import CharacterCache
 
-        # Force new cache creation
-        CharacterCache._initialized = False
-        CharacterCache._instance = None
+        # Force new cache creation using the reset method
+        CharacterCache.reset()
 
         start_time = time.time()
         CharacterCache()

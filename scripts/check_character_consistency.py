@@ -125,6 +125,32 @@ GENDER_PATTERNS = {
 }
 
 
+# Pre-compiled regex patterns for performance
+_compiled_gender_patterns: Dict[str, Dict[str, List[re.Pattern]]] = {}
+
+
+def _build_compiled_patterns() -> None:
+    """Pre-compile regex patterns for character-pronoun checking."""
+    for char in PRIMARY_8_CHARACTERS:
+        full_name = char["name"].lower()
+        gender = char["gender"]
+        if gender in GENDER_PATTERNS:
+            incorrect_pronouns = GENDER_PATTERNS[gender]["incorrect"]
+            patterns = []
+            for pronoun in incorrect_pronouns:
+                # Pattern: "Character Name" followed by verb-like word, then pronoun
+                pattern = re.compile(rf'\b{re.escape(full_name)}\b\s+\w+\s+\b{pronoun}\b')
+                patterns.append((pronoun, pattern))
+            _compiled_gender_patterns[full_name] = {
+                "gender": gender,
+                "patterns": patterns
+            }
+
+
+# Build patterns at module load time
+_build_compiled_patterns()
+
+
 def build_character_lookup() -> Dict[str, Dict[str, Any]]:
     """Build lookup dictionaries for character validation."""
     lookup = {}
@@ -168,6 +194,8 @@ def check_gender_consistency(content: str, filename: str) -> List[Tuple[int, str
     immediately after the character name (e.g., "Thorne said she" but not
     "Thorne commands the ship, and she responded").
 
+    Uses pre-compiled regex patterns for performance.
+
     Returns:
         List of (line_number, character_name, issue_description, context)
     """
@@ -182,14 +210,12 @@ def check_gender_consistency(content: str, filename: str) -> List[Tuple[int, str
             full_name = char["name"].lower()
 
             if full_name in line_lower:
-                gender = char["gender"]
-                if gender in GENDER_PATTERNS:
-                    incorrect_pronouns = GENDER_PATTERNS[gender]["incorrect"]
-                    for pronoun in incorrect_pronouns:
-                        # Check for pronoun immediately following character name on same line
-                        # Pattern: "Character Name" followed by verb-like word, then pronoun
-                        pronoun_pattern = rf'\b{re.escape(full_name)}\b\s+\w+\s+\b{pronoun}\b'
-                        if re.search(pronoun_pattern, line_lower):
+                # Use pre-compiled patterns for performance
+                if full_name in _compiled_gender_patterns:
+                    pattern_info = _compiled_gender_patterns[full_name]
+                    gender = pattern_info["gender"]
+                    for pronoun, pattern in pattern_info["patterns"]:
+                        if pattern.search(line_lower):
                             issues.append((
                                 line_num,
                                 char["name"],
@@ -257,13 +283,17 @@ def check_file(filepath: Path) -> List[Tuple[str, int, str, str, str]]:
         return all_issues
 
     # Skip binary files and certain directories
+    # Get this script's name dynamically to avoid hard-coding
+    this_script_name = Path(__file__).name
     skip_patterns = [
         '.git', '__pycache__', 'node_modules', '.venv', 'venv',
         '.png', '.jpg', '.jpeg', '.gif', '.ico', '.svg',
         '.woff', '.woff2', '.ttf', '.eot',
         '.zip', '.tar', '.gz',
         # Skip the consistency checker itself (contains typo dictionary)
-        'check_character_consistency.py'
+        this_script_name,
+        # Skip the test file for the checker (contains intentional typos)
+        'test_character_init.py'
     ]
 
     filepath_str = str(filepath)

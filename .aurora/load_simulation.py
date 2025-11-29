@@ -21,6 +21,7 @@ Returns:
 import json
 import logging
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -163,17 +164,23 @@ LOCATION_CONFIG = {
 # ============================================================================
 # CHARACTER CACHE - Performance Optimization (Phase 3)
 # ============================================================================
+_cache_lock = threading.Lock()
+
+
 class CharacterCache:
     """
     In-memory cache for character data to achieve <100ms lookup performance.
-    Singleton pattern ensures single instance across module.
+    Thread-safe singleton pattern ensures single instance across module.
     """
     _instance: Optional['CharacterCache'] = None
     _initialized: bool = False
 
     def __new__(cls) -> 'CharacterCache':
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            with _cache_lock:
+                # Double-check locking pattern
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
         return cls._instance
 
     def __init__(self):
@@ -244,6 +251,13 @@ class CharacterCache:
             "build_time_ms": round(self._build_time_ms, 2),
             "locations_cached": len(self._location_agents)
         }
+
+    @classmethod
+    def reset(cls) -> None:
+        """Reset the cache singleton for testing purposes."""
+        with _cache_lock:
+            cls._instance = None
+            cls._initialized = False
 
 
 # Global cache instance

@@ -11,6 +11,7 @@ without requiring an actual Kubernetes cluster.
 import os
 import subprocess
 import pytest
+import yaml
 from pathlib import Path
 
 
@@ -210,7 +211,6 @@ class TestWorkflowFile:
 
     def test_workflow_has_valid_yaml(self, workflow_file):
         """Verify workflow file has valid YAML syntax."""
-        import yaml
         try:
             with open(workflow_file) as f:
                 yaml.safe_load(f)

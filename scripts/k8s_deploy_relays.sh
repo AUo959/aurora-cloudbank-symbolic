@@ -13,7 +13,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
-REGISTRY="${CONTAINER_REGISTRY:-ghcr.io/auo959}"
+REGISTRY="${CONTAINER_REGISTRY:-ghcr.io}"
+IMAGE_NAME="${IMAGE_NAME:-aurora-cloudbank-symbolic}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 DRY_RUN="${DRY_RUN:-false}"
 
@@ -108,11 +109,11 @@ deploy_config() {
 # Deploy relay pods (main deployment)
 deploy_relays() {
     log_info "Deploying Aurora relay pods..."
-    log_info "Using image: ${REGISTRY}/aurora-cloudbank-symbolic:${IMAGE_TAG}"
+    log_info "Using image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
     
     # Update image in deployment manifest (temporary copy)
     local temp_manifest="/tmp/aurora-gui-cloudhub-deployment-updated.yaml"
-    sed "s|aurora-cloudbank-symbolic:latest|${REGISTRY}/aurora-cloudbank-symbolic:${IMAGE_TAG}|g" \
+    sed "s|aurora-cloudbank-symbolic:latest|${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g" \
         "$K8S_DIR/aurora-gui-cloudhub-deployment.yaml" > "$temp_manifest"
     
     if [[ "$DRY_RUN" == "true" ]]; then
@@ -223,7 +224,7 @@ print_summary() {
     echo "    Aurora Relay Deployment Summary"
     echo "========================================"
     echo "Namespace: $NAMESPACE"
-    echo "Image: ${REGISTRY}/aurora-cloudbank-symbolic:${IMAGE_TAG}"
+    echo "Image: ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
     echo "Dry Run: $DRY_RUN"
     echo ""
     
@@ -259,6 +260,10 @@ main() {
                 REGISTRY="$2"
                 shift 2
                 ;;
+            --image-name)
+                IMAGE_NAME="$2"
+                shift 2
+                ;;
             --tag)
                 IMAGE_TAG="$2"
                 shift 2
@@ -267,11 +272,12 @@ main() {
                 echo "Usage: $0 [options]"
                 echo ""
                 echo "Options:"
-                echo "  --dry-run        Run in dry-run mode (no changes)"
-                echo "  --namespace NS   Kubernetes namespace (default: aurora-cloudbank)"
-                echo "  --registry REG   Container registry (default: ghcr.io/auo959)"
-                echo "  --tag TAG        Image tag (default: latest)"
-                echo "  -h, --help       Show this help message"
+                echo "  --dry-run         Run in dry-run mode (no changes)"
+                echo "  --namespace NS    Kubernetes namespace (default: aurora-cloudbank)"
+                echo "  --registry REG    Container registry (default: ghcr.io)"
+                echo "  --image-name NAME Image name (default: aurora-cloudbank-symbolic)"
+                echo "  --tag TAG         Image tag (default: latest)"
+                echo "  -h, --help        Show this help message"
                 exit 0
                 ;;
             *)

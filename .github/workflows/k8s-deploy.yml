@@ -52,6 +52,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   AURORA_NAMESPACE: aurora-cloudbank
+  KUBECTL_VERSION: 'v1.28.0'
 
 concurrency:
   group: k8s-deploy-${{ github.ref }}
@@ -182,7 +183,7 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: ${{ env.KUBECTL_VERSION }}
       
       - name: Validate Kubernetes manifests
         run: |
@@ -246,7 +247,7 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          version: ${{ env.KUBECTL_VERSION }}
       
       - name: Set up kubeconfig
         run: |
@@ -282,7 +283,7 @@ jobs:
           # Set environment
           export DRY_RUN=true
           export IMAGE_TAG="sha-${{ github.sha }}"
-          export CONTAINER_REGISTRY="${{ env.REGISTRY }}/${{ github.repository_owner }}"
+          export CONTAINER_REGISTRY="${{ env.REGISTRY }}"
           export AURORA_NAMESPACE="${{ env.AURORA_NAMESPACE }}-staging"
           
           # Run deployment scripts in dry-run mode

@@ -14,6 +14,8 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 K8S_DIR="$PROJECT_ROOT/k8s"
 NAMESPACE="${AURORA_NAMESPACE:-aurora-cloudbank}"
 DRY_RUN="${DRY_RUN:-false}"
+HEALTH_PORT="${HEALTH_PORT:-8000}"
+HEALTH_PATH="${HEALTH_PATH:-/mcp_bridge/health}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -189,7 +191,7 @@ test_mcp_health() {
     
     # Execute health check inside pod
     local health_result
-    health_result=$(kubectl exec -n "$NAMESPACE" "$pod_name" -- curl -s http://localhost:8000/mcp_bridge/health 2>/dev/null || echo '{"error": "health check failed"}')
+    health_result=$(kubectl exec -n "$NAMESPACE" "$pod_name" -- curl -s "http://localhost:${HEALTH_PORT}${HEALTH_PATH}" 2>/dev/null || echo '{"error": "health check failed"}')
     
     echo ""
     echo "=== MCP Health Check Result ==="

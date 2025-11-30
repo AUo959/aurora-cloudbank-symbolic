@@ -1,7 +1,3 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 import os
 import secrets
 from typing import List
@@ -19,10 +15,16 @@ AIF_TOKEN = os.environ.get("AIF_TOKEN")
 if not AIF_TOKEN or AIF_TOKEN == "change-me":
     # Generate cryptographically secure random token
     AIF_TOKEN = secrets.token_urlsafe(32)
-    logger.warning("No secure AIF_TOKEN provided. Generated random token for this session.")
-    logger.info("Generated AIF_TOKEN: %s", AIF_TOKEN[:8] + "..." + AIF_TOKEN[-4:])  # Only log partial token for security
-    logger.warning("WARNING: Using generated AIF_TOKEN: {AIF_TOKEN}")
-    print("   Set AIF_TOKEN environment variable for production use.")
+    token_stub = AIF_TOKEN[:8] + "..." + AIF_TOKEN[-4:]
+    logger.warning(
+        "No secure AIF_TOKEN provided. Generated random token for this session.",
+        extra={"event": "aif_token_bootstrap"},
+    )
+    logger.info("Generated AIF_TOKEN: %s", token_stub)  # Only log partial token for security
+    logger.warning(
+        "Set AIF_TOKEN environment variable for production use.",
+        extra={"event": "aif_token_bootstrap"},
+    )
 
 
 class ConnectionManager:
@@ -45,9 +47,21 @@ class ConnectionManager:
         for connection in list(self.active_connections):
             if connection is sender:
                 continue
+            client_meta = getattr(connection, "client", None)
             try:
                 await connection.send_text(message)
-            except Exception:
+            except WebSocketDisconnect:
+                logger.info(
+                    "WebSocket disconnected during broadcast; dropping connection",
+                    extra={"client": client_meta, "event": "broadcast_disconnect"},
+                )
+                self.disconnect(connection)
+            except Exception as exc:
+                logger.warning(
+                    "Broadcast send failure; disconnecting client",
+                    extra={"client": client_meta, "event": "broadcast_failure"},
+                    exc_info=exc,
+                )
                 self.disconnect(connection)
 
 

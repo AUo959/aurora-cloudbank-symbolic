@@ -3,18 +3,17 @@
 Basic test for T71 Symbolic Infrastructure tools
 """
 
+from pathlib import Path
 import sys
 import traceback
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))
 
 from tools.symbolic.anchor_tracker import SymbolicAnchorTracker
 from tools.symbolic.memory_sealer import MemorySealingEngine
 from tools.cli.aurora_dev_cli import AuroraDeveloperCLI
 from tools.symbolic.manifest_generator import ManifestGenerator
-
-# Add tools to path
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "tools"))
 
 
 def test_anchor_tracker():
@@ -43,13 +42,24 @@ def test_memory_sealer():
     # Test sealing this test file
     test_file = Path(__file__)
     seal = sealer.seal_file(test_file)
+    seal_path = sealer.seals_dir / f"{seal.seal_id}.json"
+    backup_path = sealer.seals_dir / f"{seal.seal_id}_backup.zip"
 
-    assert seal.seal_id is not None, "Should generate seal ID"
-    assert seal.sha256_hash is not None, "Should generate hash"
+    try:
+        assert seal.seal_id is not None, "Should generate seal ID"
+        assert seal.sha256_hash is not None, "Should generate hash"
 
-    # Test verification
-    verification = sealer.verify_seal(seal.seal_id)
-    assert verification["status"] == "valid", f"Seal should be valid: {verification}"
+        # Test verification
+        verification = sealer.verify_seal(seal.seal_id)
+        assert verification["status"] == "valid", f"Seal should be valid: {verification}"
+    finally:
+        if seal_path.exists():
+            seal_path.unlink()
+
+        if backup_path.exists():
+            backup_path.unlink()
+
+        sealer.seals.pop(seal.seal_id, None)
 
     print("✅ Memory Sealer tests passed")
 

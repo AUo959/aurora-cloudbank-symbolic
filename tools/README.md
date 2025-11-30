@@ -52,7 +52,7 @@ The wizard will guide you through:
 pip install pytest black flake8 isort
 
 # Test installation
-python test_t71_tools.py
+python tests/test_t71_tools.py
 ```
 
 ### Basic Usage
@@ -266,7 +266,7 @@ Current implementation status (as of 2025-07-20):
 
 Run the comprehensive test suite:
 ```bash
-python test_t71_tools.py
+python tests/test_t71_tools.py
 ```
 
 Validates:

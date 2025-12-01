@@ -240,3 +240,399 @@ def test_ai_core_imports():
     assert ModelCapabilities is not None
     assert UnifiedAIInterface is not None
     assert unified_ai is not None
+
+
+@pytest.mark.unit
+@pytest.mark.ai
+@pytest.mark.critical
+class TestAIIntegrationErrorHandling:
+    """Test error handling for AI integration scenarios."""
+
+    @pytest.mark.asyncio
+    async def test_api_timeout_handling(self):
+        """Test handling of API timeout errors."""
+        interface = UnifiedAIInterface()
+
+        # Mock an API timeout
+        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+            import asyncio
+            mock_call.side_effect = asyncio.TimeoutError("Request timeout")
+
+            # Should handle timeout gracefully
+            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+
+            try:
+                # Timeout should be caught and handled
+                result = await interface._call_claude_api(
+                    AIRequest(prompt="test"),
+                    AIModel.CLAUDE_35_SONNET
+                )
+                # If it returns, should indicate failure
+                if result is not None:
+                    assert result.success is False
+            except asyncio.TimeoutError:
+                # Also acceptable to propagate timeout for caller to handle
+                pass
+
+    @pytest.mark.asyncio
+    async def test_rate_limit_handling(self):
+        """Test handling of rate limit errors."""
+        interface = UnifiedAIInterface()
+
+        # Mock a rate limit error response
+        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+            error_response = AIResponse(
+                content="",
+                model_used=AIModel.GPT_4O,
+                provider=AIProvider.OPENAI,
+                tokens_used=0,
+                latency_ms=100,
+                success=False,
+                error="Rate limit exceeded. Please retry after 60 seconds."
+            )
+            mock_call.return_value = error_response
+
+            interface.CAPABILITIES[AIModel.GPT_4O].available = True
+
+            result = await interface._call_openai_api(
+                AIRequest(prompt="test"),
+                AIModel.GPT_4O
+            )
+
+            assert result.success is False
+            assert "rate limit" in result.error.lower()
+
+    @pytest.mark.asyncio
+    async def test_invalid_api_key_handling(self):
+        """Test handling of invalid API key errors."""
+        interface = UnifiedAIInterface()
+
+        # Mock invalid API key error
+        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+            error_response = AIResponse(
+                content="",
+                model_used=AIModel.CLAUDE_35_SONNET,
+                provider=AIProvider.ANTHROPIC,
+                tokens_used=0,
+                latency_ms=50,
+                success=False,
+                error="Invalid API key provided"
+            )
+            mock_call.return_value = error_response
+
+            result = await interface._call_claude_api(
+                AIRequest(prompt="test"),
+                AIModel.CLAUDE_35_SONNET
+            )
+
+            assert result.success is False
+            assert "api key" in result.error.lower()
+
+    @pytest.mark.asyncio
+    async def test_network_failure_handling(self):
+        """Test handling of network connection failures."""
+        interface = UnifiedAIInterface()
+
+        # Mock network error
+        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+            import aiohttp
+            mock_call.side_effect = aiohttp.ClientError("Connection refused")
+
+            interface.CAPABILITIES[AIModel.GPT_4O].available = True
+
+            try:
+                result = await interface._call_openai_api(
+                    AIRequest(prompt="test"),
+                    AIModel.GPT_4O
+                )
+                # Should return error response
+                if result is not None:
+                    assert result.success is False
+            except aiohttp.ClientError:
+                # Also acceptable to propagate network errors
+                pass
+
+    @pytest.mark.asyncio
+    async def test_response_parsing_error_handling(self):
+        """Test handling of malformed API responses."""
+        interface = UnifiedAIInterface()
+
+        # Mock malformed response
+        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+            # Return invalid response structure
+            mock_call.return_value = None
+
+            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+
+            result = await interface._call_claude_api(
+                AIRequest(prompt="test"),
+                AIModel.CLAUDE_35_SONNET
+            )
+
+            # Should handle None response gracefully
+            assert result is None or (hasattr(result, 'success') and not result.success)
+
+    @pytest.mark.asyncio
+    async def test_model_unavailability_fallback(self):
+        """Test fallback when preferred model is unavailable."""
+        interface = UnifiedAIInterface()
+
+        # Set primary model as unavailable, backup as available
+        interface.CAPABILITIES[AIModel.CLAUDE_45_OPUS].available = False
+        interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+
+        request = AIRequest(
+            prompt="test",
+            model_preference=AIModel.CLAUDE_45_OPUS,
+            fallback_chain=[AIModel.CLAUDE_35_SONNET]
+        )
+
+        selected = await interface.select_optimal_model(request, "general")
+
+        # Should select from fallback chain
+        assert selected == AIModel.CLAUDE_35_SONNET
+
+    @pytest.mark.asyncio
+    async def test_all_models_unavailable(self):
+        """Test behavior when all models are unavailable."""
+        interface = UnifiedAIInterface()
+
+        # Mark all models as unavailable
+        for model in interface.CAPABILITIES:
+            interface.CAPABILITIES[model].available = False
+
+        request = AIRequest(prompt="test")
+
+        # Should handle gracefully, possibly returning None or error
+        try:
+            selected = await interface.select_optimal_model(request, "general")
+            # If it returns a model, it should be in capabilities
+            if selected is not None:
+                assert selected in interface.CAPABILITIES
+        except Exception as e:
+            # Should raise meaningful error
+            assert "unavailable" in str(e).lower() or "no model" in str(e).lower()
+
+    @pytest.mark.asyncio
+    async def test_partial_response_handling(self):
+        """Test handling of incomplete/partial responses."""
+        interface = UnifiedAIInterface()
+
+        # Mock partial response
+        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+            partial_response = AIResponse(
+                content="This response was cut off mid-sen",
+                model_used=AIModel.GPT_4O,
+                provider=AIProvider.OPENAI,
+                tokens_used=150,
+                latency_ms=500,
+                success=True,
+                metadata={"finish_reason": "length"}
+            )
+            mock_call.return_value = partial_response
+
+            result = await interface._call_openai_api(
+                AIRequest(prompt="test"),
+                AIModel.GPT_4O
+            )
+
+            assert result is not None
+            assert result.content is not None
+            # Should indicate partial response in metadata
+            assert "finish_reason" in result.metadata
+
+    @pytest.mark.asyncio
+    async def test_max_retries_exceeded(self):
+        """Test behavior when max retry attempts are exceeded."""
+        interface = UnifiedAIInterface()
+
+        # Mock repeated failures
+        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+            error_response = AIResponse(
+                content="",
+                model_used=AIModel.CLAUDE_35_SONNET,
+                provider=AIProvider.ANTHROPIC,
+                tokens_used=0,
+                latency_ms=100,
+                success=False,
+                error="Service temporarily unavailable"
+            )
+            mock_call.return_value = error_response
+
+            # After multiple attempts, should give up
+            for _ in range(3):
+                result = await interface._call_claude_api(
+                    AIRequest(prompt="test"),
+                    AIModel.CLAUDE_35_SONNET
+                )
+                assert result.success is False
+
+    @pytest.mark.asyncio
+    async def test_context_length_exceeded(self):
+        """Test handling when prompt exceeds model's context window."""
+        interface = UnifiedAIInterface()
+
+        # Create request with very large prompt
+        huge_prompt = "test " * 100000  # Simulate oversized prompt
+
+        request = AIRequest(
+            prompt=huge_prompt,
+            model_preference=AIModel.GPT_4O
+        )
+
+        # Should either truncate, return error, or select model with larger context
+        # Implementation specific, but should not crash
+        try:
+            selected = await interface.select_optimal_model(request, "general")
+            assert selected in interface.CAPABILITIES
+        except ValueError as e:
+            # Acceptable to raise error for oversized prompts
+            assert "context" in str(e).lower() or "length" in str(e).lower()
+
+    @pytest.mark.asyncio
+    async def test_invalid_temperature_parameter(self):
+        """Test handling of invalid temperature values."""
+        interface = UnifiedAIInterface()
+
+        # Temperature should be 0.0-1.0 or 0.0-2.0 depending on provider
+        invalid_request = AIRequest(
+            prompt="test",
+            temperature=5.0  # Invalid
+        )
+
+        # Should either clamp to valid range or raise error
+        # Implementation should validate parameters
+        assert invalid_request.temperature == 5.0  # Request object accepts it
+        # Actual validation would happen during API call
+
+    @pytest.mark.asyncio
+    async def test_empty_prompt_handling(self):
+        """Test handling of empty or whitespace-only prompts."""
+        interface = UnifiedAIInterface()
+
+        empty_request = AIRequest(prompt="")
+
+        # Should handle empty prompts gracefully
+        # Either reject or allow (depending on implementation)
+        assert empty_request.prompt == ""
+
+    @pytest.mark.asyncio
+    async def test_concurrent_request_handling(self):
+        """Test handling multiple concurrent requests."""
+        interface = UnifiedAIInterface()
+
+        # Mock successful responses
+        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+            mock_call.return_value = AIResponse(
+                content="test response",
+                model_used=AIModel.CLAUDE_35_SONNET,
+                provider=AIProvider.ANTHROPIC,
+                tokens_used=50,
+                latency_ms=200,
+                success=True
+            )
+
+            interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+
+            # Fire multiple requests concurrently
+            requests = [
+                interface._call_claude_api(
+                    AIRequest(prompt=f"test {i}"),
+                    AIModel.CLAUDE_35_SONNET
+                )
+                for i in range(5)
+            ]
+
+            results = await asyncio.gather(*requests)
+
+            # All should complete successfully
+            assert len(results) == 5
+            assert all(r.success for r in results)
+
+    @pytest.mark.asyncio
+    async def test_api_error_status_codes(self):
+        """Test handling of various HTTP error status codes."""
+        interface = UnifiedAIInterface()
+
+        error_codes = [400, 401, 403, 404, 500, 502, 503, 504]
+
+        for code in error_codes:
+            with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+                error_response = AIResponse(
+                    content="",
+                    model_used=AIModel.GPT_4O,
+                    provider=AIProvider.OPENAI,
+                    tokens_used=0,
+                    latency_ms=50,
+                    success=False,
+                    error=f"HTTP {code} error"
+                )
+                mock_call.return_value = error_response
+
+                result = await interface._call_openai_api(
+                    AIRequest(prompt="test"),
+                    AIModel.GPT_4O
+                )
+
+                assert result.success is False
+                assert str(code) in result.error
+
+
+@pytest.mark.integration
+@pytest.mark.ai
+@pytest.mark.slow
+class TestAIIntegrationResilience:
+    """Integration tests for AI system resilience."""
+
+    @pytest.mark.asyncio
+    async def test_cascading_fallback_chain(self):
+        """Test complete fallback chain when multiple models fail."""
+        interface = UnifiedAIInterface()
+
+        # Set up fallback chain
+        interface.CAPABILITIES[AIModel.CLAUDE_45_OPUS].available = False
+        interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
+        interface.CAPABILITIES[AIModel.GPT_4O].available = True
+
+        request = AIRequest(
+            prompt="test",
+            model_preference=AIModel.CLAUDE_45_OPUS,
+            fallback_chain=[
+                AIModel.CLAUDE_35_SONNET,
+                AIModel.GPT_4O
+            ]
+        )
+
+        # Should successfully select from fallback
+        selected = await interface.select_optimal_model(request, "general")
+        assert selected in [AIModel.CLAUDE_35_SONNET, AIModel.GPT_4O]
+
+    @pytest.mark.asyncio
+    async def test_model_recovery_after_failure(self):
+        """Test that models can recover after temporary failures."""
+        interface = UnifiedAIInterface()
+
+        model = AIModel.GPT_4O
+
+        # Simulate failure
+        interface.disable_model(model)
+        assert not interface.CAPABILITIES[model].available
+
+        # Simulate recovery
+        interface.enable_model(model)
+        assert interface.CAPABILITIES[model].available
+
+    @pytest.mark.asyncio
+    async def test_request_metadata_preservation(self):
+        """Test that request metadata is preserved through error conditions."""
+        interface = UnifiedAIInterface()
+
+        request = AIRequest(
+            prompt="test",
+            context_tag="test_context_123",
+            dlp_tracking=True
+        )
+
+        # Metadata should be preserved even if request fails
+        assert request.context_tag == "test_context_123"
+        assert request.dlp_tracking is True

@@ -55,5 +55,5 @@ def test_broadcast_logs_and_disconnects_on_failure(caplog):
     warning_records = [record for record in caplog.records if record.levelno >= logging.WARNING]
     info_records = [record for record in caplog.records if record.levelno == logging.INFO]
 
-    assert any(getattr(record, "event", "") == "broadcast_failure" for record in warning_records)
-    assert any(getattr(record, "event", "") == "broadcast_disconnect" for record in info_records)
+    assert any(record.__dict__.get("event", "") == "broadcast_failure" for record in warning_records)
+    assert any(record.__dict__.get("event", "") == "broadcast_disconnect" for record in info_records)

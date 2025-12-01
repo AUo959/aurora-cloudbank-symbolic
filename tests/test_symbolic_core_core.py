@@ -297,7 +297,7 @@ class TestSymbolicCoreSecurityConsiderations:
         core = SymbolicCore()
         result = core.parse_expression("x + 5")
 
-        # Should fail because variables are not supported
+        # Parsing succeeds, but evaluation fails (result is None) because variables are not supported
         assert result["success"] is True
         assert result["result"] is None  # Evaluation should fail
 

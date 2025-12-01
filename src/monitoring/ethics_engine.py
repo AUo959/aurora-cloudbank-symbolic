@@ -319,8 +319,9 @@ class EthicsEngine:
             value = context.parameters[condition]
             return bool(value) if value is not None else False
         
-        # Parse comparison expressions (e.g., "risk_to_life > 0")
-        for op in ['>', '<', '>=', '<=', '==', '!=']:
+        # Parse comparison expressions (e.g., "action_type == 'forbidden_action'")
+        # Also check context attributes like action_type, agent_id
+        for op in ['==', '!=', '>', '<', '>=', '<=']:
             if op in condition:
                 parts = condition.split(op)
                 if len(parts) == 2:
@@ -343,7 +344,26 @@ class EthicsEngine:
                             elif op == '!=':
                                 return param_value != threshold_value
                         except (ValueError, TypeError):
-                            pass
+                            # Try string comparison for non-numeric values
+                            if op == '==':
+                                return str(param_value) == threshold.strip("'\"")
+                            elif op == '!=':
+                                return str(param_value) != threshold.strip("'\"")
+        
+        # Check context attributes (action_type, agent_id) for comparison conditions
+        for op in ['==', '!=']:
+            if op in condition:
+                parts = condition.split(op)
+                if len(parts) == 2:
+                    attr_name = parts[0].strip()
+                    expected_value = parts[1].strip().strip("'\"")
+                    # Check if it's a context attribute
+                    if hasattr(context, attr_name):
+                        actual_value = getattr(context, attr_name)
+                        if op == '==':
+                            return str(actual_value) == expected_value
+                        elif op == '!=':
+                            return str(actual_value) != expected_value
         
         return False
     

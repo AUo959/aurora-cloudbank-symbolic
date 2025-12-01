@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from api.aurora_api import app
@@ -16,11 +17,29 @@ def override_csrf():
     return True
 
 
-# Override security dependencies for test client
+@pytest.fixture(autouse=True)
+def setup_security_overrides():
+    """Set up security overrides for each test and clean up after."""
+    # Set overrides before each test
+    app.dependency_overrides[security] = override_security
+    app.dependency_overrides[verify_csrf_token] = override_csrf
+    yield
+    # Clean up after each test (though they need to stay for this module)
+
+
+# Create client after overrides are set
+@pytest.fixture
+def rd_client():
+    """Provide a test client with security overrides."""
+    app.dependency_overrides[security] = override_security
+    app.dependency_overrides[verify_csrf_token] = override_csrf
+    return TestClient(app)
+
+
+# For backward compatibility with existing tests
+client = TestClient(app)
 app.dependency_overrides[security] = override_security
 app.dependency_overrides[verify_csrf_token] = override_csrf
-
-client = TestClient(app)
 
 
 def test_rd_health():

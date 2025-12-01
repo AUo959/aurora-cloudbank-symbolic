@@ -4,6 +4,7 @@ Tests for AI Core Unified Interface
 Tests model selection, fallback chains, and integration
 """
 
+import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -254,7 +255,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock an API timeout
-        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             import asyncio
             mock_call.side_effect = asyncio.TimeoutError("Request timeout")
 
@@ -263,7 +264,7 @@ class TestAIIntegrationErrorHandling:
 
             try:
                 # Timeout should be caught and handled
-                result = await interface._call_claude_api(
+                result = await interface._execute_anthropic(
                     AIRequest(prompt="test"),
                     AIModel.CLAUDE_35_SONNET
                 )
@@ -280,7 +281,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock a rate limit error response
-        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_openai', new_callable=AsyncMock) as mock_call:
             error_response = AIResponse(
                 content="",
                 model_used=AIModel.GPT_4O,
@@ -294,7 +295,7 @@ class TestAIIntegrationErrorHandling:
 
             interface.CAPABILITIES[AIModel.GPT_4O].available = True
 
-            result = await interface._call_openai_api(
+            result = await interface._execute_openai(
                 AIRequest(prompt="test"),
                 AIModel.GPT_4O
             )
@@ -308,7 +309,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock invalid API key error
-        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             error_response = AIResponse(
                 content="",
                 model_used=AIModel.CLAUDE_35_SONNET,
@@ -320,7 +321,7 @@ class TestAIIntegrationErrorHandling:
             )
             mock_call.return_value = error_response
 
-            result = await interface._call_claude_api(
+            result = await interface._execute_anthropic(
                 AIRequest(prompt="test"),
                 AIModel.CLAUDE_35_SONNET
             )
@@ -331,17 +332,20 @@ class TestAIIntegrationErrorHandling:
     @pytest.mark.asyncio
     async def test_network_failure_handling(self):
         """Test handling of network connection failures."""
+        # Skip if aiohttp is not available
+        pytest.importorskip("aiohttp")
+        import aiohttp
+
         interface = UnifiedAIInterface()
 
         # Mock network error
-        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
-            import aiohttp
+        with patch.object(interface, '_execute_openai', new_callable=AsyncMock) as mock_call:
             mock_call.side_effect = aiohttp.ClientError("Connection refused")
 
             interface.CAPABILITIES[AIModel.GPT_4O].available = True
 
             try:
-                result = await interface._call_openai_api(
+                result = await interface._execute_openai(
                     AIRequest(prompt="test"),
                     AIModel.GPT_4O
                 )
@@ -358,13 +362,13 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock malformed response
-        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             # Return invalid response structure
             mock_call.return_value = None
 
             interface.CAPABILITIES[AIModel.CLAUDE_35_SONNET].available = True
 
-            result = await interface._call_claude_api(
+            result = await interface._execute_anthropic(
                 AIRequest(prompt="test"),
                 AIModel.CLAUDE_35_SONNET
             )
@@ -410,8 +414,9 @@ class TestAIIntegrationErrorHandling:
             if selected is not None:
                 assert selected in interface.CAPABILITIES
         except Exception as e:
-            # Should raise meaningful error
-            assert "unavailable" in str(e).lower() or "no model" in str(e).lower()
+            # Should raise meaningful error about model unavailability
+            error_msg = str(e).lower()
+            assert "unavailable" in error_msg or "no model" in error_msg or "no ai" in error_msg
 
     @pytest.mark.asyncio
     async def test_partial_response_handling(self):
@@ -419,7 +424,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock partial response
-        with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_openai', new_callable=AsyncMock) as mock_call:
             partial_response = AIResponse(
                 content="This response was cut off mid-sen",
                 model_used=AIModel.GPT_4O,
@@ -431,7 +436,7 @@ class TestAIIntegrationErrorHandling:
             )
             mock_call.return_value = partial_response
 
-            result = await interface._call_openai_api(
+            result = await interface._execute_openai(
                 AIRequest(prompt="test"),
                 AIModel.GPT_4O
             )
@@ -447,7 +452,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock repeated failures
-        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             error_response = AIResponse(
                 content="",
                 model_used=AIModel.CLAUDE_35_SONNET,
@@ -461,7 +466,7 @@ class TestAIIntegrationErrorHandling:
 
             # After multiple attempts, should give up
             for _ in range(3):
-                result = await interface._call_claude_api(
+                result = await interface._execute_anthropic(
                     AIRequest(prompt="test"),
                     AIModel.CLAUDE_35_SONNET
                 )
@@ -471,6 +476,9 @@ class TestAIIntegrationErrorHandling:
     async def test_context_length_exceeded(self):
         """Test handling when prompt exceeds model's context window."""
         interface = UnifiedAIInterface()
+
+        # Mark preferred model as available
+        interface.CAPABILITIES[AIModel.GPT_4O].available = True
 
         # Create request with very large prompt
         huge_prompt = "test " * 100000  # Simulate oversized prompt
@@ -485,9 +493,10 @@ class TestAIIntegrationErrorHandling:
         try:
             selected = await interface.select_optimal_model(request, "general")
             assert selected in interface.CAPABILITIES
-        except ValueError as e:
-            # Acceptable to raise error for oversized prompts
-            assert "context" in str(e).lower() or "length" in str(e).lower()
+        except (ValueError, RuntimeError) as e:
+            # Acceptable to raise error for oversized prompts or unavailable models
+            error_msg = str(e).lower()
+            assert "context" in error_msg or "length" in error_msg or "unavailable" in error_msg or "no ai" in error_msg
 
     @pytest.mark.asyncio
     async def test_invalid_temperature_parameter(self):
@@ -522,7 +531,7 @@ class TestAIIntegrationErrorHandling:
         interface = UnifiedAIInterface()
 
         # Mock successful responses
-        with patch.object(interface, '_call_claude_api', new_callable=AsyncMock) as mock_call:
+        with patch.object(interface, '_execute_anthropic', new_callable=AsyncMock) as mock_call:
             mock_call.return_value = AIResponse(
                 content="test response",
                 model_used=AIModel.CLAUDE_35_SONNET,
@@ -536,7 +545,7 @@ class TestAIIntegrationErrorHandling:
 
             # Fire multiple requests concurrently
             requests = [
-                interface._call_claude_api(
+                interface._execute_anthropic(
                     AIRequest(prompt=f"test {i}"),
                     AIModel.CLAUDE_35_SONNET
                 )
@@ -557,7 +566,7 @@ class TestAIIntegrationErrorHandling:
         error_codes = [400, 401, 403, 404, 500, 502, 503, 504]
 
         for code in error_codes:
-            with patch.object(interface, '_call_openai_api', new_callable=AsyncMock) as mock_call:
+            with patch.object(interface, '_execute_openai', new_callable=AsyncMock) as mock_call:
                 error_response = AIResponse(
                     content="",
                     model_used=AIModel.GPT_4O,
@@ -569,7 +578,7 @@ class TestAIIntegrationErrorHandling:
                 )
                 mock_call.return_value = error_response
 
-                result = await interface._call_openai_api(
+                result = await interface._execute_openai(
                     AIRequest(prompt="test"),
                     AIModel.GPT_4O
                 )

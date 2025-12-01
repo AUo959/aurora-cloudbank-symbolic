@@ -462,9 +462,12 @@ class TestGumasUtilityEndpoints:
 
     def test_clear_violations_with_timestamp(self, clean_ethics_engine):
         """Test clearing violations before specific timestamp."""
+        from urllib.parse import quote
         timestamp = datetime.now(timezone.utc).isoformat()
+        # URL-encode the timestamp to handle the + in timezone offset
+        encoded_timestamp = quote(timestamp, safe='')
 
-        response = client.delete(f"/gumas/violations?before={timestamp}")
+        response = client.delete(f"/gumas/violations?before={encoded_timestamp}")
 
         assert response.status_code == 204
 

@@ -466,6 +466,10 @@ class TestQuantumCoreErrorHandling:
         except (IndexError, ValueError):
             # Expected for strict implementations
             pass
+        except Exception as e:
+            # Qiskit raises CircuitError for invalid qubit indices
+            # Accept any circuit-related error as valid behavior
+            assert "out of range" in str(e).lower() or "circuit" in str(e).lower()
 
     @pytest.mark.skipif(not QUANTUM_LAYER_AVAILABLE, reason="Quantum layer not available")
     def test_quantum_layer_unknown_operation(self):

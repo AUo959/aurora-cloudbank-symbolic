@@ -93,4 +93,10 @@ markers = [
     "critical: Must-pass tests for production",
     "regression: Regression prevention tests",
     "performance: Performance and benchmarking tests",
+
+    # Domain-specific markers
+    "flightcontrol: Flight control infrastructure tests",
 ]
+
+# Fix pytest-asyncio deprecation warning
+asyncio_default_fixture_loop_scope = "function"

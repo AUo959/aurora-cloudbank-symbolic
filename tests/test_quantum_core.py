@@ -336,7 +336,15 @@ class TestQuantumCircuitExecution:
 
         # Uniform distribution should have higher entropy
         assert entropy_uniform > entropy_peaked
-        assert entropy_uniform > 1.0  # Should be close to 2.0 for uniform
+        # Entropy for uniform distribution over 4 states:
+        # - log2 base: 2.0
+        # - natural log base: ~1.386
+        # Adjust expected value based on implementation
+        expected_entropy_uniform_log2 = 2.0
+        expected_entropy_uniform_ln = np.log(4)
+        # Accept either value within reasonable tolerance
+        assert np.isclose(entropy_uniform, expected_entropy_uniform_log2, atol=0.05) or \
+               np.isclose(entropy_uniform, expected_entropy_uniform_ln, atol=0.05)
         assert entropy_peaked >= 0.0
 
     def test_extract_symbolic_patterns(self):

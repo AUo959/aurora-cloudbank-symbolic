@@ -148,7 +148,7 @@ jobs:
 
     - name: Run T71 Infrastructure Tests
       run: |
-        python test_t71_tools.py
+        python tests/test_t71_tools.py
 
     - name: Validate Symbolic Anchors
       run: |
@@ -271,8 +271,9 @@ jobs:
 
         try:
             # Run the T71 test suite
+            test_path = self.repo_path / "tests" / "test_t71_tools.py"
             process = subprocess.run(
-                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
+                ["python", str(test_path)], capture_output=True, text=True, cwd=self.repo_path
             )
 
             if process.returncode == 0:
@@ -373,8 +374,9 @@ jobs:
 
         try:
             # Run basic functionality test
+            test_path = self.repo_path / "tests" / "test_t71_tools.py"
             process = subprocess.run(
-                ["python", "test_t71_tools.py"], capture_output=True, text=True, cwd=self.repo_path
+                ["python", str(test_path)], capture_output=True, text=True, cwd=self.repo_path
             )
 
             if process.returncode == 0:

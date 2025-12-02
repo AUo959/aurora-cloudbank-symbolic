@@ -719,6 +719,17 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate Drift Metrics routes: %s", e)
 
+# Include Playground backend routes
+try:
+    from src.playground import playground_router
+
+    app.include_router(playground_router)
+    logger.info("✅ Playground backend routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Playground backend not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Playground backend routes: %s", e)
+
 # Initialize Ethics Gate for high-impact operations
 try:
     from src.aurora.ethics import EthicsGate, GUMASEthicsClient

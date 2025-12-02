@@ -71,7 +71,7 @@ async def validate_phase1():
         risk_score=0.2
     )
     
-    logger.info("Event ID: {result_1["event_id']}")
+    logger.info(f"Event ID: {result_1['event_id']}")
     print()
     
     # Show Triplex Handshake results
@@ -122,7 +122,7 @@ async def validate_phase1():
         risk_score=0.2
     )
     
-    logger.info("Event ID: {result_2["event_id']}")
+    logger.info(f"Event ID: {result_2['event_id']}")
     print(f"   Pattern Application: Aurora used institutional memory")
     print(f"   (Check entity memory for pattern emergence)")
     print()
@@ -137,7 +137,7 @@ async def validate_phase1():
         "data": {"target_systems": "all", "impact": "station-wide"}
     }
     
-    logger.warning("Operation: {payload_3["task']}")
+    logger.warning(f"Operation: {payload_3['task']}")
     print(f"   Risk Score: 0.8 (high)")
     print(f"   Expected: Enhanced Triplex review")
     print()

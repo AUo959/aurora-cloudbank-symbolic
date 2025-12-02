@@ -1,36 +1,107 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import { Code2, Info } from 'lucide-react';
+import { useCallback } from 'react';
+import { toast } from 'sonner';
+import { EditorToolbar } from '@/components/Editor/EditorToolbar';
+import { CodeEditor } from '@/components/Editor/CodeEditor';
+import { OutputPanel } from '@/components/Output/OutputPanel';
+import { ExampleGallery } from '@/components/Sidebar/ExampleGallery';
+import { SettingsPanel } from '@/components/Sidebar/SettingsPanel';
+import { SharePanel } from '@/components/Sidebar/SharePanel';
+import { PlaygroundHeader } from '@/components/layout/PlaygroundHeader';
+import { PlaygroundLayout } from '@/components/layout/PlaygroundLayout';
+import { usePlaygroundStore } from '@/stores/playgroundStore';
+import { playgroundExamples } from '@/lib/playground/examples';
 
 export default function Playground() {
-  return (
-    <div className="h-full p-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-display font-bold text-gradient">Developer Playground</h1>
-        <p className="mt-2 text-gray-400">Interactive API exploration and code generation</p>
-      </div>
+  const {
+    code,
+    language,
+    theme,
+    fontSize,
+    output,
+    error,
+    isExecuting,
+    shareUrl,
+    selectedExampleId,
+    lastRunAt,
+    setCode,
+    setLanguage,
+    setTheme,
+    setFontSize,
+    executeCode,
+    shareSession,
+    saveSession,
+    forkSession,
+    loadExample,
+  } = usePlaygroundStore();
 
-      <Card className="glass-morphism">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Code2 className="h-5 w-5 text-accent-500" />
-            <span>API Explorer</span>
-          </CardTitle>
-          <CardDescription>Interactive playground coming soon</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-96 items-center justify-center border border-dashed border-white/20 rounded-lg">
-            <div className="text-center">
-              <Info className="mx-auto h-12 w-12 text-gray-500" />
-              <p className="mt-4 text-gray-400">
-                Developer Playground
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                API explorer • Code generator • Request builder • Example gallery
-              </p>
-            </div>
+  const handleRun = useCallback(async () => {
+    await executeCode();
+    toast.success('Run request dispatched', { description: 'Stub executor invoked in sandbox mode.' });
+  }, [executeCode]);
+
+  const handleShare = useCallback(async () => {
+    const url = await shareSession();
+    toast.success('Share link created', { description: 'T1 anchors preserved in encoded payload.' });
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(url);
+    }
+  }, [shareSession]);
+
+  const handleSave = useCallback(async () => {
+    const id = await saveSession();
+    toast.success('Session saved', { description: `Session id: ${id}` });
+  }, [saveSession]);
+
+  const handleFork = useCallback(async () => {
+    const id = await forkSession();
+    toast.info('Session forked', { description: `New session id: ${id}` });
+  }, [forkSession]);
+
+  return (
+    <div className="flex h-full flex-col gap-4">
+      <PlaygroundHeader lastRunAt={lastRunAt} />
+      <PlaygroundLayout
+        sidebar={
+          <div className="space-y-4">
+            <ExampleGallery examples={playgroundExamples} selectedId={selectedExampleId} onSelect={loadExample} />
+            <SettingsPanel
+              language={language}
+              theme={theme}
+              fontSize={fontSize}
+              onLanguageChange={setLanguage}
+              onThemeChange={setTheme}
+              onFontSizeChange={setFontSize}
+            />
+            <SharePanel shareUrl={shareUrl} onShare={handleShare} />
           </div>
-        </CardContent>
-      </Card>
+        }
+      >
+        <EditorToolbar
+          onRun={handleRun}
+          onSave={handleSave}
+          onShare={handleShare}
+          onFork={handleFork}
+          isExecuting={isExecuting}
+          status={
+            <div className="text-xs text-gray-300">
+              <p className="font-mono text-primary-100">Language: {language}</p>
+              {lastRunAt && <p className="text-gray-400">Last run at {new Date(lastRunAt).toLocaleTimeString()}</p>}
+            </div>
+          }
+        />
+
+        <div className="h-[520px] rounded-lg border border-white/10 bg-black/20 p-2 shadow-inner">
+          <CodeEditor
+            code={code}
+            language={language}
+            theme={theme}
+            fontSize={fontSize}
+            onChange={setCode}
+          />
+        </div>
+
+        <OutputPanel output={output} error={error} />
+      </PlaygroundLayout>
     </div>
   );
 }

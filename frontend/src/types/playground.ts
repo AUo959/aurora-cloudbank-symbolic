@@ -1,56 +1,33 @@
-export type ExecutionLanguage = 'python' | 'javascript';
+export type PlaygroundLanguage = 'python' | 'javascript';
+export type PlaygroundTheme = 'light' | 'dark';
 
-export interface SessionCreateRequest {
-  language: ExecutionLanguage;
-  seed_code?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface SessionCreateResponse {
-  session_id: string;
-  expires_at: number;
-}
-
-export interface ExecuteRequest {
-  session_id?: string;
+export interface PlaygroundExample {
+  id: string;
+  title: string;
+  description: string;
+  language: PlaygroundLanguage;
   code: string;
-  language: ExecutionLanguage;
-  stdin?: string;
+  tags: string[];
 }
 
-export interface ExecutionResult {
-  task_id: string;
-  session_id: string;
-  status: string;
-  output: string;
-  redacted_output?: string;
-  errors: string[];
-  duration_ms?: number;
+export interface PlaygroundRunResponse {
+  sessionId: string;
+  output: string[];
+  error: string | null;
+  executionTime: number;
+  status: 'success' | 'error' | 'timeout';
 }
 
-export interface ExecutionStatusResponse {
-  task_id: string;
-  session_id: string;
-  status: string;
-  result?: ExecutionResult;
-}
-
-export interface ShareRequest {
-  session_id: string;
+export interface PlaygroundState {
   code: string;
-  language: ExecutionLanguage;
-}
-
-export interface ShareResponse {
-  short_code: string;
-  session_id: string;
-  url: string;
-  embed_html: string;
-}
-
-export interface StreamMessage {
-  event: string;
-  session_id: string;
-  task_id?: string;
-  payload: Record<string, unknown>;
+  language: PlaygroundLanguage;
+  theme: PlaygroundTheme;
+  fontSize: number;
+  output: string[];
+  error: string | null;
+  sessionId: string | null;
+  shareUrl: string | null;
+  selectedExampleId: string;
+  isExecuting: boolean;
+  lastRunAt: string | null;
 }

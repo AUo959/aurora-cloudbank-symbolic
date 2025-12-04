@@ -68,6 +68,7 @@ export const usePlaygroundStore = create<PlaygroundStore>((set, get) => ({
         lastRunAt: new Date().toISOString(),
       });
     } catch (error) {
+      console.error('Error executing code:', error);
       const message = error instanceof Error ? error.message : 'Unknown execution error';
       set({ error: message, isExecuting: false });
     }

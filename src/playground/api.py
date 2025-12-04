@@ -122,6 +122,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             message = StreamMessage(**payload)
             await websocket.send_json(message.dict())
     except WebSocketDisconnect:
+        # Client disconnected from WebSocket; no action needed.
         pass
 
 

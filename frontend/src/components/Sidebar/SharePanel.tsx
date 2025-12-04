@@ -10,7 +10,11 @@ interface SharePanelProps {
 export function SharePanel({ shareUrl, onShare }: SharePanelProps) {
   const copyLink = async () => {
     if (shareUrl && navigator.clipboard) {
-      await navigator.clipboard.writeText(shareUrl);
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+      }
     }
   };
 

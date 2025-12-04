@@ -114,11 +114,22 @@ class SessionStore:
         """Async generator yielding events via Redis pubsub or in-memory store."""
         if self.async_redis:
             pubsub = self.async_redis.pubsub()
-            await pubsub.subscribe(f"playground:stream:{session_id}")
-            async for message in pubsub.listen():
-                if message.get("type") == "message":
-                    data = json.loads(message["data"])
-                    yield data
+            channel = f"playground:stream:{session_id}"
+            await pubsub.subscribe(channel)
+            try:
+                async for message in pubsub.listen():
+                    if message.get("type") == "message":
+                        data = json.loads(message["data"])
+                        yield data
+            finally:
+                try:
+                    await pubsub.unsubscribe(channel)
+                except Exception:
+                    pass
+                try:
+                    await pubsub.close()
+                except Exception:
+                    pass
         else:
             # Polling fallback
             last_payload = None

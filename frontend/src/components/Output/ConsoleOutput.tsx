@@ -17,7 +17,7 @@ export function ConsoleOutput({ lines, error }: ConsoleOutputProps) {
       <div className="space-y-2">
         {lines.length === 0 && !error && <p className="text-gray-500">Console output will appear here.</p>}
         {lines.map((line, index) => (
-          <p key={`${line}-${index}`} className="whitespace-pre-wrap text-primary-100">
+          <p key={`line-${index}`} className="whitespace-pre-wrap text-primary-100">
             {line}
           </p>
         ))}

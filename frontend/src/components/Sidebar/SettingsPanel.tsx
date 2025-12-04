@@ -29,11 +29,12 @@ export function SettingsPanel({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <p className="text-sm text-gray-400">Language</p>
-          <div className="flex gap-2">
+          <div role="group" aria-label="Language selection" className="flex gap-2">
             <Button
               variant={language === 'python' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => onLanguageChange('python')}
+              aria-pressed={language === 'python'}
             >
               Python
             </Button>
@@ -41,6 +42,7 @@ export function SettingsPanel({
               variant={language === 'javascript' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => onLanguageChange('javascript')}
+              aria-pressed={language === 'javascript'}
             >
               JavaScript
             </Button>
@@ -49,12 +51,13 @@ export function SettingsPanel({
 
         <div className="space-y-2">
           <p className="text-sm text-gray-400">Theme</p>
-          <div className="flex gap-2">
+          <div role="group" aria-label="Theme selection" className="flex gap-2">
             <Button
               variant={theme === 'dark' ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => onThemeChange('dark')}
               className="gap-2"
+              aria-pressed={theme === 'dark'}
             >
               <Moon className="h-4 w-4" /> Dark
             </Button>
@@ -63,6 +66,7 @@ export function SettingsPanel({
               size="sm"
               onClick={() => onThemeChange('light')}
               className="gap-2"
+              aria-pressed={theme === 'light'}
             >
               <SunMedium className="h-4 w-4" /> Light
             </Button>

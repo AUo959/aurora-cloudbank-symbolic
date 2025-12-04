@@ -48,13 +48,21 @@ export default function Playground() {
   }, [shareSession]);
 
   const handleSave = useCallback(async () => {
-    const id = await saveSession();
-    toast.success('Session saved', { description: `Session id: ${id}` });
+    try {
+      const id = await saveSession();
+      toast.success('Session saved', { description: `Session id: ${id}` });
+    } catch (err) {
+      toast.error('Failed to save session', { description: err instanceof Error ? err.message : String(err) });
+    }
   }, [saveSession]);
 
   const handleFork = useCallback(async () => {
-    const id = await forkSession();
-    toast.info('Session forked', { description: `New session id: ${id}` });
+    try {
+      const id = await forkSession();
+      toast.info('Session forked', { description: `New session id: ${id}` });
+    } catch (err) {
+      toast.error('Failed to fork session', { description: err instanceof Error ? err.message : String(err) });
+    }
   }, [forkSession]);
 
   return (

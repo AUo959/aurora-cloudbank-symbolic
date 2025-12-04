@@ -53,7 +53,7 @@ secure_memory = await client.memory.create(
     tags: ['bridge', 'session', 'pii-redaction'],
     description: 'Bridge a session across threads with continuity seals and redacted shares.',
     snippet: `// Anchor: T1-THREAD-BRIDGE
-import { createSession, shareSession, forkSession } from '../../src/utils/session_flow.js';
+import { createSession, shareSession, forkSession } from '../../utils/session_flow.js';
 
 const session = createSession({
   full_name: 'Quantum Trace',

@@ -407,7 +407,7 @@ class ChatGPTAgentModeIntegration:
                     "metadata_anchor": redacted_state.get("metadata_anchor"),
                 },
             }
-        elif action == "fork" and session_id and share_token:
+        elif action == "fork" and session_id:
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
 

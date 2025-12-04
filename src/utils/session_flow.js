@@ -8,16 +8,17 @@ export const defaultRedaction = {
   anchor_seed: 'T1-SESSION-FLOW-START'
 };
 
-const piiFields = new Set(defaultRedaction.fields);
+// Removed static piiFields; use dynamic set in maskState
 
 function maskState(state, redaction = defaultRedaction) {
   if (!redaction.enabled) {
     return { ...state, pii_redaction: redaction };
   }
 
+  const fieldsToMask = new Set(redaction.fields || defaultRedaction.fields);
   const masked = {};
   for (const [key, value] of Object.entries(state)) {
-    if (piiFields.has(key)) {
+    if (fieldsToMask.has(key)) {
       masked[key] = redaction.mask;
     } else {
       masked[key] = value;

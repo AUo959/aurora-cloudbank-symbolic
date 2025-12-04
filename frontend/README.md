@@ -26,6 +26,18 @@ Visit **http://localhost:5173** in your browser.
 
 ---
 
+## Try it in the Playground
+
+1. `npm run dev -- --host --port 5173`
+2. Open **http://localhost:5173/playground**
+3. Load a starter scenario from the gallery (quantum, memory, thread bridge, decision) with **T1 anchors**.
+4. Confirm the default PII redaction payload is present (`strategy: mask`, fields: `full_name`, `email`, `phone`).
+5. Use the share/fork examples to validate continuity before committing a session to collaborators.
+
+![Playground quickstart](../docs/images/playground-quickstart.svg)
+
+---
+
 ## Features
 
 ### ✅ Implemented

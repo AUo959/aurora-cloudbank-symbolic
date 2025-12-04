@@ -48,7 +48,7 @@ export const forkPlaygroundSession = async (
   payload: ExecutionPayload
 ): Promise<{ sessionId: string; parentId: string | null }> => {
   await delay(200);
-  const parentId = payload.sessionId ?? buildSessionId();
+  const parentId = payload.sessionId ?? null;
   const forkedId = buildSessionId();
   return { sessionId: forkedId, parentId };
 };

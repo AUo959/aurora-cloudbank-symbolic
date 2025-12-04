@@ -404,6 +404,66 @@ For deliverables touching security or memory:
 9. **Long Lines:** Respect 120-char limit consistently
 10. **Sync in Async:** Use async patterns throughout; never block the event loop
 
+## Technical Debt Protocol 📋
+
+**MANDATORY:** When technical debt is identified but not immediately addressed, agents MUST create a GitHub issue to track it.
+
+### When to Create a Tech Debt Issue
+
+Create an issue automatically when you encounter:
+- Lint errors in files outside the current task scope
+- Deprecated patterns that work but should be updated
+- Missing tests for existing functionality
+- Code duplication that should be refactored
+- Performance issues noted but not critical
+- Documentation gaps discovered during work
+- Security improvements identified but not blocking
+
+### Issue Template
+
+Use this format when creating tech debt issues:
+
+```markdown
+## Summary
+[One-line description of the technical debt]
+
+## Affected Files
+- `path/to/file.py` - [specific issue]
+- `path/to/other.py` - [specific issue]
+
+## Recommended Fixes
+1. [Specific actionable fix]
+2. [Another fix if applicable]
+
+## Priority
+[Low/Medium/High] - [Brief justification]
+
+---
+**Context:** Discovered during [task/command] on [date].
+**DLP:** context_tag=[relevant_tag]
+```
+
+### Required Labels
+- `tech-debt` - Always apply this label
+- `enhancement` - For improvements (not bugs)
+- Priority label if applicable: `priority:low`, `priority:medium`, `priority:high`
+
+### Example
+
+```bash
+# When you find lint issues during integration work:
+gh issue create \
+  --title "Fix lint issues in tools/cli (E402, F841)" \
+  --body "## Summary\nPre-existing lint errors causing make check to fail...\n\n## Priority\nLow - Does not affect functionality." \
+  --label "tech-debt,enhancement"
+```
+
+### Do NOT Create Issues For
+- Issues you're actively fixing in the current task
+- Theoretical improvements without concrete evidence
+- Preferences that don't affect functionality or maintainability
+- Duplicate issues (search first)
+
 ## Additional Resources
 
 - **Workflow Investigation:** `.github/AGENT_WORKFLOW_INVESTIGATION.md` - Common mistakes and patterns

@@ -97,7 +97,7 @@ export default function Playground() {
           onFork={handleFork}
           isExecuting={isExecuting}
           status={
-            <div className="text-xs text-gray-300">
+            <div className="text-xs text-gray-300" aria-live="polite">
               <p className="font-mono text-primary-100">Language: {language}</p>
               {lastRunAt && <p className="text-gray-400">Last run at {new Date(lastRunAt).toLocaleTimeString()}</p>}
             </div>

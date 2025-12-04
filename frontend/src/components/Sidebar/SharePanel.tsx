@@ -16,9 +16,11 @@ export function SharePanel({ shareUrl, onShare }: SharePanelProps) {
 
   return (
     <Card className="bg-black/40 text-white">
-      <CardHeader className="flex items-center gap-2">
-        <Share2 className="h-5 w-5 text-primary-400" aria-hidden />
-        <CardTitle className="text-lg">Share & Embed</CardTitle>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Share2 className="h-5 w-5 text-primary-400" aria-hidden />
+          <CardTitle className="text-lg">Share & Embed</CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-gray-400">

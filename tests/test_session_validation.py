@@ -18,7 +18,7 @@ class TestSessionActionValidation:
     
     def test_valid_actions(self):
         """Valid actions should be accepted"""
-        for action in ["create", "update", "get", "delete"]:
+        for action in ["create", "update", "get", "delete", "share", "fork"]:
             req = AgentSessionRequest(action=action)
             assert req.action == action
     

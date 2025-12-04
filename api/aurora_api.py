@@ -819,9 +819,10 @@ class AgentToolRequest(BaseModel):
 
 
 class AgentSessionRequest(BaseModel):
-    action: Literal["create", "update", "get", "delete"]
+    action: Literal["create", "update", "get", "delete", "share", "fork"]
     session_id: Optional[str] = None
     state_data: Optional[Dict[str, Any]] = Field(default=None)
+    share_token: Optional[str] = None
     
     @field_validator('state_data')
     @classmethod

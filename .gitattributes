@@ -30,7 +30,8 @@
 *.jpeg binary
 *.gif binary
 *.ico binary
-*.svg binary
+# SVGs are kept as text to allow reviewable diffs in docs/UI assets
+*.svg text eol=lf
 
 # Archives and backups
 *_backup.* binary

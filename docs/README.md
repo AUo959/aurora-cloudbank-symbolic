@@ -20,6 +20,7 @@ Welcome to the Aurora CloudBank documentation! This quantum-symbolic platform fe
 ### 🚀 **Quick Start & Setup**
 - **[Main README](../README.md)** - Complete project overview and quick start
 - **[Phase 0 Completion Report](PHASE0_COMPLETION_REPORT.md)** - Security baseline implementation
+- **[Playground Quickstart](PLAYGROUND_QUICKSTART.md)** - Gallery-driven starter scenarios with PII masking defaults
 
 ### 🔧 **Technical Documentation**
 - **[Architecture Overview](architecture.md)** - Quantum-symbolic system design

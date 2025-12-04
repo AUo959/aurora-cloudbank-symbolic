@@ -75,6 +75,9 @@ def load_agent_config():
         }
 
 
+DEFAULT_PII_FIELDS = {"email", "phone", "full_name", "account_number"}
+
+
 class ChatGPTAgentModeIntegration:
     """
     Advanced ChatGPT Agent Mode Integration
@@ -91,6 +94,12 @@ class ChatGPTAgentModeIntegration:
         self.agent_status = "initializing"
         self.anchor_seed = self.config.get("anchor_seed", "EOS_SEED_ORION")
         self.ethics_protocol = self.config.get("ethics_protocol", "Picard_Delta_3")
+        self.pii_redaction_defaults = {
+            "enabled": True,
+            "strategy": "mask",
+            "mask": "***",
+            "fields": sorted(DEFAULT_PII_FIELDS),
+        }
 
         # Initialize with symbolic anchor and DLP tracking
         self._initialize_symbolic_anchors()
@@ -324,13 +333,37 @@ class ChatGPTAgentModeIntegration:
         action = parameters["action"]
         session_id = parameters.get("session_id")
         state_data = parameters.get("state_data", {})
+        share_token = parameters.get("share_token")
+
+        def _with_redaction_defaults(state: Dict[str, Any]) -> Dict[str, Any]:
+            merged_state = {**state}
+            merged_state.setdefault("pii_redaction", self.pii_redaction_defaults)
+            merged_state.setdefault("metadata_anchor", {
+                "anchor_seed": context.get("symbolic_anchor", self.anchor_seed),
+                "context_tag": "agent_session_state",
+            })
+            return merged_state
+
+        def _redact_state(state: Dict[str, Any]) -> Dict[str, Any]:
+            redaction_config = state.get("pii_redaction", self.pii_redaction_defaults)
+            if not redaction_config.get("enabled", True):
+                return state
+
+            redacted = {}
+            for key, value in state.items():
+                if key in redaction_config.get("fields", []):
+                    redacted[key] = redaction_config.get("mask", "***")
+                else:
+                    redacted[key] = value
+            redacted["pii_redaction"] = redaction_config
+            return redacted
 
         if action == "create":
             session_id = str(uuid.uuid4())
             self.sessions[session_id] = {
                 "created": datetime.now().isoformat(),
                 "last_accessed": datetime.now().isoformat(),
-                "state": state_data,
+                "state": _with_redaction_defaults(state_data),
                 "symbolic_anchor": context.get("symbolic_anchor"),
                 "context_tag": "agent_session_state",
             }
@@ -338,7 +371,7 @@ class ChatGPTAgentModeIntegration:
 
         elif action == "update" and session_id:
             if session_id in self.sessions:
-                self.sessions[session_id]["state"].update(state_data)
+                self.sessions[session_id]["state"].update(_with_redaction_defaults(state_data))
                 self.sessions[session_id]["last_accessed"] = datetime.now().isoformat()
                 return {"session_id": session_id, "action": "updated", "state": self.sessions[session_id]}
             else:
@@ -357,6 +390,49 @@ class ChatGPTAgentModeIntegration:
                 return {"session_id": session_id, "action": "deleted"}
             else:
                 raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
+        elif action == "share" and session_id:
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
+
+            base_state = self.sessions[session_id]["state"]
+            redacted_state = _redact_state(base_state)
+            share_token = hashlib.sha256(f"{session_id}{self.anchor_seed}".encode()).hexdigest()[:16]
+
+            return {
+                "session_id": session_id,
+                "action": "shared",
+                "share_token": share_token,
+                "shared_state": {
+                    "state": redacted_state,
+                    "metadata_anchor": redacted_state.get("metadata_anchor"),
+                },
+            }
+        elif action == "fork" and session_id and share_token:
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
+
+            base_state = self.sessions[session_id]["state"]
+            if not share_token or not isinstance(share_token, str):
+                raise HTTPException(status_code=400, detail="Valid share token required for fork")
+
+            forked_state = _with_redaction_defaults(_redact_state(base_state))
+            new_session_id = str(uuid.uuid4())
+            forked_state["forked_from"] = session_id
+            forked_state["share_token"] = share_token
+
+            self.sessions[new_session_id] = {
+                "created": datetime.now().isoformat(),
+                "last_accessed": datetime.now().isoformat(),
+                "state": forked_state,
+                "symbolic_anchor": context.get("symbolic_anchor"),
+                "context_tag": "agent_session_state",
+            }
+
+            return {
+                "session_id": new_session_id,
+                "action": "forked",
+                "state": self.sessions[new_session_id],
+            }
         else:
             raise HTTPException(status_code=400, detail="Invalid session management action")
 

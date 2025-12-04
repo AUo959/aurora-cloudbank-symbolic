@@ -1,0 +1,51 @@
+<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Aurora Playground quickstart overview</title>
+  <desc id="desc">Static illustration of the Playground quickstart showing scenario cards, PII redaction toggle, and run/share controls.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a2a4a"/>
+      <stop offset="100%" stop-color="#0f3f63"/>
+    </linearGradient>
+    <style type="text/css">
+      .panel { fill: #0f1c2f; stroke: #24354d; stroke-width: 2; }
+      .card { fill: #15263f; stroke: #2d4970; stroke-width: 1.5; }
+      .text { font-family: 'Inter', 'Segoe UI', sans-serif; fill: #e8f3ff; }
+      .muted { fill: #b6c6dd; }
+      .accent { fill: #76d8ff; font-weight: 600; }
+      .badge { fill: #103f65; stroke: #7fe0ff; stroke-width: 1; }
+      .anchor { fill: #d1ff83; font-weight: 700; }
+    </style>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)" rx="12"/>
+  <rect x="24" y="24" width="912" height="492" class="panel" rx="14"/>
+  <text x="48" y="72" class="text" font-size="26" font-weight="700">Try it in the Playground</text>
+  <text x="48" y="100" class="muted" font-size="16">Launch a session, pick a starter scenario, and keep PII redaction on by default.</text>
+  <rect x="48" y="126" width="864" height="60" class="card" rx="10"/>
+  <text x="70" y="162" class="text" font-size="16">Session metadata</text>
+  <text x="260" y="162" class="muted" font-size="15">Anchor: <tspan class="anchor">T1-PLAYGROUND</tspan> · PII redaction <tspan class="accent">ON</tspan> · Seed: <tspan class="muted">aurora-qs</tspan></text>
+  <rect x="48" y="206" width="408" height="270" class="card" rx="12"/>
+  <text x="64" y="236" class="text" font-size="15" font-weight="600">Starter scenarios</text>
+  <rect x="64" y="256" width="176" height="90" class="badge" rx="10"/>
+  <text x="76" y="288" class="text" font-size="13" font-weight="600">Quantum ops</text>
+  <text x="76" y="308" class="muted" font-size="12">Bell pair · anchor T1-Q</text>
+  <rect x="262" y="256" width="176" height="90" class="badge" rx="10"/>
+  <text x="274" y="288" class="text" font-size="13" font-weight="600">Memory chain</text>
+  <text x="274" y="308" class="muted" font-size="12">Chronicle · anchor T1-M</text>
+  <rect x="64" y="360" width="176" height="90" class="badge" rx="10"/>
+  <text x="76" y="392" class="text" font-size="13" font-weight="600">Thread bridge</text>
+  <text x="76" y="412" class="muted" font-size="12">Interleave · anchor T1-B</text>
+  <rect x="262" y="360" width="176" height="90" class="badge" rx="10"/>
+  <text x="274" y="392" class="text" font-size="13" font-weight="600">Decision tree</text>
+  <text x="274" y="412" class="muted" font-size="12">Guard rails · anchor T1-D</text>
+  <rect x="480" y="206" width="432" height="270" class="card" rx="12"/>
+  <text x="498" y="236" class="text" font-size="15" font-weight="600">Run, share, and fork</text>
+  <rect x="498" y="256" width="396" height="80" class="badge" rx="10"/>
+  <text x="514" y="286" class="text" font-size="13" font-weight="600">1. Run session</text>
+  <text x="514" y="308" class="muted" font-size="12">Dispatch with metadata anchors and redaction defaults.</text>
+  <rect x="498" y="346" width="396" height="80" class="badge" rx="10"/>
+  <text x="514" y="376" class="text" font-size="13" font-weight="600">2. Share output</text>
+  <text x="514" y="398" class="muted" font-size="12">Generate share link; preserve T1 anchors and seed.</text>
+  <rect x="498" y="436" width="396" height="40" class="badge" rx="10"/>
+  <text x="514" y="462" class="text" font-size="13" font-weight="600">3. Fork session with redaction on</text>
+  <text x="742" y="462" class="accent" font-size="13">Create copy</text>
+</svg>

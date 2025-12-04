@@ -35,7 +35,7 @@ export function EditorToolbar({ onRun, onSave, onShare, onFork, isExecuting, sta
       <div className="flex items-center gap-3">
         {status}
         <Button variant="quantum" onClick={onRun} isLoading={isExecuting} className="gap-2">
-          {isExecuting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+          <Play className="h-4 w-4" />
           Run
         </Button>
       </div>

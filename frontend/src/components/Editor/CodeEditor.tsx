@@ -21,7 +21,6 @@ export function CodeEditor({ code, language, theme, fontSize, onChange }: CodeEd
     >
       <Editor
         height="100%"
-        defaultLanguage={language}
         language={language}
         theme={monacoTheme}
         value={code}

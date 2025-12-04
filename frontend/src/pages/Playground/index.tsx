@@ -40,10 +40,16 @@ export default function Playground() {
   }, [executeCode]);
 
   const handleShare = useCallback(async () => {
-    const url = await shareSession();
-    toast.success('Share link created', { description: 'T1 anchors preserved in encoded payload.' });
-    if (navigator?.clipboard) {
-      await navigator.clipboard.writeText(url);
+    try {
+      const url = await shareSession();
+      toast.success('Share link created', { description: 'T1 anchors preserved in encoded payload.' });
+      if (navigator?.clipboard) {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch (err) {
+      toast.error('Failed to share session', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred while sharing.',
+      });
     }
   }, [shareSession]);
 

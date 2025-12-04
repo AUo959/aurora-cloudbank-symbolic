@@ -37,11 +37,11 @@ async def _broadcast(session_id: str, payload: Dict[str, Any]):
 @router.post("/session", response_model=SessionCreateResponse)
 async def create_session(request: SessionCreateRequest) -> SessionCreateResponse:
     session_id = secrets.token_urlsafe(12)
-    sessions_gauge.inc()
     payload = store.create_session(
         session_id,
         {"language": request.language.value, "metadata": request.metadata, "seed_code": request.seed_code},
     )
+    sessions_gauge.inc()
     await _broadcast(session_id, {"event": "session_created", "session_id": session_id, "payload": payload})
     return SessionCreateResponse(session_id=session_id, expires_at=payload["expires_at"])
 

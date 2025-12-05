@@ -14,30 +14,153 @@ import {
   Play,
   Search,
   FileText,
+  RefreshCw,
+  Clock,
+  WifiOff,
 } from 'lucide-react';
 import { formatNumber, formatDuration, percentage } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { Component, ErrorInfo, ReactNode } from 'react';
+
+// Error Boundary Component for resilient rendering
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class DashboardErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Dashboard Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <Card className="glass-morphism border-red-500/30">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <AlertCircle className="h-12 w-12 text-red-500 mb-4" aria-hidden="true" />
+            <p className="text-gray-400 text-center">Something went wrong loading this section.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => this.setState({ hasError: false, error: null })}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Stale data indicator component
+interface DataFreshnessProps {
+  dataUpdatedAt: number | undefined;
+  isStale: boolean;
+  isError: boolean;
+  refetch: () => void;
+}
+
+function DataFreshnessIndicator({ dataUpdatedAt, isStale, isError, refetch }: DataFreshnessProps) {
+  if (isError) {
+    return (
+      <div className="flex items-center space-x-2 text-xs text-red-400" role="status" aria-live="polite">
+        <WifiOff className="h-3 w-3" aria-hidden="true" />
+        <span>Connection lost</span>
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => refetch()}>
+          <RefreshCw className="h-3 w-3 mr-1" aria-hidden="true" />
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (isStale) {
+    return (
+      <div className="flex items-center space-x-2 text-xs text-yellow-400" role="status" aria-live="polite">
+        <Clock className="h-3 w-3" aria-hidden="true" />
+        <span>Data may be stale</span>
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => refetch()}>
+          <RefreshCw className="h-3 w-3 mr-1" aria-hidden="true" />
+          Refresh
+        </Button>
+      </div>
+    );
+  }
+
+  if (dataUpdatedAt) {
+    const secondsAgo = Math.floor((Date.now() - dataUpdatedAt) / 1000);
+    return (
+      <div className="flex items-center space-x-1 text-xs text-gray-500" role="status">
+        <Clock className="h-3 w-3" aria-hidden="true" />
+        <span>Updated {secondsAgo}s ago</span>
+      </div>
+    );
+  }
+
+  return null;
+}
 
 export default function Dashboard() {
-  // Fetch system metrics
-  const { data: metrics, isLoading } = useQuery({
+  // Fetch system metrics with error handling
+  const {
+    data: metrics,
+    isLoading: metricsLoading,
+    isError: metricsError,
+    isStale: metricsStale,
+    dataUpdatedAt: metricsUpdatedAt,
+    refetch: refetchMetrics,
+  } = useQuery({
     queryKey: ['system-metrics'],
     queryFn: () => auroraAPI.system.metrics(),
     refetchInterval: 5000, // Refresh every 5 seconds
+    staleTime: 10000, // Consider stale after 10 seconds
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  // Fetch memory metrics
-  const { data: memoryMetrics } = useQuery({
+  // Fetch memory metrics with error handling
+  const {
+    data: memoryMetrics,
+    isError: memoryError,
+    isStale: memoryStale,
+    dataUpdatedAt: memoryUpdatedAt,
+    refetch: refetchMemory,
+  } = useQuery({
     queryKey: ['memory-metrics'],
     queryFn: () => auroraAPI.memory.metrics(),
     refetchInterval: 5000,
+    staleTime: 10000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  const isLoading = metricsLoading;
+  const hasAnyError = metricsError || memoryError;
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center" role="status" aria-live="polite">
         <div className="text-center">
-          <Activity className="mx-auto h-12 w-12 animate-pulse text-primary-500" />
+          <Activity className="mx-auto h-12 w-12 animate-pulse text-primary-500" aria-hidden="true" />
           <p className="mt-4 text-gray-400">Loading system metrics...</p>
         </div>
       </div>
@@ -46,14 +169,41 @@ export default function Dashboard() {
 
   return (
     <div className="h-full overflow-auto p-8">
-      {/* Header */}
+      {/* Header with data freshness */}
       <div className="mb-8">
-        <h1 className="text-4xl font-display font-bold text-gradient">Aurora Dashboard</h1>
-        <p className="mt-2 text-gray-400">Complex Systems Simulation Platform</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-display font-bold text-gradient">Aurora Dashboard</h1>
+            <p className="mt-2 text-gray-400">Complex Systems Simulation Platform</p>
+          </div>
+          <div className="flex flex-col items-end space-y-1">
+            <DataFreshnessIndicator
+              dataUpdatedAt={metricsUpdatedAt}
+              isStale={metricsStale}
+              isError={metricsError}
+              refetch={refetchMetrics}
+            />
+            {hasAnyError && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  refetchMetrics();
+                  refetchMemory();
+                }}
+                className="text-xs"
+              >
+                <RefreshCw className="mr-2 h-3 w-3" aria-hidden="true" />
+                Refresh All
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <DashboardErrorBoundary>
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <Link to="/simulations">
           <Card className="cursor-pointer transition-all hover:border-primary-500/50 hover:shadow-lg hover:quantum-glow">
             <CardHeader className="flex flex-row items-center space-x-4 pb-2">
@@ -96,9 +246,11 @@ export default function Dashboard() {
           </Card>
         </Link>
       </div>
+      </DashboardErrorBoundary>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <DashboardErrorBoundary>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Memory Metrics */}
         <Card className="glass-morphism">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -182,9 +334,11 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      </DashboardErrorBoundary>
 
       {/* Performance Charts */}
-      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <DashboardErrorBoundary>
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* API Performance */}
         <Card className="glass-morphism">
           <CardHeader>
@@ -259,6 +413,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+      </DashboardErrorBoundary>
     </div>
   );
 }

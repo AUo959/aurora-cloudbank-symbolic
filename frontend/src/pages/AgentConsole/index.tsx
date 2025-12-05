@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -12,6 +12,12 @@ import {
   Shield,
   TrendingUp,
   AlertTriangle,
+  Trash2,
+  Save,
+  Download,
+  ShieldAlert,
+  Coins,
+  AlertCircle,
 } from 'lucide-react';
 import type { AgentMessage, AgentResponse } from '@/types/aurora';
 import { formatDuration, getImportanceColor } from '@/lib/utils';
@@ -23,21 +29,107 @@ interface Message {
   content: string;
   timestamp: Date;
   metadata?: AgentResponse;
+  piiWarning?: boolean;
+}
+
+// PII detection patterns (client-side screening)
+const PII_PATTERNS = {
+  email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/gi,
+  phone: /\b(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}\b/g,
+  ssn: /\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b/g,
+  creditCard: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
+  ipAddress: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+};
+
+function detectPII(text: string): { hasPII: boolean; types: string[] } {
+  const types: string[] = [];
+  if (PII_PATTERNS.email.test(text)) types.push('email');
+  if (PII_PATTERNS.phone.test(text)) types.push('phone');
+  if (PII_PATTERNS.ssn.test(text)) types.push('SSN');
+  if (PII_PATTERNS.creditCard.test(text)) types.push('credit card');
+  if (PII_PATTERNS.ipAddress.test(text)) types.push('IP address');
+  return { hasPII: types.length > 0, types };
+}
+
+// Session storage key for persistence
+const STORAGE_KEY = 'aurora-agent-console-messages';
+const TOKEN_USAGE_KEY = 'aurora-agent-console-tokens';
+
+interface TokenUsageTotal {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  session_start: string;
 }
 
 export default function AgentConsole() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content:
-        "Hello! I'm Aurora, your AI research partner. I have access to quantum memory, multi-model AI orchestration, and real-time compliance monitoring. How can I help you today?",
-      timestamp: new Date(),
-    },
-  ]);
+  // Load persisted messages from session storage
+  const loadPersistedMessages = (): Message[] => {
+    try {
+      const stored = sessionStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed.map((m: Message) => ({
+          ...m,
+          timestamp: new Date(m.timestamp),
+        }));
+      }
+    } catch (e) {
+      console.warn('Failed to load persisted messages:', e);
+    }
+    return [
+      {
+        id: '1',
+        role: 'assistant',
+        content:
+          "Hello! I'm Aurora, your AI research partner. I have access to quantum memory, multi-model AI orchestration, and real-time compliance monitoring. How can I help you today?",
+        timestamp: new Date(),
+      },
+    ];
+  };
+
+  const loadTokenUsage = (): TokenUsageTotal => {
+    try {
+      const stored = sessionStorage.getItem(TOKEN_USAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (e) {
+      console.warn('Failed to load token usage:', e);
+    }
+    return {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+      session_start: new Date().toISOString(),
+    };
+  };
+
+  const [messages, setMessages] = useState<Message[]>(loadPersistedMessages);
+  const [tokenUsage, setTokenUsage] = useState<TokenUsageTotal>(loadTokenUsage);
   const [input, setInput] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [showPIIWarning, setShowPIIWarning] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Persist messages to session storage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch (e) {
+      console.warn('Failed to persist messages:', e);
+    }
+  }, [messages]);
+
+  // Persist token usage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(TOKEN_USAGE_KEY, JSON.stringify(tokenUsage));
+    } catch (e) {
+      console.warn('Failed to persist token usage:', e);
+    }
+  }, [tokenUsage]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -46,6 +138,48 @@ export default function AgentConsole() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const clearConversation = useCallback(() => {
+    const confirmClear = window.confirm('Are you sure you want to clear the conversation? This cannot be undone.');
+    if (confirmClear) {
+      setMessages([
+        {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: "Conversation cleared. I'm ready to start fresh. How can I help you?",
+          timestamp: new Date(),
+        },
+      ]);
+      setTokenUsage({
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+        session_start: new Date().toISOString(),
+      });
+      setSelectedMessage(null);
+      toast.success('Conversation cleared');
+    }
+  }, []);
+
+  const exportConversation = useCallback(() => {
+    const exportData = {
+      exported_at: new Date().toISOString(),
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp.toISOString(),
+      })),
+      token_usage: tokenUsage,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `aurora-conversation-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Conversation exported');
+  }, [messages, tokenUsage]);
 
   const sendMessage = useMutation({
     mutationFn: (message: AgentMessage) => auroraAPI.agent.chat(message),
@@ -59,6 +193,16 @@ export default function AgentConsole() {
       };
       setMessages((prev) => [...prev, assistantMessage]);
       setSelectedMessage(assistantMessage);
+
+      // Update token usage
+      if (data.token_usage) {
+        setTokenUsage(prev => ({
+          ...prev,
+          prompt_tokens: prev.prompt_tokens + (data.token_usage?.prompt_tokens || 0),
+          completion_tokens: prev.completion_tokens + (data.token_usage?.completion_tokens || 0),
+          total_tokens: prev.total_tokens + (data.token_usage?.total_tokens || 0),
+        }));
+      }
     },
     onError: (error) => {
       toast.error('Failed to send message', {
@@ -67,25 +211,42 @@ export default function AgentConsole() {
     },
   });
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = useCallback((bypassPIICheck = false) => {
+    const messageText = pendingMessage || input;
+    if (!messageText.trim()) return;
+
+    // PII detection (unless bypassed)
+    if (!bypassPIICheck) {
+      const piiCheck = detectPII(messageText);
+      if (piiCheck.hasPII) {
+        setPendingMessage(messageText);
+        setShowPIIWarning(true);
+        toast.warning(`Potential PII detected: ${piiCheck.types.join(', ')}`, {
+          description: 'Please confirm you want to send this message.',
+        });
+        return;
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: messageText,
       timestamp: new Date(),
+      piiWarning: bypassPIICheck,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    setPendingMessage(null);
+    setShowPIIWarning(false);
 
     sendMessage.mutate({
-      content: input,
+      content: messageText,
       role: 'user',
       use_memory: true,
     });
-  };
+  }, [input, pendingMessage, sendMessage]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -94,19 +255,56 @@ export default function AgentConsole() {
     }
   };
 
+  const cancelPIIMessage = useCallback(() => {
+    setPendingMessage(null);
+    setShowPIIWarning(false);
+  }, []);
+
   return (
     <div className="flex h-full">
       {/* Chat Panel - Left */}
       <div className="flex flex-1 flex-col border-r border-white/10">
-        {/* Header */}
+        {/* Header with session controls */}
         <div className="border-b border-white/10 bg-black/20 p-6">
-          <h1 className="text-2xl font-display font-bold text-gradient flex items-center space-x-2">
-            <Bot className="h-6 w-6" />
-            <span>AI Agent Console</span>
-          </h1>
-          <p className="mt-1 text-sm text-gray-400">
-            Chat with Aurora research partner • Full system transparency
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-display font-bold text-gradient flex items-center space-x-2">
+                <Bot className="h-6 w-6" aria-hidden="true" />
+                <span>AI Agent Console</span>
+              </h1>
+              <p className="mt-1 text-sm text-gray-400">
+                Chat with Aurora research partner • Full system transparency
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* Token usage display */}
+              <div className="flex items-center space-x-1 text-xs text-gray-400 bg-white/5 rounded-lg px-3 py-2" role="status" aria-label="Session token usage">
+                <Coins className="h-3 w-3 text-accent-400" aria-hidden="true" />
+                <span className="font-mono">{tokenUsage.total_tokens.toLocaleString()}</span>
+                <span>tokens</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={exportConversation}
+                className="text-gray-400 hover:text-white"
+                title="Export conversation"
+                aria-label="Export conversation as JSON"
+              >
+                <Download className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearConversation}
+                className="text-gray-400 hover:text-red-400"
+                title="Clear conversation"
+                aria-label="Clear conversation history"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Messages */}
@@ -182,6 +380,35 @@ export default function AgentConsole() {
 
         {/* Input */}
         <div className="border-t border-white/10 bg-black/20 p-4">
+          {/* PII Warning Banner */}
+          {showPIIWarning && (
+            <div className="mb-3 flex items-center justify-between rounded-lg bg-yellow-500/20 border border-yellow-500/30 px-4 py-3" role="alert">
+              <div className="flex items-center space-x-2">
+                <ShieldAlert className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                <span className="text-sm text-yellow-200">
+                  Potential sensitive information detected. Send anyway?
+                </span>
+              </div>
+              <div className="flex space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={cancelPIIMessage}
+                  className="text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSend(true)}
+                  className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+                >
+                  Send Anyway
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="flex space-x-2">
             <textarea
               value={input}
@@ -191,13 +418,15 @@ export default function AgentConsole() {
               className="flex-1 resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50"
               rows={3}
               disabled={sendMessage.isPending}
+              aria-label="Message input"
             />
             <Button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!input.trim() || sendMessage.isPending}
               variant="quantum"
               size="icon"
               className="h-auto"
+              aria-label="Send message"
             >
               <Send className="h-5 w-5" />
             </Button>

@@ -12,7 +12,7 @@ fastapi>=0.118.0                    # FastAPI web framework (updated for starlet
 uvicorn[standard]>=0.24.0           # ASGI server
 starlette>=0.49.1                   # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
 pydantic>=2.5.0                     # Data validation
-python-multipart>=0.0.6             # File upload handling
+python-multipart>=0.0.20             # File upload handling
 
 # ===================================================================
 # HTTP & NETWORKING
@@ -26,9 +26,9 @@ aiofiles>=24.1.0                    # Async file operations
 # ===================================================================
 # SECURITY & CRYPTOGRAPHY
 # ===================================================================
-cryptography>=41.0.7                # Cryptographic library
+cryptography>=44.0.0                # Cryptographic library
 bcrypt>=4.1.2                       # Password hashing
-pyjwt>=2.8.0                        # JWT tokens (migrated from python-jose)
+pyjwt>=2.10.0                        # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4              # Password handling
 # python-jose removed - see security migration Nov 2025 (ecdsa vulnerability)
 

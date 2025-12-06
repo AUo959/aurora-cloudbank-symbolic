@@ -81,7 +81,7 @@ openai>=1.50.0                      # GPT-4/5 integration
 # SYSTEM UTILITIES
 # ===================================================================
 requests>=2.32.5                    # HTTP library
-urllib3>=2.5.0                      # HTTP connection pooling
+urllib3>=2.6.0                      # HTTP connection pooling
 certifi>=2025.8.3                   # SSL certificates
 charset-normalizer>=3.4.3           # Character encoding detection
 idna>=3.10                          # Internationalized domain names

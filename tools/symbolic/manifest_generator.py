@@ -4,15 +4,14 @@ Manifest Generator - Auto-manifest creation for symbolic exports
 Part of T71 Symbolic Infrastructure Genesis
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import hashlib
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
 
 
 class ManifestGenerator:

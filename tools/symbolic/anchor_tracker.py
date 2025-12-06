@@ -10,13 +10,10 @@ Primary functions:
 - Export manifest generation with SHA256 sealing
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import argparse
 import hashlib
 import json
+import logging
 import os
 import re
 from dataclasses import asdict, dataclass
@@ -29,6 +26,8 @@ try:
     from src.core.native_dlp_export import NativeDLPTracker
 except Exception:  # Graceful fallback if import path changes
     NativeDLPTracker = None  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -616,8 +615,8 @@ def main():
                 with open(args.dlp_manifest_out, "w") as f:
                     json.dump(dlp_manifest, f, indent=2)
                 print(f"🧬 DLP manifest saved to: {args.dlp_manifest_out}")
-            except Exception as e:
-                logger.warning("Failed to export DLP manifest: {e}")
+            except Exception:
+                logger.warning("Failed to export DLP manifest")
 
         if args.json:
             print(json.dumps({"manifest_path": output_path, "manifest": manifest}, indent=2))

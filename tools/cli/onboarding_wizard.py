@@ -19,13 +19,10 @@ Thread: T71→ONBOARDING→GENESIS
 DLP: context_tag=onboarding_wizard, symbolic_hash=DEVELOPER_EXPERIENCE_v1
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import sys
 import subprocess
 import json
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple
@@ -33,6 +30,8 @@ from typing import List, Tuple
 # Add workspace root to Python path
 WORKSPACE_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WORKSPACE_ROOT))
+
+logger = logging.getLogger(__name__)
 
 
 class OnboardingWizard:

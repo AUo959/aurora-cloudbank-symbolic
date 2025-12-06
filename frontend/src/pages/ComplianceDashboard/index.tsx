@@ -1,18 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import {
-  Shield,
-  Info,
-  CheckCircle2,
   AlertTriangle,
-  Lock,
-  FileText,
-  Clock,
+  CheckCircle2,
   ChevronRight,
+  Clock,
   ExternalLink,
-  ShieldCheck,
   Eye,
+  FileText,
+  Info,
   Key,
+  Lock,
+  Shield,
+  ShieldCheck,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

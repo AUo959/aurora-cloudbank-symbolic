@@ -1,26 +1,24 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { auroraAPI } from '@/lib/api/aurora';
-import {
-  Send,
-  Bot,
-  User,
-  Database,
-  Brain,
-  Shield,
-  TrendingUp,
-  AlertTriangle,
-  Trash2,
-  Save,
-  Download,
-  ShieldAlert,
-  Coins,
-  AlertCircle,
-} from 'lucide-react';
-import type { AgentMessage, AgentResponse } from '@/types/aurora';
 import { formatDuration, getImportanceColor } from '@/lib/utils';
+import type { AgentMessage, AgentResponse } from '@/types/aurora';
+import { useMutation } from '@tanstack/react-query';
+import {
+  AlertTriangle,
+  Bot,
+  Brain,
+  Coins,
+  Database,
+  Download,
+  Send,
+  Shield,
+  ShieldAlert,
+  Trash2,
+  TrendingUp,
+  User
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Message {
@@ -324,11 +322,10 @@ export default function AgentConsole() {
                   </div>
                 )}
                 <div
-                  className={`rounded-lg px-4 py-3 ${
-                    message.role === 'user'
+                  className={`rounded-lg px-4 py-3 ${message.role === 'user'
                       ? 'bg-primary-500/20 text-white'
                       : 'glass-morphism text-gray-200'
-                  }`}
+                    }`}
                 >
                   <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
                   {message.metadata && (

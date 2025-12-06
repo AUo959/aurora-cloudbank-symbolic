@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Network, Info, Database, Search, Zap, ChevronRight, ExternalLink } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { ChevronRight, Database, ExternalLink, Info, Network, Search, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Sample data for onboarding preview

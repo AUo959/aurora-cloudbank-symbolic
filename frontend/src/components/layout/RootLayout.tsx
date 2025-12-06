@@ -1,18 +1,18 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import {
+  Code2,
   LayoutDashboard,
+  Menu,
   MessageSquare,
   Network,
-  Shield,
   Rocket,
-  Code2,
+  Shield,
   Sparkles,
-  Menu,
   X,
 } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
+import { useRef, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },

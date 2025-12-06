@@ -122,7 +122,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error tracking anchors")
+            logger.error("Error tracking anchors", exc_info=True)
             return 1
 
     def _anchor_resolve(self, args) -> int:
@@ -185,7 +185,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error resolving anchor")
+            logger.error("Error resolving anchor", exc_info=True)
             return 1
 
     def _anchor_seal(self, args) -> int:
@@ -209,7 +209,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error sealing anchor thread")
+            logger.error("Error sealing anchor thread", exc_info=True)
             return 1
 
     def cmd_seal(self, args) -> int:
@@ -258,7 +258,7 @@ class AuroraDeveloperCLI:
                 return 0
 
         except Exception:
-            logger.error("Error in seal operation")
+            logger.error("Error in seal operation", exc_info=True)
             return 1
 
     def cmd_restore(self, args) -> int:
@@ -291,7 +291,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error restoring state")
+            logger.error("Error restoring state", exc_info=True)
             return 1
 
     def cmd_manifest(self, args) -> int:
@@ -344,7 +344,7 @@ class AuroraDeveloperCLI:
                     dlp_path.write_text(json.dumps(dlp_manifest, indent=2), encoding="utf-8")
                     dlp_saved = str(dlp_path)
                 except Exception:
-                    logger.warning("Failed to export DLP manifest")
+                    logger.warning("Failed to export DLP manifest", exc_info=True)
 
             if getattr(args, "json", False):
                 print(
@@ -369,7 +369,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error generating manifest")
+            logger.error("Error generating manifest", exc_info=True)
             return 1
 
     def cmd_diff(self, args) -> int:
@@ -431,7 +431,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error comparing anchors")
+            logger.error("Error comparing anchors", exc_info=True)
             return 1
 
     def cmd_status(self, args) -> int:
@@ -503,7 +503,7 @@ class AuroraDeveloperCLI:
             return 0
 
         except Exception:
-            logger.error("Error getting status")
+            logger.error("Error getting status", exc_info=True)
             return 1
 
 

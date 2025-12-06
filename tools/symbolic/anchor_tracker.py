@@ -616,7 +616,7 @@ def main():
                     json.dump(dlp_manifest, f, indent=2)
                 print(f"🧬 DLP manifest saved to: {args.dlp_manifest_out}")
             except Exception:
-                logger.warning("Failed to export DLP manifest")
+                logger.warning("Failed to export DLP manifest", exc_info=True)
 
         if args.json:
             print(json.dumps({"manifest_path": output_path, "manifest": manifest}, indent=2))

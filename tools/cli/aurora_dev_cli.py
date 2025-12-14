@@ -10,13 +10,10 @@ Primary functions:
 - State snapshot and restore commands
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import sys
 import json
 import argparse
+import logging
 from pathlib import Path
 from datetime import datetime
 
@@ -26,6 +23,8 @@ sys.path.insert(0, str(WORKSPACE_ROOT))
 
 from tools.symbolic.memory_sealer import MemorySealingEngine  # noqa: E402
 from tools.symbolic.anchor_tracker import SymbolicAnchorTracker  # noqa: E402
+
+logger = logging.getLogger(__name__)
 
 
 class AuroraDeveloperCLI:
@@ -122,8 +121,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error tracking anchors: {e}")
+        except Exception:
+            logger.error("Error tracking anchors", exc_info=True)
             return 1
 
     def _anchor_resolve(self, args) -> int:
@@ -185,8 +184,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error resolving anchor: {e}")
+        except Exception:
+            logger.error("Error resolving anchor", exc_info=True)
             return 1
 
     def _anchor_seal(self, args) -> int:
@@ -209,8 +208,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error sealing anchor thread: {e}")
+        except Exception:
+            logger.error("Error sealing anchor thread", exc_info=True)
             return 1
 
     def cmd_seal(self, args) -> int:
@@ -258,8 +257,8 @@ class AuroraDeveloperCLI:
 
                 return 0
 
-        except Exception as e:
-            logger.error("Error in seal operation: {e}")
+        except Exception:
+            logger.error("Error in seal operation", exc_info=True)
             return 1
 
     def cmd_restore(self, args) -> int:
@@ -291,8 +290,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error restoring state: {e}")
+        except Exception:
+            logger.error("Error restoring state", exc_info=True)
             return 1
 
     def cmd_manifest(self, args) -> int:
@@ -344,8 +343,8 @@ class AuroraDeveloperCLI:
                     dlp_path = Path(args.dlp_manifest_out)
                     dlp_path.write_text(json.dumps(dlp_manifest, indent=2), encoding="utf-8")
                     dlp_saved = str(dlp_path)
-                except Exception as e:
-                    logger.warning("Failed to export DLP manifest: {e}")
+                except Exception:
+                    logger.warning("Failed to export DLP manifest", exc_info=True)
 
             if getattr(args, "json", False):
                 print(
@@ -369,8 +368,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error generating manifest: {e}")
+        except Exception:
+            logger.error("Error generating manifest", exc_info=True)
             return 1
 
     def cmd_diff(self, args) -> int:
@@ -431,8 +430,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error comparing anchors: {e}")
+        except Exception:
+            logger.error("Error comparing anchors", exc_info=True)
             return 1
 
     def cmd_status(self, args) -> int:
@@ -503,8 +502,8 @@ class AuroraDeveloperCLI:
 
             return 0
 
-        except Exception as e:
-            logger.error("Error getting status: {e}")
+        except Exception:
+            logger.error("Error getting status", exc_info=True)
             return 1
 
 

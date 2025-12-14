@@ -10,14 +10,11 @@ Primary functions:
 - Memory drift detection and correction protocols
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import argparse
 import fnmatch
 import hashlib
 import json
+import logging
 import os
 import shutil
 import zipfile
@@ -25,6 +22,8 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Union
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

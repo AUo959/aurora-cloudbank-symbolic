@@ -31,7 +31,7 @@
         }
     ],
     "env": {
-        "NEXT_PUBLIC_API_BASE_URL": "@aurora_backend_url",
+        "NEXT_PUBLIC_API_BASE_URL": "https://aurora-backend.example.com",
         "NODE_ENV": "production"
     },
     "regions": [

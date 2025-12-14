@@ -5,14 +5,10 @@
     "framework": null,
     "installCommand": "npm ci",
     "devCommand": "npm run dev",
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "https://aurora-backend.example.com/api/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
+            "source": "/api/:path*",
+            "destination": "https://aurora-backend.example.com/api/:path*"
         }
     ],
     "headers": [

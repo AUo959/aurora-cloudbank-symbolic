@@ -6,6 +6,9 @@ VENV_DIR="${WORKSPACE_DIR}/.venv"
 
 printf '\n🚀 Aurora CloudBank DevContainer setup starting...\n'
 
+# Reduce noise from executable-bit changes in containerized filesystems.
+git config core.filemode false 2>/dev/null || true
+
 # The DevContainer mounts a Docker volume at .venv, which can appear root-owned.
 # Ensure it is writable before any setup tries to create/modify the virtualenv.
 if [[ -d "${VENV_DIR}" ]]; then
@@ -21,9 +24,8 @@ if [[ -d "${VENV_DIR}" ]]; then
   fi
 fi
 
-# Make scripts executable first
+# Make shell scripts executable (avoid chmod'ing Python files to prevent mode-only diffs)
 chmod +x scripts/*.sh 2>/dev/null || true
-chmod +x scripts/*.py 2>/dev/null || true
 
 # Setup git hooks for dependency validation
 if [[ -f ".githooks/pre-commit" ]]; then

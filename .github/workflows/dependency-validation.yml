@@ -5,11 +5,15 @@ on:
     paths:
       - 'requirements*.txt'
       - 'pyproject.toml'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/dependency-validation.yml'
   pull_request:
     paths:
       - 'requirements*.txt'
       - 'pyproject.toml'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   validate-dependencies:
@@ -117,4 +121,33 @@ jobs:
       with:
         name: security-report-python-${{ matrix.python-version }}
         path: safety-report.json
+
+  validate-node-dependencies:
+    name: Node Dependency Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+
+    - name: Toolchain smoke check
+      run: |
+        npx --yes markdownlint --version
+
+    - name: Run Node tests (fast)
+      run: |
+        npm run test:node
+
+    - name: Run ESLint check
+      run: |
+        npm run lint:check
         retention-days: 7

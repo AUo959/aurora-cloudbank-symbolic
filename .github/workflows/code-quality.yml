@@ -120,6 +120,7 @@ jobs:
           always() &&
           github.event_name == 'pull_request' &&
           github.event.pull_request
+        id: build_pr_comment
         uses: actions/github-script@v7
         with:
           script: |
@@ -127,6 +128,7 @@ jobs:
             
             if (!fs.existsSync('reports/code_quality_report.json')) {
               console.log('No report found, skipping PR comment');
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_comment=false\n');
               return;
             }
             
@@ -157,9 +159,12 @@ jobs:
             
             // Write comment to file
             fs.writeFileSync('/tmp/code_quality_comment.md', comment);
+
+            // Signal the next step to post/update the PR comment
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'should_comment=true\n');
       
       - name: Post Code Quality Comment
-        if: steps.analyze_quality.outputs.should_comment == 'true'
+        if: steps.build_pr_comment.outputs.should_comment == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

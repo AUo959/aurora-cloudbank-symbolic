@@ -4,9 +4,9 @@
       "required_status_checks": {
         "strict": true,
         "contexts": [
-          "continuous-integration",
-          "health-check",
-          "security-scan"
+          "Branch Protection Status Checks / continuous-integration",
+          "Branch Protection Status Checks / health-check",
+          "Branch Protection Status Checks / security-scan"
         ]
       },
       "enforce_admins": false,

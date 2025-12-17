@@ -14,7 +14,7 @@ if (!process.env.AES_KEY_256_HEX) {
 }
 
 const { encrypt, decrypt } = loadCommonJsModule(
-  path.join(__dirname, '..', '..', 'crypto_refactored.js')
+  path.join(__dirname, '..', '..', 'lib', 'crypto_refactored.js')
 );
 
 test('encrypt/decrypt round trip uses AES-256 key material', () => {

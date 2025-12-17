@@ -2,7 +2,7 @@
 # Smart Comment Handler - Updates existing comments instead of creating duplicates
 # Usage: smart-comment.sh <pr_number> <marker> <comment_body_file>
 
-set -e
+set -euo pipefail
 
 PR_NUMBER=$1
 MARKER=$2
@@ -22,22 +22,30 @@ fi
 COMMENT_BODY="<!-- ${MARKER} -->
 $(cat "$COMMENT_FILE")"
 
-# Find existing comment with this marker
+# Find existing comment with this marker.
+# Use `databaseId` (numeric) because the REST endpoint expects a numeric id.
 EXISTING_COMMENT_ID=$(gh pr view "$PR_NUMBER" --json comments \
-    --jq ".comments[] | select(.body | contains(\"<!-- ${MARKER} -->\")) | .id" \
-    | head -n 1)
+    --jq ".comments[] | select(.body | contains(\"<!-- ${MARKER} -->\")) | .databaseId" \
+    | head -n 1 || true)
 
-if [ -n "$EXISTING_COMMENT_ID" ]; then
-    # Update existing comment
+if [ -n "${EXISTING_COMMENT_ID:-}" ]; then
     echo "Updating existing comment (ID: $EXISTING_COMMENT_ID)"
-    echo "$COMMENT_BODY" | gh api \
+    if echo "$COMMENT_BODY" | gh api \
         -X PATCH \
         "/repos/{owner}/{repo}/issues/comments/$EXISTING_COMMENT_ID" \
-        -f body=@- > /dev/null
-    echo "✅ Comment updated"
-else
-    # Create new comment
-    echo "Creating new comment with marker: $MARKER"
-    echo "$COMMENT_BODY" | gh pr comment "$PR_NUMBER" --body-file - > /dev/null
-    echo "✅ Comment created"
+        -f body=@- > /dev/null; then
+        echo "✅ Comment updated"
+        exit 0
+    fi
+
+    echo "⚠️ Comment update failed; attempting to create a new comment instead"
 fi
+
+echo "Creating new comment with marker: $MARKER"
+if echo "$COMMENT_BODY" | gh pr comment "$PR_NUMBER" --body-file - > /dev/null; then
+    echo "✅ Comment created"
+    exit 0
+fi
+
+echo "⚠️ Unable to create PR comment (likely token permissions); continuing without failing the workflow"
+exit 0

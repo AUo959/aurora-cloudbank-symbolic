@@ -6,6 +6,21 @@ VENV_DIR="${WORKSPACE_DIR}/.venv"
 
 printf '\n🚀 Aurora CloudBank DevContainer setup starting...\n'
 
+# The DevContainer mounts a Docker volume at .venv, which can appear root-owned.
+# Ensure it is writable before any setup tries to create/modify the virtualenv.
+if [[ -d "${VENV_DIR}" ]]; then
+  if [[ ! -w "${VENV_DIR}" ]]; then
+    printf '🔧 Repairing permissions on %s (requires sudo)...\n' "${VENV_DIR}"
+    sudo chown -R "$(id -u)":"$(id -g)" "${VENV_DIR}" 2>/dev/null || true
+  fi
+
+  if [[ ! -w "${VENV_DIR}" ]]; then
+    printf '⚠️ %s is still not writable; clearing with sudo...\n' "${VENV_DIR}"
+    sudo rm -rf "${VENV_DIR}"/* 2>/dev/null || true
+    sudo chown -R "$(id -u)":"$(id -g)" "${VENV_DIR}" 2>/dev/null || true
+  fi
+fi
+
 # Make scripts executable first
 chmod +x scripts/*.sh 2>/dev/null || true
 chmod +x scripts/*.py 2>/dev/null || true
@@ -35,12 +50,13 @@ failsafe_exit() {
 # Use our comprehensive setup script if available
 if [[ -f "scripts/setup_environment.sh" ]]; then
     printf '🔧 Running Aurora comprehensive setup...\n'
-    if bash scripts/setup_environment.sh; then
+  if AURORA_VENV_REPAIR=1 bash scripts/setup_environment.sh; then
         printf '✅ Comprehensive setup completed successfully\n'
     else
         printf '⚠️ Comprehensive setup failed, running failsafe recovery...\n'
         # Failsafe recovery
-        rm -rf "${VENV_DIR}" || true
+    rm -rf "${VENV_DIR}"/* 2>/dev/null || true
+    sudo rm -rf "${VENV_DIR}"/* 2>/dev/null || true
         python3 -m venv "${VENV_DIR}"
         source "${VENV_DIR}/bin/activate"
         python -m pip install --upgrade pip
@@ -57,7 +73,8 @@ else
     printf '⚠️ Comprehensive setup script not found, using enhanced fallback...\n'
     
     # Enhanced fallback with comprehensive error checking
-    rm -rf "${VENV_DIR}" || true
+    rm -rf "${VENV_DIR}"/* 2>/dev/null || true
+    sudo rm -rf "${VENV_DIR}"/* 2>/dev/null || true
     python3 -m venv "${VENV_DIR}" || failsafe_exit "Failed to create virtual environment"
     source "${VENV_DIR}/bin/activate" || failsafe_exit "Failed to activate virtual environment"
     

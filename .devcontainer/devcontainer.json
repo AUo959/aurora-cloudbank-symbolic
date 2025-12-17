@@ -32,7 +32,7 @@
     },
     "onCreateCommand": "python3 scripts/prevent_rebuild_failures.py --pre-rebuild || echo 'Pre-rebuild protection failed, continuing with fallback'",
     "postCreateCommand": "bash .devcontainer/post-create.sh",
-    "postStartCommand": "python3 scripts/prevent_rebuild_failures.py || echo 'Post-start validation completed with warnings'",
+    "postStartCommand": "bash .devcontainer/post-start.sh",
     "mounts": [
         "source=aurora-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
     ],

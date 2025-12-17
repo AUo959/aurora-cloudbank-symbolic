@@ -3,7 +3,7 @@
 
 # Environment settings
 PYTHON := python3
-VENV_DIR := .venv
+VENV_DIR ?= .venv
 PIP := $(VENV_DIR)/bin/pip
 PYTHON_VENV := $(VENV_DIR)/bin/python
 

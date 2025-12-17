@@ -10,9 +10,12 @@ echo "===================================="
 
 # Configuration
 PYTHON_VERSION="3.12"
-VENV_DIR=".venv"
+VENV_DIR="${AURORA_VENV_DIR:-.venv}"
 REQUIREMENTS_FILE="requirements-lock.txt"
 BACKUP_DIR=".backup"
+
+# Prefer a specific Python when available (can be overridden)
+PYTHON_BIN="${AURORA_PYTHON_BIN:-}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -37,6 +40,23 @@ log_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+venv_is_valid() {
+    [[ -x "$VENV_DIR/bin/python" ]] && [[ -f "$VENV_DIR/bin/activate" ]]
+}
+
+ensure_python_bin() {
+    if [[ -n "$PYTHON_BIN" ]]; then
+        return 0
+    fi
+
+    if command -v "python${PYTHON_VERSION}" &> /dev/null; then
+        PYTHON_BIN="python${PYTHON_VERSION}"
+        return 0
+    fi
+
+    PYTHON_BIN="python3"
+}
+
 # Function to check Python version
 check_python_version() {
     log_info "Checking Python version..."
@@ -45,37 +65,58 @@ check_python_version() {
         log_error "Python 3 is not installed"
         return 1
     fi
+
+    ensure_python_bin
     
-    CURRENT_VERSION=$(python3 --version | cut -d' ' -f2 | cut -d'.' -f1,2)
+    CURRENT_VERSION=$($PYTHON_BIN --version | cut -d' ' -f2 | cut -d'.' -f1,2)
     if [[ "$CURRENT_VERSION" != "$PYTHON_VERSION" ]]; then
         log_warning "Expected Python $PYTHON_VERSION, found $CURRENT_VERSION"
     fi
     
-    log_success "Python version: $(python3 --version)"
+    log_success "Python version: $($PYTHON_BIN --version)"
 }
 
 # Function to create clean virtual environment
 setup_venv() {
     log_info "Setting up virtual environment..."
+
+    ensure_python_bin
     
     # Remove existing venv if it exists and is corrupted
     if [[ -d "$VENV_DIR" ]]; then
-        if ! source "$VENV_DIR/bin/activate" 2>/dev/null; then
+        if venv_is_valid && "$VENV_DIR/bin/python" -c "import sys" &>/dev/null; then
+            log_info "Virtual environment already exists and is functional"
+            return 0
+        fi
+
+        log_warning "Existing virtual environment is missing/invalid"
+        if [[ -w "$VENV_DIR" ]]; then
             log_warning "Removing corrupted virtual environment"
             rm -rf "$VENV_DIR"
         else
-            log_info "Virtual environment already exists and is functional"
-            deactivate 2>/dev/null || true
-            return 0
+            if [[ "${AURORA_VENV_REPAIR:-0}" == "1" ]] && command -v sudo &>/dev/null; then
+                log_warning "Attempting repair of '$VENV_DIR' using sudo (AURORA_VENV_REPAIR=1)"
+                sudo chown -R "$(id -u)":"$(id -g)" "$VENV_DIR" 2>/dev/null || true
+                if [[ ! -w "$VENV_DIR" ]]; then
+                    log_warning "Chown did not make '$VENV_DIR' writable; attempting to clear contents"
+                    sudo rm -rf "$VENV_DIR"/* 2>/dev/null || true
+                    sudo chown -R "$(id -u)":"$(id -g)" "$VENV_DIR" 2>/dev/null || true
+                fi
+            fi
+
+            log_error "Cannot repair '$VENV_DIR' (not writable: $(ls -ld "$VENV_DIR" 2>/dev/null || true))"
+            log_info "Fix options:"
+            log_info "  1) Remove/chown it, then re-run: sudo rm -rf $VENV_DIR   (or: sudo chown -R \"$(id -un)\":\"$(id -gn)\" $VENV_DIR)"
+            log_info "  2) Use an alternate venv path: AURORA_VENV_DIR=.venv-user bash scripts/setup_environment.sh"
+            return 1
         fi
     fi
     
     # Create new virtual environment
-    python3 -m venv "$VENV_DIR"
-    source "$VENV_DIR/bin/activate"
+    "$PYTHON_BIN" -m venv "$VENV_DIR"
     
     # Upgrade pip to latest version
-    pip install --upgrade pip
+    "$VENV_DIR/bin/python" -m pip install --upgrade pip
     
     log_success "Virtual environment created and activated"
 }
@@ -96,9 +137,8 @@ backup_state() {
     done
     
     # Create freeze of current environment if it exists
-    if [[ -d "$VENV_DIR" ]] && source "$VENV_DIR/bin/activate" 2>/dev/null; then
-        pip freeze > "$BACKUP_DIR/requirements/pip_freeze.$(date +%Y%m%d_%H%M%S).txt"
-        deactivate
+    if venv_is_valid; then
+        "$VENV_DIR/bin/python" -m pip freeze > "$BACKUP_DIR/requirements/pip_freeze.$(date +%Y%m%d_%H%M%S).txt" || true
         log_success "Backed up current pip freeze"
     fi
 }
@@ -124,8 +164,11 @@ validate_dependencies() {
 # Function to install dependencies
 install_dependencies() {
     log_info "Installing dependencies..."
-    
-    source "$VENV_DIR/bin/activate"
+
+    if ! venv_is_valid; then
+        log_error "Virtual environment is not ready at '$VENV_DIR'"
+        return 1
+    fi
     
     # Fallback to requirements.txt when lock file is missing
     if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
@@ -134,24 +177,24 @@ install_dependencies() {
     fi
     
     # Test dependency resolution first
-    if pip install -r "$REQUIREMENTS_FILE" --dry-run; then
+    if "$VENV_DIR/bin/python" -m pip install -r "$REQUIREMENTS_FILE" --dry-run; then
         log_success "Dependency resolution test passed"
     else
-        log_error "Dependency resolution failed - check for conflicts"
-        return 1
+        log_warning "Dependency resolution dry-run failed (pip may not support --dry-run or conflicts exist)"
+        log_info "Continuing with real install; if it fails, resolve conflicts and re-run setup"
     fi
     
     # Install dependencies
-    pip install -r "$REQUIREMENTS_FILE"
+    "$VENV_DIR/bin/python" -m pip install -r "$REQUIREMENTS_FILE"
     
     # Optionally install development/testing dependencies
     if [[ -f "requirements-dev.txt" ]]; then
         log_info "Installing development dependencies from requirements-dev.txt..."
-        pip install -r requirements-dev.txt || log_warning "Development dependency installation encountered issues"
+        "$VENV_DIR/bin/python" -m pip install -r requirements-dev.txt || log_warning "Development dependency installation encountered issues"
     fi
     
     # Verify installation
-    pip check
+    "$VENV_DIR/bin/python" -m pip check
     
     log_success "Dependencies installed successfully"
 }
@@ -159,11 +202,14 @@ install_dependencies() {
 # Function to verify Aurora functionality
 verify_aurora() {
     log_info "Verifying Aurora CloudBank functionality..."
-    
-    source "$VENV_DIR/bin/activate"
+
+    if ! venv_is_valid; then
+        log_error "Virtual environment is not ready at '$VENV_DIR'"
+        return 1
+    fi
     
     # Test critical imports
-    python3 -c "
+    "$VENV_DIR/bin/python" -c "
 import fastapi
 import httpx
 import pandas
@@ -189,11 +235,16 @@ print(f'pandas: {pandas.__version__}')
 
 # Function to create environment status file
 create_status_file() {
+    if ! venv_is_valid; then
+        log_error "Virtual environment is not ready at '$VENV_DIR'"
+        return 1
+    fi
+
     cat > ".env_status.json" << EOF
 {
     "setup_date": "$(date -Iseconds)",
-    "python_version": "$(python3 --version)",
-    "pip_version": "$(pip --version)",
+    "python_version": "$("$VENV_DIR/bin/python" --version)",
+    "pip_version": "$("$VENV_DIR/bin/python" -m pip --version)",
     "requirements_file": "$REQUIREMENTS_FILE",
     "venv_path": "$VENV_DIR",
     "status": "ready",

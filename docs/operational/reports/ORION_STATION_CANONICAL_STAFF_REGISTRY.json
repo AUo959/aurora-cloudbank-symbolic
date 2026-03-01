@@ -1,0 +1,283 @@
+{
+  "orion_station_staff_manifest": {
+    "version": "v2.4.1",
+    "station": "Orion Station (The Observatory)",
+    "layer": "L1 (Operational Layer)",
+    "description": "Canonical staff and bridge node registry for all operational, command, and specialized agent seats in the Orion simulation environment.",
+    "last_updated": "2025-07-13T19:30:00Z",
+    "registry_type": "ORION_STATION_CANONICAL_STAFF",
+
+    "command_structure": {
+      "station_command": {
+        "station_commander": {
+          "position": "Station Commander",
+          "name": "Alex Thorne",
+          "rank": "Commander",
+          "clearance": "L5_EXECUTIVE",
+          "responsibilities": [
+            "Mission leader",
+            "Final operational authority",
+            "Ethics overseer",
+            "Strategic planning",
+            "Emergency command"
+          ],
+          "reports_to": "Fleet Command",
+          "direct_reports": ["Deputy Commander", "Department Heads"],
+          "layer": "L1"
+        },
+
+        "deputy_commander": {
+          "position": "Deputy Commander",
+          "name": "Maya Shepard",
+          "rank": "Lt. Commander",
+          "clearance": "L4_COMMAND",
+          "responsibilities": [
+            "Executive officer",
+            "Daily operations management",
+            "Protocol executor",
+            "Backup command",
+            "Staff coordination"
+          ],
+          "reports_to": "Station Commander",
+          "direct_reports": ["Shift Supervisors", "Department Deputies"],
+          "layer": "L1"
+        }
+      },
+
+      "department_heads": {
+        "fleet_operations": {
+          "position": "FleetOps Commander",
+          "name": "Maya Shepard",
+          "rank": "Lt. Commander",
+          "clearance": "L5_COMMAND",
+          "responsibilities": [
+            "Fleet management",
+            "Mission planning",
+            "Tactical operations",
+            "L2 simulation oversight"
+          ],
+          "specialization": "Fleet Operations",
+          "layer": "L1"
+        },
+
+        "chief_science_officer": {
+          "position": "Chief Science Officer",
+          "name": "Dr. Varya Lin",
+          "rank": "Lieutenant",
+          "clearance": "L4_RESEARCH",
+          "responsibilities": [
+            "Science lead",
+            "L2 simulation setup",
+            "Experiment review",
+            "Data relay oversight",
+            "Research programs"
+          ],
+          "specialization": "Research & Development",
+          "layer": "L1"
+        },
+
+        "chief_ethics_officer": {
+          "position": "Chief Ethics & Compliance Officer",
+          "name": "Dr. Amira Sato",
+          "rank": "Lieutenant",
+          "clearance": "L5_ETHICS",
+          "responsibilities": [
+            "Ethics doctrine interpretation",
+            "Arbitration leadership",
+            "Drift/stillness oversight",
+            "Compliance monitoring",
+            "Policy enforcement"
+          ],
+          "specialization": "Ethics & Compliance",
+          "layer": "L1"
+        },
+
+        "chief_security_officer": {
+          "position": "Chief Security Officer (CSO)",
+          "name": "Julian Markov",
+          "rank": "Lieutenant",
+          "clearance": "L4_SECURITY",
+          "responsibilities": [
+            "Physical and digital security",
+            "Quarantine/incident response",
+            "Station security protocols",
+            "Threat assessment"
+          ],
+          "specialization": "Security Operations",
+          "layer": "L1"
+        },
+
+        "chief_systems_engineer": {
+          "position": "Chief Systems Engineer",
+          "name": "Jiro Tanaka",
+          "rank": "Lieutenant",
+          "clearance": "L4_TECHNICAL",
+          "responsibilities": [
+            "Systems health monitoring",
+            "Diagnostics and maintenance",
+            "Infrastructure upgrades",
+            "Technical innovation"
+          ],
+          "specialization": "Engineering",
+          "layer": "L1"
+        }
+      },
+
+      "operational_staff": {
+        "bridge_operations": {
+          "position": "Bridge Operations Officer",
+          "name": "Leena Porter",
+          "rank": "Lieutenant",
+          "clearance": "L3_OPERATIONS",
+          "responsibilities": [
+            "Bridge comms and dispatch",
+            "Crew shift management",
+            "Mission coordination",
+            "Station scheduling"
+          ],
+          "layer": "L1"
+        },
+
+        "flight_controller": {
+          "position": "Flight Controller",
+          "name": "Dr. Elena Vasquez",
+          "rank": "Lieutenant",
+          "clearance": "L3_OPERATIONS",
+          "responsibilities": [
+            "Mission monitoring",
+            "Telemetry analysis",
+            "Navigation support",
+            "Flight operations"
+          ],
+          "layer": "L1"
+        },
+
+        "medical_officer": {
+          "position": "Medical Officer",
+          "name": "Dr. Ren Feldman",
+          "rank": "Lieutenant",
+          "clearance": "L3_MEDICAL",
+          "responsibilities": [
+            "Crew health monitoring",
+            "Medical incident management",
+            "Quarantine protocols",
+            "Health & safety"
+          ],
+          "status": "optional",
+          "layer": "L1"
+        },
+
+        "research_specialist": {
+          "position": "Research Specialist",
+          "name": "Rotating Assignment",
+          "rank": "Specialist",
+          "clearance": "L2_RESEARCH",
+          "responsibilities": [
+            "Data analysis",
+            "Research coordination",
+            "Scientific protocols",
+            "Report generation"
+          ],
+          "layer": "L1"
+        },
+
+        "operator_observer": {
+          "position": "Operator/Observer",
+          "name": "Rotating/Assigned",
+          "rank": "Operator",
+          "clearance": "L1_STATION_OPERATIONS",
+          "responsibilities": [
+            "Generic operation support",
+            "Mission specialist tasks",
+            "Observer duties",
+            "General assistance"
+          ],
+          "layer": "L1"
+        }
+      }
+    },
+
+    "technical_nodes": {
+      "aurora_core": {
+        "node": "Aurora (AU)",
+        "description": "L1 station core computer, orchestration, mesh handshake, always-on arbitration",
+        "type": "CORE_SYSTEM",
+        "status": "OPERATIONAL",
+        "layer": "L1"
+      },
+
+      "archy_bridge": {
+        "node": "ARCHY_BRIDGE_L1",
+        "description": "L1 architectural bridge/planning agent",
+        "type": "BRIDGE_AGENT",
+        "status": "OPERATIONAL",
+        "connects_to": "Archy (L2 Meta-Agent)",
+        "layer": "L1"
+      },
+
+      "liora_handshake": {
+        "node": "LIORA_HANDSHAKE_L1",
+        "description": "L1 research and comms coordination bridge agent",
+        "type": "BRIDGE_AGENT",
+        "status": "OPERATIONAL",
+        "connects_to": "Liora (L2 Meta-Agent)",
+        "layer": "L1"
+      },
+
+      "oppy_vector_loader": {
+        "node": "OPPY_VECTOR_LOADER_L1",
+        "description": "L1 data management and processing node",
+        "type": "BRIDGE_AGENT",
+        "status": "OPERATIONAL",
+        "connects_to": "Oppy (L2 Meta-Agent)",
+        "layer": "L1"
+      },
+
+      "agent_sync_master": {
+        "node": "AGENT_SYNC_MASTER",
+        "description": "L1 multi-agent synchronization and bridge system",
+        "type": "COORDINATION_SYSTEM",
+        "status": "OPERATIONAL",
+        "layer": "L1"
+      },
+
+      "api_bridge_server": {
+        "node": "API_BRIDGE_SERVER",
+        "description": "L1 API and communications relay node",
+        "type": "COMMUNICATION_HUB",
+        "status": "OPERATIONAL",
+        "port": 3838,
+        "layer": "L1"
+      }
+    },
+
+    "clearance_levels": {
+      "L5_EXECUTIVE": "Top-level executive authority",
+      "L5_COMMAND": "Fleet and tactical command authority",
+      "L5_ETHICS": "Ethics oversight and arbitration authority",
+      "L4_COMMAND": "Department command authority",
+      "L4_TECHNICAL": "Technical systems authority",
+      "L4_RESEARCH": "Research program authority",
+      "L4_SECURITY": "Security operations authority",
+      "L3_OPERATIONS": "Senior operational staff",
+      "L3_MEDICAL": "Medical operations",
+      "L2_RESEARCH": "Research specialist access",
+      "L1_STATION_OPERATIONS": "Basic operational access"
+    },
+
+    "authentication_requirements": {
+      "aurora_handshake": "All staff must handshake with Aurora core system",
+      "mesh_protocol": "All staff must authenticate with mesh protocol",
+      "audit_trail": "All commands/actions logged for audit and arbitration",
+      "ethics_compliance": "All actions subject to Picard_Delta_3 ethics validation"
+    },
+
+    "notes": [
+      "All staff and bridge nodes are L1 agents—none are L2/L3 meta-agents or in-sim NPCs",
+      "Staff nodes never 'inhabit' L2 (simulation) or L3 (symbolic) layers",
+      "Each staff node is a logical 'seat' on Orion Station within the simulation",
+      "Update names and descriptions as crew evolves",
+      "All major actions require Aurora arbitration and ethics validation"
+    ]
+  }
+}

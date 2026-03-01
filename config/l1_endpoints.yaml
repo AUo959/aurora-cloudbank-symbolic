@@ -1,0 +1,26 @@
+l1_station_endpoints:
+  health:
+    path: '/api/aurora/health/l1'
+    method: 'GET'
+    description: 'L1 Station layer health status'
+
+  crew:
+    list: '/api/aurora/crew'
+    status: '/api/aurora/crew/{crew_id}/status'
+    activate: '/api/aurora/crew/{crew_id}/activate'
+    deactivate: '/api/aurora/crew/{crew_id}/deactivate'
+
+  operator:
+    dashboard: '/api/aurora/operator/dashboard'
+    status: '/api/aurora/operator/status'
+    alerts: '/api/aurora/operator/alerts'
+
+  simulation:
+    state: '/api/aurora/simulation/state'
+    events: '/api/aurora/simulation/events'
+    dispatch: '/api/aurora/dispatch'
+
+monitoring:
+  crew_heartbeat_interval: 30
+  health_check_interval: 60
+  alert_threshold_seconds: 120

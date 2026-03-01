@@ -1,0 +1,88 @@
+{
+  "enabled": true,
+  "description": "GitWiz Automated Maintenance Scheduler Configuration",
+  "schedules": {
+    "daily_light_maintenance": {
+      "enabled": true,
+      "description": "Daily light maintenance and health check",
+      "time": "02:00",
+      "commands": ["status", "lint-scan --target scripts/ --detailed"],
+      "notify_on_issues": true,
+      "fail_on_errors": false
+    },
+    "weekly_comprehensive_cleanup": {
+      "enabled": true,
+      "description": "Weekly comprehensive code quality cleanup",
+      "day": "sunday",
+      "time": "03:00",
+      "commands": [
+        "quality-check --auto-fix --output json",
+        "maintenance --aggressive --no-dry-run",
+        "workflow --type enhanced --aggressive"
+      ],
+      "generate_report": true,
+      "notify_on_issues": true,
+      "fail_on_errors": false
+    },
+    "pre_commit_validation": {
+      "enabled": true,
+      "description": "Pre-commit validation and quality check",
+      "trigger": "git_hook",
+      "commands": [
+        "lint-scan --detailed --target .",
+        "quality-check --output summary"
+      ],
+      "fail_on_errors": true,
+      "notify_on_issues": true
+    },
+    "mid_week_security_scan": {
+      "enabled": true,
+      "description": "Mid-week security and vulnerability scan",
+      "day": "wednesday",
+      "time": "12:00",
+      "commands": ["lint-scan --target scripts/ --detailed"],
+      "generate_report": true,
+      "notify_on_issues": true,
+      "fail_on_errors": false
+    }
+  },
+  "notifications": {
+    "enabled": true,
+    "methods": ["log", "file"],
+    "severity_threshold": "warning",
+    "email": {
+      "enabled": false,
+      "smtp_server": "",
+      "recipients": []
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": "",
+      "channel": "#dev-alerts"
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "retention_days": 30,
+    "backup_before_major_changes": true,
+    "backup_location": ".gitwiz/backups"
+  },
+  "performance": {
+    "max_concurrent_jobs": 2,
+    "timeout_minutes": 30,
+    "memory_limit_mb": 512,
+    "cpu_limit_percent": 80
+  },
+  "logging": {
+    "level": "INFO",
+    "max_log_size_mb": 10,
+    "log_retention_days": 30,
+    "detailed_execution_logs": true
+  },
+  "health_monitoring": {
+    "enabled": true,
+    "check_interval_minutes": 30,
+    "alert_on_failures": true,
+    "max_consecutive_failures": 3
+  }
+}

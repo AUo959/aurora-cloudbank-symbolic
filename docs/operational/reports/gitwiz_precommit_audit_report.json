@@ -1,0 +1,505 @@
+{
+  "timestamp": "2025-07-20T15:16:02.652239",
+  "repo_path": "/home/runner/work/aurora-cloudbank-symbolic/aurora-cloudbank-symbolic",
+  "components": {
+    "enhanced_gitwiz": {
+      "available": true,
+      "class": "EnhancedGITWiz",
+      "methods": [
+        "analyze_files",
+        "analyze_repository",
+        "comprehensive_code_quality_check",
+        "config",
+        "generate_report",
+        "git_dir",
+        "gitwiz_dir",
+        "intelligent_maintenance_workflow",
+        "manage_branches",
+        "optimize_repository",
+        "repo_path",
+        "run_git_command",
+        "thresholds"
+      ]
+    },
+    "lint_manager": {
+      "available": true,
+      "tools": {
+        "autopep8": false,
+        "isort": false,
+        "pylint": false,
+        "flake8": false,
+        "bandit": false,
+        "black": false,
+        "markdownlint": false,
+        "prettier": false,
+        "eslint": false
+      }
+    },
+    "orchestrator": {
+      "available": true
+    }
+  },
+  "configurations": {
+    "pre_commit_config": {
+      "exists": true,
+      "repos": 3,
+      "hooks": 8,
+      "config": {
+        "repos": [
+          {
+            "repo": "https://github.com/pre-commit/pre-commit-hooks",
+            "rev": "v5.0.0",
+            "hooks": [
+              {
+                "id": "trailing-whitespace",
+                "exclude": "\\.(md|txt)$"
+              },
+              {
+                "id": "end-of-file-fixer",
+                "exclude": "\\.(min\\.(js|css)|zip|pdf)$"
+              },
+              {
+                "id": "check-yaml",
+                "files": "\\.(yaml|yml)$"
+              },
+              {
+                "id": "check-json",
+                "files": "\\.json$"
+              },
+              {
+                "id": "check-merge-conflict"
+              },
+              {
+                "id": "check-added-large-files",
+                "args": [
+                  "--maxkb=5120"
+                ]
+              }
+            ]
+          },
+          {
+            "repo": "https://github.com/pycqa/flake8",
+            "rev": "7.3.0",
+            "hooks": [
+              {
+                "id": "flake8",
+                "args": [
+                  "--max-line-length=100",
+                  "--ignore=E203,W503,F401",
+                  "--exclude=.venv,__pycache__,.git,build,dist,*.egg-info,syntax_errors_archive",
+                  "--per-file-ignores=__init__.py:F401"
+                ],
+                "files": "\\.py$",
+                "exclude": "(migrations|\\.venv|syntax_errors_archive)/.*\\.py$"
+              }
+            ]
+          },
+          {
+            "repo": "local",
+            "hooks": [
+              {
+                "id": "eslint-if-available",
+                "name": "ESLint (if Node.js available)",
+                "entry": "bash -c 'if command -v npm >/dev/null 2>&1 && [ -f package.json ]; then npm run lint --silent || echo \"ESLint warnings found\"; else echo \"Skipping ESLint\"; fi'",
+                "language": "system",
+                "files": "\\.(js|ts)$",
+                "exclude": "(node_modules|\\.min\\.js)/.*",
+                "pass_filenames": false
+              }
+            ]
+          }
+        ],
+        "default_stages": [
+          "pre-commit"
+        ],
+        "fail_fast": false,
+        "minimum_pre_commit_version": "3.0.0"
+      }
+    },
+    "optimized_config": {
+      "exists": true
+    },
+    "husky": {
+      "exists": true,
+      "hooks": [
+        "pre-commit"
+      ]
+    },
+    "package_json": {
+      "exists": true,
+      "pre_commit_script": true,
+      "scripts": {
+        "test": "echo 'Aurora JS tests passed'",
+        "lint": "eslint src/**/*.js --fix",
+        "lint:check": "eslint src/**/*.js",
+        "pre-commit": "npm run lint && echo 'Aurora pre-commit validation passed'",
+        "cleanup": "./scripts/aurora_cleanup_command.sh",
+        "time-to-clean-up": "./scripts/aurora_enhanced_cleanup_command.sh",
+        "cleanup:legacy": "./scripts/aurora_cleanup_command.sh",
+        "validation:setup": "python scripts/aurora_validation_manager.py --strategy smart_exclusion",
+        "validation:status": "python scripts/aurora_validation_manager.py --status",
+        "validation:cleanup": "python scripts/aurora_validation_manager.py --cleanup"
+      }
+    }
+  },
+  "functionality_tests": {
+    "status": {
+      "success": true,
+      "data": {
+        "command": "status",
+        "timestamp": "2025-07-20T15:16:02.823329",
+        "project_root": "/home/runner/work/aurora-cloudbank-symbolic/aurora-cloudbank-symbolic",
+        "components": {
+          "enhanced_gitwiz": true,
+          "lint_manager": true,
+          "orchestrator": true
+        },
+        "capabilities": {
+          "lint_tools": {
+            "autopep8": false,
+            "isort": false,
+            "pylint": false,
+            "flake8": false,
+            "bandit": false,
+            "black": false,
+            "markdownlint": false,
+            "prettier": false,
+            "eslint": false
+          }
+        },
+        "system_info": {
+          "python_version": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+          "project_structure": {
+            "python_files": 219,
+            "markdown_files": 223,
+            "javascript_files": 60,
+            "total_files": 1109,
+            "directories": 166
+          }
+        }
+      }
+    },
+    "quality_check": {
+      "success": true,
+      "data": {
+        "command": "quality-check",
+        "timestamp": "2025-07-20T15:16:02.964822",
+        "execution_time": 5.428546,
+        "summary": {
+          "total_issues": 5,
+          "auto_fixable": 0,
+          "quality_score": 92.0,
+          "tools_used": []
+        },
+        "recommendations": [
+          "\ud83d\udfe2 Low issue count - minor cleanup recommended"
+        ]
+      }
+    }
+  },
+  "issues": [
+    {
+      "severity": "MEDIUM",
+      "category": "Lint Tools",
+      "description": "Missing lint tools: flake8, pylint, black, isort, autopep8, bandit, eslint, prettier, markdownlint, pre-commit",
+      "impact": "Reduced code quality checking capabilities"
+    },
+    {
+      "severity": "MEDIUM",
+      "category": "Hook Execution",
+      "description": "Husky pre-commit hook not executing properly",
+      "impact": "Pre-commit validation not happening"
+    }
+  ],
+  "recommendations": [
+    "Install missing lint tools: flake8, pylint, black, isort, autopep8, bandit, eslint, prettier, markdownlint, pre-commit",
+    "Fix Husky pre-commit hook execution"
+  ],
+  "lint_tools": {
+    "python": {
+      "flake8": {
+        "available": false,
+        "error": "Not found"
+      },
+      "pylint": {
+        "available": false,
+        "error": "Not found"
+      },
+      "black": {
+        "available": false,
+        "error": "Not found"
+      },
+      "isort": {
+        "available": false,
+        "error": "Not found"
+      },
+      "autopep8": {
+        "available": false,
+        "error": "Not found"
+      },
+      "bandit": {
+        "available": false,
+        "error": "Not found"
+      }
+    },
+    "javascript": {
+      "eslint": {
+        "available": false,
+        "error": "Not found"
+      },
+      "prettier": {
+        "available": false,
+        "error": "Not found"
+      }
+    },
+    "markdown": {
+      "markdownlint": {
+        "available": false,
+        "error": "Not found"
+      }
+    },
+    "generic": {
+      "pre-commit": {
+        "available": false,
+        "error": "Not found"
+      }
+    }
+  },
+  "github_workflow": {
+    "exists": true,
+    "jobs": [
+      "quality-gate",
+      "security-audit",
+      "deployment-quality-check"
+    ],
+    "triggers": {},
+    "config": {
+      "name": "GitWiz Quality Gates",
+      "true": {
+        "push": {
+          "branches": [
+            "main",
+            "develop"
+          ]
+        },
+        "pull_request": {
+          "branches": [
+            "main",
+            "develop"
+          ]
+        },
+        "schedule": [
+          {
+            "cron": "0 2 * * *"
+          }
+        ]
+      },
+      "permissions": {
+        "contents": "read",
+        "actions": "read",
+        "checks": "write",
+        "pull-requests": "write",
+        "security-events": "write"
+      },
+      "jobs": {
+        "quality-gate": {
+          "runs-on": "ubuntu-latest",
+          "strategy": {
+            "matrix": {
+              "python-version": [
+                3.11
+              ]
+            }
+          },
+          "steps": [
+            {
+              "name": "Checkout code",
+              "uses": "actions/checkout@v4"
+            },
+            {
+              "name": "Set up Python ${{ matrix.python-version }}",
+              "uses": "actions/setup-python@v5",
+              "with": {
+                "python-version": "${{ matrix.python-version }}"
+              }
+            },
+            {
+              "name": "Set up Node.js",
+              "uses": "actions/setup-node@v4",
+              "with": {
+                "node-version": "18"
+              }
+            },
+            {
+              "name": "Install Python dependencies",
+              "run": "python -m pip install --upgrade pip\npip install isort black pylint flake8 bandit autopep8\nif [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n"
+            },
+            {
+              "name": "Install Node.js dependencies",
+              "run": "npm install -g markdownlint-cli prettier eslint\n"
+            },
+            {
+              "name": "GitWiz Status Check",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py status || echo \"::warning::GitWiz status check failed\"\nelse\n  echo \"::notice::GitWiz integrated command not found, skipping status check\"\nfi\n"
+            },
+            {
+              "name": "GitWiz Comprehensive Lint Scan",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py lint-scan --detailed --target scripts/ || echo \"::warning::GitWiz lint scan failed\"\nelse\n  echo \"::notice::GitWiz integrated command not found, running basic linting\"\n  # Run basic Python linting\n  find . -name \"*.py\" -exec python -m py_compile {} + || true\n  # Run basic flake8 if available\n  flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true\nfi\n"
+            },
+            {
+              "name": "GitWiz Quality Check",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py quality-check --output json > quality_report.json || echo \"::warning::GitWiz quality check failed\"\nelse\n  echo \"::notice::GitWiz integrated command not found, running basic quality checks\"\n  # Run basic quality checks\n  echo '{\"status\": \"basic\", \"message\": \"GitWiz not available, ran basic checks\"}' > quality_report.json\nfi\n"
+            },
+            {
+              "name": "Upload Quality Report",
+              "uses": "actions/upload-artifact@v4",
+              "with": {
+                "name": "quality-report",
+                "path": "quality_report.json"
+              }
+            },
+            {
+              "name": "GitWiz Maintenance Check",
+              "if": "github.event_name == 'schedule'",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py maintenance --aggressive --output json > maintenance_report.json || echo \"::warning::GitWiz maintenance failed\"\nelse\n  echo '{\"status\": \"skipped\", \"message\": \"GitWiz not available\"}' > maintenance_report.json\nfi\n"
+            },
+            {
+              "name": "Upload Maintenance Report",
+              "if": "github.event_name == 'schedule'",
+              "uses": "actions/upload-artifact@v4",
+              "with": {
+                "name": "maintenance-report",
+                "path": "maintenance_report.json"
+              }
+            },
+            {
+              "name": "Security Scan",
+              "run": "python -m bandit -r scripts/ -f json -o bandit_report.json || true\n"
+            },
+            {
+              "name": "Upload Security Report",
+              "uses": "actions/upload-artifact@v4",
+              "with": {
+                "name": "security-report",
+                "path": "bandit_report.json"
+              }
+            },
+            {
+              "name": "Code Coverage Analysis",
+              "run": "# Add coverage analysis if tests are present\necho \"Code coverage analysis placeholder\"\n"
+            },
+            {
+              "name": "Performance Benchmarks",
+              "if": "github.event_name == 'pull_request'",
+              "run": "# Add performance benchmarking\necho \"Performance benchmarks placeholder\"\n"
+            },
+            {
+              "name": "Generate Summary Report",
+              "run": "if [ -f scripts/generate_ci_summary.py ]; then\n  python scripts/generate_ci_summary.py || echo \"::warning::CI summary generation failed\"\nelse\n  echo \"# CI Summary\" > ci_summary.md\n  echo \"Basic CI checks completed successfully.\" >> ci_summary.md\nfi\n"
+            },
+            {
+              "name": "Comment PR with Results",
+              "if": "github.event_name == 'pull_request'",
+              "uses": "actions/github-script@v6",
+              "with": {
+                "script": "const fs = require('fs');\nif (fs.existsSync('ci_summary.md')) {\n  const summary = fs.readFileSync('ci_summary.md', 'utf8');\n  github.rest.issues.createComment({\n    issue_number: context.issue.number,\n    owner: context.repo.owner,\n    repo: context.repo.repo,\n    body: summary\n  });\n}\n"
+              }
+            }
+          ]
+        },
+        "security-audit": {
+          "runs-on": "ubuntu-latest",
+          "if": "github.event_name == 'push' && github.ref == 'refs/heads/main'",
+          "permissions": {
+            "contents": "read"
+          },
+          "steps": [
+            {
+              "name": "Checkout code",
+              "uses": "actions/checkout@v4"
+            },
+            {
+              "name": "Set up Python",
+              "uses": "actions/setup-python@v5",
+              "with": {
+                "python-version": "3.11"
+              }
+            },
+            {
+              "name": "Install security tools",
+              "run": "pip install bandit safety\n"
+            },
+            {
+              "name": "Run Security Audit",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py lint-scan --target scripts/ > security_scan.txt || echo \"GitWiz scan failed\" > security_scan.txt\nelse\n  echo \"Basic security scan completed\" > security_scan.txt\nfi\nbandit -r . -f json -o bandit_security.json || true\n"
+            },
+            {
+              "name": "Upload Security Artifacts",
+              "uses": "actions/upload-artifact@v4",
+              "with": {
+                "name": "security-audit",
+                "path": "security_scan.txt\nbandit_security.json\n"
+              }
+            }
+          ]
+        },
+        "deployment-quality-check": {
+          "runs-on": "ubuntu-latest",
+          "if": "github.ref == 'refs/heads/main' && github.event_name == 'push'",
+          "needs": [
+            "quality-gate"
+          ],
+          "permissions": {
+            "contents": "read",
+            "actions": "write"
+          },
+          "steps": [
+            {
+              "name": "Checkout code",
+              "uses": "actions/checkout@v4"
+            },
+            {
+              "name": "Set up Python",
+              "uses": "actions/setup-python@v5",
+              "with": {
+                "python-version": "3.11"
+              }
+            },
+            {
+              "name": "Install dependencies",
+              "run": "pip install isort black pylint flake8 bandit autopep8\n"
+            },
+            {
+              "name": "Pre-deployment Quality Gate",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py workflow --type enhanced --aggressive || echo \"::warning::GitWiz workflow failed\"\nelse\n  echo \"::notice::GitWiz not available, skipping advanced quality gate\"\nfi\n"
+            },
+            {
+              "name": "Generate Deployment Report",
+              "run": "if [ -f scripts/gitwiz_integrated_command.py ]; then\n  python scripts/gitwiz_integrated_command.py status > deployment_status.json || echo '{\"status\": \"error\"}' > deployment_status.json\nelse\n  echo '{\"status\": \"basic\", \"message\": \"GitWiz not available\"}' > deployment_status.json\nfi\n"
+            },
+            {
+              "name": "Upload Deployment Report",
+              "uses": "actions/upload-artifact@v4",
+              "with": {
+                "name": "deployment-report",
+                "path": "deployment_status.json"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hook_tests": {
+    "husky_hook": {
+      "success": false,
+      "output": "\n> aurora-cloudbank-symbolic@1.0.0 pre-commit\n> npm run lint && echo 'Aurora pre-commit validation passed'\n\n\n> aurora-cloudbank-symbolic@1.0.0 lint\n> eslint src/**/*.js --fix\n\n",
+      "error": "sh: 1: eslint: not found\n"
+    },
+    "npm_precommit": {
+      "success": false,
+      "output": "\n> aurora-cloudbank-symbolic@1.0.0 pre-commit\n> npm run lint && echo 'Aurora pre-commit validation passed'\n\n\n> aurora-cloudbank-symbolic@1.0.0 lint\n> eslint src/**/*.js --fix\n\n",
+      "error": "sh: 1: eslint: not found\n"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-07-14T04:27:35.212278",
+  "dry_run": true,
+  "operations": [
+    {
+      "type": "git",
+      "command": "gc --aggressive",
+      "description": "Aggressive garbage collection",
+      "status": "simulated"
+    },
+    {
+      "type": "git",
+      "command": "prune",
+      "description": "Remove unreachable objects",
+      "status": "simulated"
+    },
+    {
+      "type": "git",
+      "command": "reflog expire --expire=now --all",
+      "description": "Clean reflog",
+      "status": "simulated"
+    },
+    {
+      "type": "git",
+      "command": "remote prune origin",
+      "description": "Prune remote references",
+      "status": "simulated"
+    },
+    {
+      "type": "temp_cleanup",
+      "files_count": 2,
+      "size_mb": 0.07,
+      "status": "simulated"
+    }
+  ],
+  "space_saved_mb": 0.06891536712646484,
+  "files_processed": 2,
+  "errors": []
+}

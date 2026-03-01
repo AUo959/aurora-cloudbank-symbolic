@@ -1,0 +1,24 @@
+{
+  "mfa_policy": {
+    "version": "2.0",
+    "enforcement": "required",
+    "methods": [
+      "FIDO2",
+      "WebAuthn",
+      "TOTP"
+    ],
+    "scope": [
+      "github_access",
+      "cloud_console",
+      "admin_interfaces",
+      "customer_portals"
+    ],
+    "bypass_conditions": "none",
+    "grace_period": "72_hours",
+    "compliance": [
+      "SOC2",
+      "ISO27001",
+      "NIST"
+    ]
+  }
+}

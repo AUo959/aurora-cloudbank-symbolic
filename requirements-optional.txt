@@ -1,0 +1,22 @@
+# Optional Enhanced Dependencies
+# These provide enhanced functionality but have fallbacks in code
+
+# Geometric Algebra (optional - graceful fallback exists)
+clifford>=1.4.0
+
+# Enhanced Security Scanning
+bandit[toml]>=1.7.5
+safety>=2.3.0
+
+# Development Productivity  
+pre-commit>=3.5.0
+mypy>=1.7.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+
+# Additional testing tools
+coverage>=7.3.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.0

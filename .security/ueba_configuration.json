@@ -1,0 +1,27 @@
+{
+  "ueba_configuration": {
+    "platform": "Splunk_UBA",
+    "monitoring_scope": [
+      "privileged_users",
+      "data_access_patterns",
+      "file_transfers",
+      "authentication_anomalies"
+    ],
+    "ml_models": {
+      "anomaly_detection": true,
+      "peer_group_analysis": true,
+      "threat_scoring": true
+    },
+    "alert_conditions": {
+      "unusual_data_access": "immediate",
+      "after_hours_activity": "15_minutes",
+      "geographic_anomalies": "immediate",
+      "privilege_escalation": "immediate"
+    },
+    "response_actions": {
+      "automatic_account_disable": true,
+      "session_termination": true,
+      "manager_notification": true
+    }
+  }
+}

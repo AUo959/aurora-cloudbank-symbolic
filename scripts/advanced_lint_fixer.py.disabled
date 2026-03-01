@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""
+Advanced Lint Issue Fixer - Phase 2
+====================================
+
+Addresses specific Python linting issues that require manual intervention.
+"""
+
+import re
+import sys
+from pathlib import Path
+
+
+def fix_logging_fstring_interpolation(file_path: str) -> bool:
+    """Fix f-string interpolation in logging calls."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original_content = content
+
+    # Replace logging f-strings with % formatting
+    patterns = [
+        (r'\.info\("([^"]*{[^}]*}[^"]*)"\)', r'.info(r"\1", TODO_FIX_ARGS)'),
+        (r'\.error\("([^"]*{[^}]*}[^"]*)"\)', r'.error(r"\1", TODO_FIX_ARGS)'),
+        (r'\.warning\("([^"]*{[^}]*}[^"]*)"\)', r'.warning(r"\1", TODO_FIX_ARGS)'),
+        (r'\.debug\("([^"]*{[^}]*}[^"]*)"\)', r'.debug(r"\1", TODO_FIX_ARGS)r'),
+    ]
+
+    for pattern, replacement in patterns:
+        content = re.sub(pattern, replacement, content)
+
+    if content != original_content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def fix_unused_variables(file_path: str) -> bool:
+    """Fix unused variables by prefixing with underscore."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original_content = content
+
+    # Common unused variable patterns
+    patterns = [
+        (rrr"(\s+)result = subprocess\.run\(", r"\1_ = subprocess.run("),
+        (rrr"(\s+)scheduler_thread = ", r"\1_scheduler_thread = "),
+    ]
+
+    for pattern, replacement in patterns:
+        content = re.sub(pattern, replacement, content)
+
+    if content != original_content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def fix_broad_exceptions_specific(file_path: str) -> bool:
+    """Replace broad Exception catches with more specific ones."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original_content = content
+
+    # Replace common broad exception patterns
+    patterns = [
+        (
+            r"except (OSError, ValueError, RuntimeError) as e:",
+            "except (OSError, ValueError, RuntimeError) as e:",
+        ),
+        (
+            r"except (OSError, ValueError, RuntimeError):",
+            "except (OSError, ValueError, RuntimeError):",
+        ),
+    ]
+
+    for pattern, replacement in patterns:
+        content = content.replace(pattern, replacement)
+
+    if content != original_content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def remove_empty_fstrings(file_path: str) -> bool:
+    """Remove f-strings that don't have interpolation."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original_content = content
+
+    # Find f-strings without interpolation and convert to regular strings
+    pattern = r'"([^"]*)"'
+
+    def replace_func(match):
+        string_content = match.group(1)
+        if "{" not in string_content and "}" not in string_content:
+            return f'"{string_content}"'
+        return match.group(0)
+
+    content = re.sub(pattern, replace_func, content)
+
+    # Same for single quotes
+    pattern = r"'([^']*)'"
+
+    def replace_func_single(match):
+        string_content = match.group(1)
+        if "{" not in string_content and "}" not in string_content:
+            return "'{string_content}'"
+        return match.group(0)
+
+    content = re.sub(pattern, replace_func_single, content)
+
+    if content != original_content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def add_missing_type_annotations(file_path: str) -> bool:
+    """Add missing type annotations for common patterns."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    original_content = content
+
+    # Add return type annotations for simple functions
+    patterns = [
+        (
+            r'def (\w+)\(self\):\s*"""([^"]*?)"""',
+            r'def \1(self) -> None:\n        """\2""r"',
+        ),
+        (
+            r'def (\w+)\(self, (\w+): str\):\s*"""([^"]*?)"""',
+            r'def \1(self, \2: str) -> None:\n        """\3"""',
+        ),
+    ]
+
+    for pattern, replacement in patterns:
+        content = re.sub(pattern, replacement, content, flags=re.MULTILINE | re.DOTALL)
+
+    if content != original_content:
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def process_file_advanced(file_path: str) -> dict:
+    """Process a single Python file with advanced fixes."""
+    fixes = {}
+
+    try:
+        # fixes['logging_fstring'] = fix_logging_fstring_interpolation(file_path)  # Disabled as it's complex
+        fixes["unused_variables"] = fix_unused_variables(file_path)
+        fixes["broad_exceptions"] = fix_broad_exceptions_specific(file_path)
+        fixes["empty_fstrings"] = remove_empty_fstrings(file_path)
+        # fixes['type_annotations'] = add_missing_type_annotations(file_path)  # Disabled as it's risky
+
+    except (OSError, ValueError, RuntimeError) as e:
+        print("Error processing {file_path}: {e}")
+        return {}
+
+    return fixes
+
+
+def main():
+    """Main function to process all Python files."""
+    scripts_dir = Path("scripts")
+
+    if not scripts_dir.exists():
+        print("Scripts directory not found!")
+        return 1
+
+    python_files = list(scripts_dir.glob("*.py"))
+    total_fixes = {}
+
+    for py_file in python_files:
+        print("Processing {py_file}...")
+        file_fixes = process_file_advanced(str(py_file))
+
+        for fix_type, applied in file_fixes.items():
+            if fix_type not in total_fixes:
+                total_fixes[fix_type] = 0
+            if applied:
+                total_fixes[fix_type] += 1
+
+    print("\nAdvanced Fix Summary:")
+    print("=" * 40)
+    for fix_type, count in total_fixes.items():
+        print("{fix_type.replace('_', ' ').title()}: {count} files")
+
+    print("\nProcessed {len(python_files)} Python files.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

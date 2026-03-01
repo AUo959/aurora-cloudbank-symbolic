@@ -1,0 +1,36 @@
+{
+  "thresholds": {
+    "repository_size_mb": 1000,
+    "file_count": 50000,
+    "git_size_mb": 500,
+    "branch_count": 30,
+    "stale_branches": 5,
+    "cache_files": 200,
+    "temp_files": 100,
+    "large_files": 20,
+    "disk_usage_percent": 85,
+    "memory_usage_mb": 1000,
+    "cpu_usage_percent": 80,
+    "health_score_min": 0.7
+  },
+  "monitoring": {
+    "enabled": true,
+    "interval_minutes": 30,
+    "history_retention_days": 30,
+    "auto_cleanup": true,
+    "cleanup_threshold_percent": 90
+  },
+  "alerts": {
+    "enabled": true,
+    "console_output": true,
+    "log_file": true,
+    "webhook_url": null,
+    "email_notifications": false
+  },
+  "auto_actions": {
+    "cleanup_cache_files": true,
+    "cleanup_temp_files": true,
+    "prune_git_objects": false,
+    "archive_old_logs": true
+  }
+}

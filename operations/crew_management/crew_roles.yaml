@@ -1,0 +1,61 @@
+# ORION Station Crew Role Definitions
+# Enterprise Fleet Deployment Package
+
+crew_roles:
+  command:
+    - role: 'FleetOps Commander'
+      clearance: 'L5_COMMAND'
+      responsibilities:
+        ['Mission approval', 'Fleet oversight', 'Emergency command']
+      required_certifications:
+        ['Command', 'Fleet Operations', 'Emergency Response']
+
+    - role: 'Station Commander'
+      clearance: 'L4_COMMAND'
+      responsibilities:
+        ['Station operations', 'Crew management', 'Resource allocation']
+      required_certifications:
+        ['Command', 'Station Operations', 'Personnel Management']
+
+  operations:
+    - role: 'Flight Controller'
+      clearance: 'L3_OPERATIONS'
+      responsibilities:
+        ['Mission monitoring', 'Telemetry analysis', 'Navigation support']
+      required_certifications:
+        ['Flight Operations', 'Navigation', 'Communications']
+
+    - role: 'Systems Engineer'
+      clearance: 'L3_TECHNICAL'
+      responsibilities:
+        ['System maintenance', 'Technical support', 'Diagnostics']
+      required_certifications:
+        ['Engineering', 'System Administration', 'Maintenance']
+
+  specialists:
+    - role: 'Research Specialist'
+      clearance: 'L2_RESEARCH'
+      responsibilities: ['Data analysis', 'Research coordination', 'Reporting']
+      required_certifications:
+        ['Research Methods', 'Data Analysis', 'Scientific Protocols']
+
+    - role: 'Ethics Officer'
+      clearance: 'L4_ETHICS'
+      responsibilities:
+        ['Ethics review', 'Compliance monitoring', 'Policy enforcement']
+      required_certifications: ['Ethics', 'Compliance', 'Policy Management']
+
+  ai_agents:
+    - role: 'Aurora Core'
+      type: 'Primary AI'
+      responsibilities:
+        ['System orchestration', 'Symbolic processing', 'Decision support']
+      capabilities:
+        ['Natural language', 'Symbolic reasoning', 'Predictive analysis']
+
+    - role: 'Navigation AI'
+      type: 'Specialized AI'
+      responsibilities:
+        ['Route calculation', 'Hazard assessment', 'Course optimization']
+      capabilities:
+        ['Spatial reasoning', 'Risk assessment', 'Real-time calculation']

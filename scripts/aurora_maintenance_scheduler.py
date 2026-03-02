@@ -8,12 +8,16 @@ import argparse
 import json
 import logging
 import os
+import shutil
 import subprocess
 import time
 from datetime import datetime
 from typing import List
 import threading
-import schedule
+try:
+    import schedule
+except ImportError:
+    schedule = None
 
 
 class MaintenanceScheduler:
@@ -79,6 +83,10 @@ class MaintenanceScheduler:
 
     def register_tasks(self):
         """Register scheduled maintenance tasks"""
+        if schedule is None:
+            self.logger.warning("schedule package not installed; scheduled mode disabled")
+            return
+
         # Daily cleanup at 2 AM
         if self.config["schedules"]["daily_cleanup"]["enabled"]:
             schedule.every().day.at(self.config["schedules"]["daily_cleanup"]["time"]).do(self.run_daily_cleanup)
@@ -91,7 +99,13 @@ class MaintenanceScheduler:
 
         # Monthly audit on the 1st at midnight
         if self.config["schedules"]["monthly_audit"]["enabled"]:
-            schedule.every().month.do(self.run_monthly_audit)
+            schedule.every().day.at(self.config["schedules"]["monthly_audit"]["time"]).do(self._run_monthly_if_due)
+
+    def _run_monthly_if_due(self):
+        """Run monthly audit only when today's day matches configured monthly day."""
+        target_day = int(self.config["schedules"]["monthly_audit"].get("day", 1))
+        if datetime.now().day == target_day:
+            self.run_monthly_audit()
 
     def run_daily_cleanup(self):
         """Execute daily cleanup tasks"""
@@ -216,7 +230,7 @@ class MaintenanceScheduler:
 
             # Get file count
             result = subprocess.run(
-                ["find", ".", "-type", ""],
+                ["find", ".", "-type", "f"],
                 capture_output=True,
                 text=True,
                 shell=False,
@@ -353,27 +367,162 @@ class MaintenanceScheduler:
 
     def full_repository_audit(self) -> str:
         """Perform full repository audit"""
-        return "Full audit placeholder - would run comprehensive analysis"
+        try:
+            tracked = subprocess.run(
+                ["git", "ls-files"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            tracked_count = len(tracked.stdout.strip().split("\n")) if tracked.stdout.strip() else 0
+
+            dirty = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            dirty_count = len(dirty.stdout.strip().split("\n")) if dirty.stdout.strip() else 0
+
+            branch = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                check=False,
+            )
+            branch_name = branch.stdout.strip() if branch.returncode == 0 else "unknown"
+
+            health_summary = self.check_repository_health()
+            return (
+                f"Repository audit complete: branch={branch_name}, tracked_files={tracked_count}, "
+                f"dirty_files={dirty_count}, {health_summary}"
+            )
+        except (OSError, ValueError, RuntimeError) as e:
+            return f"Error: {e}"
 
     def update_dependencies(self) -> str:
         """Update dependencies"""
-        return "Dependency update placeholder - would check for updates"
+        try:
+            manifests = []
+            req_count = 0
+            npm_count = 0
+
+            if os.path.exists("requirements.txt"):
+                manifests.append("requirements.txt")
+                with open("requirements.txt", "r", encoding="utf-8") as f:
+                    req_count = len([line for line in f if line.strip() and not line.strip().startswith("#")])
+
+            if os.path.exists("package.json"):
+                manifests.append("package.json")
+                with open("package.json", "r", encoding="utf-8") as f:
+                    package = json.load(f)
+                npm_count = len(package.get("dependencies", {})) + len(package.get("devDependencies", {}))
+
+            tools = [tool for tool in ["python3", "pip", "npm"] if shutil.which(tool)]
+            return (
+                f"Dependency metadata refreshed: manifests={len(manifests)} "
+                f"({', '.join(manifests) if manifests else 'none'}), "
+                f"python_requirements={req_count}, npm_dependencies={npm_count}, tools={','.join(tools) or 'none'}"
+            )
+        except (OSError, ValueError, RuntimeError) as e:
+            return f"Error: {e}"
 
     def generate_health_report(self) -> str:
         """Generate comprehensive health report"""
-        return "Health report placeholder - would generate detailed report"
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_dir = ".maintenance"
+            os.makedirs(report_dir, exist_ok=True)
+
+            report = {
+                "generated_at": datetime.now().isoformat(),
+                "repository_health": self.check_repository_health(),
+                "dependency_audit": self.audit_dependencies(),
+                "thresholds": self.config.get("thresholds", {}),
+            }
+
+            report_path = os.path.join(report_dir, f"health_report_{timestamp}.json")
+            with open(report_path, "w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2)
+            return f"Health report generated: {report_path}"
+        except (OSError, ValueError, RuntimeError) as e:
+            return f"Error: {e}"
 
     def run_security_scan(self) -> str:
         """Run security scan"""
-        return "Security scan placeholder - would run security analysis"
+        try:
+            scan_script = "scripts/security_audit.sh"
+            if os.path.exists(scan_script):
+                result = subprocess.run(
+                    ["bash", scan_script],
+                    capture_output=True,
+                    text=True,
+                    shell=False,
+                    check=False,
+                    timeout=300,
+                )
+                if result.returncode == 0:
+                    return "Security scan completed successfully"
+                stderr = result.stderr.strip().splitlines()
+                tail = stderr[-1] if stderr else "no error output"
+                return f"Security scan failed (exit={result.returncode}): {tail}"
+
+            baseline_files = [
+                "SECURITY.md",
+                ".github/codeql/codeql-config.yml",
+                ".security/security_policy.json",
+            ]
+            present = [path for path in baseline_files if os.path.exists(path)]
+            return f"Security baseline check complete: script_missing, baseline_assets={len(present)}"
+        except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as e:
+            return f"Error: {e}"
 
     def audit_dependencies(self) -> str:
         """Audit dependencies for security issues"""
-        return "Dependency audit placeholder"
+        try:
+            results = []
+
+            if shutil.which("python3"):
+                pip_check = subprocess.run(
+                    ["python3", "-m", "pip", "check"],
+                    capture_output=True,
+                    text=True,
+                    shell=False,
+                    check=False,
+                )
+                if pip_check.returncode == 0:
+                    results.append("pip_check=ok")
+                else:
+                    stderr = pip_check.stderr.strip().splitlines()
+                    tail = stderr[-1] if stderr else "dependency issues detected"
+                    results.append(f"pip_check=issues({tail})")
+            else:
+                results.append("pip_check=skipped(no_python3)")
+
+            if os.path.exists("package.json"):
+                if shutil.which("npm") and os.path.exists("node_modules"):
+                    npm_check = subprocess.run(
+                        ["npm", "ls", "--depth=0", "--json"],
+                        capture_output=True,
+                        text=True,
+                        shell=False,
+                        check=False,
+                    )
+                    status = "ok" if npm_check.returncode == 0 else f"issues(exit={npm_check.returncode})"
+                    results.append(f"npm_tree={status}")
+                else:
+                    results.append("npm_tree=skipped(node_modules_missing_or_no_npm)")
+
+            return "Dependency audit complete: " + ", ".join(results)
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as e:
+            return f"Error: {e}"
 
     def log_maintenance_results(self, maintenance_type: str, results: List[str]):
         """Log maintenance results to file"""
-        timestamp = datetime.datetime.now().isoformat()
+        timestamp = datetime.now().isoformat()
         log_entry = {
             "timestamp": timestamp,
             "type": maintenance_type,
@@ -401,6 +550,9 @@ class MaintenanceScheduler:
 
     def start_scheduler(self):
         """Start the maintenance scheduler"""
+        if schedule is None:
+            raise RuntimeError("schedule package is required for --start mode")
+
         self.running = True
         self.logger.info("Starting maintenance scheduler")
 

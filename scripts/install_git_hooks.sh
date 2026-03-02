@@ -5,8 +5,9 @@
 set -e
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOKS_DIR="$REPO_ROOT/.git/hooks"
-GITWIZ_HOOKS_DIR="$REPO_ROOT/scripts/git-hooks"
+GITWIZ_HOOKS_DIR="$SCRIPT_DIR/git-hooks"
 
 echo "🔧 Installing GitWiz Git Hooks..."
 
@@ -31,10 +32,11 @@ cat > "$HOOKS_DIR/post-commit" << 'EOF'
 
 echo "📊 GitWiz Post-commit Analysis..."
 cd "$(git rev-parse --show-toplevel)"
+GITWIZ_SCRIPT=$(git ls-files '*gitwiz_integrated_command.py' | head -n 1)
 
-if [ -f "scripts/gitwiz_integrated_command.py" ]; then
+if [ -n "$GITWIZ_SCRIPT" ] && [ -f "$GITWIZ_SCRIPT" ]; then
     # Generate quick status report
-    python3 scripts/gitwiz_integrated_command.py status > .gitwiz/last_commit_status.json 2>/dev/null || true
+    python3 "$GITWIZ_SCRIPT" status > .gitwiz/last_commit_status.json 2>/dev/null || true
     echo "✅ Post-commit analysis complete"
 fi
 EOF
@@ -50,10 +52,11 @@ cat > "$HOOKS_DIR/pre-push" << 'EOF'
 
 echo "🚀 GitWiz Pre-push Quality Gate..."
 cd "$(git rev-parse --show-toplevel)"
+GITWIZ_SCRIPT=$(git ls-files '*gitwiz_integrated_command.py' | head -n 1)
 
-if [ -f "scripts/gitwiz_integrated_command.py" ]; then
+if [ -n "$GITWIZ_SCRIPT" ] && [ -f "$GITWIZ_SCRIPT" ]; then
     echo "🔍 Running comprehensive quality check..."
-    python3 scripts/gitwiz_integrated_command.py quality-check --output summary
+    python3 "$GITWIZ_SCRIPT" quality-check --output summary
     
     if [ $? -eq 0 ]; then
         echo "✅ Pre-push quality gate passed!"
@@ -83,4 +86,5 @@ echo "  Use --no-verify to bypass hooks when needed"
 echo ""
 echo "Test the installation:"
 echo "  git commit --dry-run (to test pre-commit)"
-echo "  python3 scripts/gitwiz_integrated_command.py status"
+echo "  GITWIZ_SCRIPT=\$(git ls-files '*gitwiz_integrated_command.py' | head -n 1)"
+echo "  python3 \"\$GITWIZ_SCRIPT\" status"

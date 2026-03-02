@@ -679,22 +679,22 @@ def main():
     if args.list_tasks:
         print("Available maintenance tasks:")
         for task_name, task_info in scheduler.tasks.items():
-            print("  {task_name}: {task_info['description']} ({task_info['schedule']})")
+            print(f"  {task_name}: {task_info['description']} ({task_info['schedule']})")
         return 0
 
     elif args.run_task:
         if args.run_task not in scheduler.tasks:
-            print("Error: Task '{args.run_task}' not found")
+            print(f"Error: Task '{args.run_task}' not found")
             return 1
 
-        print("Running task: {args.run_task}")
+        print(f"Running task: {args.run_task}")
         result = scheduler.run_task(args.run_task)
 
-        print("Status: {result['status']}")
+        print(f"Status: {result['status']}")
         if result["status"] == "error":
-            print("Error: {result['error']}")
+            print(f"Error: {result['error']}")
         else:
-            print("Details: {result['details']}")
+            print(f"Details: {result['details']}")
 
         return 0 if result["status"] == "success" else 1
 
@@ -702,14 +702,14 @@ def main():
         print("Running all maintenance tasks for testing...")
 
         for task_name in scheduler.tasks.keys():
-            print("\n--- Running {task_name} ---")
+            print(f"\n--- Running {task_name} ---")
             result = scheduler.run_task(task_name)
-            print("Status: {result['status']}")
+            print(f"Status: {result['status']}")
 
             if result["status"] == "error":
-                print("Error: {result['error']}")
+                print(f"Error: {result['error']}")
             else:
-                print("Duration: {result['duration_seconds']:.1f}s")
+                print(f"Duration: {result['duration_seconds']:.1f}s")
 
         return 0
 

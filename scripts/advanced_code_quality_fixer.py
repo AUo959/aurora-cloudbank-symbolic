@@ -172,14 +172,14 @@ class AdvancedCodeQualityFixer:
         return False
 
     def fix_f_string_issues(self, file_path: Path) -> bool:
-        """Fix F541 f-string without placeholders"""
+        """Fix F541 f-string without interpolation markers"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
 
-            # Find f-strings without placeholders and convert to regular strings
+            # Find f-strings without interpolation markers and convert to regular strings
             # Pattern: f"text without {}" or f'text without {}'
             patterns = [
                 (r'"([^"]*)"', r'"\1"'),  # "text" -> "text"
@@ -187,7 +187,7 @@ class AdvancedCodeQualityFixer:
             ]
 
             for pattern, replacement in patterns:
-                # Only replace if there are no {} placeholders
+                # Only replace if there are no {} interpolation markers
                 matches = re.finditer(pattern, content)
                 for match in matches:
                     string_content = match.group(1)

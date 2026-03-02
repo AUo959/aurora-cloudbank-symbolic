@@ -440,9 +440,9 @@ class CanonicalValidator:
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(corrected_content)
             self.auto_fixes_applied += 1
-            print("✅ AUTO-FIX APPLIED: {file_path}")
+            print(f"✅ AUTO-FIX APPLIED: {file_path}")
         except Exception as e:
-            print("❌ AUTO-FIX FAILED: {file_path} - {e}")
+            print(f"❌ AUTO-FIX FAILED: {file_path} - {e}")
 
     def _apply_json_fix(self, file_path: Path, corrected_data: dict):
         """Apply automatic fix to JSON file"""
@@ -450,9 +450,9 @@ class CanonicalValidator:
             with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(corrected_data, f, indent=2)
             self.auto_fixes_applied += 1
-            print("✅ AUTO-FIX APPLIED: {file_path}")
+            print(f"✅ AUTO-FIX APPLIED: {file_path}")
         except Exception as e:
-            print("❌ AUTO-FIX FAILED: {file_path} - {e}")
+            print(f"❌ AUTO-FIX FAILED: {file_path} - {e}")
 
     def validate_workspace(self, file_patterns: Optional[List[str]] = None) -> List[ValidationResult]:
         """Validate entire workspace against canonical specifications"""
@@ -600,7 +600,7 @@ class CanonicalValidator:
         report = self.generate_report()
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(report)
-        print("📊 Validation report saved to: {output_path}")
+        print(f"📊 Validation report saved to: {output_path}")
 
 
 def main():
@@ -622,11 +622,11 @@ def main():
     auto_fixes = [r for r in results if r.status == "AUTO_FIXED"]
 
     print("\n🎯 Validation Complete:")
-    print("  - Auto-fixes applied: {len(auto_fixes)}")
-    print("  - Escalations raised: {len(escalations)}")
+    print(f"  - Auto-fixes applied: {len(auto_fixes)}")
+    print(f"  - Escalations raised: {len(escalations)}")
 
     if escalations:
-        print("\n⚠️ {len(escalations)} issues require attention!")
+        print(f"\n⚠️ {len(escalations)} issues require attention!")
         print("📊 See CANONICAL_VALIDATION_REPORT.md for details")
     else:
         print("\n✅ All canonical validations passed!")

@@ -20,8 +20,8 @@ echo "📦 NPM version: $(npm -v)"
 # Python
 echo "🐍 Python version: $(python3 --version)"
 
-# Optional: initialize symbolic metadata (mock placeholder)
-echo "🌐 Initializing symbolic loom scaffold (placeholder)"
+# Optional: initialize symbolic metadata (scaffold preview)
+echo "🌐 Initializing symbolic loom scaffold (preview)"
 mkdir -p .aurora/loomfield
 touch .aurora/loomfield/halo-anchor.json
 

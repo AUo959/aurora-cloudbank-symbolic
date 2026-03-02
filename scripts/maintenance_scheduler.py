@@ -12,6 +12,7 @@ from pathlib import Path
 import datetime
 import argparse
 import json
+import shlex
 from typing import Dict
 import subprocess
 import threading
@@ -148,32 +149,32 @@ class MaintenanceScheduler:
     def _run_maintenance_task(self, task_name: str) -> Dict:
         """Execute a maintenance task with safety checks."""
         start_time = datetime.datetime.now()
-        self._log("Starting maintenance task: {task_name}")
+        self._log(f"Starting maintenance task: {task_name}")
 
         try:
             # Get task configuration
             task_config = self.config["maintenance_tasks"].get(task_name, {})
 
             if not task_config.get("enabled", False):
-                self._log("Task {task_name} is disabled, skipping")
+                self._log(f"Task {task_name} is disabled, skipping")
                 return {"status": "skipped", "reason": "disabled"}
 
             # Run safety checks
             safety_passed = self._run_safety_checks(task_config.get("safety_checks", []))
             if not safety_passed:
-                self._log("Safety checks failed for {task_name}")
+                self._log(f"Safety checks failed for {task_name}")
                 return {"status": "failed", "reason": "safety_checks_failed"}
 
             # Execute the task
             result = self._execute_maintenance_task(task_name, task_config)
 
             duration = (datetime.datetime.now() - start_time).total_seconds()
-            self._log("Completed maintenance task: {task_name} in {duration:.1f}s")
+            self._log(f"Completed maintenance task: {task_name} in {duration:.1f}s")
 
             return result
 
         except (OSError, ValueError, RuntimeError) as e:
-            self._log("Error in maintenance task {task_name}: {e}")
+            self._log(f"Error in maintenance task {task_name}: {e}")
             return {"status": "error", "error": str(e)}
 
     def _run_safety_checks(self, checks: List[str]) -> bool:
@@ -194,7 +195,7 @@ class MaintenanceScheduler:
                         return False
 
             except (OSError, ValueError, RuntimeError) as e:
-                self._log("Safety check {check} failed: {e}")
+                self._log(f"Safety check {check} failed: {e}")
                 return False
 
         return True
@@ -207,7 +208,7 @@ class MaintenanceScheduler:
 
             for proc_name in processes_to_check:
                 result = subprocess.run(
-                    ["pgrep", "-", proc_name],
+                    ["pgrep", "-f", proc_name],
                     capture_output=True,
                     cwd=self.repo_path,
                     shell=False,
@@ -269,16 +270,17 @@ class MaintenanceScheduler:
                     subprocess.run(
                         [
                             "cp",
-                            str(file_path, shell=False, check=False),
+                            str(file_path),
                             str(backup_path),
                         ],
                         cwd=self.repo_path,
+                        check=False,
                     )
 
             return True
 
         except (OSError, ValueError, RuntimeError) as e:
-            self._log("Backup failed: {e}")
+            self._log(f"Backup failed: {e}")
             return False
 
     def _execute_maintenance_task(self, task_name: str, task_config: Dict) -> Dict:
@@ -306,7 +308,7 @@ class MaintenanceScheduler:
 
             for command in commands:
                 if self.config["safety_settings"]["dry_run_mode"]:
-                    self._log("DRY RUN: Would execute: {command}")
+                    self._log(f"DRY RUN: Would execute: {command}")
                 else:
                     cmd_parts = shlex.split(command) if isinstance(command, str) else command
                     result = subprocess.run(
@@ -324,7 +326,7 @@ class MaintenanceScheduler:
             return {
                 "status": "success",
                 "cleaned_files": cleaned_files,
-                "message": "Cleaned {cleaned_files} cache patterns",
+                "message": f"Cleaned {cleaned_files} cache patterns",
             }
 
         except (OSError, ValueError, RuntimeError) as e:
@@ -343,7 +345,7 @@ class MaintenanceScheduler:
             high_priority_alerts = [a for a in alerts if a.get("severity") == "high"]
 
             if high_priority_alerts:
-                self._log("High priority alerts detected: {len(high_priority_alerts)}")
+                self._log(f"High priority alerts detected: {len(high_priority_alerts)}")
                 # Could trigger additional cleanup here
 
             return {
@@ -375,7 +377,7 @@ class MaintenanceScheduler:
 
             # Count files
             result = subprocess.run(
-                ["find", ".", "-type", ""],
+                ["find", ".", "-type", "f"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -420,7 +422,7 @@ class MaintenanceScheduler:
         try:
             # Find ZIP files
             result = subprocess.run(
-                ["find", ".", "-name", "*.zip", "-type", ""],
+                ["find", ".", "-name", "*.zip", "-type", "f"],
                 capture_output=True,
                 text=True,
                 cwd=self.repo_path,
@@ -509,7 +511,7 @@ class MaintenanceScheduler:
     def _log(self, message: str):
         """Log maintenance activity."""
         timestamp = datetime.datetime.now().isoformat()
-        log_entry = "[{timestamp}] {message}\n"
+        log_entry = f"[{timestamp}] {message}\n"
 
         try:
             os.makedirs(self.log_file.parent, exist_ok=True)
@@ -518,7 +520,7 @@ class MaintenanceScheduler:
         except (OSError, ValueError, RuntimeError):
             pass  # Don't fail maintenance due to logging issues
 
-        print("🔧 {message}")
+        print(f"🔧 {message}")
 
     def start_scheduler(self):
         """Start the maintenance scheduler."""
@@ -581,20 +583,20 @@ def main():
         print("📋 Configured maintenance tasks:")
         for task_name, config in scheduler.config["maintenance_tasks"].items():
             status = "✅ Enabled" if config.get("enabled") else "❌ Disabled"
-            print("   {task_name}: {status} - {config.get('description', 'No description')}")
+            print(f"   {task_name}: {status} - {config.get('description', 'No description')}")
         return
 
     if args.run_now:
-        print("🏃 Running maintenance task: {args.run_now}")
+        print(f"🏃 Running maintenance task: {args.run_now}")
         result = scheduler.run_immediate_maintenance(args.run_now)
-        print("Result: {result}")
+        print(f"Result: {result}")
         return
 
     if args.run_all:
         print("🏃 Running all maintenance tasks...")
         results = scheduler.run_immediate_maintenance()
         for task_name, result in results.items():
-            print("   {task_name}: {result.get('status', 'unknown')}")
+            print(f"   {task_name}: {result.get('status', 'unknown')}")
         return
 
     if args.daemon:

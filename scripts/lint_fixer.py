@@ -180,7 +180,7 @@ def process_file(file_path: str) -> Dict[str, bool]:
         # fixes['unused_imports'] = fix_unused_imports(file_path)  # Disabled for safety
 
     except (OSError, ValueError, RuntimeError) as e:
-        print("Error processing {file_path}: {e}")
+        print(f"Error processing {file_path}: {e}")
         return {}
 
     return fixes
@@ -190,7 +190,7 @@ def main():
     """Main function to process all Python files in scripts directory."""
     print("Starting lint fixer...")
     scripts_dir = Path("scripts")
-    print("Looking for scripts directory: {scripts_dir.absolute()}")
+    print(f"Looking for scripts directory: {scripts_dir.absolute()}")
 
     if not scripts_dir.exists():
         print("Scripts directory not found!")
@@ -200,7 +200,7 @@ def main():
     total_fixes = {}
 
     for py_file in python_files:
-        print("Processing {py_file}...")
+        print(f"Processing {py_file}...")
         file_fixes = process_file(str(py_file))
 
         for fix_type, applied in file_fixes.items():
@@ -212,9 +212,9 @@ def main():
     print("\nFix Summary:")
     print("=" * 40)
     for fix_type, count in total_fixes.items():
-        print("{fix_type.replace('_', ' ').title()}: {count} files")
+        print(f"{fix_type.replace('_', ' ').title()}: {count} files")
 
-    print("\nProcessed {len(python_files)} Python files.")
+    print(f"\nProcessed {len(python_files)} Python files.")
     return 0
 
 

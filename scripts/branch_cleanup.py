@@ -1,52 +1,30 @@
 #!/usr/bin/env python3
-"""
-Automated stale branch cleanup for Aurora CloudBank repository.
-Deletes merged feature branches, archives backup branches, and closes stale dependabot PRs.
-"""
-import re
+"""Compatibility wrapper: delegate branch cleanup to branch_manager.py."""
+
+from __future__ import annotations
+
+import argparse
 import subprocess
+import sys
+from pathlib import Path
 
 
-def get_merged_branches():
-    result = subprocess.run(
-        ["git", "branch", "-r", "--merged", "origin/main"],
-        capture_output=True,
-        text=True,
-        shell=False,
-        check=False,
-    )
-    merged = [
-        line.strip() for line in result.stdout.splitlines() if line.strip() and not line.strip().endswith("/main")
-    ]
-    return merged
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Branch cleanup wrapper")
+    parser.add_argument("--execute", action="store_true", help="Execute deletions (default is dry-run)")
+    parser.add_argument("--max-age", type=int, default=90, help="Maximum branch age in days")
+    parser.add_argument("--categories", nargs="+", default=["feature", "dependency", "security"], help="Categories")
+    args = parser.parse_args()
 
+    script_dir = Path(__file__).resolve().parent
+    manager = script_dir / "branch_manager.py"
 
-def delete_remote_branch(branch):
-    remote = branch.split("/")[0]
-    name = "/".join(branch.split("/")[1:])
-    if name == "main":
-        return
-    subprocess.run(["git", "push", remote, f":{name}"], shell=False, check=False)
+    cmd = [sys.executable, str(manager), "--cleanup", "--max-age", str(args.max_age), "--categories", *args.categories]
+    if args.execute:
+      cmd.append("--execute")
 
-
-def archive_branch(branch):
-    tag_name = f"archive/{branch.replace('/', '_')}"
-    subprocess.run(["git", "tag", tag_name, branch], shell=False, check=False)
-    delete_remote_branch(branch)
-
-
-def main():
-    merged = get_merged_branches()
-    feature_pattern = re.compile(r"codex/|feature/|alert-autofix|dependabot/")
-    backup_pattern = re.compile(r"backup")
-    for branch in merged:
-        if feature_pattern.search(branch):
-            print(f"Deleting merged feature branch: {branch}")
-            delete_remote_branch(branch)
-        elif backup_pattern.search(branch):
-            print(f"Archiving backup branch: {branch}")
-            archive_branch(branch)
+    return subprocess.run(cmd, check=False).returncode
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

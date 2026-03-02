@@ -9,8 +9,11 @@ echo "🔍 GitWiz Pre-commit Quality Check..."
 # Change to repository root
 cd "$(git rev-parse --show-toplevel)"
 
+# Locate GitWiz command script anywhere in tracked repo paths.
+GITWIZ_SCRIPT=$(git ls-files '*gitwiz_integrated_command.py' | head -n 1)
+
 # Check if GitWiz is available
-if [ ! -f "scripts/gitwiz_integrated_command.py" ]; then
+if [ -z "$GITWIZ_SCRIPT" ] || [ ! -f "$GITWIZ_SCRIPT" ]; then
     echo "❌ GitWiz not found. Skipping quality checks."
     exit 0
 fi
@@ -30,16 +33,13 @@ echo "$STAGED_FILES" > "$TEMP_FILE"
 
 # Run quality check on staged files
 echo "🔍 Running quality checks..."
-python3 scripts/gitwiz_integrated_command.py lint-scan --target "$TEMP_FILE" --output summary > /tmp/gitwiz_precommit.log 2>&1
-
-# Check results
-if [ $? -eq 0 ]; then
+if python3 "$GITWIZ_SCRIPT" lint-scan --target "$TEMP_FILE" --output summary > /tmp/gitwiz_precommit.log 2>&1; then
     echo "✅ Quality checks passed!"
     
     # Optional: Auto-fix minor issues
     if [ "$GITWIZ_AUTO_FIX" = "true" ]; then
         echo "🛠️ Auto-fixing minor issues..."
-        python3 scripts/gitwiz_integrated_command.py quality-check --auto-fix --no-dry-run > /dev/null 2>&1 || true
+        python3 "$GITWIZ_SCRIPT" quality-check --auto-fix --no-dry-run > /dev/null 2>&1 || true
         
         # Re-stage any auto-fixed files
         for file in $STAGED_FILES; do
@@ -57,7 +57,7 @@ else
     cat /tmp/gitwiz_precommit.log
     echo ""
     echo "💡 To fix issues automatically, run:"
-    echo "   python3 scripts/gitwiz_integrated_command.py quality-check --auto-fix"
+    echo "   python3 \"$GITWIZ_SCRIPT\" quality-check --auto-fix"
     echo ""
     echo "⚠️  To bypass this check (not recommended), use:"
     echo "   git commit --no-verify"

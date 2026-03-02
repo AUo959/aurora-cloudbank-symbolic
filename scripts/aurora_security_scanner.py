@@ -159,7 +159,7 @@ class AuroraSecurityScanner:
                                 }
                             )
             except Exception as e:
-                print("Could not run npm audit: {e}")
+                print(f"Could not run npm audit: {e}")
 
     def check_configuration_security(self):
         """Check for security configuration issues"""
@@ -210,7 +210,7 @@ class AuroraSecurityScanner:
                 self._fix_innerHTML_usage(issue)
             elif issue["type"] == "subprocess_shell":
                 # Skip subprocess_shell fixes for now - would need file-specific logic
-                print("  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
+                print(f"  Note: subprocess_shell issue found in {issue['file']} - manual review needed")
 
     def _fix_innerHTML_usage(self, issue):
         """Fix innerHTML usage by suggesting textContent"""
@@ -231,7 +231,7 @@ class AuroraSecurityScanner:
                     f.write(fixed_content)
                 self.fixes_applied.append("Fixed innerHTML usage in {file_path}")
         except Exception as e:
-            print("Could not fix innerHTML in {file_path}: {e}")
+            print(f"Could not fix innerHTML in {file_path}: {e}")
 
     def generate_security_report(self):
         """Generate comprehensive security report"""
@@ -247,22 +247,22 @@ class AuroraSecurityScanner:
             severity = issue["severity"]
             severity_counts[severity] += 1
 
-            print("\n[{severity}] {issue['type']} in {issue['file']}")
+            print(f"\n[{severity}] {issue['type']} in {issue['file']}")
             if "line" in issue:
-                print("  Line {issue['line']}: {issue.get('code', '')}")
-            print("  {issue['message']}")
+                print(f"  Line {issue['line']}: {issue.get('code', '')}")
+            print(f"  {issue['message']}")
 
         print("\n📊 SUMMARY:")
-        print("  CRITICAL: {severity_counts['CRITICAL']}")
-        print("  HIGH: {severity_counts['HIGH']}")
-        print("  MEDIUM: {severity_counts['MEDIUM']}")
-        print("  LOW: {severity_counts['LOW']}")
-        print("  TOTAL: {len(self.issues)}")
+        print(f"  CRITICAL: {severity_counts['CRITICAL']}")
+        print(f"  HIGH: {severity_counts['HIGH']}")
+        print(f"  MEDIUM: {severity_counts['MEDIUM']}")
+        print(f"  LOW: {severity_counts['LOW']}")
+        print(f"  TOTAL: {len(self.issues)}")
 
         if self.fixes_applied:
             print("\n✅ FIXES APPLIED:")
             for fix in self.fixes_applied:
-                print("  • {fix}")
+                print(f"  • {fix}")
 
         # Save detailed report
         date_cmd = ["date"]
@@ -303,7 +303,7 @@ def main():
 
     # Exit with appropriate code
     if critical_high_count > 0:
-        print("\n⚠️ Found {critical_high_count} critical/high severity issues!")
+        print(f"\n⚠️ Found {critical_high_count} critical/high severity issues!")
         sys.exit(1)
     else:
         print("\n✅ No critical or high severity issues found!")

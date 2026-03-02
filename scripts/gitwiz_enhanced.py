@@ -813,11 +813,11 @@ def main():
 
         elif args.action == "report":
             report = gitwiz.generate_report()
-            print("✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
-            print("📊 Health Status: {report['summary']['health_status']}")
-            print("🗂️  Files: {report['summary']['total_files']}")
-            print("💾 Size: {report['summary']['total_size_mb']:.1f}MB")
-            print("⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
+            print(f"✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
+            print(f"📊 Health Status: {report['summary']['health_status']}")
+            print(f"🗂️  Files: {report['summary']['total_files']}")
+            print(f"💾 Size: {report['summary']['total_size_mb']:.1f}MB")
+            print(f"⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
 
     except Exception as e:
         logger.error("GitWiz operation failed: {e}")

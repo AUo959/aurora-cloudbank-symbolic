@@ -31,7 +31,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing blank lines in {file_path}: {e}")
+            print(f"Error fixing blank lines in {file_path}: {e}")
 
         return False
 
@@ -58,7 +58,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing whitespace in {file_path}: {e}")
+            print(f"Error fixing whitespace in {file_path}: {e}")
 
         return False
 
@@ -97,7 +97,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing decorators in {file_path}: {e}")
+            print(f"Error fixing decorators in {file_path}: {e}")
 
         return False
 
@@ -118,7 +118,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing bare except in {file_path}: {e}")
+            print(f"Error fixing bare except in {file_path}: {e}")
 
         return False
 
@@ -142,7 +142,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing comparisons in {file_path}: {e}")
+            print(f"Error fixing comparisons in {file_path}: {e}")
 
         return False
 
@@ -166,7 +166,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing variable names in {file_path}: {e}")
+            print(f"Error fixing variable names in {file_path}: {e}")
 
         return False
 
@@ -188,7 +188,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing escape sequences in {file_path}: {e}")
+            print(f"Error fixing escape sequences in {file_path}: {e}")
 
         return False
 
@@ -210,7 +210,7 @@ class FinalCodeQualityPolisher:
                 return True
 
         except Exception as e:
-            print("Error fixing semicolons in {file_path}: {e}")
+            print(f"Error fixing semicolons in {file_path}: {e}")
 
         return False
 
@@ -288,7 +288,7 @@ class FinalCodeQualityPolisher:
                     return True
 
         except Exception as e:
-            print("Error fixing imports in {file_path}: {e}")
+            print(f"Error fixing imports in {file_path}: {e}")
 
         return False
 
@@ -331,7 +331,7 @@ class FinalCodeQualityPolisher:
             if not any(skip in str(file_path) for skip in [".git", "node_modules", "venv", "__pycache__"]):
                 filtered_files.append(file_path)
 
-        print("Polishing {len(filtered_files)} Python files...")
+        print(f"Polishing {len(filtered_files)} Python files...")
 
         files_fixed = 0
         for file_path in filtered_files:
@@ -340,14 +340,14 @@ class FinalCodeQualityPolisher:
                 if fixes > 0:
                     self.fixes_applied += fixes
                     files_fixed += 1
-                    print("  ✓ Polished {file_path} ({fixes} fixes)")
+                    print(f"  ✓ Polished {file_path} ({fixes} fixes)")
 
             except Exception as e:
-                print("  ❌ Error polishing {file_path}: {e}")
+                print(f"  ❌ Error polishing {file_path}: {e}")
 
         print("\n📊 Final Polish Summary:")
-        print("Files Fixed: {files_fixed}")
-        print("Total Fixes: {self.fixes_applied}")
+        print(f"Files Fixed: {files_fixed}")
+        print(f"Total Fixes: {self.fixes_applied}")
 
         # Final validation
         self.run_final_validation()
@@ -366,14 +366,14 @@ class FinalCodeQualityPolisher:
                 lines = result.stdout.strip().split("\n")
                 if lines and lines[-1].isdigit():
                     remaining = int(lines[-1])
-                    print("\n📈 Progress: {remaining} issues remaining")
+                    print(f"\n📈 Progress: {remaining} issues remaining")
                     if remaining < 100:
                         print("Excellent progress! Repository is nearly perfect.")
                     else:
                         print("Good progress made, continuing polish...")
 
         except Exception as e:
-            print("Could not run final validation: {e}")
+            print(f"Could not run final validation: {e}")
 
 
 def main():

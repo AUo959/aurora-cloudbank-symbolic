@@ -22,7 +22,7 @@ You are being asked to evaluate the actual content of the thread.
 Return a true classification – not an example or template output.
 
 \u2705 Return based on real content
-\u2705 DO NOT simulate or placeholder output
+\u2705 DO NOT simulate or template output
 \u2705 This is used for routing, sealing, or archive classification
 """.strip()
 

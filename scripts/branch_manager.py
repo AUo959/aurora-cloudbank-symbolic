@@ -39,11 +39,26 @@ class BranchManager:
             "hotfix/": "hotfix",
         }
 
+    @staticmethod
+    def _parse_commit_date(raw: str) -> datetime.datetime:
+        """Parse git commit date values with timezone-safe fallbacks."""
+        normalized = raw.replace(" ", "T", 1)
+        for candidate in (normalized, normalized.replace("Z", "+00:00"), raw):
+            try:
+                return datetime.datetime.fromisoformat(candidate)
+            except ValueError:
+                continue
+
+        try:
+            return datetime.datetime.strptime(raw, "%Y-%m-%d %H:%M:%S %z")
+        except ValueError:
+            return datetime.datetime.now(datetime.timezone.utc)
+
     def get_branch_info(self) -> List[BranchInfo]:
         """Get detailed information about all remote branches"""
         cmd = [
             "git",
-            "for-each-re",
+            "for-each-ref",
             "--format=%(refname:short)|%(committerdate:iso)|%(objectname:short)|%(authorname)",
             "refs/remotes/origin",
         ]
@@ -73,7 +88,7 @@ class BranchManager:
 
             # Calculate days old
             try:
-                commit_datetime = datetime.datetime.fromisoformat(commit_date.replace(" ", "T").replace("+00:00", ""))
+                commit_datetime = self._parse_commit_date(commit_date)
                 days_old = (datetime.datetime.now() - commit_datetime).days
             except ValueError:
                 # Fallback for problematic date formats
@@ -197,41 +212,43 @@ class BranchManager:
         """Generate a comprehensive branch management report"""
         analysis = self.analyze_branches()
 
-        report = """
-# Branch Management Report
-Generated: {datetime.datetime.now().isoformat()}
-
-## Summary
-- **Total Branches**: {analysis['total_branches']}
-- **Cleanup Candidates**: {sum(len(candidates) for candidates in analysis['cleanup_candidates'].values())}
-
-## Branch Categories
-"""
+        cleanup_total = sum(len(candidates) for candidates in analysis["cleanup_candidates"].values())
+        lines = [
+            "# Branch Management Report",
+            f"Generated: {datetime.datetime.now().isoformat()}",
+            "",
+            "## Summary",
+            f"- **Total Branches**: {analysis['total_branches']}",
+            f"- **Cleanup Candidates**: {cleanup_total}",
+            "",
+            "## Branch Categories",
+        ]
 
         for category, branches in analysis["categories"].items():
-            report += f"- **{category}**: {len(branches)} branches\n"
+            lines.append(f"- **{category}**: {len(branches)} branches")
 
-        report += """
-## Cleanup Recommendations
-"""
+        lines.extend(["", "## Cleanup Recommendations"])
         for rec in analysis["recommendations"]:
-            report += f"- {rec}\n"
+            lines.append(f"- {rec}")
 
-        report += """
-## Detailed Cleanup Candidates
-
-### Stale Merged Branches ({len(analysis['cleanup_candidates']['stale_merged'])})
-"""
+        lines.extend(
+            [
+                "",
+                "## Detailed Cleanup Candidates",
+                "",
+                f"### Stale Merged Branches ({len(analysis['cleanup_candidates']['stale_merged'])})",
+            ]
+        )
         for branch in analysis["cleanup_candidates"]["stale_merged"]:
-            report += f"- `{branch}`\n"
+            lines.append(f"- `{branch}`")
 
-        report += """
-### Old Unmerged Branches ({len(analysis['cleanup_candidates']['old_unmerged'])})
-"""
+        lines.append("")
+        lines.append(f"### Old Unmerged Branches ({len(analysis['cleanup_candidates']['old_unmerged'])})")
         for branch in analysis["cleanup_candidates"]["old_unmerged"]:
-            report += f"- `{branch}` (Review before deletion)\n"
+            lines.append(f"- `{branch}` (Review before deletion)")
 
-        return report
+        lines.append("")
+        return "\n".join(lines)
 
 
 def main():

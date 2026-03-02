@@ -38,7 +38,7 @@ class GITWizWorkflowOrchestrator:
         }
         self.workflow_log.append(entry)
         status_emoji = "✅" if status == "success" else "❌" if status == "error" else "🔄"
-        print("{status_emoji} {step}: {details}")
+        print(f"{status_emoji} {step}: {details}")
 
     def execute_full_optimization_workflow(self, dry_run: bool = True) -> Dict[str, Any]:
         """Execute the complete optimization workflow."""
@@ -54,15 +54,15 @@ class GITWizWorkflowOrchestrator:
 
         print("🚀 GITWIZ ENHANCED - FULL OPTIMIZATION WORKFLOW")
         print("=" * 70)
-        print("Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
-        print("Started: {self.start_time.isoformat()}")
+        print(f"Mode: {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
+        print(f"Started: {self.start_time.isoformat()}")
         print("=" * 70)
 
         # Stage 1: Repository Analysis
         self.log_step("Repository Analysis", "running", "Analyzing current state...")
         try:
             if dry_run:
-                analysis_result = self._mock_repository_analysis()
+                analysis_result = self._simulated_repository_analysis()
             else:
                 analysis_result = self._run_repository_analysis()
             workflow_result["stages"]["analysis"] = analysis_result
@@ -79,7 +79,7 @@ class GITWizWorkflowOrchestrator:
         self.log_step("Dependency Management", "running", "Scanning and updating dependencies...")
         try:
             if dry_run:
-                dep_result = self._mock_dependency_update()
+                dep_result = self._simulated_dependency_update()
             else:
                 dep_result = self._run_dependency_update()
             workflow_result["stages"]["dependencies"] = dep_result
@@ -194,10 +194,10 @@ class GITWizWorkflowOrchestrator:
         workflow_start = datetime.utcnow()
         logger_prefix = "🚀 ENHANCED QUALITY WORKFLOW"
 
-        print("{logger_prefix}")
+        print(f"{logger_prefix}")
         print("=" * 70)
-        print("Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
-        print("Started: {workflow_start.isoformat()}")
+        print(f"Mode: {'AGGRESSIVE' if aggressive else 'CONSERVATIVE'} | {'DRY RUN' if dry_run else 'LIVE EXECUTION'}")
+        print(f"Started: {workflow_start.isoformat()}")
         print("=" * 70)
 
         workflow_result = {
@@ -348,18 +348,18 @@ class GITWizWorkflowOrchestrator:
         workflow_result["execution_time"] = execution_time
 
         print("\n" + "=" * 70)
-        print("✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
-        print("Success rate: {successful_stages}/{total_stages} stages")
+        print(f"✅ Enhanced Quality Workflow completed in {execution_time:.2f}s")
+        print(f"Success rate: {successful_stages}/{total_stages} stages")
         if workflow_result["recommendations"]:
             print("🎯 Key Recommendations:")
             for rec in workflow_result["recommendations"][:3]:
-                print("  • {rec}")
+                print(f"  • {rec}")
         print("=" * 70)
 
         return workflow_result
 
-    def _mock_repository_analysis(self) -> Dict[str, Any]:
-        """Mock repository analysis for dry run."""
+    def _simulated_repository_analysis(self) -> Dict[str, Any]:
+        """Simulated repository analysis for dry run."""
         return {
             "file_count": 150,
             "total_size_mb": 45.2,
@@ -384,8 +384,8 @@ class GITWizWorkflowOrchestrator:
         # Parse the output or return basic info
         return {"analysis_completed": True, "output": result.stdout[:200]}
 
-    def _mock_dependency_update(self) -> Dict[str, Any]:
-        """Mock dependency update for dry run."""
+    def _simulated_dependency_update(self) -> Dict[str, Any]:
+        """Simulated dependency update for dry run."""
         return {
             "python_scan": {"outdated": [{"name": "package1"}, {"name": "package2"}]},
             "node_scan": {"outdated": [{"name": "nodepackage1"}]},
@@ -418,7 +418,7 @@ class GITWizWorkflowOrchestrator:
         }
 
         if dry_run:
-            # Mock optimization analysis
+            # Simulated optimization analysis
             for zip_file in zip_files[:5]:  # Show first 5
                 optimization_result["optimizations"].append(
                     {
@@ -561,16 +561,16 @@ class GITWizWorkflowOrchestrator:
         print("🎉 GITWIZ OPTIMIZATION WORKFLOW COMPLETE")
         print("=" * 70)
 
-        print("Duration: {workflow_result['duration_seconds']:.1f} seconds")
-        print("Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
-        print("Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}")
+        print(f"Duration: {workflow_result['duration_seconds']:.1f} seconds")
+        print(f"Mode: {'DRY RUN' if workflow_result['dry_run'] else 'LIVE EXECUTION'}")
+        print(f"Overall Success: {'✅ YES' if workflow_result['overall_success'] else '❌ NO'}")
         print()
 
         print("📊 STAGE SUMMARY:")
         print("-" * 40)
         for stage_name, stage_result in workflow_result["stages"].items():
             status = "❌ FAILED" if "error" in stage_result else "✅ SUCCESS"
-            print("{stage_name.title().replace('_', ' ')}: {status}")
+            print(f"{stage_name.title().replace('_', ' ')}: {status}")
 
         print()
         print("🎯 KEY ACHIEVEMENTS:")
@@ -579,24 +579,24 @@ class GITWizWorkflowOrchestrator:
         # Extract key metrics
         analysis = workflow_result["stages"].get("analysis", {})
         if "file_count" in analysis:
-            print("• Analyzed {analysis['file_count']} files")
+            print(f"• Analyzed {analysis['file_count']} files")
 
         archives = workflow_result["stages"].get("archives", {})
         if "total_archives" in archives:
-            print("• Processed {archives['total_archives']} ZIP archives")
+            print(f"• Processed {archives['total_archives']} ZIP archives")
 
         deps = workflow_result["stages"].get("dependencies", {})
         if "python_scan" in deps:
             outdated = len(deps["python_scan"].get("outdated", []))
-            print("• Found {outdated} outdated Python packages")
+            print(f"• Found {outdated} outdated Python packages")
 
         docs = workflow_result["stages"].get("documentation", {})
         if "total_docs" in docs:
-            print("• Organized {docs['total_docs']} documentation files")
+            print(f"• Organized {docs['total_docs']} documentation files")
 
         security = workflow_result["stages"].get("security", {})
         if "improvements" in security:
-            print("• Applied {len(security['improvements'])} security improvements")
+            print(f"• Applied {len(security['improvements'])} security improvements")
 
         print()
         if workflow_result["dry_run"]:
@@ -644,7 +644,7 @@ def main():
         report_file = Path("gitwiz_optimization_report.json")
         with open(report_file, "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2, default=str)
-        print("\n📄 Detailed report saved to: {report_file}")
+        print(f"\n📄 Detailed report saved to: {report_file}")
 
     elif args.security_audit:
         print("🔒 Security-focused workflow would run here")

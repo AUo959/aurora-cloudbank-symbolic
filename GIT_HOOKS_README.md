@@ -9,6 +9,7 @@ Aurora CloudBank uses intelligent Git hooks to maintain code quality and automat
 **Triggers:** Before each commit
 **Purpose:** Quality assurance and syntax validation
 **Features:**
+- Automatic selective-integration ingest gate for staged integration manifests
 - Smart-devops integration for comprehensive checks
 - Python and JavaScript syntax validation
 - File size monitoring
@@ -79,8 +80,16 @@ The hooks intelligently integrate with the Aurora Smart-DevOps system:
 
 ### Hook Failing
 - Run hook manually to see detailed output
+- Run selective ingest gate manually: `python3 scripts/auto_selective_ingest_gate.py --force`
 - Check smart-devops status: `./smart-devops status`
 - Review error messages and follow suggested fixes
+
+### Selective Integration Gate Inputs
+- Protocol: `manifests/selective_integration/Aurora_SelectiveIntegrationProtocol_v2.5_VIEW.json`
+- Modules: `manifests/selective_integration/modules_manifest.json`
+- Optional triage overrides: `manifests/selective_integration/triage_overrides.json`
+- Optional source metadata: `manifests/selective_integration/source.json`
+- Outputs: `workflow_output/selective_integration/`
 
 ### Disable Temporarily
 ```bash

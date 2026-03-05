@@ -1,0 +1,75 @@
+{
+  "protocol_id": "AURORA.SelectiveIntegration.v2.5",
+  "version": "2.5.0",
+  "issued_at_utc": "2025-08-16T05:08:28Z",
+  "purpose": "Absorb only optimal components from external kits/archives into Aurora v2.5 canon; prevent redundancy, drift, and bloat.",
+  "governance": {
+    "chain_of_command": [
+      "Crew \u2192 Alex \u2192 Aurora \u2192 Pilot (T3)..."
+    ],
+    "ethics": "Picard_Delta_3",
+    "paradox": "Shadowfax_Stillness",
+    "audit_log": "@mesh://audit/selective_integration"
+  },
+  "roles": {
+    "Alex": "Adjudicates inclusion; routes modules to specialists; approves/denies capsule merge.",
+    "Aurora": "Runs extraction, classification, redundancy checks; generates capsule and schema validation; executes merges after Alex approval.",
+    "Specialists": "Validate domain fit (Oppy/Elira/Jessica/etc.); provide risk notes and backout plans.",
+    "Pilot": "T3 override only; approves doctrine changes to protocol."
+  },
+  "decision_thresholds": {
+    "include": "Unique utility; measurable improvement; low maintenance burden.",
+    "backup_only": "Redundant but potentially useful for resilience; disabled by default.",
+    "reject": "No clear value; conflicts with canon; increases drift/bloat risk."
+  },
+  "workflow": [
+    "Pre-Screen (Alex+Relay Lead)",
+    "Extraction+Classification (Aurora)",
+    "Specialist Triage (Alex-routed)",
+    "Canonization (Aurora executes)",
+    "Post-Merge Review + Meta-Retrospective entry"
+  ],
+  "metrics": [
+    "time_to_triage_ms",
+    "redundancy_ratio",
+    "modules_included",
+    "modules_rejected",
+    "backouts_30d"
+  ],
+  "security": {
+    "dlp": "No PII; sanitize examples; restrict secrets",
+    "signing": "Capsules hashed and signed at merge",
+    "rollback": "Automatic rollback capsule generated on merge"
+  },
+  "schema_uri": "selective_integration_capsule.schema.json",
+  "example_uri": "example_selective_integration_capsule.json",
+  "integrated_example_capsule": {
+    "capsule_id": "AURORA_SI_GUMAS_AGENTS_v1",
+    "created_utc": "2025-08-16T05:08:28Z",
+    "protocol_ref": "AURORA.SelectiveIntegration.v2.5",
+    "source": {
+      "name": "GUMAS_AI_Agents_Kit.zip...",
+      "type": "zip...",
+      "uri": "local:/mnt/data/GUMAS_AI_Agents_Kit.zip...",
+      "hash": "sha256:PLACEHOLDER..."
+    },
+    "extracted_modules": [
+      "{'id': 'agent_scaffolds', 'category': 'scaffold', 'path': 'kits/agents/scaffolds/', 'integration_path': 'characters/', 'redundancy_flag': 0, 'telemetry': ['adoption_rate', 'bug_reports'], 'notes': 'Reusable archetypes for AI characters; no canon overwrite.'}...",
+      "{'id': 'ethics_autonomy_hooks', 'category': 'hook', 'path': 'hooks/ethics_autonomy/', 'integration_path': 'ethics/', 'redundancy_flag': 0, 'telemetry': ['ethics_flags', 'stillness_invocations'], 'notes': 'Complements Thermax doctrine; aligns with Picard_Delta_3.'}..."
+    ],
+    "triage": [
+      "{'module_id': 'agent_scaffolds', 'specialist': 'Elena', 'decision': 'include', 'risk_notes': 'Low risk', 'backout_plan': 'Remove scaffolds and revert character hooks.'}...",
+      "{'module_id': 'ethics_autonomy_hooks', 'specialist': 'Naomi', 'decision': 'include', 'risk_notes': 'Ensure Stillness hooks are non-blocking.', 'backout_plan': 'Disable hooks and re-run ethics tests.'}..."
+    ],
+    "approvals": {
+      "alex": "approved...",
+      "aurora": "prepared...",
+      "pilot": "not_required..."
+    },
+    "canonization": {
+      "merge_uri": "@mesh://canon/aurora/si/gumas_agents_v1...",
+      "rollback_capsule_id": "AURORA_SI_GUMAS_AGENTS_v1_ROLLBACK...",
+      "meta_retro_ref": "@mesh://meta_retro/entries/2025-07-28-GUMAS-Agents-Kit..."
+    }
+  }
+}

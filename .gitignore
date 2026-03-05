@@ -257,3 +257,6 @@ auth_config.json
 station_manifests/
 wiki-content/
 aurora_venv/
+
+# Selective integration automation outputs
+workflow_output/selective_integration/

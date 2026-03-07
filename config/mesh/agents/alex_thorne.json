@@ -1,0 +1,33 @@
+{
+  "id": "alex_thorne",
+  "display_name": "Alex Thorne",
+  "aliases": [
+    "alex",
+    "alex thorne",
+    "alex.thorne",
+    "captain alex line"
+  ],
+  "channels": [
+    "private:captain:alex",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:captain:alex",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 650
+  },
+  "response_policy": {
+    "style": "strategic",
+    "fallback_to_deterministic": true,
+    "signature": "Alex Thorne"
+  },
+  "memory_files": [
+    "config/mesh/memory/alex_thorne.md"
+  ]
+}

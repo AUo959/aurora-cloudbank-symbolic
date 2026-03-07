@@ -5,14 +5,27 @@ Aurora CloudBank into a new runtime profile without replacing existing systems.
 """
 
 from .engine import AuroraFusionEngine
+from .memory import (
+    AuroraMemoryDoctrine,
+    AuroraMemoryHit,
+    AuroraMemoryOptimizer,
+    AuroraMemoryRecord,
+    MemoryStatus,
+    MemoryTier,
+)
 from .module_map import ModuleSignal, get_high_value_module_matrix
 from .profiles import FUSION_PROFILES, FusionProfile
 
 __all__ = [
     "AuroraFusionEngine",
+    "AuroraMemoryDoctrine",
+    "AuroraMemoryHit",
+    "AuroraMemoryOptimizer",
+    "AuroraMemoryRecord",
     "FusionProfile",
     "FUSION_PROFILES",
+    "MemoryStatus",
+    "MemoryTier",
     "ModuleSignal",
     "get_high_value_module_matrix",
 ]
-

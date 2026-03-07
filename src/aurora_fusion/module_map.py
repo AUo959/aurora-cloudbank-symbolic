@@ -42,6 +42,13 @@ def get_high_value_module_matrix() -> List[ModuleSignal]:
             evidence="covered by native implementation test suite",
         ),
         ModuleSignal(
+            module_path="src.aurora_fusion.memory",
+            capability="Aurora/ORION/GUMAS memory optimization with continuity sealing",
+            value_score=10,
+            stability_score=9,
+            evidence="covered by Aurora memory optimizer tests",
+        ),
+        ModuleSignal(
             module_path="modules.symbolic_core.vsa",
             capability="pydantic-backed symbolic vector model",
             value_score=9,
@@ -93,4 +100,3 @@ def get_high_value_module_matrix() -> List[ModuleSignal]:
     ]
 
     return sorted(matrix, key=lambda item: item.composite_score, reverse=True)
-

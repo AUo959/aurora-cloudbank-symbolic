@@ -1,5 +1,7 @@
 """Aurora Cloudbank Symbolic Engine - Core Implementation"""
 
+from .command_grammar import AuroraCommandGrammar, RangeChain
+
 
 class T1Anchor:
     """Temporal T1 anchor for Aurora symbolic operations"""
@@ -44,6 +46,7 @@ class SymbolicEngine:
         self.chains = {}
         # Optional registered VSA vectors (e.g., senior leadership profiles)
         self.vsa_vectors = {}
+        self.command_grammar = AuroraCommandGrammar()
 
     def execute_chain(self, start, end):
         """Execute symbolic chain notation (001//999//)"""
@@ -60,6 +63,13 @@ class SymbolicEngine:
 
         self.chains[chain_id] = results
         return results
+
+    def execute_chain_notation(self, notation):
+        """Execute a numeric range chain parsed through the Aurora command grammar."""
+        result = self.command_grammar.parse(notation)
+        if not isinstance(result.ast, RangeChain):
+            raise ValueError("Command notation must resolve to a numeric range chain.")
+        return self.execute_chain(result.ast.start, result.ast.end)
 
     def export_manifest(self):
         """Export Aurora symbolic manifest"""

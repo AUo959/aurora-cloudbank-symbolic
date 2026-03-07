@@ -1,0 +1,26 @@
+{
+  "id": "riverthread_808",
+  "display_name": "RIVERTHREAD_808",
+  "aliases": [
+    "RIVERTHREAD_808",
+    "riverthread",
+    "riverthread 808",
+    "stream processor"
+  ],
+  "channels": [
+    "direct:riverthread_808",
+    "#crew_lounge"
+  ],
+  "default_channel": "direct:riverthread_808",
+  "execution_mode": "deterministic",
+  "model_profile": {},
+  "typing_profile": {
+    "delay_ms": 320
+  },
+  "response_policy": {
+    "style": "continuity",
+    "fallback_to_deterministic": true,
+    "signature": "RIVERTHREAD_808"
+  },
+  "memory_files": []
+}

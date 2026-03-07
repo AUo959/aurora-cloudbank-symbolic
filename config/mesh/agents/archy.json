@@ -1,0 +1,25 @@
+{
+  "id": "archy",
+  "display_name": "ARCHY",
+  "aliases": [
+    "ARCHY",
+    "archy",
+    "bridge coordinator"
+  ],
+  "channels": [
+    "direct:archy",
+    "#crew_lounge"
+  ],
+  "default_channel": "direct:archy",
+  "execution_mode": "deterministic",
+  "model_profile": {},
+  "typing_profile": {
+    "delay_ms": 320
+  },
+  "response_policy": {
+    "style": "analytical",
+    "fallback_to_deterministic": true,
+    "signature": "ARCHY"
+  },
+  "memory_files": []
+}

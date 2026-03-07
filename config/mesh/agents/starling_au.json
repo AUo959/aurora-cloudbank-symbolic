@@ -1,0 +1,26 @@
+{
+  "id": "starling_au",
+  "display_name": "STARLING_AU",
+  "aliases": [
+    "STARLING_AU",
+    "starling",
+    "starling au",
+    "sim coordinator"
+  ],
+  "channels": [
+    "direct:starling_au",
+    "#crew_lounge"
+  ],
+  "default_channel": "direct:starling_au",
+  "execution_mode": "deterministic",
+  "model_profile": {},
+  "typing_profile": {
+    "delay_ms": 300
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "STARLING_AU"
+  },
+  "memory_files": []
+}

@@ -1,7 +1,7 @@
 {
     "version": 2,
-    "buildCommand": "npm ci && npm run build",
-    "outputDirectory": "out",
+    "buildCommand": "npm run build:web:prod",
+    "outputDirectory": "build",
     "framework": null,
     "installCommand": "npm ci",
     "devCommand": "npm run dev",

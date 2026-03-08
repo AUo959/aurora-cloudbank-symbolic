@@ -16,6 +16,12 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: branch-cleanup-dry branch-cleanup-apply lint-stage1-opal2 pr-triage
 .PHONY: security clean deps-fix deps-fix-apply
 
+ensure-venv: ## Ensure the local virtual environment exists
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "❌ Virtual environment not found at $(VENV_DIR). Run 'make setup' first."; \
+		exit 1; \
+	fi
+
 install:
 	@echo "📦 Installing FULL dependencies for local development..."
 	pip install -r requirements-full.txt
@@ -128,22 +134,26 @@ lint:
 
 lint-tools:
 	# Lint only modernized tool paths (matches CI scope)
-	flake8 tools/symbolic tools/cli --max-line-length=120 --extend-ignore=E203,W503,F811
+	$(MAKE) ensure-venv
+	$(VENV_DIR)/bin/flake8 tools/symbolic tools/cli --max-line-length=120 --extend-ignore=E203,W503,F811
 
 lint-all:
 	# Broad lint across src, modules, tests, and tools (may surface legacy issues)
-	flake8 src modules tests tools/symbolic tools/cli --max-line-length=120 --extend-ignore=E203,W503
+	$(MAKE) ensure-venv
+	$(VENV_DIR)/bin/flake8 src modules tests tools/symbolic tools/cli --max-line-length=120 --extend-ignore=E203,W503
 
 test:
-	pytest tests
+	$(MAKE) ensure-venv
+	$(PYTHON_VENV) -m pytest tests
 
 run:
 	python modules/reflective_autonomy/loom_restore_script.py
 
 check:
 	# Fast stability check: scoped lint + full tests
+	$(MAKE) ensure-venv
 	$(MAKE) lint-tools
-	pytest -q
+	$(PYTHON_VENV) -m pytest -q
 
 branch-status:
 	# Generate a branch status report relative to main

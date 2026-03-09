@@ -13,7 +13,7 @@ PYTHON_VENV := $(VENV_DIR)/bin/python
 .PHONY: lint lint-tools lint-all test run check
 .PHONY: branch-status sync branch-plan pr-priority
 .PHONY: health-check maintenance-scan maintenance-manual maintenance-status
-.PHONY: branch-cleanup-dry branch-cleanup-apply lint-stage1-opal2 pr-triage
+.PHONY: branch-cleanup-dry branch-cleanup-apply branch-cleanup-safe branch-cleanup-execute lint-stage1-opal2 pr-triage
 .PHONY: security clean deps-fix deps-fix-apply
 
 ensure-venv: ## Ensure the local virtual environment exists
@@ -193,10 +193,16 @@ branch-cleanup-dry:
 	DRY_RUN=1 bash ./scripts/branch_cleanup_exec.sh 'copilot/fix-*' || true
 	DRY_RUN=1 bash ./scripts/branch_cleanup_exec.sh 'dependabot/*' || true
 
+branch-cleanup-safe:  ## Analyze branches and show safe-to-delete (dry run)
+	$(PYTHON) scripts/safe_branch_cleanup.py --report-only
+
 branch-cleanup-apply:
 	# Apply deletion of obvious obsolete branches (requires confirmation)
 	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'copilot/fix-*'
 	DRY_RUN=0 bash ./scripts/branch_cleanup_exec.sh 'dependabot/*'
+
+branch-cleanup-execute:  ## Delete branches identified as safe to remove
+	$(PYTHON) scripts/safe_branch_cleanup.py --execute
 
 lint-stage1-opal2:
 	# Stage 1 whitespace/formatting fixes for modules/opal2, then lint tools as a canary

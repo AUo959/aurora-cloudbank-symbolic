@@ -383,19 +383,25 @@ def delete_branches(
 
 def detect_repo_slug(cwd: str = ".") -> Optional[str]:
     """Try to detect owner/repo from git remote URL."""
+    import re as _re
+
     url = run_git(["remote", "get-url", "origin"], cwd=cwd)
     if not url:
         return None
-    # Handle SSH format: git@github.com:owner/repo.git
-    if "github.com:" in url:
-        slug = url.split("github.com:")[-1]
-    # Handle HTTPS format: https://github.com/owner/repo.git
-    elif "github.com/" in url:
-        slug = url.split("github.com/")[-1]
-    else:
-        return None
-    slug = slug.rstrip("/").removesuffix(".git")
-    return slug if "/" in slug else None
+
+    # Match SSH format: git@github.com:owner/repo.git
+    ssh_match = _re.match(r"^git@github\.com:([^/]+/[^/]+?)(?:\.git)?$", url)
+    if ssh_match:
+        return ssh_match.group(1)
+
+    # Match HTTPS format: https://github.com/owner/repo.git
+    https_match = _re.match(
+        r"^https?://github\.com/([^/]+/[^/]+?)(?:\.git)?/?$", url
+    )
+    if https_match:
+        return https_match.group(1)
+
+    return None
 
 
 def main() -> None:

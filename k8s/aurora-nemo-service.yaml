@@ -1,0 +1,34 @@
+# Aurora NeMo Service — Kubernetes Service
+# Ethics Protocol: Picard_Delta_3
+# T1: Service creation timestamp anchor
+# SRB: K8S_NEMO_SERVICE_v1
+# Chain Notation: #K8S//SERVICE//AURORA_NEMO//
+# DLP: [nemo, k8s, service]
+# Anchor Seed: EOS_SEED_ORION
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-nemo-service
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-nemo-service
+    component: nemo-inference
+    ethics-protocol: picard-delta-3
+  annotations:
+    aurora.io/chain-notation: "#K8S//SERVICE//AURORA_NEMO//"
+    aurora.io/srb: "K8S_NEMO_SERVICE_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+    aurora.io/module-id: "AURORA_NEMO_SERVICE"
+    aurora.io/anchor-seed: "EOS_SEED_ORION"
+spec:
+  type: ClusterIP
+  selector:
+    app: aurora-nemo-service
+    component: nemo-inference
+  ports:
+  - name: http
+    protocol: TCP
+    port: 8090
+    targetPort: 8090
+  sessionAffinity: None

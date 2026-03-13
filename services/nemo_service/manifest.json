@@ -1,0 +1,97 @@
+{
+  "module": "aurora_nemo_service",
+  "version": "1.0.0",
+  "export_time": "2026-03-13T00:00:00+00:00",
+  "team": "Aurora CloudBank Symbolic",
+  "ethics_protocol": "Picard_Delta_3",
+  "anchor_seed": "EOS_SEED_ORION",
+  "symbolic_references": {
+    "t1_anchor": "T1:NEMO_INIT",
+    "srb_tag": "NEMO_SERVICE_v1",
+    "dlp_tags": ["nemo", "inference", "gpu", "models"],
+    "chain_notation": "#SERVICES//NEMO//",
+    "ethics_lock": "ENFORCED",
+    "drift_lock": "ACTIVE",
+    "guardian_ring": "STAGED_ACTIVE"
+  },
+  "anchor_points": [
+    {
+      "id": "T1:NEMO_INIT",
+      "description": "Module initialisation anchor",
+      "file": "services/nemo_service/__init__.py"
+    },
+    {
+      "id": "T1:NEMO_CONFIG",
+      "description": "Configuration load anchor",
+      "file": "services/nemo_service/config.py"
+    },
+    {
+      "id": "T1:NEMO_BRIDGE",
+      "description": "Symbolic bridge activation anchor",
+      "file": "services/nemo_service/symbolic_bridge.py"
+    },
+    {
+      "id": "T1:NEMO_STATE",
+      "description": "State manager initialisation anchor",
+      "file": "services/nemo_service/state_manager.py"
+    },
+    {
+      "id": "T1:NEMO_SERVER",
+      "description": "FastAPI server startup anchor",
+      "file": "services/nemo_service/server.py"
+    }
+  ],
+  "memory_provenance": {
+    "hash_algorithm": "SHA256",
+    "seal_scope": "per_snapshot",
+    "snapshot_storage": "/snapshots",
+    "drift_detection": true,
+    "entropy_logging": true
+  },
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/nemo/infer",
+      "description": "ASR / NLU / TTS inference",
+      "dlp": "internal"
+    },
+    {
+      "method": "POST",
+      "path": "/nemo/generate",
+      "description": "LLM text generation",
+      "dlp": "internal"
+    },
+    {
+      "method": "GET",
+      "path": "/nemo/health",
+      "description": "Health check with entropy-state and memory-drift",
+      "dlp": "public"
+    },
+    {
+      "method": "GET",
+      "path": "/nemo/status",
+      "description": "Detailed status including model info, GPU, symbolic anchor",
+      "dlp": "internal"
+    },
+    {
+      "method": "POST",
+      "path": "/nemo/snapshot",
+      "description": "Create SHA256-sealed simulation snapshot",
+      "dlp": "confidential"
+    },
+    {
+      "method": "POST",
+      "path": "/nemo/restore",
+      "description": "Restore state from snapshot with checksum validation",
+      "dlp": "confidential"
+    }
+  ],
+  "infrastructure": {
+    "port": 8090,
+    "container_user": "aurora",
+    "container_uid": 1000,
+    "gpu_required": true,
+    "volumes": ["/models", "/snapshots"],
+    "k8s_namespace": "aurora-cloudbank"
+  }
+}

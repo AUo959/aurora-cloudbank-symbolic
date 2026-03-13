@@ -75,7 +75,7 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^7.1.0",
     "socket.io": "^4.7.0",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "engines": {
     "node": ">=20.0.0",

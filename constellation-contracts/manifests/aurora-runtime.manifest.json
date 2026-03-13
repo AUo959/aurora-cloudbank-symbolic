@@ -1,0 +1,33 @@
+{
+  "constellation_version": "1.0.0-alpha",
+  "node": {
+    "designation": "AURORA-RUNTIME",
+    "symbolic_tag": "s.tag::aurora.runtime",
+    "repo": "AuroraOS",
+    "role": "spoke",
+    "stack": ["typescript", "mastra"],
+    "description": "Agentic runtime — multi-agent orchestration, Mastra-based task execution"
+  },
+  "upstream": [
+    "s.tag::constellation.prime"
+  ],
+  "downstream": [],
+  "governance": {
+    "charter": "Picard_Delta_3",
+    "l3_modules": ["Axiomera", "Velatrix", "Glyphon", "Caelion", "Harmion"],
+    "ethics_protocol": true
+  },
+  "contracts": {
+    "published": [],
+    "consumed": ["forecast-result", "constellation-event", "constellation-health"]
+  },
+  "health": {
+    "last_sync": null,
+    "status": "initializing"
+  },
+  "meta": {
+    "created": "2026-03-13T00:00:00-04:00",
+    "created_by": "Perplexity Computer",
+    "proposal_ref": "Aurora Constellation Architecture Proposal v1.0.0"
+  }
+}

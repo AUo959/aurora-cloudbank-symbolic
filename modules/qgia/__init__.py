@@ -1,16 +1,11 @@
-"""QGIA Forecast Simulation Engine (QSFE)
+"""QGIA — Quantum Geopolitical Intelligence Agency modules
 
-Multi-agent belief propagation forecast engine for QGIA analytical operations.
-Generates a 551-agent population with Beta-distributed epistemic profiles,
-builds a ~7,407-edge trust network via Stochastic Block Model, and runs
-scenario-driven belief propagation to produce three-tier probabilistic
-intelligence forecasts.
+Submodules:
+- QSFE (Forecast Simulation Engine): Multi-agent belief propagation forecast engine
+- Knowledge Indexer: Walks QGIA repos and produces knowledge-index.json
+- Knowledge Bridge: Searchable index + QSFE enrichment layer
 
-- Population generation with archetype-weighted Monte Carlo sampling
-- SBM trust network with collaborate/challenge/reinforce/inform edges
-- Multi-round belief propagation with archetype-specific update rules
-- Three-tier output (Tier I > 25%, Tier II 10-25%, Tier III < 10%)
-- Dissent analysis and echo chamber detection
+Ref: Aurora Constellation Architecture Proposal v1.0.0
 """
 
 __version__ = "1.0.0"

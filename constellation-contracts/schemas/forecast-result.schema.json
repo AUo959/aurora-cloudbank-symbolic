@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/forecast-result.json",
+  "title": "QSFE Forecast Result",
+  "type": "object",
+  "required": ["forecast_id", "scenario_id", "tiers", "metadata"],
+  "properties": {
+    "forecast_id": { "type": "string", "pattern": "^FCST-[A-Z0-9-]+$" },
+    "scenario_id": { "type": "string" },
+    "tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tier", "outcome", "probability", "confidence"],
+        "properties": {
+          "tier": { "type": "string", "enum": ["I", "II", "III"] },
+          "outcome": { "type": "string" },
+          "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "evidence_fragments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": { "type": "string" },
+                "weight": { "type": "number" },
+                "knowledge_ref": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "analysts_activated": { "type": "integer" },
+        "echo_chambers_detected": { "type": "integer" },
+        "challenge_rounds": { "type": "integer" },
+        "processing_time_ms": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "symbolic_tag": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "caelion_anchor": { "type": "string" },
+        "charter": { "type": "string", "const": "Picard_Delta_3" },
+        "l3_compliance": { "type": "boolean" }
+      }
+    }
+  }
+}

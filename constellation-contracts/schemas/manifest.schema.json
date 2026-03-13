@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/manifest.json",
+  "title": "Constellation Manifest",
+  "description": "Schema for node manifest files (.aurora/constellation.json)",
+  "type": "object",
+  "required": ["constellation_version", "node", "governance", "contracts"],
+  "properties": {
+    "constellation_version": { "type": "string" },
+    "node": {
+      "type": "object",
+      "required": ["designation", "symbolic_tag", "repo", "role"],
+      "properties": {
+        "designation": { "type": "string" },
+        "symbolic_tag": { "type": "string", "pattern": "^s\\.tag::.+" },
+        "repo": { "type": "string" },
+        "role": { "type": "string", "enum": ["hub", "spoke"] },
+        "stack": { "type": "array", "items": { "type": "string" } },
+        "description": { "type": "string" }
+      }
+    },
+    "upstream": { "type": "array", "items": { "type": "string" } },
+    "downstream": { "type": "array", "items": { "type": "string" } },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "charter": { "type": "string" },
+        "l3_modules": { "type": "array", "items": { "type": "string" } },
+        "ethics_protocol": { "type": "boolean" }
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "properties": {
+        "published": { "type": "array", "items": { "type": "string" } },
+        "consumed": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "health": {
+      "type": "object",
+      "properties": {
+        "last_sync": {},
+        "status": { "type": "string" }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "created": { "type": "string" },
+        "created_by": { "type": "string" },
+        "proposal_ref": { "type": "string" }
+      }
+    }
+  }
+}

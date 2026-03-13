@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/knowledge-index.json",
+  "title": "QGIA Knowledge Index",
+  "type": "object",
+  "required": ["version", "source_repo", "generated_at", "documents"],
+  "properties": {
+    "version": { "type": "string" },
+    "source_repo": { "type": "string", "enum": ["qgia-knowledge-library", "qgia-knowledge-spine"] },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "domain", "path", "checksum"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "domain": { "type": "string" },
+          "path": { "type": "string" },
+          "checksum": { "type": "string" },
+          "word_count": { "type": "integer" },
+          "last_modified": { "type": "string", "format": "date-time" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "summary": { "type": "string" }
+        }
+      }
+    }
+  }
+}

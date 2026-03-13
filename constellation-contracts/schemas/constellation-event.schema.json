@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/constellation-event.json",
+  "title": "Constellation Event",
+  "type": "object",
+  "required": ["event_type", "source_node", "timestamp", "payload"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "qgia.forecast.completed",
+        "qgia.forecast.requested",
+        "zipwiz.archive.processed",
+        "aurora.drift.detected",
+        "qgia.knowledge.updated",
+        "constellation.health.check",
+        "constellation.health.response",
+        "constellation.manifest.drift"
+      ]
+    },
+    "source_node": {
+      "type": "string",
+      "enum": ["CONSTELLATION-PRIME", "AURORA-RUNTIME", "QUANTUM-VAULT", "QGIA-CORPUS", "QGIA-SPINE", "ZIPWIZ-ENGINE"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "correlation_id": { "type": "string", "format": "uuid" },
+    "payload": { "type": "object" },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "caelion_anchor": { "type": "string" },
+        "charter": { "type": "string" },
+        "l3_compliance": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/forecast-request.json",
+  "title": "QSFE Forecast Request",
+  "description": "Schema for submitting a scenario to the QGIA Forecast Simulation Engine",
+  "type": "object",
+  "required": ["scenario_id", "scenario_title", "description", "domain", "time_horizon_days"],
+  "properties": {
+    "scenario_id": { "type": "string", "pattern": "^SCN-[A-Z0-9-]+$" },
+    "scenario_title": { "type": "string", "maxLength": 200 },
+    "description": { "type": "string" },
+    "domain": { "type": "string", "enum": ["nuclear", "cyber", "economic", "military", "political", "environmental", "social", "technological", "hybrid"] },
+    "time_horizon_days": { "type": "integer", "minimum": 1, "maximum": 3650 },
+    "priority": { "type": "string", "enum": ["critical", "high", "standard", "low"], "default": "standard" },
+    "requestor": {
+      "type": "object",
+      "properties": {
+        "node": { "type": "string" },
+        "agent": { "type": "string" }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "confidence_threshold": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.6 },
+        "max_analysts": { "type": "integer", "minimum": 10, "maximum": 551, "default": 551 },
+        "challenge_enabled": { "type": "boolean", "default": true },
+        "echo_chamber_detection": { "type": "boolean", "default": true }
+      }
+    },
+    "knowledge_refs": {
+      "type": "array",
+      "items": { "type": "string", "description": "Reference IDs from QGIA knowledge corpus" }
+    },
+    "symbolic_tag": { "type": "string", "pattern": "^s\\.tag::.+" }
+  }
+}

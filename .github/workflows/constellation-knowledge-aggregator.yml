@@ -1,0 +1,50 @@
+name: "Constellation Knowledge Aggregator"
+
+# Triggered by repository_dispatch from QGIA spoke repos
+on:
+  repository_dispatch:
+    types: [qgia.knowledge.updated]
+
+  # Also allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "Source repo to aggregate from"
+        required: false
+        default: "all"
+
+permissions:
+  contents: write
+
+jobs:
+  aggregate:
+    name: Aggregate Knowledge Indexes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log trigger info
+        run: |
+          echo "Event type: ${{ github.event.action }}"
+          echo "Source node: ${{ github.event.client_payload.source_node }}"
+          echo "Source repo: ${{ github.event.client_payload.source_repo }}"
+          echo "Correlation ID: ${{ github.event.client_payload.correlation_id }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run aggregator
+        run: python scripts/aggregate-knowledge-indexes.py
+
+      - name: Commit aggregated index
+        run: |
+          git config user.name "aurora-constellation[bot]"
+          git config user.email "aurora-constellation[bot]@users.noreply.github.com"
+          git add knowledge-indexes/
+          git diff --cached --quiet || git commit -m "chore: aggregate knowledge indexes from ${{ github.event.client_payload.source_node || 'manual' }} [skip ci]"
+          git push

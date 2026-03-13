@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "source_repo": "aggregated",
+  "generated_at": "2026-03-13T15:12:04.350843+00:00",
+  "aggregation_metadata": {
+    "sources": {
+      "qgia-knowledge-library": {
+        "status": "unreachable",
+        "document_count": 0
+      },
+      "qgia-knowledge-spine": {
+        "status": "unreachable",
+        "document_count": 0
+      }
+    },
+    "total_documents": 0,
+    "aggregated_by": "constellation-knowledge-aggregator",
+    "drift_notes": [
+      "First aggregation \u2014 no previous index to compare"
+    ]
+  },
+  "documents": []
+}

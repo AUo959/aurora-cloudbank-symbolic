@@ -1,0 +1,91 @@
+name: "Constellation Health Audit"
+
+# Weekly audit of all constellation node manifests for version drift.
+# Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 4
+
+on:
+  schedule:
+    - cron: "23 7 * * 1"  # Weekly Monday 07:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    name: Audit Constellation Manifests
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.CONSTELLATION_TOKEN }}
+    steps:
+      - name: Checkout hub
+        uses: actions/checkout@v4
+
+      - name: Read hub manifest
+        id: hub
+        run: |
+          HUB_VERSION=$(jq -r '.constellation_version' .aurora/constellation.json)
+          echo "version=$HUB_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Hub constellation_version: $HUB_VERSION"
+
+      - name: Fetch spoke manifests
+        id: fetch
+        run: |
+          REPOS=(
+            "AUo959/AuroraOS"
+            "AUo959/cloudbank-quantum-en"
+            "AUo959/qgia-knowledge-library"
+            "AUo959/qgia-knowledge-spine"
+            "AUo959/zip_wizard"
+          )
+
+          DRIFT_DETECTED=false
+          REPORT="## Constellation Health Audit Report\n\n"
+          REPORT+="**Hub version**: ${{ steps.hub.outputs.version }}\n"
+          REPORT+="**Audit date**: $(date -u +%Y-%m-%dT%H:%M:%SZ)\n\n"
+          REPORT+="| Node | Repo | Version | Status |\n"
+          REPORT+="|------|------|---------|--------|\n"
+
+          for REPO in "${REPOS[@]}"; do
+            REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+            echo "Checking $REPO..."
+
+            # Try to fetch the manifest from the repo
+            MANIFEST=$(gh api "repos/$REPO/contents/.aurora/constellation.json" \
+              --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || echo "NOT_FOUND")
+
+            if [ "$MANIFEST" = "NOT_FOUND" ] || [ -z "$MANIFEST" ]; then
+              REPORT+="| ? | $REPO_NAME | N/A | ⚠️ Manifest not found |\n"
+              DRIFT_DETECTED=true
+            else
+              SPOKE_VERSION=$(echo "$MANIFEST" | jq -r '.constellation_version // "unknown"')
+              SPOKE_NODE=$(echo "$MANIFEST" | jq -r '.node.designation // "unknown"')
+
+              if [ "$SPOKE_VERSION" = "${{ steps.hub.outputs.version }}" ]; then
+                REPORT+="| $SPOKE_NODE | $REPO_NAME | $SPOKE_VERSION | ✅ In sync |\n"
+              else
+                REPORT+="| $SPOKE_NODE | $REPO_NAME | $SPOKE_VERSION | ❌ Drift ($SPOKE_VERSION != ${{ steps.hub.outputs.version }}) |\n"
+                DRIFT_DETECTED=true
+              fi
+            fi
+          done
+
+          echo "$DRIFT_DETECTED" > /tmp/drift_detected
+          echo -e "$REPORT" > /tmp/audit_report.md
+          cat /tmp/audit_report.md
+
+      - name: Create issue on drift
+        if: always()
+        run: |
+          DRIFT_DETECTED=$(cat /tmp/drift_detected)
+          if [ "$DRIFT_DETECTED" = "true" ]; then
+            REPORT=$(cat /tmp/audit_report.md)
+            gh issue create \
+              --title "Constellation Drift Detected — $(date -u +%Y-%m-%d)" \
+              --body "$REPORT" \
+              --label "constellation,drift" \
+              || echo "::warning::Could not create issue (labels may not exist yet)"
+          else
+            echo "No drift detected — all nodes in sync"
+          fi

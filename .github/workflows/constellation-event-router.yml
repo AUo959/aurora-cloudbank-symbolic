@@ -1,0 +1,127 @@
+name: "Constellation Event Router"
+
+# Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 3
+
+on:
+  repository_dispatch:
+    types:
+      - qgia.forecast.completed
+      - qgia.forecast.requested
+      - zipwiz.archive.processed
+      - aurora.drift.detected
+      - qgia.knowledge.updated
+      - constellation.health.check
+      - constellation.health.response
+      - constellation.manifest.drift
+
+permissions:
+  contents: read
+
+jobs:
+  validate-event:
+    name: Validate Event Payload
+    runs-on: ubuntu-latest
+    outputs:
+      event_type: ${{ steps.parse.outputs.event_type }}
+      source_node: ${{ steps.parse.outputs.source_node }}
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse event
+        id: parse
+        run: |
+          echo "event_type=${{ github.event.action }}" >> "$GITHUB_OUTPUT"
+          echo "source_node=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.source_node // "unknown"')" >> "$GITHUB_OUTPUT"
+          echo "correlation_id=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.correlation_id // "none"')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Validate payload against schema
+        id: validate
+        run: |
+          python3 -c "
+          import json, sys
+          from jsonschema import validate, ValidationError
+
+          with open('constellation-contracts/schemas/constellation-event.schema.json') as f:
+              schema = json.load(f)
+
+          payload = json.loads('''${{ toJSON(github.event.client_payload) }}''')
+
+          try:
+              validate(instance=payload, schema=schema)
+              print('Payload is valid')
+          except ValidationError as e:
+              print(f'Validation failed: {e.message}', file=sys.stderr)
+              sys.exit(1)
+          "
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+
+      - name: Audit log
+        run: |
+          echo "::notice::Constellation Event received: type=${{ github.event.action }}, source=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.source_node'), correlation_id=$(echo '${{ toJSON(github.event.client_payload) }}' | jq -r '.correlation_id')"
+
+  route-event:
+    name: Route to ${{ matrix.subscriber }}
+    needs: validate-event
+    if: needs.validate-event.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # qgia.forecast.completed → AURORA-RUNTIME, ZIPWIZ-ENGINE
+          - event: qgia.forecast.completed
+            subscriber: AuroraOS
+            owner: AUo959
+          - event: qgia.forecast.completed
+            subscriber: zip_wizard
+            owner: AUo959
+          # qgia.forecast.requested → CONSTELLATION-PRIME (self, for logging)
+          - event: qgia.forecast.requested
+            subscriber: aurora-cloudbank-symbolic
+            owner: AUo959
+          # zipwiz.archive.processed → CONSTELLATION-PRIME
+          - event: zipwiz.archive.processed
+            subscriber: aurora-cloudbank-symbolic
+            owner: AUo959
+          # qgia.knowledge.updated → CONSTELLATION-PRIME, AURORA-RUNTIME
+          - event: qgia.knowledge.updated
+            subscriber: aurora-cloudbank-symbolic
+            owner: AUo959
+          - event: qgia.knowledge.updated
+            subscriber: AuroraOS
+            owner: AUo959
+          # constellation.health.check → all spokes
+          - event: constellation.health.check
+            subscriber: AuroraOS
+            owner: AUo959
+          - event: constellation.health.check
+            subscriber: cloudbank-quantum-en
+            owner: AUo959
+          - event: constellation.health.check
+            subscriber: qgia-knowledge-library
+            owner: AUo959
+          - event: constellation.health.check
+            subscriber: qgia-knowledge-spine
+            owner: AUo959
+          - event: constellation.health.check
+            subscriber: zip_wizard
+            owner: AUo959
+    steps:
+      - name: Route event
+        if: needs.validate-event.outputs.event_type == matrix.event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CONSTELLATION_TOKEN }}
+          repository: ${{ matrix.owner }}/${{ matrix.subscriber }}
+          event-type: ${{ needs.validate-event.outputs.event_type }}
+          client-payload: ${{ toJSON(github.event.client_payload) }}

@@ -1,0 +1,80 @@
+name: "Constellation Event Publisher"
+
+# Reusable workflow for spoke repos to publish events to the hub event router.
+# Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 3
+
+on:
+  workflow_call:
+    inputs:
+      event_type:
+        description: "Constellation event type (e.g. qgia.forecast.completed)"
+        required: true
+        type: string
+      payload:
+        description: "Event payload as JSON string"
+        required: true
+        type: string
+    secrets:
+      CONSTELLATION_TOKEN:
+        description: "GitHub PAT with repo dispatch permissions on the hub repo"
+        required: true
+
+jobs:
+  publish:
+    name: Publish Event to Constellation Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate event type
+        run: |
+          VALID_TYPES=(
+            "qgia.forecast.completed"
+            "qgia.forecast.requested"
+            "zipwiz.archive.processed"
+            "aurora.drift.detected"
+            "qgia.knowledge.updated"
+            "constellation.health.check"
+            "constellation.health.response"
+            "constellation.manifest.drift"
+          )
+          EVENT_TYPE="${{ inputs.event_type }}"
+          FOUND=false
+          for t in "${VALID_TYPES[@]}"; do
+            if [ "$t" = "$EVENT_TYPE" ]; then
+              FOUND=true
+              break
+            fi
+          done
+          if [ "$FOUND" = "false" ]; then
+            echo "::error::Invalid event type: $EVENT_TYPE"
+            exit 1
+          fi
+          echo "Event type '$EVENT_TYPE' is valid"
+
+      - name: Build event envelope
+        id: envelope
+        run: |
+          CORRELATION_ID=$(uuidgen || python3 -c "import uuid; print(uuid.uuid4())")
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Merge payload with envelope fields
+          ENVELOPE=$(echo '${{ inputs.payload }}' | jq \
+            --arg et "${{ inputs.event_type }}" \
+            --arg ts "$TIMESTAMP" \
+            --arg cid "$CORRELATION_ID" \
+            '. + {event_type: $et, timestamp: $ts, correlation_id: $cid, provenance: {charter: "Picard_Delta_3", l3_compliance: true}}')
+
+          # Write to file to avoid shell escaping issues
+          echo "$ENVELOPE" > /tmp/event_envelope.json
+          echo "correlation_id=$CORRELATION_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to hub
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CONSTELLATION_TOKEN }}
+          repository: AUo959/aurora-cloudbank-symbolic
+          event-type: ${{ inputs.event_type }}
+          client-payload: ${{ steps.envelope.outputs.envelope || inputs.payload }}
+
+      - name: Audit log
+        run: |
+          echo "::notice::Published constellation event: type=${{ inputs.event_type }}, correlation_id=${{ steps.envelope.outputs.correlation_id }}"

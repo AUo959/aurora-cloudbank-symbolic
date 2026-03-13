@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aurora.constellation/schemas/constellation-health.json",
+  "title": "Node Health Report",
+  "type": "object",
+  "required": ["node", "status", "timestamp", "manifest_version"],
+  "properties": {
+    "node": { "type": "string" },
+    "status": { "type": "string", "enum": ["operational", "degraded", "offline", "unknown"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "manifest_version": { "type": "string" },
+    "constellation_version": { "type": "string" },
+    "last_event": { "type": "string", "format": "date-time" },
+    "checks": {
+      "type": "object",
+      "properties": {
+        "api_reachable": { "type": "boolean" },
+        "manifest_valid": { "type": "boolean" },
+        "contract_compatible": { "type": "boolean" },
+        "last_sync_age_hours": { "type": "number" }
+      }
+    }
+  }
+}

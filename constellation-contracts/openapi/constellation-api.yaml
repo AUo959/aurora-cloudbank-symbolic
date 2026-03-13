@@ -1,0 +1,489 @@
+openapi: "3.0.3"
+info:
+  title: Aurora Constellation Gateway API
+  description: >
+    Unified API gateway for the Aurora Constellation, providing access to QSFE
+    forecasting, QGIA knowledge queries, Quantum Vault operations, archive
+    processing, and agent invocation across all constellation nodes.
+    Defined in the Aurora Constellation Architecture Proposal v1.0.0.
+  version: "1.0.0-alpha"
+  contact:
+    name: Aurora Constellation
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.aurora.constellation/v1
+    description: Constellation Gateway
+
+security:
+  - BearerAuth: []
+
+paths:
+  /api/constellation/status:
+    get:
+      operationId: getConstellationStatus
+      summary: Aggregated health of all constellation nodes
+      tags: [constellation]
+      parameters:
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      responses:
+        "200":
+          description: Aggregated health report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  constellation_version:
+                    type: string
+                  nodes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/NodeHealth"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/qgia/forecast:
+    post:
+      operationId: submitForecast
+      summary: Submit a scenario for QSFE forecast simulation
+      tags: [qgia]
+      parameters:
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForecastRequest"
+      responses:
+        "200":
+          description: Forecast result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForecastResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/qgia/knowledge/{domain}:
+    get:
+      operationId: queryKnowledge
+      summary: Query QGIA knowledge library by domain
+      tags: [qgia]
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [nuclear, cyber, economic, military, political, environmental, social, technological, hybrid]
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      responses:
+        "200":
+          description: Knowledge index for the specified domain
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeIndex"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/quantum/vault:
+    post:
+      operationId: vaultOperation
+      summary: Quantum vault file operations (upload, retrieve, share)
+      tags: [quantum]
+      parameters:
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [operation, path]
+              properties:
+                operation:
+                  type: string
+                  enum: [upload, retrieve, share]
+                path:
+                  type: string
+                metadata:
+                  type: object
+      responses:
+        "200":
+          description: Vault operation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  path:
+                    type: string
+                  checksum:
+                    type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/archive/process:
+    post:
+      operationId: processArchive
+      summary: Archive extraction and analysis via ZipWiz engine
+      tags: [archive]
+      parameters:
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [archive_url]
+              properties:
+                archive_url:
+                  type: string
+                  format: uri
+                options:
+                  type: object
+                  properties:
+                    extract_metadata:
+                      type: boolean
+                      default: true
+                    scan_contents:
+                      type: boolean
+                      default: false
+      responses:
+        "200":
+          description: Archive processing result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  files_extracted:
+                    type: integer
+                  analysis:
+                    type: object
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/aurora/agent:
+    post:
+      operationId: invokeAgent
+      summary: Invoke an Aurora agent for task execution
+      tags: [aurora]
+      parameters:
+        - $ref: "#/components/parameters/XConstellationNode"
+        - $ref: "#/components/parameters/XCorrelationID"
+        - $ref: "#/components/parameters/XCaelionAnchor"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent_type, task]
+              properties:
+                agent_type:
+                  type: string
+                task:
+                  type: string
+                context:
+                  type: object
+                symbolic_tag:
+                  type: string
+      responses:
+        "200":
+          description: Agent invocation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agent_id:
+                    type: string
+                  status:
+                    type: string
+                  result:
+                    type: object
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    XConstellationNode:
+      name: X-Constellation-Node
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Source constellation node designation
+    XCorrelationID:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Correlation ID for distributed tracing
+    XCaelionAnchor:
+      name: X-Caelion-Anchor
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Caelion provenance anchor for L3 compliance
+
+  responses:
+    BadRequest:
+      description: Invalid request payload
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        correlation_id:
+          type: string
+
+    ForecastRequest:
+      type: object
+      required: [scenario_id, scenario_title, description, domain, time_horizon_days]
+      properties:
+        scenario_id:
+          type: string
+          pattern: "^SCN-[A-Z0-9-]+$"
+        scenario_title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        domain:
+          type: string
+          enum: [nuclear, cyber, economic, military, political, environmental, social, technological, hybrid]
+        time_horizon_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+        priority:
+          type: string
+          enum: [critical, high, standard, low]
+          default: standard
+        requestor:
+          type: object
+          properties:
+            node:
+              type: string
+            agent:
+              type: string
+        parameters:
+          type: object
+          properties:
+            confidence_threshold:
+              type: number
+            max_analysts:
+              type: integer
+            challenge_enabled:
+              type: boolean
+            echo_chamber_detection:
+              type: boolean
+        knowledge_refs:
+          type: array
+          items:
+            type: string
+        symbolic_tag:
+          type: string
+
+    ForecastResult:
+      type: object
+      required: [forecast_id, scenario_id, tiers, metadata]
+      properties:
+        forecast_id:
+          type: string
+          pattern: "^FCST-[A-Z0-9-]+$"
+        scenario_id:
+          type: string
+        tiers:
+          type: array
+          items:
+            type: object
+            required: [tier, outcome, probability, confidence]
+            properties:
+              tier:
+                type: string
+                enum: ["I", "II", "III"]
+              outcome:
+                type: string
+              probability:
+                type: number
+              confidence:
+                type: number
+              evidence_fragments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    source:
+                      type: string
+                    weight:
+                      type: number
+                    knowledge_ref:
+                      type: string
+        metadata:
+          type: object
+          properties:
+            analysts_activated:
+              type: integer
+            echo_chambers_detected:
+              type: integer
+            challenge_rounds:
+              type: integer
+            processing_time_ms:
+              type: number
+            timestamp:
+              type: string
+              format: date-time
+            symbolic_tag:
+              type: string
+        provenance:
+          type: object
+          properties:
+            caelion_anchor:
+              type: string
+            charter:
+              type: string
+            l3_compliance:
+              type: boolean
+
+    NodeHealth:
+      type: object
+      required: [node, status, timestamp, manifest_version]
+      properties:
+        node:
+          type: string
+        status:
+          type: string
+          enum: [operational, degraded, offline, unknown]
+        timestamp:
+          type: string
+          format: date-time
+        manifest_version:
+          type: string
+        constellation_version:
+          type: string
+        last_event:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          properties:
+            api_reachable:
+              type: boolean
+            manifest_valid:
+              type: boolean
+            contract_compatible:
+              type: boolean
+            last_sync_age_hours:
+              type: number
+
+    KnowledgeIndex:
+      type: object
+      required: [version, source_repo, generated_at, documents]
+      properties:
+        version:
+          type: string
+        source_repo:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        documents:
+          type: array
+          items:
+            type: object
+            required: [id, title, domain, path, checksum]
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              domain:
+                type: string
+              path:
+                type: string
+              checksum:
+                type: string
+              word_count:
+                type: integer
+              last_modified:
+                type: string
+                format: date-time
+              tags:
+                type: array
+                items:
+                  type: string
+              summary:
+                type: string

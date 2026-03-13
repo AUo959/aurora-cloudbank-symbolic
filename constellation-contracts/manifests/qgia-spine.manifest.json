@@ -1,0 +1,34 @@
+{
+  "constellation_version": "1.0.0-alpha",
+  "node": {
+    "designation": "QGIA-SPINE",
+    "symbolic_tag": "s.tag::qgia.spine",
+    "repo": "qgia-knowledge-spine",
+    "role": "spoke",
+    "stack": ["markdown"],
+    "description": "Knowledge spine — structural index, cross-reference backbone, domain taxonomy"
+  },
+  "upstream": [
+    "s.tag::constellation.prime",
+    "s.tag::qgia.corpus"
+  ],
+  "downstream": [],
+  "governance": {
+    "charter": "Picard_Delta_3",
+    "l3_modules": ["Axiomera", "Velatrix", "Glyphon", "Caelion", "Harmion"],
+    "ethics_protocol": true
+  },
+  "contracts": {
+    "published": ["knowledge-index"],
+    "consumed": ["constellation-event", "constellation-health"]
+  },
+  "health": {
+    "last_sync": null,
+    "status": "initializing"
+  },
+  "meta": {
+    "created": "2026-03-13T00:00:00-04:00",
+    "created_by": "Perplexity Computer",
+    "proposal_ref": "Aurora Constellation Architecture Proposal v1.0.0"
+  }
+}

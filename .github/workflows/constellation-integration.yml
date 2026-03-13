@@ -1,0 +1,199 @@
+name: "Constellation Integration CI"
+
+# Ref: Aurora Constellation Architecture Proposal v1.0.0 — Gap 4
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "constellation-contracts/**"
+      - ".aurora/constellation.json"
+      - "modules/qgia/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "constellation-contracts/**"
+      - ".aurora/constellation.json"
+      - "modules/qgia/**"
+  schedule:
+    - cron: "17 6 * * 1"  # Weekly Monday 06:17 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  validate-schemas:
+    name: Validate JSON Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate all schema files are valid JSON
+        run: |
+          echo "Validating JSON schemas..."
+          ERRORS=0
+          for f in constellation-contracts/schemas/*.json; do
+            if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
+              echo "::error::Invalid JSON: $f"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "  ✓ $f"
+            fi
+          done
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::$ERRORS schema(s) failed validation"
+            exit 1
+          fi
+          echo "All schemas are valid JSON"
+
+      - name: Validate JSON Schema draft-07 compliance
+        run: |
+          pip install jsonschema
+          python3 -c "
+          import json, glob, sys
+          from jsonschema import Draft7Validator
+
+          errors = 0
+          for path in sorted(glob.glob('constellation-contracts/schemas/*.json')):
+              with open(path) as f:
+                  schema = json.load(f)
+              validator = Draft7Validator(schema)
+              if not validator.is_valid({}):
+                  # Schema itself should be a valid JSON Schema
+                  pass
+              # Check the schema is a valid JSON Schema document
+              try:
+                  Draft7Validator.check_schema(schema)
+                  print(f'  ✓ {path}')
+              except Exception as e:
+                  print(f'  ✗ {path}: {e}', file=sys.stderr)
+                  errors += 1
+
+          if errors:
+              sys.exit(1)
+          print('All schemas are valid JSON Schema draft-07')
+          "
+
+  validate-openapi:
+    name: Validate OpenAPI Spec
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install validator
+        run: npm install -g @apidevtools/swagger-cli
+
+      - name: Validate OpenAPI
+        run: swagger-cli validate constellation-contracts/openapi/constellation-api.yaml
+
+  validate-python-types:
+    name: Validate Python Types
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Import and validate types
+        run: |
+          cd constellation-contracts/types/python
+          python3 -c "
+          from constellation_types import (
+              ForecastRequest, ForecastResult, ForecastTier, EvidenceFragment,
+              ConstellationEvent, EventType,
+              KnowledgeIndex, KnowledgeDocument,
+              NodeHealth, NodeStatus, HealthChecks,
+              Provenance, ConstellationNode,
+              validate_against_schema,
+          )
+          print('All types imported successfully')
+
+          # Validate sample data
+          sample = {
+              'scenario_id': 'SCN-TEST-001',
+              'scenario_title': 'Test Scenario',
+              'description': 'A test scenario for CI validation',
+              'domain': 'cyber',
+              'time_horizon_days': 30
+          }
+          assert validate_against_schema(sample, 'forecast-request.schema.json')
+          print('Sample validation passed')
+          "
+
+  validate-manifests:
+    name: Validate Constellation Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate hub manifest exists and is valid JSON
+        run: |
+          if [ ! -f .aurora/constellation.json ]; then
+            echo "::error::Hub manifest .aurora/constellation.json not found"
+            exit 1
+          fi
+          python3 -m json.tool .aurora/constellation.json > /dev/null
+          echo "Hub manifest is valid JSON"
+
+      - name: Validate spoke manifest templates
+        run: |
+          for f in constellation-contracts/manifests/*.json; do
+            if ! python3 -m json.tool "$f" > /dev/null 2>&1; then
+              echo "::error::Invalid manifest: $f"
+              exit 1
+            fi
+            echo "  ✓ $f"
+          done
+          echo "All spoke manifests are valid"
+
+      - name: Check constellation version consistency
+        run: |
+          python3 -c "
+          import json, glob, sys
+
+          with open('.aurora/constellation.json') as f:
+              hub = json.load(f)
+          hub_version = hub['constellation_version']
+          print(f'Hub version: {hub_version}')
+
+          errors = 0
+          for path in sorted(glob.glob('constellation-contracts/manifests/*.json')):
+              with open(path) as f:
+                  spoke = json.load(f)
+              sv = spoke.get('constellation_version', 'MISSING')
+              if sv != hub_version:
+                  print(f'  ✗ {path}: version {sv} != hub {hub_version}', file=sys.stderr)
+                  errors += 1
+              else:
+                  print(f'  ✓ {path}: {sv}')
+
+          if errors:
+              sys.exit(1)
+          print('All manifest versions match')
+          "
+
+  health-report:
+    name: Constellation Health Report
+    needs: [validate-schemas, validate-openapi, validate-python-types, validate-manifests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        run: |
+          echo "## Constellation Integration Report"
+          echo ""
+          echo "| Check | Status |"
+          echo "|-------|--------|"
+          echo "| JSON Schemas | ${{ needs.validate-schemas.result }} |"
+          echo "| OpenAPI Spec | ${{ needs.validate-openapi.result }} |"
+          echo "| Python Types | ${{ needs.validate-python-types.result }} |"
+          echo "| Manifests    | ${{ needs.validate-manifests.result }} |"

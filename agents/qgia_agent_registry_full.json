@@ -1,0 +1,45 @@
+{
+  "document_id": "QGIA-AGENT-REGISTRY-v1.0",
+  "classification": "PROPRIETARY — RESTRICTED",
+  "generated": "2026-03-12",
+  "framework": "QGIA OPERATIONAL ENVIRONMENT v3.0",
+  "total_agents": 551,
+  "note": "Full 551-agent population registry. Each agent carries complete epistemic profile, division/unit assignment, grade, archetype, regional specialization, language coverage, prior institution, education, and formative failure. Generated via Monte Carlo simulation with Beta-distributed epistemic parameters. See qgia_trust_network.json for interpersonal edge data.",
+  "divisions": {
+    "GMD": {"name": "Global Monitoring Division", "headcount": 203},
+    "MAD": {"name": "Military Analysis Division", "headcount": 142},
+    "IID": {"name": "Intelligence Integration Division", "headcount": 138},
+    "SRD": {"name": "Strategic Research Division", "headcount": 68}
+  },
+  "grade_distribution": {
+    "GS-9":  {"label": "Junior Analyst",    "count": 38},
+    "GS-11": {"label": "Analyst",           "count": 72},
+    "GS-12": {"label": "Senior Analyst",    "count": 118},
+    "GS-13": {"label": "Senior Analyst",    "count": 202},
+    "GS-14": {"label": "Principal Analyst", "count": 48},
+    "GS-15": {"label": "Senior Principal",  "count": 25},
+    "SES":   {"label": "Senior Executive",  "count": 11},
+    "DIR":   {"label": "Director/Deputy",   "count": 6},
+    "EXEC":  {"label": "Executive Staff",   "count": 31}
+  },
+  "archetype_definitions": {
+    "Aggressive Updater": "Updates beliefs rapidly on new evidence; risk of overcorrection",
+    "Prior-Anchored Conservative": "Holds firm priors; requires strong evidence for revision",
+    "Contrarian by Default": "Challenges room consensus reflexively; high dissent rate",
+    "Institutionalist": "Defers to chain of command and established doctrine",
+    "Empirical Minimalist": "Refuses to assert beyond data; pushes for more collection",
+    "Intuitive Pattern Matcher": "High-speed weak-signal detection; trusts pattern over proof",
+    "Dialectical Synthesizer": "Builds composite positions from competing arguments",
+    "Recursive Self-Corrector": "Systematically reviews own past assessments; high metacognition"
+  },
+  "epistemic_parameter_definitions": {
+    "prior_strength": "0.0-1.0. Resistance to prior revision. Beta(4,3).",
+    "update_threshold": "0.0-1.0. Evidence weight required to trigger belief update. Beta(3,4).",
+    "contrarian_index": "0.0-1.0. Propensity to challenge consensus. Beta(2,5).",
+    "trust_radius": "0.0-1.0. Breadth of trusted peer network. Beta(2,4).",
+    "domain_overconfidence": "0.0-1.0. Calibration gap in primary specialty. Beta(3,5).",
+    "intellectual_independence": "0.0-1.0. Autonomy from peer/institutional pressure. Beta(4,2).",
+    "institutional_loyalty": "0.0-1.0. Deference to organizational hierarchy. Beta(3,3)."
+  },
+  "agents": "[FULL AGENT ARRAY — see generated artifact qgia_agent_registry_full.json for complete 551-record population. This stub preserves document structure for repo commit. Full JSON available in session compute artifact code_file:151.]"
+}

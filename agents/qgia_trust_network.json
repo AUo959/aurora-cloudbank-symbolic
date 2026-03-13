@@ -1,0 +1,50 @@
+{
+  "document_id": "QGIA-TRUST-NETWORK-v1.0",
+  "classification": "PROPRIETARY — RESTRICTED",
+  "generated": "2026-03-12",
+  "model": "Stochastic Block Model with archetype-weighted edge probabilities",
+  "total_nodes": 551,
+  "total_edges": 7407,
+  "network_description": "Sparse directed influence graph across the 551-agent QGIA population. Edge probabilities governed by a Stochastic Block Model partitioned by division membership, modulated by tier proximity, combined contrarian index, and geometric mean trust radius. Four edge types encode distinct social epistemic functions.",
+  "block_parameters": {
+    "within_division_base_probability": 0.12,
+    "cross_division_base_probability": 0.025,
+    "cross_tier_penalty_per_tier_gap": 0.04,
+    "contrarian_boost_coefficient": 0.05,
+    "trust_radius_boost_coefficient": 0.04,
+    "min_edge_probability": 0.005,
+    "max_edge_probability": 0.35
+  },
+  "edge_types": {
+    "collaborate": {
+      "count": 4040,
+      "description": "Active analytical partnership within shared division; routine product exchange"
+    },
+    "challenge": {
+      "count": 583,
+      "description": "High combined contrarian index; dissent relationship — source challenges target assessments"
+    },
+    "reinforce": {
+      "count": 348,
+      "description": "Shared archetype + similar prior strength; mutual confirmation relationship"
+    },
+    "inform": {
+      "count": 2436,
+      "description": "Cross-division information flow; source provides domain product to target"
+    }
+  },
+  "network_statistics": {
+    "average_degree": 26.9,
+    "challenge_edge_ratio": 0.079,
+    "reinforce_edge_ratio": 0.047,
+    "collaborate_edge_ratio": 0.546,
+    "inform_edge_ratio": 0.329,
+    "structural_note": "Challenge edges (7.9%) are deliberately sparse — this is a feature, not a bug. In a 551-person analytical organization, genuine contrarian relationships are rare. The 583 challenge edges represent the analyst pairs whose dissent will actually be heard. Reinforce edges (4.7%) flag echo-chamber risk clusters for monitoring."
+  },
+  "usage_notes": {
+    "scenario_runs": "When running a live scenario (e.g. Iran escalation), load the subgraph of analysts assigned to that scenario's Crisis Response Cell. Edge types determine whose dissent propagates. Challenge edges create the analytical tension; reinforce clusters are the groupthink risk.",
+    "echo_chamber_detection": "Identify connected components of reinforce edges with 3+ nodes. These are the clusters most likely to produce overconfident consensus product.",
+    "dissent_propagation": "High-contrarian-index analysts connected via challenge edges to Tier 3+ nodes have outsized influence on final product. Monitor these paths."
+  },
+  "edges": "[FULL EDGE ARRAY — 7407 edges. See session compute artifact code_file:222 for complete edge list. Structure per edge: {source: agent_id, target: agent_id, type: string, weight: float}]"
+}

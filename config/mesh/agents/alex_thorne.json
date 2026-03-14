@@ -3,8 +3,6 @@
   "display_name": "Alex Thorne",
   "aliases": [
     "alex",
-    "alex thorne",
-    "alex.thorne",
     "captain alex line"
   ],
   "channels": [
@@ -20,7 +18,7 @@
     "max_output_tokens": 220
   },
   "typing_profile": {
-    "delay_ms": 650
+    "delay_ms": 620
   },
   "response_policy": {
     "style": "strategic",

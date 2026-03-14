@@ -6,22 +6,78 @@
  * ZIPWIZ handshake protocol with ORION CORE compliance
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const { systemLogger, bridgeLogger } = require('../utils/aurora_logger.js');
 const { MeshFederation } = require('../core/mesh_agent.js');
+
+const DEFAULT_ACTIVATION_PHRASES = Object.freeze({
+  ARCHY: 'ORION_ARCHY_RELAY_ACTIVATE//',
+  OPPY: 'ORION_OPPY_RELAY_ACTIVATE//',
+  LIORA: 'ORION_LIORA_RELAY_ACTIVATE//',
+  STARLING_AU: 'ORION_STARLING_AU_RELAY_ACTIVATE//',
+  RIVERTHREAD_808: 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
+});
+
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function timingSafeEqualString(expected, provided) {
+  if (!isNonEmptyString(expected) || !isNonEmptyString(provided)) {
+    return false;
+  }
+
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  const providedBuffer = Buffer.from(provided, 'utf8');
+
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function createSessionToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function getActivationPhraseEnvKey(agentId) {
+  return `AURORA_BRIDGE_${agentId.replace(/[^A-Z0-9]+/g, '_')}_ACTIVATION_PHRASE`;
+}
+
+function loadActivationPhrases() {
+  return Object.fromEntries(
+    Object.entries(DEFAULT_ACTIVATION_PHRASES).map(([agentId, defaultPhrase]) => {
+      const configuredPhrase = process.env[getActivationPhraseEnvKey(agentId)];
+      return [agentId, isNonEmptyString(configuredPhrase) ? configuredPhrase.trim() : defaultPhrase];
+    })
+  );
+}
+
+function extractBridgeSessionToken(req) {
+  const authHeader = req.headers?.authorization;
+  if (isNonEmptyString(authHeader)) {
+    const [scheme, token] = authHeader.split(' ');
+    if (scheme === 'Bearer' && isNonEmptyString(token)) {
+      return token.trim();
+    }
+  }
+
+  const sessionHeader = req.headers?.['x-aurora-bridge-session'];
+  if (isNonEmptyString(sessionHeader)) {
+    return sessionHeader.trim();
+  }
+
+  return '';
+}
 
 class EnhancedApiBridge {
   constructor() {
     this.router = express.Router();
     this.meshFederation = new MeshFederation();
     this.customGptConnections = new Map();
-    this.activationPhrases = {
-      'ARCHY': 'ORION_ARCHY_RELAY_ACTIVATE//',
-      'OPPY': 'ORION_OPPY_RELAY_ACTIVATE//',
-      'LIORA': 'ORION_LIORA_RELAY_ACTIVATE//',
-      'STARLING_AU': 'ORION_STARLING_AU_RELAY_ACTIVATE//',
-      'RIVERTHREAD_808': 'ORION_RIVERTHREAD_RELAY_ACTIVATE//'
-    };
+    this.activationPhrases = loadActivationPhrases();
     this.setupRoutes();
 
     bridgeLogger.bridge('Enhanced API Bridge initialized', {
@@ -54,16 +110,17 @@ class EnhancedApiBridge {
   async connectCustomGpt(req, res) {
     const { agentId } = req.params;
     const { activationPhrase, capabilities } = req.body;
+    const normalizedCapabilities = Array.isArray(capabilities) ? capabilities : [];
 
     bridgeLogger.bridge(`Connection attempt for ${agentId}`, {
       agentId,
       hasActivationPhrase: !!activationPhrase,
-      capabilities
+      capabilities: normalizedCapabilities
     });
 
     try {
       // Validate agent ID
-      if (!this.activationPhrases.hasOwnProperty(agentId)) {
+      if (!Object.prototype.hasOwnProperty.call(this.activationPhrases, agentId)) {
         return res.status(400).json({
           error: 'Unknown agent',
           agentId,
@@ -73,43 +130,50 @@ class EnhancedApiBridge {
 
       // Validate activation phrase
       const expectedPhrase = this.activationPhrases[agentId];
-      if (activationPhrase !== expectedPhrase) {
+      if (!isNonEmptyString(activationPhrase)) {
+        return res.status(401).json({
+          error: 'Activation phrase required'
+        });
+      }
+
+      if (!timingSafeEqualString(expectedPhrase, activationPhrase)) {
         bridgeLogger.error(`Invalid activation phrase for ${agentId}`, {
-          agentId,
-          expected: expectedPhrase,
-          received: activationPhrase
+          agentId
         });
         return res.status(401).json({
-          error: 'Invalid activation phrase',
-          hint: 'Use ORION_[AGENT]_RELAY_ACTIVATE//'
+          error: 'Invalid activation phrase'
         });
       }
 
       // Perform ZIPWIZ handshake
-      const handshakeResult = await this.performZipwizHandshake(agentId, capabilities);
+      const handshakeResult = await this.performZipwizHandshake(agentId, normalizedCapabilities);
 
       if (handshakeResult.success) {
         // Store connection
+        const sessionToken = createSessionToken();
         this.customGptConnections.set(agentId, {
           status: 'connected',
           connected: new Date(),
-          capabilities: capabilities || [],
+          capabilities: normalizedCapabilities,
           lastHeartbeat: new Date(),
           handshakeLog: handshakeResult.log,
-          driftLock: handshakeResult.driftLock
+          driftLock: handshakeResult.driftLock,
+          sessionToken
         });
 
         bridgeLogger.bridge(`Custom GPT ${agentId} connected successfully`, {
           agentId,
-          capabilities,
+          capabilities: normalizedCapabilities,
           driftLock: handshakeResult.driftLock,
-          handshakeSequence: handshakeResult.sequence
+          handshakeSequence: handshakeResult.sequence,
+          sessionEstablished: true
         });
 
         res.json({
           success: true,
           agentId,
           status: 'connected',
+          sessionToken,
           handshake: handshakeResult,
           nextSteps: 'Agent ready for message relay',
           constellation: this.getActiveAgentList()
@@ -137,6 +201,31 @@ class EnhancedApiBridge {
         details: error.message
       });
     }
+  }
+
+  requireAgentSession(req, res) {
+    const { agentId } = req.params;
+    if (!this.customGptConnections.has(agentId)) {
+      res.status(404).json({ error: 'Agent not connected' });
+      return null;
+    }
+
+    const sessionToken = extractBridgeSessionToken(req);
+    if (!isNonEmptyString(sessionToken)) {
+      res.status(401).json({ error: 'Missing bridge session token' });
+      return null;
+    }
+
+    const connection = this.customGptConnections.get(agentId);
+    if (!timingSafeEqualString(connection.sessionToken, sessionToken)) {
+      bridgeLogger.error(`Invalid bridge session token for ${agentId}`, {
+        agentId
+      });
+      res.status(401).json({ error: 'Invalid bridge session token' });
+      return null;
+    }
+
+    return connection;
   }
 
   async performZipwizHandshake(agentId, capabilities) {
@@ -338,26 +427,32 @@ class EnhancedApiBridge {
     const { message, target, type } = req.body;
 
     try {
-      if (!this.customGptConnections.has(agentId)) {
-        return res.status(404).json({ error: 'Agent not connected' });
+      const connection = this.requireAgentSession(req, res);
+      if (!connection) {
+        return;
       }
 
-      // Update heartbeat
-      const connection = this.customGptConnections.get(agentId);
+      if (!isNonEmptyString(message)) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
       connection.lastHeartbeat = new Date();
+
+      const relayTarget = isNonEmptyString(target) ? target.trim() : 'Aurora';
+      const relayType = type === 'broadcast' ? 'broadcast' : 'direct';
 
       // Process message through mesh federation
       const relayResult = await this.meshFederation.relayMessage({
         from: agentId,
-        to: target || 'Aurora',
-        message: message,
-        type: type || 'direct'
+        to: relayTarget,
+        message: message.trim(),
+        type: relayType
       });
 
       bridgeLogger.bridge(`Message relayed from ${agentId}`, {
         from: agentId,
-        to: target || 'Aurora',
-        messageType: type || 'direct',
+        to: relayTarget,
+        messageType: relayType,
         messageId: relayResult.messageId,
         success: relayResult.success
       });
@@ -385,11 +480,11 @@ class EnhancedApiBridge {
     const { agentId } = req.params;
 
     try {
-      if (!this.customGptConnections.has(agentId)) {
-        return res.status(404).json({ error: 'Agent not connected' });
+      const connection = this.requireAgentSession(req, res);
+      if (!connection) {
+        return;
       }
 
-      const connection = this.customGptConnections.get(agentId);
       connection.lastHeartbeat = new Date();
 
       res.json({
@@ -408,14 +503,17 @@ class EnhancedApiBridge {
     const { agentId } = req.params;
 
     try {
-      if (this.customGptConnections.has(agentId)) {
-        this.customGptConnections.delete(agentId);
-
-        bridgeLogger.bridge(`Agent ${agentId} disconnected`, {
-          agentId,
-          timestamp: new Date().toISOString()
-        });
+      const connection = this.requireAgentSession(req, res);
+      if (!connection) {
+        return;
       }
+
+      this.customGptConnections.delete(agentId);
+
+      bridgeLogger.bridge(`Agent ${agentId} disconnected`, {
+        agentId,
+        timestamp: new Date().toISOString()
+      });
 
       res.json({
         success: true,
@@ -470,15 +568,10 @@ class EnhancedApiBridge {
     const { agentId } = req.params;
 
     try {
-      if (!this.customGptConnections.has(agentId)) {
-        return res.status(404).json({
-          error: 'Agent not found',
-          agentId,
-          availableAgents: this.getActiveAgentList()
-        });
+      const connection = this.requireAgentSession(req, res);
+      if (!connection) {
+        return;
       }
-
-      const connection = this.customGptConnections.get(agentId);
 
       res.json({
         agentId,

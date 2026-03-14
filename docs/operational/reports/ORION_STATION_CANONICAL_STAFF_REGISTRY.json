@@ -1,11 +1,16 @@
 {
   "orion_station_staff_manifest": {
-    "version": "v2.4.1",
+    "version": "v2.4.2",
     "station": "Orion Station (The Observatory)",
     "layer": "L1 (Operational Layer)",
     "description": "Canonical staff and bridge node registry for all operational, command, and specialized agent seats in the Orion simulation environment.",
-    "last_updated": "2025-07-13T19:30:00Z",
+    "last_updated": "2026-03-09T00:00:00Z",
     "registry_type": "ORION_STATION_CANONICAL_STAFF",
+    "reconciliation_policy": {
+      "office_vs_watch": "Permanent office holders retain their seats even when watch authority rotates.",
+      "thread_merge": "Mission-manifest counterpart threads are preserved as adjacent canon, not treated as overwrite targets.",
+      "alex_thorne_rule": "Alex Thorne remains Station Commander regardless of off-station status; absence transfers acting command or watch, not command ownership."
+    },
 
     "command_structure": {
       "station_command": {
@@ -23,11 +28,14 @@
           ],
           "reports_to": "Fleet Command",
           "direct_reports": ["Deputy Commander", "Department Heads"],
+          "office_status": "permanent_office_holder",
+          "watch_authority_rule": "Off-station deployment, off-watch status, or delegated control transfers acting command to the Deputy Commander and designated watch officers without vacating command ownership.",
           "layer": "L1"
         },
 
         "deputy_commander": {
           "position": "Deputy Commander",
+          "secondary_title": "Executive Officer",
           "name": "Maya Shepard",
           "rank": "Lt. Commander",
           "clearance": "L4_COMMAND",
@@ -40,6 +48,7 @@
           ],
           "reports_to": "Station Commander",
           "direct_reports": ["Shift Supervisors", "Department Deputies"],
+          "acting_command_rule": "Assumes acting command when Alex Thorne is absent, unavailable, or has delegated operational control.",
           "layer": "L1"
         }
       },
@@ -57,6 +66,11 @@
             "L2 simulation oversight"
           ],
           "specialization": "Fleet Operations",
+          "mission_manifest_counterpart": {
+            "role": "FleetOps Commander / ORF-01 mission-command thread",
+            "name": "Commander Alex Thorne",
+            "merge_status": "parallel_threads_preserved"
+          },
           "layer": "L1"
         },
 
@@ -73,6 +87,11 @@
             "Research programs"
           ],
           "specialization": "Research & Development",
+          "mission_manifest_counterpart": {
+            "role": "Research Director / Lead Science Officer",
+            "name": "Dr. Amina Velin",
+            "merge_status": "parallel_threads_preserved"
+          },
           "layer": "L1"
         },
 
@@ -89,6 +108,11 @@
             "Policy enforcement"
           ],
           "specialization": "Ethics & Compliance",
+          "mission_manifest_counterpart": {
+            "role": "Chief Ethics Officer / reflexivity mission thread",
+            "name": "Dr. Elira Noor",
+            "merge_status": "parallel_threads_preserved"
+          },
           "layer": "L1"
         },
 
@@ -119,6 +143,11 @@
             "Technical innovation"
           ],
           "specialization": "Engineering",
+          "mission_manifest_counterpart": {
+            "role": "Chief Systems Engineer / mission engineering lead",
+            "name": "Marcus Chen",
+            "merge_status": "parallel_threads_preserved"
+          },
           "layer": "L1"
         }
       },
@@ -135,6 +164,7 @@
             "Mission coordination",
             "Station scheduling"
           ],
+          "watch_eligibility": "eligible_officer_of_the_watch",
           "layer": "L1"
         },
 
@@ -194,6 +224,58 @@
           ],
           "layer": "L1"
         }
+      }
+    },
+
+    "watch_structure": {
+      "officer_of_the_watch": {
+        "type": "rotating_duty_assignment",
+        "authority_scope": [
+          "temporary watch command",
+          "real-time station coordination",
+          "incident escalation"
+        ],
+        "does_not_replace": "Station Commander"
+      },
+      "duty_security_officer": {
+        "type": "rotating_security_watch",
+        "reports_to": "Chief Security Officer",
+        "authority_scope": [
+          "access control",
+          "alert triage",
+          "first response",
+          "quarantine initiation"
+        ]
+      },
+      "duty_systems_officer": {
+        "type": "rotating_engineering_watch",
+        "reports_to": "Chief Systems Engineer",
+        "mission_manifest_counterpart": "Marcus Chen",
+        "authority_scope": [
+          "systems diagnostics",
+          "containment actions",
+          "repair escalation"
+        ]
+      },
+      "duty_science_officer": {
+        "type": "rotating_science_watch",
+        "reports_to": "Chief Science Officer",
+        "mission_manifest_counterpart": "Dr. Amina Velin",
+        "authority_scope": [
+          "research validation",
+          "analysis workflows",
+          "simulation supervision"
+        ]
+      },
+      "duty_ethics_officer": {
+        "type": "rotating_ethics_watch",
+        "reports_to": "Chief Ethics & Compliance Officer",
+        "mission_manifest_counterpart": "Dr. Elira Noor",
+        "authority_scope": [
+          "ethics pause authority",
+          "continuity review",
+          "policy interpretation"
+        ]
       }
     },
 
@@ -276,6 +358,8 @@
       "All staff and bridge nodes are L1 agents—none are L2/L3 meta-agents or in-sim NPCs",
       "Staff nodes never 'inhabit' L2 (simulation) or L3 (symbolic) layers",
       "Each staff node is a logical 'seat' on Orion Station within the simulation",
+      "Alex Thorne remains Station Commander even when off-station; watch authority rotates without vacating the office",
+      "Mission-manifest counterpart threads for science, systems, and ethics are preserved as adjacent canon rather than clipped",
       "Update names and descriptions as crew evolves",
       "All major actions require Aurora arbitration and ethics validation"
     ]

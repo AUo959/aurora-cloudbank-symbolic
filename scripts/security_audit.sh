@@ -2,7 +2,7 @@
 # Aurora CloudBank Security Audit Script
 # Comprehensive security check for XSS and permission vulnerabilities
 
-set -e
+set -uo pipefail
 
 echo "� AURORA CLOUDBANK SECURITY AUDIT - ENHANCED"
 echo "=" $(printf "%*s" 50 "" | tr ' ' '=')
@@ -62,6 +62,13 @@ check_dir() {
     fi
 }
 
+find_project_files() {
+    local pattern="$1"
+    find . \
+        \( -type d \( -name ".git" -o -name "node_modules" -o -name ".venv" -o -name "venv" -o -name "__pycache__" -o -name ".pytest_cache" -o -name "build" -o -name "dist" -o -name "coverage" \) -prune \) \
+        -o -type f -name "$pattern" -print0
+}
+
 # Function to check for security patterns in files
 check_security_patterns() {
     local file="$1"
@@ -98,7 +105,8 @@ check_security_patterns() {
     fi
 
     # Check for unsafe protocol usage
-    if grep -q "javascript:" "$file" 2>/dev/null; then
+    protocol_hits=$(grep -n "javascript:" "$file" 2>/dev/null | grep -v "replace(/javascript:" | grep -vcE '^[0-9]+:[[:space:]]*(//|/\*|\*|#)')
+    if [ "${protocol_hits:-0}" -gt 0 ]; then
         echo "  ⚠️  Security risk: javascript: protocol found"
         issues=$((issues + 1))
     fi
@@ -141,7 +149,7 @@ echo "📋 3. CHECKING HTML FILES FOR XSS PROTECTION"
 echo "--------------------------------------------"
 
 # Check HTML files for security measures
-for html_file in $(find . -name "*.html" -not -path "./node_modules/*" -not -path "./.git/*"); do
+while IFS= read -r -d '' html_file; do
     if [ -f "$html_file" ]; then
         # Check for CSP headers
         if grep -q "Content-Security-Policy" "$html_file"; then
@@ -164,27 +172,27 @@ for html_file in $(find . -name "*.html" -not -path "./node_modules/*" -not -pat
         security_issues=$?
         total_issues=$((total_issues + security_issues))
     fi
-done
+done < <(find_project_files "*.html")
 
 echo ""
 echo "📋 4. CHECKING JAVASCRIPT FILES"
 echo "-------------------------------"
 
 # Check JavaScript files for security issues
-for js_file in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.git/*" -not -path "./static/js/aurora-security.js"); do
+while IFS= read -r -d '' js_file; do
     if [ -f "$js_file" ]; then
         check_security_patterns "$js_file"
         security_issues=$?
         total_issues=$((total_issues + security_issues))
     fi
-done
+done < <(find_project_files "*.js")
 
 echo ""
 echo "📋 5. CHECKING PYTHON FILES FOR SQL INJECTION"
 echo "---------------------------------------------"
 
 # Check Python files for potential SQL injection vulnerabilities
-for py_file in $(find . -name "*.py" -not -path "./node_modules/*" -not -path "./.git/*"); do
+while IFS= read -r -d '' py_file; do
     if [ -f "$py_file" ]; then
         if grep -q "execute.*%" "$py_file" 2>/dev/null; then
             echo "⚠️  $py_file: Potential SQL injection with string formatting"
@@ -201,7 +209,7 @@ for py_file in $(find . -name "*.py" -not -path "./node_modules/*" -not -path ".
             total_issues=$((total_issues + 1))
         fi
     fi
-done
+done < <(find_project_files "*.py")
 
 echo ""
 echo "📋 6. CHECKING PACKAGE SECURITY"
@@ -214,8 +222,12 @@ if [ -f "package.json" ]; then
     # Check for npm audit if npm is available
     if command -v npm >/dev/null 2>&1; then
         echo "🔍 Running npm audit..."
-        if npm audit --audit-level moderate 2>/dev/null; then
+        audit_output=$(npm audit --audit-level moderate 2>&1)
+        audit_rc=$?
+        if [ $audit_rc -eq 0 ]; then
             echo "✅ No moderate/high security vulnerabilities found in npm packages"
+        elif printf '%s\n' "$audit_output" | grep -qiE "network|ENOTFOUND|EAI_AGAIN|ECONNRESET|timed out|audit endpoint"; then
+            echo "ℹ️  npm audit could not complete in the current environment: network-restricted or audit service unavailable"
         else
             echo "⚠️  Security vulnerabilities found in npm packages - run 'npm audit fix'"
             total_issues=$((total_issues + 1))
@@ -244,20 +256,20 @@ echo "📋 7. CHECKING FILE PERMISSIONS"
 echo "-------------------------------"
 
 # Check for executable files that shouldn't be
-find . -name "*.html" -perm /u+x -not -path "./.git/*" | while read -r file; do
+while IFS= read -r -d '' file; do
     echo "⚠️  $file is executable (should not be)"
     total_issues=$((total_issues + 1))
-done
+done < <(find_project_files "*.html" | xargs -0 -I {} sh -c 'if [ -x "$1" ]; then printf "%s\0" "$1"; fi' _ {})
 
-find . -name "*.css" -perm /u+x -not -path "./.git/*" | while read -r file; do
+while IFS= read -r -d '' file; do
     echo "⚠️  $file is executable (should not be)"
     total_issues=$((total_issues + 1))
-done
+done < <(find_project_files "*.css" | xargs -0 -I {} sh -c 'if [ -x "$1" ]; then printf "%s\0" "$1"; fi' _ {})
 
-find . -name "*.json" -perm /u+x -not -path "./.git/*" | while read -r file; do
+while IFS= read -r -d '' file; do
     echo "⚠️  $file is executable (should not be)"
     total_issues=$((total_issues + 1))
-done
+done < <(find_project_files "*.json" | xargs -0 -I {} sh -c 'if [ -x "$1" ]; then printf "%s\0" "$1"; fi' _ {})
 
 echo ""
 echo "📊 SECURITY AUDIT SUMMARY"

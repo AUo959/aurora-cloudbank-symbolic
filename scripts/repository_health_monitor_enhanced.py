@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 from dataclasses import dataclass, asdict
 from datetime import datetime
@@ -455,8 +456,19 @@ class RepositoryHealthMonitor:
         return metrics
 
 
+def _run_canonical_health_monitor(output_path: Path, repo_root: Path) -> int:
+    script = Path(__file__).resolve().with_name("repo_health_monitor.py")
+    result = subprocess.run(
+        [sys.executable, str(script), "--output", str(output_path)],
+        cwd=repo_root,
+        shell=False,
+        check=False,
+    )
+    return result.returncode
+
+
 def main():
-    """Main monitoring function"""
+    """Compatibility wrapper around the canonical lightweight health monitor."""
 
     parser = argparse.ArgumentParser(description="Repository health monitor")
     parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
@@ -466,28 +478,30 @@ def main():
         default=60,
         help="Check interval in minutes (default: 60)",
     )
+    parser.add_argument(
+        "--output",
+        default="logs/repo_health_status.json",
+        help="Output path for the generated JSON report",
+    )
 
     args = parser.parse_args()
-
-    monitor = RepositoryHealthMonitor()
+    repo_root = Path(__file__).resolve().parent.parent
+    output_path = Path(args.output)
 
     if args.continuous:
-        print("🔄 Starting continuous monitoring...")
+        print("🔄 Starting continuous monitoring via repo_health_monitor.py...")
         while True:
             try:
-                monitor.run_monitoring_cycle()
+                exit_code = _run_canonical_health_monitor(output_path, repo_root)
+                if exit_code != 0:
+                    print(f"❌ Health monitor exited with code {exit_code}")
                 print(f"💤 Sleeping for {args.interval} minutes...")
-                time.sleep(args.interval * 60)
+                time.sleep(max(args.interval, 1) * 60)
             except KeyboardInterrupt:
                 print("\n👋 Monitoring stopped by user")
-                break
-            except (OSError, ValueError, RuntimeError) as e:
-                print(f"❌ Error in monitoring cycle: {e}")
-                time.sleep(60)  # Wait 1 minute before retrying
-    else:
-        # Single run
-        monitor.run_monitoring_cycle()
+                return 0
+    return _run_canonical_health_monitor(output_path, repo_root)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

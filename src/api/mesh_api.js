@@ -3,6 +3,7 @@
  * Provides RESTful endpoints for mesh agent communication and management
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const { MESH_CONFIG, MeshFederation } = require('../core/mesh_agent.js');
 const { systemLogger, bridgeLogger } = require('../utils/aurora_logger.js');
@@ -11,6 +12,58 @@ const router = express.Router();
 
 // Global mesh federation instance
 let meshFederation = null;
+
+function getRequestBodyKeys(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return [];
+  }
+
+  return Object.keys(body);
+}
+
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function timingSafeEqualString(expected, provided) {
+  if (!isNonEmptyString(expected) || !isNonEmptyString(provided)) {
+    return false;
+  }
+
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  const providedBuffer = Buffer.from(provided, 'utf8');
+
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function isValidActivationPhrase(agentId, activationPhrase) {
+  return timingSafeEqualString(MESH_CONFIG.activationPhrases[agentId], activationPhrase);
+}
+
+function getPublicMeshConfig() {
+  return {
+    version: MESH_CONFIG.version,
+    anchorSeed: MESH_CONFIG.anchorSeed,
+    ethicsProtocol: MESH_CONFIG.ethicsProtocol,
+    constellation: MESH_CONFIG.constellation,
+    commProtocol: MESH_CONFIG.commProtocol,
+    endpoints: MESH_CONFIG.relayApiEndpoints,
+    activationPhraseRequired: true,
+    supportedAgents: Object.keys(MESH_CONFIG.activationPhrases)
+  };
+}
+
+function _setMeshFederationForTests(federation) {
+  meshFederation = federation;
+}
+
+function _resetMeshFederationForTests() {
+  meshFederation = null;
+}
 
 /**
  * Initialize mesh federation
@@ -117,7 +170,7 @@ router.post('/message', async (req, res) => {
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Message send failed', {
       error: error.message,
-      body: req.body
+      bodyKeys: getRequestBodyKeys(req.body)
     });
 
     res.status(500).json({
@@ -171,7 +224,7 @@ router.post('/arbitration', async (req, res) => {
   } catch (error) {
     systemLogger.error('❌ [MESH_API] Arbitration initiation failed', {
       error: error.message,
-      body: req.body
+      bodyKeys: getRequestBodyKeys(req.body)
     });
 
     res.status(500).json({
@@ -256,8 +309,15 @@ router.post('/agents/:agentId/activate', async (req, res) => {
       });
     }
 
-    const expectedPhrase = MESH_CONFIG.activationPhrases[agentId];
-    if (activationPhrase !== expectedPhrase) {
+    if (!isNonEmptyString(activationPhrase)) {
+      return res.status(401).json({
+        success: false,
+        error: 'Activation phrase required',
+        timestamp: Date.now()
+      });
+    }
+
+    if (!isValidActivationPhrase(agentId, activationPhrase)) {
       return res.status(401).json({
         success: false,
         error: 'Invalid activation phrase',
@@ -272,8 +332,7 @@ router.post('/agents/:agentId/activate', async (req, res) => {
 
     bridgeLogger.bridge(`🚀 [MESH_API] Agent ${agentId} activated`, {
       agentId: agentId,
-      status: agent.status,
-      activationPhrase: expectedPhrase
+      status: agent.status
     });
 
     res.json({
@@ -310,15 +369,7 @@ router.get('/config', (req, res) => {
 
     res.json({
       success: true,
-      config: {
-        version: MESH_CONFIG.version,
-        anchorSeed: MESH_CONFIG.anchorSeed,
-        ethicsProtocol: MESH_CONFIG.ethicsProtocol,
-        constellation: MESH_CONFIG.constellation,
-        commProtocol: MESH_CONFIG.commProtocol,
-        endpoints: MESH_CONFIG.relayApiEndpoints,
-        activationPhrases: Object.keys(MESH_CONFIG.activationPhrases)
-      },
+      config: getPublicMeshConfig(),
       timestamp: Date.now()
     });
 
@@ -338,5 +389,9 @@ router.get('/config', (req, res) => {
 module.exports = {
   router,
   initializeMeshFederation,
-  MESH_CONFIG
+  MESH_CONFIG,
+  getPublicMeshConfig,
+  isValidActivationPhrase,
+  _setMeshFederationForTests,
+  _resetMeshFederationForTests
 };

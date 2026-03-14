@@ -5,6 +5,7 @@ FastAPI-based REST API for Aurora CloudBank services
 """
 
 import random
+import os
 import numpy as np
 import uvicorn
 from pydantic import BaseModel
@@ -19,6 +20,19 @@ from typing import Any, Dict, List, Optional
 from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException
+
+
+def parse_allowed_origins(raw_value: str | None) -> list[str]:
+    if raw_value:
+        configured = [origin.strip().rstrip("/") for origin in raw_value.split(",") if origin.strip() and origin.strip() != "*"]
+        if configured:
+            return configured
+    return [
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+    ]
 
 
 class QuantumVectorRequest(BaseModel):
@@ -42,10 +56,10 @@ app = FastAPI(title="Aurora CloudBank API", description="Quantum-Aware Symbolic 
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=parse_allowed_origins(os.getenv("AURORA_ALLOWED_ORIGINS")),
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Global status

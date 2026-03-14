@@ -4,12 +4,13 @@ This guide describes the self-healing bootstrap process used by the Aurora repos
 
 ## Overview
 
-The script `scripts/infallible_codespace_init.py` is executed automatically when a Codespace is created. It installs all dependencies with automatic retries and runs the onboarding script. Each step has three fallbacks, ensuring that common network hiccups or package issues do not interrupt the build.
+The script `scripts/infallible_codespace_init.py` is executed automatically when a Codespace is created. It bootstraps the Python environment, installs Node dependencies when needed, and runs the onboarding hook. When you run it locally outside Codespaces, it defaults to a diagnostic dry run so you can inspect the plan before mutating the machine.
 
 You can re-run the bootstrap script at any time:
 
 ```bash
 python3 scripts/infallible_codespace_init.py
+python3 scripts/infallible_codespace_init.py --execute
 ```
 
-If a step fails after all retries the script will continue with the next step so the development environment remains usable.
+Use `--execute` for a local rebuild. The plain command is useful for checking what the script would do before it changes the environment.

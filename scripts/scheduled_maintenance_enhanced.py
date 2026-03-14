@@ -8,11 +8,16 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Callable, Dict, Optional
-import schedule
+try:
+    import schedule
+except ImportError:
+    schedule = None
 
 
 @dataclass
@@ -538,42 +543,65 @@ class ScheduledMaintenanceSystem:
 
 
 def main():
-    """Main maintenance function"""
+    """Compatibility wrapper around the canonical maintenance entrypoint."""
 
     parser = argparse.ArgumentParser(description="Scheduled maintenance system")
     parser.add_argument("--daemon", action="store_true", help="Run as daemon (continuous scheduling)")
     parser.add_argument("--run-task", type=str, help="Run specific task now")
     parser.add_argument("--status", action="store_true", help="Show task status")
+    parser.add_argument(
+        "--interval-minutes",
+        type=int,
+        default=60,
+        help="Daemon loop interval in minutes when using compatibility mode",
+    )
 
     args = parser.parse_args()
+    repo_root = Path(__file__).resolve().parent.parent
+    script_dir = Path(__file__).resolve().parent
+    maintenance_script = script_dir / "scheduled_maintenance.sh"
+    health_script = script_dir / "repo_health_monitor.py"
+    branch_script = script_dir / "branch_cleanup.py"
+    report_path = repo_root / "logs" / "repo_health_status.json"
 
-    maintenance = ScheduledMaintenanceSystem()
+    def run_command(command: list[str]) -> int:
+        result = subprocess.run(command, cwd=repo_root, shell=False, check=False)
+        return result.returncode
 
     if args.status:
-        status = maintenance.get_task_status()
-        print("\n📊 Maintenance Task Status:")
+        print("\n📊 Maintenance Status")
         print("=" * 50)
-        for name, info in status.items():
-            print(f"\n{name}:")
-            print(f"  Enabled: {info['enabled']}")
-            print(f"  Last Run: {info['last_run'] or 'Never'}")
-            print(f"  Success/Failures: {info['success_count']}/{info['failure_count']}")
-            print(f"  Description: {info['description']}")
-
-    elif args.run_task:
-        print(f"🔧 Running task: {args.run_task}")
-        success = maintenance.run_task_now(args.run_task)
-        if success:
-            print("✅ Task completed successfully")
+        print("Supported tasks: branch_analysis, health_check, maintenance")
+        print(f"Daemon scheduler library available: {schedule is not None}")
+        if report_path.exists():
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            print(json.dumps(report, indent=2))
         else:
-            print("❌ Task failed")
+            print("No health report found yet.")
+        return 0
 
-    elif args.daemon:
-        maintenance.run_scheduler()
+    if args.run_task:
+        print(f"🔧 Running task: {args.run_task}")
+        if args.run_task == "branch_analysis":
+            return run_command([sys.executable, str(branch_script)])
+        if args.run_task == "health_check":
+            return run_command([sys.executable, str(health_script), "--output", "logs/repo_health_status.json"])
+        if args.run_task == "maintenance":
+            return run_command([str(maintenance_script)])
+        print(f"❌ Unsupported task: {args.run_task}")
+        return 2
 
-    else:
-        print("Use --daemon to start scheduler, --run-task to run specific task, or --status to check status")
+    if args.daemon:
+        print("🔄 Starting compatibility maintenance daemon...")
+        while True:
+            exit_code = run_command([str(maintenance_script)])
+            if exit_code != 0:
+                return exit_code
+            print(f"💤 Sleeping for {max(args.interval_minutes, 1)} minutes...")
+            time.sleep(max(args.interval_minutes, 1) * 60)
+
+    return run_command([str(maintenance_script)])
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

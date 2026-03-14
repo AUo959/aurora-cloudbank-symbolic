@@ -1,34 +1,82 @@
 #!/bin/bash
+set -euo pipefail
 
-# Aurora CloudBank - Complete GPG Setup Script
-echo "🔐 Aurora CloudBank - Complete GPG Setup Script"
-echo "=============================================="
+REAL_NAME="${AURORA_GPG_NAME:-Aurora CloudBank Orion Station}"
+EMAIL="${AURORA_GPG_EMAIL:-tlstreets@gmail.com}"
+KEY_COMMENT="${AURORA_GPG_COMMENT:-Aurora GPG 2025}"
+KEY_TYPE="${AURORA_GPG_TYPE:-rsa}"
+KEY_LENGTH="${AURORA_GPG_LENGTH:-4096}"
+KEY_EXPIRE="${AURORA_GPG_EXPIRE:-1y}"
+EXPORT_PATH="${AURORA_GPG_EXPORT_PATH:-gpg_pubkey_for_github.asc}"
+EXECUTE=0
+CONFIGURE_GIT=1
 
-# === CONFIG ===
-REAL_NAME="Aurora CloudBank Orion Station"
-EMAIL="tlstreets@gmail.com"
-KEY_COMMENT="Aurora GPG 2025"
-KEY_TYPE="rsa"  # Using RSA for better compatibility
-KEY_LENGTH="4096"
-KEY_EXPIRE="1y"
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [--execute] [--no-configure-git]
 
-# === STEP 0: Check prerequisites ===
-echo "🔍 Checking prerequisites..."
-if ! command -v gpg &> /dev/null; then
-    echo "❌ GPG not found. Installing..."
-    apt-get update && apt-get install -y gnupg
+Diagnose or create the Aurora GPG signing configuration.
+
+Default mode is diagnostic-only. Re-run with --execute to generate a key,
+export the public key, and optionally configure global git signing settings.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --execute)
+      EXECUTE=1
+      ;;
+    --no-configure-git)
+      CONFIGURE_GIT=0
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "[setup-gpg-robust] Unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+echo "Aurora CloudBank GPG Setup"
+echo "=========================="
+echo "Name: $REAL_NAME"
+echo "Email: $EMAIL"
+echo "Export path: $EXPORT_PATH"
+
+if command -v gpg >/dev/null 2>&1; then
+  echo "[setup-gpg-robust] gpg detected: $(command -v gpg)"
+  gpg --list-secret-keys --keyid-format LONG "$EMAIL" 2>/dev/null || true
+else
+  echo "[setup-gpg-robust] gpg is not installed"
 fi
 
-if ! command -v git &> /dev/null; then
-    echo "❌ Git not found. Please install git first."
-    exit 1
+if command -v git >/dev/null 2>&1; then
+  echo "[setup-gpg-robust] git detected: $(command -v git)"
+  git config --global --get user.name || true
+  git config --global --get user.email || true
+  git config --global --get user.signingkey || true
+else
+  echo "[setup-gpg-robust] git is not installed"
 fi
 
-# === STEP 1: Generate Key ===
-echo "🔐 Generating GPG key for $REAL_NAME <$EMAIL>..."
+if [ "$EXECUTE" -eq 0 ]; then
+  echo "[setup-gpg-robust] Dry-run complete. Re-run with --execute to generate/export a key."
+  exit 0
+fi
 
-# Create GPG batch file
-cat > /tmp/gpg_batch_config << EOF
+command -v gpg >/dev/null 2>&1 || { echo "[setup-gpg-robust] gpg is required" >&2; exit 1; }
+command -v git >/dev/null 2>&1 || { echo "[setup-gpg-robust] git is required" >&2; exit 1; }
+
+batch_file="$(mktemp)"
+trap 'rm -f "$batch_file"' EXIT
+
+cat > "$batch_file" <<EOF
 Key-Type: $KEY_TYPE
 Key-Length: $KEY_LENGTH
 Subkey-Type: $KEY_TYPE
@@ -39,57 +87,22 @@ Name-Email: $EMAIL
 Expire-Date: $KEY_EXPIRE
 %no-protection
 %commit
-%echo Done
 EOF
 
-# Generate key
-gpg --batch --generate-key /tmp/gpg_batch_config
+echo "[setup-gpg-robust] Generating GPG key"
+gpg --batch --generate-key "$batch_file"
 
-# Clean up batch file
-rm -f /tmp/gpg_batch_config
+KEY_ID="$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" 2>/dev/null | awk '/^sec/{print $2}' | head -1 | cut -d/ -f2)"
+[ -n "$KEY_ID" ] || { echo "[setup-gpg-robust] Failed to resolve generated key ID" >&2; exit 1; }
 
-# === STEP 2: Get Key ID ===
-echo "🔍 Finding generated key..."
-sleep 2  # Wait for key generation to complete
-
-KEY_ID=$(gpg --list-secret-keys --keyid-format LONG "$EMAIL" 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
-if [ -z "$KEY_ID" ]; then
-  echo "❌ Failed to find generated key for $EMAIL."
-  echo "🔍 Available keys:"
-  gpg --list-secret-keys --keyid-format LONG
-  exit 1
+if [ "$CONFIGURE_GIT" -eq 1 ]; then
+  echo "[setup-gpg-robust] Configuring global git signing"
+  git config --global user.signingkey "$KEY_ID"
+  git config --global user.email "$EMAIL"
+  git config --global user.name "$REAL_NAME"
+  git config --global commit.gpgsign true
 fi
 
-echo "✅ Found key ID: $KEY_ID"
-
-# === STEP 3: Set as default signing key ===
-echo "⚙️ Configuring git..."
-git config --global user.signingkey "$KEY_ID"
-git config --global user.email "$EMAIL"
-git config --global user.name "$REAL_NAME"
-git config --global commit.gpgsign true
-
-# === STEP 4: Export Public Key for GitHub ===
-echo "📤 Exporting public key..."
-gpg --armor --export "$KEY_ID" > gpg_pubkey_for_github.asc
-echo "✅ GPG public key exported to gpg_pubkey_for_github.asc"
-
-# === STEP 5: Display ===
-echo ""
-echo "🎉 GPG Setup Complete!"
-echo "======================"
-echo "📝 Add this key to GitHub → https://github.com/settings/keys (GPG section)"
-echo "───────────────────────────────────────────────"
-cat gpg_pubkey_for_github.asc
-echo "───────────────────────────────────────────────"
-
-# === STEP 6: Test Commit ===
-echo ""
-echo "🧪 You can now make a test commit:"
-echo "git commit -S -m \"Test signed commit\""
-echo ""
-echo "📊 Current git configuration:"
-git config --global --get user.name
-git config --global --get user.email
-git config --global --get user.signingkey
-git config --global --get commit.gpgsign
+gpg --armor --export "$KEY_ID" > "$EXPORT_PATH"
+echo "[setup-gpg-robust] Public key exported to $EXPORT_PATH"
+echo "[setup-gpg-robust] Generated key ID: $KEY_ID"

@@ -119,7 +119,7 @@ class RepositoryOrganizer:
                     analysis["security_issues"].extend(security_issues)
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.warning("Error analyzing file {file_path}: {e}")
+            logger.warning(f"Error analyzing file {file_path}: {e}")
 
     def _analyze_zip_file(self, zip_path: Path) -> Dict[str, Any]:
         """Analyze ZIP file contents."""
@@ -219,7 +219,7 @@ class RepositoryOrganizer:
                 self.duplicate_files[content_hash] = file_path
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.debug("Error checking duplicates for {file_path}: {e}")
+            logger.debug(f"Error checking duplicates for {file_path}: {e}")
 
     def _scan_file_security(self, file_path: Path) -> List[Dict[str, Any]]:
         """Scan file for potential security issues."""
@@ -256,7 +256,7 @@ class RepositoryOrganizer:
                     )
 
         except (OSError, ValueError, RuntimeError) as e:
-            logger.debug("Error scanning security for {file_path}: {e}")
+            logger.debug(f"Error scanning security for {file_path}: {e}")
 
         return issues
 
@@ -490,7 +490,7 @@ def main():
         if args.output:
             with open(args.output, "w") as f:
                 json.dump(result, f, indent=2, default=str)
-            print("✅ Results saved to {args.output}")
+            print(f"✅ Results saved to {args.output}")
         else:
             print(json.dumps(result, indent=2, default=str))
 

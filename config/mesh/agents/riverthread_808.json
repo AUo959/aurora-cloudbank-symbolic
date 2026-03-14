@@ -3,8 +3,10 @@
   "display_name": "RIVERTHREAD_808",
   "aliases": [
     "RIVERTHREAD_808",
+    "riverthread_808",
     "riverthread",
     "riverthread 808",
+    "data logistics relay",
     "stream processor"
   ],
   "channels": [
@@ -12,8 +14,13 @@
     "#crew_lounge"
   ],
   "default_channel": "direct:riverthread_808",
-  "execution_mode": "deterministic",
-  "model_profile": {},
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.35,
+    "max_output_tokens": 220
+  },
   "typing_profile": {
     "delay_ms": 320
   },
@@ -22,5 +29,7 @@
     "fallback_to_deterministic": true,
     "signature": "RIVERTHREAD_808"
   },
-  "memory_files": []
+  "memory_files": [
+    "config/mesh/memory/riverthread_808.md"
+  ]
 }

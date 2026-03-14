@@ -4,6 +4,13 @@
 **Canonical Reference**: COPILOT HANDOFF PACKAGE v3.5.1 (Live Sync Drift Lock)
 **Status**: ✅ **FULLY VALIDATED AND INTEGRATED**
 
+**Provenance Note (2026-03-09):** This completion summary records the
+runtime-facing office-holder set, not the full multi-thread personnel picture.
+Later reconciliation preserved Alex Thorne as permanent Station Commander,
+modeled duty-watch rotation explicitly, and kept Marcus Chen, Dr. Amina Velin,
+and Dr. Elira Noor as mission-thread counterparts instead of deleting them from
+canon.
+
 ## 🎯 CANONICAL ALIGNMENT ACHIEVED
 
 Our Aurora CloudBank Symbolic system has been **successfully validated and enhanced** to achieve complete alignment with the canonical ORION STATION core specification.
@@ -36,12 +43,15 @@ threadcore_version: "v3.5.1_macroready"   // ✅ VALIDATED
 
 ### Canonical Staff Registry ✅
 
+**Provenance Note:** Read the list below as the runtime-facing office-holder
+summary only.
+
 - **Commander**: Alex Thorne (Mission/ethics lead; final authority)
-- **XO**: Maya Shepard (Exec officer; protocol backup)
+- **XO / Acting Command Path**: Maya Shepard (Exec officer; protocol backup; acting command when delegated or absent)
 - **Chief Science Officer**: Varya Lin (L2 sim ops & experiment lead)
-- **Chief Ethics OfficerDr. Amira Sato, drift audits, protocol review)
+- **Chief Ethics Officer**: Dr. Amira Sato (Arbitration, drift audits, protocol review)
 - **Chief Security Officer**: Julian Markov (Security/incident management)
-- **Bridge OperationsLeena Porter, dispatch, mesh ops)
+- **Bridge Operations**: Leena Porter (Dispatch, mesh ops)
 - **Engineering**: Jiro Tanaka (Systems health, upgrades)
 - **Medical Officer**: Dr. Ren Feldman (Crew health/crisis support)
 - **Operator/Observer**: Assigned/rotating (Mission specialist node)

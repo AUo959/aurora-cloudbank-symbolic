@@ -39,9 +39,9 @@ class TestChatGPTAgentModeIntegration:
         assert "context_tag" in self.agent.symbolic_anchors
         assert len(self.agent.tools_registry) > 0
 
-    async def test_tool_discovery(self):
+    def test_tool_discovery(self):
         """Test agent tool discovery endpoint"""
-        tools_info = await self.agent.discover_tools()
+        tools_info = asyncio.run(self.agent.discover_tools())
 
         assert "tools" in tools_info
         assert "capabilities" in tools_info
@@ -50,13 +50,19 @@ class TestChatGPTAgentModeIntegration:
         assert "context_tag" in tools_info
 
         # Verify required tools are registered
-        required_tools = ["symbolic_processing", "geometric_algebra", "session_management", "system_status"]
+        required_tools = [
+            "symbolic_processing",
+            "geometric_algebra",
+            "session_management",
+            "system_status",
+            "aurora_command_grammar",
+        ]
         for tool in required_tools:
             assert tool in tools_info["tools"]
             assert "description" in tools_info["tools"][tool]
             assert "parameters" in tools_info["tools"][tool]
 
-    async def test_symbolic_processing_tool(self):
+    def test_symbolic_processing_tool(self):
         """Test symbolic processing tool execution"""
         parameters = {
             "operation": "test_symbolic_operation",
@@ -64,7 +70,7 @@ class TestChatGPTAgentModeIntegration:
             "anchor_context": "test_context",
         }
 
-        result = await self.agent.execute_tool("symbolic_processing", parameters)
+        result = asyncio.run(self.agent.execute_tool("symbolic_processing", parameters))
 
         assert result["success"] is True
         assert "result" in result
@@ -73,11 +79,11 @@ class TestChatGPTAgentModeIntegration:
         assert "execution_context" in result
         assert result["execution_context"]["context_tag"].startswith("agent_tool_execution_")
 
-    async def test_geometric_algebra_tool(self):
+    def test_geometric_algebra_tool(self):
         """Test geometric algebra tool execution"""
         parameters = {"expression_a": "e1 + e2", "expression_b": "e2 + e3", "operation": "mult"}
 
-        result = await self.agent.execute_tool("geometric_algebra", parameters)
+        result = asyncio.run(self.agent.execute_tool("geometric_algebra", parameters))
 
         assert result["success"] is True
         assert "result" in result
@@ -85,41 +91,41 @@ class TestChatGPTAgentModeIntegration:
         assert result["result"]["operation"] == "mult"
         assert result["symbolic_hash_validation"] is True
 
-    async def test_session_management_tool(self):
+    def test_session_management_tool(self):
         """Test session management capabilities"""
         # Create session
         create_params = {"action": "create", "state_data": {"test_state": "initial"}}
 
-        create_result = await self.agent.execute_tool("session_management", create_params)
+        create_result = asyncio.run(self.agent.execute_tool("session_management", create_params))
         assert create_result["success"] is True
         session_id = create_result["result"]["session_id"]
 
         # Update session
         update_params = {"action": "update", "session_id": session_id, "state_data": {"test_state": "updated"}}
 
-        update_result = await self.agent.execute_tool("session_management", update_params)
+        update_result = asyncio.run(self.agent.execute_tool("session_management", update_params))
         assert update_result["success"] is True
         assert update_result["result"]["action"] == "updated"
 
         # Get session
         get_params = {"action": "get", "session_id": session_id}
 
-        get_result = await self.agent.execute_tool("session_management", get_params)
+        get_result = asyncio.run(self.agent.execute_tool("session_management", get_params))
         assert get_result["success"] is True
         assert get_result["result"]["state"]["state"]["test_state"] == "updated"
 
         # Delete session
         delete_params = {"action": "delete", "session_id": session_id}
 
-        delete_result = await self.agent.execute_tool("session_management", delete_params)
+        delete_result = asyncio.run(self.agent.execute_tool("session_management", delete_params))
         assert delete_result["success"] is True
         assert delete_result["result"]["action"] == "deleted"
 
-    async def test_system_status_tool(self):
+    def test_system_status_tool(self):
         """Test system status tool with different detail levels"""
         # Basic status
         basic_params = {"detail_level": "basic"}
-        basic_result = await self.agent.execute_tool("system_status", basic_params)
+        basic_result = asyncio.run(self.agent.execute_tool("system_status", basic_params))
 
         assert basic_result["success"] is True
         assert "agent_status" in basic_result["result"]
@@ -128,7 +134,7 @@ class TestChatGPTAgentModeIntegration:
 
         # Detailed status
         detailed_params = {"detail_level": "detailed"}
-        detailed_result = await self.agent.execute_tool("system_status", detailed_params)
+        detailed_result = asyncio.run(self.agent.execute_tool("system_status", detailed_params))
 
         assert detailed_result["success"] is True
         assert "config_version" in detailed_result["result"]
@@ -136,30 +142,53 @@ class TestChatGPTAgentModeIntegration:
 
         # Full status
         full_params = {"detail_level": "full"}
-        full_result = await self.agent.execute_tool("system_status", full_params)
+        full_result = asyncio.run(self.agent.execute_tool("system_status", full_params))
 
         assert full_result["success"] is True
         assert "session_details" in full_result["result"]
         assert "tool_registry" in full_result["result"]
 
-    async def test_invalid_tool_execution(self):
+    def test_aurora_command_grammar_tool(self):
+        """Test Aurora command grammar parsing and //. enforcement."""
+        accepted = asyncio.run(
+            self.agent.execute_tool(
+            "aurora_command_grammar",
+            {"command_text": "001//.", "validate": True},
+            )
+        )
+        assert accepted["success"] is True
+        assert accepted["result"]["accepted"] is True
+        assert accepted["result"]["executable"] is True
+        assert accepted["result"]["normalized_text"].endswith("//.")
+
+        rejected = asyncio.run(
+            self.agent.execute_tool(
+            "aurora_command_grammar",
+            {"command_text": "001", "validate": True},
+            )
+        )
+        assert rejected["success"] is True
+        assert rejected["result"]["accepted"] is False
+        assert rejected["result"]["enforcement"]["execute_terminator"] == "//."
+
+    def test_invalid_tool_execution(self):
         """Test error handling for invalid tool requests"""
         # Test non-existent tool
         try:
-            await self.agent.execute_tool("non_existent_tool", {})
+            asyncio.run(self.agent.execute_tool("non_existent_tool", {}))
             assert False, "Should have raised HTTPException"
         except Exception as e:
             assert "not found" in str(e)
 
         # Test invalid parameters
-        result = await self.agent.execute_tool("geometric_algebra", {"invalid": "params"})
+        result = asyncio.run(self.agent.execute_tool("geometric_algebra", {"invalid": "params"}))
         assert result["success"] is False
         assert "error" in result
         assert "recovery_suggestions" in result
 
-    async def test_agent_status(self):
+    def test_agent_status(self):
         """Test comprehensive agent status reporting"""
-        status = await self.agent.get_agent_status()
+        status = asyncio.run(self.agent.get_agent_status())
 
         assert status["integration_status"] == "active"
         assert status["agent_mode"] == "chatgpt_agent_mode"
@@ -178,7 +207,7 @@ class TestChatGPTAgentModeIntegration:
         assert seal1 == seal2
         assert len(seal1) == 16  # 16-character hex string
 
-    async def test_error_recovery_suggestions(self):
+    def test_error_recovery_suggestions(self):
         """Test recovery suggestion generation"""
         test_error = ValueError("test error")
 

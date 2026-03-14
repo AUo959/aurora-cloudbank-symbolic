@@ -57,6 +57,9 @@ class AgentManifest:
     typing_profile: TypingProfile = field(default_factory=TypingProfile)
     response_policy: ResponsePolicy = field(default_factory=ResponsePolicy)
     memory_files: List[str] = field(default_factory=list)
+    instruction_profile_file: str = ""
+    tool_bindings: List[str] = field(default_factory=list)
+    continuity_log_file: str = ""
 
     @classmethod
     def from_dict(cls, payload: Dict[str, Any]) -> "AgentManifest":
@@ -71,6 +74,9 @@ class AgentManifest:
             typing_profile=TypingProfile.from_dict(payload.get("typing_profile")),
             response_policy=ResponsePolicy.from_dict(payload.get("response_policy")),
             memory_files=list(payload.get("memory_files", [])),
+            instruction_profile_file=str(payload.get("instruction_profile_file", "")),
+            tool_bindings=list(payload.get("tool_bindings", [])),
+            continuity_log_file=str(payload.get("continuity_log_file", "")),
         )
 
     def to_dict(self) -> Dict[str, Any]:

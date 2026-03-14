@@ -1,12 +1,15 @@
 import logging
+import os
 import uuid
 import hashlib
 import uvicorn
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
 from fastapi import (
+    Body,
     Depends,
     FastAPI,
     File,
@@ -38,16 +41,19 @@ except ImportError:
     AerSimulator = None
     QISKIT_AVAILABLE = False
 
-app = FastAPI(title="Aurora Quantum VSA Playground")
 
-# Add CORS middleware for frontend integration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def parse_allowed_origins(raw_value: Optional[str]) -> List[str]:
+    if raw_value:
+        configured = [origin.strip().rstrip("/") for origin in raw_value.split(",") if origin.strip() and origin.strip() != "*"]
+        if configured:
+            return configured
+    return [
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8080",
+        "http://localhost:8080",
+    ]
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +61,29 @@ logger = logging.getLogger("aurora_gui_cloudhub")
 
 # Active WebSocket connections for basic broadcast
 connections: List[WebSocket] = []
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    connections.clear()
+    logger.info("Aurora Cloud GUI FastAPI service starting up...")
+    try:
+        yield
+    finally:
+        connections.clear()
+        logger.info("Aurora Cloud GUI FastAPI service shutting down...")
+
+
+app = FastAPI(title="Aurora Quantum VSA Playground", lifespan=lifespan)
+
+# Add CORS middleware for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=parse_allowed_origins(os.getenv("AURORA_ALLOWED_ORIGINS")),
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 # Serve static files if needed in the future
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -92,6 +121,11 @@ class QuantumCircuitRequest(BaseModel):
 class GeometricAlgebraRequest(BaseModel):
     operation: str  # product, add, commutator
     vectors: List[Dict[str, float]]  # e.g., [{"e1": 1.0, "e2": 0.5}]
+
+
+class MCPRouteCommandRequest(BaseModel):
+    command: str
+    anchor: str = "EOS_SEED_ORION"
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -164,17 +198,6 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         connections.remove(websocket)
 
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("Aurora Cloud GUI FastAPI service starting up...")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    logger.info("Aurora Cloud GUI FastAPI service shutting down...")
-
-
 class GeometricProductRequest(BaseModel):
     a: float
     b: float
@@ -227,7 +250,9 @@ def get_mcp_bridge():
     """
     Returns the MCP Bridge Core configuration as JSON.
     """
-    data = get_mcp_bridge_core()
+    data = dict(get_mcp_bridge_core())
+    data["recommended_shuttle_bay_path"] = "/mcp/shuttle-bay"
+    data["legacy_bridge"] = True
     return JSONResponse(content=data)
 
 
@@ -237,7 +262,8 @@ def get_mcp_bridge():
     response_description="Routed command result",
 )
 def mcp_route_command(
-    command: str,
+    request: Optional[MCPRouteCommandRequest] = Body(None),
+    command: Optional[str] = None,
     anchor: str = "EOS_SEED_ORION",
     security: None = Depends(mcp_security_dependency),
 ):
@@ -247,9 +273,17 @@ def mcp_route_command(
     Request body: {"command": str, "anchor": str}
     Response: {"status": str, "routed_command": str, "governance_layer": str, "protocol": list}
     """
-    mcp_security.validate_anchor(anchor)
+    route_command = request.command if request else command
+    route_anchor = request.anchor if request else anchor
+    if not route_command:
+        raise HTTPException(status_code=400, detail="Command is required")
+
+    mcp_security.validate_anchor(route_anchor)
     router = MCPCommandRouter()
-    return router.route(command)
+    response = router.route(route_command)
+    response["legacy_bridge"] = True
+    response["recommended_shuttle_bay_path"] = "/mcp/shuttle-bay/execute"
+    return response
 
 
 @app.post(

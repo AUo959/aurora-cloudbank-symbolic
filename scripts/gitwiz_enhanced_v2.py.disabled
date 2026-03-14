@@ -191,14 +191,16 @@ class GitWizEnhanced:
             metrics.stale_branches = self._count_stale_branches()
 
         except Exception as e:
-            logger.error("Error collecting git metrics: {e}")
-            metrics.issues_detected.append("Git metrics collection failed: {e}")
+            logger.error(f"Error collecting git metrics: {e}")
+            metrics.issues_detected.append(f"Git metrics collection failed: {e}")
 
         # Calculate scores
         metrics.optimization_score = self._calculate_optimization_score(metrics)
         metrics.security_score = self._calculate_security_score()
 
-        logger.info("Repository analysis complete: {metrics.total_files} files, {metrics.total_size_mb:.1f}MB")
+        logger.info(
+            f"Repository analysis complete: {metrics.total_files} files, {metrics.total_size_mb:.1f}MB"
+        )
         return metrics
 
     def analyze_files(self) -> FileAnalysis:
@@ -250,7 +252,7 @@ class GitWizEnhanced:
                         file_hashes[file_hash] = [str(rel_path)]
 
             except (OSError, PermissionError) as e:
-                logger.warning("Could not analyze {file_path}: {e}")
+                logger.warning(f"Could not analyze {file_path}: {e}")
 
         # Find duplicates
         for file_hash, paths in file_hashes.items():
@@ -522,7 +524,7 @@ class GitWizEnhanced:
                     elif full_path.is_dir():
                         shutil.rmtree(full_path)
             except (OSError, PermissionError) as e:
-                logger.warning("Could not remove {file_path}: {e}")
+                logger.warning(f"Could not remove {file_path}: {e}")
 
     def _count_stale_branches(self) -> int:
         """Count stale branches."""
@@ -670,14 +672,14 @@ def main():
 
         elif args.action == "report":
             report = gitwiz.generate_report()
-            print("✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
-            print("📊 Health Status: {report['summary']['health_status']}")
-            print("🗂️  Files: {report['summary']['total_files']}")
-            print("💾 Size: {report['summary']['total_size_mb']:.1f}MB")
-            print("⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
+            print(f"✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
+            print(f"📊 Health Status: {report['summary']['health_status']}")
+            print(f"🗂️  Files: {report['summary']['total_files']}")
+            print(f"💾 Size: {report['summary']['total_size_mb']:.1f}MB")
+            print(f"⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
 
     except Exception as e:
-        logger.error("GitWiz operation failed: {e}")
+        logger.error(f"GitWiz operation failed: {e}")
         return 1
 
     return 0

@@ -14,16 +14,20 @@ from typing import Any, Dict, List, Optional
 
 
 DEFAULT_BASE_URL = os.getenv("MESH_ROUTER_URL", "http://127.0.0.1:8000")
+DEFAULT_CONTROL_TOKEN = os.getenv("AURORA_MESH_CONTROL_TOKEN", "")
 
 
 def request_json(method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Perform a JSON HTTP request against the mesh runtime."""
 
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
+    headers = {"Content-Type": "application/json"}
+    if DEFAULT_CONTROL_TOKEN:
+        headers["Authorization"] = f"Bearer {DEFAULT_CONTROL_TOKEN}"
     request = urllib.request.Request(
         urllib.parse.urljoin(DEFAULT_BASE_URL, path),
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
         method=method,
     )
     try:
@@ -109,6 +113,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(description="Aurora mesh router CLI")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="Mesh runtime base URL")
+    parser.add_argument("--token", default=DEFAULT_CONTROL_TOKEN, help="Optional mesh control token for remote runtimes")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     status_parser = subparsers.add_parser("status", help="Show mesh runtime status")
@@ -151,10 +156,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[List[str]] = None) -> int:
     """CLI entry point."""
 
-    global DEFAULT_BASE_URL
+    global DEFAULT_BASE_URL, DEFAULT_CONTROL_TOKEN
     parser = build_parser()
     args = parser.parse_args(argv)
     DEFAULT_BASE_URL = args.base_url
+    DEFAULT_CONTROL_TOKEN = args.token
     return args.func(args)
 
 

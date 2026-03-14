@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Mesh Dashboard</title>
     <style>
         :root {
@@ -257,8 +258,8 @@
                 event cursor, and channel state all come from the same source of truth the chamber uses.
             </p>
             <div class="toolbar">
-                <button onclick="dashboard.refresh()">Refresh Status</button>
-                <button class="secondary" onclick="dashboard.activateAll()">Activate All</button>
+                <button id="refreshStatusBtn" type="button">Refresh Status</button>
+                <button id="activateAllBtn" type="button" class="secondary">Activate All</button>
                 <a class="link-btn secondary" href="/chamber">Open Chamber</a>
             </div>
         </section>
@@ -272,6 +273,7 @@
         <section class="agents" id="agentGrid"></section>
     </div>
 
+    <script src="../../static/js/aurora-security.js"></script>
     <script>
         class MeshDashboard {
             constructor() {
@@ -279,6 +281,47 @@
                 this.summaryCards = document.getElementById('summaryCards');
                 this.agentGrid = document.getElementById('agentGrid');
                 this.lastRefresh = document.getElementById('lastRefresh');
+                this.refreshButton = document.getElementById('refreshStatusBtn');
+                this.activateAllButton = document.getElementById('activateAllBtn');
+                this.refreshButton.addEventListener('click', () => {
+                    this.refresh();
+                });
+                this.activateAllButton.addEventListener('click', () => {
+                    this.activateAll();
+                });
+            }
+
+            toText(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                return String(value);
+            }
+
+            toArray(value) {
+                return Array.isArray(value) ? value : [];
+            }
+
+            statusClass(status) {
+                const normalized = this.toText(status)
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_-]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                return normalized || 'disconnected';
+            }
+
+            formatTimestamp(value) {
+                if (!value) {
+                    return 'none';
+                }
+                const date = new Date(value);
+                return Number.isNaN(date.getTime()) ? this.toText(value) : date.toLocaleString();
+            }
+
+            buildMetaLine(label, value) {
+                const line = document.createElement('div');
+                line.textContent = `${label}: ${value}`;
+                return line;
             }
 
             async refresh() {
@@ -295,44 +338,100 @@
                     ['Event Cursor', this.status.event_cursor],
                     ['Total Agents', this.status.total_agents],
                     ['Active Agents', this.status.active_agents],
-                    ['Channels', this.status.channels.length]
+                    ['Channels', this.toArray(this.status.channels).length]
                 ];
 
-                this.summaryCards.innerHTML = cards.map(([label, value]) => `
-                    <article class="card">
-                        <div class="card-label">${label}</div>
-                        <div class="card-value">${value}</div>
-                    </article>
-                `).join('');
+                // Build DOM nodes instead of injecting runtime values into HTML.
+                const fragment = document.createDocumentFragment();
+                for (const [label, value] of cards) {
+                    const article = document.createElement('article');
+                    article.className = 'card';
+
+                    const labelNode = document.createElement('div');
+                    labelNode.className = 'card-label';
+                    labelNode.textContent = label;
+
+                    const valueNode = document.createElement('div');
+                    valueNode.className = 'card-value';
+                    valueNode.textContent = this.toText(value);
+
+                    article.append(labelNode, valueNode);
+                    fragment.append(article);
+                }
+
+                this.summaryCards.replaceChildren(fragment);
             }
 
             renderAgents() {
-                this.agentGrid.innerHTML = this.status.agents.map((agent) => {
-                    const pillClass = `status-${agent.status}`;
-                    const channelTarget = encodeURIComponent(agent.default_channel);
-                    const agentTarget = encodeURIComponent(agent.agent_id);
-                    const channels = agent.channels.map((channel) => `<span class="chip">${channel}</span>`).join('');
-                    return `
-                        <article class="agent-card">
-                            <div class="agent-top">
-                                <div>
-                                    <div class="agent-name">${agent.display_name}</div>
-                                    <div class="meta">${agent.execution_mode} | default ${agent.default_channel}</div>
-                                </div>
-                                <div class="status-pill ${pillClass}">${agent.status}</div>
-                            </div>
-                            <div class="chips">${channels}</div>
-                            <div class="meta">
-                                Aliases: ${agent.aliases.join(', ')}<br>
-                                Last heartbeat: ${agent.last_heartbeat ? new Date(agent.last_heartbeat).toLocaleString() : 'none'}
-                            </div>
-                            <div class="agent-actions">
-                                <button onclick="dashboard.activateAgent('${agent.agent_id}')">Activate</button>
-                                <a class="link-btn secondary" href="/chamber?agent=${agentTarget}&channel=${channelTarget}">Open Line</a>
-                            </div>
-                        </article>
-                    `;
-                }).join('');
+                const fragment = document.createDocumentFragment();
+
+                for (const agent of this.toArray(this.status.agents)) {
+                    const article = document.createElement('article');
+                    article.className = 'agent-card';
+
+                    const top = document.createElement('div');
+                    top.className = 'agent-top';
+
+                    const identity = document.createElement('div');
+                    const name = document.createElement('div');
+                    name.className = 'agent-name';
+                    name.textContent = this.toText(agent.display_name);
+
+                    const mode = document.createElement('div');
+                    mode.className = 'meta';
+                    mode.textContent = `${this.toText(agent.execution_mode)} | default ${this.toText(agent.default_channel)}`;
+                    identity.append(name, mode);
+
+                    const status = document.createElement('div');
+                    status.className = `status-pill status-${this.statusClass(agent.status)}`;
+                    status.textContent = this.toText(agent.status);
+                    top.append(identity, status);
+
+                    const chips = document.createElement('div');
+                    chips.className = 'chips';
+                    for (const channel of this.toArray(agent.channels)) {
+                        const chip = document.createElement('span');
+                        chip.className = 'chip';
+                        chip.textContent = this.toText(channel);
+                        chips.append(chip);
+                    }
+
+                    const details = document.createElement('div');
+                    details.className = 'meta';
+                    const aliases = this.toArray(agent.aliases)
+                        .map((alias) => this.toText(alias))
+                        .filter(Boolean)
+                        .join(', ') || 'none';
+                    details.append(
+                        this.buildMetaLine('Aliases', aliases),
+                        this.buildMetaLine('Last heartbeat', this.formatTimestamp(agent.last_heartbeat))
+                    );
+
+                    const actions = document.createElement('div');
+                    actions.className = 'agent-actions';
+
+                    const activateButton = document.createElement('button');
+                    activateButton.type = 'button';
+                    activateButton.textContent = 'Activate';
+                    const agentId = this.toText(agent.agent_id);
+                    activateButton.addEventListener('click', () => {
+                        this.activateAgent(agentId);
+                    });
+
+                    const openLine = document.createElement('a');
+                    openLine.className = 'link-btn secondary';
+                    openLine.textContent = 'Open Line';
+                    const chamberUrl = new URL('/chamber', window.location.origin);
+                    chamberUrl.searchParams.set('agent', agentId);
+                    chamberUrl.searchParams.set('channel', this.toText(agent.default_channel));
+                    openLine.href = `${chamberUrl.pathname}${chamberUrl.search}`;
+
+                    actions.append(activateButton, openLine);
+                    article.append(top, chips, details, actions);
+                    fragment.append(article);
+                }
+
+                this.agentGrid.replaceChildren(fragment);
             }
 
             async activateAgent(agentId) {

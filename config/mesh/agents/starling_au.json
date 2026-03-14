@@ -3,8 +3,10 @@
   "display_name": "STARLING_AU",
   "aliases": [
     "STARLING_AU",
+    "starling_au",
     "starling",
-    "starling au",
+    "documentation coordinator",
+    "continuity dispatcher",
     "sim coordinator"
   ],
   "channels": [
@@ -12,8 +14,13 @@
     "#crew_lounge"
   ],
   "default_channel": "direct:starling_au",
-  "execution_mode": "deterministic",
-  "model_profile": {},
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.35,
+    "max_output_tokens": 220
+  },
   "typing_profile": {
     "delay_ms": 300
   },
@@ -22,5 +29,7 @@
     "fallback_to_deterministic": true,
     "signature": "STARLING_AU"
   },
-  "memory_files": []
+  "memory_files": [
+    "config/mesh/memory/starling_au.md"
+  ]
 }

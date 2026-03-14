@@ -4,6 +4,8 @@
   "aliases": [
     "OPPY",
     "oppy",
+    "operations coordinator",
+    "operational flight relay",
     "vector processor"
   ],
   "channels": [
@@ -11,8 +13,13 @@
     "#crew_lounge"
   ],
   "default_channel": "direct:oppy",
-  "execution_mode": "deterministic",
-  "model_profile": {},
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.35,
+    "max_output_tokens": 220
+  },
   "typing_profile": {
     "delay_ms": 300
   },
@@ -21,5 +28,7 @@
     "fallback_to_deterministic": true,
     "signature": "OPPY"
   },
-  "memory_files": []
+  "memory_files": [
+    "config/mesh/memory/oppy.md"
+  ]
 }

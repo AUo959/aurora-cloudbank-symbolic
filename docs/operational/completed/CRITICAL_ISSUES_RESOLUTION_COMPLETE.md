@@ -9,6 +9,12 @@
 - 🟡 **Medium Priority Issues**: **137** (mostly false positives)
 - 🟢 **Low Priority Issues**: **2** (minor improvements)
 
+**Provenance Note (2026-03-09):** This resolution summary reflects the
+runtime-facing canonical name set that replaced earlier bad names. A later
+reconciliation step preserved mission-thread counterpart roles and duty-watch
+distinctions as valid adjacent canon, rather than flattening Orion personnel
+into a single-source roster.
+
 ---
 
 ## 🏆 **Critical Issues Resolution Summary**
@@ -51,14 +57,17 @@
 
 ### **Staff Registry**: ✅ **CANONICALLY ALIGNED**
 
+**Provenance Note:** The list below is a runtime-facing office-holder summary,
+not the full merged personnel ledger.
+
 - ✅ **Commander**: Alex Thorne (canonical)
-- ✅ **XO/Second-in-Command**: Maya Shepard (canonical)
+- ✅ **XO/Second-in-Command**: Maya Shepard (canonical acting-command path)
 - ✅ **Chief Science Officer**: Varya Lin (canonical)
-- ✅ **Chief Ethics OfficerDr. Amira Sato
-- ✅ **Chief Security OfficerJulian Markov
+- ✅ **Chief Ethics Officer**: Dr. Amira Sato (canonical)
+- ✅ **Chief Security Officer**: Julian Markov (canonical)
 - ✅ **Bridge Operations**: Leena Porter (canonical)
 - ✅ **Engineering**: Jiro Tanaka (canonical)
-- ✅ **Medical OfficerDr. Ren Feldman
+- ✅ **Medical Officer**: Dr. Ren Feldman (canonical)
 
 ---
 

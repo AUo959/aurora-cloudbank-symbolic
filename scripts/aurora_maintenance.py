@@ -392,10 +392,12 @@ class MaintenanceScheduler:
             if branch_script.exists():
                 # Run branch analysis
                 branch_result = subprocess.run(
-                    ["python3", str(branch_script, shell=False, check=False), "--analyze"],
+                    [sys.executable, str(branch_script), "--analyze"],
                     capture_output=True,
                     text=True,
                     cwd=self.repo_path,
+                    shell=False,
+                    check=False,
                 )
 
                 result["details"] = {

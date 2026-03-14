@@ -12,7 +12,8 @@
       "real_time_communication",
       "symbolic_processing",
       "quantum_vsa_operations",
-      "geometric_algebra_computation"
+      "geometric_algebra_computation",
+      "command_grammar_parsing"
     ],
     "api_schema_version": "2024.1",
     "communication_protocols": {
@@ -47,6 +48,14 @@
           "expression_a": "string",
           "expression_b": "string", 
           "operation": "string"
+        }
+      },
+      "aurora_command_grammar": {
+        "type": "function",
+        "description": "Parse and validate Aurora command strings with //. execution enforcement",
+        "parameters": {
+          "command_text": "string",
+          "validate": "boolean"
         }
       },
       "session_state": {

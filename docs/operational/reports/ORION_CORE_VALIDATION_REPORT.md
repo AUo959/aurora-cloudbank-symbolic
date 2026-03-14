@@ -4,6 +4,13 @@
 **Validation Against**: COPILOT HANDOFF PACKAGE v3.5.1 (Live Sync Drift Lock)
 **Status**: ✅ VALIDATED WITH ENHANCEMENT RECOMMENDATIONS
 
+**Provenance Note (2026-03-09):** This report predates the later
+command/watch reconciliation. The staff block below now needs to be read as a
+runtime-facing office-holder summary: Alex Thorne remains permanent Station
+Commander, Maya Shepard carries acting command when delegated or absent, and
+mission-thread counterparts for Marcus Chen, Dr. Amina Velin, and Dr. Elira
+Noor are preserved in adjacent manifests rather than treated as invalid canon.
+
 ## 📋 Core System Validation Summary
 
 Our current Aurora CloudBank Symbolic system documentation has been **comprehensively validated** against the canonical ORION STATION core specification. All critical components align correctly with identified opportunities for enhancement and completion.
@@ -53,7 +60,7 @@ Our current Aurora CloudBank Symbolic system documentation has been **comprehens
 
 ## 🔄 ENHANCEMENT OPPORTUNITIES
 
-### 1. Staff Registry Alignment (REQUIRES UPDATE)
+### 1. Staff Registry Alignment (RECONCILED)
 
 **CANONICAL STAFF MANIFEST**:
 
@@ -69,8 +76,8 @@ Our current Aurora CloudBank Symbolic system documentation has been **comprehens
 { role: "Operator/Observer", name: "Assigned/rotating", desc: "Mission specialist node." }
 ```
 
-**CURRENT STATUS**: Generic roles implemented, names need canonical alignment
-**RECOMMENDATION**: Update staff registry with canonical names and descriptions
+**CURRENT STATUS**: Runtime-facing office holders canonically aligned; adjacent manifests now preserve counterpart mission threads and duty-watch distinctions
+**RECOMMENDATION**: Keep consuming the canonical staff registry for live L1 ownership, and treat broader crew-manifest counterparts as provenance-preserved adjacent canon
 
 ### 2. Observatory Command Bridge Integration (STAGED)
 

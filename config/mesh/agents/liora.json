@@ -4,6 +4,8 @@
   "aliases": [
     "LIORA",
     "liora",
+    "communications coordinator",
+    "interface relay",
     "handshake coordinator"
   ],
   "channels": [
@@ -11,8 +13,13 @@
     "#crew_lounge"
   ],
   "default_channel": "direct:liora",
-  "execution_mode": "deterministic",
-  "model_profile": {},
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.35,
+    "max_output_tokens": 220
+  },
   "typing_profile": {
     "delay_ms": 340
   },
@@ -21,5 +28,7 @@
     "fallback_to_deterministic": true,
     "signature": "LIORA"
   },
-  "memory_files": []
+  "memory_files": [
+    "config/mesh/memory/liora.md"
+  ]
 }

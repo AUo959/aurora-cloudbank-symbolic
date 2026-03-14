@@ -144,10 +144,16 @@ This project requires the following Python packages (see `requirements.txt`):
 - numba
 - clifford
 
-To install all dependencies, run:
+To build the canonical Python environment, run:
 
 ```bash
-pip install -r requirements.txt
+scripts/setup_dependencies.sh --execute --install-python
+```
+
+To scan FastAPI and dependency health without mutating the workspace, run:
+
+```bash
+python3 scripts/gitwiz_dependency_updater.py --scan --output logs/dependency_status.json
 ```
 
 ## Quick Start
@@ -170,12 +176,13 @@ make run
 ## Infallible Codespaces Bootstrap
 
 The repository includes a helper script that ensures Codespaces always finish
-building successfully. The script performs package installation with automatic
-retries and runs the onboarding checks. It is executed automatically by the
-devcontainer:
+building successfully. The script detects Codespaces and performs the bootstrap
+automatically there. When run manually outside Codespaces it defaults to a
+diagnostic dry run, and you can opt into local execution with `--execute`:
 
 ```bash
 python3 scripts/infallible_codespace_init.py
+python3 scripts/infallible_codespace_init.py --execute
 ```
 
 You can run the script manually if the environment becomes corrupted to

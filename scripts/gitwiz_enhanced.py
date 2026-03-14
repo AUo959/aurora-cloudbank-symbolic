@@ -10,6 +10,7 @@ import json
 import logging
 import shutil
 import subprocess
+import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from pathlib import Path
@@ -785,45 +786,51 @@ EnhancedGITWiz = GitWizEnhanced
 
 
 def main():
-    """Main CLI interface."""
+    """Compatibility wrapper routing legacy actions to the canonical gitwiz entrypoint."""
 
     parser = argparse.ArgumentParser(description="GitWiz Enhanced v2.0 - Intelligent Git Repository Management")
+    parser.add_argument("command", nargs="?", help="Legacy positional command")
     parser.add_argument("--repo", default=".", help="Repository path (default: current directory)")
     parser.add_argument(
-        "--action", choices=["analyze", "optimize", "branches", "report"], default="report", help="Action to perform"
+        "--action",
+        choices=[
+            "status",
+            "analyze",
+            "report",
+            "branches",
+            "optimize",
+            "deep-analyze",
+            "analyze-zips",
+            "consolidate-zips",
+        ],
+        help="Legacy action flag",
     )
+    parser.add_argument("--threshold-mb", type=int, default=50, help="ZIP threshold in MB for archive actions")
+    parser.add_argument("--archive-dir", default="archive", help="Archive directory for ZIP actions")
+    parser.add_argument("--execute", action="store_true", help="Allow ZIP archive moves during consolidation")
     parser.add_argument("--dry-run", action="store_true", help="Perform dry run (no changes)")
 
-    args = parser.parse_args()
+    args, extra = parser.parse_known_args()
+    legacy_action = args.action or args.command or "report"
+    gitwiz_script = Path(__file__).resolve().with_name("gitwiz.py")
+    command = [sys.executable, str(gitwiz_script)]
 
-    try:
-        gitwiz = GitWizEnhanced(args.repo)
+    if legacy_action in {"status", "analyze", "report", "branches", "optimize"}:
+        command.append(legacy_action)
+    elif legacy_action == "deep-analyze":
+        command.append("report")
+    elif legacy_action in {"analyze-zips", "consolidate-zips"}:
+        command.extend(["archives", "--threshold-mb", str(args.threshold_mb), "--archive-dir", args.archive_dir])
+        if legacy_action == "consolidate-zips":
+            if args.execute:
+                command.append("--execute")
+            else:
+                print("[gitwiz_enhanced] consolidate-zips now defaults to dry-run. Re-run with --execute to move files.")
+    else:
+        parser.error(f"Unsupported action: {legacy_action}")
 
-        if args.action == "analyze":
-            metrics = gitwiz.analyze_repository()
-            print(json.dumps(asdict(metrics), indent=2))
-
-        elif args.action == "optimize":
-            result = gitwiz.optimize_repository(dry_run=args.dry_run)
-            print(json.dumps(result, indent=2))
-
-        elif args.action == "branches":
-            result = gitwiz.manage_branches("analyze")
-            print(json.dumps(result, indent=2))
-
-        elif args.action == "report":
-            report = gitwiz.generate_report()
-            print(f"✅ Report generated: {gitwiz.gitwiz_dir}/health_report_*.json")
-            print(f"📊 Health Status: {report['summary']['health_status']}")
-            print(f"🗂️  Files: {report['summary']['total_files']}")
-            print(f"💾 Size: {report['summary']['total_size_mb']:.1f}MB")
-            print(f"⭐ Optimization Score: {report['summary']['optimization_score']:.2f}")
-
-    except Exception as e:
-        logger.error("GitWiz operation failed: {e}")
-        return 1
-
-    return 0
+    command.extend(extra)
+    return subprocess.run(command, cwd=Path(args.repo).resolve(), shell=False, check=False).returncode
 
 
 if __name__ == "__main__":

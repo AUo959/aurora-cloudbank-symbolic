@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -76,21 +78,13 @@ def main() -> int:
     parser.add_argument("--execute", action="store_true", help="Execute cleanup (default is dry-run)")
     parser.add_argument("--report-only", action="store_true", help="Generate report only")
     args = parser.parse_args()
-
-    manager = BranchCleanupManager()
-    branches = manager.analyze_branches()
-
-    report = manager.generate_cleanup_report(branches)
-    report_path = Path("branch_cleanup_report.md")
-    report_path.write_text(report, encoding="utf-8")
-    print(f"Report saved to: {report_path}")
-
+    wrapper = Path(__file__).resolve().with_name("branch_cleanup.py")
+    cmd = [sys.executable, str(wrapper)]
+    if args.execute:
+        cmd.append("--execute")
     if args.report_only:
-        return 0
-
-    results = manager.execute_cleanup(branches, dry_run=not args.execute)
-    print(f"Deleted: {len(results['deleted'])}, Errors: {len(results['errors'])}")
-    return 0
+        cmd.append("--report-only")
+    return subprocess.run(cmd, check=False).returncode
 
 
 if __name__ == "__main__":

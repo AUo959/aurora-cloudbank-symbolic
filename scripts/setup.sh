@@ -1,7 +1,7 @@
 #!/bin/bash
-# Setup script for Aurora Reflective Autonomy System
-echo "Setting up environment..."
-pip install -r requirements.txt || exit 1
-mkdir -p logs data
-cp .env.example .env 2>/dev/null || true
-echo "Setup complete."
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "[setup] Delegating to setup_dependencies.sh"
+"$SCRIPT_DIR/setup_dependencies.sh" "$@"

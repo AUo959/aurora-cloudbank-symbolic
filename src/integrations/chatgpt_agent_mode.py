@@ -37,6 +37,15 @@ except ImportError:
 
 
 try:
+    from src.aurora.core.command_grammar import AuroraCommandGrammar, CommandParseError
+except ImportError:
+    AuroraCommandGrammar = None
+
+    class CommandParseError(ValueError):
+        pass
+
+
+try:
     from modules.symbolic_core.sonnet4_integration_hub import sonnet4_hub
 except ImportError:
     # Mock sonnet4_hub for testing
@@ -172,7 +181,27 @@ class ChatGPTAgentModeIntegration:
                 },
                 "handler": self._handle_system_status,
             },
+            "aurora_command_grammar": {
+                "type": "function",
+                "description": "Parse and validate Aurora command strings, including //. execution enforcement",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command_text": {"type": "string", "description": "Aurora command string to inspect"},
+                        "validate": {"type": "boolean", "description": "Whether to run validator checks", "default": True},
+                    },
+                    "required": ["command_text"],
+                },
+                "handler": self._handle_aurora_command_grammar,
+            },
         }
+
+    def get_public_tools_registry(self) -> Dict[str, Dict[str, Any]]:
+        """Return a JSON-safe tool registry for API responses."""
+        public_registry: Dict[str, Dict[str, Any]] = {}
+        for tool_name, tool_def in self.tools_registry.items():
+            public_registry[tool_name] = {key: value for key, value in tool_def.items() if key != "handler"}
+        return public_registry
 
     async def discover_tools(self) -> Dict[str, Any]:
         """
@@ -180,7 +209,7 @@ class ChatGPTAgentModeIntegration:
         Returns OpenAPI-compatible tool definitions for ChatGPT agent mode
         """
         return {
-            "tools": self.tools_registry,
+            "tools": self.get_public_tools_registry(),
             "capabilities": self.config.get("agent_capabilities", []),
             "api_schema_version": self.config.get("api_schema_version", "2024.1"),
             "symbolic_anchors": self.symbolic_anchors,
@@ -378,6 +407,56 @@ class ChatGPTAgentModeIntegration:
             )
 
         return status
+
+    async def _handle_aurora_command_grammar(self, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
+        """Parse and validate Aurora command strings without executing them."""
+        command_text = parameters["command_text"]
+        validate = bool(parameters.get("validate", True))
+
+        if AuroraCommandGrammar is None:
+            raise HTTPException(status_code=500, detail="Aurora command grammar is unavailable")
+
+        grammar = AuroraCommandGrammar()
+        enforcement = {
+            "requires_execute_terminator": True,
+            "chain_operator": "//",
+            "execute_terminator": "//.",
+        }
+
+        if not command_text.strip().endswith("//."):
+            return {
+                "accepted": False,
+                "executable": False,
+                "error": "Command text must terminate with '//.' before parsing.",
+                "normalized_text": command_text.strip(),
+                "warnings": [],
+                "validation_issues": [],
+                "enforcement": enforcement,
+            }
+
+        try:
+            result = grammar.parse(command_text, validate=validate)
+        except CommandParseError as exc:
+            return {
+                "accepted": False,
+                "executable": False,
+                "error": str(exc),
+                "normalized_text": command_text.strip(),
+                "warnings": [],
+                "validation_issues": [],
+                "enforcement": enforcement,
+            }
+
+        return {
+            "accepted": True,
+            "executable": result.normalized_text.endswith("//."),
+            "normalized_text": result.normalized_text,
+            "ast_type": type(result.ast).__name__,
+            "warnings": [warning.message for warning in result.warnings],
+            "validation_issues": [issue.message for issue in result.validation_issues],
+            "enforcement": enforcement,
+            "context_tag": context.get("context_tag", "agent_tool_execution_aurora_command_grammar"),
+        }
 
     def _get_recovery_suggestions(self, tool_name: str, error: Exception) -> List[str]:
         """Provide recovery suggestions for tool execution errors"""

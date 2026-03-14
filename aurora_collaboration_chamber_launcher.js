@@ -9,19 +9,150 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const fs = require('fs').promises;
+
+const PROJECT_ROOT = __dirname;
+const PORT = Number.parseInt(process.env.AURORA_CHAMBER_PORT || '8080', 10);
+const HOST = process.env.AURORA_CHAMBER_HOST || '127.0.0.1';
+const ENABLE_SYSTEM_COMMANDS = process.env.AURORA_ENABLE_CHAMBER_COMMANDS === '1';
+const ENABLE_CONTEXT_TRANSFER = process.env.AURORA_ENABLE_CONTEXT_TRANSFER === '1';
+
+function parseListEnv(value, fallback) {
+  if (!value || !value.trim()) {
+    return fallback;
+  }
+
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeOrigin(origin) {
+  return origin.replace(/\/+$/, '');
+}
+
+const ALLOWED_ORIGINS = new Set(
+  parseListEnv(process.env.AURORA_CHAMBER_ALLOWED_ORIGINS, [
+    `http://${HOST}:${PORT}`,
+    `http://127.0.0.1:${PORT}`,
+    `http://localhost:${PORT}`
+  ]).map(normalizeOrigin)
+);
+
+const ALLOWED_CONTEXT_ROOTS = parseListEnv(process.env.AURORA_CONTEXT_TRANSFER_ROOTS, [
+  path.join(PROJECT_ROOT, 'docs'),
+  path.join(PROJECT_ROOT, 'src'),
+  path.join(PROJECT_ROOT, 'static'),
+  path.join(PROJECT_ROOT, 'tests')
+]).map((root) => path.resolve(root));
+
+const SAFE_SYSTEM_COMMANDS = {
+  'git status': {
+    command: 'git',
+    args: ['status']
+  },
+  'npm run lint': {
+    command: 'npm',
+    args: ['run', 'lint']
+  },
+  'npm run time-to-clean-up': {
+    command: 'npm',
+    args: ['run', 'time-to-clean-up']
+  },
+  'npm run validation:cleanup': {
+    command: 'npm',
+    args: ['run', 'validation:cleanup']
+  },
+  'npm run validation:status': {
+    command: 'npm',
+    args: ['run', 'validation:status']
+  },
+  'ps aux | grep aurora': {
+    command: 'ps',
+    args: ['aux'],
+    transformOutput: (stdout) =>
+      stdout
+        .split('\n')
+        .filter((line) => /aurora/i.test(line))
+        .join('\n')
+  },
+  'python scripts/aurora_validation_manager.py --cleanup': {
+    command: 'python3',
+    args: ['scripts/aurora_validation_manager.py', '--cleanup']
+  },
+  'python scripts/aurora_validation_manager.py --status': {
+    command: 'python3',
+    args: ['scripts/aurora_validation_manager.py', '--status']
+  },
+  'python scripts/canonical_validator.py --status': {
+    command: 'python3',
+    args: ['scripts/canonical_validator.py', '--status']
+  }
+};
+
+function isAllowedOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
+  return ALLOWED_ORIGINS.has(normalizeOrigin(origin));
+}
+
+function buildRejectedCommandResult(command, processId, reason) {
+  return {
+    processId,
+    command,
+    timestamp: new Date().toISOString(),
+    success: false,
+    stdout: '',
+    stderr: '',
+    exitCode: 1,
+    error: reason
+  };
+}
+
+function resolveContextPath(filePath) {
+  if (!ENABLE_CONTEXT_TRANSFER) {
+    throw new Error(
+      'Context transfer is disabled by default. Set AURORA_ENABLE_CONTEXT_TRANSFER=1 to enable it explicitly.'
+    );
+  }
+
+  if (typeof filePath !== 'string' || !filePath.trim()) {
+    throw new Error('Context transfer requires a non-empty relative file path.');
+  }
+
+  if (path.isAbsolute(filePath)) {
+    throw new Error('Absolute paths are not allowed for context transfer.');
+  }
+
+  const resolvedPath = path.resolve(PROJECT_ROOT, filePath);
+  const withinAllowedRoot = ALLOWED_CONTEXT_ROOTS.some(
+    (root) => resolvedPath === root || resolvedPath.startsWith(`${root}${path.sep}`)
+  );
+
+  if (!withinAllowedRoot) {
+    throw new Error('Requested file is outside the allowed context roots.');
+  }
+
+  return resolvedPath;
+}
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: '*',
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Origin not allowed by Aurora chamber policy.'));
+    },
     methods: ['GET', 'POST']
   }
 });
-
-const PORT = 8080;
 
 // Collaboration Chamber state
 const chamberState = {
@@ -41,6 +172,28 @@ const chamberState = {
 // Static file serving
 app.use(express.static(path.join(__dirname, 'src/interfaces')));
 app.use(express.json());
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin && !isAllowedOrigin(origin)) {
+    res.status(403).json({ success: false, error: 'Origin not allowed by Aurora chamber policy.' });
+    return;
+  }
+
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+
+  next();
+});
 
 // Routes
 app.get('/', (req, res) => {
@@ -285,40 +438,81 @@ class AuroraEngine {
   }
 
   async executeSystemCommand(command) {
-    return new Promise((resolve, reject) => {
-      const processId = `CMD-${Date.now()}`;
+    const processId = `CMD-${Date.now()}`;
+    const commandSpec = SAFE_SYSTEM_COMMANDS[command];
 
-      exec(command, {
-        cwd: process.cwd(),
-        timeout: 300000, // 5 minutes
-        maxBuffer: 1024 * 1024 // 1MB buffer
-      }, (error, stdout, stderr) => {
+    if (!ENABLE_SYSTEM_COMMANDS) {
+      return buildRejectedCommandResult(
+        command,
+        processId,
+        'System command execution is disabled by default. Set AURORA_ENABLE_CHAMBER_COMMANDS=1 to enable it explicitly.'
+      );
+    }
+
+    if (!commandSpec) {
+      return buildRejectedCommandResult(command, processId, 'Command not permitted by Aurora chamber policy.');
+    }
+
+    return new Promise((resolve) => {
+      const child = spawn(commandSpec.command, commandSpec.args, {
+        cwd: PROJECT_ROOT,
+        env: process.env,
+        shell: false
+      });
+      let stdout = '';
+      let stderr = '';
+      let timedOut = false;
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        child.kill('SIGTERM');
+      }, 30000);
+
+      child.stdout.setEncoding('utf8');
+      child.stderr.setEncoding('utf8');
+      child.stdout.on('data', (chunk) => {
+        stdout += chunk;
+      });
+      child.stderr.on('data', (chunk) => {
+        stderr += chunk;
+      });
+      child.on('error', (error) => {
+        clearTimeout(timeout);
+        resolve(buildRejectedCommandResult(command, processId, error.message));
+      });
+      child.on('close', (code, signal) => {
+        clearTimeout(timeout);
+        const transformOutput = commandSpec.transformOutput || ((value) => value);
+        const transformedStdout = transformOutput(stdout).trim();
         const result = {
           processId,
           command,
           timestamp: new Date().toISOString(),
-          success: !error,
-          stdout: stdout.trim(),
+          success: code === 0 && !signal && !timedOut,
+          stdout: transformedStdout,
           stderr: stderr.trim(),
-          exitCode: error ? error.code : 0
+          exitCode: code ?? 1
         };
 
-        if (error) {
-          result.error = error.message;
-          reject(result);
-        } else {
-          resolve(result);
+        if (timedOut) {
+          result.error = 'Command timed out after 30 seconds.';
+        } else if (signal) {
+          result.error = `Command terminated by signal ${signal}.`;
+        } else if (code !== 0) {
+          result.error = `Command exited with code ${code}.`;
         }
+
+        resolve(result);
       });
     });
   }
 
   async readFileForContext(filePath) {
     try {
-      const content = await fs.readFile(filePath, 'utf8');
+      const safePath = resolveContextPath(filePath);
+      const content = await fs.readFile(safePath, 'utf8');
       return {
         success: true,
-        filePath,
+        filePath: path.relative(PROJECT_ROOT, safePath),
         content,
         size: content.length,
         lines: content.split('\n').length
@@ -550,19 +744,7 @@ io.on('connection', (socket) => {
     try {
       const { command, authority, plan } = data;
 
-      // Security check - only allow certain commands
-      const allowedCommands = [
-        'npm run time-to-clean-up',
-        'npm run validation:status',
-        'npm run validation:cleanup',
-        'git status',
-        'python scripts/canonical_validator.py --status',
-        'python scripts/aurora_validation_manager.py --status',
-        'ps aux | grep aurora'
-      ];
-
-      const isAllowed = allowedCommands.some(allowed => command.startsWith(allowed));
-      if (!isAllowed) {
+      if (!SAFE_SYSTEM_COMMANDS[command]) {
         socket.emit('command_rejected', {
           command,
           reason: 'Command not in allowed list for security',
@@ -689,8 +871,8 @@ io.on('connection', (socket) => {
       aurora: {
         engine: 'operational',
         naturalLanguageProcessing: true,
-        systemCommandExecution: true,
-        contextTransfer: true,
+        systemCommandExecution: ENABLE_SYSTEM_COMMANDS,
+        contextTransfer: ENABLE_CONTEXT_TRANSFER,
         agentCoordination: true
       },
       system: {
@@ -716,12 +898,16 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log('🌟 Aurora CloudBank Collaboration Chamber Started');
-  console.log(`🏛️  Interface: http://localhost:${PORT}/chamber`);
+  console.log(`🏛️  Interface: http://${HOST}:${PORT}/chamber`);
   console.log('🕸️  @mesh System: ACTIVE');
   console.log('🎯 Agents: ARCHY, OPPY, LIORA, STARLING_AU, RIVERTHREAD_808');
-  console.log('📡 Features: Live Feed | Command Traceback | Agent Selection');
+  console.log(
+    `📡 Features: Live Feed | Command Traceback | Agent Selection | System Commands ${
+      ENABLE_SYSTEM_COMMANDS ? 'ENABLED' : 'DISABLED'
+    } | Context Transfer ${ENABLE_CONTEXT_TRANSFER ? 'ENABLED' : 'DISABLED'}`
+  );
   console.log('🌌 Phase 7: HOLOGRAPHIC COMMAND INTERFACE - OPERATIONAL');
 
   // Add welcome messages

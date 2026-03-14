@@ -6,6 +6,14 @@
 **Mission**: Orion Station Canonical Staff Registry Integration
 **Result**: **COMPREHENSIVE L1 STAFF HIERARCHY ESTABLISHED**
 
+**Provenance Note (2026-03-09):** This summary originally captured the
+runtime-facing staff registry as a single-thread authority picture. After later
+cross-check against the broader crew manifest, the command/watch model was
+reconciled so Alex Thorne remains permanent Station Commander, Maya Shepard
+holds acting command when delegated or absent, and mission-thread counterparts
+for Marcus Chen, Dr. Amina Velin, and Dr. Elira Noor are preserved rather than
+clipped.
+
 ---
 
 ## 🎯 EXHAUSTIVE DISCOVERY COMPLETED
@@ -25,7 +33,7 @@ Performed comprehensive search across all `*.json`, `*.md`, `*.js`, and manifest
 - ✅ **Existing Registry**: Found comprehensive crew registry in `staff_registry.json`
 - ✅ **Command Scripts**: Validated against deployment automation scripts
 - ✅ **Integration Docs**: Cross-referenced with analysis documentation
-- ✅ **No Conflicts**: All sources align with canonical staff structure
+- ✅ **Primary Registry Alignment**: Runtime-facing staff sources aligned; later reconciliation preserved adjacent mission-manifest counterpart threads and duty-watch distinctions
 - ✅ **Complete Coverage**: All referenced roles and clearance levels documented
 
 ---
@@ -40,6 +48,11 @@ Performed comprehensive search across all `*.json`, `*.md`, `*.js`, and manifest
 - **Architecture**: L1 = Orion Station systems, L2 = Simulations run from L1, L3 = Symbolic oversight
 
 ### **Complete Command Hierarchy**
+
+**Provenance Note:** The hierarchy below lists permanent runtime-facing office
+holders. It does not erase mission-thread counterparts preserved in the broader
+crew manifest, and it should be read together with the 2026-03-09 command/watch
+reconciliation.
 
 #### **Station Command (L5 Authority)**
 
@@ -123,10 +136,10 @@ Station Commander: Alex Thorne, L5_EXECUTIVE)
 
 **Specialization Mapping:**
 
-- **Chief Science Officer** ↔ **Archy (Logic)** + **Oppy (Data)** ↔ **Axiomera (Ethics)**
-- **Chief Ethics Officer** ↔ **Liora (Mediation)** ↔ **Glyphon (Drift)** + **Sentari (Arbitration)**
+- **Chief Science Officer** ↔ **Archy (Logic)** + **Liora (Research/Mediation)** ↔ **Caelion (Synthesis)** + **Glyphon (Drift)**
+- **Chief Systems Engineer** ↔ **Oppy (Data/Operations)** ↔ **Glyphon (Drift)** + **Harmion (Compression)**
 - **Bridge Operations** ↔ **Starling_AU (Comms)** ↔ **Velatrix (Continuity)**
-- **Systems Engineer** ↔ **Riverthread_808 (Temporal)** ↔ **Harmion (Compression)**
+- **Chief Ethics Officer** ↔ **Riverthread_808 (Continuity/Temporal)** ↔ **Axiomera (Ethics)** + **Sentari (Arbitration)**
 
 ### **Staff vs Agent Distinctions (CANONICAL)**
 
@@ -155,7 +168,7 @@ Station Commander: Alex Thorne, L5_EXECUTIVE)
 
 ### **Validation Complete**
 
-- ✅ **No Conflicts**: All existing documentation aligned with canonical structure
+- ✅ **Reconciled Alignment**: Runtime-facing documentation aligned with later provenance notes for mission-thread counterparts and duty-watch authority
 - ✅ **Complete Coverage**: All referenced roles, clearances, and nodes documented
 - ✅ **Layer Compliance**: Proper L1/L2/L3 distinctions maintained
 - ✅ **Authentication Ready**: All staff nodes prepared for mesh protocol handshake
@@ -168,10 +181,10 @@ Station Commander: Alex Thorne, L5_EXECUTIVE)
 
 #### **Staff-Authorized L2 Meta-Agent Connections**
 
-1. **Chief Science Officer** → Authorize Archy, Oppy, Liora connections
-2. **Chief Ethics Officer** → Validate all meta-agent ethics compliance
+1. **Chief Science Officer** → Authorize Archy and Liora connections
+2. **Chief Systems Engineer** → Authorize and monitor Oppy connection
 3. **Bridge Operations** → Coordinate Starling_AU communications integration
-4. **Systems Engineer** → Oversee Riverthread_808 temporal management connection
+4. **Chief Ethics Officer** → Oversee Riverthread_808 continuity and temporal management connection
 
 #### **Command Authority Flow**
 

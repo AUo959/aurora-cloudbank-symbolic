@@ -104,7 +104,7 @@ File Types:
 **File:** `requirements.txt` lines 19-21
 
 ```
-<<<<<<< HEAD
+[merge conflict marker removed]
 black==25.1.0
 isort==6.0.1
 pylint==3.2.8

@@ -5,6 +5,8 @@ Continuous monitoring, alerting, and automated maintenance for git repositories
 Created for Aurora CloudBank Symbolic - July 2025
 """
 
+from __future__ import annotations
+
 import argparse
 import datetime
 import json
@@ -15,22 +17,23 @@ from typing import List
 from typing import Any
 import logging
 import subprocess
+import sys
 from dataclasses import asdict
 import hashlib
 from pathlib import Path
 from typing import Callable
 import threading
-import psutil as ps
+try:
+    import psutil as ps
+except ImportError:
+    ps = None
 import sched
 from datetime import timedelta
 from collections import defaultdict
 
 
 # Optional imports
-try:
-    HAS_PSUTIL = True
-except ImportError:
-    HAS_PSUTIL = False
+HAS_PSUTIL = ps is not None
 
 try:
     HAS_SCHEDULE = True
@@ -850,42 +853,58 @@ def main():
     parser.add_argument("--action", choices=["monitor", "report", "check"], default="check", help="Action to perform")
     parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--daemon", action="store_true", help="Run as daemon")
+    parser.add_argument(
+        "--output",
+        default="logs/repo_health_status.json",
+        help="Output path for the generated JSON report",
+    )
 
     args = parser.parse_args()
+    repo_root = Path(args.repo).resolve()
+    output_path = Path(args.output)
+    canonical_script = Path(__file__).resolve().with_name("repo_health_monitor.py")
+
+    def run_once() -> int:
+        result = subprocess.run(
+            [sys.executable, str(canonical_script), "--output", str(output_path)],
+            cwd=repo_root,
+            shell=False,
+            check=False,
+        )
+        return result.returncode
 
     try:
-        monitor = RepositoryHealthMonitor(args.repo, args.config)
+        if args.config:
+            logger.warning("Custom config loading is not supported in compatibility mode; ignoring %s", args.config)
 
-        if args.action == "monitor":
-            monitor.start_monitoring()
-            if args.daemon:
-                logger.info("Running in daemon mode. Press Ctrl+C to stop.")
-                try:
-                    while True:
-                        time.sleep(1)
-                except KeyboardInterrupt:
-                    logger.info("Stopping monitoring...")
-                    monitor.stop_monitoring()
+        if args.action == "monitor" and args.daemon:
+            logger.info("Running canonical health monitor in daemon mode. Press Ctrl+C to stop.")
+            while True:
+                exit_code = run_once()
+                if exit_code != 0:
+                    return exit_code
+                time.sleep(30 * 60)
+        else:
+            exit_code = run_once()
+            if exit_code != 0:
+                return exit_code
 
-        elif args.action == "report":
-            report = monitor.get_health_report()
+        resolved_output = output_path if output_path.is_absolute() else (repo_root / output_path)
+        if resolved_output.exists():
+            report = json.loads(resolved_output.read_text(encoding="utf-8"))
+        else:
+            report = {}
+
+        if args.action == "report":
             print(json.dumps(report, indent=2))
-
-        elif args.action == "check":
-            metrics = monitor.collect_health_metrics()
+        elif args.action in {"check", "monitor"}:
             print("✅ Health Check Complete")
-            print(f"📊 Health Score: {metrics.health_score:.2f}")
-            print(f"📁 Files: {metrics.file_count}")
-            print(f"💾 Size: {metrics.repository_size_mb:.1f}MB")
-            print(f"🌿 Branches: {metrics.branch_count}")
-
-            if metrics.alerts:
-                print(f"🚨 Alerts: {len(metrics.alerts)}")
-                for alert in metrics.alerts:
-                    print(f"  - {alert}")
+            print(f"📁 Files: {report.get('file_count', 0)}")
+            print(f"💾 Size: {report.get('repo_size_mb', 0)}MB")
+            print(f"🌿 Branches: {report.get('branch_count', 0)}")
 
     except Exception as e:
-        logger.error("Health monitor operation failed: {e}")
+        logger.error("Health monitor operation failed: %s", e)
         return 1
 
     return 0

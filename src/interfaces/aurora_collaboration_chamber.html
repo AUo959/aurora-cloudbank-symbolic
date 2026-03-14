@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';">
     <title>Aurora Collaboration Chamber</title>
     <style>
         :root {
@@ -276,8 +277,8 @@
                 <div class="composer-row">
                     <div class="meta" id="composerMeta"></div>
                     <div style="display:flex; gap:10px;">
-                        <button class="secondary" onclick="chamber.reloadHistory()">Replay History</button>
-                        <button onclick="chamber.sendMessage()">Send</button>
+                        <button id="replayHistoryBtn" type="button" class="secondary">Replay History</button>
+                        <button id="sendMessageBtn" type="button">Send</button>
                     </div>
                 </div>
             </section>
@@ -289,6 +290,7 @@
         </aside>
     </div>
 
+    <script src="../../static/js/aurora-security.js"></script>
     <script>
         class MeshChamber {
             constructor() {
@@ -309,6 +311,58 @@
                 this.typingIndicator = document.getElementById('typingIndicator');
                 this.composerMeta = document.getElementById('composerMeta');
                 this.messageInput = document.getElementById('messageInput');
+                this.replayHistoryButton = document.getElementById('replayHistoryBtn');
+                this.sendMessageButton = document.getElementById('sendMessageBtn');
+                this.replayHistoryButton.addEventListener('click', () => {
+                    this.reloadHistory();
+                });
+                this.sendMessageButton.addEventListener('click', () => {
+                    this.sendMessage();
+                });
+            }
+
+            toText(value) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+                return String(value);
+            }
+
+            toArray(value) {
+                return Array.isArray(value) ? value : [];
+            }
+
+            formatTimestamp(value) {
+                if (!value) {
+                    return 'unknown';
+                }
+                const date = new Date(value);
+                return Number.isNaN(date.getTime()) ? this.toText(value) : date.toLocaleTimeString();
+            }
+
+            createElement(tagName, options = {}) {
+                const element = document.createElement(tagName);
+                if (options.className) {
+                    element.className = options.className;
+                }
+                if (Object.prototype.hasOwnProperty.call(options, 'text')) {
+                    element.textContent = this.toText(options.text);
+                }
+                return element;
+            }
+
+            stringifyPayload(payload) {
+                if (typeof payload === 'string') {
+                    return payload;
+                }
+                if (payload === null || payload === undefined) {
+                    return '';
+                }
+                try {
+                    return JSON.stringify(payload);
+                } catch (error) {
+                    return '[unserializable payload]';
+                }
             }
 
             async init() {
@@ -346,21 +400,47 @@
             }
 
             renderChannels() {
-                this.channelList.innerHTML = this.status.channels.map((channel) => `
-                    <div class="channel ${this.channelId === channel ? 'active' : ''}" onclick="chamber.selectChannel('${channel}')">
-                        <div>${channel}</div>
-                        <div class="channel-sub">${channel.startsWith('#') ? 'Broadcast channel' : 'Direct line'}</div>
-                    </div>
-                `).join('');
+                const fragment = document.createDocumentFragment();
+                for (const channel of this.toArray(this.status.channels)) {
+                    const item = this.createElement('div', {
+                        className: `channel ${this.channelId === channel ? 'active' : ''}`,
+                    });
+                    item.addEventListener('click', () => {
+                        this.selectChannel(channel);
+                    });
+
+                    item.append(
+                        this.createElement('div', { text: channel }),
+                        this.createElement('div', {
+                            className: 'channel-sub',
+                            text: channel.startsWith('#') ? 'Broadcast channel' : 'Direct line',
+                        })
+                    );
+                    fragment.append(item);
+                }
+                this.channelList.replaceChildren(fragment);
             }
 
             renderAgents() {
-                this.agentList.innerHTML = this.status.agents.map((agent) => `
-                    <div class="agent ${this.selectedAgent === agent.agent_id ? 'active' : ''}" onclick="chamber.selectAgent('${agent.agent_id}')">
-                        <div>${agent.display_name}</div>
-                        <div class="channel-sub">${agent.execution_mode} | ${agent.status}</div>
-                    </div>
-                `).join('');
+                const fragment = document.createDocumentFragment();
+                for (const agent of this.toArray(this.status.agents)) {
+                    const item = this.createElement('div', {
+                        className: `agent ${this.selectedAgent === agent.agent_id ? 'active' : ''}`,
+                    });
+                    item.addEventListener('click', () => {
+                        this.selectAgent(agent.agent_id);
+                    });
+
+                    item.append(
+                        this.createElement('div', { text: agent.display_name }),
+                        this.createElement('div', {
+                            className: 'channel-sub',
+                            text: `${this.toText(agent.execution_mode)} | ${this.toText(agent.status)}`,
+                        })
+                    );
+                    fragment.append(item);
+                }
+                this.agentList.replaceChildren(fragment);
             }
 
             renderHeader() {
@@ -450,54 +530,65 @@
             }
 
             renderFeed() {
-                this.feed.innerHTML = this.events
-                    .filter((event) => event.event_type !== 'trace_update')
-                    .map((event) => {
-                        let bubbleClass = 'bubble system';
-                        let title = event.event_type;
-                        let body = JSON.stringify(event.payload);
+                const fragment = document.createDocumentFragment();
+                for (const event of this.events.filter((item) => item.event_type !== 'trace_update')) {
+                    let bubbleClass = 'bubble system';
+                    let title = event.event_type;
+                    let body = this.stringifyPayload(event.payload);
 
-                        if (event.event_type === 'message_accepted') {
-                            bubbleClass = event.agent_id ? 'bubble system' : 'bubble user';
-                            title = event.payload.sender_name || 'User';
-                            body = event.payload.content;
-                        } else if (event.event_type === 'agent_reply') {
-                            bubbleClass = 'bubble reply';
-                            title = event.payload.agent_name || event.agent_id;
-                            body = event.payload.content;
-                        } else if (event.event_type === 'agent_ack') {
-                            title = event.payload.agent_name || event.agent_id;
-                            body = `Acknowledged in ${event.payload.execution_mode}`;
-                        } else if (event.event_type === 'agent_typing') {
-                            title = event.payload.agent_name || event.agent_id;
-                            body = 'Preparing reply';
-                        } else if (event.event_type === 'delivery_error') {
-                            bubbleClass = 'bubble error';
-                            title = event.payload.agent_name || event.agent_id || 'Delivery error';
-                            body = event.payload.error;
-                        }
+                    if (event.event_type === 'message_accepted') {
+                        bubbleClass = event.agent_id ? 'bubble system' : 'bubble user';
+                        title = event.payload.sender_name || 'User';
+                        body = event.payload.content;
+                    } else if (event.event_type === 'agent_reply') {
+                        bubbleClass = 'bubble reply';
+                        title = event.payload.agent_name || event.agent_id;
+                        body = event.payload.content;
+                    } else if (event.event_type === 'agent_ack') {
+                        title = event.payload.agent_name || event.agent_id;
+                        body = `Acknowledged in ${event.payload.execution_mode}`;
+                    } else if (event.event_type === 'agent_typing') {
+                        title = event.payload.agent_name || event.agent_id;
+                        body = 'Preparing reply';
+                    } else if (event.event_type === 'delivery_error') {
+                        bubbleClass = 'bubble error';
+                        title = event.payload.agent_name || event.agent_id || 'Delivery error';
+                        body = event.payload.error;
+                    }
 
-                        return `
-                            <article class="${bubbleClass}">
-                                <div class="bubble-head">
-                                    <div class="bubble-title">${title}</div>
-                                    <div class="meta">${new Date(event.timestamp).toLocaleTimeString()}</div>
-                                </div>
-                                <div>${body}</div>
-                            </article>
-                        `;
-                    }).join('');
+                    const article = this.createElement('article', { className: bubbleClass });
+                    const head = this.createElement('div', { className: 'bubble-head' });
+                    head.append(
+                        this.createElement('div', { className: 'bubble-title', text: title }),
+                        this.createElement('div', { className: 'meta', text: this.formatTimestamp(event.timestamp) })
+                    );
+
+                    const bodyNode = this.createElement('div', { text: body });
+                    article.append(head, bodyNode);
+                    fragment.append(article);
+                }
+                this.feed.replaceChildren(fragment);
                 this.feed.scrollTop = this.feed.scrollHeight;
             }
 
             renderTrace() {
-                this.traceList.innerHTML = this.traceEvents.slice(-40).map((event) => `
-                    <div class="trace-item">
-                        <strong>${event.payload.phase || event.event_type}</strong><br>
-                        ${event.payload.detail || ''}<br>
-                        <span class="meta">${new Date(event.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                `).join('');
+                const fragment = document.createDocumentFragment();
+                for (const event of this.traceEvents.slice(-40)) {
+                    const item = this.createElement('div', { className: 'trace-item' });
+                    const phase = this.createElement('strong', {
+                        text: event.payload.phase || event.event_type,
+                    });
+                    const detail = this.createElement('div', {
+                        text: event.payload.detail || '',
+                    });
+                    const timestamp = this.createElement('span', {
+                        className: 'meta',
+                        text: this.formatTimestamp(event.timestamp),
+                    });
+                    item.append(phase, detail, timestamp);
+                    fragment.append(item);
+                }
+                this.traceList.replaceChildren(fragment);
             }
 
             async sendMessage() {

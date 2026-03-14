@@ -4,6 +4,7 @@
  * Part of Phase 7: Holographic Command Interface deployment
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -15,15 +16,93 @@ const AuroraCustomGptBridge = require('../integrations/aurora_custom_gpt_bridge.
 // Import mesh agent system
 const { CollaborationMeshAgent } = require('../core/mesh_agent.js');
 
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function parseAllowedOrigins(rawValue, port) {
+  if (isNonEmptyString(rawValue)) {
+    const configuredOrigins = rawValue
+      .split(',')
+      .map(origin => origin.trim().replace(/\/$/, ''))
+      .filter(origin => origin && origin !== '*');
+
+    if (configuredOrigins.length > 0) {
+      return configuredOrigins;
+    }
+  }
+
+  return [
+    `http://127.0.0.1:${port}`,
+    `http://localhost:${port}`
+  ];
+}
+
+function isOriginAllowed(origin, allowedOrigins) {
+  return !origin || allowedOrigins.includes(origin.replace(/\/$/, ''));
+}
+
+function timingSafeEqualString(expected, provided) {
+  if (!isNonEmptyString(expected) || !isNonEmptyString(provided)) {
+    return false;
+  }
+
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+  const providedBuffer = Buffer.from(provided, 'utf8');
+
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+function extractBearerToken(headerValue) {
+  if (!isNonEmptyString(headerValue)) {
+    return '';
+  }
+
+  const [scheme, token] = headerValue.split(' ');
+  if (scheme !== 'Bearer' || !isNonEmptyString(token)) {
+    return '';
+  }
+
+  return token.trim();
+}
+
+function getAuthorityTokenFromRequest(req) {
+  return extractBearerToken(req.get('Authorization')) || (isNonEmptyString(req.get('Aurora-Command-Authority')) ? req.get('Aurora-Command-Authority').trim() : '');
+}
+
+function getAuthorityTokenFromSocket(socket) {
+  return (
+    extractBearerToken(socket.handshake?.headers?.authorization) ||
+    (isNonEmptyString(socket.handshake?.headers?.['aurora-command-authority']) ? socket.handshake.headers['aurora-command-authority'].trim() : '') ||
+    (isNonEmptyString(socket.handshake?.auth?.token) ? socket.handshake.auth.token.trim() : '')
+  );
+}
+
 class HolographicInterfaceOrchestrator {
   constructor(port = 8080) {
     this.port = port;
+    this.host = process.env.AURORA_HOLOGRAPHIC_HOST || '127.0.0.1';
+    this.allowedOrigins = parseAllowedOrigins(process.env.AURORA_HOLOGRAPHIC_ALLOWED_ORIGINS, port);
+    this.privilegedCommandsEnabled = process.env.AURORA_ENABLE_HOLOGRAPHIC_COMMANDS === 'true';
+    this.authorityToken = (process.env.AURORA_HOLOGRAPHIC_AUTHORITY_TOKEN || '').trim();
     this.app = express();
     this.server = http.createServer(this.app);
     this.io = socketIo(this.server, {
       cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
+        origin: (origin, callback) => {
+          if (isOriginAllowed(origin, this.allowedOrigins)) {
+            callback(null, true);
+            return;
+          }
+
+          callback(new Error('Origin not allowed'));
+        },
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Authorization', 'Aurora-Command-Authority', 'Content-Type']
       }
     });
 
@@ -46,14 +125,31 @@ class HolographicInterfaceOrchestrator {
   }
 
   setupMiddleware() {
-    this.app.use(express.json());
+    this.app.use(express.json({ limit: '1mb' }));
     this.app.use(express.static(path.join(__dirname, '../interface')));
 
     // CORS headers for Aurora Custom GPT integration
     this.app.use((req, res, next) => {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      const origin = req.headers.origin;
+      if (origin && !isOriginAllowed(origin, this.allowedOrigins)) {
+        res.status(403).json({
+          success: false,
+          error: 'Origin not allowed'
+        });
+        return;
+      }
+
+      if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+      }
+
+      res.header('Vary', 'Origin');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
       res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Aurora-Command-Authority');
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(204);
+        return;
+      }
       next();
     });
   }
@@ -67,11 +163,25 @@ class HolographicInterfaceOrchestrator {
     // Aurora Custom GPT integration endpoints
     this.app.post('/api/holographic/command', async (req, res) => {
       try {
+        if (!this.ensurePrivilegedCommandAccess(req, res)) {
+          return;
+        }
+
         const { command, source, authority } = req.body;
+        if (!isNonEmptyString(command)) {
+          res.status(400).json({
+            success: false,
+            error: 'Command is required'
+          });
+          return;
+        }
 
-        this.logger.info(`Received holographic command: ${command} from ${source}`);
+        this.logger.info('Received holographic command', {
+          source: source || 'unknown',
+          commandLength: command.trim().length
+        });
 
-        const result = await this.executeHolographicCommand(command, source, authority);
+        const result = await this.executeHolographicCommand(command.trim(), source, authority);
 
         // Broadcast to connected clients
         this.io.emit('command_executed', {
@@ -145,8 +255,20 @@ class HolographicInterfaceOrchestrator {
     // Mesh communication endpoint
     this.app.post('/api/mesh/broadcast', async (req, res) => {
       try {
+        if (!this.ensurePrivilegedCommandAccess(req, res)) {
+          return;
+        }
+
         const { message, authority } = req.body;
-        const result = await this.broadcastToMesh(message, authority);
+        if (!isNonEmptyString(message)) {
+          res.status(400).json({
+            success: false,
+            error: 'Message is required'
+          });
+          return;
+        }
+
+        const result = await this.broadcastToMesh(message.trim(), authority);
 
         res.json({
           success: true,
@@ -165,10 +287,21 @@ class HolographicInterfaceOrchestrator {
     // Direct agent communication endpoint
     this.app.post('/api/agent/:agentId/message', async (req, res) => {
       try {
+        if (!this.ensurePrivilegedCommandAccess(req, res)) {
+          return;
+        }
+
         const { agentId } = req.params;
         const { message, authority } = req.body;
+        if (!isNonEmptyString(message)) {
+          res.status(400).json({
+            success: false,
+            error: 'Message is required'
+          });
+          return;
+        }
 
-        const result = await this.sendDirectMessage(agentId, message, authority);
+        const result = await this.sendDirectMessage(agentId, message.trim(), authority);
 
         res.json({
           success: true,
@@ -236,10 +369,23 @@ class HolographicInterfaceOrchestrator {
       // Handle real-time commands with enhanced traceback
       socket.on('execute_command', async (data) => {
         try {
-          const { command, authority, target } = data;
+          if (!this.ensurePrivilegedSocketAccess(socket, 'command_result')) {
+            return;
+          }
+
+          const { command, authority, target = '' } = data || {};
+          if (!isNonEmptyString(command)) {
+            socket.emit('command_result', {
+              success: false,
+              error: 'Command is required',
+              timestamp: new Date().toISOString()
+            });
+            return;
+          }
+
           const commandId = `ws-${Date.now()}-${socket.id}`;
 
-          this.addCommandTraceback(commandId, command, '/ws/execute_command', {
+          this.addCommandTraceback(commandId, command.trim(), '/ws/execute_command', {
             socketId: socket.id,
             target,
             authority
@@ -248,17 +394,17 @@ class HolographicInterfaceOrchestrator {
           let result;
 
           // Route command based on target
-          if (target === '@mesh' || target.startsWith('{{@mesh')) {
+          if (target === '@mesh' || (isNonEmptyString(target) && target.startsWith('{{@mesh'))) {
             this.addTracebackStep(commandId, 'Routing to mesh broadcast system');
-            result = await this.broadcastToMesh(command, authority);
-          } else if (target.startsWith('@agent.') || target.startsWith('{{@agent.')) {
+            result = await this.broadcastToMesh(command.trim(), authority);
+          } else if (isNonEmptyString(target) && (target.startsWith('@agent.') || target.startsWith('{{@agent.'))) {
             const agentId = target.replace('@agent.', '').replace('{{@agent.', '').split(' ')[0];
             this.addTracebackStep(commandId, `Routing to direct agent communication: ${agentId}`);
-            result = await this.sendDirectMessage(agentId, command, authority);
+            result = await this.sendDirectMessage(agentId, command.trim(), authority);
           } else {
             // Default routing through Aurora bridge
             this.addTracebackStep(commandId, 'Routing to Aurora Custom GPT Bridge');
-            result = await this.executeHolographicCommand(command, 'collaboration_chamber', authority);
+            result = await this.executeHolographicCommand(command.trim(), 'collaboration_chamber', authority);
           }
 
           socket.emit('command_result', {
@@ -289,7 +435,7 @@ class HolographicInterfaceOrchestrator {
 
           socket.emit('command_result', errorResult);
 
-          if (data.commandId) {
+          if (data && data.commandId) {
             this.addTracebackStep(data.commandId, 'Command execution failed', null, error.message);
           }
         }
@@ -319,8 +465,20 @@ class HolographicInterfaceOrchestrator {
       // Handle mesh broadcast requests
       socket.on('mesh_broadcast', async (data) => {
         try {
-          const { message, authority } = data;
-          const result = await this.broadcastToMesh(message, authority || 'user');
+          if (!this.ensurePrivilegedSocketAccess(socket, 'mesh_broadcast_result')) {
+            return;
+          }
+
+          const { message, authority } = data || {};
+          if (!isNonEmptyString(message)) {
+            socket.emit('mesh_broadcast_result', {
+              success: false,
+              error: 'Message is required'
+            });
+            return;
+          }
+
+          const result = await this.broadcastToMesh(message.trim(), authority || 'user');
 
           socket.emit('mesh_broadcast_result', {
             success: true,
@@ -337,8 +495,20 @@ class HolographicInterfaceOrchestrator {
       // Handle direct agent messages
       socket.on('direct_message', async (data) => {
         try {
-          const { agentId, message, authority } = data;
-          const result = await this.sendDirectMessage(agentId, message, authority || 'user');
+          if (!this.ensurePrivilegedSocketAccess(socket, 'direct_message_result')) {
+            return;
+          }
+
+          const { agentId, message, authority } = data || {};
+          if (!isNonEmptyString(agentId) || !isNonEmptyString(message)) {
+            socket.emit('direct_message_result', {
+              success: false,
+              error: 'Agent ID and message are required'
+            });
+            return;
+          }
+
+          const result = await this.sendDirectMessage(agentId, message.trim(), authority || 'user');
 
           socket.emit('direct_message_result', {
             success: true,
@@ -439,6 +609,67 @@ class HolographicInterfaceOrchestrator {
       this.logger.error(`Collaboration Chamber initialization error: ${error.message}`);
       throw error;
     }
+  }
+
+  ensurePrivilegedCommandAccess(req, res) {
+    if (!this.privilegedCommandsEnabled) {
+      res.status(503).json({
+        success: false,
+        error: 'Privileged holographic commands are disabled'
+      });
+      return false;
+    }
+
+    if (!isNonEmptyString(this.authorityToken)) {
+      res.status(503).json({
+        success: false,
+        error: 'Holographic authority token is not configured'
+      });
+      return false;
+    }
+
+    const providedToken = getAuthorityTokenFromRequest(req);
+    if (!timingSafeEqualString(this.authorityToken, providedToken)) {
+      res.status(401).json({
+        success: false,
+        error: isNonEmptyString(providedToken) ? 'Invalid authority token' : 'Missing authority token'
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  ensurePrivilegedSocketAccess(socket, failureEvent) {
+    if (!this.privilegedCommandsEnabled) {
+      socket.emit(failureEvent, {
+        success: false,
+        error: 'Privileged holographic commands are disabled',
+        timestamp: new Date().toISOString()
+      });
+      return false;
+    }
+
+    if (!isNonEmptyString(this.authorityToken)) {
+      socket.emit(failureEvent, {
+        success: false,
+        error: 'Holographic authority token is not configured',
+        timestamp: new Date().toISOString()
+      });
+      return false;
+    }
+
+    const providedToken = getAuthorityTokenFromSocket(socket);
+    if (!timingSafeEqualString(this.authorityToken, providedToken)) {
+      socket.emit(failureEvent, {
+        success: false,
+        error: isNonEmptyString(providedToken) ? 'Invalid authority token' : 'Missing authority token',
+        timestamp: new Date().toISOString()
+      });
+      return false;
+    }
+
+    return true;
   }
 
   async executeHolographicCommand(command, source, authority) {
@@ -542,8 +773,20 @@ class HolographicInterfaceOrchestrator {
     // Mesh communication endpoint
     this.app.post('/api/mesh/broadcast', async (req, res) => {
       try {
+        if (!this.ensurePrivilegedCommandAccess(req, res)) {
+          return;
+        }
+
         const { message, authority } = req.body;
-        const result = await this.broadcastToMesh(message, authority);
+        if (!isNonEmptyString(message)) {
+          res.status(400).json({
+            success: false,
+            error: 'Message is required'
+          });
+          return;
+        }
+
+        const result = await this.broadcastToMesh(message.trim(), authority);
 
         res.json({
           success: true,
@@ -562,10 +805,21 @@ class HolographicInterfaceOrchestrator {
     // Direct agent communication endpoint
     this.app.post('/api/agent/:agentId/message', async (req, res) => {
       try {
+        if (!this.ensurePrivilegedCommandAccess(req, res)) {
+          return;
+        }
+
         const { agentId } = req.params;
         const { message, authority } = req.body;
+        if (!isNonEmptyString(message)) {
+          res.status(400).json({
+            success: false,
+            error: 'Message is required'
+          });
+          return;
+        }
 
-        const result = await this.sendDirectMessage(agentId, message, authority);
+        const result = await this.sendDirectMessage(agentId, message.trim(), authority);
 
         res.json({
           success: true,
@@ -774,9 +1028,14 @@ class HolographicInterfaceOrchestrator {
   }
 
   start() {
-    this.server.listen(this.port, () => {
-      this.logger.info(`🌟 Aurora CloudBank Holographic Command Interface started on port ${this.port}`);
+    this.server.listen(this.port, this.host, () => {
+      this.logger.info(`🌟 Aurora CloudBank Holographic Command Interface started on ${this.host}:${this.port}`);
       this.logger.info(`✨ Access the interface at: http://localhost:${this.port}`);
+      if (!this.privilegedCommandsEnabled) {
+        this.logger.info('🔒 Privileged holographic commands are disabled until AURORA_ENABLE_HOLOGRAPHIC_COMMANDS=true');
+      } else if (!isNonEmptyString(this.authorityToken)) {
+        this.logger.info('🔒 Privileged holographic commands require AURORA_HOLOGRAPHIC_AUTHORITY_TOKEN');
+      }
       this.logger.info('🎯 PHASE 7: HOLOGRAPHIC COMMAND INTERFACE - OPERATIONAL');
     });
   }

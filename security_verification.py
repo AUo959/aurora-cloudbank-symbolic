@@ -4,10 +4,15 @@
 Post-remediation security verification and comprehensive audit report.
 """
 
+import ast
 import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent
+SCRIPTS_ROOT = REPO_ROOT / "scripts"
+IGNORED_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".pytest_cache", "build", "dist"}
 
 
 def secure_run(cmd: str) -> tuple[str, str, int]:
@@ -20,41 +25,94 @@ def secure_run(cmd: str) -> tuple[str, str, int]:
         return "", str(e), 1
 
 
+def iter_script_python_files():
+    """Yield repo-owned Python scripts for runtime security verification."""
+    if not SCRIPTS_ROOT.exists():
+        return
+
+    for path in SCRIPTS_ROOT.rglob("*.py"):
+        if any(part in IGNORED_DIRS for part in path.parts):
+            continue
+        yield path
+
+
+def call_name(node: ast.AST) -> str:
+    """Return a dotted call name when it can be resolved statically."""
+    if isinstance(node, ast.Name):
+        return node.id
+    if isinstance(node, ast.Attribute):
+        parent = call_name(node.value)
+        return f"{parent}.{node.attr}" if parent else node.attr
+    return ""
+
+
+def shell_keyword_is_true(node: ast.Call) -> bool:
+    """Return True when a call explicitly sets shell=True."""
+    for keyword in node.keywords:
+        if keyword.arg == "shell" and isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+            return True
+    return False
+
+
+def inspect_script_runtime_risks():
+    """Scan script files for real runtime risk sites instead of matching raw strings."""
+    shell_true_sites = []
+    dynamic_exec_sites = []
+
+    for path in iter_script_python_files() or []:
+        try:
+            source = path.read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=str(path))
+        except (OSError, SyntaxError, UnicodeDecodeError):
+            continue
+
+        relative_path = path.relative_to(REPO_ROOT)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+
+            name = call_name(node.func)
+            line = getattr(node, "lineno", 0)
+
+            if name in {"eval", "exec"}:
+                dynamic_exec_sites.append((relative_path, line, name))
+            elif name.startswith("subprocess.") and shell_keyword_is_true(node):
+                shell_true_sites.append((relative_path, line, name))
+
+    return shell_true_sites, dynamic_exec_sites
+
+
 def main():
     """Generate final security verification report."""
     print("🔒 AURORA CLOUDBANK - FINAL SECURITY VERIFICATION")
     print("=" * 60)
     print(f"📅 Report Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("🎯 Verification: All Security Vulnerabilities Resolved")
+    print("🎯 Verification: Current runtime security snapshot")
     print()
 
     # Check for remaining vulnerabilities
     print("🔍 VULNERABILITY SCAN RESULTS")
     print("-" * 40)
 
-    # Check for shell=True usage
-    stdout, stderr, rc = secure_run("find . -name '*.py' -path './scripts/*' -exec grep -l 'shell=True' {} \\;")
-    if rc == 0 and stdout.strip():
+    shell_true_sites, dynamic_exec_sites = inspect_script_runtime_risks()
+    critical_findings = 0
+    dynamic_exec_warnings = 0
+    infra_warnings = 0
+    missing_infra = 0
+
+    if shell_true_sites:
+        critical_findings += len(shell_true_sites)
         print("❌ CRITICAL: shell=True vulnerabilities still found:")
-        for file in stdout.strip().split("\n"):
-            print(f"   - {file}")
+        for file_path, line, callsite in shell_true_sites:
+            print(f"   - {file_path}:{line} ({callsite})")
     else:
         print("✅ shell=True vulnerabilities: RESOLVED")
 
-    # Check for eval/exec usage
-    find_eval_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'eval(' {} \\;"  # nosec - grep pattern
-    stdout, stderr, rc = secure_run(find_eval_cmd)
-    eval_files = stdout.strip().split("\n") if stdout.strip() else []
-
-    find_exec_cmd = "find . -name '*.py' -path './scripts/*' -exec grep -l 'exec(' {} \\;"  # nosec - grep pattern
-    stdout, stderr, rc = secure_run(find_exec_cmd)
-    exec_files = stdout.strip().split("\n") if stdout.strip() else []
-
-    if eval_files or exec_files:
+    if dynamic_exec_sites:
+        dynamic_exec_warnings += len(dynamic_exec_sites)
         print("⚠️  WARNING: Dynamic code execution found:")
-        for file in eval_files + exec_files:
-            if file:
-                print(f"   - {file}")
+        for file_path, line, callsite in dynamic_exec_sites:
+            print(f"   - {file_path}:{line} ({callsite})")
     else:
         print("✅ Dynamic code execution: CLEAN")
 
@@ -62,56 +120,63 @@ def main():
     print("🛡️  SECURITY INFRASTRUCTURE STATUS")
     print("-" * 40)
 
-    # Check security files
-    security_files = [
-        ".security/security_policy.json",
-        ".security/secure_helpers.py",
-        ".github/security-config.yml",
-        "SECURITY.md",
-    ]
+    security_files = {
+        ".security/security_policy.json": [".security/security_policy.json"],
+        ".security/secure_helpers.py": [".security/secure_helpers.py", ".security/secure_helpers.py.disabled"],
+        ".github/security-config.yml": [".github/security-config.yml"],
+        "SECURITY.md": ["SECURITY.md"],
+    }
 
-    for file in security_files:
-        if Path(file).exists():
-            print(f"✅ {file}")
+    for label, candidates in security_files.items():
+        resolved = next((candidate for candidate in candidates if (REPO_ROOT / candidate).exists()), None)
+        if resolved is None:
+            print(f"❌ {label} MISSING")
+            missing_infra += 1
+        elif resolved.endswith(".disabled"):
+            print(f"⚠️  {label} present as disabled artifact ({Path(resolved).name})")
+            infra_warnings += 1
         else:
-            print(f"❌ {file} MISSING")
+            print(f"✅ {label}")
 
     print()
-    print("📊 REMEDIATION SUMMARY")
+    print("📊 VERIFICATION SUMMARY")
     print("-" * 40)
-    print("✅ Fixed: Shell injection vulnerabilities (5 files)")
-    print("✅ Added: Comprehensive security policy")
-    print("✅ Added: Secure helper functions")
-    print("✅ Added: GitHub security automation")
-    print("✅ Added: Security documentation")
-    print("✅ Added: Input validation & sanitization")
-    print("✅ Added: Timeout protections")
-    print("✅ Added: Error handling improvements")
+    print(f"Critical findings: {critical_findings}")
+    print(f"Dynamic execution warnings: {dynamic_exec_warnings}")
+    print(f"Infrastructure warnings: {infra_warnings}")
+    print(f"Missing infrastructure files: {missing_infra}")
 
     print()
     print("🎯 SECURITY COMPLIANCE STATUS")
     print("-" * 40)
-    print("✅ OWASP Top 10: Compliant")
-    print("✅ Shell Injection: Protected")
-    print("✅ XSS Prevention: Implemented")
-    print("✅ Input Validation: Active")
-    print("✅ Dependency Scanning: Automated")
-    print("✅ Security Monitoring: Enabled")
+    if critical_findings == 0 and dynamic_exec_warnings == 0 and infra_warnings == 0 and missing_infra == 0:
+        print("✅ Runtime verification: clean")
+        print("✅ Shell injection: protected")
+        print("✅ Dynamic execution: not detected")
+        print("✅ Security infrastructure: complete")
+    else:
+        print("⚠️  Review required before calling the audit fully clean")
+        print(f"⚠️  Shell injection findings: {critical_findings}")
+        print(f"⚠️  Dynamic execution findings: {dynamic_exec_warnings}")
+        print(f"⚠️  Infrastructure warnings: {infra_warnings}")
+        print(f"⚠️  Infrastructure gaps: {missing_infra}")
 
     print()
     print("🚀 NEXT STEPS")
     print("-" * 40)
-    print("1. Deploy security-hardened codebase")
-    print("2. Enable automated security scanning")
-    print("3. Schedule regular security audits")
-    print("4. Train team on secure coding practices")
-    print("5. Implement security incident response plan")
+    print("1. Fix or explicitly justify any remaining script runtime findings")
+    print("2. Re-enable or remove disabled security helper artifacts intentionally")
+    print("3. Keep dependency and governance scans in the regular validation loop")
 
     print()
     print("=" * 60)
-    print("🎉 AURORA CLOUDBANK IS NOW SECURITY-HARDENED!")
-    print("🔒 All critical vulnerabilities have been resolved")
-    print("🛡️  Comprehensive security measures are in place")
+    if critical_findings == 0 and dynamic_exec_warnings == 0 and infra_warnings == 0 and missing_infra == 0:
+        print("🎉 AURORA CLOUDBANK VERIFICATION IS CLEAN")
+        print("🔒 No runtime script regressions were detected")
+        print("🛡️  Security infrastructure checks passed")
+    else:
+        print("🔍 AURORA CLOUDBANK VERIFICATION REQUIRES FOLLOW-UP")
+        print("🛠️  Findings above should be reviewed before treating the audit as final")
     print("=" * 60)
 
 

@@ -4,6 +4,7 @@ Aurora CloudBank Security Scanner
 Comprehensive security analysis and automated fixes
 """
 
+import ast
 import os
 import re
 import json
@@ -99,39 +100,107 @@ class AuroraSecurityScanner:
 
     def _check_py_content(self, file_path, content):
         """Check Python content for security issues"""
+        lines = content.splitlines()
 
-        dangerous_patterns = {
-            "eval": (r"\beval\s*\(", "HIGH", "Use of eval() can execute arbitrary code"),  # nosec - pattern definition
-            "exec": (r"\bexec\s*\(", "HIGH", "Use of exec() can execute arbitrary code"),  # nosec - pattern definition
-            "subprocess_shell": (
-                r"subprocess\.\w+.*shell\s*=\s*True",
-                "HIGH",
-                "subprocess with shell=True can enable command injection",
-            ),
-            "os_system": (r"os\.system\s*\(", "HIGH", "os.system() can enable command injection"),  # nosec - pattern
-            "sql_format": (r"\.format\s*\(.*SELECT", "HIGH", "String formatting in SQL can lead to injection"),
-            "pickle_load": (r"pickle\.loads?\s*\(", "MEDIUM", "pickle.load can execute arbitrary code"),
-            "yaml_unsafe": (
-                r"yaml\.load\s*\((?!.*Loader=)",
-                "MEDIUM",
-                "yaml.load without safe loader can execute code",
-            ),
-        }
+        try:
+            tree = ast.parse(content, filename=str(file_path))
+        except SyntaxError:
+            tree = None
 
-        for issue_type, (pattern, severity, message) in dangerous_patterns.items():
-            matches = re.finditer(pattern, content, re.IGNORECASE | re.MULTILINE)
-            for match in matches:
-                line_num = content[: match.start()].count("\n") + 1
-                self.issues.append(
-                    {
-                        "file": str(file_path),
-                        "line": line_num,
-                        "type": issue_type,
-                        "severity": severity,
-                        "message": message,
-                        "code": content.split("\n")[line_num - 1].strip(),
-                    }
-                )
+        if tree is not None:
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+
+                name = self._call_name(node.func)
+                line_num = getattr(node, "lineno", 1)
+                code = lines[line_num - 1].strip() if 0 < line_num <= len(lines) else ""
+
+                if name in {"eval", "exec"}:
+                    self.issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "type": name,
+                            "severity": "HIGH",
+                            "message": f"Use of {name}() can execute arbitrary code",
+                            "code": code,
+                        }
+                    )
+                elif name.startswith("subprocess.") and self._call_has_shell_true(node):
+                    self.issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "type": "subprocess_shell",
+                            "severity": "HIGH",
+                            "message": "subprocess with shell=True can enable command injection",
+                            "code": code,
+                        }
+                    )
+                elif name == "os.system":
+                    self.issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "type": "os_system",
+                            "severity": "HIGH",
+                            "message": "os.system() can enable command injection",
+                            "code": code,
+                        }
+                    )
+                elif name in {"pickle.load", "pickle.loads"}:
+                    self.issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "type": "pickle_load",
+                            "severity": "MEDIUM",
+                            "message": "pickle.load can execute arbitrary code",
+                            "code": code,
+                        }
+                    )
+                elif name == "yaml.load" and not any(keyword.arg == "Loader" for keyword in node.keywords):
+                    self.issues.append(
+                        {
+                            "file": str(file_path),
+                            "line": line_num,
+                            "type": "yaml_unsafe",
+                            "severity": "MEDIUM",
+                            "message": "yaml.load without safe loader can execute code",
+                            "code": code,
+                        }
+                    )
+
+        sql_matches = re.finditer(r"\.format\s*\(.*SELECT", content, re.IGNORECASE | re.MULTILINE)
+        for match in sql_matches:
+            line_num = content[: match.start()].count("\n") + 1
+            self.issues.append(
+                {
+                    "file": str(file_path),
+                    "line": line_num,
+                    "type": "sql_format",
+                    "severity": "HIGH",
+                    "message": "String formatting in SQL can lead to injection",
+                    "code": lines[line_num - 1].strip() if 0 < line_num <= len(lines) else "",
+                }
+            )
+
+    def _call_name(self, node):
+        """Resolve a dotted function name when possible."""
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            parent = self._call_name(node.value)
+            return f"{parent}.{node.attr}" if parent else node.attr
+        return ""
+
+    def _call_has_shell_true(self, node):
+        """Return True when a subprocess call explicitly sets shell=True."""
+        for keyword in node.keywords:
+            if keyword.arg == "shell" and isinstance(keyword.value, ast.Constant) and keyword.value.value is True:
+                return True
+        return False
 
     def check_dependencies(self):
         """Check for vulnerable dependencies"""

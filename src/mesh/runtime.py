@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import sqlite3
 import threading
 import uuid
@@ -19,6 +20,7 @@ except ImportError:  # pragma: no cover - runtime still works without FastAPI in
 from .live_agents import LiveAdapterUnavailable, OpenAILiveAdapter
 from .manifests import build_alias_index, ensure_seed_memory_files, load_manifests, normalize_lookup
 from .models import AgentManifest, MeshEvent, MeshMessageRequest
+from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 
 
 ORION_CORE = {
@@ -328,6 +330,12 @@ class WebSocketHub:
         with self._lock:
             self._connections.discard(websocket)
 
+    def clear(self) -> None:
+        """Drop all tracked socket references during app shutdown/reset."""
+
+        with self._lock:
+            self._connections.clear()
+
     async def broadcast(self, payload: Dict[str, Any]) -> None:
         with self._lock:
             recipients = list(self._connections)
@@ -355,6 +363,7 @@ class MeshRuntime:
         self.store = MeshStore(self.runtime_root / "mesh.db", self.runtime_root / "transcripts")
         self.websocket_hub = WebSocketHub()
         self.live_adapter = OpenAILiveAdapter()
+        self.agent_tool_runtime = chatgpt_agent_integration
         self.manifests: Dict[str, AgentManifest] = {}
         self.alias_index: Dict[str, str] = {}
         self.reload_manifests()
@@ -480,9 +489,33 @@ class MeshRuntime:
         """Run target processing outside the request event loop."""
 
         def runner() -> None:
-            asyncio.run(self._process_target(message_id, channel_id, request, manifest))
+            try:
+                asyncio.run(self._process_target(message_id, channel_id, request, manifest))
+            except BaseException as exc:
+                error_text = str(exc) or exc.__class__.__name__
+                try:
+                    self.store.append_event(
+                        "delivery_error",
+                        message_id=message_id,
+                        channel_id=channel_id,
+                        agent_id=manifest.id,
+                        payload={
+                            "agent_name": manifest.display_name,
+                            "error": error_text,
+                            "error_type": exc.__class__.__name__,
+                            "phase": "worker_crash",
+                        },
+                    )
+                except Exception:
+                    # Preserve the original worker failure signal even if event persistence is unavailable.
+                    pass
 
-        thread = threading.Thread(target=runner, daemon=True)
+        # Use non-daemon workers so accepted messages can finish cleanly during normal shutdown/reload.
+        thread = threading.Thread(
+            target=runner,
+            daemon=False,
+            name=f"mesh-target-{manifest.id}-{message_id[:8]}",
+        )
         thread.start()
 
     async def inject_agent_message(
@@ -551,7 +584,16 @@ class MeshRuntime:
                 payload={"agent_name": manifest.display_name, "delay_ms": manifest.typing_profile.delay_ms},
             )
 
-            reply_text, mode, trace_detail = await self._generate_reply(manifest, request.content, channel_id)
+            reply_text, mode, trace_detail, tool_context = await self._generate_reply(manifest, request.content, channel_id)
+            if tool_context:
+                tool_names = ", ".join(item["tool_name"] for item in tool_context)
+                await self._record_event(
+                    "trace_update",
+                    message_id=message_id,
+                    channel_id=channel_id,
+                    agent_id=manifest.id,
+                    payload={"phase": "tool_binding", "detail": f"Executed bound tools: {tool_names}", "tools": tool_context},
+                )
             await self._record_event(
                 "trace_update",
                 message_id=message_id,
@@ -566,32 +608,84 @@ class MeshRuntime:
                 agent_id=manifest.id,
                 payload={"content": reply_text, "agent_name": manifest.display_name, "mode": mode},
             )
-        except Exception as exc:
+            self._append_continuity_entry(
+                manifest=manifest,
+                channel_id=channel_id,
+                user_content=request.content,
+                reply_text=reply_text,
+                mode=mode,
+                tool_context=tool_context,
+            )
+        except BaseException as exc:
             await self._record_event(
                 "delivery_error",
                 message_id=message_id,
                 channel_id=channel_id,
                 agent_id=manifest.id,
-                payload={"error": str(exc), "agent_name": manifest.display_name},
+                payload={
+                    "error": str(exc) or exc.__class__.__name__,
+                    "error_type": exc.__class__.__name__,
+                    "agent_name": manifest.display_name,
+                },
             )
 
-    async def _generate_reply(self, manifest: AgentManifest, content: str, channel_id: str) -> Sequence[str]:
+    async def _generate_reply(self, manifest: AgentManifest, content: str, channel_id: str) -> Sequence[Any]:
         memory_text = self._read_memory(manifest)
+        instruction_profile = self._read_instruction_profile(manifest)
+        continuity_reflections = self._read_continuity_reflections(manifest)
         recent_events = self.store.get_recent_events(channel_id, limit=12)
+        tool_context = await self._execute_bound_tools(manifest, content)
+        tool_schemas = self._bound_tool_schemas(manifest)
 
         if manifest.execution_mode == "live_llm":
             try:
-                reply = await self.live_adapter.generate_reply(manifest, content, memory_text, recent_events)
-                return reply, "live_llm", "OpenAI live adapter completed successfully"
+                reply = await self.live_adapter.generate_reply(
+                    manifest,
+                    content,
+                    memory_text,
+                    recent_events,
+                    instruction_profile=instruction_profile,
+                    continuity_reflections=continuity_reflections,
+                    tool_context=tool_context,
+                    tool_schemas=tool_schemas,
+                )
+                return reply, "live_llm", "OpenAI live adapter completed successfully", tool_context
             except LiveAdapterUnavailable as exc:
                 if not manifest.response_policy.fallback_to_deterministic:
                     raise
-                fallback = self._deterministic_reply(manifest, content, memory_text)
-                return fallback, "deterministic_fallback", f"Live adapter unavailable: {exc}"
+                fallback = self._deterministic_reply(
+                    manifest,
+                    content,
+                    memory_text,
+                    instruction_profile=instruction_profile,
+                    continuity_reflections=continuity_reflections,
+                    tool_context=tool_context,
+                )
+                return fallback, "deterministic_fallback", f"Live adapter unavailable: {exc}", tool_context
 
-        return self._deterministic_reply(manifest, content, memory_text), "deterministic", "Deterministic responder"
+        return (
+            self._deterministic_reply(
+                manifest,
+                content,
+                memory_text,
+                instruction_profile=instruction_profile,
+                continuity_reflections=continuity_reflections,
+                tool_context=tool_context,
+            ),
+            "deterministic",
+            "Deterministic responder",
+            tool_context,
+        )
 
-    def _deterministic_reply(self, manifest: AgentManifest, content: str, memory_text: str) -> str:
+    def _deterministic_reply(
+        self,
+        manifest: AgentManifest,
+        content: str,
+        memory_text: str,
+        instruction_profile: Optional[Dict[str, Any]] = None,
+        continuity_reflections: Optional[List[Dict[str, Any]]] = None,
+        tool_context: Optional[List[Dict[str, Any]]] = None,
+    ) -> str:
         style = manifest.response_policy.style
         content_excerpt = content.strip().replace("\n", " ")
         if len(content_excerpt) > 180:
@@ -624,6 +718,13 @@ class MeshRuntime:
             "continuity": (
                 f"{manifest.display_name}: I'd anchor {content_excerpt} to the current thread state first, then update the channel without introducing drift."
             ),
+            "aurora_control_plane": self._aurora_deterministic_reply(
+                manifest=manifest,
+                content_excerpt=content_excerpt,
+                instruction_profile=instruction_profile or {},
+                continuity_reflections=continuity_reflections or [],
+                tool_context=tool_context or [],
+            ),
             "general": f"{manifest.display_name}: I've logged {content_excerpt} and I'm responding from the shared mesh context.",
         }
         body = templates.get(style, templates["general"])
@@ -654,6 +755,217 @@ class MeshRuntime:
             if candidate.exists():
                 parts.append(candidate.read_text())
         return "\n\n".join(parts).strip()
+
+    def _read_instruction_profile(self, manifest: AgentManifest) -> Dict[str, Any]:
+        if not manifest.instruction_profile_file:
+            return {}
+        candidate = (self.project_root / manifest.instruction_profile_file).resolve()
+        if not candidate.exists():
+            return {}
+        return json.loads(candidate.read_text())
+
+    def _read_continuity_reflections(self, manifest: AgentManifest, limit: int = 4) -> List[Dict[str, Any]]:
+        if not manifest.continuity_log_file:
+            return []
+        candidate = (self.project_root / manifest.continuity_log_file).resolve()
+        if not candidate.exists():
+            return []
+        entries: List[Dict[str, Any]] = []
+        for line in candidate.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if payload.get("entry_type") != "interaction":
+                continue
+            entries.append(payload)
+        return entries[-limit:]
+
+    async def _execute_bound_tools(self, manifest: AgentManifest, content: str) -> List[Dict[str, Any]]:
+        if not manifest.tool_bindings:
+            return []
+        tool_requests = self._select_bound_tools(manifest, content)
+        if not tool_requests:
+            return []
+
+        results: List[Dict[str, Any]] = []
+        for item in tool_requests:
+            response = await self.agent_tool_runtime.execute_tool(
+                tool_name=item["tool_name"],
+                parameters=item["parameters"],
+                session_id=f"mesh::{manifest.id}",
+            )
+            results.append(
+                {
+                    "tool_name": item["tool_name"],
+                    "parameters": item["parameters"],
+                    "result": response.get("result"),
+                    "success": response.get("success", True),
+                    "summary": self._summarize_tool_result(item["tool_name"], response),
+                }
+            )
+        return results
+
+    def _bound_tool_schemas(self, manifest: AgentManifest) -> Dict[str, Dict[str, Any]]:
+        registry = self.agent_tool_runtime.get_public_tools_registry()
+        return {tool_name: registry[tool_name] for tool_name in manifest.tool_bindings if tool_name in registry}
+
+    def _select_bound_tools(self, manifest: AgentManifest, content: str) -> List[Dict[str, Any]]:
+        lowered = content.lower()
+        requests: List[Dict[str, Any]] = []
+        seen: Set[str] = set()
+
+        def add(tool_name: str, parameters: Dict[str, Any]) -> None:
+            if tool_name not in manifest.tool_bindings or tool_name in seen:
+                return
+            seen.add(tool_name)
+            requests.append({"tool_name": tool_name, "parameters": parameters})
+
+        if "aurora_command_grammar" in manifest.tool_bindings and ("//" in content or "command grammar" in lowered):
+            add("aurora_command_grammar", {"command_text": content, "validate": True})
+
+        if "system_status" in manifest.tool_bindings and re.search(r"\b(status|health|uptime|tool|surface|available)\b", lowered):
+            add("system_status", {"detail_level": "basic"})
+
+        if "geometric_algebra" in manifest.tool_bindings and (
+            re.search(r"\be[123]\b", lowered) or "geometric algebra" in lowered or "multivector" in lowered
+        ):
+            expressions = re.findall(r"e[123](?:\s*[+-]\s*e[123])*", content)
+            expr_a = expressions[0] if expressions else "e1 + e2"
+            expr_b = expressions[1] if len(expressions) > 1 else "e2 + e3"
+            add("geometric_algebra", {"expression_a": expr_a, "expression_b": expr_b, "operation": "mult"})
+
+        if "symbolic_processing" in manifest.tool_bindings and re.search(
+            r"\b(symbolic|anchor|drift|continuity|glyph|provenance|rollback)\b", lowered
+        ):
+            add(
+                "symbolic_processing",
+                {
+                    "operation": "analyze_request_context",
+                    "data": {"content": content, "agent": manifest.id},
+                    "anchor_context": ORION_CORE["anchor_seed"],
+                },
+            )
+
+        if "session_management" in manifest.tool_bindings and re.search(r"\b(session|state|context persistence)\b", lowered):
+            add(
+                "session_management",
+                {
+                    "action": "get",
+                    "session_id": f"mesh::{manifest.id}",
+                    "state_data": {},
+                },
+            )
+
+        return requests
+
+    def _summarize_tool_result(self, tool_name: str, response: Dict[str, Any]) -> str:
+        result = response.get("result", {})
+        if tool_name == "aurora_command_grammar":
+            accepted = result.get("accepted")
+            normalized = result.get("normalized_text", "")
+            return f"command grammar accepted={accepted}; normalized={normalized or 'n/a'}"
+        if tool_name == "system_status":
+            return f"system status agent={result.get('agent_status', 'unknown')}; sessions={result.get('active_sessions', 'n/a')}"
+        if tool_name == "geometric_algebra":
+            return f"geometric algebra result={result.get('geometric_result', 'n/a')}"
+        if tool_name == "symbolic_processing":
+            return f"symbolic processing operation={result.get('operation', 'n/a')}"
+        if tool_name == "session_management":
+            return f"session management action={result.get('action', 'n/a')}"
+        return f"{tool_name} executed"
+
+    def _aurora_deterministic_reply(
+        self,
+        manifest: AgentManifest,
+        content_excerpt: str,
+        instruction_profile: Dict[str, Any],
+        continuity_reflections: List[Dict[str, Any]],
+        tool_context: List[Dict[str, Any]],
+    ) -> str:
+        core_identity = instruction_profile.get("core_identity", {})
+        purpose = core_identity.get("purpose", [])
+        purpose_note = purpose[0] if purpose else "keep the ORION system usable without becoming unsafe"
+        tool_note = ""
+        if tool_context:
+            tool_note = " Tool signals: " + "; ".join(item["summary"] for item in tool_context[:3]) + "."
+        continuity_note = ""
+        if continuity_reflections:
+            continuity_note = f" Continuity note: {continuity_reflections[-1].get('reflection_summary', '')}"
+        return (
+            f"{manifest.display_name}: I am handling {content_excerpt} as AU control-plane work. "
+            f"Primary aim is to {purpose_note.lower()} while preserving provenance, bounded authority, and rollback paths."
+            f"{tool_note}{continuity_note}"
+        )
+
+    def _append_continuity_entry(
+        self,
+        manifest: AgentManifest,
+        channel_id: str,
+        user_content: str,
+        reply_text: str,
+        mode: str,
+        tool_context: List[Dict[str, Any]],
+    ) -> None:
+        if not manifest.continuity_log_file:
+            return
+        target = (self.project_root / manifest.continuity_log_file).resolve()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        command_grammar_result = next((item.get("result") for item in tool_context if item["tool_name"] == "aurora_command_grammar"), None)
+        constraints_triggered = []
+        if command_grammar_result and not command_grammar_result.get("accepted", True):
+            constraints_triggered.append("command_protocol_enforcement")
+        if "Aurora Core" in user_content:
+            constraints_triggered.append("aurora_core_alias_ambiguity")
+        open_threads = self._extract_open_threads(user_content)
+        entry = {
+            "entry_type": "interaction",
+            "timestamp": utcnow(),
+            "agent_id": manifest.id,
+            "channel_id": channel_id,
+            "user_intent_summary": self._summarize_text(user_content, limit=140),
+            "tools_used": [item["tool_name"] for item in tool_context],
+            "tool_summaries": [item["summary"] for item in tool_context],
+            "command_grammar_result": command_grammar_result,
+            "constraints_triggered": constraints_triggered,
+            "reflection_summary": self._build_reflection_summary(user_content, tool_context, open_threads),
+            "open_threads": open_threads,
+            "reply_excerpt": self._summarize_text(reply_text, limit=160),
+            "mode": mode,
+            "drift_status": "drift 0.0",
+        }
+        with target.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, sort_keys=True) + "\n")
+
+    def _build_reflection_summary(self, user_content: str, tool_context: List[Dict[str, Any]], open_threads: List[str]) -> str:
+        summary = f"Handled {self._summarize_text(user_content, limit=90)}"
+        if tool_context:
+            summary += f"; used {', '.join(item['tool_name'] for item in tool_context)}"
+        if open_threads:
+            summary += f"; open threads: {', '.join(open_threads)}"
+        summary += "; preserved AU charter boundaries"
+        return summary
+
+    def _extract_open_threads(self, user_content: str) -> List[str]:
+        lowered = user_content.lower()
+        threads: List[str] = []
+        if "drift" in lowered:
+            threads.append("drift")
+        if "status" in lowered:
+            threads.append("status")
+        if "command" in lowered:
+            threads.append("command protocol")
+        if "aurora core" in lowered:
+            threads.append("Aurora Core ambiguity")
+        return threads
+
+    def _summarize_text(self, text: str, limit: int = 120) -> str:
+        collapsed = " ".join(text.split())
+        if len(collapsed) <= limit:
+            return collapsed
+        return collapsed[: limit - 3].rstrip() + "..."
 
     def _resolve_targets(self, request: MeshMessageRequest) -> List[AgentManifest]:
         if request.to:
@@ -702,6 +1014,9 @@ class MeshRuntime:
             "typing_profile": manifest.typing_profile.to_dict(),
             "model_profile": manifest.model_profile,
             "memory_files": manifest.memory_files,
+            "instruction_profile_file": manifest.instruction_profile_file,
+            "tool_bindings": manifest.tool_bindings,
+            "continuity_log_file": manifest.continuity_log_file,
         }
 
 

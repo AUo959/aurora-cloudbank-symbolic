@@ -391,10 +391,10 @@ app = FastAPI(
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "http://127.0.0.1:8080", "http://localhost:8080"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Global status
@@ -590,7 +590,7 @@ if __name__ == "__main__":
     print("🔗 Dashboard: http://localhost:8000")
     print("📖 API Docs: http://localhost:8000/docs")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=False)
 '''
 
         with open("aurora_api_server.py", "w", encoding="utf-8") as f:

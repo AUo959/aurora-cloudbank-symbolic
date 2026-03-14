@@ -1,0 +1,31 @@
+{
+  "id": "julian_markov",
+  "display_name": "Julian Markov",
+  "aliases": [
+    "julian markov",
+    "julian"
+  ],
+  "channels": [
+    "private:crew:julian_markov",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:julian_markov",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 620
+  },
+  "response_policy": {
+    "style": "strategic",
+    "fallback_to_deterministic": true,
+    "signature": "Julian Markov"
+  },
+  "memory_files": [
+    "config/mesh/memory/julian_markov.md"
+  ]
+}

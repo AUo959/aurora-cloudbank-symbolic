@@ -1,0 +1,32 @@
+{
+  "id": "amina_velin",
+  "display_name": "Amina Velin",
+  "aliases": [
+    "dr. amina velin",
+    "amina velin",
+    "amina"
+  ],
+  "channels": [
+    "private:crew:amina_velin",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:amina_velin",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 500
+  },
+  "response_policy": {
+    "style": "adaptive",
+    "fallback_to_deterministic": true,
+    "signature": "Amina Velin"
+  },
+  "memory_files": [
+    "config/mesh/memory/amina_velin.md"
+  ]
+}

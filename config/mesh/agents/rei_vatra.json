@@ -1,0 +1,31 @@
+{
+  "id": "rei_vatra",
+  "display_name": "Rei Vatra",
+  "aliases": [
+    "rei vatra",
+    "rei"
+  ],
+  "channels": [
+    "private:crew:rei_vatra",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:rei_vatra",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Rei Vatra"
+  },
+  "memory_files": [
+    "config/mesh/memory/rei_vatra.md"
+  ]
+}

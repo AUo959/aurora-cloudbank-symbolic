@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "policy_mode": "policy_first",
+  "policy_classes": {
+    "observation": {
+      "risk_score": 0.1,
+      "default_lane": "green",
+      "review_required": false,
+      "destructive": false,
+      "external": false,
+      "deny_conditions": []
+    },
+    "validation": {
+      "risk_score": 0.1,
+      "default_lane": "green",
+      "review_required": false,
+      "destructive": false,
+      "external": false,
+      "deny_conditions": []
+    },
+    "session_control": {
+      "risk_score": 0.15,
+      "default_lane": "green",
+      "review_required": false,
+      "destructive": false,
+      "external": false,
+      "deny_conditions": []
+    },
+    "compute": {
+      "risk_score": 0.25,
+      "default_lane": "green",
+      "review_required": false,
+      "destructive": false,
+      "external": false,
+      "deny_conditions": []
+    },
+    "symbolic_execution": {
+      "risk_score": 0.45,
+      "default_lane": "gray",
+      "review_required": true,
+      "destructive": false,
+      "external": false,
+      "deny_conditions": ["missing_anchor", "security_inactive", "missing_tool_schema", "missing_overlay_config"]
+    }
+  }
+}

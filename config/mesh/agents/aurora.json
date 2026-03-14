@@ -1,0 +1,45 @@
+{
+  "id": "aurora",
+  "display_name": "Aurora",
+  "aliases": [
+    "Aurora",
+    "aurora",
+    "AU",
+    "au",
+    "station control plane",
+    "control plane interface",
+    "supervisory system"
+  ],
+  "channels": [
+    "direct:aurora",
+    "#crew_lounge"
+  ],
+  "default_channel": "direct:aurora",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.25,
+    "max_output_tokens": 260
+  },
+  "typing_profile": {
+    "delay_ms": 280
+  },
+  "response_policy": {
+    "style": "aurora_control_plane",
+    "fallback_to_deterministic": true,
+    "signature": "AURORA"
+  },
+  "memory_files": [
+    "config/mesh/memory/aurora.md"
+  ],
+  "instruction_profile_file": "config/mesh/profiles/aurora_instruction_profile.json",
+  "tool_bindings": [
+    "aurora_command_grammar",
+    "system_status",
+    "symbolic_processing",
+    "geometric_algebra",
+    "session_management"
+  ],
+  "continuity_log_file": "config/mesh/continuity/aurora.jsonl"
+}

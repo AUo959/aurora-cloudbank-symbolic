@@ -1,0 +1,32 @@
+{
+  "id": "amira_sato",
+  "display_name": "Amira Sato",
+  "aliases": [
+    "dr. amira sato",
+    "amira sato",
+    "amira"
+  ],
+  "channels": [
+    "private:crew:amira_sato",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:amira_sato",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 620
+  },
+  "response_policy": {
+    "style": "strategic",
+    "fallback_to_deterministic": true,
+    "signature": "Amira Sato"
+  },
+  "memory_files": [
+    "config/mesh/memory/amira_sato.md"
+  ]
+}

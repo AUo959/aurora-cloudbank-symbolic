@@ -1,0 +1,32 @@
+{
+  "id": "maren_koss",
+  "display_name": "Maren Koss",
+  "aliases": [
+    "dr. maren koss",
+    "maren koss",
+    "maren"
+  ],
+  "channels": [
+    "private:crew:maren_koss",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:maren_koss",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 460
+  },
+  "response_policy": {
+    "style": "continuity",
+    "fallback_to_deterministic": true,
+    "signature": "Maren Koss"
+  },
+  "memory_files": [
+    "config/mesh/memory/maren_koss.md"
+  ]
+}

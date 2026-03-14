@@ -1,0 +1,32 @@
+{
+  "id": "elira_noor",
+  "display_name": "Elira Noor",
+  "aliases": [
+    "dr. elira noor",
+    "elira noor",
+    "elira"
+  ],
+  "channels": [
+    "private:crew:elira_noor",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:elira_noor",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 620
+  },
+  "response_policy": {
+    "style": "strategic",
+    "fallback_to_deterministic": true,
+    "signature": "Elira Noor"
+  },
+  "memory_files": [
+    "config/mesh/memory/elira_noor.md"
+  ]
+}

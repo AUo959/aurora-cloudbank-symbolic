@@ -1,0 +1,31 @@
+{
+  "id": "naomi_vell",
+  "display_name": "Naomi Vell",
+  "aliases": [
+    "naomi vell",
+    "naomi"
+  ],
+  "channels": [
+    "private:crew:naomi_vell",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:naomi_vell",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Naomi Vell"
+  },
+  "memory_files": [
+    "config/mesh/memory/naomi_vell.md"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "kai_drev",
+  "display_name": "Kai Drev",
+  "aliases": [
+    "kai drev",
+    "kai"
+  ],
+  "channels": [
+    "private:crew:kai_drev",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:kai_drev",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Kai Drev"
+  },
+  "memory_files": [
+    "config/mesh/memory/kai_drev.md"
+  ]
+}

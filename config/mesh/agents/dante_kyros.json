@@ -1,0 +1,31 @@
+{
+  "id": "dante_kyros",
+  "display_name": "Dante Kyros",
+  "aliases": [
+    "dante kyros",
+    "dante"
+  ],
+  "channels": [
+    "private:crew:dante_kyros",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:dante_kyros",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Dante Kyros"
+  },
+  "memory_files": [
+    "config/mesh/memory/dante_kyros.md"
+  ]
+}

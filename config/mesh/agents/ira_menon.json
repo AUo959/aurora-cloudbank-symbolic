@@ -1,0 +1,31 @@
+{
+  "id": "ira_menon",
+  "display_name": "Ira Menon",
+  "aliases": [
+    "ira menon",
+    "ira"
+  ],
+  "channels": [
+    "private:crew:ira_menon",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:ira_menon",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 520
+  },
+  "response_policy": {
+    "style": "analytical",
+    "fallback_to_deterministic": true,
+    "signature": "Ira Menon"
+  },
+  "memory_files": [
+    "config/mesh/memory/ira_menon.md"
+  ]
+}

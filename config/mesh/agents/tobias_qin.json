@@ -1,0 +1,31 @@
+{
+  "id": "tobias_qin",
+  "display_name": "Tobias Qin",
+  "aliases": [
+    "tobias qin",
+    "tobias"
+  ],
+  "channels": [
+    "private:crew:tobias_qin",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:tobias_qin",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 500
+  },
+  "response_policy": {
+    "style": "adaptive",
+    "fallback_to_deterministic": true,
+    "signature": "Tobias Qin"
+  },
+  "memory_files": [
+    "config/mesh/memory/tobias_qin.md"
+  ]
+}

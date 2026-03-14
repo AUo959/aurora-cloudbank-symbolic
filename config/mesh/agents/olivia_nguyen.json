@@ -1,0 +1,31 @@
+{
+  "id": "olivia_nguyen",
+  "display_name": "Olivia Nguyen",
+  "aliases": [
+    "olivia nguyen",
+    "olivia"
+  ],
+  "channels": [
+    "private:crew:olivia_nguyen",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:olivia_nguyen",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 460
+  },
+  "response_policy": {
+    "style": "continuity",
+    "fallback_to_deterministic": true,
+    "signature": "Olivia Nguyen"
+  },
+  "memory_files": [
+    "config/mesh/memory/olivia_nguyen.md"
+  ]
+}

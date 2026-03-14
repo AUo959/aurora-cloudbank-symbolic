@@ -1,0 +1,32 @@
+{
+  "id": "kieran_zhao",
+  "display_name": "Kieran Zhao",
+  "aliases": [
+    "dr. kieran zhao",
+    "kieran zhao",
+    "kieran"
+  ],
+  "channels": [
+    "private:crew:kieran_zhao",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:kieran_zhao",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 520
+  },
+  "response_policy": {
+    "style": "analytical",
+    "fallback_to_deterministic": true,
+    "signature": "Kieran Zhao"
+  },
+  "memory_files": [
+    "config/mesh/memory/kieran_zhao.md"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "samantha_lee",
+  "display_name": "Samantha Lee",
+  "aliases": [
+    "samantha lee"
+  ],
+  "channels": [
+    "private:crew:samantha_lee",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:samantha_lee",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 460
+  },
+  "response_policy": {
+    "style": "continuity",
+    "fallback_to_deterministic": true,
+    "signature": "Samantha Lee"
+  },
+  "memory_files": [
+    "config/mesh/memory/samantha_lee.md"
+  ]
+}

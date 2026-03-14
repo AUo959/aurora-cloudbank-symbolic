@@ -1,0 +1,31 @@
+{
+  "id": "varya_lin",
+  "display_name": "Varya Lin",
+  "aliases": [
+    "varya lin",
+    "varya"
+  ],
+  "channels": [
+    "private:crew:varya_lin",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:varya_lin",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 520
+  },
+  "response_policy": {
+    "style": "analytical",
+    "fallback_to_deterministic": true,
+    "signature": "Varya Lin"
+  },
+  "memory_files": [
+    "config/mesh/memory/varya_lin.md"
+  ]
+}

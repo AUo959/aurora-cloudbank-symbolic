@@ -1,0 +1,31 @@
+{
+  "id": "marcus_chen",
+  "display_name": "Marcus Chen",
+  "aliases": [
+    "marcus chen",
+    "marcus"
+  ],
+  "channels": [
+    "private:crew:marcus_chen",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:marcus_chen",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 470
+  },
+  "response_policy": {
+    "style": "performance",
+    "fallback_to_deterministic": true,
+    "signature": "Marcus Chen"
+  },
+  "memory_files": [
+    "config/mesh/memory/marcus_chen.md"
+  ]
+}

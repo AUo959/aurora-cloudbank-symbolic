@@ -1,0 +1,31 @@
+{
+  "id": "lt_nakamura",
+  "display_name": "Lt. Nakamura",
+  "aliases": [
+    "lt. nakamura",
+    "nakamura"
+  ],
+  "channels": [
+    "private:crew:lt_nakamura",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:lt_nakamura",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 620
+  },
+  "response_policy": {
+    "style": "strategic",
+    "fallback_to_deterministic": true,
+    "signature": "Lt. Nakamura"
+  },
+  "memory_files": [
+    "config/mesh/memory/lt_nakamura.md"
+  ]
+}

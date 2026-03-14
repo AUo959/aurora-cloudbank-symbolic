@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "tool_routing": {
+    "system_status": {
+      "tool_domain": "observation",
+      "lane": "green",
+      "relay_agent": "Oppy",
+      "authority_role": "Chief Systems Engineer",
+      "shuttle_id": "SHUTTLE_01_AURORA",
+      "oversight_glyphs": ["glyphon", "caelion"]
+    },
+    "aurora_command_grammar": {
+      "tool_domain": "validation",
+      "lane": "green",
+      "relay_agent": "Liora",
+      "authority_role": "Chief Science Officer",
+      "shuttle_id": "SHUTTLE_02_LIORA",
+      "oversight_glyphs": ["glyphon", "axiomera"]
+    },
+    "geometric_algebra": {
+      "tool_domain": "compute",
+      "lane": "green",
+      "relay_agent": "Archy",
+      "authority_role": "Chief Science Officer",
+      "shuttle_id": "SHUTTLE_03_ARCHY",
+      "oversight_glyphs": ["caelion", "sentari"]
+    },
+    "session_management": {
+      "tool_domain": "session_control",
+      "lane": "green",
+      "relay_agent": "Liora",
+      "authority_role": "Chief Science Officer",
+      "shuttle_id": "SHUTTLE_02_LIORA",
+      "oversight_glyphs": ["glyphon", "velatrix"]
+    },
+    "symbolic_processing": {
+      "tool_domain": "symbolic_execution",
+      "lane": "gray",
+      "relay_agent": "Oppy",
+      "authority_role": "Chief Systems Engineer",
+      "shuttle_id": "SHUTTLE_01_AURORA",
+      "oversight_glyphs": ["glyphon", "axiomera", "velatrix"]
+    }
+  }
+}

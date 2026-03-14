@@ -1,0 +1,32 @@
+{
+  "id": "raj_patel",
+  "display_name": "Raj Patel",
+  "aliases": [
+    "chief engineer raj patel",
+    "raj patel",
+    "raj"
+  ],
+  "channels": [
+    "private:crew:raj_patel",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:raj_patel",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 520
+  },
+  "response_policy": {
+    "style": "analytical",
+    "fallback_to_deterministic": true,
+    "signature": "Raj Patel"
+  },
+  "memory_files": [
+    "config/mesh/memory/raj_patel.md"
+  ]
+}

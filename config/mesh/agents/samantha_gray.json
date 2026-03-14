@@ -1,0 +1,30 @@
+{
+  "id": "samantha_gray",
+  "display_name": "Samantha Gray",
+  "aliases": [
+    "samantha gray"
+  ],
+  "channels": [
+    "private:crew:samantha_gray",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:samantha_gray",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Samantha Gray"
+  },
+  "memory_files": [
+    "config/mesh/memory/samantha_gray.md"
+  ]
+}

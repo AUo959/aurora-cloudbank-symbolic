@@ -1,0 +1,31 @@
+{
+  "id": "haneul_park",
+  "display_name": "Haneul Park",
+  "aliases": [
+    "haneul park",
+    "haneul"
+  ],
+  "channels": [
+    "private:crew:haneul_park",
+    "#crew_lounge"
+  ],
+  "default_channel": "private:crew:haneul_park",
+  "execution_mode": "live_llm",
+  "model_profile": {
+    "provider": "openai",
+    "model": "gpt-4.1-mini",
+    "temperature": 0.4,
+    "max_output_tokens": 220
+  },
+  "typing_profile": {
+    "delay_ms": 430
+  },
+  "response_policy": {
+    "style": "communications",
+    "fallback_to_deterministic": true,
+    "signature": "Haneul Park"
+  },
+  "memory_files": [
+    "config/mesh/memory/haneul_park.md"
+  ]
+}

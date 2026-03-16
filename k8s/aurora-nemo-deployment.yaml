@@ -64,7 +64,10 @@ spec:
         seccompProfile:
           type: RuntimeDefault
 
-      # ── Init container: model download / verification ──────────────────
+      # ── Init container: model directory verification ──────────────────
+      # Note: /models PVC is read-only. This container verifies presence
+      # of model files before the main container starts; it does NOT
+      # download models (use a separate offline pipeline to populate the PVC).
       initContainers:
       - name: model-init
         image: python:3.12-slim
@@ -80,7 +83,7 @@ spec:
         volumeMounts:
         - name: nemo-models
           mountPath: /models
-          readOnly: false
+          readOnly: true
         resources:
           requests:
             memory: "64Mi"

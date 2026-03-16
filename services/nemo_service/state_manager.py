@@ -28,6 +28,19 @@ logger = logging.getLogger("nemo_service.state_manager")
 
 
 # ---------------------------------------------------------------------------
+# Custom exceptions
+# ---------------------------------------------------------------------------
+
+
+class SnapshotNotFoundError(ValueError):
+    """Raised when a snapshot ID cannot be located."""
+
+
+class SnapshotIntegrityError(ValueError):
+    """Raised when a snapshot's SHA256 seal does not match its data (tamper detected)."""
+
+
+# ---------------------------------------------------------------------------
 # Snapshot data structure
 # ---------------------------------------------------------------------------
 
@@ -221,10 +234,10 @@ class StateManager:
         """
         snapshot = self._find_snapshot(snapshot_id)
         if snapshot is None:
-            raise ValueError(f"Snapshot not found: {snapshot_id}")
+            raise SnapshotNotFoundError(f"Snapshot not found: {snapshot_id}")
 
         if not self.verify_snapshot(snapshot_id):
-            raise ValueError(f"Snapshot seal verification failed: {snapshot_id}")
+            raise SnapshotIntegrityError(f"Snapshot seal verification failed: {snapshot_id}")
 
         self._current_snapshot_id = snapshot_id
         logger.info(

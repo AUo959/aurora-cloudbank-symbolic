@@ -7,11 +7,6 @@ Tests for the Aurora NeMo Service.
 # Ethics Protocol: Picard_Delta_3
 """
 
-import hashlib
-import json
-import time
-from unittest.mock import MagicMock, patch
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -176,6 +171,22 @@ class TestInferEndpoint:
         ).json()
         assert data["model_type"] == "asr"
 
+    def test_infer_nlu_without_text_returns_422(self, client):
+        """NLU inference without text should return HTTP 422."""
+        response = client.post(
+            "/nemo/infer",
+            json={"model_type": "nlu"},
+        )
+        assert response.status_code == 422
+
+    def test_infer_llm_without_text_returns_422(self, client):
+        """LLM inference without text should return HTTP 422."""
+        response = client.post(
+            "/nemo/infer",
+            json={"model_type": "llm"},
+        )
+        assert response.status_code == 422
+
 
 # ---------------------------------------------------------------------------
 # Generate endpoint
@@ -282,6 +293,26 @@ class TestSnapshotEndpoints:
         ).json()
         assert restore["seal"] == snap["seal"]
 
+    def test_restore_tampered_snapshot_returns_409(self, client):
+        """Restoring a tampered snapshot should return HTTP 409 (integrity failure)."""
+        from services.nemo_service import server as nemo_server
+
+        snap = client.post(
+            "/nemo/snapshot",
+            json={"description": "tamper test"},
+        ).json()
+        snapshot_id = snap["snapshot_id"]
+
+        # Directly mutate the stored snapshot to simulate tampering
+        stored = nemo_server._state_manager._find_snapshot(snapshot_id)
+        stored.data["tampered"] = True  # Seal no longer matches
+
+        response = client.post(
+            "/nemo/restore",
+            json={"snapshot_id": snapshot_id},
+        )
+        assert response.status_code == 409
+
 
 # ---------------------------------------------------------------------------
 # Symbolic bridge — unit tests
@@ -385,8 +416,10 @@ class TestStateManager:
         assert restored["count"] == 99
 
     def test_restore_raises_on_missing_snapshot(self, state_manager):
-        """restore_snapshot should raise ValueError for an unknown ID."""
-        with pytest.raises(ValueError, match="Snapshot not found"):
+        """restore_snapshot should raise SnapshotNotFoundError for an unknown ID."""
+        from services.nemo_service.state_manager import SnapshotNotFoundError
+
+        with pytest.raises(SnapshotNotFoundError, match="Snapshot not found"):
             state_manager.restore_snapshot("nonexistent-id")
 
     def test_list_snapshots_returns_all(self, state_manager):
@@ -396,10 +429,20 @@ class TestStateManager:
         snapshots = state_manager.list_snapshots()
         assert len(snapshots) >= 2
 
-    def test_list_snapshots_newest_first(self, state_manager):
+    def test_list_snapshots_newest_first(self, state_manager, monkeypatch):
         """list_snapshots should be ordered newest-first by timestamp."""
+        import time as _time
+
+        call_count = [0]
+        base_time = 1_000_000.0
+
+        def fake_time():
+            call_count[0] += 1
+            return base_time + call_count[0]
+
+        monkeypatch.setattr(_time, "time", fake_time)
+
         state_manager.create_snapshot({"order": "first"})
-        time.sleep(0.01)
         state_manager.create_snapshot({"order": "second"})
         snaps = state_manager.list_snapshots()
         assert snaps[0]["timestamp"] >= snaps[1]["timestamp"]

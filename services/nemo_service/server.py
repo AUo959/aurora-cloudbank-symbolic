@@ -16,17 +16,18 @@ Endpoints:
   POST /nemo/restore    — Restore NeMo state from a snapshot
 """
 
+import asyncio
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from .config import NeMoModelType, get_config
-from .state_manager import StateManager
+from .state_manager import SnapshotIntegrityError, SnapshotNotFoundError, StateManager
 from .symbolic_bridge import SymbolicBridge
 
 # ---------------------------------------------------------------------------
@@ -58,6 +59,9 @@ _state_manager = StateManager(snapshots_dir=config.snapshots_dir)
 
 # Inference call counter (used for entropy logging)
 _infer_counter: int = 0
+
+# Lock protecting shared mutable state under concurrent requests
+_state_lock = asyncio.Lock()
 
 # ---------------------------------------------------------------------------
 # NeMo model handle (lazy-loaded to avoid hard import dependency)
@@ -121,6 +125,21 @@ class InferRequest(BaseModel):
         default=None,
         description="Optional symbolic context to inject",
     )
+
+    @model_validator(mode="after")
+    def validate_required_fields(self) -> "InferRequest":
+        """Enforce that the correct input field is present for each model_type."""
+        if self.model_type in (NeMoModelType.ASR, NeMoModelType.TTS):
+            if not self.audio_bytes and not self.text:
+                raise ValueError(
+                    f"{self.model_type.value.upper()} inference requires 'audio_bytes' or 'text'."
+                )
+        elif self.model_type in (NeMoModelType.NLU, NeMoModelType.LLM):
+            if not self.text:
+                raise ValueError(
+                    f"{self.model_type.value.upper()} inference requires 'text'."
+                )
+        return self
 
 
 class InferResponse(BaseModel):
@@ -318,7 +337,9 @@ async def nemo_infer(request: InferRequest) -> InferResponse:
     global _infer_counter  # noqa: PLW0603
 
     start = time.time()
-    _infer_counter += 1
+    async with _state_lock:
+        _infer_counter += 1
+        current_call = _infer_counter
 
     anchor_ctx = _bridge.resolve_anchor_context(model_type=request.model_type.value)
 
@@ -354,9 +375,9 @@ async def nemo_infer(request: InferRequest) -> InferResponse:
             raise HTTPException(status_code=500, detail=f"Inference failed: {exc}") from exc
 
         # Compute dummy entropy from the call counter as a placeholder
-        entropy_value = _bridge.compute_entropy([float(_infer_counter % 10)])
+        entropy_value = _bridge.compute_entropy([float(current_call % 10)])
         reading = _bridge.log_entropy(
-            call_index=_infer_counter,
+            call_index=current_call,
             entropy=entropy_value,
             model_type=request.model_type.value,
         )
@@ -384,7 +405,9 @@ async def nemo_generate(request: GenerateRequest) -> GenerateResponse:
     global _infer_counter  # noqa: PLW0603
 
     start = time.time()
-    _infer_counter += 1
+    async with _state_lock:
+        _infer_counter += 1
+        current_call = _infer_counter
 
     anchor_ctx = _bridge.resolve_anchor_context(model_type="llm")
     model = _load_nemo_model()
@@ -410,7 +433,7 @@ async def nemo_generate(request: GenerateRequest) -> GenerateResponse:
                 [float(i) for i in range(min(tokens_generated, 20))]
             )
             _bridge.log_entropy(
-                call_index=_infer_counter,
+                call_index=current_call,
                 entropy=entropy_value,
                 model_type="llm",
             )
@@ -464,15 +487,29 @@ async def nemo_restore(request: RestoreRequest) -> RestoreResponse:
     """
     Restore NeMo state from a snapshot with checksum validation.
 
+    Returns 404 if the snapshot ID is not found.
+    Returns 409 if the snapshot seal verification fails (tamper detected).
+
     # Hash verification: All snapshot operations include SHA256 checksums
     """
     try:
         restored_data = _state_manager.restore_snapshot(request.snapshot_id)
-    except ValueError as exc:
+    except SnapshotNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except SnapshotIntegrityError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Snapshot integrity check failed: {exc}",
+        ) from exc
 
     snapshot = _state_manager.get_snapshot(request.snapshot_id)
     seal = snapshot["seal"] if snapshot else ""
+
+    logger.info(
+        "State restored — snapshot_id=%s t1=%s",
+        request.snapshot_id,
+        restored_data.get("t1_anchor", "unknown"),
+    )
 
     return RestoreResponse(
         snapshot_id=request.snapshot_id,

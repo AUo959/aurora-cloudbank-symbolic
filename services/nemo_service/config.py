@@ -8,12 +8,11 @@ Aurora NeMo Service — Configuration Management
 # Anchor Seed: EOS_SEED_ORION
 """
 
-import os
 from enum import Enum
-from typing import List, Optional
 from functools import lru_cache
+from typing import Optional
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,18 +48,22 @@ class NeMoConfig(BaseSettings):
     aurora_module_id: str = Field(
         default="AURORA_NEMO_SERVICE",
         description="Aurora module identifier",
+        validation_alias=AliasChoices("AURORA_MODULE_ID", "NEMO_AURORA_MODULE_ID"),
     )
     aurora_ethics_protocol: str = Field(
         default="Picard_Delta_3",
         description="Active ethics protocol",
+        validation_alias=AliasChoices("AURORA_ETHICS_PROTOCOL", "NEMO_AURORA_ETHICS_PROTOCOL"),
     )
     nemo_anchor_seed: str = Field(
         default="EOS_SEED_ORION",
         description="Symbolic anchor seed for continuity verification",
+        validation_alias=AliasChoices("NEMO_ANCHOR_SEED", "NEMO_NEMO_ANCHOR_SEED"),
     )
     aurora_chain_notation: str = Field(
         default="#SERVICES//NEMO//RUNTIME//",
         description="Chain notation for this runtime context",
+        validation_alias=AliasChoices("AURORA_CHAIN_NOTATION", "NEMO_AURORA_CHAIN_NOTATION"),
     )
     dlp_classification: DLPClassification = Field(
         default=DLPClassification.INTERNAL,

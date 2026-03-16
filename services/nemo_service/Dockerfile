@@ -71,6 +71,27 @@ COPY services/nemo_service/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r /app/requirements.txt
 
+# ── Entrypoint script — fixes volume ownership then drops to aurora user ──
+# Named volumes are created as root; this ensures UID 1000 can write to
+# /snapshots (and /models if writable). Runs as root briefly then exec's
+# uvicorn as the aurora user.
+RUN printf '#!/bin/sh\n\
+# Fix snapshot volume ownership so aurora (UID 1000) can write\n\
+chown -R aurora:aurora /snapshots 2>/dev/null || true\n\
+# Use gosu if available (preferred), otherwise fall back to su\n\
+if command -v gosu > /dev/null 2>&1; then\n\
+  exec gosu aurora uvicorn services.nemo_service.server:app \\\n\
+    --host "${NEMO_HOST:-0.0.0.0}" \\\n\
+    --port "${NEMO_PORT:-8090}" \\\n\
+    --log-level info\n\
+else\n\
+  exec su -s /bin/sh aurora -c \\\n\
+    "uvicorn services.nemo_service.server:app \\\n\
+     --host ${NEMO_HOST:-0.0.0.0} \\\n\
+     --port ${NEMO_PORT:-8090} \\\n\
+     --log-level info"\n\
+fi\n' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh
 
 # ── Volume mount points ───────────────────────────────────────────────────
 # /models    — NeMo model weight checkpoints (persistent PVC in K8s)
@@ -93,18 +114,12 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# ── Ownership ─────────────────────────────────────────────────────────────
-RUN chown -R aurora:aurora /app /models /snapshots || true
+# ── Ownership (build-time; runtime volumes fixed by entrypoint) ───────────
+RUN chown -R aurora:aurora /app || true
 
-# ── Switch to non-root user ───────────────────────────────────────────────
-USER aurora
-
-# ── Health check ──────────────────────────────────────────────────────────
+# ── Health check (Python-based — no curl dependency required) ─────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8090/nemo/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:' + __import__('os').environ.get('NEMO_PORT','8090') + '/nemo/health')" || exit 1
 
-# ── Entrypoint ────────────────────────────────────────────────────────────
-CMD ["uvicorn", "services.nemo_service.server:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8090", \
-     "--log-level", "info"]
+# ── Entrypoint — fixes volume permissions then runs as aurora ─────────────
+ENTRYPOINT ["/entrypoint.sh"]

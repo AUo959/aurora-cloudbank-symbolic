@@ -48,7 +48,7 @@ class BranchCleanupManager:
             cmd = [
                 "git",
                 "for-each-ref",
-                "--format=%(refname:short)|%(committerdate:iso8601)|%(authorname)|%(subject)",
+                "--format=%(refname:short)|%(committerdate:iso8601-strict)|%(authorname)|%(subject)",
                 "refs/remotes/origin/",
             ]
             result = subprocess.run(

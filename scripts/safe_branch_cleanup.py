@@ -96,7 +96,7 @@ def get_branch_details(branch: str, cwd: str = ".") -> Dict[str, Any]:
 
     # Last commit date and author
     log_output = run_git(
-        ["log", "-1", "--format=%ci|%an|%s", ref], cwd=cwd
+        ["log", "-1", "--format=%cI|%an|%s", ref], cwd=cwd
     )
     parts = log_output.split("|", 2)
     commit_date_str = parts[0] if parts else ""
@@ -282,7 +282,7 @@ def generate_report(
     lines = [
         "# 🧹 Branch Cleanup Analysis",
         f"**Generated:** {now}",
-        f"**Total Remote Branches:** {total}",
+        f"**Total Remote Branches Analyzed:** {total}",
         f"**Safe to Delete:** {safe_count}",
         f"**Active (keep):** {len(categories['protected']) + len(categories['active_prs'])}",
         f"**Needs Review:** {len(categories['review_needed'])}",
@@ -479,8 +479,8 @@ def main() -> None:
         logger.info("Found PR data for %d branches", len(branch_prs))
     elif not args.skip_github:
         logger.warning(
-            "Could not detect GitHub repo slug. "
-            "Use --repo owner/repo or set GITHUB_TOKEN. "
+            "Could not detect GitHub repo slug from git remotes. "
+            "Use --repo owner/repo to specify it explicitly. "
             "Skipping PR cross-referencing."
         )
 

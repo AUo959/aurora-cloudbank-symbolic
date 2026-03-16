@@ -16,26 +16,26 @@
 # ──────────────────────────────────────────────────────────────────────────
 
 # ══════════════════════════════════════════════════════════════════════════
-# Stage 1 — Builder
-# Base: NVIDIA NGC NeMo 24.07 (includes CUDA, cuDNN, PyTorch, NeMo toolkit)
-# ══════════════════════════════════════════════════════════════════════════
-FROM nvcr.io/nvidia/nemo:24.07 AS builder
+# Stage 1 — (builder stage removed)
+# NOTE: A dedicated builder stage previously installed Python dependencies
+# and copied the service source. This has been simplified into a single-
+# stage image to avoid reinstalling dependencies in multiple stages.
+# The runtime stage below now handles copying the source and installing
+# the required Python packages directly.
 
-LABEL stage="builder"
-LABEL aurora.module-id="AURORA_NEMO_SERVICE"
-LABEL aurora.ethics-protocol="Picard_Delta_3"
 
-WORKDIR /build
 
-# Copy service-specific requirements first for layer caching
-COPY services/nemo_service/requirements.txt /build/requirements.txt
 
-# Install Python dependencies on top of the NeMo base environment
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r /build/requirements.txt
 
-# Copy the full service source
-COPY services/nemo_service/ /build/nemo_service/
+
+
+
+
+
+
+
+
+
 
 # ══════════════════════════════════════════════════════════════════════════
 # Stage 2 — Runtime
@@ -65,12 +65,12 @@ WORKDIR /app
 RUN groupadd -g 1000 aurora \
     && useradd -u 1000 -g aurora -m -s /bin/bash aurora
 
-# ── Copy installed Python packages from builder ───────────────────────────
-COPY --from=builder /build/nemo_service/ /app/services/nemo_service/
-
-# Install runtime dependencies (pip packages from builder stage)
+# ── Copy service source and install Python dependencies ───────────────────
+COPY services/nemo_service/ /app/services/nemo_service/
 COPY services/nemo_service/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements.txt
+
 
 # ── Volume mount points ───────────────────────────────────────────────────
 # /models    — NeMo model weight checkpoints (persistent PVC in K8s)

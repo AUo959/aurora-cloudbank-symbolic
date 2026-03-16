@@ -11,6 +11,7 @@ Aurora NeMo Service — Configuration Management
 import os
 from enum import Enum
 from typing import List, Optional
+from functools import lru_cache
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -140,6 +141,10 @@ class NeMoConfig(BaseSettings):
     )
 
 
+@lru_cache(maxsize=1)
 def get_config() -> NeMoConfig:
-    """Return a singleton NeMoConfig instance populated from the environment."""
+    """Return a singleton NeMoConfig instance populated from the environment.
+
+    The configuration is instantiated on first use and cached for subsequent calls.
+    """
     return NeMoConfig()

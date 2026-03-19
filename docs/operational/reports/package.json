@@ -31,10 +31,10 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dompurify": "^3.3.2",
+    "dompurify": "^3.3.3",
     "dotenv": "^17.0.1",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.0.1",
+    "express-rate-limit": "^8.0.2",
     "express-validator": "^7.3.0",
     "helmet": "^8.1.0",
     "http": "^0.0.1-security",

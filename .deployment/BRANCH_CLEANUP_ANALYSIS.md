@@ -1,237 +1,206 @@
-# 🧹 Branch Cleanup Analysis - Orion Station Operations
-**Date:** 2025-11-12  
-**Analyst:** OPS Rodriguez, Tactical Operations Specialist  
-**Commander:** Commander Thorne  
-**Mission:** Strategic branch cleanup for repository hygiene
+# 🧹 Branch Cleanup Analysis — Orion Station Operations
+
+**Date:** 2026-03-09  
+**Previous Analysis:** 2025-11-12  
+**Mission:** Safe branch consolidation and cleanup
 
 ---
 
 ## 📊 Current State Assessment
 
-**Total Branches:** 58 (21 local + 37 remote)  
-**Active Work:** 15 open PRs  
-**Cleanup Candidates:** 43 branches  
+**Total Remote Branches:** 24  
+**Open PRs:** 4 (including this cleanup PR)  
+**Safe to Delete:** 12 branches  
+**Needs Review:** 7 branches  
+
+Previous cleanup efforts (Nov 2025) reduced branches from 58 → 24.
+This analysis targets the remaining stale branches.
 
 ---
 
 ## 🎯 Branch Categories
 
-### ✅ **CATEGORY A: Safe to Delete (Stale/Completed)** - 28 branches
+### 🔒 **KEEP — Protected / Active** (5 branches)
 
-**Alert Autofix Branches (4)** - Automated security fixes from Oct/Nov
-- `alert-autofix-763` (local) - Oct 2, merged
-- `alert-autofix-802` (local) - Oct 2, merged  
-- `alert-autofix-804` (local) - Oct 2, merged
-- `alert-autofix-808` (local) - Oct 2, merged
-
-**Old Copilot Workspace Branches (7)** - Completed automation work
-- `copilot/audit-codebase-for-improvements` (local) - Oct 30, completed
-- `copilot/begin-work-on-open-issue` (local) - Oct 30, completed
-- `copilot/define-project-vision-and-requirements` (local) - Nov 2, completed
-- `copilot/fix-206913296-963398764-10abf06b-8800-4040-8fa7-62af080046b1` (local) - Nov 5
-- `copilot/fix-206913296-963398764-93143db7-5004-4ff7-ab04-50d3d0b553b0` (local) - Nov 5
-- `copilot/vscode1761444161199` (local) - Oct 26, stale
-- `origin/copilot/fix-7369bb8a-5c6c-44e8-9192-18fcd73222c0` (remote) - Sep 27, very old
-
-**Sub-PR Branches (6)** - Failed attempts at PR #268
-- `origin/copilot/sub-pr-268` (remote) - Oct 30
-- `origin/copilot/sub-pr-268-again` (remote) - Oct 30
-- `origin/copilot/sub-pr-268-another-one` (remote) - Oct 30
-- `origin/copilot/sub-pr-268-one-more-time` (remote) - Oct 30
-- `origin/copilot/sub-pr-268-yet-again` (remote) - Oct 30
-- `origin/copilot/sub-pr-268-please-work` (remote) - Oct 30
-
-**Quality Improvement Branches (3)** - Completed work
-- `quality/documentation-and-config` (local) - Nov 1, merged
-- `quality/infrastructure-and-analyzers` (local) - Nov 2, merged
-- `quality/test-improvements` (local) - Nov 2, merged
-
-**Security Fix Branches (2)** - Completed security patches
-- `security/fix-log-injection-vulnerabilities` (local) - Nov 3, merged
-- `security/fix-path-expression-vulnerabilities` (local) - Nov 3, merged
-
-**Old Feature/Fix Branches (6)**
-- `constellation-selective-integration` (local) - Nov 2, superseded
-- `fix-hash-glyphcard-output` (local) - Oct 25, old
-- `integrate/zipwiz-on-main` (local) - Oct 8, very old (behind 28 commits)
-- `origin/bad-html-filtering-fix` (remote) - Oct 25, merged
-- `origin/chore/dependabot-batch-20251006` (remote) - Oct 7, old batch
-- `pr-168` (local) - Sep 24, very old
-
-**Sync Branches (2)** - Command #321 operations completed
-- `sync/321-comprehensive-system-sync` (local) - Oct 28, completed
-- `sync/321-post-rebuild-consolidation` (local) - Oct 28, completed
+| Branch | Status | Notes |
+|--------|--------|-------|
+| `main` | Default branch | Protected |
+| `copilot/consolidate-and-cleanup-branches` | PR #478 open | This cleanup PR |
+| `staging/wave1-2026-03-08` | PR #475 open | Active staging wave |
+| `staging/wave2-deps-2026-03-08` | PR #476 open | Active dependency batch |
+| `staging/wave3-pr462-clean-2026-03-08` | PR #477 open | Active markdownlint bump |
 
 ---
 
-### ⚠️ **CATEGORY B: Review Before Delete** - 8 branches
+### ✅ **SAFE TO DELETE — Closed PRs (never merged)** (8 branches)
 
-**Feature Branches (3)** - May have unmerged work
-- `feature/code-improvement-engine` (local) - Oct 31
-- `feature/opentelemetry-support` (local) - Oct 30
-- `feature/synergy-dashboard` (local) - Oct 30
+These branches had PRs that were closed without merging. Work was either
+superseded, abandoned, or consolidated into other PRs.
 
-**CodeQL Branch (2)** - Syntax error fixes
-- `codeql-syntax-error-fixes` (local) - Oct 30, ahead 63, behind 13
-- `origin/codeql-syntax-error-fixes` (remote) - Oct 29
-
-**Copilot Add Assertions (1)**
-- `copilot/add-assertions-automation-tests` (local) - Nov 2
-
-**Copilot Fix Open Issues (2)**
-- `copilot/fix-open-issues` (local) - Nov 1
-- `origin/copilot/fix-open-issues` (remote) - Nov 1
+| Branch | PR | Age (days) | Ahead | Behind | Reason |
+|--------|----|-----------|-------|--------|--------|
+| `chore/fix-vercel-deploy-config` | #469 closed | ~73 | 1 | 10 | Superseded by staging waves |
+| `chore/venv-consistent-tooling` | #468 closed | ~73 | 1 | 10 | Superseded by staging waves |
+| `claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR` | #376 closed | ~109 | 5 | 158 | CLAUDE.md written via other path |
+| `claude/orion-crew-search-01HqwbewEu9C964Fo4MRG6aq` | #415 closed | ~107 | 15 | 140 | Superseded by PRs #416–418 (merged) |
+| `copilot/add-constellink-symbolic-module` | #414 closed | ~103 | 3 | 123 | Superseded by merged forecast engine |
+| `copilot/fix-quality-gate-issue` | #452 closed | ~94 | 2 | 41 | Quality gate issue resolved elsewhere |
+| `copilot/start-work-on-pr-412` | #420 closed | ~103 | 2 | 114 | Work completed in parent PR #412 |
+| `copilot/sub-pr-445` | #449 closed | ~94 | 13 | 41 | Sub-PR not merged; parent #445 merged |
 
 ---
 
-### 🔒 **CATEGORY C: Keep (Active PRs)** - 15 branches
+### ✅ **SAFE TO DELETE — Stale, No PR** (3 branches)
 
-**Dependabot PRs (9)** - Auto-updates awaiting merge
-- PR #331: `dependabot/npm_and_yarn/eslint-9.39.1`
-- PR #328: `dependabot/npm_and_yarn/express-rate-limit-8.2.1`
-- PR #330: `dependabot/npm_and_yarn/terser-5.44.1`
-- PR #329: `dependabot/npm_and_yarn/types/node-24.10.0`
-- PR #334: `dependabot/pip/prometheus-client-0.23.1`
-- PR #336: `dependabot/pip/python-json-logger-4.0.0`
-- PR #332: `dependabot/pip/pyyaml-6.0.3`
-- PR #333: `dependabot/pip/qiskit-2.2.3`
-- PR #335: `dependabot/pip/watchfiles-1.1.1`
+These feature branches have no associated PR and are significantly behind main.
 
-**Claude Analysis PRs (3)** - Strategic improvements
-- PR #318: `claude/developer-friendly-brainstorm-011CUwVb3PEhKevELRWLvtbB`
-- PR #317: `claude/integrate-quantum-backends-011CUwU6dknLVbG15M6TWfir`
-- PR #316: `claude/repo-analysis-synthesis-011CUwQVrfr1gLHKVCGoeMy6`
-
-**Copilot Feature PRs (3)** - Active development
-- PR #319: `copilot/create-dashboard-for-synergies`
-- PR #312: `copilot/implement-alerting-system`
-- PR #310: `copilot/integrate-telemetry-for-r2-agent`
+| Branch | Age (days) | Ahead | Behind | Notes |
+|--------|-----------|-------|--------|-------|
+| `feature/drift-aware-agents` | ~115 | 1 | 366 | Nov 2025, placeholder branch |
+| `feature/ethical-checkpointing` | ~115 | 1 | 366 | Nov 2025, placeholder branch |
+| `feature/symbolic-forecast-engine` | ~115 | 1 | 366 | Nov 2025, work merged via `copilot/implement-symbolic-forecast-engine` PR #419 |
 
 ---
 
-### 🤔 **CATEGORY D: Orphaned Remotes** - 7 branches
+### ✅ **SAFE TO DELETE — Very Old Patch** (1 branch)
 
-These remote branches have no local tracking:
-- `origin/AUo959-codebase-updates-ui-concept` - Sep 26 (old UI concept)
-- `origin/AUo959-patch-4` - Oct 28
-- `origin/AUo959-patch-Codacy-Scan` - Sep 24 (very old)
-- `origin/alert-autofix-156` - Oct 20 (old autofix)
-- `origin/copilot/fix-codespaces-init-failure` - Oct 29
-- `origin/copilot/improve-integration-analysis-feedback` - Oct 30
-- `origin/dependabot/pip/rich-14.2.0` - Oct 13 (old dependency PR)
+| Branch | Age (days) | Ahead | Behind | Notes |
+|--------|-----------|-------|--------|-------|
+| `AUo959-patch-quantum-forge-vector-gen` | ~117 | 1 | 407 | Nov 2025, no open PR |
 
 ---
 
-## 🎯 Recommended Action Plan
+### ⚠️ **NEEDS REVIEW** (4 branches)
 
-### **Phase 1: Immediate Safe Cleanup** (28 branches)
-Delete all Category A branches - zero risk, confirmed completed/merged
+These branches are relatively recent or have unique content worth checking.
 
-**Command:**
-```bash
-# Delete local branches (22)
-git branch -D alert-autofix-763 alert-autofix-802 alert-autofix-804 alert-autofix-808 \
-  copilot/audit-codebase-for-improvements copilot/begin-work-on-open-issue \
-  copilot/define-project-vision-and-requirements \
-  copilot/fix-206913296-963398764-10abf06b-8800-4040-8fa7-62af080046b1 \
-  copilot/fix-206913296-963398764-93143db7-5004-4ff7-ab04-50d3d0b553b0 \
-  copilot/vscode1761444161199 quality/documentation-and-config \
-  quality/infrastructure-and-analyzers quality/test-improvements \
-  security/fix-log-injection-vulnerabilities security/fix-path-expression-vulnerabilities \
-  constellation-selective-integration fix-hash-glyphcard-output integrate/zipwiz-on-main \
-  pr-168 sync/321-comprehensive-system-sync sync/321-post-rebuild-consolidation
+| Branch | Age (days) | Ahead | Behind | Notes |
+|--------|-----------|-------|--------|-------|
+| `chore/recover-local-main-commits-2026-03-08` | ~1 | 2 | 0 | Very recent, 2 commits not on main |
+| `claude/fix-cl-checks-WoZGv` | ~4 | 3 | 0 | Recent, 3 commits not on main |
+| `claude/code-quality-review-0173PBr3e4Gd8be4ikMhrKvx` | ~109 | 2 | 171 | No PR, stale but has unique content |
+| `claude/developer-friendly-brainstorm-011CUwVb3PEhKevELRWLvtbB` | ~113 | 3 | 572 | Very old, deeply diverged |
 
-# Delete remote branches (6 + prune)
-git push origin --delete copilot/sub-pr-268 copilot/sub-pr-268-again \
-  copilot/sub-pr-268-another-one copilot/sub-pr-268-one-more-time \
-  copilot/sub-pr-268-yet-again copilot/sub-pr-268-please-work \
-  bad-html-filtering-fix chore/dependabot-batch-20251006 \
-  copilot/fix-7369bb8a-5c6c-44e8-9192-18fcd73222c0
-
-# Prune stale remote references
-git remote prune origin
-```
-
-**Expected Result:** 28 branches removed, cleaner repository
+**Substatus for review branches:**
+- `chore/recover-local-main-commits-2026-03-08` — Created same day as staging waves; may contain commits intended for main. **Check if these commits are in the staging branches.**
+- `claude/fix-cl-checks-WoZGv` — Recent CI fix work. **Check if fixes landed on main.**
+- `claude/code-quality-review-*` and `claude/developer-friendly-brainstorm-*` — Old Claude session branches. Likely safe to delete but verify no unique docs.
 
 ---
 
-### **Phase 2: Review & Decision** (8 branches)
+### 🔍 **Staging Branches (not in scope)** (2 integration branches)
 
-**Action Required:** Commander decision on each:
+These staging branches are not associated with open PRs but were used for
+integration work alongside the active wave PRs.
 
-1. **`codeql-syntax-error-fixes`** (local + remote)
-   - Status: Ahead 63, behind 13 commits
-   - Recommendation: Check if work is valuable, rebase or abandon
-   - Decision: [ ] Keep & Rebase [ ] Delete
+| Branch | Age (days) | Ahead | Behind | Notes |
+|--------|-----------|-------|--------|-------|
+| `staging/integration-2026-03-06` | ~3 | 8 | 0 | Integration staging |
+| `staging/integration-deps-2026-03-06` | ~1 | 17 | 0 | Deps integration staging |
 
-2. **Feature branches** (3 local)
-   - `feature/code-improvement-engine`
-   - `feature/opentelemetry-support`  
-   - `feature/synergy-dashboard`
-   - Recommendation: Review for unmerged changes, merge or archive
-   - Decision: [ ] Merge [ ] Archive [ ] Delete
-
-3. **`copilot/add-assertions-automation-tests`** (local)
-   - Recent (Nov 2), may have useful test additions
-   - Decision: [ ] Keep [ ] Delete
-
-4. **`copilot/fix-open-issues`** (local + remote)
-   - Recent (Nov 1), may be actively used
-   - Decision: [ ] Keep [ ] Delete
+**Recommendation:** Keep until wave PRs (#475–477) are resolved.
 
 ---
 
-### **Phase 3: Orphaned Remote Cleanup** (7 branches)
+### 🔍 **Claude Review Branch** (1 branch)
 
-Verify these can be deleted (likely merged or abandoned):
+| Branch | Age (days) | Ahead | Behind | Notes |
+|--------|-----------|-------|--------|-------|
+| `claude/review-recent-agents-01JLVAkok774R7ERR7XjN6hS` | ~105 | 5 | 129 | Agent review session, no PR |
+
+**Recommendation:** Safe to delete after verifying no unique review docs.
+
+---
+
+## 🚀 Cleanup Commands
+
+### Phase 1: Closed PR branches (zero risk)
+
 ```bash
 git push origin --delete \
-  AUo959-codebase-updates-ui-concept AUo959-patch-4 AUo959-patch-Codacy-Scan \
-  alert-autofix-156 copilot/fix-codespaces-init-failure \
-  copilot/improve-integration-analysis-feedback dependabot/pip/rich-14.2.0
+  chore/fix-vercel-deploy-config \
+  chore/venv-consistent-tooling \
+  claude/claude-md-mi195x335e1nhkdy-01EnfSEMdXZ1wBghSvejx2oR \
+  claude/orion-crew-search-01HqwbewEu9C964Fo4MRG6aq \
+  copilot/add-constellink-symbolic-module \
+  copilot/fix-quality-gate-issue \
+  copilot/start-work-on-pr-412 \
+  copilot/sub-pr-445
+```
+
+### Phase 2: Stale feature branches (zero risk)
+
+```bash
+git push origin --delete \
+  feature/drift-aware-agents \
+  feature/ethical-checkpointing \
+  feature/symbolic-forecast-engine \
+  AUo959-patch-quantum-forge-vector-gen
+```
+
+### Phase 3: After review of "Needs Review" branches
+
+```bash
+# Only after confirming content is not needed:
+git push origin --delete \
+  claude/code-quality-review-0173PBr3e4Gd8be4ikMhrKvx \
+  claude/developer-friendly-brainstorm-011CUwVb3PEhKevELRWLvtbB \
+  claude/review-recent-agents-01JLVAkok774R7ERR7XjN6hS
+# Recent branches — delete only after verifying content:
+# git push origin --delete chore/recover-local-main-commits-2026-03-08
+# git push origin --delete claude/fix-cl-checks-WoZGv
+```
+
+### Phase 4: After staging wave PRs are resolved
+
+```bash
+git push origin --delete \
+  staging/integration-2026-03-06 \
+  staging/integration-deps-2026-03-06
 ```
 
 ---
 
 ## 📊 Expected Impact
 
-**Before Cleanup:**
-- Local branches: 21
-- Remote branches: 37
-- **Total: 58 branches**
+| Phase | Branches Removed | Remaining |
+|-------|-----------------|-----------|
+| Before | — | 24 |
+| Phase 1 (closed PRs) | 8 | 16 |
+| Phase 2 (stale features) | 4 | 12 |
+| Phase 3 (after review) | 3–5 | 7–9 |
+| Phase 4 (after staging) | 2 | 5–7 |
 
-**After Phase 1:**
-- Local branches: ~10 (keep active + review)
-- Remote branches: ~18 (keep active PRs + orphaned)
-- **Total: ~28 branches** (-30 branches, -52%)
-
-**After All Phases:**
-- Local branches: ~8 (active work only)
-- Remote branches: ~15 (active PRs only)
-- **Total: ~23 branches** (-35 branches, -60%)
+**Target state:** 5–7 branches (main + active work only)
 
 ---
 
-## 🎖️ OPS Rodriguez's Assessment
+## 🔧 Automated Cleanup Tool
 
-**Mission Complexity:** MODERATE  
-**Risk Level:** LOW (with proper review of Category B)  
-**Time Required:** 15-20 minutes  
-**Recommended Priority:** HIGH
+For future cleanups, use the safe branch cleanup script:
 
-**Commander,**
+```bash
+# Dry-run analysis (safe — no changes)
+python scripts/safe_branch_cleanup.py
 
-We have significant branch accumulation from automation (alert-autofix, copilot sub-PRs) and completed work (quality/security branches). Phase 1 cleanup is zero-risk and will immediately improve repository hygiene.
+# Generate report to file
+python scripts/safe_branch_cleanup.py --save-report BRANCH_CLEANUP_PLAN.md --report-only
 
-Phase 2 requires your strategic input on feature branches - do we preserve the work or archive for future reference?
+# Execute cleanup (deletes safe-to-remove branches)
+python scripts/safe_branch_cleanup.py --execute
 
-**Tactical Recommendation:** Execute Phase 1 immediately, then brief on Phase 2 decisions.
+# Custom staleness threshold
+python scripts/safe_branch_cleanup.py --stale-days 60
+```
 
-Standing by for your orders. 🫡
+Or via Makefile:
+```bash
+make branch-cleanup-dry     # Preview deletions
+make branch-cleanup-safe    # Run safe_branch_cleanup.py in dry-run mode
+```
 
 ---
 
-**Report Generated:** 2025-11-12 05:00:00 UTC  
-**Next Review:** After Phase 1 execution  
-**Authorization Required:** Commander Thorne approval for Phase 2+
+**Report Generated:** 2026-03-09  
+**Next Review:** After Phase 1+2 execution  
+**Tool:** `scripts/safe_branch_cleanup.py`

@@ -1,0 +1,25 @@
+{
+  "id": "liora",
+  "display_name": "LIORA",
+  "aliases": [
+    "LIORA",
+    "liora",
+    "handshake coordinator"
+  ],
+  "channels": [
+    "direct:liora",
+    "#crew_lounge"
+  ],
+  "default_channel": "direct:liora",
+  "execution_mode": "deterministic",
+  "model_profile": {},
+  "typing_profile": {
+    "delay_ms": 340
+  },
+  "response_policy": {
+    "style": "adaptive",
+    "fallback_to_deterministic": true,
+    "signature": "LIORA"
+  },
+  "memory_files": []
+}

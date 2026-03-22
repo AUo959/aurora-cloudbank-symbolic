@@ -258,3 +258,25 @@ auth_config.json
 station_manifests/
 wiki-content/
 aurora_venv/
+
+# Selective integration automation outputs
+workflow_output/selective_integration/
+
+# Aurora runtime/state files
+.env.mesh
+workflow_reports/
+reports/analysis/gitwiz/
+.aurora/SIMULATION_STATE*.json
+.aurora/audit_trail.json
+.aurora/branch_config.json
+.aurora/gpg/*
+!.aurora/gpg/.gitignore
+.aurora/index/*
+!.aurora/index/.gitignore
+.aurora/quicksaves/*
+!.aurora/quicksaves/.gitignore
+.aurora/seals/*
+!.aurora/seals/.gitignore
+runtime/mesh/*.db
+runtime/mesh/*.log
+runtime/mesh/transcripts/*.jsonl

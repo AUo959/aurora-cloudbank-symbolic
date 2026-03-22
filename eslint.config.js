@@ -2,9 +2,23 @@
 // Migration from .eslintrc.json to eslint.config.js
 
 export default [
+  // Global ignores for generated/vendor trees.
+  {
+    ignores: [
+      '**/.venv/**',
+      '**/venv/**',
+      '**/venv_opal2/**',
+      '**/site-packages/**',
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/dist/**',
+      '**/build/**',
+      '**/*.min.js',
+    ],
+  },
   // Node.js files configuration
   {
-    files: ['src/**/*.js', 'scripts/**/*.js', 'tests/**/*.js', '*.js'],
+    files: ['src/**/*.js', 'scripts/**/*.js', 'tests/**/*.js', './*.js'],
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',

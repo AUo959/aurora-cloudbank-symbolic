@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mesh Router"
+  short_description: "Route Aurora mesh messages through the local runtime"
+  default_prompt: "Use $mesh-router to route this request through the local Aurora mesh runtime instead of simulating the exchange in prompt text."

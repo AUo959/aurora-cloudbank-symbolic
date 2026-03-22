@@ -2,6 +2,15 @@
 # Streamlined for performance and reliability
 
 repos:
+  - repo: local
+    hooks:
+      - id: aurora-pre-commit
+        name: aurora-pre-commit
+        entry: bash scripts/run_pre_commit.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
   # Essential file checks - fast and reliable
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0

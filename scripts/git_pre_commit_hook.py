@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-
-            from aurora_validation_manager import ValidationManager
-
 Aurora CloudBank - Git Pre-commit Hook
 Automatically validates changes against canonical specifications
 Prevents commits that violate critical canonical requirements
@@ -13,16 +10,10 @@ This hook runs before each commit and:
 3. Blocks commits with critical violations
 4. Provides clear feedback and remediation guidance
 """
-import logging
-
-logger = logging.getLogger(__name__)
-
 from pathlib import Path
 import subprocess
 import os
 import sys
-
-
 
 # Add the scripts directory to Python path
 script_dir = Path(__file__).parent.parent / "scripts"
@@ -31,20 +22,25 @@ sys.path.insert(0, str(script_dir))
 try:
     from canonical_validator import CanonicalValidator
 except ImportError:
-    logger.error("Error: Could not import canonical_validator")
+    print("❌ Error: Could not import canonical_validator")
     print("   Ensure scripts/canonical_validator.py exists")
     sys.exit(1)
 
+try:
+    from aurora_validation_manager import ValidationManager
+except ImportError:
+    ValidationManager = None
 
-class ValidationManager: pass  # Stub
 def get_staged_files():
     """Get list of staged files for commit"""
     try:
         result = subprocess.run(
-            ["git", "di", "--cached", "--name-only"],
-            capture_output=True, text=True, check=True
+            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        return [f.strip() for f in result.stdout.split('\n') if f.strip()]
+        return [f.strip() for f in result.stdout.split("\n") if f.strip()]
     except subprocess.CalledProcessError:
         return []
 
@@ -98,18 +94,15 @@ def main():
     staged_files = get_staged_files()
 
     if not staged_files:
-        logger.info("No files to validate")
+        print("✅ No files to validate")
         return 0
 
     # Filter for files we can validate
-    validatable_extensions = {'.md', '.txt', '.js', '.ts', '.py', '.json', '.yaml', '.yml'}
-    files_to_validate = [
-        f for f in staged_files
-        if Path(f).exists() and Path(f).suffix in validatable_extensions
-    ]
+    validatable_extensions = {".md", ".txt", ".js", ".ts", ".py", ".json", ".yaml", ".yml"}
+    files_to_validate = [f for f in staged_files if Path(f).exists() and Path(f).suffix in validatable_extensions]
 
     if not files_to_validate:
-        logger.info("No validatable files in commit")
+        print("✅ No validatable files in commit")
         return 0
 
     print(f"📁 Validating {len(files_to_validate)} files...")
@@ -124,7 +117,7 @@ def main():
             results = validator.validate_file(file_path)
             all_results.extend(results)
         except Exception as e:
-            logger.error("Error validating {file_path}: {e}")
+            print(f"❌ Error validating {file_path}: {e}")
             return 1
 
     # Print validation summary
@@ -152,11 +145,14 @@ def main():
     # Generate quick report for escalations using validation manager
     escalations = [r for r in all_results if r.status == "ESCALATE"]
     if escalations:
-        # Import validation manager to handle file paths intelligently
-        try:
-            sys.path.append(str(Path(__file__).parent))
+        # Use validation manager when available to avoid report-file commit loops.
+        if ValidationManager is not None:
+            try:
+                manager = ValidationManager()
+            except Exception:
+                manager = None
 
-            manager = ValidationManager()
+        if ValidationManager is not None and manager is not None:
             report_path = manager.get_validation_file_path("PRE_COMMIT_VALIDATION_ISSUES.md")
 
             # Only write if not in memory-only mode
@@ -164,14 +160,14 @@ def main():
                 # Ensure directory exists
                 report_path.parent.mkdir(parents=True, exist_ok=True)
 
-                with open(report_path, 'w', encoding="utf-8") as f:
+                with open(report_path, "w", encoding="utf-8") as f:
                     f.write("# Pre-Commit Validation Issues\n\n")
-                    f.write("Generated: {Path(__file__).name} at {Path().cwd()}\n")
-                    f.write("Strategy: {manager.config['strategy']}\n\n")
+                    f.write(f"Generated: {Path(__file__).name} at {Path.cwd()}\n")
+                    f.write(f"Strategy: {manager.config['strategy']}\n\n")
                     for issue in escalations:
-                        f.write("## {issue.check_name} ({issue.severity})\n")
-                        f.write("**Issue**: {issue.message}\n\n")
-                        f.write("**Suggested Fix**: {issue.suggested_fix}\n\n")
+                        f.write(f"## {issue.check_name} ({issue.severity})\n")
+                        f.write(f"**Issue**: {issue.message}\n\n")
+                        f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
 
                 print(f"📊 Detailed issues saved to: {report_path}")
 
@@ -181,15 +177,15 @@ def main():
             else:
                 print("📊 Validation complete (memory-only mode - no files written)")
 
-        except ImportError:
+        else:
             # Fallback to original behavior if manager not available
             report_path = "PRE_COMMIT_VALIDATION_ISSUES.md"
-            with open(report_path, 'w', encoding="utf-8") as f:
+            with open(report_path, "w", encoding="utf-8") as f:
                 f.write("# Pre-Commit Validation Issues\n\n")
                 for issue in escalations:
-                    f.write("## {issue.check_name} ({issue.severity})\n")
-                    f.write("**Issue**: {issue.message}\n\n")
-                    f.write("**Suggested Fix**: {issue.suggested_fix}\n\n")
+                    f.write(f"## {issue.check_name} ({issue.severity})\n")
+                    f.write(f"**Issue**: {issue.message}\n\n")
+                    f.write(f"**Suggested Fix**: {issue.suggested_fix}\n\n")
             print(f"📊 Detailed issues saved to: {report_path}")
 
     auto_fixes = [r for r in all_results if r.status == "AUTO_FIXED"]

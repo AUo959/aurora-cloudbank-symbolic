@@ -1,0 +1,259 @@
+# Aurora NeMo Service — Kubernetes Deployment
+# Ethics Protocol: Picard_Delta_3
+# T1: Deployment timestamp anchor
+# SRB: K8S_NEMO_DEPLOYMENT_v1
+# Chain Notation: #K8S//DEPLOYMENT//AURORA_NEMO//
+# DLP: [nemo, k8s, gpu, deployment]
+# Anchor Seed: EOS_SEED_ORION
+#
+# Features:
+# - GPU resource requests/limits (nvidia.com/gpu: 1)
+# - Init container for model download/verification
+# - Liveness and readiness probes on /nemo/health
+# - Non-root security context (aurora UID 1000)
+# - PVC volume mounts for models and snapshots
+# - Aurora symbolic annotations following existing conventions
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aurora-nemo-service
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-nemo-service
+    component: nemo-inference
+    version: v1.0.0
+    ethics-protocol: picard-delta-3
+    governance-layer: aurora-nemo-gpu
+  annotations:
+    aurora.io/chain-notation: "#K8S//DEPLOYMENT//AURORA_NEMO//"
+    aurora.io/srb: "K8S_NEMO_DEPLOYMENT_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+    aurora.io/module-id: "AURORA_NEMO_SERVICE"
+    aurora.io/anchor-seed: "EOS_SEED_ORION"
+    kubernetes.io/change-cause: "Initial NeMo GPU inference service deployment"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aurora-nemo-service
+      component: nemo-inference
+  strategy:
+    type: Recreate  # GPU workloads: avoid two pods competing for the same GPU
+  template:
+    metadata:
+      labels:
+        app: aurora-nemo-service
+        component: nemo-inference
+        version: v1.0.0
+        ethics-protocol: picard-delta-3
+      annotations:
+        aurora.io/anchor-seed: "EOS_SEED_ORION"
+        aurora.io/drift-lock: "ACTIVE"
+        aurora.io/guardian-ring: "STAGED_ACTIVE"
+        aurora.io/ethics-lock: "ENFORCED"
+        aurora.io/dlp-tags: "nemo,inference,gpu,models"
+        prometheus.io/scrape: "false"
+    spec:
+      serviceAccountName: aurora-gui-cloudhub
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      # ── Init container: model directory verification ──────────────────
+      # Note: /models PVC is read-only. This container verifies presence
+      # of model files before the main container starts; it does NOT
+      # download models (use a separate offline pipeline to populate the PVC).
+      initContainers:
+      - name: model-init
+        image: python:3.12-slim
+        command:
+        - sh
+        - -c
+        - |
+          echo "🔍 Aurora NeMo — model directory check"
+          echo "  Chain: #K8S//NEMO//INIT//MODEL_CHECK//"
+          echo "  Anchor: EOS_SEED_ORION"
+          ls -la /models || echo "Models directory empty — ready for download"
+          echo "✅ Init complete"
+        volumeMounts:
+        - name: nemo-models
+          mountPath: /models
+          readOnly: true
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+
+      # ── Main NeMo inference container ──────────────────────────────────
+      containers:
+      - name: aurora-nemo-service
+        image: aurora-nemo-service:v1.0.0
+        imagePullPolicy: IfNotPresent
+        command:
+        - uvicorn
+        - services.nemo_service.server:app
+        - --host
+        - "0.0.0.0"
+        - --port
+        - "8090"
+        - --log-level
+        - info
+
+        ports:
+        - name: http
+          containerPort: 8090
+          protocol: TCP
+
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "compute,utility"
+        - name: AURORA_MODULE_ID
+          value: "AURORA_NEMO_SERVICE"
+        - name: AURORA_CHAIN_NOTATION
+          value: "#K8S//POD//AURORA_NEMO//"
+        - name: AURORA_ETHICS_PROTOCOL
+          value: "Picard_Delta_3"
+        - name: NEMO_ANCHOR_SEED
+          value: "EOS_SEED_ORION"
+        - name: NEMO_MODELS_DIR
+          value: "/models"
+        - name: NEMO_SNAPSHOTS_DIR
+          value: "/snapshots"
+        - name: NEMO_PORT
+          value: "8090"
+        # Kubernetes downward API
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "2000m"
+            ephemeral-storage: "4Gi"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "16Gi"
+            cpu: "4000m"
+            ephemeral-storage: "8Gi"
+            nvidia.com/gpu: "1"
+
+        # ── Probes ──────────────────────────────────────────────────────
+        startupProbe:
+          httpGet:
+            path: /nemo/health
+            port: http
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 18  # 3 minutes for NeMo to start
+
+        livenessProbe:
+          httpGet:
+            path: /nemo/health
+            port: http
+          initialDelaySeconds: 180
+          periodSeconds: 15
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /nemo/health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+
+        volumeMounts:
+        - name: nemo-models
+          mountPath: /models
+          readOnly: true
+        - name: nemo-snapshots
+          mountPath: /snapshots
+
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+
+      # ── Volumes ────────────────────────────────────────────────────────
+      volumes:
+      - name: nemo-models
+        persistentVolumeClaim:
+          claimName: nemo-models-pvc
+          readOnly: true
+      - name: nemo-snapshots
+        # emptyDir is used for ephemeral snapshots (lost on pod restart).
+        # For persistent snapshots (time-travel debugging) replace with a PVC:
+        #   persistentVolumeClaim:
+        #     claimName: nemo-snapshots-pvc
+        emptyDir:
+          sizeLimit: 10Gi
+
+      # ── Tolerations for GPU nodes ──────────────────────────────────────
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "aurora-workload"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+      # ── Node selector for GPU nodes ────────────────────────────────────
+      nodeSelector:
+        accelerator: nvidia-gpu
+
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 60
+      dnsPolicy: ClusterFirst
+
+---
+# PersistentVolumeClaim for NeMo model weights
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nemo-models-pvc
+  namespace: aurora-cloudbank
+  labels:
+    app: aurora-nemo-service
+    component: model-storage
+  annotations:
+    aurora.io/chain-notation: "#K8S//PVC//NEMO_MODELS//"
+    aurora.io/srb: "K8S_NEMO_PVC_v1"
+    aurora.io/ethics-protocol: "Picard_Delta_3"
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: standard

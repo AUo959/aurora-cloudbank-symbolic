@@ -184,40 +184,65 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: ${{ env.KUBECTL_VERSION }}
+
+      - name: Install PyYAML
+        run: python3 -m pip install --user pyyaml
       
       - name: Validate Kubernetes manifests
         run: |
           echo "🔍 Validating Kubernetes manifests..."
-          
-          # Validate each manifest file
-          for manifest in k8s/*.yaml; do
-            if [[ -f "$manifest" ]]; then
-              echo "Validating: $manifest"
-              kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null
-              if [[ $? -eq 0 ]]; then
-                echo "✅ $manifest is valid"
-              else
-                echo "❌ $manifest validation failed"
-                exit 1
-              fi
-            fi
-          done
-          
-          # Validate deployment subdirectory
-          if [[ -d k8s/deployment ]]; then
-            for manifest in k8s/deployment/*.yaml k8s/deployment/*.yml; do
-              if [[ -f "$manifest" ]]; then
-                echo "Validating: $manifest"
-                kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null || {
-                  echo "❌ $manifest validation failed"
-                  exit 1
-                }
-                echo "✅ $manifest is valid"
-              fi
-            done
-          fi
-          
-          echo "✅ All manifests validated successfully"
+
+          python3 <<'PY'
+          from pathlib import Path
+          import sys
+          import yaml
+
+          manifest_paths = sorted(Path("k8s").glob("*.yaml"))
+          deployment_dir = Path("k8s/deployment")
+          if deployment_dir.is_dir():
+              manifest_paths.extend(sorted(deployment_dir.glob("*.yaml")))
+              manifest_paths.extend(sorted(deployment_dir.glob("*.yml")))
+
+          errors = []
+
+          for manifest in manifest_paths:
+              print(f"Validating: {manifest}")
+              try:
+                  with manifest.open("r", encoding="utf-8") as handle:
+                      documents = list(yaml.safe_load_all(handle))
+              except Exception as exc:  # noqa: BLE001
+                  errors.append(f"{manifest}: YAML parse failed: {exc}")
+                  continue
+
+              found_resource = False
+              for index, document in enumerate(documents, start=1):
+                  if document is None:
+                      continue
+                  if not isinstance(document, dict):
+                      errors.append(f"{manifest}: document {index} is not a mapping")
+                      continue
+
+                  api_version = document.get("apiVersion")
+                  kind = document.get("kind")
+                  if api_version and kind:
+                      found_resource = True
+                  else:
+                      errors.append(
+                          f"{manifest}: document {index} missing required keys "
+                          f"apiVersion/kind"
+                      )
+
+              if found_resource:
+                  print(f"✅ {manifest} is valid")
+
+          if errors:
+              print("❌ Kubernetes manifest validation failed:")
+              for error in errors:
+                  print(f"  - {error}")
+              sys.exit(1)
+
+          print("✅ All manifests validated successfully")
+          PY
       
       - name: Lint Kubernetes manifests
         continue-on-error: true

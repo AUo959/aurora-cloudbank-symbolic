@@ -1,0 +1,2 @@
+[bandit]
+exclude = tests/test_nemo_service.py

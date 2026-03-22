@@ -1,4 +1,11 @@
 version: '3.8'
+
+# Aurora CloudBank Symbolic — Docker Compose
+# Ethics Protocol: Picard_Delta_3
+# T1: Compose-file anchor
+# SRB: COMPOSE_v1
+# Chain Notation: #SERVICES//COMPOSE//
+
 services:
   aurora_gui:
     build:
@@ -7,9 +14,57 @@ services:
     volumes:
       - ../memory:/app/symbols/memory
       - ../aurora.seed.json:/app/symbols/aurora.seed.json
+
   command_node:
     build:
       context: ./services/command_node
     ports:
       - "3001:3001"
     restart: unless-stopped
+
+  # ── NeMo Inference Service ─────────────────────────────────────────────
+  # Ethics Protocol: Picard_Delta_3
+  # SRB: NEMO_SERVICE_v1
+  # Chain Notation: #SERVICES//NEMO//COMPOSE//
+  # Anchor Seed: EOS_SEED_ORION
+  nemo_service:
+    build:
+      context: .
+      dockerfile: services/nemo_service/Dockerfile
+    ports:
+      - "8090:8090"
+    restart: unless-stopped
+    depends_on:
+      - aurora_gui
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      AURORA_MODULE_ID: AURORA_NEMO_SERVICE
+      AURORA_ETHICS_PROTOCOL: Picard_Delta_3
+      NEMO_ANCHOR_SEED: EOS_SEED_ORION
+      NEMO_HOST: 0.0.0.0
+      NEMO_PORT: "8090"
+      NEMO_MODELS_DIR: /models
+      NEMO_SNAPSHOTS_DIR: /snapshots
+    volumes:
+      - nemo_models:/models
+      - nemo_snapshots:/snapshots
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/nemo/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  nemo_models:
+    driver: local
+  nemo_snapshots:
+    driver: local

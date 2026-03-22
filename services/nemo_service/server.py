@@ -69,6 +69,11 @@ _state_lock = asyncio.Lock()
 _nemo_model: Optional[Any] = None
 
 
+def _snapshot_ref(snapshot_id: str) -> str:
+    """Return a short log-safe snapshot reference."""
+    return snapshot_id[:8]
+
+
 def _load_nemo_model() -> Optional[Any]:
     """
     Attempt to load the default NeMo model checkpoint.
@@ -252,6 +257,30 @@ def _gpu_utilisation() -> Optional[float]:
         return None
 
 
+def _mock_inference_result(request: InferRequest) -> Dict[str, Any]:
+    """Return a graceful fallback payload when NeMo is unavailable."""
+    return {
+        "mock": True,
+        "message": "NeMo model not loaded — returning mock result",
+        "input_received": {
+            "text": request.text,
+            "model_type": request.model_type.value,
+            "has_audio": request.audio_bytes is not None,
+        },
+    }
+
+
+def _run_loaded_inference(request: InferRequest, model: Any) -> Dict[str, Any]:
+    """Execute inference against a loaded NeMo model."""
+    if request.model_type == NeMoModelType.ASR:
+        return {"transcript": model.transcribe([request.audio_bytes])}
+    if request.model_type == NeMoModelType.NLU:
+        return {"intent": model.predict([request.text])}
+    if request.model_type == NeMoModelType.TTS:
+        return {"audio": model.generate([request.text])}
+    return {"output": model.generate([request.text])}
+
+
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
@@ -327,7 +356,10 @@ async def nemo_status() -> Dict[str, Any]:
     }
 
 
-@app.post("/nemo/infer", response_model=InferResponse)
+@app.post(
+    "/nemo/infer",
+    responses={500: {"description": "Inference failed"}},
+)
 async def nemo_infer(request: InferRequest) -> InferResponse:
     """
     Run NeMo model inference (ASR, NLU, or TTS depending on loaded model).
@@ -349,27 +381,12 @@ async def nemo_infer(request: InferRequest) -> InferResponse:
     # Mock result when no model is loaded (graceful degradation)
     # -----------------------------------------------------------------------
     if model is None:
-        result = {
-            "mock": True,
-            "message": "NeMo model not loaded — returning mock result",
-            "input_received": {
-                "text": request.text,
-                "model_type": request.model_type.value,
-                "has_audio": request.audio_bytes is not None,
-            },
-        }
+        result = _mock_inference_result(request)
         entropy_value = 0.0
         drift_flagged = False
     else:
         try:
-            if request.model_type == NeMoModelType.ASR:
-                result = {"transcript": model.transcribe([request.audio_bytes])}
-            elif request.model_type == NeMoModelType.NLU:
-                result = {"intent": model.predict([request.text])}
-            elif request.model_type == NeMoModelType.TTS:
-                result = {"audio": model.generate([request.text])}
-            else:
-                result = {"output": model.generate([request.text])}
+            result = _run_loaded_inference(request, model)
         except Exception as exc:  # noqa: BLE001
             logger.error("Inference error: %s", exc)
             raise HTTPException(status_code=500, detail=f"Inference failed: {exc}") from exc
@@ -395,7 +412,10 @@ async def nemo_infer(request: InferRequest) -> InferResponse:
     )
 
 
-@app.post("/nemo/generate", response_model=GenerateResponse)
+@app.post(
+    "/nemo/generate",
+    responses={500: {"description": "Generation failed"}},
+)
 async def nemo_generate(request: GenerateRequest) -> GenerateResponse:
     """
     Text generation endpoint for NeMo LLM models.
@@ -452,7 +472,10 @@ async def nemo_generate(request: GenerateRequest) -> GenerateResponse:
     )
 
 
-@app.post("/nemo/snapshot", response_model=SnapshotResponse)
+@app.post(
+    "/nemo/snapshot",
+    responses={500: {"description": "Snapshot creation failed"}},
+)
 async def nemo_snapshot(request: SnapshotRequest) -> SnapshotResponse:
     """
     Create a SHA256-sealed simulation snapshot of the current NeMo state.
@@ -482,7 +505,13 @@ async def nemo_snapshot(request: SnapshotRequest) -> SnapshotResponse:
     )
 
 
-@app.post("/nemo/restore", response_model=RestoreResponse)
+@app.post(
+    "/nemo/restore",
+    responses={
+        404: {"description": "Snapshot not found"},
+        409: {"description": "Snapshot integrity check failed"},
+    },
+)
 async def nemo_restore(request: RestoreRequest) -> RestoreResponse:
     """
     Restore NeMo state from a snapshot with checksum validation.
@@ -507,7 +536,7 @@ async def nemo_restore(request: RestoreRequest) -> RestoreResponse:
 
     logger.info(
         "State restored — snapshot_id=%s t1=%s",
-        request.snapshot_id,
+        _snapshot_ref(request.snapshot_id),
         restored_data.get("t1_anchor", "unknown"),
     )
 

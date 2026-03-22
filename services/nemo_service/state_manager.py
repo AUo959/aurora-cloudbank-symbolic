@@ -27,6 +27,19 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger("nemo_service.state_manager")
 
 
+def _normalise_snapshot_id(snapshot_id: str) -> str:
+    """Return a canonical UUID string or raise SnapshotNotFoundError."""
+    try:
+        return str(uuid.UUID(snapshot_id))
+    except (TypeError, ValueError) as exc:
+        raise SnapshotNotFoundError(f"Snapshot not found: {snapshot_id}") from exc
+
+
+def _snapshot_ref(snapshot_id: str) -> str:
+    """Return a short log-safe snapshot reference."""
+    return snapshot_id[:8]
+
+
 # ---------------------------------------------------------------------------
 # Custom exceptions
 # ---------------------------------------------------------------------------
@@ -145,7 +158,8 @@ class StateManager:
 
     def _snapshot_path(self, snapshot_id: str) -> str:
         """Return the on-disk file path for a given snapshot ID."""
-        return os.path.join(self._snapshots_dir, f"{snapshot_id}.json")
+        canonical_snapshot_id = _normalise_snapshot_id(snapshot_id)
+        return os.path.join(self._snapshots_dir, f"{canonical_snapshot_id}.json")
 
     # ------------------------------------------------------------------
     # Public API
@@ -204,9 +218,10 @@ class StateManager:
 
         # Hash verification: All snapshot operations include SHA256 checksums
         """
-        snapshot = self._find_snapshot(snapshot_id)
+        canonical_snapshot_id = _normalise_snapshot_id(snapshot_id)
+        snapshot = self._find_snapshot(canonical_snapshot_id)
         if snapshot is None:
-            logger.warning("verify_snapshot: snapshot not found — id=%s", snapshot_id)
+            logger.warning("verify_snapshot: snapshot not found — id=%s", _snapshot_ref(canonical_snapshot_id))
             return False
 
         computed = self._compute_seal(snapshot.data)
@@ -217,7 +232,7 @@ class StateManager:
         else:
             logger.error(
                 "Snapshot seal mismatch — id=%s expected=%s… got=%s…",
-                snapshot_id,
+                _snapshot_ref(canonical_snapshot_id),
                 snapshot.seal[:16],
                 computed[:16],
                 extra={"event": "snapshot_seal_mismatch"},
@@ -232,21 +247,22 @@ class StateManager:
         Raises ValueError if the snapshot is not found or if the SHA256 seal
         is invalid (tamper detected).
         """
-        snapshot = self._find_snapshot(snapshot_id)
+        canonical_snapshot_id = _normalise_snapshot_id(snapshot_id)
+        snapshot = self._find_snapshot(canonical_snapshot_id)
         if snapshot is None:
-            raise SnapshotNotFoundError(f"Snapshot not found: {snapshot_id}")
+            raise SnapshotNotFoundError(f"Snapshot not found: {canonical_snapshot_id}")
 
-        if not self.verify_snapshot(snapshot_id):
-            raise SnapshotIntegrityError(f"Snapshot seal verification failed: {snapshot_id}")
+        if not self.verify_snapshot(canonical_snapshot_id):
+            raise SnapshotIntegrityError(f"Snapshot seal verification failed: {canonical_snapshot_id}")
 
-        self._current_snapshot_id = snapshot_id
+        self._current_snapshot_id = canonical_snapshot_id
         logger.info(
             "Snapshot restored — id=%s seal=%s…",
-            snapshot_id,
+            _snapshot_ref(canonical_snapshot_id),
             snapshot.seal[:16],
             extra={
                 "event": "snapshot_restored",
-                "snapshot_id": snapshot_id,
+                "snapshot_id": canonical_snapshot_id,
                 "chain_notation": "#SERVICES//NEMO//SNAPSHOT//RESTORE//",
             },
         )
@@ -269,7 +285,7 @@ class StateManager:
 
     def get_snapshot(self, snapshot_id: str) -> Optional[Dict[str, Any]]:
         """Return the full serialised snapshot dict, or None if not found."""
-        snapshot = self._find_snapshot(snapshot_id)
+        snapshot = self._find_snapshot(_normalise_snapshot_id(snapshot_id))
         return snapshot.to_dict() if snapshot else None
 
     def get_current_snapshot_id(self) -> Optional[str]:
@@ -282,12 +298,13 @@ class StateManager:
 
     def _find_snapshot(self, snapshot_id: str) -> Optional[Snapshot]:
         """Look up a snapshot by ID in memory, falling back to disk."""
+        canonical_snapshot_id = _normalise_snapshot_id(snapshot_id)
         for s in self._history:
-            if s.snapshot_id == snapshot_id:
+            if s.snapshot_id == canonical_snapshot_id:
                 return s
 
         # Try loading from disk (supports restarts)
-        path = self._snapshot_path(snapshot_id)
+        path = self._snapshot_path(canonical_snapshot_id)
         if os.path.isfile(path):
             try:
                 with open(path) as fh:
@@ -296,7 +313,11 @@ class StateManager:
                 self._history.append(snapshot)
                 return snapshot
             except (json.JSONDecodeError, OSError, KeyError, TypeError) as exc:
-                logger.error("Failed to load snapshot from disk: %s — %s", path, exc)
+                logger.error(
+                    "Failed to load snapshot from disk — id=%s error=%s",
+                    _snapshot_ref(canonical_snapshot_id),
+                    exc,
+                )
 
         return None
 

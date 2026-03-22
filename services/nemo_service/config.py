@@ -73,7 +73,7 @@ class NeMoConfig(BaseSettings):
     # ---------------------------------------------------------------------------
     # Server settings
     # ---------------------------------------------------------------------------
-    host: str = Field(default="0.0.0.0", description="Bind host")
+    host: str = Field(default="127.0.0.1", description="Bind host")
     port: int = Field(default=8090, description="Bind port")
     workers: int = Field(default=1, description="Number of uvicorn workers")
     log_level: str = Field(default="info", description="Uvicorn log level")
@@ -96,7 +96,7 @@ class NeMoConfig(BaseSettings):
         description="Root directory containing NeMo model checkpoints",
     )
     snapshots_dir: str = Field(
-        default="/tmp/nemo_snapshots",
+        default="/var/lib/nemo_snapshots",
         description=(
             "Directory for state snapshots. "
             "PRODUCTION: override with a persistent path (e.g. /var/lib/nemo_snapshots) "

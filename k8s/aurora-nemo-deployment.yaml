@@ -101,7 +101,7 @@ spec:
       # ── Main NeMo inference container ──────────────────────────────────
       containers:
       - name: aurora-nemo-service
-        image: aurora-nemo-service:latest
+        image: aurora-nemo-service:v1.0.0
         imagePullPolicy: IfNotPresent
         command:
         - uvicorn
@@ -151,10 +151,12 @@ spec:
           requests:
             memory: "8Gi"
             cpu: "2000m"
+            ephemeral-storage: "4Gi"
             nvidia.com/gpu: "1"
           limits:
             memory: "16Gi"
             cpu: "4000m"
+            ephemeral-storage: "8Gi"
             nvidia.com/gpu: "1"
 
         # ── Probes ──────────────────────────────────────────────────────

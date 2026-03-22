@@ -192,6 +192,13 @@ jobs:
           # Validate each manifest file
           for manifest in k8s/*.yaml; do
             if [[ -f "$manifest" ]]; then
+              case "$(basename "$manifest")" in
+                *template*.yaml|*template*.yml)
+                  echo "⏭️ Skipping template manifest: $manifest"
+                  continue
+                  ;;
+              esac
+
               echo "Validating: $manifest"
               kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null
               if [[ $? -eq 0 ]]; then
@@ -207,6 +214,13 @@ jobs:
           if [[ -d k8s/deployment ]]; then
             for manifest in k8s/deployment/*.yaml k8s/deployment/*.yml; do
               if [[ -f "$manifest" ]]; then
+                case "$(basename "$manifest")" in
+                  *template*.yaml|*template*.yml)
+                    echo "⏭️ Skipping template manifest: $manifest"
+                    continue
+                    ;;
+                esac
+
                 echo "Validating: $manifest"
                 kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null || {
                   echo "❌ $manifest validation failed"

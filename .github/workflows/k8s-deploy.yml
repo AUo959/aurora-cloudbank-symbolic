@@ -200,7 +200,7 @@ jobs:
               esac
 
               echo "Validating: $manifest"
-              kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null
+              kubectl create -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null
               if [[ $? -eq 0 ]]; then
                 echo "✅ $manifest is valid"
               else
@@ -222,7 +222,7 @@ jobs:
                 esac
 
                 echo "Validating: $manifest"
-                kubectl apply -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null || {
+                kubectl create -f "$manifest" --dry-run=client --validate=false -o yaml > /dev/null || {
                   echo "❌ $manifest validation failed"
                   exit 1
                 }

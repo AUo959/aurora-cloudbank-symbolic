@@ -36,14 +36,15 @@ git config --global commit.gpgsign true
 
 # === STEP 4: Export Public Key for GitHub ===
 echo "📤 Exporting public key..."
-gpg --armor --export "$KEY_ID" > gpg_pubkey_for_github.asc
-echo "✅ GPG public key exported to gpg_pubkey_for_github.asc"
+mkdir -p .security/keys
+gpg --armor --export "$KEY_ID" > .security/keys/gpg_pubkey_for_github.asc
+echo "✅ GPG public key exported to .security/keys/gpg_pubkey_for_github.asc"
 
 # === STEP 5: Display ===
 echo ""
 echo "📝 Add this key to GitHub → https://github.com/settings/keys (GPG section)"
 echo "───────────────────────────────────────────────"
-cat gpg_pubkey_for_github.asc
+cat .security/keys/gpg_pubkey_for_github.asc
 echo "───────────────────────────────────────────────"
 
 # === STEP 6: Test Commit ===

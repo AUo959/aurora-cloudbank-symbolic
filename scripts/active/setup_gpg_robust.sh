@@ -71,9 +71,11 @@ git config --global commit.gpgsign true
 
 # === STEP 4: Export Public Key for GitHub ===
 echo "📤 Exporting public key..."
-mkdir -p .security/keys
-gpg --armor --export "$KEY_ID" > .security/keys/gpg_pubkey_for_github.asc
-echo "✅ GPG public key exported to .security/keys/gpg_pubkey_for_github.asc"
+GPG_EXPORT_DIR="$HOME/.aurora-gpg"
+mkdir -p "$GPG_EXPORT_DIR"
+gpg --armor --export "$KEY_ID" > "$GPG_EXPORT_DIR/gpg_pubkey_for_github.asc"
+echo "✅ GPG public key exported to $GPG_EXPORT_DIR/gpg_pubkey_for_github.asc"
+echo "ℹ️  Key exported outside the repository to prevent accidental check-ins."
 
 # === STEP 5: Display ===
 echo ""
@@ -81,7 +83,7 @@ echo "🎉 GPG Setup Complete!"
 echo "======================"
 echo "📝 Add this key to GitHub → https://github.com/settings/keys (GPG section)"
 echo "───────────────────────────────────────────────"
-cat .security/keys/gpg_pubkey_for_github.asc
+cat "$GPG_EXPORT_DIR/gpg_pubkey_for_github.asc"
 echo "───────────────────────────────────────────────"
 
 # === STEP 6: Test Commit ===

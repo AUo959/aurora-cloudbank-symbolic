@@ -39,6 +39,7 @@ test_security_fixes.py
 /tmp/
 .security_temp/
 .security/scan_log.json
+.security/keys/*.asc
 
 # Unit test / coverage reports
 htmlcov/

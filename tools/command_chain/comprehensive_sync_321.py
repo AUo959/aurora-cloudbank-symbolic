@@ -541,6 +541,7 @@ class ComprehensiveSync:
             branch_result = self._run_command(['git', 'branch', '--show-current'])
             current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else 'main'
             sync_uses_rebase = self.config.use_rebase and current_branch == 'main'
+            merge_command = ['git', '-c', 'commit.gpgsign=false', 'merge', 'origin/main', '--no-edit']
 
             # First, fetch latest from main
             fetch_result = self._run_command(['git', 'fetch', 'origin', 'main'])
@@ -566,7 +567,7 @@ class ComprehensiveSync:
                     if sync_uses_rebase:
                         pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
                     else:
-                        pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
+                        pull_result = self._run_command(merge_command)
                 else:
                     logger.info("Branch is up-to-date with main")
                     pull_result = subprocess.CompletedProcess(
@@ -580,7 +581,7 @@ class ComprehensiveSync:
                 if sync_uses_rebase:
                     pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
                 else:
-                    pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
+                    pull_result = self._run_command(merge_command)
 
             if pull_result.returncode != 0:
                 # Enhanced conflict detection

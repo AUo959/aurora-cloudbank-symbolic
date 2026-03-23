@@ -1,180 +1,128 @@
-"""
-Memory Retrieval Module - Storage Backend
+"""Memory Retrieval Module - Storage Backend.
 
 Manages persistent memory storage with vector indexing and similarity search.
-
-Exports and imports symbolic vectors through THREAD_TRANSFER_BRIDGE_v1 for 
-cross-thread memory continuity.
 """
 
-from typing import List, Optional, Tuple
-import uuid
-import math
-import hashlib
+from __future__ import annotations
+
 from datetime import datetime, timezone
+import hashlib
+import json
+import math
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+import uuid
+
+from modules.memory_retrieval.config import MemoryRetrievalConfig
 
 
 class MemoryStore:
-    """
-    Storage backend for memory entries with vector similarity search.
-    
-    Initial implementation uses in-memory list with linear search.
-    Future versions will support pluggable backends (file, vector DB).
-    """
-    
-    def __init__(self, config):
-        """
-        Initialize memory store.
-        
-        Args:
-            config: MemoryRetrievalConfig instance
-        """
+    """Storage backend for memory entries with vector similarity search."""
+
+    def __init__(self, config: MemoryRetrievalConfig):
         self._config = config
-        self._memories: List[dict] = []
-    
+        self._memories: List[Dict] = []
+        if self._config.storage_backend == "file":
+            self._load_from_disk()
+
     def add_memory(self, context_id: str, content: str, metadata: dict) -> str:
-        """
-        Add a new memory entry.
-        
-        Args:
-            context_id: Context isolation identifier
-            content: Memory content text
-            metadata: Additional metadata dict
-        
-        Returns:
-            Generated memory_id (UUID)
-        """
+        """Add a new memory entry and return its identifier."""
         memory_id = str(uuid.uuid4())
-        embedding = self._generate_embedding(content)
-        
+        created_at = metadata.get("created_at", datetime.now(timezone.utc).isoformat())
         memory = {
             "id": memory_id,
             "context_id": context_id,
             "content": content,
-            "embedding": embedding,
+            "embedding": self._generate_embedding(content),
             "metadata": metadata,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": created_at,
+            "t1_anchor": metadata.get("t1_anchor", "T1:MRM:ADD"),
+            "srb_anchor": metadata.get("srb_anchor", f"SRB:{context_id}:{memory_id}"),
+            "anchor_seed": metadata.get("anchor_seed", self._config.anchor_seed),
+            "ethics_protocol": metadata.get("ethics_protocol", self._config.ethics_protocol),
         }
-        
         self._memories.append(memory)
+        self._persist_if_needed()
         return memory_id
-    
-    def query_memory(self, context_id: str, query: str, top_k: int) -> List[Tuple]:
-        """
-        Query memories by semantic similarity.
-        
-        Args:
-            context_id: Context to search within
-            query: Search query string
-            top_k: Number of top results to return
-        
-        Returns:
-            List of (memory_id, score, content, metadata) tuples ordered by score
-        """
+
+    def query_memory(self, context_id: str, query: str, top_k: int) -> List[Tuple[str, float, str, dict]]:
+        """Query memories by semantic similarity within a context."""
         query_embedding = self._generate_embedding(query)
-        
-        # Filter by context and compute similarities
-        results = []
+        results: List[Tuple[str, float, str, dict]] = []
         for memory in self._memories:
             if memory["context_id"] != context_id:
                 continue
-            
             similarity = self._cosine_similarity(query_embedding, memory["embedding"])
-            results.append((
-                memory["id"],
-                similarity,
-                memory["content"],
-                memory["metadata"]
-            ))
-        
-        # Sort by score descending and return top_k
-        results.sort(key=lambda x: x[1], reverse=True)
+            metadata = dict(memory["metadata"])
+            metadata.setdefault("created_at", memory["created_at"])
+            metadata.setdefault("t1_anchor", memory["t1_anchor"])
+            metadata.setdefault("srb_anchor", memory["srb_anchor"])
+            metadata.setdefault("anchor_seed", memory["anchor_seed"])
+            metadata.setdefault("ethics_protocol", memory["ethics_protocol"])
+            results.append((memory["id"], similarity, memory["content"], metadata))
+        results.sort(key=lambda item: item[1], reverse=True)
         return results[:top_k]
-    
-    def get_memory(self, memory_id: str) -> Optional[dict]:
-        """
-        Retrieve a specific memory by ID.
-        
-        Args:
-            memory_id: Memory identifier
-        
-        Returns:
-            Memory dict or None if not found
-        """
+
+    def get_memory(self, memory_id: str) -> Optional[Dict]:
+        """Retrieve a specific memory by ID."""
         for memory in self._memories:
             if memory["id"] == memory_id:
-                return memory
+                return dict(memory)
         return None
-    
+
     def delete_memory(self, memory_id: str) -> bool:
-        """
-        Remove a memory from storage.
-        
-        Args:
-            memory_id: Memory identifier
-        
-        Returns:
-            True if deleted, False if not found
-        """
-        for i, memory in enumerate(self._memories):
+        """Remove a memory from storage."""
+        for index, memory in enumerate(self._memories):
             if memory["id"] == memory_id:
-                del self._memories[i]
+                del self._memories[index]
+                self._persist_if_needed()
                 return True
         return False
-    
+
+    def _persist_if_needed(self) -> None:
+        if self._config.storage_backend == "file":
+            self._save_to_disk()
+
+    def _load_from_disk(self) -> None:
+        path = Path(self._config.storage_path or "")
+        if not path.exists():
+            return
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        self._memories = payload.get("memories", [])
+
+    def _save_to_disk(self) -> None:
+        path = Path(self._config.storage_path or "")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "anchor_seed": self._config.anchor_seed,
+            "ethics_protocol": self._config.ethics_protocol,
+            "memories": self._memories,
+        }
+        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
     def _generate_embedding(self, text: str) -> List[float]:
-        """
-        Generate embedding vector for text.
-        
-        Initial implementation uses simple mock embeddings.
-        Future: integrate sentence-transformers or similar.
-        
-        Args:
-            text: Input text
-        
-        Returns:
-            Embedding vector
-        """
-        # Mock implementation: simple hash-based embedding
-        # NOTE: Production systems should use sentence-transformers or similar
-        # This deterministic hash-based approach provides consistent embeddings
-        # suitable for development and testing without external dependencies
-        
-        hash_val = int(hashlib.sha256(text.encode()).hexdigest(), 16)
+        """Generate a deterministic development-time embedding vector."""
+        tokens = [token for token in text.lower().split() if token]
         dimension = self._config.vector_dimension
-        
-        # Generate pseudo-random vector from hash
-        embedding = []
-        for i in range(dimension):
-            val = ((hash_val >> (i % 32)) & 0xFF) / 255.0
-            embedding.append(val)
-        
-        # Normalize to unit length
-        magnitude = math.sqrt(sum(x * x for x in embedding))
+        embedding = [0.0] * dimension
+        if not tokens:
+            return embedding
+        for token in tokens:
+            digest = hashlib.sha256(token.encode("utf-8")).digest()
+            for index, byte in enumerate(digest):
+                bucket = index % dimension
+                embedding[bucket] += (byte / 255.0) - 0.5
+        magnitude = math.sqrt(sum(value * value for value in embedding))
         if magnitude > 0:
-            embedding = [x / magnitude for x in embedding]
-        
+            embedding = [value / magnitude for value in embedding]
         return embedding
-    
+
     def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
-        """
-        Compute cosine similarity between two vectors.
-        
-        Args:
-            vec1: First vector
-            vec2: Second vector
-        
-        Returns:
-            Similarity score (0-1)
-        """
+        """Compute cosine similarity between two vectors."""
         if len(vec1) != len(vec2):
             raise ValueError("Vectors must have same dimension")
-        
-        dot_product = sum(a * b for a, b in zip(vec1, vec2))
         magnitude1 = math.sqrt(sum(a * a for a in vec1))
         magnitude2 = math.sqrt(sum(b * b for b in vec2))
-        
         if magnitude1 == 0 or magnitude2 == 0:
             return 0.0
-        
-        return dot_product / (magnitude1 * magnitude2)
+        return sum(a * b for a, b in zip(vec1, vec2)) / (magnitude1 * magnitude2)

@@ -5,15 +5,21 @@ Manages persistent memory storage with vector indexing and similarity search.
 
 from __future__ import annotations
 
+import copy
 from datetime import datetime, timezone
+from enum import Enum
 import hashlib
 import json
+import logging
 import math
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from modules.memory_retrieval.config import MemoryRetrievalConfig
+
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryStore:
@@ -28,18 +34,20 @@ class MemoryStore:
     def add_memory(self, context_id: str, content: str, metadata: dict) -> str:
         """Add a new memory entry and return its identifier."""
         memory_id = str(uuid.uuid4())
-        created_at = metadata.get("created_at", datetime.now(timezone.utc).isoformat())
+        metadata_copy = self._prepare_metadata(metadata)
+        created_at = self._normalize_created_at(metadata_copy.get("created_at"))
+        metadata_copy["created_at"] = created_at
         memory = {
             "id": memory_id,
             "context_id": context_id,
             "content": content,
             "embedding": self._generate_embedding(content),
-            "metadata": metadata,
+            "metadata": metadata_copy,
             "created_at": created_at,
-            "t1_anchor": metadata.get("t1_anchor", "T1:MRM:ADD"),
-            "srb_anchor": metadata.get("srb_anchor", f"SRB:{context_id}:{memory_id}"),
-            "anchor_seed": metadata.get("anchor_seed", self._config.anchor_seed),
-            "ethics_protocol": metadata.get("ethics_protocol", self._config.ethics_protocol),
+            "t1_anchor": metadata_copy.get("t1_anchor", "T1:MRM:ADD"),
+            "srb_anchor": metadata_copy.get("srb_anchor", f"SRB:{context_id}:{memory_id}"),
+            "anchor_seed": metadata_copy.get("anchor_seed", self._config.anchor_seed),
+            "ethics_protocol": metadata_copy.get("ethics_protocol", self._config.ethics_protocol),
         }
         self._memories.append(memory)
         self._persist_if_needed()
@@ -67,7 +75,7 @@ class MemoryStore:
         """Retrieve a specific memory by ID."""
         for memory in self._memories:
             if memory["id"] == memory_id:
-                return dict(memory)
+                return copy.deepcopy(memory)
         return None
 
     def delete_memory(self, memory_id: str) -> bool:
@@ -87,8 +95,18 @@ class MemoryStore:
         path = Path(self._config.storage_path or "")
         if not path.exists():
             return
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        self._memories = payload.get("memories", [])
+        if path.is_dir():
+            logger.warning("MRM storage path points to a directory: %s", path)
+            self._memories = []
+            return
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("Failed to load MRM store from %s: %s", path, exc)
+            self._memories = []
+            return
+        memories = payload.get("memories", [])
+        self._memories = memories if isinstance(memories, list) else []
 
     def _save_to_disk(self) -> None:
         path = Path(self._config.storage_path or "")
@@ -98,7 +116,9 @@ class MemoryStore:
             "ethics_protocol": self._config.ethics_protocol,
             "memories": self._memories,
         }
-        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        temp_path = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+        temp_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        temp_path.replace(path)
 
     def _generate_embedding(self, text: str) -> List[float]:
         """Generate a deterministic development-time embedding vector."""
@@ -108,14 +128,55 @@ class MemoryStore:
         if not tokens:
             return embedding
         for token in tokens:
-            digest = hashlib.sha256(token.encode("utf-8")).digest()
-            for index, byte in enumerate(digest):
-                bucket = index % dimension
-                embedding[bucket] += (byte / 255.0) - 0.5
+            block_index = 0
+            value_index = 0
+            while value_index < dimension:
+                digest = hashlib.sha256(f"{token}:{block_index}".encode("utf-8")).digest()
+                for byte in digest:
+                    embedding[value_index] += (byte / 255.0) - 0.5
+                    value_index += 1
+                    if value_index >= dimension:
+                        break
+                block_index += 1
         magnitude = math.sqrt(sum(value * value for value in embedding))
         if magnitude > 0:
             embedding = [value / magnitude for value in embedding]
         return embedding
+
+    def _prepare_metadata(self, metadata: dict) -> Dict[str, Any]:
+        """Create an isolated, JSON-safe copy of caller metadata."""
+        return self._make_json_safe(copy.deepcopy(metadata))
+
+    def _make_json_safe(self, value: Any) -> Any:
+        """Normalize common Python objects to JSON-safe values."""
+        if isinstance(value, dict):
+            return {str(key): self._make_json_safe(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple, set)):
+            return [self._make_json_safe(item) for item in value]
+        if isinstance(value, datetime):
+            return value.isoformat()
+        if isinstance(value, Path):
+            return str(value)
+        if isinstance(value, Enum):
+            return self._make_json_safe(value.value)
+        if value is None or isinstance(value, (bool, int, float, str)):
+            return value
+        return str(value)
+
+    def _normalize_created_at(self, created_at: Any) -> str:
+        """Normalize created_at into an ISO8601 string for scoring and persistence."""
+        if isinstance(created_at, datetime):
+            timestamp = created_at
+        elif isinstance(created_at, (int, float)):
+            timestamp = datetime.fromtimestamp(created_at, tz=timezone.utc)
+        elif isinstance(created_at, str) and created_at:
+            return created_at
+        else:
+            timestamp = datetime.now(timezone.utc)
+
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        return timestamp.isoformat()
 
     def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
         """Compute cosine similarity between two vectors."""

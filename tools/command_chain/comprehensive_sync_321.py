@@ -402,7 +402,9 @@ class ComprehensiveSync:
                 logger.warning("Git commit signing unavailable; retrying commit without GPG signing")
                 result = self._run_command(['git', '-c', 'commit.gpgsign=false', 'commit', '-m', commit_message])
                 if result.returncode == 0:
-                    warnings.append('Commit created without GPG signing because signing is unavailable in this environment')
+                    warnings.append(
+                        'Commit created without GPG signing because signing is unavailable in this environment'
+                    )
 
             if result.returncode != 0:
                 return PhaseResult(
@@ -536,6 +538,10 @@ class ComprehensiveSync:
         logger.info("Phase 4: Syncing to main...")
 
         try:
+            branch_result = self._run_command(['git', 'branch', '--show-current'])
+            current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else 'main'
+            sync_uses_rebase = self.config.use_rebase and current_branch == 'main'
+
             # First, fetch latest from main
             fetch_result = self._run_command(['git', 'fetch', 'origin', 'main'])
             if fetch_result.returncode != 0:
@@ -557,7 +563,7 @@ class ComprehensiveSync:
                     logger.info(f"Branch is {behind_count} commit(s) behind main - syncing...")
 
                     # Merge main into current branch (works for both main and feature branches)
-                    if self.config.use_rebase:
+                    if sync_uses_rebase:
                         pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
                     else:
                         pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
@@ -571,7 +577,7 @@ class ComprehensiveSync:
                     )
             else:
                 # Fallback: try to sync anyway
-                if self.config.use_rebase:
+                if sync_uses_rebase:
                     pull_result = self._run_command(['git', 'pull', '--rebase', 'origin', 'main'])
                 else:
                     pull_result = self._run_command(['git', 'merge', 'origin/main', '--no-edit'])
@@ -596,16 +602,12 @@ class ComprehensiveSync:
                     phase_name="Sync to Main",
                     success=False,
                     duration_seconds=time.time() - phase_start,
-                    message="Failed to pull from remote",
+                    message="Failed to sync with origin/main",
                     warnings=["Check for network issues or repository access"]
                 )
 
             # Push if auto_push enabled
             if self.config.auto_push:
-                # Get current branch name to push to correct remote
-                branch_result = self._run_command(['git', 'branch', '--show-current'])
-                current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else 'main'
-
                 push_result = self._run_command(['git', 'push', 'origin', current_branch])
                 if push_result.returncode != 0:
                     return PhaseResult(

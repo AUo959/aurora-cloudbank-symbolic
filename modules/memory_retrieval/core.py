@@ -135,12 +135,19 @@ class MemoryRetrievalCore:
         if not created_at:
             return 0.5
         try:
-            created = datetime.fromisoformat(created_at)
+            if isinstance(created_at, datetime):
+                created = created_at
+            elif isinstance(created_at, (int, float)):
+                created = datetime.fromtimestamp(created_at, tz=timezone.utc)
+            elif isinstance(created_at, str):
+                created = datetime.fromisoformat(created_at)
+            else:
+                return 0.5
             if created.tzinfo is None:
                 created = created.replace(tzinfo=timezone.utc)
             age_days = (datetime.now(timezone.utc) - created).total_seconds() / 86400
             return math.exp(-self._config.recency_decay_rate * age_days)
-        except ValueError:
+        except (TypeError, ValueError, OSError, OverflowError):
             return 0.5
 
     def get_cache_stats(self) -> dict:
@@ -149,12 +156,13 @@ class MemoryRetrievalCore:
 
     def _next_anchor(self, operation: str, context_id: str) -> Dict[str, str]:
         self._anchor_counter += 1
+        anchor_token = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S%f')}-{self._anchor_counter:04d}"
         return {
-            "t1_anchor": f"T1:MRM:{operation}:{self._anchor_counter:04d}",
-            "srb_anchor": f"SRB:MRM:{context_id}:{self._anchor_counter:04d}",
+            "t1_anchor": f"T1:MRM:{operation}:{anchor_token}",
+            "srb_anchor": f"SRB:MRM:{context_id}:{anchor_token}",
             "anchor_seed": self._config.anchor_seed,
             "ethics_protocol": self._config.ethics_protocol,
-            "chain_notation": f"001//999//MRM//{operation}//T1:{self._anchor_counter:04d}//",
+            "chain_notation": f"001//999//MRM//{operation}//T1:{anchor_token}//",
         }
 
     def _register_dlp_event(self, operation: str, context_id: str, context_tag: str, preview: str) -> None:

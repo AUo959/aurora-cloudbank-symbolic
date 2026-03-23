@@ -12,15 +12,11 @@ Chain: #test/memory_retrieval/001
 Target: 95%+ code coverage
 """
 
-import sys
 import time
-from pathlib import Path
 from datetime import datetime, timezone, timedelta
+from enum import Enum
 
 import pytest
-
-# Add modules to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from modules.memory_retrieval.config import MemoryRetrievalConfig
 from modules.memory_retrieval.store import MemoryStore
@@ -178,6 +174,26 @@ class TestMemoryStore:
         assert retrieved["content"] == content
         assert retrieved["metadata"]["importance"] == 0.9
 
+    def test_store_isolates_metadata_from_caller_mutation(self):
+        """Test that caller metadata mutations do not alter stored state."""
+        config = MemoryRetrievalConfig()
+        store = MemoryStore(config)
+        metadata = {"importance": 0.9, "nested": {"topic": "anchors"}}
+
+        memory_id = store.add_memory(
+            context_id="test_context",
+            content="mutable metadata check",
+            metadata=metadata,
+        )
+        metadata["nested"]["topic"] = "mutated"
+
+        retrieved = store.get_memory(memory_id)
+        assert retrieved["metadata"]["nested"]["topic"] == "anchors"
+
+        retrieved["metadata"]["nested"]["topic"] = "changed again"
+        reloaded = store.get_memory(memory_id)
+        assert reloaded["metadata"]["nested"]["topic"] == "anchors"
+
     def test_get_nonexistent_memory(self):
         """Test retrieving non-existent memory returns None."""
         config = MemoryRetrievalConfig()
@@ -284,6 +300,7 @@ class TestMemoryStore:
         # Embeddings should be normalized (unit length)
         magnitude = sum(x * x for x in embedding) ** 0.5
         assert abs(magnitude - 1.0) < 0.001
+        assert any(abs(value) > 0 for value in embedding[32:])
 
     def test_embedding_consistency(self):
         """Test that same text produces same embedding."""
@@ -541,6 +558,19 @@ class TestMemoryRetrievalCore:
 
         assert results1 == results2
 
+    def test_recency_score_accepts_non_string_timestamps(self):
+        """Test recency scoring degrades safely for non-string timestamp inputs."""
+        config = MemoryRetrievalConfig()
+        core = MemoryRetrievalCore(config)
+
+        score_from_datetime = core._compute_recency_score(datetime.now(timezone.utc))
+        score_from_epoch = core._compute_recency_score(time.time())
+        score_from_invalid = core._compute_recency_score(object())
+
+        assert 0.0 <= score_from_datetime <= 1.0
+        assert 0.0 <= score_from_epoch <= 1.0
+        assert score_from_invalid == 0.5
+
     def test_retrieve_memories_with_scoring(self):
         """Test that retrieved memories include score breakdown."""
         config = MemoryRetrievalConfig()
@@ -723,13 +753,14 @@ class TestMemoryRetrievalApi:
         MemoryRetrievalCore._instance = None
 
     def test_api_add_get_delete_memory(self):
+        config = MemoryRetrievalConfig.from_env()
         add_result = add_memory("api_context", "symbolic anchor memory", {"importance": 0.9})
         assert add_result["success"] is True
 
         fetch_result = get_memory(add_result["memory_id"])
         assert fetch_result["success"] is True
-        assert fetch_result["memory"]["metadata"]["anchor_seed"] == "EOS_SEED_ORION"
-        assert fetch_result["memory"]["metadata"]["ethics_protocol"] == "Picard_Delta_3"
+        assert fetch_result["memory"]["metadata"]["anchor_seed"] == config.anchor_seed
+        assert fetch_result["memory"]["metadata"]["ethics_protocol"] == config.ethics_protocol
 
         delete_result = delete_memory(add_result["memory_id"])
         assert delete_result["success"] is True
@@ -758,3 +789,35 @@ class TestMemoryRetrievalApi:
         fetched = reloaded_store.get_memory(memory_id)
         assert fetched is not None
         assert fetched["content"] == "persistent symbolic memory"
+
+    def test_file_backend_handles_invalid_json_gracefully(self, tmp_path):
+        storage_path = tmp_path / "mrm_store.json"
+        storage_path.write_text("{invalid json", encoding="utf-8")
+
+        config = MemoryRetrievalConfig(storage_backend="file", storage_path=str(storage_path))
+        store = MemoryStore(config)
+
+        assert store._memories == []
+
+    def test_file_backend_serializes_common_metadata_types(self, tmp_path):
+        class Status(Enum):
+            ACTIVE = "active"
+
+        storage_path = tmp_path / "mrm_store.json"
+        config = MemoryRetrievalConfig(storage_backend="file", storage_path=str(storage_path))
+        store = MemoryStore(config)
+
+        created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        memory_id = store.add_memory(
+            "persist_ctx",
+            "persistent symbolic memory",
+            {"importance": 0.7, "created_at": created_at, "tags": {"alpha", "beta"}, "status": Status.ACTIVE},
+        )
+
+        reloaded_store = MemoryStore(config)
+        fetched = reloaded_store.get_memory(memory_id)
+
+        assert fetched is not None
+        assert fetched["metadata"]["created_at"] == created_at.isoformat()
+        assert sorted(fetched["metadata"]["tags"]) == ["alpha", "beta"]
+        assert fetched["metadata"]["status"] == "active"

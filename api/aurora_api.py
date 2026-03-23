@@ -260,7 +260,7 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle with startup and shutdown logic"""
     # Startup
     logger.info("Aurora API starting up...")
-    
+
     # Initialize telemetry systems
     try:
         aurora_telemetry = get_telemetry(service_name="aurora-cloudbank-api")
@@ -272,7 +272,7 @@ async def lifespan(app: FastAPI):
         )
     except Exception as e:
         logger.warning("⚠️ Failed to initialize telemetry: %s", e)
-    
+
     # Start HALO/PAS drift controller if available
     if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
         try:
@@ -280,12 +280,12 @@ async def lifespan(app: FastAPI):
             logger.info("✅ HALO/PAS Drift Controller started")
         except Exception as e:
             logger.error("❌ Failed to start HALO/PAS Controller: %s", e)
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Aurora API shutting down...")
-    
+
     # Export final telemetry snapshot
     try:
         aurora_telemetry = get_telemetry()
@@ -297,7 +297,7 @@ async def lifespan(app: FastAPI):
         )
     except Exception as e:
         logger.debug("Telemetry snapshot failed: %s", e)
-    
+
     # Stop HALO/PAS drift controller if running
     if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
         try:
@@ -435,20 +435,20 @@ async def rate_limit_header_middleware(request: Request, call_next):  # pragma: 
 async def telemetry_middleware(request: Request, call_next):
     """
     Middleware to automatically trace all HTTP requests with telemetry.
-    
+
     Captures:
     - Request path and method
     - Response status code
     - Request duration
     - Errors during processing
-    
+
     DLP: request_tracing_middleware
     """
     telemetry = get_telemetry()
-    
+
     # Create operation name from method and path
     operation_name = f"{request.method}_{request.url.path.replace('/', '_').strip('_')}"
-    
+
     # Trace the request
     with telemetry.trace_operation(
         operation_name,
@@ -460,7 +460,7 @@ async def telemetry_middleware(request: Request, call_next):
     ):
         try:
             response = await call_next(request)
-            
+
             # Record feature usage based on endpoint
             if request.url.path.startswith("/geometric"):
                 telemetry.record_feature_usage("geometric_algebra_api")
@@ -470,7 +470,7 @@ async def telemetry_middleware(request: Request, call_next):
                 telemetry.record_feature_usage("memory_api")
             elif request.url.path.startswith("/quantum"):
                 telemetry.record_feature_usage("quantum_api")
-            
+
             return response
         except Exception as e:
             # Record error explicitly before re-raising for visibility
@@ -482,44 +482,44 @@ async def telemetry_middleware(request: Request, call_next):
 def validate_identifier(identifier: str, param_name: str) -> str:
     """
     Validate identifiers (node_id, repo_id, bridge_id, etc.) to prevent injection attacks.
-    
+
     HIGH-5: NoSQL injection prevention pattern
     - Alphanumeric + hyphens/underscores only
     - Max length: 64 characters
     - No path traversal sequences
     - No special characters that could enable injection
-    
+
     Args:
         identifier: The identifier string to validate
         param_name: Name of the parameter (for error messages)
-    
+
     Returns:
         Validated identifier string
-    
+
     Raises:
         HTTPException: If identifier is invalid (400 Bad Request)
     """
     import re
-    
+
     if not identifier or len(identifier) > 64:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid {param_name}: must be 1-64 characters"
         )
-    
+
     if not re.match(r'^[a-zA-Z0-9_-]+$', identifier):
         raise HTTPException(
             status_code=400,
             detail=f"Invalid {param_name}: alphanumeric, hyphens, underscores only"
         )
-    
+
     # Block path traversal attempts
     if '..' in identifier or '/' in identifier or '\\' in identifier:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid {param_name}: path traversal detected"
         )
-    
+
     return identifier
 
 
@@ -833,20 +833,20 @@ class AgentSessionRequest(BaseModel):
     session_id: Optional[str] = None
     state_data: Optional[Dict[str, Any]] = Field(default=None)
     share_token: Optional[str] = None
-    
+
     @field_validator('state_data')
     @classmethod
     def validate_state_data(cls, v):
         """Validate state_data to prevent NoSQL/dictionary injection attacks"""
         if v is None:
             return v
-        
+
         # Whitelist allowed keys to prevent injection
         ALLOWED_KEYS = {"preference", "context", "metadata", "theme", "settings", "config", "options"}
         invalid_keys = set(v.keys()) - ALLOWED_KEYS
         if invalid_keys:
             raise ValueError(f"Invalid state_data keys: {invalid_keys}. Allowed keys: {ALLOWED_KEYS}")
-        
+
         # Check for dangerous injection patterns
         dangerous_patterns = ["$where", "$regex", "__proto__", "constructor", "prototype"]
         for key, value in v.items():
@@ -854,7 +854,7 @@ class AgentSessionRequest(BaseModel):
             value_str = str(value)
             if any(pattern in key_str or pattern in value_str for pattern in dangerous_patterns):
                 raise ValueError("Dangerous pattern detected in state_data: potential injection attempt")
-        
+
         return v
 
 
@@ -983,12 +983,12 @@ def health_check_api(request: Request):
 def prometheus_metrics(request: Request):
     """
     Prometheus metrics endpoint for standard telemetry.
-    
+
     Returns metrics in Prometheus text exposition format for:
     - Operation counts and durations
     - Feature usage statistics
     - Error counts by type
-    
+
     DLP: telemetry_export_metrics
     """
     from fastapi.responses import PlainTextResponse
@@ -1006,15 +1006,15 @@ def prometheus_metrics(request: Request):
 def telemetry_snapshot(request: Request, context_tag: Optional[str] = None):
     """
     Get current telemetry metrics snapshot.
-    
+
     Returns structured metrics including:
     - Performance statistics (operation times, counts)
     - Adoption metrics (feature usage)
     - Error metrics
-    
+
     Args:
         context_tag: Optional DLP context tag for lineage tracking
-    
+
     DLP: telemetry_snapshot_export
     """
     try:
@@ -1041,7 +1041,7 @@ def telemetry_snapshot(request: Request, context_tag: Optional[str] = None):
 async def get_halo_pas_status(request: Request):
     """
     Get HALO/PAS drift controller status with drift statistics.
-    
+
     Returns real-time drift measurements across L1/L2/L3 timeline layers.
     DLP: halo_pas_drift_controller_v1
     Anchors: T1, SRB, EOS_SEED_ORION
@@ -1051,7 +1051,7 @@ async def get_halo_pas_status(request: Request):
             status_code=503,
             detail="HALO/PAS Drift Controller not available"
         )
-    
+
     try:
         status = HALO_PAS_CONTROLLER.export_status()
         return JSONResponse(content=status)
@@ -1338,7 +1338,7 @@ async def execute_gemini_agent_tool(
 async def thread_bridge_status_endpoint(request: Request):
     """
     Get Thread Transfer Bridge status
-    
+
     Returns current bridge status, drift metrics, and companion thread health.
     """
     if not THREAD_BRIDGE_AVAILABLE:
@@ -1346,11 +1346,11 @@ async def thread_bridge_status_endpoint(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge not available"
         )
-    
+
     try:
         bridge = get_bridge_instance()
         status = bridge.get_status()
-        
+
         return {
             "success": True,
             "status": status.status,
@@ -1383,7 +1383,7 @@ async def thread_bridge_handshake_endpoint(
 ):
     """
     Initiate handshake sequence with a companion thread
-    
+
     Executes the 5-stage handshake: INIT → VERIFY_ANCHOR → LOCK_DRIFT →
     ALIGN_ETHICS → SYNC_COMPLETE
     """
@@ -1393,11 +1393,11 @@ async def thread_bridge_handshake_endpoint(
             status_code=503,
             detail="Thread Transfer Bridge not available"
         )
-    
+
     try:
         bridge = get_bridge_instance()
         result = bridge.handshake(request.thread_id)
-        
+
         if not result.get("success"):
             return JSONResponse(
                 status_code=400,
@@ -1408,7 +1408,7 @@ async def thread_bridge_handshake_endpoint(
                     "context_tag": "thread_bridge_handshake_failed"
                 }
             )
-        
+
         return {
             "success": True,
             "thread_id": result["thread_id"],
@@ -1435,7 +1435,7 @@ async def thread_bridge_validate_endpoint(
 ):
     """
     Validate continuity between two threads before transfer
-    
+
     Checks anchor alignment, drift levels, and ethics compatibility.
     """
     verify_csrf_token(token)
@@ -1444,11 +1444,11 @@ async def thread_bridge_validate_endpoint(
             status_code=503,
             detail="Thread Transfer Bridge not available"
         )
-    
+
     try:
         bridge = get_bridge_instance()
         validation = bridge.validate_continuity(request.source, request.target)
-        
+
         return {
             "success": True,
             "valid": validation.get("valid"),
@@ -1468,7 +1468,7 @@ async def thread_bridge_validate_endpoint(
 async def thread_bridge_companions_endpoint(request: Request):
     """
     Get list of all companion threads with their status
-    
+
     Returns detailed information about each companion thread including
     alignment status, drift levels, and last sync timestamp.
     """
@@ -1477,11 +1477,11 @@ async def thread_bridge_companions_endpoint(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge not available"
         )
-    
+
     try:
         bridge = get_bridge_instance()
         companions = bridge.get_companion_threads()
-        
+
         return {
             "success": True,
             "companion_threads": companions,
@@ -1509,7 +1509,7 @@ async def thread_bridge_transfer_endpoint(
 ):
     """
     Transfer context from source thread to target thread
-    
+
     Performs full validation, ethics checks, and secure state transfer
     between companion threads.
     """
@@ -1519,7 +1519,7 @@ async def thread_bridge_transfer_endpoint(
             status_code=503,
             detail="Thread Transfer Bridge not available"
         )
-    
+
     try:
         bridge = get_bridge_instance()
         result = bridge.transfer_context(
@@ -1527,7 +1527,7 @@ async def thread_bridge_transfer_endpoint(
             target=request.target,
             context_data=request.context_data
         )
-        
+
         if not result.get("success"):
             return JSONResponse(
                 status_code=400,
@@ -1538,7 +1538,7 @@ async def thread_bridge_transfer_endpoint(
                     "context_tag": "thread_bridge_transfer_failed"
                 }
             )
-        
+
         return {
             "success": True,
             "source": result["source"],
@@ -1610,7 +1610,7 @@ async def v2_register_node(
 ):
     """
     Register a new bridge node in the distributed constellation.
-    
+
     Requires: hostname, port, region, capacity, version
     Returns: Node metadata with unique node_id
     """
@@ -1620,7 +1620,7 @@ async def v2_register_node(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         registry = get_node_registry()
         node = await registry.register_node(
@@ -1631,7 +1631,7 @@ async def v2_register_node(
             version=node_request.version,
             capabilities=node_request.capabilities or []
         )
-        
+
         return {
             "success": True,
             "node": {
@@ -1659,45 +1659,45 @@ async def v2_unregister_node(
 ):
     """
     Unregister a bridge node from the constellation.
-    
+
     Gracefully removes node from registry and load balancing pool.
-    
+
     SECURITY: CSRF protection via token validation (HIGH-4 remediation)
     ETHICS: Ethics gate evaluation before node deletion
     """
     # HIGH-4: Verify CSRF token before node deletion
     verify_csrf_token(token)
-    
+
     # HIGH-5: Validate node_id parameter to prevent injection
     node_id = validate_identifier(node_id, "node_id")
-    
+
     if not THREAD_BRIDGE_V2_AVAILABLE:
         raise HTTPException(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     # Ethics Gate: Evaluate node deletion action
     if ETHICS_GATE_AVAILABLE and ethics_gate:
         try:
             from src.aurora.ethics import EthicsViolation
-            
+
             action = {
                 "type": "delete_node",
                 "node_id": node_id,
                 "resource": "bridge_node",
                 "operation": "unregister"
             }
-            
+
             context = {
                 "agent_id": "api_user",
                 "route": f"/api/v2/nodes/{node_id}",
                 "source": "api_endpoint",
                 "method": "DELETE"
             }
-            
+
             verdict = await ethics_gate.evaluate(action, context)
-            
+
             if not verdict.allowed:
                 # Log detailed reason server-side
                 logger.warning(
@@ -1716,7 +1716,7 @@ async def v2_unregister_node(
                     status_code=403,
                     detail="Node deletion not permitted by ethics policy"
                 )
-            
+
             # Log approval
             logger.info(
                 "Ethics gate approved node deletion: node_id=%s (score=%.2f)",
@@ -1728,7 +1728,7 @@ async def v2_unregister_node(
                     "aurora_module": "api_v2_nodes"
                 }
             )
-            
+
         except EthicsViolation as e:
             # Block on ethics violation
             logger.warning(
@@ -1752,14 +1752,14 @@ async def v2_unregister_node(
                 extra={"node_id": node_id, "aurora_module": "api_v2_nodes"},
                 exc_info=True
             )
-    
+
     try:
         registry = get_node_registry()
         success = await registry.unregister_node(node_id)
-        
+
         if not success:
             raise HTTPException(status_code=404, detail=f"Node {node_id} not found")
-        
+
         return {
             "success": True,
             "node_id": node_id,
@@ -1776,7 +1776,7 @@ async def v2_unregister_node(
 async def v2_get_node_health(node_id: str, request: Request):
     """
     Get detailed health status for a specific node.
-    
+
     Returns: 4-metric health check (heartbeat, API, anchor, drift)
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -1784,14 +1784,14 @@ async def v2_get_node_health(node_id: str, request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         registry = get_node_registry()
         node = await registry.get_node(node_id)
-        
+
         if not node:
             raise HTTPException(status_code=404, detail=f"Node {node_id} not found")
-        
+
         return {
             "success": True,
             "node_id": node.node_id,
@@ -1814,7 +1814,7 @@ async def v2_get_node_health(node_id: str, request: Request):
 async def v2_list_nodes(request: Request):
     """
     List all registered bridge nodes.
-    
+
     Returns: Array of node metadata with current status and load
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -1822,11 +1822,11 @@ async def v2_list_nodes(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         registry = get_node_registry()
         nodes = await registry.get_online_nodes()
-        
+
         return {
             "success": True,
             "count": len(nodes),
@@ -1855,7 +1855,7 @@ async def v2_list_nodes(request: Request):
 async def v2_get_cluster_health(request: Request):
     """
     Get overall cluster health status.
-    
+
     Returns: Aggregate metrics across all nodes
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -1863,11 +1863,11 @@ async def v2_get_cluster_health(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         registry = get_node_registry()
         cluster_health = await registry.get_cluster_health()
-        
+
         return {
             "success": True,
             "cluster_health": cluster_health,
@@ -1883,7 +1883,7 @@ async def v2_get_cluster_health(request: Request):
 async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredentials = Depends(security)):
     """
     Trigger a Raft consensus leader election.
-    
+
     WARNING: Use only for testing or emergency recovery.
     """
     verify_csrf_token(token)
@@ -1892,7 +1892,7 @@ async def v2_trigger_election(request: Request, token: HTTPAuthorizationCredenti
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     return {
         "success": False,
         "message": "Consensus election must be triggered via node registry",
@@ -1913,7 +1913,7 @@ async def v2_register_repository(
 ):
     """
     Register a Git repository for cross-repo synchronization.
-    
+
     Enables anchor propagation and thread continuity across repos.
     """
     verify_csrf_token(token)
@@ -1922,7 +1922,7 @@ async def v2_register_repository(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         synchronizer = get_repository_synchronizer()
         repo_info = await synchronizer.register_repository(
@@ -1930,7 +1930,7 @@ async def v2_register_repository(
             repo_path=request.repo_path,
             branch=request.branch
         )
-        
+
         return {
             "success": True,
             "repository": {
@@ -1957,7 +1957,7 @@ async def v2_sync_repository(
 ):
     """
     Synchronize a registered repository.
-    
+
     Pulls latest changes and pushes local anchors.
     Direction: push, pull, or bidirectional
     """
@@ -1967,10 +1967,10 @@ async def v2_sync_repository(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         synchronizer = get_repository_synchronizer()
-        
+
         # Map string to SyncDirection enum
         from modules.reflective_autonomy.thread_transfer.v2 import SyncDirection
         direction_map = {
@@ -1979,9 +1979,9 @@ async def v2_sync_repository(
             "bidirectional": SyncDirection.BIDIRECTIONAL
         }
         sync_dir = direction_map.get(direction.lower(), SyncDirection.BIDIRECTIONAL)
-        
+
         result = await synchronizer.sync_repository(repo_id, sync_dir)
-        
+
         return {
             "success": result["success"],
             "repo_id": repo_id,
@@ -2005,7 +2005,7 @@ async def v2_create_cross_repo_bridge(
 ):
     """
     Create a cross-repository bridge for thread continuity.
-    
+
     Initiates 7-stage handshake between repositories.
     """
     verify_csrf_token(token)
@@ -2014,7 +2014,7 @@ async def v2_create_cross_repo_bridge(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         cross_repo_bridge = get_cross_repository_bridge()
         # Generate a unique bridge id for this cross-repo bridge
@@ -2050,7 +2050,7 @@ async def v2_execute_cross_repo_handshake(
 ):
     """
     Execute 7-stage cross-repository handshake.
-    
+
     Completes thread transfer between repositories with full validation.
     """
     verify_csrf_token(token)
@@ -2059,12 +2059,12 @@ async def v2_execute_cross_repo_handshake(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         cross_repo_bridge = get_cross_repository_bridge()
-        
+
         result = await cross_repo_bridge.execute_handshake(bridge_id)
-        
+
         return {
             "success": result["success"],
             "bridge_id": bridge_id,
@@ -2090,7 +2090,7 @@ async def v2_predict_drift(
 ):
     """
     Predict future drift based on current features.
-    
+
     Uses LSTM model with 11-feature input for 24-hour prediction.
     """
     verify_csrf_token(token)
@@ -2099,10 +2099,10 @@ async def v2_predict_drift(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         predictor = get_drift_predictor()
-        
+
         features = DriftFeatures(
             drift_velocity=drift_request.drift_velocity,
             drift_acceleration=drift_request.drift_acceleration,
@@ -2116,9 +2116,9 @@ async def v2_predict_drift(
             sync_frequency=drift_request.sync_frequency,
             node_count=drift_request.node_count
         )
-        
+
         prediction = await predictor.predict_drift(features, drift_request.thread_id)
-        
+
         return {
             "success": True,
             "thread_id": drift_request.thread_id,
@@ -2138,7 +2138,7 @@ async def v2_predict_drift(
 async def v2_analyze_patterns(request: Request):
     """
     Analyze historical drift patterns.
-    
+
     Returns detected patterns: stable, trending, cyclical, volatile, anomalous
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -2146,11 +2146,11 @@ async def v2_analyze_patterns(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         analyzer = get_pattern_analyzer()
         patterns = await analyzer.analyze_patterns()
-        
+
         return {
             "success": True,
             "patterns": [
@@ -2178,7 +2178,7 @@ async def v2_record_observation(
 ):
     """
     Record a drift observation for pattern analysis.
-    
+
     Adds data point to historical drift tracking.
     """
     verify_csrf_token(token)
@@ -2187,12 +2187,12 @@ async def v2_record_observation(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         from datetime import datetime
         analyzer = get_pattern_analyzer()
         analyzer.add_observation(datetime.now(), drift)
-        
+
         return {
             "success": True,
             "drift": drift,
@@ -2208,7 +2208,7 @@ async def v2_record_observation(
 async def v2_get_prediction_accuracy(request: Request):
     """
     Get prediction accuracy metrics.
-    
+
     Returns: Historical accuracy statistics for drift predictions
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -2216,11 +2216,11 @@ async def v2_get_prediction_accuracy(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         predictor = get_drift_predictor()
         accuracy = await predictor.get_prediction_accuracy()
-        
+
         return {
             "success": True,
             "accuracy": accuracy,
@@ -2242,7 +2242,7 @@ async def v2_apply_correction(
 ):
     """
     Apply auto-correction actions based on drift prediction.
-    
+
     Evaluates correction strategies and executes if drift exceeds threshold.
     """
     verify_csrf_token(token)
@@ -2251,17 +2251,17 @@ async def v2_apply_correction(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         corrector = get_auto_corrector()
-        
+
         actions = await corrector.evaluate_correction(
             predicted_drift=predicted_drift,
             current_drift=current_drift,
             thread_id=thread_id,
             metadata={}
         )
-        
+
         return {
             "success": True,
             "thread_id": thread_id,
@@ -2294,7 +2294,7 @@ async def v2_create_layer_bridge(
 ):
     """
     Create a multi-layer bridge (L1/L2/L3).
-    
+
     L1: Thread-to-thread (5 stages, 0.0% max drift)
     L2: Repo-to-repo (7 stages, 0.1% max drift)
     L3: Cluster-to-cluster (9 stages, 0.5% max drift, PKI required)
@@ -2305,10 +2305,10 @@ async def v2_create_layer_bridge(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
-        
+
         # Map string to BridgeLayer enum
         layer_map = {
             "L1": BridgeLayer.L1,
@@ -2316,10 +2316,10 @@ async def v2_create_layer_bridge(
             "L3": BridgeLayer.L3
         }
         layer = layer_map.get(layer_request.layer.upper())
-        
+
         if not layer:
             raise HTTPException(status_code=400, detail=f"Invalid layer: {layer_request.layer}")
-        
+
         bridge = await layer_manager.create_bridge(
             bridge_id=layer_request.bridge_id,
             layer=layer,
@@ -2327,7 +2327,7 @@ async def v2_create_layer_bridge(
             target_id=layer_request.target_id,
             thread_id=layer_request.thread_id
         )
-        
+
         return {
             "success": True,
             "bridge": {
@@ -2356,7 +2356,7 @@ async def v2_execute_layered_handshake(
 ):
     """
     Execute layer-specific handshake protocol.
-    
+
     Completes all stages for the bridge's layer with proper validation.
     """
     verify_csrf_token(token)
@@ -2365,12 +2365,12 @@ async def v2_execute_layered_handshake(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
-        
+
         result = await layer_manager.execute_layered_handshake(bridge_id)
-        
+
         return {
             "success": result["success"],
             "bridge_id": bridge_id,
@@ -2393,7 +2393,7 @@ async def v2_validate_hierarchy(
 ):
     """
     Validate multi-layer hierarchy for a thread.
-    
+
     Checks: layer completion, drift tolerance, PKI (L3), dependencies
     """
     verify_csrf_token(token)
@@ -2402,18 +2402,18 @@ async def v2_validate_hierarchy(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
         validator = get_hierarchy_validator()
-        
+
         bridges = layer_manager.list_bridges(thread_id=thread_id)
         report = await validator.validate_hierarchy(
             bridges=bridges,
             thread_id=thread_id,
             strict_mode=strict_mode
         )
-        
+
         return {
             "success": True,
             "valid": report.valid,
@@ -2439,7 +2439,7 @@ async def v2_validate_hierarchy(
 async def v2_list_layer_bridges(thread_id: Optional[str] = None, layer: Optional[str] = None, request: Request = None):
     """
     List all layer bridges, optionally filtered by thread_id or layer.
-    
+
     Returns array of bridge metadata with current status.
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -2447,10 +2447,10 @@ async def v2_list_layer_bridges(thread_id: Optional[str] = None, layer: Optional
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
-        
+
         # Parse layer filter if provided
         layer_enum = None
         if layer:
@@ -2460,9 +2460,9 @@ async def v2_list_layer_bridges(thread_id: Optional[str] = None, layer: Optional
                 "L3": BridgeLayer.L3
             }
             layer_enum = layer_map.get(layer.upper())
-        
+
         bridges = layer_manager.list_bridges(thread_id=thread_id, layer=layer_enum)
-        
+
         return {
             "success": True,
             "count": len(bridges),
@@ -2489,7 +2489,7 @@ async def v2_list_layer_bridges(thread_id: Optional[str] = None, layer: Optional
 async def v2_get_layer_statistics(request: Request):
     """
     Get layer management statistics.
-    
+
     Returns: Counts by layer, status, and aggregate metrics
     """
     if not THREAD_BRIDGE_V2_AVAILABLE:
@@ -2497,11 +2497,11 @@ async def v2_get_layer_statistics(request: Request):
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
         stats = layer_manager.get_layer_statistics()
-        
+
         return {
             "success": True,
             "statistics": stats,
@@ -2521,7 +2521,7 @@ async def v2_cascade_validate(
 ):
     """
     Perform cascading validation across all layers for a thread.
-    
+
     Validates L1 → L2 → L3 dependencies and cross-layer consistency.
     """
     verify_csrf_token(token)
@@ -2530,18 +2530,18 @@ async def v2_cascade_validate(
             status_code=503,
             detail="Thread Transfer Bridge v2 not available"
         )
-    
+
     try:
         layer_manager = get_layer_manager()
         validator = get_hierarchy_validator()
-        
+
         bridges = layer_manager.list_bridges(thread_id=thread_id)
         report = await validator.validate_hierarchy(
             bridges=bridges,
             thread_id=thread_id,
             strict_mode=True  # Cascade validation always strict
         )
-        
+
         return {
             "success": True,
             "valid": report.valid,
@@ -2582,13 +2582,13 @@ try:
     from src.monitoring.ethics_engine import EthicsEngine
     import json
     from pathlib import Path
-    
+
     PATCHWEAVER_AVAILABLE = True
-    
+
     # Initialize PatchWeaver state backend (file-based for v1)
     PATCHWEAVER_STATE_FILE = Path("./data/patchweaver_state.json")
     PATCHWEAVER_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    
+
     def _load_patchweaver_state() -> Dict[str, Any]:
         """Load PatchWeaver state from JSON file"""
         if PATCHWEAVER_STATE_FILE.exists():
@@ -2598,7 +2598,7 @@ try:
                 logger.error("Failed to load PatchWeaver state: %s", e)
                 return {}
         return {}
-    
+
     def _save_patchweaver_state(state: Dict[str, Any]) -> None:
         """Save PatchWeaver state to JSON file"""
         try:
@@ -2606,7 +2606,7 @@ try:
         except Exception as e:
             logger.error("Failed to save PatchWeaver state: %s", e)
             raise
-    
+
     # Initialize PatchWeaver instance with ethics gate
     _patchweaver_ethics = EthicsEngine()
     _patchweaver_dlp = NativeDLPTracker()
@@ -2616,9 +2616,9 @@ try:
         ethics_gate=_patchweaver_ethics,
         dlp_tracker=_patchweaver_dlp
     )
-    
+
     logger.info("PatchWeaver initialized successfully")
-    
+
 except ImportError as e:
     logger.warning("PatchWeaver not available: %s", e)
     PATCHWEAVER_AVAILABLE = False
@@ -2637,7 +2637,7 @@ class PatchWeaverRequest(BaseModel):
         default_factory=dict,
         description="Context for ethics validation and DLP tracking"
     )
-    
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -2669,15 +2669,15 @@ async def apply_patchweaver_patch(
 ):
     """
     Apply a state patch with ethics validation and DLP tracking.
-    
+
     **Admin-only endpoint** - Requires authentication, CSRF token, and strict rate limiting.
-    
+
     Patch format:
     - `set`: Dictionary of path/value pairs to set (creates nested structures)
     - `delete`: List of paths to delete (idempotent)
-    
+
     Path format: Use `/` to separate nested keys, e.g., `"config/setting"` → `state["config"]["setting"]`
-    
+
     Returns:
     - `applied`: Whether patch was successfully applied
     - `reason`: "ok" or error/block reason
@@ -2685,7 +2685,7 @@ async def apply_patchweaver_patch(
     - `after_hash`: State hash after patch
     - `modified_paths`: List of paths that were modified
     - `timestamp`: ISO timestamp of operation
-    
+
     Security:
     - All patches validated by ethics gate
     - Full DLP audit trail with anchors (T1/SRB, EOS_SEED_ORION, Picard_Delta_3)
@@ -2693,30 +2693,30 @@ async def apply_patchweaver_patch(
     - Strict rate limiting (5 requests/minute)
     """
     verify_csrf_token(token)
-    
+
     if not PATCHWEAVER_AVAILABLE:
         raise HTTPException(
             status_code=503,
             detail="PatchWeaver service not available"
         )
-    
+
     try:
         # Ensure agent_id is in context for ethics validation
         if "agent_id" not in req.context:
             req.context["agent_id"] = "api_user"
-        
+
         # Apply patch via PatchWeaver
         result = _patchweaver.apply_patch(
             patch=req.patch,
             context=req.context
         )
-        
+
         # Return result as JSON
         return {
             "success": result.applied,
             **result.to_dict()
         }
-        
+
     except Exception as e:
         logger.error("PatchWeaver operation failed: %s", e)
         raise HTTPException(
@@ -2734,12 +2734,12 @@ async def get_patchweaver_history(
 ):
     """
     Get history of PatchWeaver operations.
-    
+
     **Admin-only endpoint** - Returns recent patch operations with full DLP metadata.
-    
+
     Query parameters:
     - `limit`: Maximum number of operations to return (default: 20)
-    
+
     Returns list of patch operations with:
     - Operation metadata
     - DLP tags and anchors
@@ -2748,26 +2748,26 @@ async def get_patchweaver_history(
     - Timestamps
     """
     verify_csrf_token(token)
-    
+
     if not PATCHWEAVER_AVAILABLE:
         raise HTTPException(
             status_code=503,
             detail="PatchWeaver service not available"
         )
-    
+
     try:
         history = _patchweaver.get_patch_history()
-        
+
         # Apply limit
         if limit:
             history = history[-limit:]
-        
+
         return {
             "success": True,
             "count": len(history),
             "operations": history
         }
-        
+
     except Exception as e:
         logger.error("Failed to retrieve PatchWeaver history: %s", e)
         raise HTTPException(
@@ -2785,46 +2785,46 @@ async def verify_patchweaver_state(
 ):
     """
     Verify current state hash against expected value.
-    
+
     **Admin-only endpoint** - Validates state integrity.
-    
+
     Request body:
     - `expected_hash`: SHA256 hash to verify against
-    
+
     Returns:
     - `valid`: Whether current state matches expected hash
     - `current_hash`: Current state hash
     - `expected_hash`: Hash that was checked
     """
     verify_csrf_token(token)
-    
+
     if not PATCHWEAVER_AVAILABLE:
         raise HTTPException(
             status_code=503,
             detail="PatchWeaver service not available"
         )
-    
+
     if not expected_hash:
         raise HTTPException(
             status_code=400,
             detail="expected_hash parameter required"
         )
-    
+
     try:
         # Verify hash
         valid = _patchweaver.verify_state_hash(expected_hash)
-        
+
         # Get current hash
         current_state = _patchweaver.load_state()
         current_hash = _patchweaver._compute_hash(current_state)
-        
+
         return {
             "success": True,
             "valid": valid,
             "current_hash": current_hash,
             "expected_hash": expected_hash
         }
-        
+
     except Exception as e:
         logger.error("State verification failed: %s", e)
         raise HTTPException(

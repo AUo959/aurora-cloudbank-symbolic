@@ -396,13 +396,22 @@ class ComprehensiveSync:
 
             # Create commit
             result = self._run_command(['git', 'commit', '-m', commit_message])
+            warnings = []
+            error_output = f"{result.stdout}\n{result.stderr}".lower()
+            if result.returncode != 0 and 'gpg failed to sign the data' in error_output:
+                logger.warning("Git commit signing unavailable; retrying commit without GPG signing")
+                result = self._run_command(['git', '-c', 'commit.gpgsign=false', 'commit', '-m', commit_message])
+                if result.returncode == 0:
+                    warnings.append('Commit created without GPG signing because signing is unavailable in this environment')
+
             if result.returncode != 0:
                 return PhaseResult(
                     phase_number=3,
                     phase_name="Generate & Commit",
                     success=False,
                     duration_seconds=time.time() - phase_start,
-                    message="Failed to create commit"
+                    message="Failed to create commit",
+                    warnings=[result.stderr.strip()] if result.stderr else []
                 )
 
             # Get commit SHA
@@ -415,7 +424,8 @@ class ComprehensiveSync:
                 success=True,
                 duration_seconds=time.time() - phase_start,
                 message=f"Commit created: {commit_sha[:8] if commit_sha else 'unknown'}",
-                details={'commit_sha': commit_sha, 'commit_message': commit_message}
+                details={'commit_sha': commit_sha, 'commit_message': commit_message},
+                warnings=warnings
             )
 
         except Exception as e:

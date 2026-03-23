@@ -1238,7 +1238,7 @@ class CommandExecutor:
             'status': 'executed',
             'action': 'start_server',
             'message': 'Aurora API server started',
-            'command': 'python aurora_api.py',
+            'command': '.venv/bin/python api/aurora_api.py',
             'port': 8000,
             'reload': True
         }

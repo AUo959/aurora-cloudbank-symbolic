@@ -2,7 +2,7 @@
 # This ensures terminal output is visible to Copilot Chat
 
 # Set a simple, clean prompt that doesn't interfere with Copilot
-export PS1="node@\h:\w\$ "
+export PS1="vscode@\h:\w\$ "
 
 # Ensure output is flushed immediately
 export PYTHONUNBUFFERED=1
@@ -24,12 +24,11 @@ alias ..='cd ..'
 alias ...='cd ../..'
 
 # Aurora CloudBank specific aliases
-alias aurora-status='python3 aurora_system_validator.py'
-alias aurora-api='python3 aurora_api.py'
-alias aurora-gui='python3 aurora_gui_cloudhub_fastapi.py'
+alias aurora-status='.venv/bin/python api/aurora_system_validator.py'
+alias aurora-api='.venv/bin/python api/aurora_api.py'
+alias aurora-gui='.venv/bin/python api/aurora_gui_cloudhub_fastapi.py'
 
 # Ensure Node.js and Python are available
 export PATH="/usr/local/bin:$PATH"
 
 # No banner, no figlet, no fancy output - keep it clean for Copilot
-echo "Aurora CloudBank DevContainer Ready"

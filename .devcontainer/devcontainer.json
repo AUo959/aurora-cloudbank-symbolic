@@ -20,7 +20,7 @@
                 "ms-vscode.vscode-json"
             ],
             "settings": {
-                "python.defaultInterpreterPath": "./.venv/bin/python",
+                "python.defaultInterpreterPath": ".venv/bin/python",
                 "python.terminal.activateEnvironment": true,
                 "python.formatting.provider": "black",
                 "python.linting.enabled": true,
@@ -33,9 +33,6 @@
     "onCreateCommand": "python3 scripts/prevent_rebuild_failures.py --pre-rebuild || echo 'Pre-rebuild protection failed, continuing with fallback'",
     "postCreateCommand": "bash .devcontainer/post-create.sh",
     "postStartCommand": "python3 scripts/prevent_rebuild_failures.py || echo 'Post-start validation completed with warnings'",
-    "mounts": [
-        "source=aurora-venv,target=${containerWorkspaceFolder}/.venv,type=volume"
-    ],
     "forwardPorts": [
         8000,
         3000,

@@ -91,6 +91,10 @@ else
     fi
 fi
 
+  if [[ ! -x "${VENV_DIR}/bin/python" ]]; then
+    failsafe_exit "Virtual environment was not created correctly at ${VENV_DIR}/bin/python"
+  fi
+
 if [[ -f "requirements-test.txt" ]]; then
   python -m pip install -r requirements-test.txt
 fi
@@ -141,8 +145,17 @@ cat > activate_aurora.sh << 'EOF'
 #!/bin/bash
 # Quick activation script for Aurora CloudBank environment
 
-if [[ -f ".venv/bin/activate" ]]; then
-    source .venv/bin/activate
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -f "$REPO_ROOT/.venv/bin/activate" ]]; then
+  source "$REPO_ROOT/.venv/bin/activate"
+  if [[ -f "$REPO_ROOT/.env" ]]; then
+    set -a
+    source "$REPO_ROOT/.env"
+    set +a
+  fi
     echo "✅ Aurora CloudBank environment activated"
     echo "🌐 API docs: http://localhost:8000/docs (when running)"
     echo "🧪 Run tests: python -m pytest tests/"
@@ -164,6 +177,8 @@ if [[ -f "scripts/validate_dependencies.py" ]] && [[ -d "${VENV_DIR}" ]]; then
         printf '⚠️ Validation warnings detected\n'
     fi
 fi
+
+echo '{"status":"ready","timestamp":"'$(date -Iseconds)'","venv_python":"'"${VENV_DIR}/bin/python"'"}' > "$STATUS_FILE"
 
 printf '\n✅ DevContainer setup complete. Python interpreter: %s\n' "${VENV_DIR}/bin/python"
 printf '📝 Quick start: source activate_aurora.sh\n'

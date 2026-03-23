@@ -168,11 +168,23 @@ if [ -f "src/bridge/api_bridge_server.js" ]; then
     fi
 fi
 
+PYTHON_BIN=".venv/bin/python"
+if [ ! -x "$PYTHON_BIN" ]; then
+  PYTHON_BIN="$(command -v python3 2>/dev/null || true)"
+fi
+
+if [ -f ".env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env
+  set +a
+fi
+
 # Start Python FastAPI service if available
-if [ -f "aurora_gui_cloudhub_fastapi.py" ]; then
+if [ -f "api/aurora_gui_cloudhub_fastapi.py" ]; then
     log "Starting Aurora GUI CloudHub FastAPI service..."
-    if command -v python3 >/dev/null 2>&1; then
-        nohup python3 aurora_gui_cloudhub_fastapi.py > logs/l1_station/fastapi.log 2>&1 &
+  if [ -n "$PYTHON_BIN" ]; then
+    nohup "$PYTHON_BIN" api/aurora_gui_cloudhub_fastapi.py > logs/l1_station/fastapi.log 2>&1 &
         FASTAPI_PID=$!
         log "FastAPI service started with PID: $FASTAPI_PID"
         echo $FASTAPI_PID > logs/l1_station/fastapi.pid

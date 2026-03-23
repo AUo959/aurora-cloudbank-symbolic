@@ -6,15 +6,18 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
-from typing import Any, Dict, Optional, Literal
-from contextlib import asynccontextmanager
-
 import logging
+import os
+from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional, Literal
+
+from api import env_bootstrap  # noqa: F401
 from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket
-from src.middleware.exception_handler import validation_handler
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, field_validator, ConfigDict
+from src.observability import get_telemetry, get_r2_telemetry
+from src.middleware.exception_handler import validation_handler
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -48,7 +51,6 @@ from src.middleware.fastapi_security import (
 )
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-import os
 from fastapi import APIRouter
 from src.security.oauth2 import get_current_active_user, User  # authentication dependency
 from src.agents.crew.base_agent import get_crew_agent, get_all_crew_agents
@@ -115,9 +117,6 @@ async def collaborate_agents(
     task_def = payload.get("task", {})
     result = await primary.collaborate_with(secondary, task_def)
     return result
-
-# Import telemetry and observability
-from src.observability import get_telemetry, get_r2_telemetry
 
 # (Moved time/hash imports into helper to satisfy lint ordering)
 

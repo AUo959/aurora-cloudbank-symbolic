@@ -26,6 +26,7 @@ from modules.memory_retrieval.config import MemoryRetrievalConfig
 from modules.memory_retrieval.store import MemoryStore
 from modules.memory_retrieval.cache import MemoryCache
 from modules.memory_retrieval.core import MemoryRetrievalCore
+from modules.memory_retrieval.api import add_memory, delete_memory, get_memory, query_memory
 
 
 @pytest.mark.unit
@@ -712,3 +713,48 @@ class TestMemoryRetrievalIntegration:
         assert len(results_b) == 1
         assert results_a[0]["content"] == "content for context A"
         assert results_b[0]["content"] == "content for context B"
+
+
+@pytest.mark.unit
+class TestMemoryRetrievalApi:
+    """Test public API helpers and persistence extensions."""
+
+    def setup_method(self):
+        MemoryRetrievalCore._instance = None
+
+    def test_api_add_get_delete_memory(self):
+        add_result = add_memory("api_context", "symbolic anchor memory", {"importance": 0.9})
+        assert add_result["success"] is True
+
+        fetch_result = get_memory(add_result["memory_id"])
+        assert fetch_result["success"] is True
+        assert fetch_result["memory"]["metadata"]["anchor_seed"] == "EOS_SEED_ORION"
+        assert fetch_result["memory"]["metadata"]["ethics_protocol"] == "Picard_Delta_3"
+
+        delete_result = delete_memory(add_result["memory_id"])
+        assert delete_result["success"] is True
+
+        missing_result = get_memory(add_result["memory_id"])
+        assert missing_result["success"] is False
+
+    def test_query_ranks_semantically_related_content(self):
+        add_memory("semantic_ctx", "quantum ledger anchor stability", {"importance": 0.8})
+        add_memory("semantic_ctx", "gardening almanac and soil notes", {"importance": 0.2})
+
+        query_result = query_memory("semantic_ctx", "quantum anchor ledger", top_k=2)
+        assert query_result["success"] is True
+        assert len(query_result["results"]) == 2
+        assert query_result["results"][0]["content"] == "quantum ledger anchor stability"
+
+    def test_file_backend_persists_memories(self, tmp_path):
+        storage_path = tmp_path / "mrm_store.json"
+        config = MemoryRetrievalConfig(storage_backend="file", storage_path=str(storage_path))
+        config.validate()
+
+        store = MemoryStore(config)
+        memory_id = store.add_memory("persist_ctx", "persistent symbolic memory", {"importance": 0.7})
+
+        reloaded_store = MemoryStore(config)
+        fetched = reloaded_store.get_memory(memory_id)
+        assert fetched is not None
+        assert fetched["content"] == "persistent symbolic memory"

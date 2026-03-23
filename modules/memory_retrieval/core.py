@@ -103,10 +103,14 @@ class MemoryRetrievalCore:
 
     def get_memory(self, memory_id: str) -> Optional[Dict]:
         """Fetch a single memory entry."""
+        cache_key = f"memory:{memory_id}"
+        cached_memory = self._cache.get(cache_key)
+        if cached_memory is not None:
+            return cached_memory
+
         memory = self._store.get_memory(memory_id)
         if memory is None:
             return None
-        cache_key = f"memory:{memory_id}"
         self._cache.set(cache_key, memory)
         return memory
 

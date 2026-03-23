@@ -9,7 +9,12 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PYTHON_BIN="$REPO_ROOT/.venv/bin/python"
 
 if [[ ! -x "$PYTHON_BIN" ]]; then
-    PYTHON_BIN="$(command -v python3)"
+    PYTHON_BIN="$(command -v python3 2>/dev/null || command -v python 2>/dev/null || true)"
+fi
+
+if [[ -z "${PYTHON_BIN:-}" ]]; then
+    echo "❌ Python interpreter not found. Please install Python 3 and ensure it's on your PATH, or create .venv." >&2
+    exit 1
 fi
 
 if [[ -f "$REPO_ROOT/.env" ]]; then

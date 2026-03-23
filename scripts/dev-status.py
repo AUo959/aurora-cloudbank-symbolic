@@ -118,7 +118,8 @@ def main():
     ports = [8000, 8080, 3001]
     for port in ports:
         status = "⚠️  In use" if is_port_in_use(port) else "✅ Available"
-        print(f"   {status.split()[0]} Port {port}: {status.split()[1]}")
+        emoji, message = status.split(maxsplit=1)
+        print(f"   {emoji} Port {port}: {message}")
 
     # 7. Quick Actions
     print("\n🚀 Quick Actions:")

@@ -75,7 +75,14 @@ class MemoryStore:
         """Retrieve a specific memory by ID."""
         for memory in self._memories:
             if memory["id"] == memory_id:
-                return copy.deepcopy(memory)
+                memory_copy = copy.deepcopy(memory)
+                metadata = memory_copy.setdefault("metadata", {})
+                metadata.setdefault("created_at", memory_copy.get("created_at"))
+                metadata.setdefault("t1_anchor", memory_copy.get("t1_anchor"))
+                metadata.setdefault("srb_anchor", memory_copy.get("srb_anchor"))
+                metadata.setdefault("anchor_seed", memory_copy.get("anchor_seed"))
+                metadata.setdefault("ethics_protocol", memory_copy.get("ethics_protocol"))
+                return memory_copy
         return None
 
     def delete_memory(self, memory_id: str) -> bool:

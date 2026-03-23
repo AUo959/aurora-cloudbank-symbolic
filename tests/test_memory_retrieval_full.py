@@ -12,6 +12,7 @@ Chain: #test/memory_retrieval/001
 Target: 95%+ code coverage
 """
 
+import os
 import time
 from datetime import datetime, timezone, timedelta
 from enum import Enum
@@ -751,6 +752,13 @@ class TestMemoryRetrievalApi:
 
     def setup_method(self):
         MemoryRetrievalCore._instance = None
+        for env_var in [
+            "MRM_STORAGE_BACKEND",
+            "MRM_STORAGE_PATH",
+            "MRM_ANCHOR_SEED",
+            "MRM_ETHICS_PROTOCOL",
+        ]:
+            os.environ.pop(env_var, None)
 
     def test_api_add_get_delete_memory(self):
         config = MemoryRetrievalConfig.from_env()
@@ -789,6 +797,25 @@ class TestMemoryRetrievalApi:
         fetched = reloaded_store.get_memory(memory_id)
         assert fetched is not None
         assert fetched["content"] == "persistent symbolic memory"
+        assert fetched["metadata"]["created_at"] == fetched["created_at"]
+        assert fetched["metadata"]["anchor_seed"] == config.anchor_seed
+
+    def test_core_get_memory_uses_cache(self):
+        config = MemoryRetrievalConfig()
+        core = MemoryRetrievalCore(config)
+        memory_id = core.add_memory("cache_ctx", "cache me", {"importance": 0.6})
+
+        first_memory = core.get_memory(memory_id)
+        assert first_memory is not None
+
+        original_get_memory = core._store.get_memory
+        try:
+            core._store.get_memory = lambda _memory_id: (_ for _ in ()).throw(AssertionError("store cache miss"))
+            cached_memory = core.get_memory(memory_id)
+        finally:
+            core._store.get_memory = original_get_memory
+
+        assert cached_memory == first_memory
 
     def test_file_backend_handles_invalid_json_gracefully(self, tmp_path):
         storage_path = tmp_path / "mrm_store.json"

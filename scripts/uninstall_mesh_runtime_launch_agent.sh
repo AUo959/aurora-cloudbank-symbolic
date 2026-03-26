@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/zsh
 set -euo pipefail
 
 LABEL="com.aurora.mesh-runtime"

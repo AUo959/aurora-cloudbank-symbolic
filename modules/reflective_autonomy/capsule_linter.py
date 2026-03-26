@@ -1,4 +1,5 @@
-# capsule_linter.py
-# Aurora Reflective Autonomy System - Capsule Linter
+"""Capsule linter reexport backed by the reflective monitor core."""
 
-# ...existing code...
+from .reflective_monitor_core import CapsuleLinter
+
+__all__ = ["CapsuleLinter"]

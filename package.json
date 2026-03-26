@@ -41,6 +41,12 @@
     "express": "^4.18.0",
     "cors": "^2.8.5"
   },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/.venv/",
+      "<rootDir>/venv_opal2/"
+    ]
+  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

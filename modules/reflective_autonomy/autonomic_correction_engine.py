@@ -1,4 +1,5 @@
-# autonomic_correction_engine.py
-# Aurora Reflective Autonomy System - Autonomic Correction Engine
+"""Autonomic correction engine reexport backed by the reflective monitor core."""
 
-# ...existing code...
+from .reflective_monitor_core import AutonomicCorrectionEngine
+
+__all__ = ["AutonomicCorrectionEngine"]

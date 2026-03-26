@@ -1,4 +1,5 @@
-# reflective_autonomy_loop.py
-# Aurora Reflective Autonomy System - Main Loop
+"""Reflective autonomy loop reexport backed by the reflective monitor core."""
 
-# ...existing code...
+from .reflective_monitor_core import ReflectiveAutonomyLoop
+
+__all__ = ["ReflectiveAutonomyLoop"]

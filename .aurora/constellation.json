@@ -1,0 +1,37 @@
+{
+  "constellation_version": "1.0.0-alpha",
+  "node": {
+    "designation": "CONSTELLATION-PRIME",
+    "symbolic_tag": "s.tag::constellation.prime",
+    "repo": "aurora-cloudbank-symbolic",
+    "role": "hub",
+    "stack": ["python", "javascript"],
+    "description": "Central hub — quantum-symbolic platform, memory vault, QSFE, meta-agent coordination"
+  },
+  "upstream": [],
+  "downstream": [
+    "s.tag::aurora.runtime",
+    "s.tag::quantum.vault",
+    "s.tag::qgia.corpus",
+    "s.tag::qgia.spine",
+    "s.tag::zipwiz.engine"
+  ],
+  "governance": {
+    "charter": "Picard_Delta_3",
+    "l3_modules": ["Axiomera", "Velatrix", "Glyphon", "Caelion", "Harmion"],
+    "ethics_protocol": true
+  },
+  "contracts": {
+    "published": ["forecast-request", "forecast-result", "constellation-event", "knowledge-index", "constellation-health"],
+    "consumed": []
+  },
+  "health": {
+    "last_sync": null,
+    "status": "initializing"
+  },
+  "meta": {
+    "created": "2026-03-12T21:00:00-04:00",
+    "created_by": "Perplexity Computer",
+    "proposal_ref": "Aurora Constellation Architecture Proposal v1.0.0"
+  }
+}

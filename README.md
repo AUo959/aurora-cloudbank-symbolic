@@ -2,6 +2,12 @@
 
 A fully operational quantum-enhanced symbolic governance and self-healing system featuring Vector Symbolic Architecture (VSA), cultural awareness simulation, and Claude Sonnet 4 integration.
 
+## Current Runtime Note
+
+The current validated runtime surface is the mesh runtime under `src/servers/l2_integration_server.py`, `src/mesh/`, `config/mesh/`, and `runtime/mesh/`.
+
+Phase 1 stabilization found that parts of the broader repo are mid-migration and some historical documentation links are currently missing from the worktree. See `docs/PHASE1_MESH_RUNTIME_BOUNDARY.md` for the validated runtime path, current drift, and safe operating guidance.
+
 ## 🌟 **Live Demo Available**
 
 **🎮 Try It Now**: [**Aurora CloudBank Quantum VSA Demo**](https://auo959.github.io/aurora-cloudbank-symbolic) ← **LIVE!**
@@ -40,7 +46,7 @@ A fully operational quantum-enhanced symbolic governance and self-healing system
 - **Features**: Function calling, tool execution, session persistence, real-time WebSocket communication
 - **Tools Available**: 4 core tools (symbolic processing, geometric algebra, session management, system status)
 - **API Endpoints**: `/agent/tools`, `/agent/execute`, `/agent/session`, `/agent/stream`, `/agent/status`
-- **Documentation**: See `docs/CHATGPT_AGENT_MODE_INTEGRATION.md`
+- **Documentation**: See `docs/PHASE1_MESH_RUNTIME_BOUNDARY.md` for the current validated runtime and migration notes
 
 ### 🧠 Claude Sonnet 4 Integration Complete
 
@@ -75,8 +81,8 @@ The Aurora CloudBank documentation follows a structured organization system for 
 
 ### Technical Documentation (`docs/`)
 - **[Documentation Index](docs/index.md)** - Architecture guides and visualization packages
-- **[Operational README](docs/operational/README.md)** - Operational documentation overview
-- **[Organization Summary](docs/operational/ORGANIZATION_SUMMARY.md)** - Complete audit trail of documentation organization
+- **[Phase 1 Mesh Runtime Boundary](docs/PHASE1_MESH_RUNTIME_BOUNDARY.md)** - Current validated runtime surface and migration cautions
+- Historical operational docs remain under `docs/operational/`, but some prior index files are not present in the current worktree
 
 **Entropy Reduction Achieved**: 98% reduction in root directory clutter with systematic categorization of 42+ documentation files.
 
@@ -274,7 +280,7 @@ Aurora CloudBank now includes comprehensive **ChatGPT Agent Mode integration** w
 3. **Session Management** — Manage persistent agent context and state
 4. **System Status** — Get real-time health monitoring and capability reporting
 
-For detailed agent mode documentation, see `docs/CHATGPT_AGENT_MODE_INTEGRATION.md`.
+For current agent mode and mesh runtime guidance, see `docs/PHASE1_MESH_RUNTIME_BOUNDARY.md`.
 
 ## Architecture Diagram
 

@@ -181,7 +181,7 @@ class IntelligentTestSelector:
         doc_only_patterns = [
             "*.md", "docs/", "README*", "CHANGELOG*",
             "LICENSE*", ".gitignore", ".github/ISSUE_TEMPLATE/",
-            ".github/pull_request_template.md"
+            ".github/PULL_REQUEST_TEMPLATE.md"
         ]
         
         non_doc_files = []

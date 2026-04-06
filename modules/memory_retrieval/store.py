@@ -2,7 +2,6 @@
 
 Manages persistent memory storage with vector indexing and similarity search.
 """
-
 from __future__ import annotations
 
 import copy
@@ -17,7 +16,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import uuid
 
 from modules.memory_retrieval.config import MemoryRetrievalConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +115,11 @@ class MemoryStore:
 
     def _save_to_disk(self) -> None:
         path = Path(self._config.storage_path or "")
+        if path.is_dir():
+            raise ValueError(
+                f"MRM storage_path '{path}' is a directory; expected a file path. "
+                "Call config.validate() before initialising MemoryStore."
+            )
         path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "anchor_seed": self._config.anchor_seed,
@@ -180,7 +183,6 @@ class MemoryStore:
             return created_at
         else:
             timestamp = datetime.now(timezone.utc)
-
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=timezone.utc)
         return timestamp.isoformat()

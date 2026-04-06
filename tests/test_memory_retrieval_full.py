@@ -492,7 +492,7 @@ class TestMemoryRetrievalCore:
         # Verify memory was added with proper metadata
         memory = core._store.get_memory(memory_id)
         assert memory is not None
-        assert memory["metadata"]["importance"] == 0.8
+        assert memory["metadata"]["importance"] == pytest.approx(0.8)
         assert "dlp_tag" in memory["metadata"]
 
     def test_add_memory_default_metadata(self):

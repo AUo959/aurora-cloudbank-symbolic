@@ -2,10 +2,13 @@
 
 Centralized configuration management for the MRM.
 """
-
 from dataclasses import dataclass
 import os
 from typing import Optional
+
+# Accepted storage backend values (aliases normalised in validate())
+_VALID_BACKENDS = frozenset({"memory", "file", "filesystem", "vector_db"})
+_FILE_BACKENDS = frozenset({"file", "filesystem"})
 
 
 @dataclass
@@ -42,13 +45,18 @@ class MemoryRetrievalConfig:
         )
 
     def validate(self) -> bool:
-        """Validate configuration parameters."""
+        """Validate configuration parameters and normalise aliases."""
         if self.vector_dimension <= 0:
             raise ValueError("vector_dimension must be positive")
         if self.cache_ttl_seconds <= 0:
             raise ValueError("cache_ttl_seconds must be positive")
-        if self.storage_backend not in ["memory", "file", "vector_db"]:
-            raise ValueError("storage_backend must be 'memory', 'file', or 'vector_db'")
+        if self.storage_backend not in _VALID_BACKENDS:
+            raise ValueError(
+                "storage_backend must be 'memory', 'file', 'filesystem', or 'vector_db'"
+            )
+        # Normalise 'filesystem' alias to canonical 'file'
+        if self.storage_backend == "filesystem":
+            self.storage_backend = "file"
         if self.max_results <= 0 or self.max_results > 1000:
             raise ValueError("max_results must be between 1 and 1000")
         if self.recency_decay_rate <= 0:
@@ -57,9 +65,12 @@ class MemoryRetrievalConfig:
             raise ValueError("anchor_seed must not be empty")
         if not self.ethics_protocol:
             raise ValueError("ethics_protocol must not be empty")
-        if self.storage_backend == "file" and not self.storage_path:
-            raise ValueError("storage_path is required when storage_backend='file'")
-
+        if self.storage_backend == "file":
+            if not self.storage_path:
+                raise ValueError("storage_path is required when storage_backend='file'")
+            # If storage_path points at a directory, pick a default filename inside it
+            if os.path.isdir(self.storage_path):
+                self.storage_path = os.path.join(self.storage_path, "memory_store.json")
         total_weight = (
             self.weight_relevance
             + self.weight_importance

@@ -96,10 +96,10 @@ class TestMemoryRetrievalConfig:
         """Test score weighting configuration."""
         config = MemoryRetrievalConfig()
 
-        assert config.weight_relevance == 0.4
-        assert config.weight_importance == 0.3
-        assert config.weight_recency == 0.2
-        assert config.weight_cultural == 0.1
+        assert config.weight_relevance == pytest.approx(0.4)
+        assert config.weight_importance == pytest.approx(0.3)
+        assert config.weight_recency == pytest.approx(0.2)
+        assert config.weight_cultural == pytest.approx(0.1)
 
         # Weights should sum to 1.0
         total_weight = (
@@ -173,7 +173,7 @@ class TestMemoryStore:
         assert retrieved is not None
         assert retrieved["id"] == memory_id
         assert retrieved["content"] == content
-        assert retrieved["metadata"]["importance"] == 0.9
+        assert retrieved["metadata"]["importance"] == pytest.approx(0.9)
 
     def test_store_isolates_metadata_from_caller_mutation(self):
         """Test that caller metadata mutations do not alter stored state."""

@@ -570,7 +570,7 @@ class TestMemoryRetrievalCore:
 
         assert 0.0 <= score_from_datetime <= 1.0
         assert 0.0 <= score_from_epoch <= 1.0
-        assert score_from_invalid == 0.5
+        assert score_from_invalid == pytest.approx(0.5)
 
     def test_retrieve_memories_with_scoring(self):
         """Test that retrieved memories include score breakdown."""
@@ -654,11 +654,11 @@ class TestMemoryRetrievalCore:
 
         # Invalid timestamp should return default
         score = core._compute_recency_score("invalid")
-        assert score == 0.5
+        assert score == pytest.approx(0.5)
 
         # Empty string should return default
         score2 = core._compute_recency_score("")
-        assert score2 == 0.5
+        assert score2 == pytest.approx(0.5)
 
     def test_get_cache_stats(self):
         """Test retrieving cache statistics."""

@@ -1,6 +1,6 @@
 {
   "name": "Aurora CloudBank - VS Code Web Optimized",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
   "postCreateCommand": "/bin/bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
@@ -18,8 +18,9 @@
         "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
-  "terminal.integrated.defaultProfile.linux": "bash",
-  "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": ".venv/bin/python",
+        "python.terminal.activateEnvironment": true,
         "python.linting.enabled": true,
         "python.linting.flake8Enabled": true,
         "editor.formatOnSave": true,
@@ -27,5 +28,18 @@
         "git.terminalAuthentication": true
       }
     }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}",
+    "AURORA_ENVIRONMENT": "development",
+    "REBUILD_PROTECTION": "enabled"
   }
 }

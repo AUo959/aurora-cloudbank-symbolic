@@ -5,10 +5,18 @@ Quick overview of repository health and development readiness
 """
 
 import shlex
+import socket
 import subprocess
+import sys
 
 
 from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+VENV_PYTHON = REPO_ROOT / ".venv/bin/python"
+VENV_PIP = REPO_ROOT / ".venv/bin/pip"
+VENV_FLAKE8 = REPO_ROOT / ".venv/bin/flake8"
 
 
 def run_command(cmd):
@@ -24,7 +32,36 @@ def run_command(cmd):
 
 def check_file_exists(path):
     """Check if file exists and return status."""
-    return "✅" if Path(path).exists() else "❌"
+    return "✅" if (REPO_ROOT / path).exists() else "❌"
+
+
+def python_command(*args):
+    """Build a Python command using the project venv when available."""
+    executable = VENV_PYTHON if VENV_PYTHON.exists() else Path(sys.executable)
+    return [str(executable), *args]
+
+
+def pip_command(*args):
+    """Build a pip command using the project venv when available."""
+    executable = VENV_PIP if VENV_PIP.exists() else ["pip"]
+    if isinstance(executable, Path):
+        return [str(executable), *args]
+    return [*executable, *args]
+
+
+def flake8_command(*args):
+    """Build a flake8 command using the project venv when available."""
+    executable = VENV_FLAKE8 if VENV_FLAKE8.exists() else ["flake8"]
+    if isinstance(executable, Path):
+        return [str(executable), *args]
+    return [*executable, *args]
+
+
+def is_port_in_use(port):
+    """Check whether a localhost TCP port is already in use."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(0.2)
+        return sock.connect_ex(("127.0.0.1", port)) == 0
 
 
 def main():
@@ -34,8 +71,8 @@ def main():
     # 1. Core Files Check
     print("\n📁 Core Files:")
     core_files = [
-        "aurora_api.py",
-        "aurora_gui_cloudhub_fastapi.py",
+        "api/aurora_api.py",
+        "api/aurora_gui_cloudhub_fastapi.py",
         "requirements.txt",
         "package.json",
         "pyproject.toml",
@@ -46,14 +83,14 @@ def main():
 
     # 2. Environment Check
     print("\n🐍 Python Environment:")
-    python_version, _ = run_command("python3 --version")
-    pip_version, _ = run_command("pip --version")
+    python_version, _ = run_command(python_command("--version"))
+    pip_version, _ = run_command(pip_command("--version"))
     print(f"   ✅ Python: {python_version}")
     print(f"   ✅ Pip: {pip_version.split()[1] if pip_version else 'Not found'}")
     # 3. Dependencies Check
     print("\n📦 Dependencies:")
     deps_check, deps_ok = run_command(
-        "python3 -c 'import fastapi, uvicorn, numpy, yaml; print(\"All core packages available\")'"
+        python_command("-c", 'import fastapi, uvicorn, numpy, yaml; print("All core packages available")')
     )
     print(f"   {'✅' if deps_ok else '⚠️ '} Core Python packages")
 
@@ -62,7 +99,7 @@ def main():
 
     # 4. Code Quality Check
     print("\n🧪 Code Quality:")
-    flake8_check, flake8_ok = run_command("flake8 . --count")
+    flake8_check, flake8_ok = run_command(flake8_command(".", "--count"))
     flake8_count = flake8_check.split("\n")[-1] if flake8_check else "0"
     print(f"   {'✅' if flake8_count == '0' else '⚠️ '} Flake8: {flake8_count} issues")
 
@@ -80,15 +117,15 @@ def main():
     print("\n🌐 Development Ports:")
     ports = [8000, 8080, 3001]
     for port in ports:
-        port_check, port_free = run_command(f"netstat -tuln 2>/dev/null | grep ':{port} ' || echo 'free'")
-        status = "✅ Available" if "free" in port_check or not port_check else "⚠️  In use"
-        print(f"   {status.split()[0]} Port {port}: {status.split()[1]}")
+        status = "⚠️  In use" if is_port_in_use(port) else "✅ Available"
+        emoji, message = status.split(maxsplit=1)
+        print(f"   {emoji} Port {port}: {message}")
 
     # 7. Quick Actions
     print("\n🚀 Quick Actions:")
     print("   💻 Start development: ./scripts/quick-start.sh")
-    print("   🔧 Run linting: flake8 . && black --check .")
-    print("   📋 Run tests: python -m pytest tests/")
+    print("   🔧 Run linting: .venv/bin/flake8 . && .venv/bin/black --check .")
+    print("   📋 Run tests: .venv/bin/python -m pytest tests/")
     print("   🌐 API docs: http://localhost:8000/docs (when running)")
 
     print("\n" + "=" * 50)

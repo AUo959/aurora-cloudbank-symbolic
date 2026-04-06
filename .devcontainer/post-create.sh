@@ -45,12 +45,20 @@ if [[ -f "scripts/setup_environment.sh" ]]; then
         source "${VENV_DIR}/bin/activate"
         python -m pip install --upgrade pip
         
-        if [[ -f "requirements-lock.txt" ]]; then
-            if python -m pip install -r requirements-lock.txt --dry-run >/dev/null 2>&1; then
-                python -m pip install -r requirements-lock.txt || failsafe_exit "Failed to install dependencies"
-            else
-                failsafe_exit "Dependency conflicts in requirements-lock.txt"
-            fi
+        REQUIREMENTS_FILE="requirements-lock.txt"
+        if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
+          printf '⚠️ No requirements-lock.txt found, falling back to requirements.txt\n'
+          REQUIREMENTS_FILE="requirements.txt"
+        fi
+
+        if [[ -f "$REQUIREMENTS_FILE" ]]; then
+          if python -m pip install -r "$REQUIREMENTS_FILE" --dry-run >/dev/null 2>&1; then
+            python -m pip install -r "$REQUIREMENTS_FILE" || failsafe_exit "Failed to install dependencies"
+          else
+            failsafe_exit "Dependency conflicts in $REQUIREMENTS_FILE"
+          fi
+        else
+          failsafe_exit "No dependency requirements file found"
         fi
     fi
 else
@@ -64,18 +72,28 @@ else
     python -m pip install --upgrade pip || failsafe_exit "Failed to upgrade pip"
     python -m pip install --upgrade wheel setuptools || printf '⚠️ Warning: Failed to upgrade wheel/setuptools\n'
     
-    if [[ -f "requirements-lock.txt" ]]; then
+    REQUIREMENTS_FILE="requirements-lock.txt"
+    if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
+      printf '⚠️ No requirements-lock.txt found, falling back to requirements.txt\n'
+      REQUIREMENTS_FILE="requirements.txt"
+    fi
+
+    if [[ -f "$REQUIREMENTS_FILE" ]]; then
         printf '🧪 Testing dependency resolution...\n'
-        if python -m pip install -r requirements-lock.txt --dry-run >/dev/null 2>&1; then
+      if python -m pip install -r "$REQUIREMENTS_FILE" --dry-run >/dev/null 2>&1; then
             printf '✅ Dependency resolution test passed\n'
-            python -m pip install -r requirements-lock.txt || failsafe_exit "Failed to install requirements"
+        python -m pip install -r "$REQUIREMENTS_FILE" || failsafe_exit "Failed to install requirements"
         else
-            failsafe_exit "Dependency conflicts detected in requirements-lock.txt"
+        failsafe_exit "Dependency conflicts detected in $REQUIREMENTS_FILE"
         fi
     else
-        printf '⚠️ No requirements-lock.txt found\n'
+      failsafe_exit "No dependency requirements file found"
     fi
 fi
+
+  if [[ ! -x "${VENV_DIR}/bin/python" ]]; then
+    failsafe_exit "Virtual environment was not created correctly at ${VENV_DIR}/bin/python"
+  fi
 
 if [[ -f "requirements-test.txt" ]]; then
   python -m pip install -r requirements-test.txt
@@ -127,8 +145,17 @@ cat > activate_aurora.sh << 'EOF'
 #!/bin/bash
 # Quick activation script for Aurora CloudBank environment
 
-if [[ -f ".venv/bin/activate" ]]; then
-    source .venv/bin/activate
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -f "$REPO_ROOT/.venv/bin/activate" ]]; then
+  source "$REPO_ROOT/.venv/bin/activate"
+  if [[ -f "$REPO_ROOT/.env" ]]; then
+    set -a
+    source "$REPO_ROOT/.env"
+    set +a
+  fi
     echo "✅ Aurora CloudBank environment activated"
     echo "🌐 API docs: http://localhost:8000/docs (when running)"
     echo "🧪 Run tests: python -m pytest tests/"
@@ -150,6 +177,8 @@ if [[ -f "scripts/validate_dependencies.py" ]] && [[ -d "${VENV_DIR}" ]]; then
         printf '⚠️ Validation warnings detected\n'
     fi
 fi
+
+echo '{"status":"ready","timestamp":"'$(date -Iseconds)'","venv_python":"'"${VENV_DIR}/bin/python"'"}' > "$STATUS_FILE"
 
 printf '\n✅ DevContainer setup complete. Python interpreter: %s\n' "${VENV_DIR}/bin/python"
 printf '📝 Quick start: source activate_aurora.sh\n'

@@ -369,7 +369,7 @@ Aurora CloudBank provides several ways to explore the system:
 
 2. API SERVER - FastAPI backend:
    make run                              # Start the system
-   python aurora_api.py                  # Direct API launch
+    .venv/bin/python api/aurora_api.py    # Direct API launch
 
 3. WEB DEMO:
    Visit: https://auo959.github.io/aurora-cloudbank-symbolic
@@ -392,7 +392,7 @@ Aurora CloudBank provides several ways to explore the system:
 
         print("\n💡 Try these when ready:")
         print("   python aurora_cli.py --quantum")
-        print("   python aurora_api.py  # Then visit http://localhost:8000/docs")
+        print("   .venv/bin/python api/aurora_api.py  # Then visit http://localhost:8000/docs")
 
     def step_next_steps(self):
         """Final step: Next steps and resources"""

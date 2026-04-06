@@ -189,10 +189,11 @@ print(f'pandas: {pandas.__version__}')
 
 # Function to create environment status file
 create_status_file() {
+    source "$VENV_DIR/bin/activate"
     cat > ".env_status.json" << EOF
 {
     "setup_date": "$(date -Iseconds)",
-    "python_version": "$(python3 --version)",
+    "python_version": "$(python --version)",
     "pip_version": "$(pip --version)",
     "requirements_file": "$REQUIREMENTS_FILE",
     "venv_path": "$VENV_DIR",
@@ -200,6 +201,7 @@ create_status_file() {
     "validation_passed": true
 }
 EOF
+    deactivate 2>/dev/null || true
     log_success "Environment status file created"
 }
 

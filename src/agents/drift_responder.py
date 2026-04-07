@@ -23,7 +23,7 @@ from src.monitoring.drift_detector import DriftAlert
 
 logger = logging.getLogger(__name__)
 
-_RUNBOOKS_PATH = Path(__file__).parent / "drift_runbooks.yaml"
+_RUNBOOKS_PATH = Path(__file__).parent.parent / "aurora" / "drift_runbooks.yaml"
 
 
 # ---------------------------------------------------------------------------

@@ -266,7 +266,8 @@ async def list_example_scenarios() -> ExampleScenariosResponse:
     DLP: qgia_example_scenarios
     """
     scenarios = []
-    for scenario in EXAMPLE_SCENARIOS:
+    for key, factory in EXAMPLE_SCENARIOS.items():
+        scenario = factory()
         scenarios.append({
             "scenario_id": scenario.scenario_id,
             "title": scenario.title,
@@ -274,17 +275,23 @@ async def list_example_scenarios() -> ExampleScenariosResponse:
             "domain": scenario.domain,
             "evidence_fragment_count": len(scenario.evidence_fragments),
             "requesting_node": scenario.requesting_node,
+            "key": key,
         })
     return ExampleScenariosResponse(scenarios=scenarios, count=len(scenarios))
 
 
 def _find_example_scenario(name: str) -> Optional[ScenarioInput]:
-    """Return an example scenario whose id or title contains `name`."""
+    """Return an example scenario whose dict key or title contains `name`."""
     normalized = name.lower().replace("-", "_")
-    for s in EXAMPLE_SCENARIOS:
-        key = s.title.lower().replace(" ", "_").replace("-", "_")
-        if normalized in key or normalized == s.scenario_id.lower():
-            return s
+    for key, factory in EXAMPLE_SCENARIOS.items():
+        if normalized in key:
+            return factory()
+    # Fall back to matching against built scenario title / id
+    for factory in EXAMPLE_SCENARIOS.values():
+        scenario = factory()
+        title_key = scenario.title.lower().replace(" ", "_").replace("-", "_")
+        if normalized in title_key or normalized == scenario.scenario_id.lower():
+            return scenario
     return None
 
 
@@ -299,7 +306,7 @@ async def run_example_forecast(scenario_name: str) -> ForecastOutput:
     """
     matched = _find_example_scenario(scenario_name)
     if matched is None:
-        available = [s.scenario_id for s in EXAMPLE_SCENARIOS]
+        available = list(EXAMPLE_SCENARIOS.keys())
         raise HTTPException(
             status_code=404,
             detail=f"Example scenario '{scenario_name}' not found. Available: {available}",

@@ -909,6 +909,16 @@ except ImportError as e:
 except Exception as e:
     logger.error("❌ Failed to integrate Drift Metrics routes: %s", e)
 
+# Include QGIA Forecast Simulation Engine routes
+try:
+    from modules.qgia.api import router as qgia_router
+    app.include_router(qgia_router)
+    logger.info("✅ QGIA Forecast API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ QGIA Forecast routes not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate QGIA Forecast routes: %s", e)
+
 # Include Playground backend routes
 try:
     from src.playground import playground_router

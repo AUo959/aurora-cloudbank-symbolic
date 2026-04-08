@@ -371,8 +371,23 @@ class QGIAForecastEngine:
 
         tiers: list[TierAssessment] = []
 
+        # Compute raw clamped tier probabilities
+        tier1_raw = max(0.26, min(0.85, mean))
+        tier2_raw = max(0.10, min(0.25, 0.25 - std * 0.5))
+        tier3_raw = max(0.01, min(0.09, 0.10 - std))
+
+        # Softmax normalization: ensures probabilities form a coherent distribution summing to 1.0.
+        # Full floating-point precision is preserved (no rounding) so that downstream consumers
+        # receive a valid probability simplex: tier1_prob + tier2_prob + tier3_prob == 1.0.
+        raw_tier_probs = np.array([tier1_raw, tier2_raw, tier3_raw])
+        softmax_exp = np.exp(raw_tier_probs - raw_tier_probs.max())  # subtract max for numerical stability
+        tier1_prob, tier2_prob, tier3_prob = softmax_exp / softmax_exp.sum()
+
+        # Confidence scalars for each tier
+        tier2_confidence = round(composite_confidence * 0.85, 3)
+        tier3_confidence = round(composite_confidence * 0.7, 3)
+
         # Tier I — Most Likely (modal scenario)
-        tier1_prob = round(max(0.26, min(0.85, mean)), 3)
         tiers.append(
             TierAssessment(
                 tier=1,
@@ -388,8 +403,6 @@ class QGIAForecastEngine:
         )
 
         # Tier II — Plausible Alternatives (±1 sigma)
-        tier2_prob = round(max(0.10, min(0.25, 0.25 - std * 0.5)), 3)
-        tier2_confidence = round(composite_confidence * 0.85, 3)
         tiers.append(
             TierAssessment(
                 tier=2,
@@ -405,8 +418,6 @@ class QGIAForecastEngine:
         )
 
         # Tier III — Tail Risks (±2 sigma)
-        tier3_prob = round(max(0.01, min(0.09, 0.10 - std)), 3)
-        tier3_confidence = round(composite_confidence * 0.7, 3)
         tiers.append(
             TierAssessment(
                 tier=3,

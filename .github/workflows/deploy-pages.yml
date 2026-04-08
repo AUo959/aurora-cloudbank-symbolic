@@ -27,9 +27,6 @@ on:
       - static/**
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 concurrency:
   group: deploy-pages-${{ github.ref }}
   cancel-in-progress: true
@@ -37,6 +34,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

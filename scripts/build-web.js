@@ -4,15 +4,28 @@
  * Optimizes GitHub Pages assets for production deployment
  */
 
-import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const BUILD_HTML_FILES = ['index.html', 'aurora_dashboard.html', '404.html'];
+const BUILD_SUBDIRECTORIES = Object.freeze({
+  js: 'js',
+  css: 'css'
+});
+const PROJECT_FILE_MAP = Object.freeze({
+  version: ['VERSION'],
+  siteResources: ['static', 'data', 'site-resources.json'],
+  deploymentReceipt: ['deployment', 'status', 'latest_check.json'],
+  apiCatalog: ['docs', 'api', 'API_CATALOG.json'],
+  modules: ['modules'],
+  docs: ['docs'],
+  tests: ['tests']
+});
 
 class AuroraWebBuilder {
   constructor() {
@@ -62,8 +75,8 @@ class AuroraWebBuilder {
       fs.rmSync(this.buildDir, { recursive: true });
     }
     fs.mkdirSync(this.buildDir, { recursive: true });
-    fs.mkdirSync(path.join(this.buildDir, 'js'), { recursive: true });
-    fs.mkdirSync(path.join(this.buildDir, 'css'), { recursive: true });
+    fs.mkdirSync(this.buildPath(BUILD_SUBDIRECTORIES.js), { recursive: true });
+    fs.mkdirSync(this.buildPath(BUILD_SUBDIRECTORIES.css), { recursive: true });
     console.log('📁 Build directory created');
   }
 
@@ -79,11 +92,11 @@ class AuroraWebBuilder {
         }
 
         // Update asset paths for build
-        content = content.replace(/static\/js\//g, 'js/');
-        content = content.replace(/static\/css\//g, 'css/');
-        content = content.replace(/static\/icon\.svg/g, 'icon.svg');
+        content = content.replaceAll(/static\/js\//g, 'js/');
+        content = content.replaceAll(/static\/css\//g, 'css/');
+        content = content.replaceAll('static/icon.svg', 'icon.svg');
 
-        fs.writeFileSync(path.join(this.buildDir, file), content);
+        fs.writeFileSync(this.buildPath(file), content);
         console.log(`📄 Processed: ${file}`);
       }
     }
@@ -101,7 +114,7 @@ class AuroraWebBuilder {
       }
 
       const relativePath = path.relative(jsDir, filePath);
-      const outputPath = path.join(this.buildDir, 'js', relativePath);
+      const outputPath = this.buildAssetPath(BUILD_SUBDIRECTORIES.js, relativePath);
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       fs.writeFileSync(outputPath, content);
       console.log(`🔧 Processed: static/js/${relativePath}`);
@@ -120,7 +133,7 @@ class AuroraWebBuilder {
       }
 
       const relativePath = path.relative(cssDir, filePath);
-      const outputPath = path.join(this.buildDir, 'css', relativePath);
+      const outputPath = this.buildAssetPath(BUILD_SUBDIRECTORIES.css, relativePath);
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       fs.writeFileSync(outputPath, content);
       console.log(`🎨 Processed: static/css/${relativePath}`);
@@ -147,7 +160,8 @@ class AuroraWebBuilder {
   }
 
   async generateServiceWorker() {
-    const cacheName = `aurora-cloudbank-v${this.version}${this.revision ? `-${this.revision}` : ''}`;
+    const cacheSuffix = this.revision ? `-${this.revision}` : '';
+    const cacheName = `aurora-cloudbank-v${this.version}${cacheSuffix}`;
     const urlsToCache = [
       './',
       'index.html',
@@ -166,7 +180,7 @@ class AuroraWebBuilder {
       'quantum-vsa-demo.html',
       'social-preview.html',
       'synergy-dashboard.html'
-    ].filter(asset => fs.existsSync(path.join(this.buildDir, asset)));
+    ].filter(asset => fs.existsSync(this.buildPath(this.normalizeRelativePath(asset))));
 
     const swContent = `
 // Aurora CloudBank Service Worker v${this.version}
@@ -224,7 +238,7 @@ self.addEventListener('fetch', event => {
 });
 `;
 
-    fs.writeFileSync(path.join(this.buildDir, 'sw.js'), swContent);
+    fs.writeFileSync(this.buildPath('sw.js'), swContent);
     console.log('⚙️ Service worker generated');
   }
 
@@ -266,7 +280,7 @@ self.addEventListener('fetch', event => {
     };
 
     fs.writeFileSync(
-      path.join(this.buildDir, 'manifest.json'),
+      this.buildPath('manifest.json'),
       JSON.stringify(manifest, null, 2)
     );
 
@@ -282,7 +296,7 @@ self.addEventListener('fetch', event => {
     };
 
     fs.writeFileSync(
-      path.join(this.buildDir, 'build-info.json'),
+      this.buildPath('build-info.json'),
       JSON.stringify(buildInfo, null, 2)
     );
 
@@ -291,7 +305,7 @@ self.addEventListener('fetch', event => {
 
   async writeSiteData() {
     fs.writeFileSync(
-      path.join(this.buildDir, 'site-data.json'),
+      this.buildPath('site-data.json'),
       JSON.stringify(this.siteData, null, 2)
     );
     console.log('🧭 Site data generated');
@@ -304,7 +318,7 @@ self.addEventListener('fetch', event => {
       `Sitemap: ${this.toSiteUrl('sitemap.xml')}`
     ].join('\n');
 
-    fs.writeFileSync(path.join(this.buildDir, 'robots.txt'), `${robotsContent}\n`);
+    fs.writeFileSync(this.buildPath('robots.txt'), `${robotsContent}\n`);
     console.log('🤖 robots.txt generated');
   }
 
@@ -315,7 +329,7 @@ self.addEventListener('fetch', event => {
       'quantum-vsa-demo.html',
       'social-preview.html',
       'synergy-dashboard.html'
-    ].filter(relativePath => relativePath === '' || fs.existsSync(path.join(this.buildDir, relativePath)));
+    ].filter(relativePath => relativePath === '' || fs.existsSync(this.buildPath(this.normalizeRelativePath(relativePath))));
 
     const urls = pages.map(relativePath => {
       const location = relativePath ? this.toSiteUrl(relativePath) : this.normalizeSiteUrl(this.siteData.site.pagesUrl);
@@ -334,12 +348,12 @@ self.addEventListener('fetch', event => {
       '</urlset>'
     ].join('\n');
 
-    fs.writeFileSync(path.join(this.buildDir, 'sitemap.xml'), `${sitemap}\n`);
+    fs.writeFileSync(this.buildPath('sitemap.xml'), `${sitemap}\n`);
     console.log('🗺️ Sitemap generated');
   }
 
   async generateNoJekyllFile() {
-    fs.writeFileSync(path.join(this.buildDir, '.nojekyll'), '');
+    fs.writeFileSync(this.buildPath('.nojekyll'), '');
   }
 
   optimizeHtml(content) {
@@ -347,38 +361,38 @@ self.addEventListener('fetch', event => {
     let previous;
     do {
       previous = content;
-      content = content.replace(/<!--[\s\S]*?-->/g, '');
+      content = content.replaceAll(/<!--[\s\S]*?-->/g, '');
     } while (content !== previous);
     return content
-      .replace(/\s+/g, ' ')
-      .replace(/>\s+</g, '><')
+      .replaceAll(/\s+/g, ' ')
+      .replaceAll(/>\s+</g, '><')
       .trim();
   }
 
   minifyCss(content) {
     return content
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/\s+/g, ' ')
-      .replace(/\s*([{}:;,])\s*/g, '$1')
-      .replace(/;}/g, '}')
+      .replaceAll(/\/\*[\s\S]*?\*\//g, '')
+      .replaceAll(/\s+/g, ' ')
+      .replaceAll(/\s*([{}:;,])\s*/g, '$1')
+      .replaceAll(/;}/g, '}')
       .trim();
   }
 
   minifyJavaScript(content) {
     // Basic minification - remove comments and extra whitespace
     return content
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      .replace(/\/\/.*$/gm, '')
-      .replace(/\s+/g, ' ')
-      .replace(/;\s+/g, ';')
+      .replaceAll(/\/\*[\s\S]*?\*\//g, '')
+      .replaceAll(/\/\/.*$/gm, '')
+      .replaceAll(/\s+/g, ' ')
+      .replaceAll(/;\s+/g, ';')
       .trim();
   }
 
   generateSiteData() {
-    const siteResources = this.readJsonFile(path.join(this.staticDir, 'data', 'site-resources.json'));
-    const deploymentReceipt = this.readJsonFile(path.join(projectRoot, 'deployment', 'status', 'latest_check.json'), { deployment_check: {} });
+    const siteResources = this.readJsonFromProject(PROJECT_FILE_MAP.siteResources);
+    const deploymentReceipt = this.readJsonFromProject(PROJECT_FILE_MAP.deploymentReceipt, { deployment_check: {} });
     const deployment = deploymentReceipt.deployment_check || {};
-    const apiCatalog = this.readJsonFile(path.join(projectRoot, 'docs', 'api', 'API_CATALOG.json'), {});
+    const apiCatalog = this.readJsonFromProject(PROJECT_FILE_MAP.apiCatalog, {});
     const routeEntries = Array.isArray(apiCatalog.routes) ? apiCatalog.routes.length : 0;
     const reportedRouteCount = typeof apiCatalog.total_routes === 'number' ? apiCatalog.total_routes : null;
     const notes = [];
@@ -414,9 +428,9 @@ self.addEventListener('fetch', event => {
         metrics: {
           apiRouteEntries: routeEntries,
           apiRouteEntriesReported: reportedRouteCount,
-          moduleCount: this.countTopLevelDirectories(path.join(projectRoot, 'modules')),
-          docsCount: this.countTrackedFiles('docs'),
-          testCount: this.countTrackedFiles('tests'),
+          moduleCount: this.countTopLevelDirectories(this.projectPath(...PROJECT_FILE_MAP.modules)),
+          docsCount: this.countProjectFiles('docs'),
+          testCount: this.countProjectFiles('tests'),
           resourceCount: Array.isArray(siteResources.resources) ? siteResources.resources.length : 0,
           staticExperienceCount: Array.isArray(siteResources.experiences) ? siteResources.experiences.length : 0
         },
@@ -426,7 +440,7 @@ self.addEventListener('fetch', event => {
   }
 
   readVersion() {
-    const versionPath = path.join(projectRoot, 'VERSION');
+    const versionPath = this.projectPath(...PROJECT_FILE_MAP.version);
     if (!fs.existsSync(versionPath)) {
       return '0.0.0';
     }
@@ -441,7 +455,7 @@ self.addEventListener('fetch', event => {
     }
 
     try {
-      return execSync('git rev-parse --short HEAD', {
+      return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
         cwd: projectRoot,
         stdio: ['ignore', 'pipe', 'ignore']
       }).toString().trim();
@@ -459,6 +473,10 @@ self.addEventListener('fetch', event => {
     }
 
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  }
+
+  readJsonFromProject(relativeSegments, fallback = null) {
+    return this.readJsonFile(this.projectPath(...relativeSegments), fallback);
   }
 
   calculateAgeInDays(timestamp) {
@@ -485,21 +503,12 @@ self.addEventListener('fetch', event => {
     }).format(parsed);
   }
 
-  countTrackedFiles(relativeDir) {
-    try {
-      const output = execSync(`git ls-files ${relativeDir}`, {
-        cwd: projectRoot,
-        stdio: ['ignore', 'pipe', 'ignore']
-      }).toString().trim();
-
-      if (!output) {
-        return 0;
-      }
-
-      return output.split('\n').filter(Boolean).length;
-    } catch {
-      return this.collectFiles(path.join(projectRoot, relativeDir)).length;
+  countProjectFiles(relativeDir) {
+    if (!Object.hasOwn(PROJECT_FILE_MAP, relativeDir)) {
+      throw new Error(`Unsupported project file count target: ${relativeDir}`);
     }
+
+    return this.collectFiles(this.projectPath(...PROJECT_FILE_MAP[relativeDir])).length;
   }
 
   countTopLevelDirectories(targetDir) {
@@ -521,7 +530,7 @@ self.addEventListener('fetch', event => {
     const entries = fs.readdirSync(targetDir, { withFileTypes: true });
 
     for (const entry of entries) {
-      const entryPath = path.join(targetDir, entry.name);
+      const entryPath = path.resolve(targetDir, entry.name);
       if (entry.isDirectory()) {
         files.push(...this.collectFiles(entryPath, predicate));
       } else if (predicate(entryPath)) {
@@ -542,11 +551,11 @@ self.addEventListener('fetch', event => {
 
   escapeXml(value) {
     return String(value)
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/'/g, '&apos;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('"', '&quot;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll("'", '&apos;');
   }
 
   copyDirectory(src, dest, shouldCopy = () => true, rootDir = src) {
@@ -557,15 +566,47 @@ self.addEventListener('fetch', event => {
     const entries = fs.readdirSync(src, { withFileTypes: true });
 
     for (const entry of entries) {
-      const srcPath = path.join(src, entry.name);
-      const destPath = path.join(dest, entry.name);
+      const srcPath = path.resolve(src, entry.name);
+      const relativePath = this.normalizeRelativePath(path.relative(rootDir, srcPath));
+      const destPath = path.resolve(dest, entry.name);
 
       if (entry.isDirectory()) {
         this.copyDirectory(srcPath, destPath, shouldCopy, rootDir);
-      } else if (shouldCopy(path.relative(rootDir, srcPath))) {
+      } else if (shouldCopy(relativePath)) {
         fs.copyFileSync(srcPath, destPath);
       }
     }
+  }
+
+  normalizeRelativePath(relativePath) {
+    const normalizedPath = relativePath.split(path.sep).join('/');
+    const safePath = path.posix.normalize(normalizedPath);
+    if (
+      safePath === '..' ||
+      safePath.startsWith('../') ||
+      path.posix.isAbsolute(safePath) ||
+      safePath.includes('\0')
+    ) {
+      throw new Error(`Unsafe relative path: ${relativePath}`);
+    }
+    return safePath;
+  }
+
+  safeJoin(baseDir, relativePath) {
+    const safeRelativePath = this.normalizeRelativePath(relativePath);
+    return path.join(baseDir, ...safeRelativePath.split('/'));
+  }
+
+  buildPath(relativePath) {
+    return this.safeJoin(this.buildDir, relativePath);
+  }
+
+  buildAssetPath(assetDir, relativePath) {
+    return this.safeJoin(this.buildPath(assetDir), relativePath);
+  }
+
+  projectPath(...segments) {
+    return path.join(projectRoot, ...segments);
   }
 }
 

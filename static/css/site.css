@@ -265,7 +265,7 @@ input {
 .button-link.secondary {
   border-color: rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
-  color: #f7f3ea;
+  color: #ffffff;
 }
 
 .runtime-boundary,
@@ -463,7 +463,7 @@ input {
   border-radius: 0.95rem;
   border: 1px solid rgba(217, 119, 6, 0.24);
   background: rgba(217, 119, 6, 0.08);
-  color: #7c4700;
+  color: #5f3200;
   line-height: 1.55;
 }
 

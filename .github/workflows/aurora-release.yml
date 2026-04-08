@@ -22,6 +22,8 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    env:
+      MANUAL_RELEASE_VERSION: ${{ inputs.version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,9 +34,9 @@ jobs:
         id: version
         run: |
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            echo "value=${GITHUB_REF_NAME}" >> "${GITHUB_OUTPUT}"
+            printf 'value=%s\n' "${GITHUB_REF_NAME}" >> "${GITHUB_OUTPUT}"
           else
-            echo "value=${{ inputs.version }}" >> "${GITHUB_OUTPUT}"
+            printf 'value=%s\n' "${MANUAL_RELEASE_VERSION}" >> "${GITHUB_OUTPUT}"
           fi
 
       - name: Generate changelog

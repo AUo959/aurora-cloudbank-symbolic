@@ -2,13 +2,148 @@ const dataPath = "site-data.json";
 
 const getById = (id) => document.getElementById(id);
 const page = document.body.dataset.page;
+const runtimeGlobal = globalThis;
 
 function isExternal(href) {
   return /^https?:\/\//.test(href);
 }
 
-function linkAttributes(href) {
-  return isExternal(href) ? ' target="_blank" rel="noreferrer"' : "";
+function toSafeHref(href) {
+  if (typeof href !== "string") {
+    return "#";
+  }
+
+  if (href.startsWith("#") || isExternal(href)) {
+    return href;
+  }
+
+  return /^[./A-Za-z0-9][A-Za-z0-9./_#?=&:-]*$/.test(href) ? href : "#";
+}
+
+function appendChildren(parent, children = []) {
+  for (const child of children) {
+    if (child === null || child === undefined || child === false) {
+      continue;
+    }
+
+    if (Array.isArray(child)) {
+      appendChildren(parent, child);
+      continue;
+    }
+
+    if (child instanceof Node) {
+      parent.appendChild(child);
+      continue;
+    }
+
+    parent.appendChild(document.createTextNode(String(child)));
+  }
+}
+
+function createElement(tagName, options = {}, children = []) {
+  const element = document.createElement(tagName);
+  const {
+    className,
+    text,
+    htmlFor,
+    value,
+    type,
+    placeholder,
+    dataset,
+    attributes
+  } = options;
+
+  if (className) {
+    element.className = className;
+  }
+
+  if (text !== undefined) {
+    element.textContent = text;
+  }
+
+  if (htmlFor) {
+    element.htmlFor = htmlFor;
+  }
+
+  if (value !== undefined) {
+    element.value = value;
+  }
+
+  if (type) {
+    element.type = type;
+  }
+
+  if (placeholder) {
+    element.placeholder = placeholder;
+  }
+
+  if (dataset) {
+    Object.entries(dataset).forEach(([key, datasetValue]) => {
+      element.dataset[key] = datasetValue;
+    });
+  }
+
+  if (attributes) {
+    Object.entries(attributes).forEach(([key, attributeValue]) => {
+      if (attributeValue !== undefined && attributeValue !== null) {
+        element.setAttribute(key, attributeValue);
+      }
+    });
+  }
+
+  appendChildren(element, children);
+  return element;
+}
+
+function replaceChildren(target, children = []) {
+  if (!target) {
+    return;
+  }
+
+  target.replaceChildren();
+  appendChildren(target, children);
+}
+
+function createLink(label, href, className, attributes = {}) {
+  const safeHref = toSafeHref(href);
+  const linkAttributes = {
+    ...attributes,
+    href: safeHref
+  };
+
+  if (isExternal(safeHref)) {
+    linkAttributes.target = "_blank";
+    linkAttributes.rel = "noreferrer";
+  }
+
+  return createElement("a", {
+    className,
+    text: label,
+    attributes: linkAttributes
+  });
+}
+
+function createChip(className, text) {
+  return createElement("span", { className, text });
+}
+
+function createPathChip(text) {
+  return createChip("path-chip", text);
+}
+
+function createKindChip(text) {
+  return createChip("kind-chip", text);
+}
+
+function createCopyButton(label, value) {
+  return createElement("button", {
+    className: "copy-button",
+    text: label,
+    type: "button",
+    dataset: {
+      copy: value
+    }
+  });
 }
 
 function formatDate(value) {
@@ -28,15 +163,154 @@ function formatDate(value) {
   }).format(date)} UTC`;
 }
 
+function createStatusFacts(facts) {
+  const list = createElement("dl", { className: "status-facts" });
+
+  replaceChildren(list, facts.map(([label, value]) => createElement("div", {}, [
+    createElement("dt", { text: label }),
+    createElement("dd", { text: value })
+  ])));
+
+  return list;
+}
+
+function createMetricCard(metric) {
+  return createElement("div", { className: "metric-card" }, [
+    createElement("div", { className: "metric-label", text: metric.label }),
+    createElement("div", { className: "metric-value", text: metric.value }),
+    createElement("div", { className: "metric-source", text: metric.source })
+  ]);
+}
+
+function createTagLine(tags) {
+  return createElement("div", { className: "tag-line" }, tags.map((tag) => createElement("span", { text: tag })));
+}
+
+function createResourceHeader(kind, sourcePath) {
+  return createElement("div", { className: "resource-header" }, [
+    createKindChip(kind),
+    createPathChip(sourcePath)
+  ]);
+}
+
+function createResourceRow(resource) {
+  return createElement("article", { className: "resource-row" }, [
+    createElement("div", {}, [
+      createResourceHeader(resource.kind, resource.sourcePath),
+      createElement("h3", { text: resource.title }),
+      createElement("p", { text: resource.summary }),
+      createTagLine(resource.tags)
+    ]),
+    createLink("Open", resource.href, "resource-action")
+  ]);
+}
+
+function createExperienceItem(experience) {
+  return createElement("article", { className: "experience-item" }, [
+    createElement("div", {}, [
+      createElement("div", { className: "experience-header" }, [
+        createKindChip(experience.type),
+        createPathChip(experience.href)
+      ]),
+      createElement("h3", { text: experience.title }),
+      createElement("p", { text: experience.summary })
+    ]),
+    createLink("Open", experience.href, "resource-action")
+  ]);
+}
+
+function createLayerRow(layer) {
+  return createElement("article", { className: "layer-row" }, [
+    createElement("div", { className: "layer-level", text: layer.level }),
+    createElement("div", {}, [
+      createElement("h3", { text: layer.title }),
+      createElement("p", { text: layer.summary })
+    ]),
+    createLink("Open source", layer.href, "resource-action")
+  ]);
+}
+
+function createRuntimeSurface(surface) {
+  return createElement("div", { className: "runtime-surface" }, [
+    createChip("surface-badge", surface.availability),
+    createElement("strong", { text: surface.title }),
+    createElement("p", { text: surface.description }),
+    createLink("Open surface", surface.href, "surface-link")
+  ]);
+}
+
+function createModeButton(entry, isActive) {
+  return createElement("button", {
+    className: `mode-button${isActive ? " active" : ""}`,
+    text: entry.label,
+    type: "button",
+    dataset: {
+      persona: entry.id
+    }
+  });
+}
+
+function createFilterButton(kind, isActive) {
+  return createElement("button", {
+    className: `filter-button${isActive ? " active" : ""}`,
+    text: kind === "all" ? "All resources" : kind,
+    type: "button",
+    dataset: {
+      kind
+    }
+  });
+}
+
+function createEmptyState(message) {
+  return createElement("div", {
+    className: "empty-state",
+    text: message
+  });
+}
+
+function createSummaryBlock(persona) {
+  const outcomesList = createElement("ul");
+  replaceChildren(outcomesList, persona.outcomes.map((outcome) => createElement("li", { text: outcome })));
+
+  return createElement("div", {}, [
+    createElement("div", { className: "section-kicker", text: "Current mode" }),
+    createElement("h3", { text: persona.label }),
+    createElement("p", { text: persona.summary }),
+    outcomesList
+  ]);
+}
+
+function createCommandLine(command) {
+  return createElement("div", { className: "command-line" }, [
+    createElement("code", { text: command }),
+    createCopyButton("Copy", command)
+  ]);
+}
+
+function createCommandPanel(panel) {
+  return createElement("article", { className: "command-panel" }, [
+    createElement("div", { className: "command-header" }, [
+      createElement("div", {}, [
+        createElement("h3", { text: panel.title }),
+        createElement("p", { text: panel.intro })
+      ]),
+      createCopyButton("Copy block", panel.commands.join("\n"))
+    ]),
+    createElement("div", { className: "command-list" }, panel.commands.map((command) => createCommandLine(command)))
+  ]);
+}
+
+function createMiniRuntimeSurface(surface) {
+  return createElement("div", { className: "surface-mini-item" }, [
+    createChip("surface-badge", surface.availability),
+    createElement("strong", { text: surface.title }),
+    createElement("p", { text: surface.description })
+  ]);
+}
+
 function renderHeroActions(siteData) {
   const target = getById("hero-actions");
-  if (!target) {
-    return;
-  }
-
-  target.innerHTML = siteData.heroActions.map((action) => `
-    <a class="button-link ${action.style}" href="${action.href}"${linkAttributes(action.href)}>${action.label}</a>
-  `).join("");
+  replaceChildren(target, siteData.heroActions.map((action) => createLink(action.label, action.href, `button-link ${action.style}`)));
 }
 
 function renderDeploymentStatus(siteData) {
@@ -52,125 +326,75 @@ function renderDeploymentStatus(siteData) {
     ["Pages URL", siteData.site.pagesUrl.replace(/^https?:\/\//, "")]
   ];
 
-  target.innerHTML = `
-    <div class="status-pill"><span class="status-dot"></span>${deployment.status}</div>
-    <dl class="status-facts">
-      ${facts.map(([label, value]) => `
-        <div>
-          <dt>${label}</dt>
-          <dd>${value}</dd>
-        </div>
-      `).join("")}
-    </dl>
-  `;
+  replaceChildren(target, [
+    createElement("div", { className: "status-pill" }, [
+      createElement("span", { className: "status-dot", attributes: { "aria-hidden": "true" } }),
+      deployment.status
+    ]),
+    createStatusFacts(facts)
+  ]);
 }
 
 function renderMiniRuntimeSurfaces(siteData) {
   const target = getById("hero-runtime-surfaces");
-  if (!target) {
-    return;
-  }
-
-  target.innerHTML = siteData.runtimeSurfaces.slice(0, 3).map((surface) => `
-    <div class="surface-mini-item">
-      <span class="surface-badge">${surface.availability}</span>
-      <strong>${surface.title}</strong>
-      <p>${surface.description}</p>
-    </div>
-  `).join("");
+  replaceChildren(target, siteData.runtimeSurfaces.slice(0, 3).map((surface) => createMiniRuntimeSurface(surface)));
 }
 
 function renderEvidence(siteData) {
   const metricsTarget = getById("evidence-metrics");
   const notesTarget = getById("evidence-notes");
 
-  if (metricsTarget) {
-    const metrics = [
-      {
-        label: "Version",
-        value: `v${siteData.generated.version}`,
-        source: "VERSION"
-      },
-      {
-        label: "Deployment",
-        value: siteData.generated.deployment.status,
-        source: `deployment/status/latest_check.json · ${siteData.generated.deployment.readinessPercent}%`
-      },
-      {
-        label: "API Route Entries",
-        value: String(siteData.generated.metrics.apiRouteEntries),
-        source: "docs/api/API_CATALOG.json"
-      },
-      {
-        label: "Modules",
-        value: String(siteData.generated.metrics.moduleCount),
-        source: "Top-level directories under modules/"
-      },
-      {
-        label: "Docs",
-        value: String(siteData.generated.metrics.docsCount),
-        source: "Tracked files under docs/"
-      },
-      {
-        label: "Tests",
-        value: String(siteData.generated.metrics.testCount),
-        source: "Tracked files under tests/"
-      }
-    ];
+  const metrics = [
+    {
+      label: "Version",
+      value: `v${siteData.generated.version}`,
+      source: "VERSION"
+    },
+    {
+      label: "Deployment",
+      value: siteData.generated.deployment.status,
+      source: `deployment/status/latest_check.json · ${siteData.generated.deployment.readinessPercent}%`
+    },
+    {
+      label: "API Route Entries",
+      value: String(siteData.generated.metrics.apiRouteEntries),
+      source: "docs/api/API_CATALOG.json"
+    },
+    {
+      label: "Modules",
+      value: String(siteData.generated.metrics.moduleCount),
+      source: "Top-level directories under modules/"
+    },
+    {
+      label: "Docs",
+      value: String(siteData.generated.metrics.docsCount),
+      source: "Tracked files under docs/"
+    },
+    {
+      label: "Tests",
+      value: String(siteData.generated.metrics.testCount),
+      source: "Tracked files under tests/"
+    }
+  ];
 
-    metricsTarget.innerHTML = metrics.map((metric) => `
-      <div class="metric-card">
-        <div class="metric-label">${metric.label}</div>
-        <div class="metric-value">${metric.value}</div>
-        <div class="metric-source">${metric.source}</div>
-      </div>
-    `).join("");
-  }
+  replaceChildren(metricsTarget, metrics.map((metric) => createMetricCard(metric)));
 
-  if (notesTarget && siteData.generated.notes.length) {
-    notesTarget.innerHTML = siteData.generated.notes.map((note) => `
-      <div class="note-chip">${note}</div>
-    `).join("");
+  if (notesTarget) {
+    replaceChildren(notesTarget, siteData.generated.notes.map((note) => createElement("div", {
+      className: "note-chip",
+      text: note
+    })));
   }
 }
 
 function renderLayers(siteData) {
   const target = getById("layer-map");
-  if (!target) {
-    return;
-  }
-
-  target.innerHTML = siteData.layers.map((layer) => `
-    <article class="layer-row">
-      <div class="layer-level">${layer.level}</div>
-      <div>
-        <h3>${layer.title}</h3>
-        <p>${layer.summary}</p>
-      </div>
-      <a class="resource-action" href="${layer.href}"${linkAttributes(layer.href)}>Open source</a>
-    </article>
-  `).join("");
+  replaceChildren(target, siteData.layers.map((layer) => createLayerRow(layer)));
 }
 
 function renderExperiences(siteData, targetId = "experience-list") {
   const target = getById(targetId);
-  if (!target) {
-    return;
-  }
-
-  target.innerHTML = siteData.experiences.map((experience) => `
-    <article class="experience-item">
-      <div>
-        <div class="experience-header">
-          <span class="kind-chip">${experience.type}</span>
-          <span class="path-chip">${experience.href}</span>
-        </div>
-        <h3>${experience.title}</h3>
-        <p>${experience.summary}</p>
-      </div>
-      <a class="resource-action" href="${experience.href}">Open</a>
-    </article>
-  `).join("");
+  replaceChildren(target, siteData.experiences.map((experience) => createExperienceItem(experience)));
 }
 
 function installCopyHandlers(root = document) {
@@ -196,8 +420,10 @@ function installCopyHandlers(root = document) {
 }
 
 function renderLaunchpad(siteData) {
+  const initialHash = runtimeGlobal.location?.hash?.slice(1) || "";
+  const defaultPersonaId = siteData.personas[0]?.id;
   const personaState = {
-    activePersona: siteData.personas.find((entry) => entry.id === window.location.hash.slice(1))?.id || siteData.personas[0].id,
+    activePersona: siteData.personas.find((entry) => entry.id === initialHash)?.id || defaultPersonaId,
     activeKind: "all",
     query: ""
   };
@@ -213,76 +439,30 @@ function renderLaunchpad(siteData) {
     const persona = siteData.personas.find((entry) => entry.id === personaState.activePersona);
     const personaResources = siteData.resources.filter((resource) => resource.personas.includes(persona.id));
     const kinds = ["all", ...new Set(personaResources.map((resource) => resource.kind))];
+    const normalizedQuery = personaState.query.trim().toLowerCase();
     const filteredResources = personaResources.filter((resource) => {
       const matchesKind = personaState.activeKind === "all" || resource.kind === personaState.activeKind;
-      const query = personaState.query.trim().toLowerCase();
-      const haystack = [resource.title, resource.summary, resource.tags.join(" "), resource.sourcePath].join(" ").toLowerCase();
-      return matchesKind && (!query || haystack.includes(query));
+      const haystack = [resource.title, resource.summary, resource.tags.join(" "), resource.sourcePath]
+        .join(" ")
+        .toLowerCase();
+
+      return matchesKind && (!normalizedQuery || haystack.includes(normalizedQuery));
     });
 
-    personaTarget.innerHTML = siteData.personas.map((entry) => `
-      <button class="mode-button ${entry.id === persona.id ? "active" : ""}" data-persona="${entry.id}">
-        ${entry.label}
-      </button>
-    `).join("");
-
-    summaryTarget.innerHTML = `
-      <div class="section-kicker">Current mode</div>
-      <h3>${persona.label}</h3>
-      <p>${persona.summary}</p>
-      <ul>
-        ${persona.outcomes.map((outcome) => `<li>${outcome}</li>`).join("")}
-      </ul>
-    `;
+    replaceChildren(personaTarget, siteData.personas.map((entry) => createModeButton(entry, entry.id === persona.id)));
+    replaceChildren(summaryTarget, [createSummaryBlock(persona)]);
 
     const panels = siteData.commandPanels.filter((panel) => panel.personas.includes(persona.id));
-    commandTarget.innerHTML = panels.map((panel) => `
-      <article class="command-panel">
-        <div class="command-header">
-          <div>
-            <h3>${panel.title}</h3>
-            <p>${panel.intro}</p>
-          </div>
-          <button class="copy-button" data-copy="${panel.commands.join("\n").replace(/"/g, "&quot;")}">Copy block</button>
-        </div>
-        <div class="command-list">
-          ${panel.commands.map((command) => `
-            <div class="command-line">
-              <code>${command}</code>
-              <button class="copy-button" data-copy="${command.replace(/"/g, "&quot;")}">Copy</button>
-            </div>
-          `).join("")}
-        </div>
-      </article>
-    `).join("");
+    replaceChildren(commandTarget, panels.map((panel) => createCommandPanel(panel)));
 
-    filterTarget.innerHTML = kinds.map((kind) => `
-      <button class="filter-button ${kind === personaState.activeKind ? "active" : ""}" data-kind="${kind}">
-        ${kind === "all" ? "All resources" : kind}
-      </button>
-    `).join("");
+    replaceChildren(filterTarget, kinds.map((kind) => createFilterButton(kind, kind === personaState.activeKind)));
 
     if (filteredResources.length === 0) {
-      resourceTarget.innerHTML = `<div class="empty-state">No resources match the current mode and search.</div>`;
+      replaceChildren(resourceTarget, [createEmptyState("No resources match the current mode and search.")]);
       return;
     }
 
-    resourceTarget.innerHTML = filteredResources.map((resource) => `
-      <article class="resource-row">
-        <div>
-          <div class="resource-header">
-            <span class="kind-chip">${resource.kind}</span>
-            <span class="path-chip">${resource.sourcePath}</span>
-          </div>
-          <h3>${resource.title}</h3>
-          <p>${resource.summary}</p>
-          <div class="tag-line">
-            ${resource.tags.map((tag) => `<span>${tag}</span>`).join("")}
-          </div>
-        </div>
-        <a class="resource-action" href="${resource.href}"${linkAttributes(resource.href)}>Open</a>
-      </article>
-    `).join("");
+    replaceChildren(resourceTarget, filteredResources.map((resource) => createResourceRow(resource)));
   };
 
   personaTarget?.addEventListener("click", (event) => {
@@ -293,7 +473,7 @@ function renderLaunchpad(siteData) {
 
     personaState.activePersona = button.dataset.persona;
     personaState.activeKind = "all";
-    window.history.replaceState({}, "", `#${personaState.activePersona}`);
+    runtimeGlobal.history?.replaceState({}, "", `#${personaState.activePersona}`);
     renderPersona();
   });
 
@@ -321,53 +501,34 @@ function renderDashboard(siteData) {
   const checklistTarget = getById("dashboard-checklist");
   const resourcesTarget = getById("dashboard-resources");
 
-  if (metricsTarget) {
-    const metrics = [
-      ["Version", `v${siteData.generated.version}`],
-      ["Deployment", siteData.generated.deployment.status],
-      ["Readiness", `${siteData.generated.deployment.readinessPercent}%`],
-      ["Route entries", String(siteData.generated.metrics.apiRouteEntries)]
-    ];
+  const metrics = [
+    ["Version", `v${siteData.generated.version}`],
+    ["Deployment", siteData.generated.deployment.status],
+    ["Readiness", `${siteData.generated.deployment.readinessPercent}%`],
+    ["Route entries", String(siteData.generated.metrics.apiRouteEntries)]
+  ];
 
-    metricsTarget.innerHTML = metrics.map(([label, value]) => `
-      <div class="metric-card">
-        <div class="metric-label">${label}</div>
-        <div class="metric-value">${value}</div>
-      </div>
-    `).join("");
-  }
+  replaceChildren(metricsTarget, metrics.map(([label, value]) => createElement("div", { className: "metric-card" }, [
+    createElement("div", { className: "metric-label", text: label }),
+    createElement("div", { className: "metric-value", text: value })
+  ])));
 
-  if (runtimeTarget) {
-    runtimeTarget.innerHTML = siteData.runtimeSurfaces.map((surface) => `
-      <div class="runtime-surface">
-        <span class="surface-badge">${surface.availability}</span>
-        <strong>${surface.title}</strong>
-        <p>${surface.description}</p>
-        <a class="surface-link" href="${surface.href}"${linkAttributes(surface.href)}>Open surface</a>
-      </div>
-    `).join("");
-  }
+  replaceChildren(runtimeTarget, siteData.runtimeSurfaces.map((surface) => createRuntimeSurface(surface)));
 
-  if (checklistTarget) {
-    checklistTarget.innerHTML = siteData.opsChecklist.map((item) => `<li>${item}</li>`).join("");
-  }
+  replaceChildren(checklistTarget, siteData.opsChecklist.map((item) => createElement("li", { text: item })));
 
-  if (resourcesTarget) {
-    const operateResources = siteData.resources.filter((resource) => resource.personas.includes("operate") || resource.personas.includes("build")).slice(0, 6);
-    resourcesTarget.innerHTML = operateResources.map((resource) => `
-      <article class="resource-row">
-        <div>
-          <div class="resource-header">
-            <span class="kind-chip">${resource.kind}</span>
-            <span class="path-chip">${resource.sourcePath}</span>
-          </div>
-          <h3>${resource.title}</h3>
-          <p>${resource.summary}</p>
-        </div>
-        <a class="resource-action" href="${resource.href}"${linkAttributes(resource.href)}>Open</a>
-      </article>
-    `).join("");
-  }
+  const operateResources = siteData.resources
+    .filter((resource) => resource.personas.includes("operate") || resource.personas.includes("build"))
+    .slice(0, 6);
+
+  replaceChildren(resourcesTarget, operateResources.map((resource) => createElement("article", { className: "resource-row" }, [
+    createElement("div", {}, [
+      createResourceHeader(resource.kind, resource.sourcePath),
+      createElement("h3", { text: resource.title }),
+      createElement("p", { text: resource.summary })
+    ]),
+    createLink("Open", resource.href, "resource-action")
+  ])));
 
   renderExperiences(siteData, "dashboard-experiences");
 }
@@ -377,23 +538,24 @@ function applyCommonSiteData(siteData) {
   const buildStamp = getById("footer-build-stamp");
   const dashboardBuildStamp = getById("dashboard-build-stamp");
   const revisionSuffix = siteData.generated.revision ? ` · ${siteData.generated.revision}` : "";
+  const buildText = `Built ${formatDate(siteData.generated.buildTime)}${revisionSuffix} from tracked repo evidence`;
 
   if (versionChip) {
     versionChip.textContent = `v${siteData.generated.version}`;
   }
 
   if (buildStamp) {
-    buildStamp.textContent = `Built ${formatDate(siteData.generated.buildTime)}${revisionSuffix} from tracked repo evidence`;
+    buildStamp.textContent = buildText;
   }
 
   if (dashboardBuildStamp) {
-    dashboardBuildStamp.textContent = `Built ${formatDate(siteData.generated.buildTime)}${revisionSuffix} from tracked repo evidence`;
+    dashboardBuildStamp.textContent = buildText;
   }
 }
 
 function enableReveals() {
   const nodes = [...document.querySelectorAll("[data-reveal]")];
-  if (!("IntersectionObserver" in window)) {
+  if (!("IntersectionObserver" in runtimeGlobal)) {
     nodes.forEach((node) => node.classList.add("is-visible"));
     return;
   }
@@ -413,12 +575,12 @@ function enableReveals() {
 }
 
 function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) {
+  if (!runtimeGlobal.navigator?.serviceWorker) {
     return;
   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch((error) => {
+  runtimeGlobal.addEventListener("load", () => {
+    runtimeGlobal.navigator.serviceWorker.register("sw.js").catch((error) => {
       console.error("Service worker registration failed", error);
     });
   });

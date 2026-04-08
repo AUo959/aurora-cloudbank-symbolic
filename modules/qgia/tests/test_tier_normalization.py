@@ -11,7 +11,6 @@ from modules.qgia.forecast_engine import QGIAForecastEngine
 from modules.qgia.scenario import (
     european_energy_crisis,
     iran_nuclear_escalation,
-    south_china_sea_confrontation,
     subsaharan_instability,
 )
 

@@ -28,6 +28,17 @@ from src.entities.framework_agents import get_axiomera, get_caelion
 from src.entities.relay_agents import get_halo, get_archy
 from src.core.event_system import Event, EventType, StationLocation
 
+# Default continuity load for decisions that don't specify one.
+# 0.3 represents a moderate operational load that won't trigger
+# Caelion or Axiomera continuity-load concerns (threshold is > 0.7).
+_DEFAULT_CONTINUITY_LOAD = 0.3
+
+# DLP context-tag prefix applied to every decision forwarded to real entities.
+_DLP_CONTEXT_PREFIX = "decision_"
+
+# Number of symbolic anchors verified by Caelion (T1 temporal + SRB spatial).
+_CAELION_ANCHOR_COUNT = 2
+
 
 @dataclass
 class ValidationResult:
@@ -140,8 +151,9 @@ class TriplexHandshakeValidator:
             primary_entity="Aurora (SYS_001)",
             payload=context,
             risk_score=decision.risk_assessment,
-            continuity_load=context.get('continuity_load', 0.3),
-            context_tag=decision.decision_id,
+            continuity_load=context.get('continuity_load', _DEFAULT_CONTINUITY_LOAD),
+            # Prefix decision_id with DLP context prefix for data-lineage tracking
+            context_tag=_DLP_CONTEXT_PREFIX + decision.decision_id,
             human_context=context.get('human_context'),
         )
 
@@ -265,7 +277,7 @@ class TriplexHandshakeValidator:
         anchor_result = {
             'approved': anchor_approved,
             'anchor_status': 'aligned' if anchor_approved else 'invalid',
-            'anchors_checked': 2,  # T1 + SRB
+            'anchors_checked': _CAELION_ANCHOR_COUNT,
             'issues': raw_anchor['anchor_validation']['concerns'],
             'evaluator': 'Caelion',
             'recommendation': raw_anchor['recommendation'],

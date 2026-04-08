@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title>Aurora CloudBank Symbolic</title>
+  <desc>Orbital mark for the Aurora CloudBank Pages launchpad.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07141b" />
+      <stop offset="100%" stop-color="#15313d" />
+    </linearGradient>
+    <linearGradient id="orbit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f3dd9d" />
+      <stop offset="100%" stop-color="#73d5c6" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#bg)" />
+  <circle cx="128" cy="128" r="66" fill="none" stroke="url(#orbit)" stroke-width="12" opacity="0.95" />
+  <circle cx="128" cy="128" r="32" fill="#f3dd9d" opacity="0.95" />
+  <path d="M52 158c30-44 72-70 126-78" fill="none" stroke="#73d5c6" stroke-width="10" stroke-linecap="round" opacity="0.85" />
+  <circle cx="190" cy="78" r="12" fill="#73d5c6" />
+  <circle cx="70" cy="166" r="10" fill="#f3dd9d" />
+</svg>

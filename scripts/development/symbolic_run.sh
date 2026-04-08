@@ -3,7 +3,7 @@
 
 echo "🔧 Initializing symbolic runtime..."
 
-mkdir -p static && echo "<!-- placeholder -->" > static/index.html
+mkdir -p static/js static/css static/data
 pip install -r requirements.txt
 
 echo "🚀 Launching Aurora ZIP Wizard GUI..."

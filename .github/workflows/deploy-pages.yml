@@ -4,20 +4,38 @@ on:
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/deploy-pages.yml
+      - index.html
+      - aurora_dashboard.html
+      - 404.html
+      - VERSION
+      - deployment/status/latest_check.json
+      - docs/api/API_CATALOG.json
+      - scripts/build-web.js
+      - static/**
+  pull_request:
+    paths:
+      - .github/workflows/deploy-pages.yml
+      - index.html
+      - aurora_dashboard.html
+      - 404.html
+      - VERSION
+      - deployment/status/latest_check.json
+      - docs/api/API_CATALOG.json
+      - scripts/build-web.js
+      - static/**
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: deploy-pages
+  group: deploy-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -29,23 +47,42 @@ jobs:
           node-version: "20"
 
       - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Build static site
         run: node scripts/build-web.js
 
-      - name: Prevent Jekyll processing
-        run: touch build/.nojekyll
+      - name: Validate Pages artifact
+        run: |
+          test -f build/index.html
+          test -f build/404.html
+          test -f build/aurora_dashboard.html
+          test -f build/site-data.json
+          test -f build/manifest.json
+          test -f build/robots.txt
+          test -f build/sitemap.xml
+
+      - name: Upload preview artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-preview
+          path: build
 
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: build
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

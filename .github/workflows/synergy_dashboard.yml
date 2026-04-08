@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: write
+
+concurrency:
+  group: synergy-dashboard-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   update-dashboard:
     runs-on: ubuntu-latest
@@ -13,6 +20,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -223,14 +232,24 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          git checkout -B "${BRANCH_NAME}"
           git add .github/dashboards/synergy_dashboard.md
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Auto-update: Synergy Dashboard Module (Issue #260)"
-            # Extract branch name and push explicitly to avoid detached HEAD issues
-            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-            git push origin HEAD:"${BRANCH_NAME}"
+            for attempt in 1 2 3; do
+              if git pull --rebase origin "${BRANCH_NAME}" && git push origin HEAD:"${BRANCH_NAME}"; then
+                exit 0
+              fi
+              git rebase --abort || true
+              if [ "${attempt}" -eq 3 ]; then
+                echo "Failed to push dashboard after ${attempt} attempts"
+                exit 1
+              fi
+              sleep 5
+            done
           fi
       
       - name: Upload dashboard artifact (for PRs)

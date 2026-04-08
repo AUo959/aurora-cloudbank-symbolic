@@ -1,6 +1,0 @@
-# Codacy Configuration
-
-# This file is used to configure the workflows for Codacy.
-
-# Disable this workflow by setting the following condition
-if: false

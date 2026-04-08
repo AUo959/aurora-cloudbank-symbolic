@@ -51,10 +51,10 @@ print(report)
 
 3. **Belief Propagation** — 5-8 rounds of message passing on the trust network. Edge types modulate influence: collaborate (1.0x), reinforce (1.2x), inform (0.7x), challenge (-0.5x). Convergence threshold: 0.01.
 
-4. **Tier Aggregation** — Final beliefs are aggregated into three tiers:
-   - Tier I (P > 0.25): Most likely scenario
-   - Tier II (P 0.10-0.25): Plausible alternatives
-   - Tier III (P < 0.10): Tail risks
+4. **Tier Aggregation** — Final beliefs are aggregated into three tiers using a two-step process:
+   - Raw probabilities are clamped to per-tier bands: Tier I ∈ [0.26, 0.85], Tier II ∈ [0.10, 0.25], Tier III ∈ [0.01, 0.09]
+   - Softmax normalization is then applied across the three raw values so the outputs form a valid probability distribution: **P(I) + P(II) + P(III) = 1.0**
+   - Post-normalization values are not bounded to the pre-normalization bands; the bands only govern the relative ordering of inputs to softmax
 
 5. **Dissent & Echo Chamber Analysis** — Identifies analysts >1.5σ from consensus, ranks by influence. Detects reinforce-edge clusters with low internal variance.
 

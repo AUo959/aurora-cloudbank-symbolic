@@ -1,8 +1,13 @@
 """Unit tests for QGIA tier probability normalization.
 
-Verifies that Tier I, II, III probabilities form a coherent probability
-distribution summing to exactly 1.0 for all valid inputs, as required by
-the QGIA Analyst Orientation Guide output specification.
+Verifies that the softmax normalization applied in ``_aggregate_to_tiers``
+produces a coherent probability distribution: Tier I + Tier II + Tier III
+must sum to exactly 1.0 for all valid inputs.
+
+Note: the pre-normalization clamping bands (Tier I ∈ [0.26, 0.85],
+Tier II ∈ [0.10, 0.25], Tier III ∈ [0.01, 0.09]) are *inputs* to the
+softmax step.  Post-normalization values are not constrained to those
+bands; the only guaranteed post-normalization invariant is sum == 1.0.
 """
 
 import pytest

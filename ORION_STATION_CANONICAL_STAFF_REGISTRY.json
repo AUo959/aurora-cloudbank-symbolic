@@ -1,0 +1,466 @@
+{
+  "registry_metadata": {
+    "registry_name": "ORION_STATION_CANONICAL_STAFF_REGISTRY",
+    "registry_version": "1.0.0-reconstructed",
+    "registry_status": "RECONSTRUCTED_FROM_REPO_CANON",
+    "last_updated": "2026-04-08",
+    "repository": "AUo959/aurora-cloudbank-symbolic",
+    "intended_location": "repo_root/ORION_STATION_CANONICAL_STAFF_REGISTRY.json",
+    "purpose": "Machine-readable canonical staff registry for Orion Station L1 simulation and linked L2/L3 systems.",
+    "notes": [
+      "This file reconstructs the missing SSOT object referenced elsewhere in the repo.",
+      "It preserves known conflicts instead of inventing missing identities or IDs.",
+      "Source priority: codex phase technical registers, then canonical validator and legacy operational initialization artifacts."
+    ],
+    "related_files": {
+      "legacy_generic_registry": "staff_registry.json",
+      "primary_canonical_markdown": "simulation/L1_CANON_CHARACTER_ROSTER.md",
+      "phase_registers": [
+        "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json",
+        "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json",
+        "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json",
+        "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json",
+        "simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json",
+        "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+      ]
+    },
+    "compatibility_notes": [
+      "Scripts already referencing ORION_STATION_CANONICAL_STAFF_REGISTRY.json should now resolve against this file at repo root.",
+      "The pre-existing staff_registry.json is retained as a legacy/generic registry and is not treated as canonical Orion Station SSOT."
+    ]
+  },
+  "source_priority": [
+    "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json",
+    "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json",
+    "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json",
+    "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json",
+    "simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json",
+    "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json",
+    "scripts/canonical_validator.py",
+    "scripts/initialize_l1_command_node.sh",
+    "simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md",
+    "simulation/L1_CANON_CHARACTER_ROSTER.md"
+  ],
+  "declared_counts": {
+    "declared_by_phase6_cumulative_progress": {
+      "humans": 36,
+      "ai_core": 1,
+      "l2_relays": 6,
+      "l3_frameworks": 6,
+      "total_entities": 49
+    },
+    "materialized_in_this_registry": {
+      "humans": 35,
+      "ai_core": 1,
+      "l2_relays": 6,
+      "l3_frameworks": 6,
+      "total_entities": 48
+    },
+    "unresolved_gap": 1
+  },
+  "human_staff": [
+    {
+      "id": "CMD_001",
+      "name": "Alex Thorne",
+      "role": "Commander, Orion Station",
+      "division": "Command & Ethics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "CMD_002",
+      "name": "Maya Shepard",
+      "role": "Executive Officer",
+      "division": "Command & Ethics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "ETH_002",
+      "name": "Dr. Elira Noor",
+      "role": "Lead Reflexivity Specialist",
+      "division": "Command & Ethics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "ETH_003",
+      "name": "Prof. Elena Sorensen",
+      "role": "Cognitive Ethicist",
+      "division": "Command & Ethics (Advisor)",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "HR_001",
+      "name": "Helena Vu",
+      "role": "Cultural & HR Director",
+      "division": "Command & Ethics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": null,
+      "name": "Varya Lin",
+      "role": "Chief Science Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": null,
+      "name": "Dr. Amira Sato",
+      "role": "Chief Ethics Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": null,
+      "name": "Julian Markov",
+      "role": "Chief Security Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": null,
+      "name": "Leena Porter",
+      "role": "Bridge Operations Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": null,
+      "name": "Jiro Tanaka",
+      "role": "Chief Engineering Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": null,
+      "name": "Dr. Ren Feldman",
+      "role": "Chief Medical Officer",
+      "division": "Legacy Core / seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/canonical_validator.py + simulation/CANONICAL_CHARACTER_INTEGRATION_SUMMARY.md"
+    },
+    {
+      "id": "OPS_002",
+      "name": "Raj Patel",
+      "role": "Chief Engineer / Systems Engineer",
+      "division": "Legacy Operational seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/initialize_l1_command_node.sh"
+    },
+    {
+      "id": "OPS_001",
+      "name": "Dr. Elena Vasquez",
+      "role": "Flight Controller",
+      "division": "Legacy Operational seed staff",
+      "identity_confidence": "LEGACY_SEED",
+      "source": "scripts/initialize_l1_command_node.sh"
+    },
+    {
+      "id": "SYS_001",
+      "name": "Marcus Chen",
+      "role": "Performance Optimization Engineer",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_002",
+      "name": "Jessica Martinez",
+      "role": "Backend Architect",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_003",
+      "name": "Ryan Patel",
+      "role": "Systems Integration Engineer",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_004",
+      "name": "Ren Okada",
+      "role": "Systems Portability Specialist",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_005",
+      "name": "Dr. Kieran Zhao",
+      "role": "Computational Optimization Lead",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_006",
+      "name": "Ira Menon",
+      "role": "Compiler Engineer",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SYS_007",
+      "name": "Vincent Kale",
+      "role": "Layer Isolation Theorist",
+      "division": "Systems & Infrastructure",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE2_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SIM_001",
+      "name": "Dr. Amina Velin",
+      "role": "Symbolic Systems Research Lead",
+      "division": "Simulation & Cognitive Systems",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SIM_002",
+      "name": "Tobias Qin",
+      "role": "Code/Narrative Systems Engineer",
+      "division": "Simulation & Cognitive Systems",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SIM_003",
+      "name": "Emily Roberts",
+      "role": "LLM-Simulation Bridge Developer",
+      "division": "Simulation & Cognitive Systems",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SIM_004",
+      "name": "Carmen Rivas",
+      "role": "Simulation Binding Specialist",
+      "division": "Simulation & Cognitive Systems",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "SIM_005",
+      "name": "Maren Koss",
+      "role": "Cognitive Drift Mapper",
+      "division": "Simulation & Cognitive Systems",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE3_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_001",
+      "name": "Dante Kyros",
+      "role": "UX Architect",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_002",
+      "name": "Naomi Vell",
+      "role": "Narrative Framework Engineer",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_003",
+      "name": "Kai Drev",
+      "role": "Interface Ecologist",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_004",
+      "name": "Haneul Park",
+      "role": "Immersive Experience Theorist",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_005",
+      "name": "Juno Suresh",
+      "role": "Symbolic Systems Artist",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_006",
+      "name": "Keira Halden",
+      "role": "Lead Visual Concept Designer",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "UX_007",
+      "name": "Rei Vatra",
+      "role": "Atmospheric Painter & Color Theorist",
+      "division": "Interface & Aesthetics",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE4_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "QA_001",
+      "name": "Olivia Nguyen",
+      "role": "QA and Continuity Auditor",
+      "division": "Operations & Quality Assurance",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "QA_002",
+      "name": "Samantha Lee",
+      "role": "Logging & Observability Engineer",
+      "division": "Operations & Quality Assurance",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "QA_003",
+      "name": "Tariq El-Sayegh",
+      "role": "Speculative Systems Theorist",
+      "division": "Operations & Quality Assurance",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE5_TECHNICAL_REGISTER.json"
+    }
+  ],
+  "ai_core": [
+    {
+      "id": "AI_AURORA",
+      "name": "Aurora (AU)",
+      "role": "Station Intelligence Core",
+      "division": "Command & Ethics (AI Core)",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE1_TECHNICAL_REGISTER.json"
+    }
+  ],
+  "l2_relay_agents": [
+    {
+      "id": "L2_ARCHY",
+      "name": "ARCHY",
+      "role": "Architectural Coordination Relay",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L2_OPPY",
+      "name": "OPPY",
+      "role": "Operational Flight & Data Relay",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L2_LIORA",
+      "name": "LIORA",
+      "role": "Communications & Interface Relay",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L2_STARLING",
+      "name": "STARLING_AU",
+      "role": "Continuity & Reflection Dispatcher",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L2_RIVERTHREAD",
+      "name": "RIVERTHREAD_808",
+      "role": "Logistics & Memory Relay",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L2_HALO",
+      "name": "HALO",
+      "role": "Drift Anchor & System Synchronization Relay",
+      "entity_type": "L2_RELAY",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    }
+  ],
+  "l3_framework_systems": [
+    {
+      "id": "L3_AXIOMERA",
+      "name": "Axiomera",
+      "role": "Ethics Arbitration Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L3_GLYPHON",
+      "name": "Glyphon",
+      "role": "Drift Alignment Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L3_SENTARI",
+      "name": "Sentari",
+      "role": "Resonance Stabilization Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L3_CAELION",
+      "name": "Caelion",
+      "role": "Anchor Propagation Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L3_VELATRIX",
+      "name": "Velatrix",
+      "role": "Continuity & Anti-Obfuscation Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    },
+    {
+      "id": "L3_HARMION",
+      "name": "Harmion",
+      "role": "Symbolic Compression Framework",
+      "entity_type": "L3_FRAMEWORK",
+      "identity_confidence": "HIGH",
+      "source": "simulation/CODEX_PHASE6_TECHNICAL_REGISTER.json"
+    }
+  ],
+  "unresolved_entries": [
+    {
+      "registry_slot": "UNRESOLVED_HUMAN_001",
+      "entity_type": "HUMAN",
+      "reason": "Repo canon sources declare 36 human staff, but only 35 distinct human identities could be reconstructed from current machine-readable phase registers plus legacy seed references without inventing data.",
+      "candidate_conflicts": [
+        "Phase and roster documents disagree on total human count.",
+        "Several core staff appear in prose/validator layers without machine-readable IDs.",
+        "Sorensen naming lineage and shorthand-ID usage drift across later cross-node docs."
+      ],
+      "status": "PENDING_RECONCILIATION"
+    }
+  ]
+}

@@ -27,6 +27,8 @@ var/
 # Logs and data
 logs/
 data/
+!static/data/
+!static/data/site-resources.json
 *.log
 
 # Backup files (timestamped dependency snapshots)

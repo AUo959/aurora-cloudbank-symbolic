@@ -1,0 +1,494 @@
+{
+  "site": {
+    "name": "Aurora CloudBank Symbolic",
+    "subtitle": "GitHub Pages Launchpad",
+    "description": "Repo-backed static portal for evaluating, building, operating, and researching Aurora without pretending GitHub Pages is the runtime.",
+    "repoUrl": "https://github.com/AUo959/aurora-cloudbank-symbolic",
+    "wikiUrl": "https://github.com/AUo959/aurora-cloudbank-symbolic/wiki",
+    "releasesUrl": "https://github.com/AUo959/aurora-cloudbank-symbolic/releases",
+    "issuesUrl": "https://github.com/AUo959/aurora-cloudbank-symbolic/issues",
+    "pagesUrl": "https://auo959.github.io/aurora-cloudbank-symbolic/"
+  },
+  "heroActions": [
+    {
+      "label": "Choose a Path",
+      "href": "#paths",
+      "style": "primary"
+    },
+    {
+      "label": "Deployment Guide",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/DEVELOPER_DEPLOYMENT_GUIDE.md",
+      "style": "secondary"
+    },
+    {
+      "label": "Source Repository",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic",
+      "style": "secondary"
+    }
+  ],
+  "personas": [
+    {
+      "id": "evaluate",
+      "label": "Evaluate",
+      "summary": "Start with repo evidence, architecture, documented routes, and static demos before committing to a local runtime or deeper deployment work.",
+      "outcomes": [
+        "Understand what GitHub Pages actually serves.",
+        "Inspect system posture from tracked deployment evidence.",
+        "Compare the static portal to documented API and architecture surfaces."
+      ]
+    },
+    {
+      "id": "build",
+      "label": "Build",
+      "summary": "Use the documented local setup path, contributor docs, and SDK/frontend references to get a real development environment running.",
+      "outcomes": [
+        "Bootstrap a local environment with the supported commands.",
+        "Find the docs that matter before touching runtime code.",
+        "Move from Pages orientation into real build surfaces quickly."
+      ]
+    },
+    {
+      "id": "operate",
+      "label": "Operate",
+      "summary": "Treat Pages as a static launch surface, then pivot into monitoring, health checks, incident docs, and deployment references for actual runtime work.",
+      "outcomes": [
+        "Read the deployment posture and runtime boundaries clearly.",
+        "Jump into monitoring and incident-response docs without hunting.",
+        "Probe health and metrics from a local or deployed runtime."
+      ]
+    },
+    {
+      "id": "research",
+      "label": "Research",
+      "summary": "Map Aurora's conceptual, ethics, and quantum-symbolic materials without losing the concrete API and code entrypoints behind them.",
+      "outcomes": [
+        "Link conceptual docs to code and API surfaces.",
+        "Navigate research and ethics references from one static index.",
+        "Start deeper investigation from concrete files, not slogans."
+      ]
+    }
+  ],
+  "commandPanels": [
+    {
+      "id": "evidence-sweep",
+      "personas": [
+        "evaluate"
+      ],
+      "title": "Evidence Sweep",
+      "intro": "Use tracked files first to ground what the public site claims.",
+      "commands": [
+        "cat VERSION",
+        "python3 -m json.tool deployment/status/latest_check.json",
+        "rg -n '\"total_routes\"|\"/health\"|\"/metrics\"' docs/api/API_CATALOG.json"
+      ]
+    },
+    {
+      "id": "local-bootstrap",
+      "personas": [
+        "build"
+      ],
+      "title": "Local Bootstrap",
+      "intro": "These are the documented commands for standing up Aurora locally.",
+      "commands": [
+        "make setup",
+        "make check",
+        "make run"
+      ]
+    },
+    {
+      "id": "runtime-probes",
+      "personas": [
+        "operate"
+      ],
+      "title": "Runtime Probes",
+      "intro": "Pages is static; these commands target a live local or deployed runtime.",
+      "commands": [
+        "curl http://localhost:8000/health",
+        "curl http://localhost:8000/metrics",
+        "python api/aurora_system_validator.py"
+      ]
+    },
+    {
+      "id": "research-entrypoints",
+      "personas": [
+        "research"
+      ],
+      "title": "Research Entrypoints",
+      "intro": "Start from concrete docs and code search rather than broad summaries.",
+      "commands": [
+        "sed -n '1,120p' docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md",
+        "sed -n '1,120p' docs/api/RD_API_REFERENCE.md",
+        "rg -n 'APIRouter|FastAPI' api src modules -g '*.py'"
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "level": "L0",
+      "title": "Quantum Foundation",
+      "summary": "Quantum state, memory, and orchestration primitives anchor the lower layer of Aurora's symbolic system.",
+      "sourcePath": "modules/nexus/quantum/hybrid_orchestrator.py",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/modules/nexus/quantum/hybrid_orchestrator.py"
+    },
+    {
+      "level": "L1",
+      "title": "Symbolic Core",
+      "summary": "Vector symbolic architecture and geometric algebra provide the typed symbolic substrate documented in the architecture references.",
+      "sourcePath": "docs/architecture.md",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/architecture.md"
+    },
+    {
+      "level": "L2",
+      "title": "Coordination and Relays",
+      "summary": "Crew agents, event coordination, thread bridges, and relay managers connect symbolic components to operational behavior.",
+      "sourcePath": "api/aurora_api.py",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/api/aurora_api.py"
+    },
+    {
+      "level": "L3",
+      "title": "Services and Operations",
+      "summary": "FastAPI surfaces, deployment assets, monitoring, and GitHub automation sit at the service layer where operators actually work.",
+      "sourcePath": "docs/DEVELOPER_DEPLOYMENT_GUIDE.md",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/DEVELOPER_DEPLOYMENT_GUIDE.md"
+    }
+  ],
+  "runtimeSurfaces": [
+    {
+      "title": "Pages Launchpad",
+      "href": "index.html",
+      "availability": "Pages Static",
+      "description": "Static orientation surface for the repo, docs, and deployment posture."
+    },
+    {
+      "title": "Deployment Dashboard",
+      "href": "aurora_dashboard.html",
+      "availability": "Pages Static",
+      "description": "Compact operator snapshot for readiness, surfaces, and next actions."
+    },
+    {
+      "title": "Quantum VSA Demo",
+      "href": "quantum-vsa-demo.html",
+      "availability": "Pages Static",
+      "description": "Interactive static demo for the quantum-symbolic playground surface."
+    },
+    {
+      "title": "Synergy Dashboard",
+      "href": "synergy-dashboard.html",
+      "availability": "Pages Static",
+      "description": "Static component dashboard experience generated from repository assets."
+    },
+    {
+      "title": "API Health",
+      "href": "http://localhost:8000/health",
+      "availability": "Local Runtime",
+      "description": "Live FastAPI health endpoint. Not hosted by GitHub Pages."
+    },
+    {
+      "title": "API Docs",
+      "href": "http://localhost:8000/docs",
+      "availability": "Local Runtime",
+      "description": "Swagger UI for a running Aurora API instance."
+    },
+    {
+      "title": "Prometheus Metrics",
+      "href": "http://localhost:8000/metrics",
+      "availability": "Local Runtime",
+      "description": "Metrics export from a running service instance."
+    }
+  ],
+  "experiences": [
+    {
+      "title": "Deployment Dashboard",
+      "href": "aurora_dashboard.html",
+      "summary": "Operator-oriented snapshot page for readiness, runtime boundaries, and deployment references.",
+      "type": "Operator View"
+    },
+    {
+      "title": "Quantum VSA Demo",
+      "href": "quantum-vsa-demo.html",
+      "summary": "Interactive static demo for symbolic vector generation and quantum-inspired inspection.",
+      "type": "Interactive Demo"
+    },
+    {
+      "title": "Synergy Dashboard",
+      "href": "synergy-dashboard.html",
+      "summary": "Component registry and dependency view powered by the repo's dashboard assets.",
+      "type": "Static Dashboard"
+    }
+  ],
+  "opsChecklist": [
+    "Confirm the tracked deployment status is READY before presenting Pages as current system posture.",
+    "Use make setup, make check, and make run for local runtime work instead of treating Pages as the application runtime.",
+    "Probe /health and /metrics from a live service instance, not from GitHub Pages.",
+    "Use monitoring, incident-response, and security docs before exposing a runtime outside local development.",
+    "Treat Pages as an evidence, docs, and demo surface that points users into the real repo and runtime."
+  ],
+  "resources": [
+    {
+      "id": "developer-deployment-guide",
+      "title": "Developer Deployment Guide",
+      "summary": "Supported setup, local run, CI handling, and deployment preview workflow.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/DEVELOPER_DEPLOYMENT_GUIDE.md",
+      "sourcePath": "docs/DEVELOPER_DEPLOYMENT_GUIDE.md",
+      "kind": "guide",
+      "personas": [
+        "build",
+        "operate"
+      ],
+      "tags": [
+        "setup",
+        "deployment",
+        "runtime"
+      ]
+    },
+    {
+      "id": "architecture-overview",
+      "title": "System Architecture",
+      "summary": "High-level symbolic and API architecture notes with references to the VSA core.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/architecture.md",
+      "sourcePath": "docs/architecture.md",
+      "kind": "reference",
+      "personas": [
+        "evaluate",
+        "research"
+      ],
+      "tags": [
+        "architecture",
+        "symbolic",
+        "overview"
+      ]
+    },
+    {
+      "id": "api-catalog-json",
+      "title": "API Catalog JSON",
+      "summary": "Machine-readable catalog of documented routes used as the Pages evidence source.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/api/API_CATALOG.json",
+      "sourcePath": "docs/api/API_CATALOG.json",
+      "kind": "reference",
+      "personas": [
+        "evaluate",
+        "build"
+      ],
+      "tags": [
+        "api",
+        "json",
+        "routes"
+      ]
+    },
+    {
+      "id": "rd-api-reference",
+      "title": "R&D API Reference",
+      "summary": "Detailed reference for the R&D Productization Pipeline endpoints and governance posture.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/api/RD_API_REFERENCE.md",
+      "sourcePath": "docs/api/RD_API_REFERENCE.md",
+      "kind": "reference",
+      "personas": [
+        "evaluate",
+        "research"
+      ],
+      "tags": [
+        "api",
+        "rd",
+        "governance"
+      ]
+    },
+    {
+      "id": "monitoring-quickstart",
+      "title": "Monitoring Quickstart",
+      "summary": "Fast orientation for monitoring surfaces before deeper observability work.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/MONITORING_QUICKSTART.md",
+      "sourcePath": "docs/MONITORING_QUICKSTART.md",
+      "kind": "operations",
+      "personas": [
+        "operate"
+      ],
+      "tags": [
+        "monitoring",
+        "observability",
+        "ops"
+      ]
+    },
+    {
+      "id": "incident-response-runbook",
+      "title": "Incident Response Runbook",
+      "summary": "Operational escalation and response guidance for incidents around the Aurora runtime.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/INCIDENT_RESPONSE_RUNBOOK.md",
+      "sourcePath": "docs/INCIDENT_RESPONSE_RUNBOOK.md",
+      "kind": "operations",
+      "personas": [
+        "operate"
+      ],
+      "tags": [
+        "incident",
+        "runbook",
+        "ops"
+      ]
+    },
+    {
+      "id": "security-guidelines",
+      "title": "Security Guidelines",
+      "summary": "Security posture, patterns, and safe defaults for runtime and contributor work.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/SECURITY_GUIDELINES.md",
+      "sourcePath": "docs/SECURITY_GUIDELINES.md",
+      "kind": "operations",
+      "personas": [
+        "build",
+        "operate"
+      ],
+      "tags": [
+        "security",
+        "policy",
+        "ops"
+      ]
+    },
+    {
+      "id": "k8s-deployment-guide",
+      "title": "Kubernetes Deployment Guide",
+      "summary": "Preview deployment material for k8s-based Aurora rollout paths.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/k8s/KUBERNETES_DEPLOYMENT_GUIDE.md",
+      "sourcePath": "k8s/KUBERNETES_DEPLOYMENT_GUIDE.md",
+      "kind": "guide",
+      "personas": [
+        "build",
+        "operate"
+      ],
+      "tags": [
+        "k8s",
+        "deployment",
+        "infrastructure"
+      ]
+    },
+    {
+      "id": "python-sdk-readme",
+      "title": "Python SDK README",
+      "summary": "Entry point for the Python SDK surface and packaging expectations.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/sdk/python/README.md",
+      "sourcePath": "sdk/python/README.md",
+      "kind": "guide",
+      "personas": [
+        "build"
+      ],
+      "tags": [
+        "sdk",
+        "python",
+        "integration"
+      ]
+    },
+    {
+      "id": "frontend-readme",
+      "title": "Frontend README",
+      "summary": "Architecture and setup notes for the dedicated frontend app surface.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/frontend/README.md",
+      "sourcePath": "frontend/README.md",
+      "kind": "guide",
+      "personas": [
+        "build"
+      ],
+      "tags": [
+        "frontend",
+        "vite",
+        "ui"
+      ]
+    },
+    {
+      "id": "contributing-guide",
+      "title": "Contributing Guide",
+      "summary": "Contributor norms, expectations, and repo workflow entrypoint.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/CONTRIBUTING.md",
+      "sourcePath": "CONTRIBUTING.md",
+      "kind": "repository",
+      "personas": [
+        "build"
+      ],
+      "tags": [
+        "contributing",
+        "workflow",
+        "git"
+      ]
+    },
+    {
+      "id": "what-is-aurora",
+      "title": "What Is Aurora For?",
+      "summary": "Conceptual orientation document for the repo's real use cases and positioning.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/WHAT_IS_AURORA_FOR.md",
+      "sourcePath": "docs/WHAT_IS_AURORA_FOR.md",
+      "kind": "reference",
+      "personas": [
+        "evaluate",
+        "research"
+      ],
+      "tags": [
+        "positioning",
+        "orientation",
+        "concept"
+      ]
+    },
+    {
+      "id": "quantum-forge-guide",
+      "title": "Quantum Forge v3 Guide",
+      "summary": "Guide to the repo's quantum-oriented simulation and orchestration surface.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md",
+      "sourcePath": "docs/QUANTUM_FORGE_V3_COMPLETE_GUIDE.md",
+      "kind": "reference",
+      "personas": [
+        "research"
+      ],
+      "tags": [
+        "quantum",
+        "forge",
+        "simulation"
+      ]
+    },
+    {
+      "id": "data-ethics-handbook",
+      "title": "Data Ethics Steward Handbook",
+      "summary": "Stewardship reference for ethical handling, review, and governance posture.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/data-ethics/STEWARD_HANDBOOK.md",
+      "sourcePath": "docs/data-ethics/STEWARD_HANDBOOK.md",
+      "kind": "reference",
+      "personas": [
+        "research",
+        "operate"
+      ],
+      "tags": [
+        "ethics",
+        "data",
+        "governance"
+      ]
+    },
+    {
+      "id": "cross-repo-collaboration",
+      "title": "Cross-Repo Collaboration",
+      "summary": "Repo relationship context for work that spans Aurora surfaces and supporting projects.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/blob/main/docs/CROSS_REPO_COLLABORATION.md",
+      "sourcePath": "docs/CROSS_REPO_COLLABORATION.md",
+      "kind": "repository",
+      "personas": [
+        "build",
+        "research"
+      ],
+      "tags": [
+        "collaboration",
+        "repo",
+        "workflow"
+      ]
+    },
+    {
+      "id": "github-releases",
+      "title": "GitHub Releases",
+      "summary": "Release artifacts, version history, and public distribution surface.",
+      "href": "https://github.com/AUo959/aurora-cloudbank-symbolic/releases",
+      "sourcePath": "VERSION",
+      "kind": "repository",
+      "personas": [
+        "evaluate",
+        "operate"
+      ],
+      "tags": [
+        "releases",
+        "versions",
+        "distribution"
+      ]
+    }
+  ]
+}

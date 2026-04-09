@@ -440,12 +440,11 @@ self.addEventListener('fetch', event => {
   }
 
   readVersion() {
-    const versionPath = this.projectPath(...PROJECT_FILE_MAP.version); // nosemgrep NOSONAR -- VERSION is a fixed repository file.
-    if (!fs.existsSync(versionPath)) {
+    try {
+      return fs.readFileSync(this.projectPath(...PROJECT_FILE_MAP.version), 'utf8').trim() || '0.0.0'; // nosemgrep NOSONAR -- VERSION is a fixed repository file.
+    } catch {
       return '0.0.0';
     }
-
-    return fs.readFileSync(versionPath, 'utf8').trim() || '0.0.0'; // nosemgrep NOSONAR -- VERSION is a fixed repository file.
   }
 
   resolveRevision() {

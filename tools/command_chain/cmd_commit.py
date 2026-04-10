@@ -16,7 +16,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tools.command_chain.comprehensive_sync_321 import (  # noqa: E402
     ComprehensiveSync,
     SyncConfig,
-    SyncResult
+    SyncResult,
+    resolve_config_path,
+    resolve_workspace_path,
 )
 
 
@@ -32,18 +34,11 @@ def execute_commit(config_path: Optional[str] = None, workspace_path: Optional[s
         SyncResult with phases 1-3 executed
     """
     # Load configuration
-    if config_path and Path(config_path).exists():
-        config = SyncConfig.load(Path(config_path))
-    elif Path(".aurora/sync_config.json").exists():
-        config = SyncConfig.load(Path(".aurora/sync_config.json"))
-    else:
-        config = SyncConfig()
+    resolved_config_path = resolve_config_path(config_path, workspace_path)
+    config = SyncConfig.load(resolved_config_path)
 
     # Set workspace
-    if workspace_path:
-        workspace = Path(workspace_path)
-    else:
-        workspace = Path.cwd()
+    workspace = resolve_workspace_path(workspace_path)
 
     # Create sync instance
     sync = ComprehensiveSync(config, workspace)
@@ -82,7 +77,7 @@ def execute_commit(config_path: Optional[str] = None, workspace_path: Optional[s
 
     # Phase 2: Stage changes
     print("Phase 2: Staging changes intelligently...")
-    phase2 = sync._phase2_intelligent_staging(phase1.details['categories'])
+    phase2 = sync._phase2_intelligent_staging(phase1.details)
     phases.append(phase2)
 
     if not phase2.success:
@@ -100,9 +95,8 @@ def execute_commit(config_path: Optional[str] = None, workspace_path: Optional[s
     # Phase 3: Commit
     print("Phase 3: Generating commit message and committing...")
     phase3 = sync._phase3_generate_commit(
-        phase1.details['categories'],
-        phase1.details.get('is_docs_only', False),
-        phase1.details.get('is_config_only', False)
+        phase1.details,
+        phase2.details,
     )
     phases.append(phase3)
 
@@ -124,7 +118,8 @@ def execute_commit(config_path: Optional[str] = None, workspace_path: Optional[s
         phases=phases,
         commit_sha=phase3.details.get('commit_sha'),
         files_changed=phase1.details['files_changed'],
-        total_duration=sum(p.duration_seconds for p in phases)
+        total_duration=sum(p.duration_seconds for p in phases),
+        summary_message=phase3.details.get('commit_message', ''),
     )
 
     print("\n" + "=" * 60)

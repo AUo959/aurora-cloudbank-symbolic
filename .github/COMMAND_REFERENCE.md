@@ -22,14 +22,13 @@
 **Quick Access:** Frequently used command codes with direct documentation links.
 
 ### Predefined Workflows
-- **[#321//.](../tools/command_chain/COMPREHENSIVE_SYNC_321.md)** - **Comprehensive Sync & Validate (Enhanced v4.0)**
-  - Universal "clean working tree" command with intelligent automation
-  - Stages, commits, syncs with remote, validates all changes
-  - **✨ NEW:** Automatically updates VERSION → README badges and syncs wiki submodule
-  - **Use anytime:** You want pending changes sorted with high quality + smart doc updates
-  - **Phases:** 7 (status → **doc intelligence** → stage → commit → **wiki sync** → remote sync → validate)
-  - **Runtime:** ~30-60 seconds
-  - **Run:** `bash scripts/sync_321_enhanced.sh`
+- **[#321//.](../tools/command_chain/COMPREHENSIVE_SYNC_321.md)** - **Comprehensive Sync & Validate**
+  - Universal "clean working tree" command with split implementations
+  - **Integrated Python path:** `python tools/command_chain/cmd_321.py` or `python tools/command_chain/dispatcher.py 321`
+  - **Integrated phases:** 6 (check → stage → commit → sync → validate → performance verify)
+  - **Enhanced shell variant:** `bash scripts/sync_321_enhanced.sh`
+  - **Enhanced extras:** VERSION/README automation and wiki sync, but this is a separate manual path, not the dispatcher-backed implementation
+  - **Use anytime:** You want pending changes sorted with high quality and a clear execution path
 
 - **[#808//.](../tools/command_chain/OPTIMIZING_PULSE_808.md)** - **Optimizing Pulse** (if exists)
   - Finds optimal path through complex workflows

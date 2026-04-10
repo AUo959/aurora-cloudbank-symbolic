@@ -18,10 +18,13 @@ Features:
 """
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Callable, List, Optional
 
 from .executor import ChainExecutionResult, CommandExecutor, ExecutionResult
+
+UTC = timezone.utc
 
 
 class FlowControlType(Enum):
@@ -154,7 +157,6 @@ class CommandChainFlow:
             parse_result = self.executor.parser.parse(cmd)
             if parse_result.has_errors:
                 # Create failed result
-                from datetime import datetime, UTC
                 return ChainExecutionResult(
                     chain_hash='',
                     results=[],

@@ -281,7 +281,7 @@ dlp_integration = get_dlp_integration()
 2. **code-quality.yml** - Flake8 + SonarCloud analysis (Issue #258)
 3. **dependency-validation.yml** - Python 3.11/3.12 matrix testing
 4. **codeql-unified.yml** - Security analysis
-5. **codacy.yml** - Third-party quality analysis
+5. **codacy-analysis.yml** - Third-party quality analysis
 
 **Key Patterns:**
 - `continue-on-error: true` for non-critical checks

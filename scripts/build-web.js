@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -242,8 +242,13 @@ self.addEventListener('fetch', event => {
   }
 }
 
+// Resolve relative CLI paths so `node scripts/build-web.js` works in CI and locally.
+const invokedModuleUrl = process.argv[1]
+  ? pathToFileURL(path.resolve(process.argv[1])).href
+  : null;
+
 // Run build if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (invokedModuleUrl && import.meta.url === invokedModuleUrl) {
   const builder = new AuroraWebBuilder();
   builder.build().catch(console.error);
 }

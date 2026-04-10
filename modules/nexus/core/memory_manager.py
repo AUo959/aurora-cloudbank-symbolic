@@ -12,10 +12,11 @@ import hashlib
 import json
 from datetime import datetime, UTC
 from pathlib import Path
-from typing import Dict, Any, Optional, List
 import logging
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
+
 
 class SymbolicMemoryManager:
     """
@@ -157,8 +158,10 @@ class SymbolicMemoryManager:
         
         return manifest
 
+
 # Module-level initialization
 memory_manager = SymbolicMemoryManager()
+
 
 def get_memory_manager() -> SymbolicMemoryManager:
     """Get singleton memory manager instance"""

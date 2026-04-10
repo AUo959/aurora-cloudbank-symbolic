@@ -120,7 +120,7 @@ class DataGuardianMiddleware(BaseHTTPMiddleware):
                     detections = self.detector.scan_dict(data)
 
                     if detections and self.redact_mode:
-                        redacted_data = self.redaction_engine.redact_dict(
+                        self.redaction_engine.redact_dict(
                             data,
                             detections
                         )

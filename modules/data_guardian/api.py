@@ -16,6 +16,7 @@ from .redaction import RedactionEngine, RedactionStrategy
 
 # Pydantic models for API requests/responses
 
+
 class ScanRequest(BaseModel):
     """Request body for scanning data."""
     data: Dict[str, Any] = Field(..., description="Data to scan for PII")

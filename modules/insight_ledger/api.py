@@ -6,7 +6,6 @@ Anchor: T1-TIL-API-001
 """
 
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query, status

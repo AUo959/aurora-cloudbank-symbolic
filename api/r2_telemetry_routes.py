@@ -8,16 +8,18 @@ Provides HTTP endpoints for:
 - Health status checks
 """
 
-from fastapi import APIRouter, Query, HTTPException
-from fastapi.responses import PlainTextResponse
-from typing import Optional, Dict, Any, List
+from dataclasses import asdict
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Query
+from fastapi.responses import PlainTextResponse
 
 try:
-    from src.observability import get_r2_telemetry, AgentOperationMetrics
+    from src.observability import get_r2_telemetry
 except ImportError:
     # Fallback for testing
-    from observability import get_r2_telemetry, AgentOperationMetrics
+    from observability import get_r2_telemetry
 
 
 router = APIRouter(prefix="/r2-telemetry", tags=["R-2 Agent Telemetry"])
@@ -88,8 +90,6 @@ async def get_recent_operations(
         include_failures_only=failures_only
     )
     
-    # Convert to dicts for JSON serialization
-    from dataclasses import asdict
     return [asdict(op) for op in operations]
 
 
@@ -149,7 +149,6 @@ async def get_detected_anomalies(
     # Use public method to get anomalies
     anomalies = telemetry.get_recent_anomalies(limit=limit)
     
-    from dataclasses import asdict
     return [asdict(anomaly) for anomaly in anomalies]
 
 

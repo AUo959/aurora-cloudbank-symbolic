@@ -6,16 +6,15 @@ Command-line interface for managing the Insight Ledger.
 Anchor: T1-TIL-004
 """
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 import json
+import logging
 import sys
 from typing import Optional
 
 from modules.insight_ledger.ledger_core import InsightLedger
 from modules.insight_ledger.schemas import AuditQuery, InsightRecord, InsightType
+
+logger = logging.getLogger(__name__)
 
 
 def record_insight_cli(
@@ -44,7 +43,7 @@ def record_insight_cli(
         try:
             itype = InsightType(insight_type)
         except ValueError:
-            logger.error("Invalid insight type: {insight_type}")
+            logger.error("Invalid insight type: %s", insight_type)
             print(f"Valid types: {', '.join([t.value for t in InsightType])}")
             sys.exit(1)
 
@@ -57,7 +56,7 @@ def record_insight_cli(
             try:
                 context_dict = json.loads(context)
             except json.JSONDecodeError:
-                logger.error("Invalid JSON context: {context}")
+                logger.error("Invalid JSON context: %s", context)
                 sys.exit(1)
 
         # Create ledger and record
@@ -79,8 +78,8 @@ def record_insight_cli(
         print(f"   Hash: {entry.entry_hash[:16]}...")
         print(f"   Signature: {entry.signature[:16]}...")
 
-    except Exception as e:
-        logger.error("Failed to record insight: {e}")
+    except Exception as exc:
+        logger.error("Failed to record insight: %s", exc)
         sys.exit(1)
 
 
@@ -95,7 +94,7 @@ def verify_integrity_cli(storage_path: str, limit: Optional[int] = None) -> None
     try:
         ledger = InsightLedger(storage_path=storage_path)
 
-        print(f"🔍 Verifying ledger integrity...")
+        print("🔍 Verifying ledger integrity...")
         if limit:
             print(f"   Checking last {limit} entries")
 
@@ -115,8 +114,8 @@ def verify_integrity_cli(storage_path: str, limit: Optional[int] = None) -> None
                     print(f"   - {error}")
             sys.exit(1)
 
-    except Exception as e:
-        logger.error("Verification failed: {e}")
+    except Exception as exc:
+        logger.error("Verification failed: %s", exc)
         sys.exit(1)
 
 
@@ -151,7 +150,7 @@ def query_history_cli(
             try:
                 query.insight_types = [InsightType(insight_type)]
             except ValueError:
-                logger.error("Invalid insight type: {insight_type}")
+                logger.error("Invalid insight type: %s", insight_type)
                 sys.exit(1)
 
         if source:
@@ -204,8 +203,8 @@ def query_history_cli(
                     f"{entry.insight_type.value:<12} {entry.source:<20} {content_short:<40}"
                 )
 
-    except Exception as e:
-        logger.error("Query failed: {e}")
+    except Exception as exc:
+        logger.error("Query failed: %s", exc)
         sys.exit(1)
 
 
@@ -220,25 +219,27 @@ def get_stats_cli(storage_path: str) -> None:
         ledger = InsightLedger(storage_path=storage_path)
         stats = ledger.get_stats()
 
-        print(f"\n📊 Ledger Statistics\n")
+        print("\n📊 Ledger Statistics\n")
         print(f"Total Entries:      {stats.total_entries}")
-        print(f"First Entry:        {stats.first_entry_time.strftime('%Y-%m-%d %H:%M:%S') if stats.first_entry_time else 'N/A'}")
-        print(f"Last Entry:         {stats.last_entry_time.strftime('%Y-%m-%d %H:%M:%S') if stats.last_entry_time else 'N/A'}")
+        first_entry = stats.first_entry_time.strftime('%Y-%m-%d %H:%M:%S') if stats.first_entry_time else 'N/A'
+        last_entry = stats.last_entry_time.strftime('%Y-%m-%d %H:%M:%S') if stats.last_entry_time else 'N/A'
+        print(f"First Entry:        {first_entry}")
+        print(f"Last Entry:         {last_entry}")
         print(f"Integrity Verified: {'✅ Yes' if stats.integrity_verified else '❌ No'}")
         print(f"Storage Size:       {stats.ledger_size_bytes:,} bytes")
 
         if stats.entries_by_type:
-            print(f"\n📈 Entries by Type:")
+            print("\n📈 Entries by Type:")
             for itype, count in sorted(stats.entries_by_type.items(), key=lambda x: -x[1]):
                 print(f"   {itype:<15} {count:>6}")
 
         if stats.entries_by_source:
-            print(f"\n🔍 Entries by Source:")
+            print("\n🔍 Entries by Source:")
             for source, count in sorted(stats.entries_by_source.items(), key=lambda x: -x[1])[:10]:
                 print(f"   {source:<30} {count:>6}")
 
-    except Exception as e:
-        logger.error("Failed to get stats: {e}")
+    except Exception as exc:
+        logger.error("Failed to get stats: %s", exc)
         sys.exit(1)
 
 
@@ -264,8 +265,8 @@ def export_ledger_cli(
         print(f"   Entries exported: {count}")
         print(f"   Output file: {output_path}")
 
-    except Exception as e:
-        logger.error("Export failed: {e}")
+    except Exception as exc:
+        logger.error("Export failed: %s", exc)
         sys.exit(1)
 
 

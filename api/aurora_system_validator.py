@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
+"""Aurora CloudBank System Validator."""
+
+import json
 import logging
+from pathlib import Path
+import os
+import sys
 
 logger = logging.getLogger(__name__)
 
-from pathlib import Path
-import json
-import os
-import sys
-"""
-Aurora CloudBank System Validator
-Comprehensive validation of the Aurora CloudBank Symbolic repository
-"""
-
-
 
 class AuroraSystemValidator:
-
     def __init__(self):
         self.project_root = Path("/workspaces/aurora-cloudbank-symbolic")
         self.results = {}
@@ -40,8 +35,8 @@ class AuroraSystemValidator:
             else:
                 return False, f"❌ Only {toolset_count} toolsets found, expected 10+"
 
-        except Exception as e:
-            return False, f"❌ Error reading toolsets file: {str(e)}"
+        except Exception as exc:
+            return False, f"❌ Error reading toolsets file: {str(exc)}"
 
     def validate_git_status(self):
         """Validate git repository status"""
@@ -68,8 +63,8 @@ class AuroraSystemValidator:
             else:
                 return False, "❌ GitWiz exclusions not found in .gitignore"
 
-        except Exception as e:
-            return False, f"❌ Error checking git status: {str(e)}"
+        except Exception as exc:
+            return False, f"❌ Error checking git status: {str(exc)}"
 
     def validate_source_structure(self):
         """Validate source code structure"""
@@ -174,11 +169,11 @@ class AuroraSystemValidator:
                 success, message = validator()
                 if success:
                     total_score += 1
-                    logger.info("{name}: {message}")
+                    logger.info("%s: %s", name, message)
                 else:
-                    logger.error("{name}: {message}")
-            except Exception as e:
-                logger.error("{name}: Error during validation - {str(e)}")
+                    logger.error("%s: %s", name, message)
+            except Exception as exc:
+                logger.error("%s: Error during validation - %s", name, str(exc))
 
         print()
         print("=" * 60)

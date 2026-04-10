@@ -17,7 +17,6 @@ from pydantic import BaseModel, Field
 from src.monitoring.ethics_engine import (
     EthicsEngine,
     ActionContext,
-    EthicsViolation,
     EthicsRule,
     ViolationSeverity,
     RuleCategory

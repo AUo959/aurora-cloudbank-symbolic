@@ -165,13 +165,13 @@ class SynapseValidator:
             else:
                 return (
                     f"CONSENSUS DENY: {denied_count}/{total} validators rejected "
-                    f"(consensus: {(1.0-consensus_score):.0%}). "
+                    f"(consensus: {(1.0 - consensus_score):.0%}). "
                     f"Distributed validation confirms high geometric resistance."
                 )
         else:
             return (
                 f"NO CONSENSUS: {allowed_count} allow, {denied_count} deny "
-                f"(split: {consensus_score:.0%}/{(1.0-consensus_score):.0%}). "
+                f"(split: {consensus_score:.0%}/{(1.0 - consensus_score):.0%}). "
                 f"Requires human-in-loop decision."
             )
 

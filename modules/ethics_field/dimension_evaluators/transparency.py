@@ -14,7 +14,7 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=transparency_evaluator, symbolic_hash=AUDITABILITY_v1
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
 class TransparencyEvaluator:

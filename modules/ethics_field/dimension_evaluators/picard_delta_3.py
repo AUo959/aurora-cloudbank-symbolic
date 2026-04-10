@@ -15,7 +15,7 @@ DLP: context_tag=picard_delta_3_evaluator, symbolic_hash=AUTONOMY_RESPECT_v1
 """
 
 import math
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class PicardDelta3Evaluator:

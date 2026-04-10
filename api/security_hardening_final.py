@@ -4,16 +4,14 @@ Aurora CloudBank - Final Security Hardening Pass
 Comprehensive security improvements before merge
 """
 
+import json
 import logging
+import os
+import re
+import subprocess
 
 logger = logging.getLogger(__name__)
 
-import os
-import subprocess
-import sys
-import json
-import re
-from pathlib import Path
 
 class SecurityHardener:
     def __init__(self):
@@ -25,8 +23,11 @@ class SecurityHardener:
         print("🔍 Checking Python dependencies...")
         try:
             # Check if safety is available for dependency scanning
-            result = subprocess.run(['python3', '-m', 'pip', 'list', '--format=json'], 
-                                  capture_output=True, text=True)
+            result = subprocess.run(
+                ['python3', '-m', 'pip', 'list', '--format=json'],
+                capture_output=True,
+                text=True,
+            )
             if result.returncode == 0:
                 packages = json.loads(result.stdout)
                 vulnerable_packages = []
@@ -52,8 +53,8 @@ class SecurityHardener:
                 else:
                     logger.info("Python dependencies look good")
                     
-        except Exception as e:
-            logger.warning("Could not check Python dependencies: {e}")
+        except Exception as exc:
+            logger.warning("Could not check Python dependencies: %s", exc)
     
     def harden_fastapi_imports(self):
         """Ensure secure FastAPI configurations"""
@@ -123,7 +124,7 @@ class SecurityHardener:
                     if re.search(pattern, content):
                         self.vulnerabilities_found.append(f"Unsafe pattern in {file_path}: {pattern}")
                         
-            except Exception as e:
+            except Exception:
                 continue
     
     def create_security_config(self):
@@ -212,6 +213,7 @@ class SecurityHardener:
         
         print("\n🎯 Security Status: HARDENED")
         print("🚀 Ready for safe merge with main!")
+
 
 if __name__ == "__main__":
     hardener = SecurityHardener()

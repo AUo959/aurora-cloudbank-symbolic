@@ -19,7 +19,7 @@ Thread: T1→T8→INFINITE
 DLP: context_tag=layer_integrity_evaluator, symbolic_hash=REALITY_COHERENCE_v1
 """
 
-from typing import Any, Dict, Set
+from typing import Any, Dict
 
 
 class LayerIntegrityEvaluator:
@@ -148,7 +148,6 @@ class LayerIntegrityEvaluator:
         """
         source_layer = self._normalize_layer(source.get("layer", "L1"))
         target_layer = self._normalize_layer(target.get("layer", "L1"))
-        source_entity = source.get("entity_type", "")
         target_entity = target.get("entity_type", "")
 
         # CRITICAL: L2 cannot affect L1 physical

@@ -12,7 +12,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
 import logging
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 # DLP tracking for synergy dashboard operations

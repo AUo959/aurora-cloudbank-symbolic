@@ -12,14 +12,15 @@ with full entropy awareness and divergent truth detection
 """
 
 import asyncio
-import json
 import hashlib
+import json
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
-import numpy as np
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 from src.core.time_utils import utc_now
 
 
@@ -291,8 +292,12 @@ class MultiAgentCoordinator:
         divergence_path.parent.mkdir(parents=True, exist_ok=True)
         divergence_path.write_text(json.dumps(divergence, indent=2))
         
-    async def coordinate_action(self, action: str, agents: List[str], 
-                               mode: Optional[CoordinationMode] = None) -> Dict:
+    async def coordinate_action(
+        self,
+        action: str,
+        agents: List[str],
+        mode: Optional[CoordinationMode] = None,
+    ) -> Dict:
         """Coordinate an action across multiple agents"""
         
         if mode:
@@ -415,14 +420,14 @@ class MultiAgentCoordinator:
         if agent_state_file.exists():
             try:
                 self.agents = json.loads(agent_state_file.read_text())
-            except:
+            except Exception:
                 pass  # Start fresh if corrupted
                 
         entropy_state_file = self.state_path / "entropy.json"
         if entropy_state_file.exists():
             try:
                 self.entropy_monitor = json.loads(entropy_state_file.read_text())
-            except:
+            except Exception:
                 pass  # Use default if corrupted
                 
     def _save_state(self):
@@ -433,8 +438,10 @@ class MultiAgentCoordinator:
         entropy_state_file = self.state_path / "entropy.json"
         entropy_state_file.write_text(json.dumps(self.entropy_monitor, indent=2))
 
+
 # Module initialization
 coordinator = MultiAgentCoordinator()
+
 
 def get_coordinator() -> MultiAgentCoordinator:
     """Get singleton coordinator instance"""

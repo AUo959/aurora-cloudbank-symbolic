@@ -17,7 +17,7 @@ DLP: context_tag=geometric_ethics_core, symbolic_hash=FIELD_GEOMETRY_v1
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from .field_curvature import FieldCurvature
 

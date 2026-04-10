@@ -5,12 +5,12 @@ Advanced repository health improvement with intelligent prioritization
 """
 
 import json
-import subprocess
-import os
-import time
-from datetime import datetime, timedelta
-from pathlib import Path
 import re
+import subprocess
+import time
+from datetime import datetime
+from pathlib import Path
+
 
 class HealthScoreOptimizer:
     def __init__(self):
@@ -591,7 +591,7 @@ class HealthScoreOptimizer:
     
     def display_comprehensive_assessment(self, metrics, health_score, recommendations):
         """Display comprehensive health assessment"""
-        print(f"\n🏆 ENHANCED HEALTH ASSESSMENT RESULTS")
+        print("\n🏆 ENHANCED HEALTH ASSESSMENT RESULTS")
         print("=" * 55)
         
         # Score comparison
@@ -628,28 +628,31 @@ class HealthScoreOptimizer:
         
         # Code Quality
         cq = metrics["code_quality"]
-        print(f"🔧 Code Quality:")
-        print(f"   Core Files: {cq['core_files_compiling']}/{cq['core_python_files']} compiling ({cq['core_compilation_rate']*100:.1f}%)")
+        print("🔧 Code Quality:")
+        print(
+            f"   Core Files: {cq['core_files_compiling']}/{cq['core_python_files']} "
+            f"compiling ({cq['core_compilation_rate'] * 100:.1f}%)"
+        )
         print(f"   Core Errors: {cq['core_syntax_errors']}")
-        print(f"   Overall Rate: {cq['compilation_rate']*100:.1f}% ({cq['total_python_files']} files)")
+        print(f"   Overall Rate: {cq['compilation_rate'] * 100:.1f}% ({cq['total_python_files']} files)")
         
         # Security
         sec = metrics["security"]
-        print(f"🔒 Security:")
+        print("🔒 Security:")
         print(f"   Framework: {'✅ Operational' if sec['security_framework_operational'] else '❌ Not Working'}")
         print(f"   Validation Score: {sec['security_validation_score']}/6")
         print(f"   Protection: {'✅ Configured' if sec['gitignore_protection'] else '⚠️  Basic'}")
         
         # Repository
         repo = metrics["repository"]
-        print(f"📈 Repository:")
+        print("📈 Repository:")
         print(f"   Size: {repo['total_size_mb']} MB")
         print(f"   Large Files: {repo['large_files_count']}")
         print(f"   Optimization Tools: {repo['cleanup_tools_available']}/3")
         
         # Git Health
         git = metrics["git_health"]
-        print(f"🔄 Git Health:")
+        print("🔄 Git Health:")
         print(f"   Recent Commits: {git['commits_last_30_days']} (30 days)")
         print(f"   Active Branches: {git['active_branches']}")
         print(f"   Working Dir: {'✅ Clean' if git['clean_working_directory'] else '⚠️  Modified'}")
@@ -705,6 +708,7 @@ class HealthScoreOptimizer:
         
         return report
 
+
 def main():
     optimizer = HealthScoreOptimizer()
     
@@ -716,7 +720,7 @@ def main():
     
     # Execute immediate actions if possible
     if recommendations["immediate_actions"]:
-        print(f"\n🔧 EXECUTING IMMEDIATE OPTIMIZATIONS...")
+        print("\n🔧 EXECUTING IMMEDIATE OPTIMIZATIONS...")
         print("-" * 40)
         
         for action in recommendations["immediate_actions"]:
@@ -733,7 +737,7 @@ def main():
                 print("   🔒 Verifying security framework...")
                 print("   ✅ Security framework operational!")
     
-    print(f"\n🎊 HEALTH OPTIMIZATION ASSESSMENT COMPLETE!")
+    print("\n🎊 HEALTH OPTIMIZATION ASSESSMENT COMPLETE!")
     print(f"📊 Current Health Score: {health_score:.1f}/100")
     print(f"🎯 Production Target: {optimizer.target_health_score}/100")
     
@@ -743,6 +747,7 @@ def main():
         gap = optimizer.target_health_score - health_score
         print(f"📈 {gap:.1f} points needed for production-ready status")
         print("💡 Follow immediate actions above for quick improvements")
+
 
 if __name__ == "__main__":
     main()

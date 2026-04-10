@@ -1,23 +1,19 @@
+#!/usr/bin/env python3
+"""Aurora CloudBank Context Updater.
+
+Automatically updates custom instructions based on current repository state.
+"""
+
+from datetime import datetime
+import json
 import logging
+from pathlib import Path
+import subprocess
 
 logger = logging.getLogger(__name__)
 
-from fastapi import FastAPI
-from datetime import datetime
-from pathlib import Path
-import json
-import subprocess
-
-# !/usr/bin/env python3
-"""
-Aurora CloudBank Context Updater
-Automatically updates custom instructions based on current repository state
-"""
-
-
 
 class AuroraContextUpdater:
-
     def __init__(self):
         self.project_root = Path("/workspaces/aurora-cloudbank-symbolic")
         self.instructions_file = self.project_root / "GitHub_Copilot_Custom_Instructions_Aurora_GUMAS.txt"
@@ -74,7 +70,11 @@ class AuroraContextUpdater:
     def get_performance_metrics(self):
         """Get current performance status"""
         # Check if native implementations exist
-        native_files = ["src/core/native_quantum.py", "src/core/native_vsa.py", "src/core/native_symbolic_anchor.py"]
+        native_files = [
+            "src/core/native_quantum.py",
+            "src/core/native_vsa.py",
+            "src/core/native_symbolic_anchor.py",
+        ]
 
         native_implemented = all((self.project_root / f).exists() for f in native_files)
 
@@ -138,15 +138,19 @@ class AuroraContextUpdater:
 
     def generate_status_section(self, status):
         """Generate updated status section"""
-        len(status["missing_components"])
+        missing_count = len(status["missing_components"])
+        status_icon = "🔄" if missing_count > 0 else "✅"
+        implementation_status = "implementation in progress" if missing_count > 0 else "complete"
+        performance = status["performance_metrics"]
 
-        section = """### Current Status (July 2025)
+        section = f"""### Current Status (July 2025)
 - ✅ All 5 development phases completed
 - ✅ Test environment with 24 passing native implementation tests
-- ✅ Performance optimization: {status["performance_metrics"]["startup_improvement"]} startup improvement, {status["performance_metrics"]["memory_reduction"]} memory reduction
+- ✅ Performance optimization: {performance["startup_improvement"]} startup improvement,
+  {performance["memory_reduction"]} memory reduction
 - ✅ Native implementations replace heavy dependencies (numpy, qiskit)
 - ✅ FastAPI ecosystem preserved for web interface
-- {'🔄' if missing_count > 0 else '✅'} Agent infrastructure {'implementation in progress' if missing_count > 0 else 'complete'} ({missing_count} components remaining)
+- {status_icon} Agent infrastructure {implementation_status} ({missing_count} components remaining)
 
 ### Latest Context Update: {status["timestamp"][:19]}
 - Git Status: {status["git_status"]}

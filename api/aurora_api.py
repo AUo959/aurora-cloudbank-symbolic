@@ -2577,7 +2577,7 @@ async def v2_cascade_validate(
 
 # Import PatchWeaver components
 try:
-    from src.aurora.patching.patchweaver import PatchWeaver, PatchResult
+    from src.aurora.patching.patchweaver import PatchWeaver
     from src.core.native_dlp_export import NativeDLPTracker
     from src.monitoring.ethics_engine import EthicsEngine
     import json

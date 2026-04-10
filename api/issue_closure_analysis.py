@@ -5,13 +5,11 @@ Analyzes completed work to identify which issues can be closed
 """
 
 import logging
+from datetime import datetime
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-import os
-import re
-from pathlib import Path
-from datetime import datetime
 
 class IssueAnalyzer:
     def __init__(self):
@@ -205,7 +203,7 @@ class IssueAnalyzer:
         for fix in self.completed_fixes:
             print(f"   • {fix}")
             
-        print(f"\n🎯 Issues Ready for Review/Closure:")
+        print("\n🎯 Issues Ready for Review/Closure:")
         print("   • Python syntax and compilation errors")  
         print("   • FastAPI import and dependency issues")
         print("   • Security vulnerability reports")
@@ -213,18 +211,19 @@ class IssueAnalyzer:
         print("   • Repository optimization requests")
         print("   • General code quality issues")
         
-        print(f"\n📋 ACTION ITEMS:")
+        print("\n📋 ACTION ITEMS:")
         print("   1. Review GitHub issues for patterns mentioned above")
         print("   2. Close issues that match our completed work")
         print("   3. Update any related project boards or milestones")
         print("   4. Document resolution in issue comments")
         print("   5. Consider creating 'completed work' milestone")
         
-        print(f"\n🚀 IMPACT:")
+        print("\n🚀 IMPACT:")
         print("   • Repository health significantly improved")
         print("   • All critical blocking issues resolved")
         print("   • Production-ready status achieved")
         print("   • Foundation set for continued development")
+
 
 def main():
     analyzer = IssueAnalyzer()
@@ -233,6 +232,7 @@ def main():
     analyzer.generate_closure_recommendations()
     analyzer.check_issue_templates()
     analyzer.generate_summary()
+
 
 if __name__ == "__main__":
     main()

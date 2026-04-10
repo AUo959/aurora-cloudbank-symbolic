@@ -17,13 +17,15 @@ Pattern:
 import hashlib
 import json
 from dataclasses import dataclass
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from .parser import Command, CommandChainParser
 from .real_implementations import RealCommandImplementations
 from .artifact_manager import ArtifactManager
+
+UTC = timezone.utc
 
 
 @dataclass
@@ -271,10 +273,11 @@ class CommandExecutor:
             output = handler()
             end_time = datetime.now(UTC)
             exec_time = (end_time - start_time).total_seconds() * 1000
+            success = self._normalize_handler_success(output)
 
             return ExecutionResult(
                 command=cmd.name,
-                success=True,
+                success=success,
                 output=output,
                 error=None,
                 dlp_hash=self._generate_execution_hash(cmd.name),
@@ -292,6 +295,20 @@ class CommandExecutor:
                 dlp_hash=self._generate_execution_hash(cmd.name),
                 execution_time_ms=exec_time
             )
+
+    def _normalize_handler_success(self, output: Any) -> bool:
+        """Interpret dict-based handler payloads consistently for chain metrics."""
+        if not isinstance(output, dict):
+            return True
+
+        if 'success' in output:
+            return bool(output['success'])
+
+        status = output.get('status')
+        if status != 'executed':
+            return False
+
+        return True
 
     def _generate_execution_hash(self, command: str) -> str:
         """Generate DLP hash for execution tracking"""

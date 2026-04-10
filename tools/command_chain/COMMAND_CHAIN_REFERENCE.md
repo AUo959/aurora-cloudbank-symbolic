@@ -12,6 +12,11 @@ python tools/command_chain/cmd_321.py
 python tools/command_chain/dispatcher.py 321
 ```
 
+The integrated command-chain entrypoints above invoke the Python implementation
+in `tools/command_chain/comprehensive_sync_321.py`. The enhanced shell workflow
+at `scripts/sync_321_enhanced.sh` is a separate manual path and is not what the
+dispatcher runs.
+
 **Phases:**
 1. Check for pending changes
 2. Intelligent staging (by priority)

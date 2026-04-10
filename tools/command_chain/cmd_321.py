@@ -27,7 +27,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tools.command_chain.comprehensive_sync_321 import (  # noqa: E402
     SyncConfig,
-    execute_321
+    execute_321,
+    resolve_config_path,
 )
 
 
@@ -183,14 +184,12 @@ Philosophy:
         return init_config(config_path)
 
     # Determine config path
-    config_path = None
+    config_path = resolve_config_path(args.config, args.workspace)
     if args.config:
-        config_path = Path(args.config)
         if not config_path.exists():
             print(f"❌ Config file not found: {config_path}")
             return 1
-    elif Path('.aurora/sync_config.json').exists():
-        config_path = Path('.aurora/sync_config.json')
+    elif config_path:
         print(f"📄 Using config: {config_path}")
 
     # Handle show-config

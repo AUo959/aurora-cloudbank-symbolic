@@ -15,7 +15,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from tools.command_chain.comprehensive_sync_321 import (  # noqa: E402
     ComprehensiveSync,
-    SyncConfig
+    SyncConfig,
+    resolve_config_path,
+    resolve_workspace_path,
 )
 
 
@@ -31,18 +33,11 @@ def execute_status(config_path: Optional[str] = None, workspace_path: Optional[s
         Phase 1 result with file categorization
     """
     # Load configuration
-    if config_path and Path(config_path).exists():
-        config = SyncConfig.load(Path(config_path))
-    elif Path(".aurora/sync_config.json").exists():
-        config = SyncConfig.load(Path(".aurora/sync_config.json"))
-    else:
-        config = SyncConfig()
+    resolved_config_path = resolve_config_path(config_path, workspace_path)
+    config = SyncConfig.load(resolved_config_path)
 
     # Set workspace
-    if workspace_path:
-        workspace = Path(workspace_path)
-    else:
-        workspace = Path.cwd()
+    workspace = resolve_workspace_path(workspace_path)
 
     # Create sync instance
     sync = ComprehensiveSync(config, workspace)

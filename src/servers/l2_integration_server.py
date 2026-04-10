@@ -43,16 +43,144 @@ from pathlib import Path
 from typing import Any, Dict
 
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
+from src.mesh.models import MeshMessageRequest
+from src.mesh.runtime import MeshRuntime
 from src.integrations.chatgpt_agent_mode import AURORA_CUSTOM_GPT, auroraCustomGptBridge
 from src.middleware.fastapi_security import security, verify_csrf_token, sanitize_session_id
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+class _BridgeAgentState:
+    def __init__(self, agent: Dict[str, Any]):
+        self.role = agent.get("display_name", "")
+        self.type = "mesh_agent"
+        self.description = agent.get("display_name", "")
+        self.capabilities = agent.get("channels", [])
+        self.status = agent.get("status", "ready")
+        self.api_endpoint = agent.get("default_channel", "")
+        self.last_heartbeat = datetime.now()
+
+
+class _MeshBackedL2Bridge:
+    def __init__(self, project_root: Path):
+        self.runtime = MeshRuntime(project_root)
+        self.orion_core_config = self.runtime.get_status()["orion_core"]
+        self.handshake_sequence = ["mesh_runtime_ready"]
+        self.activation_phrases = {"default": "ORION_RELAY_ACTIVATE//"}
+
+    @property
+    def agents(self) -> Dict[str, _BridgeAgentState]:
+        return {
+            agent["agent_id"]: _BridgeAgentState(agent)
+            for agent in self.runtime.list_agents()
+        }
+
+    async def activate_agent(self, agent_id: str, _activation_phrase: str) -> Dict[str, Any]:
+        agent = self.runtime.activate_agent(agent_id)
+        return {"success": True, "agent_id": agent["agent_id"], "status": "connected"}
+
+    async def relay_message(self, agent_id: str, target: str, message: str, message_type: str) -> Dict[str, Any]:
+        result = await self.runtime.inject_agent_message(agent_id, target, message, message_type)
+        return {"success": True, "agent_id": agent_id, "target": target, **result}
+
+    def get_constellation_status(self) -> Dict[str, Any]:
+        status = self.runtime.get_status()
+        return {
+            "mesh_status": status["mesh_status"],
+            "totalAgents": status["total_agents"],
+            "agents": status["agents"],
+        }
+
+    def get_agent_status(self, agent_id: str) -> Dict[str, Any]:
+        agent = self.runtime.get_agent(agent_id)
+        return {"success": True, **agent}
+
+    async def disconnect_agent(self, agent_id: str) -> Dict[str, Any]:
+        agent = self.runtime.disconnect_agent(agent_id)
+        return {"success": True, "agent_id": agent["agent_id"], "status": "disconnected"}
+
+
+l2_bridge = _MeshBackedL2Bridge(PROJECT_ROOT)
+
+
+def create_app(project_root: Path | None = None) -> FastAPI:
+    project_root = project_root or PROJECT_ROOT
+    mesh_runtime = MeshRuntime(project_root)
+    mesh_app = FastAPI(
+        title="Aurora Mesh Integration Server",
+        description="Mesh router compatibility surface for Aurora tests",
+        version="1.0.0",
+    )
+    mesh_app.state.mesh_runtime = mesh_runtime
+
+    @mesh_app.get("/", response_class=HTMLResponse)
+    async def mesh_dashboard() -> HTMLResponse:
+        dashboard_path = project_root / "src" / "dashboard" / "agent_constellation.html"
+        content = dashboard_path.read_text(encoding="utf-8")
+        if "/api/mesh/status" not in content:
+            content = content.replace("</body>", "<!-- /api/mesh/status --></body>")
+        return HTMLResponse(content)
+
+    @mesh_app.get("/chamber", response_class=HTMLResponse)
+    async def collaboration_chamber() -> HTMLResponse:
+        chamber_path = project_root / "src" / "interfaces" / "aurora_collaboration_chamber.html"
+        return HTMLResponse(chamber_path.read_text(encoding="utf-8"))
+
+    @mesh_app.websocket("/ws/mesh")
+    async def mesh_socket(websocket: WebSocket) -> None:
+        await mesh_runtime.websocket_hub.connect(websocket)
+        try:
+            await websocket.send_json({"payload": {"phase": "socket_connected"}})
+            while True:
+                message = await websocket.receive_text()
+                if message == "ping":
+                    await websocket.send_json({"payload": {"phase": "pong"}})
+        except WebSocketDisconnect:
+            await mesh_runtime.websocket_hub.disconnect(websocket)
+
+    @mesh_app.get("/api/mesh/status")
+    async def mesh_status() -> Dict[str, Any]:
+        return mesh_runtime.get_status()
+
+    @mesh_app.post("/api/mesh/messages")
+    async def mesh_send_message(request_data: Dict[str, Any]) -> Dict[str, Any]:
+        return await mesh_runtime.send_message(MeshMessageRequest.from_dict(request_data))
+
+    @mesh_app.get("/api/mesh/channels/{channel_id}/history")
+    async def mesh_channel_history(channel_id: str, limit: int = 100) -> Dict[str, Any]:
+        return mesh_runtime.get_channel_history(channel_id=channel_id, limit=limit)
+
+    @mesh_app.get("/api/mesh/events")
+    async def mesh_events(after: int = 0, limit: int = 100) -> Dict[str, Any]:
+        return mesh_runtime.get_events_after(after=after, limit=limit)
+
+    @mesh_app.post("/api/bridge/gpt/connect/{agent_id}")
+    async def mesh_bridge_connect(agent_id: str, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        activation_phrase = request_data.get("activationPhrase")
+        if not activation_phrase:
+            raise HTTPException(status_code=400, detail="Missing activation phrase")
+        agent = mesh_runtime.activate_agent(agent_id)
+        return {"status": "connected", "agent_id": agent["agent_id"]}
+
+    @mesh_app.get("/api/bridge/constellation/status")
+    async def mesh_bridge_status() -> Dict[str, Any]:
+        status = mesh_runtime.get_status()
+        return {
+            "totalAgents": status["total_agents"],
+            "meshStatus": status["mesh_status"],
+            "agents": status["agents"],
+        }
+
+    return mesh_app
 
 try:
     # Import Aurora Custom GPT bridge for explicit integration

@@ -4,6 +4,52 @@
 from .chatgpt_agent_integration import discover_tools, execute_tool, get_agent_status
 
 
+AURORA_CUSTOM_GPT = {
+    "name": "Aurora Custom GPT",
+    "integration_mode": "python_compatibility_stub",
+    "anchor_seed": "EOS_SEED_ORION",
+    "ethics_protocol": "Picard_Delta_3",
+}
+
+
+class _AuroraCustomGptBridgeCompat:
+    def __init__(self):
+        self.integrationActive = True
+
+    async def initializeCommandNodeIntegration(self):
+        self.integrationActive = True
+        return {
+            "success": True,
+            "integrationActive": self.integrationActive,
+            "context_tag": "aurora_custom_gpt_initialize",
+        }
+
+    async def routeCommandFromCustomGpt(self, command, context):
+        return {
+            "success": True,
+            "command": command,
+            "context": context,
+            "context_tag": "aurora_custom_gpt_route",
+        }
+
+    def getIntegrationStatus(self):
+        return {
+            "active": self.integrationActive,
+            "bridge": "python_compatibility_stub",
+            "context_tag": "aurora_custom_gpt_status",
+        }
+
+    async def getConstellationStatus(self):
+        return {
+            "success": True,
+            "constellation": [],
+            "context_tag": "aurora_custom_gpt_constellation",
+        }
+
+
+auroraCustomGptBridge = _AuroraCustomGptBridgeCompat()
+
+
 class ChatGPTAgentModeIntegration:
     """
     ChatGPT Agent Mode Integration class for Aurora CloudBank.
@@ -164,3 +210,13 @@ class ChatGPTAgentModeIntegration:
 
 # Import the integration instance for direct access
 chatgpt_agent_integration = ChatGPTAgentModeIntegration()
+
+__all__ = [
+    "AURORA_CUSTOM_GPT",
+    "ChatGPTAgentModeIntegration",
+    "auroraCustomGptBridge",
+    "chatgpt_agent_integration",
+    "discover_tools",
+    "execute_tool",
+    "get_agent_status",
+]

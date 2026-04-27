@@ -20,7 +20,7 @@ transformers>=4.35.0                # Transformer models (if using AI features)
 # ===================================================================
 # Optional enhanced visualizations beyond plotly
 matplotlib>=3.8.0                   # Additional plotting
-seaborn>=0.13.0                     # Statistical visualizations
+seaborn>=0.13.2                     # Statistical visualizations
 
 # ===================================================================
 # JUPYTER NOTEBOOK SUPPORT

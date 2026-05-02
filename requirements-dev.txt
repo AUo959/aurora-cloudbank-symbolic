@@ -29,7 +29,7 @@ semgrep>=1.45.0                     # Static analysis security scanner
 # ===================================================================
 # DEVELOPMENT PRODUCTIVITY
 # ===================================================================
-pre-commit>=3.5.0                   # Git hooks
+pre-commit>=4.3.0                   # Git hooks
 python-dotenv>=1.1.1                # Environment management
 GitPython>=3.1.45                   # Git integration
 httptools>=0.6.4                    # Fast HTTP parsing

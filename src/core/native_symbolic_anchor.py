@@ -1,6 +1,4 @@
 """
-import hashlib
-import time
 Native Symbolic CPU Anchor - Zero Dependencies
 Optimized quantum-symbolic hybrid processing core using native implementations.
 """

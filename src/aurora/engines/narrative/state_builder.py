@@ -19,6 +19,12 @@ from .types import (
 )
 
 _ORIGIN_PRECEDENCE = {"declared": 3, "recovered": 2, "inferred": 1}
+_INSTITUTIONAL_ENTITY_TYPES = {"institution", "government", "city"}
+_LOGISTICAL_CONSTRAINT_TYPES = {"logistical", "communication"}
+_TEMPORAL_CONSTRAINT_TYPES = {"temporal", "time"}
+_POLITICAL_CONSTRAINT_TYPES = {"political", "institutional"}
+_TEMPORAL_QUESTION_TOKENS = ("same night", "tonight", "next")
+_LOGISTICAL_QUESTION_TOKENS = ("pre-telegraph", "courier", "distant cities")
 
 
 def build_canonical_state(
@@ -187,7 +193,9 @@ def _infer_minimal_motives(state: CanonicalState, proposal: Mapping[str, Any]) -
     if not actor:
         return
     candidate_pressures = [
-        pressure for pressure in state.pressures if pressure.actor.casefold() == actor.casefold() and pressure.strength >= 0.8
+        pressure
+        for pressure in state.pressures
+        if pressure.actor.casefold() == actor.casefold() and pressure.strength >= 0.8
     ]
     for pressure in candidate_pressures:
         state.motives.append(
@@ -221,16 +229,30 @@ def _collect_layers(
     request: NormalizedTaskRequest,
 ) -> list[LayerRecord]:
     layers: dict[str, LayerRecord] = {}
+    _collect_declared_layers(layers, payload)
+    _collect_entity_layers(layers, state)
+    _collect_state_layers(layers, state)
+    _collect_constraint_layers(layers, state)
+    _collect_question_layers(layers, state, request)
+
+    return sorted(layers.values(), key=lambda layer: layer.name)
+
+
+def _collect_declared_layers(layers: dict[str, LayerRecord], payload: Mapping[str, Any]) -> None:
     for declared in payload.get("declared_layers", []):
         _upsert_layer(layers, str(declared), "declared", 1.0)
+
+
+def _collect_entity_layers(layers: dict[str, LayerRecord], state: CanonicalState) -> None:
     if any(entity.entity_type == "character" for entity in state.entities):
         _upsert_layer(layers, "character", "recovered", 0.95)
-    if any(entity.entity_type in {"institution", "government", "city"} for entity in state.entities):
+    if any(entity.entity_type in _INSTITUTIONAL_ENTITY_TYPES for entity in state.entities):
         _upsert_layer(layers, "institutional", "recovered", 0.9)
+
+
+def _collect_state_layers(layers: dict[str, LayerRecord], state: CanonicalState) -> None:
     if state.motives:
-        origin = "recovered" if any(not motive.inferred for motive in state.motives) else "inferred"
-        confidence = 0.9 if origin == "recovered" else 0.55
-        _upsert_layer(layers, "motive", origin, confidence)
+        _collect_motive_layer(layers, state)
     if state.events:
         _upsert_layer(layers, "event", "recovered", 0.95)
     if state.knowledge_states:
@@ -238,29 +260,60 @@ def _collect_layers(
     if state.continuity:
         _upsert_layer(layers, "continuity", "recovered", 0.95)
     if state.pressures:
-        _upsert_layer(layers, "pressure", "recovered", 0.9)
-        if any("crown" in pressure.label.lower() or "government" in pressure.label.lower() for pressure in state.pressures):
-            _upsert_layer(layers, "political", "inferred", 0.65)
-    if state.constraints:
-        _upsert_layer(layers, "constraint", "recovered", 0.95)
-        for constraint in state.constraints:
-            constraint_type = constraint.constraint_type.lower()
-            if constraint_type in {"logistical", "communication"}:
-                _upsert_layer(layers, "logistical", "recovered", 0.95)
-            if constraint_type in {"temporal", "time"}:
-                _upsert_layer(layers, "temporal", "recovered", 0.95)
-            if constraint_type in {"political", "institutional"}:
-                _upsert_layer(layers, constraint_type, "recovered", 0.9)
+        _collect_pressure_layers(layers, state)
 
+
+def _collect_motive_layer(layers: dict[str, LayerRecord], state: CanonicalState) -> None:
+    origin = "recovered" if any(not motive.inferred for motive in state.motives) else "inferred"
+    confidence = 0.9 if origin == "recovered" else 0.55
+    _upsert_layer(layers, "motive", origin, confidence)
+
+
+def _collect_pressure_layers(layers: dict[str, LayerRecord], state: CanonicalState) -> None:
+    _upsert_layer(layers, "pressure", "recovered", 0.9)
+    if any(_pressure_is_political(pressure.label) for pressure in state.pressures):
+        _upsert_layer(layers, "political", "inferred", 0.65)
+
+
+def _pressure_is_political(label: str) -> bool:
+    normalized = label.lower()
+    return "crown" in normalized or "government" in normalized
+
+
+def _collect_constraint_layers(layers: dict[str, LayerRecord], state: CanonicalState) -> None:
+    if not state.constraints:
+        return
+    _upsert_layer(layers, "constraint", "recovered", 0.95)
+    for constraint in state.constraints:
+        _collect_constraint_type_layer(layers, constraint.constraint_type.lower())
+
+
+def _collect_constraint_type_layer(layers: dict[str, LayerRecord], constraint_type: str) -> None:
+    if constraint_type in _LOGISTICAL_CONSTRAINT_TYPES:
+        _upsert_layer(layers, "logistical", "recovered", 0.95)
+    if constraint_type in _TEMPORAL_CONSTRAINT_TYPES:
+        _upsert_layer(layers, "temporal", "recovered", 0.95)
+    if constraint_type in _POLITICAL_CONSTRAINT_TYPES:
+        _upsert_layer(layers, constraint_type, "recovered", 0.9)
+
+
+def _collect_question_layers(
+    layers: dict[str, LayerRecord],
+    state: CanonicalState,
+    request: NormalizedTaskRequest,
+) -> None:
     question = request.user_query.lower()
-    if any(event.timing for event in state.events) or any(token in question for token in ("same night", "tonight", "next")):
+    if any(event.timing for event in state.events) or _has_question_token(question, _TEMPORAL_QUESTION_TOKENS):
         _upsert_layer(layers, "temporal", "inferred", 0.7)
-    if request.task_kind == TaskKind.HISTORICAL_PLAUSIBILITY_CHECK and any(
-        token in question for token in ("pre-telegraph", "courier", "distant cities")
+    if request.task_kind == TaskKind.HISTORICAL_PLAUSIBILITY_CHECK and _has_question_token(
+        question,
+        _LOGISTICAL_QUESTION_TOKENS,
     ):
         _upsert_layer(layers, "logistical", "inferred", 0.75)
 
-    return sorted(layers.values(), key=lambda layer: layer.name)
+
+def _has_question_token(question: str, tokens: tuple[str, ...]) -> bool:
+    return any(token in question for token in tokens)
 
 
 def _upsert_layer(layers: dict[str, LayerRecord], name: str, origin: str, confidence: float) -> None:

@@ -20,6 +20,11 @@ _TASK_HINT_MAP = {
     "expansion": TaskKind.EXPANSION,
     "translation": TaskKind.TRANSLATION,
 }
+_PHASE_ONE_UNSUPPORTED_REASON = "Phase one only supports three validation tasks."
+_TRANSLATION_TOKENS = ("translate", "convert this into", "structural translation")
+_EXPANSION_TOKENS = ("expand this", "what myths", "what civilization", "fork in the road")
+_HISTORICAL_TOKENS = ("historical", "pre-telegraph", "as stated", "plausible in the setting")
+_NEXT_EVENT_TOKENS = ("next beat", "next scene", "happen next", "same night")
 
 
 def normalize_input(raw_input: str | Mapping[str, Any]) -> dict[str, Any]:
@@ -80,35 +85,53 @@ def _extract_question(payload: Mapping[str, Any]) -> str:
 
 
 def _classify_task(payload: Mapping[str, Any], proposal: Mapping[str, Any]) -> tuple[TaskKind, str | None]:
-    hint = str(payload.get("task_hint") or payload.get("task_kind") or "").strip().lower().replace(" ", "_")
-    if hint in _TASK_HINT_MAP:
-        task_kind = _TASK_HINT_MAP[hint]
+    task_kind = _task_from_hint(payload)
+    if task_kind is not None:
         return task_kind, _unsupported_reason(task_kind)
 
     question = _extract_question(payload).lower()
-    if not question and proposal:
-        if proposal.get("timing"):
-            return TaskKind.NEXT_EVENT_CONTINUITY_CHECK, None
-        if proposal.get("actor"):
-            return TaskKind.CHARACTER_ACTION_AUDIT, None
+    proposal_task = _task_from_proposal(question, proposal)
+    if proposal_task is not None:
+        return proposal_task, None
 
-    if any(token in question for token in ("translate", "convert this into", "structural translation")):
+    return _classify_question(question, proposal)
+
+
+def _task_from_hint(payload: Mapping[str, Any]) -> TaskKind | None:
+    hint = str(payload.get("task_hint") or payload.get("task_kind") or "").strip().lower().replace(" ", "_")
+    return _TASK_HINT_MAP.get(hint)
+
+
+def _task_from_proposal(question: str, proposal: Mapping[str, Any]) -> TaskKind | None:
+    if question or not proposal:
+        return None
+    if proposal.get("timing"):
+        return TaskKind.NEXT_EVENT_CONTINUITY_CHECK
+    if proposal.get("actor"):
+        return TaskKind.CHARACTER_ACTION_AUDIT
+    return None
+
+
+def _classify_question(question: str, proposal: Mapping[str, Any]) -> tuple[TaskKind, str | None]:
+    if _question_has_any(question, _TRANSLATION_TOKENS):
         return TaskKind.TRANSLATION, _unsupported_reason(TaskKind.TRANSLATION)
-    if any(token in question for token in ("expand this", "what myths", "what civilization", "fork in the road")):
+    if _question_has_any(question, _EXPANSION_TOKENS):
         return TaskKind.EXPANSION, _unsupported_reason(TaskKind.EXPANSION)
     if "symbolize" in question or "symbolic fit" in question:
         return TaskKind.UNSUPPORTED, "Phase one does not implement symbolic-fit audits."
-    if any(token in question for token in ("historical", "pre-telegraph", "as stated", "plausible in the setting")):
+    if _question_has_any(question, _HISTORICAL_TOKENS):
         return TaskKind.HISTORICAL_PLAUSIBILITY_CHECK, None
-    if any(token in question for token in ("next beat", "next scene", "happen next", "same night")):
+    if _question_has_any(question, _NEXT_EVENT_TOKENS):
         return TaskKind.NEXT_EVENT_CONTINUITY_CHECK, None
     if any(token in question for token in ("would", "really do this", "make sense for")) and proposal.get("actor"):
         return TaskKind.CHARACTER_ACTION_AUDIT, None
     if question.endswith("?") and proposal.get("actor"):
         return TaskKind.CHARACTER_ACTION_AUDIT, None
-    if question:
-        return TaskKind.UNSUPPORTED, "Phase one only supports three validation tasks."
-    return TaskKind.UNSUPPORTED, "Phase one only supports three validation tasks."
+    return TaskKind.UNSUPPORTED, _PHASE_ONE_UNSUPPORTED_REASON
+
+
+def _question_has_any(question: str, tokens: tuple[str, ...]) -> bool:
+    return any(token in question for token in tokens)
 
 
 def _unsupported_reason(task_kind: TaskKind) -> str | None:
@@ -117,5 +140,5 @@ def _unsupported_reason(task_kind: TaskKind) -> str | None:
     if task_kind == TaskKind.TRANSLATION:
         return "Phase one intentionally excludes translation mode."
     if task_kind == TaskKind.UNSUPPORTED:
-        return "Phase one only supports three validation tasks."
+        return _PHASE_ONE_UNSUPPORTED_REASON
     return None

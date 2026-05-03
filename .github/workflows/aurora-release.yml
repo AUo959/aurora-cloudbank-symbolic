@@ -30,11 +30,13 @@ jobs:
 
       - name: Resolve release version
         id: version
+        env:
+          RELEASE_VERSION_INPUT: ${{ inputs.version }}
         run: |
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             echo "value=${GITHUB_REF_NAME}" >> "${GITHUB_OUTPUT}"
           else
-            echo "value=${{ inputs.version }}" >> "${GITHUB_OUTPUT}"
+            echo "value=${RELEASE_VERSION_INPUT}" >> "${GITHUB_OUTPUT}"
           fi
 
       - name: Generate changelog

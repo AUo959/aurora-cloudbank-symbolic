@@ -20,7 +20,7 @@ Usage:
 
 import json
 import logging
-import subprocess
+import subprocess  # nosec B404
 import time
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -41,14 +41,19 @@ def resolve_config_path(config_path: Optional[str] = None, workspace_path: Optio
 
     if config_path:
         candidate = Path(config_path).expanduser()
-        if candidate.exists() or candidate.is_absolute() or workspace is None:
+        if candidate.is_absolute() or workspace is None:
             return candidate
 
         workspace_candidate = workspace / candidate
-        if workspace_candidate.exists():
-            return workspace_candidate
+        if candidate.exists() and workspace_candidate.exists():
+            logger.warning(
+                "Config path '%s' exists in both caller CWD and workspace; "
+                "using workspace-scoped path '%s'",
+                candidate,
+                workspace_candidate,
+            )
 
-        return candidate
+        return workspace_candidate
 
     if workspace is not None:
         workspace_config = workspace / ".aurora" / "sync_config.json"
@@ -766,7 +771,7 @@ class ComprehensiveSync:
         """Execute shell command with timeout"""
         timeout = timeout or self.config.timeout_seconds
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec
                 cmd,
                 cwd=self.workspace,
                 capture_output=True,

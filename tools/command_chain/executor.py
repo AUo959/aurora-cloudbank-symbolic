@@ -305,7 +305,8 @@ class CommandExecutor:
             return bool(output['success'])
 
         status = output.get('status')
-        if status != 'executed':
+        failure_statuses = {'failed', 'partial', 'warning'}
+        if isinstance(status, str) and status.lower() in failure_statuses:
             return False
 
         return True

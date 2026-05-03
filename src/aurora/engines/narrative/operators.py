@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from .types import CanonicalState, NormalizedTaskRequest, TaskKind
+from .types import CanonicalState, MotiveRecord, NormalizedTaskRequest, PressureRecord, TaskKind
+
+_SUPPORT_MOTIVE_LABELS = ("rebellion", "mission", "duty")
+_SUPPORT_ACTION_TOKENS = ("rebellion", "signal", "save")
+_RESISTANCE_MOTIVE_LABELS = ("protect", "loyalty", "trust")
+_RESISTANCE_ACTION_TOKENS = ("abandon", "betray", "accuse")
 
 
 def run_operator_suite(
@@ -21,8 +26,8 @@ def run_operator_suite(
         motive_inference(state, request, proposal),
         knowledge_propagation(state, request, proposal),
         temporal_sequencing(state, request, proposal),
-        plausibility_envelope_check(state, request, proposal),
-        setup_sufficiency_check(state, request, proposal),
+        plausibility_envelope_check(state, request),
+        setup_sufficiency_check(state, request),
     ):
         for key, values in operator.items():
             results[key].extend(values)
@@ -39,41 +44,22 @@ def motive_inference(
 
     actor = str(proposal.get("actor", "")).casefold()
     action_text = _proposal_text(proposal)
-    supports: list[str] = []
-    soft_blocks: list[str] = []
-    confidence_notes: list[str] = []
+    results = _empty_result()
 
     for motive in state.motives:
-        if actor and motive.actor.casefold() != actor:
+        if not _actor_matches(actor, motive.actor):
             continue
-        label = motive.label.lower()
-        if any(token in label for token in ("rebellion", "mission", "duty")) and any(
-            token in action_text for token in ("rebellion", "signal", "save")
-        ):
-            supports.append(f"{motive.actor}'s motive '{motive.label}' aligns with the proposed action.")
-        if any(token in label for token in ("protect", "loyalty", "trust")) and any(
-            token in action_text for token in ("abandon", "betray", "accuse")
-        ):
-            soft_blocks.append(f"{motive.actor}'s motive '{motive.label}' resists the proposed action.")
-        if motive.inferred:
-            confidence_notes.append(f"Motive '{motive.label}' is inferred at low confidence.")
+        motive_result = _evaluate_motive(motive, action_text)
+        for key, values in motive_result.items():
+            results[key].extend(values)
 
     for pressure in state.pressures:
-        if actor and pressure.actor.casefold() != actor:
+        if not _actor_matches(actor, pressure.actor):
             continue
-        message = f"{pressure.actor}'s pressure '{pressure.label}' pulls {pressure.direction} the move."
-        if pressure.direction.lower() == "toward":
-            supports.append(message)
-        else:
-            soft_blocks.append(message)
+        key, message = _evaluate_pressure(pressure)
+        results[key].append(message)
 
-    return {
-        "supports": supports,
-        "soft_blocks": soft_blocks,
-        "hard_blocks": [],
-        "missing_bridges": [],
-        "confidence_notes": confidence_notes,
-    }
+    return results
 
 
 def knowledge_propagation(
@@ -94,7 +80,8 @@ def knowledge_propagation(
         fact = knowledge_state.fact.lower()
         if "innocent" in fact and "accuse" in action_text:
             soft_blocks.append(
-                f"{knowledge_state.holder} knows the suspect is innocent, so the accusation fights knowledge continuity."
+                f"{knowledge_state.holder} knows the suspect is innocent, so the accusation fights "
+                "knowledge continuity."
             )
         elif "collapse" in fact and any(token in action_text for token in ("save", "deliver", "signal")):
             supports.append(
@@ -148,7 +135,6 @@ def temporal_sequencing(
 def plausibility_envelope_check(
     state: CanonicalState,
     request: NormalizedTaskRequest,
-    proposal: Mapping[str, Any],
 ) -> dict[str, list[str]]:
     if request.task_kind != TaskKind.HISTORICAL_PLAUSIBILITY_CHECK:
         return _empty_result()
@@ -177,7 +163,6 @@ def plausibility_envelope_check(
 def setup_sufficiency_check(
     state: CanonicalState,
     request: NormalizedTaskRequest,
-    proposal: Mapping[str, Any],
 ) -> dict[str, list[str]]:
     missing_bridges: list[str] = []
     confidence_notes: list[str] = []
@@ -202,8 +187,43 @@ def setup_sufficiency_check(
 
 
 def _proposal_text(proposal: Mapping[str, Any]) -> str:
-    parts = [str(proposal.get("label", "")), str(proposal.get("action", "")), str(proposal.get("timing", ""))]
+    parts = [
+        str(proposal.get("label", "")),
+        str(proposal.get("action", "")),
+        str(proposal.get("timing", "")),
+    ]
     return " ".join(part for part in parts if part).lower()
+
+
+def _actor_matches(actor: str, subject: str) -> bool:
+    return not actor or subject.casefold() == actor
+
+
+def _has_any(text: str, tokens: tuple[str, ...]) -> bool:
+    return any(token in text for token in tokens)
+
+
+def _evaluate_motive(motive: MotiveRecord, action_text: str) -> dict[str, list[str]]:
+    label = motive.label.lower()
+    result = _empty_result()
+    if _has_any(label, _SUPPORT_MOTIVE_LABELS) and _has_any(action_text, _SUPPORT_ACTION_TOKENS):
+        result["supports"].append(
+            f"{motive.actor}'s motive '{motive.label}' aligns with the proposed action."
+        )
+    if _has_any(label, _RESISTANCE_MOTIVE_LABELS) and _has_any(action_text, _RESISTANCE_ACTION_TOKENS):
+        result["soft_blocks"].append(
+            f"{motive.actor}'s motive '{motive.label}' resists the proposed action."
+        )
+    if motive.inferred:
+        result["confidence_notes"].append(f"Motive '{motive.label}' is inferred at low confidence.")
+    return result
+
+
+def _evaluate_pressure(pressure: PressureRecord) -> tuple[str, str]:
+    message = f"{pressure.actor}'s pressure '{pressure.label}' pulls {pressure.direction} the move."
+    if pressure.direction.lower() == "toward":
+        return "supports", message
+    return "soft_blocks", message
 
 
 def _empty_result() -> dict[str, list[str]]:

@@ -13,10 +13,10 @@ autonomous decisions.
 Protocol:
 L3 (Framework): Axiomera (ethics) + Caelion (anchors)
 L2 (Relay): HALO (drift) + ARCHY (feasibility)
-L1 (Human): Command Bridge (final oversight for critical decisions)
+L1 (Oversight): ARCHYEntity architecture oversight for critical decisions
 
 This ensures every significant Aurora decision is validated through
-ethical, technical, and human oversight layers before execution.
+ethical, technical, and oversight layers before execution.
 """
 
 import logging
@@ -38,6 +38,14 @@ _DLP_CONTEXT_PREFIX = "decision_"
 
 # Number of symbolic anchors verified by Caelion (T1 temporal + SRB spatial).
 _CAELION_ANCHOR_COUNT = 2
+
+_ETHICS_PASS_RECOMMENDATIONS = {
+    "APPROVE",
+    "PROCEED_WITH_OVERSIGHT",
+    "REQUIRE_HUMAN_CONSENT",
+}
+_ETHICS_RECOMMENDATIONS_REQUIRING_L1 = {"REQUIRE_HUMAN_CONSENT"}
+_ANCHOR_PASS_RECOMMENDATIONS = {"APPROVE", "PROCEED_WITH_MONITORING"}
 
 
 @dataclass
@@ -102,7 +110,7 @@ class TriplexHandshakeValidator:
     Canonical Protocol:
     1. L3 Framework: Ethics (Axiomera) + Anchors (Caelion)
     2. L2 Relay: Drift (HALO) + Feasibility (ARCHY)
-    3. L1 Human: Command Bridge oversight (critical only)
+    3. L1 Oversight: ARCHYEntity architecture oversight (critical only)
 
     Each level must approve before proceeding to next.
     Any level can block the decision.
@@ -124,13 +132,13 @@ class TriplexHandshakeValidator:
         self.halo = get_halo()
         self.archy = MockARCHY()
         # ARCHYEntity provides L1 architecture-level oversight for critical decisions
-        self.command_bridge = get_archy()
+        self.l1_oversight = get_archy()
 
         self.logger.info(
             "🛡️ Triplex Handshake Validator initialized (real entity mode)"
         )
 
-    def _decision_to_event(self, decision) -> Event:
+    def _decision_to_event(self, decision, event_type: EventType) -> Event:
         """
         Convert AuroraDecision to Event for real entity evaluation.
 
@@ -140,13 +148,14 @@ class TriplexHandshakeValidator:
 
         Args:
             decision: AuroraDecision from the orchestration layer
+            event_type: Triplex layer event type for the evaluation being run
 
         Returns:
             Event suitable for real entity evaluation
         """
         context = decision.context or {}
         return Event(
-            event_type=EventType.ETHICAL_REVIEW_L3,
+            event_type=event_type,
             location=StationLocation.COMMAND_BRIDGE,
             primary_entity="Aurora (SYS_001)",
             payload=context,
@@ -218,10 +227,11 @@ class TriplexHandshakeValidator:
 
         self.logger.info("✅ L2 Relay validation passed")
 
-        # L1: Human Level (Critical decisions only)
+        # L1: Oversight Level (critical decisions or L3 human-consent recommendations)
         l1_result = None
-        if decision.requires_human_approval:
-            l1_result = await self.l1_human_validation(decision, l3_result, l2_result)
+        requires_l1_oversight = decision.requires_human_approval or l3_result.get('requires_human_approval', False)
+        if requires_l1_oversight:
+            l1_result = await self.l1_oversight_validation(decision, l3_result, l2_result)
             if not l1_result['approved']:
                 self.logger.warning(f"❌ L1 validation failed: {l1_result['reason']}")
                 return ValidationResult(
@@ -233,7 +243,7 @@ class TriplexHandshakeValidator:
                     reason=l1_result['reason']
                 )
 
-            self.logger.info("✅ L1 Human validation passed")
+            self.logger.info("✅ L1 Oversight validation passed")
 
         # All levels passed
         self.logger.info(f"✅ Triplex validation APPROVED: {decision.action}")
@@ -256,24 +266,27 @@ class TriplexHandshakeValidator:
         """
         self.logger.debug("🔍 L3 Framework validation...")
 
-        event = self._decision_to_event(decision)
+        event = self._decision_to_event(decision, EventType.ETHICAL_REVIEW_L3)
 
         # Axiomera ethics evaluation via real entity
         raw_ethics = await self.axiomera.evaluate_for_triplex(event)
-        ethics_approved = raw_ethics['recommendation'] in ('APPROVE', 'PROCEED_WITH_OVERSIGHT')
+        ethics_recommendation = raw_ethics['recommendation']
+        ethics_requires_l1 = ethics_recommendation in _ETHICS_RECOMMENDATIONS_REQUIRING_L1
+        ethics_approved = ethics_recommendation in _ETHICS_PASS_RECOMMENDATIONS
         ethics_result = {
             'approved': ethics_approved,
             'score': raw_ethics['ethical_assessment']['ethical_score'],
             'concerns': raw_ethics['ethical_assessment']['concerns'],
             'evaluator': 'Axiomera',
             'protocol': 'Picard_Delta_3',
-            'recommendation': raw_ethics['recommendation'],
+            'recommendation': ethics_recommendation,
+            'requires_l1_oversight': ethics_requires_l1,
             'reasoning': raw_ethics['reasoning'],
         }
 
         # Caelion anchor verification via real entity
         raw_anchor = await self.caelion.evaluate_for_triplex(event)
-        anchor_approved = raw_anchor['recommendation'] in ('APPROVE', 'PROCEED_WITH_MONITORING')
+        anchor_approved = raw_anchor['recommendation'] in _ANCHOR_PASS_RECOMMENDATIONS
         anchor_result = {
             'approved': anchor_approved,
             'anchor_status': 'aligned' if anchor_approved else 'invalid',
@@ -305,6 +318,7 @@ class TriplexHandshakeValidator:
             'ethics': ethics_result,
             'anchors': anchor_result,
             'concerns': concerns,
+            'requires_human_approval': ethics_requires_l1,
             'reason': reason
         }
 
@@ -320,17 +334,18 @@ class TriplexHandshakeValidator:
         """
         self.logger.debug("🔍 L2 Relay validation...")
 
-        event = self._decision_to_event(decision)
+        event = self._decision_to_event(decision, EventType.DRIFT_CHECK_L2)
 
         # HALO drift assessment via real entity
         raw_drift = await self.halo.evaluate_for_triplex(event)
         drift_approved = raw_drift['recommendation'] != 'BLOCK'
-        drift_current = raw_drift['drift_analysis']['current_drift']
+        drift_analysis = raw_drift['drift_analysis']
+        drift_current = drift_analysis['current_drift']
         drift_result = {
             'approved': drift_approved,
-            'predicted_drift': drift_current,
             'current_drift': drift_current,
-            'warning': raw_drift['reasoning'] if not raw_drift['drift_analysis']['acceptable'] else None,
+            'drift_velocity': drift_analysis.get('drift_velocity', 0.0),
+            'warning': raw_drift['reasoning'] if not drift_analysis['acceptable'] else None,
             'evaluator': 'HALO',
             'recommendation': raw_drift['recommendation'],
         }
@@ -350,7 +365,7 @@ class TriplexHandshakeValidator:
         reason = None
         if not approved:
             if not drift_result['approved']:
-                reason = f"Drift risk too high: {drift_result['predicted_drift']:.3f}"
+                reason = f"Drift risk too high: {drift_result['current_drift']:.3f}"
             elif not feasibility_result['approved']:
                 reason = "Technical feasibility check failed"
 
@@ -363,23 +378,23 @@ class TriplexHandshakeValidator:
             'reason': reason
         }
 
-    async def l1_human_validation(
+    async def l1_oversight_validation(
         self,
         decision,
         l3_result: Dict[str, Any],
         l2_result: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        L1 Human Level: Command Bridge Oversight
+        L1 Oversight Level: ARCHYEntity Architecture Oversight
 
         For critical decisions, architecture-level oversight required.
         Uses ARCHYEntity to evaluate architectural soundness before execution.
         """
-        self.logger.debug("🔍 L1 Human validation...")
+        self.logger.debug("🔍 L1 Oversight validation...")
 
-        event = self._decision_to_event(decision)
+        event = self._decision_to_event(decision, EventType.HUMAN_CONSENT_L1)
 
-        raw_arch = await self.command_bridge.evaluate_for_triplex(event)
+        raw_arch = await self.l1_oversight.evaluate_for_triplex(event)
         approved = raw_arch['recommendation'] != 'BLOCK'
 
         approval_result = {

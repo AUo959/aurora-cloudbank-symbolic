@@ -1,18 +1,15 @@
 """Tests for bounded QGIA tier probability normalization."""
 
-from unittest import TestCase
-
+import numpy as np
 import pytest
 
+from modules.qgia.config import TIER_PROBABILITY_BOUNDS
 from modules.qgia.forecast_engine import QGIAForecastEngine
 from modules.qgia.scenario import (
     european_energy_crisis,
     iran_nuclear_escalation,
     subsaharan_instability,
 )
-
-
-_CHECK = TestCase()
 
 
 @pytest.fixture(scope="module")
@@ -29,13 +26,16 @@ def _extract_tier_probabilities(output) -> tuple[float, float, float]:
 
 def _check_bounded_simplex(probabilities: tuple[float, float, float]) -> None:
     """Check final tier probabilities against sum and band invariants."""
-    lower_bounds = (0.26, 0.10, 0.01)
-    upper_bounds = (0.85, 0.25, 0.09)
+    if abs(sum(probabilities) - 1.0) >= 1e-9:
+        pytest.fail(f"Tier probabilities sum to {sum(probabilities):.12f}")
 
-    _CHECK.assertLess(abs(sum(probabilities) - 1.0), 1e-9)
-    for probability, lower_bound, upper_bound in zip(probabilities, lower_bounds, upper_bounds):
-        _CHECK.assertGreaterEqual(probability, lower_bound)
-        _CHECK.assertLessEqual(probability, upper_bound)
+    bounds = [TIER_PROBABILITY_BOUNDS[tier] for tier in (1, 2, 3)]
+    for probability, (lower_bound, upper_bound) in zip(probabilities, bounds):
+        if not lower_bound <= probability <= upper_bound:
+            pytest.fail(
+                f"Tier probability {probability:.12f} outside "
+                f"[{lower_bound:.2f}, {upper_bound:.2f}]"
+            )
 
 
 @pytest.mark.parametrize(
@@ -47,6 +47,20 @@ def _check_bounded_simplex(probabilities: tuple[float, float, float]) -> None:
     ],
 )
 def test_tier_probabilities_are_bounded_normalized(engine, scenario_fn):
-    """Tier probabilities sum to 1.0 while staying inside documented bands."""
+    """Tier probabilities sum to 1.0 while staying inside configured bounds."""
     output = engine.run_forecast(scenario_fn())
     _check_bounded_simplex(_extract_tier_probabilities(output))
+
+
+@pytest.mark.parametrize(
+    "raw_probabilities",
+    [
+        np.array([0.26, 0.10, 0.01], dtype=float),
+        np.array([0.85, 0.25, 0.09], dtype=float),
+        np.array([0.26, 0.25, 0.09], dtype=float),
+    ],
+)
+def test_bounded_projection_handles_sum_and_clipping_edges(raw_probabilities):
+    """Projection handles raw sums below one, above one, and capped alternatives."""
+    probabilities = QGIAForecastEngine._project_to_bounded_simplex(raw_probabilities)
+    _check_bounded_simplex(probabilities)

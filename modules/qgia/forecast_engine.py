@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 import numpy as np
 
-from .config import GRADE_TIERS, SRD_THEMES
+from .config import GRADE_TIERS, SRD_THEMES, TIER_PROBABILITY_BOUNDS
 from .population_generator import generate_population
 from .schemas import Agent, ForecastOutput, ScenarioInput, TierAssessment, TrustEdge
 from .trust_network import build_adjacency, build_outgoing_adjacency, generate_trust_network
@@ -63,8 +63,9 @@ class QGIAForecastEngine:
     @staticmethod
     def _project_to_bounded_simplex(raw_probabilities: np.ndarray) -> tuple[float, float, float]:
         """Project tier probabilities onto the documented bounded simplex."""
-        lower_bounds = np.array([0.26, 0.10, 0.01], dtype=float)
-        upper_bounds = np.array([0.85, 0.25, 0.09], dtype=float)
+        bounds = [TIER_PROBABILITY_BOUNDS[tier] for tier in (1, 2, 3)]
+        lower_bounds = np.array([bound[0] for bound in bounds], dtype=float)
+        upper_bounds = np.array([bound[1] for bound in bounds], dtype=float)
         target_total = 1.0
 
         low = float(np.min(lower_bounds - raw_probabilities))
@@ -390,11 +391,11 @@ class QGIAForecastEngine:
         tiers: list[TierAssessment] = []
 
         # Compute raw clamped tier probabilities
-        tier1_raw = max(0.26, min(0.85, mean))
-        tier2_raw = max(0.10, min(0.25, 0.25 - std * 0.5))
-        tier3_raw = max(0.01, min(0.09, 0.10 - std))
+        tier1_raw = max(TIER_PROBABILITY_BOUNDS[1][0], min(TIER_PROBABILITY_BOUNDS[1][1], mean))
+        tier2_raw = max(TIER_PROBABILITY_BOUNDS[2][0], min(TIER_PROBABILITY_BOUNDS[2][1], 0.25 - std * 0.5))
+        tier3_raw = max(TIER_PROBABILITY_BOUNDS[3][0], min(TIER_PROBABILITY_BOUNDS[3][1], 0.10 - std))
 
-        # Bounded projection keeps the documented tier bands while enforcing
+        # Bounded projection keeps the configured tier bounds while enforcing
         # a coherent probability distribution across the three tiers.
         raw_tier_probs = np.array([tier1_raw, tier2_raw, tier3_raw], dtype=float)
         tier1_prob, tier2_prob, tier3_prob = self._project_to_bounded_simplex(raw_tier_probs)

@@ -13,6 +13,7 @@ __all__ = [
     "TRUST_NETWORK_PARAMS",
     "EDGE_TYPES",
     "GRADE_TIERS",
+    "TIER_PROBABILITY_BOUNDS",
     "DIVISION_ARCHETYPES",
     "DIVISION_REGIONS",
     "SRD_THEMES",
@@ -22,6 +23,12 @@ __all__ = [
 
 TOTAL_AGENTS = 551
 TARGET_EDGES = 7407
+
+TIER_PROBABILITY_BOUNDS: dict[int, tuple[float, float]] = {
+    1: (0.26, 0.85),
+    2: (0.10, 0.25),
+    3: (0.01, 0.09),
+}
 
 DIVISIONS: dict[str, dict] = {
     "GMD": {"name": "Global Monitoring Division", "headcount": 203},

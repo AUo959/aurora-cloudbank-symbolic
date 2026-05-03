@@ -60,6 +60,27 @@ class QGIAForecastEngine:
         self._incoming: dict[str, list[TrustEdge]] = build_adjacency(self.edges)
         self._outgoing: dict[str, list[TrustEdge]] = build_outgoing_adjacency(self.edges)
 
+    @staticmethod
+    def _project_to_bounded_simplex(raw_probabilities: np.ndarray) -> tuple[float, float, float]:
+        """Project tier probabilities onto the documented bounded simplex."""
+        lower_bounds = np.array([0.26, 0.10, 0.01], dtype=float)
+        upper_bounds = np.array([0.85, 0.25, 0.09], dtype=float)
+        target_total = 1.0
+
+        low = float(np.min(lower_bounds - raw_probabilities))
+        high = float(np.max(upper_bounds - raw_probabilities))
+
+        for _ in range(80):
+            shift = (low + high) / 2.0
+            candidate = np.clip(raw_probabilities + shift, lower_bounds, upper_bounds)
+            if float(candidate.sum()) < target_total:
+                low = shift
+            else:
+                high = shift
+
+        projected = np.clip(raw_probabilities + high, lower_bounds, upper_bounds)
+        return tuple(float(probability) for probability in projected)
+
     def run_forecast(self, scenario: ScenarioInput) -> ForecastOutput:
         """Run the full five-phase forecast pipeline on a scenario."""
         t_start = datetime.now(timezone.utc)
@@ -80,8 +101,6 @@ class QGIAForecastEngine:
         dissenters, echo_warnings = self._analyze_dissent(beliefs, cell)
 
         # Attach dissent info to tier assessments
-        cell_mean = self._weighted_mean(beliefs, cell)
-        cell_std = self._weighted_std(beliefs, cell, cell_mean)
         for ta in tier_assessments:
             ta.dissent_count = len(dissenters)
             ta.key_dissenters = [d["agent_id"] for d in dissenters[:5]]
@@ -240,7 +259,6 @@ class QGIAForecastEngine:
             (final_beliefs, rounds_run, history_per_round)
         """
         cell_ids = {a.agent_id for a in cell}
-        agent_map = {a.agent_id: a for a in cell}
         history: list[dict[str, float]] = [dict(beliefs)]
 
         for round_num in range(max_rounds):
@@ -376,12 +394,10 @@ class QGIAForecastEngine:
         tier2_raw = max(0.10, min(0.25, 0.25 - std * 0.5))
         tier3_raw = max(0.01, min(0.09, 0.10 - std))
 
-        # Softmax normalization: ensures probabilities form a coherent distribution summing to 1.0.
-        # Full floating-point precision is preserved (no rounding) so that downstream consumers
-        # receive a valid probability simplex: tier1_prob + tier2_prob + tier3_prob == 1.0.
-        raw_tier_probs = np.array([tier1_raw, tier2_raw, tier3_raw])
-        softmax_exp = np.exp(raw_tier_probs - raw_tier_probs.max())  # subtract max for numerical stability
-        tier1_prob, tier2_prob, tier3_prob = softmax_exp / softmax_exp.sum()
+        # Bounded projection keeps the documented tier bands while enforcing
+        # a coherent probability distribution across the three tiers.
+        raw_tier_probs = np.array([tier1_raw, tier2_raw, tier3_raw], dtype=float)
+        tier1_prob, tier2_prob, tier3_prob = self._project_to_bounded_simplex(raw_tier_probs)
 
         # Confidence scalars for each tier
         tier2_confidence = round(composite_confidence * 0.85, 3)
@@ -477,7 +493,7 @@ class QGIAForecastEngine:
             mean = self._weighted_mean(beliefs, cell)
             chain.extend([
                 f"Belief convergence: weighted mean {mean:.3f} after multi-round propagation",
-                f"Archetype distribution in cell provides balanced epistemic coverage",
+                "Archetype distribution in cell provides balanced epistemic coverage",
                 f"Primary scenario supported by {sum(1 for b in beliefs.values() if b > 0.5)}/{n_cell} analysts",
             ])
         elif tier == "tier2":

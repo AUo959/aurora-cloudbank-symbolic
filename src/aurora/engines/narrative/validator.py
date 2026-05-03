@@ -77,7 +77,7 @@ def _build_summary(request: NormalizedTaskRequest, evaluation: EvaluationPacket,
     first_support = evaluation.supports[0] if evaluation.supports else "direct support remains thin."
     first_block = evaluation.blocks[0] if evaluation.blocks else "no major blocker is established."
     if request.task_kind.value == "character_action_audit":
-        return f"This character move is {verdict.value}: {first_support} But {first_block}"
+        return f"This character move is {verdict.value}: {first_support}, but {first_block}."
     if request.task_kind.value == "next_event_continuity_check":
         return f"This next beat is {verdict.value}: {first_block}"
     if request.task_kind.value == "historical_plausibility_check":

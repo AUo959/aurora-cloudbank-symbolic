@@ -294,7 +294,7 @@ def _collect_constraint_type_layer(layers: dict[str, LayerRecord], constraint_ty
     if constraint_type in _TEMPORAL_CONSTRAINT_TYPES:
         _upsert_layer(layers, "temporal", "recovered", 0.95)
     if constraint_type in _POLITICAL_CONSTRAINT_TYPES:
-        _upsert_layer(layers, constraint_type, "recovered", 0.9)
+        _upsert_layer(layers, "political", "recovered", 0.9)
 
 
 def _collect_question_layers(

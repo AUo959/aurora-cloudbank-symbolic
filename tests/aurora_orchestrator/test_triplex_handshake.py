@@ -9,6 +9,8 @@ Ethics: Picard_Delta_3
 Anchor: AURORA-ORCHESTRATOR-TRIPLEX-001
 """
 
+from unittest import TestCase
+
 import pytest
 
 from src.core.event_system import Event, EventType, StationLocation
@@ -45,14 +47,23 @@ async def test_axiomera_blocks_high_risk_event():
 
     axiomera = get_axiomera()
     result = await axiomera.evaluate_for_triplex(event)
+    assertions = TestCase()
 
-    assert result["recommendation"] == "BLOCK", (
-        f"Expected BLOCK for critically high-risk event, "
-        f"got {result['recommendation']!r}. "
-        f"Reasoning: {result.get('reasoning')}"
+    assertions.assertEqual(
+        result["recommendation"],
+        "BLOCK",
+        msg=(
+            f"Expected BLOCK for critically high-risk event, "
+            f"got {result['recommendation']!r}. "
+            f"Reasoning: {result.get('reasoning')}"
+        ),
     )
-    assert result["ethical_assessment"]["ethical_score"] < 0.3, (
-        f"Expected ethical_score < 0.3 for critical risk, "
-        f"got {result['ethical_assessment']['ethical_score']}"
+    assertions.assertLess(
+        result["ethical_assessment"]["ethical_score"],
+        0.3,
+        msg=(
+            f"Expected ethical_score < 0.3 for critical risk, "
+            f"got {result['ethical_assessment']['ethical_score']}"
+        ),
     )
-    assert result["ethical_assessment"]["risk_level"] == "critical"
+    assertions.assertEqual(result["ethical_assessment"]["risk_level"], "critical")

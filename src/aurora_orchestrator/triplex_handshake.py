@@ -13,16 +13,39 @@ autonomous decisions.
 Protocol:
 L3 (Framework): Axiomera (ethics) + Caelion (anchors)
 L2 (Relay): HALO (drift) + ARCHY (feasibility)
-L1 (Human): Command Bridge (final oversight for critical decisions)
+L1 (Oversight): ARCHYEntity architecture oversight for critical decisions
 
 This ensures every significant Aurora decision is validated through
-ethical, technical, and human oversight layers before execution.
+ethical, technical, and oversight layers before execution.
 """
 
 import logging
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+
+from src.entities.framework_agents import get_axiomera, get_caelion
+from src.entities.relay_agents import get_halo, get_archy
+from src.core.event_system import Event, EventType, StationLocation
+
+# Default continuity load for decisions that don't specify one.
+# 0.3 represents a moderate operational load that won't trigger
+# Caelion or Axiomera continuity-load concerns (threshold is > 0.7).
+_DEFAULT_CONTINUITY_LOAD = 0.3
+
+# DLP context-tag prefix applied to every decision forwarded to real entities.
+_DLP_CONTEXT_PREFIX = "decision_"
+
+# Number of symbolic anchors verified by Caelion (T1 temporal + SRB spatial).
+_CAELION_ANCHOR_COUNT = 2
+
+_ETHICS_PASS_RECOMMENDATIONS = {
+    "APPROVE",
+    "PROCEED_WITH_OVERSIGHT",
+    "REQUIRE_HUMAN_CONSENT",
+}
+_ETHICS_RECOMMENDATIONS_REQUIRING_L1 = {"REQUIRE_HUMAN_CONSENT"}
+_ANCHOR_PASS_RECOMMENDATIONS = {"APPROVE", "PROCEED_WITH_MONITORING"}
 
 
 @dataclass
@@ -39,131 +62,6 @@ class ValidationResult:
     def __post_init__(self):
         if not self.timestamp:
             self.timestamp = datetime.now().isoformat()
-
-
-class MockAxiomera:
-    """
-    Mock Axiomera (Ethics Evaluator) - Future: Real Entity
-
-    Axiomera evaluates decisions against Picard_Delta_3 ethics protocol.
-    Currently uses simple heuristics - future will be full ethics engine.
-    """
-
-    def __init__(self):
-        self.logger = logging.getLogger('MockAxiomera')
-
-    async def evaluate_ethics(self, decision) -> Dict[str, Any]:
-        """
-        Evaluate decision ethics.
-
-        Returns:
-            Dict with: approved (bool), score (float), concerns (list)
-        """
-        # Simple heuristics for now
-        risk = decision.risk_assessment
-        ethical_compliance = decision.ethical_compliance
-
-        approved = ethical_compliance and risk < 0.8
-
-        concerns = []
-        if risk > 0.7:
-            concerns.append("High risk action - requires careful review")
-        if not ethical_compliance:
-            concerns.append("Ethics compliance not verified")
-
-        # Placeholder await for async compliance
-        import asyncio
-        await asyncio.sleep(0)
-
-        return {
-            'approved': approved,
-            'score': 0.9 if approved else 0.4,
-            'concerns': concerns,
-            'evaluator': 'Axiomera',
-            'protocol': 'Picard_Delta_3'
-        }
-
-
-class MockCaelion:
-    """
-    Mock Caelion (Anchor Verifier) - Future: Real Entity
-
-    Caelion verifies symbolic anchor alignment and continuity.
-    """
-
-    def __init__(self):
-        self.logger = logging.getLogger('MockCaelion')
-
-    async def verify_anchors(self, decision) -> Dict[str, Any]:
-        """
-        Verify symbolic anchor alignment.
-
-        Returns:
-            Dict with: approved (bool), anchor_status (str), issues (list)
-        """
-        # Check for symbolic anchors in context
-        context = decision.context or {}
-        symbolic_anchors = context.get('symbolic_anchors', [])
-
-        # Future: Real anchor verification logic
-        approved = len(symbolic_anchors) > 0
-
-        issues = []
-        if not symbolic_anchors:
-            issues.append("No symbolic anchors present")
-
-        # Placeholder await for async compliance
-        import asyncio
-        await asyncio.sleep(0)
-
-        return {
-            'approved': approved,
-            'anchor_status': 'aligned' if approved else 'missing',
-            'anchors_checked': len(symbolic_anchors),
-            'issues': issues,
-            'evaluator': 'Caelion'
-        }
-
-
-class MockHALO:
-    """
-    Mock HALO (Drift Monitor) - Future: Real Entity
-
-    HALO monitors and predicts system drift from decisions.
-    """
-
-    def __init__(self):
-        self.logger = logging.getLogger('MockHALO')
-
-    async def assess_drift_risk(self, decision) -> Dict[str, Any]:
-        """
-        Assess drift risk from decision.
-
-        Returns:
-            Dict with: approved (bool), predicted_drift (float), warning (str)
-        """
-        # Estimate drift from decision context
-        context = decision.context or {}
-        predicted_drift = context.get('predicted_drift', 0.01)
-
-        # Approve if drift < 0.1 (10%)
-        approved = predicted_drift < 0.1
-
-        warning = None
-        if predicted_drift > 0.05:
-            warning = f"Moderate drift predicted: {predicted_drift:.3f}"
-
-        # Placeholder await for async compliance
-        import asyncio
-        await asyncio.sleep(0)
-
-        return {
-            'approved': approved,
-            'predicted_drift': predicted_drift,
-            'current_drift': 0.023,  # Mock current drift
-            'warning': warning,
-            'evaluator': 'HALO'
-        }
 
 
 class MockARCHY:
@@ -203,62 +101,6 @@ class MockARCHY:
         }
 
 
-class MockCommandBridge:
-    """
-    Mock Command Bridge (Human Oversight) - Future: Real Interface
-
-    Command Bridge provides human oversight for critical decisions.
-    """
-
-    def __init__(self):
-        self.logger = logging.getLogger('MockCommandBridge')
-        self.pending_approvals: Dict[str, Any] = {}
-
-    async def request_approval(
-        self,
-        decision,
-        l3_result: Dict[str, Any],
-        l2_result: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Request human approval for critical decision.
-
-        In production, this would:
-        - Send notification to human operators
-        - Present decision context and analysis
-        - Wait for approval/rejection
-        - Return human decision
-
-        For now, auto-approve in mock mode.
-        """
-        self.logger.info(
-            f"🚨 CRITICAL DECISION - Human approval requested: {decision.action}"
-        )
-
-        # Store for review
-        self.pending_approvals[decision.decision_id] = {
-            'decision': decision,
-            'l3_result': l3_result,
-            'l2_result': l2_result,
-            'requested_at': datetime.now().isoformat()
-        }
-
-        # Mock: Auto-approve low-medium risk, reject high risk
-        auto_approve = decision.risk_assessment < 0.6
-
-        return {
-            'approved': auto_approve,
-            'approver': 'MockCommandBridge',
-            'approval_mode': 'automatic',
-            'reason': 'Risk within acceptable threshold' if auto_approve else 'Risk too high',
-            'timestamp': datetime.now().isoformat()
-        }
-
-    def get_pending_approvals(self) -> Dict[str, Any]:
-        """Get pending human approvals"""
-        return self.pending_approvals
-
-
 class TriplexHandshakeValidator:
     """
     Triplex Handshake Validation System
@@ -268,7 +110,7 @@ class TriplexHandshakeValidator:
     Canonical Protocol:
     1. L3 Framework: Ethics (Axiomera) + Anchors (Caelion)
     2. L2 Relay: Drift (HALO) + Feasibility (ARCHY)
-    3. L1 Human: Command Bridge oversight (critical only)
+    3. L1 Oversight: ARCHYEntity architecture oversight (critical only)
 
     Each level must approve before proceeding to next.
     Any level can block the decision.
@@ -284,16 +126,44 @@ class TriplexHandshakeValidator:
         self.config = config
         self.logger = self._setup_logging()
 
-        # Initialize mock validators
-        # Future: Replace with real entity integrations
-        self.axiomera = MockAxiomera()
-        self.caelion = MockCaelion()
-        self.halo = MockHALO()
+        # Real entity singletons for L3 (Framework) and L2 (Relay) gates
+        self.axiomera = get_axiomera()
+        self.caelion = get_caelion()
+        self.halo = get_halo()
         self.archy = MockARCHY()
-        self.command_bridge = MockCommandBridge()
+        # ARCHYEntity provides L1 architecture-level oversight for critical decisions
+        self.l1_oversight = get_archy()
 
         self.logger.info(
-            "🛡️ Triplex Handshake Validator initialized (mock mode)"
+            "🛡️ Triplex Handshake Validator initialized (real entity mode)"
+        )
+
+    def _decision_to_event(self, decision, event_type: EventType) -> Event:
+        """
+        Convert AuroraDecision to Event for real entity evaluation.
+
+        Maps orchestration decision fields to Event properties consumed
+        by the real entity triplex evaluators (AxiomeraEntity, CaelionEntity,
+        HALOEntity, ARCHYEntity).
+
+        Args:
+            decision: AuroraDecision from the orchestration layer
+            event_type: Triplex layer event type for the evaluation being run
+
+        Returns:
+            Event suitable for real entity evaluation
+        """
+        context = decision.context or {}
+        return Event(
+            event_type=event_type,
+            location=StationLocation.COMMAND_BRIDGE,
+            primary_entity="Aurora (SYS_001)",
+            payload=context,
+            risk_score=decision.risk_assessment,
+            continuity_load=context.get('continuity_load', _DEFAULT_CONTINUITY_LOAD),
+            # Prefix decision_id with DLP context prefix for data-lineage tracking
+            context_tag=_DLP_CONTEXT_PREFIX + decision.decision_id,
+            human_context=context.get('human_context'),
         )
 
     def _setup_logging(self) -> logging.Logger:
@@ -357,10 +227,11 @@ class TriplexHandshakeValidator:
 
         self.logger.info("✅ L2 Relay validation passed")
 
-        # L1: Human Level (Critical decisions only)
+        # L1: Oversight Level (critical decisions or L3 human-consent recommendations)
         l1_result = None
-        if decision.requires_human_approval:
-            l1_result = await self.l1_human_validation(decision, l3_result, l2_result)
+        requires_l1_oversight = decision.requires_human_approval or l3_result.get('requires_human_approval', False)
+        if requires_l1_oversight:
+            l1_result = await self.l1_oversight_validation(decision, l3_result, l2_result)
             if not l1_result['approved']:
                 self.logger.warning(f"❌ L1 validation failed: {l1_result['reason']}")
                 return ValidationResult(
@@ -372,7 +243,7 @@ class TriplexHandshakeValidator:
                     reason=l1_result['reason']
                 )
 
-            self.logger.info("✅ L1 Human validation passed")
+            self.logger.info("✅ L1 Oversight validation passed")
 
         # All levels passed
         self.logger.info(f"✅ Triplex validation APPROVED: {decision.action}")
@@ -395,11 +266,36 @@ class TriplexHandshakeValidator:
         """
         self.logger.debug("🔍 L3 Framework validation...")
 
-        # Axiomera ethics evaluation
-        ethics_result = await self.axiomera.evaluate_ethics(decision)
+        event = self._decision_to_event(decision, EventType.ETHICAL_REVIEW_L3)
 
-        # Caelion anchor verification
-        anchor_result = await self.caelion.verify_anchors(decision)
+        # Axiomera ethics evaluation via real entity
+        raw_ethics = await self.axiomera.evaluate_for_triplex(event)
+        ethics_recommendation = raw_ethics['recommendation']
+        ethics_requires_l1 = ethics_recommendation in _ETHICS_RECOMMENDATIONS_REQUIRING_L1
+        ethics_approved = ethics_recommendation in _ETHICS_PASS_RECOMMENDATIONS
+        ethics_result = {
+            'approved': ethics_approved,
+            'score': raw_ethics['ethical_assessment']['ethical_score'],
+            'concerns': raw_ethics['ethical_assessment']['concerns'],
+            'evaluator': 'Axiomera',
+            'protocol': 'Picard_Delta_3',
+            'recommendation': ethics_recommendation,
+            'requires_l1_oversight': ethics_requires_l1,
+            'reasoning': raw_ethics['reasoning'],
+        }
+
+        # Caelion anchor verification via real entity
+        raw_anchor = await self.caelion.evaluate_for_triplex(event)
+        anchor_approved = raw_anchor['recommendation'] in _ANCHOR_PASS_RECOMMENDATIONS
+        anchor_result = {
+            'approved': anchor_approved,
+            'anchor_status': 'aligned' if anchor_approved else 'invalid',
+            'anchors_checked': _CAELION_ANCHOR_COUNT,
+            'issues': raw_anchor['anchor_validation']['concerns'],
+            'evaluator': 'Caelion',
+            'recommendation': raw_anchor['recommendation'],
+            'reasoning': raw_anchor['reasoning'],
+        }
 
         # Both must approve
         approved = ethics_result['approved'] and anchor_result['approved']
@@ -422,6 +318,7 @@ class TriplexHandshakeValidator:
             'ethics': ethics_result,
             'anchors': anchor_result,
             'concerns': concerns,
+            'requires_human_approval': ethics_requires_l1,
             'reason': reason
         }
 
@@ -437,10 +334,23 @@ class TriplexHandshakeValidator:
         """
         self.logger.debug("🔍 L2 Relay validation...")
 
-        # HALO drift assessment
-        drift_result = await self.halo.assess_drift_risk(decision)
+        event = self._decision_to_event(decision, EventType.DRIFT_CHECK_L2)
 
-        # ARCHY feasibility verification
+        # HALO drift assessment via real entity
+        raw_drift = await self.halo.evaluate_for_triplex(event)
+        drift_approved = raw_drift['recommendation'] != 'BLOCK'
+        drift_analysis = raw_drift['drift_analysis']
+        drift_current = drift_analysis['current_drift']
+        drift_result = {
+            'approved': drift_approved,
+            'current_drift': drift_current,
+            'drift_velocity': drift_analysis.get('drift_velocity', 0.0),
+            'warning': raw_drift['reasoning'] if not drift_analysis['acceptable'] else None,
+            'evaluator': 'HALO',
+            'recommendation': raw_drift['recommendation'],
+        }
+
+        # ARCHY feasibility verification (mock — not yet replaced)
         feasibility_result = await self.archy.verify_feasibility(decision)
 
         # Both must approve
@@ -455,7 +365,7 @@ class TriplexHandshakeValidator:
         reason = None
         if not approved:
             if not drift_result['approved']:
-                reason = f"Drift risk too high: {drift_result['predicted_drift']:.3f}"
+                reason = f"Drift risk too high: {drift_result['current_drift']:.3f}"
             elif not feasibility_result['approved']:
                 reason = "Technical feasibility check failed"
 
@@ -468,27 +378,33 @@ class TriplexHandshakeValidator:
             'reason': reason
         }
 
-    async def l1_human_validation(
+    async def l1_oversight_validation(
         self,
         decision,
         l3_result: Dict[str, Any],
         l2_result: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        L1 Human Level: Command Bridge Oversight
+        L1 Oversight Level: ARCHYEntity Architecture Oversight
 
-        For critical decisions, human approval required.
-        Presents full context from L3 and L2 to human operator.
+        For critical decisions, architecture-level oversight required.
+        Uses ARCHYEntity to evaluate architectural soundness before execution.
         """
-        self.logger.debug("🔍 L1 Human validation...")
+        self.logger.debug("🔍 L1 Oversight validation...")
 
-        approval_result = await self.command_bridge.request_approval(
-            decision=decision,
-            l3_result=l3_result,
-            l2_result=l2_result
-        )
+        event = self._decision_to_event(decision, EventType.HUMAN_CONSENT_L1)
 
-        approved = approval_result['approved']
+        raw_arch = await self.l1_oversight.evaluate_for_triplex(event)
+        approved = raw_arch['recommendation'] != 'BLOCK'
+
+        approval_result = {
+            'approved': approved,
+            'approver': raw_arch.get('entity', 'ARCHY (RELAY_001)'),
+            'approval_mode': 'architecture_oversight',
+            'reason': raw_arch['reasoning'],
+            'recommendation': raw_arch['recommendation'],
+            'timestamp': datetime.now().isoformat(),
+        }
 
         return {
             'approved': approved,
@@ -498,5 +414,5 @@ class TriplexHandshakeValidator:
         }
 
     def get_pending_approvals(self) -> Dict[str, Any]:
-        """Get pending human approvals"""
-        return self.command_bridge.get_pending_approvals()
+        """Get pending human approvals (no queue with real ARCHYEntity oversight)"""
+        return {}

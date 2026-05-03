@@ -58,8 +58,9 @@ def test_resolve_config_path_does_not_leak_caller_cwd(monkeypatch, temp_git_repo
 
     monkeypatch.chdir(caller_dir)
 
-    if resolve_config_path(workspace_path=str(temp_git_repo)) is not None:
-        pytest.fail("Expected workspace config lookup to ignore caller CWD config")
+    assert resolve_config_path(workspace_path=str(temp_git_repo)) is None, (  # nosec B101
+        "Expected workspace config lookup to ignore caller CWD config"
+    )
 
 
 def test_resolve_config_path_prefers_workspace_relative_config(monkeypatch, temp_git_repo):
@@ -80,8 +81,7 @@ def test_resolve_config_path_prefers_workspace_relative_config(monkeypatch, temp
         workspace_path=str(workspace_dir),
     )
 
-    if resolved != workspace_config:
-        pytest.fail(f"Expected workspace-scoped config, got {resolved}")
+    assert resolved == workspace_config, f"Expected workspace-scoped config, got {resolved}"  # nosec B101
 
 
 def test_execute_commit_creates_local_commit(temp_git_repo):
@@ -89,10 +89,8 @@ def test_execute_commit_creates_local_commit(temp_git_repo):
 
     result = execute_commit(workspace_path=str(temp_git_repo))
 
-    if not result.success:
-        pytest.fail("Expected execute_commit to succeed")
-    if not result.commit_sha:
-        pytest.fail("Expected execute_commit to return a commit SHA")
+    assert result.success, "Expected execute_commit to succeed"  # nosec B101
+    assert result.commit_sha, "Expected execute_commit to return a commit SHA"  # nosec B101
     commit_count = subprocess.run(  # nosec
         ["git", "rev-list", "--count", "HEAD"],
         cwd=temp_git_repo,
@@ -100,8 +98,7 @@ def test_execute_commit_creates_local_commit(temp_git_repo):
         capture_output=True,
         text=True,
     )
-    if commit_count.stdout.strip() != "2":
-        pytest.fail(f"Expected two commits, got {commit_count.stdout.strip()}")
+    assert commit_count.stdout.strip() == "2", f"Expected two commits, got {commit_count.stdout.strip()}"  # nosec B101
 
 
 def test_execute_321_preserves_partial_commit_metadata_on_sync_failure(temp_git_repo):
@@ -109,14 +106,12 @@ def test_execute_321_preserves_partial_commit_metadata_on_sync_failure(temp_git_
 
     result = execute_321(workspace_path=str(temp_git_repo))
 
-    if result.success:
-        pytest.fail("Expected execute_321 to fail during sync without origin")
-    if not result.commit_sha:
-        pytest.fail("Expected execute_321 to preserve the local commit SHA")
-    if result.files_changed != 1:
-        pytest.fail(f"Expected one changed file, got {result.files_changed}")
-    if not any(phase.phase_number == 4 and not phase.success for phase in result.phases):
-        pytest.fail("Expected execute_321 to preserve the phase 4 sync failure")
+    assert not result.success, "Expected execute_321 to fail during sync without origin"  # nosec B101
+    assert result.commit_sha, "Expected execute_321 to preserve the local commit SHA"  # nosec B101
+    assert result.files_changed == 1, f"Expected one changed file, got {result.files_changed}"  # nosec B101
+    assert any(phase.phase_number == 4 and not phase.success for phase in result.phases), (  # nosec B101
+        "Expected execute_321 to preserve the phase 4 sync failure"
+    )
 
     commit_count = subprocess.run(  # nosec
         ["git", "rev-list", "--count", "HEAD"],
@@ -125,27 +120,22 @@ def test_execute_321_preserves_partial_commit_metadata_on_sync_failure(temp_git_
         capture_output=True,
         text=True,
     )
-    if commit_count.stdout.strip() != "2":
-        pytest.fail(f"Expected two commits, got {commit_count.stdout.strip()}")
+    assert commit_count.stdout.strip() == "2", f"Expected two commits, got {commit_count.stdout.strip()}"  # nosec B101
 
 
 def test_command_executor_imports_under_current_python(temp_git_repo):
-    executor = CommandExecutor(str(temp_git_repo))
-    if executor is None:
-        pytest.fail("Expected CommandExecutor to import and instantiate")
+    CommandExecutor(str(temp_git_repo))
 
 
 def test_command_executor_treats_continuity_accept_as_success(temp_git_repo):
     result = CommandExecutor(str(temp_git_repo)).execute("#999//.")
 
-    if not result.success:
-        pytest.fail("Continuity accept should be treated as a successful command")
-    if result.failed_commands != 0:
-        pytest.fail(f"Expected no failed commands, got {result.failed_commands}")
-    if not result.results[0].success:
-        pytest.fail("Continuity accept result should be successful")
-    if result.results[0].output["status"] != "sealed":
-        pytest.fail(f"Expected sealed status, got {result.results[0].output['status']}")
+    assert result.success, "Continuity accept should be treated as a successful command"  # nosec B101
+    assert result.failed_commands == 0, f"Expected no failed commands, got {result.failed_commands}"  # nosec B101
+    assert result.results[0].success, "Continuity accept result should be successful"  # nosec B101
+    assert result.results[0].output["status"] == "sealed", (  # nosec B101
+        f"Expected sealed status, got {result.results[0].output['status']}"
+    )
 
 
 def test_command_executor_reports_handler_failure_for_sync_workflow(temp_git_repo):
@@ -153,11 +143,9 @@ def test_command_executor_reports_handler_failure_for_sync_workflow(temp_git_rep
 
     result = CommandExecutor(str(temp_git_repo)).execute("#321//.")
 
-    if result.success:
-        pytest.fail("Expected #321//. sync workflow to fail without origin")
-    if result.failed_commands != 1:
-        pytest.fail(f"Expected one failed command, got {result.failed_commands}")
-    if result.results[0].success:
-        pytest.fail("Expected #321//. command result to fail without origin")
-    if result.results[0].output["status"] not in {"failed", "partial", "warning"}:
-        pytest.fail(f"Expected failure-like status, got {result.results[0].output['status']}")
+    assert not result.success, "Expected #321//. sync workflow to fail without origin"  # nosec B101
+    assert result.failed_commands == 1, f"Expected one failed command, got {result.failed_commands}"  # nosec B101
+    assert not result.results[0].success, "Expected #321//. command result to fail without origin"  # nosec B101
+    assert result.results[0].output["status"] in {"failed", "partial", "warning"}, (  # nosec B101
+        f"Expected failure-like status, got {result.results[0].output['status']}"
+    )

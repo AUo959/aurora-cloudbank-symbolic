@@ -117,11 +117,6 @@ HISTORICAL_PROPOSAL = {
 }
 
 
-def _expect(condition, message):
-    if not condition:
-        pytest.fail(message)
-
-
 @pytest.mark.unit
 @pytest.mark.aurora
 @pytest.mark.parametrize(
@@ -175,29 +170,24 @@ def test_narrative_engine_golden_cases(
 ):
     run = ENGINE.run(raw_input, proposal=proposal)
 
-    _expect(
-        run.request.task_kind == expected_kind,
-        f"Expected task kind {expected_kind}, got {run.request.task_kind}",
+    assert run.request.task_kind == expected_kind, (  # nosec B101
+        f"Expected task kind {expected_kind}, got {run.request.task_kind}"
     )
-    _expect(
-        run.response.verdict == expected_verdict,
-        f"Expected verdict {expected_verdict}, got {run.response.verdict}",
+    assert run.response.verdict == expected_verdict, (  # nosec B101
+        f"Expected verdict {expected_verdict}, got {run.response.verdict}"
     )
-    _expect(
-        run.evaluation.active_layers == expected_layers,
-        f"Expected active layers {expected_layers}, got {run.evaluation.active_layers}",
+    assert run.evaluation.active_layers == expected_layers, (  # nosec B101
+        f"Expected active layers {expected_layers}, got {run.evaluation.active_layers}"
     )
-    _expect(run.response.supported_in_phase_one is True, "Expected phase-one support")
+    assert run.response.supported_in_phase_one, "Expected phase-one support"  # nosec B101
     if support_snippet:
-        _expect(
-            any(support_snippet.lower() in item.lower() for item in run.response.main_supports),
-            f"Expected support snippet {support_snippet!r}",
+        assert any(support_snippet.lower() in item.lower() for item in run.response.main_supports), (  # nosec B101
+            f"Expected support snippet {support_snippet!r}"
         )
-    _expect(
-        any(blocker_snippet.lower() in item.lower() for item in run.response.main_blockers),
-        f"Expected blocker snippet {blocker_snippet!r}",
+    assert any(blocker_snippet.lower() in item.lower() for item in run.response.main_blockers), (  # nosec B101
+        f"Expected blocker snippet {blocker_snippet!r}"
     )
-    _expect(bool(run.response.smallest_fix), "Expected a smallest-fix recommendation")
+    assert run.response.smallest_fix, "Expected a smallest-fix recommendation"  # nosec B101
 
 
 @pytest.mark.unit
@@ -205,13 +195,15 @@ def test_narrative_engine_golden_cases(
 def test_sparse_input_restraint_stays_minimal():
     run = ENGINE.run("a hero came to a fork in the road")
 
-    _expect(run.request.task_kind == TaskKind.EXPANSION, f"Expected expansion, got {run.request.task_kind}")
-    _expect(run.response.supported_in_phase_one is False, "Expected unsupported phase-one response")
-    _expect(run.response.verdict is None, f"Expected no verdict, got {run.response.verdict}")
-    _expect(not run.state.entities, f"Expected no entities, got {run.state.entities}")
-    _expect(not run.state.motives, f"Expected no motives, got {run.state.motives}")
-    _expect(bool(run.state.uncertainties), "Expected sparse-input uncertainty")
-    _expect(run.response.confidence <= 0.2, f"Expected low confidence, got {run.response.confidence}")
+    assert run.request.task_kind == TaskKind.EXPANSION, (  # nosec B101
+        f"Expected expansion, got {run.request.task_kind}"
+    )
+    assert not run.response.supported_in_phase_one, "Expected unsupported phase-one response"  # nosec B101
+    assert run.response.verdict is None, f"Expected no verdict, got {run.response.verdict}"  # nosec B101
+    assert not run.state.entities, f"Expected no entities, got {run.state.entities}"  # nosec B101
+    assert not run.state.motives, f"Expected no motives, got {run.state.motives}"  # nosec B101
+    assert run.state.uncertainties, "Expected sparse-input uncertainty"  # nosec B101
+    assert run.response.confidence <= 0.2, f"Expected low confidence, got {run.response.confidence}"  # nosec B101
 
 
 @pytest.mark.unit
@@ -228,15 +220,17 @@ def test_missing_layer_honesty_reduces_confidence():
         proposal={"actor": "Ilya", "action": "betray the crew", "type": "action"},
     )
 
-    _expect("motive" in run.evaluation.missing_layers, f"Expected missing motive layer: {run.evaluation}")
-    _expect(
-        run.response.verdict == Verdict.POSSIBLE_WITH_SETUP,
-        f"Expected possible-with-setup verdict, got {run.response.verdict}",
+    assert "motive" in run.evaluation.missing_layers, f"Expected missing motive layer: {run.evaluation}"  # nosec B101
+    assert run.response.verdict == Verdict.POSSIBLE_WITH_SETUP, (  # nosec B101
+        f"Expected possible-with-setup verdict, got {run.response.verdict}"
     )
-    _expect(run.response.confidence < 0.55, f"Expected reduced confidence, got {run.response.confidence}")
-    _expect(
-        any("motive" in item.lower() or "pressure" in item.lower() for item in run.response.smallest_fix),
-        f"Expected motive or pressure smallest-fix guidance, got {run.response.smallest_fix}",
+    assert run.response.confidence < 0.55, f"Expected reduced confidence, got {run.response.confidence}"  # nosec B101
+    has_fix_guidance = any(
+        "motive" in item.lower() or "pressure" in item.lower()
+        for item in run.response.smallest_fix
+    )
+    assert has_fix_guidance, (  # nosec B101
+        f"Expected motive or pressure smallest-fix guidance, got {run.response.smallest_fix}"
     )
 
 
@@ -245,12 +239,14 @@ def test_missing_layer_honesty_reduces_confidence():
 def test_symbolic_request_is_typed_unsupported_without_overclaim():
     run = ENGINE.run("Does the moon above the ruined bridge definitely symbolize rebirth?")
 
-    _expect(run.request.task_kind == TaskKind.UNSUPPORTED, f"Expected unsupported, got {run.request.task_kind}")
-    _expect(run.response.supported_in_phase_one is False, "Expected unsupported phase-one response")
-    _expect(run.response.verdict is None, f"Expected no verdict, got {run.response.verdict}")
-    _expect(run.response.main_supports == [], f"Expected no supports, got {run.response.main_supports}")
-    _expect(run.response.main_blockers == [], f"Expected no blockers, got {run.response.main_blockers}")
-    _expect(run.response.confidence <= 0.2, f"Expected low confidence, got {run.response.confidence}")
+    assert run.request.task_kind == TaskKind.UNSUPPORTED, (  # nosec B101
+        f"Expected unsupported, got {run.request.task_kind}"
+    )
+    assert not run.response.supported_in_phase_one, "Expected unsupported phase-one response"  # nosec B101
+    assert run.response.verdict is None, f"Expected no verdict, got {run.response.verdict}"  # nosec B101
+    assert run.response.main_supports == [], f"Expected no supports, got {run.response.main_supports}"  # nosec B101
+    assert run.response.main_blockers == [], f"Expected no blockers, got {run.response.main_blockers}"  # nosec B101
+    assert run.response.confidence <= 0.2, f"Expected low confidence, got {run.response.confidence}"  # nosec B101
 
 
 @pytest.mark.unit
@@ -259,12 +255,10 @@ def test_proposal_stays_provisional_in_state():
     run = ENGINE.run(MARA_INPUT, proposal=MARA_PROPOSAL)
 
     proposed_events = [event for event in run.state.events if event.status == "proposed"]
-    _expect(len(proposed_events) == 1, f"Expected one proposed event, got {proposed_events}")
-    _expect(
-        proposed_events[0].label == "abandon Teren to deliver the rebellion signal",
-        f"Unexpected proposed event label: {proposed_events[0].label}",
+    assert len(proposed_events) == 1, f"Expected one proposed event, got {proposed_events}"  # nosec B101
+    assert proposed_events[0].label == "abandon Teren to deliver the rebellion signal", (  # nosec B101
+        f"Unexpected proposed event label: {proposed_events[0].label}"
     )
-    _expect(
-        proposed_events[0].label not in run.state.continuity["established_events"],
-        "Expected proposed event to stay out of established continuity",
+    assert proposed_events[0].label not in run.state.continuity["established_events"], (  # nosec B101
+        "Expected proposed event to stay out of established continuity"
     )

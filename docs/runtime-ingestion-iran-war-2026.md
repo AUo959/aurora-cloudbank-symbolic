@@ -34,7 +34,7 @@ This document specifies the runtime ingestion contract for the Iran War 2026 pac
 
 6. **Load scenario catalog** — Construct the scenario tier index. Register Tier I scenarios as primary tracking targets for all QGIA deliverables.
 
-7. **Register package node** — Emit `KNOWLEDGE_NODE_REGISTERED` event to CONSTELLATION-PRIME.
+7. **Register package node** — Emit a `qgia.knowledge.updated` event that conforms to the shared Constellation event schema, including `source_node` and a `payload` object with package registration metadata for CONSTELLATION-PRIME and AURORA-RUNTIME consumers.
 
 ---
 

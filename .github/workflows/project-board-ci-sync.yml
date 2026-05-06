@@ -21,10 +21,6 @@ permissions:
   statuses: read
   checks: read
 
-concurrency:
-  group: project-sync-${{ join(github.event.workflow_run.pull_requests.*.number, '-') || github.event.workflow_run.id }}
-  cancel-in-progress: true
-
 jobs:
   sync-project-status:
     name: Sync Project Status Labels

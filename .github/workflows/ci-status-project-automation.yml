@@ -21,10 +21,6 @@ permissions:
   statuses: read
   checks: read
 
-concurrency:
-  group: ci-status-${{ join(github.event.workflow_run.pull_requests.*.number, '-') || github.event.workflow_run.id }}
-  cancel-in-progress: true
-
 jobs:
   update-pr-ci-status:
     name: Update PR CI Labels and Comment
@@ -189,7 +185,7 @@ jobs:
                 '### Failed Checks',
                 failedList.length > 0
                   ? failedList
-                  : '- A required status reported failure without an attached check run name.',
+                  : '- Failed check names were unavailable for this run.',
                 omittedFailureCount > 0 ? `- ...and ${omittedFailureCount} more failed checks` : null,
                 '',
                 'Please review the failed checks and push a follow-up fix.',

@@ -171,6 +171,7 @@ jobs:
             const existingComment = await findExistingComment();
 
             if (statusLabel === 'ci: failed') {
+              const omittedFailureCount = Math.max(failedChecks.length - maxFailedChecksToShow, 0);
               const failedList = failedChecks
                 .slice(0, maxFailedChecksToShow)
                 .map((check) => `- ${check.name}`)
@@ -189,9 +190,10 @@ jobs:
                 failedList.length > 0
                   ? failedList
                   : '- A required status reported failure without an attached check run name.',
+                omittedFailureCount > 0 ? `- ...and ${omittedFailureCount} more failed checks` : null,
                 '',
                 'Please review the failed checks and push a follow-up fix.',
-              ].join('\n');
+              ].filter(Boolean).join('\n');
 
               if (existingComment) {
                 await github.rest.issues.updateComment({

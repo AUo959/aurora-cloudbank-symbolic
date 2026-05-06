@@ -1,17 +1,56 @@
-# aurora_agent_runner.yml
+name: Aurora Agent Runner
 
-# Disable this workflow
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: aurora-agent-runner-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  aurora-agent:
+    name: Run Aurora Agent
     runs-on: ubuntu-latest
-    if: false
+    timeout-minutes: 10
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run your script
-        run: echo 'This is a placeholder step'
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Aurora Agent dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests
+
+      - name: Ensure log directory exists
+        run: mkdir -p logs
+
+      - name: Run Aurora Agent heartbeat
+        env:
+          CI: "true"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python .github/agents/aurora_agent_final.py
+
+      - name: Upload Aurora logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aurora-logs-${{ github.run_number }}
+          path: logs/aurora_agent.log
+          if-no-files-found: warn
+          retention-days: 90

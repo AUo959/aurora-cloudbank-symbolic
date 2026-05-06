@@ -43,6 +43,26 @@ class AutomationAuditor:
                 self.repo_name = "Unknown Repository"
         except Exception:
             self.repo_name = "Unknown Repository"
+
+    @staticmethod
+    def _normalize_workflow_definition(workflow: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalize workflow YAML so the `on` key survives YAML 1.1 parsing."""
+        workflow = workflow or {}
+        if True in workflow and "on" not in workflow:
+            workflow["on"] = workflow.pop(True)
+        return workflow
+
+    @staticmethod
+    def _job_is_disabled(job_config: Any) -> bool:
+        """Return True when a GitHub Actions job is intentionally disabled."""
+        if not isinstance(job_config, dict):
+            return False
+        condition = job_config.get("if")
+        if isinstance(condition, bool):
+            return condition is False
+        if isinstance(condition, str):
+            return condition.strip().lower() == "false"
+        return False
         
     def audit_workflows(self) -> Dict[str, Any]:
         """Audit GitHub Actions workflows"""
@@ -58,26 +78,87 @@ class AutomationAuditor:
         for workflow_file in workflow_dir.glob("*.yml"):
             try:
                 with open(workflow_file, 'r') as f:
-                    workflow = yaml.safe_load(f)
+                    workflow = self._normalize_workflow_definition(yaml.safe_load(f))
+
+                workflow_on = workflow.get("on", {}) if isinstance(workflow, dict) else {}
+                workflow_jobs = workflow.get("jobs", {}) if isinstance(workflow, dict) else {}
+                disabled_jobs = [
+                    job_name for job_name, job_config in workflow_jobs.items() if self._job_is_disabled(job_config)
+                ]
                     
                 workflow_info = {
                     "name": workflow_file.name,
                     "title": workflow.get("name", "Unknown"),
-                    "triggers": list(workflow.get("on", {}).keys()),
-                    "jobs": list(workflow.get("jobs", {}).keys())
+                    "triggers": list(workflow_on.keys()),
+                    "jobs": list(workflow_jobs.keys()),
+                    "disabled_jobs": disabled_jobs,
                 }
                 workflows.append(workflow_info)
                 
                 # Check for common issues
-                if "schedule" in workflow.get("on", {}):
-                    cron = workflow["on"]["schedule"]
+                if "schedule" in workflow_on:
+                    cron = workflow_on["schedule"]
                     workflow_info["scheduled"] = True
-                    
+                    workflow_info["cron"] = cron
+                     
                 if "permissions" not in workflow:
                     self.warnings.append(
                         f"⚠️ {workflow_file.name}: No permissions defined"
                     )
-                    
+
+                if workflow_jobs and len(disabled_jobs) == len(workflow_jobs):
+                    workflow_issues.append({
+                        "file": workflow_file.name,
+                        "severity": "HIGH",
+                        "error": "All jobs are disabled"
+                    })
+                    self.warnings.append(
+                        f"⚠️ {workflow_file.name}: All jobs are disabled"
+                    )
+
+                if workflow_file.name == "aurora_agent_runner.yml":
+                    missing_triggers = [
+                        trigger for trigger in ("schedule", "workflow_dispatch") if trigger not in workflow_on
+                    ]
+                    if missing_triggers:
+                        workflow_issues.append({
+                            "file": workflow_file.name,
+                            "severity": "HIGH",
+                            "error": f"Missing required triggers: {', '.join(missing_triggers)}"
+                        })
+                        self.warnings.append(
+                            f"⚠️ {workflow_file.name}: Missing triggers {', '.join(missing_triggers)}"
+                        )
+
+                    aurora_permissions = workflow.get("permissions", {})
+                    missing_permissions = [
+                        scope for scope in ("contents", "issues", "pull-requests")
+                        if aurora_permissions.get(scope) != "write"
+                    ]
+                    if missing_permissions:
+                        workflow_issues.append({
+                            "file": workflow_file.name,
+                            "severity": "HIGH",
+                            "error": f"Missing Aurora permissions: {', '.join(missing_permissions)}"
+                        })
+                        self.warnings.append(
+                            f"⚠️ {workflow_file.name}: Missing write permissions for {', '.join(missing_permissions)}"
+                        )
+
+                    aurora_steps = workflow_jobs.get("aurora-agent", {}).get("steps", [])
+                    if not any(
+                        isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/upload-artifact@")
+                        for step in aurora_steps
+                    ):
+                        workflow_issues.append({
+                            "file": workflow_file.name,
+                            "severity": "MEDIUM",
+                            "error": "Aurora logs are not uploaded as workflow artifacts"
+                        })
+                        self.warnings.append(
+                            f"⚠️ {workflow_file.name}: Aurora logs are not archived"
+                        )
+                     
             except Exception as e:
                 workflow_issues.append({
                     "file": workflow_file.name,

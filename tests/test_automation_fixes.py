@@ -8,6 +8,7 @@ import subprocess
 import sys
 import os
 from pathlib import Path
+import yaml
 
 # Always run commands from the repository root, independent of current CWD
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +29,26 @@ def run_command(cmd, timeout=30):
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return -1, "", "Command timed out"
+
+
+def load_yaml_file(path: Path):
+    """Load YAML content from disk."""
+    with open(path, "r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
+
+
+def normalize_workflow_definition(workflow):
+    """Normalize GitHub workflow YAML so the `on` key survives YAML 1.1 parsing."""
+    if True in workflow and "on" not in workflow:
+        workflow["on"] = workflow.pop(True)
+    return workflow
+
+
+def load_aurora_workflow():
+    """Load the Aurora Agent runner workflow."""
+    workflow_path = REPO_ROOT / ".github" / "workflows" / "aurora_agent_runner.yml"
+    workflow = normalize_workflow_definition(load_yaml_file(workflow_path))
+    return workflow_path, workflow
 
 
 def test_aurora_agent_ci_mode():
@@ -95,6 +116,7 @@ def test_audit_tool():
 
     assert returncode in (0, 1), f"Unexpected exit code {returncode}"  # 0 = pass, 1 = warnings only
     assert "Critical Issues: 0" in stdout, f"Critical issues detected: {stdout}"
+    assert "⚠️ aurora_agent_runner.yml" not in stdout, f"Aurora workflow warnings detected: {stdout}"
 
     if "Overall Status: ✅ PASS" not in stdout:
         print("  ⚠️ WARNING: Status not PASS (may have warnings)")
@@ -121,6 +143,46 @@ def test_log_files_created():
     print("  ✅ PASSED: Log files created correctly")
 
 
+def test_aurora_workflow_is_scheduled_and_enabled():
+    """Test Aurora Agent workflow is runnable on schedule and by hand."""
+    print("🧪 Testing Aurora Agent workflow triggers...")
+
+    workflow_path, workflow = load_aurora_workflow()
+    triggers = workflow.get("on", {})
+    jobs = workflow.get("jobs", {})
+
+    assert workflow_path.exists(), "Aurora workflow file missing"
+    assert "schedule" in triggers, "Workflow is missing a schedule trigger"
+    assert triggers["schedule"], "Workflow schedule trigger is empty"
+    assert "workflow_dispatch" in triggers, "Workflow is missing manual dispatch support"
+    assert jobs, "Workflow does not define any jobs"
+    assert all(job.get("if") not in (False, "false") for job in jobs.values()), "Workflow jobs are disabled"
+
+    print("  ✅ PASSED: Workflow is scheduled, manually triggerable, and enabled")
+
+
+def test_aurora_workflow_permissions_and_artifacts():
+    """Test Aurora Agent workflow keeps the required permissions and log archival."""
+    print("🧪 Testing Aurora Agent workflow permissions and artifacts...")
+
+    _, workflow = load_aurora_workflow()
+    permissions = workflow.get("permissions", {})
+    aurora_job = workflow.get("jobs", {}).get("aurora-agent", {})
+    steps = aurora_job.get("steps", [])
+    uses_values = [step.get("uses", "") for step in steps if isinstance(step, dict)]
+
+    for scope in ("contents", "issues", "pull-requests"):
+        assert permissions.get(scope) == "write", f"Workflow permission {scope} is not write"
+
+    assert any(uses.startswith("actions/checkout@") for uses in uses_values), "Workflow does not check out the repo"
+    assert any(uses.startswith("actions/setup-python@") for uses in uses_values), "Workflow does not set up Python"
+    assert any(
+        uses.startswith("actions/upload-artifact@") for uses in uses_values
+    ), "Workflow does not archive Aurora logs"
+
+    print("  ✅ PASSED: Workflow permissions and log archival are configured")
+
+
 def main():
     """Run all tests (for standalone execution)"""
     print("\n" + "="*60)
@@ -137,6 +199,8 @@ def main():
         test_makefile_no_warnings,
         test_audit_tool,
         test_log_files_created,
+        test_aurora_workflow_is_scheduled_and_enabled,
+        test_aurora_workflow_permissions_and_artifacts,
     ]
 
     failed_count = 0

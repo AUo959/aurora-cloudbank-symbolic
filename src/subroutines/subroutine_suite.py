@@ -11,12 +11,11 @@ Combined with the 3 existing subroutines (Reality Sim Monitor, Vision Alignment,
 Ethics Compliance), this provides a complete executive subroutine suite.
 """
 
-from collections.abc import Awaitable, Callable
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Awaitable, Callable
 import logging
 from datetime import datetime, UTC
 from dataclasses import dataclass
-import importlib
+from importlib.util import find_spec
 import json
 import re
 
@@ -611,11 +610,11 @@ class DependencyHealthMonitor:
         if not module_name:
             return {"healthy": False, "error": "Dependency name cannot be empty after normalization"}
 
-        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_\.]*", module_name):
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", module_name):
             return {"healthy": False, "error": "Dependency name contains unsupported characters"}
 
         try:
-            module_spec = importlib.util.find_spec(module_name)
+            module_spec = find_spec(module_name)
         except (ImportError, ValueError) as exc:
             return {"healthy": False, "error": f"Module not importable: {exc}"}
 

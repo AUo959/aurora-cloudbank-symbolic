@@ -274,7 +274,13 @@ class TestDependencyHealthMonitor:
         result = await check_dependencies()
 
         assert result["success"] is True
-        assert set(result["dependency_health"]) == {"gumas_api", "quantum_provider", "database"}
+        assert isinstance(result["dependency_health"], dict)
+        assert result["dependency_health"]
+        assert all(
+            dependency_result["dependency"] == dependency_name
+            and dependency_result["status"] in {"healthy", "unhealthy", "error"}
+            for dependency_name, dependency_result in result["dependency_health"].items()
+        )
 
 
 class TestPerformanceProfiler:

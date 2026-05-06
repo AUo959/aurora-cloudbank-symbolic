@@ -19,7 +19,7 @@ transformers>=4.35.0                # Transformer models (if using AI features)
 # ADVANCED VISUALIZATION
 # ===================================================================
 # Optional enhanced visualizations beyond plotly
-matplotlib>=3.8.0                   # Additional plotting
+matplotlib>=3.9.4                   # Additional plotting
 seaborn>=0.13.2                     # Statistical visualizations
 
 # ===================================================================

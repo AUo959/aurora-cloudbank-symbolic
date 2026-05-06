@@ -1,20 +1,17 @@
 name: CI Status Project Automation
 
-# This workflow manages project board status based on CI/test results
-# - When CI/tests fail: move items to 'In Progress' with warning
-# - When CI passes: move PRs to 'In Review', issues to 'Ready' or 'Done'
-# - Display CI/test status on project cards
+# This workflow tracks aggregate CI state for pull requests without recursively
+# triggering on every check suite or bot-authored workflow completion.
 
 on:
-  status:
-  check_suite:
-    types: [completed]
-  check_run:
-    types: [completed]
-  pull_request:
-    types: [opened, synchronize, reopened]
   workflow_run:
-    workflows: ["*"]
+    workflows:
+      - "Aurora CI (Minimal)"
+      - "CodeQL"
+      - "PR Evaluation"
+      - "Constellation CI"
+      - "Code Quality"
+      - "Codacy Analysis"
     types: [completed]
 
 permissions:
@@ -24,190 +21,184 @@ permissions:
   statuses: read
   checks: read
 
+concurrency:
+  group: ci-status-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
+
 jobs:
-  update-project-on-ci-status:
-    name: Update Project Based on CI Status
+  update-pr-ci-status:
+    name: Update PR CI Labels and Comment
     runs-on: ubuntu-latest
     steps:
-      - name: Get PR or Issue Info
-        id: get-info
+      - name: Reconcile CI status labels and comment
         uses: actions/github-script@v7
         with:
           script: |
-            const context_name = context.eventName;
-            let item_number = null;
-            let item_type = null;
-            let sha = null;
-            
-            // Determine the item (PR or issue) and commit SHA
-            if (context.payload.pull_request) {
-              item_number = context.payload.pull_request.number;
-              item_type = 'pull_request';
-              sha = context.payload.pull_request.head.sha;
-            } else if (context.payload.issue) {
-              item_number = context.payload.issue.number;
-              item_type = 'issue';
-            } else if (context.payload.check_suite) {
-              // Get PRs associated with this check suite
-              const prs = context.payload.check_suite.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.check_suite.head_sha;
-            } else if (context.payload.check_run) {
-              const prs = context.payload.check_run.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.check_run.head_sha;
-            } else if (context.payload.workflow_run) {
-              const prs = context.payload.workflow_run.pull_requests;
-              if (prs && prs.length > 0) {
-                item_number = prs[0].number;
-                item_type = 'pull_request';
-              }
-              sha = context.payload.workflow_run.head_sha;
-            }
-            
-            core.setOutput('item_number', item_number);
-            core.setOutput('item_type', item_type);
-            core.setOutput('sha', sha);
+            const workflowRun = context.payload.workflow_run;
+            const pr = workflowRun.pull_requests?.[0];
 
-      - name: Check CI Status
-        id: check-ci
-        if: steps.get-info.outputs.sha
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const sha = '${{ steps.get-info.outputs.sha }}';
-            
-            // Get all check runs for this commit
-            const { data: checkRuns } = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Get combined status
-            const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Determine overall status
-            let ci_passed = true;
-            let ci_status = 'success';
-            let failed_checks = [];
-            
-            // Check if any required checks failed
-            for (const check of checkRuns.check_runs) {
-              if (check.conclusion === 'failure' || check.conclusion === 'cancelled' || check.conclusion === 'timed_out') {
-                ci_passed = false;
-                ci_status = 'failure';
-                failed_checks.push(check.name);
-              }
-            }
-            
-            // Also check commit statuses
-            if (combinedStatus.state === 'failure' || combinedStatus.state === 'error') {
-              ci_passed = false;
-              ci_status = 'failure';
-            }
-            
-            core.setOutput('ci_passed', ci_passed);
-            core.setOutput('ci_status', ci_status);
-            core.setOutput('failed_checks', failed_checks.join(', '));
-
-      - name: Post CI Status Comment
-        if: steps.check_status.outputs.all_passed == 'true' || steps.check_status.outputs.has_failures == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Create comment body
-          cat > /tmp/ci_status_comment.md << 'EOF'
-          ## ✅ CI Status Update
-          
-          **Status:** ${{ steps.check_status.outputs.all_passed == 'true' && 'All Checks Passed' || 'Some Checks Failed' }}
-          **Last Updated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          
-          ### Check Summary
-          - Total Checks: ${{ steps.check_status.outputs.total_checks }}
-          - Passed: ${{ steps.check_status.outputs.passed_checks }}
-          - Failed: ${{ steps.check_status.outputs.failed_checks }}
-          
-          ${{ steps.check_status.outputs.all_passed == 'true' && '🎉 Project board updated to **In Review**' || '⚠️ Please review failed checks before merging' }}
-          EOF
-          
-          # Use smart comment handler to update existing comment
-          bash .github/scripts/smart-comment.sh ${{ github.event.pull_request.number }} "CI_STATUS_UPDATE" /tmp/ci_status_comment.md
-
-  add-ci-status-to-cards:
-    name: Display CI Status on Project Cards
-    runs-on: ubuntu-latest
-    if: github.event.pull_request || github.event.issue
-    steps:
-      - name: Add CI Status Label (Silent)
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const item_number = context.payload.pull_request?.number || context.payload.issue?.number;
-            const sha = context.payload.pull_request?.head?.sha;
-            
-            if (!sha) {
-              console.log('No SHA available, skipping');
+            if (!pr) {
+              core.notice('No pull request associated with this workflow run; skipping.');
               return;
             }
-            
-            // Get CI status
-            const { data: checkRuns } = await github.rest.checks.listForRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: sha
-            });
-            
-            // Determine status label
-            let statusLabel = 'ci: pending';
-            const hasFailures = checkRuns.check_runs.some(c => c.conclusion === 'failure');
-            const allSuccess = checkRuns.check_runs.length > 0 && 
-                              checkRuns.check_runs.every(c => 
-                                c.conclusion === 'success' || 
-                                c.conclusion === 'skipped' ||
-                                c.conclusion === null
-                              );
-            
-            if (hasFailures) {
-              statusLabel = 'ci: failed';
-            } else if (allSuccess) {
-              statusLabel = 'ci: passed';
-            }
-            
-            // Remove old CI labels silently
-            const labels = ['ci: pending', 'ci: passed', 'ci: failed'];
-            for (const label of labels) {
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = pr.number;
+            const sha = workflowRun.head_sha;
+            const ciLabels = {
+              'ci: pending': {
+                color: 'ededed',
+                description: 'CI checks are still running or waiting to start',
+              },
+              'ci: passed': {
+                color: '0e8a16',
+                description: 'CI checks completed successfully',
+              },
+              'ci: failed': {
+                color: 'd73a4a',
+                description: 'One or more CI checks failed',
+              },
+            };
+            const commentMarker = '<!-- CI_STATUS_UPDATE -->';
+
+            async function ensureLabel(name, config) {
               try {
-                await github.rest.issues.removeLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: item_number,
-                  name: label
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name,
+                  color: config.color,
+                  description: config.description,
                 });
-              } catch (e) {
-                // Label doesn't exist, ignore
               }
             }
-            
-            // Add current status label silently
-            try {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: item_number,
-                labels: [statusLabel]
+
+            async function removeLabel(name) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  name,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            async function findExistingComment() {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner,
+                repo,
+                issue_number: prNumber,
+                per_page: 100,
               });
-              console.log(`✅ Updated CI label to: ${statusLabel}`);
-            } catch (e) {
-              console.log(`⚠️ Could not add label: ${e.message}`);
+
+              return comments.find((comment) => comment.body?.includes(commentMarker));
+            }
+
+            const { data: checksForRef } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: sha,
+              per_page: 100,
+            });
+
+            const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: sha,
+            });
+
+            const checkRuns = checksForRef.check_runs;
+            const failureConclusions = new Set(['failure', 'cancelled', 'timed_out', 'action_required', 'startup_failure']);
+            const successConclusions = new Set(['success', 'neutral', 'skipped']);
+            const completedChecks = checkRuns.filter((check) => check.status === 'completed');
+            const failedChecks = completedChecks.filter((check) => failureConclusions.has(check.conclusion));
+            const pendingChecks = checkRuns.filter((check) => check.status !== 'completed');
+            const passedChecks = completedChecks.filter((check) => successConclusions.has(check.conclusion));
+
+            let statusLabel = 'ci: pending';
+            let statusSummary = 'pending';
+
+            if (failedChecks.length > 0 || ['failure', 'error'].includes(combinedStatus.state)) {
+              statusLabel = 'ci: failed';
+              statusSummary = 'failed';
+            } else if (
+              checkRuns.length > 0 &&
+              pendingChecks.length === 0 &&
+              completedChecks.every((check) => successConclusions.has(check.conclusion)) &&
+              combinedStatus.state === 'success'
+            ) {
+              statusLabel = 'ci: passed';
+              statusSummary = 'passed';
+            }
+
+            for (const [name, config] of Object.entries(ciLabels)) {
+              await ensureLabel(name, config);
+            }
+
+            for (const labelName of Object.keys(ciLabels)) {
+              if (labelName !== statusLabel) {
+                await removeLabel(labelName);
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [statusLabel],
+            });
+
+            const existingComment = await findExistingComment();
+
+            if (statusLabel === 'ci: failed') {
+              const failedList = failedChecks.slice(0, 10).map((check) => `- ${check.name}`).join('\n');
+              const body = [
+                commentMarker,
+                '## ⚠️ CI Status Update',
+                '',
+                `**Status:** Checks ${statusSummary}`,
+                `**Commit:** \`${sha.slice(0, 7)}\``,
+                `**Completed Checks:** ${completedChecks.length}`,
+                `**Passed:** ${passedChecks.length}`,
+                `**Failed:** ${failedChecks.length}`,
+                '',
+                '### Failed Checks',
+                failedList || '- A required status reported failure without an attached check run name.',
+                '',
+                'Please review the failed checks and push a follow-up fix.',
+              ].join('\n');
+
+              if (existingComment) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existingComment.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body,
+                });
+              }
+            } else if (existingComment) {
+              await github.rest.issues.deleteComment({
+                owner,
+                repo,
+                comment_id: existingComment.id,
+              });
             }

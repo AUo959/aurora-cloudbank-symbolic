@@ -1,170 +1,132 @@
 name: Project Board CI Sync
 
-# Syncs GitHub Project board status based on CI check results
-# Uses GitHub Projects V2 GraphQL API
+# This workflow mirrors CI state into durable PR labels so project automation
+# can consume stable signals without requiring direct Projects API mutations.
 
 on:
-  check_suite:
-    types: [completed]
   workflow_run:
-    workflows: ["*"]
+    workflows:
+      - "Aurora CI (Minimal)"
+      - "CodeQL"
+      - "PR Evaluation"
+      - "Constellation CI"
+      - "Code Quality"
+      - "Codacy Analysis"
     types: [completed]
 
 permissions:
   contents: read
   issues: write
   pull-requests: write
+  statuses: read
   checks: read
+
+concurrency:
+  group: project-sync-${{ github.event.workflow_run.id }}
+  cancel-in-progress: true
 
 jobs:
   sync-project-status:
-    name: Sync Project Board with CI Status
+    name: Sync Project Status Labels
     runs-on: ubuntu-latest
     steps:
-      - name: Get PR/Issue from Check Suite
-        id: get-item
+      - name: Update status labels from aggregate CI state
         uses: actions/github-script@v7
         with:
           script: |
-            let pr_number = null;
-            let issue_number = null;
-            
-            // Get PR from check suite or workflow run
-            if (context.payload.check_suite?.pull_requests) {
-              const prs = context.payload.check_suite.pull_requests;
-              if (prs.length > 0) pr_number = prs[0].number;
-            } else if (context.payload.workflow_run?.pull_requests) {
-              const prs = context.payload.workflow_run.pull_requests;
-              if (prs.length > 0) pr_number = prs[0].number;
+            const workflowRun = context.payload.workflow_run;
+            const pr = workflowRun.pull_requests?.[0];
+
+            if (!pr) {
+              core.notice('No pull request associated with this workflow run; skipping.');
+              return;
             }
-            
-            core.setOutput('pr_number', pr_number);
-            core.setOutput('has_item', pr_number !== null);
 
-      - name: Determine CI Status
-        id: ci-status
-        if: steps.get-item.outputs.has_item == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const conclusion = context.payload.check_suite?.conclusion || 
-                              context.payload.workflow_run?.conclusion;
-            
-            const ci_passed = conclusion === 'success';
-            const ci_failed = conclusion === 'failure' || 
-                             conclusion === 'cancelled' || 
-                             conclusion === 'timed_out';
-            
-            core.setOutput('ci_passed', ci_passed);
-            core.setOutput('ci_failed', ci_failed);
-            core.setOutput('conclusion', conclusion);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = pr.number;
+            const sha = workflowRun.head_sha;
+            const managedLabels = {
+              'status: in-progress': {
+                color: '0e8a16',
+                description: 'CI is failing or still in flight; follow-up work is needed',
+              },
+              'status: review-needed': {
+                color: 'fbca04',
+                description: 'CI passed and the pull request is ready for reviewer attention',
+              },
+            };
 
-      - name: Update Project Board - Move to In Progress (CI Failed)
-        if: steps.ci-status.outputs.ci_failed == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr_number = '${{ steps.get-item.outputs.pr_number }}';
-            
-            // GraphQL query to update project item status
-            const query = `
-              query($owner: String!, $repo: String!, $pr_number: Int!) {
-                repository(owner: $owner, name: $repo) {
-                  pullRequest(number: $pr_number) {
-                    projectItems(first: 10) {
-                      nodes {
-                        id
-                        project {
-                          id
-                          title
-                        }
-                      }
-                    }
-                  }
+            async function ensureLabel(name, config) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name,
+                  color: config.color,
+                  description: config.description,
+                });
+              }
+            }
+
+            async function removeLabel(name) {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  name,
+                });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
                 }
               }
-            `;
-            
-            try {
-              const result = await github.graphql(query, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pr_number: parseInt(pr_number)
-              });
-              
-              console.log('Found project items:', result);
-              
-              // Update each project item to 'In Progress' status
-              // Note: Field IDs need to be fetched per project
-              // This is a simplified version - in production, you'd fetch field IDs dynamically
-              
-            } catch (error) {
-              console.error('Error updating project:', error);
             }
 
-      - name: Update Project Board - Move to In Review (CI Passed)
-        if: steps.ci-status.outputs.ci_passed == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const pr_number = '${{ steps.get-item.outputs.pr_number }}';
-            
-            // GraphQL query to update project item status
-            const query = `
-              query($owner: String!, $repo: String!, $pr_number: Int!) {
-                repository(owner: $owner, name: $repo) {
-                  pullRequest(number: $pr_number) {
-                    projectItems(first: 10) {
-                      nodes {
-                        id
-                        project {
-                          id
-                          title
-                        }
-                      }
-                    }
-                  }
-                }
+            const { data: checksForRef } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: sha,
+              per_page: 100,
+            });
+
+            const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: sha,
+            });
+
+            const checkRuns = checksForRef.check_runs;
+            const completedChecks = checkRuns.filter((check) => check.status === 'completed');
+            const successConclusions = new Set(['success', 'neutral', 'skipped']);
+            const allSuccessful =
+              checkRuns.length > 0 &&
+              completedChecks.length === checkRuns.length &&
+              completedChecks.every((check) => successConclusions.has(check.conclusion)) &&
+              combinedStatus.state === 'success';
+
+            const targetLabel = allSuccessful ? 'status: review-needed' : 'status: in-progress';
+
+            for (const [name, config] of Object.entries(managedLabels)) {
+              await ensureLabel(name, config);
+            }
+
+            for (const labelName of Object.keys(managedLabels)) {
+              if (labelName !== targetLabel) {
+                await removeLabel(labelName);
               }
-            `;
-            
-            try {
-              const result = await github.graphql(query, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pr_number: parseInt(pr_number)
-              });
-              
-              console.log('Found project items:', result);
-              
-              // Update each project item to 'In Review' status
-              // Note: Field IDs need to be fetched per project
-              // This is a simplified version - in production, you'd fetch field IDs dynamically
-              
-            } catch (error) {
-              console.error('Error updating project:', error);
             }
 
-      - name: Add Status Comment
-        if: steps.get-item.outputs.has_item == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr_number = parseInt('${{ steps.get-item.outputs.pr_number }}');
-            const ci_passed = '${{ steps.ci-status.outputs.ci_passed }}' === 'true';
-            const conclusion = '${{ steps.ci-status.outputs.conclusion }}';
-            
-            let emoji = ci_passed ? '✅' : '⚠️';
-            let status = ci_passed ? 'passed' : 'failed';
-            let target_status = ci_passed ? '**In Review**' : '**In Progress**';
-            
-            const comment = `${emoji} **CI Status Update**\n\nCI checks have ${status} (conclusion: ${conclusion}).\n\nProject board status will be updated to ${target_status}.`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr_number,
-              body: comment
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: prNumber,
+              labels: [targetLabel],
             });

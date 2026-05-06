@@ -182,7 +182,9 @@ jobs:
                 `**Failed:** ${failedChecks.length}`,
                 '',
                 '### Failed Checks',
-                failedList || '- A required status reported failure without an attached check run name.',
+                failedList.length > 0
+                  ? failedList
+                  : '- A required status reported failure without an attached check run name.',
                 '',
                 'Please review the failed checks and push a follow-up fix.',
               ].join('\n');

@@ -33,13 +33,13 @@ jobs:
             const workflowRun = context.payload.workflow_run;
             const pr = workflowRun.pull_requests?.[0];
 
-            if ((workflowRun.pull_requests?.length || 0) > 1) {
-              core.notice(`Workflow run ${workflowRun.id} is linked to multiple PRs; using #${pr.number}.`);
-            }
-
             if (!pr) {
               core.notice('No pull request associated with this workflow run; skipping.');
               return;
+            }
+
+            if ((workflowRun.pull_requests?.length || 0) > 1) {
+              core.notice(`Workflow run ${workflowRun.id} is linked to multiple PRs; using #${pr.number}.`);
             }
 
             const owner = context.repo.owner;

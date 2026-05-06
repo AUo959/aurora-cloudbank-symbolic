@@ -159,8 +159,10 @@ def reset_rate_limiter():  # pragma: no cover - exercised via tests indirectly
 # CSRF Protection
 # ================================
 
-# HTTPBearer security scheme for CSRF token validation
-security = HTTPBearer()
+# HTTPBearer security scheme for CSRF token validation.
+# Preserve legacy 403 behavior for missing CSRF bearer tokens by delegating
+# missing-token handling to verify_csrf_token().
+security = HTTPBearer(auto_error=False)
 
 # Get CSRF secret from environment
 CSRF_SECRET_KEY = os.getenv("CSRF_SECRET_KEY")

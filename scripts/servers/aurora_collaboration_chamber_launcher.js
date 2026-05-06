@@ -562,7 +562,7 @@ io.on('connection', (socket) => {
       ];
 
       // Match strictly against allowed command specifications
-      let matched = allowedCommands.find(ac => {
+      const matched = allowedCommands.find(ac => {
         const userParts = command.trim().split(/\s+/);
         if (ac.args.includes('|')) {
           // Special case: allow 'ps aux | grep aurora' only if equal

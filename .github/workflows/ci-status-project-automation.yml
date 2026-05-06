@@ -122,10 +122,14 @@ jobs:
             const checkRuns = checksForRef.check_runs;
             const failureConclusions = new Set(['failure', 'cancelled', 'timed_out', 'action_required', 'startup_failure']);
             const successConclusions = new Set(['success', 'neutral', 'skipped']);
+            const maxFailedChecksToShow = 10;
             const completedChecks = checkRuns.filter((check) => check.status === 'completed');
             const failedChecks = completedChecks.filter((check) => failureConclusions.has(check.conclusion));
             const pendingChecks = checkRuns.filter((check) => check.status !== 'completed');
             const passedChecks = completedChecks.filter((check) => successConclusions.has(check.conclusion));
+            const allCompletedChecksSucceeded = completedChecks.every(
+              (check) => Boolean(check.conclusion) && successConclusions.has(check.conclusion)
+            );
 
             let statusLabel = 'ci: pending';
             let statusSummary = 'pending';
@@ -136,7 +140,7 @@ jobs:
             } else if (
               checkRuns.length > 0 &&
               pendingChecks.length === 0 &&
-              completedChecks.every((check) => successConclusions.has(check.conclusion)) &&
+              allCompletedChecksSucceeded &&
               combinedStatus.state === 'success'
             ) {
               statusLabel = 'ci: passed';
@@ -163,7 +167,10 @@ jobs:
             const existingComment = await findExistingComment();
 
             if (statusLabel === 'ci: failed') {
-              const failedList = failedChecks.slice(0, 10).map((check) => `- ${check.name}`).join('\n');
+              const failedList = failedChecks
+                .slice(0, maxFailedChecksToShow)
+                .map((check) => `- ${check.name}`)
+                .join('\n');
               const body = [
                 commentMarker,
                 '## ⚠️ CI Status Update',

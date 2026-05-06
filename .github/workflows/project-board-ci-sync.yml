@@ -106,10 +106,13 @@ jobs:
             const checkRuns = checksForRef.check_runs;
             const completedChecks = checkRuns.filter((check) => check.status === 'completed');
             const successConclusions = new Set(['success', 'neutral', 'skipped']);
+            const allCompletedChecksSucceeded = completedChecks.every(
+              (check) => Boolean(check.conclusion) && successConclusions.has(check.conclusion)
+            );
             const allSuccessful =
               checkRuns.length > 0 &&
               completedChecks.length === checkRuns.length &&
-              completedChecks.every((check) => successConclusions.has(check.conclusion)) &&
+              allCompletedChecksSucceeded &&
               combinedStatus.state === 'success';
 
             const targetLabel = allSuccessful ? 'status: review-needed' : 'status: in-progress';

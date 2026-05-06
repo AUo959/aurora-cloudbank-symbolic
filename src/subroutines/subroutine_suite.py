@@ -11,10 +11,12 @@ Combined with the 3 existing subroutines (Reality Sim Monitor, Vision Alignment,
 Ethics Compliance), this provides a complete executive subroutine suite.
 """
 
+from collections.abc import Awaitable, Callable
 from typing import Dict, Any, Optional, List
 import logging
 from datetime import datetime, UTC
 from dataclasses import dataclass
+import importlib
 import json
 
 logger = logging.getLogger(__name__)
@@ -549,11 +551,14 @@ class DependencyHealthMonitor:
     async def check_dependency_health(
         self,
         dependency_name: str,
-        health_check_func: callable
+        health_check_func: Optional[Callable[[], Awaitable[Dict[str, Any]]]]
     ) -> Dict[str, Any]:
         """Check health of a dependency"""
         try:
-            result = await health_check_func()
+            if health_check_func is None:
+                result = await self._default_health_check(dependency_name)
+            else:
+                result = await health_check_func()
             
             # Update status
             if dependency_name not in self._dependency_status:
@@ -598,6 +603,19 @@ class DependencyHealthMonitor:
                 "status": "error",
                 "error": str(e)
             }
+
+    async def _default_health_check(self, dependency_name: str) -> Dict[str, Any]:
+        """Perform a basic import probe when no custom health check is provided."""
+        module_name = dependency_name.strip().replace("-", "_")
+        if not module_name:
+            return {"healthy": False, "error": "Dependency name is required"}
+
+        try:
+            importlib.import_module(module_name)
+        except ImportError as exc:
+            return {"healthy": False, "error": f"Module not importable: {exc}"}
+
+        return {"healthy": True, "module": module_name}
 
     async def _open_circuit_breaker(self, dependency_name: str):
         """Open circuit breaker for failing dependency"""

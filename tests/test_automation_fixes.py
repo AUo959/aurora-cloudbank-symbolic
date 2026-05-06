@@ -7,6 +7,7 @@ Validates that all critical fixes are working correctly
 import subprocess
 import sys
 import os
+import json
 from pathlib import Path
 import yaml
 
@@ -113,10 +114,17 @@ def test_audit_tool():
         "python scripts/automation_audit.py",
         timeout=60
     )
+    report_path = REPO_ROOT / "automation_audit_report.json"
 
     assert returncode in (0, 1), f"Unexpected exit code {returncode}"  # 0 = pass, 1 = warnings only
     assert "Critical Issues: 0" in stdout, f"Critical issues detected: {stdout}"
-    assert "⚠️ aurora_agent_runner.yml" not in stdout, f"Aurora workflow warnings detected: {stdout}"
+    assert report_path.exists(), "Automation audit report was not created"
+
+    with open(report_path, "r", encoding="utf-8") as handle:
+        report = json.load(handle)
+
+    aurora_warnings = [warning for warning in report.get("warnings", []) if "aurora_agent_runner.yml" in warning]
+    assert not aurora_warnings, f"Aurora workflow warnings detected: {aurora_warnings}"
 
     if "Overall Status: ✅ PASS" not in stdout:
         print("  ⚠️ WARNING: Status not PASS (may have warnings)")

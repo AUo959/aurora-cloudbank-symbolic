@@ -160,8 +160,8 @@ def reset_rate_limiter():  # pragma: no cover - exercised via tests indirectly
 # ================================
 
 # HTTPBearer security scheme for CSRF token validation.
-# Preserve legacy 403 behavior for missing CSRF bearer tokens by delegating
-# missing-token handling to verify_csrf_token().
+# FastAPI/Starlette upgrades now return 401 for a missing bearer token by default,
+# but this codebase's CSRF contract and tests expect verify_csrf_token() to emit 403.
 security = HTTPBearer(auto_error=False)
 
 # Get CSRF secret from environment

@@ -18,6 +18,7 @@ from datetime import datetime, UTC
 from dataclasses import dataclass
 import importlib
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -608,12 +609,18 @@ class DependencyHealthMonitor:
         """Perform a basic import probe when no custom health check is provided."""
         module_name = dependency_name.strip().replace("-", "_")
         if not module_name:
-            return {"healthy": False, "error": "Dependency name is required"}
+            return {"healthy": False, "error": "Dependency name cannot be empty after normalization"}
+
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_\.]*", module_name):
+            return {"healthy": False, "error": "Dependency name contains unsupported characters"}
 
         try:
-            importlib.import_module(module_name)
-        except ImportError as exc:
+            module_spec = importlib.util.find_spec(module_name)
+        except (ImportError, ValueError) as exc:
             return {"healthy": False, "error": f"Module not importable: {exc}"}
+
+        if module_spec is None:
+            return {"healthy": False, "error": f"Module not importable: {module_name}"}
 
         return {"healthy": True, "module": module_name}
 

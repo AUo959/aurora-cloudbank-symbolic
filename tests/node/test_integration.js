@@ -123,7 +123,7 @@ async function runIntegrationTests() {
     // Process through StarlingAu bridge
     const bridgeResult = await starling.processExternalCommunication(testMessage);
     
-    log('✅ End-to-end communication flow successful', colors.green);
+    log(`✅ End-to-end communication flow successful`, colors.green);
     log(`   └─ Routing: ${routingResult.status}`, colors.white);
     log(`   └─ Bridge Processing: ${bridgeResult.status}`, colors.white);
     totalTests++;
@@ -137,7 +137,7 @@ async function runIntegrationTests() {
   
   // Final Results
   log('\n' + '=' .repeat(60), colors.blue);
-  log('🧪 Integration Test Results', colors.cyan);
+  log(`🧪 Integration Test Results`, colors.cyan);
   log(`   Tests Passed: ${passedTests}/${totalTests}`, passedTests === totalTests ? colors.green : colors.red);
   
   if (passedTests === totalTests) {

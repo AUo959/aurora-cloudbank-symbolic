@@ -47,7 +47,7 @@ class AutomationAuditor:
     @staticmethod
     def _normalize_workflow_definition(workflow: Dict[str, Any]) -> Dict[str, Any]:
         """Normalize workflow YAML so the `on` key survives YAML 1.1 parsing."""
-        workflow = workflow or {}
+        workflow = dict(workflow or {})
         if True in workflow and "on" not in workflow:
             workflow["on"] = workflow.pop(True)
         return workflow

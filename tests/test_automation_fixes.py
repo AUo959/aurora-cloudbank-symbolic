@@ -40,6 +40,7 @@ def load_yaml_file(path: Path):
 
 def normalize_workflow_definition(workflow):
     """Normalize GitHub workflow YAML so the `on` key survives YAML 1.1 parsing."""
+    workflow = dict(workflow or {})
     if True in workflow and "on" not in workflow:
         workflow["on"] = workflow.pop(True)
     return workflow

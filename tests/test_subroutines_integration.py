@@ -10,7 +10,6 @@ Tests for new subroutine functionality.
 
 import pytest
 import asyncio
-from typing import Dict, Any
 
 
 class TestEthicsComplianceMonitor:

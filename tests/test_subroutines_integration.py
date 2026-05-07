@@ -10,6 +10,7 @@ Tests for new subroutine functionality.
 
 import pytest
 import asyncio
+import unittest
 
 
 class TestEthicsComplianceMonitor:
@@ -241,11 +242,12 @@ class TestDependencyHealthMonitor:
             dependency_name="test_dependency",
             health_check_func=mock_health_check
         )
-        
-        assert isinstance(result, dict)
-        assert result["dependency"] == "test_dependency"
-        assert result["status"] == "healthy"
-        assert result["details"] == {"healthy": True}
+
+        checks = unittest.TestCase()
+        checks.assertIsInstance(result, dict)
+        checks.assertEqual(result["dependency"], "test_dependency")
+        checks.assertEqual(result["status"], "healthy")
+        checks.assertEqual(result["details"], {"healthy": True})
 
     @pytest.mark.unit
     @pytest.mark.asyncio
@@ -260,10 +262,11 @@ class TestDependencyHealthMonitor:
             health_check_func=None
         )
 
-        assert isinstance(result, dict)
-        assert result["dependency"] == "json"
-        assert result["status"] == "healthy"
-        assert result["details"]["module"] == "json"
+        checks = unittest.TestCase()
+        checks.assertIsInstance(result, dict)
+        checks.assertEqual(result["dependency"], "json")
+        checks.assertEqual(result["status"], "healthy")
+        checks.assertEqual(result["details"]["module"], "json")
 
     @pytest.mark.unit
     @pytest.mark.asyncio
@@ -273,14 +276,13 @@ class TestDependencyHealthMonitor:
 
         result = await check_dependencies()
 
-        assert result["success"] is True
-        assert isinstance(result["dependency_health"], dict)
-        assert result["dependency_health"]
-        assert all(
-            dependency_result["dependency"] == dependency_name
-            and dependency_result["status"] in {"healthy", "unhealthy", "error"}
-            for dependency_name, dependency_result in result["dependency_health"].items()
-        )
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], True)
+        checks.assertIsInstance(result["dependency_health"], dict)
+        checks.assertTrue(result["dependency_health"])
+        for dependency_name, dependency_result in result["dependency_health"].items():
+            checks.assertEqual(dependency_result["dependency"], dependency_name)
+            checks.assertIn(dependency_result["status"], {"healthy", "unhealthy", "error"})
 
 
 class TestPerformanceProfiler:

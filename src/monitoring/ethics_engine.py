@@ -321,14 +321,15 @@ class EthicsEngine:
         
         # Parse comparison expressions (e.g., "action_type == 'forbidden_action'")
         # Also check context attributes like action_type, agent_id
-        for op in ['==', '!=', '>', '<', '>=', '<=']:
+        for op in ['>=', '<=', '==', '!=', '>', '<']:
             if op in condition:
-                parts = condition.split(op)
+                parts = condition.split(op, 1)
                 if len(parts) == 2:
                     param, threshold = parts[0].strip(), parts[1].strip()
                     if param in context.parameters:
+                        param_value = context.parameters[param]
                         try:
-                            param_value = float(context.parameters[param])
+                            param_value = float(param_value)
                             threshold_value = float(threshold)
                             
                             if op == '>':
@@ -353,7 +354,7 @@ class EthicsEngine:
         # Check context attributes (action_type, agent_id) for comparison conditions
         for op in ['==', '!=']:
             if op in condition:
-                parts = condition.split(op)
+                parts = condition.split(op, 1)
                 if len(parts) == 2:
                     attr_name = parts[0].strip()
                     expected_value = parts[1].strip().strip("'\"")

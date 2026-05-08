@@ -2,12 +2,13 @@
 Tests for Ethics Engine
 """
 
-import pytest
+import unittest
 from pathlib import Path
+
+import pytest
 from src.monitoring.ethics_engine import (
     EthicsEngine,
     EthicsRule,
-    EthicsViolation,
     ActionContext,
     ViolationSeverity,
     RuleCategory
@@ -246,6 +247,35 @@ class TestEthicsEngine:
             None
         )
         assert resource_violation is not None
+
+    @pytest.mark.parametrize(
+        ("condition", "value", "expected"),
+        [
+            ("score > 0.5", 0.51, True),
+            ("score > 0.5", 0.5, False),
+            ("score < 0.5", 0.49, True),
+            ("score < 0.5", 0.5, False),
+            ("score >= 0.5", 0.5, True),
+            ("score >= 0.5", 0.49, False),
+            ("score <= 0.5", 0.5, True),
+            ("score <= 0.5", 0.51, False),
+            ("score == 0.5", 0.5, True),
+            ("score == 0.5", 0.51, False),
+            ("score != 0.5", 0.51, True),
+            ("score != 0.5", 0.5, False),
+        ],
+    )
+    def test_condition_operator_boundaries(self, condition, value, expected):
+        """Test comparison operators parse longest-first and respect boundary values."""
+        engine = EthicsEngine()
+        context = ActionContext(
+            agent_id="test-agent",
+            action_type="resource_allocation",
+            parameters={"score": value}
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(engine._check_condition(condition, context), expected)
     
     def test_violation_remediation(self):
         """Test remediation suggestions"""

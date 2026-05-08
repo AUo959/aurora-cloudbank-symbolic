@@ -10,7 +10,7 @@ Additional API endpoints for new subroutine functionality.
 """
 
 from fastapi import APIRouter, HTTPException, status
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from pydantic import BaseModel, Field
 import logging
 
@@ -175,16 +175,20 @@ async def detect_anomaly(request: AnomalyCheckRequest) -> Dict[str, Any]:
         )
         
         if anomaly:
+            metadata = anomaly.metadata or {}
             return {
                 "success": True,
                 "anomaly_detected": True,
                 "anomaly": {
-                    "metric_name": anomaly.metric_name,
-                    "current_value": anomaly.current_value,
-                    "expected_value": anomaly.expected_value,
-                    "deviation": anomaly.deviation,
+                    "anomaly_id": anomaly.anomaly_id,
+                    "anomaly_type": anomaly.anomaly_type,
                     "severity": anomaly.severity,
                     "confidence_score": anomaly.confidence_score,
+                    "metric_name": metadata.get("metric", request.metric_name),
+                    "current_value": metadata.get("current_value"),
+                    "baseline_mean": metadata.get("baseline_mean"),
+                    "baseline_std": metadata.get("baseline_std"),
+                    "deviation_score": metadata.get("deviation_score"),
                     "affected_components": anomaly.affected_components,
                     "recommended_actions": anomaly.recommended_actions,
                     "timestamp": anomaly.timestamp

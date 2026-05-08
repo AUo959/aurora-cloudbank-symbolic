@@ -117,6 +117,36 @@ class TestAnomalyDetectionEngine:
         assert hasattr(result, 'severity')
         assert hasattr(result, 'confidence_score')
 
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_anomaly_endpoint_serializes_dataclass_schema(self):
+        """Test anomaly endpoint returns the current dataclass schema without crashing."""
+        from src.subroutines.api_enhanced import AnomalyCheckRequest, detect_anomaly
+
+        result = await detect_anomaly(
+            AnomalyCheckRequest(
+                metric_name="test_metric",
+                current_value=1000.0,
+                context={}
+            )
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], True)
+        checks.assertIs(result["anomaly_detected"], True)
+
+        anomaly = result["anomaly"]
+        checks.assertIn("anomaly_id", anomaly)
+        checks.assertEqual(anomaly["anomaly_type"], "statistical_deviation")
+        checks.assertEqual(anomaly["severity"], "high")
+        checks.assertEqual(anomaly["metric_name"], "test_metric")
+        checks.assertEqual(anomaly["current_value"], 1000.0)
+        checks.assertEqual(anomaly["baseline_mean"], 50.0)
+        checks.assertEqual(anomaly["baseline_std"], 10.0)
+        checks.assertAlmostEqual(anomaly["deviation_score"], 95.0)
+        checks.assertIn("test_metric", anomaly["affected_components"])
+        checks.assertTrue(anomaly["recommended_actions"])
+
 
 class TestIntegrationValidator:
     """Tests for Integration Validator subroutine"""

@@ -13,6 +13,16 @@ import asyncio
 import unittest
 
 
+class StubEthicsGate:
+    """Controllable async ethics gate for focused monitor tests."""
+
+    def __init__(self, verdict):
+        self.verdict = verdict
+
+    async def evaluate(self, action, context):
+        return self.verdict
+
+
 class TestEthicsComplianceMonitor:
     """Tests for Ethics Compliance Monitor subroutine"""
     
@@ -33,6 +43,123 @@ class TestEthicsComplianceMonitor:
         assert hasattr(result, 'success')
         assert hasattr(result, 'ethics_score')
         assert hasattr(result, 'violations')
+        checks = unittest.TestCase()
+        checks.assertTrue(hasattr(result, 'blocked'))
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_critical_score_requires_block_without_counting_unhalted_operation(self):
+        """Test passive checks do not count a block until a caller enforces it."""
+        from src.subroutines import EthicsComplianceMonitor
+
+        monitor = EthicsComplianceMonitor(
+            ethics_gate=StubEthicsGate({
+                "approved": False,
+                "score": 0.2,
+                "violations": [{"rule": "critical_test"}],
+            }),
+            audit_log=None,
+            alert_system=None,
+            config={
+                "ethics_threshold": 0.7,
+                "critical_threshold": 0.5,
+                "auto_block_enabled": True,
+                "alert_on_violation": False,
+                "audit_all_checks": False,
+            },
+        )
+
+        result = await monitor.check_operation_ethics(
+            operation_id="critical_op_001",
+            operation_type="state_modification",
+            operation_context={"resource": "critical_state"},
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(result.success, False)
+        checks.assertIs(result.blocked, True)
+        checks.assertIn("CRITICAL: Operation block required", result.warnings)
+
+        stats = monitor.get_compliance_stats()
+        checks.assertEqual(stats["violations_detected"], 1)
+        checks.assertEqual(stats["operations_blocked"], 0)
+
+        checks.assertIs(monitor.record_operation_blocked(result), True)
+        checks.assertEqual(monitor.get_compliance_stats()["operations_blocked"], 1)
+
+        checks.assertIs(monitor.record_operation_blocked(result), False)
+        checks.assertEqual(monitor.get_compliance_stats()["operations_blocked"], 1)
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_critical_score_without_auto_block_does_not_set_blocked(self):
+        """Test critical verdicts remain non-blocking when auto-block is disabled."""
+        from src.subroutines import EthicsComplianceMonitor
+
+        monitor = EthicsComplianceMonitor(
+            ethics_gate=StubEthicsGate({
+                "approved": False,
+                "score": 0.2,
+                "violations": [{"rule": "critical_test"}],
+            }),
+            audit_log=None,
+            alert_system=None,
+            config={
+                "ethics_threshold": 0.7,
+                "critical_threshold": 0.5,
+                "auto_block_enabled": False,
+                "alert_on_violation": False,
+                "audit_all_checks": False,
+            },
+        )
+
+        result = await monitor.check_operation_ethics(
+            operation_id="critical_op_002",
+            operation_type="state_modification",
+            operation_context={"resource": "critical_state"},
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(result.success, False)
+        checks.assertIs(result.blocked, False)
+        checks.assertIs(monitor.record_operation_blocked(result), False)
+        checks.assertEqual(monitor.get_compliance_stats()["operations_blocked"], 0)
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_ethics_endpoint_exposes_blocked_verdict(self, monkeypatch):
+        """Test endpoint response includes the enforcement gate verdict."""
+        import src.subroutines as subroutines
+        from src.subroutines.api_enhanced import EthicsCheckRequest, check_ethics_compliance
+        from src.subroutines.ethics_compliance_monitor import EthicsCheckResult
+
+        class StubMonitor:
+            async def check_operation_ethics(self, operation_id, operation_type, operation_context):
+                return EthicsCheckResult(
+                    success=False,
+                    operation_id=operation_id,
+                    ethics_score=0.2,
+                    threshold=0.7,
+                    violations=[],
+                    warnings=["CRITICAL: Operation block required"],
+                    timestamp="2026-05-08T00:00:00+00:00",
+                    metadata={"operation_type": operation_type},
+                    blocked=True,
+                )
+
+        monkeypatch.setattr(subroutines, "EthicsComplianceMonitor", StubMonitor)
+
+        result = await check_ethics_compliance(
+            EthicsCheckRequest(
+                operation_id="critical_op_003",
+                operation_type="state_modification",
+                operation_context={"resource": "critical_state"},
+            )
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], False)
+        checks.assertIs(result["blocked"], True)
     
     @pytest.mark.unit
     def test_ethics_stats(self):

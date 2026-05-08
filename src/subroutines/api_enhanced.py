@@ -368,7 +368,7 @@ async def get_performance_profile() -> Dict[str, Any]:
         from src.subroutines import PerformanceProfiler
         
         profiler = PerformanceProfiler()
-        stats = profiler.get_profiler_stats()
+        stats = profiler.get_performance_report()
         
         return {
             "success": True,

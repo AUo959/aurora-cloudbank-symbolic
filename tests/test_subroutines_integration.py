@@ -10,7 +10,7 @@ Tests for new subroutine functionality.
 
 import pytest
 import asyncio
-from typing import Dict, Any
+import unittest
 
 
 class TestEthicsComplianceMonitor:
@@ -228,7 +228,6 @@ class TestDependencyHealthMonitor:
     
     @pytest.mark.unit
     @pytest.mark.asyncio
-    @pytest.mark.xfail(reason="DependencyHealthMonitor not yet implemented")
     async def test_dependency_health_check(self):
         """Test dependency health check"""
         from src.subroutines import DependencyHealthMonitor
@@ -243,10 +242,47 @@ class TestDependencyHealthMonitor:
             dependency_name="test_dependency",
             health_check_func=mock_health_check
         )
-        
-        assert isinstance(result, dict)
-        assert 'status' in result
-        assert 'consecutive_failures' in result
+
+        checks = unittest.TestCase()
+        checks.assertIsInstance(result, dict)
+        checks.assertEqual(result["dependency"], "test_dependency")
+        checks.assertEqual(result["status"], "healthy")
+        checks.assertEqual(result["details"], {"healthy": True})
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_dependency_health_check_default_probe(self):
+        """Test default dependency health probe when no callback is provided."""
+        from src.subroutines import DependencyHealthMonitor
+
+        monitor = DependencyHealthMonitor()
+
+        result = await monitor.check_dependency_health(
+            dependency_name="json",
+            health_check_func=None
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIsInstance(result, dict)
+        checks.assertEqual(result["dependency"], "json")
+        checks.assertEqual(result["status"], "healthy")
+        checks.assertEqual(result["details"]["module"], "json")
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_dependency_health_endpoint_uses_default_probe(self):
+        """Test dependency health endpoint no longer crashes without a custom callback."""
+        from src.subroutines.api_enhanced import check_dependencies
+
+        result = await check_dependencies()
+
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], True)
+        checks.assertIsInstance(result["dependency_health"], dict)
+        checks.assertTrue(result["dependency_health"])
+        for dependency_name, dependency_result in result["dependency_health"].items():
+            checks.assertEqual(dependency_result["dependency"], dependency_name)
+            checks.assertIn(dependency_result["status"], {"healthy", "unhealthy", "error"})
 
 
 class TestPerformanceProfiler:

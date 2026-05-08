@@ -11,11 +11,13 @@ Combined with the 3 existing subroutines (Reality Sim Monitor, Vision Alignment,
 Ethics Compliance), this provides a complete executive subroutine suite.
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Awaitable, Callable
 import logging
 from datetime import datetime, UTC
 from dataclasses import dataclass
+from importlib.util import find_spec
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -549,11 +551,14 @@ class DependencyHealthMonitor:
     async def check_dependency_health(
         self,
         dependency_name: str,
-        health_check_func: callable
+        health_check_func: Optional[Callable[[], Awaitable[Dict[str, Any]]]]
     ) -> Dict[str, Any]:
         """Check health of a dependency"""
         try:
-            result = await health_check_func()
+            if health_check_func is None:
+                result = await self._default_health_check(dependency_name)
+            else:
+                result = await health_check_func()
             
             # Update status
             if dependency_name not in self._dependency_status:
@@ -598,6 +603,25 @@ class DependencyHealthMonitor:
                 "status": "error",
                 "error": str(e)
             }
+
+    async def _default_health_check(self, dependency_name: str) -> Dict[str, Any]:
+        """Perform a basic import probe when no custom health check is provided."""
+        module_name = dependency_name.strip().replace("-", "_")
+        if not module_name:
+            return {"healthy": False, "error": "Dependency name cannot be empty after normalization"}
+
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*", module_name):
+            return {"healthy": False, "error": "Dependency name contains unsupported characters"}
+
+        try:
+            module_spec = find_spec(module_name)
+        except (ImportError, ValueError) as exc:
+            return {"healthy": False, "error": f"Module not importable: {exc}"}
+
+        if module_spec is None:
+            return {"healthy": False, "error": f"Module not importable: {module_name}"}
+
+        return {"healthy": True, "module": module_name}
 
     async def _open_circuit_breaker(self, dependency_name: str):
         """Open circuit breaker for failing dependency"""

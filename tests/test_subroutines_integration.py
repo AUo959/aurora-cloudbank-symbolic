@@ -367,6 +367,23 @@ class TestDependencyHealthMonitor:
 
 class TestPerformanceProfiler:
     """Tests for Performance Profiler subroutine"""
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_performance_profile_endpoint_uses_report_method(self):
+        """Test performance profile endpoint returns the implemented report schema."""
+        from src.subroutines.api_enhanced import get_performance_profile
+
+        result = await get_performance_profile()
+
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], True)
+
+        profile = result["performance_profile"]
+        checks.assertIn("timestamp", profile)
+        checks.assertEqual(profile["operations_profiled"], 0)
+        checks.assertEqual(profile["slow_operations_detected"], 0)
+        checks.assertEqual(profile["profiles"], {})
     
     @pytest.mark.unit
     @pytest.mark.asyncio

@@ -46,11 +46,21 @@ class Sonnet4IntegrationHub:
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from YAML file"""
         try:
-            with open(self.config_path, "r") as f:
-                return yaml.safe_load(f)
-        except Exception as e:
-            logger.error("Failed to load config: %s", str(e)[:100])
-            return {}
+            with open(self.config_path, "r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+        except FileNotFoundError as exc:
+            raise RuntimeError(f"Config file not found: {self.config_path}") from exc
+        except yaml.YAMLError as exc:
+            raise RuntimeError(f"Malformed config YAML in {self.config_path}: {exc}") from exc
+        except OSError as exc:
+            raise RuntimeError(f"Failed to load config {self.config_path}: {exc}") from exc
+
+        if config is None:
+            raise RuntimeError(f"Config file is empty: {self.config_path}")
+        if not isinstance(config, dict):
+            raise RuntimeError(f"Config root must be a mapping: {self.config_path}")
+
+        return config
 
     def _parse_sonnet4_config(self) -> Sonnet4Config:
         """Parse Sonnet 4 specific configuration"""
@@ -151,46 +161,48 @@ class Sonnet4IntegrationHub:
 
     async def _update_config(self):
         """Update configuration file with current Sonnet 4 settings"""
+        if not isinstance(self.config, dict):
+            raise RuntimeError("Cannot update Sonnet 4 config because loaded config is not a mapping")
+
+        self.config["claude_sonnet4"] = {
+            "enabled": self.sonnet4_config.enabled,
+            "enable_for_all_clients": self.sonnet4_config.enable_for_all_clients,
+            "api_version": self.sonnet4_config.api_version,
+            "model": self.sonnet4_config.model,
+            "features": {
+                "quantum_bridge": True,
+                "symbolic_validation": True,
+                "ethics_security": True,
+                "reflective_autonomy": True,
+                "enhanced_reasoning": True,
+            },
+            "settings": {
+                "max_tokens": self.sonnet4_config.max_tokens,
+                "temperature": self.sonnet4_config.temperature,
+                "top_p": self.sonnet4_config.top_p,
+                "safety_level": self.sonnet4_config.safety_level,
+                "context_window": self.sonnet4_config.context_window,
+            },
+            "integration": {
+                "aurora_compatibility": True,
+                "preserve_4o_logic": self.sonnet4_config.preserve_4o_logic,
+                "conflict_resolution": "merge_enhanced",
+                "fallback_model": self.sonnet4_config.fallback_model,
+            },
+            "security": {
+                "ethics_validation": True,
+                "output_filtering": True,
+                "content_safety": True,
+                "data_privacy": True,
+            },
+        }
+
+        # Use async file I/O to avoid blocking event loop
         try:
-            self.config["claude_sonnet4"] = {
-                "enabled": self.sonnet4_config.enabled,
-                "enable_for_all_clients": self.sonnet4_config.enable_for_all_clients,
-                "api_version": self.sonnet4_config.api_version,
-                "model": self.sonnet4_config.model,
-                "features": {
-                    "quantum_bridge": True,
-                    "symbolic_validation": True,
-                    "ethics_security": True,
-                    "reflective_autonomy": True,
-                    "enhanced_reasoning": True,
-                },
-                "settings": {
-                    "max_tokens": self.sonnet4_config.max_tokens,
-                    "temperature": self.sonnet4_config.temperature,
-                    "top_p": self.sonnet4_config.top_p,
-                    "safety_level": self.sonnet4_config.safety_level,
-                    "context_window": self.sonnet4_config.context_window,
-                },
-                "integration": {
-                    "aurora_compatibility": True,
-                    "preserve_4o_logic": self.sonnet4_config.preserve_4o_logic,
-                    "conflict_resolution": "merge_enhanced",
-                    "fallback_model": self.sonnet4_config.fallback_model,
-                },
-                "security": {
-                    "ethics_validation": True,
-                    "output_filtering": True,
-                    "content_safety": True,
-                    "data_privacy": True,
-                },
-            }
-
-            # Use async file I/O to avoid blocking event loop
-            async with aiofiles.open(self.config_path, "w") as f:
-                await f.write(yaml.dump(self.config, default_flow_style=False))
-
-        except Exception as e:
-            logger.error("Failed to update config: %s", str(e)[:100])
+            async with aiofiles.open(self.config_path, "w", encoding="utf-8") as f:
+                await f.write(yaml.safe_dump(self.config, default_flow_style=False))
+        except OSError as exc:
+            raise RuntimeError(f"Failed to update config {self.config_path}: {exc}") from exc
 
     def get_client_status(self, client_id: str) -> Dict[str, Any]:
         """Get Sonnet 4 status for a specific client"""

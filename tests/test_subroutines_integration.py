@@ -79,6 +79,56 @@ class TestResourceOptimizationManager:
         assert isinstance(actions, list)
         # Actions may be empty if no optimization needed
 
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_resource_analysis_endpoint_serializes_network_io(self, monkeypatch):
+        """Test resource endpoint serializes nested network I/O fields without crashing."""
+        import src.subroutines as subroutines
+        from src.subroutines.api_enhanced import ResourceMetricsRequest, analyze_resources
+        from src.subroutines.resource_optimization import OptimizationAction, ResourceMetrics
+
+        class StubResourceOptimizationManager:
+            async def collect_resource_metrics(self):
+                return ResourceMetrics(
+                    timestamp="2026-05-08T00:00:00+00:00",
+                    cpu_percent=12.5,
+                    memory_percent=34.0,
+                    disk_percent=56.0,
+                    network_io={"bytes_sent": 1234, "bytes_recv": 5678},
+                    quantum_circuit_queue=2,
+                    api_rate_limit_remaining={},
+                    active_processes=9
+                )
+
+            async def analyze_and_optimize(self):
+                return [
+                    OptimizationAction(
+                        action_type="rebalance",
+                        resource_target="cpu",
+                        reason="test",
+                        priority="low",
+                        estimated_impact="test impact"
+                    )
+                ]
+
+        monkeypatch.setattr(subroutines, "ResourceOptimizationManager", StubResourceOptimizationManager)
+
+        result = await analyze_resources(
+            ResourceMetricsRequest(
+                include_network=True,
+                include_quantum=True
+            )
+        )
+
+        checks = unittest.TestCase()
+        checks.assertIs(result["success"], True)
+
+        metrics = result["metrics"]
+        checks.assertEqual(metrics["network_io_sent"], 1234)
+        checks.assertEqual(metrics["network_io_recv"], 5678)
+        checks.assertEqual(metrics["quantum_circuit_queue"], 2)
+        checks.assertEqual(metrics["active_processes"], 9)
+
 
 class TestAnomalyDetectionEngine:
     """Tests for Anomaly Detection Engine subroutine"""

@@ -123,6 +123,7 @@ async def analyze_resources(request: ResourceMetricsRequest) -> Dict[str, Any]:
         optimizer = ResourceOptimizationManager()
         metrics = await optimizer.collect_resource_metrics()
         actions = await optimizer.analyze_and_optimize()
+        network_io = metrics.network_io or {}
         
         return {
             "success": True,
@@ -131,8 +132,8 @@ async def analyze_resources(request: ResourceMetricsRequest) -> Dict[str, Any]:
                 "memory_percent": metrics.memory_percent,
                 "disk_percent": metrics.disk_percent,
                 "quantum_circuit_queue": metrics.quantum_circuit_queue if request.include_quantum else None,
-                "network_io_sent": metrics.network_io_sent if request.include_network else None,
-                "network_io_recv": metrics.network_io_recv if request.include_network else None,
+                "network_io_sent": network_io.get("bytes_sent") if request.include_network else None,
+                "network_io_recv": network_io.get("bytes_recv") if request.include_network else None,
                 "active_processes": metrics.active_processes,
                 "timestamp": metrics.timestamp
             },

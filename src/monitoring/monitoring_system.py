@@ -58,6 +58,7 @@ class Intervention:
     reason: str
     context: Dict[str, Any]
     success: bool
+    error: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
@@ -109,6 +110,7 @@ class MonitoringSystem:
         # Intervention tracking
         self.interventions: List[Intervention] = []
         self.last_intervention_time: Dict[str, datetime] = {}
+        self._enforcement_handlers: Dict[InterventionType, Callable] = {}
         
         # Alert handlers
         self.alert_handlers: Dict[AlertLevel, List[Callable]] = {
@@ -118,6 +120,20 @@ class MonitoringSystem:
         }
         
         logger.info("Monitoring system initialized (storage=%s)", storage_dir)
+
+    def register_enforcement_handler(
+        self,
+        intervention_type: InterventionType,
+        handler: Callable
+    ):
+        """
+        Register a concrete handler for an automated intervention type.
+
+        Handlers receive agent_id and should return True only after the
+        enforcement action is complete.
+        """
+        self._enforcement_handlers[intervention_type] = handler
+        logger.info("Registered enforcement handler for %s", intervention_type.value)
     
     def register_alert_handler(self, level: AlertLevel, handler: Callable):
         """
@@ -348,34 +364,72 @@ class MonitoringSystem:
         reason: str
     ):
         """Execute an automated intervention"""
+        success = False
+        error = None
+        handler = self._enforcement_handlers.get(intervention_type)
+
+        if handler:
+            try:
+                success = self._run_enforcement_handler(
+                    handler,
+                    agent_id=agent_id
+                )
+            except Exception as exc:
+                error = str(exc)
+                logger.error(
+                    "Intervention handler failed for %s on %s: %s",
+                    intervention_type.value, agent_id, error
+                )
+        else:
+            error = f"No enforcement handler registered for {intervention_type.value}"
+
         intervention = Intervention(
             timestamp=utc_iso(),
             agent_id=agent_id,
             type=intervention_type,
             reason=reason,
             context={},
-            success=True  # Would be set based on actual execution
+            success=success,
+            error=error
         )
         
         self.interventions.append(intervention)
-        self.last_intervention_time[agent_id] = utc_now()
+        if success:
+            self.last_intervention_time[agent_id] = utc_now()
         
         # Log to audit
         self.audit_logger.log_intervention(
             agent_id=agent_id,
             severity="critical",
             intervention_type=intervention_type.value,
-            action_taken=intervention_type.value,
-            reason=reason
+            action_taken=intervention_type.value if success else "not_executed",
+            reason=reason,
+            success=success,
+            error=error
         )
         
         logger.warning(
-            "Intervention executed for %s: %s - %s",
-            agent_id, intervention_type.value, reason
+            "Intervention recorded for %s: %s success=%s - %s",
+            agent_id, intervention_type.value, success, reason
         )
         
         # Notify critical handlers
         self._notify_handlers(AlertLevel.CRITICAL, intervention.to_dict())
+
+    def _run_enforcement_handler(
+        self,
+        handler: Callable,
+        agent_id: str
+    ) -> bool:
+        """Run a registered enforcement handler and normalize its result."""
+        result = handler(agent_id)
+
+        if isinstance(result, dict):
+            if not result.get("success", False) and result.get("error"):
+                raise RuntimeError(str(result["error"]))
+            return bool(result.get("success", False))
+
+        return bool(result)
     
     def _map_drift_to_alert_level(self, drift_level: DriftLevel) -> AlertLevel:
         """Map drift level to alert level"""

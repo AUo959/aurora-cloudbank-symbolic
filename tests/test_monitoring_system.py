@@ -3,6 +3,7 @@ Tests for Integrated Monitoring System
 """
 
 import pytest
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from datetime import datetime, timedelta, timezone
@@ -243,6 +244,91 @@ class TestMonitoringSystem:
             
             # No intervention should be recorded
             assert len(monitoring.interventions) == 0
+
+    def test_intervention_without_handler_records_failed_audit_receipt(self):
+        """Test interventions are not marked successful without enforcement."""
+        with TemporaryDirectory() as tmpdir:
+            monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
+
+            monitoring._execute_intervention(
+                agent_id="test-agent",
+                intervention_type=InterventionType.SUSPEND_AGENT,
+                reason="critical drift"
+            )
+
+            checks = unittest.TestCase()
+            checks.assertEqual(len(monitoring.interventions), 1)
+            intervention = monitoring.interventions[0]
+            checks.assertIs(intervention.success, False)
+            checks.assertIn("No enforcement handler registered", intervention.error)
+            checks.assertNotIn("test-agent", monitoring.last_intervention_time)
+
+            audit_entry = monitoring.audit_logger.entries[-1]
+            checks.assertEqual(audit_entry.data["intervention_type"], "suspend_agent")
+            checks.assertEqual(audit_entry.data["action_taken"], "not_executed")
+            checks.assertIs(audit_entry.data["success"], False)
+            checks.assertIn("No enforcement handler registered", audit_entry.data["error"])
+
+    def test_registered_intervention_handler_records_success(self):
+        """Test successful intervention receipts require handler confirmation."""
+        with TemporaryDirectory() as tmpdir:
+            monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
+            handled = []
+
+            def suspend_handler(agent_id):
+                handled.append(agent_id)
+                return True
+
+            monitoring.register_enforcement_handler(
+                InterventionType.SUSPEND_AGENT,
+                suspend_handler
+            )
+            monitoring._execute_intervention(
+                agent_id="test-agent",
+                intervention_type=InterventionType.SUSPEND_AGENT,
+                reason="critical drift"
+            )
+
+            checks = unittest.TestCase()
+            checks.assertEqual(handled, ["test-agent"])
+            intervention = monitoring.interventions[0]
+            checks.assertIs(intervention.success, True)
+            checks.assertIsNone(intervention.error)
+            checks.assertIn("test-agent", monitoring.last_intervention_time)
+
+            audit_entry = monitoring.audit_logger.entries[-1]
+            checks.assertEqual(audit_entry.data["action_taken"], "suspend_agent")
+            checks.assertIs(audit_entry.data["success"], True)
+            checks.assertNotIn("error", audit_entry.data)
+
+    def test_intervention_handler_exception_records_failed_receipt(self):
+        """Test handler errors are preserved as failed audit receipts."""
+        with TemporaryDirectory() as tmpdir:
+            monitoring = MonitoringSystem(storage_dir=Path(tmpdir))
+
+            def failing_handler(agent_id):
+                raise RuntimeError("suspension backend unavailable")
+
+            monitoring.register_enforcement_handler(
+                InterventionType.SUSPEND_AGENT,
+                failing_handler
+            )
+            monitoring._execute_intervention(
+                agent_id="test-agent",
+                intervention_type=InterventionType.SUSPEND_AGENT,
+                reason="critical drift"
+            )
+
+            checks = unittest.TestCase()
+            intervention = monitoring.interventions[0]
+            checks.assertIs(intervention.success, False)
+            checks.assertEqual(intervention.error, "suspension backend unavailable")
+            checks.assertNotIn("test-agent", monitoring.last_intervention_time)
+
+            audit_entry = monitoring.audit_logger.entries[-1]
+            checks.assertEqual(audit_entry.data["action_taken"], "not_executed")
+            checks.assertIs(audit_entry.data["success"], False)
+            checks.assertEqual(audit_entry.data["error"], "suspension backend unavailable")
     
     def test_audit_log_integrity(self):
         """Test audit log maintains integrity"""

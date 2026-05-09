@@ -9,7 +9,7 @@ import hashlib
 import hmac
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
@@ -222,7 +222,9 @@ class AuditLogger:
         intervention_type: str,
         action_taken: str,
         reason: str,
-        context_tag: Optional[str] = None
+        context_tag: Optional[str] = None,
+        success: Optional[bool] = None,
+        error: Optional[str] = None
     ) -> AuditEntry:
         """
         Log automated intervention
@@ -234,20 +236,28 @@ class AuditLogger:
             action_taken: Action that was taken
             reason: Reason for intervention
             context_tag: DLP context tag
+            success: Whether the enforcement action was confirmed
+            error: Failure reason when enforcement was not confirmed
         
         Returns:
             Created audit entry
         """
+        data = {
+            'intervention_type': intervention_type,
+            'action_taken': action_taken,
+            'reason': reason
+        }
+        if success is not None:
+            data['success'] = success
+        if error:
+            data['error'] = error
+
         return self._create_entry(
             event_type=AuditEventType.INTERVENTION,
             agent_id=agent_id,
             severity=severity,
             description=f"Intervention: {intervention_type}",
-            data={
-                'intervention_type': intervention_type,
-                'action_taken': action_taken,
-                'reason': reason
-            },
+            data=data,
             context_tag=context_tag
         )
     

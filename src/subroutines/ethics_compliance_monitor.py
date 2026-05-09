@@ -30,6 +30,7 @@ class EthicsCheckResult:
     warnings: List[str]
     timestamp: str
     metadata: Dict[str, Any]
+    blocked: bool = False
 
 
 class EthicsComplianceMonitor:
@@ -74,6 +75,7 @@ class EthicsComplianceMonitor:
         self._checks_performed = 0
         self._violations_detected = 0
         self._operations_blocked = 0
+        self._blocked_operation_ids = set()
 
     def _get_default_ethics_gate(self):
         """Get default ethics gate"""
@@ -162,16 +164,18 @@ class EthicsComplianceMonitor:
             # Check thresholds
             threshold = self.config.get("ethics_threshold", 0.7)
             critical_threshold = self.config.get("critical_threshold", 0.5)
+            auto_block_enabled = self.config.get("auto_block_enabled", False)
             
             warnings = []
             if ethics_score < threshold:
                 warnings.append(f"Ethics score {ethics_score:.2f} below threshold {threshold}")
             
+            blocked = auto_block_enabled and ethics_score < critical_threshold
+
             if ethics_score < critical_threshold:
                 self._violations_detected += 1
-                if self.config.get("auto_block_enabled"):
-                    self._operations_blocked += 1
-                    warnings.append("CRITICAL: Operation auto-blocked")
+                if blocked:
+                    warnings.append("CRITICAL: Operation block required")
                 
                 # Alert on critical violations
                 if self.alert_system and self.config.get("alert_on_violation"):
@@ -180,11 +184,11 @@ class EthicsComplianceMonitor:
             # Audit trail
             if self.audit_log and self.config.get("audit_all_checks"):
                 self._log_compliance_check(
-                    operation_id, operation_type, ethics_score, violations
+                    operation_id, operation_type, ethics_score, violations, blocked
                 )
             
             result = EthicsCheckResult(
-                success=approved and ethics_score >= threshold,
+                success=approved and ethics_score >= threshold and not blocked,
                 operation_id=operation_id,
                 ethics_score=ethics_score,
                 threshold=threshold,
@@ -194,8 +198,11 @@ class EthicsComplianceMonitor:
                 metadata={
                     "operation_type": operation_type,
                     "verdict": verdict,
-                    "context_keys": list(operation_context.keys())
-                }
+                    "context_keys": list(operation_context.keys()),
+                    "auto_block_enabled": auto_block_enabled,
+                    "critical_threshold": critical_threshold
+                },
+                blocked=blocked
             )
             
             logger.info(
@@ -215,7 +222,8 @@ class EthicsComplianceMonitor:
                 violations=[{"type": "check_failure", "message": str(e)}],
                 warnings=["Ethics check system error"],
                 timestamp=timestamp,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
+                blocked=False
             )
 
     async def _send_alert(self, operation_id: str, score: float, violations: List):
@@ -241,7 +249,8 @@ class EthicsComplianceMonitor:
         operation_id: str,
         operation_type: str,
         score: float,
-        violations: List
+        violations: List,
+        blocked: bool = False
     ):
         """Log compliance check to audit trail"""
         if not self.audit_log:
@@ -254,13 +263,33 @@ class EthicsComplianceMonitor:
                     "operation_id": operation_id,
                     "operation_type": operation_type,
                     "ethics_score": score,
-                    "violations": violations
+                    "violations": violations,
+                    "blocked": blocked
                 },
                 context_tag=f"ethics_check_{operation_id}",
                 symbolic_validation=True
             )
         except Exception as e:
             logger.error("Failed to log compliance check: %s", str(e))
+
+    def record_operation_blocked(self, result: EthicsCheckResult) -> bool:
+        """
+        Record that a caller actually halted a blocked operation.
+
+        check_operation_ethics() only reports whether the ethics gate requires
+        blocking. This method should be called after the caller enforces that
+        decision, keeping operations_blocked tied to an actual halted action.
+        """
+        if not result.blocked:
+            return False
+
+        if result.operation_id in self._blocked_operation_ids:
+            return False
+
+        self._blocked_operation_ids.add(result.operation_id)
+        self._operations_blocked += 1
+        logger.info("Ethics block enforced: operation=%s", result.operation_id)
+        return True
 
     def get_compliance_stats(self) -> Dict[str, Any]:
         """Get compliance monitoring statistics"""
@@ -280,6 +309,7 @@ class EthicsComplianceMonitor:
         self._checks_performed = 0
         self._violations_detected = 0
         self._operations_blocked = 0
+        self._blocked_operation_ids.clear()
         logger.info("Compliance statistics reset")
 
 

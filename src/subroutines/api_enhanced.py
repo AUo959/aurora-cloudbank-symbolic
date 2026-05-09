@@ -74,6 +74,7 @@ async def check_ethics_compliance(request: EthicsCheckRequest) -> Dict[str, Any]
             "operation_id": result.operation_id,
             "ethics_score": result.ethics_score,
             "threshold": result.threshold,
+            "blocked": result.blocked,
             "violations": result.violations,
             "warnings": result.warnings,
             "timestamp": result.timestamp

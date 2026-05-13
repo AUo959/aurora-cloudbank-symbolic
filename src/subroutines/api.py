@@ -10,10 +10,13 @@ FastAPI router for subroutine management and execution.
 Provides endpoints for registering, querying, and monitoring subroutines.
 """
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import APIKeyHeader
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
+import hmac
 import logging
+import os
 import time
 
 from src.subroutines.registry import (
@@ -28,6 +31,39 @@ from src.subroutines.registry import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/subroutines", tags=["subroutines"])
+
+SUBROUTINE_API_KEY_ENV = "AURORA_SUBROUTINE_API_KEY"
+SUBROUTINE_API_KEY_FALLBACK_ENV = "AURORA_API_KEY"
+SUBROUTINE_API_KEY_HEADER = "X-API-Key"
+ALLOWED_SUBROUTINE_MODULE_PREFIXES = ("src.subroutines.", "modules.")
+
+api_key_header = APIKeyHeader(name=SUBROUTINE_API_KEY_HEADER, auto_error=False)
+
+
+def verify_subroutine_api_key(api_key: Optional[str] = Depends(api_key_header)) -> None:
+    """Require an API key for mutation and execution endpoints."""
+    expected_key = os.getenv(SUBROUTINE_API_KEY_ENV) or os.getenv(SUBROUTINE_API_KEY_FALLBACK_ENV)
+    if not expected_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Subroutine API key is not configured",
+        )
+    if not api_key or not hmac.compare_digest(api_key, expected_key):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid subroutine API key",
+        )
+
+
+def validate_subroutine_module_path(module_path: str) -> None:
+    """Reject dynamic imports outside the approved subroutine module namespaces."""
+    if module_path.startswith(ALLOWED_SUBROUTINE_MODULE_PREFIXES):
+        return
+    logger.warning("Rejected non-allowlisted subroutine module path")
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Subroutine module path is not allowed",
+    )
 
 
 # Pydantic Models for API
@@ -86,7 +122,11 @@ class SubroutineSearchRequest(BaseModel):
     tags: Optional[List[str]] = Field(None, description="Filter by tags")
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(verify_subroutine_api_key)],
+)
 async def register_subroutine(request: SubroutineCreate) -> Dict[str, Any]:
     """
     Register a new subroutine in the system.
@@ -96,6 +136,7 @@ async def register_subroutine(request: SubroutineCreate) -> Dict[str, Any]:
     """
     try:
         registry = get_subroutine_registry()
+        validate_subroutine_module_path(request.module_path)
         
         # Convert category string to enum
         try:
@@ -313,7 +354,7 @@ async def search_subroutines(request: SubroutineSearchRequest) -> Dict[str, Any]
         )
 
 
-@router.put("/status/{subroutine_id}")
+@router.put("/status/{subroutine_id}", dependencies=[Depends(verify_subroutine_api_key)])
 async def update_subroutine_status(
     subroutine_id: str,
     request: SubroutineStatusUpdate
@@ -364,7 +405,7 @@ async def update_subroutine_status(
         )
 
 
-@router.post("/execute")
+@router.post("/execute", dependencies=[Depends(verify_subroutine_api_key)])
 async def execute_subroutine(request: SubroutineExecutionRequest) -> Dict[str, Any]:
     """
     Execute a subroutine with provided inputs.
@@ -390,6 +431,7 @@ async def execute_subroutine(request: SubroutineExecutionRequest) -> Dict[str, A
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Subroutine '{request.subroutine_id}' is not active (status: {subroutine.status.value})"
             )
+        validate_subroutine_module_path(subroutine.module_path)
         
         # Dynamic import and execution
         start_time = time.time()

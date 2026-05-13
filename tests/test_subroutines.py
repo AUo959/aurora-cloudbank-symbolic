@@ -14,6 +14,7 @@ Comprehensive tests for Aurora's subroutine system including:
 
 import pytest
 from datetime import datetime, timedelta, UTC
+from uuid import uuid4
 from src.subroutines.reality_sim_monitor import RealitySimMonitor, RealityCheckResult
 from src.subroutines.aurora_vision_alignment import (
     VisionAlignmentManager,
@@ -436,6 +437,28 @@ class TestSubroutineAPI:
         app.include_router(router)
         return TestClient(app)
 
+    def auth_headers(self, monkeypatch):
+        """Configure test API key auth headers for protected subroutine routes."""
+        monkeypatch.setenv("AURORA_SUBROUTINE_API_KEY", "test-subroutine-key")
+        return {"X-API-Key": "test-subroutine-key"}
+
+    def register_payload(self, module_path="src.subroutines.resource_optimization"):
+        """Build a unique valid registration payload."""
+        return {
+            "id": f"test_secure_subroutine_{uuid4().hex}",
+            "name": "Test Secure Subroutine",
+            "version": "1.0.0",
+            "description": "Focused API security test subroutine",
+            "author": {
+                "name": "Test Author",
+                "team": "Aurora Test",
+            },
+            "category": "utility",
+            "module_path": module_path,
+            "class_name": "ResourceOptimizationManager",
+            "entry_point": "optimize_resources",
+        }
+
     def test_health_check(self, client):
         """Test health endpoint"""
         response = client.get("/subroutines/health")
@@ -501,6 +524,88 @@ class TestSubroutineAPI:
         assert data["success"] is True
         assert "export" in data
         assert "subroutines" in data["export"]
+
+    def test_register_requires_api_key(self, client, monkeypatch):
+        """Registration must not accept unauthenticated registry writes."""
+        monkeypatch.setenv("AURORA_SUBROUTINE_API_KEY", "test-subroutine-key")
+
+        response = client.post("/subroutines/register", json=self.register_payload())
+
+        assert response.status_code == 403
+
+    def test_register_rejects_non_allowlisted_module_path(self, client, monkeypatch):
+        """Registration must reject unsafe dynamic import module paths."""
+        response = client.post(
+            "/subroutines/register",
+            json=self.register_payload(module_path="os"),
+            headers=self.auth_headers(monkeypatch),
+        )
+
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Subroutine module path is not allowed"
+
+    def test_register_allows_authenticated_allowlisted_module_path(self, client, monkeypatch):
+        """Registration still works for authenticated allowlisted subroutine modules."""
+        response = client.post(
+            "/subroutines/register",
+            json=self.register_payload(),
+            headers=self.auth_headers(monkeypatch),
+        )
+
+        assert response.status_code == 201
+        assert response.json()["success"] is True
+
+    def test_execute_requires_api_key(self, client, monkeypatch):
+        """Execution must not accept unauthenticated callers."""
+        monkeypatch.setenv("AURORA_SUBROUTINE_API_KEY", "test-subroutine-key")
+
+        response = client.post(
+            "/subroutines/execute",
+            json={"subroutine_id": "reality_sim_monitor", "inputs": {}},
+        )
+
+        assert response.status_code == 403
+
+    def test_execute_rejects_non_allowlisted_registered_module(self, client, monkeypatch):
+        """Execution validates stored module paths before dynamic import."""
+        registry = get_subroutine_registry()
+        subroutine_id = f"unsafe_test_subroutine_{uuid4().hex}"
+        registry.register(
+            Subroutine(
+                id=subroutine_id,
+                name="Unsafe Test Subroutine",
+                version="1.0.0",
+                description="Unsafe module path regression fixture",
+                author=SubroutineAuthor(name="Test Author", team="Aurora Test"),
+                created_at=datetime.now(UTC).isoformat(),
+                updated_at=datetime.now(UTC).isoformat(),
+                status=SubroutineStatus.ACTIVE,
+                category=SubroutineCategory.UTILITY,
+                module_path="os",
+                class_name="system",
+                entry_point="system",
+            )
+        )
+
+        response = client.post(
+            "/subroutines/execute",
+            json={"subroutine_id": subroutine_id, "inputs": {"command": "echo unsafe"}},
+            headers=self.auth_headers(monkeypatch),
+        )
+
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Subroutine module path is not allowed"
+
+    def test_status_update_requires_api_key(self, client, monkeypatch):
+        """Status mutation must not accept unauthenticated callers."""
+        monkeypatch.setenv("AURORA_SUBROUTINE_API_KEY", "test-subroutine-key")
+
+        response = client.put(
+            "/subroutines/status/reality_sim_monitor",
+            json={"status": "active"},
+        )
+
+        assert response.status_code == 403
 
 
 # Add markers for pytest

@@ -147,10 +147,9 @@ tests/
 
 ### Environment Variables
 
-**Production Required:**
+**Required:**
 ```bash
-AURORA_ENV=production                      # Enable production mode
-MONITORING_SIGNING_KEY=<hex-key>          # Required in production
+MONITORING_SIGNING_KEY=<hex-key>          # Required for audit log signing
 ```
 
 **Optional Configuration:**

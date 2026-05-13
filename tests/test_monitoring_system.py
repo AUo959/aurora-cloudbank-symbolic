@@ -17,6 +17,11 @@ from src.monitoring.monitoring_system import (
 
 class TestMonitoringSystem:
     """Test suite for MonitoringSystem"""
+
+    @pytest.fixture(autouse=True)
+    def monitoring_signing_key(self, monkeypatch):
+        """Provide the required audit HMAC key for monitoring tests."""
+        monkeypatch.setenv("MONITORING_SIGNING_KEY", "test-monitoring-signing-key")
     
     def test_initialization(self):
         """Test monitoring system initialization"""

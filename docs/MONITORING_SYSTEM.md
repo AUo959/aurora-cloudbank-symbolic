@@ -58,7 +58,7 @@ pip install opentelemetry-api opentelemetry-sdk
 
 ### Environment Variables
 
-Configure the following environment variables for production:
+Configure the following environment variables before starting monitoring:
 
 ```bash
 # Required for persistent audit chain verification
@@ -72,7 +72,7 @@ export ETHICS_RULES_PATH="./ethics/validation_engine/validation_rules.json"
 export MONITORING_API_TOKEN="your-api-token-here"
 ```
 
-**Important**: The `MONITORING_SIGNING_KEY` must be consistent across system restarts to maintain audit chain verification. Never use runtime-generated keys in production.
+**Important**: The `MONITORING_SIGNING_KEY` is required and must be consistent across system restarts to maintain audit chain verification.
 
 ### Setup
 

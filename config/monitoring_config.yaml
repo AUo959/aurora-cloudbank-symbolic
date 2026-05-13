@@ -224,7 +224,7 @@ security:
     algorithm: "HMAC-SHA256"
     # Key MUST be stored in environment variable: MONITORING_SIGNING_KEY
     # Generate with: python -c "import secrets; print(secrets.token_hex(32))"
-    # WARNING: Using runtime-generated keys causes audit chain verification to fail across restarts
+    # Required at startup; runtime-generated keys are not used
   
   # API authentication
   api_auth:

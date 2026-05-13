@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from enum import Enum
@@ -17,6 +18,8 @@ from typing import Dict, List, Optional, Any
 from src.core.time_utils import utc_now
 
 logger = logging.getLogger(__name__)
+
+MONITORING_SIGNING_KEY_ENV = "MONITORING_SIGNING_KEY"
 
 
 class AuditEventType(Enum):
@@ -103,25 +106,16 @@ class AuditLogger:
         
         # Try environment variable first
         if signing_key is None:
-            import os
-            signing_key = os.getenv("MONITORING_SIGNING_KEY")
-            
-            # In production, require explicit signing key
-            if signing_key is None and os.getenv("AURORA_ENV") == "production":
-                raise ValueError(
-                    "MONITORING_SIGNING_KEY environment variable must be set in production. "
-                    "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
-                )
-        
-        self.signing_key = signing_key or self._generate_key()
-        
-        # Warn if using generated key
-        if signing_key is None:
-            logger.warning(
-                "Using runtime-generated signing key. Audit chain verification will fail "
-                "across restarts. Set MONITORING_SIGNING_KEY environment variable for production."
+            signing_key = os.getenv(MONITORING_SIGNING_KEY_ENV)
+
+        if not signing_key:
+            raise ValueError(
+                f"{MONITORING_SIGNING_KEY_ENV} environment variable must be set. "
+                "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
             )
-        
+
+        self.signing_key = signing_key
+
         self.entries: List[AuditEntry] = []
         self._next_id = 1
         
@@ -133,11 +127,6 @@ class AuditLogger:
             "Audit logger initialized (storage=%s, entries=%d)",
             storage_path, len(self.entries)
         )
-    
-    def _generate_key(self) -> str:
-        """Generate a random signing key"""
-        import secrets
-        return secrets.token_hex(32)
     
     def log_drift_alert(
         self,
@@ -446,7 +435,6 @@ class AuditLogger:
         try:
             data = {
                 'entries': [e.to_dict() for e in self.entries],
-                'signing_key': self.signing_key,
                 'next_id': self._next_id
             }
             
@@ -463,7 +451,8 @@ class AuditLogger:
             with open(self.storage_path, 'r') as f:
                 data = json.load(f)
             
-            self.signing_key = data.get('signing_key', self.signing_key)
+            if 'signing_key' in data:
+                logger.warning("Ignoring persisted audit signing key")
             self._next_id = data.get('next_id', 1)
             
             for entry_data in data.get('entries', []):

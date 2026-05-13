@@ -27,6 +27,8 @@ from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
 
+from src.monitoring.ethics_engine import ActionContext, EthicsEngine
+
 # Try to import subroutine system
 try:
     from src.subroutines.reality_sim_monitor import RealitySimMonitor
@@ -303,6 +305,7 @@ class AuroraConsciousnessAgent:
         # Core subsystems
         self.quantum_processor = QuantumSymbolicProcessor()
         self.strategic_engine = StrategicReasoningEngine()
+        self.ethics_engine = EthicsEngine()
         
         # Subroutine system integration
         self.reality_monitor: Optional[Any] = None
@@ -383,8 +386,9 @@ class AuroraConsciousnessAgent:
             },
             symbolic_anchors=list(self.quantum_processor.symbolic_anchors),
             quantum_coherence=self.quantum_processor.quantum_state['coherence'],
-            ethical_verified=True  # Would integrate with ethics system
+            ethical_verified=False
         )
+        thought.ethical_verified = self._verify_thought_ethics(thought, context)
         
         self.thoughts.append(thought)
         self.stats['thoughts_processed'] += 1
@@ -393,6 +397,35 @@ class AuroraConsciousnessAgent:
                         f"(coherence: {thought.quantum_coherence:.2f})")
         
         return thought
+
+    def _verify_thought_ethics(self, thought: AuroraThought, context: Dict[str, Any]) -> bool:
+        """Evaluate a generated thought before marking it ethics-verified."""
+        parameters = dict(context)
+        parameters['thought'] = thought.to_dict()
+        parameters['original_context'] = context
+
+        try:
+            violations = self.ethics_engine.evaluate_action(
+                ActionContext(
+                    agent_id=self.agent_id,
+                    action_type="thought",
+                    parameters=parameters,
+                    context_tag="aurora_consciousness_thought"
+                )
+            )
+        except Exception:
+            self.logger.exception("Thought ethics verification failed: %s", thought.thought_id)
+            return False
+
+        self.stats['ethical_verifications'] += 1
+        should_block = self.ethics_engine.check_should_block(violations)
+        if should_block:
+            self.logger.warning(
+                "Thought failed ethics verification: %s (%d violations)",
+                thought.thought_id,
+                len(violations)
+            )
+        return not should_block
     
     def _generate_awareness_note(self, context: Dict[str, Any]) -> str:
         """Generate awareness note about context"""

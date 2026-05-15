@@ -29,7 +29,6 @@ active_connections: Dict[str, List[WebSocket]] = {}
 
 @router.post(
     "/scenario",
-    response_model=SimulationResult,
     status_code=202,
     dependencies=MUTATION_DEPENDENCIES,
 )
@@ -207,7 +206,6 @@ async def delete_simulation_result(simulation_id: str) -> None:
 
 @router.post(
     "/forecast",
-    response_model=SimulationResult,
     status_code=202,
     dependencies=MUTATION_DEPENDENCIES,
 )

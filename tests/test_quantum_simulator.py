@@ -28,6 +28,7 @@ if "slowapi" not in sys.modules and importlib.util.find_spec("slowapi") is None:
 
     class _Limiter:
         def __init__(self, *args, **kwargs):
+            # Test stub: the limiter has no runtime state in local dependency-light runs.
             pass
 
         def limit(self, *args, **kwargs):

@@ -42,9 +42,12 @@ def _auth_header():
 
 @pytest.fixture
 def temp_ledger_dir():
-    """Create temporary directory for ledger storage."""
+    """Create temporary directory for ledger storage.
+
+    The path validator only permits absolute test paths under /tmp.
+    """
     with tempfile.TemporaryDirectory(
-        dir="/tmp",  # NOSONAR: test-only path allowed by validator.
+        dir="/tmp",  # NOSONAR
     ) as tmpdir:
         yield tmpdir
 

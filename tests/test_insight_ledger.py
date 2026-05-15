@@ -43,7 +43,9 @@ def _auth_header():
 @pytest.fixture
 def temp_ledger_dir():
     """Create temporary directory for ledger storage."""
-    with tempfile.TemporaryDirectory(dir="/tmp") as tmpdir:
+    with tempfile.TemporaryDirectory(
+        dir="/tmp",  # NOSONAR: test-only path allowed by validator.
+    ) as tmpdir:
         yield tmpdir
 
 

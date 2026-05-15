@@ -9,11 +9,8 @@ Anchor: T1-QSS-TEST
 
 import hashlib
 import hmac
-import importlib.util
 import os
-import sys
 import time
-import types
 import unittest
 from datetime import datetime, timedelta, timezone
 
@@ -22,27 +19,12 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-if "slowapi" not in sys.modules and importlib.util.find_spec("slowapi") is None:
-    slowapi_module = types.ModuleType("slowapi")
-    slowapi_util_module = types.ModuleType("slowapi.util")
+from tests._slowapi_stub import install_slowapi_stub
 
-    class _Limiter:
-        def __init__(self, *args, **kwargs):
-            # Test stub: the limiter has no runtime state in local dependency-light runs.
-            pass
 
-        def limit(self, *args, **kwargs):
-            def decorator(func):
-                return func
+install_slowapi_stub()
 
-            return decorator
-
-    slowapi_module.Limiter = _Limiter
-    slowapi_util_module.get_remote_address = lambda request: "test-client"
-    sys.modules["slowapi"] = slowapi_module
-    sys.modules["slowapi.util"] = slowapi_util_module
-
-from modules.quantum_simulator import (
+from modules.quantum_simulator import (  # noqa: E402
     MockQuantumProvider,
     OptimizationMethod,
     QuantumBackend,
@@ -57,7 +39,7 @@ from modules.quantum_simulator import (
     create_ghz_state,
     create_w_state,
 )
-from modules.quantum_simulator.api import router as quantum_simulator_router
+from modules.quantum_simulator.api import router as quantum_simulator_router  # noqa: E402
 
 
 def _auth_header():

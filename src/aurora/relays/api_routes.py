@@ -13,14 +13,19 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src.aurora.relays.relay_manager import RelayManager, RelayMessage
 from src.aurora.ethics.ethics_gate import EthicsViolation
+from src.middleware.fastapi_security import require_csrf_token
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/relay", tags=["relay-manager"])
+router = APIRouter(
+    prefix="/relay",
+    tags=["relay-manager"],
+    dependencies=[Depends(require_csrf_token)],
+)
 
 # Singleton relay manager instance
 _relay_manager_instance: Optional[RelayManager] = None

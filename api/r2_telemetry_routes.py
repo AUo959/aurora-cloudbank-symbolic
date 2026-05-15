@@ -12,8 +12,10 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import PlainTextResponse
+
+from src.middleware.fastapi_security import require_csrf_token
 
 try:
     from src.observability import get_r2_telemetry
@@ -22,14 +24,18 @@ except ImportError:
     from observability import get_r2_telemetry
 
 
-router = APIRouter(prefix="/r2-telemetry", tags=["R-2 Agent Telemetry"])
+router = APIRouter(
+    prefix="/r2-telemetry",
+    tags=["R-2 Agent Telemetry"],
+    dependencies=[Depends(require_csrf_token)],
+)
 
 
 @router.get("/metrics", response_class=PlainTextResponse)
 async def get_prometheus_metrics():
     """
     Export R-2 agent metrics in Prometheus format
-    
+
     This endpoint is designed to be scraped by Prometheus for monitoring.
     Returns metrics in the Prometheus text exposition format.
     """
@@ -50,11 +56,11 @@ async def get_metrics_summary(
 ) -> Dict[str, Any]:
     """
     Get comprehensive metrics summary for R-2 agent operations
-    
+
     Args:
         time_window: Time window in seconds (default: 3600 = 1 hour)
         context_tag: Optional DLP context tag
-        
+
     Returns:
         Summary with counts, success rates, and performance metrics
     """
@@ -74,12 +80,12 @@ async def get_recent_operations(
 ) -> List[Dict[str, Any]]:
     """
     Get recent R-2 agent operations
-    
+
     Args:
         limit: Maximum number of operations to return
         operation_type: Filter by specific operation type
         failures_only: Only return failed operations
-        
+
     Returns:
         List of operation metrics
     """
@@ -89,7 +95,7 @@ async def get_recent_operations(
         operation_type=operation_type,
         include_failures_only=failures_only
     )
-    
+
     return [asdict(op) for op in operations]
 
 
@@ -97,26 +103,26 @@ async def get_recent_operations(
 async def get_telemetry_health() -> Dict[str, Any]:
     """
     Get R-2 agent telemetry system health status
-    
+
     Returns:
         Health status with system information
     """
     telemetry = get_r2_telemetry()
-    
+
     # Get recent metrics summary
     summary = telemetry.get_metrics_summary(time_window_seconds=300)  # Last 5 minutes
-    
+
     # Determine health status
     success_rate = summary.get("success_rate", 0)
     anomaly_count = summary.get("anomaly_count", 0)
-    
+
     if success_rate >= 0.95 and anomaly_count == 0:
         status = "healthy"
     elif success_rate >= 0.80:
         status = "degraded"
     else:
         status = "unhealthy"
-    
+
     return {
         "status": status,
         "timestamp": datetime.utcnow().isoformat(),
@@ -137,18 +143,18 @@ async def get_detected_anomalies(
 ) -> List[Dict[str, Any]]:
     """
     Get recently detected anomalies in R-2 agent operations
-    
+
     Args:
         limit: Maximum number of anomalies to return
-        
+
     Returns:
         List of detected anomalies with details
     """
     telemetry = get_r2_telemetry()
-    
+
     # Use public method to get anomalies
     anomalies = telemetry.get_recent_anomalies(limit=limit)
-    
+
     return [asdict(anomaly) for anomaly in anomalies]
 
 
@@ -156,15 +162,15 @@ async def get_detected_anomalies(
 async def get_operation_types() -> Dict[str, Any]:
     """
     Get list of all tracked operation types with statistics
-    
+
     Returns:
         Dictionary of operation types with their statistics
     """
     telemetry = get_r2_telemetry()
     summary = telemetry.get_metrics_summary()
-    
+
     operations_by_type = summary.get("operations_by_type", {})
-    
+
     return {
         "total_types": len(operations_by_type),
         "operations": operations_by_type
@@ -178,18 +184,18 @@ async def test_telemetry_operation(
 ) -> Dict[str, Any]:
     """
     Test endpoint to generate sample telemetry data
-    
+
     Args:
         operation_type: Type of operation to simulate
         should_fail: Whether to simulate a failure
-        
+
     Returns:
         Test operation result
     """
     import time
-    
+
     telemetry = get_r2_telemetry()
-    
+
     with telemetry.trace_agent_operation(
         operation_type=operation_type,
         context_tag=f"test_operation_{int(time.time())}",
@@ -198,14 +204,14 @@ async def test_telemetry_operation(
     ) as metrics:
         # Simulate work
         time.sleep(0.1)
-        
+
         # Add some metadata
         metrics.decisions_made = 3
         metrics.tools_invoked = ["test_tool_1", "test_tool_2"]
-        
+
         if should_fail:
             raise ValueError("Simulated test failure")
-    
+
     return {
         "success": True,
         "message": "Test operation completed successfully",

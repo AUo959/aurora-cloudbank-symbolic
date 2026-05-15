@@ -5,9 +5,22 @@ import secrets
 import time
 from typing import Any, Dict
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 from fastapi.responses import Response
+from fastapi.security import HTTPAuthorizationCredentials
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+from src.middleware.fastapi_security import security, verify_csrf_token
 
 from .executor import ExecutionQueue
 from .limiter import get_rate_limiter
@@ -34,12 +47,53 @@ async def _broadcast(session_id: str, payload: Dict[str, Any]):
     await store.publish_event(session_id, payload)
 
 
+def _session_id_from_token(token: HTTPAuthorizationCredentials) -> str:
+    verify_csrf_token(token)
+    return token.credentials.split(".", 1)[0]
+
+
+def require_playground_auth(token: HTTPAuthorizationCredentials = Depends(security)) -> str:
+    """Require a valid CSRF bearer token and return its bound session id."""
+    return _session_id_from_token(token)
+
+
+def _require_session_owner(session_id: str, auth_session_id: str) -> Dict[str, Any]:
+    session = store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.get("owner") != auth_session_id:
+        raise HTTPException(status_code=403, detail="Session access denied")
+    return session
+
+
+def _require_websocket_auth(websocket: WebSocket) -> str:
+    auth_header = websocket.headers.get("authorization")
+    if not auth_header or not auth_header.lower().startswith("bearer "):
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason="Missing bearer token")
+
+    scheme, credentials = auth_header.split(" ", 1)
+    try:
+        return _session_id_from_token(
+            HTTPAuthorizationCredentials(scheme=scheme, credentials=credentials.strip())
+        )
+    except HTTPException as exc:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason=str(exc.detail)) from exc
+
+
 @router.post("/session", response_model=SessionCreateResponse)
-async def create_session(request: SessionCreateRequest) -> SessionCreateResponse:
+async def create_session(
+    request: SessionCreateRequest,
+    auth_session_id: str = Depends(require_playground_auth),
+) -> SessionCreateResponse:
     session_id = secrets.token_urlsafe(12)
     payload = store.create_session(
         session_id,
-        {"language": request.language.value, "metadata": request.metadata, "seed_code": request.seed_code},
+        {
+            "language": request.language.value,
+            "metadata": request.metadata,
+            "owner": auth_session_id,
+            "seed_code": request.seed_code,
+        },
     )
     sessions_gauge.inc()
     await _broadcast(session_id, {"event": "session_created", "session_id": session_id, "payload": payload})
@@ -48,29 +102,49 @@ async def create_session(request: SessionCreateRequest) -> SessionCreateResponse
 
 @router.post("/execute", response_model=ExecutionStatusResponse)
 async def execute_code(
-    request: Request, body: ExecuteRequest, background_tasks: BackgroundTasks
+    request: Request,
+    body: ExecuteRequest,
+    background_tasks: BackgroundTasks,
+    auth_session_id: str = Depends(require_playground_auth),
 ) -> ExecutionStatusResponse:
     client_ip = request.client.host if request.client else "unknown"
     rate_limiter.enforce(client_ip)
     session_id = body.session_id or secrets.token_urlsafe(12)
     existing = store.get_session(session_id)
-    if not existing:
-        store.create_session(session_id, {"language": body.language.value, "metadata": {}, "seed_code": None})
+    if existing:
+        _require_session_owner(session_id, auth_session_id)
+    else:
+        store.create_session(
+            session_id,
+            {
+                "language": body.language.value,
+                "metadata": {},
+                "owner": auth_session_id,
+                "seed_code": None,
+            },
+        )
     await _broadcast(session_id, {"event": "started", "session_id": session_id})
     task_id = await queue.enqueue(session_id, body.code, body.language, body.stdin, background_tasks)
     return queue.get_status(session_id, task_id)
 
 
 @router.get("/results/{session_id}", response_model=ExecutionStatusResponse)
-async def get_results(session_id: str, task_id: str) -> ExecutionStatusResponse:
+async def get_results(
+    session_id: str,
+    task_id: str,
+    auth_session_id: str = Depends(require_playground_auth),
+) -> ExecutionStatusResponse:
+    _require_session_owner(session_id, auth_session_id)
     return queue.get_status(session_id, task_id)
 
 
 @router.post("/share", response_model=ShareResponse)
-async def share_session(body: ShareRequest, request: Request) -> ShareResponse:
-    session = store.get_session(body.session_id)
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
+async def share_session(
+    request: Request,
+    body: ShareRequest,
+    auth_session_id: str = Depends(require_playground_auth),
+) -> ShareResponse:
+    _require_session_owner(body.session_id, auth_session_id)
     short_code = secrets.token_urlsafe(6)
     share_payload = {
         "session_id": body.session_id,
@@ -116,11 +190,16 @@ async def healthcheck() -> PlaygroundHealth:
 
 @router.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    auth_session_id = _require_websocket_auth(websocket)
+    session = store.get_session(session_id)
+    if not session or session.get("owner") != auth_session_id:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason="Session access denied")
+
     await websocket.accept()
     try:
         async for payload in store.stream_events(session_id):
             message = StreamMessage(**payload)
-            await websocket.send_json(message.dict())
+            await websocket.send_json(message.model_dump())
     except WebSocketDisconnect:
         # Client disconnected from WebSocket; no action needed.
         pass

@@ -2,8 +2,26 @@
 Integration tests for telemetry activation in FastAPI application
 """
 
+import hashlib
+import hmac
+import os
+import time
+
 import pytest
 from fastapi.testclient import TestClient
+
+
+def _auth_header():
+    session_id = "test-session"
+    timestamp = str(int(time.time()))
+    message = f"{session_id}.{timestamp}"
+    signature = hmac.new(
+        os.environ["CSRF_SECRET_KEY"].encode(),
+        message.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    token = f"{session_id}.{timestamp}.{signature}"
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.mark.integration
@@ -65,12 +83,12 @@ def test_r2_telemetry_routes_available():
     client = TestClient(app)
 
     # Test metrics endpoint
-    response = client.get("/r2-telemetry/metrics")
+    response = client.get("/r2-telemetry/metrics", headers=_auth_header())
     assert response.status_code == 200
     assert "r2_agent" in response.text or "# HELP" in response.text
 
     # Test health endpoint
-    response = client.get("/r2-telemetry/health")
+    response = client.get("/r2-telemetry/health", headers=_auth_header())
     assert response.status_code == 200
     data = response.json()
     assert "status" in data
@@ -84,7 +102,7 @@ def test_r2_telemetry_summary():
     from api.aurora_api import app
 
     client = TestClient(app)
-    response = client.get("/r2-telemetry/summary")
+    response = client.get("/r2-telemetry/summary", headers=_auth_header())
 
     assert response.status_code == 200
     data = response.json()

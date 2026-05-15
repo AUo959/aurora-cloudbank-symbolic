@@ -22,7 +22,7 @@ import os
 import time
 import re
 
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.cors import CORSMiddleware
 from slowapi import Limiter
@@ -252,6 +252,13 @@ def verify_csrf_token(token: HTTPAuthorizationCredentials, session_id: Optional[
     except Exception:
         # Log error securely without exposing details to client
         raise HTTPException(status_code=403, detail='CSRF token validation failed')
+
+
+def require_csrf_token(
+    token: HTTPAuthorizationCredentials = Depends(security),
+) -> None:
+    """FastAPI dependency that requires a valid CSRF bearer token."""
+    verify_csrf_token(token)
 
 
 # ================================

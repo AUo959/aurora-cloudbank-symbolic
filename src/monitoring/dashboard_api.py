@@ -10,20 +10,23 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 try:
-    from fastapi import APIRouter, HTTPException, Query
+    from fastapi import APIRouter, Depends, HTTPException, Query
     from pydantic import BaseModel, Field
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
     APIRouter = None
+    Depends = None
     HTTPException = None
     Query = None
     BaseModel = object
-    Field = lambda **kwargs: None
 
-from .monitoring_system import MonitoringSystem, AlertConfig, AlertLevel
-from .ethics_engine import ActionContext
+    def Field(*args, **kwargs):
+        return None
+
+from .monitoring_system import MonitoringSystem
 from src.core.time_utils import utc_now, utc_iso
+from src.middleware.fastapi_security import require_csrf_token
 
 logger = logging.getLogger(__name__)
 
@@ -71,13 +74,13 @@ def get_monitoring_system(
 ) -> MonitoringSystem:
     """Get or create global monitoring system instance"""
     global _monitoring_system
-    
+
     if _monitoring_system is None:
         # Use default paths if not provided
         if storage_dir is None:
             import os
             storage_dir = Path(os.getenv("MONITORING_STORAGE_DIR", "./monitoring_data"))
-        
+
         if ethics_rules_path is None:
             import os
             # Try environment variable first, then default path
@@ -85,12 +88,12 @@ def get_monitoring_system(
             ethics_path = Path(ethics_path_str)
             if ethics_path.exists():
                 ethics_rules_path = ethics_path
-        
+
         _monitoring_system = MonitoringSystem(
             storage_dir=storage_dir,
             ethics_rules_path=ethics_rules_path
         )
-    
+
     return _monitoring_system
 
 
@@ -100,23 +103,27 @@ def create_monitoring_router(
 ) -> Optional[APIRouter]:
     """
     Create FastAPI router for monitoring dashboard
-    
+
     Args:
         storage_dir: Directory for persistent storage
         ethics_rules_path: Path to ethics rules configuration
-    
+
     Returns:
         APIRouter with monitoring endpoints (None if FastAPI not available)
     """
     if not FASTAPI_AVAILABLE:
         logger.warning("FastAPI not available - monitoring routes disabled")
         return None
-    
-    router = APIRouter(prefix="/monitoring", tags=["monitoring"])
-    
+
+    router = APIRouter(
+        prefix="/monitoring",
+        tags=["monitoring"],
+        dependencies=[Depends(require_csrf_token)],
+    )
+
     # Initialize monitoring system
     monitoring = get_monitoring_system(storage_dir, ethics_rules_path)
-    
+
     @router.get("/health")
     async def health_check():
         """Health check for monitoring system"""
@@ -125,7 +132,7 @@ def create_monitoring_router(
             "timestamp": utc_iso(),
             "audit_chain_valid": monitoring.audit_logger.verify_chain()
         }
-    
+
     @router.post("/baseline")
     async def establish_baseline(input: BaselineInput):
         """Establish behavioral baseline for an agent"""
@@ -134,7 +141,7 @@ def create_monitoring_router(
                 agent_id=input.agent_id,
                 historical_data=input.historical_data
             )
-            
+
             return {
                 "success": True,
                 "agent_id": input.agent_id,
@@ -144,7 +151,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to establish baseline: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.post("/behavior/record")
     async def record_behavior(input: BehaviorMetricsInput):
         """Record behavioral metrics for an agent"""
@@ -154,7 +161,7 @@ def create_monitoring_router(
                 metrics=input.metrics,
                 context_tag=input.context_tag
             )
-            
+
             return {
                 "success": True,
                 "agent_id": input.agent_id,
@@ -164,7 +171,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to record behavior: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.post("/behavior/check")
     async def check_behavior(
         agent_id: str = Query(..., description="Agent identifier"),
@@ -176,12 +183,12 @@ def create_monitoring_router(
                 agent_id=agent_id,
                 context_tag=context_tag
             )
-            
+
             return result
         except Exception as e:
             logger.error("Failed to check behavior: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.post("/action/evaluate")
     async def evaluate_action(input: ActionEvaluationInput):
         """Evaluate action against ethics rules"""
@@ -192,12 +199,12 @@ def create_monitoring_router(
                 parameters=input.parameters,
                 context_tag=input.context_tag
             )
-            
+
             return result
         except Exception as e:
             logger.error("Failed to evaluate action: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/agent/{agent_id}/status")
     async def get_agent_status(agent_id: str):
         """Get comprehensive status for an agent"""
@@ -207,7 +214,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to get agent status: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/alerts")
     async def get_alerts(
         agent_id: Optional[str] = Query(None, description="Filter by agent ID"),
@@ -217,16 +224,16 @@ def create_monitoring_router(
         """Get drift alerts"""
         try:
             since = utc_now() - timedelta(hours=since_hours)
-            
+
             from .drift_detector import DriftLevel
             drift_level = DriftLevel(level) if level else None
-            
+
             alerts = monitoring.drift_detector.get_alerts(
                 agent_id=agent_id,
                 level=drift_level,
                 since=since
             )
-            
+
             return {
                 "alerts": [a.to_dict() for a in alerts],
                 "count": len(alerts),
@@ -235,7 +242,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to get alerts: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/violations")
     async def get_violations(
         agent_id: Optional[str] = Query(None, description="Filter by agent ID"),
@@ -245,16 +252,16 @@ def create_monitoring_router(
         """Get ethics violations"""
         try:
             since = utc_now() - timedelta(hours=since_hours)
-            
+
             from .ethics_engine import ViolationSeverity
             violation_severity = ViolationSeverity(severity) if severity else None
-            
+
             violations = monitoring.ethics_engine.get_violations(
                 agent_id=agent_id,
                 severity=violation_severity,
                 since=since
             )
-            
+
             return {
                 "violations": [v.to_dict() for v in violations],
                 "count": len(violations),
@@ -263,7 +270,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to get violations: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/audit")
     async def get_audit_log(
         agent_id: Optional[str] = Query(None, description="Filter by agent ID"),
@@ -273,16 +280,16 @@ def create_monitoring_router(
         """Get audit log entries"""
         try:
             since = utc_now() - timedelta(hours=since_hours)
-            
+
             from .audit_logger import AuditEventType
             audit_type = AuditEventType(event_type) if event_type else None
-            
+
             entries = monitoring.audit_logger.get_entries(
                 agent_id=agent_id,
                 event_type=audit_type,
                 since=since
             )
-            
+
             return {
                 "entries": [e.to_dict() for e in entries],
                 "count": len(entries),
@@ -292,7 +299,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to get audit log: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/compliance/report")
     async def get_compliance_report(
         since_hours: Optional[int] = Query(168, description="Hours to look back"),
@@ -301,17 +308,17 @@ def create_monitoring_router(
         """Generate compliance report"""
         try:
             since = utc_now() - timedelta(hours=since_hours)
-            
+
             report = monitoring.generate_compliance_report(
                 since=since,
                 agent_id=agent_id
             )
-            
+
             return report
         except Exception as e:
             logger.error("Failed to generate compliance report: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/export")
     async def export_state():
         """Export full monitoring system state"""
@@ -321,21 +328,21 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to export state: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     @router.get("/dashboard/stats")
     async def get_dashboard_stats():
         """Get overall dashboard statistics"""
         try:
             agent_ids = monitoring.behavior_monitor.get_agent_ids()
             since_24h = utc_now() - timedelta(hours=24)
-            
+
             total_alerts = len(monitoring.drift_detector.get_alerts(since=since_24h))
             total_violations = len(monitoring.ethics_engine.get_violations(since=since_24h))
             total_interventions = len([
                 i for i in monitoring.interventions
                 if datetime.fromisoformat(i.timestamp) >= since_24h
             ])
-            
+
             return {
                 "agents_monitored": len(agent_ids),
                 "alerts_24h": total_alerts,
@@ -348,7 +355,7 @@ def create_monitoring_router(
         except Exception as e:
             logger.error("Failed to get dashboard stats: %s", e)
             raise HTTPException(status_code=500, detail=str(e))
-    
+
     logger.info("Monitoring API router created with %d routes", len(router.routes))
-    
+
     return router

@@ -15,10 +15,25 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from modules.insight_ledger.api import initialize_ledger, router
-from modules.insight_ledger.crypto_signatures import SignatureManager, generate_secret_key, validate_secret_key
-from modules.insight_ledger.ledger_core import InsightLedger
-from modules.insight_ledger.schemas import AuditQuery, InsightRecord, InsightType
+from tests._slowapi_stub import install_slowapi_stub
+
+
+install_slowapi_stub()
+
+from modules.insight_ledger.api import initialize_ledger, router  # noqa: E402
+from modules.insight_ledger.crypto_signatures import (  # noqa: E402
+    SignatureManager,
+    generate_secret_key,
+    validate_secret_key,
+)
+from modules.insight_ledger.ledger_core import InsightLedger  # noqa: E402
+from modules.insight_ledger.schemas import AuditQuery, InsightRecord, InsightType  # noqa: E402
+from src.middleware.fastapi_security import generate_csrf_token  # noqa: E402
+
+
+def _auth_header():
+    token = generate_csrf_token("test-session")
+    return {"Authorization": f"Bearer {token}"}
 
 # ============================================================================
 # Fixtures
@@ -27,8 +42,13 @@ from modules.insight_ledger.schemas import AuditQuery, InsightRecord, InsightTyp
 
 @pytest.fixture
 def temp_ledger_dir():
-    """Create temporary directory for ledger storage."""
-    with tempfile.TemporaryDirectory() as tmpdir:
+    """Create temporary directory for ledger storage.
+
+    The path validator only permits absolute test paths under /tmp.
+    """
+    with tempfile.TemporaryDirectory(
+        dir="/tmp",  # NOSONAR
+    ) as tmpdir:
         yield tmpdir
 
 
@@ -550,7 +570,11 @@ def test_api_record_insight(api_client):
         }
     }
 
-    response = api_client.post("/ledger/insight", json=insight_data)
+    response = api_client.post(
+        "/ledger/insight",
+        json=insight_data,
+        headers=_auth_header(),
+    )
 
     assert response.status_code == 201
     data = response.json()
@@ -583,11 +607,19 @@ def test_api_query_history(api_client):
                 "source": "api-test",
             }
         }
-        api_client.post("/ledger/insight", json=insight_data)
+        api_client.post(
+            "/ledger/insight",
+            json=insight_data,
+            headers=_auth_header(),
+        )
 
     # Query
     query_data = {"limit": 10}
-    response = api_client.post("/ledger/history", json=query_data)
+    response = api_client.post(
+        "/ledger/history",
+        json=query_data,
+        headers=_auth_header(),
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -613,7 +645,9 @@ def test_api_export_ledger(api_client, temp_ledger_dir):
     export_path = Path(temp_ledger_dir) / "api_export.json"
 
     response = api_client.post(
-        "/ledger/export", params={"output_path": str(export_path), "include_genesis": True}
+        "/ledger/export",
+        params={"output_path": str(export_path), "include_genesis": True},
+        headers=_auth_header(),
     )
 
     assert response.status_code == 200
@@ -634,11 +668,18 @@ def test_api_get_entry_by_id(api_client):
             "source": "api-test",
         }
     }
-    create_response = api_client.post("/ledger/insight", json=insight_data)
+    create_response = api_client.post(
+        "/ledger/insight",
+        json=insight_data,
+        headers=_auth_header(),
+    )
     entry_id = create_response.json()["entry_id"]
 
     # Retrieve by ID
-    response = api_client.get(f"/ledger/entry/{entry_id}")
+    response = api_client.get(
+        f"/ledger/entry/{entry_id}",
+        headers=_auth_header(),
+    )
 
     assert response.status_code == 200
     data = response.json()
@@ -649,9 +690,35 @@ def test_api_get_entry_by_id(api_client):
 @pytest.mark.api
 def test_api_get_entry_not_found(api_client):
     """Test GET /ledger/entry/{entry_id} with invalid ID."""
-    response = api_client.get("/ledger/entry/invalid_id_xyz")
+    response = api_client.get(
+        "/ledger/entry/invalid_id_xyz",
+        headers=_auth_header(),
+    )
 
     assert response.status_code == 404
+
+
+@pytest.mark.api
+def test_api_sensitive_routes_reject_missing_token(api_client, temp_ledger_dir):
+    """Sensitive ledger routes reject unauthenticated access."""
+    export_path = Path(temp_ledger_dir) / "unauthorized_export.json"
+    insight_data = {
+        "insight": {
+            "insight_type": "alert",
+            "content": "Blocked alert",
+            "source": "api-test",
+        }
+    }
+
+    unauthorized_responses = [
+        api_client.post("/ledger/insight", json=insight_data),
+        api_client.post("/ledger/history", json={"limit": 1}),
+        api_client.post("/ledger/export", params={"output_path": str(export_path)}),
+        api_client.get("/ledger/entry/missing-entry"),
+    ]
+
+    for response in unauthorized_responses:
+        assert response.status_code in (401, 403)
 
 
 @pytest.mark.api

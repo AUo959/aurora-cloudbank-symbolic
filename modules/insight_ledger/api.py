@@ -8,14 +8,17 @@ Anchor: T1-TIL-API-001
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
+
+from src.middleware.fastapi_security import require_csrf_token
 
 from .ledger_core import InsightLedger
 from .schemas import AuditQuery, InsightRecord, LedgerEntry, LedgerStats, VerificationReport
 
 # Initialize router
 router = APIRouter(prefix="/ledger", tags=["Insight Ledger"])
+SENSITIVE_LEDGER_DEPENDENCIES = (Depends(require_csrf_token),)
 
 # Global ledger instance (initialized by main app)
 _ledger_instance: Optional[InsightLedger] = None
@@ -91,6 +94,7 @@ class ExportLedgerResponse(BaseModel):
     status_code=status.HTTP_201_CREATED,
     summary="Record New Insight",
     description="Record a new insight in the immutable ledger with cryptographic signature",
+    dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def record_insight(request: RecordInsightRequest) -> RecordInsightResponse:
     """
@@ -169,6 +173,7 @@ async def verify_integrity(
     response_model=QueryHistoryResponse,
     summary="Query Ledger History",
     description="Query ledger entries with flexible filters (time, type, source, tags, etc.)",
+    dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def query_history(query: Optional[AuditQuery] = None) -> QueryHistoryResponse:
     """
@@ -233,6 +238,7 @@ async def get_stats() -> LedgerStats:
     response_model=ExportLedgerResponse,
     summary="Export Ledger",
     description="Export complete ledger to JSON file for backup or analysis",
+    dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def export_ledger(
     output_path: str = Query(..., description="Output file path"),
@@ -251,7 +257,7 @@ async def export_ledger(
     - External analysis
     - Compliance reporting
     - Data migration
-    
+
     Note:
     - output_path must be relative to the safe export directory
     - Absolute paths and parent directory references (..) are rejected
@@ -287,6 +293,7 @@ async def export_ledger(
     response_model=LedgerEntry,
     summary="Get Entry by ID",
     description="Retrieve a specific ledger entry by its unique identifier",
+    dependencies=SENSITIVE_LEDGER_DEPENDENCIES,
 )
 async def get_entry_by_id(entry_id: str) -> LedgerEntry:
     """

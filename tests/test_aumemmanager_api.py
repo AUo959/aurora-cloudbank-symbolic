@@ -2,11 +2,39 @@
 API tests for AuMemManager FastAPI router
 """
 
+import os
+import unittest
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from modules.aumemmanager.api_integration import router as aumem_router
+from tests._slowapi_stub import install_slowapi_stub
+
+os.environ.setdefault("CSRF_SECRET_KEY", "test-csrf-secret-for-aumemmanager-api")
+os.environ.setdefault("WS_AUTH_SECRET", "test-ws-secret-for-aumemmanager-api")
+install_slowapi_stub()
+
+from modules.aumemmanager.api_integration import router as aumem_router  # noqa: E402
+from src.middleware.fastapi_security import generate_csrf_token  # noqa: E402
+
+
+def _auth_header():
+    token = generate_csrf_token("test-session")
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _memory_payload():
+    return {
+        "content": {"note": "integration-test memory"},
+        "memory_type": "agent",
+        "owner": "test_agent",
+        "importance": 3.5,
+        "tags": ["test", "integration"],
+        "quantum_properties": {"vector_id": "vec_it_001", "magnitude": 0.9, "phase": 0.1},
+        "aurora_anchors": ["T1:1", "SRB:1"],
+        "cultural_score": 0.42,
+    }
 
 
 @pytest.fixture
@@ -56,17 +84,7 @@ def test_memory_metrics_endpoint(client):
 @pytest.mark.aurora
 def test_create_and_retrieve_memory_flow(client):
     # Create
-    create_payload = {
-        "content": {"note": "integration-test memory"},
-        "memory_type": "agent",
-        "owner": "test_agent",
-        "importance": 3.5,
-        "tags": ["test", "integration"],
-        "quantum_properties": {"vector_id": "vec_it_001", "magnitude": 0.9, "phase": 0.1},
-        "aurora_anchors": ["T1:1", "SRB:1"],
-        "cultural_score": 0.42,
-    }
-    c_resp = client.post("/memory/create", json=create_payload)
+    c_resp = client.post("/memory/create", json=_memory_payload(), headers=_auth_header())
     assert c_resp.status_code == 200
     c_data = c_resp.json()
     assert c_data.get("status") == "created"
@@ -80,3 +98,44 @@ def test_create_and_retrieve_memory_flow(client):
     assert isinstance(items, list)
     # At least one memory should match the flow
     assert any(m.get("owner") == "test_agent" for m in items)
+
+
+@pytest.mark.api
+@pytest.mark.aurora
+@pytest.mark.security
+def test_sensitive_memory_routes_reject_missing_token(client):
+    checks = unittest.TestCase()
+    requests = (
+        ("post", "/memory/create", {"json": _memory_payload()}),
+        ("post", "/memory/lifecycle/batch_process", {}),
+        ("post", "/memory/compress", {}),
+        ("get", "/memory/export", {}),
+    )
+
+    for method, url, kwargs in requests:
+        response = getattr(client, method)(url, **kwargs)
+        checks.assertIn(response.status_code, (401, 403))
+
+
+@pytest.mark.api
+@pytest.mark.aurora
+@pytest.mark.security
+def test_sensitive_memory_routes_accept_valid_token(client):
+    checks = unittest.TestCase()
+    headers = _auth_header()
+
+    create_response = client.post("/memory/create", json=_memory_payload(), headers=headers)
+    checks.assertEqual(create_response.status_code, 200)
+    checks.assertEqual(create_response.json()["status"], "created")
+
+    lifecycle_response = client.post("/memory/lifecycle/batch_process", headers=headers)
+    checks.assertEqual(lifecycle_response.status_code, 200)
+    checks.assertEqual(lifecycle_response.json()["status"], "completed")
+
+    compress_response = client.post("/memory/compress", headers=headers)
+    checks.assertEqual(compress_response.status_code, 200)
+    checks.assertEqual(compress_response.json()["status"], "completed")
+
+    export_response = client.get("/memory/export", headers=headers)
+    checks.assertEqual(export_response.status_code, 200)
+    checks.assertEqual(export_response.json()["status"], "exported")

@@ -7,13 +7,24 @@ caching, and API endpoints.
 Anchor: T1-QSS-TEST
 """
 
+import hashlib
+import hmac
+import os
+import time
+import unittest
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from modules.quantum_simulator import (
+from tests._slowapi_stub import install_slowapi_stub
+
+
+install_slowapi_stub()
+
+from modules.quantum_simulator import (  # noqa: E402
     MockQuantumProvider,
     OptimizationMethod,
     QuantumBackend,
@@ -28,7 +39,33 @@ from modules.quantum_simulator import (
     create_ghz_state,
     create_w_state,
 )
-from modules.quantum_simulator.api import router as quantum_simulator_router
+from modules.quantum_simulator.api import router as quantum_simulator_router  # noqa: E402
+
+
+def _auth_header():
+    session_id = "test-session"
+    timestamp = str(int(time.time()))
+    message = f"{session_id}.{timestamp}"
+    signature = hmac.new(
+        os.environ["CSRF_SECRET_KEY"].encode(),
+        message.encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    token = f"{session_id}.{timestamp}.{signature}"
+    return {"Authorization": f"Bearer {token}"}
+
+
+def _simulation_payload(name="API Test Simulation"):
+    return {
+        "scenario_type": "optimization",
+        "name": name,
+        "description": "Test simulation via API",
+        "backend": "mock",
+        "optimization_method": "qaoa",
+        "parameters": {"num_variables": 3, "max_iterations": 10},
+        "seed": 42,
+    }
+
 
 # ============================================================================
 # Quantum State Tests
@@ -519,8 +556,6 @@ def test_cache_clear():
 @pytest.fixture
 def test_client():
     """Create test client for API endpoints."""
-    from fastapi import FastAPI
-
     app = FastAPI()
     app.include_router(quantum_simulator_router)
     return TestClient(app)
@@ -549,17 +584,13 @@ def test_list_backends_endpoint(test_client):
 @pytest.mark.quantum
 def test_run_simulation_endpoint(test_client):
     """Test run simulation endpoint."""
-    payload = {
-        "scenario_type": "optimization",
-        "name": "API Test Simulation",
-        "description": "Test simulation via API",
-        "backend": "mock",
-        "optimization_method": "qaoa",
-        "parameters": {"num_variables": 3, "max_iterations": 10},
-        "seed": 42,
-    }
+    payload = _simulation_payload()
 
-    response = test_client.post("/simulate/scenario", json=payload)
+    response = test_client.post(
+        "/simulate/scenario",
+        json=payload,
+        headers=_auth_header(),
+    )
     assert response.status_code == 202
     data = response.json()
     assert "simulation_id" in data
@@ -571,16 +602,14 @@ def test_run_simulation_endpoint(test_client):
 def test_get_simulation_result_endpoint(test_client):
     """Test get simulation result endpoint."""
     # First create a simulation
-    payload = {
-        "scenario_type": "optimization",
-        "name": "Test for Retrieval",
-        "description": "Test retrieval",
-        "backend": "mock",
-        "parameters": {"num_variables": 2, "max_iterations": 5},
-        "seed": 42,
-    }
+    payload = _simulation_payload("Test for Retrieval")
+    payload["parameters"] = {"num_variables": 2, "max_iterations": 5}
 
-    create_response = test_client.post("/simulate/scenario", json=payload)
+    create_response = test_client.post(
+        "/simulate/scenario",
+        json=payload,
+        headers=_auth_header(),
+    )
     simulation_id = create_response.json()["simulation_id"]
 
     # Retrieve it
@@ -623,8 +652,40 @@ def test_forecast_endpoint_validation(test_client):
         "backend": "mock",
     }
 
-    response = test_client.post("/simulate/forecast", json=payload)
+    response = test_client.post(
+        "/simulate/forecast",
+        json=payload,
+        headers=_auth_header(),
+    )
     assert response.status_code == 400
+
+
+class TestQuantumSimulatorAPISecurity(unittest.TestCase):
+    """Mutation routes require CSRF bearer auth before simulator state changes."""
+
+    def setUp(self) -> None:
+        app = FastAPI()
+        app.include_router(quantum_simulator_router)
+        self.client = TestClient(app)
+
+    def test_mutation_routes_reject_missing_token(self) -> None:
+        unauthorized_requests = [
+            self.client.post("/simulate/scenario", json=_simulation_payload()),
+            self.client.post("/simulate/forecast", json=_simulation_payload()),
+            self.client.delete("/simulate/results/sim-missing"),
+            self.client.post("/simulate/cache/clear"),
+        ]
+
+        for response in unauthorized_requests:
+            self.assertIn(response.status_code, (401, 403))
+
+    def test_cache_clear_accepts_valid_token(self) -> None:
+        response = self.client.post(
+            "/simulate/cache/clear",
+            headers=_auth_header(),
+        )
+
+        self.assertEqual(response.status_code, 204)
 
 
 # ============================================================================

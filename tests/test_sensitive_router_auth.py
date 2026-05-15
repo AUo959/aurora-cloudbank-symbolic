@@ -1,58 +1,21 @@
 """Regression tests for authentication on sensitive mounted routers."""
 
 import unittest
-import importlib.util
-import sys
-import types
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from tests._slowapi_stub import install_slowapi_stub
 
-if "slowapi" not in sys.modules and importlib.util.find_spec("slowapi") is None:
-    slowapi_module = types.ModuleType("slowapi")
-    slowapi_util_module = types.ModuleType("slowapi.util")
 
-    class _Limiter:
-        def __init__(self, *args, **kwargs):
-            pass
+install_slowapi_stub()
 
-        def limit(self, *args, **kwargs):
-            def decorator(func):
-                return func
-
-            return decorator
-
-    slowapi_module.Limiter = _Limiter
-    slowapi_util_module.get_remote_address = lambda request: "test-client"
-    sys.modules["slowapi"] = slowapi_module
-    sys.modules["slowapi.util"] = slowapi_util_module
-
-if "slowapi" in sys.modules and "slowapi.errors" not in sys.modules:
-    slowapi_errors_module = types.ModuleType("slowapi.errors")
-    slowapi_middleware_module = types.ModuleType("slowapi.middleware")
-
-    class _RateLimitExceeded(Exception):
-        pass
-
-    class _SlowAPIMiddleware:
-        def __init__(self, app, *args, **kwargs):
-            self.app = app
-
-        async def __call__(self, scope, receive, send):
-            await self.app(scope, receive, send)
-
-    slowapi_errors_module.RateLimitExceeded = _RateLimitExceeded
-    slowapi_middleware_module.SlowAPIMiddleware = _SlowAPIMiddleware
-    sys.modules["slowapi.errors"] = slowapi_errors_module
-    sys.modules["slowapi.middleware"] = slowapi_middleware_module
-
-from api import r2_telemetry_routes
-from src.aurora.relays import api_routes as relay_api_routes
-from src.middleware.fastapi_security import generate_csrf_token
-from src.monitoring import dashboard_api
+from api import r2_telemetry_routes  # noqa: E402
+from src.aurora.relays import api_routes as relay_api_routes  # noqa: E402
+from src.middleware.fastapi_security import generate_csrf_token  # noqa: E402
+from src.monitoring import dashboard_api  # noqa: E402
 
 
 def _auth_header() -> dict[str, str]:

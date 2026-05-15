@@ -9,8 +9,10 @@ Anchor: T1-QSS-003
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
+
+from src.middleware.fastapi_security import require_csrf_token
 
 from .orchestrator import get_orchestrator
 from .scenario_cache import get_cache
@@ -19,12 +21,17 @@ from .schemas import ScenarioListItem, ScenarioRequest, ScenarioType, Simulation
 
 # Create router
 router = APIRouter(prefix="/simulate", tags=["quantum-simulator"])
+MUTATION_DEPENDENCIES = [Depends(require_csrf_token)]
 
 # WebSocket connections for progress tracking
 active_connections: Dict[str, List[WebSocket]] = {}
 
 
-@router.post("/scenario", response_model=SimulationResult, status_code=202)
+@router.post(
+    "/scenario",
+    status_code=202,
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def run_simulation(request: ScenarioRequest) -> SimulationResult:
     """
     Run quantum-classical hybrid simulation scenario.
@@ -154,7 +161,7 @@ async def get_simulation_status(simulation_id: str) -> SimulationStatus:
     # Check if result is cached
     cache = get_cache()
     result = cache.get(simulation_id)
-    
+
     if result:
         # Return completed status
         return SimulationStatus(
@@ -165,14 +172,18 @@ async def get_simulation_status(simulation_id: str) -> SimulationStatus:
             estimated_time_remaining=None,
             message=f"Simulation {result.status}"
         )
-    
+
     raise HTTPException(
         status_code=404,
         detail=f"Simulation {simulation_id} not found"
     )
 
 
-@router.delete("/results/{simulation_id}", status_code=204)
+@router.delete(
+    "/results/{simulation_id}",
+    status_code=204,
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def delete_simulation_result(simulation_id: str) -> None:
     """
     Delete cached simulation result.
@@ -193,7 +204,11 @@ async def delete_simulation_result(simulation_id: str) -> None:
         )
 
 
-@router.post("/forecast", response_model=SimulationResult, status_code=202)
+@router.post(
+    "/forecast",
+    status_code=202,
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def run_forecast(request: ScenarioRequest) -> SimulationResult:
     """
     Run quantum-enhanced forecasting simulation.
@@ -262,7 +277,11 @@ async def get_cache_stats() -> Dict:
     return cache.get_cache_stats()
 
 
-@router.post("/cache/clear", status_code=204)
+@router.post(
+    "/cache/clear",
+    status_code=204,
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def clear_cache(
     expired_only: bool = Query(False, description="Clear only expired entries")
 ) -> None:

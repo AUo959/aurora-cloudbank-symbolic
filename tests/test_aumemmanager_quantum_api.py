@@ -3,6 +3,7 @@ Quantum API tests for AuMemManager FastAPI router
 """
 
 import os
+import unittest
 
 import pytest
 from fastapi import FastAPI
@@ -122,6 +123,7 @@ def test_quantum_network_analysis(client):
 @pytest.mark.quantum
 @pytest.mark.security
 def test_quantum_mutation_routes_reject_missing_token(client):
+    checks = unittest.TestCase()
     requests = (
         (
             "/memory/quantum/create_vector",
@@ -146,4 +148,4 @@ def test_quantum_mutation_routes_reject_missing_token(client):
 
     for url, kwargs in requests:
         response = client.post(url, **kwargs)
-        assert response.status_code in (401, 403)
+        checks.assertIn(response.status_code, (401, 403))

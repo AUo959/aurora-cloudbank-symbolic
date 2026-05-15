@@ -3,6 +3,7 @@ API tests for AuMemManager FastAPI router
 """
 
 import os
+import unittest
 
 import pytest
 from fastapi import FastAPI
@@ -103,6 +104,7 @@ def test_create_and_retrieve_memory_flow(client):
 @pytest.mark.aurora
 @pytest.mark.security
 def test_sensitive_memory_routes_reject_missing_token(client):
+    checks = unittest.TestCase()
     requests = (
         ("post", "/memory/create", {"json": _memory_payload()}),
         ("post", "/memory/lifecycle/batch_process", {}),
@@ -112,27 +114,28 @@ def test_sensitive_memory_routes_reject_missing_token(client):
 
     for method, url, kwargs in requests:
         response = getattr(client, method)(url, **kwargs)
-        assert response.status_code in (401, 403)
+        checks.assertIn(response.status_code, (401, 403))
 
 
 @pytest.mark.api
 @pytest.mark.aurora
 @pytest.mark.security
 def test_sensitive_memory_routes_accept_valid_token(client):
+    checks = unittest.TestCase()
     headers = _auth_header()
 
     create_response = client.post("/memory/create", json=_memory_payload(), headers=headers)
-    assert create_response.status_code == 200
-    assert create_response.json()["status"] == "created"
+    checks.assertEqual(create_response.status_code, 200)
+    checks.assertEqual(create_response.json()["status"], "created")
 
     lifecycle_response = client.post("/memory/lifecycle/batch_process", headers=headers)
-    assert lifecycle_response.status_code == 200
-    assert lifecycle_response.json()["status"] == "completed"
+    checks.assertEqual(lifecycle_response.status_code, 200)
+    checks.assertEqual(lifecycle_response.json()["status"], "completed")
 
     compress_response = client.post("/memory/compress", headers=headers)
-    assert compress_response.status_code == 200
-    assert compress_response.json()["status"] == "completed"
+    checks.assertEqual(compress_response.status_code, 200)
+    checks.assertEqual(compress_response.json()["status"], "completed")
 
     export_response = client.get("/memory/export", headers=headers)
-    assert export_response.status_code == 200
-    assert export_response.json()["status"] == "exported"
+    checks.assertEqual(export_response.status_code, 200)
+    checks.assertEqual(export_response.json()["status"], "exported")

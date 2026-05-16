@@ -29,6 +29,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from modules.nexus.emergence.vector_binding import (
+    ECHOCHAIN_LINKS,
+    ECHOCHAIN_LOOPSET,
+    ETHICS_PROTOCOL,
+    LOCKPOINT_REFERENCE,
+    PHASE6_ANCHOR,
+    SEED_ANCHOR,
+    VECTOR_STATE,
+)
+
 __all__ = [
     "SymbolicObserver",
     "EntropyState",
@@ -38,9 +48,7 @@ __all__ = [
 ]
 
 
-PRIMARY_ANCHOR = "T6-EMERGENCE-2025"
-SEED_ANCHOR = "EOS_SEED_ORION"
-ETHICS_PROTOCOL = "Picard_Delta_3"
+PRIMARY_ANCHOR = PHASE6_ANCHOR
 DEFAULT_SNAPSHOT_INTERVAL = 5
 DEFAULT_SNAPSHOT_DIR = ".nexus/snapshots"
 
@@ -229,6 +237,10 @@ class EnhancedConsciousnessProtocol:
         self.anchor = anchor
         self.seed = SEED_ANCHOR
         self.ethics_protocol = ETHICS_PROTOCOL
+        self.vector_state = VECTOR_STATE
+        self.lockpoint_reference = LOCKPOINT_REFERENCE
+        self.echochain_loopset = ECHOCHAIN_LOOPSET
+        self.echochain_links = list(ECHOCHAIN_LINKS)
         self.observer = observer or _DefaultSymbolicObserver()
         self.snapshot_directory = Path(snapshot_directory or DEFAULT_SNAPSHOT_DIR)
         self.snapshot_directory.mkdir(parents=True, exist_ok=True)

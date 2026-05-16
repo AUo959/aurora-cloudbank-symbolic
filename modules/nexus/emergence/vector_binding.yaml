@@ -1,0 +1,25 @@
+contract_version: "1.0.0"
+phase_anchor: "T6-EMERGENCE-2025"
+seed_anchor: "EOS_SEED_ORION"
+ethics_protocol: "Picard_Delta_3"
+vector_state: "QEM-SN1-ACTIVE::BASELINE_V1"
+lockpoint_reference: "SN1_LOCKPOINT_20250406T1432Z"
+echochain:
+  loopset: "LOOPSET_001"
+  linked:
+    - "NESTED_001_ECHO"
+    - "DRIFTTRACE::REI"
+runtime_bindings:
+  phase6_protocol: "modules.nexus.emergence.consciousness_emergence_enhanced.EnhancedConsciousnessProtocol"
+  phase6_protocol_legacy: "modules.nexus.emergence.consciousness_emergence.ConsciousnessEmergenceProtocol"
+  scale_support: "modules.nexus.scale.distributed_consciousness.DistributedConsciousnessMesh"
+  protocol_archive: ".nexus/emergence/protocols/PROT-1758781014.405975.json"
+verification:
+  startup_assertion: "modules.nexus.emergence.vector_binding.startup_assert_phase6_vector_binding"
+  required_identifiers:
+    - "T6-EMERGENCE-2025"
+    - "QEM-SN1-ACTIVE::BASELINE_V1"
+    - "LOOPSET_001"
+    - "NESTED_001_ECHO"
+    - "DRIFTTRACE::REI"
+    - "SN1_LOCKPOINT_20250406T1432Z"

@@ -18,6 +18,7 @@ from src.agents.aurora_consciousness_agent import AuroraDecision, DecisionPriori
 from src.aurora_orchestrator.triplex_handshake import TriplexHandshakeValidator
 from src.core.event_system import Event, EventType, StationLocation
 from src.entities.framework_agents import get_axiomera
+from src.entities.relay_agents import get_archy
 
 
 def _assertions():
@@ -112,3 +113,46 @@ async def test_validator_routes_human_consent_recommendation_to_l1_oversight():
     assertions.assertTrue(result.l3_result["requires_human_approval"])
     assertions.assertEqual(result.l3_result["ethics"]["recommendation"], "REQUIRE_HUMAN_CONSENT")
     assertions.assertEqual(result.l1_result["approval"]["approval_mode"], "architecture_oversight")
+
+
+def test_validator_uses_real_archy_singleton_for_l2_feasibility():
+    """The L2 feasibility gate must use ARCHYEntity, not a local mock."""
+    validator = TriplexHandshakeValidator()
+    assertions = _assertions()
+
+    assertions.assertIs(validator.archy, get_archy())
+    assertions.assertIs(validator.l1_oversight, validator.archy)
+
+
+@pytest.mark.asyncio
+async def test_validator_blocks_infeasible_decision_at_l2_archy():
+    """ARCHYEntity feasibility rejection should block at L2."""
+    decision = AuroraDecision(
+        decision_id="triplex-l2-infeasible",
+        timestamp=datetime.utcnow().isoformat(),
+        priority=DecisionPriority.MEDIUM,
+        context={
+            "action": "bounded_maintenance_operation",
+            "continuity_load": 0.3,
+            "feasible": False,
+        },
+        action="perform bounded maintenance operation",
+        rationale="exercise L2 ARCHY feasibility rejection",
+        expected_outcomes=["L2 rejection"],
+        risk_assessment=0.1,
+        ethical_compliance=True,
+        requires_human_approval=False,
+    )
+
+    result = await TriplexHandshakeValidator().validate_decision(decision)
+    assertions = _assertions()
+
+    assertions.assertFalse(result.approved)
+    assertions.assertEqual(result.blocked_at_level, "L2")
+    assertions.assertEqual(result.reason, "Technical feasibility check failed")
+    assertions.assertFalse(result.l2_result["feasibility"]["approved"])
+    assertions.assertEqual(result.l2_result["feasibility"]["evaluator"], "ARCHY (RELAY_001)")
+    assertions.assertIn(
+        "Decision context marks operation infeasible",
+        result.l2_result["feasibility"]["constraints"],
+    )

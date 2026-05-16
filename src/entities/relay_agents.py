@@ -386,6 +386,69 @@ class ARCHYEntity:
             "l3_considered": l3_assessment is not None,
             "timestamp": utc_iso()
         }
+
+    async def verify_feasibility(
+        self,
+        decision: Any,
+        event: Optional[Event] = None,
+    ) -> Dict[str, Any]:
+        """
+        Verify L2 technical feasibility for a Triplex decision.
+
+        This is the production ARCHY contract used by the Triplex validator.
+        It keeps the older decision-level feasibility semantics while routing
+        the architecture checks through the real ARCHYEntity.
+        """
+        constraints = self._decision_feasibility_constraints(decision)
+        architecture_result, architecture_constraints = await self._architecture_feasibility_constraints(event)
+        constraints.extend(architecture_constraints)
+
+        feasible = not constraints
+
+        return {
+            "approved": feasible,
+            "feasible": feasible,
+            "constraints": constraints,
+            "capacity_available": feasible,
+            "evaluator": self.entity_id,
+            "architecture": architecture_result,
+            "timestamp": utc_iso(),
+        }
+
+    def _decision_feasibility_constraints(self, decision: Any) -> List[str]:
+        context = getattr(decision, "context", None) or {}
+        constraints = []
+
+        if not isinstance(context, dict):
+            constraints.append("Decision context must be a mapping")
+            context = {}
+
+        required_fields = ("decision_id", "action", "rationale", "expected_outcomes")
+        missing_fields = [field for field in required_fields if not getattr(decision, field, None)]
+        if missing_fields:
+            constraints.append(f"Decision missing required fields: {', '.join(missing_fields)}")
+
+        if context.get("feasible") is False:
+            constraints.append("Decision context marks operation infeasible")
+
+        return constraints
+
+    async def _architecture_feasibility_constraints(
+        self,
+        event: Optional[Event],
+    ) -> tuple[Optional[Dict[str, Any]], List[str]]:
+        if event is None:
+            return None, []
+
+        architecture_result = await self.evaluate_for_triplex(event)
+        constraints = []
+
+        if architecture_result["recommendation"] == "BLOCK":
+            constraints.append(architecture_result["reasoning"])
+        if not event.context_tag or not event.context_tag.startswith("decision_"):
+            constraints.append("Decision event missing valid DLP context tag")
+
+        return architecture_result, constraints
     
     def enforce_pattern(self, pattern_name: str, data: Dict[str, Any]) -> bool:
         """

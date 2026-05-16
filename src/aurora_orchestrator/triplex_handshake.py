@@ -64,43 +64,6 @@ class ValidationResult:
             self.timestamp = datetime.now().isoformat()
 
 
-class MockARCHY:
-    """
-    Mock ARCHY (Architecture Verifier) - Future: Real Entity
-
-    ARCHY verifies technical feasibility and architectural soundness.
-    """
-
-    def __init__(self):
-        self.logger = logging.getLogger('MockARCHY')
-
-    async def verify_feasibility(self, decision) -> Dict[str, Any]:
-        """
-        Verify technical feasibility.
-
-        Returns:
-            Dict with: approved (bool), feasible (bool), constraints (list)
-        """
-        # Check context for feasibility flag
-        context = decision.context or {}
-        # Placeholder await for async compliance
-        import asyncio
-        await asyncio.sleep(0)
-        feasible = context.get('feasible', True)
-
-        constraints = []
-        if not feasible:
-            constraints.append("Technical constraints not satisfied")
-
-        return {
-            'approved': feasible,
-            'feasible': feasible,
-            'constraints': constraints,
-            'capacity_available': True,
-            'evaluator': 'ARCHY'
-        }
-
-
 class TriplexHandshakeValidator:
     """
     Triplex Handshake Validation System
@@ -130,9 +93,9 @@ class TriplexHandshakeValidator:
         self.axiomera = get_axiomera()
         self.caelion = get_caelion()
         self.halo = get_halo()
-        self.archy = MockARCHY()
-        # ARCHYEntity provides L1 architecture-level oversight for critical decisions
-        self.l1_oversight = get_archy()
+        self.archy = get_archy()
+        # ARCHYEntity provides both L2 feasibility and L1 architecture-level oversight.
+        self.l1_oversight = self.archy
 
         self.logger.info(
             "🛡️ Triplex Handshake Validator initialized (real entity mode)"
@@ -350,8 +313,8 @@ class TriplexHandshakeValidator:
             'recommendation': raw_drift['recommendation'],
         }
 
-        # ARCHY feasibility verification (mock — not yet replaced)
-        feasibility_result = await self.archy.verify_feasibility(decision)
+        # ARCHY feasibility verification via real relay entity
+        feasibility_result = await self.archy.verify_feasibility(decision, event=event)
 
         # Both must approve
         approved = drift_result['approved'] and feasibility_result['approved']

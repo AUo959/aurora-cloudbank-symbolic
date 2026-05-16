@@ -5,12 +5,36 @@ import sys
 import types
 from typing import Any, Callable
 
+SLOWAPI_TEST_STUB_MARKER = "__aurora_test_stub__"
+
+
+def _real_slowapi_available() -> bool:
+    try:
+        return importlib.util.find_spec("slowapi") is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def assert_real_slowapi_loaded() -> None:
+    """Fail fast when a real SlowAPI integration test is accidentally using this stub."""
+    import slowapi  # type: ignore[import-not-found]
+
+    if getattr(slowapi, SLOWAPI_TEST_STUB_MARKER, False):
+        raise AssertionError("tests/_slowapi_stub.py is loaded; real SlowAPI coverage is not active")
+    if not getattr(slowapi, "__file__", None):
+        raise AssertionError("slowapi has no package file; real SlowAPI coverage is not active")
+
 
 def install_slowapi_stub() -> None:
     """Install minimal slowapi modules when the optional package is unavailable."""
-    if "slowapi" not in sys.modules and importlib.util.find_spec("slowapi") is None:
+    if _real_slowapi_available():
+        return
+
+    if "slowapi" not in sys.modules:
         slowapi_module = types.ModuleType("slowapi")
         slowapi_util_module = types.ModuleType("slowapi.util")
+        setattr(slowapi_module, SLOWAPI_TEST_STUB_MARKER, True)
+        setattr(slowapi_util_module, SLOWAPI_TEST_STUB_MARKER, True)
 
         class _Limiter:
             def __init__(self, *args: Any, **kwargs: Any):
@@ -37,6 +61,8 @@ def install_slowapi_stub() -> None:
     if "slowapi" in sys.modules and "slowapi.errors" not in sys.modules:
         slowapi_errors_module = types.ModuleType("slowapi.errors")
         slowapi_middleware_module = types.ModuleType("slowapi.middleware")
+        setattr(slowapi_errors_module, SLOWAPI_TEST_STUB_MARKER, True)
+        setattr(slowapi_middleware_module, SLOWAPI_TEST_STUB_MARKER, True)
 
         class _RateLimitExceeded(Exception):
             """Test stub for slowapi.errors.RateLimitExceeded."""

@@ -1,4 +1,35 @@
-# loom_governance_system.yaml
-# Aurora Reflective Autonomy System - Governance Configuration
-
-# ...existing code...
+system_identity:
+  symbolic_system: Aurora Reflective Autonomy System
+  phase_complete: 7
+  module_path: modules/reflective_autonomy
+  anchor_seed: EOS_SEED_ORION
+governance:
+  ethics_protocol: Picard_Delta_3
+  correction_mode: planned_not_silent
+  audit_required: true
+  canonical_registry: threadcore_registry.json
+resetcore:
+  command: RESETCORE
+  handler: modules.reflective_autonomy.loom_restore_script.run_resetcore
+  purpose: restore reflective autonomy governance, lint capsule state, and emit an audit receipt
+  sequence:
+    - load_governance_config
+    - initialize_capsule_linter
+    - initialize_autonomic_correction_engine
+    - run_reflective_autonomy_cycle
+    - write_audit_receipt
+modules:
+  capsule_linter: modules.reflective_autonomy.capsule_linter.CapsuleLinter
+  correction_engine: modules.reflective_autonomy.autonomic_correction_engine.AutonomicCorrectionEngine
+  autonomy_loop: modules.reflective_autonomy.reflective_autonomy_loop.ReflectiveAutonomyLoop
+  restore_handler: modules.reflective_autonomy.loom_restore_script.run_resetcore
+validation:
+  required_capsule_fields:
+    - anchor_seed
+    - ethics_protocol
+    - role
+  threadcore_anchor_seed: EOS_SEED_ORION
+  threadcore_ethics_protocol: Picard_Delta_3
+  max_symbolic_drift: 0.002
+audit_logging:
+  default_audit_log: .loom/reflect/autonomy_audit_log.txt

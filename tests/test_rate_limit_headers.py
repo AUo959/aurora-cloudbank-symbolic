@@ -8,9 +8,12 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from tests._slowapi_stub import assert_real_slowapi_loaded
 
 
 def build_isolated_app(limit_token_per_min: int = 2):
+    assert_real_slowapi_loaded()
+
     # Set env before importing router so decorator picks new value
     os.environ["RATE_LIMIT_AUTH_TOKEN_PER_MIN"] = str(limit_token_per_min)
     # Ensure limiter enabled & default strategy

@@ -11,7 +11,7 @@ Provides RESTful endpoints for component registry access:
 - GET /synergy/export - Export registry data
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
@@ -22,9 +22,11 @@ from src.synergy import (
     DependencyType,
     ComponentDependency
 )
+from src.middleware.fastapi_security import require_csrf_token
 
 
 router = APIRouter(prefix="/synergy", tags=["Synergy Dashboard"])
+MUTATION_DEPENDENCIES = [Depends(require_csrf_token)]
 
 
 # Pydantic models for API
@@ -92,28 +94,33 @@ async def list_components(
 ):
     """
     List all registered components
-    
+
     Returns list of components, optionally filtered by status.
     """
     registry = get_registry()
-    
+
     status_filter = None
     if status:
         status_filter = ComponentStatus(status.value)
-    
+
     components = registry.list_components(status=status_filter)
     return [comp.to_dict() for comp in components]
 
 
-@router.post("/components", response_model=ComponentResponse, status_code=201)
+@router.post(
+    "/components",
+    response_model=ComponentResponse,
+    status_code=201,
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def register_component(component: ComponentInput):
     """
     Register a new component in the registry
-    
+
     Creates or updates component registration with dependencies.
     """
     registry = get_registry()
-    
+
     # Convert input dependencies to ComponentDependency objects
     deps = [
         ComponentDependency(
@@ -124,7 +131,7 @@ async def register_component(component: ComponentInput):
         )
         for dep in component.dependencies
     ]
-    
+
     registered = registry.register_component(
         name=component.name,
         version=component.version,
@@ -136,7 +143,7 @@ async def register_component(component: ComponentInput):
         context_tag=component.context_tag,
         metadata=component.metadata
     )
-    
+
     return registered.to_dict()
 
 
@@ -144,35 +151,39 @@ async def register_component(component: ComponentInput):
 async def get_component(name: str):
     """
     Get details for a specific component
-    
+
     Returns component metadata including dependencies and status.
     """
     registry = get_registry()
     component = registry.get_component(name)
-    
+
     if component is None:
         raise HTTPException(status_code=404, detail=f"Component '{name}' not found")
-    
+
     return component.to_dict()
 
 
-@router.put("/components/{name}/status", response_model=Dict[str, Any])
+@router.put(
+    "/components/{name}/status",
+    response_model=Dict[str, Any],
+    dependencies=MUTATION_DEPENDENCIES,
+)
 async def update_component_status(name: str, status_update: StatusUpdateInput):
     """
     Update component health status
-    
+
     Updates the operational status of a registered component.
     """
     registry = get_registry()
-    
+
     success = registry.update_component_status(
         name,
         ComponentStatus(status_update.status.value)
     )
-    
+
     if not success:
         raise HTTPException(status_code=404, detail=f"Component '{name}' not found")
-    
+
     return {
         "component": name,
         "status": status_update.status.value,
@@ -187,18 +198,18 @@ async def get_dependencies(
 ):
     """
     Get dependencies for a component
-    
+
     Returns direct dependencies or full transitive dependency tree.
     """
     registry = get_registry()
-    
+
     component = registry.get_component(name)
     if component is None:
         raise HTTPException(status_code=404, detail=f"Component '{name}' not found")
-    
+
     deps = registry.get_dependencies(name, recursive=recursive)
     dependents = registry.get_dependents(name)
-    
+
     return {
         "component": name,
         "dependencies": list(deps),
@@ -211,12 +222,12 @@ async def get_dependencies(
 async def detect_conflicts():
     """
     Detect dependency conflicts in the registry
-    
+
     Identifies circular dependencies, missing dependencies, and version conflicts.
     """
     registry = get_registry()
     conflicts = registry.detect_conflicts()
-    
+
     return conflicts
 
 
@@ -224,15 +235,15 @@ async def detect_conflicts():
 async def export_registry(context_tag: Optional[str] = Query(None, description="DLP context tag")):
     """
     Export complete registry state
-    
+
     Returns all registry data for backup, analysis, or integration.
     """
     registry = get_registry()
     export_data = registry.export_registry()
-    
+
     if context_tag:
         export_data["context_tag"] = context_tag
-    
+
     return export_data
 
 
@@ -240,20 +251,20 @@ async def export_registry(context_tag: Optional[str] = Query(None, description="
 async def registry_health():
     """
     Get registry health status
-    
+
     Returns metrics about registry state and component health distribution.
     """
     registry = get_registry()
-    
+
     all_components = registry.list_components()
     status_counts = {}
-    
+
     for component in all_components:
         status_val = component.status.value
         status_counts[status_val] = status_counts.get(status_val, 0) + 1
-    
+
     conflicts = registry.detect_conflicts()
-    
+
     return {
         "total_components": len(all_components),
         "status_distribution": status_counts,

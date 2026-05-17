@@ -475,6 +475,7 @@ except ImportError:
 
 ```python
 import pytest
+import os
 from fastapi.testclient import TestClient
 
 def test_protected_route_with_auth(client: TestClient):
@@ -482,7 +483,10 @@ def test_protected_route_with_auth(client: TestClient):
     # Login first
     response = client.post(
         "/api/auth/token",
-        data={"username": "admin", "password": "admin123"}
+        data={
+            "username": os.environ["AURORA_TEST_ADMIN_USERNAME"],
+            "password": os.environ["AURORA_TEST_ADMIN_PASSWORD"],
+        },
     )
     token = response.json()["access_token"]
     
@@ -508,7 +512,10 @@ def test_admin_route_with_observer(client: TestClient):
     # Login as observer
     response = client.post(
         "/api/auth/token",
-        data={"username": "observer", "password": "observer123"}
+        data={
+            "username": os.environ["AURORA_TEST_OBSERVER_USERNAME"],
+            "password": os.environ["AURORA_TEST_OBSERVER_PASSWORD"],
+        },
     )
     token = response.json()["access_token"]
     

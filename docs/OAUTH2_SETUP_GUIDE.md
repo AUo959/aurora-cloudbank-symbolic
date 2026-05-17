@@ -55,10 +55,10 @@ python api/aurora_api.py
 ### 3. Test Authentication
 
 ```bash
-# Login as admin
+# Login as a configured admin user
 curl -X POST "http://localhost:8000/api/auth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=admin&password=admin123"
+  -d "username=${AURORA_ADMIN_USERNAME}&password=${AURORA_ADMIN_PASSWORD}"
 
 # Response:
 {
@@ -141,15 +141,16 @@ Aurora CloudBank defines three roles with hierarchical permissions:
 
 **Example Users:** System administrators, DevOps team
 
-### Default Demo Users
+### Auth User Store
 
-The system includes three demo users for testing (⚠️ **Change passwords in production!**):
+The mounted auth router does not ship default passwords. Configure users with
+`AURORA_AUTH_USERS_JSON` or `AURORA_AUTH_USERS_FILE`; each user must provide a
+`password_hash`/`hashed_password` value or a `password_env` reference to a
+secret environment variable.
 
-| Username | Password | Role | Email |
-|----------|----------|------|-------|
-| `admin` | `admin123` | Admin | admin@aurora.local |
-| `operator` | `operator123` | Relay Operator | operator@aurora.local |
-| `observer` | `observer123` | Observer | observer@aurora.local |
+Dev/test fixture users are available only when
+`AURORA_ALLOW_DEV_AUTH_FIXTURE=true` and the corresponding
+`AURORA_DEV_*_PASSWORD` variables are set.
 
 ## API Endpoints
 
@@ -165,7 +166,7 @@ Login and obtain access and refresh tokens.
 ```bash
 curl -X POST "http://localhost:8000/api/auth/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=admin&password=admin123"
+  -d "username=${AURORA_ADMIN_USERNAME}&password=${AURORA_ADMIN_PASSWORD}"
 ```
 
 **Response:**

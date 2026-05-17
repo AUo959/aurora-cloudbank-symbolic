@@ -67,10 +67,12 @@ Successfully implemented a comprehensive RBAC and OAuth2 authentication system w
   - `GET /api/auth/me/permissions` - User permissions
   - `POST /api/auth/logout` - Logout (client-side)
 
-- **Demo Users:** (⚠️ **Change passwords in production!**)
-  - `admin:admin123` - Admin role
-  - `operator:operator123` - Relay Operator role
-  - `observer:observer123` - Observer role
+- **User Store:**
+  - Production auth users must be provided through `AURORA_AUTH_USERS_JSON`
+    or `AURORA_AUTH_USERS_FILE` with password hashes.
+  - Dev/test fixture users require `AURORA_ALLOW_DEV_AUTH_FIXTURE=true` and
+    password values supplied through `AURORA_DEV_*_PASSWORD` environment
+    variables.
 
 ### Configuration
 

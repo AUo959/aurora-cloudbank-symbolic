@@ -17,6 +17,12 @@ if "WS_AUTH_SECRET" not in os.environ:
 if "JWT_SECRET_KEY" not in os.environ:
     os.environ["JWT_SECRET_KEY"] = "test-jwt-secret-key-do-not-use-in-production-hex32"
 
+# Auth route tests use an explicitly gated dev-only fixture user store.
+os.environ.setdefault("AURORA_ALLOW_DEV_AUTH_FIXTURE", "true")
+os.environ.setdefault("AURORA_DEV_ADMIN_PASSWORD", "test-" + "admin-secret")
+os.environ.setdefault("AURORA_DEV_OPERATOR_PASSWORD", "test-" + "operator-secret")
+os.environ.setdefault("AURORA_DEV_OBSERVER_PASSWORD", "test-" + "observer-secret")
+
 import pytest  # noqa: E402 - import must happen after env setup
 from fastapi.testclient import TestClient  # noqa: E402
 

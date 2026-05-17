@@ -10,10 +10,10 @@ Anchor: T1-RSD-002
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
-from src.middleware.fastapi_security import verify_ws_token
+from src.middleware.fastapi_security import require_csrf_token, verify_ws_token
 
 from .alert_manager import AlertSeverity
 from .monitoring_engine import MonitoringEngine
@@ -125,6 +125,7 @@ def get_monitoring_engine() -> MonitoringEngine:
 
 # Create API router
 router = APIRouter(prefix="/sentinel", tags=["monitoring", "resilience"])
+SENTINEL_MUTATION_DEPENDENCIES = [Depends(require_csrf_token)]
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -264,7 +265,7 @@ async def get_alerts(
     }
 
 
-@router.post("/alerts/acknowledge")
+@router.post("/alerts/acknowledge", dependencies=SENTINEL_MUTATION_DEPENDENCIES)
 async def acknowledge_alert(request: AlertAckRequest):
     """
     Acknowledge an alert.
@@ -284,7 +285,7 @@ async def acknowledge_alert(request: AlertAckRequest):
     return {"success": True, "message": f"Alert {request.alert_id} acknowledged"}
 
 
-@router.post("/alerts/resolve")
+@router.post("/alerts/resolve", dependencies=SENTINEL_MUTATION_DEPENDENCIES)
 async def resolve_alert(request: AlertAckRequest):
     """
     Resolve an alert.
@@ -312,7 +313,7 @@ async def get_alert_rules():
     return [rule.to_dict() for rule in rules]
 
 
-@router.post("/alerts/rules")
+@router.post("/alerts/rules", dependencies=SENTINEL_MUTATION_DEPENDENCIES)
 async def create_alert_rule(rule_request: AlertRuleRequest):
     """
     Create a new alert rule.
@@ -351,7 +352,7 @@ async def create_alert_rule(rule_request: AlertRuleRequest):
     return {"success": True, "rule": rule.to_dict()}
 
 
-@router.delete("/alerts/rules/{rule_name}")
+@router.delete("/alerts/rules/{rule_name}", dependencies=SENTINEL_MUTATION_DEPENDENCIES)
 async def delete_alert_rule(rule_name: str):
     """Delete an alert rule."""
     engine = get_monitoring_engine()

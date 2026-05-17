@@ -13,10 +13,13 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
+from src.middleware.fastapi_security import verify_ws_token
+
 from .alert_manager import AlertSeverity
 from .monitoring_engine import MonitoringEngine
 
 # Pydantic models for API requests/responses
+
 
 class MetricResponse(BaseModel):
     """Single metric response."""
@@ -470,6 +473,26 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+def _extract_websocket_token(websocket: WebSocket) -> Optional[str]:
+    token = websocket.query_params.get("token")
+    if token:
+        return token
+
+    authorization = websocket.headers.get("authorization")
+    if authorization and authorization.lower().startswith("bearer "):
+        return authorization.split(" ", 1)[1].strip()
+    return None
+
+
+async def _authorize_metrics_websocket(websocket: WebSocket) -> Optional[str]:
+    token = _extract_websocket_token(websocket)
+    client_id = verify_ws_token(token) if token else None
+    if not client_id:
+        await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
+        return None
+    return client_id
+
+
 @router.websocket("/ws/metrics")
 async def websocket_metrics(websocket: WebSocket):
     """
@@ -483,6 +506,10 @@ async def websocket_metrics(websocket: WebSocket):
         - Every 60s: Sends updated dashboard data
         - On new alert: Sends alert notification
     """
+    client_id = await _authorize_metrics_websocket(websocket)
+    if not client_id:
+        return
+
     engine = get_monitoring_engine()
     await manager.connect(websocket)
 

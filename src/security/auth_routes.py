@@ -5,8 +5,11 @@ Provides OAuth2 authentication endpoints for token management.
 """
 
 from datetime import timedelta
+import json
+import os
+from pathlib import Path
 import time
-from typing import Dict
+from typing import Any, Dict, Mapping, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -20,7 +23,6 @@ from src.security.oauth2 import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
 from src.middleware.fastapi_security import limiter
-import os
 from src.security.roles import Role, get_all_permissions
 
 # Ensure fresh rate limiter storage for isolated test app constructions.
@@ -43,34 +45,127 @@ router = APIRouter(
 )
 
 
-# In-memory user database for demonstration
-# In production, replace with actual database
-USERS_DB: Dict[str, UserInDB] = {
-    "admin": UserInDB(
-        username="admin",
-        email="admin@aurora.local",
-        full_name="System Administrator",
-        role=Role.ADMIN,
-        hashed_password=OAuth2Handler.get_password_hash("admin123"),  # Change in production!
-        disabled=False,
-    ),
-    "operator": UserInDB(
-        username="operator",
-        email="operator@aurora.local",
-        full_name="Relay Operator",
-        role=Role.RELAY_OPERATOR,
-        hashed_password=OAuth2Handler.get_password_hash("operator123"),  # Change in production!
-        disabled=False,
-    ),
-    "observer": UserInDB(
-        username="observer",
-        email="observer@aurora.local",
-        full_name="System Observer",
-        role=Role.OBSERVER,
-        hashed_password=OAuth2Handler.get_password_hash("observer123"),  # Change in production!
-        disabled=False,
-    ),
+AUTH_USERS_JSON_ENV = "AURORA_AUTH_USERS_JSON"
+AUTH_USERS_FILE_ENV = "AURORA_AUTH_USERS_FILE"
+ALLOW_DEV_AUTH_FIXTURE_ENV = "AURORA_ALLOW_DEV_AUTH_FIXTURE"
+
+DEV_AUTH_FIXTURE_USERS: Dict[str, Dict[str, str]] = {
+    "admin": {
+        "email": "admin@aurora.local",
+        "full_name": "System Administrator",
+        "role": Role.ADMIN.value,
+        "password_env": "AURORA_DEV_ADMIN_PASSWORD",
+    },
+    "operator": {
+        "email": "operator@aurora.local",
+        "full_name": "Relay Operator",
+        "role": Role.RELAY_OPERATOR.value,
+        "password_env": "AURORA_DEV_OPERATOR_PASSWORD",
+    },
+    "observer": {
+        "email": "observer@aurora.local",
+        "full_name": "System Observer",
+        "role": Role.OBSERVER.value,
+        "password_env": "AURORA_DEV_OBSERVER_PASSWORD",
+    },
 }
+
+
+def build_auth_users_db(env: Optional[Mapping[str, str]] = None) -> Dict[str, UserInDB]:
+    """Build the mounted auth user database from explicit configuration."""
+    env_map = env if env is not None else os.environ
+    configured_payload = _load_auth_users_payload(env_map)
+    if configured_payload:
+        return _build_users_from_payload(configured_payload, env_map)
+
+    if _truthy(env_map.get(ALLOW_DEV_AUTH_FIXTURE_ENV)):
+        return _build_users_from_payload(DEV_AUTH_FIXTURE_USERS, env_map)
+
+    raise RuntimeError(
+        "AURORA auth users are not configured. Set AURORA_AUTH_USERS_JSON or "
+        "AURORA_AUTH_USERS_FILE with user password hashes, or explicitly set "
+        "AURORA_ALLOW_DEV_AUTH_FIXTURE=true in dev/test with AURORA_DEV_*_PASSWORD secrets."
+    )
+
+
+def _load_auth_users_payload(env: Mapping[str, str]) -> Dict[str, Mapping[str, Any]]:
+    raw_payload = env.get(AUTH_USERS_JSON_ENV)
+    payload_file = env.get(AUTH_USERS_FILE_ENV)
+    if raw_payload and payload_file:
+        raise RuntimeError("Set only one of AURORA_AUTH_USERS_JSON or AURORA_AUTH_USERS_FILE.")
+    if payload_file:
+        raw_payload = Path(payload_file).read_text(encoding="utf-8")
+    if not raw_payload:
+        return {}
+    try:
+        payload = json.loads(raw_payload)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Invalid auth user JSON: {exc}") from exc
+    return _normalise_user_payload(payload)
+
+
+def _normalise_user_payload(payload: Any) -> Dict[str, Mapping[str, Any]]:
+    if isinstance(payload, Mapping):
+        return {str(username): record for username, record in payload.items() if isinstance(record, Mapping)}
+    if isinstance(payload, list):
+        users: Dict[str, Mapping[str, Any]] = {}
+        for record in payload:
+            if not isinstance(record, Mapping):
+                raise RuntimeError("Auth user list entries must be objects.")
+            username = record.get("username")
+            if not username:
+                raise RuntimeError("Auth user list entries must include username.")
+            users[str(username)] = record
+        return users
+    raise RuntimeError("Auth user configuration must be a JSON object or list.")
+
+
+def _build_users_from_payload(
+    payload: Mapping[str, Mapping[str, Any]], env: Mapping[str, str]
+) -> Dict[str, UserInDB]:
+    if not payload:
+        raise RuntimeError("Auth user configuration did not contain any users.")
+
+    users: Dict[str, UserInDB] = {}
+    for username, record in payload.items():
+        role = _coerce_role(str(record.get("role", Role.OBSERVER.value)), username)
+        users[username] = UserInDB(
+            username=username,
+            email=record.get("email"),
+            full_name=record.get("full_name"),
+            role=role,
+            hashed_password=_resolve_password_hash(username, record, env),
+            disabled=bool(record.get("disabled", False)),
+        )
+    return users
+
+
+def _resolve_password_hash(username: str, record: Mapping[str, Any], env: Mapping[str, str]) -> str:
+    configured_hash = record.get("password_hash") or record.get("hashed_password")
+    if configured_hash:
+        return str(configured_hash)
+
+    password_env = record.get("password_env")
+    if not password_env:
+        raise RuntimeError(f"Auth user {username!r} must define password_hash or password_env.")
+    password = env.get(str(password_env))
+    if not password:
+        raise RuntimeError(f"Auth user {username!r} password env {password_env!r} is not set.")
+    return OAuth2Handler.get_password_hash(password)
+
+
+def _coerce_role(raw_role: str, username: str) -> Role:
+    try:
+        return Role(raw_role)
+    except ValueError as exc:
+        raise RuntimeError(f"Auth user {username!r} has invalid role {raw_role!r}.") from exc
+
+
+def _truthy(value: Optional[str]) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+USERS_DB = build_auth_users_db()
 
 
 # Rate limit configuration:

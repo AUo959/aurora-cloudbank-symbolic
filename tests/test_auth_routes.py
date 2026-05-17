@@ -1,18 +1,15 @@
-"""
-Integration tests for authentication API routes.
+"""Integration tests for authentication API routes."""
 
-Tests OAuth2 endpoints and authentication flow.
-
-Note: Test credentials are intentionally hardcoded for testing purposes only.
-These are not production credentials and are safe for test environments.
-SonarCloud security hotspots are acknowledged and accepted.
-"""
+import json
+import os
+from unittest import TestCase
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.security.auth_routes import router
+from src.security.auth_routes import build_auth_users_db, router
+from src.security.oauth2 import OAuth2Handler
 from slowapi.middleware import SlowAPIMiddleware
 from src.middleware.fastapi_security import limiter
 
@@ -34,12 +31,71 @@ def client(app):
     return TestClient(app)
 
 
+def auth_data(username):
+    """Return dev-fixture credentials from the explicit test environment."""
+    return {
+        "username": username,
+        "password": os.environ[f"AURORA_DEV_{username.upper()}_PASSWORD"],
+    }
+
+
+class TestAuthUserStoreConfiguration(TestCase):
+    """Validate production and dev/test auth user-store configuration."""
+
+    def test_production_startup_requires_configured_users(self):
+        """Mounted auth must not silently ship default credentials."""
+        with pytest.raises(RuntimeError, match="auth users are not configured"):
+            build_auth_users_db({})
+
+    def test_configured_user_store_accepts_password_hashes(self):
+        """Production-style configuration should use supplied password hashes."""
+        password_hash = OAuth2Handler.get_password_hash("configured-secret")
+        payload = {
+            "configured": {
+                "email": "configured@aurora.local",
+                "full_name": "Configured User",
+                "role": "observer",
+                "password_hash": password_hash,
+            }
+        }
+
+        users = build_auth_users_db({"AURORA_AUTH_USERS_JSON": json.dumps(payload)})
+
+        self.assertEqual(users["configured"].email, "configured@aurora.local")
+        self.assertIsNotNone(OAuth2Handler.authenticate_user("configured", "configured-secret", users))
+        self.assertIsNone(OAuth2Handler.authenticate_user("configured", "wrong-secret", users))
+
+    def test_dev_fixture_requires_explicit_gate_and_password_secrets(self):
+        """Dev/test fixture users require both the gate and password env values."""
+        with pytest.raises(RuntimeError, match="AURORA_DEV_ADMIN_PASSWORD"):
+            build_auth_users_db({"AURORA_ALLOW_DEV_AUTH_FIXTURE": "true"})
+
+        users = build_auth_users_db(
+            {
+                "AURORA_ALLOW_DEV_AUTH_FIXTURE": "true",
+                "AURORA_DEV_ADMIN_PASSWORD": os.environ["AURORA_DEV_ADMIN_PASSWORD"],
+                "AURORA_DEV_OPERATOR_PASSWORD": os.environ["AURORA_DEV_OPERATOR_PASSWORD"],
+                "AURORA_DEV_OBSERVER_PASSWORD": os.environ["AURORA_DEV_OBSERVER_PASSWORD"],
+            }
+        )
+
+        self.assertIsNotNone(
+            OAuth2Handler.authenticate_user("admin", os.environ["AURORA_DEV_ADMIN_PASSWORD"], users)
+        )
+        self.assertIsNotNone(
+            OAuth2Handler.authenticate_user("operator", os.environ["AURORA_DEV_OPERATOR_PASSWORD"], users)
+        )
+        self.assertIsNotNone(
+            OAuth2Handler.authenticate_user("observer", os.environ["AURORA_DEV_OBSERVER_PASSWORD"], users)
+        )
+
+
 class TestLoginEndpoint:
     """Test the /api/auth/token endpoint."""
 
     def test_login_success_admin(self, client):
         """Test successful login with admin credentials."""
-        response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        response = client.post("/api/auth/token", data=auth_data("admin"))
 
         assert response.status_code == 200
         data = response.json()
@@ -51,7 +107,7 @@ class TestLoginEndpoint:
 
     def test_login_success_operator(self, client):
         """Test successful login with operator credentials."""
-        response = client.post("/api/auth/token", data={"username": "operator", "password": "operator123"})
+        response = client.post("/api/auth/token", data=auth_data("operator"))
 
         assert response.status_code == 200
         data = response.json()
@@ -59,7 +115,7 @@ class TestLoginEndpoint:
 
     def test_login_success_observer(self, client):
         """Test successful login with observer credentials."""
-        response = client.post("/api/auth/token", data={"username": "observer", "password": "observer123"})
+        response = client.post("/api/auth/token", data=auth_data("observer"))
 
         assert response.status_code == 200
         data = response.json()
@@ -91,7 +147,7 @@ class TestUserInfoEndpoint:
     def test_get_user_info_authenticated(self, client):
         """Test getting user info with valid token."""
         # Login first
-        login_response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        login_response = client.post("/api/auth/token", data=auth_data("admin"))
         token = login_response.json()["access_token"]
 
         # Get user info
@@ -121,7 +177,7 @@ class TestPermissionsEndpoint:
     def test_get_permissions_admin(self, client):
         """Test getting permissions for admin user."""
         # Login as admin
-        login_response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        login_response = client.post("/api/auth/token", data=auth_data("admin"))
         token = login_response.json()["access_token"]
 
         # Get permissions
@@ -139,7 +195,7 @@ class TestPermissionsEndpoint:
     def test_get_permissions_observer(self, client):
         """Test getting permissions for observer user."""
         # Login as observer
-        login_response = client.post("/api/auth/token", data={"username": "observer", "password": "observer123"})
+        login_response = client.post("/api/auth/token", data=auth_data("observer"))
         token = login_response.json()["access_token"]
 
         # Get permissions
@@ -156,7 +212,7 @@ class TestPermissionsEndpoint:
     def test_get_permissions_operator(self, client):
         """Test getting permissions for operator user."""
         # Login as operator
-        login_response = client.post("/api/auth/token", data={"username": "operator", "password": "operator123"})
+        login_response = client.post("/api/auth/token", data=auth_data("operator"))
         token = login_response.json()["access_token"]
 
         # Get permissions
@@ -177,7 +233,7 @@ class TestRefreshTokenEndpoint:
     def test_refresh_token_success(self, client):
         """Test refreshing a valid token."""
         # Login first
-        login_response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        login_response = client.post("/api/auth/token", data=auth_data("admin"))
         refresh_token = login_response.json()["refresh_token"]
 
         # Refresh the token
@@ -197,7 +253,7 @@ class TestRefreshTokenEndpoint:
     def test_refresh_with_access_token(self, client):
         """Test that access token cannot be used for refresh."""
         # Login first
-        login_response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        login_response = client.post("/api/auth/token", data=auth_data("admin"))
         access_token = login_response.json()["access_token"]
 
         # Try to use access token for refresh (should fail)
@@ -213,7 +269,7 @@ class TestLogoutEndpoint:
     def test_logout_success(self, client):
         """Test successful logout."""
         # Login first
-        login_response = client.post("/api/auth/token", data={"username": "admin", "password": "admin123"})
+        login_response = client.post("/api/auth/token", data=auth_data("admin"))
         token = login_response.json()["access_token"]
 
         # Logout
@@ -237,7 +293,7 @@ class TestAuthenticationFlow:
     def test_full_auth_flow(self, client):
         """Test complete authentication flow: login -> get info -> logout."""
         # Step 1: Login
-        login_response = client.post("/api/auth/token", data={"username": "operator", "password": "operator123"})
+        login_response = client.post("/api/auth/token", data=auth_data("operator"))
         assert login_response.status_code == 200
         token = login_response.json()["access_token"]
 
@@ -272,7 +328,7 @@ class TestRateLimiting:
         for i in range(11):
             response = isolated_client.post(
                 "/api/auth/token",
-                data={"username": "admin", "password": "admin123"}
+                data=auth_data("admin"),
             )
             if response.status_code == 200:
                 success_count += 1

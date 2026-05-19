@@ -116,6 +116,11 @@ keyring/
 # Automation audit reports (local analysis)
 automation_audit_report.json
 
+# SSMT maintenance scheduler local state
+weekly_schedule.json
+ssmt_maintenance_config.json
+maintenance_report_*.json
+
 # Node.js dependencies and artifacts
 node_modules/
 npm-debug.log*

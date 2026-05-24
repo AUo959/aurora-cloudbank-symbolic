@@ -18,9 +18,9 @@ from pathlib import Path
 class WeeklyAutomationScheduler:
     """Manages weekly automated maintenance tasks"""
     
-    def __init__(self, repo_path="/workspaces/aurora-cloudbank-symbolic"):
-        self.repo_path = repo_path
-        self.schedule_file = Path(repo_path) / "weekly_schedule.json"
+    def __init__(self, repo_path=None):
+        self.repo_path = Path(repo_path) if repo_path else Path(__file__).resolve().parents[1]
+        self.schedule_file = self.repo_path / "weekly_schedule.json"
         self.load_schedule()
     
     def load_schedule(self):

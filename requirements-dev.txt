@@ -15,7 +15,7 @@ coverage>=7.10.7                    # Coverage measurement
 black>=25.11.0                       # Code formatting
 flake8>=6.1.0                       # Linting
 isort>=5.12.0                       # Import sorting
-mypy>=1.7.0                         # Static type checking
+mypy>=2.1.0                         # Static type checking
 
 # ===================================================================
 # SECURITY SCANNING & VALIDATION

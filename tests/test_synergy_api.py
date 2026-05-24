@@ -27,7 +27,7 @@ def _auth_headers():
 
 def _csrf_only_headers():
     token = generate_csrf_token("synergy-test-session")
-    return {"Authorization": f"Bearer {token}"}
+    return {"X-CSRF-Token": token}
 
 
 class AuthorizedMutationTestClient(TestClient):

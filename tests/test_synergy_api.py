@@ -11,9 +11,21 @@ from fastapi import FastAPI
 from src.synergy.api import router
 from src.synergy import reset_registry
 from src.middleware.fastapi_security import generate_csrf_token
+from src.security.oauth2 import OAuth2Handler
 
 
 def _auth_headers():
+    access_token = OAuth2Handler.create_access_token(
+        {"sub": "synergy-test-user", "role": "admin"}
+    )
+    token = generate_csrf_token("synergy-test-session")
+    return {
+        "Authorization": f"Bearer {access_token}",
+        "X-CSRF-Token": token,
+    }
+
+
+def _csrf_only_headers():
     token = generate_csrf_token("synergy-test-session")
     return {"Authorization": f"Bearer {token}"}
 
@@ -96,6 +108,30 @@ def test_register_component_requires_auth_before_mutation(unauthenticated_client
     checks.assertIn(response.status_code, (401, 403))
     checks.assertEqual(
         unauthenticated_client.get("/synergy/components/blocked-component").status_code,
+        404,
+    )
+
+
+@pytest.mark.api
+@pytest.mark.synergy
+def test_register_component_rejects_csrf_without_user_auth(unauthenticated_client):
+    """A valid CSRF token alone cannot authorize registry writes."""
+    checks = unittest.TestCase()
+    component_data = {
+        "name": "csrf-only-component",
+        "version": "1.0.0",
+        "description": "Should not register"
+    }
+
+    response = unauthenticated_client.post(
+        "/synergy/components",
+        json=component_data,
+        headers=_csrf_only_headers(),
+    )
+
+    checks.assertIn(response.status_code, (401, 403))
+    checks.assertEqual(
+        unauthenticated_client.get("/synergy/components/csrf-only-component").status_code,
         404,
     )
 
@@ -200,6 +236,32 @@ def test_update_component_status_requires_auth_before_mutation(unauthenticated_c
 
     checks.assertIn(response.status_code, (401, 403))
     get_response = unauthenticated_client.get("/synergy/components/changeable")
+    checks.assertEqual(get_response.json()["status"], "active")
+
+
+@pytest.mark.api
+@pytest.mark.synergy
+def test_update_component_status_rejects_csrf_without_user_auth(unauthenticated_client):
+    """A valid CSRF token alone cannot authorize status mutation."""
+    checks = unittest.TestCase()
+    unauthenticated_client.post(
+        "/synergy/components",
+        json={
+            "name": "csrf-only-changeable",
+            "version": "1.0.0",
+            "description": "Status should stay active"
+        },
+        headers=_auth_headers(),
+    )
+
+    response = unauthenticated_client.put(
+        "/synergy/components/csrf-only-changeable/status",
+        json={"status": "degraded"},
+        headers=_csrf_only_headers(),
+    )
+
+    checks.assertIn(response.status_code, (401, 403))
+    get_response = unauthenticated_client.get("/synergy/components/csrf-only-changeable")
     checks.assertEqual(get_response.json()["status"], "active")
 
 

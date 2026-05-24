@@ -11,7 +11,8 @@ Provides RESTful endpoints for component registry access:
 - GET /synergy/export - Export registry data
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
@@ -22,11 +23,27 @@ from src.synergy import (
     DependencyType,
     ComponentDependency
 )
-from src.middleware.fastapi_security import require_csrf_token
+from src.middleware.fastapi_security import verify_csrf_token
+from src.security.oauth2 import User, get_current_active_user
 
 
 router = APIRouter(prefix="/synergy", tags=["Synergy Dashboard"])
-MUTATION_DEPENDENCIES = [Depends(require_csrf_token)]
+
+
+def require_synergy_mutation_auth(
+    csrf_token: Optional[str] = Header(None, alias="X-CSRF-Token"),
+    current_user: User = Depends(get_current_active_user),
+) -> User:
+    """Require both JWT authentication and a separate CSRF token for writes."""
+    if not csrf_token:
+        raise HTTPException(status_code=403, detail="Missing CSRF token")
+    verify_csrf_token(
+        HTTPAuthorizationCredentials(scheme="Bearer", credentials=csrf_token)
+    )
+    return current_user
+
+
+MUTATION_DEPENDENCIES = [Depends(require_synergy_mutation_auth)]
 
 
 # Pydantic models for API

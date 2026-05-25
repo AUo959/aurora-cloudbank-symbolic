@@ -42,7 +42,7 @@ watchfiles>=1.1.0                   # File watching for auto-reload
 mkdocs>=1.5.0                       # Documentation generator
 mkdocs-material>=9.7.6              # Material theme for MkDocs
 rich>=14.1.0                        # Rich terminal formatting
-Pygments>=2.19.2                    # Syntax highlighting
+Pygments>=2.20.0                    # Syntax highlighting
 markdown-it-py>=4.0.0               # Markdown parser
 
 # ===================================================================

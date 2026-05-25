@@ -9,9 +9,10 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from src.middleware.exception_handler import processing_handler, integration_handler
+from src.middleware.fastapi_security import require_csrf_token
 
 from src.coordination.event_models import (
     ConflictReport,
@@ -82,7 +83,7 @@ class ConflictResolutionRequest(BaseModel):
 
 
 # Event Publishing Endpoints
-@router.post("/events/publish")
+@router.post("/events/publish", dependencies=[Depends(require_csrf_token)])
 async def publish_event(request: PublishEventRequest) -> Dict[str, Any]:
     """
     Publish event to coordination registry
@@ -132,7 +133,7 @@ async def publish_event(request: PublishEventRequest) -> Dict[str, Any]:
 
 
 # Subscription Endpoints
-@router.post("/subscriptions/subscribe")
+@router.post("/subscriptions/subscribe", dependencies=[Depends(require_csrf_token)])
 async def subscribe_to_events(request: SubscribeRequest) -> Dict[str, Any]:
     """
     Subscribe to events matching filter criteria
@@ -173,7 +174,7 @@ async def subscribe_to_events(request: SubscribeRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Subscription failed")
 
 
-@router.delete("/subscriptions/{subscription_id}")
+@router.delete("/subscriptions/{subscription_id}", dependencies=[Depends(require_csrf_token)])
 async def unsubscribe_from_events(subscription_id: str) -> Dict[str, Any]:
     """
     Unsubscribe from events
@@ -273,7 +274,7 @@ async def replay_events(
 
 
 # Conflict Detection and Resolution
-@router.post("/conflicts/detect")
+@router.post("/conflicts/detect", dependencies=[Depends(require_csrf_token)])
 async def detect_conflict(request: ConflictDetectionRequest) -> Dict[str, Any]:
     """
     Detect potential conflicts with other agents
@@ -312,7 +313,7 @@ async def detect_conflict(request: ConflictDetectionRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Conflict detection failed")
 
 
-@router.post("/conflicts/resolve")
+@router.post("/conflicts/resolve", dependencies=[Depends(require_csrf_token)])
 async def resolve_conflict(request: ConflictResolutionRequest) -> Dict[str, Any]:
     """
     Mark conflict as resolved
@@ -346,7 +347,7 @@ async def resolve_conflict(request: ConflictResolutionRequest) -> Dict[str, Any]
 
 
 # Resource Locking
-@router.post("/locks/acquire")
+@router.post("/locks/acquire", dependencies=[Depends(require_csrf_token)])
 async def acquire_lock(request: LockRequest) -> Dict[str, Any]:
     """
     Acquire exclusive lock on resource
@@ -380,7 +381,7 @@ async def acquire_lock(request: LockRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="Lock acquisition failed")
 
 
-@router.delete("/locks/{resource_id}")
+@router.delete("/locks/{resource_id}", dependencies=[Depends(require_csrf_token)])
 async def release_lock(resource_id: str, agent_id: str = Query(...)) -> Dict[str, Any]:
     """
     Release lock on resource
@@ -411,7 +412,7 @@ async def release_lock(resource_id: str, agent_id: str = Query(...)) -> Dict[str
 
 
 # Workflow Orchestration
-@router.post("/workflows/create")
+@router.post("/workflows/create", dependencies=[Depends(require_csrf_token)])
 async def create_workflow(workflow: WorkflowDefinition) -> Dict[str, Any]:
     """
     Create multi-agent workflow

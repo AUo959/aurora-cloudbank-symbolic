@@ -4,7 +4,7 @@ import uuid
 import hashlib
 import uvicorn
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Annotated, Dict, List, Optional, Any
 
 import aiofiles
 import numpy as np
@@ -111,6 +111,34 @@ async def _require_websocket_auth(websocket: WebSocket) -> Optional[str]:
         await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
         return None
     return client_id
+
+
+def _aligned_vsa_vectors(symbol_a: str, symbol_b: str) -> tuple[np.ndarray, np.ndarray, int]:
+    vec_a = vsa_store.get(symbol_a)
+    vec_b = vsa_store.get(symbol_b)
+    if vec_a is None or vec_b is None:
+        raise HTTPException(status_code=404, detail="One or both symbols not found")
+
+    arr_a = np.asarray(vec_a.vector)
+    arr_b = np.asarray(vec_b.vector)
+    min_dim = min(len(arr_a), len(arr_b))
+    return arr_a[:min_dim], arr_b[:min_dim], min_dim
+
+
+def _store_vsa_vector(symbol: str, vector: np.ndarray) -> QuantumSymbolicVector:
+    result_qsv = QuantumSymbolicVector(symbol, len(vector))
+    result_qsv.vector = np.asarray(vector)
+    result_qsv.dim = len(vector)
+    result_qsv.vector_type = "bipolar"
+    vsa_store[symbol] = result_qsv
+    return result_qsv
+
+
+def _cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
+    denominator = float(np.linalg.norm(vec_a) * np.linalg.norm(vec_b))
+    if np.isclose(denominator, 0.0):
+        return 0.0
+    return float(np.dot(vec_a, vec_b) / denominator)
 
 # Serve static files if needed in the future
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -235,6 +263,19 @@ def _apply_symbolic_gates(qc, depth: int, qubits: int) -> None:
             else:
                 if q < qubits - 1:
                     qc.cx(q, q + 1)
+
+
+def _serialize_quantum_circuit(qc) -> Optional[str]:
+    qasm_method = getattr(qc, "qasm", None)
+    if callable(qasm_method):
+        return qasm_method()
+
+    try:
+        from qiskit import qasm2
+
+        return qasm2.dumps(qc)
+    except Exception:
+        return None
 
 
 @app.post("/upload/", dependencies=[Depends(security)])  # verify_csrf inside
@@ -636,6 +677,7 @@ def mcp_route_command(
     summary="VSA Operation",
     response_description="Result of VSA operation",
     dependencies=[Depends(security)],
+    responses={400: {"description": "Unsupported paired VSA operation type"}},
 )
 def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials = Depends(security)):
     """Perform an operation on the VSA symbolic vector.
@@ -647,17 +689,11 @@ def vsa_operation(req: VSAOperationRequest, token: HTTPAuthorizationCredentials 
     if req.operation_type == "generate":
         vec = quantum_symbolic_vector(req.symbol, req.dimension)
         result = vec.tolist()
-    elif req.operation_type == "bind":
-        # Binding logic here
-        _ = "Binding not implemented in demo"
-    elif req.operation_type == "unbind":
-        # Unbinding logic here
-        _ = "Unbinding not implemented in demo"
-    elif req.operation_type == "similarity":
-        # Similarity logic here
-        result = "Similarity not implemented in demo"
     else:
-        raise HTTPException(status_code=400, detail="Invalid operation type")
+        raise HTTPException(
+            status_code=400,
+            detail="Only generate is supported by /vsa/operation; use /vsa/bind or /vsa/similarity for paired vectors",
+        )
 
     return {"symbol": req.symbol, "dimension": req.dimension, "result": result}
 
@@ -675,19 +711,13 @@ def vsa_bind(req: VSABindRequest, token: HTTPAuthorizationCredentials = Depends(
     Response: {"result_name": str, "dimension": int, "result": Any}
     """
     verify_csrf_token(token)
-    # Retrieve vectors from store
-    vec_a = vsa_store.get(req.symbol_a)
-    vec_b = vsa_store.get(req.symbol_b)
-    if vec_a is None or vec_b is None:
-        raise HTTPException(status_code=404, detail="One or both symbols not found")
-
-    # Perform binding (placeholder logic)
-    bound_vector = vec_a  # Replace with actual binding logic
-    vsa_store[req.result_name] = bound_vector
+    vec_a, vec_b, dimension = _aligned_vsa_vectors(req.symbol_a, req.symbol_b)
+    bound_vector = vec_a * vec_b
+    _store_vsa_vector(req.result_name, bound_vector)
 
     return {
         "result_name": req.result_name,
-        "dimension": req.dimension,
+        "dimension": dimension,
         "result": bound_vector.tolist(),
     }
 
@@ -705,42 +735,32 @@ def vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorizationCredential
     Response: {"symbol_a": str, "symbol_b": str, "similarity": float}
     """
     verify_csrf_token(token)
-    # Retrieve vectors from store
-    vec_a = vsa_store.get(req.symbol_a)
-    vec_b = vsa_store.get(req.symbol_b)
-    if vec_a is None or vec_b is None:
-        raise HTTPException(status_code=404, detail="One or both symbols not found")
-
-    # Compute similarity (placeholder logic)
-    similarity_score = float(_rng.random())  # Placeholder similarity using modern RNG
+    vec_a, vec_b, dimension = _aligned_vsa_vectors(req.symbol_a, req.symbol_b)
+    similarity_score = _cosine_similarity(vec_a, vec_b)
 
     return {
         "symbol_a": req.symbol_a,
         "symbol_b": req.symbol_b,
         "similarity": similarity_score,
+        "dimension": dimension,
     }
 
 
-@app.post(  # verify_csrf inside
+@app.post(
     "/quantum/circuit",
     summary="Quantum Circuit",
     response_description="Result of quantum circuit operation",
-)
-def quantum_circuit(req: QuantumCircuitRequest):
+)  # verify_csrf inside
+def quantum_circuit(
+    req: QuantumCircuitRequest,
+    token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+):
     """
-    Execute a quantum circuit and return the result.
+    Execute a quantum circuit using the canonical API backend.
     Request body: {"symbol": str, "depth": int, "qubits": int}
     Response: {"symbol": str, "depth": int, "qubits": int, "result": Any}
     """
-    # Placeholder for quantum circuit execution
-    result = {
-        "message": "Quantum circuit executed",
-        "symbol": req.symbol,
-        "depth": req.depth,
-        "qubits": req.qubits,
-    }
-
-    return result
+    return generate_quantum_circuit(req, token)
 
 
 @app.post(  # verify_csrf inside
@@ -990,7 +1010,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizatio
             "most_frequent_state": most_frequent[0],
             "most_frequent_probability": most_frequent[1] / 1000,
             "total_shots": 1000,
-            "circuit_qasm": qc.qasm(),
+            "circuit_qasm": _serialize_quantum_circuit(qc),
         }
     except Exception as e:  # pragma: no cover
         raise HTTPException(status_code=500, detail=f"Quantum circuit generation failed: {str(e)}")

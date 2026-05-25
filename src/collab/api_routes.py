@@ -29,7 +29,7 @@ from src.collab.drift_monitor import (
     DriftLevel
 )
 from src.core.native_dlp_export import NativeDLPTracker
-from src.middleware.fastapi_security import require_auth
+from src.middleware.fastapi_security import require_auth, require_csrf_token
 
 logger = logging.getLogger(__name__)
 
@@ -319,10 +319,13 @@ async def import_context(
         )
 
 
-@router.post("/workflow/trigger", response_model=WorkflowTriggerResponse)
+@router.post(
+    "/workflow/trigger",
+    response_model=WorkflowTriggerResponse,
+    dependencies=[Depends(require_csrf_token)],
+)
 async def trigger_workflow(
     request: WorkflowTriggerRequest,
-    token: HTTPAuthorizationCredentials = Depends(require_auth)
 ) -> WorkflowTriggerResponse:
     """
     Trigger build/test workflow in external repository.
@@ -342,18 +345,15 @@ async def trigger_workflow(
         "event_type": request.event_type
     })
     
-    # Generate event chain ID for tracking
-    event_chain_id = f"chain_{int(datetime.now().timestamp())}"
-    
-    # Note: Actual workflow triggering would require GitHub API integration
-    # This is a placeholder implementation
-    
-    return WorkflowTriggerResponse(
-        success=True,
-        target_repo=request.target_repo,
-        workflow_name=request.workflow_name,
-        trigger_timestamp=datetime.now().isoformat(),
-        event_chain_id=event_chain_id
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail={
+            "error": "workflow_dispatch_not_configured",
+            "message": "No external workflow dispatch provider is configured for this route.",
+            "target_repo": request.target_repo,
+            "workflow_name": request.workflow_name,
+            "event_type": request.event_type,
+        },
     )
 
 

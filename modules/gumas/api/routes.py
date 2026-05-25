@@ -11,7 +11,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
 import logging
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.monitoring.ethics_engine import (
@@ -22,6 +22,7 @@ from src.monitoring.ethics_engine import (
     RuleCategory
 )
 from src.core.native_dlp_export import NativeDLPTracker
+from src.middleware.fastapi_security import require_csrf_token
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/gumas", tags=["GUMAS Ethics"])
@@ -268,7 +269,12 @@ async def get_rule(rule_id: str) -> RuleResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/rules", response_model=RuleResponse, status_code=201)
+@router.post(
+    "/rules",
+    response_model=RuleResponse,
+    status_code=201,
+    dependencies=[Depends(require_csrf_token)],
+)
 async def add_rule(request: AddRuleRequest) -> RuleResponse:
     """
     Add a new ethics rule
@@ -329,7 +335,11 @@ async def add_rule(request: AddRuleRequest) -> RuleResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/rules/{rule_id}", status_code=204)
+@router.delete(
+    "/rules/{rule_id}",
+    status_code=204,
+    dependencies=[Depends(require_csrf_token)],
+)
 async def delete_rule(rule_id: str):
     """
     Delete an ethics rule
@@ -377,7 +387,11 @@ async def register_custom_evaluator(
     )
 
 
-@router.delete("/violations", status_code=204)
+@router.delete(
+    "/violations",
+    status_code=204,
+    dependencies=[Depends(require_csrf_token)],
+)
 async def clear_violations(
     before: Optional[str] = Query(None, description="Clear violations before this ISO timestamp")
 ):

@@ -27,14 +27,19 @@ router = APIRouter(prefix="/api/synergy", tags=["synergy"])
 
 # Data models
 class ComponentStatus(BaseModel):
-    """Real-time component status"""
+    """Static component registry entry."""
     component_id: str
     name: str
-    status: str = Field(description="active|degraded|offline")
-    health_score: float = Field(ge=0.0, le=100.0)
-    last_heartbeat: str
-    uptime_seconds: int
-    resource_usage: Dict[str, float]
+    category: str
+    description: str
+    endpoints: List[str]
+    status: str = Field(description="documented")
+    telemetry_available: bool = False
+    telemetry_source: str = "static_registry"
+    health_score: Optional[float] = Field(default=None, ge=0.0, le=100.0)
+    last_heartbeat: Optional[str] = None
+    uptime_seconds: Optional[int] = None
+    resource_usage: Optional[Dict[str, float]] = None
 
 
 class ComponentInteraction(BaseModel):
@@ -219,29 +224,23 @@ def calculate_synergy_score(component1: str, component2: str) -> float:
 
 # API Endpoints
 
-@router.get("/components", response_model=List[ComponentStatus])
+@router.get("/components", response_model=List[ComponentStatus], response_model_exclude_none=True)
 async def get_components(
-    status_filter: Optional[str] = Query(None, description="Filter by status: active|degraded|offline")
+    status_filter: Optional[str] = Query(None, description="Filter by status: documented")
 ) -> List[ComponentStatus]:
     """
-    Get all registered R-2 components with real-time status
+    Get registered R-2 component topology entries.
+
+    This route intentionally returns static registry data only. It does not
+    synthesize health, uptime, heartbeat, or resource usage values.
     
     DLP: synergy_dashboard_components
     """
     components = get_component_registry()
-    now = datetime.now(timezone.utc).isoformat()
     
     statuses = []
     for comp in components:
-        health = calculate_component_health(comp["id"])
-        
-        # Determine status from health score
-        if health >= 80:
-            status = "active"
-        elif health >= 50:
-            status = "degraded"
-        else:
-            status = "offline"
+        status = "documented"
         
         # Apply filter if specified
         if status_filter and status != status_filter:
@@ -250,14 +249,12 @@ async def get_components(
         statuses.append(ComponentStatus(
             component_id=comp["id"],
             name=comp["name"],
+            category=comp["category"],
+            description=comp["description"],
+            endpoints=comp["endpoints"],
             status=status,
-            health_score=health,
-            last_heartbeat=now,
-            uptime_seconds=86400,  # Placeholder
-            resource_usage={
-                "cpu_percent": 25.0 + (hash(comp["id"]) % 20),
-                "memory_mb": 128.0 + (hash(comp["id"]) % 256),
-            }
+            telemetry_available=False,
+            telemetry_source="static_registry",
         ))
     
     # Track with DLP

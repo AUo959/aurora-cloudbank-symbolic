@@ -22,7 +22,7 @@ class TestSynergyDashboardAPI:
         """Test dashboard health check endpoint"""
         response = test_client.get("/api/synergy/health")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["status"] == "healthy"
         assert data["service"] == "synergy_dashboard_api"
@@ -30,10 +30,10 @@ class TestSynergyDashboardAPI:
         assert "version" in data
     
     def test_get_components(self, test_client):
-        """Test retrieving all components"""
+        """Test retrieving static component topology entries."""
         response = test_client.get("/api/synergy/components")
         assert response.status_code == 200
-        
+
         components = response.json()
         assert isinstance(components, list)
         assert len(components) > 0
@@ -42,29 +42,46 @@ class TestSynergyDashboardAPI:
         component = components[0]
         assert "component_id" in component
         assert "name" in component
+        assert "category" in component
+        assert "description" in component
+        assert "endpoints" in component
         assert "status" in component
-        assert "health_score" in component
-        assert "last_heartbeat" in component
-        assert "uptime_seconds" in component
-        assert "resource_usage" in component
-        
-        # Verify health score range
-        assert 0 <= component["health_score"] <= 100
-        
-        # Verify status values
-        assert component["status"] in ["active", "degraded", "offline"]
+        assert "telemetry_available" in component
+        assert "telemetry_source" in component
+
+        # The route is static topology, not live health telemetry.
+        assert component["status"] == "documented"
+        assert component["telemetry_available"] is False
+        assert component["telemetry_source"] == "static_registry"
+        assert "health_score" not in component
+        assert "last_heartbeat" not in component
+        assert "uptime_seconds" not in component
+        assert "resource_usage" not in component
     
     def test_get_components_with_filter(self, test_client):
         """Test retrieving components with status filter"""
-        response = test_client.get("/api/synergy/components?status_filter=active")
+        response = test_client.get("/api/synergy/components?status_filter=documented")
         assert response.status_code == 200
         
         components = response.json()
         assert isinstance(components, list)
         
-        # All returned components should be active
+        # All returned components should be documented static entries.
         for component in components:
-            assert component["status"] == "active"
+            assert component["status"] == "documented"
+
+    def test_components_do_not_report_placeholder_live_health(self, test_client):
+        """Static component entries do not expose synthetic live-health fields."""
+        response = test_client.get("/api/synergy/components")
+        assert response.status_code == 200
+
+        for component in response.json():
+            assert component["telemetry_available"] is False
+            assert component["telemetry_source"] == "static_registry"
+            assert "health_score" not in component
+            assert "last_heartbeat" not in component
+            assert "uptime_seconds" not in component
+            assert "resource_usage" not in component
     
     def test_get_topology(self, test_client):
         """Test retrieving component topology"""

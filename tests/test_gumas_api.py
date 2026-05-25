@@ -30,9 +30,14 @@ from src.monitoring.ethics_engine import (
     ViolationSeverity,
     RuleCategory
 )
+from src.middleware.fastapi_security import generate_csrf_token
 
 # Create test client
 client = TestClient(app)
+
+
+def _auth_headers() -> dict[str, str]:
+    return {"Authorization": f"Bearer {generate_csrf_token('gumas-test-session')}"}
 
 
 @pytest.fixture
@@ -326,7 +331,7 @@ class TestGumasRulesManagement:
             "metadata": {"created_by": "test"}
         }
 
-        response = client.post("/gumas/rules", json=new_rule)
+        response = client.post("/gumas/rules", json=new_rule, headers=_auth_headers())
 
         assert response.status_code == 201
         data = response.json()
@@ -347,11 +352,11 @@ class TestGumasRulesManagement:
         }
 
         # Add rule first time
-        response1 = client.post("/gumas/rules", json=rule_data)
+        response1 = client.post("/gumas/rules", json=rule_data, headers=_auth_headers())
         assert response1.status_code == 201
 
         # Try to add again
-        response2 = client.post("/gumas/rules", json=rule_data)
+        response2 = client.post("/gumas/rules", json=rule_data, headers=_auth_headers())
         assert response2.status_code == 409  # Conflict
         assert "already exists" in response2.json()["detail"]
 
@@ -368,7 +373,7 @@ class TestGumasRulesManagement:
             "metadata": {}
         }
 
-        response = client.post("/gumas/rules", json=rule_data)
+        response = client.post("/gumas/rules", json=rule_data, headers=_auth_headers())
 
         assert response.status_code == 400
         assert "Invalid parameter" in response.json()["detail"]
@@ -386,7 +391,7 @@ class TestGumasRulesManagement:
             "metadata": {}
         }
 
-        response = client.post("/gumas/rules", json=rule_data)
+        response = client.post("/gumas/rules", json=rule_data, headers=_auth_headers())
 
         assert response.status_code == 400
 
@@ -406,7 +411,7 @@ class TestGumasRulesManagement:
         clean_ethics_engine.add_rule(test_rule)
 
         # Delete the rule
-        response = client.delete("/gumas/rules/rule_to_delete")
+        response = client.delete("/gumas/rules/rule_to_delete", headers=_auth_headers())
 
         assert response.status_code == 204
 
@@ -416,7 +421,7 @@ class TestGumasRulesManagement:
 
     def test_delete_nonexistent_rule(self, clean_ethics_engine):
         """Test deleting a rule that doesn't exist."""
-        response = client.delete("/gumas/rules/nonexistent_rule")
+        response = client.delete("/gumas/rules/nonexistent_rule", headers=_auth_headers())
 
         assert response.status_code == 404
 
@@ -456,7 +461,7 @@ class TestGumasUtilityEndpoints:
 
     def test_clear_violations(self, clean_ethics_engine):
         """Test clearing old violations."""
-        response = client.delete("/gumas/violations")
+        response = client.delete("/gumas/violations", headers=_auth_headers())
 
         assert response.status_code == 204
 
@@ -467,13 +472,13 @@ class TestGumasUtilityEndpoints:
         # URL-encode the timestamp to handle the + in timezone offset
         encoded_timestamp = quote(timestamp, safe='')
 
-        response = client.delete(f"/gumas/violations?before={encoded_timestamp}")
+        response = client.delete(f"/gumas/violations?before={encoded_timestamp}", headers=_auth_headers())
 
         assert response.status_code == 204
 
     def test_clear_violations_invalid_timestamp(self, clean_ethics_engine):
         """Test clearing violations with invalid timestamp."""
-        response = client.delete("/gumas/violations?before=invalid_timestamp")
+        response = client.delete("/gumas/violations?before=invalid_timestamp", headers=_auth_headers())
 
         assert response.status_code == 400
         assert "Invalid timestamp" in response.json()["detail"]
@@ -507,7 +512,7 @@ class TestGumasApiIntegration:
             "metadata": {"test": "lifecycle"}
         }
 
-        add_response = client.post("/gumas/rules", json=new_rule)
+        add_response = client.post("/gumas/rules", json=new_rule, headers=_auth_headers())
         assert add_response.status_code == 201
 
         # 2. Verify rule exists
@@ -525,7 +530,7 @@ class TestGumasApiIntegration:
         assert eval_response.status_code == 200
 
         # 4. Delete the rule
-        delete_response = client.delete("/gumas/rules/lifecycle_test_rule")
+        delete_response = client.delete("/gumas/rules/lifecycle_test_rule", headers=_auth_headers())
         assert delete_response.status_code == 204
 
         # 5. Verify rule is deleted
@@ -550,7 +555,7 @@ class TestGumasApiIntegration:
         ]
 
         for rule in rules:
-            response = client.post("/gumas/rules", json=rule)
+            response = client.post("/gumas/rules", json=rule, headers=_auth_headers())
             assert response.status_code == 201
 
         # Verify all rules are present
@@ -562,13 +567,59 @@ class TestGumasApiIntegration:
 
         # Clean up
         for i in range(3):
-            client.delete(f"/gumas/rules/multi_rule_{i}")
+            client.delete(f"/gumas/rules/multi_rule_{i}", headers=_auth_headers())
 
 
 @pytest.mark.api
 @pytest.mark.security
 class TestGumasApiSecurity:
     """Test API security considerations."""
+
+    def test_add_rule_requires_auth_before_mutation(self, clean_ethics_engine):
+        """Unauthenticated callers cannot add ethics rules."""
+        rule_data = {
+            "id": "unauthenticated_rule",
+            "name": "Unauthenticated Rule",
+            "description": "Should not be added",
+            "category": "safety",
+            "severity": "low",
+            "auto_block": False,
+            "conditions": [],
+            "metadata": {}
+        }
+
+        response = client.post("/gumas/rules", json=rule_data)
+
+        assert response.status_code in (401, 403)
+        assert "unauthenticated_rule" not in clean_ethics_engine.rules
+
+    def test_delete_rule_requires_auth_before_mutation(self, clean_ethics_engine):
+        """Unauthenticated callers cannot delete ethics rules."""
+        clean_ethics_engine.add_rule(EthicsRule(
+            id="protected_rule",
+            name="Protected Rule",
+            description="Should remain present",
+            category=RuleCategory.SAFETY,
+            severity=ViolationSeverity.LOW,
+            auto_block=False,
+            conditions=[],
+            metadata={}
+        ))
+
+        response = client.delete("/gumas/rules/protected_rule")
+
+        assert response.status_code in (401, 403)
+        assert "protected_rule" in clean_ethics_engine.rules
+
+    def test_clear_violations_requires_auth_before_mutation(self, clean_ethics_engine):
+        """Unauthenticated callers cannot clear recorded violations."""
+        violation_marker = object()
+        clean_ethics_engine.violations.append(violation_marker)
+
+        response = client.delete("/gumas/violations")
+
+        assert response.status_code in (401, 403)
+        assert clean_ethics_engine.violations == [violation_marker]
 
     def test_input_validation_prevents_injection(self, clean_ethics_engine):
         """Test that input validation prevents injection attacks."""
@@ -583,7 +634,7 @@ class TestGumasApiSecurity:
             "metadata": {}
         }
 
-        response = client.post("/gumas/rules", json=malicious_rule)
+        response = client.post("/gumas/rules", json=malicious_rule, headers=_auth_headers())
 
         # Should either succeed with sanitized input or fail validation
         # But should not cause server errors
@@ -604,7 +655,7 @@ class TestGumasApiSecurity:
             "metadata": large_metadata
         }
 
-        response = client.post("/gumas/rules", json=rule_data)
+        response = client.post("/gumas/rules", json=rule_data, headers=_auth_headers())
 
         # Should handle large payloads gracefully
         assert response.status_code in [201, 413, 422]

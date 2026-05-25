@@ -10,7 +10,7 @@ import aiofiles
 import numpy as np
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
-from src.middleware.fastapi_security import security, verify_csrf_token
+from src.middleware.fastapi_security import security, verify_csrf_token, verify_ws_token
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -86,6 +86,31 @@ logger = logging.getLogger("aurora_gui_cloudhub")
 
 # Active WebSocket connections for basic broadcast
 connections: List[WebSocket] = []
+
+
+def _extract_websocket_token(websocket: WebSocket) -> Optional[str]:
+    """Return a WebSocket token from query params or Authorization header."""
+    query_token = websocket.query_params.get("token")
+    if query_token:
+        return query_token
+
+    auth_header = websocket.headers.get("authorization")
+    if not auth_header:
+        return None
+
+    scheme, _, token = auth_header.partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    return token.strip() or None
+
+
+async def _require_websocket_auth(websocket: WebSocket) -> Optional[str]:
+    token = _extract_websocket_token(websocket)
+    client_id = verify_ws_token(token) if token else None
+    if not client_id:
+        await websocket.close(code=1008, reason="Unauthorized: Invalid or missing token")
+        return None
+    return client_id
 
 # Serve static files if needed in the future
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -233,6 +258,10 @@ async def upload_bundle(file: UploadFile = File(...), token: HTTPAuthorizationCr
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    client_id = await _require_websocket_auth(websocket)
+    if not client_id:
+        return
+
     await websocket.accept()
     connections.append(websocket)
     try:
@@ -253,7 +282,8 @@ async def websocket_endpoint(websocket: WebSocket):
                         id(conn),
                     )
     except WebSocketDisconnect:
-        connections.remove(websocket)
+        if websocket in connections:
+            connections.remove(websocket)
     except Exception as e:
         logger.error("WebSocket handler error: %s (ws_id=%s)", str(e)[:100], id(websocket))
 
@@ -973,6 +1003,10 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
     """
     Enhanced WebSocket endpoint for real-time VSA collaboration.
     """
+    client_id = await _require_websocket_auth(websocket)
+    if not client_id:
+        return
+
     await websocket.accept()
     connections.append(websocket)
 
@@ -982,6 +1016,7 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
         "message": "Connected to Aurora VSA Collaboration",
         "current_vectors": len(vsa_store),
         "vector_list": list(vsa_store.keys()),
+        "client_id": client_id,
     }
     await websocket.send_json(welcome_msg)
 
@@ -1017,7 +1052,8 @@ async def websocket_collaboration_endpoint(websocket: WebSocket):
                 await _broadcast_operation(websocket, data)
 
     except WebSocketDisconnect:
-        connections.remove(websocket)
+        if websocket in connections:
+            connections.remove(websocket)
     except Exception as e:
         logger.error("WebSocket collab handler error: %s (ws_id=%s)", str(e)[:100], id(websocket))
 

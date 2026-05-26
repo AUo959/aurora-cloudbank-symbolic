@@ -27,7 +27,7 @@ seaborn>=0.13.2                     # Statistical visualizations
 # ===================================================================
 # For interactive development and demos
 jupyter>=1.0.0                      # Jupyter notebook
-ipykernel>=6.27.0                   # IPython kernel
+ipykernel>=7.2.0                   # IPython kernel
 ipywidgets>=8.1.0                   # Interactive widgets
 
 # ===================================================================

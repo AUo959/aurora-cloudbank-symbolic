@@ -67,6 +67,7 @@ class VisionAlignmentManager:
         "continuously interacting with both the Aurora intelligence and the human/institutional crew of Orion Station—"
         "bridging simulation, decision, and the real world in a collaborative feedback loop."
     )
+    LAST_REVIEW_KEY = "alignment_review_timestamp"
 
     def __init__(
         self,
@@ -106,7 +107,7 @@ class VisionAlignmentManager:
         self._success_count = 0
         self._failure_count = 0
         self._warning_count = 0
-        self._last_review = None
+        self._last_review = self._load_last_review()
 
     def _get_default_system_state(self):
         """Get default system state (mock for graceful degradation)"""
@@ -132,6 +133,67 @@ class VisionAlignmentManager:
         except ImportError:
             logger.warning("DLP tracker not available, using mock")
             return MockAuditLog()
+
+    def _load_last_review(self) -> Optional[datetime]:
+        """Load the last completed periodic review timestamp from the knowledge base."""
+        try:
+            get_latest = getattr(self.knowledge_base, "get_latest", None)
+            if not callable(get_latest):
+                return None
+
+            record = get_latest(self.LAST_REVIEW_KEY)
+            return self._extract_review_timestamp(record)
+        except Exception as e:
+            logger.warning("Failed to load last alignment review timestamp: %s", str(e))
+            return None
+
+    def _save_last_review(self, reviewed_at: datetime):
+        """Persist the last completed periodic review timestamp to the knowledge base."""
+        try:
+            store = getattr(self.knowledge_base, "store", None)
+            if not callable(store):
+                return
+
+            store(
+                self.LAST_REVIEW_KEY,
+                {
+                    "timestamp": reviewed_at.isoformat(),
+                    "record_type": self.LAST_REVIEW_KEY
+                }
+            )
+        except Exception as e:
+            logger.warning("Failed to save last alignment review timestamp: %s", str(e))
+
+    def _extract_review_timestamp(self, record: Any) -> Optional[datetime]:
+        """Normalize a persisted timestamp record into an aware datetime."""
+        if record is None:
+            return None
+        if isinstance(record, datetime):
+            return self._ensure_aware(record)
+        if isinstance(record, str):
+            return self._parse_review_timestamp(record)
+        if isinstance(record, dict):
+            timestamp = record.get("timestamp") or record.get("review_timestamp")
+            return self._parse_review_timestamp(timestamp)
+
+        timestamp = getattr(record, "timestamp", None)
+        return self._parse_review_timestamp(timestamp)
+
+    def _parse_review_timestamp(self, timestamp: Any) -> Optional[datetime]:
+        """Parse a persisted timestamp value."""
+        if isinstance(timestamp, datetime):
+            return self._ensure_aware(timestamp)
+        if not timestamp:
+            return None
+
+        parsed = datetime.fromisoformat(str(timestamp))
+        return self._ensure_aware(parsed)
+
+    def _ensure_aware(self, value: datetime) -> datetime:
+        """Ensure timestamps loaded from storage are UTC-aware."""
+        if value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
 
     def enforce_alignment(
         self,
@@ -401,6 +463,7 @@ class VisionAlignmentManager:
         
         # Update last review timestamp
         self._last_review = now
+        self._save_last_review(now)
         
         result = AlignmentReviewResult(
             review_timestamp=now.isoformat(),
@@ -466,6 +529,7 @@ class MockKnowledgeBase:
     def __init__(self):
         self._alignments = []
         self._contexts = {}
+        self._records = {}
     
     def push_alignment(self, alignment_record: AlignmentRecord):
         logger.debug("Mock KB: storing alignment for %s", alignment_record.computation_id)
@@ -474,6 +538,14 @@ class MockKnowledgeBase:
     def store_context(self, computation_id: str, context: Dict[str, Any]):
         logger.debug("Mock KB: storing context for %s", computation_id)
         self._contexts[computation_id] = context
+
+    def store(self, key: str, data: Dict[str, Any]):
+        logger.debug("Mock KB: storing record for %s", key)
+        self._records[key] = data
+
+    def get_latest(self, key: str) -> Optional[Dict[str, Any]]:
+        logger.debug("Mock KB: loading latest record for %s", key)
+        return self._records.get(key)
     
     def review_recent_alignments(
         self,

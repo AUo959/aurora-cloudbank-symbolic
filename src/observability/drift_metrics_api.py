@@ -9,7 +9,9 @@ Anchors: EOS_SEED_ORION, HALO_CONTINUITY_GRAFT_005
 """
 
 import logging
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -28,6 +30,11 @@ _drift_detector: Optional[DriftDetector] = None
 _drift_exporter = None  # Lazy import to avoid circular deps
 
 
+def _monitoring_storage_dir() -> Path:
+    """Resolve the shared monitoring storage directory."""
+    return Path(os.getenv("MONITORING_STORAGE_DIR", "./monitoring_data"))
+
+
 def _get_exporter():
     """Get or create the drift exporter instance."""
     global _drift_exporter
@@ -41,7 +48,9 @@ def _get_drift_detector():
     """Get current drift detector instance, creating one if needed."""
     global _drift_detector
     if _drift_detector is None:
-        _drift_detector = DriftDetector()
+        _drift_detector = DriftDetector(
+            alerts_path=_monitoring_storage_dir() / "drift_alerts.jsonl"
+        )
     return _drift_detector
 
 

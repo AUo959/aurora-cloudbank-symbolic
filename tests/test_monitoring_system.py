@@ -227,6 +227,59 @@ class TestMonitoringSystem:
             assert 'rules' in state
             assert 'behavior_history' in state
             assert 'interventions' in state
+            assert 'last_intervention_time' in state
+            assert 'violations' in state
+            assert 'drift_alerts' in state
+
+    def test_import_state_restores_intervention_cooldowns(self):
+        """Test intervention history and cooldowns survive restart."""
+        with TemporaryDirectory() as tmpdir:
+            storage_dir = Path(tmpdir)
+            monitoring = MonitoringSystem(storage_dir=storage_dir)
+
+            monitoring.register_enforcement_handler(
+                InterventionType.SUSPEND_AGENT,
+                lambda agent_id: True
+            )
+            monitoring._execute_intervention(
+                agent_id="test-agent",
+                intervention_type=InterventionType.SUSPEND_AGENT,
+                reason="critical drift"
+            )
+
+            restarted = MonitoringSystem(storage_dir=storage_dir)
+            assert len(restarted.interventions) == 1
+            assert restarted.interventions[0].agent_id == "test-agent"
+            assert restarted.interventions[0].success is True
+            assert "test-agent" in restarted.last_intervention_time
+
+    def test_monitoring_histories_reload_from_storage_dir(self):
+        """Test violation and drift alert histories survive restart."""
+        with TemporaryDirectory() as tmpdir:
+            storage_dir = Path(tmpdir)
+            monitoring = MonitoringSystem(storage_dir=storage_dir)
+
+            monitoring.evaluate_action(
+                agent_id="test-agent",
+                action_type="critical",
+                parameters={
+                    'critical_decision': True,
+                    'no_human_approval': True
+                }
+            )
+            monitoring.establish_agent_baseline(
+                "test-agent",
+                {'decisions_made': [10, 11, 12]}
+            )
+            monitoring.record_agent_behavior(
+                agent_id="test-agent",
+                metrics={'decisions_made': 30}
+            )
+            monitoring.check_agent_behavior(agent_id="test-agent")
+
+            restarted = MonitoringSystem(storage_dir=storage_dir)
+            assert restarted.ethics_engine.get_violations(agent_id="test-agent")
+            assert restarted.drift_detector.get_alerts(agent_id="test-agent")
     
     def test_automated_intervention_disabled(self):
         """Test with automated intervention disabled"""

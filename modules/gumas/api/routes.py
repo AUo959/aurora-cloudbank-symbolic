@@ -10,6 +10,8 @@ T1: Initial implementation
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timezone
 import logging
+import os
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -28,8 +30,16 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/gumas", tags=["GUMAS Ethics"])
 dlp_tracker = NativeDLPTracker()
 
+
+def _monitoring_storage_dir() -> Path:
+    """Resolve the shared monitoring storage directory."""
+    return Path(os.getenv("MONITORING_STORAGE_DIR", "./monitoring_data"))
+
+
 # Initialize global ethics engine
-ethics_engine = EthicsEngine()
+ethics_engine = EthicsEngine(
+    violations_path=_monitoring_storage_dir() / "ethics_violations.jsonl"
+)
 
 
 # Pydantic Models

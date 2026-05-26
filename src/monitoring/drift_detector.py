@@ -10,6 +10,7 @@ import logging
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
 from enum import Enum
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 import statistics
 
@@ -90,7 +91,8 @@ class DriftDetector:
         moving_avg_window: int = 10,
         info_threshold: float = 0.2,
         warning_threshold: float = 0.5,
-        critical_threshold: float = 0.8
+        critical_threshold: float = 0.8,
+        alerts_path: Optional[Path] = None
     ):
         """
         Initialize drift detector
@@ -101,16 +103,19 @@ class DriftDetector:
             info_threshold: Relative change threshold for info alerts (default: 0.2 = 20%)
             warning_threshold: Relative change threshold for warning alerts (default: 0.5 = 50%)
             critical_threshold: Relative change threshold for critical alerts (default: 0.8 = 80%)
+            alerts_path: Append-only JSONL path for persisted alerts
         """
         self.z_score_threshold = z_score_threshold
         self.moving_avg_window = moving_avg_window
         self.info_threshold = info_threshold
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
+        self.alerts_path = alerts_path
         
         # Storage for baselines and alerts
         self.baselines: Dict[str, BaselineMetrics] = {}
         self.alerts: List[DriftAlert] = []
+        self._load_alerts()
         
         logger.info("Drift detector initialized with z_threshold=%.1f", z_score_threshold)
     
@@ -241,6 +246,7 @@ class DriftDetector:
                 )
         
         if alert:
+            self._persist_alert(alert)
             self.alerts.append(alert)
             logger.warning(
                 "Drift detected: %s:%s [%s] - current=%.2f, baseline=%.2f",
@@ -318,6 +324,76 @@ class DriftDetector:
             ]
         
         return alerts
+
+    def export_alerts(self) -> List[Dict[str, Any]]:
+        """Export recorded alerts for persistence and diagnostics."""
+        return [alert.to_dict() for alert in self.alerts]
+
+    def import_alerts(self, data: List[Dict[str, Any]]):
+        """Import alerts from persisted data."""
+        self.alerts = [
+            self._alert_from_dict(alert_data)
+            for alert_data in data
+        ]
+        self._rewrite_alerts()
+        logger.info("Imported %d drift alerts", len(self.alerts))
+
+    def _persist_alert(self, alert: DriftAlert):
+        """Append an alert to the shared alert store."""
+        if not self.alerts_path:
+            return
+
+        try:
+            self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.alerts_path, 'a') as f:
+                f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+        except Exception as e:
+            logger.error("Failed to persist drift alert: %s", e)
+
+    def _load_alerts(self):
+        """Load persisted alerts from the shared alert store."""
+        if not self.alerts_path or not self.alerts_path.exists():
+            return
+
+        try:
+            with open(self.alerts_path, 'r') as f:
+                self.alerts = [
+                    self._alert_from_dict(json.loads(line))
+                    for line in f
+                    if line.strip()
+                ]
+            logger.info("Loaded %d drift alerts", len(self.alerts))
+        except Exception as e:
+            logger.error("Failed to load drift alerts: %s", e)
+
+    def _rewrite_alerts(self):
+        """Rewrite the shared alert store after explicit mutation."""
+        if not self.alerts_path:
+            return
+
+        try:
+            self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.alerts_path, 'w') as f:
+                for alert in self.alerts:
+                    f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+        except Exception as e:
+            logger.error("Failed to rewrite drift alerts: %s", e)
+
+    def _alert_from_dict(self, data: Dict[str, Any]) -> DriftAlert:
+        """Restore a drift alert from persisted data."""
+        return DriftAlert(
+            timestamp=data['timestamp'],
+            agent_id=data['agent_id'],
+            metric_name=data['metric_name'],
+            level=DriftLevel(data['level']),
+            method=DriftMethod(data['method']),
+            current_value=data['current_value'],
+            baseline_value=data['baseline_value'],
+            deviation=data['deviation'],
+            description=data['description'],
+            context_tag=data.get('context_tag'),
+            metadata=data.get('metadata', {})
+        )
     
     def clear_alerts(self, before: Optional[datetime] = None):
         """
@@ -333,6 +409,8 @@ class DriftDetector:
             ]
         else:
             self.alerts.clear()
+
+        self._rewrite_alerts()
         
         logger.info("Cleared drift alerts (before=%s)", before)
     

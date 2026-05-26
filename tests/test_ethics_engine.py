@@ -214,6 +214,27 @@ class TestEthicsEngine:
         
         engine.clear_violations()
         assert len(engine.violations) == 0
+
+    def test_violations_persist_across_restart(self, tmp_path):
+        """Test persisted violations are loaded by new engine instances."""
+        violations_path = tmp_path / "ethics_violations.jsonl"
+        engine = EthicsEngine(violations_path=violations_path)
+
+        context = ActionContext(
+            agent_id="test-agent",
+            action_type="critical",
+            parameters={'critical_decision': True, 'no_human_approval': True}
+        )
+        engine.evaluate_action(context)
+
+        restarted = EthicsEngine(violations_path=violations_path)
+        assert len(restarted.violations) == len(engine.violations)
+        assert restarted.violations[0].agent_id == "test-agent"
+        assert restarted.violations[0].rule_id == engine.violations[0].rule_id
+
+        restarted.clear_violations()
+        empty_restart = EthicsEngine(violations_path=violations_path)
+        assert empty_restart.violations == []
     
     def test_export_rules(self):
         """Test rule export"""

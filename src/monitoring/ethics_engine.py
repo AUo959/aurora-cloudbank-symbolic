@@ -97,22 +97,30 @@ class EthicsEngine:
     - Extensible with custom evaluators
     """
     
-    def __init__(self, rules_path: Optional[Path] = None):
+    def __init__(
+        self,
+        rules_path: Optional[Path] = None,
+        violations_path: Optional[Path] = None
+    ):
         """
         Initialize ethics engine
         
         Args:
             rules_path: Path to rules configuration file (JSON)
+            violations_path: Append-only JSONL path for persisted violations
         """
         self.rules: Dict[str, EthicsRule] = {}
         self.violations: List[EthicsViolation] = []
         self.custom_evaluators: Dict[str, Callable] = {}
+        self.violations_path = violations_path
         
         # Load default rules if available
         if rules_path and rules_path.exists():
             self.load_rules(rules_path)
         else:
             self._load_default_rules()
+
+        self._load_violations()
         
         logger.info("Ethics engine initialized with %d rules", len(self.rules))
     
@@ -242,6 +250,7 @@ class EthicsEngine:
         for rule in self.rules.values():
             violation = self._evaluate_rule(rule, context)
             if violation:
+                self._persist_violation(violation)
                 violations.append(violation)
                 self.violations.append(violation)
         
@@ -416,6 +425,76 @@ class EthicsEngine:
             ]
         
         return violations
+
+    def export_violations(self) -> List[Dict[str, Any]]:
+        """Export recorded violations for persistence and diagnostics."""
+        return [violation.to_dict() for violation in self.violations]
+
+    def import_violations(self, data: List[Dict[str, Any]]):
+        """Import violations from persisted data."""
+        self.violations = [
+            self._violation_from_dict(violation_data)
+            for violation_data in data
+        ]
+        self._rewrite_violations()
+        logger.info("Imported %d ethics violations", len(self.violations))
+
+    def _persist_violation(self, violation: EthicsViolation):
+        """Append a violation to the shared violation store."""
+        if not self.violations_path:
+            return
+
+        try:
+            self.violations_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.violations_path, 'a') as f:
+                f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+        except Exception as e:
+            logger.error("Failed to persist ethics violation: %s", e)
+
+    def _load_violations(self):
+        """Load persisted violations from the shared violation store."""
+        if not self.violations_path or not self.violations_path.exists():
+            return
+
+        try:
+            with open(self.violations_path, 'r') as f:
+                self.violations = [
+                    self._violation_from_dict(json.loads(line))
+                    for line in f
+                    if line.strip()
+                ]
+            logger.info("Loaded %d ethics violations", len(self.violations))
+        except Exception as e:
+            logger.error("Failed to load ethics violations: %s", e)
+
+    def _rewrite_violations(self):
+        """Rewrite the shared violation store after explicit mutation."""
+        if not self.violations_path:
+            return
+
+        try:
+            self.violations_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.violations_path, 'w') as f:
+                for violation in self.violations:
+                    f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+        except Exception as e:
+            logger.error("Failed to rewrite ethics violations: %s", e)
+
+    def _violation_from_dict(self, data: Dict[str, Any]) -> EthicsViolation:
+        """Restore a violation from persisted data."""
+        return EthicsViolation(
+            timestamp=data['timestamp'],
+            agent_id=data['agent_id'],
+            rule_id=data['rule_id'],
+            rule_name=data['rule_name'],
+            severity=ViolationSeverity(data['severity']),
+            category=RuleCategory(data['category']),
+            description=data['description'],
+            blocked=data['blocked'],
+            context=data['context'],
+            context_tag=data.get('context_tag'),
+            remediation=data.get('remediation')
+        )
     
     def check_should_block(self, violations: List[EthicsViolation]) -> bool:
         """
@@ -470,5 +549,7 @@ class EthicsEngine:
             ]
         else:
             self.violations.clear()
+
+        self._rewrite_violations()
         
         logger.info("Cleared violations (before=%s)", before)

@@ -35,10 +35,13 @@ from modules.quantum_simulator import (  # noqa: E402
     ScenarioRequest,
     ScenarioType,
     SimulatorQuantumProvider,
+    SimulationResult,
+    SimulationStatus,
     StateVector,
     create_ghz_state,
     create_w_state,
 )
+from modules.quantum_simulator import api as quantum_simulator_api  # noqa: E402
 from modules.quantum_simulator.api import router as quantum_simulator_router  # noqa: E402
 
 
@@ -65,6 +68,28 @@ def _simulation_payload(name="API Test Simulation"):
         "parameters": {"num_variables": 3, "max_iterations": 10},
         "seed": 42,
     }
+
+
+def _reset_progress_state():
+    quantum_simulator_api.get_cache().clear_all()
+    quantum_simulator_api.active_connections.clear()
+    quantum_simulator_api.active_simulations.clear()
+
+
+def _completed_result(simulation_id="completed-sim"):
+    start_time = datetime.now(timezone.utc)
+    return SimulationResult(
+        simulation_id=simulation_id,
+        scenario_name="Completed Simulation",
+        scenario_type=ScenarioType.OPTIMIZATION,
+        status="completed",
+        backend_used=QuantumBackend.MOCK,
+        start_time=start_time,
+        end_time=start_time,
+        execution_time_seconds=3.25,
+        parameters={},
+        metrics={},
+    )
 
 
 # ============================================================================
@@ -617,6 +642,63 @@ def test_get_simulation_result_endpoint(test_client):
     assert response.status_code == 200
     data = response.json()
     assert data["simulation_id"] == simulation_id
+
+
+@pytest.mark.api
+@pytest.mark.quantum
+def test_progress_websocket_unknown_id_returns_not_found(test_client):
+    """Progress websocket does not synthesize a running state for unknown IDs."""
+    _reset_progress_state()
+
+    with test_client.websocket_connect("/simulate/progress/missing-sim") as websocket:
+        data = websocket.receive_json()
+
+    assert data["simulation_id"] == "missing-sim"
+    assert data["status"] == "not_found"
+    assert data["progress"] == pytest.approx(0.0)
+    assert data["message"] == "Simulation missing-sim not found or not active"
+
+
+@pytest.mark.api
+@pytest.mark.quantum
+def test_progress_websocket_streams_active_status(test_client):
+    """Progress websocket reads active runtime state instead of sending a heartbeat."""
+    _reset_progress_state()
+    quantum_simulator_api.active_simulations["active-sim"] = SimulationStatus(
+        simulation_id="active-sim",
+        status="running",
+        progress=0.23,
+        elapsed_time_seconds=1.5,
+        estimated_time_remaining=4.0,
+        message="Running quantum optimization...",
+    )
+
+    with test_client.websocket_connect("/simulate/progress/active-sim") as websocket:
+        data = websocket.receive_json()
+
+    assert data["simulation_id"] == "active-sim"
+    assert data["status"] == "running"
+    assert data["progress"] == pytest.approx(0.23)
+    assert data["elapsed_time_seconds"] == pytest.approx(1.5)
+    assert data["estimated_time_remaining"] == pytest.approx(4.0)
+    assert data["message"] == "Running quantum optimization..."
+
+
+@pytest.mark.api
+@pytest.mark.quantum
+def test_progress_websocket_returns_completed_result(test_client):
+    """Progress websocket emits cached completion state for finished simulations."""
+    _reset_progress_state()
+    quantum_simulator_api.get_cache().set(_completed_result("completed-sim"))
+
+    with test_client.websocket_connect("/simulate/progress/completed-sim") as websocket:
+        data = websocket.receive_json()
+
+    assert data["simulation_id"] == "completed-sim"
+    assert data["status"] == "completed"
+    assert data["progress"] == pytest.approx(1.0)
+    assert data["elapsed_time_seconds"] == pytest.approx(3.25)
+    assert data["message"] == "Simulation completed"
 
 
 @pytest.mark.api

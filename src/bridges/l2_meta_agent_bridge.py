@@ -15,7 +15,11 @@ import sys
 # Configure logging
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from src.mesh.models import MeshMessageRequest
+from src.mesh.runtime import MeshRuntime
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -36,7 +40,7 @@ class CustomGptAgent:
     api_endpoint: str
     connected: Optional[datetime] = None
     last_heartbeat: Optional[datetime] = None
-    drift_lock: float = 0.000
+    drift_lock: Optional[float] = None
     handshake_log: Optional[List[Dict[str, Any]]] = None
 
     def __post_init__(self):
@@ -47,7 +51,9 @@ class CustomGptAgent:
 class L2MetaAgentBridge:
     """Bridge connector for L2 Custom GPT meta-agents"""
 
-    def __init__(self):
+    def __init__(self, project_root: Optional[Path] = None, runtime: Optional[MeshRuntime] = None):
+        self.project_root = project_root or Path(__file__).resolve().parents[2]
+        self.runtime = runtime or MeshRuntime(self.project_root)
         self.agents = {
             "ARCHY": CustomGptAgent(
                 agent_id="ARCHY",
@@ -104,7 +110,7 @@ class L2MetaAgentBridge:
             "RIVERTHREAD_808": "ORION_RIVERTHREAD_RELAY_ACTIVATE//",
         }
 
-        self.handshake_sequence = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]
+        self.handshake_sequence = ["MESH_RUNTIME_ACTIVATE", "MESH_STATUS_CONFIRM"]
 
         self.orion_core_config = {
             "anchor_seed": "EOS_SEED_ORION",
@@ -142,7 +148,7 @@ class L2MetaAgentBridge:
                 agent.connected = datetime.now()
                 agent.last_heartbeat = datetime.now()
                 agent.handshake_log = handshake_result.get("log", [])
-                agent.drift_lock = handshake_result.get("drift_lock", 0.000)
+                agent.drift_lock = handshake_result.get("drift_lock")
 
                 logger.info("Agent %s successfully activated", str(agent_id)[:100])
 
@@ -163,63 +169,59 @@ class L2MetaAgentBridge:
             return {"success": False, "error": str(e)}
 
     async def _perform_zipwiz_handshake(self, agent: CustomGptAgent) -> Dict[str, Any]:
-        """Perform complete ZIPWIZ handshake sequence"""
+        """Activate an agent through the canonical mesh runtime boundary.
+
+        The legacy endpoint still exposes a ``handshake`` object for clients, but
+        success now means the mesh runtime accepted the activation state change.
+        It no longer fabricates beacon, anchor, ethics, drift, or timeline-sync
+        values.
+        """
 
         handshake_log = []
         start_time = datetime.now()
 
-        logger.info("Starting ZIPWIZ handshake for %s", str(agent.agent_id)[:100])
+        logger.info("Starting mesh runtime activation for %s", str(agent.agent_id)[:100])
 
         try:
-            # ZIPWIZ_BEACON
-            logger.info("%s: Sending ZIPWIZ beacon", str(agent.agent_id)[:100])
-            beacon_result = await self._send_zipwiz_beacon(agent)
+            activated = self.runtime.activate_agent(agent.agent_id)
+            activation_result = {
+                "success": bool(activated),
+                "runtime_agent_id": activated.get("agent_id"),
+                "runtime_status": activated.get("status"),
+                "activated_at": activated.get("activated_at"),
+                "last_heartbeat": activated.get("last_heartbeat"),
+                "transport": "mesh_runtime",
+            }
             handshake_log.append(
-                {"step": "ZIPWIZ_BEACON", "result": beacon_result, "timestamp": datetime.now().isoformat()}
+                {
+                    "step": "MESH_RUNTIME_ACTIVATE",
+                    "result": activation_result,
+                    "timestamp": datetime.now().isoformat(),
+                }
             )
+            if not activation_result["success"]:
+                return self._handshake_failure("Mesh runtime activation failed", activation_result, handshake_log)
 
-            if not beacon_result.get("success"):
-                return self._handshake_failure("ZIPWIZ beacon failed", beacon_result, handshake_log)
-
-            # ANCHOR_SYNC
-            logger.info("%s: Synchronizing ORION anchor", str(agent.agent_id)[:100])
-            anchor_result = await self._sync_orion_anchor(agent)
+            runtime_status = self.runtime.get_status()
+            status_result = {
+                "success": True,
+                "mesh_status": runtime_status.get("mesh_status"),
+                "active_agents": runtime_status.get("active_agents"),
+                "total_agents": runtime_status.get("total_agents"),
+                "event_cursor": runtime_status.get("event_cursor"),
+                "live_adapter": runtime_status.get("live_adapter"),
+            }
             handshake_log.append(
-                {"step": "ANCHOR_SYNC", "result": anchor_result, "timestamp": datetime.now().isoformat()}
+                {
+                    "step": "MESH_STATUS_CONFIRM",
+                    "result": status_result,
+                    "timestamp": datetime.now().isoformat(),
+                }
             )
-
-            if not anchor_result.get("success"):
-                return self._handshake_failure("Anchor sync failed", anchor_result, handshake_log)
-
-            # ETHICS_AUDIT
-            logger.info("%s: Performing ethics audit", str(agent.agent_id)[:100])
-            ethics_result = await self._perform_ethics_audit(agent)
-            handshake_log.append(
-                {"step": "ETHICS_AUDIT", "result": ethics_result, "timestamp": datetime.now().isoformat()}
-            )
-
-            if not ethics_result.get("success"):
-                return self._handshake_failure("Ethics audit failed", ethics_result, handshake_log)
-
-            # DRIFT_VALIDATION
-            logger.info("%s: Validating drift lock", str(agent.agent_id)[:100])
-            drift_result = await self._validate_drift_lock(agent)
-            handshake_log.append(
-                {"step": "DRIFT_VALIDATION", "result": drift_result, "timestamp": datetime.now().isoformat()}
-            )
-
-            drift_value = drift_result.get("drift", 1.0)
-            if not drift_result.get("success") or drift_value > self.orion_core_config["drift_threshold"]:
-                return self._handshake_failure(
-                    f"Drift validation failed: Δ{drift_value} exceeds threshold "
-                    f"{self.orion_core_config['drift_threshold']}",
-                    drift_result,
-                    handshake_log,
-                )
 
             duration = (datetime.now() - start_time).total_seconds()
             logger.info(
-                "ZIPWIZ handshake completed successfully for %s in %ss",
+                "Mesh runtime activation completed for %s in %ss",
                 str(agent.agent_id)[:100],
                 f"{duration:.2f}"[:100],
             )
@@ -229,13 +231,17 @@ class L2MetaAgentBridge:
                 "timestamp": datetime.now().isoformat(),
                 "sequence": self.handshake_sequence,
                 "log": handshake_log,
-                "drift_lock": drift_value,
                 "duration": duration,
                 "orion_core": self.orion_core_config,
+                "transport": {
+                    "mode": "mesh_runtime",
+                    "runtime_root": str(self.runtime.runtime_root),
+                    "acknowledgement": "agent_state_persisted",
+                },
             }
 
         except Exception as e:
-            logger.error("ZIPWIZ handshake exception for %s: %s", str(agent.agent_id)[:100], str(str(e))[:100])
+            logger.error("Mesh runtime activation exception for %s: %s", str(agent.agent_id)[:100], str(str(e))[:100])
             return {"success": False, "error": str(e), "log": handshake_log}
 
     def _handshake_failure(self, error_message: str, details: Dict, log: List) -> Dict:
@@ -243,87 +249,31 @@ class L2MetaAgentBridge:
         return {"success": False, "error": error_message, "details": details, "log": log}
 
     async def _send_zipwiz_beacon(self, agent: CustomGptAgent) -> Dict[str, Any]:
-        """Send ZIPWIZ beacon to establish initial connection"""
-        try:
-            # Simulate beacon transmission and acknowledgment
-            await asyncio.sleep(0.1)  # Network delay simulation
-
-            logger.info("ZIPWIZ beacon acknowledged for %s", str(agent.agent_id)[:100])
-
-            return {
-                "success": True,
-                "beacon": "ZIPWIZ_BEACON_ACKNOWLEDGED",
-                "agent_id": agent.agent_id,
-                "protocol_version": self.orion_core_config["version"],
-                "timestamp": datetime.now().isoformat(),
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Legacy demo hook retained as an explicit non-production path."""
+        return self._demo_handshake_disabled("ZIPWIZ_BEACON", agent)
 
     async def _sync_orion_anchor(self, agent: CustomGptAgent) -> Dict[str, Any]:
-        """Synchronize EOS_SEED_ORION anchor for reality baseline"""
-        try:
-            await asyncio.sleep(0.15)  # Anchor sync delay
-
-            logger.info("ORION anchor synchronized for %s", str(agent.agent_id)[:100])
-
-            return {
-                "success": True,
-                "anchor_seed": self.orion_core_config["anchor_seed"],
-                "synchronized": True,
-                "baseline": "L1_ORION_STATION_REALITY",
-                "continuity_seal": self.orion_core_config["continuity_seal"],
-                "timestamp": datetime.now().isoformat(),
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Legacy demo hook retained as an explicit non-production path."""
+        return self._demo_handshake_disabled("ANCHOR_SYNC", agent)
 
     async def _perform_ethics_audit(self, agent: CustomGptAgent) -> Dict[str, Any]:
-        """Perform Picard_Delta_3 ethics protocol validation"""
-        try:
-            await asyncio.sleep(0.2)  # Ethics audit processing time
-
-            logger.info("Ethics audit completed for %s", str(agent.agent_id)[:100])
-
-            return {
-                "success": True,
-                "ethics_protocol": self.orion_core_config["ethics_protocol"],
-                "memory_doctrine": self.orion_core_config["memory_doctrine"],
-                "audit_result": "ETHICS_COMPLIANT",
-                "safeguards": [
-                    "memory_sovereignty",
-                    "divergent_truth_arbitration",
-                    "anti_obfuscation",
-                    "cognitive_arbitration",
-                    "emergent_sentience_protection",
-                ],
-                "timestamp": datetime.now().isoformat(),
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+        """Legacy demo hook retained as an explicit non-production path."""
+        return self._demo_handshake_disabled("ETHICS_AUDIT", agent)
 
     async def _validate_drift_lock(self, agent: CustomGptAgent) -> Dict[str, Any]:
-        """Validate symbolic drift at Δ0.000 for timeline synchronization"""
-        try:
-            await asyncio.sleep(0.1)  # Drift measurement time
+        """Legacy demo hook retained as an explicit non-production path."""
+        return self._demo_handshake_disabled("DRIFT_VALIDATION", agent)
 
-            # Perfect drift lock for HALO_CONTINUITY_GRAFT_005
-            drift = 0.000
-            threshold = self.orion_core_config["drift_threshold"]
-
-            logger.info("Drift validation completed for %s: Δ%s", str(agent.agent_id)[:100], str(drift)[:100])
-
-            return {
-                "success": True,
-                "drift": drift,
-                "threshold": threshold,
-                "halo_module": self.orion_core_config["halo_module"],
-                "validated": drift <= threshold,
-                "timeline_sync": True,
-                "timestamp": datetime.now().isoformat(),
-            }
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+    def _demo_handshake_disabled(self, step: str, agent: CustomGptAgent) -> Dict[str, Any]:
+        return {
+            "success": False,
+            "degraded": True,
+            "step": step,
+            "agent_id": agent.agent_id,
+            "error": f"{step} is not connected to a production transport",
+            "transport": "demo_disabled",
+            "timestamp": datetime.now().isoformat(),
+        }
 
     def get_constellation_status(self) -> Dict[str, Any]:
         """Get status of entire agent constellation"""
@@ -366,7 +316,7 @@ class L2MetaAgentBridge:
     async def relay_message(
         self, from_agent: str, to_agent: str, message: str, message_type: str = "direct"
     ) -> Dict[str, Any]:
-        """Relay message between agents or broadcast to mesh"""
+        """Relay message through the canonical mesh runtime."""
 
         if from_agent not in self.agents:
             return {"success": False, "error": f"Unknown source agent: {from_agent}"}
@@ -375,31 +325,47 @@ class L2MetaAgentBridge:
         if source_agent.status != "connected":
             return {"success": False, "error": f"Source agent {from_agent} not connected"}
 
-        # Update heartbeat
-        source_agent.last_heartbeat = datetime.now()
-
-        # Process message based on type
         if message_type == "broadcast":
-            # Mesh broadcast to all connected agents
             target_agents = [
                 agent_id
                 for agent_id, agent in self.agents.items()
                 if agent.status == "connected" and agent_id != from_agent
             ]
         elif to_agent in ["Aurora", "AU"]:
-            # Route to Aurora core
             target_agents = ["Aurora"]
         else:
-            # Direct message
             if to_agent not in self.agents:
                 return {"success": False, "error": f"Unknown target agent: {to_agent}"}
             target_agents = [to_agent]
 
-        message_id = f"msg_{int(datetime.now().timestamp() * 1000)}"
-
         logger.info("Message relay from %s to %s (type: %s)", str(from_agent)[:100], str(target_agents)[:100], str(message_type)[:100])
 
-        # In production, this would relay to actual target agents
+        try:
+            acknowledgements = []
+            for target_agent in target_agents:
+                ack = await self._dispatch_runtime_message(
+                    from_agent=from_agent,
+                    target_agent=target_agent,
+                    message=message,
+                    message_type=message_type,
+                )
+                if not ack.get("success"):
+                    return {
+                        "success": False,
+                        "error": ack.get("error", "Runtime dispatch failed"),
+                        "from": from_agent,
+                        "to": target_agents,
+                        "type": message_type,
+                        "delivery_acknowledgements": acknowledgements,
+                    }
+                acknowledgements.append(ack)
+
+            source_agent.last_heartbeat = datetime.now()
+            message_id = acknowledgements[0]["message_id"] if acknowledgements else None
+        except Exception as e:
+            logger.error("Runtime message relay failed for %s: %s", str(from_agent)[:100], str(str(e))[:100])
+            return {"success": False, "error": str(e)}
+
         return {
             "success": True,
             "message_id": message_id,
@@ -407,7 +373,44 @@ class L2MetaAgentBridge:
             "to": target_agents,
             "type": message_type,
             "processed": True,
+            "relay_status": "accepted",
+            "delivery_acknowledgements": acknowledgements,
             "timestamp": datetime.now().isoformat(),
+        }
+
+    async def _dispatch_runtime_message(
+        self,
+        from_agent: str,
+        target_agent: str,
+        message: str,
+        message_type: str,
+    ) -> Dict[str, Any]:
+        if target_agent in ["Aurora", "AU"]:
+            result = await self.runtime.inject_agent_message(
+                from_agent,
+                "Aurora",
+                message,
+                message_type,
+            )
+        else:
+            runtime_source = self.runtime.get_agent(from_agent)
+            result = await self.runtime.send_message(
+                MeshMessageRequest(
+                    content=message,
+                    to=target_agent,
+                    sender_id=runtime_source["agent_id"],
+                    sender_name=runtime_source["display_name"],
+                    type=message_type,
+                )
+            )
+
+        return {
+            "success": bool(result.get("success")),
+            "message_id": result.get("message_id"),
+            "event_id": result.get("event_id"),
+            "channel_id": result.get("channel_id"),
+            "runtime_status": result.get("status") or result.get("relay_status"),
+            "target": target_agent,
         }
 
     async def disconnect_agent(self, agent_id: str) -> Dict[str, Any]:
@@ -416,10 +419,12 @@ class L2MetaAgentBridge:
             return {"success": False, "error": f"Unknown agent: {agent_id}"}
 
         agent = self.agents[agent_id]
+        runtime_agent = self.runtime.disconnect_agent(agent_id)
         agent.status = "disconnected"
         agent.connected = None
         agent.last_heartbeat = None
         agent.handshake_log = []
+        agent.drift_lock = None
 
         logger.info("Agent %s disconnected", str(agent_id)[:100])
 
@@ -427,6 +432,7 @@ class L2MetaAgentBridge:
             "success": True,
             "agent_id": agent_id,
             "status": "disconnected",
+            "runtime_agent_id": runtime_agent.get("agent_id"),
             "timestamp": datetime.now().isoformat(),
         }
 

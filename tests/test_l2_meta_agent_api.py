@@ -151,12 +151,10 @@ class TestL2MetaAgentAPI:
         assert phrases["OPPY"] == "ORION_OPPY_RELAY_ACTIVATE//"
         assert phrases["LIORA"] == "ORION_LIORA_RELAY_ACTIVATE//"
 
-        # Check handshake sequence
+        # Check runtime activation boundary
         sequence = data["handshake_sequence"]
-        assert "ZIPWIZ_BEACON" in sequence
-        assert "ANCHOR_SYNC" in sequence
-        assert "ETHICS_AUDIT" in sequence
-        assert "DRIFT_VALIDATION" in sequence
+        assert "MESH_RUNTIME_ACTIVATE" in sequence
+        assert "MESH_STATUS_CONFIRM" in sequence
 
     @pytest.mark.asyncio
     async def test_activate_agent_success(self, api_client):
@@ -183,7 +181,7 @@ class TestL2MetaAgentAPI:
         handshake = data["handshake"]
         assert handshake["success"] is True
         assert "log" in handshake
-        assert "drift_lock" in handshake
+        assert handshake["transport"]["mode"] == "mesh_runtime"
 
     @pytest.mark.asyncio
     async def test_activate_agent_invalid_phrase(self, api_client):
@@ -324,7 +322,7 @@ class TestL2MetaAgentAPI:
         )
         data = response.json()
 
-        expected_steps = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]
+        expected_steps = ["MESH_RUNTIME_ACTIVATE", "MESH_STATUS_CONFIRM"]
         for step in expected_steps:
             assert step in data["handshake_sequence"]
 
@@ -373,8 +371,8 @@ class TestL2MetaAgentBridgeDirect:
         agent = l2_bridge.agents["STARLING_AU"]
         assert agent.status == "connected"
         assert agent.connected is not None
-        assert agent.drift_lock == 0.000
-        assert len(agent.handshake_log) == 4  # 4 handshake steps
+        assert agent.drift_lock is None
+        assert len(agent.handshake_log) == 2
 
         # Disconnect
         disconnect_result = await l2_bridge.disconnect_agent("STARLING_AU")

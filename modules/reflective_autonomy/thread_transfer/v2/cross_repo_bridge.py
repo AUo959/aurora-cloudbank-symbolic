@@ -18,9 +18,13 @@ Ethics: Picard_Delta_3_Extended
 """
 
 import asyncio
+import hashlib
+import json
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 from enum import Enum
 
@@ -422,20 +426,108 @@ class CrossRepositoryBridge:
         bridge.current_stage = CrossRepoHandshakeStage.THREAD_TRANSFER
         
         try:
-            # Transfer thread context (metadata, glyph chain, etc.)
-            # This is placeholder logic - would integrate with actual thread transfer
+            context_payload = self._resolve_thread_context_payload(bridge)
+            if not context_payload:
+                bridge.metadata["thread_context_transferred"] = False
+                return {
+                    "success": False,
+                    "stage": "thread_transfer",
+                    "error": "No thread context payload available for transfer"
+                }
+
+            target_repo_path = bridge.metadata.get("target_repo_path")
+            if not target_repo_path:
+                bridge.metadata["thread_context_transferred"] = False
+                return {
+                    "success": False,
+                    "stage": "thread_transfer",
+                    "error": "Target repository path is unavailable"
+                }
+
+            transfer_timestamp = datetime.now().isoformat()
+            transfer_record = {
+                "bridge_id": bridge.bridge_id,
+                "thread_id": bridge.thread_id,
+                "source_repo_id": bridge.source_repo_id,
+                "target_repo_id": bridge.target_repo_id,
+                "anchor_hash": bridge.anchor_hash,
+                "transferred_at": transfer_timestamp,
+                "context": context_payload,
+                "source_anchor": bridge.metadata.get("source_anchor"),
+            }
+            transfer_bytes = json.dumps(
+                transfer_record,
+                sort_keys=True,
+                indent=2,
+                default=str,
+            ).encode("utf-8")
+            transfer_hash = hashlib.sha256(transfer_bytes).hexdigest()
+
+            transfer_path = self._thread_context_path(target_repo_path, bridge.thread_id)
+            transfer_path.parent.mkdir(parents=True, exist_ok=True)
+            transfer_path.write_bytes(transfer_bytes)
+
+            written_bytes = transfer_path.read_bytes()
+            written_hash = hashlib.sha256(written_bytes).hexdigest()
+            if written_hash != transfer_hash:
+                bridge.metadata["thread_context_transferred"] = False
+                return {
+                    "success": False,
+                    "stage": "thread_transfer",
+                    "error": "Transferred thread context failed hash verification"
+                }
+
             bridge.metadata["thread_context_transferred"] = True
-            bridge.metadata["transfer_timestamp"] = datetime.now().isoformat()
+            bridge.metadata["thread_context_transfer"] = {
+                "target_path": str(transfer_path),
+                "sha256": transfer_hash,
+                "bytes_transferred": len(written_bytes),
+                "transfer_timestamp": transfer_timestamp,
+            }
             
             logger.info(f"Stage 5 complete for bridge {bridge.bridge_id}")
-            return {"success": True, "stage": "thread_transfer"}
+            return {
+                "success": True,
+                "stage": "thread_transfer",
+                "sha256": transfer_hash,
+                "bytes_transferred": len(written_bytes),
+                "target_path": str(transfer_path),
+            }
             
         except Exception as e:
+            bridge.metadata["thread_context_transferred"] = False
             return {
                 "success": False,
                 "stage": "thread_transfer",
                 "error": str(e)
             }
+
+    def _resolve_thread_context_payload(self, bridge: CrossRepoBridge) -> Optional[Dict[str, Any]]:
+        """Resolve a concrete thread context payload for stage-5 transfer."""
+        direct_context = (
+            bridge.metadata.get("thread_context")
+            or bridge.metadata.get("context_data")
+            or bridge.metadata.get("thread_payload")
+        )
+        if isinstance(direct_context, dict) and direct_context:
+            return direct_context
+
+        source_anchor = bridge.metadata.get("source_anchor") or {}
+        source_metadata = source_anchor.get("metadata", {}) if isinstance(source_anchor, dict) else {}
+        anchor_context = (
+            source_metadata.get("thread_context")
+            or source_metadata.get("context_data")
+            or source_metadata.get("thread_payload")
+        )
+        if isinstance(anchor_context, dict) and anchor_context:
+            return anchor_context
+
+        return None
+
+    def _thread_context_path(self, target_repo_path: str, thread_id: str) -> Path:
+        """Return the target-repo path for a transferred thread context record."""
+        safe_thread_id = re.sub(r"[^A-Za-z0-9_.-]+", "_", thread_id).strip("_") or "thread"
+        return Path(target_repo_path) / ".aurora" / "thread_context" / f"{safe_thread_id}.json"
 
     async def _stage6_sync_execution(self, bridge: CrossRepoBridge) -> Dict[str, Any]:
         """Stage 6: Sync Execution."""
@@ -487,6 +579,14 @@ class CrossRepositoryBridge:
         try:
             target_repo_path = bridge.metadata["target_repo_path"]
             target_branch = bridge.metadata["target_branch"]
+
+            transfer_verification = self._verify_thread_context_transfer(bridge)
+            if not transfer_verification["success"]:
+                return {
+                    "success": False,
+                    "stage": "verification",
+                    "error": transfer_verification["error"]
+                }
             
             # Verify target anchor matches source
             target_anchor = await self.propagator.read_anchor(
@@ -522,6 +622,39 @@ class CrossRepositoryBridge:
                 "stage": "verification",
                 "error": str(e)
             }
+
+    def _verify_thread_context_transfer(self, bridge: CrossRepoBridge) -> Dict[str, Any]:
+        """Verify the stage-5 thread context artifact still matches its receipt."""
+        receipt = bridge.metadata.get("thread_context_transfer")
+        if not bridge.metadata.get("thread_context_transferred") or not isinstance(receipt, dict):
+            return {
+                "success": False,
+                "error": "Thread context transfer receipt is missing"
+            }
+
+        target_path = receipt.get("target_path")
+        expected_hash = receipt.get("sha256")
+        if not target_path or not expected_hash:
+            return {
+                "success": False,
+                "error": "Thread context transfer receipt is incomplete"
+            }
+
+        transfer_path = Path(target_path)
+        if not transfer_path.exists():
+            return {
+                "success": False,
+                "error": "Thread context transfer artifact is missing"
+            }
+
+        actual_hash = hashlib.sha256(transfer_path.read_bytes()).hexdigest()
+        if actual_hash != expected_hash:
+            return {
+                "success": False,
+                "error": "Thread context transfer artifact hash mismatch"
+            }
+
+        return {"success": True}
 
     def get_bridge(self, bridge_id: str) -> Optional[CrossRepoBridge]:
         """Get bridge information."""

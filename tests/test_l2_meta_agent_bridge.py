@@ -11,7 +11,7 @@ Chain: #932//. Integration Coverage Sprint
 
 import pytest
 from datetime import datetime
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch
 
 # Import the module under test
 from src.bridges.l2_meta_agent_bridge import (
@@ -39,7 +39,7 @@ class TestCustomGptAgent:
         assert agent.status == "disconnected"
         assert agent.connected is None
         assert agent.last_heartbeat is None
-        assert agent.drift_lock == 0.000
+        assert agent.drift_lock is None
         assert agent.handshake_log == []
 
     def test_create_agent_with_all_fields(self):
@@ -123,7 +123,7 @@ class TestL2MetaAgentBridgeInit:
     def test_handshake_sequence_defined(self):
         """Test handshake sequence is properly defined"""
         bridge = L2MetaAgentBridge()
-        expected = ["ZIPWIZ_BEACON", "ANCHOR_SYNC", "ETHICS_AUDIT", "DRIFT_VALIDATION"]
+        expected = ["MESH_RUNTIME_ACTIVATE", "MESH_STATUS_CONFIRM"]
         assert bridge.handshake_sequence == expected
 
     def test_orion_core_config_set(self):
@@ -221,56 +221,58 @@ class TestZIPWIZHandshake:
 
     @pytest.mark.asyncio
     async def test_zipwiz_beacon(self, bridge):
-        """Test ZIPWIZ beacon step"""
+        """Legacy ZIPWIZ beacon helper is explicitly non-production."""
         agent = bridge.agents["ARCHY"]
         result = await bridge._send_zipwiz_beacon(agent)
 
-        assert result["success"] is True
-        assert result["beacon"] == "ZIPWIZ_BEACON_ACKNOWLEDGED"
+        assert result["success"] is False
+        assert result["degraded"] is True
+        assert result["transport"] == "demo_disabled"
+        assert result["step"] == "ZIPWIZ_BEACON"
         assert result["agent_id"] == "ARCHY"
 
     @pytest.mark.asyncio
     async def test_orion_anchor_sync(self, bridge):
-        """Test Orion anchor synchronization"""
+        """Legacy anchor sync helper is explicitly non-production."""
         agent = bridge.agents["OPPY"]
         result = await bridge._sync_orion_anchor(agent)
 
-        assert result["success"] is True
-        assert result["anchor_seed"] == "EOS_SEED_ORION"
-        assert result["synchronized"] is True
-        assert result["baseline"] == "L1_ORION_STATION_REALITY"
+        assert result["success"] is False
+        assert result["degraded"] is True
+        assert result["transport"] == "demo_disabled"
+        assert result["step"] == "ANCHOR_SYNC"
 
     @pytest.mark.asyncio
     async def test_ethics_audit(self, bridge):
-        """Test ethics audit step"""
+        """Legacy ethics audit helper is explicitly non-production."""
         agent = bridge.agents["LIORA"]
         result = await bridge._perform_ethics_audit(agent)
 
-        assert result["success"] is True
-        assert result["ethics_protocol"] == "Picard_Delta_3"
-        assert result["audit_result"] == "ETHICS_COMPLIANT"
-        assert "safeguards" in result
-        assert len(result["safeguards"]) == 5
+        assert result["success"] is False
+        assert result["degraded"] is True
+        assert result["transport"] == "demo_disabled"
+        assert result["step"] == "ETHICS_AUDIT"
 
     @pytest.mark.asyncio
     async def test_drift_validation(self, bridge):
-        """Test drift validation step"""
+        """Legacy drift validation helper is explicitly non-production."""
         agent = bridge.agents["STARLING_AU"]
         result = await bridge._validate_drift_lock(agent)
 
-        assert result["success"] is True
-        assert result["drift"] == 0.000
-        assert result["validated"] is True
-        assert result["timeline_sync"] is True
+        assert result["success"] is False
+        assert result["degraded"] is True
+        assert result["transport"] == "demo_disabled"
+        assert result["step"] == "DRIFT_VALIDATION"
 
     @pytest.mark.asyncio
-    async def test_handshake_returns_drift_lock(self, bridge):
-        """Test handshake returns drift lock value"""
+    async def test_handshake_returns_runtime_transport(self, bridge):
+        """Test activation handshake reports the real runtime boundary."""
         agent = bridge.agents["ARCHY"]
         result = await bridge._perform_zipwiz_handshake(agent)
 
-        assert "drift_lock" in result
-        assert result["drift_lock"] <= bridge.orion_core_config["drift_threshold"]
+        assert "drift_lock" not in result
+        assert result["transport"]["mode"] == "mesh_runtime"
+        assert result["transport"]["acknowledgement"] == "agent_state_persisted"
 
     def test_handshake_failure_helper(self, bridge):
         """Test handshake failure helper method"""
@@ -367,6 +369,8 @@ class TestMessageRelay:
         assert result["from"] == "ARCHY"
         assert "OPPY" in result["to"]
         assert result["type"] == "direct"
+        assert result["relay_status"] == "accepted"
+        assert result["delivery_acknowledgements"][0]["event_id"] > 0
 
     @pytest.mark.asyncio
     async def test_relay_to_aurora(self, connected_bridge):

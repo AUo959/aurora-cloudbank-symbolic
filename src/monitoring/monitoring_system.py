@@ -6,6 +6,7 @@ and alerting for comprehensive agent oversight.
 """
 
 import logging
+import json
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_now, utc_iso
@@ -66,6 +67,19 @@ class Intervention:
         data['type'] = self.type.value
         return data
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Intervention":
+        """Restore an intervention from persisted data."""
+        return cls(
+            timestamp=data['timestamp'],
+            agent_id=data['agent_id'],
+            type=InterventionType(data['type']),
+            reason=data['reason'],
+            context=data.get('context', {}),
+            success=data['success'],
+            error=data.get('error')
+        )
+
 
 class MonitoringSystem:
     """
@@ -96,13 +110,19 @@ class MonitoringSystem:
             ethics_rules_path: Path to ethics rules configuration
             config: Alert configuration
         """
-        self.storage_dir = storage_dir or Path("./monitoring_data")
+        self.storage_dir = Path(storage_dir or "./monitoring_data")
+        self._state_path = self.storage_dir / "monitoring_state.json"
         self.config = config or AlertConfig()
         
         # Initialize subsystems
         self.behavior_monitor = BehaviorMonitor(retention_hours=168)
-        self.drift_detector = DriftDetector()
-        self.ethics_engine = EthicsEngine(rules_path=ethics_rules_path)
+        self.drift_detector = DriftDetector(
+            alerts_path=self.storage_dir / "drift_alerts.jsonl"
+        )
+        self.ethics_engine = EthicsEngine(
+            rules_path=ethics_rules_path,
+            violations_path=self.storage_dir / "ethics_violations.jsonl"
+        )
         
         audit_storage = self.storage_dir / "audit_log.json"
         self.audit_logger = AuditLogger(storage_path=audit_storage)
@@ -118,6 +138,8 @@ class MonitoringSystem:
             AlertLevel.WARNING: [],
             AlertLevel.CRITICAL: []
         }
+
+        self.import_state()
         
         logger.info("Monitoring system initialized (storage=%s)", storage_dir)
 
@@ -396,6 +418,7 @@ class MonitoringSystem:
         self.interventions.append(intervention)
         if success:
             self.last_intervention_time[agent_id] = utc_now()
+        self._persist_state()
         
         # Log to audit
         self.audit_logger.log_intervention(
@@ -568,7 +591,76 @@ class MonitoringSystem:
         """Export full monitoring system state"""
         return {
             'baselines': self.drift_detector.export_baselines(),
+            'drift_alerts': self.drift_detector.export_alerts(),
             'rules': self.ethics_engine.export_rules(),
+            'violations': self.ethics_engine.export_violations(),
             'behavior_history': self.behavior_monitor.export_history(),
-            'interventions': [i.to_dict() for i in self.interventions]
+            'interventions': [i.to_dict() for i in self.interventions],
+            'last_intervention_time': {
+                agent_id: timestamp.isoformat()
+                for agent_id, timestamp in self.last_intervention_time.items()
+            }
         }
+
+    def import_state(self, state: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        Import persisted monitoring system state.
+
+        When state is omitted, the method attempts to load monitoring_state.json
+        from storage_dir. Missing state is a normal first-start condition.
+        """
+        if state is None:
+            if not self._state_path.exists():
+                return False
+
+            try:
+                with open(self._state_path, 'r') as f:
+                    state = json.load(f)
+            except Exception as e:
+                logger.error("Failed to load monitoring state: %s", e)
+                return False
+
+        if 'baselines' in state:
+            self.drift_detector.import_baselines(state['baselines'])
+        if 'drift_alerts' in state:
+            self.drift_detector.import_alerts(state['drift_alerts'])
+        if 'violations' in state:
+            self.ethics_engine.import_violations(state['violations'])
+
+        self.interventions = [
+            Intervention.from_dict(intervention_data)
+            for intervention_data in state.get('interventions', [])
+        ]
+        self.last_intervention_time = {
+            agent_id: datetime.fromisoformat(timestamp)
+            for agent_id, timestamp in state.get('last_intervention_time', {}).items()
+        }
+
+        logger.info(
+            "Imported monitoring state: interventions=%d cooldowns=%d",
+            len(self.interventions), len(self.last_intervention_time)
+        )
+        return True
+
+    def _persist_state(self):
+        """Persist intervention state needed for restart-safe cooldowns."""
+        try:
+            self._state_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self._state_path, 'w') as f:
+                json.dump(
+                    {
+                        'interventions': [
+                            intervention.to_dict()
+                            for intervention in self.interventions
+                        ],
+                        'last_intervention_time': {
+                            agent_id: timestamp.isoformat()
+                            for agent_id, timestamp in self.last_intervention_time.items()
+                        }
+                    },
+                    f,
+                    indent=2,
+                    sort_keys=True
+                )
+        except Exception as e:
+            logger.error("Failed to persist monitoring state: %s", e)

@@ -27,6 +27,8 @@ var/
 # Logs and data
 logs/
 data/
+monitoring_data/
+.monitoring/
 *.log
 
 # Backup files (timestamped dependency snapshots)

@@ -229,6 +229,24 @@ class TestDriftDetector:
         
         detector.clear_alerts()
         assert len(detector.alerts) == 0
+
+    def test_alerts_persist_across_restart(self, tmp_path):
+        """Test persisted alerts are loaded by new detector instances."""
+        alerts_path = tmp_path / "drift_alerts.jsonl"
+        detector = DriftDetector(alerts_path=alerts_path)
+
+        detector.establish_baseline("agent-1", "metric-1", [10.0, 11.0, 12.0])
+        alert = detector.detect_drift("agent-1", "metric-1", 30.0)
+
+        assert alert is not None
+        restarted = DriftDetector(alerts_path=alerts_path)
+        assert len(restarted.alerts) == 1
+        assert restarted.alerts[0].agent_id == "agent-1"
+        assert restarted.alerts[0].level == alert.level
+
+        restarted.clear_alerts()
+        empty_restart = DriftDetector(alerts_path=alerts_path)
+        assert empty_restart.alerts == []
     
     def test_export_import_baselines(self):
         """Test baseline export and import"""

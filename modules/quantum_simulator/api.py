@@ -25,6 +25,32 @@ MUTATION_DEPENDENCIES = [Depends(require_csrf_token)]
 
 # WebSocket connections for progress tracking
 active_connections: Dict[str, List[WebSocket]] = {}
+active_simulations: Dict[str, SimulationStatus] = {}
+
+
+def _completed_status_from_result(
+    simulation_id: str,
+    result: SimulationResult,
+) -> SimulationStatus:
+    return SimulationStatus(
+        simulation_id=simulation_id,
+        status=result.status,
+        progress=1.0 if result.status == "completed" else 0.0,
+        elapsed_time_seconds=result.execution_time_seconds or 0.0,
+        estimated_time_remaining=None,
+        message=f"Simulation {result.status}",
+    )
+
+
+def _not_found_status(simulation_id: str) -> SimulationStatus:
+    return SimulationStatus(
+        simulation_id=simulation_id,
+        status="not_found",
+        progress=0.0,
+        elapsed_time_seconds=0.0,
+        estimated_time_remaining=None,
+        message=f"Simulation {simulation_id} not found or not active",
+    )
 
 
 @router.post(
@@ -68,13 +94,14 @@ async def run_simulation(request: ScenarioRequest) -> SimulationResult:
         cache = get_cache()
 
         # Create scenario engine
-        engine = ScenarioEngine(orchestrator)
+        engine = ScenarioEngine(orchestrator, status_store=active_simulations)
 
         # Execute scenario
         result = await engine.execute_scenario(request)
 
         # Cache result
         cache.set(result, ttl_hours=24)
+        active_simulations.pop(result.simulation_id, None)
 
         return result
 
@@ -164,14 +191,11 @@ async def get_simulation_status(simulation_id: str) -> SimulationStatus:
 
     if result:
         # Return completed status
-        return SimulationStatus(
-            simulation_id=simulation_id,
-            status=result.status,
-            progress=1.0 if result.status == "completed" else 0.0,
-            elapsed_time_seconds=result.execution_time_seconds or 0.0,
-            estimated_time_remaining=None,
-            message=f"Simulation {result.status}"
-        )
+        return _completed_status_from_result(simulation_id, result)
+
+    status = active_simulations.get(simulation_id)
+    if status:
+        return status
 
     raise HTTPException(
         status_code=404,
@@ -383,28 +407,19 @@ async def simulation_progress_websocket(websocket: WebSocket, simulation_id: str
             # Check if simulation is completed (in cache)
             result = cache.get(simulation_id)
             if result:
-                status = SimulationStatus(
-                    simulation_id=simulation_id,
-                    status=result.status,
-                    progress=1.0,
-                    elapsed_time_seconds=result.execution_time_seconds or 0.0,
-                    estimated_time_remaining=None,
-                    message=f"Simulation {result.status}"
+                await websocket.send_json(
+                    _completed_status_from_result(simulation_id, result).model_dump(mode="json")
                 )
-                await websocket.send_json(status.model_dump(mode="json"))
                 break
 
-            # For active simulations, would query engine status
-            # For now, send periodic heartbeat
-            status = SimulationStatus(
-                simulation_id=simulation_id,
-                status="running",
-                progress=0.5,
-                elapsed_time_seconds=0.0,
-                estimated_time_remaining=None,
-                message="Simulation in progress..."
-            )
+            status = active_simulations.get(simulation_id)
+            if not status:
+                await websocket.send_json(_not_found_status(simulation_id).model_dump(mode="json"))
+                break
+
             await websocket.send_json(status.model_dump(mode="json"))
+            if status.status in {"completed", "failed", "timeout"}:
+                break
 
             await asyncio.sleep(1.0)
 
@@ -418,7 +433,8 @@ async def simulation_progress_websocket(websocket: WebSocket, simulation_id: str
     finally:
         # Cleanup connection
         if simulation_id in active_connections:
-            active_connections[simulation_id].remove(websocket)
+            if websocket in active_connections[simulation_id]:
+                active_connections[simulation_id].remove(websocket)
             if not active_connections[simulation_id]:
                 del active_connections[simulation_id]
 

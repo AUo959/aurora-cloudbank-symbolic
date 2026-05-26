@@ -35,16 +35,23 @@ class ScenarioEngine:
     risk analysis, optimization, Monte Carlo, quantum annealing.
     """
 
-    def __init__(self, orchestrator: QuantumOrchestrator, enable_dlp: bool = True):
+    def __init__(
+        self,
+        orchestrator: QuantumOrchestrator,
+        enable_dlp: bool = True,
+        status_store: Optional[Dict[str, SimulationStatus]] = None,
+    ):
         """
         Initialize scenario engine.
 
         Args:
             orchestrator: Quantum orchestrator for backend management
             enable_dlp: Enable DLP tracking (default: True)
+            status_store: Optional shared status registry for API progress streams
         """
         self.orchestrator = orchestrator
-        self.active_simulations: Dict[str, SimulationStatus] = {}
+        self.active_simulations = status_store if status_store is not None else {}
+        self._simulation_start_times: Dict[str, float] = {}
         self.dlp_integration = get_dlp_integration() if enable_dlp else None
 
     async def execute_scenario(self, request: ScenarioRequest) -> SimulationResult:
@@ -69,6 +76,7 @@ class ScenarioEngine:
             )
 
         # Initialize status tracking
+        self._simulation_start_times[simulation_id] = start_time_epoch
         self.active_simulations[simulation_id] = SimulationStatus(
             simulation_id=simulation_id,
             status="running",
@@ -102,6 +110,8 @@ class ScenarioEngine:
             # Mark as completed
             self.active_simulations[simulation_id].status = "completed"
             self.active_simulations[simulation_id].progress = 1.0
+            self.active_simulations[simulation_id].elapsed_time_seconds = execution_time
+            self.active_simulations[simulation_id].estimated_time_remaining = None
             self.active_simulations[simulation_id].message = "Simulation completed successfully"
 
             simulation_result = SimulationResult(
@@ -137,6 +147,8 @@ class ScenarioEngine:
             # Mark as failed
             if simulation_id in self.active_simulations:
                 self.active_simulations[simulation_id].status = "failed"
+                self.active_simulations[simulation_id].elapsed_time_seconds = execution_time
+                self.active_simulations[simulation_id].estimated_time_remaining = None
                 self.active_simulations[simulation_id].message = f"Simulation failed: {str(e)}"
 
             # Track error in DLP
@@ -538,8 +550,13 @@ class ScenarioEngine:
             message: Status message
         """
         if simulation_id in self.active_simulations:
-            self.active_simulations[simulation_id].progress = progress
-            self.active_simulations[simulation_id].message = message
+            status = self.active_simulations[simulation_id]
+            status.progress = progress
+            status.elapsed_time_seconds = max(
+                0.0,
+                time.time() - self._simulation_start_times.get(simulation_id, time.time()),
+            )
+            status.message = message
 
     def get_simulation_status(self, simulation_id: str) -> Optional[SimulationStatus]:
         """

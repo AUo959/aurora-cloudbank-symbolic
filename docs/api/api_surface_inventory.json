@@ -1,0 +1,409 @@
+{
+  "schema_version": "1.0",
+  "last_reviewed": "2026-05-26",
+  "governance_decision": "primary-fastapi-with-declared-standalone-services",
+  "status_values": [
+    "active",
+    "active-optional",
+    "active-standalone",
+    "superseded",
+    "test-only",
+    "inactive-unverified",
+    "generated-snapshot"
+  ],
+  "entries": [
+    {
+      "id": "primary_fastapi_app",
+      "owner": "platform-api",
+      "runtime": "fastapi",
+      "entrypoint": "api/aurora_api.py",
+      "mount_path": "/",
+      "service_class": "primary-application",
+      "status": "active",
+      "status_evidence": [
+        "Defines app = FastAPI(...).",
+        "Includes active and optional module routers."
+      ],
+      "notes": "Canonical primary HTTP aggregation surface."
+    },
+    {
+      "id": "aumemmanager",
+      "owner": "memory",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/aumemmanager/api_integration.py",
+      "mount_path": "/memory",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /memory.",
+        "api/aurora_api.py includes it when AUMEMMANAGER_AVAILABLE is true."
+      ],
+      "notes": "Optional dependency surface with guarded import."
+    },
+    {
+      "id": "data_guardian",
+      "owner": "data-governance",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/data_guardian/api.py",
+      "mount_path": "/data",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /data.",
+        "api/aurora_api.py includes it when DATA_GUARDIAN_AVAILABLE is true."
+      ],
+      "notes": "PII scan/redaction surface."
+    },
+    {
+      "id": "insight_ledger",
+      "owner": "audit-ledger",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/insight_ledger/api.py",
+      "mount_path": "/ledger",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /ledger.",
+        "api/aurora_api.py includes it when INSIGHT_LEDGER_AVAILABLE is true."
+      ],
+      "notes": "Audit and insight history surface."
+    },
+    {
+      "id": "quantum_simulator",
+      "owner": "simulation",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/quantum_simulator/api.py",
+      "mount_path": "/simulate",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /simulate.",
+        "api/aurora_api.py includes it when QUANTUM_SIMULATOR_AVAILABLE is true."
+      ],
+      "notes": "Current prefix is /simulate; older /quantum claims are legacy unless reintroduced."
+    },
+    {
+      "id": "rd_pipeline",
+      "owner": "hr-rd-productization",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/hr/rd_api.py",
+      "mount_path": "/rd",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /rd.",
+        "api/aurora_api.py includes rd_router when RD_PIPELINE_AVAILABLE is true."
+      ],
+      "notes": "Distinct from HR staffing and character generation."
+    },
+    {
+      "id": "hr_system",
+      "owner": "hr-staffing",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/hr_system/api/hr_routes.py",
+      "mount_path": "/hr_system",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /hr_system.",
+        "api/aurora_api.py imports modules.hr_system.api.hr_routes and includes the router."
+      ],
+      "notes": "Staffing and character generation surface."
+    },
+    {
+      "id": "cross_repo_collaboration",
+      "owner": "collaboration",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/collab/api_routes.py",
+      "mount_path": "/collab",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /collab.",
+        "api/aurora_api.py imports src.collab.api_routes and includes the router."
+      ],
+      "notes": "Context export/import, invites, sync, and drift routes."
+    },
+    {
+      "id": "subroutines",
+      "owner": "subroutines",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/subroutines/api.py",
+      "mount_path": "/subroutines",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Base and enhanced routers use prefix /subroutines.",
+        "api/aurora_api.py includes src.subroutines.api and src.subroutines.api_enhanced."
+      ],
+      "notes": "Enhanced router entrypoint is src/subroutines/api_enhanced.py."
+    },
+    {
+      "id": "event_coordination",
+      "owner": "coordination",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/coordination/event_api.py",
+      "mount_path": "/api/coordination",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /api/coordination.",
+        "api/aurora_api.py includes it when EVENT_COORDINATION_AVAILABLE is true."
+      ],
+      "notes": "Event, subscription, conflict, lock, workflow, and metrics surface."
+    },
+    {
+      "id": "fleet_bridge",
+      "owner": "fleet",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/integrations/fleet_bridge.py",
+      "mount_path": "/api/fleet",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /api/fleet.",
+        "api/aurora_api.py includes it when FLEET_BRIDGE_AVAILABLE is true."
+      ],
+      "notes": "Fleet status and craft profile API."
+    },
+    {
+      "id": "relay_manager",
+      "owner": "relay",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/aurora/relays/api_routes.py",
+      "mount_path": "/relay",
+      "service_class": "main-app-router",
+      "status": "active-optional",
+      "status_evidence": [
+        "Router prefix is /relay.",
+        "api/aurora_api.py includes it when RELAY_MANAGER_AVAILABLE is true."
+      ],
+      "notes": "Relay send, status, stats, and health surface."
+    },
+    {
+      "id": "synergy_api",
+      "owner": "synergy",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/synergy/api.py",
+      "mount_path": "/synergy",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /synergy.",
+        "api/aurora_api.py imports src.synergy routers and includes them."
+      ],
+      "notes": "Component registry and dependency surface."
+    },
+    {
+      "id": "synergy_dashboard",
+      "owner": "synergy",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/synergy/dashboard_api.py",
+      "mount_path": "/api/synergy",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/synergy.",
+        "api/aurora_api.py imports src.synergy routers and includes them."
+      ],
+      "notes": "Dashboard component topology and scores."
+    },
+    {
+      "id": "resilience_sentinel",
+      "owner": "monitoring-resilience",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/resilience_sentinel/api.py",
+      "mount_path": "/sentinel",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /sentinel.",
+        "api/aurora_api.py imports modules.resilience_sentinel.api and includes the router."
+      ],
+      "notes": "Monitoring, alerts, notifications, dashboard, and WebSocket metrics."
+    },
+    {
+      "id": "monitoring_dashboard",
+      "owner": "monitoring",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/monitoring/dashboard_api.py",
+      "mount_path": "/monitoring",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "create_monitoring_router() uses prefix /monitoring.",
+        "api/aurora_api.py creates and includes the monitoring router when available."
+      ],
+      "notes": "Behavior, ethics, drift, audit, compliance, and export surface."
+    },
+    {
+      "id": "gumas_ethics",
+      "owner": "gumas-ethics",
+      "runtime": "fastapi-router",
+      "entrypoint": "modules/gumas/api/routes.py",
+      "mount_path": "/gumas",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /gumas.",
+        "api/aurora_api.py imports modules.gumas.api and includes the router."
+      ],
+      "notes": "Ethics evaluation and rule management surface."
+    },
+    {
+      "id": "oauth2_rbac",
+      "owner": "security",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/security/auth_routes.py",
+      "mount_path": "/api/auth",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/auth.",
+        "api/aurora_api.py imports src.security.auth_routes and includes the router."
+      ],
+      "notes": "Token, refresh, current user, permissions, and logout surface."
+    },
+    {
+      "id": "r2_telemetry",
+      "owner": "telemetry",
+      "runtime": "fastapi-router",
+      "entrypoint": "api/r2_telemetry_routes.py",
+      "mount_path": "/r2-telemetry",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /r2-telemetry.",
+        "api/aurora_api.py imports api.r2_telemetry_routes and includes the router."
+      ],
+      "notes": "R2 metrics, summaries, recent operations, anomalies, and test operation."
+    },
+    {
+      "id": "crew_agents",
+      "owner": "crew",
+      "runtime": "fastapi-router",
+      "entrypoint": "api/aurora_api.py",
+      "mount_path": "/api/crew",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "api/aurora_api.py defines crew_router with prefix /api/crew.",
+        "api/aurora_api.py includes crew_router in the R2 Telemetry integration block."
+      ],
+      "notes": "Crew collaboration endpoint currently lives in the main API file."
+    },
+    {
+      "id": "l2_meta_agents",
+      "owner": "l2-agents",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/api/l2_meta_agent_api.py",
+      "mount_path": "/api/l2-agents",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/l2-agents.",
+        "api/aurora_api.py imports src.api.l2_meta_agent_api and includes the router."
+      ],
+      "notes": "L2 constellation and activation phrase surface."
+    },
+    {
+      "id": "drift_metrics",
+      "owner": "observability",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/observability/drift_metrics_api.py",
+      "mount_path": "/api/drift",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /api/drift.",
+        "api/aurora_api.py imports src.observability.drift_metrics_api and includes the router."
+      ],
+      "notes": "Drift metrics and Prometheus exporter surface."
+    },
+    {
+      "id": "playground",
+      "owner": "developer-experience",
+      "runtime": "fastapi-router",
+      "entrypoint": "src/playground/api.py",
+      "mount_path": "/playground",
+      "service_class": "main-app-router",
+      "status": "active",
+      "status_evidence": [
+        "Router prefix is /playground.",
+        "api/aurora_api.py imports src.playground and includes playground_router."
+      ],
+      "notes": "Interactive execution, share, health, metrics, and WebSocket surface."
+    },
+    {
+      "id": "mesh_runtime_v1",
+      "owner": "mesh-runtime",
+      "runtime": "fastapi-standalone",
+      "entrypoint": "src/servers/l2_integration_server.py",
+      "mount_path": "/api/mesh, /api/bridge, /ws/mesh",
+      "service_class": "standalone-service",
+      "status": "active-standalone",
+      "status_evidence": [
+        "create_app() defines /api/mesh/status, /api/mesh/messages, /api/mesh/channels/{channel_id}/history, /api/mesh/events, bridge compatibility routes, and /ws/mesh.",
+        "tests/test_mesh_router_v1.py validates the API and UI contract."
+      ],
+      "notes": "Canonical Mesh Runtime V1 surface."
+    },
+    {
+      "id": "api_bridge_server",
+      "owner": "bridge",
+      "runtime": "node-standalone",
+      "entrypoint": "src/bridge/api_bridge_server.js",
+      "mount_path": ":3838",
+      "service_class": "standalone-helper",
+      "status": "active-standalone",
+      "status_evidence": [
+        "Exports ApiBridgeServer and starts when executed directly.",
+        "scripts/initialize_l1_station.sh starts the bridge when present."
+      ],
+      "notes": "Not mounted into the FastAPI app."
+    },
+    {
+      "id": "mesh_api_js",
+      "owner": "mesh-runtime",
+      "runtime": "express-router",
+      "entrypoint": "src/api/mesh_api.js",
+      "mount_path": "/api/mesh",
+      "service_class": "legacy-router",
+      "status": "test-only",
+      "status_evidence": [
+        "Exports an Express router.",
+        "tests/node/mesh_api_activation.test.js mounts it for node tests.",
+        "No current production server mount was found during the 2026-05-26 review."
+      ],
+      "notes": "Use mesh_runtime_v1 for current runtime authority unless a deployment surface mounts this router."
+    },
+    {
+      "id": "enhanced_api_bridge",
+      "owner": "bridge",
+      "runtime": "express-router-helper",
+      "entrypoint": "src/bridge/enhanced_api_bridge.js",
+      "mount_path": "/api/bridge",
+      "service_class": "compatibility-bridge",
+      "status": "superseded",
+      "status_evidence": [
+        "Exports EnhancedApiBridge and is covered by node tests.",
+        "Current canonical mesh and bridge endpoints are served by src/servers/l2_integration_server.py."
+      ],
+      "notes": "Compatibility bridge, not current route authority."
+    },
+    {
+      "id": "generated_api_catalog_snapshot",
+      "owner": "api-docs",
+      "runtime": "generated-json",
+      "entrypoint": "docs/api/API_CATALOG.json",
+      "mount_path": "n/a",
+      "service_class": "generated-snapshot",
+      "status": "generated-snapshot",
+      "status_evidence": [
+        "Snapshot has a generated timestamp and route list.",
+        "It is not an ownership or deployment authority."
+      ],
+      "notes": "Regenerate before using for current route-level detail."
+    }
+  ]
+}

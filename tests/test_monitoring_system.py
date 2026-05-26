@@ -403,6 +403,7 @@ class TestMonitoringSystem:
             # Verify audit chain
             assert monitoring.audit_logger.verify_chain() is True
             assert len(monitoring.audit_logger.entries) > 0
+            assert monitoring.audit_logger.storage_path.name == "audit_log.jsonl"
     
     def test_multiple_agents_tracking(self):
         """Test tracking multiple agents"""

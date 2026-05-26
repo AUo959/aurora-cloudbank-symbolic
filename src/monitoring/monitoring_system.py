@@ -124,7 +124,7 @@ class MonitoringSystem:
             violations_path=self.storage_dir / "ethics_violations.jsonl"
         )
         
-        audit_storage = self.storage_dir / "audit_log.json"
+        audit_storage = self.storage_dir / "audit_log.jsonl"
         self.audit_logger = AuditLogger(storage_path=audit_storage)
         
         # Intervention tracking

@@ -51,6 +51,22 @@ class AuditEntry:
         data = asdict(self)
         data['event_type'] = self.event_type.value
         return data
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AuditEntry":
+        """Restore an audit entry from persisted data."""
+        return cls(
+            id=data['id'],
+            timestamp=data['timestamp'],
+            event_type=AuditEventType(data['event_type']),
+            agent_id=data['agent_id'],
+            severity=data['severity'],
+            description=data['description'],
+            data=data['data'],
+            context_tag=data.get('context_tag'),
+            previous_hash=data.get('previous_hash'),
+            signature=data.get('signature')
+        )
     
     def compute_hash(self) -> str:
         """Compute cryptographic hash of entry"""
@@ -322,7 +338,7 @@ class AuditLogger:
         
         # Persist if storage configured
         if self.storage_path:
-            self._save_entries()
+            self._append_entry_to_disk(entry)
         
         return entry
     
@@ -427,53 +443,78 @@ class AuditLogger:
         
         return entries
     
-    def _save_entries(self):
-        """Save entries to storage"""
+    def _append_entry_to_disk(self, entry: AuditEntry):
+        """Append one entry to the audit log without rewriting history."""
         if not self.storage_path:
             return
-        
+
         try:
-            data = {
-                'entries': [e.to_dict() for e in self.entries],
-                'next_id': self._next_id
-            }
-            
             self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.storage_path, 'w') as f:
-                json.dump(data, f, indent=2)
-        
+            with open(self.storage_path, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry.to_dict(), sort_keys=True) + "\n")
+                f.flush()
+                os.fsync(f.fileno())
         except Exception as e:
-            logger.error("Failed to save audit entries: %s", e)
+            logger.error("Failed to append audit entry: %s", e)
     
     def _load_entries(self):
         """Load entries from storage"""
         try:
-            with open(self.storage_path, 'r') as f:
-                data = json.load(f)
-            
-            if 'signing_key' in data:
-                logger.warning("Ignoring persisted audit signing key")
-            self._next_id = data.get('next_id', 1)
-            
-            for entry_data in data.get('entries', []):
-                entry = AuditEntry(
-                    id=entry_data['id'],
-                    timestamp=entry_data['timestamp'],
-                    event_type=AuditEventType(entry_data['event_type']),
-                    agent_id=entry_data['agent_id'],
-                    severity=entry_data['severity'],
-                    description=entry_data['description'],
-                    data=entry_data['data'],
-                    context_tag=entry_data.get('context_tag'),
-                    previous_hash=entry_data.get('previous_hash'),
-                    signature=entry_data.get('signature')
-                )
-                self.entries.append(entry)
+            text = self.storage_path.read_text(encoding='utf-8')
+            if not text.strip():
+                return
+
+            try:
+                legacy_data = json.loads(text)
+            except json.JSONDecodeError:
+                self._load_jsonl_entries(text)
+            else:
+                if isinstance(legacy_data, dict) and (
+                    'entries' in legacy_data
+                    or 'next_id' in legacy_data
+                    or 'signing_key' in legacy_data
+                ):
+                    self._load_legacy_json_entries(legacy_data)
+                else:
+                    self._load_jsonl_entries(text)
             
             logger.info("Loaded %d audit entries from storage", len(self.entries))
             
         except Exception as e:
             logger.error("Failed to load audit entries: %s", e)
+
+    def _load_legacy_json_entries(self, data: Dict[str, Any]):
+        """Load the pre-JSONL full-file audit log format."""
+        if 'signing_key' in data:
+            logger.warning("Ignoring persisted audit signing key")
+        self._next_id = data.get('next_id', 1)
+        self.entries = [
+            AuditEntry.from_dict(entry_data)
+            for entry_data in data.get('entries', [])
+        ]
+
+    def _load_jsonl_entries(self, text: str):
+        """Load append-only JSONL audit entries."""
+        self.entries = [
+            AuditEntry.from_dict(json.loads(line))
+            for line in text.splitlines()
+            if line.strip()
+        ]
+        self._next_id = self._derive_next_id()
+
+    def _derive_next_id(self) -> int:
+        """Derive the next audit id after loading JSONL entries."""
+        if not self.entries:
+            return 1
+
+        max_id = 0
+        for entry in self.entries:
+            try:
+                max_id = max(max_id, int(entry.id.rsplit("-", 1)[1]))
+            except (IndexError, ValueError):
+                logger.warning("Could not parse audit entry id: %s", entry.id)
+
+        return max_id + 1
     
     def export_report(
         self,

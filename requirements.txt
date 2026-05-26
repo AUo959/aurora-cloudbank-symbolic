@@ -47,7 +47,7 @@ python-dotenv>=1.0.0                # Environment variables
 pyyaml>=6.0.1                       # YAML parsing
 click>=8.1.0                        # CLI interface
 structlog>=23.2.0                   # Structured logging
-python-json-logger>=2.0.7           # JSON logging
+python-json-logger>=4.1.0           # JSON logging
 
 # ===================================================================
 # QUANTUM COMPUTING (Nexus)

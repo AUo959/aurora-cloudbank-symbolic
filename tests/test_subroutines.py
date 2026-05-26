@@ -19,7 +19,8 @@ from src.subroutines.reality_sim_monitor import RealitySimMonitor, RealityCheckR
 from src.subroutines.aurora_vision_alignment import (
     VisionAlignmentManager,
     AlignmentRecord,
-    AlignmentReviewResult
+    AlignmentReviewResult,
+    MockKnowledgeBase
 )
 from src.subroutines.registry import (
     SubroutineRegistry,
@@ -366,6 +367,34 @@ class TestVisionAlignmentManager:
         assert isinstance(result, AlignmentReviewResult)
         assert result.computations_reviewed > 0
         assert result.overall_health in ['healthy', 'warning', 'critical']
+
+    def test_periodic_review_timestamp_persists_across_restart(self):
+        """Test completed review cadence survives manager restart."""
+        knowledge_base = MockKnowledgeBase()
+        manager = VisionAlignmentManager(
+            knowledge_base=knowledge_base,
+            review_interval_days=30
+        )
+        manager.enforce_alignment("test_comp_restart", {"test": True}, {"result": True})
+
+        result = manager.periodic_alignment_review(
+            last_review=datetime.now(UTC) - timedelta(days=31)
+        )
+
+        assert result.computations_reviewed == 1
+        persisted = knowledge_base.get_latest(VisionAlignmentManager.LAST_REVIEW_KEY)
+        assert persisted is not None
+        assert persisted["timestamp"] == manager._last_review.isoformat()
+
+        restarted = VisionAlignmentManager(
+            knowledge_base=knowledge_base,
+            review_interval_days=30
+        )
+
+        assert restarted._last_review == manager._last_review
+        not_due = restarted.periodic_alignment_review()
+        assert not_due.computations_reviewed == 0
+        assert "not yet due" in not_due.recommendations[0].lower()
 
     def test_get_stats(self):
         """Test statistics tracking"""

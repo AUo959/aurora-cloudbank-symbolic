@@ -68,6 +68,21 @@
 - [ ] **Memory Seals**: Respects quantum memory integrity markers
 - [ ] **Thread Continuity**: Maintains T1→T8→T9→INFINITE thread structure
 
+## ⚠️ Drift Threshold Awareness
+
+<!-- MANDATORY for any PR touching capsule_linter, QGIA agents, threadcore_registry, or drift/anomaly logic -->
+
+> The Aurora architecture uses a **three-layer stratified drift threshold system**.
+> Before merging any changes to drift detection, anomaly logic, or threshold constants,
+> confirm you have read the reference document:
+> 📄 [`docs/dev-notes/drift-threshold-stratification.md`](../docs/dev-notes/drift-threshold-stratification.md)
+
+- [ ] My changes **do not touch** drift thresholds or anomaly detection (skip remaining boxes)
+- [ ] I have reviewed `docs/dev-notes/drift-threshold-stratification.md`
+- [ ] The three-layer values (0.002 / 0.02 / 0.1) are **unchanged**, OR
+- [ ] I am intentionally changing a threshold and have updated the dev note to match
+- [ ] I have verified that all three layers remain consistent with each other (no silent divergence)
+
 ## 🚀 Deployment Notes
 
 <!-- Any special deployment considerations, migration steps, or breaking changes -->

@@ -2,82 +2,94 @@
 
 ## 📚 **Comprehensive Documentation Suite**
 
-Welcome to the Aurora CloudBank documentation! This quantum-symbolic platform features comprehensive documentation covering all aspects from basic usage to advanced quantum computing operations.
+Welcome to the Aurora CloudBank documentation. This quantum-symbolic platform includes documentation for setup, runtime governance, development planning, security, observability, and advanced symbolic/quantum modules.
 
-### 🛡️ **Rebuild Protection System** (NEW! - September 2025)
-- **[Rebuild Failure Prevention](../REBUILD_FAILURE_PREVENTION.md)** - Complete guide to our bulletproof rebuild protection system
+## 🧭 **Current Development Control Plane**
+
+Start here when deciding what to build, review, or triage next:
+
+- **[Current Development Roadmap](ROADMAP.md)** — central priority and sequencing document
+- **[Review Notes Intake Queue](review-notes/README.md)** — persistent destination for outside reviews, session observations, risks, and architectural tensions
+- **[Runtime API Governance](api/API_CATALOG_GOVERNANCE.md)** — source-of-truth rules for active API surfaces
+- **[Runtime Topology and L3 Authority](architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md)** — current runtime authority map
+- **[Runtime Path Drift Ledger](architecture/RUNTIME_PATH_DRIFT_LEDGER.md)** — stale/conflicting path and route claims to resolve
+
+## 🛡️ **Rebuild Protection System**
+
+- **[Rebuild Failure Prevention](../REBUILD_FAILURE_PREVENTION.md)** - Complete guide to the rebuild protection system
 - **[Rebuild Protection Status](../REBUILD_PROTECTION_ACTIVATED.md)** - Current system status and emergency commands
-- **Emergency Commands**: 
+- **Emergency Commands**:
   - `bash scripts/emergency_rebuild_recovery.sh` - Complete disaster recovery
   - `python3 scripts/prevent_rebuild_failures.py` - System validation
   - `bash scripts/activate_rebuild_protection.sh` - Protection status
 
-### 🏆 **System Health & Optimization**
-- **[Health Optimization Complete](../AURORA_HEALTH_OPTIMIZATION_COMPLETE.md)** - Outstanding 95.8/100 achievement
-- **[Security Guidelines](SECURITY_GUIDELINES.md)** - Enterprise-grade security framework
-- **[Dependency Management](DEPENDENCY_MANAGEMENT.md)** - Bulletproof dependency handling
+## 🏆 **System Health & Optimization**
 
-### 🚀 **Quick Start & Setup**
+- **[Health Optimization Complete](../AURORA_HEALTH_OPTIMIZATION_COMPLETE.md)** - Historical 95.8/100 achievement report
+- **[Security Guidelines](SECURITY_GUIDELINES.md)** - Enterprise-grade security framework
+- **[Dependency Management](DEPENDENCY_MANAGEMENT.md)** - Dependency handling guidance
+
+## 🚀 **Quick Start & Setup**
+
 - **[Main README](../README.md)** - Complete project overview and quick start
 - **[Phase 0 Completion Report](PHASE0_COMPLETION_REPORT.md)** - Security baseline implementation
 - **[Playground Quickstart](PLAYGROUND_QUICKSTART.md)** - Gallery-driven starter scenarios with PII masking defaults
 
-### 🔧 **Technical Documentation**
+## 🔧 **Technical Documentation**
+
 - **[Architecture Overview](architecture.md)** - Quantum-symbolic system design
 - **[API Schema Documentation](symbolicvector_api_schema.md)** - VSA-based symbolic data structures
+- **[API Surface Inventory](api/api_surface_inventory.json)** - Machine-readable API surface registry
 
-### 🌟 **Advanced Features**
+## 🌟 **Advanced Features**
+
 - **VSA-Based Symbolic Data** - Vector Symbolic Architecture implementation (see `modules/symbolic_core/vsa.py`)
 - **Opal2 Graphics Module** - Quantum symbolic vector graphics processing (see `modules/opal2/`)
 - **Quantum Computing Integration** - Hybrid quantum-classical processing capabilities
 
-## 🎯 **Current System Status** (September 27, 2025)
+## 📋 **Recent Planning Updates**
 
-### ✅ **Operational Excellence**
-- **Health Score**: 95.8/100 (Outstanding - Industry Leading)
-- **Rebuild Protection**: BULLETPROOF (Multi-layer failsafe system)
-- **Dependencies**: FastAPI 0.117.1, HTTPX 0.28.1, HTTPCore 1.0.9, H11 0.16.0
-- **API Endpoints**: 27 total (16 core + 11 AuMemManager)
-- **Security Score**: 25/25 (Perfect)
-- **Emergency Recovery**: Ready and validated
+### [2026-05-28] Central roadmap and review intake wiring
 
-### 🛡️ **Protection Features**
-- **Zero Rebuild Failures**: Multi-strategy dependency installation
-- **Automatic Backups**: Timestamped state preservation
-- **Emergency Recovery**: Complete disaster recovery protocols
-- **Continuous Monitoring**: Health checks and status tracking
-
-## 📋 **Recent Updates**
+- Added `docs/ROADMAP.md` as the active development roadmap.
+- Promoted `docs/review-notes/` as the persistent intake queue for outside/session reviews.
+- Linked runtime governance, topology, and path-drift docs from this index.
 
 ### [2025-09-27] Bulletproof Rebuild Protection System
-- **Multi-layer failsafe system** prevents DevContainer rebuild failures
-- **Emergency recovery scripts** for disaster scenarios
-- **Automatic backup creation** with timestamped state preservation
-- **Comprehensive logging** and audit trails
+
+- Multi-layer failsafe system prevents DevContainer rebuild failures.
+- Emergency recovery scripts support disaster scenarios.
+- Automatic backup creation includes timestamped state preservation.
+- Comprehensive logging and audit trails are documented.
 
 ### [2025-06-30] Opal2 Graphics Card Module
-- Introduces `modules/opal2` with the first Opal2 component
-- `GlyphGenerator` combines geometric algebra with quantum symbolic vectors
-- Designed to function as a lightweight graphics card for hybrid symbolic processing
-- Configuration lives in `config/opal2_graphics.yaml`
+
+- Introduces `modules/opal2` with the first Opal2 component.
+- `GlyphGenerator` combines geometric algebra with quantum symbolic vectors.
+- Designed to function as a lightweight graphics card for hybrid symbolic processing.
+- Configuration lives in `config/opal2_graphics.yaml`.
 
 ### [2025-06-25] VSA-Based Symbolic Data & API Schema Update
-- Symbolic data structures are now VSA-based (see `modules/symbolic_core/vsa.py`)
-- All symbolic REST/WebSocket endpoints use the `SymbolicVector` JSON schema
-- Extension points for quantum/geometric plugins
+
+- Symbolic data structures are now VSA-based (see `modules/symbolic_core/vsa.py`).
+- All symbolic REST/WebSocket endpoints use the `SymbolicVector` JSON schema.
+- Extension points support quantum/geometric plugins.
 
 ## 🚀 **Getting Started**
 
 1. **Clone Repository**: `git clone https://github.com/AUo959/aurora-cloudbank-symbolic.git`
-2. **Quick Setup**: `make install && make run`
-3. **Validate System**: `python3 scripts/prevent_rebuild_failures.py`
-4. **Access Demo**: Visit http://localhost:8000
+2. **Quick Setup**: `make setup`
+3. **Validate System**: `make check`
+4. **Review Current Work**: read [`ROADMAP.md`](ROADMAP.md)
 
 ## 🆘 **Emergency Support**
 
-If you encounter any issues:
+If you encounter setup or runtime issues:
+
 1. **System Health**: `python3 scripts/prevent_rebuild_failures.py`
 2. **Emergency Recovery**: `bash scripts/emergency_rebuild_recovery.sh`
 3. **Protection Status**: `bash scripts/activate_rebuild_protection.sh`
 
-**The system is designed to be bulletproof - protection systems will activate automatically!** 🛡️✨
+---
+
+*Built for consistency, clarity, and care.*

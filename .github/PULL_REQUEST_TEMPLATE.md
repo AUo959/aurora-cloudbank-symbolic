@@ -19,9 +19,9 @@
 
 <!-- Describe what you changed and why -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## 🧪 Testing
 
@@ -36,7 +36,7 @@
 ### Test Results
 <!-- Paste relevant test output or describe test scenarios -->
 
-```
+```text
 # Test output here
 ```
 
@@ -50,6 +50,24 @@
 - [ ] README or docs updated (if needed)
 - [ ] API documentation updated (if applicable)
 - [ ] Examples added/updated (if applicable)
+
+## 🧭 Roadmap / Review Intake / Governance
+
+<!-- Required for feature work, architecture changes, outside-review follow-ups, API/runtime changes, and issue-triage PRs -->
+
+- [ ] This PR does **not** affect roadmap sequencing, review-note status, API/runtime authority, or path-drift status
+- [ ] `docs/ROADMAP.md` updated because this PR changes active priority, sequencing, or feature maturity
+- [ ] `docs/review-notes/` updated because this PR picks up, issues, resolves, or supersedes an intake note
+- [ ] Runtime governance docs updated because this PR changes API surface, service authority, startup paths, or route ownership
+- [ ] Linked GitHub issue(s) include acceptance criteria and reflect the final implementation scope
+
+Relevant references:
+
+- [`docs/ROADMAP.md`](../docs/ROADMAP.md)
+- [`docs/review-notes/README.md`](../docs/review-notes/README.md)
+- [`docs/api/API_CATALOG_GOVERNANCE.md`](../docs/api/API_CATALOG_GOVERNANCE.md)
+- [`docs/architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md`](../docs/architecture/RUNTIME_TOPOLOGY_AND_L3_AUTHORITY.md)
+- [`docs/architecture/RUNTIME_PATH_DRIFT_LEDGER.md`](../docs/architecture/RUNTIME_PATH_DRIFT_LEDGER.md)
 
 ## 🔗 Related Issues/PRs
 

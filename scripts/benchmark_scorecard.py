@@ -18,10 +18,55 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# Narrow set of exceptions a single check can plausibly raise. Anything else
+# is a real bug we want to see.
+_CHECK_EXCEPTIONS = (
+    subprocess.SubprocessError,
+    OSError,
+    re.error,
+    ValueError,
+    AttributeError,
+    KeyError,
+    IndexError,
+)
+
+_SUBPROCESS_TIMEOUT = 30
+
+
+class ToolMissingError(RuntimeError):
+    """Raised when a required external tool (grep, rg) is not on PATH."""
+
+
+@lru_cache(maxsize=8)
+def _resolve(tool: str) -> str | None:
+    """Return the absolute path of `tool`, or None if it is not installed."""
+    return shutil.which(tool)
+
+
+def _require(tool: str) -> str:
+    path = _resolve(tool)
+    if path is None:
+        raise ToolMissingError(f"required tool not on PATH: {tool}")
+    return path
+
+
+def _run(argv: list[str]) -> subprocess.CompletedProcess[str]:
+    """Run a subprocess with a bounded timeout, never via the shell."""
+    return subprocess.run(  # noqa: S603 -- argv list, shell=False, absolute path
+        argv,
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=_SUBPROCESS_TIMEOUT,
+        shell=False,
+    )
 
 
 @dataclass
@@ -41,21 +86,45 @@ class Check:
     required: bool = False
 
 
+def _grep_cmd(pattern: str, paths: list[str], include: str, mode: str) -> list[str]:
+    """Build a grep/rg argv with an absolute path. `mode` is 'count' or 'list'."""
+    rg = _resolve("rg")
+    if rg is not None:
+        if mode == "count":
+            return [rg, "-c", "--no-heading", "-g", include, "-e", pattern, *paths]
+        if mode == "list":
+            return [rg, "-l", "-g", include, "-e", pattern, *paths]
+    grep = _require("grep")
+    if mode == "count":
+        return [grep, "-rcE", f"--include={include}", pattern, *paths]
+    return [grep, "-rlE", f"--include={include}", pattern, *paths]
+
+
 def _grep_count(pattern: str, paths: list[str], include: str = "*.py") -> int:
-    """Count regex matches across `paths` (silently 0 if rg/grep missing)."""
-    if shutil.which("rg"):
-        cmd = ["rg", "-c", "--no-heading", "-g", include, "-e", pattern, *paths]
-    else:
-        cmd = ["grep", "-rcE", f"--include={include}", pattern, *paths]
-    proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)
+    """Count regex matches across `paths`."""
+    proc = _run(_grep_cmd(pattern, paths, include, "count"))
     total = 0
     for line in proc.stdout.splitlines():
-        if ":" in line:
-            try:
-                total += int(line.rsplit(":", 1)[1])
-            except ValueError:
-                pass
+        if ":" not in line:
+            continue
+        try:
+            total += int(line.rsplit(":", 1)[1])
+        except ValueError:
+            continue
     return total
+
+
+def _grep_list(pattern: str, paths: list[str], include: str = "*.py") -> list[str]:
+    """Return files containing matches for `pattern`."""
+    proc = _run(_grep_cmd(pattern, paths, include, "list"))
+    return [line for line in proc.stdout.splitlines() if line]
+
+
+def _file_text(rel: str) -> str:
+    path = REPO_ROOT / rel
+    if not path.exists():
+        return ""
+    return path.read_text(errors="ignore")
 
 
 def _file_exists(rel: str) -> bool:
@@ -63,18 +132,17 @@ def _file_exists(rel: str) -> bool:
 
 
 def _file_contains(rel: str, needle: str) -> bool:
-    path = REPO_ROOT / rel
-    if not path.exists():
-        return False
-    return needle in path.read_text(errors="ignore")
+    return needle in _file_text(rel)
 
 
 # ---------- security ----------
 
 def check_str_e_leak() -> Result:
-    n = _grep_count(r"detail=str\(e\)|detail=f\".*\{str\(e\)|detail=f\".*\{e\}", ["api", "modules", "src"])
-    status = "pass" if n == 0 else "fail"
-    return Result(n, status, "Issue #783 target: 0")
+    n = _grep_count(
+        r"detail=str\(e\)|detail=f\".*\{str\(e\)|detail=f\".*\{e\}",
+        ["api", "modules", "src"],
+    )
+    return Result(n, "pass" if n == 0 else "fail", "Issue #783 target: 0")
 
 
 def check_datetime_utcnow() -> Result:
@@ -83,70 +151,94 @@ def check_datetime_utcnow() -> Result:
 
 
 def check_csrf_router_coverage() -> Result:
-    files = subprocess.run(
-        ["grep", "-rl", "Depends(verify_csrf", "--include=*.py", "api", "modules", "src"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    ).stdout.splitlines()
+    files = _grep_list(r"Depends\(verify_csrf", ["api", "modules", "src"])
     n = len(files)
     status = "fail" if n < 5 else "warn" if n < 10 else "pass"
     return Result(n, status, "Issue #784 target: every state-changing router")
 
 
+_ACTION_PIN_RE = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
+_SHA_RE = re.compile(r"[0-9a-f]{40}")
+
+
+def _classify_action_pins(workflow_text: str) -> tuple[int, int]:
+    """Return (third_party_sha_pinned, third_party_tag_pinned)."""
+    sha = 0
+    tag = 0
+    for m in _ACTION_PIN_RE.finditer(workflow_text):
+        owner, ref = m.group(1), m.group(2)
+        if owner.startswith("actions/"):
+            continue
+        if _SHA_RE.fullmatch(ref):
+            sha += 1
+        else:
+            tag += 1
+    return sha, tag
+
+
 def check_third_party_action_sha_pins() -> Result:
-    workflows = list((REPO_ROOT / ".github/workflows").glob("*.yml"))
-    tag_pinned = 0
-    sha_pinned = 0
-    pat = re.compile(r"uses:\s*([^\s@]+)@([^\s#]+)")
-    for wf in workflows:
-        for m in pat.finditer(wf.read_text(errors="ignore")):
-            owner = m.group(1)
-            ref = m.group(2)
-            if owner.startswith("actions/"):
-                continue
-            if re.fullmatch(r"[0-9a-f]{40}", ref):
-                sha_pinned += 1
-            else:
-                tag_pinned += 1
-    total = tag_pinned + sha_pinned
-    status = "pass" if tag_pinned == 0 and total > 0 else "fail"
-    return Result(f"{sha_pinned}/{total} SHA-pinned", status, "Issue #832 target: all third-party")
+    workflow_dir = REPO_ROOT / ".github/workflows"
+    if not workflow_dir.exists():
+        return Result("no workflows dir", "warn", "Issue #832")
+    sha_total = 0
+    tag_total = 0
+    for wf in workflow_dir.glob("*.yml"):
+        sha, tag = _classify_action_pins(wf.read_text(errors="ignore"))
+        sha_total += sha
+        tag_total += tag
+    total = sha_total + tag_total
+    if total == 0:
+        return Result("0 third-party", "warn", "Issue #832: nothing to pin")
+    status = "pass" if tag_total == 0 else "fail"
+    return Result(f"{sha_total}/{total} SHA-pinned", status, "Issue #832")
+
+
+def _is_digest_pinned(from_line: str) -> bool | None:
+    """True if `FROM ... @sha256:...`, False if tag-pinned, None if irrelevant."""
+    stripped = from_line.strip()
+    if not stripped.startswith("FROM ") or "scratch" in stripped:
+        return None
+    return "@sha256:" in stripped
 
 
 def check_docker_digest_pins() -> Result:
-    dockerfiles = [p for p in REPO_ROOT.rglob("Dockerfile*") if "node_modules" not in str(p)]
     digest = 0
     tag = 0
-    for df in dockerfiles:
+    for df in REPO_ROOT.rglob("Dockerfile*"):
+        if "node_modules" in str(df):
+            continue
         for line in df.read_text(errors="ignore").splitlines():
-            line = line.strip()
-            if line.startswith("FROM ") and "scratch" not in line:
-                if "@sha256:" in line:
-                    digest += 1
-                else:
-                    tag += 1
+            verdict = _is_digest_pinned(line)
+            if verdict is True:
+                digest += 1
+            elif verdict is False:
+                tag += 1
     total = digest + tag
-    status = "pass" if tag == 0 and total > 0 else "fail"
-    return Result(f"{digest}/{total} digest-pinned", status, "Issue #833 target: all FROM lines")
+    if total == 0:
+        return Result("0 FROM lines", "warn", "Issue #833")
+    status = "pass" if tag == 0 else "fail"
+    return Result(f"{digest}/{total} digest-pinned", status, "Issue #833")
 
 
 # ---------- testing / verification ----------
 
 def check_test_function_count() -> Result:
-    proc = subprocess.run(
-        ["grep", "-rhE", r"^\s*(async\s+)?def test_", "--include=*.py", "tests"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    )
-    n = len(proc.stdout.splitlines())
+    proc = _run([_require("grep"), "-rhE", r"^\s*(async\s+)?def test_",
+                 "--include=*.py", "tests"])
+    n = sum(1 for _ in proc.stdout.splitlines())
     return Result(n, "info", "Issue #789: README must match")
 
 
 def check_test_file_count() -> Result:
-    n = sum(1 for _ in (REPO_ROOT / "tests").rglob("test_*.py"))
+    tests_dir = REPO_ROOT / "tests"
+    if not tests_dir.exists():
+        return Result(0, "warn", "Issue #789: tests/ missing")
+    n = sum(1 for _ in tests_dir.rglob("test_*.py"))
     return Result(n, "info", "Issue #789: README must match")
 
 
 def check_coverage_threshold() -> Result:
-    pyproj = (REPO_ROOT / "pyproject.toml").read_text(errors="ignore")
+    pyproj = _file_text("pyproject.toml")
     has_section = "[tool.coverage" in pyproj
     has_threshold = "fail_under" in pyproj or "--cov-fail-under" in pyproj
     if has_threshold:
@@ -157,23 +249,25 @@ def check_coverage_threshold() -> Result:
 
 
 def check_ci_tests_blocking() -> Result:
-    workflow = REPO_ROOT / ".github/workflows/aurora-ci-minimal.yml"
-    if not workflow.exists():
+    text = _file_text(".github/workflows/aurora-ci-minimal.yml")
+    if not text:
         return Result("missing", "fail", "Issue #758")
-    text = workflow.read_text(errors="ignore")
     occurrences = text.count("continue-on-error: true")
-    status = "pass" if occurrences == 0 else "fail"
-    return Result(occurrences, status, "Issue #758 target: 0 in test/lint jobs")
+    return Result(occurrences,
+                  "pass" if occurrences == 0 else "fail",
+                  "Issue #758 target: 0 in test/lint jobs")
 
 
 def check_codeql_enabled() -> Result:
-    workflow = REPO_ROOT / ".github/workflows/codeql-unified.yml"
-    if not workflow.exists():
+    text = _file_text(".github/workflows/codeql-unified.yml")
+    if not text:
         return Result("missing", "warn", "Issue #786")
-    text = workflow.read_text(errors="ignore")
     disabled = "if: false" in text
-    return Result("disabled" if disabled else "enabled",
-                  "fail" if disabled else "pass", "Issue #786")
+    return Result(
+        "disabled" if disabled else "enabled",
+        "fail" if disabled else "pass",
+        "Issue #786",
+    )
 
 
 def check_hollow_assertions() -> Result:
@@ -188,173 +282,204 @@ def check_hollow_assertions() -> Result:
 # ---------- wiring / observability ----------
 
 def check_telemetry_middleware() -> Result:
-    has = _file_contains("api/aurora_api.py", "R2AgentTelemetry") and _grep_count(
-        r"track_operation\(", ["api"]
-    ) > 0
-    return Result("wired" if has else "missing",
-                  "pass" if has else "fail", "Issue #769")
-
-
-def check_ethics_response_path() -> Result:
-    # Require evaluate_action to be called from an HTTP-router file: either
-    # api/aurora_api.py or any modules/*/api*.py / src/**/api*.py.
-    proc = subprocess.run(
-        ["grep", "-rlE", r"evaluate_action\(", "--include=*.py",
-         "api", "modules", "src"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
+    has_class = _file_contains("api/aurora_api.py", "R2AgentTelemetry")
+    has_call = _grep_count(r"track_operation\(", ["api"]) > 0
+    return Result(
+        "wired" if (has_class and has_call) else "missing",
+        "pass" if (has_class and has_call) else "fail",
+        "Issue #769",
     )
+
+
+_ROUTER_PATH_RE = re.compile(
+    r"(modules|src)/.*/(api(_[a-z]+)?|routes?)\.py$"
+)
+
+
+def _ethics_router_callers() -> tuple[list[str], list[str], bool]:
+    """Return (all_router_callers, non_gumas_callers, central_api_among_them)."""
+    raw = _grep_list(r"evaluate_action\(", ["api", "modules", "src"])
     router_callers = [
-        f for f in proc.stdout.splitlines()
-        if (f == "api/aurora_api.py"
-            or re.search(r"(modules|src)/.*/api(_[a-z]+)?\.py$", f)
-            or re.search(r"(modules|src)/.*/routes?\.py$", f))
+        f for f in raw
+        if (f == "api/aurora_api.py" or _ROUTER_PATH_RE.search(f))
         and "dashboard_api" not in f
         and "patchweaver" not in f
     ]
-    # GUMAS routes call EthicsEngine on its own evaluator — that's the trivial
-    # case and predates #770. Require the central API or another router.
     non_gumas = [f for f in router_callers if "gumas" not in f]
     main_api = "api/aurora_api.py" in router_callers
+    return router_callers, non_gumas, main_api
+
+
+def check_ethics_response_path() -> Result:
+    router_callers, non_gumas, main_api = _ethics_router_callers()
     if main_api and non_gumas:
         status = "pass"
     elif non_gumas or main_api:
         status = "warn"
     else:
         status = "fail"
-    return Result(f"{len(router_callers)} ({len(non_gumas)} non-GUMAS)",
-                  status,
-                  "Issue #770 target: api/aurora_api.py + ≥1 other router")
+    return Result(
+        f"{len(router_callers)} ({len(non_gumas)} non-GUMAS)",
+        status,
+        "Issue #770 target: api/aurora_api.py + ≥1 other router",
+    )
 
 
 def check_ledger_startup_verify() -> Result:
-    ledger = REPO_ROOT / "modules/insight_ledger/ledger_core.py"
-    if not ledger.exists():
+    text = _file_text("modules/insight_ledger/ledger_core.py")
+    if not text:
         return Result("missing", "warn", "Issue #806")
-    text = ledger.read_text(errors="ignore")
-    init_block = text.split("def __init__", 1)[-1].split("\n    def ", 1)[0]
+    parts = text.split("def __init__", 1)
+    if len(parts) < 2:
+        return Result("no __init__", "warn", "Issue #806")
+    init_block = parts[1].split("\n    def ", 1)[0]
     called = "verify_integrity" in init_block
     return Result("called" if called else "absent",
                   "pass" if called else "fail", "Issue #806")
 
 
+_ATOMIC_WRITE_RE = re.compile(r"os\.replace\(|NamedTemporaryFile|atomic_write")
+_STATE_FILES = (
+    "modules/insight_ledger/ledger_core.py",
+    "modules/aumemmanager/hierarchical_memory.py",
+    "src/monitoring/monitoring_system.py",
+    "src/monitoring/drift_detector.py",
+    "src/monitoring/ethics_engine.py",
+)
+
+
 def check_atomic_writes() -> Result:
-    files = ["modules/insight_ledger/ledger_core.py",
-             "modules/aumemmanager/hierarchical_memory.py",
-             "src/monitoring/monitoring_system.py",
-             "src/monitoring/drift_detector.py",
-             "src/monitoring/ethics_engine.py"]
-    pat = re.compile(r"os\.replace\(|NamedTemporaryFile|atomic_write")
-    have = sum(1 for f in files if (REPO_ROOT / f).exists()
-               and pat.search((REPO_ROOT / f).read_text(errors="ignore")))
-    total = len(files)
-    return Result(f"{have}/{total}", "pass" if have == total else "fail",
-                  "Issue #807 target: all state-bearing modules")
+    have = sum(
+        1 for rel in _STATE_FILES
+        if _ATOMIC_WRITE_RE.search(_file_text(rel))
+    )
+    total = len(_STATE_FILES)
+    return Result(
+        f"{have}/{total}",
+        "pass" if have == total else "fail",
+        "Issue #807 target: all state-bearing modules",
+    )
 
 
 def check_request_id_middleware() -> Result:
-    api = REPO_ROOT / "api/aurora_api.py"
-    if not api.exists():
+    text = _file_text("api/aurora_api.py")
+    if not text:
         return Result("missing", "warn", "Issue #818")
-    text = api.read_text(errors="ignore")
     has = "X-Request-ID" in text or "request_id_middleware" in text
     return Result("wired" if has else "missing",
                   "pass" if has else "fail", "Issue #818")
 
 
 def check_health_split() -> Result:
-    api = REPO_ROOT / "api/aurora_api.py"
-    if not api.exists():
+    text = _file_text("api/aurora_api.py")
+    if not text:
         return Result("missing", "warn", "Issue #814")
-    text = api.read_text(errors="ignore")
-    paths = sum(1 for p in ('"/live"', '"/ready"', '"/health"') if p in text)
-    return Result(f"{paths}/3", "pass" if paths == 3 else "fail",
-                  "Issue #814 target: 3 distinct endpoints")
+    paths_found = sum(1 for p in ('"/live"', '"/ready"', '"/health"') if p in text)
+    return Result(
+        f"{paths_found}/3",
+        "pass" if paths_found == 3 else "fail",
+        "Issue #814 target: 3 distinct endpoints",
+    )
 
 
 # ---------- supply chain ----------
 
+_FLOOR_PATTERNS = {
+    "setup.py": r"python_requires\s*=\s*[\"'](>=\d+\.\d+)",
+    "runtime.txt": r"python-(\d+\.\d+)",
+    "sdk/python/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
+    "cli/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
+}
+
+
 def check_python_floor_consistency() -> Result:
-    candidates = {
-        "setup.py": r"python_requires\s*=\s*[\"'](>=\d+\.\d+)",
-        "runtime.txt": r"python-(\d+\.\d+)",
-        "sdk/python/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
-        "cli/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
-    }
-    floors = set()
-    for rel, pat in candidates.items():
-        p = REPO_ROOT / rel
-        if not p.exists():
+    floors: set[str] = set()
+    for rel, pat in _FLOOR_PATTERNS.items():
+        text = _file_text(rel)
+        if not text:
             continue
-        m = re.search(pat, p.read_text(errors="ignore"))
+        m = re.search(pat, text)
         if m:
             floors.add(m.group(1))
     if len(floors) <= 1:
         return Result(",".join(sorted(floors)) or "unset", "pass", "Issue #834")
-    return Result(",".join(sorted(floors)), "fail", "Issue #834 target: single floor")
+    return Result(",".join(sorted(floors)), "fail",
+                  "Issue #834 target: single floor")
 
 
 def check_lockfile_present_and_hashed() -> Result:
-    lock = REPO_ROOT / "requirements-lock.txt"
-    if not lock.exists():
+    text = _file_text("requirements-lock.txt")
+    if not text:
         return Result("missing", "fail", "Issues #787, #835")
-    has_hashes = "--hash=" in lock.read_text(errors="ignore")
+    has_hashes = "--hash=" in text
     return Result("hashed" if has_hashes else "no-hashes",
                   "pass" if has_hashes else "warn", "Issue #835")
 
 
-def check_env_example_completeness() -> Result:
-    env_ex = REPO_ROOT / ".env.example"
-    if not env_ex.exists():
-        return Result("missing", "fail", "Issue #821")
-    declared = {line.split("=", 1)[0].strip()
-                for line in env_ex.read_text(errors="ignore").splitlines()
-                if line.strip() and not line.strip().startswith("#") and "=" in line}
-    proc = subprocess.run(
-        ["grep", "-rhoE",
-         r"os\.getenv\(\s*[\"'][A-Z_][A-Z0-9_]+|os\.environ\.get\(\s*[\"'][A-Z_][A-Z0-9_]+|"
-         r"os\.environ\[\s*[\"'][A-Z_][A-Z0-9_]+",
-         "--include=*.py", "api", "modules", "src", "connector"],
-        cwd=REPO_ROOT, capture_output=True, text=True,
-    )
-    var_pat = re.compile(r"[\"']([A-Z_][A-Z0-9_]+)")
-    referenced = set()
+_ENV_REF_RE = re.compile(
+    r"os\.getenv\(\s*[\"'][A-Z_][A-Z0-9_]+|"
+    r"os\.environ\.get\(\s*[\"'][A-Z_][A-Z0-9_]+|"
+    r"os\.environ\[\s*[\"'][A-Z_][A-Z0-9_]+"
+)
+_VAR_NAME_RE = re.compile(r"[\"']([A-Z_][A-Z0-9_]+)")
+_ENV_SKIP = frozenset({
+    "GITHUB_TOKEN", "GH_TOKEN", "GITHUB_BASE_REF", "GITHUB_EVENT_NAME",
+    "GITHUB_OUTPUT", "USER", "HOME", "PATH",
+})
+
+
+def _env_referenced() -> set[str]:
+    proc = _run([_require("grep"), "-rhoE", _ENV_REF_RE.pattern,
+                 "--include=*.py", "api", "modules", "src", "connector"])
+    referenced: set[str] = set()
     for line in proc.stdout.splitlines():
-        m = var_pat.search(line)
+        m = _VAR_NAME_RE.search(line)
         if m:
             referenced.add(m.group(1))
-    # exclude CI-only / framework vars
-    skip = {"GITHUB_TOKEN", "GH_TOKEN", "GITHUB_BASE_REF", "GITHUB_EVENT_NAME",
-            "GITHUB_OUTPUT", "USER", "HOME", "PATH"}
-    missing = (referenced - declared) - skip
+    return referenced
+
+
+def _env_declared() -> set[str]:
+    declared: set[str] = set()
+    for line in _file_text(".env.example").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#") or "=" not in s:
+            continue
+        declared.add(s.split("=", 1)[0].strip())
+    return declared
+
+
+def check_env_example_completeness() -> Result:
+    if not _file_exists(".env.example"):
+        return Result("missing", "fail", "Issue #821")
+    missing = (_env_referenced() - _env_declared()) - _ENV_SKIP
     n = len(missing)
     if n == 0:
         return Result("complete", "pass", "Issue #821")
+    sample = sorted(missing)[:5]
     if n <= 5:
-        return Result(n, "warn", f"Issue #821: missing {sorted(missing)[:5]}")
-    return Result(n, "fail", f"Issue #821: missing {n} vars")
+        return Result(n, "warn", f"Issue #821: missing {sample}")
+    return Result(n, "fail", f"Issue #821: missing {n} vars (e.g. {sample})")
 
 
 # ---------- connector ----------
 
 def check_connector_tests_exist() -> Result:
-    dirs = [REPO_ROOT / "tests/connector", REPO_ROOT / "connector/tests"]
-    found = next((d for d in dirs if d.exists() and any(d.glob("test_*.py"))), None)
+    candidates = [REPO_ROOT / "tests/connector", REPO_ROOT / "connector/tests"]
+    found = any(d.exists() and any(d.glob("test_*.py")) for d in candidates)
     return Result("present" if found else "missing",
                   "pass" if found else "fail", "Issue #827")
 
 
 def check_connector_bridge_retries() -> Result:
-    bridge = REPO_ROOT / "connector/transport/bridge.py"
-    if not bridge.exists():
+    text = _file_text("connector/transport/bridge.py")
+    if not text:
         return Result("missing", "warn", "Issue #824")
-    text = bridge.read_text(errors="ignore")
-    has_retry = ("tenacity" in text or "retry" in text.lower())
+    has_retry = "tenacity" in text or "retry" in text.lower()
     has_user_agent = "User-Agent" in text or "user-agent" in text
-    flags = []
-    if has_retry:
-        flags.append("retries")
-    if has_user_agent:
-        flags.append("user-agent")
+    flags = [name for name, present in
+             (("retries", has_retry), ("user-agent", has_user_agent))
+             if present]
     if len(flags) == 2:
         return Result(",".join(flags), "pass", "Issues #824, #826")
     if flags:
@@ -421,14 +546,30 @@ CHECKS: list[Check] = [
 GLYPH = {"pass": "PASS", "warn": "WARN", "fail": "FAIL", "info": "INFO"}
 
 
+def _execute(check: Check) -> Result:
+    try:
+        return check.fn()
+    except ToolMissingError as exc:
+        return Result(None, "warn", f"tool missing: {exc}")
+    except _CHECK_EXCEPTIONS as exc:
+        return Result(None, "fail", f"check raised: {exc!r}")
+
+
+def _print_row(check: Check, result: Result, w_metric: int, w_value: int) -> None:
+    value = "—" if result.value is None else str(result.value)
+    print(f"  {check.metric.ljust(w_metric)} "
+          f"{value.ljust(w_value)} "
+          f"{GLYPH[result.status]:5}  "
+          f"{check.target:8} "
+          f"{check.issues}")
+    if result.detail:
+        print(f"    └─ {result.detail}")
+
+
 def run(strict: bool) -> int:
     by_domain: dict[str, list[tuple[Check, Result]]] = {}
     for check in CHECKS:
-        try:
-            result = check.fn()
-        except Exception as exc:  # noqa: BLE001
-            result = Result(None, "fail", f"check raised: {exc!r}")
-        by_domain.setdefault(check.domain, []).append((check, result))
+        by_domain.setdefault(check.domain, []).append((check, _execute(check)))
 
     width_metric = max(len(c.metric) for c in CHECKS) + 2
     width_value = 22
@@ -440,23 +581,14 @@ def run(strict: bool) -> int:
     for domain, rows in by_domain.items():
         print(f"\n[{domain.upper()}]")
         for check, result in rows:
-            value = "—" if result.value is None else str(result.value)
-            print(f"  {check.metric.ljust(width_metric)} "
-                  f"{value.ljust(width_value)} "
-                  f"{GLYPH[result.status]:5}  "
-                  f"{check.target:8} "
-                  f"{check.issues}")
-            if result.detail:
-                print(f"    └─ {result.detail}")
+            _print_row(check, result, width_metric, width_value)
             if result.status == "fail":
                 failed_any += 1
                 if check.required:
                     failed_required += 1
 
     print(f"\nTotal fails: {failed_any} (required: {failed_required})")
-    if strict and failed_required:
-        return 1
-    return 0
+    return 1 if (strict and failed_required) else 0
 
 
 def main() -> int:

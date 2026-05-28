@@ -2,81 +2,46 @@
 """
 Benchmark scorecard for the #767-#836 hardening push.
 
-Runs grep/file checks against the working tree and prints a per-metric
+Runs static checks against the working tree and prints a per-metric
 status. Returns non-zero exit code if `--strict` is set and any required
 metric is failing.
 
-Add new checks by appending a Check(...) to CHECKS. Each check is a pure
-function over the repo root; no network calls.
+Add a new check by appending a Check(...) to CHECKS. Each check is a
+pure function over the repo root; no network, no subprocess.
 """
 
 from __future__ import annotations
 
 import argparse
 import re
-import shutil
-import subprocess
 import sys
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Narrow set of exceptions a single check can plausibly raise. Anything else
-# is a real bug we want to see.
+# Narrow set of exceptions a single check can plausibly raise.
 _CHECK_EXCEPTIONS = (
-    subprocess.SubprocessError,
     OSError,
     re.error,
     ValueError,
     AttributeError,
     KeyError,
     IndexError,
+    UnicodeDecodeError,
 )
 
-_SUBPROCESS_TIMEOUT = 30
 
-
-class ToolMissingError(RuntimeError):
-    """Raised when a required external tool (grep, rg) is not on PATH."""
-
-
-@lru_cache(maxsize=8)
-def _resolve(tool: str) -> str | None:
-    """Return the absolute path of `tool`, or None if it is not installed."""
-    return shutil.which(tool)
-
-
-def _require(tool: str) -> str:
-    path = _resolve(tool)
-    if path is None:
-        raise ToolMissingError(f"required tool not on PATH: {tool}")
-    return path
-
-
-def _run(argv: list[str]) -> subprocess.CompletedProcess[str]:
-    """Run a subprocess with a bounded timeout, never via the shell."""
-    return subprocess.run(  # noqa: S603 -- argv list, shell=False, absolute path
-        argv,
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=_SUBPROCESS_TIMEOUT,
-        shell=False,
-    )
-
-
-@dataclass
+@dataclass(frozen=True)
 class Result:
     value: int | str | None
     status: str  # "pass", "warn", "fail", "info"
     detail: str = ""
 
 
-@dataclass
+@dataclass(frozen=True)
 class Check:
     domain: str
     metric: str
@@ -86,45 +51,32 @@ class Check:
     required: bool = False
 
 
-def _grep_cmd(pattern: str, paths: list[str], include: str, mode: str) -> list[str]:
-    """Build a grep/rg argv with an absolute path. `mode` is 'count' or 'list'."""
-    rg = _resolve("rg")
-    if rg is not None:
-        if mode == "count":
-            return [rg, "-c", "--no-heading", "-g", include, "-e", pattern, *paths]
-        if mode == "list":
-            return [rg, "-l", "-g", include, "-e", pattern, *paths]
-    grep = _require("grep")
-    if mode == "count":
-        return [grep, "-rcE", f"--include={include}", pattern, *paths]
-    return [grep, "-rlE", f"--include={include}", pattern, *paths]
+# ---------- file walking helpers (pure Python; no subprocess) ----------
 
-
-def _grep_count(pattern: str, paths: list[str], include: str = "*.py") -> int:
-    """Count regex matches across `paths`."""
-    proc = _run(_grep_cmd(pattern, paths, include, "count"))
-    total = 0
-    for line in proc.stdout.splitlines():
-        if ":" not in line:
+def _iter_python_files(roots: Iterable[str]) -> Iterable[Path]:
+    """Yield every *.py file under each root, skipping common noise dirs."""
+    skip_parts = {".git", "__pycache__", "node_modules", ".venv", "venv",
+                  ".mypy_cache", ".pytest_cache", ".tox", "dist", "build"}
+    for root in roots:
+        base = REPO_ROOT / root
+        if not base.exists():
             continue
-        try:
-            total += int(line.rsplit(":", 1)[1])
-        except ValueError:
-            continue
-    return total
+        for path in base.rglob("*.py"):
+            if any(part in skip_parts for part in path.parts):
+                continue
+            yield path
 
 
-def _grep_list(pattern: str, paths: list[str], include: str = "*.py") -> list[str]:
-    """Return files containing matches for `pattern`."""
-    proc = _run(_grep_cmd(pattern, paths, include, "list"))
-    return [line for line in proc.stdout.splitlines() if line]
+@lru_cache(maxsize=512)
+def _read_text(path_str: str) -> str:
+    path = Path(path_str)
+    if not path.exists() or not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8", errors="ignore")
 
 
 def _file_text(rel: str) -> str:
-    path = REPO_ROOT / rel
-    if not path.exists():
-        return ""
-    return path.read_text(errors="ignore")
+    return _read_text(str(REPO_ROOT / rel))
 
 
 def _file_exists(rel: str) -> bool:
@@ -135,23 +87,57 @@ def _file_contains(rel: str, needle: str) -> bool:
     return needle in _file_text(rel)
 
 
+def _regex_count(pattern: str, roots: Iterable[str]) -> int:
+    """Count regex matches across every *.py file under `roots`."""
+    rx = re.compile(pattern)
+    total = 0
+    for path in _iter_python_files(roots):
+        total += sum(1 for _ in rx.finditer(_read_text(str(path))))
+    return total
+
+
+def _regex_files(pattern: str, roots: Iterable[str]) -> list[str]:
+    """Return repo-relative paths of files matching `pattern`."""
+    rx = re.compile(pattern)
+    hits: list[str] = []
+    for path in _iter_python_files(roots):
+        if rx.search(_read_text(str(path))):
+            hits.append(str(path.relative_to(REPO_ROOT)))
+    return hits
+
+
+def _regex_capture_set(pattern: str, roots: Iterable[str], group: int = 1) -> set[str]:
+    """Return the set of unique capture-group values across all matches."""
+    rx = re.compile(pattern)
+    out: set[str] = set()
+    for path in _iter_python_files(roots):
+        for m in rx.finditer(_read_text(str(path))):
+            try:
+                value = m.group(group)
+            except IndexError:
+                continue
+            if value:
+                out.add(value)
+    return out
+
+
 # ---------- security ----------
 
 def check_str_e_leak() -> Result:
-    n = _grep_count(
-        r"detail=str\(e\)|detail=f\".*\{str\(e\)|detail=f\".*\{e\}",
-        ["api", "modules", "src"],
+    n = _regex_count(
+        r'detail=str\(e\)|detail=f".*\{str\(e\)|detail=f".*\{e\}',
+        ("api", "modules", "src"),
     )
     return Result(n, "pass" if n == 0 else "fail", "Issue #783 target: 0")
 
 
 def check_datetime_utcnow() -> Result:
-    n = _grep_count(r"datetime\.utcnow\(\)", ["api", "modules", "src"])
+    n = _regex_count(r"datetime\.utcnow\(\)", ("api", "modules", "src"))
     return Result(n, "pass" if n == 0 else "fail", "Issue #768 target: 0")
 
 
 def check_csrf_router_coverage() -> Result:
-    files = _grep_list(r"Depends\(verify_csrf", ["api", "modules", "src"])
+    files = _regex_files(r"Depends\(verify_csrf", ("api", "modules", "src"))
     n = len(files)
     status = "fail" if n < 5 else "warn" if n < 10 else "pass"
     return Result(n, status, "Issue #784 target: every state-changing router")
@@ -183,7 +169,7 @@ def check_third_party_action_sha_pins() -> Result:
     sha_total = 0
     tag_total = 0
     for wf in workflow_dir.glob("*.yml"):
-        sha, tag = _classify_action_pins(wf.read_text(errors="ignore"))
+        sha, tag = _classify_action_pins(_read_text(str(wf)))
         sha_total += sha
         tag_total += tag
     total = sha_total + tag_total
@@ -205,9 +191,9 @@ def check_docker_digest_pins() -> Result:
     digest = 0
     tag = 0
     for df in REPO_ROOT.rglob("Dockerfile*"):
-        if "node_modules" in str(df):
+        if "node_modules" in df.parts:
             continue
-        for line in df.read_text(errors="ignore").splitlines():
+        for line in _read_text(str(df)).splitlines():
             verdict = _is_digest_pinned(line)
             if verdict is True:
                 digest += 1
@@ -222,11 +208,14 @@ def check_docker_digest_pins() -> Result:
 
 # ---------- testing / verification ----------
 
+_TEST_DEF_RE = re.compile(r"^\s*(?:async\s+)?def\s+test_", re.MULTILINE)
+
+
 def check_test_function_count() -> Result:
-    proc = _run([_require("grep"), "-rhE", r"^\s*(async\s+)?def test_",
-                 "--include=*.py", "tests"])
-    n = sum(1 for _ in proc.stdout.splitlines())
-    return Result(n, "info", "Issue #789: README must match")
+    total = 0
+    for path in _iter_python_files(("tests",)):
+        total += sum(1 for _ in _TEST_DEF_RE.finditer(_read_text(str(path))))
+    return Result(total, "info", "Issue #789: README must match")
 
 
 def check_test_file_count() -> Result:
@@ -271,7 +260,7 @@ def check_codeql_enabled() -> Result:
 
 
 def check_hollow_assertions() -> Result:
-    n = _grep_count(r"assert.*is not None|assert hasattr", ["tests"])
+    n = _regex_count(r"assert.*is not None|assert hasattr", ("tests",))
     if n > 300:
         return Result(n, "fail", "Issue #791 target: <100 in Tier 1")
     if n > 100:
@@ -283,7 +272,7 @@ def check_hollow_assertions() -> Result:
 
 def check_telemetry_middleware() -> Result:
     has_class = _file_contains("api/aurora_api.py", "R2AgentTelemetry")
-    has_call = _grep_count(r"track_operation\(", ["api"]) > 0
+    has_call = _regex_count(r"track_operation\(", ("api",)) > 0
     return Result(
         "wired" if (has_class and has_call) else "missing",
         "pass" if (has_class and has_call) else "fail",
@@ -298,7 +287,7 @@ _ROUTER_PATH_RE = re.compile(
 
 def _ethics_router_callers() -> tuple[list[str], list[str], bool]:
     """Return (all_router_callers, non_gumas_callers, central_api_among_them)."""
-    raw = _grep_list(r"evaluate_action\(", ["api", "modules", "src"])
+    raw = _regex_files(r"evaluate_action\(", ("api", "modules", "src"))
     router_callers = [
         f for f in raw
         if (f == "api/aurora_api.py" or _ROUTER_PATH_RE.search(f))
@@ -384,17 +373,17 @@ def check_health_split() -> Result:
 
 # ---------- supply chain ----------
 
-_FLOOR_PATTERNS = {
-    "setup.py": r"python_requires\s*=\s*[\"'](>=\d+\.\d+)",
-    "runtime.txt": r"python-(\d+\.\d+)",
-    "sdk/python/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
-    "cli/pyproject.toml": r"requires-python\s*=\s*[\"'](>=\d+\.\d+)",
-}
+_FLOOR_PATTERNS = (
+    ("setup.py", r"python_requires\s*=\s*['\"](>=\d+\.\d+)"),
+    ("runtime.txt", r"python-(\d+\.\d+)"),
+    ("sdk/python/pyproject.toml", r"requires-python\s*=\s*['\"](>=\d+\.\d+)"),
+    ("cli/pyproject.toml", r"requires-python\s*=\s*['\"](>=\d+\.\d+)"),
+)
 
 
 def check_python_floor_consistency() -> Result:
     floors: set[str] = set()
-    for rel, pat in _FLOOR_PATTERNS.items():
+    for rel, pat in _FLOOR_PATTERNS:
         text = _file_text(rel)
         if not text:
             continue
@@ -416,12 +405,11 @@ def check_lockfile_present_and_hashed() -> Result:
                   "pass" if has_hashes else "warn", "Issue #835")
 
 
-_ENV_REF_RE = re.compile(
-    r"os\.getenv\(\s*[\"'][A-Z_][A-Z0-9_]+|"
-    r"os\.environ\.get\(\s*[\"'][A-Z_][A-Z0-9_]+|"
-    r"os\.environ\[\s*[\"'][A-Z_][A-Z0-9_]+"
+_ENV_REF_RE = (
+    r"os\.getenv\(\s*['\"]([A-Z_][A-Z0-9_]+)"
+    r"|os\.environ\.get\(\s*['\"]([A-Z_][A-Z0-9_]+)"
+    r"|os\.environ\[\s*['\"]([A-Z_][A-Z0-9_]+)"
 )
-_VAR_NAME_RE = re.compile(r"[\"']([A-Z_][A-Z0-9_]+)")
 _ENV_SKIP = frozenset({
     "GITHUB_TOKEN", "GH_TOKEN", "GITHUB_BASE_REF", "GITHUB_EVENT_NAME",
     "GITHUB_OUTPUT", "USER", "HOME", "PATH",
@@ -429,13 +417,13 @@ _ENV_SKIP = frozenset({
 
 
 def _env_referenced() -> set[str]:
-    proc = _run([_require("grep"), "-rhoE", _ENV_REF_RE.pattern,
-                 "--include=*.py", "api", "modules", "src", "connector"])
+    rx = re.compile(_ENV_REF_RE)
     referenced: set[str] = set()
-    for line in proc.stdout.splitlines():
-        m = _VAR_NAME_RE.search(line)
-        if m:
-            referenced.add(m.group(1))
+    for path in _iter_python_files(("api", "modules", "src", "connector")):
+        for m in rx.finditer(_read_text(str(path))):
+            name = next((g for g in m.groups() if g), None)
+            if name:
+                referenced.add(name)
     return referenced
 
 
@@ -465,7 +453,7 @@ def check_env_example_completeness() -> Result:
 # ---------- connector ----------
 
 def check_connector_tests_exist() -> Result:
-    candidates = [REPO_ROOT / "tests/connector", REPO_ROOT / "connector/tests"]
+    candidates = (REPO_ROOT / "tests/connector", REPO_ROOT / "connector/tests")
     found = any(d.exists() and any(d.glob("test_*.py")) for d in candidates)
     return Result("present" if found else "missing",
                   "pass" if found else "fail", "Issue #827")
@@ -549,8 +537,6 @@ GLYPH = {"pass": "PASS", "warn": "WARN", "fail": "FAIL", "info": "INFO"}
 def _execute(check: Check) -> Result:
     try:
         return check.fn()
-    except ToolMissingError as exc:
-        return Result(None, "warn", f"tool missing: {exc}")
     except _CHECK_EXCEPTIONS as exc:
         return Result(None, "fail", f"check raised: {exc!r}")
 

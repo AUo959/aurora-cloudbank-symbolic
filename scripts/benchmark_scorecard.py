@@ -552,27 +552,42 @@ def _print_row(check: Check, result: Result, w_metric: int, w_value: int) -> Non
         print(f"    └─ {result.detail}")
 
 
-def run(strict: bool) -> int:
+def _collect_by_domain() -> dict[str, list[tuple[Check, Result]]]:
     by_domain: dict[str, list[tuple[Check, Result]]] = {}
     for check in CHECKS:
         by_domain.setdefault(check.domain, []).append((check, _execute(check)))
+    return by_domain
 
+
+def _tally_fails(rows: Iterable[tuple[Check, Result]]) -> tuple[int, int]:
+    any_count = 0
+    required_count = 0
+    for check, result in rows:
+        if result.status != "fail":
+            continue
+        any_count += 1
+        if check.required:
+            required_count += 1
+    return any_count, required_count
+
+
+def _print_scorecard(by_domain: dict[str, list[tuple[Check, Result]]]) -> None:
     width_metric = max(len(c.metric) for c in CHECKS) + 2
     width_value = 22
-    print(f"\n{'METRIC'.ljust(width_metric)} {'VALUE'.ljust(width_value)} STATUS  TARGET   ISSUES")
+    header = f"{'METRIC'.ljust(width_metric)} {'VALUE'.ljust(width_value)} STATUS  TARGET   ISSUES"
+    print(f"\n{header}")
     print("-" * (width_metric + width_value + 30))
-
-    failed_required = 0
-    failed_any = 0
     for domain, rows in by_domain.items():
         print(f"\n[{domain.upper()}]")
         for check, result in rows:
             _print_row(check, result, width_metric, width_value)
-            if result.status == "fail":
-                failed_any += 1
-                if check.required:
-                    failed_required += 1
 
+
+def run(strict: bool) -> int:
+    by_domain = _collect_by_domain()
+    _print_scorecard(by_domain)
+    all_rows = [pair for rows in by_domain.values() for pair in rows]
+    failed_any, failed_required = _tally_fails(all_rows)
     print(f"\nTotal fails: {failed_any} (required: {failed_required})")
     return 1 if (strict and failed_required) else 0
 

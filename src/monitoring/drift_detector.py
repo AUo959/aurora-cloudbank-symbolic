@@ -7,6 +7,7 @@ Detects deviations from baseline patterns using multiple algorithms.
 
 import json
 import logging
+import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -116,6 +117,9 @@ class DriftDetector:
         self.critical_threshold = critical_threshold
         self.alerts_path = alerts_path
         self.retention_hours = retention_hours
+        # #808: serialise alert append, persist, and retention prune so
+        # concurrent detect_drift() callers can't tear JSONL lines.
+        self._write_lock = threading.Lock()
 
         # Storage for baselines and alerts
         self.baselines: Dict[str, BaselineMetrics] = {}
@@ -251,9 +255,10 @@ class DriftDetector:
                 )
         
         if alert:
-            self._persist_alert(alert)
-            self.alerts.append(alert)
-            self._prune_alerts_by_retention()
+            with self._write_lock:
+                self._persist_alert(alert)
+                self.alerts.append(alert)
+                self._prune_alerts_by_retention()
             logger.warning(
                 "Drift detected: %s:%s [%s] - current=%.2f, baseline=%.2f",
                 agent_id, metric_name, alert.level.value, current_value, baseline.mean

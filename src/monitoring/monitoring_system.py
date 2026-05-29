@@ -7,6 +7,7 @@ and alerting for comprehensive agent oversight.
 
 import logging
 import json
+import threading
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_now, utc_iso
@@ -133,6 +134,8 @@ class MonitoringSystem:
         self.interventions: List[Intervention] = []
         self.last_intervention_time: Dict[str, datetime] = {}
         self._enforcement_handlers: Dict[InterventionType, Callable] = {}
+        # #808: serialise intervention append + state persist + retention prune.
+        self._write_lock = threading.Lock()
         
         # Alert handlers
         self.alert_handlers: Dict[AlertLevel, List[Callable]] = {
@@ -417,11 +420,12 @@ class MonitoringSystem:
             error=error
         )
         
-        self.interventions.append(intervention)
-        self._prune_interventions_by_retention()
-        if success:
-            self.last_intervention_time[agent_id] = utc_now()
-        self._persist_state()
+        with self._write_lock:
+            self.interventions.append(intervention)
+            self._prune_interventions_by_retention()
+            if success:
+                self.last_intervention_time[agent_id] = utc_now()
+            self._persist_state()
         
         # Log to audit
         self.audit_logger.log_intervention(

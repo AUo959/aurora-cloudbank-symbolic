@@ -7,6 +7,7 @@ and safety boundaries. Supports configurable rules and automated enforcement.
 
 import json
 import logging
+import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_iso
@@ -120,6 +121,9 @@ class EthicsEngine:
         self.custom_evaluators: Dict[str, Callable] = {}
         self.violations_path = violations_path
         self.retention_hours = retention_hours
+        # #808: serialise the in-memory violations list mutation, the
+        # JSONL persist, and the retention prune across threads.
+        self._write_lock = threading.Lock()
         
         # Load default rules if available
         if rules_path and rules_path.exists():
@@ -254,14 +258,15 @@ class EthicsEngine:
         """
         violations = []
         
-        for rule in self.rules.values():
-            violation = self._evaluate_rule(rule, context)
-            if violation:
-                self._persist_violation(violation)
-                violations.append(violation)
-                self.violations.append(violation)
+        with self._write_lock:
+            for rule in self.rules.values():
+                violation = self._evaluate_rule(rule, context)
+                if violation:
+                    self._persist_violation(violation)
+                    violations.append(violation)
+                    self.violations.append(violation)
 
-        self._prune_violations_by_retention()
+            self._prune_violations_by_retention()
         if violations:
             logger.warning(
                 "Ethics violations detected for %s: %d violations",

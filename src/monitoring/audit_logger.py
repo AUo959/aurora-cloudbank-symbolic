@@ -10,6 +10,7 @@ import hmac
 import json
 import logging
 import os
+import threading
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from enum import Enum
@@ -134,6 +135,10 @@ class AuditLogger:
 
         self.entries: List[AuditEntry] = []
         self._next_id = 1
+        # #808: serialise writes so concurrent log_*() calls from
+        # different request handlers cannot tear JSONL lines or race
+        # on chain-hash construction.
+        self._write_lock = threading.Lock()
         
         # Load existing entries if storage exists
         if storage_path and storage_path.exists():
@@ -309,36 +314,43 @@ class AuditLogger:
         data: Dict[str, Any],
         context_tag: Optional[str]
     ) -> AuditEntry:
-        """Create and sign a new audit entry"""
-        # Get previous hash for chain
-        previous_hash = self.entries[-1].compute_hash() if self.entries else None
-        
-        entry = AuditEntry(
-            id=f"AUDIT-{self._next_id:08d}",
-            timestamp=utc_now().isoformat(),
-            event_type=event_type,
-            agent_id=agent_id,
-            severity=severity,
-            description=description,
-            data=data,
-            context_tag=context_tag,
-            previous_hash=previous_hash
-        )
-        
-        # Sign the entry
-        entry.signature = self._sign_entry(entry)
-        
-        self.entries.append(entry)
-        self._next_id += 1
-        
-        logger.info(
-            "Audit entry created: %s [%s] - %s",
-            entry.id, event_type.value, description
-        )
-        
-        # Persist if storage configured
-        if self.storage_path:
-            self._append_entry_to_disk(entry)
+        """Create and sign a new audit entry.
+
+        #808: wrap chain-hash read, signing, in-memory append, and disk
+        persist in a single critical section so concurrent log_*()
+        callers cannot interleave and produce mismatched previous_hash
+        values or torn JSONL lines.
+        """
+        with self._write_lock:
+            # Get previous hash for chain
+            previous_hash = self.entries[-1].compute_hash() if self.entries else None
+
+            entry = AuditEntry(
+                id=f"AUDIT-{self._next_id:08d}",
+                timestamp=utc_now().isoformat(),
+                event_type=event_type,
+                agent_id=agent_id,
+                severity=severity,
+                description=description,
+                data=data,
+                context_tag=context_tag,
+                previous_hash=previous_hash
+            )
+
+            # Sign the entry
+            entry.signature = self._sign_entry(entry)
+
+            self.entries.append(entry)
+            self._next_id += 1
+
+            logger.info(
+                "Audit entry created: %s [%s] - %s",
+                entry.id, event_type.value, description
+            )
+
+            # Persist if storage configured
+            if self.storage_path:
+                self._append_entry_to_disk(entry)
         
         return entry
     

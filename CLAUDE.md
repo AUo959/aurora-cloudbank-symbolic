@@ -1241,12 +1241,14 @@ bottlenecks = analyzer.identify_bottlenecks()
 
 ### Requirements Files
 
-- **`requirements.txt`**: Vercel production (lightweight)
-- **`requirements-full.txt`**: Complete with optional dependencies
-- **`requirements-lock.txt`**: Locked versions
-- **`requirements-dev.txt`**: Development tools
-- **`requirements-secure.txt`**: Security-focused subset
-- **`requirements-optional.txt`**: Optional heavy dependencies (qiskit, scipy, pandas)
+- **`requirements.txt`**: Production runtime (lightweight; Vercel-compatible)
+- **`requirements-dev.txt`**: Development and testing tools
+- **`requirements-optional.txt`**: Optional heavy dependencies (qiskit, scipy, pandas, AWS/Azure SDKs)
+
+> *Note*: prior versions of this guide listed `requirements-full.txt`,
+> `requirements-lock.txt`, and `requirements-secure.txt`. Those files
+> are not currently shipped. A hashed lock file is planned via #787 and
+> #835; see #830 for the inventory reconciliation that landed here.
 
 ### Documentation
 

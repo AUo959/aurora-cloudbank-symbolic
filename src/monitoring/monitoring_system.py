@@ -643,6 +643,12 @@ class MonitoringSystem:
             }
         }
 
+    # #811: schema version stamped on every freshly-written state.json.
+    # Pre-#811 files without the field are accepted as legacy v1.0 with
+    # a warning; unknown versions fail closed to avoid silent partial
+    # state imports after an upgrade.
+    STATE_SCHEMA_VERSION = "1.0"
+
     def import_state(self, state: Optional[Dict[str, Any]] = None) -> bool:
         """
         Import persisted monitoring system state.
@@ -660,6 +666,19 @@ class MonitoringSystem:
             except Exception as e:
                 logger.error("Failed to load monitoring state: %s", e)
                 return False
+
+        version = state.get('schema_version')
+        if version is None:
+            logger.warning(
+                "Monitoring state.json has no schema_version; treating as legacy v1.0 (#811)."
+            )
+        elif version != self.STATE_SCHEMA_VERSION:
+            logger.error(
+                "Monitoring state.json schema_version=%r not supported by this build "
+                "(expected %r). Refusing to import to avoid silent partial restore (#811).",
+                version, self.STATE_SCHEMA_VERSION,
+            )
+            return False
 
         if 'baselines' in state:
             self.drift_detector.import_baselines(state['baselines'])
@@ -693,6 +712,7 @@ class MonitoringSystem:
         try:
             self._state_path.parent.mkdir(parents=True, exist_ok=True)
             payload = {
+                'schema_version': self.STATE_SCHEMA_VERSION,  # #811
                 'interventions': [
                     intervention.to_dict()
                     for intervention in self.interventions

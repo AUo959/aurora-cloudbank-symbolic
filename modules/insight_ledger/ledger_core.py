@@ -264,12 +264,22 @@ class InsightLedger:
         
         return content
 
+    # #811: schema version stamped on every freshly-written index. Bump
+    # the minor on additive changes, the major on breaking changes, and
+    # add a migration step (see src/utils/state_migrations.py — to be
+    # built when a real v2 lands). Missing schema_version is treated as
+    # legacy v1.0 so pre-#811 ledgers keep loading.
+    INDEX_SCHEMA_VERSION = "1.0"
+
     def _load_index(self) -> Dict[str, Any]:
         """Load ledger index from disk."""
         if self.index_file.exists():
             with open(self.index_file, "r") as f:
-                return json.load(f)
+                index = json.load(f)
+            self._validate_index_schema(index)
+            return index
         return {
+            "schema_version": self.INDEX_SCHEMA_VERSION,
             "entry_count": 0,
             "last_hash": None,
             "first_timestamp": None,
@@ -277,6 +287,22 @@ class InsightLedger:
             "entries_by_type": {},
             "entries_by_source": {},
         }
+
+    def _validate_index_schema(self, index: Dict[str, Any]) -> None:
+        """Refuse to load an index whose schema version we don't understand."""
+        version = index.get("schema_version")
+        if version is None:
+            logger.warning(
+                "Ledger index has no schema_version; treating as legacy v1.0 (#811)."
+            )
+            index["schema_version"] = self.INDEX_SCHEMA_VERSION
+            return
+        if version != self.INDEX_SCHEMA_VERSION:
+            raise RuntimeError(
+                f"Insight ledger index schema_version={version!r} not supported "
+                f"by this build (expected {self.INDEX_SCHEMA_VERSION!r}). "
+                "See #811 for the migration registry."
+            )
 
     def _save_index(self) -> None:
         """Persist index to disk (#807: atomic write + fsync)."""

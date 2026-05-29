@@ -100,11 +100,12 @@ class MonitoringSystem:
         self,
         storage_dir: Optional[Path] = None,
         ethics_rules_path: Optional[Path] = None,
-        config: Optional[AlertConfig] = None
+        config: Optional[AlertConfig] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize monitoring system
-        
+
         Args:
             storage_dir: Directory for persistent storage
             ethics_rules_path: Path to ethics rules configuration
@@ -127,7 +128,8 @@ class MonitoringSystem:
         audit_storage = self.storage_dir / "audit_log.jsonl"
         self.audit_logger = AuditLogger(storage_path=audit_storage)
         
-        # Intervention tracking
+        # Intervention tracking (#809: retention bounds memory growth)
+        self.retention_hours = retention_hours
         self.interventions: List[Intervention] = []
         self.last_intervention_time: Dict[str, datetime] = {}
         self._enforcement_handlers: Dict[InterventionType, Callable] = {}
@@ -416,6 +418,7 @@ class MonitoringSystem:
         )
         
         self.interventions.append(intervention)
+        self._prune_interventions_by_retention()
         if success:
             self.last_intervention_time[agent_id] = utc_now()
         self._persist_state()
@@ -472,6 +475,40 @@ class MonitoringSystem:
         else:
             return AlertLevel.INFO
     
+    def _prune_interventions_by_retention(self) -> int:
+        """Drop in-memory interventions and stale cooldown markers (#809).
+
+        Bounds RSS growth in long-running processes: interventions are an
+        unbounded list and last_intervention_time is an unbounded dict
+        keyed by agent id. Persisted audit log on disk is untouched.
+        """
+        if self.retention_hours <= 0:
+            return 0
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+
+        dropped = 0
+        kept: list = []
+        for iv in self.interventions:
+            try:
+                ts = datetime.fromisoformat(iv.timestamp)
+            except (TypeError, ValueError):
+                kept.append(iv)
+                continue
+            if ts >= cutoff:
+                kept.append(iv)
+            else:
+                dropped += 1
+        if dropped:
+            self.interventions = kept
+
+        # Evict cooldown entries whose timestamps fell outside the window.
+        stale = [
+            agent for agent, ts in self.last_intervention_time.items() if ts < cutoff
+        ]
+        for agent in stale:
+            del self.last_intervention_time[agent]
+        return dropped + len(stale)
+
     def _notify_handlers(self, level: AlertLevel, data: Dict[str, Any]):
         """Notify registered alert handlers"""
         for handler in self.alert_handlers[level]:

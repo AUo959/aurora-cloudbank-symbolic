@@ -8,7 +8,7 @@ and safety boundaries. Supports configurable rules and automated enforcement.
 import json
 import logging
 from dataclasses import dataclass, field, asdict
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_iso
 from enum import Enum
 from pathlib import Path
@@ -100,19 +100,26 @@ class EthicsEngine:
     def __init__(
         self,
         rules_path: Optional[Path] = None,
-        violations_path: Optional[Path] = None
+        violations_path: Optional[Path] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize ethics engine
-        
+
         Args:
             rules_path: Path to rules configuration file (JSON)
             violations_path: Append-only JSONL path for persisted violations
+            retention_hours: In-memory violation retention window (#809). The
+                ``violations`` list is pruned to entries newer than this on
+                each evaluate_action call so long-running processes don't grow
+                without bound. Persistence on disk is unaffected. Defaults to
+                168h (7 days) to match BehaviorMonitor.
         """
         self.rules: Dict[str, EthicsRule] = {}
         self.violations: List[EthicsViolation] = []
         self.custom_evaluators: Dict[str, Callable] = {}
         self.violations_path = violations_path
+        self.retention_hours = retention_hours
         
         # Load default rules if available
         if rules_path and rules_path.exists():
@@ -253,7 +260,8 @@ class EthicsEngine:
                 self._persist_violation(violation)
                 violations.append(violation)
                 self.violations.append(violation)
-        
+
+        self._prune_violations_by_retention()
         if violations:
             logger.warning(
                 "Ethics violations detected for %s: %d violations",
@@ -535,10 +543,35 @@ class EthicsEngine:
             for rule_id, rule in self.rules.items()
         }
     
+    def _prune_violations_by_retention(self) -> int:
+        """Drop in-memory violations older than the retention window (#809).
+
+        Returns the number of entries removed. Persisted JSONL on disk is
+        not touched; this is purely a process-memory bound.
+        """
+        if not self.violations or self.retention_hours <= 0:
+            return 0
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        kept: list = []
+        dropped = 0
+        for v in self.violations:
+            try:
+                ts = datetime.fromisoformat(v.timestamp)
+            except (TypeError, ValueError):
+                kept.append(v)
+                continue
+            if ts >= cutoff:
+                kept.append(v)
+            else:
+                dropped += 1
+        if dropped:
+            self.violations = kept
+        return dropped
+
     def clear_violations(self, before: Optional[datetime] = None):
         """
         Clear old violations
-        
+
         Args:
             before: Clear violations before this time (default: all)
         """

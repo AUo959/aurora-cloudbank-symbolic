@@ -92,11 +92,12 @@ class DriftDetector:
         info_threshold: float = 0.2,
         warning_threshold: float = 0.5,
         critical_threshold: float = 0.8,
-        alerts_path: Optional[Path] = None
+        alerts_path: Optional[Path] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize drift detector
-        
+
         Args:
             z_score_threshold: Standard deviations for z-score alerts (default: 3.0)
             moving_avg_window: Window size for moving average (default: 10)
@@ -104,6 +105,9 @@ class DriftDetector:
             warning_threshold: Relative change threshold for warning alerts (default: 0.5 = 50%)
             critical_threshold: Relative change threshold for critical alerts (default: 0.8 = 80%)
             alerts_path: Append-only JSONL path for persisted alerts
+            retention_hours: In-memory alert retention window (#809). The
+                ``alerts`` list is pruned to entries newer than this on each
+                detect_drift call. Persisted JSONL is unaffected.
         """
         self.z_score_threshold = z_score_threshold
         self.moving_avg_window = moving_avg_window
@@ -111,7 +115,8 @@ class DriftDetector:
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
         self.alerts_path = alerts_path
-        
+        self.retention_hours = retention_hours
+
         # Storage for baselines and alerts
         self.baselines: Dict[str, BaselineMetrics] = {}
         self.alerts: List[DriftAlert] = []
@@ -248,6 +253,7 @@ class DriftDetector:
         if alert:
             self._persist_alert(alert)
             self.alerts.append(alert)
+            self._prune_alerts_by_retention()
             logger.warning(
                 "Drift detected: %s:%s [%s] - current=%.2f, baseline=%.2f",
                 agent_id, metric_name, alert.level.value, current_value, baseline.mean
@@ -395,10 +401,34 @@ class DriftDetector:
             metadata=data.get('metadata', {})
         )
     
+    def _prune_alerts_by_retention(self) -> int:
+        """Drop in-memory alerts older than the retention window (#809).
+
+        Persisted JSONL on disk is untouched.
+        """
+        if not self.alerts or self.retention_hours <= 0:
+            return 0
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        kept: list = []
+        dropped = 0
+        for a in self.alerts:
+            try:
+                ts = datetime.fromisoformat(a.timestamp)
+            except (TypeError, ValueError):
+                kept.append(a)
+                continue
+            if ts >= cutoff:
+                kept.append(a)
+            else:
+                dropped += 1
+        if dropped:
+            self.alerts = kept
+        return dropped
+
     def clear_alerts(self, before: Optional[datetime] = None):
         """
         Clear old alerts
-        
+
         Args:
             before: Clear alerts before this time (default: all alerts)
         """

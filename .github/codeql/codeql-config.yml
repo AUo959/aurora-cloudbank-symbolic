@@ -3,6 +3,24 @@ name: "Aurora CodeQL Unified Config"
 queries:
   - uses: security-extended
 
+# Suppress specific queries by file. Each suppression must carry the
+# rule id, the file path, and a justification comment so future
+# operators understand why it's allowlisted.
+query-filters:
+  # src/utils/atomic_io.py is the internal crash-safe write helper
+  # (#807). All callers pass paths derived from validated storage
+  # roots (#813 + InsightLedger.validate_safe_path). The helper itself
+  # has Path.resolve() + NUL-byte rejection as defence-in-depth.
+  # CodeQL's py/path-injection taint flow cannot trace the up-chain
+  # validation and flags the parameter as user-controlled. Adding an
+  # allowed-root parameter to the helper would push the validation
+  # burden back onto every call site for no real safety improvement,
+  # since the call sites already validate. Tracked in #807.
+  - exclude:
+      id: py/path-injection
+      paths:
+        - src/utils/atomic_io.py
+
 paths:
   - src
   - modules

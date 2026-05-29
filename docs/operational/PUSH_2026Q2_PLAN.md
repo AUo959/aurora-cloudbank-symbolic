@@ -262,6 +262,7 @@ Burndown is observed via `python scripts/benchmark_scorecard.py`. Snapshot rows 
 | 2026-05-29 | 19 / 7 | #834 Python floor unified at `>=3.11`; #789, #830 docs reconciled |
 | 2026-05-29 | 18 / 7 | #768 `datetime.utcnow()` sweep complete (136 → 0); #788 cookies posture documented; #831 upper-bound pins added to 38 packages |
 | 2026-05-29 | 17 / 7 | #767 kube-linter pinned via official action; #786 CodeQL re-enabled (Python + JavaScript matrix, weekly schedule, scoped permissions) |
+| 2026-05-29 | 16 / 7 | #821 `.env.example` reconciled — 21 missing vars added with documented defaults and module references |
 
 ---
 

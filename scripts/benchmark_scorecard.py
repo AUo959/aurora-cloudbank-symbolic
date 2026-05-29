@@ -247,11 +247,15 @@ def check_ci_tests_blocking() -> Result:
                   "Issue #758 target: 0 in test/lint jobs")
 
 
+# Match `if: false` as a YAML field, not as a substring inside a comment.
+_CODEQL_DISABLED_RE = re.compile(r"^\s*if:\s*false\b", re.MULTILINE)
+
+
 def check_codeql_enabled() -> Result:
     text = _file_text(".github/workflows/codeql-unified.yml")
     if not text:
         return Result("missing", "warn", "Issue #786")
-    disabled = "if: false" in text
+    disabled = bool(_CODEQL_DISABLED_RE.search(text))
     return Result(
         "disabled" if disabled else "enabled",
         "fail" if disabled else "pass",

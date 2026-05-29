@@ -6,14 +6,43 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # Weekly full scan to catch newly-disclosed advisories.
+    - cron: '0 5 * * 1'
+
+# Restrict default permissions; CodeQL only needs read access plus the
+# security-events write scope to upload SARIF.
+permissions:
+  contents: read
+
 jobs:
   analyze:
-    if: false
+    # Re-enabled per #786. Was previously gated with `if: false`, which made
+    # the project look CodeQL-covered while disabling automated scanning.
     runs-on: ubuntu-latest
-    name: Analyze
+    name: Analyze (${{ matrix.language }})
+    timeout-minutes: 60
+    permissions:
+      # Required to upload SARIF and create CodeQL alerts.
+      security-events: write
+      # Required for actions/checkout.
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['python', 'javascript']
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up the CodeQL tool
-        uses: github/codeql-action/setup@v1
-      - name: Analyze code
-        uses: github/codeql-action/analyze@v1
+      # NOTE (#832): all third-party action references in this workflow use
+      # major-version tags. Replace with commit-SHA pins when #832 lands.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

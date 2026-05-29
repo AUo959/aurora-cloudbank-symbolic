@@ -281,3 +281,40 @@ Remove any duplicate:
 
 *Migration completed as of commit e075190*
 *All API files now use centralized security module*
+
+---
+
+## Session and Cookie Posture (#788)
+
+**Aurora's FastAPI app does not set authentication or session cookies.**
+
+- Authentication is HTTP `Authorization: Bearer <jwt>` only (`src/security/oauth2.py`).
+- CSRF tokens are header-based (`X-CSRF-Token` / `Depends(verify_csrf_token)`),
+  not cookie-stored.
+- `Set-Cookie` is not emitted by any production endpoint — verified by
+  `grep -rn "set_cookie\|Set-Cookie\|response\.cookies" --include="*.py" api/ modules/ src/`
+  returning zero hits in production code.
+- The lone reference to cookie attributes in `src/agents/crew/markov.py:148-152`
+  is **declarative metadata returned by an agent task description**, not a
+  live `Set-Cookie` code path.
+
+**Therefore no global `SessionMiddleware` or cookie-flag middleware is
+required at this time.**
+
+### If cookies are added in the future
+
+If a future endpoint introduces cookies (e.g. for a browser-targeted
+session UX), it MUST set the following attributes:
+
+| Attribute | Value | Rationale |
+|---|---|---|
+| `Secure` | `True` (when TLS is terminated upstream) | Prevents transmission over plaintext |
+| `HttpOnly` | `True` | Blocks JavaScript access; mitigates XSS token theft |
+| `SameSite` | `"Strict"` (or `"Lax"` with explicit justification) | Mitigates CSRF in browser contexts |
+| `Domain` | The exact host serving the cookie | Avoids subdomain leakage |
+| `Path` | The narrowest path that needs the cookie | Limits scope |
+
+At that point, add a `SessionMiddleware` or a small response-side middleware
+in `src/middleware/` that enforces these defaults on every `Set-Cookie`
+header, and add an integration test that asserts the flags. Update this
+section and #788 / its successor accordingly.

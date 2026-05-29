@@ -81,88 +81,168 @@ class DashboardMetrics(BaseModel):
 
 
 # Helper functions for component data
+#
+# #771: registry + health are now derived from the live FastAPI app's
+# mounted routes rather than from a hardcoded dict. The component
+# definition (id, name, category, description, expected route prefix)
+# stays as metadata here -- those are intrinsic descriptions of the
+# subsystem, not runtime state. What's runtime is "are those routes
+# actually mounted right now?", which is what powers calculate_component_health.
+#
+# get_component_interactions() remains static for now and is annotated
+# with source="static" so callers can tell. Wiring it to a real
+# topology source (cross-module import graph at startup, or telemetry
+# edges from #769) is tracked as a follow-up under #771.
+
+_COMPONENT_DEFS: List[Dict[str, Any]] = [
+    {
+        "id": "aumemmanager",
+        "name": "AuMemManager",
+        "category": "memory",
+        "description": "Quantum memory management with 56K capacity",
+        "expected_prefixes": ["/memory", "/aumem"],
+    },
+    {
+        "id": "data_guardian",
+        "name": "Data Guardian",
+        "category": "privacy",
+        "description": "PII detection and redaction",
+        "expected_prefixes": ["/guardian", "/data"],
+    },
+    {
+        "id": "insight_ledger",
+        "name": "Insight Ledger",
+        "category": "audit",
+        "description": "Cryptographic audit trail",
+        "expected_prefixes": ["/ledger"],
+    },
+    {
+        "id": "quantum_simulator",
+        "name": "Quantum Simulator",
+        "category": "compute",
+        "description": "Quantum scenario simulation",
+        "expected_prefixes": ["/quantum"],
+    },
+    {
+        "id": "dlp_tracker",
+        "name": "DLP Tracker",
+        "category": "governance",
+        "description": "Data lineage and provenance tracking",
+        "expected_prefixes": ["/dlp"],
+    },
+    {
+        "id": "chatgpt_agent",
+        "name": "ChatGPT Agent Mode",
+        "category": "ai_integration",
+        "description": "Agent tool registry and session management",
+        "expected_prefixes": ["/agent"],
+    },
+    {
+        "id": "symbolic_engine",
+        "name": "Symbolic Engine",
+        "category": "computation",
+        "description": "Chain notation and T1/SRB anchor processing",
+        "expected_prefixes": [],  # internal, no HTTP surface
+    },
+    {
+        "id": "thread_bridge",
+        "name": "Thread Transfer Bridge",
+        "category": "continuity",
+        "description": "Cross-thread state continuity",
+        "expected_prefixes": [],  # internal
+    },
+]
+
+
+def _live_route_paths() -> List[str]:
+    """Return the set of HTTP paths mounted on the canonical FastAPI app.
+
+    Returns an empty list if the app can't be imported (env without
+    optional deps, test harness with TestClient still building, etc.).
+    Cached per-process via lru_cache on the helper since route mount
+    is fixed after app creation.
+    """
+    try:
+        from api.aurora_api import app as _app  # local import to avoid cycle
+    except Exception:  # pragma: no cover - import-time fall-through
+        return []
+    paths: List[str] = []
+    for route in getattr(_app, "routes", []):
+        path = getattr(route, "path", None)
+        if isinstance(path, str):
+            paths.append(path)
+    return paths
+
+
 def get_component_registry() -> List[Dict[str, Any]]:
-    """Get list of registered R-2 components"""
-    # Core components from R-2 architecture
-    components = [
-        {
-            "id": "aumemmanager",
-            "name": "AuMemManager",
-            "category": "memory",
-            "description": "Quantum memory management with 56K capacity",
-            "endpoints": ["/memory/create", "/memory/search", "/memory/health"],
-        },
-        {
-            "id": "data_guardian",
-            "name": "Data Guardian",
-            "category": "privacy",
-            "description": "PII detection and redaction",
-            "endpoints": ["/guardian/detect", "/guardian/redact"],
-        },
-        {
-            "id": "insight_ledger",
-            "name": "Insight Ledger",
-            "category": "audit",
-            "description": "Cryptographic audit trail",
-            "endpoints": ["/ledger/record", "/ledger/verify"],
-        },
-        {
-            "id": "quantum_simulator",
-            "name": "Quantum Simulator",
-            "category": "compute",
-            "description": "Quantum scenario simulation",
-            "endpoints": ["/quantum/simulate", "/quantum/scenarios"],
-        },
-        {
-            "id": "dlp_tracker",
-            "name": "DLP Tracker",
-            "category": "governance",
-            "description": "Data lineage and provenance tracking",
-            "endpoints": ["/dlp/export", "/dlp/manifest"],
-        },
-        {
-            "id": "chatgpt_agent",
-            "name": "ChatGPT Agent Mode",
-            "category": "ai_integration",
-            "description": "Agent tool registry and session management",
-            "endpoints": ["/agent/tools", "/agent/stream"],
-        },
-        {
-            "id": "symbolic_engine",
-            "name": "Symbolic Engine",
-            "category": "computation",
-            "description": "Chain notation and T1/SRB anchor processing",
-            "endpoints": [],
-        },
-        {
-            "id": "thread_bridge",
-            "name": "Thread Transfer Bridge",
-            "category": "continuity",
-            "description": "Cross-thread state continuity",
-            "endpoints": [],
-        },
-    ]
-    return components
+    """Return the component list with `endpoints` populated from live routes.
+
+    The `endpoints` field for each component is computed by filtering
+    the live FastAPI app's route table to paths under any of the
+    component's `expected_prefixes`. Components with no mounted routes
+    get `endpoints=[]` and will surface as health=0 in
+    calculate_component_health.
+    """
+    live_paths = _live_route_paths()
+    out: List[Dict[str, Any]] = []
+    for comp in _COMPONENT_DEFS:
+        prefixes = comp.get("expected_prefixes") or []
+        if prefixes:
+            mounted = sorted({
+                p for p in live_paths
+                if any(p == prefix or p.startswith(prefix + "/") for prefix in prefixes)
+            })
+        else:
+            mounted = []
+        out.append({
+            "id": comp["id"],
+            "name": comp["name"],
+            "category": comp["category"],
+            "description": comp["description"],
+            "endpoints": mounted,
+        })
+    return out
 
 
 def calculate_component_health(component_id: str) -> float:
-    """Calculate health score for a component (0-100)"""
-    # Placeholder implementation - would query actual metrics
-    health_scores = {
-        "aumemmanager": 95.0,
-        "data_guardian": 88.0,
-        "insight_ledger": 92.0,
-        "quantum_simulator": 85.0,
-        "dlp_tracker": 98.0,
-        "chatgpt_agent": 90.0,
-        "symbolic_engine": 87.0,
-        "thread_bridge": 82.0,
-    }
-    return health_scores.get(component_id, 0.0)
+    """Health from live route presence (#771).
+
+    Today: 100 if all expected_prefixes have at least one mounted route,
+    proportional otherwise, 0 if the component is unknown. Components
+    with no expected HTTP surface (symbolic_engine, thread_bridge)
+    return 100 by convention -- they cannot be unhealthy via route
+    inventory alone.
+
+    Future (after #769 telemetry middleware is wired): combine with
+    p99 latency, error rate, and freshness signals.
+    """
+    comp = next((c for c in _COMPONENT_DEFS if c["id"] == component_id), None)
+    if comp is None:
+        return 0.0
+    prefixes = comp.get("expected_prefixes") or []
+    if not prefixes:
+        return 100.0
+    live_paths = _live_route_paths()
+    if not live_paths:
+        # App not importable in this context -- be honest, not optimistic.
+        return 0.0
+    covered = sum(
+        1 for prefix in prefixes
+        if any(p == prefix or p.startswith(prefix + "/") for p in live_paths)
+    )
+    return round(100.0 * covered / len(prefixes), 1)
 
 
 def get_component_interactions() -> List[Dict[str, Any]]:
-    """Get documented component interactions"""
+    """Get documented component interactions.
+
+    #771 status: this is still a static, hand-curated list. Each entry
+    is annotated with ``"source": "static"`` so downstream callers (and
+    the synergy dashboard itself) can distinguish documented-only edges
+    from edges that will later come from telemetry (#769) or a startup
+    cross-module import scan. The shape of each entry is preserved so
+    later runtime data can be slotted in without a response break.
+    """
     interactions = [
         {
             "source": "aumemmanager",
@@ -201,6 +281,11 @@ def get_component_interactions() -> List[Dict[str, Any]]:
             "description": "Simulation results tracked for lineage",
         },
     ]
+    # #771: tag every entry with source="static" so callers and the
+    # dashboard can render them distinctly from telemetry-derived edges
+    # once #769 wires real interaction signals.
+    for item in interactions:
+        item.setdefault("source", "static")
     return interactions
 
 

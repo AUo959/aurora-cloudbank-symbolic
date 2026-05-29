@@ -18,7 +18,7 @@
     "build:web": "node scripts/build-web.js",
     "build:prod": "NODE_ENV=production npm run build",
     "build:web:prod": "NODE_ENV=production node scripts/build-web.js",
-    "start": "python3 aurora_api_server.py || echo \"Aurora CloudBank starting...\"",
+    "start": "uvicorn api.aurora_api:app --host 0.0.0.0 --port 8000",
     "start:web": "node scripts/web-server.js",
     "dev": "npm run start",
     "dev:web": "concurrently \"npm run start:web\" \"npm run lint:check\"",

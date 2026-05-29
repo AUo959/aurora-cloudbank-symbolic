@@ -147,7 +147,14 @@ test:
 	$(PYTHON_VENV) -m pytest tests
 
 run:
+	# Legacy demo target (loom restore). For the canonical API server
+	# use `make serve`. See #759.
 	python modules/reflective_autonomy/loom_restore_script.py
+
+serve:
+	# Canonical FastAPI entrypoint (#759). Configure host/port via
+	# AURORA_HOST / AURORA_PORT environment variables.
+	uvicorn api.aurora_api:app --host $${AURORA_HOST:-0.0.0.0} --port $${AURORA_PORT:-8000}
 
 check:
 	# Fast stability check: scoped lint + full tests

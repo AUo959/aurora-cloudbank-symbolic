@@ -363,6 +363,20 @@ def check_request_id_middleware() -> Result:
                   "pass" if has else "fail", "Issue #818")
 
 
+def check_app_assembly_tests() -> Result:
+    path = REPO_ROOT / "tests/test_app_assembly.py"
+    if not path.exists():
+        return Result("missing", "fail", "Issue #793")
+    text = _read_text(str(path))
+    has_routes = "EXPECTED_ROUTES" in text
+    has_middleware = "EXPECTED_MIDDLEWARE" in text
+    has_lifespan = "lifespan" in text.lower()
+    score = sum((has_routes, has_middleware, has_lifespan))
+    if score == 3:
+        return Result("present", "pass", "Issue #793")
+    return Result(f"{score}/3", "warn", "Issue #793: scaffold partial")
+
+
 def check_health_split() -> Result:
     text = _file_text("api/aurora_api.py")
     if not text:
@@ -519,6 +533,8 @@ CHECKS: list[Check] = [
           check_atomic_writes),
     Check("wiring", "Request-ID middleware mounted", "wired", "#818",
           check_request_id_middleware),
+    Check("testing", "App-assembly test scaffold", "present", "#793",
+          check_app_assembly_tests),
     Check("ops", "Health endpoints split", "3/3", "#814",
           check_health_split),
 

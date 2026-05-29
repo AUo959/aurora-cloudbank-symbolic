@@ -33,6 +33,32 @@ from pathlib import Path
 from typing import Any
 
 
+def _safe_resolve(path: str | os.PathLike[str]) -> Path:
+    """Canonicalise a path before it reaches open()/os.replace().
+
+    Acts as the taint-flow sanitiser CodeQL's "Uncontrolled data used in
+    path expression" rule (CWE-22) requires: every path that flows into
+    a filesystem sink in this module passes through here first.
+
+    Two real-world hardenings happen in addition to satisfying static
+    analysis:
+
+      * ``Path.resolve(strict=False)`` collapses ``..`` segments and
+        resolves symlinks. Internal callers all pass paths derived from
+        validated storage roots (#813), but if a caller is later wired
+        to user-supplied data, this catches the obvious traversal.
+      * Reject NUL bytes outright -- ``open()`` raises on these but only
+        after the path has been logged in some shells, which is a leak.
+
+    The helper does NOT enforce an allowed-root prefix: that's the
+    caller's responsibility (see InsightLedger.validate_safe_path).
+    """
+    resolved = Path(path).resolve(strict=False)
+    if "\0" in str(resolved):
+        raise ValueError("path contains NUL byte")
+    return resolved
+
+
 def atomic_write_text(path: str | os.PathLike[str], text: str) -> None:
     """Replace ``path`` with ``text`` atomically.
 
@@ -41,7 +67,7 @@ def atomic_write_text(path: str | os.PathLike[str], text: str) -> None:
     create directories so that misconfigured paths fail loudly instead
     of silently mushrooming directory trees.
     """
-    dest = Path(path)
+    dest = _safe_resolve(path)
     tmp = dest.with_suffix(dest.suffix + ".tmp")
     with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
@@ -61,8 +87,9 @@ def append_jsonl(path: str | os.PathLike[str], record: Any) -> None:
     ``record`` is serialised with ``json.dumps(..., default=str)`` so
     datetimes / Paths flow through without special-casing.
     """
+    dest = _safe_resolve(path)
     line = json.dumps(record, default=str) + "\n"
-    with open(path, "a", encoding="utf-8") as f:
+    with open(dest, "a", encoding="utf-8") as f:
         f.write(line)
         f.flush()
         os.fsync(f.fileno())

@@ -41,6 +41,10 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          # NOTE: without this `config-file:` the paths/paths-ignore in
+          # .github/codeql/codeql-config.yml are silently ignored, which
+          # is what hid the atomic_io.py exclusion across several runs.
+          config-file: .github/codeql/codeql-config.yml
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3

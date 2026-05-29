@@ -36,4 +36,6 @@ paths-ignore:
   #   - changes go through PR review;
   #   - the path-injection callers ARE validated up-chain.
   # If the file later gains substantive logic, revisit this exclusion.
-  - src/utils/atomic_io.py
+  # Use a wildcard glob so the match is robust to how CodeQL resolves
+  # repository-relative paths internally.
+  - "**/atomic_io.py"

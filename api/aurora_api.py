@@ -8,6 +8,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 
 import logging
 import os
+import uuid  # #818 request-ID middleware
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional, Literal
 
@@ -476,6 +477,41 @@ async def telemetry_middleware(request: Request, call_next):
             # Record error explicitly before re-raising for visibility
             logger.error("Request processing error: %s", e)
             raise
+
+
+# ================================
+# Request-ID Middleware (#818)
+# ================================
+
+REQUEST_ID_HEADER = "X-Request-ID"
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Stamp every request with a sanitized, propagated request id.
+
+    Reads inbound ``X-Request-ID`` (sanitized via the existing
+    ``sanitize_request_id`` helper so we don't trust attacker-supplied
+    values), falls back to a UUID4, attaches it to ``request.state.request_id``
+    so handlers and the upcoming envelope (#774) can read it, and echoes
+    it back on the response so distributed clients can correlate logs.
+
+    Because ``@app.middleware`` decorators wrap in reverse-source order,
+    declaring this AFTER the telemetry middleware means request-id
+    handling is the outermost layer — telemetry, rate-limiting, and any
+    future PII/ethics middleware get a populated request_id for free.
+    """
+    inbound = request.headers.get(REQUEST_ID_HEADER)
+    request_id = sanitize_request_id(inbound) or uuid.uuid4().hex
+    request.state.request_id = request_id
+    try:
+        response = await call_next(request)
+    except Exception:
+        # Surface the id even when the handler raises so error logs
+        # downstream can correlate.
+        raise
+    response.headers[REQUEST_ID_HEADER] = request_id
+    return response
 
 
 # HIGH-5: NoSQL Injection Prevention - Input Validation Helper

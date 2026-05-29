@@ -263,6 +263,7 @@ Burndown is observed via `python scripts/benchmark_scorecard.py`. Snapshot rows 
 | 2026-05-29 | 18 / 7 | #768 `datetime.utcnow()` sweep complete (136 → 0); #788 cookies posture documented; #831 upper-bound pins added to 38 packages |
 | 2026-05-29 | 17 / 7 | #767 kube-linter pinned via official action; #786 CodeQL re-enabled (Python + JavaScript matrix, weekly schedule, scoped permissions) |
 | 2026-05-29 | 16 / 7 | #821 `.env.example` reconciled — 21 missing vars added with documented defaults and module references |
+| 2026-05-29 | 15 / 7 | #836 PEP 621 migration; #794 partial (blocked by #815); #792 slow markers; #759 canonical entrypoint; #818 request-ID middleware mounted (first Phase 2 spine layer) |
 
 ---
 

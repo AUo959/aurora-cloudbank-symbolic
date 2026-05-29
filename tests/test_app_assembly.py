@@ -151,6 +151,31 @@ def test_middleware_inventory_includes_documented_layers():
 
 @pytest.mark.integration
 @pytest.mark.api
+def test_request_id_round_trip():
+    """#818: every response carries X-Request-ID; inbound is preserved."""
+    from fastapi.testclient import TestClient
+
+    with TestClient(app) as client:
+        # Without inbound header: middleware must generate one.
+        r = client.get("/health")
+        assert r.status_code == 200, r.text
+        generated = r.headers.get("X-Request-ID")
+        assert generated, "response missing X-Request-ID"
+        assert len(generated) >= 8
+
+        # With inbound header: a valid value must be preserved.
+        r = client.get("/health", headers={"X-Request-ID": "abc-123"})
+        assert r.headers.get("X-Request-ID") == "abc-123"
+
+        # Junk inbound must be sanitized away (not echoed verbatim).
+        r = client.get("/health", headers={"X-Request-ID": "evil\r\nx: y"})
+        echoed = r.headers.get("X-Request-ID")
+        assert echoed and "\r" not in echoed and "\n" not in echoed
+        assert echoed != "evil\r\nx: y"
+
+
+@pytest.mark.integration
+@pytest.mark.api
 def test_lifespan_starts_cleanly(caplog):
     """TestClient drives lifespan startup; this must not raise.
 

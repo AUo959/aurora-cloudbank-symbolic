@@ -176,6 +176,47 @@ def test_request_id_round_trip():
 
 @pytest.mark.integration
 @pytest.mark.api
+def test_envelope_attaches_context_tag():
+    """#774: middleware sets request.state.context_tag matching the request id.
+
+    Uses a per-test route registered on the live app so we can read the
+    state attached by the middleware. The route is removed after the
+    assertion to avoid polluting the route inventory the other tests
+    in this file enforce.
+    """
+    from fastapi import Request as _Req
+    from fastapi.testclient import TestClient
+
+    from api.aurora_api import CONTEXT_TAG_PREFIX, get_request_context_tag
+
+    probe_path = "/__envelope_probe__"
+
+    @app.get(probe_path)
+    async def _probe(request: _Req):
+        return {
+            "request_id": getattr(request.state, "request_id", None),
+            "context_tag": getattr(request.state, "context_tag", None),
+            "helper": get_request_context_tag(request),
+        }
+
+    try:
+        with TestClient(app) as client:
+            r = client.get(probe_path, headers={"X-Request-ID": "rid-abc"})
+            assert r.status_code == 200, r.text
+            body = r.json()
+            assert body["request_id"] == "rid-abc"
+            assert body["context_tag"] == f"{CONTEXT_TAG_PREFIX}rid-abc"
+            assert body["helper"] == body["context_tag"]
+    finally:
+        # Drop the probe route so test_route_inventory_includes_documented_endpoints
+        # (which runs in any order) doesn't see it.
+        app.router.routes = [
+            r for r in app.router.routes if getattr(r, "path", None) != probe_path
+        ]
+
+
+@pytest.mark.integration
+@pytest.mark.api
 def test_lifespan_starts_cleanly(caplog):
     """TestClient drives lifespan startup; this must not raise.
 

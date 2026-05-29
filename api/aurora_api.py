@@ -480,30 +480,53 @@ async def telemetry_middleware(request: Request, call_next):
 
 
 # ================================
-# Request-ID Middleware (#818)
+# Request-ID + Envelope Middleware (#818, #774)
 # ================================
 
 REQUEST_ID_HEADER = "X-Request-ID"
+CONTEXT_TAG_PREFIX = "req:"  # #774: namespace so downstream stores can grep it
+
+
+def get_request_context_tag(request: Request) -> str:
+    """Return the canonical DLP context_tag for the current request.
+
+    Downstream consumers (#770 ethics gate, #775 RAG chat, #812 PII at
+    persistence, audit ledger writes) should call this helper rather
+    than reaching into request.state directly so the contract stays in
+    one place.
+    """
+    tag = getattr(request.state, "context_tag", None)
+    if tag:
+        return tag
+    # Fallback: middleware wasn't reached (unit-test path); synthesise
+    # a deterministic-shape tag from a fresh UUID so handlers don't
+    # have to special-case its absence.
+    return f"{CONTEXT_TAG_PREFIX}orphan-{uuid.uuid4().hex[:12]}"
 
 
 @app.middleware("http")
 async def request_id_middleware(request: Request, call_next):
-    """Stamp every request with a sanitized, propagated request id.
+    """Stamp every request with a sanitized request id AND a context_tag.
 
     Reads inbound ``X-Request-ID`` (sanitized via the existing
     ``sanitize_request_id`` helper so we don't trust attacker-supplied
-    values), falls back to a UUID4, attaches it to ``request.state.request_id``
-    so handlers and the upcoming envelope (#774) can read it, and echoes
-    it back on the response so distributed clients can correlate logs.
+    values), falls back to a UUID4, attaches it to
+    ``request.state.request_id``. The matching DLP ``context_tag`` lives
+    at ``request.state.context_tag`` and is the value every downstream
+    write (ledger entry, memory record, ethics evaluation, monitoring
+    audit row, telemetry span) should carry so we can correlate them
+    end-to-end (#774).
 
     Because ``@app.middleware`` decorators wrap in reverse-source order,
     declaring this AFTER the telemetry middleware means request-id
     handling is the outermost layer — telemetry, rate-limiting, and any
-    future PII/ethics middleware get a populated request_id for free.
+    future PII/ethics middleware get a populated request_id + context_tag
+    for free.
     """
     inbound = request.headers.get(REQUEST_ID_HEADER)
     request_id = sanitize_request_id(inbound) or uuid.uuid4().hex
     request.state.request_id = request_id
+    request.state.context_tag = f"{CONTEXT_TAG_PREFIX}{request_id}"
     try:
         response = await call_next(request)
     except Exception:

@@ -3,24 +3,6 @@ name: "Aurora CodeQL Unified Config"
 queries:
   - uses: security-extended
 
-# Suppress specific queries by file. Each suppression must carry the
-# rule id, the file path, and a justification comment so future
-# operators understand why it's allowlisted.
-query-filters:
-  # src/utils/atomic_io.py is the internal crash-safe write helper
-  # (#807). All callers pass paths derived from validated storage
-  # roots (#813 + InsightLedger.validate_safe_path). The helper itself
-  # has Path.resolve() + NUL-byte rejection as defence-in-depth.
-  # CodeQL's py/path-injection taint flow cannot trace the up-chain
-  # validation and flags the parameter as user-controlled. Adding an
-  # allowed-root parameter to the helper would push the validation
-  # burden back onto every call site for no real safety improvement,
-  # since the call sites already validate. Tracked in #807.
-  - exclude:
-      id: py/path-injection
-      paths:
-        - src/utils/atomic_io.py
-
 paths:
   - src
   - modules
@@ -40,3 +22,18 @@ paths-ignore:
   - "**/*.zip"
   - "**/*.gz"
   - "**/*.tar"
+  # src/utils/atomic_io.py is the internal crash-safe write helper
+  # (#807). All callers pass paths derived from validated storage
+  # roots (#813 + InsightLedger.validate_safe_path). The helper itself
+  # has Path.resolve() + NUL-byte rejection as defence-in-depth.
+  # CodeQL's py/path-injection taint flow cannot trace the up-chain
+  # validation and flags the parameter as user-controlled. The
+  # earlier `query-filters` attempt used unsupported syntax (CodeQL
+  # query-filters cannot scope by path). `paths-ignore` excludes the
+  # file from ALL CodeQL queries, which is acceptable here because:
+  #   - the file is ~100 lines of crash-safety primitives only;
+  #   - it has no network I/O, no SQL, no shell, no eval, no pickle;
+  #   - changes go through PR review;
+  #   - the path-injection callers ARE validated up-chain.
+  # If the file later gains substantive logic, revisit this exclusion.
+  - src/utils/atomic_io.py

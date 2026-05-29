@@ -1,0 +1,80 @@
+{
+  "_meta": {
+    "source": "Aurora EthicsEngine — canonical rules (#782).",
+    "doc": "Edits here change runtime behaviour. The rule set is loaded at EthicsEngine.__init__ via ETHICS_RULES_PATH or config/ethics_rules.json by default. Schema is mirrored from src/monitoring/ethics_engine.py:_map_category and the EthicsRule dataclass.",
+    "schema": {
+      "category": "one of: mission_ethics, resource_ethics, ai_ethics, safety, transparency, fairness",
+      "severity": "one of: low, medium, high, critical",
+      "auto_block": "true means the engine signals callers to refuse the action; false means flag-and-continue",
+      "conditions": "list of free-form strings evaluated by EthicsEngine._check_condition; matched against ActionContext attributes via simple comparison parsing"
+    },
+    "version": "1.0",
+    "history": [
+      "1.0 (#782): initial extraction from _load_default_rules"
+    ]
+  },
+  "ethics_validation_rules": {
+    "rule_categories": {
+      "safety": {
+        "rules": [
+          {
+            "id": "SAFETY_001",
+            "name": "Life Safety Priority",
+            "description": "Actions must not create risk to human safety",
+            "severity": "critical",
+            "auto_block": true,
+            "conditions": ["risk_to_life > 0", "safety_override_missing"]
+          }
+        ]
+      },
+      "ai_ethics": {
+        "rules": [
+          {
+            "id": "AI_001",
+            "name": "Human Oversight Required",
+            "description": "Critical decisions must have human oversight",
+            "severity": "critical",
+            "auto_block": true,
+            "conditions": ["critical_decision", "no_human_approval"]
+          }
+        ]
+      },
+      "transparency": {
+        "rules": [
+          {
+            "id": "AI_002",
+            "name": "Decision Transparency",
+            "description": "AI decisions must be explainable",
+            "severity": "high",
+            "auto_block": false,
+            "conditions": ["decision_opacity > 0.5", "no_explanation"]
+          }
+        ]
+      },
+      "fairness": {
+        "rules": [
+          {
+            "id": "RESOURCE_001",
+            "name": "Fair Resource Allocation",
+            "description": "Resources must be allocated fairly",
+            "severity": "medium",
+            "auto_block": false,
+            "conditions": ["inequality_coefficient > 0.7"]
+          }
+        ]
+      },
+      "mission_ethics": {
+        "rules": [
+          {
+            "id": "MISSION_001",
+            "name": "Informed Consent",
+            "description": "Stakeholders must provide informed consent",
+            "severity": "high",
+            "auto_block": true,
+            "conditions": ["consent_missing", "insufficient_information"]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ and safety boundaries. Supports configurable rules and automated enforcement.
 
 import json
 import logging
+import os
 import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
@@ -125,15 +126,52 @@ class EthicsEngine:
         # JSONL persist, and the retention prune across threads.
         self._write_lock = threading.Lock()
         
-        # Load default rules if available
-        if rules_path and rules_path.exists():
-            self.load_rules(rules_path)
+        # #782: rule source-of-truth resolution. Order:
+        #   1. explicit rules_path argument
+        #   2. ETHICS_RULES_PATH environment variable
+        #   3. config/ethics_rules.json (canonical, shipped)
+        #   4. inline _load_default_rules fallback (warn loudly)
+        resolved_path = self._resolve_rules_path(rules_path)
+        if resolved_path and resolved_path.exists():
+            self.load_rules(resolved_path)
+            self._rules_source = str(resolved_path)
         else:
+            logger.warning(
+                "Ethics rules JSON not found (tried: %s); falling back to "
+                "inline _load_default_rules. This is acceptable for dev/test "
+                "but production should ship config/ethics_rules.json (#782).",
+                resolved_path,
+            )
             self._load_default_rules()
+            self._rules_source = "<inline:_load_default_rules>"
 
         self._load_violations()
-        
-        logger.info("Ethics engine initialized with %d rules", len(self.rules))
+
+        logger.info(
+            "Ethics engine initialized with %d rules (source=%s)",
+            len(self.rules), self._rules_source,
+        )
+
+    @staticmethod
+    def _resolve_rules_path(explicit: Optional[Path]) -> Optional[Path]:
+        """Resolve where to load ethics rules from (#782).
+
+        Precedence:
+            1. explicit Path passed to __init__
+            2. ETHICS_RULES_PATH environment variable
+            3. <repo>/config/ethics_rules.json (canonical default)
+        Returns the first candidate; the caller verifies .exists().
+        """
+        if explicit is not None:
+            return explicit
+        env_path = os.getenv("ETHICS_RULES_PATH")
+        if env_path:
+            return Path(env_path)
+        # repo-shipped default: <package>/../../../config/ethics_rules.json
+        # ethics_engine.py lives at src/monitoring/, so config is up three.
+        here = Path(__file__).resolve()
+        candidate = here.parent.parent.parent / "config" / "ethics_rules.json"
+        return candidate
     
     def _load_default_rules(self):
         """Load default ethics rules"""

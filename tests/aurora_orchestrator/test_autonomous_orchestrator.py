@@ -49,6 +49,7 @@ async def test_orchestrator_initialization(orchestrator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow  # #792: integration test sleeps 2s while orchestrator loop runs
 async def test_orchestrator_start_stop(orchestrator):
     """Test orchestrator can start and stop"""
     await orchestrator.start_orchestration()
@@ -77,6 +78,7 @@ async def test_system_observation(orchestrator):
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow  # #792: decision-loop test sleeps 3s
 async def test_decision_making(orchestrator):
     """Test Aurora can make decisions"""
     await orchestrator.start_orchestration()

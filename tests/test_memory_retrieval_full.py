@@ -379,6 +379,7 @@ class TestMemoryCache:
         assert value is None
         assert cache._stats["misses"] == 1
 
+    @pytest.mark.slow  # #792: TTL test sleeps 1.1s
     def test_cache_ttl_expiration(self):
         """Test that cache entries expire after TTL."""
         config = MemoryRetrievalConfig(cache_ttl_seconds=1)

@@ -363,6 +363,7 @@ class TestEventCoordinationRegistry:
         assert result4["success"] is True
 
     @pytest.mark.asyncio
+    @pytest.mark.slow  # #792: TTL test sleeps 1.5s
     async def test_lock_auto_release(self, registry):
         """Test automatic lock release after TTL"""
         # Acquire lock with short TTL

@@ -392,6 +392,7 @@ def test_operation_metadata_tracking():
 
 @pytest.mark.integration
 @pytest.mark.observability
+@pytest.mark.slow  # #792: concurrent operations with per-task asyncio.sleep
 async def test_concurrent_operations():
     """Test telemetry with concurrent operations"""
     telemetry = R2AgentTelemetry()

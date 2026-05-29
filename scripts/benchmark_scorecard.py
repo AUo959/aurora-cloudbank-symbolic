@@ -124,16 +124,38 @@ def _regex_capture_set(pattern: str, roots: Iterable[str], group: int = 1) -> se
 # ---------- security ----------
 
 def check_str_e_leak() -> Result:
-    n = _regex_count(
-        r'detail=str\(e\)|detail=f".*\{str\(e\)|detail=f".*\{e\}',
-        ("api", "modules", "src"),
+    # #783: count direct exception-message leaks of common shapes.
+    # Covers: detail=str(e) / detail=repr(e) (any single-letter or
+    # named exception var); and detail=f"...{e}" / {e!r} / {e!s} /
+    # {str(e)} / {repr(e)} / {exc} / {err} variants. Final dict-style
+    # leaks like detail={"error": str(e)} are not counted here -- they
+    # appear only when the route deliberately structures the response.
+    pat = (
+        r'detail\s*=\s*(?:str|repr)\(\s*\w+\s*\)'
+        r'|detail\s*=\s*f["\'].*?\{(?:str|repr)\(\s*\w+\s*\)\}'
+        r'|detail\s*=\s*f["\'].*?\{\s*(?:e|exc|err|error|exception)\s*[!:][^}]*\}'
+        r'|detail\s*=\s*f["\'].*?\{\s*(?:e|exc|err|error|exception)\s*\}'
     )
+    n = _regex_count(pat, ("api", "modules", "src"))
     return Result(n, "pass" if n == 0 else "fail", "Issue #783 target: 0")
+
+
+_UTCNOW_DOC_FILE = "src/core/time_utils.py"
 
 
 def check_datetime_utcnow() -> Result:
     n = _regex_count(r"datetime\.utcnow\(\)", ("api", "modules", "src"))
-    return Result(n, "pass" if n == 0 else "fail", "Issue #768 target: 0")
+    # The migration helper module's docstring legitimately names the
+    # deprecated call as the thing being replaced; subtract that one
+    # documentation mention so the count reflects real call sites.
+    doc_mentions = sum(
+        1 for _ in re.finditer(
+            r"datetime\.utcnow\(\)",
+            _file_text(_UTCNOW_DOC_FILE),
+        )
+    )
+    real = max(0, n - doc_mentions)
+    return Result(real, "pass" if real == 0 else "fail", "Issue #768 target: 0")
 
 
 def check_csrf_router_coverage() -> Result:
@@ -168,7 +190,9 @@ def check_third_party_action_sha_pins() -> Result:
         return Result("no workflows dir", "warn", "Issue #832")
     sha_total = 0
     tag_total = 0
-    for wf in workflow_dir.glob("*.yml"):
+    # Workflows can be saved as .yml OR .yaml; skip neither.
+    workflow_files = list(workflow_dir.glob("*.yml")) + list(workflow_dir.glob("*.yaml"))
+    for wf in workflow_files:
         sha, tag = _classify_action_pins(_read_text(str(wf)))
         sha_total += sha
         tag_total += tag
@@ -345,16 +369,33 @@ _STATE_FILES = (
 )
 
 
+_RAW_WRITE_RE = re.compile(r"open\([^)]*['\"]w['\"]")
+
+
 def check_atomic_writes() -> Result:
-    have = sum(
-        1 for rel in _STATE_FILES
-        if _ATOMIC_WRITE_RE.search(_file_text(rel))
-    )
+    # Require BOTH: the file references atomic_io helpers (os.replace,
+    # NamedTemporaryFile, atomic_write) AND it does NOT still contain
+    # a plain `open(..., "w")` somewhere -- otherwise an unrelated
+    # atomic_io use elsewhere in the file can mask the real
+    # overwrite-as-truncate site we care about (#807 audit).
+    have = 0
+    leftover_raw_writes: list[str] = []
+    for rel in _STATE_FILES:
+        text = _file_text(rel)
+        if not _ATOMIC_WRITE_RE.search(text):
+            continue
+        if _RAW_WRITE_RE.search(text):
+            leftover_raw_writes.append(rel)
+            continue
+        have += 1
     total = len(_STATE_FILES)
+    detail = "Issue #807 target: all state-bearing modules"
+    if leftover_raw_writes:
+        detail += f" (raw open('w') still present in {leftover_raw_writes})"
     return Result(
         f"{have}/{total}",
         "pass" if have == total else "fail",
-        "Issue #807 target: all state-bearing modules",
+        detail,
     )
 
 
@@ -381,14 +422,25 @@ def check_app_assembly_tests() -> Result:
     return Result(f"{score}/3", "warn", "Issue #793: scaffold partial")
 
 
+_ROUTE_DECORATOR_RE = re.compile(
+    r"@(?:app|router)\.(?:get|post|put|delete)\s*\(\s*['\"]([^'\"]+)['\"]"
+)
+
+
 def check_health_split() -> Result:
     text = _file_text("api/aurora_api.py")
     if not text:
         return Result("missing", "warn", "Issue #814")
-    paths_found = sum(1 for p in ('"/live"', '"/ready"', '"/health"') if p in text)
+    # Require routes, not bare strings: a log line or docstring that
+    # happens to mention "/live" must not flip this row PASS.
+    declared = {
+        m.group(1) for m in _ROUTE_DECORATOR_RE.finditer(text)
+    }
+    expected = {"/live", "/ready", "/health"}
+    present = expected & declared
     return Result(
-        f"{paths_found}/3",
-        "pass" if paths_found == 3 else "fail",
+        f"{len(present)}/3",
+        "pass" if len(present) == 3 else "fail",
         "Issue #814 target: 3 distinct endpoints",
     )
 
@@ -415,8 +467,12 @@ def check_python_floor_consistency() -> Result:
         m = re.search(pat, text)
         if m:
             floors.add(m.group(1))
-    if len(floors) <= 1:
-        return Result(",".join(sorted(floors)) or "unset", "pass", "Issue #834")
+    # Empty set means none of pyproject / sdk / cli declared a floor at
+    # all. Don't silently pass -- that hides a real regression.
+    if not floors:
+        return Result("unset", "warn", "Issue #834: no requires-python found")
+    if len(floors) == 1:
+        return Result(next(iter(floors)), "pass", "Issue #834")
     return Result(",".join(sorted(floors)), "fail",
                   "Issue #834 target: single floor")
 
@@ -488,7 +544,17 @@ def check_connector_bridge_retries() -> Result:
     text = _file_text("connector/transport/bridge.py")
     if not text:
         return Result("missing", "warn", "Issue #824")
-    has_retry = "tenacity" in text or "retry" in text.lower()
+    # Reject literal substring "retry" so a TODO comment or log
+    # message can't trip the check. Require behavior-bearing patterns
+    # like an import, a decorator, or a kwarg.
+    has_retry = bool(
+        re.search(
+            r"\bimport\s+tenacity\b|from\s+tenacity\s+import|"
+            r"@retry\(|max_retries\s*=|retry_count\s*=|"
+            r"with_retry\(",
+            text,
+        )
+    )
     has_user_agent = "User-Agent" in text or "user-agent" in text
     flags = [name for name, present in
              (("retries", has_retry), ("user-agent", has_user_agent))
@@ -610,21 +676,34 @@ def _print_scorecard(by_domain: dict[str, list[tuple[Check, Result]]]) -> None:
             _print_row(check, result, width_metric, width_value)
 
 
-def run(strict: bool) -> int:
+def run(strict: bool, strict_all: bool) -> int:
     by_domain = _collect_by_domain()
     _print_scorecard(by_domain)
     all_rows = [pair for rows in by_domain.values() for pair in rows]
     failed_any, failed_required = _tally_fails(all_rows)
     print(f"\nTotal fails: {failed_any} (required: {failed_required})")
-    return 1 if (strict and failed_required) else 0
+    if strict_all and failed_any:
+        return 1
+    if strict and failed_required:
+        return 1
+    return 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Aurora benchmark scorecard")
-    parser.add_argument("--strict", action="store_true",
-                        help="Exit non-zero if any required check fails")
+    parser.add_argument(
+        "--strict", action="store_true",
+        help="Exit non-zero if any required check fails (release gate).",
+    )
+    parser.add_argument(
+        "--strict-all", action="store_true",
+        help=(
+            "Exit non-zero if ANY check fails, required or not. "
+            "Use for the eventual all-green burn-down target."
+        ),
+    )
     args = parser.parse_args()
-    return run(strict=args.strict)
+    return run(strict=args.strict, strict_all=args.strict_all)
 
 
 if __name__ == "__main__":

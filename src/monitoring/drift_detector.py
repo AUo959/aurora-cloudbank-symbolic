@@ -425,6 +425,10 @@ class DriftDetector:
         for a in self.alerts:
             try:
                 ts = datetime.fromisoformat(a.timestamp)
+                # See ethics_engine._prune_violations_by_retention for
+                # the naive-vs-aware comparison reasoning.
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
             except (TypeError, ValueError):
                 kept.append(a)
                 continue

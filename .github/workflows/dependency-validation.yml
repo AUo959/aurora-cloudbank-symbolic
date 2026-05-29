@@ -40,21 +40,30 @@ jobs:
         source .venv/bin/activate
         pip install --upgrade pip wheel setuptools
     
-    # NOTE: requirements-lock.txt does not currently exist in the repo (see #830).
-    # When #787 (lock file in CI) + #835 (--require-hashes) land, this step and
-    # the install step below should be updated to:
-    #   pip install --require-hashes -r requirements-lock.txt
+    # When #787 (lock file in CI) + #835 (--require-hashes) land, the
+    # lock-file branches below will auto-engage. Until then they're
+    # quiet no-ops because requirements-lock.txt is absent.
     - name: Test dependency resolution (dry run)
       continue-on-error: true
       run: |
         source .venv/bin/activate
         echo "🧪 Testing dependency resolution..."
-        pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
+        if [[ -f "requirements-lock.txt" ]]; then
+          pip install --require-hashes -r requirements-lock.txt --dry-run || \
+            echo "⚠️ Dependency resolution check failed (non-blocking)"
+        else
+          pip install -r requirements.txt --dry-run || \
+            echo "⚠️ Dependency resolution check failed (non-blocking)"
+        fi
 
     - name: Install dependencies
       run: |
         source .venv/bin/activate
-        pip install -r requirements.txt
+        if [[ -f "requirements-lock.txt" ]]; then
+          pip install --require-hashes -r requirements-lock.txt
+        else
+          pip install -r requirements.txt
+        fi
     
     - name: Validate dependency compatibility
       run: |

@@ -1,9 +1,9 @@
 """App-assembly tests (#793).
 
 These tests guard the FastAPI app's structural assumptions so that
-follow-up wiring tickets (request envelope #774, telemetry middleware
-#769, ethics gate #770, request-ID middleware #818, health split #814,
-etc.) land against a stable harness instead of a moving target.
+follow-up wiring tickets (telemetry middleware #769, ethics gate #770,
+PII middleware #778, health split #814) land against a stable harness
+instead of a moving target.
 
 What this suite asserts today:
 - The canonical FastAPI app imports cleanly and is constructed via the
@@ -11,12 +11,15 @@ What this suite asserts today:
 - A documented set of routes is present (route inventory).
 - A documented set of middleware classes is mounted in expected order.
 - Lifespan startup completes without raising and emits a log message.
+- Request-ID middleware is mounted and round-trips (#818 -- landed).
+- Per-request context_tag envelope is attached and reachable via
+  ``get_request_context_tag`` (#774 -- landed).
 
 What it intentionally does NOT do yet:
-- It does not yet require the future telemetry/request-ID/PII/ethics
-  middlewares — those are added as the corresponding tickets land. When
-  a ticket adds a middleware, it should also add a row to
-  `EXPECTED_MIDDLEWARE` and (where relevant) a row to `EXPECTED_ROUTES`.
+- It does not yet require the telemetry middleware (#769), PII
+  middleware (#778), or ethics gate (#770). When a ticket adds a
+  middleware, it should also add a row to ``EXPECTED_MIDDLEWARE`` and,
+  where relevant, a row to ``EXPECTED_ROUTES``.
 
 Run with: pytest tests/test_app_assembly.py -v
 """

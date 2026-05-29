@@ -607,6 +607,13 @@ class EthicsEngine:
         for v in self.violations:
             try:
                 ts = datetime.fromisoformat(v.timestamp)
+                # Normalise legacy naive ISO strings so the >= compare
+                # below doesn't raise TypeError: comparing offset-naive
+                # against offset-aware (which would escape the loop and
+                # leave the in-memory list unpruned, then crash the
+                # next evaluate_action call).
+                if ts.tzinfo is None:
+                    ts = ts.replace(tzinfo=timezone.utc)
             except (TypeError, ValueError):
                 kept.append(v)
                 continue

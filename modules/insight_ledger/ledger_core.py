@@ -289,7 +289,16 @@ class InsightLedger:
         }
 
     def _validate_index_schema(self, index: Dict[str, Any]) -> None:
-        """Refuse to load an index whose schema version we don't understand."""
+        """Verify the index's schema_version.
+
+        Default behaviour mirrors _verify_on_startup (#806): log loudly
+        but keep loading, so a rollback or forward-migrated state file
+        does NOT take production down on next boot. Set
+        ``AURORA_LEDGER_SCHEMA_FAIL_CLOSED=true`` to raise instead --
+        appropriate when the operator wants startup to refuse rather
+        than degrade.
+        """
+        import os
         version = index.get("schema_version")
         if version is None:
             logger.warning(
@@ -297,12 +306,16 @@ class InsightLedger:
             )
             index["schema_version"] = self.INDEX_SCHEMA_VERSION
             return
-        if version != self.INDEX_SCHEMA_VERSION:
-            raise RuntimeError(
-                f"Insight ledger index schema_version={version!r} not supported "
-                f"by this build (expected {self.INDEX_SCHEMA_VERSION!r}). "
-                "See #811 for the migration registry."
-            )
+        if version == self.INDEX_SCHEMA_VERSION:
+            return
+        msg = (
+            f"Insight ledger index schema_version={version!r} differs from "
+            f"build's expected {self.INDEX_SCHEMA_VERSION!r}. "
+            "See #811 for the migration registry."
+        )
+        if os.getenv("AURORA_LEDGER_SCHEMA_FAIL_CLOSED", "").lower() == "true":
+            raise RuntimeError(msg)
+        logger.error("%s Continuing in degraded mode (fail-open default).", msg)
 
     def _save_index(self) -> None:
         """Persist index to disk (#807: atomic write + fsync)."""

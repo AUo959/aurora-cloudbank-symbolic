@@ -244,15 +244,17 @@ jobs:
           print("✅ All manifests validated successfully")
           PY
       
-      - name: Lint Kubernetes manifests
+      # NOTE (#767): kube-linter is installed via the official action rather
+      # than `curl|sh main` (which is a supply-chain risk because the install
+      # script could change at any time). Action is pinned to a major-version
+      # tag here; #832 will replace this with a commit-SHA pin alongside the
+      # rest of the third-party actions in this repo.
+      - name: Lint Kubernetes manifests with kube-linter
+        uses: stackrox/kube-linter-action@v1.0.5  # TODO(#832): pin by commit SHA
         continue-on-error: true
-        run: |
-          # Install kube-linter
-          curl -sSfL https://raw.githubusercontent.com/stackrox/kube-linter/main/scripts/install.sh | sh -s -- -b /usr/local/bin
-          
-          # Run kube-linter
-          kube-linter lint k8s/ --config .kube-linter.yaml 2>/dev/null || \
-          kube-linter lint k8s/ || echo "⚠️ Some linting issues found (non-blocking)"
+        with:
+          directory: k8s/
+          config: .kube-linter.yaml
 
   # Job 4: Deploy to staging (on merge to main/develop)
   deploy-staging:

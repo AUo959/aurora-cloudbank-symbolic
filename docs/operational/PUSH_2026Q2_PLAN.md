@@ -260,6 +260,7 @@ Burndown is observed via `python scripts/benchmark_scorecard.py`. Snapshot rows 
 |---|---|---|
 | 2026-05-29 | 20 / 7 | Baseline before push begins |
 | 2026-05-29 | 19 / 7 | #834 Python floor unified at `>=3.11`; #789, #830 docs reconciled |
+| 2026-05-29 | 18 / 7 | #768 `datetime.utcnow()` sweep complete (136 → 0); #788 cookies posture documented; #831 upper-bound pins added to 38 packages |
 
 ---
 

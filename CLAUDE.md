@@ -36,20 +36,19 @@
 
 ### Key Statistics
 
-- **48,347 lines** of Python code
-- **109 test files** with 1,030+ tests
+- **178 test files** with **2,104 test functions** (regenerate via `scripts/test_inventory.py`)
+- **30+ production modules** and **16+ routers**
 - **319 documentation files**
-- **302 Python modules**
-- **50+ REST API endpoints** (FastAPI)
-- **30+ production modules**
-- **172 total API routes** across 16+ routers
+- **172 total API routes** (regenerate via `scripts/generate_api_catalog.py`)
+
+> *Note: Static line/module/test counts in this file are checkpoints, not contracts. Regenerate the numbers above when reporting status — see #789 for the rationale.*
 
 ### Production Status
 
-- ✅ Production-ready v2.0.0
-- ✅ Zero HIGH CVEs (as of Nov 2025)
-- ✅ 95.9% test pass rate
-- ✅ Automated code quality (flake8, SonarCloud, Codacy)
+- v2.0.0 release tagged; production hardening tracked in `docs/operational/PUSH_2026Q2_PLAN.md` (#758–#841)
+- Zero HIGH CVEs (snapshot Nov 2025 — re-verify with `safety check` / `pip-audit`; see #835)
+- Test pass rate previously reported as 95.9% is unverified by current CI (tests run with `continue-on-error: true`; see #758, #760)
+- Automated code quality: flake8 (CI), SonarCloud (CI), Codacy (CI); CodeQL gated by #786
 - ✅ Pydantic V2 migration complete
 
 ---
@@ -63,7 +62,7 @@ aurora-cloudbank-symbolic/
 ├── api/                    # FastAPI server and routes (2,467 lines)
 ├── modules/                # Core feature modules (30+ modules, 302 files)
 ├── src/                    # Implementation layer (observability, monitoring, integrations)
-├── tests/                  # Test suite (109 files, 1,030+ tests)
+├── tests/                  # Test suite (regenerate counts via scripts/test_inventory.py)
 ├── docs/                   # Documentation (319 MD files)
 ├── scripts/                # Automation scripts (40+ scripts)
 ├── cli/                    # Command-line tools
@@ -139,10 +138,11 @@ Each module follows a consistent pattern: `module_name/api.py`, `module_name/cor
 - **`middleware/`**: Security & validation
   - CSRF protection, rate limiting, JWT authentication
 
-#### `tests/` - Test Suite (109 files)
+#### `tests/` - Test Suite
+- **Inventory**: regenerate counts via `scripts/test_inventory.py` (see #789)
 - **Organization**: Component-based and speed-based markers
-- **Framework**: pytest with asyncio support
-- **Coverage**: 1,030+ tests, 95.9% pass rate
+- **Framework**: pytest with asyncio support (`asyncio_mode = "auto"`)
+- **Coverage**: collection enabled; threshold enforcement tracked in #790
 - **Markers**: `unit`, `integration`, `slow`, `smoke`, `critical`, `aurora`, `quantum`, `security`, `api`, etc.
 
 #### `docs/` - Documentation (319 files)
@@ -1296,29 +1296,27 @@ bottlenecks = analyzer.identify_bottlenecks()
 
 ## Summary Statistics
 
+> Static counts are checkpoints. Treat them as regenerable, not authoritative.
+> Run the cited scripts (or the linked issues) to verify current state.
+
 **Codebase**:
-- 48,347 lines of Python code
-- 302 Python modules
-- 109 test files (1,030+ tests, 95.9% pass rate)
-- 319 documentation files
+- Python module / line counts: regenerate via `find modules src api -name "*.py" | wc -l` and `cloc`
+- Test surface: `scripts/test_inventory.py` (178 files / 2,104 functions on 2026-05-29)
+- Docs: `find docs -name "*.md" | wc -l`
 
 **API**:
-- 172 total API routes (16+ routers)
-- 50+ REST endpoints documented
-- 11 AuMemManager endpoints
-- 13 Quantum Simulator endpoints
-- 8 Telemetry endpoints
-- 14 Monitoring endpoints
-- 6 Synergy Dashboard endpoints
+- Total routes / per-router breakdown: regenerate via `scripts/generate_api_catalog.py` (snapshot freshness tracked in #763)
+- 16+ routers across `modules/*/api*.py`, `src/*/dashboard_api.py`, and `api/aurora_api.py`
 
 **Testing**:
 - 26 pytest markers (speed, component, environment, priority)
-- 95.9% test pass rate
+- `asyncio_mode = "auto"` enables async tests without explicit decoration
+- Pass rate and coverage threshold: enforcement tracked in #758 + #790; do not quote a static percentage until CI gates it
 - Coverage tracking with pytest-cov
 
 **Quality**:
-- Zero HIGH CVEs (as of Nov 2025)
-- Automated quality gates (flake8, SonarCloud, Codacy)
+- Last CVE re-verification: snapshot Nov 2025; re-run with `safety check` / `pip-audit` after dependency changes (see #835)
+- Automated quality gates: flake8 (CI), SonarCloud (CI), Codacy (CI); CodeQL re-enable tracked in #786
 - 120-character line limit
 - Pydantic V2 migration complete
 
@@ -1390,7 +1388,7 @@ from src.core.native_dlp_export import NativeDLPTracker
 Aurora CloudBank Symbolic is a production-ready, enterprise-grade platform with:
 
 - **Strong conventions**: Follow established patterns
-- **Comprehensive testing**: 1,030+ tests with markers
+- **Comprehensive testing**: 2,104+ test functions across 178 files (regenerate via `scripts/test_inventory.py`)
 - **Security first**: Encryption, sanitization, rate limiting
 - **DLP compliance**: Audit trails, context tags, symbolic validation
 - **Graceful degradation**: Optional dependencies handled

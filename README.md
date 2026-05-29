@@ -197,10 +197,9 @@ Single API for Claude, GPT, quantum reasoning
 ### 🏢 **Production-Ready**
 
 **Code Quality:**
-- 48,347 lines Python
-- 109 test files
-- Zero HIGH CVEs
-- SonarCloud + Codacy gates
+- 178 test files (regen: `scripts/test_inventory.py`)
+- Zero HIGH CVEs at last `safety check` (Nov 2025)
+- SonarCloud + Codacy gates; CodeQL re-enable tracked in #786
 
 **Security:**
 - Rate limiting
@@ -1698,13 +1697,17 @@ asyncio.run(run_safety_monitoring())
 
 ## 📊 Production Status
 
-### System Metrics (November 2025)
+### System Metrics
 
-**Codebase:**
-- 📝 **48,347 lines** of production Python code
-- 🧪 **109 test files** with comprehensive coverage
-- 📚 **319 documentation files** (Markdown)
-- 🔧 **302 Python modules** across core/modules/tests
+> Static counts above were captured 2025-11; regenerate before quoting in
+> external materials. The test inventory in particular drifted significantly
+> — see [#789](https://github.com/AUo959/aurora-cloudbank-symbolic/issues/789).
+
+**Codebase (regenerate before quoting):**
+- 🧪 **178 test files** / **2,104 test functions** (`scripts/test_inventory.py`, as of 2026-05-29)
+- 📝 Python line count: `find modules src api -name "*.py" | xargs wc -l | tail -1`
+- 🔧 Python module count: `find modules src api -name "*.py" | wc -l`
+- 📚 Documentation count: `find docs -name "*.md" | wc -l`
 
 **API Surface:**
 - 🌐 **50+ REST endpoints** (FastAPI)

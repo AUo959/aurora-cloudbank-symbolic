@@ -81,25 +81,30 @@ async def analyze_staffing_needs(request: StaffingNeedRequest):
     """
     try:
         from modules.hr_system.core.staffing_analyzer import StaffingAnalyzer
-        
+
         analyzer = StaffingAnalyzer()
         result = analyzer.analyze_department_needs(
             department=request.department,
             context_tag=request.context_tag
         )
-        
+
         return result
-        
-    except ImportError:
-        # Graceful degradation if core module not available
-        logger.warning("StaffingAnalyzer not available, returning mock data")
+
+    except (ImportError, NotImplementedError) as exc:
+        # #761: degraded-fallback contract -- response carries explicit
+        # flags so callers can detect they're getting mock data and
+        # NOT, e.g., accidentally pipe it into a real staffing decision.
+        logger.warning("StaffingAnalyzer unavailable (%s); returning flagged mock data", exc)
         return {
             "department": request.department,
             "current_staff": 10,
             "recommended_staff": 12,
             "gap_analysis": {"general": 2},
             "priority": "MEDIUM",
-            "rationale": "Staffing analyzer not yet fully implemented"
+            "rationale": "Staffing analyzer not yet fully implemented",
+            "degraded": True,
+            "_implementation_status": "mock_fallback",
+            "_unavailable_reason": str(exc),
         }
     except Exception as e:
         logger.error("Staffing analysis failed: %s", str(e))
@@ -125,9 +130,10 @@ async def generate_character(request: CharacterGenerationRequest):
         
         return character
         
-    except ImportError:
-        # Graceful degradation if core module not available
-        logger.warning("CharacterGenerator not available, returning mock data")
+    except (ImportError, NotImplementedError) as exc:
+        # #761: degraded-fallback contract -- same explicit flags as the
+        # other HR routes so clients can detect mock responses.
+        logger.warning("CharacterGenerator unavailable (%s); returning flagged mock data", exc)
         return {
             "name": f"Officer_{request.role[:3].upper()}",
             "role": request.role,
@@ -139,7 +145,10 @@ async def generate_character(request: CharacterGenerationRequest):
                 "coherence": 0.85,
                 "entanglement_potential": 0.72,
                 "symbolic_resonance": "high"
-            }
+            },
+            "degraded": True,
+            "_implementation_status": "mock_fallback",
+            "_unavailable_reason": str(exc),
         }
     except Exception as e:
         logger.error("Character generation failed: %s", str(e))
@@ -162,15 +171,24 @@ async def get_organizational_intelligence(
         
         return data
         
-    except ImportError:
-        # Graceful degradation
-        logger.warning("OrganizationalIntelligence not available, returning mock data")
+    except (ImportError, NotImplementedError) as exc:
+        # #761: OrganizationalIntelligence is shipped as a stub
+        # (modules/hr_system/core/organizational_intelligence.py) that
+        # raises NotImplementedError; the catch covers the legacy
+        # ImportError case too. The response is flagged so clients
+        # never treat the mock as authoritative capacity data.
+        logger.warning(
+            "OrganizationalIntelligence unavailable (%s); returning flagged mock data", exc
+        )
         return {
             "departments": ["Security", "Engineering", "Science", "Medical", "Operations"],
             "total_capacity": 100,
             "current_utilization": 0.78,
             "growth_trajectory": "expanding",
-            "recommendation": "Organizational intelligence system not yet fully implemented"
+            "recommendation": "Organizational intelligence system not yet fully implemented",
+            "degraded": True,
+            "_implementation_status": "mock_fallback",
+            "_unavailable_reason": str(exc),
         }
     except Exception as e:
         logger.error("Organizational intelligence query failed: %s", str(e))

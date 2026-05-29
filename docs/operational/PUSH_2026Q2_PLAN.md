@@ -265,6 +265,7 @@ Burndown is observed via `python scripts/benchmark_scorecard.py`. Snapshot rows 
 | 2026-05-29 | 16 / 7 | #821 `.env.example` reconciled — 21 missing vars added with documented defaults and module references |
 | 2026-05-29 | 15 / 7 | #836 PEP 621 migration; #794 partial (blocked by #815); #792 slow markers; #759 canonical entrypoint; #818 request-ID middleware mounted (first Phase 2 spine layer) |
 | 2026-05-29 | 14 / 7 | #774 context_tag envelope wired; #813 storage paths env-configurable; #809 retention TTL on 3 monitoring stores; #807 atomic writes + fsync across 9 sites |
+| 2026-05-29 | 13 / 7 | #808 write locks on AuditLogger / EthicsEngine / DriftDetector / MonitoringSystem; #806 ledger startup integrity verification (configurable depth + fail-mode) |
 
 ---
 

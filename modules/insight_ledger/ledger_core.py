@@ -148,7 +148,53 @@ class InsightLedger:
         # Create genesis entry if ledger is empty
         if self._index["entry_count"] == 0:
             self._create_genesis_entry()
-    
+
+        # #806: verify the cryptographic chain on startup. Catches torn
+        # writes from prior runs (paired with #807 atomic writes) and
+        # tampering. By default checks the tail; set
+        # AURORA_LEDGER_VERIFY_FULL=true for a full-chain check.
+        self._verify_on_startup()
+
+    def _verify_on_startup(self) -> None:
+        """Run a bounded integrity verification at construction time.
+
+        Configurable via env:
+          AURORA_LEDGER_VERIFY_FULL=true     -- check every entry (default: tail only)
+          AURORA_LEDGER_VERIFY_LIMIT=N       -- tail entry count (default: 100)
+          AURORA_LEDGER_VERIFY_FAIL_CLOSED=true -- raise on chain breakage (default: log)
+
+        Default is non-fatal: log the breakage so the alert is visible
+        without preventing the API from accepting new entries (which
+        would compound an outage). Operators who want fail-closed
+        behaviour set AURORA_LEDGER_VERIFY_FAIL_CLOSED=true.
+        """
+        import os
+        full = os.getenv("AURORA_LEDGER_VERIFY_FULL", "").lower() == "true"
+        try:
+            limit = int(os.getenv("AURORA_LEDGER_VERIFY_LIMIT", "100"))
+        except ValueError:
+            limit = 100
+        report = self.verify_integrity(limit=None if full else limit)
+        if report.get("chain_intact"):
+            logger.info(
+                "Insight ledger verified at startup (entries=%d, checked=%d)",
+                report.get("total_entries", 0),
+                report.get("verified_entries", 0),
+            )
+            return
+        failed = report.get("failed_entries", [])
+        errors = report.get("errors", [])
+        logger.error(
+            "Insight ledger integrity FAILED at startup: failed=%d errors=%d",
+            len(failed), len(errors),
+        )
+        if os.getenv("AURORA_LEDGER_VERIFY_FAIL_CLOSED", "").lower() == "true":
+            raise RuntimeError(
+                f"Insight ledger chain broken on startup "
+                f"(failed={len(failed)}, errors={len(errors)}). "
+                "See AURORA_LEDGER_VERIFY_FAIL_CLOSED."
+            )
+
     def _store_key_securely(self, key_hex: str) -> None:
         """
         Store key with encryption if available, otherwise plaintext with warning.

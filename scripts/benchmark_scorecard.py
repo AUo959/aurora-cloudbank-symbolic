@@ -326,7 +326,11 @@ def check_ledger_startup_verify() -> Result:
     if len(parts) < 2:
         return Result("no __init__", "warn", "Issue #806")
     init_block = parts[1].split("\n    def ", 1)[0]
-    called = "verify_integrity" in init_block
+    # Either inline verify_integrity or a helper named *verify*startup*.
+    called = (
+        "verify_integrity" in init_block
+        or "_verify_on_startup" in init_block
+    )
     return Result("called" if called else "absent",
                   "pass" if called else "fail", "Issue #806")
 

@@ -43,7 +43,7 @@
     "@react-three/postprocessing": "^2.16.0",
     "@tanstack/react-query": "^5.14.0",
     "@visx/visx": "^3.7.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",

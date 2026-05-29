@@ -1323,7 +1323,7 @@ bottlenecks = analyzer.identify_bottlenecks()
 - Pydantic V2 migration complete
 
 **Dependencies**:
-- Python 3.8+ required (3.12 recommended)
+- Python 3.11+ required (3.12 recommended; see #834 for the floor reconciliation)
 - Node.js 20+ for web components
 - Graceful degradation for optional deps (qiskit, scipy, pandas)
 

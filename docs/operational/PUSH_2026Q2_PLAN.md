@@ -259,6 +259,7 @@ Burndown is observed via `python scripts/benchmark_scorecard.py`. Snapshot rows 
 | Date | Total fails / required | Notes |
 |---|---|---|
 | 2026-05-29 | 20 / 7 | Baseline before push begins |
+| 2026-05-29 | 19 / 7 | #834 Python floor unified at `>=3.11`; #789, #830 docs reconciled |
 
 ---
 

@@ -373,9 +373,11 @@ def check_health_split() -> Result:
 
 # ---------- supply chain ----------
 
+# Files that semantically declare a Python *floor* (requires-python or
+# python_requires). runtime.txt is excluded: it pins the deploy runtime
+# version, not a constraint, and may legitimately be ≥ the floor.
 _FLOOR_PATTERNS = (
     ("setup.py", r"python_requires\s*=\s*['\"](>=\d+\.\d+)"),
-    ("runtime.txt", r"python-(\d+\.\d+)"),
     ("sdk/python/pyproject.toml", r"requires-python\s*=\s*['\"](>=\d+\.\d+)"),
     ("cli/pyproject.toml", r"requires-python\s*=\s*['\"](>=\d+\.\d+)"),
 )

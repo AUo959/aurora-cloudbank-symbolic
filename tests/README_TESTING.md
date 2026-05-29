@@ -234,6 +234,62 @@ pytest -m "unit and not slow"
 - All test runs tracked for quality metrics
 - Ethics validation: Picard_Delta_3 ✅
 
+## Assertion Patterns (anti-pattern: instantiation-only checks, #791)
+
+`grep -rcE "assert.*is not None|assert hasattr" tests/` shows **333**
+assertion lines fitting these shallow patterns across **61 files**. They
+confirm an object was created or has an attribute — they do **not**
+confirm behavior. A logic regression that produces a wrong-but-non-None
+result still passes them.
+
+### Anti-pattern
+
+```python
+# Avoid: confirms only that construction returned something.
+result = orchestrator.run_scenario(...)
+assert result is not None
+assert hasattr(result, "objective_value")
+```
+
+### Replacement
+
+```python
+# Prefer: assert the behavior the test is named for.
+result = orchestrator.run_scenario(...)
+assert result.objective_value > 0, result
+assert result.solution.is_feasible, result
+# Use isinstance / type checks where shape matters
+assert isinstance(result.iterations, int) and result.iterations >= 1
+```
+
+### Tier-1 modules (priority for cleanup)
+
+Files with the highest hollow-assertion density — start here:
+
+| File                                            | Hollow sites |
+|-------------------------------------------------|--------------|
+| `tests/test_quantum_core.py`                    | 34           |
+| `tests/test_quantum_forge_v3.py`                | 27           |
+| `tests/test_bridge_v2_basic.py`                 | 20           |
+| `tests/test_thread_transfer_bridge_v2.py`       | 16           |
+| `tests/test_subroutines_quick.py`               | 14           |
+| `tests/test_mcp_consolidation.py`               | 13           |
+| `tests/test_subroutines.py`                     | 12           |
+| `tests/test_memory_retrieval_full.py`           | 12           |
+
+Refresh this table by running:
+```bash
+for f in $(grep -rln "assert.*is not None\|assert hasattr" --include="*.py" tests/); do
+  c=$(grep -cE "assert.*is not None|assert hasattr" "$f"); echo "$c $f";
+done | sort -rn | head -20
+```
+
+### Progress tracking
+
+`scripts/benchmark_scorecard.py` reports the total count under the
+**Hollow assertion count** row. The target is **<100 in Tier 1
+modules** (#791 acceptance criterion).
+
 ## Resources
 
 - [Pytest Documentation](https://docs.pytest.org/)

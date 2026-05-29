@@ -5,7 +5,9 @@ FastAPI endpoints for the immutable insight ledger.
 Anchor: T1-TIL-API-001
 """
 
+import os
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -24,6 +26,23 @@ SENSITIVE_LEDGER_DEPENDENCIES = (Depends(require_csrf_token),)
 _ledger_instance: Optional[InsightLedger] = None
 
 
+def _resolve_ledger_storage_path() -> str:
+    """Resolve the ledger storage directory (#813).
+
+    Precedence:
+        1. AURORA_LEDGER_PATH  -- explicit ledger override
+        2. AURORA_STATE_ROOT   -- common state root, ledger goes in /ledgers
+        3. ./data/ledgers      -- back-compat default (matches prior hardcoded path)
+    """
+    explicit = os.getenv("AURORA_LEDGER_PATH")
+    if explicit:
+        return explicit
+    state_root = os.getenv("AURORA_STATE_ROOT")
+    if state_root:
+        return str(Path(state_root) / "ledgers")
+    return str(Path("data") / "ledgers")
+
+
 def get_ledger() -> InsightLedger:
     """Get the global ledger instance."""
     if _ledger_instance is None:
@@ -34,19 +53,25 @@ def get_ledger() -> InsightLedger:
     return _ledger_instance
 
 
-def initialize_ledger(storage_path: str, secret_key: Optional[str] = None) -> InsightLedger:
+def initialize_ledger(
+    storage_path: Optional[str] = None,
+    secret_key: Optional[str] = None,
+) -> InsightLedger:
     """
     Initialize the global ledger instance.
 
     Args:
-        storage_path: Directory for ledger storage
+        storage_path: Directory for ledger storage. If None (default), resolved
+            via AURORA_LEDGER_PATH / AURORA_STATE_ROOT / ``./data/ledgers``
+            (see #813).
         secret_key: Optional HMAC secret key (hex)
 
     Returns:
         Initialized ledger instance
     """
     global _ledger_instance
-    _ledger_instance = InsightLedger(storage_path=storage_path, secret_key=secret_key)
+    resolved = storage_path or _resolve_ledger_storage_path()
+    _ledger_instance = InsightLedger(storage_path=resolved, secret_key=secret_key)
     return _ledger_instance
 
 

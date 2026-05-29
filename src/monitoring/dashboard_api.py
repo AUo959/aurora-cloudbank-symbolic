@@ -76,10 +76,25 @@ def get_monitoring_system(
     global _monitoring_system
 
     if _monitoring_system is None:
-        # Use default paths if not provided
+        # Use default paths if not provided. Precedence (#813):
+        #   1. MONITORING_STORAGE_DIR  -- explicit override (legacy name, still honored)
+        #   2. AURORA_MONITORING_PATH  -- new explicit override
+        #   3. AURORA_STATE_ROOT       -- common state root, monitoring goes in /monitoring
+        #   4. ./monitoring_data       -- back-compat default
         if storage_dir is None:
             import os
-            storage_dir = Path(os.getenv("MONITORING_STORAGE_DIR", "./monitoring_data"))
+            override = (
+                os.getenv("MONITORING_STORAGE_DIR")
+                or os.getenv("AURORA_MONITORING_PATH")
+            )
+            if override:
+                storage_dir = Path(override)
+            else:
+                state_root = os.getenv("AURORA_STATE_ROOT")
+                storage_dir = (
+                    Path(state_root) / "monitoring" if state_root
+                    else Path("./monitoring_data")
+                )
 
         if ethics_rules_path is None:
             import os

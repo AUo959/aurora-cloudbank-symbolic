@@ -351,8 +351,9 @@ class DriftDetector:
 
         try:
             self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.alerts_path, 'a') as f:
-                f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+            # #807: append + fsync so prior alerts remain durable on crash.
+            from src.utils.atomic_io import append_jsonl
+            append_jsonl(self.alerts_path, alert.to_dict())
         except Exception as e:
             logger.error("Failed to persist drift alert: %s", e)
 
@@ -379,9 +380,14 @@ class DriftDetector:
 
         try:
             self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.alerts_path, 'w') as f:
-                for alert in self.alerts:
-                    f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+            # #807: write to .tmp + os.replace so a crash mid-rewrite
+            # cannot leave the alerts file truncated.
+            from src.utils.atomic_io import atomic_write_text
+            payload = "".join(
+                json.dumps(a.to_dict(), sort_keys=True) + "\n"
+                for a in self.alerts
+            )
+            atomic_write_text(self.alerts_path, payload)
         except Exception as e:
             logger.error("Failed to rewrite drift alerts: %s", e)
 

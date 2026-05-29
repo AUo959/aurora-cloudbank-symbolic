@@ -454,8 +454,10 @@ class EthicsEngine:
 
         try:
             self.violations_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.violations_path, 'a') as f:
-                f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+            # #807: fsync after each append so prior records stay durable
+            # even if this process is SIGKILL'd mid-write.
+            from src.utils.atomic_io import append_jsonl
+            append_jsonl(self.violations_path, violation.to_dict())
         except Exception as e:
             logger.error("Failed to persist ethics violation: %s", e)
 
@@ -482,9 +484,14 @@ class EthicsEngine:
 
         try:
             self.violations_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.violations_path, 'w') as f:
-                for violation in self.violations:
-                    f.write(json.dumps(violation.to_dict(), sort_keys=True) + "\n")
+            # #807: write to .tmp + fsync + os.replace so a crash mid-write
+            # leaves the original violations file intact.
+            from src.utils.atomic_io import atomic_write_text
+            payload = "".join(
+                json.dumps(v.to_dict(), sort_keys=True) + "\n"
+                for v in self.violations
+            )
+            atomic_write_text(self.violations_path, payload)
         except Exception as e:
             logger.error("Failed to rewrite ethics violations: %s", e)
 

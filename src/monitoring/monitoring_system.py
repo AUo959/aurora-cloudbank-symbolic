@@ -680,24 +680,25 @@ class MonitoringSystem:
         return True
 
     def _persist_state(self):
-        """Persist intervention state needed for restart-safe cooldowns."""
+        """Persist intervention state needed for restart-safe cooldowns.
+
+        #807: atomic write so a crash here cannot leave a half-written
+        state.json that fails to parse on next startup (which would
+        silently reset all cooldowns).
+        """
         try:
             self._state_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self._state_path, 'w') as f:
-                json.dump(
-                    {
-                        'interventions': [
-                            intervention.to_dict()
-                            for intervention in self.interventions
-                        ],
-                        'last_intervention_time': {
-                            agent_id: timestamp.isoformat()
-                            for agent_id, timestamp in self.last_intervention_time.items()
-                        }
-                    },
-                    f,
-                    indent=2,
-                    sort_keys=True
-                )
+            payload = {
+                'interventions': [
+                    intervention.to_dict()
+                    for intervention in self.interventions
+                ],
+                'last_intervention_time': {
+                    agent_id: timestamp.isoformat()
+                    for agent_id, timestamp in self.last_intervention_time.items()
+                }
+            }
+            from src.utils.atomic_io import atomic_write_json
+            atomic_write_json(self._state_path, payload)
         except Exception as e:
             logger.error("Failed to persist monitoring state: %s", e)

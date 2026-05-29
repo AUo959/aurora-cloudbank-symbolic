@@ -716,10 +716,14 @@ class HierarchicalMemoryManager:
             }
     
     def save_to_file(self, filepath: str) -> None:
-        """Save memory system to file with Aurora CloudBank metadata"""
+        """Save memory system to file with Aurora CloudBank metadata.
+
+        #807: atomic write (tmp + fsync + os.replace) so a SIGKILL or
+        OOM-kill during the dump cannot leave a half-written snapshot.
+        """
         state = self.export_state()
-        with open(filepath, 'w') as f:
-            json.dump(state, f, indent=2, default=str)
+        from src.utils.atomic_io import atomic_write_json
+        atomic_write_json(filepath, state)
         logger.info("Aurora CloudBank memory system saved to %s", str(filepath)[:SUMMARY_MAX_LENGTH])
     
     def batch_process_lifecycle(self) -> Dict[str, Dict[str, int]]:

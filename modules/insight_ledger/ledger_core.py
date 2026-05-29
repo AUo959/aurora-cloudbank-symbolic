@@ -233,9 +233,9 @@ class InsightLedger:
         }
 
     def _save_index(self) -> None:
-        """Persist index to disk."""
-        with open(self.index_file, "w") as f:
-            json.dump(self._index, f, indent=2, default=str)
+        """Persist index to disk (#807: atomic write + fsync)."""
+        from src.utils.atomic_io import atomic_write_json
+        atomic_write_json(self.index_file, self._index)
 
     def _create_genesis_entry(self) -> None:
         """Create the first (genesis) entry in the ledger."""
@@ -309,8 +309,11 @@ class InsightLedger:
             }
 
             # Append to file (JSONL format - one JSON object per line)
-            with open(self.entries_file, "a") as f:
-                f.write(json.dumps(complete_entry, default=str) + "\n")
+            # #807: append_jsonl flushes + fsyncs so a crash here can at
+            # worst tear the in-flight line; everything previously
+            # written stays durable.
+            from src.utils.atomic_io import append_jsonl
+            append_jsonl(self.entries_file, complete_entry)
 
             # Update index
             self._index["entry_count"] += 1
@@ -623,7 +626,9 @@ class InsightLedger:
 
         validated_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(validated_path, "w") as f:
-            json.dump(export_data, f, indent=2, default=str)
+        # #807: atomic so an export interrupted mid-write can never
+        # produce a partial JSON file that mis-presents the ledger.
+        from src.utils.atomic_io import atomic_write_json
+        atomic_write_json(validated_path, export_data)
 
         return len(entries)

@@ -50,12 +50,14 @@ jobs:
       run: |
         echo "🔑 Verifying critical files..."
         
+        # NOTE (#836): setup.py was removed when this project migrated to
+        # PEP 621 — pyproject.toml carries the metadata via the dynamic
+        # dependency loader. Don't restore setup.py.
         CRITICAL_FILES=(
           "README.md"
           "package.json"
           "requirements.txt"
           "pyproject.toml"
-          "setup.py"
           "Makefile"
         )
         

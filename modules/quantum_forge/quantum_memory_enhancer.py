@@ -26,7 +26,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
@@ -403,7 +403,7 @@ class QuantumMemoryEnhancer:
             "failed_count": len(failed),
             "refreshed_ids": refreshed,
             "failed": failed,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def get_memory_health(self, memory_id: str) -> Dict[str, Any]:
@@ -439,7 +439,7 @@ class QuantumMemoryEnhancer:
         manifest = {
             "manifest_version": "1.0.0",
             "component": "quantum_memory_enhancer",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": self.metrics,
             "coherence_monitoring": self.monitor_coherence(),
             "enhanced_memories": [

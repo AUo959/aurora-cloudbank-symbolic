@@ -24,7 +24,7 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -91,7 +91,7 @@ class TopologyMapping:
     average_fidelity: float
     max_path_length: float
     optimization_metric: TopologyMetric
-    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class ConstellationTopologyMapper:
@@ -188,7 +188,7 @@ class ConstellationTopologyMapper:
         max_path = max(link.path_length for link in optimized_links)
         
         # Create mapping
-        mapping_id = f"TOPO_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        mapping_id = f"TOPO_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
         mapping = TopologyMapping(
             mapping_id=mapping_id,
             modules={k: v for k, v in self.modules.items() if k in target_modules},
@@ -430,7 +430,7 @@ class ConstellationTopologyMapper:
                 "total_modules": len(nodes),
                 "total_links": len(edges),
                 "optimization_metric": self.optimization_metric.value,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         }
         
@@ -439,7 +439,7 @@ class ConstellationTopologyMapper:
         manifest = {
             "component": "constellation_topology_mapper",
             "version": "1.0.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "optimization_metric": self.optimization_metric.value,
             "modules": len(self.modules),
             "active_links": len(self.links),

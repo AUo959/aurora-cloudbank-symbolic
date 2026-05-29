@@ -25,7 +25,7 @@ import json
 import logging
 import random
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
@@ -77,7 +77,7 @@ class GenerationStats:
     avg_joy: float
     avg_alignment: float
     diversity_score: float
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class JoyEvolutionEngine:
@@ -384,7 +384,7 @@ class JoyEvolutionEngine:
         manifest = {
             "component": "joy_evolution_engine",
             "version": "1.0.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "parameters": {
                 "population_size": self.params.population_size,
                 "elite_size": self.params.elite_size,

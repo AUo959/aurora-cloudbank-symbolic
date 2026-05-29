@@ -25,7 +25,7 @@ import hashlib
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
@@ -214,7 +214,7 @@ class QuantumForgeIntegration:
                 "fidelity": quantum_state.fidelity,
                 "coherence_time": agent_qstate.coherence_time,
                 "elapsed_time": elapsed,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             
             logger.info(
@@ -301,7 +301,7 @@ class QuantumForgeIntegration:
                 "fidelity": agent_quantum_state.fidelity,
                 "updated": update_agent,
                 "elapsed_time": elapsed,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
             
             logger.info(
@@ -445,7 +445,7 @@ class QuantumForgeIntegration:
         manifest = {
             "manifest_version": "1.0.0",
             "component": "quantum_forge_integration",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": self.get_integration_metrics(),
             "active_agents": [
                 {

@@ -29,7 +29,7 @@ import json
 import time
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -842,7 +842,7 @@ class QuantumForge:
         """
         return {
             "version": "2.0.0",
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "ethics": {
                 "level": self.ethics.level.value,
                 "drift_threshold": self.ethics.drift_threshold,

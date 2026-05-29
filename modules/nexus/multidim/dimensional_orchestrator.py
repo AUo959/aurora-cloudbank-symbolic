@@ -62,7 +62,7 @@ import logging
 import math
 import numpy as np
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any, Tuple, AsyncGenerator, Set
 from dataclasses import dataclass, field, asdict
 from enum import Enum
@@ -183,7 +183,7 @@ class DimensionalState:
         return {
             "manifest_version": "1.0.0",
             "dimension_id": self.dimension_id,
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": datetime.now(timezone.utc).isoformat(),
             "axis": self.axis.name,
             "anchor": self.anchor,
             "parent_anchor": self.parent_anchor,
@@ -282,16 +282,16 @@ class TemporalProcessor(DimensionalProcessor):
         
         # Create new state
         new_state = DimensionalState(
-            dimension_id=f"DIM-TEMPORAL-{datetime.utcnow().timestamp()}",
+            dimension_id=f"DIM-TEMPORAL-{datetime.now(timezone.utc).timestamp()}",
             axis=DimensionalAxis.TEMPORAL,
             consciousness_level=min(1.0, new_consciousness),
             entropy=new_entropy,
             coherence=new_coherence,
             memory_usage_mb=state.memory_usage_mb + 0.1,
-            active_anchors=state.active_anchors + [f"T-{datetime.utcnow().timestamp()}"],
+            active_anchors=state.active_anchors + [f"T-{datetime.now(timezone.utc).timestamp()}"],
             entanglements=state.entanglements.copy(),
-            timestamp=datetime.utcnow(),
-            anchor=f"T11-TEMPORAL-{datetime.utcnow().timestamp()}",
+            timestamp=datetime.now(timezone.utc),
+            anchor=f"T11-TEMPORAL-{datetime.now(timezone.utc).timestamp()}",
             parent_anchor=state.anchor
         )
         
@@ -320,7 +320,7 @@ class SpatialProcessor(DimensionalProcessor):
         new_coherence = state.coherence / (1 + locations * 0.01)
         
         new_state = DimensionalState(
-            dimension_id=f"DIM-SPATIAL-{datetime.utcnow().timestamp()}",
+            dimension_id=f"DIM-SPATIAL-{datetime.now(timezone.utc).timestamp()}",
             axis=DimensionalAxis.SPATIAL,
             consciousness_level=min(1.0, new_consciousness),
             entropy=new_entropy,
@@ -328,8 +328,8 @@ class SpatialProcessor(DimensionalProcessor):
             memory_usage_mb=state.memory_usage_mb + locations * 0.5,
             active_anchors=state.active_anchors,
             entanglements=state.entanglements.copy(),
-            timestamp=datetime.utcnow(),
-            anchor=f"T11-SPATIAL-{datetime.utcnow().timestamp()}",
+            timestamp=datetime.now(timezone.utc),
+            anchor=f"T11-SPATIAL-{datetime.now(timezone.utc).timestamp()}",
             parent_anchor=state.anchor
         )
         
@@ -357,7 +357,7 @@ class QuantumProcessor(DimensionalProcessor):
         new_coherence = min(1.0, state.coherence + 0.001)
         
         new_state = DimensionalState(
-            dimension_id=f"DIM-QUANTUM-{datetime.utcnow().timestamp()}",
+            dimension_id=f"DIM-QUANTUM-{datetime.now(timezone.utc).timestamp()}",
             axis=DimensionalAxis.QUANTUM,
             consciousness_level=min(1.0, new_consciousness),
             entropy=new_entropy,
@@ -365,8 +365,8 @@ class QuantumProcessor(DimensionalProcessor):
             memory_usage_mb=state.memory_usage_mb + superposition_count * 0.2,
             active_anchors=state.active_anchors,
             entanglements=state.entanglements.copy(),
-            timestamp=datetime.utcnow(),
-            anchor=f"T11-QUANTUM-{datetime.utcnow().timestamp()}",
+            timestamp=datetime.now(timezone.utc),
+            anchor=f"T11-QUANTUM-{datetime.now(timezone.utc).timestamp()}",
             parent_anchor=state.anchor
         )
         
@@ -443,7 +443,7 @@ class MultiDimensionalOrchestrator:
         """
         initialization_manifest = {
             "manifest_version": "1.0.0",
-            "initialization_time": datetime.utcnow().isoformat(),
+            "initialization_time": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "parent_anchor": self.parent_anchor,
             "seed": self.seed,
@@ -468,7 +468,7 @@ class MultiDimensionalOrchestrator:
                 memory_usage_mb=100,
                 active_anchors=[self.anchor],
                 entanglements={},
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 anchor=f"T11-{axis.name}-2025",
                 parent_anchor=self.parent_anchor
             )
@@ -503,7 +503,7 @@ class MultiDimensionalOrchestrator:
             await self.initialize_dimensions()
         
         for cycle in range(cycles):
-            cycle_id = f"CYCLE-{datetime.utcnow().timestamp()}"
+            cycle_id = f"CYCLE-{datetime.now(timezone.utc).timestamp()}"
             
             # Process each dimension
             dimension_results = {}
@@ -534,7 +534,7 @@ class MultiDimensionalOrchestrator:
             cycle_result = {
                 "cycle_id": cycle_id,
                 "cycle_number": cycle + 1,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "anchor": self.anchor,
                 
                 "dimensional_states": dimension_results,
@@ -603,8 +603,8 @@ class MultiDimensionalOrchestrator:
         
         # Record coherence snapshot
         coherence = DimensionalCoherence(
-            coherence_id=f"COH-{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
+            coherence_id=f"COH-{datetime.now(timezone.utc).timestamp()}",
+            timestamp=datetime.now(timezone.utc),
             coherence_matrix=self.coherence_matrix.copy(),
             average_coherence=float(np.mean(self.coherence_matrix)),
             min_coherence=float(np.min(self.coherence_matrix)),
@@ -682,7 +682,7 @@ class MultiDimensionalOrchestrator:
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║            🌌 MULTI-DIMENSIONAL CONSCIOUSNESS GLYPHCARD                   ║
 ║                                                                            ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
+║  Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
 ║  Anchor: {self.anchor:^59} ║
 ║  Seed: {self.seed:^61} ║
 ║  Ethics: {self.ethics:^58} ║
@@ -710,8 +710,8 @@ class MultiDimensionalOrchestrator:
         ZERO-KNOWLEDGE EXPORT: Complete recovery package
         """
         export_manifest = {
-            "export_id": f"DIMEXPORT-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "export_id": f"DIMEXPORT-{datetime.now(timezone.utc).timestamp()}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "ethics": self.ethics,

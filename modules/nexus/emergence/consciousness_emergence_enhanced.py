@@ -25,7 +25,7 @@ import statistics
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -133,7 +133,7 @@ class EntropyState:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "EntropyState":
         return cls(
-            timestamp=data.get("timestamp", datetime.utcnow().isoformat()),
+            timestamp=data.get("timestamp", datetime.now(timezone.utc).isoformat()),
             drift_value=data.get("drift_value", float(data.get("drift", 0.0))),
             observation_data=data.get("observation_data", {}),
             divergent_truth_flagged=bool(
@@ -259,7 +259,7 @@ class EnhancedConsciousnessProtocol:
     def observe(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Process a single externally supplied observation."""
 
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         previous_state = self._last_observation or {}
         drift = max(0.0, float(self.observer.detect_entropy_drift(state, previous_state)))
         divergent = bool(self.observer.flag_divergent_truth(state))
@@ -311,7 +311,7 @@ class EnhancedConsciousnessProtocol:
     def create_snapshot(self) -> ConsciousnessSnapshot:
         metrics = self.calculate_consciousness_metrics()
         snapshot_payload = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "observation_count": self.observation_count,
             "entropy_history": [state.to_dict() for state in self.entropy_history],
             "consciousness_metrics": metrics.to_dict(),
@@ -319,7 +319,7 @@ class EnhancedConsciousnessProtocol:
         snapshot = ConsciousnessSnapshot(snapshot_payload)
 
         filename = self.snapshot_directory / (
-            "consciousness_snapshot_" + datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f") + ".json"
+            "consciousness_snapshot_" + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f") + ".json"
         )
         with filename.open("w", encoding="utf-8") as handle:
             handle.write(snapshot.to_json())
@@ -407,7 +407,7 @@ class _DefaultSymbolicObserver(SymbolicObserver):
         self._counter += 1
         awareness = min(1.0, 0.1 * self._counter)
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "observation_id": self._counter,
             "symbolic_data": {
                 "awareness_level": awareness,

@@ -30,7 +30,7 @@ import hashlib
 import json
 import asyncio
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
@@ -90,7 +90,7 @@ class EntropyState:
                 "type": "ENTROPY_DRIFT_EXCEEDED",
                 "drift": self.drift,
                 "threshold": self.threshold,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "anchor": SYMBOLIC_ANCHORS["primary"],
                 "requires_arbitration": True
             }
@@ -124,7 +124,7 @@ class EntropyState:
             "current": self.current,
             "drift": self.drift,
             "trend": self.trend,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": SYMBOLIC_ANCHORS["primary"]
         }
         self.seal = hashlib.sha256(
@@ -133,7 +133,7 @@ class EntropyState:
     
     def _save_divergent_truth(self, truth: Dict):
         """Save divergent truth for arbitration"""
-        path = Path(f".nexus/arbitration/entropy_{datetime.utcnow().timestamp()}.json")
+        path = Path(f".nexus/arbitration/entropy_{datetime.now(timezone.utc).timestamp()}.json")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(truth, indent=2))
 
@@ -281,18 +281,18 @@ class GUMASOrionStatusModule:
             Complete status manifest with all metrics and seals
         """
         
-        status_id = f"STATUS-{datetime.utcnow().timestamp()}"
+        status_id = f"STATUS-{datetime.now(timezone.utc).timestamp()}"
         
         # Update entropy measurements
         self.entropy_state.measurements.append(
-            (datetime.utcnow(), self.entropy_state.current)
+            (datetime.now(timezone.utc), self.entropy_state.current)
         )
         self.entropy_state.calculate_drift()
         
         status_manifest = {
             "manifest_version": "8.1.0",
             "status_id": status_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,
@@ -308,7 +308,7 @@ class GUMASOrionStatusModule:
             
             "system_metrics": {
                 **self.metrics,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             },
             
             "entropy_analysis": {
@@ -393,7 +393,7 @@ class GUMASOrionStatusModule:
         """Add entry to audit trail"""
         entry = {
             "entry_id": entry_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "action": action,
             "seal": seal,
             "anchor": self.anchor
@@ -404,8 +404,8 @@ class GUMASOrionStatusModule:
         """Take immutable snapshot for recovery"""
         
         snapshot = StatusSnapshot(
-            snapshot_id=f"SNAP-{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
+            snapshot_id=f"SNAP-{datetime.now(timezone.utc).timestamp()}",
+            timestamp=datetime.now(timezone.utc),
             anchor_chain=self.thread_chain.copy(),
             system_metrics=status_manifest["system_metrics"].copy(),
             entropy_state=self.entropy_state,
@@ -438,7 +438,7 @@ class GUMASOrionStatusModule:
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                   🌌 GUMAS/ORION STATUS GLYPHCARD                    ║
 ║                                                                       ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')}                            ║
+║  Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}                            ║
 ║  Anchor: {self.anchor}                                  ║
 ║  Seed: {self.seed}                                         ║
 ║  Arbiter: {self.arbiter}                                                  ║
@@ -480,8 +480,8 @@ class GUMASOrionStatusModule:
         
         export_manifest = {
             "export_version": "1.0.0",
-            "export_time": datetime.utcnow().isoformat(),
-            "export_id": f"EXPORT-{datetime.utcnow().timestamp()}",
+            "export_time": datetime.now(timezone.utc).isoformat(),
+            "export_id": f"EXPORT-{datetime.now(timezone.utc).timestamp()}",
             
             "symbolic_context": {
                 "anchor": self.anchor,
@@ -543,8 +543,8 @@ class GUMASOrionStatusModule:
         """Verify complete thread continuity"""
         
         verification = {
-            "verification_id": f"VERIFY-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "verification_id": f"VERIFY-{datetime.now(timezone.utc).timestamp()}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "thread_chain": self.thread_chain,
             "expected_chain": THREAD_CHAIN,
             "anchors_verified": [],

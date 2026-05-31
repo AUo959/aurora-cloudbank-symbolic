@@ -23,11 +23,11 @@ ensure-venv: ## Ensure the local virtual environment exists
 	fi
 
 install:
-	@echo "📦 Installing FULL dependencies for local development..."
-	pip install -r requirements-full.txt
+	@echo "📦 Installing runtime and optional dependencies for local development..."
+	pip install -r requirements.txt -r requirements-optional.txt
 
 install-vercel:
-	@echo "📦 Installing lightweight dependencies (Vercel-compatible)..."
+	@echo "📦 Installing runtime dependencies..."
 	pip install -r requirements.txt
 
 # New dependency management targets
@@ -50,7 +50,9 @@ deps-check: validate ## Check for dependency conflicts
 deps-update: ## Update dependencies (with backup)
 	@echo "📦 Updating dependencies..."
 	@if [ ! -d ".backup/requirements" ]; then mkdir -p .backup/requirements; fi
-	@cp requirements-lock.txt .backup/requirements/requirements-lock.txt.$(shell date +%Y%m%d_%H%M%S) 2>/dev/null || true
+	@cp requirements.txt .backup/requirements/requirements.txt.$(shell date +%Y%m%d_%H%M%S) 2>/dev/null || true
+	@cp requirements-dev.txt .backup/requirements/requirements-dev.txt.$(shell date +%Y%m%d_%H%M%S) 2>/dev/null || true
+	@cp requirements-optional.txt .backup/requirements/requirements-optional.txt.$(shell date +%Y%m%d_%H%M%S) 2>/dev/null || true
 
 backup: ## Backup current environment and requirements
 	@echo "💾 Creating backup..."

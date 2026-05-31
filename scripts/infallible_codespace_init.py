@@ -32,7 +32,7 @@ def ensure_workspace_venv():
 def install_python_dependencies():
     env = get_venv_env()
     setup_script = WORKSPACE_DIR / "scripts" / "setup_environment.sh"
-    requirements_file = "requirements-lock.txt"
+    requirements_file = "requirements.txt"
     if not (WORKSPACE_DIR / requirements_file).exists():
         requirements_file = "requirements.txt"
 

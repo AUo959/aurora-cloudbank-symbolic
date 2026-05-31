@@ -155,7 +155,7 @@ Add to workflow for faster Python setup:
   with:
     python-version: '3.12'
     cache: 'pip'
-    cache-dependency-path: requirements-lock.txt
+    cache-dependency-path: requirements*.txt
 ```
 
 ## 📝 Next Steps

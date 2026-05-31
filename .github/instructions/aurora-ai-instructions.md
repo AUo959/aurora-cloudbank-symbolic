@@ -122,7 +122,8 @@ See `docs/BRANCH_PROTECTION_BYPASS.md` for complete documentation.
 - `package.json` - Node.js dependencies and scripts
 - `pyproject.toml` - Python project configuration
 - `requirements.txt` - Python dependencies
-- `requirements-lock.txt` - Locked versions
+- `requirements-dev.txt` - Development and test dependencies
+- `requirements-optional.txt` - Optional integration dependencies
 
 **Documentation:**
 - `CONTRIBUTING.md` - 348-line comprehensive contributor guide

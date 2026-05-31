@@ -67,7 +67,8 @@ def backup_requirements():
     """Backup current requirements before changes."""
     requirements_files = [
         "requirements.txt",
-        "requirements-lock.txt",
+        "requirements-dev.txt",
+        "requirements-optional.txt",
         "pyproject.toml"
     ]
 

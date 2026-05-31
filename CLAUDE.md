@@ -1241,12 +1241,9 @@ bottlenecks = analyzer.identify_bottlenecks()
 
 ### Requirements Files
 
-- **`requirements.txt`**: Vercel production (lightweight)
-- **`requirements-full.txt`**: Complete with optional dependencies
-- **`requirements-lock.txt`**: Locked versions
-- **`requirements-dev.txt`**: Development tools
-- **`requirements-secure.txt`**: Security-focused subset
-- **`requirements-optional.txt`**: Optional heavy dependencies (qiskit, scipy, pandas)
+- **`requirements.txt`**: Core runtime dependencies
+- **`requirements-dev.txt`**: Development and test tooling
+- **`requirements-optional.txt`**: Optional integrations and heavyweight feature dependencies
 
 ### Documentation
 

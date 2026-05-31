@@ -11,7 +11,7 @@ echo "===================================="
 # Configuration
 PYTHON_VERSION="3.12"
 VENV_DIR=".venv"
-REQUIREMENTS_FILE="requirements-lock.txt"
+REQUIREMENTS_FILE="requirements.txt"
 BACKUP_DIR=".backup"
 
 # Colors for output
@@ -88,7 +88,7 @@ backup_state() {
     mkdir -p "$BACKUP_DIR/venv"
     
     # Backup requirements files
-    for file in requirements.txt requirements-lock.txt pyproject.toml; do
+    for file in requirements.txt requirements-dev.txt requirements-optional.txt pyproject.toml; do
         if [[ -f "$file" ]]; then
             cp "$file" "$BACKUP_DIR/requirements/$file.$(date +%Y%m%d_%H%M%S)"
             log_success "Backed up $file"
@@ -127,10 +127,9 @@ install_dependencies() {
     
     source "$VENV_DIR/bin/activate"
     
-    # Fallback to requirements.txt when lock file is missing
     if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
-        log_warning "Lock file $REQUIREMENTS_FILE not found; falling back to requirements.txt"
-        REQUIREMENTS_FILE="requirements.txt"
+        log_error "Required dependency file $REQUIREMENTS_FILE not found"
+        return 1
     fi
     
     # Test dependency resolution first

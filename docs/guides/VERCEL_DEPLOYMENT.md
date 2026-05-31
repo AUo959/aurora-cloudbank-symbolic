@@ -13,23 +13,22 @@ Your repository is now configured for Vercel deployment with the following files
    - Routes all traffic to `api/index.py`
    - Set memory to 3008 MB and max duration to 60s
 
-### 3. **`requirements.txt`** - Lightweight Dependencies for Vercel
-   - **PRODUCTION DEPLOYMENT ONLY** - excludes heavy packages (qiskit, scipy, pandas, plotly, redis)
-   - Optimized for Vercel's 50MB deployment size limit
-   - All excluded packages gracefully degrade with mock implementations
+### 3. **`requirements.txt`** - Runtime Dependencies
+   - Root runtime dependency inventory used by dependency validation
+   - For local development, use `make setup` so the dev tooling inventory is installed too
 
-### 4. **`requirements-full.txt`** - Complete Dependencies for Local Development
-   - **LOCAL DEVELOPMENT** - includes ALL packages
-   - Use this for local setup: `pip install -r requirements-full.txt`
-   - Includes quantum computing (qiskit), scientific computing (scipy), data analysis (pandas)
+### 4. **`requirements-optional.txt`** - Optional Integrations
+   - Optional heavyweight features and provider integrations
+   - Install only when a local task needs these integrations
 
 ## 🏗️ Dependency Strategy
 
-**Two-Tier Approach:**
-- **Vercel (Production):** Uses `requirements.txt` (lightweight, ~40MB)
-- **Local Dev:** Uses `requirements-full.txt` (complete, ~150MB)
+**Current tracked inventory:**
+- **Runtime:** `requirements.txt`
+- **Development:** `requirements-dev.txt`
+- **Optional integrations:** `requirements-optional.txt`
 
-This allows full-featured local development while keeping deployments within Vercel limits.
+Run `python scripts/audit_requirements_inventory.py` after changing dependency docs or setup scripts.
 
 ## 🔧 Environment Variables Required
 

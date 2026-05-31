@@ -188,9 +188,9 @@ This repository models a quantum-symbolic governance stack where every feature m
    make setup  # Runs scripts/setup_environment.sh
    python scripts/dev-status.py  # Confirm environment status
    ```
-   - **NEVER** run `pip install -r requirements.txt` directly
+   - Prefer `make setup` over ad hoc `pip install` commands
    - Always use `make setup` which handles version conflicts and venv creation
-   - Uses `requirements-lock.txt` for pinned dependencies, not `requirements.txt`
+   - Uses the tracked requirements inventory: `requirements.txt`, `requirements-dev.txt`, and `requirements-optional.txt`
    
 2. **Check Status:** `make status` - View Python version, venv, and setup state
 
@@ -384,8 +384,8 @@ For deliverables touching security or memory:
 ## Common Pitfalls to Avoid
 
 ### Critical Infrastructure Mistakes
-1. **Wrong pip Command:** NEVER run `pip install -r requirements.txt` - always use `make setup`
-   - Project uses `requirements-lock.txt` for pinned dependencies
+1. **Wrong pip Command:** Prefer `make setup` over direct pip installs
+   - Project tracks runtime, development, and optional dependency files separately
    - Direct pip bypasses httpx/httpcore conflict resolution
    - `scripts/setup_environment.sh` handles version conflicts automatically
 2. **Wrong API Path:** Server is at `api/aurora_api.py` (NOT root `aurora_api.py`)
@@ -624,7 +624,7 @@ from modules.gumas.api import router as gumas_router
 ### Dependency Validation
 - **Matrix Testing:** Python 3.11 and 3.12
 - **Dry-Run Phase:** Catches conflicts before installation
-- **Lock File:** Uses `requirements-lock.txt` for reproducibility
+- **Requirements Inventory:** Validates tracked requirements files against current docs
 - **Local Validation:** `python scripts/validate_dependencies.py`
 
 ### Running CI Locally

@@ -22,8 +22,8 @@ python api/aurora_api.py       # Start server
 | Component | ❌ WRONG | ✅ CORRECT |
 |-----------|----------|-----------|
 | **API Server** | `python aurora_api.py` | `python api/aurora_api.py` |
-| **Dependencies** | `pip install -r requirements.txt` | `make setup` |
-| **Lock File** | `requirements.txt` | `requirements-lock.txt` |
+| **Dependencies** | Undocumented ad hoc installs | `make setup` |
+| **Requirements Inventory** | Missing requirements files | `requirements.txt`, `requirements-dev.txt`, `requirements-optional.txt` |
 | **Test Run** | `pytest` (slow!) | `pytest -m unit` (fast) |
 
 ---

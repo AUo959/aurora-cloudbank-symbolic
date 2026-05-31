@@ -5,11 +5,44 @@ on:
     paths:
       - 'requirements*.txt'
       - 'pyproject.toml'
+      - 'CLAUDE.md'
+      - 'README.md'
+      - 'docs/DEPENDENCIES.md'
+      - 'docs/guides/VERCEL_DEPLOYMENT.md'
+      - 'Makefile'
+      - '.github/CODACY_INTEGRATION.md'
+      - '.github/QUICK_REFERENCE.md'
+      - '.github/chatmodes/**'
+      - '.github/copilot/modes/**'
+      - '.github/instructions/**'
+      - '.github/copilot-instructions.md'
       - '.github/workflows/dependency-validation.yml'
+      - 'scripts/audit_requirements_inventory.py'
+      - 'scripts/infallible_codespace_init.py'
+      - 'scripts/setup_environment.sh'
+      - 'scripts/validate_dependencies.py'
+      - 'tests/test_audit_requirements_inventory.py'
   pull_request:
     paths:
       - 'requirements*.txt'
       - 'pyproject.toml'
+      - 'CLAUDE.md'
+      - 'README.md'
+      - 'docs/DEPENDENCIES.md'
+      - 'docs/guides/VERCEL_DEPLOYMENT.md'
+      - 'Makefile'
+      - '.github/CODACY_INTEGRATION.md'
+      - '.github/QUICK_REFERENCE.md'
+      - '.github/chatmodes/**'
+      - '.github/copilot/modes/**'
+      - '.github/instructions/**'
+      - '.github/copilot-instructions.md'
+      - '.github/workflows/dependency-validation.yml'
+      - 'scripts/audit_requirements_inventory.py'
+      - 'scripts/infallible_codespace_init.py'
+      - 'scripts/setup_environment.sh'
+      - 'scripts/validate_dependencies.py'
+      - 'tests/test_audit_requirements_inventory.py'
 
 jobs:
   validate-dependencies:
@@ -20,6 +53,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+
+    - name: Audit requirements inventory references
+      run: python3 scripts/audit_requirements_inventory.py
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -45,18 +81,14 @@ jobs:
       run: |
         source .venv/bin/activate
         echo "🧪 Testing dependency resolution..."
-        if [[ -f "requirements-lock.txt" ]]; then
-          pip install -r requirements-lock.txt --dry-run --report dependency_report.json || echo "⚠️ Dependency resolution check failed (non-blocking)"
-        elif [[ -f "requirements.txt" ]]; then
+        if [[ -f "requirements.txt" ]]; then
           pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
         fi
     
     - name: Install dependencies
       run: |
         source .venv/bin/activate
-        if [[ -f "requirements-lock.txt" ]]; then
-          pip install -r requirements-lock.txt
-        elif [[ -f "requirements.txt" ]]; then
+        if [[ -f "requirements.txt" ]]; then
           pip install -r requirements.txt
         fi
     

@@ -288,7 +288,7 @@ pytest -m "not slow"                    # Fast tests only (CI pattern)
 ## Standards Reference
 
 ### Critical Infrastructure Rules
-1. **NEVER** run `pip install -r requirements.txt` directly → Use `make setup`
+1. **Prefer `make setup` over direct pip installs**; it validates the tracked requirements inventory first.
 2. **API Path:** Server is at `api/aurora_api.py` (NOT root)
 3. **Test Markers:** Use `pytest -m unit` for fast tests
 

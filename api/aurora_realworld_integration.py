@@ -7,7 +7,7 @@ Comprehensive integration system bringing together all Aurora components
 import asyncio
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 

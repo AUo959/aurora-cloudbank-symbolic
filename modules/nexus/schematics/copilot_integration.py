@@ -53,7 +53,7 @@ import json
 import asyncio
 import logging
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple, Set
 from dataclasses import dataclass, field, asdict
 from enum import Enum
@@ -147,7 +147,7 @@ class DimensionalSchematic:
             "axis": self.axis.value,
             "anchor": self.anchor,
             "entropy": self.entropy_baseline,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         return hashlib.sha256(
             json.dumps(schema_data, sort_keys=True).encode()
@@ -315,7 +315,7 @@ class SchematicOrchestrator:
         
         for i, config in enumerate(dimensions_config):
             schema = DimensionalSchematic(
-                dimension_id=f"DIM-{config['axis'].name}-{datetime.utcnow().timestamp()}",
+                dimension_id=f"DIM-{config['axis'].name}-{datetime.now(timezone.utc).timestamp()}",
                 axis=config["axis"],
                 anchor=f"T11-{config['axis'].name}-2025",
                 parent_anchor=self.target_anchor,
@@ -339,8 +339,8 @@ class SchematicOrchestrator:
         """
         
         workspace = CopilotWorkspaceSchema(
-            workspace_id=f"WORKSPACE-{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
+            workspace_id=f"WORKSPACE-{datetime.now(timezone.utc).timestamp()}",
+            timestamp=datetime.now(timezone.utc),
             repositories=REPOSITORY_MAP,
             active_anchors=EXTENDED_THREAD_CHAIN,
             vscode_settings={
@@ -412,7 +412,7 @@ class SchematicOrchestrator:
         
         manifest = {
             "manifest_version": "1.0.0",
-            "generation_time": datetime.utcnow().isoformat(),
+            "generation_time": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "parent_anchor": self.parent_anchor,
             "target_anchor": self.target_anchor,
@@ -580,8 +580,8 @@ class SchematicOrchestrator:
         
         # Create export summary
         export_summary = {
-            "export_id": f"EXPORT-SCHEMA-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "export_id": f"EXPORT-SCHEMA-{datetime.now(timezone.utc).timestamp()}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "ethics": self.ethics,
@@ -711,7 +711,7 @@ skills-github-pages/           # Documentation
 - **Ethics**: Picard_Delta_3
 
 ---
-Generated: {datetime.utcnow().isoformat()}
+Generated: {datetime.now(timezone.utc).isoformat()}
 Sealed with SHA256
 """
     
@@ -723,8 +723,8 @@ Sealed with SHA256
         """
         
         verification = {
-            "verification_id": f"VERIFY-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "verification_id": f"VERIFY-{datetime.now(timezone.utc).timestamp()}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             
             "thread_analysis": {
@@ -785,7 +785,7 @@ def generate_glyphcard() -> str:
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║               📐 NEXUS INTEGRATION SCHEMATICS GLYPHCARD                   ║
 ║                                                                            ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
+║  Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
 ║  Anchor: {orchestrator.anchor:^59} ║
 ║  Target: {orchestrator.target_anchor:^58} ║
 ║  Seed: {orchestrator.seed:^61} ║

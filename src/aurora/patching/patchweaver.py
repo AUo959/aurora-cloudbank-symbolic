@@ -13,7 +13,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Callable
 
 from src.core.native_dlp_export import NativeDLPTag, NativeDLPTracker
@@ -36,7 +36,7 @@ class PatchResult:
         if self.modified_paths is None:
             self.modified_paths = []
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow().isoformat()
+            self.timestamp = datetime.now(timezone.utc).isoformat()
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
@@ -217,7 +217,7 @@ class PatchWeaver:
             "modified_paths": modified_paths,
             "before_hash": before_hash,
             "after_hash": after_hash,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "agent_id": context.get("agent_id", "unknown"),
             "context_tag": action_context.context_tag
         })

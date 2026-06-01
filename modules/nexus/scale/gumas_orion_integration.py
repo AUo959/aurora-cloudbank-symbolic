@@ -16,7 +16,7 @@ import hashlib
 import json
 import asyncio
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
 from dataclasses import dataclass, field, asdict
@@ -344,11 +344,11 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             Orchestration results with meta-agent responses
         """
         
-        orchestration_id = f"ORCH-{datetime.utcnow().timestamp()}"
+        orchestration_id = f"ORCH-{datetime.now(timezone.utc).timestamp()}"
         
         orchestration = {
             "orchestration_id": orchestration_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "directive": directive,
             "meta_agent_responses": {},
             "simulation_impacts": {},
@@ -617,12 +617,12 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             Simulation results with all levels integrated
         """
         
-        sim_id = f"MLSIM-{datetime.utcnow().timestamp()}"
+        sim_id = f"MLSIM-{datetime.now(timezone.utc).timestamp()}"
         
         simulation = {
             "simulation_id": sim_id,
             "scenario": scenario,
-            "start_time": datetime.utcnow().isoformat(),
+            "start_time": datetime.now(timezone.utc).isoformat(),
             "phases": [],
             "meta_agent_actions": {},
             "crew_responses": {},
@@ -641,7 +641,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             simulation["phases"].append({
                 "phase": "crew_spawn",
                 "spawned": len(crew_ids),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
         
         # Phase 3: Orchestrate meta-agents
@@ -651,7 +651,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
         simulation["phases"].append({
             "phase": "meta_orchestration",
             "agents_involved": list(orchestration["meta_agent_responses"].keys()),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
         
         # Phase 4: Distribute tasks to crew
@@ -662,7 +662,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             simulation["phases"].append({
                 "phase": "crew_execution",
                 "tasks_completed": len(crew_responses),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             })
         
         # Phase 5: Update station status
@@ -684,7 +684,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             "active_shards": self.metrics["active_shards"]
         }
         
-        simulation["end_time"] = datetime.utcnow().isoformat()
+        simulation["end_time"] = datetime.now(timezone.utc).isoformat()
         
         # Seal simulation
         simulation["seal"] = hashlib.sha256(
@@ -744,7 +744,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
             "task_id": task["task_id"],
             "status": "completed",
             "crew_member": task["assigned_to"],
-            "completion_time": datetime.utcnow().isoformat()
+            "completion_time": datetime.now(timezone.utc).isoformat()
         }
     
     def export_gumas_manifest(self) -> Dict:
@@ -752,7 +752,7 @@ class GUMASOrionIntegration(DistributedConsciousnessMesh):
         
         manifest = {
             "manifest_version": "7.5.0",
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,

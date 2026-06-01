@@ -8,7 +8,7 @@ Arbiter: AUo959
 import click
 import json
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import sys
 
@@ -111,7 +111,7 @@ def seal(ctx, description):
     """Seal current state as checkpoint"""
     checkpoint = {
         'description': description,
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'anchor': ctx.obj['anchor'],
         'arbiter': ctx.obj['arbiter']
     }

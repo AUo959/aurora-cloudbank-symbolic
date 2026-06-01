@@ -9,6 +9,7 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Literal
 
 from api import env_bootstrap  # noqa: F401
@@ -968,7 +969,6 @@ def readiness(request: Request):
 
     Returns 503 if core dependencies are unavailable.
     """
-    from datetime import datetime, timezone as _tz
     issues = []
     if not AUMEMMANAGER_AVAILABLE:
         issues.append("aumemmanager unavailable")
@@ -979,20 +979,19 @@ def readiness(request: Request):
         return JSONResponse(
             status_code=503,
             content={"status": "not_ready", "issues": issues,
-                     "timestamp": datetime.now(_tz.utc).isoformat()},
+                     "timestamp": datetime.now(timezone.utc).isoformat()},
         )
-    return {"status": "ready", "timestamp": datetime.now(_tz.utc).isoformat()}
+    return {"status": "ready", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 @app.get("/health")
 @limiter.limit("300/minute")
 def health_check(request: Request):
     """Full health report — component status for monitoring dashboards."""
-    from datetime import datetime, timezone as _tz
     return {
         "status": "healthy",
         "service": "Aurora CloudBank Symbolic API",
-        "timestamp": datetime.now(_tz.utc).isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "components": {
             "aumemmanager": AUMEMMANAGER_AVAILABLE,
             "data_guardian": DATA_GUARDIAN_AVAILABLE,

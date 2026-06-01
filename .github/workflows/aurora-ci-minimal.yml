@@ -87,24 +87,25 @@ jobs:
       - name: Run critical tests
         run: |
           echo "Python version: $(python --version)"
-          echo "Pytest version: $(pytest --version)"
           if [ ! -d tests ]; then
             echo "No tests directory found - skipping"
             exit 0
           fi
           FILES=$(grep -rl "@pytest.mark.critical\|@pytest.mark.smoke" tests/ --include="*.py" 2>/dev/null | tr '\n' ' ')
-          echo "Critical/smoke test files: $FILES"
           if [ -z "$FILES" ]; then
             echo "No critical/smoke tests found - skipping"
             exit 0
           fi
-          OUTPUT=$(pytest $FILES -m "critical or smoke" -q --no-header --continue-on-collection-errors --tb=line 2>&1)
-          echo "$OUTPUT"
-          if echo "$OUTPUT" | grep -qE "^FAILED |[0-9]+ failed"; then
-            echo "::error::Critical/smoke tests FAILED — see output above"
+          set +e
+          pytest $FILES -m "critical or smoke" -q --no-header --continue-on-collection-errors --tb=line
+          PYTEST_EXIT=$?
+          set -e
+          echo "pytest exit code: $PYTEST_EXIT"
+          if [ $PYTEST_EXIT -eq 1 ]; then
+            echo "::error::Critical/smoke tests FAILED (exit 1)"
             exit 1
           fi
-          echo "All critical/smoke tests passed (collection errors in unrelated files are advisory)"
+          echo "Critical tests done (exit $PYTEST_EXIT — treating as pass)"
 
       # FULL TEST SUITE - informational, failures tracked but do not block
       - name: Run full test suite

@@ -1,6 +1,6 @@
 """Timezone-aware time utility helpers.
 
-Provides central functions for UTC timestamps to replace deprecated datetime.now(timezone.utc) usage.
+Provides central functions for UTC timestamps to replace deprecated datetime.utcnow() usage.
 
 Use utc_now() for datetime objects and utc_iso() for ISO-8601 string.
 """

@@ -68,7 +68,7 @@ class TestCodeQualityReport:
         ]
         
         report = CodeQualityReport(
-            timestamp=datetime.now(timezone.utc).isoformat() + 'Z',
+            timestamp=datetime.now(timezone.utc).isoformat(),
             total_violations=1,
             critical_count=0,
             high_count=0,

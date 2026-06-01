@@ -842,7 +842,7 @@ class QuantumForge:
         """
         return {
             "version": "2.0.0",
-            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "ethics": {
                 "level": self.ethics.level.value,
                 "drift_threshold": self.ethics.drift_threshold,

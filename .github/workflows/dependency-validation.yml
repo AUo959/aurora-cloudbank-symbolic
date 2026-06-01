@@ -86,11 +86,10 @@ jobs:
         fi
     
     - name: Test critical imports
-      continue-on-error: true
       run: |
         source .venv/bin/activate
         echo "🔍 Testing critical imports..."
-        python -c "import fastapi, httpx, httpcore, h11; print('✅ All imports successful')" || echo "⚠️ Import test failed (non-blocking)"
+        python -c "import fastapi, httpx, httpcore, h11; print('✅ All imports successful')"
     
     - name: Upload dependency report
       if: always()
@@ -109,7 +108,7 @@ jobs:
         source .venv/bin/activate
         pip install safety bandit
         echo "🔒 Running security checks..."
-        safety check --json --output safety-report.json || echo "⚠️ Safety check completed with warnings"
+        safety check --json --output safety-report.json || echo "⚠️ Safety check found vulnerabilities (see security-report artifact)"
         
     - name: Upload security report
       if: always()

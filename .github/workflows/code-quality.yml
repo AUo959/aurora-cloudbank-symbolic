@@ -1,4 +1,5 @@
 name: Code Quality
+
 on:
   push:
     branches:
@@ -10,9 +11,36 @@ on:
 jobs:
   code_quality:
     runs-on: ubuntu-latest
-    if: false
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run Code Quality Checks
-        run: echo 'Running code quality checks'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install linting tools
+        run: pip install flake8
+
+      - name: Syntax errors (fail closed)
+        run: |
+          paths=""
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+            [ -d "$d" ] && paths="$paths $d"
+          done
+          [ -z "$paths" ] && echo "No target directories" && exit 0
+          flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2,modules/nexus
+
+      - name: Style and complexity (informational)
+        continue-on-error: true
+        run: |
+          paths=""
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+            [ -d "$d" ] && paths="$paths $d"
+          done
+          [ -z "$paths" ] && echo "No target directories" && exit 0
+          flake8 $paths --count --max-complexity=10 --max-line-length=120 --statistics \
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2,modules/nexus

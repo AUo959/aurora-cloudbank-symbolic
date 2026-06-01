@@ -81,13 +81,19 @@ jobs:
           flake8 $paths --count --max-complexity=10 --max-line-length=127 --statistics \
             --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,modules/nexus/*,.security/*
       
-      # TESTS - when they exist
-      - name: Run tests
-        continue-on-error: true
+      # CRITICAL TESTS - must pass, fail closed
+      - name: Run critical tests
         run: |
-          # Only run if tests directory exists
           if [ -d tests ]; then
-            pytest tests/ -v --cov=. --cov-report=term-missing || echo "Tests found but some failed - this is okay for now"
+            pytest tests/ -m "critical or smoke" -q --no-header
           else
             echo "No tests directory found - skipping"
+          fi
+
+      # FULL TEST SUITE - informational, failures tracked but do not block
+      - name: Run full test suite
+        continue-on-error: true
+        run: |
+          if [ -d tests ]; then
+            pytest tests/ -v --cov=. --cov-report=term-missing
           fi

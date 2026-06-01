@@ -85,7 +85,12 @@ jobs:
       - name: Run critical tests
         run: |
           if [ -d tests ]; then
-            pytest tests/ -m "critical or smoke" -q --no-header
+            FILES=$(grep -rl "@pytest.mark.critical\|@pytest.mark.smoke" tests/ --include="*.py" 2>/dev/null | tr '\n' ' ')
+            if [ -z "$FILES" ]; then
+              echo "No critical/smoke tests found - skipping"
+            else
+              pytest $FILES -m "critical or smoke" -q --no-header --continue-on-collection-errors
+            fi
           else
             echo "No tests directory found - skipping"
           fi

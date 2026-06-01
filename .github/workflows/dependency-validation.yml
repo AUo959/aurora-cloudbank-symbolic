@@ -45,20 +45,12 @@ jobs:
       run: |
         source .venv/bin/activate
         echo "🧪 Testing dependency resolution..."
-        if [[ -f "requirements-lock.txt" ]]; then
-          pip install -r requirements-lock.txt --dry-run --report dependency_report.json || echo "⚠️ Dependency resolution check failed (non-blocking)"
-        elif [[ -f "requirements.txt" ]]; then
-          pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
-        fi
-    
+        pip install -r requirements.txt --dry-run || echo "⚠️ Dependency resolution check failed (non-blocking)"
+
     - name: Install dependencies
       run: |
         source .venv/bin/activate
-        if [[ -f "requirements-lock.txt" ]]; then
-          pip install -r requirements-lock.txt
-        elif [[ -f "requirements.txt" ]]; then
-          pip install -r requirements.txt
-        fi
+        pip install -r requirements.txt
     
     - name: Validate dependency compatibility
       run: |

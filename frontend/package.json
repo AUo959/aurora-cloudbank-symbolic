@@ -43,7 +43,7 @@
     "@react-three/postprocessing": "^2.16.0",
     "@tanstack/react-query": "^5.14.0",
     "@visx/visx": "^3.7.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
@@ -83,8 +83,8 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
-    "@vitest/coverage-v8": "^4.0.15",
-    "@vitest/ui": "^4.0.15",
+    "@vitest/coverage-v8": "^4.1.8",
+    "@vitest/ui": "^4.1.8",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -100,7 +100,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.3.3",
     "vite": "^7.3.2",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.8"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

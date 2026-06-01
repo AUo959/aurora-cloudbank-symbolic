@@ -954,22 +954,59 @@ def get_client_sonnet4_status(client_id: str, request: Request):
     return sonnet4_hub.get_client_status(client_id)
 
 
+@app.get("/live")
+@limiter.limit("600/minute")
+def liveness(request: Request):
+    """Kubernetes liveness probe — confirms the process is alive."""
+    return {"status": "ok"}
+
+
+@app.get("/ready")
+@limiter.limit("300/minute")
+def readiness(request: Request):
+    """Kubernetes readiness probe — confirms the app is ready to serve traffic.
+
+    Returns 503 if core dependencies are unavailable.
+    """
+    from datetime import datetime, timezone as _tz
+    issues = []
+    if not AUMEMMANAGER_AVAILABLE:
+        issues.append("aumemmanager unavailable")
+    if not DATA_GUARDIAN_AVAILABLE:
+        issues.append("data_guardian unavailable")
+
+    if issues:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "issues": issues,
+                     "timestamp": datetime.now(_tz.utc).isoformat()},
+        )
+    return {"status": "ready", "timestamp": datetime.now(_tz.utc).isoformat()}
+
+
 @app.get("/health")
-@limiter.limit("300/minute")  # Health check - frequent monitoring
+@limiter.limit("300/minute")
 def health_check(request: Request):
-    """Health check endpoint"""
+    """Full health report — component status for monitoring dashboards."""
+    from datetime import datetime, timezone as _tz
     return {
         "status": "healthy",
         "service": "Aurora CloudBank Symbolic API",
-        "sonnet4_enabled": sonnet4_hub.sonnet4_config.enabled,
-        "agent_mode_enabled": True,
-        "timestamp": "2025-06-29",
+        "timestamp": datetime.now(_tz.utc).isoformat(),
+        "components": {
+            "aumemmanager": AUMEMMANAGER_AVAILABLE,
+            "data_guardian": DATA_GUARDIAN_AVAILABLE,
+            "insight_ledger": INSIGHT_LEDGER_AVAILABLE,
+            "quantum_simulator": QUANTUM_SIMULATOR_AVAILABLE,
+            "gemini_agent": GEMINI_AGENT_AVAILABLE,
+            "sonnet4": sonnet4_hub.sonnet4_config.enabled,
+        },
     }
 
 
 # Compatibility alias for Docker healthcheck (docker-compose points to /api/health)
 @app.get("/api/health")
-@limiter.limit("300/minute")  # Health check - frequent monitoring
+@limiter.limit("300/minute")
 def health_check_api(request: Request):
     return health_check(request)
 

@@ -5,7 +5,7 @@ Demonstrates how to integrate the monitoring system with R-2 agent operations.
 """
 
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.monitoring import (
     MonitoringSystem,
     AlertConfig,
@@ -257,7 +257,7 @@ def generate_r2_status_report(monitoring, agent_id="R-2-001"):
     print("\n📊 Generating compliance report...\n")
     
     report = monitoring.generate_compliance_report(
-        since=datetime.utcnow() - timedelta(hours=24),
+        since=datetime.now(timezone.utc) - timedelta(hours=24),
         agent_id=agent_id
     )
     

@@ -19,7 +19,7 @@ and accumulates institutional wisdom.
 
 from dataclasses import dataclass
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 from src.core.event_system import (
@@ -283,10 +283,10 @@ class AuroraEntity:
         """
         if result.get("status") == "success":
             pattern = {
-                "pattern_id": f"pattern_{datetime.utcnow().isoformat()}",
+                "pattern_id": f"pattern_{datetime.now(timezone.utc).isoformat()}",
                 "domain": data.get("type", "general"),
                 "strategy": "contextual_analysis",
-                "discovered_at": datetime.utcnow().isoformat(),
+                "discovered_at": datetime.now(timezone.utc).isoformat(),
                 "success_rate": 1.0  # First success, will evolve with more uses
             }
             return [pattern]

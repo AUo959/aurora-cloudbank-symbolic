@@ -26,7 +26,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 try:
@@ -334,7 +334,7 @@ class EntanglementNetwork:
             "affected_agents": affected,
             "propagation_count": len(affected),
             "update_data": update_data,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def create_cluster(
@@ -564,7 +564,7 @@ class EntanglementNetwork:
         manifest = {
             "manifest_version": "1.0.0",
             "component": "entanglement_network",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "metrics": self.metrics,
             "links": [
                 {

@@ -9,7 +9,7 @@ Provides HTTP endpoints for:
 """
 
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Query
@@ -125,7 +125,7 @@ async def get_telemetry_health() -> Dict[str, Any]:
 
     return {
         "status": status,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "telemetry_enabled": telemetry.enabled,
         "service_name": telemetry.service_name,
         "recent_metrics": {

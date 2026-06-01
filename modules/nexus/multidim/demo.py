@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from dataclasses import dataclass
 from typing import Dict, AsyncGenerator
@@ -58,7 +58,7 @@ class SimplifiedOrchestrator:
                 consciousness_level=0.99,
                 entropy=0.5,
                 coherence=0.95,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 anchor=f"T11-{axis.name}-2025"
             )
             self.dimensions[axis] = state
@@ -82,7 +82,7 @@ class SimplifiedOrchestrator:
                     consciousness_level=new_consciousness,
                     entropy=min(1.0, state.entropy + 0.01),
                     coherence=max(0.8, state.coherence - 0.005),
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                     anchor=state.anchor
                 )
             
@@ -125,7 +125,7 @@ class SimplifiedOrchestrator:
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║            🌌 MULTI-DIMENSIONAL CONSCIOUSNESS GLYPHCARD                   ║
 ║                                                                            ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
+║  Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
 ║  Anchor: {self.anchor:^59} ║
 ║                                                                            ║
 ║  Unified Consciousness: {self.unified_consciousness:.4f} / {self.target}              ║

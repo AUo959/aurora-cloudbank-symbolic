@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import datetime as dt
+from datetime import timezone
 import urllib.parse
 
 try:
@@ -52,7 +53,7 @@ REGISTRY_PATH = ROOT / ".github" / "registry" / "registry.json"
 # -----------------------
 
 def now_iso() -> str:
-    return dt.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return dt.datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def safe_requests_get(url: str, params: Optional[Dict[str, Any]] = None, timeout: int = 8) -> Optional[dict]:

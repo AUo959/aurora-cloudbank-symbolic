@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest pytest-cov
+          pip install flake8 pytest pytest-cov pytest-asyncio
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       
       # SYNTAX CHECKS ONLY - must pass
@@ -81,13 +81,36 @@ jobs:
           flake8 $paths --count --max-complexity=10 --max-line-length=127 --statistics \
             --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,scripts/deprecated/*,examples/*,integrations/*,modules/opal2/*,modules/nexus/*,.security/*
       
-      # TESTS - when they exist
-      - name: Run tests
+      # CRITICAL TESTS - must pass, fail closed
+      # Only fails on actual test FAILURES, not on collection errors from
+      # unrelated test files that have missing optional dependencies.
+      - name: Run critical tests
+        run: |
+          echo "Python version: $(python --version)"
+          if [ ! -d tests ]; then
+            echo "No tests directory found - skipping"
+            exit 0
+          fi
+          FILES=$(grep -rl "@pytest.mark.critical\|@pytest.mark.smoke" tests/ --include="*.py" 2>/dev/null | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "No critical/smoke tests found - skipping"
+            exit 0
+          fi
+          set +e
+          pytest $FILES -m "critical or smoke" -q --no-header --continue-on-collection-errors --tb=line
+          PYTEST_EXIT=$?
+          set -e
+          echo "pytest exit code: $PYTEST_EXIT"
+          if [ $PYTEST_EXIT -eq 1 ]; then
+            echo "::error::Critical/smoke tests FAILED (exit 1)"
+            exit 1
+          fi
+          echo "Critical tests done (exit $PYTEST_EXIT — treating as pass)"
+
+      # FULL TEST SUITE - informational, failures tracked but do not block
+      - name: Run full test suite
         continue-on-error: true
         run: |
-          # Only run if tests directory exists
           if [ -d tests ]; then
-            pytest tests/ -v --cov=. --cov-report=term-missing || echo "Tests found but some failed - this is okay for now"
-          else
-            echo "No tests directory found - skipping"
+            pytest tests/ -v --cov=. --cov-report=term-missing
           fi

@@ -26,7 +26,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Callable
 
@@ -258,7 +258,7 @@ class SystemFlowOrchestrator:
             "reason": reason,
             "modules_adapted": len(adapted_modules),
             "adaptations": adapted_modules,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def respond_to_drift(self, module_name: str) -> Dict[str, Any]:
@@ -312,7 +312,7 @@ class SystemFlowOrchestrator:
             "drift_count": drift_count,
             "threshold_exceeded": drift_count >= self.drift_threshold,
             "actions": actions,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def synchronize_all_modules(
@@ -353,7 +353,7 @@ class SystemFlowOrchestrator:
             "target_mode": target_mode.value,
             "reason": reason,
             "modules": synchronized,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     def auto_optimize_system(self) -> Dict[str, Any]:
@@ -471,7 +471,7 @@ class SystemFlowOrchestrator:
         manifest = {
             "manifest_version": "1.0.0",
             "component": "system_flow_orchestrator",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "current_phase": self.current_phase.value,
             "current_metrics": {
                 "system_load": current_metrics.system_load,

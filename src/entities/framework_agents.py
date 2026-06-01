@@ -16,7 +16,7 @@ significant operation.
 
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.core.event_system import Event, StationLocation
 
@@ -220,7 +220,7 @@ class AxiomeraEntity:
                 "recommendations": assessment.recommendations,
                 "full_reasoning": assessment.reasoning
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def get_state_summary(self) -> Dict[str, Any]:
@@ -393,7 +393,7 @@ class CaelionEntity:
                 "concerns": validation.concerns,
                 "full_reasoning": validation.reasoning
             },
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def get_state_summary(self) -> Dict[str, Any]:
@@ -479,5 +479,5 @@ async def l3_evaluation(event: Event) -> Dict[str, Any]:
         "reasoning": reasoning,
         "axiomera_assessment": axiomera_assessment,
         "caelion_assessment": caelion_assessment,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }

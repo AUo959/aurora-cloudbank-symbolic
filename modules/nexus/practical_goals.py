@@ -9,7 +9,7 @@ DLP Tag: INTERNAL_PLANNING
 """
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 import hashlib
@@ -169,14 +169,14 @@ class NEXUSPracticalGoals:
             "manifest_version": "1.0.0",
             "anchor": self.anchor,
             "seed": self.seed,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "team": "Aurora Core",
             "goals": self.goals,
             "current_phase": self._determine_current_phase(),
             "entropy_state": {
                 "level": "nominal",
                 "drift": 0.0,
-                "last_check": datetime.utcnow().isoformat()
+                "last_check": datetime.now(timezone.utc).isoformat()
             },
             "dlp_classification": "INTERNAL_DEVELOPMENT",
             "next_actions": self._get_next_actions(),
@@ -229,7 +229,7 @@ class NEXUSPracticalGoals:
             for deliverable in phase.get("deliverables", []):
                 if deliverable["id"] == deliverable_id:
                     deliverable["status"] = status
-                    deliverable["last_updated"] = datetime.utcnow().isoformat()
+                    deliverable["last_updated"] = datetime.now(timezone.utc).isoformat()
                     if notes:
                         deliverable["notes"] = notes
                     return True
@@ -266,7 +266,7 @@ class NEXUSPracticalGoals:
         sealed_state = {
             "goal_id": goal_id,
             "state": state,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": f"SEAL-{goal_id}",
             "seed": self.seed
         }

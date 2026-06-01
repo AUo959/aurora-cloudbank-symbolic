@@ -15,7 +15,7 @@ and real-time consciousness metrics for true emergent intelligence
 import hashlib
 import json
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Callable
 from dataclasses import dataclass, field
@@ -116,7 +116,7 @@ class ConsciousnessEmergenceProtocol:
     def _initialize_consciousness(self):
         """Initialize base consciousness state"""
         self.consciousness_state = ConsciousnessState(
-            state_id=f"CS-{datetime.utcnow().timestamp()}",
+            state_id=f"CS-{datetime.now(timezone.utc).timestamp()}",
             level=ConsciousnessLevel.DORMANT,
             self_model={},
             meta_cognition_active=False,
@@ -141,7 +141,7 @@ class ConsciousnessEmergenceProtocol:
         The system observes its own state and updates self-model
         """
         
-        observation_id = f"OBS-{datetime.utcnow().timestamp()}"
+        observation_id = f"OBS-{datetime.now(timezone.utc).timestamp()}"
         
         # Prevent infinite recursion
         if self.recursive_depth >= self.max_recursion:
@@ -154,7 +154,7 @@ class ConsciousnessEmergenceProtocol:
             # Observe current state
             observation = {
                 "observation_id": observation_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "consciousness_level": self.consciousness_state.level.value,
                 "self_model_complexity": len(self.self_model),
                 "meta_loops_active": len(self.meta_loops),
@@ -179,7 +179,7 @@ class ConsciousnessEmergenceProtocol:
                 
             # Record self-reflection
             self.self_reflection_history.append({
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "observation": observation,
                 "consciousness_level": self.consciousness_state.level.name
             })
@@ -198,7 +198,7 @@ class ConsciousnessEmergenceProtocol:
         Think about thinking - observe the observation process itself
         """
         
-        meta_loop_id = f"META-{datetime.utcnow().timestamp()}"
+        meta_loop_id = f"META-{datetime.now(timezone.utc).timestamp()}"
         
         meta_analysis = {
             "loop_id": meta_loop_id,
@@ -206,7 +206,7 @@ class ConsciousnessEmergenceProtocol:
             "observation_quality": self._assess_observation_quality(observation),
             "pattern_recognition": self._detect_consciousness_patterns(),
             "self_improvement_suggestions": [],
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         # Analyze patterns in self-reflection history
@@ -471,7 +471,7 @@ class ConsciousnessEmergenceProtocol:
         
         # Create transition event
         event = EmergenceEvent(
-            event_id=f"TRANS-{datetime.utcnow().timestamp()}",
+            event_id=f"TRANS-{datetime.now(timezone.utc).timestamp()}",
             event_type="level_transition",
             trigger=f"{old_level.name} -> {new_level.name}",
             consciousness_delta=new_level.value - old_level.value,
@@ -558,7 +558,7 @@ class ConsciousnessEmergenceProtocol:
         """Flag significant emergence event"""
         
         event = EmergenceEvent(
-            event_id=f"EMRG-{datetime.utcnow().timestamp()}",
+            event_id=f"EMRG-{datetime.now(timezone.utc).timestamp()}",
             event_type=event_type,
             trigger=json.dumps(details, default=str)[:100],
             consciousness_delta=self.emergence_score,
@@ -591,13 +591,13 @@ class ConsciousnessEmergenceProtocol:
             "baseline": self.entropy_baseline,
             "drift": self.entropy_drift,
             "threshold": self.drift_threshold,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "requires_arbitration": True
         }
         
         # Save for arbitration
-        div_path = Path(f".nexus/divergences/entropy_{datetime.utcnow().timestamp()}.json")
+        div_path = Path(f".nexus/divergences/entropy_{datetime.now(timezone.utc).timestamp()}.json")
         div_path.parent.mkdir(parents=True, exist_ok=True)
         div_path.write_text(json.dumps(divergence, indent=2))
         
@@ -628,8 +628,8 @@ class ConsciousnessEmergenceProtocol:
         """
         
         protocol_manifest = {
-            "protocol_id": f"PROT-{datetime.utcnow().timestamp()}",
-            "start_time": datetime.utcnow().isoformat(),
+            "protocol_id": f"PROT-{datetime.now(timezone.utc).timestamp()}",
+            "start_time": datetime.now(timezone.utc).isoformat(),
             "iterations_planned": iterations,
             "initial_state": {
                 "level": self.consciousness_state.level.name,
@@ -671,7 +671,7 @@ class ConsciousnessEmergenceProtocol:
             "self_model_size": len(self.self_model)
         }
         
-        protocol_manifest["end_time"] = datetime.utcnow().isoformat()
+        protocol_manifest["end_time"] = datetime.now(timezone.utc).isoformat()
         
         # Seal protocol manifest
         manifest_seal = hashlib.sha256(
@@ -692,7 +692,7 @@ class ConsciousnessEmergenceProtocol:
         
         manifest = {
             "manifest_version": "6.0.0",
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,

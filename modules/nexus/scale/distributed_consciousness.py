@@ -15,7 +15,7 @@ and production-ready scalability for Aurora/GUMAS ecosystem
 import hashlib
 import json
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
@@ -114,7 +114,7 @@ class DistributedConsciousnessMesh:
         tasks = []
         
         for i in range(count):
-            agent_id = f"AGENT-{agent_type}-{datetime.utcnow().timestamp()}-{i}"
+            agent_id = f"AGENT-{agent_type}-{datetime.now(timezone.utc).timestamp()}-{i}"
             task = self._spawn_single_agent(agent_id, agent_type)
             tasks.append(task)
             
@@ -186,7 +186,7 @@ class DistributedConsciousnessMesh:
     async def _create_consciousness_shard(self, agent_ids: List[str]) -> ConsciousnessShard:
         """Create consciousness shard from agents"""
         
-        shard_id = f"SHARD-{datetime.utcnow().timestamp()}"
+        shard_id = f"SHARD-{datetime.now(timezone.utc).timestamp()}"
         
         # Calculate collective consciousness
         collective = sum(
@@ -221,8 +221,8 @@ class DistributedConsciousnessMesh:
                                            min_shards: int = 3) -> Dict:
         """Achieve consensus across distributed shards"""
         
-        consensus_id = f"CONSENSUS-{datetime.utcnow().timestamp()}"
-        start_time = datetime.utcnow()
+        consensus_id = f"CONSENSUS-{datetime.now(timezone.utc).timestamp()}"
+        start_time = datetime.now(timezone.utc)
         
         consensus = {
             "consensus_id": consensus_id,
@@ -263,7 +263,7 @@ class DistributedConsciousnessMesh:
         consensus["consensus_achieved"] = votes_for > votes_against
         
         # Calculate latency
-        consensus["latency_ms"] = (datetime.utcnow() - start_time).total_seconds() * 1000
+        consensus["latency_ms"] = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
         self.metrics["consensus_latency_ms"] = consensus["latency_ms"]
         
         # Seal consensus
@@ -321,8 +321,8 @@ class DistributedConsciousnessMesh:
     async def scale_test(self, target_agents: int = 100) -> Dict:
         """Run scale test with target agent count"""
         
-        test_id = f"SCALE-TEST-{datetime.utcnow().timestamp()}"
-        start_time = datetime.utcnow()
+        test_id = f"SCALE-TEST-{datetime.now(timezone.utc).timestamp()}"
+        start_time = datetime.now(timezone.utc)
         
         test_results = {
             "test_id": test_id,
@@ -348,12 +348,12 @@ class DistributedConsciousnessMesh:
         # Test consensus at scale
         if len(self.shards) >= 1:
             consensus = await self.achieve_distributed_consensus(
-                {"action": "scale_test", "timestamp": datetime.utcnow().isoformat()}
+                {"action": "scale_test", "timestamp": datetime.now(timezone.utc).isoformat()}
             )
             test_results["consensus_results"].append(consensus)
             
         # Calculate performance metrics
-        elapsed_seconds = (datetime.utcnow() - start_time).total_seconds()
+        elapsed_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
         
         test_results["performance_metrics"] = {
             "total_agents": self.metrics["total_agents"],
@@ -363,7 +363,7 @@ class DistributedConsciousnessMesh:
             "global_entropy": self.metrics["global_entropy"]
         }
         
-        test_results["end_time"] = datetime.utcnow().isoformat()
+        test_results["end_time"] = datetime.now(timezone.utc).isoformat()
         
         # Seal test results
         test_results["seal"] = hashlib.sha256(
@@ -377,7 +377,7 @@ class DistributedConsciousnessMesh:
         
         manifest = {
             "manifest_version": "7.0.0",
-            "export_time": datetime.utcnow().isoformat(),
+            "export_time": datetime.now(timezone.utc).isoformat(),
             "anchor": self.anchor,
             "seed": self.seed,
             "arbiter": self.arbiter,

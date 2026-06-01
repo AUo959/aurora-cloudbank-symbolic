@@ -24,7 +24,7 @@ Ethics: GUMAS_Thermax, Quantum_Critical_Safety
 import hashlib
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -89,7 +89,7 @@ class EthicsAwareQuantumGate:
             "risk_level": risk.value,
             "acceptable": is_acceptable,
             "intervention": intervention.value if intervention else None,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
         # Apply intervention
@@ -161,7 +161,7 @@ class EthicsAwareQuantumGate:
         manifest = {
             "component": "ethics_quantum_gates",
             "version": "1.0.0",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "ethics_level": self.gumas.level.value,
             "metrics": self.get_ethics_metrics(),
             "recent_audit_log": self.audit_log[-10:],  # Last 10 entries

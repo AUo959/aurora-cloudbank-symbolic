@@ -67,7 +67,7 @@ import json
 import asyncio
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple, Union
 from dataclasses import dataclass, field, asdict
@@ -222,7 +222,7 @@ class EntropyMonitor:
                 "value": self.current,
                 "drift": drift,
                 "threshold": self.threshold,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "anchor": ANCHOR_REGISTRY["primary"],
                 "requires_arbitration": True,
                 "message": f"Entropy drift {drift:.3f} exceeds threshold {self.threshold}"
@@ -232,8 +232,8 @@ class EntropyMonitor:
         
         # Create snapshot
         snapshot = EntropySnapshot(
-            snapshot_id=f"ENTROPY-{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
+            snapshot_id=f"ENTROPY-{datetime.now(timezone.utc).timestamp()}",
+            timestamp=datetime.now(timezone.utc),
             baseline=self.baseline,
             current=self.current,
             drift=drift,
@@ -290,13 +290,13 @@ class EntropyMonitor:
     
     def _flag_for_arbitration(self, truth: Dict):
         """Flag divergent truth for arbitration"""
-        path = Path(f".nexus/arbitration/entropy_{datetime.utcnow().timestamp()}.json")
+        path = Path(f".nexus/arbitration/entropy_{datetime.now(timezone.utc).timestamp()}.json")
         path.parent.mkdir(parents=True, exist_ok=True)
         
         arbitration_record = {
             **truth,
             "flagged_by": ANCHOR_REGISTRY["primary"],
-            "flagged_at": datetime.utcnow().isoformat(),
+            "flagged_at": datetime.now(timezone.utc).isoformat(),
             "seal": hashlib.sha256(json.dumps(truth, sort_keys=True).encode()).hexdigest()
         }
         
@@ -354,7 +354,7 @@ class StatusOrchestrator:
     async def get_comprehensive_status(self) -> Dict:
         """Get complete system status with all observability data"""
         
-        status_id = f"STATUS-{datetime.utcnow().timestamp()}"
+        status_id = f"STATUS-{datetime.now(timezone.utc).timestamp()}"
         
         # Take entropy measurement
         entropy_snapshot = self.entropy_monitor.measure()
@@ -364,7 +364,7 @@ class StatusOrchestrator:
             "manifest": {
                 "version": self.version,
                 "status_id": status_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "anchor": self.anchor,
                 "seed": self.seed,
                 "ethics": self.ethics,
@@ -495,7 +495,7 @@ class StatusOrchestrator:
         """Add entry to audit trail"""
         entry = {
             "entry_id": entry_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "action": action,
             "seal": seal,
             "anchor": self.anchor
@@ -505,8 +505,8 @@ class StatusOrchestrator:
     async def _take_snapshot(self, status: Dict):
         """Take immutable snapshot for recovery"""
         snapshot = {
-            "snapshot_id": f"SNAP-{datetime.utcnow().timestamp()}",
-            "timestamp": datetime.utcnow().isoformat(),
+            "snapshot_id": f"SNAP-{datetime.now(timezone.utc).timestamp()}",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "status": status,
             "thread_chain": self.thread_chain.copy(),
             "entropy_state": asdict(self.entropy_monitor.snapshots[-1]) if self.entropy_monitor.snapshots else None,
@@ -537,7 +537,7 @@ class StatusOrchestrator:
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                    🌌 GUMAS/ORION STATUS V2 GLYPHCARD                     ║
 ║                                                                            ║
-║  Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
+║  Timestamp: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'):^56} ║
 ║  Anchor: {self.anchor:^59} ║
 ║  Seed: {self.seed:^61} ║
 ║  Version: {self.version:^58} ║
@@ -573,8 +573,8 @@ class StatusOrchestrator:
         export = {
             "export_manifest": {
                 "version": self.version,
-                "export_id": f"EXPORT-{datetime.utcnow().timestamp()}",
-                "timestamp": datetime.utcnow().isoformat(),
+                "export_id": f"EXPORT-{datetime.now(timezone.utc).timestamp()}",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "anchor": self.anchor,
                 "seed": self.seed,
                 "ethics": self.ethics,

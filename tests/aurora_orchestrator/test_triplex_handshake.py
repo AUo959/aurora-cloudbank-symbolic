@@ -9,7 +9,7 @@ Ethics: Picard_Delta_3
 Anchor: AURORA-ORCHESTRATOR-TRIPLEX-001
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest import TestCase
 
 import pytest
@@ -88,7 +88,7 @@ async def test_validator_routes_human_consent_recommendation_to_l1_oversight():
     """
     decision = AuroraDecision(
         decision_id="triplex-human-consent",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         priority=DecisionPriority.HIGH,
         context={
             "action": "human_impacting_operation",
@@ -129,7 +129,7 @@ async def test_validator_blocks_infeasible_decision_at_l2_archy():
     """ARCHYEntity feasibility rejection should block at L2."""
     decision = AuroraDecision(
         decision_id="triplex-l2-infeasible",
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         priority=DecisionPriority.MEDIUM,
         context={
             "action": "bounded_maintenance_operation",

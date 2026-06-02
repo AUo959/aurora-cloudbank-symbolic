@@ -17,6 +17,7 @@ class MemoryRetrievalConfig:
 
     vector_dimension: int = 384
     cache_ttl_seconds: int = 300
+    cache_max_size: int = 10_000
     storage_backend: str = "memory"
     storage_path: Optional[str] = None
     max_results: int = 10
@@ -36,6 +37,7 @@ class MemoryRetrievalConfig:
         return cls(
             vector_dimension=int(os.getenv("MRM_VECTOR_DIM", 384)),
             cache_ttl_seconds=int(os.getenv("MRM_CACHE_TTL", 300)),
+            cache_max_size=int(os.getenv("MRM_CACHE_MAX_SIZE", 10_000)),
             storage_backend=os.getenv("MRM_STORAGE_BACKEND", "memory"),
             storage_path=os.getenv("MRM_STORAGE_PATH"),
             max_results=int(os.getenv("MRM_MAX_RESULTS", 10)),
@@ -50,6 +52,8 @@ class MemoryRetrievalConfig:
             raise ValueError("vector_dimension must be positive")
         if self.cache_ttl_seconds <= 0:
             raise ValueError("cache_ttl_seconds must be positive")
+        if self.cache_max_size <= 0:
+            raise ValueError("cache_max_size must be positive")
         if self.storage_backend not in _VALID_BACKENDS:
             raise ValueError(
                 "storage_backend must be 'memory', 'file', 'filesystem', or 'vector_db'"

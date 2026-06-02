@@ -45,7 +45,7 @@ pandas>=2.1.0                       # Data analysis
 # ===================================================================
 python-dotenv>=1.0.0                # Environment variables
 pyyaml>=6.0.1                       # YAML parsing
-click>=8.1.0                        # CLI interface
+click>=8.4.1                        # CLI interface
 structlog>=23.2.0                   # Structured logging
 python-json-logger>=4.1.0           # JSON logging
 

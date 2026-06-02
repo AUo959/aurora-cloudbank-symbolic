@@ -460,6 +460,84 @@ class TestMemoryCache:
         key3 = cache.make_query_key("context2", "test query", 10)
         assert key != key3
 
+    def test_cache_enforces_max_size(self):
+        """Cache never exceeds the configured max_size."""
+        config = MemoryRetrievalConfig(cache_max_size=10)
+        cache = MemoryCache(config)
+
+        for i in range(25):
+            cache.set(f"key{i}", f"value{i}")
+
+        assert len(cache._cache) == 10
+        assert cache.get_stats()["size"] == 10
+        assert cache.get_stats()["max_size"] == 10
+
+    def test_cache_lru_eviction_drops_oldest(self):
+        """When over capacity, the least-recently-used entry is evicted first."""
+        config = MemoryRetrievalConfig(cache_max_size=3)
+        cache = MemoryCache(config)
+
+        cache.set("a", "va")
+        cache.set("b", "vb")
+        cache.set("c", "vc")
+
+        # Touch "a" so it becomes most-recently-used; "b" is now LRU.
+        assert cache.get("a") == "va"
+
+        # Inserting a 4th entry must evict the LRU entry ("b"), not "a".
+        cache.set("d", "vd")
+
+        assert cache.get("b") is None
+        assert cache.get("a") == "va"
+        assert cache.get("c") == "vc"
+        assert cache.get("d") == "vd"
+
+    def test_cache_eviction_counter_increments(self):
+        """Eviction stat reflects entries dropped due to capacity."""
+        config = MemoryRetrievalConfig(cache_max_size=5)
+        cache = MemoryCache(config)
+
+        for i in range(8):
+            cache.set(f"key{i}", f"value{i}")
+
+        # 8 inserts into a cap-5 cache => 3 capacity evictions.
+        assert cache.get_stats()["evictions"] == 3
+
+    def test_cache_overwrite_does_not_grow(self):
+        """Re-setting an existing key updates in place without growing size."""
+        config = MemoryRetrievalConfig(cache_max_size=10)
+        cache = MemoryCache(config)
+
+        cache.set("key", "v1")
+        cache.set("key", "v2")
+        cache.set("key", "v3")
+
+        assert len(cache._cache) == 1
+        assert cache.get("key") == "v3"
+
+    def test_cache_clear_expired_reclaims_cold_entries(self):
+        """clear_expired removes expired entries that were never read back."""
+        config = MemoryRetrievalConfig(cache_ttl_seconds=1, cache_max_size=100)
+        cache = MemoryCache(config)
+
+        cache.set("cold1", "v1")
+        cache.set("cold2", "v2")
+        assert len(cache._cache) == 2
+
+        time.sleep(1.1)
+
+        reclaimed = cache.clear_expired()
+
+        assert reclaimed == 2
+        assert len(cache._cache) == 0
+        assert cache.get_stats()["evictions"] == 2
+
+    def test_cache_max_size_validation(self):
+        """Config rejects non-positive cache_max_size."""
+        config = MemoryRetrievalConfig(cache_max_size=0)
+        with pytest.raises(ValueError, match="cache_max_size must be positive"):
+            config.validate()
+
 
 @pytest.mark.unit
 @pytest.mark.critical

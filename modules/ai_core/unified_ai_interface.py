@@ -27,18 +27,28 @@ class AIProvider(Enum):
 
 
 class AIModel(Enum):
-    """Supported AI models with version tracking"""
+    """Supported AI models with version tracking.
+
+    Catalog reconciliation: 2026-06-02.
+
+    Identifiers tagged "UNVERIFIED placeholder" below are aspirational and are
+    NOT confirmed against the provider's live catalog. They are gated by
+    ``available=False`` in ``CAPABILITIES`` so they can never be selected
+    through the public interface (see ``select_optimal_model``). Promote one to
+    a live identifier only after confirming it against the provider catalog and
+    flipping its ``available`` flag in the same change.
+    """
 
     # Claude family
-    CLAUDE_35_SONNET = "claude-3-5-sonnet-20241022"
-    CLAUDE_45_OPUS = "claude-4-5-opus-20250115"  # Expected model identifier
+    CLAUDE_35_SONNET = "claude-3-5-sonnet-20241022"  # Verified live
+    CLAUDE_45_OPUS = "claude-4-5-opus-20250115"  # UNVERIFIED placeholder (available=False)
 
     # GPT family
-    GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo-preview"
-    GPT_4O = "gpt-4o"
-    GPT_5 = "gpt-5"  # Expected model identifier
-    GPT_5_CODEX = "gpt-5-codex"  # Expected Codex variant
+    GPT_4 = "gpt-4"  # Verified live
+    GPT_4_TURBO = "gpt-4-turbo-preview"  # Defined but no capability profile -> not selectable
+    GPT_4O = "gpt-4o"  # Verified live
+    GPT_5 = "gpt-5"  # UNVERIFIED placeholder (available=False)
+    GPT_5_CODEX = "gpt-5-codex"  # UNVERIFIED placeholder (available=False)
 
 
 @dataclass
@@ -257,6 +267,14 @@ class UnifiedAIInterface:
             logger.warning("⚠️  OpenAI library not available - install: pip install openai>=1.50.0")
         except Exception as e:
             logger.warning(f"⚠️  OpenAI client initialization failed: {e}")
+
+        # Surface the active model catalog so operators can verify which IDs are
+        # actually selectable (available=True) versus gated placeholders.
+        active = [model.value for model, caps in self.CAPABILITIES.items() if caps.available]
+        gated = [model.value for model, caps in self.CAPABILITIES.items() if not caps.available]
+        logger.info("🧭 Active AI models (available=True): %s", ", ".join(active) or "none")
+        if gated:
+            logger.info("🚧 Gated AI models (available=False, not selectable): %s", ", ".join(gated))
 
     async def select_optimal_model(
         self, request: AIRequest, task_type: str = "general"

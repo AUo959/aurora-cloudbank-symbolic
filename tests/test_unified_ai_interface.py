@@ -135,6 +135,47 @@ class TestUnifiedAIInterface:
         interface.enable_model(AIModel.GPT_5)
         assert interface.CAPABILITIES[AIModel.GPT_5].available
 
+    def test_aspirational_models_default_unavailable(self):
+        """Aspirational placeholder IDs must ship gated (available=False)."""
+        interface = UnifiedAIInterface()
+
+        for model in (AIModel.CLAUDE_45_OPUS, AIModel.GPT_5, AIModel.GPT_5_CODEX):
+            assert interface.CAPABILITIES[model].available is False, (
+                f"{model.value} is an unverified placeholder and must default to "
+                "available=False"
+            )
+
+    @pytest.mark.asyncio
+    async def test_unavailable_model_cannot_be_selected(self):
+        """An available=False model is never returned by the public selector,
+        even when requested explicitly as the preference."""
+        interface = UnifiedAIInterface()
+
+        # Gate every model except one known-available target.
+        for model in interface.CAPABILITIES:
+            interface.CAPABILITIES[model].available = False
+        interface.CAPABILITIES[AIModel.GPT_4O].available = True
+
+        # Explicitly prefer a gated model; selector must skip it.
+        request = AIRequest(prompt="test", model_preference=AIModel.GPT_5)
+        selected = await interface.select_optimal_model(request, "general")
+
+        assert selected == AIModel.GPT_4O
+        assert interface.CAPABILITIES[selected].available is True
+        assert selected != AIModel.GPT_5
+
+    @pytest.mark.asyncio
+    async def test_selection_raises_when_no_models_available(self):
+        """With every model gated, selection fails closed rather than returning
+        an unusable (aspirational) model."""
+        interface = UnifiedAIInterface()
+        for model in interface.CAPABILITIES:
+            interface.CAPABILITIES[model].available = False
+
+        request = AIRequest(prompt="test", model_preference=AIModel.GPT_5)
+        with pytest.raises(RuntimeError, match="No AI models available"):
+            await interface.select_optimal_model(request, "general")
+
 
 @pytest.mark.unit
 @pytest.mark.ai

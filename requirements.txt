@@ -4,21 +4,25 @@
 # Install: pip install -r requirements.txt
 # For development: pip install -r requirements.txt -r requirements-dev.txt
 # For optional features: pip install -r requirements-optional.txt
+#
+# Version policy: critical packages carry a next-major upper bound so a fresh
+# install cannot silently resolve to a breaking major. See
+# docs/DEPENDENCY_VERSION_POLICY.md (reviewed quarterly).
 
 # ===================================================================
 # CORE WEB FRAMEWORK
 # ===================================================================
-fastapi>=0.128.8                    # FastAPI web framework (updated for starlette 0.50+ compatibility)
+fastapi>=0.128.8,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
 uvicorn[standard]>=0.24.0           # ASGI server
-starlette>=0.49.3                   # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
-pydantic>=2.5.0                     # Data validation
+starlette>=0.49.3,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
+pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
 pydantic-settings>=2.0.0            # Settings management via environment variables
 python-multipart>=0.0.20             # File upload handling
 
 # ===================================================================
 # HTTP & NETWORKING
 # ===================================================================
-httpx>=0.28.0                       # Async HTTP client (requires httpcore 1.x)
+httpx>=0.28.0,<1.0.0                # Async HTTP client (requires httpcore 1.x)
 httpcore>=1.0.0                     # HTTP core (requires h11 0.16.0+)
 h11>=0.16.0                         # HTTP/1.1 implementation (security updates)
 websockets>=11.0.3                  # WebSocket support
@@ -27,9 +31,9 @@ aiofiles>=24.1.0                    # Async file operations
 # ===================================================================
 # SECURITY & CRYPTOGRAPHY
 # ===================================================================
-cryptography>=44.0.0                # Cryptographic library
+cryptography>=44.0.0,<49.0.0        # Cryptographic library (cap reviewed quarterly; bump for security releases)
 bcrypt>=4.1.2                       # Password hashing
-pyjwt>=2.10.0                        # JWT tokens (migrated from python-jose)
+pyjwt>=2.10.0,<3.0.0                 # JWT tokens (migrated from python-jose)
 passlib[bcrypt]>=1.7.4              # Password handling
 # python-jose removed - see security migration Nov 2025 (ecdsa vulnerability)
 
@@ -75,8 +79,8 @@ slowapi>=0.1.9                      # Rate limiting for FastAPI
 # ===================================================================
 # AI MODEL INTEGRATIONS
 # ===================================================================
-anthropic>=0.40.0                   # Claude 3.5/4.5 integration
-openai>=1.50.0                      # GPT-4/5 integration
+anthropic>=0.40.0,<1.0.0            # Claude 3.5/4.5 integration
+openai>=1.50.0,<3.0.0               # GPT-4/5 integration
 
 # ===================================================================
 # SYSTEM UTILITIES

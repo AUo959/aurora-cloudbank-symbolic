@@ -547,7 +547,11 @@ if INSIGHT_LEDGER_AVAILABLE and INSIGHT_LEDGER_ROUTER:
     try:
         app.include_router(INSIGHT_LEDGER_ROUTER)
         if initialize_ledger:
-            initialize_ledger(storage_path="./data/insight_ledger")
+            initialize_ledger(
+                storage_path=os.environ.get(
+                    "INSIGHT_LEDGER_STORAGE_PATH", "./data/insight_ledger"
+                )
+            )
         logger.info("Insight Ledger API routes integrated successfully")
     except Exception as e:
         logger.error("Failed to integrate Insight Ledger API routes: %s", e)

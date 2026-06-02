@@ -35,6 +35,20 @@ def _auth_header():
     token = generate_csrf_token("test-session")
     return {"Authorization": f"Bearer {token}"}
 
+
+def _tamper_entry_content(storage_path: str, original: str, replacement: str) -> None:
+    entries_file = Path(storage_path) / "entries.jsonl"
+    content = entries_file.read_text()
+    entries_file.write_text(content.replace(original, replacement, 1))
+
+
+def _sample_decision(content: str = "Startup verification decision") -> InsightRecord:
+    return InsightRecord(
+        insight_type=InsightType.DECISION,
+        content=content,
+        source="test-suite",
+    )
+
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -193,8 +207,12 @@ def test_ledger_initialization(temp_ledger_dir):
     ledger = InsightLedger(storage_path=temp_ledger_dir)
 
     stats = ledger.get_stats()
+    health = ledger.get_verification_health()
     assert stats.total_entries == 1  # Genesis entry
     assert stats.integrity_verified
+    assert health["startup_verification"]["completed"]
+    assert health["chain_intact"]
+    assert health["accepting_writes"]
 
     # Check files created
     ledger_path = Path(temp_ledger_dir)
@@ -478,6 +496,86 @@ def test_verify_integrity_after_tampering(temp_ledger_dir):
 
 
 @pytest.mark.unit
+def test_startup_verification_logs_clean_ledger(temp_ledger_dir, caplog):
+    """Startup verification records a clean result and logs the outcome."""
+    with caplog.at_level("INFO", logger="modules.insight_ledger.ledger_core"):
+        ledger = InsightLedger(storage_path=temp_ledger_dir, startup_verification_limit=0)
+
+    health = ledger.get_verification_health()
+    assert health["startup_verification"] == {
+        "enabled": True,
+        "limit": None,
+        "completed": True,
+    }
+    assert health["last_verification"]["source"] == "startup"
+    assert health["last_verification"]["report"]["chain_intact"]
+    assert "InsightLedger integrity verification passed" in caplog.text
+
+
+@pytest.mark.integration
+def test_startup_verification_detects_tamper_open_with_signal(temp_ledger_dir):
+    """Tampering is surfaced at startup while writes remain available in signal mode."""
+    ledger = InsightLedger(storage_path=temp_ledger_dir, verify_on_startup=False)
+    ledger.record_insight(_sample_decision("original startup content"))
+    _tamper_entry_content(temp_ledger_dir, "original startup content", "tampered startup content")
+
+    restarted = InsightLedger(
+        storage_path=temp_ledger_dir,
+        startup_verification_limit=0,
+        verification_fail_mode="open-with-signal",
+    )
+
+    health = restarted.get_verification_health()
+    assert health["compromised"]
+    assert not health["chain_intact"]
+    assert health["accepting_writes"]
+    assert health["verification_fail_mode"] == "open-with-signal"
+    assert health["last_verification"]["source"] == "startup"
+    assert health["last_verification"]["report"]["failed_entries"]
+
+    entry = restarted.record_insight(_sample_decision("allowed after signal"))
+    assert entry.content == "allowed after signal"
+
+
+@pytest.mark.integration
+def test_startup_verification_fail_closed_blocks_writes(temp_ledger_dir):
+    """Closed failure mode refuses new writes after startup detects tampering."""
+    ledger = InsightLedger(storage_path=temp_ledger_dir, verify_on_startup=False)
+    ledger.record_insight(_sample_decision("closed-mode original"))
+    _tamper_entry_content(temp_ledger_dir, "closed-mode original", "closed-mode tampered")
+
+    restarted = InsightLedger(
+        storage_path=temp_ledger_dir,
+        startup_verification_limit=0,
+        verification_fail_mode="closed",
+    )
+
+    health = restarted.get_verification_health()
+    assert health["compromised"]
+    assert not health["accepting_writes"]
+
+    with pytest.raises(RuntimeError, match="writes are disabled"):
+        restarted.record_insight(_sample_decision("blocked after tamper"))
+
+
+@pytest.mark.unit
+def test_query_history_logs_malformed_entry(temp_ledger_dir, caplog):
+    """Malformed JSONL entries emit a warning instead of being silently skipped."""
+    ledger = InsightLedger(storage_path=temp_ledger_dir, verify_on_startup=False)
+    ledger.record_insight(_sample_decision("valid before malformed"))
+
+    entries_file = Path(temp_ledger_dir) / "entries.jsonl"
+    with open(entries_file, "a") as f:
+        f.write("{malformed-json\n")
+
+    with caplog.at_level("WARNING", logger="modules.insight_ledger.ledger_core"):
+        entries = ledger.query_history(AuditQuery(limit=10))
+
+    assert entries
+    assert "Malformed InsightLedger entry skipped during query" in caplog.text
+
+
+@pytest.mark.unit
 def test_get_stats(ledger):
     """Test ledger statistics generation."""
     # Record mixed entries
@@ -731,6 +829,27 @@ def test_api_health_check(api_client):
     assert data["status"] == "healthy"
     assert data["ledger_initialized"]
     assert "total_entries" in data
+    assert data["chain_intact"]
+    assert not data["compromised"]
+    assert data["accepting_writes"]
+    assert data["verification_fail_mode"] == "open-with-signal"
+    assert data["startup_verification"]["enabled"]
+    assert data["last_verification"]["source"] == "startup"
+
+
+@pytest.mark.api
+def test_initialize_ledger_uses_env_verification_config(temp_ledger_dir, monkeypatch):
+    """Env defaults configure startup verification depth and fail mode."""
+    monkeypatch.setenv("INSIGHT_LEDGER_VERIFY_ON_STARTUP", "true")
+    monkeypatch.setenv("INSIGHT_LEDGER_STARTUP_VERIFY_LIMIT", "0")
+    monkeypatch.setenv("INSIGHT_LEDGER_VERIFICATION_FAIL_MODE", "closed")
+
+    configured = initialize_ledger(storage_path=temp_ledger_dir)
+    health = configured.get_verification_health()
+
+    assert health["startup_verification"]["limit"] is None
+    assert health["verification_fail_mode"] == "closed"
+    assert health["last_verification"]["source"] == "startup"
 
 
 # ============================================================================

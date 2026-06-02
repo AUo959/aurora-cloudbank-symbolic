@@ -5,6 +5,7 @@ FastAPI endpoints for the immutable insight ledger.
 Anchor: T1-TIL-API-001
 """
 
+import os
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -24,6 +25,28 @@ SENSITIVE_LEDGER_DEPENDENCIES = (Depends(require_csrf_token),)
 _ledger_instance: Optional[InsightLedger] = None
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_optional_int(name: str, default: Optional[int]) -> Optional[int]:
+    raw = os.environ.get(name)
+    if raw is None or raw == "":
+        return default
+
+    normalized = raw.strip().lower()
+    if normalized in {"0", "none", "full", "all"}:
+        return None
+
+    value = int(normalized)
+    if value < 0:
+        raise ValueError(f"{name} must be >= 0")
+    return value
+
+
 def get_ledger() -> InsightLedger:
     """Get the global ledger instance."""
     if _ledger_instance is None:
@@ -34,19 +57,52 @@ def get_ledger() -> InsightLedger:
     return _ledger_instance
 
 
-def initialize_ledger(storage_path: str, secret_key: Optional[str] = None) -> InsightLedger:
+def initialize_ledger(
+    storage_path: str,
+    secret_key: Optional[str] = None,
+    *,
+    auto_checkpoint: int = 1000,
+    verify_on_startup: Optional[bool] = None,
+    startup_verification_limit: Optional[int] = None,
+    verification_fail_mode: Optional[str] = None,
+) -> InsightLedger:
     """
     Initialize the global ledger instance.
 
     Args:
         storage_path: Directory for ledger storage
         secret_key: Optional HMAC secret key (hex)
+        auto_checkpoint: Create checkpoint entry every N entries (0=disabled)
+        verify_on_startup: Run integrity verification during initialization.
+        startup_verification_limit: Max startup entries to verify (0/None = full chain).
+        verification_fail_mode: "closed" or "open-with-signal"
 
     Returns:
         Initialized ledger instance
     """
     global _ledger_instance
-    _ledger_instance = InsightLedger(storage_path=storage_path, secret_key=secret_key)
+    effective_verify_on_startup = (
+        verify_on_startup
+        if verify_on_startup is not None
+        else _env_bool("INSIGHT_LEDGER_VERIFY_ON_STARTUP", True)
+    )
+    effective_limit = (
+        startup_verification_limit
+        if startup_verification_limit is not None
+        else _env_optional_int("INSIGHT_LEDGER_STARTUP_VERIFY_LIMIT", 100)
+    )
+    effective_fail_mode = verification_fail_mode or os.environ.get(
+        "INSIGHT_LEDGER_VERIFICATION_FAIL_MODE", "open-with-signal"
+    )
+
+    _ledger_instance = InsightLedger(
+        storage_path=storage_path,
+        secret_key=secret_key,
+        auto_checkpoint=auto_checkpoint,
+        verify_on_startup=effective_verify_on_startup,
+        startup_verification_limit=effective_limit,
+        verification_fail_mode=effective_fail_mode,
+    )
     return _ledger_instance
 
 
@@ -145,7 +201,7 @@ async def verify_integrity(
     """
     try:
         ledger = get_ledger()
-        report_dict = ledger.verify_integrity(limit=limit)
+        report_dict = ledger.run_integrity_verification(limit=limit, source="api")
         report = VerificationReport(**report_dict)
 
         if report.chain_intact:
@@ -344,13 +400,22 @@ async def health_check() -> Dict[str, Any]:
             return {"status": "not_initialized", "message": "Ledger not initialized"}
 
         ledger = get_ledger()
-        stats = ledger.get_stats()
+        health = ledger.get_verification_health()
+        status_value = "healthy"
+        if health["compromised"]:
+            status_value = "unhealthy" if not health["accepting_writes"] else "degraded"
 
         return {
-            "status": "healthy",
+            "status": status_value,
             "ledger_initialized": True,
-            "total_entries": stats.total_entries,
-            "integrity_verified": stats.integrity_verified,
+            "total_entries": health["total_entries"],
+            "integrity_verified": health["chain_intact"],
+            "chain_intact": health["chain_intact"],
+            "compromised": health["compromised"],
+            "accepting_writes": health["accepting_writes"],
+            "verification_fail_mode": health["verification_fail_mode"],
+            "startup_verification": health["startup_verification"],
+            "last_verification": health["last_verification"],
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 

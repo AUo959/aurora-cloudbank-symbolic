@@ -8,6 +8,7 @@ Anchor: T1-TIL-001
 """
 
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from enum import Enum
@@ -24,6 +25,9 @@ try:
 except ImportError:
     SecureStorage = None  # type: ignore
     CRYPTOGRAPHY_AVAILABLE = False
+
+
+logger = logging.getLogger(__name__)
 
 
 def validate_safe_path(user_path: str, safe_root: Path, allow_create: bool = False) -> Path:
@@ -99,7 +103,13 @@ class InsightLedger:
     """
 
     def __init__(
-        self, storage_path: str, secret_key: Optional[str] = None, auto_checkpoint: int = 1000
+        self,
+        storage_path: str,
+        secret_key: Optional[str] = None,
+        auto_checkpoint: int = 1000,
+        verify_on_startup: bool = True,
+        startup_verification_limit: Optional[int] = 100,
+        verification_fail_mode: str = "open-with-signal",
     ):
         """
         Initialize insight ledger.
@@ -108,6 +118,10 @@ class InsightLedger:
             storage_path: Directory path for ledger storage (relative to safe root)
             secret_key: HMAC secret key (hex). If None, loads or generates new.
             auto_checkpoint: Create checkpoint entry every N entries (0=disabled)
+            verify_on_startup: Run integrity verification after loading the ledger.
+            startup_verification_limit: Max entries to verify on startup (None/0 = full chain).
+            verification_fail_mode: "closed" blocks writes after verification failure;
+                "open-with-signal" keeps reads/writes available and reports compromised status.
             
         Raises:
             ValueError: If storage_path is invalid or outside safe directory
@@ -128,6 +142,21 @@ class InsightLedger:
         self.index_file = self.storage_path / "index.json"
 
         self.auto_checkpoint = auto_checkpoint
+        self.verify_on_startup = verify_on_startup
+        self.startup_verification_limit = self._normalize_verification_limit(
+            startup_verification_limit
+        )
+        self.verification_fail_mode = self._normalize_verification_fail_mode(
+            verification_fail_mode
+        )
+        self._accepting_writes = True
+        self._startup_verification_completed = False
+        self._last_verification: Dict[str, Any] = {
+            "checked_at": None,
+            "source": None,
+            "limit": None,
+            "report": None,
+        }
         self._lock = Lock()
 
         # Initialize or load signature manager with secure storage
@@ -148,6 +177,39 @@ class InsightLedger:
         # Create genesis entry if ledger is empty
         if self._index["entry_count"] == 0:
             self._create_genesis_entry()
+
+        if self.verify_on_startup:
+            self.run_integrity_verification(
+                limit=self.startup_verification_limit,
+                source="startup",
+            )
+
+    @staticmethod
+    def _normalize_verification_limit(limit: Optional[int]) -> Optional[int]:
+        """Normalize verification limit, treating 0/None as full-chain verification."""
+        if limit is None or limit == 0:
+            return None
+        if limit < 0:
+            raise ValueError("startup_verification_limit must be >= 0")
+        return limit
+
+    @staticmethod
+    def _normalize_verification_fail_mode(mode: str) -> str:
+        """Return a supported verification failure mode."""
+        normalized = mode.strip().lower().replace("_", "-")
+        aliases = {
+            "open": "open-with-signal",
+            "signal": "open-with-signal",
+            "open-with-signal": "open-with-signal",
+            "closed": "closed",
+            "fail-closed": "closed",
+        }
+        try:
+            return aliases[normalized]
+        except KeyError as exc:
+            raise ValueError(
+                "verification_fail_mode must be 'closed' or 'open-with-signal'"
+            ) from exc
     
     def _store_key_securely(self, key_hex: str) -> None:
         """
@@ -362,6 +424,12 @@ class InsightLedger:
         Returns:
             Complete ledger entry with cryptographic signatures
         """
+        if not self._accepting_writes:
+            raise RuntimeError(
+                "InsightLedger writes are disabled because integrity verification failed "
+                "and verification_fail_mode is closed"
+            )
+
         entry = self._append_entry(insight)
 
         # Perform checkpointing outside the main append lock
@@ -450,11 +518,82 @@ class InsightLedger:
 
                     results.append(entry)
 
-                except (json.JSONDecodeError, ValueError):
-                    # Skip malformed entries (indicates potential tampering)
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.warning(
+                        "Malformed InsightLedger entry skipped during query",
+                        extra={"line_number": line_num + 1, "error": str(e)},
+                    )
                     continue
 
         return results
+
+    def run_integrity_verification(
+        self, limit: Optional[int] = None, source: str = "manual"
+    ) -> Dict[str, Any]:
+        """Run integrity verification and persist the latest health state."""
+        normalized_limit = self._normalize_verification_limit(limit)
+        report = self.verify_integrity(limit=normalized_limit)
+        checked_at = datetime.now(timezone.utc).isoformat()
+        compromised = not report["chain_intact"]
+
+        self._last_verification = {
+            "checked_at": checked_at,
+            "source": source,
+            "limit": normalized_limit,
+            "report": report,
+        }
+        if source == "startup":
+            self._startup_verification_completed = True
+        self._accepting_writes = not (compromised and self.verification_fail_mode == "closed")
+
+        if compromised:
+            logger.error(
+                "InsightLedger integrity verification failed",
+                extra={
+                    "source": source,
+                    "limit": normalized_limit,
+                    "fail_mode": self.verification_fail_mode,
+                    "failed_entries": report["failed_entries"],
+                    "error_count": len(report["errors"]),
+                },
+            )
+        else:
+            logger.info(
+                "InsightLedger integrity verification passed",
+                extra={
+                    "source": source,
+                    "limit": normalized_limit,
+                    "verified_entries": report["verified_entries"],
+                    "total_entries": report["total_entries"],
+                },
+            )
+
+        return report
+
+    def get_verification_health(self) -> Dict[str, Any]:
+        """Return the latest persisted integrity verification health state."""
+        report = self._last_verification.get("report")
+        chain_intact = True if report is None else bool(report.get("chain_intact"))
+        ledger_size = 0
+        if self.entries_file.exists():
+            ledger_size += self.entries_file.stat().st_size
+        if self.index_file.exists():
+            ledger_size += self.index_file.stat().st_size
+
+        return {
+            "chain_intact": chain_intact,
+            "compromised": not chain_intact,
+            "accepting_writes": self._accepting_writes,
+            "verification_fail_mode": self.verification_fail_mode,
+            "total_entries": self._index["entry_count"],
+            "ledger_size_bytes": ledger_size,
+            "startup_verification": {
+                "enabled": self.verify_on_startup,
+                "limit": self.startup_verification_limit,
+                "completed": self._startup_verification_completed,
+            },
+            "last_verification": self._last_verification.copy(),
+        }
 
     def verify_integrity(self, limit: Optional[int] = None) -> Dict[str, Any]:
         """
@@ -481,66 +620,82 @@ class InsightLedger:
                 "errors": [],
             }
 
-        previous_hash: Optional[str] = None
-
         with open(self.entries_file, "r") as f:
-            for entry_num, line in enumerate(f):
-                if limit and entry_num >= limit:
-                    break
+            all_lines = f.readlines()
 
-                try:
-                    entry_dict = json.loads(line)
+        selected_lines = all_lines
+        if limit and len(all_lines) > limit:
+            selected_lines = all_lines[-limit:]
 
-                    # Extract fields
-                    entry_id = entry_dict["entry_id"]
-                    timestamp = datetime.fromisoformat(entry_dict["timestamp"])
-                    content = entry_dict["content"]
-                    signature = entry_dict["signature"]
-                    entry_previous_hash = entry_dict.get("previous_hash")
-                    entry_hash = entry_dict["entry_hash"]
+        previous_hash: Optional[str] = None
+        if len(selected_lines) != len(all_lines):
+            try:
+                first_selected = json.loads(selected_lines[0])
+                previous_hash = first_selected.get("previous_hash")
+            except (json.JSONDecodeError, AttributeError):
+                previous_hash = None
 
-                    # Verify signature
-                    signable_data = {
-                        k: v
-                        for k, v in entry_dict.items()
-                        if k not in ("signature", "previous_hash", "entry_hash")
-                    }
-                    if not self.signature_manager.verify_signature(signable_data, signature):
-                        failed_entries.append(entry_id)
-                        errors.append(f"Entry {entry_id}: Invalid signature")
-                        continue
+        entry_offset = len(all_lines) - len(selected_lines)
 
-                    # Verify hash chain
-                    if not self.signature_manager.verify_chain_link(
-                        entry_id, timestamp, content, entry_previous_hash, signature, entry_hash
-                    ):
-                        failed_entries.append(entry_id)
-                        errors.append(f"Entry {entry_id}: Hash mismatch")
-                        continue
+        for offset, line in enumerate(selected_lines):
+            entry_num = entry_offset + offset
+            entry_dict: Dict[str, Any] = {}
 
-                    # Verify chain continuity
-                    if entry_previous_hash != previous_hash:
-                        failed_entries.append(entry_id)
-                        errors.append(
-                            f"Entry {entry_id}: Chain break (expected {previous_hash}, "
-                            f"got {entry_previous_hash})"
-                        )
-                        continue
+            try:
+                entry_dict = json.loads(line)
 
-                    verified_count += 1
-                    previous_hash = entry_hash
+                # Extract fields
+                entry_id = entry_dict["entry_id"]
+                timestamp = datetime.fromisoformat(entry_dict["timestamp"])
+                content = entry_dict["content"]
+                signature = entry_dict["signature"]
+                entry_previous_hash = entry_dict.get("previous_hash")
+                entry_hash = entry_dict["entry_hash"]
 
-                except (json.JSONDecodeError, KeyError, ValueError) as e:
-                    entry_id = entry_dict.get("entry_id", f"line_{entry_num}")
+                # Verify signature
+                signable_data = {
+                    k: v
+                    for k, v in entry_dict.items()
+                    if k not in ("signature", "previous_hash", "entry_hash")
+                }
+                if not self.signature_manager.verify_signature(signable_data, signature):
                     failed_entries.append(entry_id)
-                    errors.append(f"Entry {entry_id}: Parse error ({str(e)})")
+                    errors.append(f"Entry {entry_id}: Invalid signature")
+                    continue
+
+                # Verify hash chain
+                if not self.signature_manager.verify_chain_link(
+                    entry_id, timestamp, content, entry_previous_hash, signature, entry_hash
+                ):
+                    failed_entries.append(entry_id)
+                    errors.append(f"Entry {entry_id}: Hash mismatch")
+                    continue
+
+                # Verify chain continuity
+                if entry_previous_hash != previous_hash:
+                    failed_entries.append(entry_id)
+                    errors.append(
+                        f"Entry {entry_id}: Chain break (expected {previous_hash}, "
+                        f"got {entry_previous_hash})"
+                    )
+                    continue
+
+                verified_count += 1
+                previous_hash = entry_hash
+
+            except (json.JSONDecodeError, KeyError, ValueError) as e:
+                entry_id = (
+                    entry_dict.get("entry_id", f"line_{entry_num + 1}")
+                    if isinstance(entry_dict, dict)
+                    else f"line_{entry_num + 1}"
+                )
+                failed_entries.append(entry_id)
+                errors.append(f"Entry {entry_id}: Parse error ({str(e)})")
 
         end_time = datetime.now(timezone.utc)
         verification_time_ms = (end_time - start_time).total_seconds() * 1000
 
-        total_entries = (
-            limit if limit and limit < self._index["entry_count"] else self._index["entry_count"]
-        )
+        total_entries = len(selected_lines)
 
         return {
             "total_entries": total_entries,
@@ -559,7 +714,7 @@ class InsightLedger:
             Ledger statistics including counts and integrity status
         """
         # Verify integrity (sample last 100 entries for quick check)
-        verification = self.verify_integrity(limit=100)
+        verification = self.run_integrity_verification(limit=100, source="stats")
 
         # Calculate storage size
         ledger_size = 0

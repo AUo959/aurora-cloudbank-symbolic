@@ -15,7 +15,7 @@
 fastapi>=0.128.8,<1.0.0             # FastAPI web framework (updated for starlette 0.50+ compatibility)
 uvicorn[standard]>=0.24.0           # ASGI server
 starlette>=0.49.3,<2.0.0            # ASGI framework (SECURITY: Fixed GHSA-7f5h-v6xp-fcq8 - Range header DoS)
-pydantic>=2.5.0,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
+pydantic>=2.13.4,<3.0.0             # Data validation (cap at next major; V2->V3 would be breaking)
 pydantic-settings>=2.0.0            # Settings management via environment variables
 python-multipart>=0.0.20             # File upload handling
 

@@ -447,18 +447,58 @@ class TestMemoryCache:
         config = MemoryRetrievalConfig()
         cache = MemoryCache(config)
 
-        key = cache.make_query_key("context1", "test query", 10)
+        key = cache.make_query_key(user_id="user1", context_id="context1", query="test query", top_k=10)
 
         assert key.startswith("query:context1:")
+        assert "user1" in key
         assert ":10" in key
 
         # Same inputs should produce same key
-        key2 = cache.make_query_key("context1", "test query", 10)
+        key2 = cache.make_query_key(user_id="user1", context_id="context1", query="test query", top_k=10)
         assert key == key2
 
-        # Different inputs should produce different keys
-        key3 = cache.make_query_key("context2", "test query", 10)
+        # Different context_id should produce different key
+        key3 = cache.make_query_key(user_id="user1", context_id="context2", query="test query", top_k=10)
         assert key != key3
+
+    def test_cache_key_user_isolation(self):
+        """Different user_ids with identical other params produce distinct keys (cross-tenant safety)."""
+        config = MemoryRetrievalConfig()
+        cache = MemoryCache(config)
+
+        key_a = cache.make_query_key(user_id="alice", context_id="ctx", query="same query", top_k=5)
+        key_b = cache.make_query_key(user_id="bob", context_id="ctx", query="same query", top_k=5)
+
+        assert key_a != key_b, "Different users must not share cache keys"
+
+    def test_cache_key_includes_user_id(self):
+        """user_id is embedded in the key so entries from different users never collide."""
+        config = MemoryRetrievalConfig()
+        cache = MemoryCache(config)
+
+        key = cache.make_query_key(user_id="tenant-99", context_id="ctx", query="q", top_k=1)
+        assert "tenant-99" in key
+
+    def test_cache_key_hash_length(self):
+        """Query hash uses 16 hex characters (64-bit entropy) to reduce collision probability."""
+        config = MemoryRetrievalConfig()
+        cache = MemoryCache(config)
+
+        key = cache.make_query_key(user_id="u", context_id="c", query="test query here", top_k=10)
+        # Format: query:{context_id}:{user_id}:{16-hex-hash}:{top_k}
+        parts = key.split(":")
+        # parts[0]=query, parts[1]=context_id, parts[2]=user_id, parts[3]=hash, parts[4]=top_k
+        query_hash = parts[3]
+        assert len(query_hash) == 16, f"Expected 16-char hash, got {len(query_hash)}: {query_hash}"
+
+    def test_cache_single_user_sentinel_produces_stable_keys(self):
+        """Passing user_id='public' is the documented sentinel for single-tenant usage."""
+        config = MemoryRetrievalConfig()
+        cache = MemoryCache(config)
+
+        k1 = cache.make_query_key(user_id="public", context_id="ctx", query="q", top_k=3)
+        k2 = cache.make_query_key(user_id="public", context_id="ctx", query="q", top_k=3)
+        assert k1 == k2
 
     def test_cache_enforces_max_size(self):
         """Cache never exceeds the configured max_size."""

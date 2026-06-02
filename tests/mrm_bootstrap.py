@@ -463,20 +463,21 @@ class MemoryCache:
             "size": len(self._cache),
         }
     
-    def make_query_key(self, context_id: str, query: str, top_k: int) -> str:
+    def make_query_key(self, *, user_id: str, context_id: str, query: str, top_k: int) -> str:
         """
-        Generate cache key for query.
-        
+        Generate a scoped cache key for a query result.
+
         Args:
-            context_id: Context identifier
-            query: Query string
-            top_k: Number of results
-        
+            user_id: User/tenant identifier for cache isolation.
+            context_id: Context identifier.
+            query: Query string.
+            top_k: Number of results.
+
         Returns:
             Cache key string
         """
-        query_hash = hashlib.sha256(query.encode()).hexdigest()[:8]
-        return f"query:{context_id}:{query_hash}:{top_k}"
+        query_hash = hashlib.sha256(query.encode()).hexdigest()[:16]
+        return f"query:{context_id}:{user_id}:{query_hash}:{top_k}"
 '''
 
 
@@ -597,21 +598,24 @@ class MemoryRetrievalCore:
         logger.info(f"Added memory {memory_id} to context {context_id}", extra={"context_tag": context_tag})
         return memory_id
     
-    def retrieve_memories(self, context_id: str, query: str, top_k: int = 10) -> List[Dict]:
+    def retrieve_memories(
+        self, context_id: str, query: str, top_k: int = 10, *, user_id: str = "default"
+    ) -> List[Dict]:
         """
         Main retrieval method combining cache, store, and scoring.
-        
+
         Args:
             context_id: Context to search within
             query: Search query
             top_k: Number of results to return
-        
+            user_id: Tenant/user identifier for cache isolation.
+
         Returns:
             List of scored and ranked memory results
         """
         # Add DLP tracking for query operation
         context_tag = f"MRM:query:{context_id}"
-        
+
         if self._dlp_tracker:
             tag_id = self._dlp_tracker.create_tag("query_memory", {
                 "context_id": context_id,
@@ -621,9 +625,11 @@ class MemoryRetrievalCore:
             tag = self._dlp_tracker.tags[tag_id]
             tag.add_anchor_protocol("Picard_Delta_3")
             tag.metadata["context_tag"] = context_tag
-        
+
         # Check cache first
-        cache_key = self._cache.make_query_key(context_id, query, top_k)
+        cache_key = self._cache.make_query_key(
+            user_id=user_id, context_id=context_id, query=query, top_k=top_k
+        )
         cached_results = self._cache.get(cache_key)
         
         if cached_results is not None:

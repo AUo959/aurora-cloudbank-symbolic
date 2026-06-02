@@ -68,13 +68,26 @@ class MemoryRetrievalCore:
         logger.info("Added memory %s to context %s", memory_id, context_id, extra={"context_tag": context_tag})
         return memory_id
 
-    def retrieve_memories(self, context_id: str, query: str, top_k: int = 10) -> List[Dict]:
-        """Retrieve scored memories for a context/query pair."""
+    def retrieve_memories(
+        self, context_id: str, query: str, top_k: int = 10, *, user_id: str = "default"
+    ) -> List[Dict]:
+        """Retrieve scored memories for a context/query pair.
+
+        Args:
+            context_id: Context (session / agent) identifier.
+            query: Query string.
+            top_k: Maximum number of results to return.
+            user_id: Tenant / user identifier used for cache isolation.
+                Pass the authenticated user's ID; use ``"default"`` only in
+                single-tenant deployments where cross-user leakage is impossible.
+        """
         context_tag = f"mrm:query:{context_id}"
         if self._dlp_tracker:
             self._register_dlp_event("query_memory", context_id, context_tag, query[:100])
 
-        cache_key = self._cache.make_query_key(context_id, query, top_k)
+        cache_key = self._cache.make_query_key(
+            user_id=user_id, context_id=context_id, query=query, top_k=top_k
+        )
         cached_results = self._cache.get(cache_key)
         if cached_results is not None:
             return cached_results

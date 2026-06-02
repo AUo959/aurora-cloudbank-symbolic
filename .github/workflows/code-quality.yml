@@ -27,20 +27,22 @@ jobs:
       - name: Syntax errors (fail closed)
         run: |
           paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus; do
             [ -d "$d" ] && paths="$paths $d"
           done
           [ -z "$paths" ] && echo "No target directories" && exit 0
+          # modules/opal2 excluded: 3 pre-existing syntax errors pending separate fix
           flake8 $paths --count --select=E9,F63,F7,F82 --show-source --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2,modules/nexus
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2
 
       - name: Style and complexity (informational)
         continue-on-error: true
         run: |
           paths=""
-          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager; do
+          for d in api src tools tests modules/hr_system modules/resilience_sentinel modules/gumas modules/symbolic_core modules/aumemmanager modules/nexus; do
             [ -d "$d" ] && paths="$paths $d"
           done
           [ -z "$paths" ] && echo "No target directories" && exit 0
+          # modules/opal2 excluded: 3 pre-existing syntax errors pending separate fix
           flake8 $paths --count --max-complexity=10 --max-line-length=120 --statistics \
-            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2,modules/nexus
+            --exclude=.git,__pycache__,.pytest_cache,venv,env,.venv,.tox,dist,build,modules/opal2

@@ -19,6 +19,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from src.observability import get_telemetry, get_r2_telemetry
 from src.middleware.exception_handler import validation_handler
+from src.middleware.request_id import RequestIDMiddleware
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -398,6 +399,10 @@ try:
     logger.info("✅ SlowAPI rate limiting middleware enabled")
 except Exception as e:  # pragma: no cover - graceful degradation if slowapi misconfigured
     logger.warning("⚠️ Failed to enable rate limiting middleware: %s", e)
+
+# Request-ID middleware: must be registered last so it wraps everything and
+# its ContextVar is set before any inner middleware runs.
+app.add_middleware(RequestIDMiddleware)
 
 
 @app.exception_handler(RateLimitExceeded)

@@ -44,7 +44,11 @@ run_gitwiz_scan() {
 
 echo "🔍 Aurora CloudBank canonical pre-commit"
 python3 scripts/auto_selective_ingest_gate.py
-bash ./smart-devops quick
+if [[ -f "./smart-devops" ]]; then
+  bash ./smart-devops quick
+else
+  echo "ℹ️ smart-devops not found; skipping."
+fi
 run_gitwiz_scan
 python3 scripts/git_pre_commit_hook.py
 

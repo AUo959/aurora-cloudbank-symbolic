@@ -287,3 +287,6 @@ reports/analysis/gitwiz/
 runtime/mesh/*.db
 runtime/mesh/*.log
 runtime/mesh/transcripts/*.jsonl
+
+# Claude Code internal directory
+.claude/

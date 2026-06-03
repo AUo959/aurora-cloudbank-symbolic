@@ -94,9 +94,19 @@ class DistributedConsciousnessMesh:
         
         # Thread executor for parallel operations
         self.executor = ThreadPoolExecutor(max_workers=10)
-        
+
         # Logging
         self.logger = self._setup_logger()
+
+    def close(self) -> None:
+        """Shut down the thread-pool executor cleanly."""
+        self.executor.shutdown(wait=True, cancel_futures=False)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
         
     def _setup_logger(self) -> logging.Logger:
         """Setup distributed logging"""

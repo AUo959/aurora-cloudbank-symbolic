@@ -85,8 +85,18 @@ class AuroraDiffOptimizer:
             max_workers=self.config.parallel_workers
         )
         self._lock = threading.Lock()
-        
-    async def optimize_diff(self, source_data: Any, target_data: Any = None, 
+
+    def close(self) -> None:
+        """Shut down the thread-pool executor cleanly."""
+        self.executor.shutdown(wait=True, cancel_futures=False)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
+    async def optimize_diff(self, source_data: Any, target_data: Any = None,
                            optimization_params: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Main entry point for Aurora diff optimization
@@ -303,9 +313,9 @@ class AuroraDiffOptimizer:
             }
         }
         
-        logger.info("Integrity validation: {"PASS' if integrity_valid else 'FAIL'}")
-        logger.info("Performance validation: {"PASS' if performance_valid else 'FAIL'}")
-        logger.info("Signature validation: {"PASS' if signature_valid else 'FAIL'}")
+        logger.info("Integrity validation: %s", "PASS" if integrity_valid else "FAIL")
+        logger.info("Performance validation: %s", "PASS" if performance_valid else "FAIL")
+        logger.info("Signature validation: %s", "PASS" if signature_valid else "FAIL")
         logger.info("Accuracy score: {self.metrics.accuracy_score:.2%}")
         
         # Store optimization history for adaptive learning

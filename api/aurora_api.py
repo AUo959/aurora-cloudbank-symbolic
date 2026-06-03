@@ -9,6 +9,14 @@ Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 import logging
 import os
 from contextlib import asynccontextmanager
+
+# Install log-injection filter as early as possible so all subsequent loggers
+# inherit it.  Import is guarded so a missing data_guardian doesn't crash startup.
+try:
+    from modules.data_guardian.log_sanitizer import SanitizingLogFilter as _SanitizingLogFilter
+    logging.getLogger().addFilter(_SanitizingLogFilter())
+except Exception:  # pragma: no cover - graceful degradation
+    pass
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Literal
 

@@ -49,6 +49,36 @@ system integrity, and ensure secure operations across all components.
 - **Incident Response**: Automated alert system
 - **Audit Logging**: Complete security event logging
 
+## 🍪 Authentication & Cookie Policy
+
+### Authentication Architecture
+
+Aurora CloudBank uses **stateless, token-based authentication** exclusively. The API does not
+set HTTP cookies for any purpose.
+
+- **Primary auth**: `Authorization: Bearer <JWT>` header
+- **Session management**: Cryptographically-signed JWT tokens with configurable expiry
+- **CSRF protection**: Token-based CSRF verification (`X-CSRF-Token` header), not cookie-based
+
+### Cookie Usage
+
+**The Aurora CloudBank API backend does not issue `Set-Cookie` headers.**
+
+No cookies are created, read, or required by any API endpoint. This means HTTP cookie flags
+(`Secure`, `HttpOnly`, `SameSite`) are not applicable to the backend itself.
+
+**Rationale:**
+- Stateless token-based auth is better suited for REST APIs and microservices
+- Eliminates cookie-related attack surfaces (session fixation, cross-site cookie leakage)
+- Enables horizontal scaling without shared session state
+- Simplifies CORS configuration (no `credentials: true` needed)
+
+### Guidance for Web Clients
+
+If a web frontend stores JWT tokens in cookies (a valid hardening option), it should enforce
+`Secure; HttpOnly; SameSite=Strict` on those cookies. The backend enforces no opinion on
+client-side token storage.
+
 ## 🚨 Vulnerability Reporting
 
 ### Responsible Disclosure

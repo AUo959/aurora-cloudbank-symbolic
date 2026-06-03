@@ -247,9 +247,14 @@ jobs:
       - name: Lint Kubernetes manifests
         continue-on-error: true
         run: |
-          # Install kube-linter
-          curl -sSfL https://raw.githubusercontent.com/stackrox/kube-linter/main/scripts/install.sh | sh -s -- -b /usr/local/bin
-          
+          # Install kube-linter from a pinned release (avoids curl|sh from mutable main)
+          KUBE_LINTER_VERSION="v0.6.7"
+          curl -sSfL \
+            "https://github.com/stackrox/kube-linter/releases/download/${KUBE_LINTER_VERSION}/kube-linter_linux_amd64.tar.gz" \
+            -o /tmp/kube-linter.tar.gz
+          tar -xzf /tmp/kube-linter.tar.gz -C /tmp kube-linter
+          sudo mv /tmp/kube-linter /usr/local/bin/kube-linter
+
           # Run kube-linter
           kube-linter lint k8s/ --config .kube-linter.yaml 2>/dev/null || \
           kube-linter lint k8s/ || echo "⚠️ Some linting issues found (non-blocking)"

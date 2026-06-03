@@ -48,6 +48,7 @@ async def test_orchestrator_initialization(orchestrator):
     assert orchestrator.config.enabled
 
 
+@pytest.mark.slow
 @pytest.mark.asyncio
 async def test_orchestrator_start_stop(orchestrator):
     """Test orchestrator can start and stop"""
@@ -76,6 +77,7 @@ async def test_system_observation(orchestrator):
     assert 0.0 <= state['overall_health'] <= 1.0
 
 
+@pytest.mark.slow
 @pytest.mark.asyncio
 async def test_decision_making(orchestrator):
     """Test Aurora can make decisions"""

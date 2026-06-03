@@ -560,7 +560,22 @@ if INSIGHT_LEDGER_AVAILABLE and INSIGHT_LEDGER_ROUTER:
     try:
         app.include_router(INSIGHT_LEDGER_ROUTER)
         if initialize_ledger:
-            initialize_ledger(storage_path="./data/insight_ledger")
+            _ledger_instance = initialize_ledger(storage_path="./data/insight_ledger")
+            try:
+                _integrity = _ledger_instance.verify_integrity()
+                if _integrity.get("chain_intact"):
+                    logger.info(
+                        "Ledger integrity verified on startup: %d entries",
+                        _integrity.get("verified_entries", 0),
+                    )
+                else:
+                    logger.warning(
+                        "Ledger integrity check FAILED on startup: %d failed entries; errors: %s",
+                        len(_integrity.get("failed_entries", [])),
+                        _integrity.get("errors", []),
+                    )
+            except Exception as _integrity_err:
+                logger.warning("Ledger integrity check raised an exception on startup: %s", _integrity_err)
         logger.info("Insight Ledger API routes integrated successfully")
     except Exception as e:
         logger.error("Failed to integrate Insight Ledger API routes: %s", e)

@@ -100,3 +100,38 @@ markers = [
 
 # Fix pytest-asyncio deprecation warning
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["modules", "src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/conftest.py",
+    "*/setup.py",
+    "*/scripts/*",
+    "*/cli/*",
+    "*/sdk/*",
+]
+branch = true
+
+[tool.coverage.report]
+# Enforce a minimum coverage floor; raise incrementally as coverage improves.
+fail_under = 60
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.xml]
+output = "coverage.xml"

@@ -169,17 +169,23 @@ class MemoryCache:
             "utilization": size / self._max_size if self._max_size else 0.0,
         }
 
-    def make_query_key(self, context_id: str, query: str, top_k: int) -> str:
+    def make_query_key(self, *, user_id: str, context_id: str, query: str, top_k: int) -> str:
         """
-        Generate cache key for query.
+        Generate a scoped cache key for a query result.
 
         Args:
-            context_id: Context identifier
-            query: Query string
-            top_k: Number of results
+            user_id: Caller-supplied user or tenant identifier. Pass ``"public"``
+                     only when multi-tenant isolation is genuinely irrelevant.
+                     Required; callers must not omit it.
+            context_id: Context (session / agent) identifier.
+            query: Raw query string.
+            top_k: Number of results requested.
 
         Returns:
-            Cache key string
+            Cache key string unique per (user, context, query, top_k) tuple.
         """
-        query_hash = hashlib.sha256(query.encode()).hexdigest()[:8]
-        return f"query:{context_id}:{query_hash}:{top_k}"
+        # 16 hex chars = 64 bits of entropy; reduces collision probability from
+        # ~50% at 77k entries (8-char/32-bit) to negligible at realistic scales.
+        query_hash = hashlib.sha256(query.encode()).hexdigest()[:16]
+        # context_id comes first so invalidate(f"query:{context_id}:") still works.
+        return f"query:{context_id}:{user_id}:{query_hash}:{top_k}"

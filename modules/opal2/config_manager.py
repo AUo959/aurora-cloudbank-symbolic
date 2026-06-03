@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import toml
 import yaml
@@ -19,6 +19,11 @@ from watchdog.observers import Observer
 
 # Configure logging
 from dataclasses import dataclass
+
+try:
+    from src.coordination.task_utils import fire_and_forget as _fire_and_forget
+except ImportError:  # pragma: no cover — only missing in isolated unit test envs
+    _fire_and_forget = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -77,6 +82,7 @@ class ConfigurationManager:
         self.change_callbacks: Dict[str, List[Callable]] = {}
         self.file_observer: Optional[Observer] = None
         self.hot_reload_enabled = False
+        self._pending_tasks: Set[asyncio.Task] = set()
 
         # Default configuration schemas
         self._initialize_default_schemas()
@@ -427,7 +433,14 @@ class ConfigurationManager:
             for callback in self.change_callbacks[config_name]:
                 try:
                     if asyncio.iscoroutinefunction(callback):
-                        asyncio.create_task(callback(change_event))
+                        if _fire_and_forget is not None:
+                            _fire_and_forget(
+                                callback(change_event),
+                                name=f"opal2-config-callback-{config_name}",
+                                pending_tasks=self._pending_tasks,
+                            )
+                        else:
+                            asyncio.create_task(callback(change_event))
                     else:
                         callback(change_event)
                 except Exception as e:

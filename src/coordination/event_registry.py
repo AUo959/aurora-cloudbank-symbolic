@@ -21,7 +21,9 @@ import hashlib
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set
+
+from src.coordination.task_utils import fire_and_forget as _fire_and_forget
 
 from src.coordination.event_models import (
     ConflictReport,
@@ -75,6 +77,9 @@ class EventCoordinationRegistry:
 
         # Workflow orchestration
         self._workflows: Dict[str, WorkflowDefinition] = {}  # workflow_id -> WorkflowDefinition
+
+        # Holds strong references to background tasks to prevent GC cancellation.
+        self._pending_tasks: Set[asyncio.Task] = set()
 
         # Metrics and monitoring
         self._metrics = {
@@ -436,8 +441,13 @@ class EventCoordinationRegistry:
         if lock_event_to_publish:
             await self.publish_event(lock_event_to_publish)
 
-        # Schedule lock release
-        asyncio.create_task(self._auto_release_lock(resource_id, agent_id, ttl_seconds))
+        # Schedule lock release — use fire_and_forget to keep a strong reference and
+        # log failures; a silently-dropped auto-release would leave the lock held forever.
+        _fire_and_forget(
+            self._auto_release_lock(resource_id, agent_id, ttl_seconds),
+            name=f"lock-release-{resource_id}",
+            pending_tasks=self._pending_tasks,
+        )
 
         return {"success": True, "resource_id": resource_id, "expires_in": ttl_seconds}
 

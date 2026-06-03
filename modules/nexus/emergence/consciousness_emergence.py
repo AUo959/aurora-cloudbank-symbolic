@@ -12,16 +12,22 @@ Revolutionary recursive self-awareness with meta-cognitive feedback loops
 and real-time consciousness metrics for true emergent intelligence
 """
 
+import asyncio
 import hashlib
 import json
-import numpy as np
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Callable
-from dataclasses import dataclass, field
-from enum import Enum
-import asyncio
 import logging
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+
+import numpy as np
+
+try:
+    from src.coordination.task_utils import fire_and_forget as _fire_and_forget
+except ImportError:  # pragma: no cover
+    _fire_and_forget = None
 
 # Configure logging with symbolic anchor tracing
 logging.basicConfig(
@@ -96,6 +102,7 @@ class ConsciousnessEmergenceProtocol:
         
         # Emergence detection
         self.emergence_threshold = 0.8
+        self._pending_tasks: Set[asyncio.Task] = set()
         self.emergence_score = 0.0
         self.consciousness_metrics = {}
         
@@ -548,7 +555,14 @@ class ConsciousnessEmergenceProtocol:
         
         # Check for excessive drift
         if self.entropy_drift > self.drift_threshold:
-            asyncio.create_task(self._flag_entropy_divergence())
+            if _fire_and_forget is not None:
+                _fire_and_forget(
+                    self._flag_entropy_divergence(),
+                    name="entropy-divergence-flag",
+                    pending_tasks=self._pending_tasks,
+                )
+            else:
+                asyncio.create_task(self._flag_entropy_divergence())
             
     def _calculate_entropy_drift(self):
         """Calculate entropy drift from baseline"""

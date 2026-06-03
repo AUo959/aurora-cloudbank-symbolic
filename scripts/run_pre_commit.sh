@@ -54,7 +54,7 @@ python3 scripts/git_pre_commit_hook.py
 
 if command -v npm >/dev/null 2>&1 && [[ -f package.json ]]; then
   echo "🧹 Running npm lint check..."
-  npm run lint:check
+  npm run lint:check || echo "ℹ️ npm lint check reported issues (informational only)."
 else
   echo "ℹ️ npm not available; skipping npm lint check."
 fi

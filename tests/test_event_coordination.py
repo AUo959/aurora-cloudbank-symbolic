@@ -362,6 +362,7 @@ class TestEventCoordinationRegistry:
         result4 = await registry.acquire_lock("agent-002", "resource-123")
         assert result4["success"] is True
 
+    @pytest.mark.slow
     @pytest.mark.asyncio
     async def test_lock_auto_release(self, registry):
         """Test automatic lock release after TTL"""

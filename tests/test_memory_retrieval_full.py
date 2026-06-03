@@ -379,6 +379,7 @@ class TestMemoryCache:
         assert value is None
         assert cache._stats["misses"] == 1
 
+    @pytest.mark.slow
     def test_cache_ttl_expiration(self):
         """Test that cache entries expire after TTL."""
         config = MemoryRetrievalConfig(cache_ttl_seconds=1)
@@ -555,6 +556,7 @@ class TestMemoryCache:
         assert len(cache._cache) == 1
         assert cache.get("key") == "v3"
 
+    @pytest.mark.slow
     def test_cache_clear_expired_reclaims_cold_entries(self):
         """clear_expired removes expired entries that were never read back."""
         config = MemoryRetrievalConfig(cache_ttl_seconds=1, cache_max_size=100)

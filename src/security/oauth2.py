@@ -170,7 +170,7 @@ class OAuth2Handler:
         except PyJWTError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f"Could not validate credentials: {str(e)}",
+                detail="Internal server error",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 

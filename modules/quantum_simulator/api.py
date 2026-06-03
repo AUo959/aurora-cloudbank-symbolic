@@ -106,7 +106,7 @@ async def run_simulation(request: ScenarioRequest) -> SimulationResult:
         return result
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Simulation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/results/{simulation_id}", response_model=SimulationResult)

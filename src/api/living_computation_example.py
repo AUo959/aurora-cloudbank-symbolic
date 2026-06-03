@@ -132,7 +132,7 @@ async def analyze_with_living_computation(request: AnalysisRequest):
             event_id=event.event_id,
             result={"status": "failed", "error": str(e)}
         )
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
     
     # 4. STORE EXPERIENCE (Event completes with full context)
     # This becomes institutional memory - Aurora remembers this forever

@@ -221,7 +221,7 @@ async def export_context(
         logger.error("Export failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Export failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -315,7 +315,7 @@ async def import_context(
         logger.error("Import failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Import failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -408,7 +408,7 @@ async def repo_linking_invite(
         logger.error("Invitation failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Invitation failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -596,5 +596,5 @@ async def compute_capsule_diff(
         logger.error("Failed to compute capsule diff: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Diff computation failed: {str(e)}"
+            detail="Internal server error"
         )

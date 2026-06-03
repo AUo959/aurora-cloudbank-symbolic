@@ -119,7 +119,7 @@ async def health_check() -> HealthResponse:
         )
     except Exception as e:
         logger.error("Health check failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/evaluate", response_model=EvaluateActionResponse)
@@ -170,7 +170,7 @@ async def evaluate_action(request: EvaluateActionRequest) -> EvaluateActionRespo
         
     except Exception as e:
         logger.error("Action evaluation failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/violations", response_model=List[Dict[str, Any]])
@@ -207,10 +207,10 @@ async def get_violations(request: ViolationQueryRequest) -> List[Dict[str, Any]]
         return violations_data
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
+        raise HTTPException(status_code=400, detail="Internal server error")
     except Exception as e:
         logger.error("Violations query failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/rules", response_model=List[RuleResponse])
@@ -245,7 +245,7 @@ async def get_rules() -> List[RuleResponse]:
         
     except Exception as e:
         logger.error("Rules list failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/rules/{rule_id}", response_model=RuleResponse)
@@ -276,7 +276,7 @@ async def get_rule(rule_id: str) -> RuleResponse:
         raise
     except Exception as e:
         logger.error("Rule detail failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post(
@@ -304,7 +304,7 @@ async def add_rule(request: AddRuleRequest) -> RuleResponse:
             category = RuleCategory(request.category)
             severity = ViolationSeverity(request.severity)
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
+            raise HTTPException(status_code=400, detail="Internal server error")
         
         # Create rule
         rule = EthicsRule(
@@ -342,7 +342,7 @@ async def add_rule(request: AddRuleRequest) -> RuleResponse:
         raise
     except Exception as e:
         logger.error("Add rule failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.delete(
@@ -374,7 +374,7 @@ async def delete_rule(rule_id: str):
         raise
     except Exception as e:
         logger.error("Delete rule failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/rules/{rule_id}/register-evaluator")
@@ -423,10 +423,10 @@ async def clear_violations(
         return None
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid timestamp: {e}")
+        raise HTTPException(status_code=400, detail="Internal server error")
     except Exception as e:
         logger.error("Clear violations failed: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/categories", response_model=List[str])

@@ -282,12 +282,12 @@ async def process_agent_task(
     except ValueError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid task for agent {agent_surname}: {str(e)}"
+            detail="Internal server error"
         )
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error processing task: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -360,7 +360,7 @@ async def coordinate_collaboration(request: CollaborationRequest) -> Dict[str, A
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Collaboration error: {str(e)}"
+            detail="Internal server error"
         )
 
 

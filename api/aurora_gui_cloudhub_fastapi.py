@@ -839,7 +839,7 @@ def generate_vsa_vector(req: VSAOperationRequest, token: HTTPAuthorizationCreden
             "quantum_generated": True,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"VSA generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post("/api/vsa/bind", summary="Bind two VSA vectors", dependencies=[Depends(security)])  # verify_csrf inside
@@ -882,7 +882,7 @@ def bind_vsa_vectors(req: VSABindRequest, token: HTTPAuthorizationCredentials = 
             "similarity_b": float(np.dot(bound_vector, vec_b) / min_dim),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"VSA binding failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post(
@@ -922,7 +922,7 @@ def calculate_vsa_similarity(req: VSASimilarityRequest, token: HTTPAuthorization
             "dimension": min_dim,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Similarity calculation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/vsa/list", summary="List stored VSA vectors")
@@ -978,7 +978,7 @@ def advanced_geometric_operations(
             return {"operation": req.operation, "input_vectors": req.vectors, "results": [], "mock_mode": ga._mock}
         return {"operation": req.operation, "input_vectors": req.vectors, "results": computed, "mock_mode": ga._mock}
     except Exception as e:  # pragma: no cover
-        raise HTTPException(status_code=500, detail=f"Geometric algebra operation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post(
@@ -1013,7 +1013,7 @@ def generate_quantum_circuit(req: QuantumCircuitRequest, token: HTTPAuthorizatio
             "circuit_qasm": _serialize_quantum_circuit(qc),
         }
     except Exception as e:  # pragma: no cover
-        raise HTTPException(status_code=500, detail=f"Quantum circuit generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # === Enhanced WebSocket for Real-time Collaboration ===
 

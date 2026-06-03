@@ -234,7 +234,7 @@ async def get_health(request: Request):
         logger.error("Health check failed: %s", str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Health check failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -258,7 +258,7 @@ async def get_constellation_status(request: Request):
         logger.error("Failed to get constellation status: %s", str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get constellation status: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -313,7 +313,7 @@ async def activate_agent(
         logger.error("Agent activation failed for %s: %s", req.agent_id[:20], str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Agent activation failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -345,7 +345,7 @@ async def get_agent_status(agent_id: str, request: Request):
         logger.error("Failed to get agent status for %s: %s", agent_id[:20], str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get agent status: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -400,7 +400,7 @@ async def relay_message(
         logger.error("Message relay failed: %s", str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Message relay failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -446,7 +446,7 @@ async def disconnect_agent(
         logger.error("Agent disconnection failed for %s: %s", agent_id[:20], str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Agent disconnection failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -479,5 +479,5 @@ async def get_activation_phrases(
         logger.error("Failed to get activation phrases: %s", str(e)[:100])
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get activation phrases: {str(e)}"
+            detail="Internal server error"
         )

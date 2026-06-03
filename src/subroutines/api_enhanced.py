@@ -84,7 +84,7 @@ async def check_ethics_compliance(request: EthicsCheckRequest) -> Dict[str, Any]
         logger.error("Ethics check failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ethics check failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -106,7 +106,7 @@ async def get_ethics_stats() -> Dict[str, Any]:
         logger.error("Failed to get ethics stats: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Stats failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -154,7 +154,7 @@ async def analyze_resources(request: ResourceMetricsRequest) -> Dict[str, Any]:
         logger.error("Resource analysis failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Analysis failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -207,7 +207,7 @@ async def detect_anomaly(request: AnomalyCheckRequest) -> Dict[str, Any]:
         logger.error("Anomaly detection failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Detection failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -234,7 +234,7 @@ async def validate_integrations() -> Dict[str, Any]:
         logger.error("Integration validation failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Validation failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -263,7 +263,7 @@ async def optimize_circuit(request: CircuitOptimizationRequest) -> Dict[str, Any
         logger.error("Circuit optimization failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Optimization failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -290,7 +290,7 @@ async def scan_for_threats(request: ThreatScanRequest) -> Dict[str, Any]:
         logger.error("Threat scan failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Scan failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -317,7 +317,7 @@ async def sync_knowledge_bases() -> Dict[str, Any]:
         logger.error("Knowledge sync failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Sync failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -353,7 +353,7 @@ async def check_dependencies() -> Dict[str, Any]:
         logger.error("Dependency health check failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Health check failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -380,5 +380,5 @@ async def get_performance_profile() -> Dict[str, Any]:
         logger.error("Performance profiling failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Profiling failed: {str(e)}"
+            detail="Internal server error"
         )

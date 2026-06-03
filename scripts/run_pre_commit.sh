@@ -59,4 +59,10 @@ else
   echo "ℹ️ npm not available; skipping npm lint check."
 fi
 
+# Guard: reject detail=str(e) exception leaks
+if grep -rn --include="*.py" 'detail\s*=\s*\(str(e)\|f".*{[^}]*e[^}]*}' api/ modules/ src/ 2>/dev/null | grep -v "fastapi_security.py" | grep -q .; then
+  echo "❌ Found detail=str(e) or detail=f\"...{e}\" patterns — use 'Internal server error' instead."
+  exit 1
+fi
+
 echo "✅ Aurora pre-commit validation passed."

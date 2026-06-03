@@ -193,7 +193,7 @@ async def get_statistics() -> StatisticsResponse:
         )
     except Exception as e:
         logger.error("Failed to get statistics: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/status")
@@ -215,4 +215,4 @@ async def get_status() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Failed to get status: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

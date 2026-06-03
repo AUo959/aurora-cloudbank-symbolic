@@ -108,7 +108,7 @@ async def generate_quantum_vector(
 
         return JSONResponse(content=result)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Quantum processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post("/api/consciousness/evolve")  # verify_csrf inside
@@ -134,7 +134,7 @@ async def evolve_consciousness(request: ConsciousnessRequest, token: HTTPAuthori
 
         return JSONResponse(content=result)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Consciousness processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post("/api/learning/pattern")  # verify_csrf inside
@@ -165,7 +165,7 @@ async def detect_learning_pattern(
 
         return JSONResponse(content=result)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Learning processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/integration/test")
@@ -189,7 +189,7 @@ async def run_integration_test():
             "test_duration": "2.3s",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Integration test error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/systems/{system_name}")

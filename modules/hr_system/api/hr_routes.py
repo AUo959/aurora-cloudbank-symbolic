@@ -103,7 +103,7 @@ async def analyze_staffing_needs(request: StaffingNeedRequest):
         }
     except Exception as e:
         logger.error("Staffing analysis failed: %s", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/generate_character", response_model=CharacterProfile)
@@ -143,7 +143,7 @@ async def generate_character(request: CharacterGenerationRequest):
         }
     except Exception as e:
         logger.error("Character generation failed: %s", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/organizational_intel")
@@ -174,4 +174,4 @@ async def get_organizational_intelligence(
         }
     except Exception as e:
         logger.error("Organizational intelligence query failed: %s", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")

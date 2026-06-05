@@ -326,7 +326,7 @@ class ChatGPTAgentModeIntegration:
             }
 
         except Exception as e:
-            raise HTTPException(status_code=400, detail="Internal server error")
+            raise HTTPException(status_code=400, detail="Geometric algebra computation failed: invalid input")
 
     async def _handle_session_management(self, parameters: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """Handle agent session state management"""

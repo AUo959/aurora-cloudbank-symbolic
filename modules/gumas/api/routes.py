@@ -207,7 +207,7 @@ async def get_violations(request: ViolationQueryRequest) -> List[Dict[str, Any]]
         return violations_data
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Internal server error")
+        raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
     except Exception as e:
         logger.error("Violations query failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -304,8 +304,8 @@ async def add_rule(request: AddRuleRequest) -> RuleResponse:
             category = RuleCategory(request.category)
             severity = ViolationSeverity(request.severity)
         except ValueError as e:
-            raise HTTPException(status_code=400, detail="Internal server error")
-        
+            raise HTTPException(status_code=400, detail=f"Invalid parameter: {e}")
+
         # Create rule
         rule = EthicsRule(
             id=request.id,
@@ -423,7 +423,7 @@ async def clear_violations(
         return None
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Internal server error")
+        raise HTTPException(status_code=400, detail=f"Invalid timestamp: {e}")
     except Exception as e:
         logger.error("Clear violations failed: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")

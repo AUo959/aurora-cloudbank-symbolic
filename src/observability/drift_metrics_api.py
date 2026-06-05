@@ -334,7 +334,7 @@ async def establish_baseline(request: EstablishBaselineRequest) -> Dict[str, Any
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Internal server error")
+        raise HTTPException(status_code=400, detail=f"Invalid value: {e}")
     except Exception as e:
         logger.error("Failed to establish baseline: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error")

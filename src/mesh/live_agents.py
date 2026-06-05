@@ -8,6 +8,22 @@ from typing import Iterable
 
 from .models import AgentManifest
 
+# Module-level shared OpenAI client (avoids per-request construction overhead).
+# If the package is absent or the env var is missing at import time we fall back
+# to per-request construction inside generate_reply so the module stays importable.
+_MESH_CLIENT = None
+try:
+    import httpx
+    from openai import OpenAI as _OpenAI
+
+    _MESH_CLIENT = _OpenAI(
+        api_key=os.environ.get("OPENAI_API_KEY", ""),
+        timeout=httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0),
+        max_retries=2,
+    )
+except Exception:
+    _MESH_CLIENT = None
+
 
 class LiveAdapterUnavailable(RuntimeError):
     """Raised when a live agent adapter cannot produce a reply."""
@@ -33,12 +49,19 @@ class OpenAILiveAdapter:
         if not self.available():
             raise LiveAdapterUnavailable("OPENAI_API_KEY is not configured")
 
-        try:
-            from openai import OpenAI
-        except ImportError as exc:
-            raise LiveAdapterUnavailable("openai package is not installed") from exc
-
-        client = OpenAI(api_key=self.api_key)
+        if _MESH_CLIENT is not None:
+            client = _MESH_CLIENT
+        else:
+            try:
+                import httpx
+                from openai import OpenAI
+            except ImportError as exc:
+                raise LiveAdapterUnavailable("openai package is not installed") from exc
+            client = OpenAI(
+                api_key=self.api_key,
+                timeout=httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=60.0),
+                max_retries=2,
+            )
         model = manifest.model_profile.get("model", self.model)
         max_output_tokens = int(manifest.model_profile.get("max_output_tokens", 220))
 

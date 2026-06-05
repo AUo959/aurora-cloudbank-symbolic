@@ -14,6 +14,17 @@ from slowapi.middleware import SlowAPIMiddleware
 from src.middleware.fastapi_security import limiter
 
 
+@pytest.fixture(autouse=True)
+def _require_dev_auth_env(dev_auth_fixture_env):  # noqa: PT004
+    """Activate the dev-auth fixture environment for every test in this module.
+
+    All tests here exercise authentication routes that depend on the dev/test
+    fixture user store (AURORA_ALLOW_DEV_AUTH_FIXTURE + password secrets).
+    Using autouse=True within this file avoids repetitive per-test requests
+    while keeping the variables absent from modules that do not request them.
+    """
+
+
 @pytest.fixture
 def app():
     """Create a test FastAPI application."""

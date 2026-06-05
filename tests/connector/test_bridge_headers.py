@@ -8,6 +8,7 @@ Covers:
   - BridgeError raised on HTTP 4xx/5xx responses
   - BridgeError raised when the server is unreachable
   - Base URL trailing-slash normalisation
+  - User-Agent, X-Source-Client, X-Connector-Version identifying headers (Issue #826)
 """
 
 import pytest
@@ -19,6 +20,9 @@ try:
 except ImportError:
     RESPX_AVAILABLE = False
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
+from connector import __version__ as _CONNECTOR_VERSION
 from connector.transport.bridge import CloudbankBridge, BridgeError
 
 pytestmark = pytest.mark.skipif(
@@ -226,3 +230,241 @@ async def test_post_sends_empty_body_when_payload_is_none(monkeypatch):
     import json
     body = json.loads(sent_request.content)
     assert body == {}
+
+
+# ---------------------------------------------------------------------------
+# Identifying headers — Issue #826 (User-Agent, X-Source-Client, X-Connector-Version)
+# ---------------------------------------------------------------------------
+
+# Helpers for mock-based tests
+
+
+def _make_ok_response(body: dict | None = None) -> MagicMock:
+    """Return a mock httpx.Response that succeeds and returns JSON."""
+    resp = MagicMock()
+    resp.raise_for_status = MagicMock()  # does not raise
+    resp.json.return_value = body or {"status": "ok"}
+    return resp
+
+
+def _make_error_response(status_code: int = 500) -> MagicMock:
+    """Return a mock that simulates an HTTP error status."""
+    resp = MagicMock()
+    resp.status_code = status_code
+    resp.text = "Internal Server Error"
+
+    http_err = httpx.HTTPStatusError(
+        message=f"{status_code}",
+        request=MagicMock(),
+        response=resp,
+    )
+    resp.raise_for_status.side_effect = http_err
+    return resp
+
+
+@pytest.mark.unit
+class TestBridgeHeadersProperty:
+    """Test the _headers property directly — no HTTP calls needed."""
+
+    def test_user_agent_present(self):
+        bridge = CloudbankBridge()
+        assert "User-Agent" in bridge._headers
+
+    def test_user_agent_value(self):
+        bridge = CloudbankBridge()
+        assert bridge._headers["User-Agent"] == f"aurora-mcp-connector/{_CONNECTOR_VERSION}"
+
+    def test_x_source_client_present(self):
+        bridge = CloudbankBridge()
+        assert "X-Source-Client" in bridge._headers
+
+    def test_x_source_client_value(self):
+        bridge = CloudbankBridge()
+        assert bridge._headers["X-Source-Client"] == "aurora-mcp-connector"
+
+    def test_x_connector_version_present(self):
+        bridge = CloudbankBridge()
+        assert "X-Connector-Version" in bridge._headers
+
+    def test_x_connector_version_value(self):
+        bridge = CloudbankBridge()
+        assert bridge._headers["X-Connector-Version"] == _CONNECTOR_VERSION
+
+    def test_standard_headers_still_present(self):
+        bridge = CloudbankBridge()
+        headers = bridge._headers
+        assert headers["Content-Type"] == "application/json"
+        assert headers["Accept"] == "application/json"
+
+    def test_authorization_absent_without_token(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge.__new__(CloudbankBridge)
+        bridge.base_url = "http://localhost:8000"
+        bridge.token = ""
+        assert "Authorization" not in bridge._headers
+
+    def test_authorization_present_with_token(self, monkeypatch):
+        monkeypatch.setenv("AURORA_CONNECTOR_TOKEN", "test-token-abc")
+        bridge = CloudbankBridge()
+        assert bridge._headers["Authorization"] == "Bearer test-token-abc"
+
+
+@pytest.mark.unit
+class TestBridgeGetHeaders:
+    """Verify identifying headers are sent on GET requests."""
+
+    @pytest.mark.asyncio
+    async def test_get_sends_user_agent(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_get(url, headers=None, params=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.get = AsyncMock(side_effect=fake_get)
+            mock_client_cls.return_value = instance
+
+            await bridge.get("/state")
+
+        assert captured["headers"]["User-Agent"] == f"aurora-mcp-connector/{_CONNECTOR_VERSION}"
+
+    @pytest.mark.asyncio
+    async def test_get_sends_x_source_client(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_get(url, headers=None, params=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.get = AsyncMock(side_effect=fake_get)
+            mock_client_cls.return_value = instance
+
+            await bridge.get("/state")
+
+        assert captured["headers"]["X-Source-Client"] == "aurora-mcp-connector"
+
+    @pytest.mark.asyncio
+    async def test_get_sends_x_connector_version(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_get(url, headers=None, params=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.get = AsyncMock(side_effect=fake_get)
+            mock_client_cls.return_value = instance
+
+            await bridge.get("/state")
+
+        assert captured["headers"]["X-Connector-Version"] == _CONNECTOR_VERSION
+
+
+@pytest.mark.unit
+class TestBridgePostHeaders:
+    """Verify identifying headers are sent on POST requests."""
+
+    @pytest.mark.asyncio
+    async def test_post_sends_user_agent(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_post(url, headers=None, json=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.post = AsyncMock(side_effect=fake_post)
+            mock_client_cls.return_value = instance
+
+            await bridge.post("/memory/node", payload={"key": "value"})
+
+        assert captured["headers"]["User-Agent"] == f"aurora-mcp-connector/{_CONNECTOR_VERSION}"
+
+    @pytest.mark.asyncio
+    async def test_post_sends_x_source_client(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_post(url, headers=None, json=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.post = AsyncMock(side_effect=fake_post)
+            mock_client_cls.return_value = instance
+
+            await bridge.post("/memory/node", payload={"key": "value"})
+
+        assert captured["headers"]["X-Source-Client"] == "aurora-mcp-connector"
+
+    @pytest.mark.asyncio
+    async def test_post_sends_x_connector_version(self, monkeypatch):
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_post(url, headers=None, json=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.post = AsyncMock(side_effect=fake_post)
+            mock_client_cls.return_value = instance
+
+            await bridge.post("/memory/node", payload={"key": "value"})
+
+        assert captured["headers"]["X-Connector-Version"] == _CONNECTOR_VERSION
+
+    @pytest.mark.asyncio
+    async def test_post_no_payload_still_sends_headers(self, monkeypatch):
+        """Ensure headers are present even when no payload is given."""
+        monkeypatch.delenv("AURORA_CONNECTOR_TOKEN", raising=False)
+        bridge = CloudbankBridge()
+        captured = {}
+
+        async def fake_post(url, headers=None, json=None):
+            captured["headers"] = headers
+            return _make_ok_response()
+
+        with patch("httpx.AsyncClient") as mock_client_cls:
+            instance = AsyncMock()
+            instance.__aenter__ = AsyncMock(return_value=instance)
+            instance.__aexit__ = AsyncMock(return_value=False)
+            instance.post = AsyncMock(side_effect=fake_post)
+            mock_client_cls.return_value = instance
+
+            await bridge.post("/anomaly/flag")
+
+        headers = captured["headers"]
+        assert headers["User-Agent"] == f"aurora-mcp-connector/{_CONNECTOR_VERSION}"
+        assert headers["X-Source-Client"] == "aurora-mcp-connector"
+        assert headers["X-Connector-Version"] == _CONNECTOR_VERSION

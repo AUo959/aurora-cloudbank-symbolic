@@ -8,6 +8,16 @@ from typing import Iterable
 
 from .models import AgentManifest
 
+try:
+    from modules.ai_core.prompt_safety import (
+        UNTRUSTED_PREAMBLE,
+        sanitize_for_prompt,
+        wrap_untrusted,
+    )
+    _PROMPT_SAFETY_AVAILABLE = True
+except ImportError:  # pragma: no cover — graceful degradation
+    _PROMPT_SAFETY_AVAILABLE = False
+
 
 class LiveAdapterUnavailable(RuntimeError):
     """Raised when a live agent adapter cannot produce a reply."""
@@ -49,15 +59,38 @@ class OpenAILiveAdapter:
             if text:
                 history_lines.append(f"{speaker}: {text}")
 
+        if _PROMPT_SAFETY_AVAILABLE:
+            # Scan user_content for injection attempts before embedding
+            _ctx_tag = f"live_agent_{manifest.display_name}"
+            user_content, _user_findings = sanitize_for_prompt(user_content, context_tag=_ctx_tag)
+            if memory_text:
+                memory_text, _ = sanitize_for_prompt(memory_text, context_tag=f"{_ctx_tag}_memory")
+
+            _preamble = UNTRUSTED_PREAMBLE + "\n\n"
+            _mem_block = (
+                wrap_untrusted(memory_text, label="memory")
+                if memory_text
+                else "No additional memory loaded."
+            )
+            _history_raw = chr(10).join(history_lines[-8:]) or "No prior channel history."
+            _history_block = wrap_untrusted(_history_raw, label="channel_history")
+            _user_block = wrap_untrusted(user_content, label="user_input")
+        else:
+            _preamble = ""
+            _mem_block = memory_text or "No additional memory loaded."
+            _history_block = chr(10).join(history_lines[-8:]) or "No prior channel history."
+            _user_block = user_content
+
         system_prompt = (
+            f"{_preamble}"
             f"You are {manifest.display_name} in the Aurora mesh workspace.\n"
             f"Execution mode: {manifest.execution_mode}.\n"
             f"Respond concisely and operationally.\n"
-            f"Memory:\n{memory_text or 'No additional memory loaded.'}"
+            f"Memory:\n{_mem_block}"
         )
         user_prompt = (
-            f"Recent channel context:\n{chr(10).join(history_lines[-8:]) or 'No prior channel history.'}\n\n"
-            f"Incoming message:\n{user_content}"
+            f"Recent channel context:\n{_history_block}\n\n"
+            f"Incoming message:\n{_user_block}"
         )
 
         def _request() -> str:

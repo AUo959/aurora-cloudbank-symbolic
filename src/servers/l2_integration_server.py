@@ -553,7 +553,7 @@ async def connect_custom_gpt(
         raise
     except Exception as e:
         logger.error("Custom GPT connection failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/message/{agent_id}")
@@ -592,7 +592,7 @@ async def relay_message(
         raise
     except Exception as e:
         logger.error("Message relay failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/bridge/constellation/status")
 async def get_constellation_status():
@@ -614,7 +614,7 @@ async def get_constellation_status():
 
     except Exception as e:
         logger.error("Status retrieval failed: %s", str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/bridge/gpt/status/{agent_id}")
 async def get_agent_status(agent_id: str):
@@ -633,7 +633,7 @@ async def get_agent_status(agent_id: str):
         raise
     except Exception as e:
         logger.error("Agent status retrieval failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Status retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/heartbeat/{agent_id}")
@@ -663,7 +663,7 @@ async def update_heartbeat(agent_id: str, token: HTTPAuthorizationCredentials = 
         raise
     except Exception as e:
         logger.error("Heartbeat update failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Heartbeat update failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # CSRF token verification occurs inside the handler
 @app.post("/api/bridge/gpt/disconnect/{agent_id}")
@@ -687,7 +687,7 @@ async def disconnect_agent(agent_id: str, token: HTTPAuthorizationCredentials = 
         raise
     except Exception as e:
         logger.error("Disconnect failed for %s: %s", str(agent_id)[:100], str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Disconnect failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # Additional API endpoints
 
@@ -714,7 +714,7 @@ async def list_agents():
             return {"agents": [], "total": 0}
     except Exception as e:
         logger.error("Agent listing failed: %s", str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"Agent listing failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.get("/api/orion-core")
 async def get_orion_core_info():
@@ -737,7 +737,7 @@ async def get_orion_core_info():
             }
     except Exception as e:
         logger.error("ORION Core info retrieval failed: %s", str(str(e))[:100])
-        raise HTTPException(status_code=500, detail=f"ORION Core info failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 # Server lifecycle events
 

@@ -180,7 +180,7 @@ async def get_craft_by_id(craft_id: str) -> CraftProfile:
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to retrieve craft: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -209,7 +209,7 @@ async def get_fleet_status() -> FleetStatus:
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to compute fleet status: {str(e)}"
+            detail="Internal server error"
         )
 
 

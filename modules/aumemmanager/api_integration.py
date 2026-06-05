@@ -3,13 +3,13 @@ AuMemManager API Integration for Aurora CloudBank
 FastAPI endpoints for hierarchical memory management with quantum-symbolic capabilities
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 import time
 
 from modules.aumemmanager import HierarchicalMemoryManager, MemoryType
-from src.middleware.fastapi_security import require_csrf_token
+from src.middleware.fastapi_security import limiter, require_csrf_token
 
 # Global memory manager instance (in production, this would be properly managed)
 memory_manager = HierarchicalMemoryManager(max_active_memories=1000)
@@ -92,7 +92,8 @@ class SystemMetricsResponse(BaseModel):
 
 
 @router.post("/create", response_model=Dict[str, str], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
-async def create_memory(request: MemoryCreateRequest):
+@limiter.limit("60/minute")  # Memory write - rate limited per IP
+async def create_memory(request: MemoryCreateRequest, http_request: Request):
     """Create a new memory item with quantum-symbolic capabilities"""
     try:
         # Convert string memory type to enum
@@ -119,7 +120,7 @@ async def create_memory(request: MemoryCreateRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create memory: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/retrieve", response_model=List[MemoryResponse])
@@ -176,11 +177,12 @@ async def retrieve_memories(request: MemoryRetrievalRequest):
         return response_memories
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve memories: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/quantum/create_vector", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
-async def create_quantum_vector(request: QuantumVectorRequest):
+@limiter.limit("60/minute")  # Memory write - rate limited per IP
+async def create_quantum_vector(request: QuantumVectorRequest, http_request: Request):
     """Create a quantum-symbolic vector for memory management"""
     try:
         qv = memory_manager.flight_controller.create_quantum_vector(
@@ -201,7 +203,7 @@ async def create_quantum_vector(request: QuantumVectorRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create quantum vector: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/quantum/entangle", response_model=Dict[str, str], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
@@ -221,7 +223,7 @@ async def entangle_vectors(vector1_id: str, vector2_id: str):
             raise HTTPException(status_code=404, detail="One or both vectors not found")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to entangle vectors: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/quantum/trajectory", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
@@ -243,7 +245,7 @@ async def compute_trajectory(request: TrajectoryRequest):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to compute trajectory: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/metrics", response_model=SystemMetricsResponse)
@@ -265,7 +267,7 @@ async def get_system_metrics():
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get metrics: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/lifecycle/batch_process", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
@@ -282,7 +284,7 @@ async def batch_process_lifecycle():
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process lifecycle: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/compress", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
@@ -304,7 +306,7 @@ async def compress_memories(
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to compress memories: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/export", response_model=Dict[str, Any], dependencies=SENSITIVE_MEMORY_DEPENDENCIES)
@@ -315,7 +317,7 @@ async def export_system_state():
         return {"status": "exported", "export_timestamp": state["export_timestamp"], "system_state": state}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to export state: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/quantum/network_analysis", response_model=Dict[str, Any])
@@ -326,7 +328,7 @@ async def get_quantum_network_analysis():
         return {"status": "analyzed", "timestamp": time.time(), "network_analysis": analysis}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to analyze quantum network: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # Health check endpoint

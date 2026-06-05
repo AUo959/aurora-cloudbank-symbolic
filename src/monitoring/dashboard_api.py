@@ -150,7 +150,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to establish baseline: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.post("/behavior/record")
     async def record_behavior(input: BehaviorMetricsInput):
@@ -170,7 +170,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to record behavior: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.post("/behavior/check")
     async def check_behavior(
@@ -187,7 +187,7 @@ def create_monitoring_router(
             return result
         except Exception as e:
             logger.error("Failed to check behavior: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.post("/action/evaluate")
     async def evaluate_action(input: ActionEvaluationInput):
@@ -203,7 +203,7 @@ def create_monitoring_router(
             return result
         except Exception as e:
             logger.error("Failed to evaluate action: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/agent/{agent_id}/status")
     async def get_agent_status(agent_id: str):
@@ -213,7 +213,7 @@ def create_monitoring_router(
             return status
         except Exception as e:
             logger.error("Failed to get agent status: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/alerts")
     async def get_alerts(
@@ -241,7 +241,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to get alerts: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/violations")
     async def get_violations(
@@ -269,7 +269,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to get violations: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/audit")
     async def get_audit_log(
@@ -298,7 +298,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to get audit log: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/compliance/report")
     async def get_compliance_report(
@@ -317,7 +317,7 @@ def create_monitoring_router(
             return report
         except Exception as e:
             logger.error("Failed to generate compliance report: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/export")
     async def export_state():
@@ -327,7 +327,7 @@ def create_monitoring_router(
             return state
         except Exception as e:
             logger.error("Failed to export state: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     @router.get("/dashboard/stats")
     async def get_dashboard_stats():
@@ -354,7 +354,7 @@ def create_monitoring_router(
             }
         except Exception as e:
             logger.error("Failed to get dashboard stats: %s", e)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail="Internal server error")
 
     logger.info("Monitoring API router created with %d routes", len(router.routes))
 

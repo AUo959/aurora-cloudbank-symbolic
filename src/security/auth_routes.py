@@ -290,7 +290,7 @@ async def refresh_token(request: Request, refresh_token: str):  # request requir
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Could not refresh token: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Internal server error")
 
 
 @router.get("/me", response_model=User)

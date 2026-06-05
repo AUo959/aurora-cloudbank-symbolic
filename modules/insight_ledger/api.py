@@ -120,7 +120,7 @@ async def record_insight(request: RecordInsightRequest) -> RecordInsightResponse
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to record insight: {str(e)}",
+            detail="Internal server error",
         )
 
 
@@ -164,7 +164,7 @@ async def verify_integrity(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Verification failed: {str(e)}",
+            detail="Internal server error",
         )
 
 
@@ -201,7 +201,7 @@ async def query_history(query: Optional[AuditQuery] = None) -> QueryHistoryRespo
 
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Query failed: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
 
 
@@ -229,7 +229,7 @@ async def get_stats() -> LedgerStats:
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve stats: {str(e)}",
+            detail="Internal server error",
         )
 
 
@@ -278,13 +278,13 @@ async def export_ledger(
         # Path validation errors from export_ledger
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid export path: {str(e)}"
+            detail="Internal server error"
         )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Export failed: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
 
 
@@ -321,7 +321,7 @@ async def get_entry_by_id(entry_id: str) -> LedgerEntry:
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve entry: {str(e)}",
+            detail="Internal server error",
         )
 
 

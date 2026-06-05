@@ -140,7 +140,7 @@ async def get_prometheus_metrics():
         return PlainTextResponse(content=metrics, media_type="text/plain")
     except Exception as e:
         logger.error("Failed to export Prometheus metrics: %s", e)
-        raise HTTPException(status_code=500, detail=f"Metrics export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get(
@@ -170,7 +170,7 @@ async def get_drift_summary() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Failed to get drift summary: %s", e)
-        raise HTTPException(status_code=500, detail=f"Summary retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get(
@@ -232,7 +232,7 @@ async def get_drift_alerts(
         raise
     except Exception as e:
         logger.error("Failed to get drift alerts: %s", e)
-        raise HTTPException(status_code=500, detail=f"Alert retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get(
@@ -270,7 +270,7 @@ async def get_baselines() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error("Failed to get baselines: %s", e)
-        raise HTTPException(status_code=500, detail=f"Baseline retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post(
@@ -334,10 +334,10 @@ async def establish_baseline(request: EstablishBaselineRequest) -> Dict[str, Any
     except HTTPException:
         raise
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=f"Invalid value: {e}")
     except Exception as e:
         logger.error("Failed to establish baseline: %s", e)
-        raise HTTPException(status_code=500, detail=f"Baseline establishment failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get(

@@ -222,7 +222,7 @@ async def scan_data(request: ScanRequest = Body(...)):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error scanning data: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -294,7 +294,7 @@ async def redact_data(request: RedactRequest = Body(...)):
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error redacting data: {str(e)}"
+            detail="Internal server error"
         )
 
 

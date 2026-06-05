@@ -202,7 +202,7 @@ async def register_subroutine(request: SubroutineCreate) -> Dict[str, Any]:
         logger.error("Failed to register subroutine: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Registration failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -258,7 +258,7 @@ async def list_subroutines(
         logger.error("Failed to list subroutines: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"List failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -294,7 +294,7 @@ async def get_subroutine(subroutine_id: str) -> Dict[str, Any]:
         logger.error("Failed to get subroutine: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Get failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -350,7 +350,7 @@ async def search_subroutines(request: SubroutineSearchRequest) -> Dict[str, Any]
         logger.error("Search failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Search failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -401,7 +401,7 @@ async def update_subroutine_status(
         logger.error("Failed to update status: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Update failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -517,7 +517,7 @@ async def get_registry_stats() -> Dict[str, Any]:
         logger.error("Failed to get stats: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Stats failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -542,7 +542,7 @@ async def export_registry() -> Dict[str, Any]:
         logger.error("Export failed: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Export failed: {str(e)}"
+            detail="Internal server error"
         )
 
 

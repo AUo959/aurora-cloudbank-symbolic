@@ -93,9 +93,11 @@ async def list_all_crew(user: User = Depends(get_current_active_user)):
 
 
 @crew_router.post("/{surname}/process")
+@limiter.limit("30/minute")  # Crew collaboration - moderate rate per IP
 async def process_agent_task(
     surname: str,
     task: Dict[str, Any],
+    request: Request,
     user: User = Depends(get_current_active_user),
 ):
     """Process a task with a specific crew agent.
@@ -111,8 +113,10 @@ async def process_agent_task(
 
 
 @crew_router.post("/collaborate")
+@limiter.limit("30/minute")  # Crew collaboration - moderate rate per IP
 async def collaborate_agents(
     payload: Dict[str, Any],
+    request: Request,
     user: User = Depends(get_current_active_user),
 ):
     """Collaborate two agents on a task.
@@ -270,6 +274,7 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle with startup and shutdown logic"""
     # Startup
     logger.info("Aurora API starting up...")
+    logger.info("Rate limiter active: AI=20/min, crew=30/min, quantum=10/min, memory_write=60/min")
 
     # Initialize telemetry systems
     try:
@@ -1062,7 +1067,7 @@ def prometheus_metrics(request: Request):
         return PlainTextResponse(content=prometheus_data, media_type="text/plain; version=0.0.4")
     except Exception as e:
         logger.error("Failed to export Prometheus metrics: %s", e)
-        raise HTTPException(status_code=500, detail=f"Metrics export failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/telemetry/snapshot")
@@ -1093,7 +1098,7 @@ def telemetry_snapshot(request: Request, context_tag: Optional[str] = None):
         }
     except Exception as e:
         logger.error("Failed to get telemetry snapshot: %s", e)
-        raise HTTPException(status_code=500, detail=f"Snapshot retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ================================
@@ -1123,7 +1128,7 @@ async def get_halo_pas_status(request: Request):
         logger.error("Failed to get HALO/PAS status: %s", e)
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to get HALO/PAS status: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -1143,12 +1148,12 @@ async def get_agent_tools(request: Request):
         tools_info = _sanitize_tools_info(tools_info)
         return JSONResponse(content=tools_info)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to discover tools: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
 @app.post("/agent/execute", dependencies=[Depends(security), Depends(verify_csrf_token)])
-@limiter.limit("30/minute")  # Agent tools - execution rate matches discovery
+@limiter.limit("20/minute")  # AI inference - stricter rate limit per IP
 async def execute_agent_tool(
     req: AgentToolRequest,
     request: Request,
@@ -1171,7 +1176,7 @@ async def execute_agent_tool(
     except HTTPException as e:
         raise e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -1242,7 +1247,7 @@ async def get_agent_status(request: Request):
         status = await chatgpt_agent_integration.get_agent_status()
         return JSONResponse(content=status)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get agent status: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.websocket("/agent/stream")
@@ -1365,7 +1370,7 @@ async def get_gemini_agent_tools(request: Request):
 
 # verify_csrf inside
 @app.post("/agent/gemini/execute", dependencies=[Depends(security), Depends(verify_csrf_token)])
-@limiter.limit("30/minute")  # Agent tools - Gemini tool execution
+@limiter.limit("20/minute")  # AI inference - stricter rate limit per IP
 async def execute_gemini_agent_tool(
     req: AgentToolRequest,
     request: Request,
@@ -1430,7 +1435,7 @@ async def thread_bridge_status_endpoint(request: Request):
             "timestamp": "2025-10-28T00:00:00Z"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Bridge status error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 class HandshakeRequest(BaseModel):
@@ -1481,7 +1486,7 @@ async def thread_bridge_handshake_endpoint(
             "context_tag": "thread_bridge_handshake_success"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Handshake error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 class ValidateRequest(BaseModel):
@@ -1524,7 +1529,7 @@ async def thread_bridge_validate_endpoint(
             "context_tag": "thread_bridge_validation"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Validation error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/thread-bridge/companions")
@@ -1554,7 +1559,7 @@ async def thread_bridge_companions_endpoint(request: Request):
             "context_tag": "thread_bridge_companions"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Companions query error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 class TransferRequest(BaseModel):
@@ -1614,7 +1619,7 @@ async def thread_bridge_transfer_endpoint(
             "context_tag": "thread_bridge_transfer_success"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Transfer error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -1711,7 +1716,7 @@ async def v2_register_node(
             "context_tag": "v2_node_registered"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Node registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.delete("/api/v2/nodes/{node_id}", dependencies=[Depends(security)])
@@ -1832,7 +1837,7 @@ async def v2_unregister_node(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Node unregistration error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/nodes/{node_id}/health")
@@ -1870,7 +1875,7 @@ async def v2_get_node_health(node_id: str, request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Health check error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/nodes")
@@ -1911,7 +1916,7 @@ async def v2_list_nodes(request: Request):
             "context_tag": "v2_nodes_listed"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Node listing error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/cluster/health")
@@ -1938,7 +1943,7 @@ async def v2_get_cluster_health(request: Request):
             "context_tag": "v2_cluster_health"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cluster health error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2007,7 +2012,7 @@ async def v2_register_repository(
             "context_tag": "v2_repo_registered"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Repository registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2054,7 +2059,7 @@ async def v2_sync_repository(
             "context_tag": "v2_repo_synced"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Repository sync error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2101,7 +2106,7 @@ async def v2_create_cross_repo_bridge(
             "context_tag": "v2_cross_repo_bridge_created"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cross-repo bridge error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2137,7 +2142,7 @@ async def v2_execute_cross_repo_handshake(
             "context_tag": "v2_cross_repo_handshake_executed"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cross-repo handshake error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ------------------------------------------------------------------------
@@ -2194,7 +2199,7 @@ async def v2_predict_drift(
             "context_tag": "v2_drift_predicted"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Drift prediction error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/drift/patterns")
@@ -2229,7 +2234,7 @@ async def v2_analyze_patterns(request: Request):
             "context_tag": "v2_patterns_analyzed"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Pattern analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2264,7 +2269,7 @@ async def v2_record_observation(
             "context_tag": "v2_observation_recorded"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Observation recording error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/drift/accuracy")
@@ -2291,7 +2296,7 @@ async def v2_get_prediction_accuracy(request: Request):
             "context_tag": "v2_prediction_accuracy"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Accuracy metrics error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2341,7 +2346,7 @@ async def v2_apply_correction(
             "context_tag": "v2_corrections_evaluated"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Correction application error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ------------------------------------------------------------------------
@@ -2407,7 +2412,7 @@ async def v2_create_layer_bridge(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Layer bridge creation error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2443,7 +2448,7 @@ async def v2_execute_layered_handshake(
             "context_tag": "v2_layered_handshake_executed"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Layered handshake error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2495,7 +2500,7 @@ async def v2_validate_hierarchy(
             "context_tag": "v2_hierarchy_validated"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Hierarchy validation error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/layers/bridges")
@@ -2545,7 +2550,7 @@ async def v2_list_layer_bridges(thread_id: Optional[str] = None, layer: Optional
             "context_tag": "v2_layer_bridges_listed"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Layer bridges listing error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/api/v2/layers/statistics")
@@ -2572,7 +2577,7 @@ async def v2_get_layer_statistics(request: Request):
             "context_tag": "v2_layer_statistics"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Layer statistics error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # verify_csrf inside
@@ -2624,7 +2629,7 @@ async def v2_cascade_validate(
             "context_tag": "v2_cascade_validated"
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Cascade validation error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # Example quantum endpoint (stub)
@@ -2785,7 +2790,7 @@ async def apply_patchweaver_patch(
         logger.error("PatchWeaver operation failed: %s", e)
         raise HTTPException(
             status_code=500,
-            detail=f"Patch operation failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -2836,7 +2841,7 @@ async def get_patchweaver_history(
         logger.error("Failed to retrieve PatchWeaver history: %s", e)
         raise HTTPException(
             status_code=500,
-            detail=f"History retrieval failed: {str(e)}"
+            detail="Internal server error"
         )
 
 
@@ -2893,7 +2898,7 @@ async def verify_patchweaver_state(
         logger.error("State verification failed: %s", e)
         raise HTTPException(
             status_code=500,
-            detail=f"Verification failed: {str(e)}"
+            detail="Internal server error"
         )
 
 

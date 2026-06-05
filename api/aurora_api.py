@@ -6,6 +6,7 @@ Exposes endpoints for quantum and geometric algebra modules.
 Enhanced with Claude Sonnet 4 capabilities and ChatGPT Agent Mode integration.
 """
 
+import asyncio
 import logging
 import os
 import time
@@ -342,6 +343,22 @@ async def lifespan(app: FastAPI):
             shutdown_coordinator.register_flush(HALO_PAS_CONTROLLER.stop, name="HALO/PAS stop")
         except Exception as e:
             logger.error("❌ Failed to start HALO/PAS Controller: %s", e)
+
+    # Periodic retention cleanup: evict old violations/alerts/interventions from memory
+    _cleanup_interval = int(os.getenv("AURORA_RETENTION_CLEANUP_INTERVAL_SECONDS", "3600"))
+
+    async def _retention_cleanup_loop() -> None:
+        from src.monitoring.dashboard_api import run_monitoring_cleanup
+        while True:
+            await asyncio.sleep(_cleanup_interval)
+            try:
+                run_monitoring_cleanup()
+            except Exception as _exc:  # noqa: BLE001
+                logger.debug("Retention cleanup cycle error: %s", _exc)
+
+    _cleanup_task = asyncio.create_task(_retention_cleanup_loop(), name="retention_cleanup")
+    shutdown_coordinator.register(_cleanup_task, name="retention_cleanup")
+    logger.info("✅ Retention cleanup task started (interval=%ds)", _cleanup_interval)
 
     # Register telemetry snapshot as a shutdown flush
     def _telemetry_flush() -> None:

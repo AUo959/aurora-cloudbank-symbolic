@@ -101,19 +101,22 @@ class EthicsEngine:
     def __init__(
         self,
         rules_path: Optional[Path] = None,
-        violations_path: Optional[Path] = None
+        violations_path: Optional[Path] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize ethics engine
-        
+
         Args:
             rules_path: Path to rules configuration file (JSON)
             violations_path: Append-only JSONL path for persisted violations
+            retention_hours: Retain in-memory violations for this many hours (default: 168 = 7 days)
         """
         self.rules: Dict[str, EthicsRule] = {}
         self.violations: List[EthicsViolation] = []
         self.custom_evaluators: Dict[str, Callable] = {}
         self.violations_path = violations_path
+        self.retention_hours = retention_hours
         self._write_lock = threading.Lock()
         
         # Load default rules if available
@@ -539,6 +542,17 @@ class EthicsEngine:
             for rule_id, rule in self.rules.items()
         }
     
+    def purge_old_violations(self) -> int:
+        """Drop in-memory violations older than *retention_hours*. Returns count removed."""
+        from datetime import timedelta, timezone
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        before_count = len(self.violations)
+        self.clear_violations(before=cutoff)
+        removed = before_count - len(self.violations)
+        if removed:
+            logger.info("Ethics engine: purged %d violations older than %dh", removed, self.retention_hours)
+        return removed
+
     def clear_violations(self, before: Optional[datetime] = None):
         """
         Clear old violations

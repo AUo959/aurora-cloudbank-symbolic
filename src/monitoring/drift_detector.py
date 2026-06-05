@@ -95,11 +95,12 @@ class DriftDetector:
         info_threshold: float = 0.2,
         warning_threshold: float = 0.5,
         critical_threshold: float = 0.8,
-        alerts_path: Optional[Path] = None
+        alerts_path: Optional[Path] = None,
+        retention_hours: int = 168,
     ):
         """
         Initialize drift detector
-        
+
         Args:
             z_score_threshold: Standard deviations for z-score alerts (default: 3.0)
             moving_avg_window: Window size for moving average (default: 10)
@@ -107,6 +108,7 @@ class DriftDetector:
             warning_threshold: Relative change threshold for warning alerts (default: 0.5 = 50%)
             critical_threshold: Relative change threshold for critical alerts (default: 0.8 = 80%)
             alerts_path: Append-only JSONL path for persisted alerts
+            retention_hours: Retain in-memory alerts for this many hours (default: 168 = 7 days)
         """
         self.z_score_threshold = z_score_threshold
         self.moving_avg_window = moving_avg_window
@@ -114,6 +116,7 @@ class DriftDetector:
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
         self.alerts_path = alerts_path
+        self.retention_hours = retention_hours
 
         self._write_lock = threading.Lock()
 
@@ -121,7 +124,7 @@ class DriftDetector:
         self.baselines: Dict[str, BaselineMetrics] = {}
         self.alerts: List[DriftAlert] = []
         self._load_alerts()
-        
+
         logger.info("Drift detector initialized with z_threshold=%.1f", z_score_threshold)
     
     def establish_baseline(
@@ -409,6 +412,16 @@ class DriftDetector:
             metadata=data.get('metadata', {})
         )
     
+    def purge_old_alerts(self) -> int:
+        """Drop in-memory alerts older than *retention_hours*. Returns count removed."""
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=self.retention_hours)
+        before_count = len(self.alerts)
+        self.clear_alerts(before=cutoff)
+        removed = before_count - len(self.alerts)
+        if removed:
+            logger.info("Drift detector: purged %d alerts older than %dh", removed, self.retention_hours)
+        return removed
+
     def clear_alerts(self, before: Optional[datetime] = None):
         """
         Clear old alerts

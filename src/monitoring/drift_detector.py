@@ -7,6 +7,7 @@ Detects deviations from baseline patterns using multiple algorithms.
 
 import json
 import logging
+import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -15,6 +16,8 @@ from typing import Dict, List, Optional, Any
 import statistics
 from src.utils.persist_redact import redact_for_persistence
 from src.utils.schema_migrations import get_registry
+
+from src.utils.atomic_io import atomic_write_json, append_jsonl
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +116,10 @@ class DriftDetector:
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
         self.alerts_path = alerts_path
-        
+
+        # Thread safety for alert persistence
+        self._lock = threading.Lock()
+
         # Storage for baselines and alerts
         self.baselines: Dict[str, BaselineMetrics] = {}
         self.alerts: List[DriftAlert] = []
@@ -346,16 +352,15 @@ class DriftDetector:
             return
 
         try:
-            self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
             alert_dict = alert.to_dict()
             # Redact PII from metadata before persisting
             if "metadata" in alert_dict and isinstance(alert_dict["metadata"], dict):
                 alert_dict["metadata"] = redact_for_persistence(
                     alert_dict["metadata"], context_tag=alert.context_tag or ""
                 )
-            record = get_registry().stamp(alert_dict, "drift_alert")
-            with open(self.alerts_path, 'a') as f:
-                f.write(json.dumps(record, sort_keys=True) + "\n")
+            with self._lock:
+                record = get_registry().stamp(alert_dict, "drift_alert")
+                append_jsonl(self.alerts_path, record)
         except Exception as e:
             logger.error("Failed to persist drift alert: %s", e)
 
@@ -381,10 +386,20 @@ class DriftDetector:
             return
 
         try:
-            self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.alerts_path, 'w') as f:
-                for alert in self.alerts:
-                    f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+            with self._lock:
+                tmp = self.alerts_path.with_suffix(self.alerts_path.suffix + ".tmp")
+                try:
+                    import os
+                    self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(tmp, "w", encoding="utf-8") as f:
+                        for alert in self.alerts:
+                            f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+                        f.flush()
+                        os.fsync(f.fileno())
+                    os.replace(tmp, self.alerts_path)
+                except Exception:
+                    tmp.unlink(missing_ok=True)
+                    raise
         except Exception as e:
             logger.error("Failed to rewrite drift alerts: %s", e)
 

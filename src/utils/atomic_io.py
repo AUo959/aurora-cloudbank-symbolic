@@ -9,12 +9,13 @@ import json
 import os
 import tempfile
 import logging
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def atomic_write_json(path: str, data: Any, indent: int = 2) -> None:
+def atomic_write_json(path: Path | str, data: Any, indent: int = 2) -> None:
     """Write *data* to *path* as JSON atomically.
 
     The write is performed to a sibling temp file in the same directory and
@@ -30,7 +31,8 @@ def atomic_write_json(path: str, data: Any, indent: int = 2) -> None:
         TypeError: If *data* is not JSON-serialisable.
         OSError:   If the destination directory is not writable.
     """
-    dest_dir = os.path.dirname(os.path.abspath(path))
+    path = Path(path)
+    dest_dir = str(path.parent)
     os.makedirs(dest_dir, exist_ok=True)
 
     # Write to a temp file in the same directory so that os.replace() is
@@ -41,7 +43,7 @@ def atomic_write_json(path: str, data: Any, indent: int = 2) -> None:
             json.dump(data, fh, indent=indent, default=str)
             fh.flush()
             os.fsync(fh.fileno())
-        os.replace(tmp_path, path)
+        os.replace(tmp_path, str(path))
     except Exception:
         # Clean up the temp file if anything goes wrong.
         try:
@@ -49,3 +51,13 @@ def atomic_write_json(path: str, data: Any, indent: int = 2) -> None:
         except OSError:
             pass
         raise
+
+
+def append_jsonl(path: Path | str, record: Any) -> None:
+    """Append *record* as a JSON line to *path*, fsyncing after each write."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, default=str) + "\n")
+        fh.flush()
+        os.fsync(fh.fileno())

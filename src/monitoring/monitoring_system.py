@@ -8,6 +8,7 @@ and alerting for comprehensive agent oversight.
 import logging
 import json
 import os
+import threading
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_now, utc_iso
@@ -15,6 +16,8 @@ from src.utils.schema_migrations import get_registry
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
+
+from src.utils.atomic_io import atomic_write_json
 
 from .drift_detector import DriftDetector, DriftAlert, DriftLevel
 from .ethics_engine import EthicsEngine, EthicsViolation, ActionContext, ViolationSeverity
@@ -140,6 +143,9 @@ class MonitoringSystem:
         audit_storage = self.storage_dir / "audit_log.jsonl"
         self.audit_logger = AuditLogger(storage_path=audit_storage)
         
+        # Thread safety for state persistence
+        self._lock = threading.Lock()
+
         # Intervention tracking
         self.interventions: List[Intervention] = []
         self.last_intervention_time: Dict[str, datetime] = {}
@@ -658,21 +664,20 @@ class MonitoringSystem:
     def _persist_state(self):
         """Persist intervention state needed for restart-safe cooldowns."""
         try:
-            self._state_path.parent.mkdir(parents=True, exist_ok=True)
-            state = get_registry().stamp(
-                {
-                    'interventions': [
-                        intervention.to_dict()
-                        for intervention in self.interventions
-                    ],
-                    'last_intervention_time': {
-                        agent_id: timestamp.isoformat()
-                        for agent_id, timestamp in self.last_intervention_time.items()
-                    }
-                },
-                "monitoring_state",
-            )
-            with open(self._state_path, 'w') as f:
-                json.dump(state, f, indent=2, sort_keys=True)
+            with self._lock:
+                state = get_registry().stamp(
+                    {
+                        'interventions': [
+                            intervention.to_dict()
+                            for intervention in self.interventions
+                        ],
+                        'last_intervention_time': {
+                            agent_id: timestamp.isoformat()
+                            for agent_id, timestamp in self.last_intervention_time.items()
+                        }
+                    },
+                    "monitoring_state",
+                )
+                atomic_write_json(self._state_path, state)
         except Exception as e:
             logger.error("Failed to persist monitoring state: %s", e)

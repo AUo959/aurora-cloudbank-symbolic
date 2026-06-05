@@ -7,6 +7,7 @@ and alerting for comprehensive agent oversight.
 
 import logging
 import json
+import os
 from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta, timezone
 from src.core.time_utils import utc_now, utc_iso
@@ -110,7 +111,18 @@ class MonitoringSystem:
             ethics_rules_path: Path to ethics rules configuration
             config: Alert configuration
         """
-        self.storage_dir = Path(storage_dir or "./monitoring_data")
+        if storage_dir is not None:
+            self.storage_dir = Path(storage_dir)
+        else:
+            # Priority: AURORA_MONITORING_PATH → AURORA_STATE_ROOT/monitoring → ./monitoring_data
+            _state_root = os.environ.get("AURORA_STATE_ROOT", "")
+            _mon_env = os.environ.get("AURORA_MONITORING_PATH", "")
+            if _mon_env:
+                self.storage_dir = Path(_mon_env)
+            elif _state_root:
+                self.storage_dir = Path(_state_root) / "monitoring"
+            else:
+                self.storage_dir = Path("./monitoring_data")
         self._state_path = self.storage_dir / "monitoring_state.json"
         self.config = config or AlertConfig()
         
@@ -141,7 +153,7 @@ class MonitoringSystem:
 
         self.import_state()
         
-        logger.info("Monitoring system initialized (storage=%s)", storage_dir)
+        logger.info("Monitoring system initialized (storage=%s)", self.storage_dir)
 
     def register_enforcement_handler(
         self,

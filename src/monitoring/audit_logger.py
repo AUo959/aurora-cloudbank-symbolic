@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from src.core.time_utils import utc_now
 from src.utils.persist_redact import redact_for_persistence
+from src.utils.schema_migrations import get_registry
 
 logger = logging.getLogger(__name__)
 
@@ -454,8 +455,9 @@ class AuditLogger:
 
         try:
             self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+            record = get_registry().stamp(entry.to_dict(), "audit_log")
             with open(self.storage_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(entry.to_dict(), sort_keys=True) + "\n")
+                f.write(json.dumps(record, sort_keys=True) + "\n")
                 f.flush()
                 os.fsync(f.fileno())
         except Exception as e:

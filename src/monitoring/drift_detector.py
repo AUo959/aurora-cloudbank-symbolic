@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 import statistics
 from src.utils.persist_redact import redact_for_persistence
+from src.utils.schema_migrations import get_registry
 
 logger = logging.getLogger(__name__)
 
@@ -352,8 +353,9 @@ class DriftDetector:
                 alert_dict["metadata"] = redact_for_persistence(
                     alert_dict["metadata"], context_tag=alert.context_tag or ""
                 )
+            record = get_registry().stamp(alert_dict, "drift_alert")
             with open(self.alerts_path, 'a') as f:
-                f.write(json.dumps(alert_dict, sort_keys=True) + "\n")
+                f.write(json.dumps(record, sort_keys=True) + "\n")
         except Exception as e:
             logger.error("Failed to persist drift alert: %s", e)
 

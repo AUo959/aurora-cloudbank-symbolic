@@ -278,6 +278,13 @@ async def lifespan(app: FastAPI):
     """Manage application lifecycle with startup and shutdown logic."""
     # Startup
     logger.info("Aurora API starting up...")
+
+    # Validate application configuration — exits non-zero if critical vars missing
+    from src.config.settings import load_settings
+    _settings = load_settings(exit_on_error=True)
+    if _settings:
+        logger.info("Configuration validated (build_phase=%s)", _settings.aurora_build_phase)
+
     logger.info("Rate limiter active: AI=20/min, crew=30/min, quantum=10/min, memory_write=60/min")
 
     # Warn when in-process monitoring state cannot be shared across workers.
@@ -346,6 +353,20 @@ async def lifespan(app: FastAPI):
             logger.warning("⚠️ Failed to generate shutdown manifest: %s", exc)
 
     shutdown_coordinator.register_flush(_manifest_flush, name="shutdown manifest")
+
+    # ── Structured startup-complete record ──────────────────────────────────────
+    _optional_modules = {
+        "aumemmanager": AUMEMMANAGER_AVAILABLE,
+        "data_guardian": DATA_GUARDIAN_AVAILABLE,
+        "insight_ledger": INSIGHT_LEDGER_AVAILABLE,
+        "quantum_simulator": QUANTUM_SIMULATOR_AVAILABLE,
+        "halo_pas": HALO_PAS_AVAILABLE,
+    }
+    logger.info(
+        "Aurora API startup complete — routes=%d optional_modules=%s",
+        len(app.routes),
+        {k: v for k, v in _optional_modules.items() if not v},  # log only degraded ones
+    )
 
     yield
 

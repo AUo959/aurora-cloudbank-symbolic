@@ -17,6 +17,44 @@ except ImportError:
     logger.warning("NativeDLPTracker not available, DLP tracking disabled")
 
 
+def _estimate_tokens(text: str) -> int:
+    """Estimate token count using a 4-chars-per-token heuristic (no tiktoken required)."""
+    try:
+        import tiktoken
+        enc = tiktoken.get_encoding("cl100k_base")
+        return len(enc.encode(text))
+    except (ImportError, Exception):
+        return max(1, len(text) // 4)
+
+
+def _dedup_memories(memories: list) -> list:
+    """Remove duplicate memories by content hash, keeping highest-scored."""
+    import hashlib
+    seen: dict = {}
+    for mem in memories:
+        content_hash = hashlib.sha256(
+            str(mem.get("content", "")).encode("utf-8", errors="replace")
+        ).hexdigest()
+        if content_hash not in seen:
+            seen[content_hash] = mem
+    return list(seen.values())
+
+
+def _apply_cap(memories: list, max_tokens: Optional[int]) -> list:
+    """Apply a token budget cap, returning only memories that fit within max_tokens."""
+    if max_tokens is None:
+        return memories
+    capped: List[Dict] = []
+    running = 0
+    for mem in memories:
+        t = _estimate_tokens(str(mem.get("content", "")))
+        if running + t > max_tokens:
+            break
+        capped.append(mem)
+        running += t
+    return capped
+
+
 class MemoryRetrievalCore:
     """Core orchestration layer for memory retrieval."""
 
@@ -69,7 +107,13 @@ class MemoryRetrievalCore:
         return memory_id
 
     def retrieve_memories(
-        self, context_id: str, query: str, top_k: int = 10, *, user_id: str = "default"
+        self,
+        context_id: str,
+        query: str,
+        top_k: int = 10,
+        *,
+        user_id: str = "default",
+        max_tokens: Optional[int] = None,
     ) -> List[Dict]:
         """Retrieve scored memories for a context/query pair.
 
@@ -80,6 +124,9 @@ class MemoryRetrievalCore:
             user_id: Tenant / user identifier used for cache isolation.
                 Pass the authenticated user's ID; use ``"default"`` only in
                 single-tenant deployments where cross-user leakage is impossible.
+            max_tokens: Optional token budget cap. When set, returned memories
+                are truncated so that their cumulative estimated token count
+                does not exceed this value.
         """
         context_tag = f"mrm:query:{context_id}"
         if self._dlp_tracker:
@@ -90,7 +137,7 @@ class MemoryRetrievalCore:
         )
         cached_results = self._cache.get(cache_key)
         if cached_results is not None:
-            return cached_results
+            return _apply_cap(cached_results, max_tokens)
 
         raw_results = self._store.query_memory(context_id, query, top_k)
         scored_results: List[Dict] = []
@@ -111,8 +158,11 @@ class MemoryRetrievalCore:
                 }
             )
         scored_results.sort(key=lambda item: item["score"], reverse=True)
+
+        # Dedup by content hash before caching (dedup is stable across calls)
+        scored_results = _dedup_memories(scored_results)
         self._cache.set(cache_key, scored_results)
-        return scored_results
+        return _apply_cap(scored_results, max_tokens)
 
     def get_memory(self, memory_id: str) -> Optional[Dict]:
         """Fetch a single memory entry."""

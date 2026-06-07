@@ -68,7 +68,7 @@ jobs:
           echo "correlation_id=$CORRELATION_ID" >> "$GITHUB_OUTPUT"
 
       - name: Dispatch to hub
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@ce5485de42c9b2622d2ed064be479e8ed65e76f2  # v3.0.0
         with:
           token: ${{ secrets.CONSTELLATION_TOKEN }}
           repository: AUo959/aurora-cloudbank-symbolic

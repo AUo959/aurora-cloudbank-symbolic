@@ -72,6 +72,17 @@ from fastapi import APIRouter
 from src.security.oauth2 import get_current_active_user, User  # authentication dependency
 from src.agents.crew.base_agent import get_crew_agent, get_all_crew_agents
 
+# Action Guard: fire-and-forget ethics/compliance evaluation on response paths
+try:
+    from src.monitoring.action_guard import evaluate_response as _evaluate_response
+    ACTION_GUARD_AVAILABLE = True
+except Exception as _action_guard_exc:  # pragma: no cover - graceful degradation
+    logging.getLogger("aurora_api").warning("ActionGuard not available: %s", _action_guard_exc)
+    ACTION_GUARD_AVAILABLE = False
+
+    def _evaluate_response(*_args, **_kwargs) -> None:  # type: ignore[misc]
+        """No-op fallback when action_guard cannot be imported."""
+
 # Crew Agents API Router (Phase 3 minimal implementation)
 crew_router = APIRouter(prefix="/api/crew", tags=["crew"])
 
@@ -116,6 +127,13 @@ async def process_agent_task(
     if not agent:
         raise HTTPException(status_code=404, detail=f"Crew agent '{surname}' not found")
     result = await agent.process_request(task)
+    _evaluate_response(
+        "agent_task",
+        result,
+        metadata={"endpoint": f"/api/crew/{surname}/process", "surname": surname},
+        agent_id=surname,
+        context_tag=f"crew_agent_{surname}",
+    )
     return result
 
 
@@ -1307,6 +1325,12 @@ async def execute_agent_tool(
             parameters=req.parameters,
             session_id=req.session_id
         )
+        _evaluate_response(
+            "agent_execute",
+            result,
+            metadata={"endpoint": "/agent/execute", "tool_name": req.tool_name},
+            context_tag=f"agent_execute_{req.tool_name}",
+        )
         return JSONResponse(content=result)
     except HTTPException as e:
         raise e
@@ -1523,6 +1547,12 @@ async def execute_gemini_agent_tool(
         result = await gemini_agent_integration.handle_tool_call(
             tool_name=req.tool_name,
             params=req.parameters
+        )
+        _evaluate_response(
+            "agent_gemini_execute",
+            result,
+            metadata={"endpoint": "/agent/gemini/execute", "tool_name": req.tool_name},
+            context_tag=f"gemini_execute_{req.tool_name}",
         )
         return JSONResponse(content=result)
     except ValueError as e:

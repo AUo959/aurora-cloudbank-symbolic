@@ -7,6 +7,7 @@ Detects deviations from baseline patterns using multiple algorithms.
 
 import json
 import logging
+import threading
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -113,7 +114,9 @@ class DriftDetector:
         self.warning_threshold = warning_threshold
         self.critical_threshold = critical_threshold
         self.alerts_path = alerts_path
-        
+
+        self._write_lock = threading.Lock()
+
         # Storage for baselines and alerts
         self.baselines: Dict[str, BaselineMetrics] = {}
         self.alerts: List[DriftAlert] = []
@@ -353,9 +356,10 @@ class DriftDetector:
                 alert_dict["metadata"] = redact_for_persistence(
                     alert_dict["metadata"], context_tag=alert.context_tag or ""
                 )
-            record = get_registry().stamp(alert_dict, "drift_alert")
-            with open(self.alerts_path, 'a') as f:
-                f.write(json.dumps(record, sort_keys=True) + "\n")
+            with self._write_lock:
+                record = get_registry().stamp(alert_dict, "drift_alert")
+                with open(self.alerts_path, 'a') as f:
+                    f.write(json.dumps(record, sort_keys=True) + "\n")
         except Exception as e:
             logger.error("Failed to persist drift alert: %s", e)
 
@@ -382,9 +386,10 @@ class DriftDetector:
 
         try:
             self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.alerts_path, 'w') as f:
-                for alert in self.alerts:
-                    f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+            with self._write_lock:
+                with open(self.alerts_path, 'w') as f:
+                    for alert in self.alerts:
+                        f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
         except Exception as e:
             logger.error("Failed to rewrite drift alerts: %s", e)
 

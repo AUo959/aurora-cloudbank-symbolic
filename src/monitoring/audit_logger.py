@@ -10,6 +10,7 @@ import hmac
 import json
 import logging
 import os
+import threading
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from enum import Enum
@@ -134,6 +135,7 @@ class AuditLogger:
 
         self.signing_key = signing_key
 
+        self._write_lock = threading.Lock()
         self.entries: List[AuditEntry] = []
         self._next_id = 1
         
@@ -454,12 +456,13 @@ class AuditLogger:
             return
 
         try:
-            self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-            record = get_registry().stamp(entry.to_dict(), "audit_log")
-            with open(self.storage_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(record, sort_keys=True) + "\n")
-                f.flush()
-                os.fsync(f.fileno())
+            with self._write_lock:
+                self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+                record = get_registry().stamp(entry.to_dict(), "audit_log")
+                with open(self.storage_path, 'a', encoding='utf-8') as f:
+                    f.write(json.dumps(record, sort_keys=True) + "\n")
+                    f.flush()
+                    os.fsync(f.fileno())
         except Exception as e:
             logger.error("Failed to append audit entry: %s", e)
     

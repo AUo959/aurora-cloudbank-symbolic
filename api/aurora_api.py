@@ -34,6 +34,12 @@ from src.middleware.idempotency import IdempotencyMiddleware
 from src.middleware.pii_middleware import PIIMiddleware
 from src.middleware.request_id import RequestIDMiddleware
 from src.runtime.shutdown import ShutdownCoordinator
+try:
+    from src.middleware.telemetry_middleware import MetricsMiddleware
+    _METRICS_MIDDLEWARE_AVAILABLE = True
+except Exception as _mm_exc:  # pragma: no cover - graceful degradation
+    logging.getLogger("aurora_api").warning("MetricsMiddleware unavailable: %s", _mm_exc)
+    _METRICS_MIDDLEWARE_AVAILABLE = False
 
 from modules.symbolic_core.geometric_algebra import GeometricAlgebra
 try:
@@ -353,6 +359,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning("⚠️ Failed to initialize telemetry: %s", e)
 
+    # Start background metrics pusher for live DriftDetector feeds
+    try:
+        from src.monitoring.metrics_pusher import start_background_pusher
+        start_background_pusher(interval_seconds=30)
+        logger.info("Background metrics pusher started (feeds DriftDetector every 30s)")
+    except Exception as e:
+        logger.warning("Failed to start background metrics pusher: %s", e)
+
     # Start HALO/PAS drift controller if available
     if HALO_PAS_AVAILABLE and HALO_PAS_CONTROLLER:
         try:
@@ -535,6 +549,12 @@ app.add_middleware(PIIMiddleware)
 # Request-ID middleware: must be registered last so it wraps everything and
 # its ContextVar is set before any inner middleware runs.
 app.add_middleware(RequestIDMiddleware)
+
+# Metrics middleware: record per-request latency/status for DriftDetector.
+# Registered after RequestIDMiddleware so request-ID context is available.
+if _METRICS_MIDDLEWARE_AVAILABLE:
+    app.add_middleware(MetricsMiddleware)
+    logger.info("MetricsMiddleware registered for live drift detection")
 
 
 @app.exception_handler(RateLimitExceeded)

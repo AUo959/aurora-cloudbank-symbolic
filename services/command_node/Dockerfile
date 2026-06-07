@@ -1,4 +1,5 @@
 # Sample Dockerfile for Node.js Command Node
+# TODO(#833): pin to verified SHA256 digest
 FROM node:20-alpine
 WORKDIR /usr/src/app
 COPY package*.json ./

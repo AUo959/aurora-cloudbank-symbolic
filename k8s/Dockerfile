@@ -6,6 +6,7 @@
 # ==============================================================================
 # Stage 1: Builder (Install dependencies and compile)
 # ==============================================================================
+# TODO(#833): pin to verified SHA256 digest
 FROM python:3.12-slim AS builder
 
 # Metadata labels for ethics and symbolic continuity
@@ -41,6 +42,7 @@ RUN pip install --upgrade pip setuptools wheel && \
 # ==============================================================================
 # Stage 2: Runtime (Minimal production image)
 # ==============================================================================
+# TODO(#833): pin to verified SHA256 digest
 FROM python:3.12-slim
 
 # Metadata labels

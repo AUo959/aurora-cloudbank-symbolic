@@ -16,10 +16,10 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
     
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@1d0ff469b13e2e8e5e78b7b0cf6e63745e38d00b  # v4.2.0
       with:
         node-version: '20'
         cache: 'npm'
@@ -44,12 +44,12 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
       with:
         repository: AUo959/aurora-cloudbank-symbolic
         
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@1d0ff469b13e2e8e5e78b7b0cf6e63745e38d00b  # v4.2.0
       with:
         node-version: '20'
         
@@ -68,10 +68,10 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
     
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@1d0ff469b13e2e8e5e78b7b0cf6e63745e38d00b  # v4.2.0
       with:
         node-version: '20'
         
@@ -82,7 +82,7 @@ jobs:
       run: npm audit --json > audit-results.json || true
       
     - name: Upload audit results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@4cec3d8aa04e39d1a96e1c98e851de01adfe1f14  # v4.4.3
       with:
         name: security-audit
         path: audit-results.json

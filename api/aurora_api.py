@@ -30,6 +30,7 @@ from src.observability import get_telemetry, get_r2_telemetry
 from src.middleware.body_size import MaxBodySizeMiddleware, _default_max_bytes
 from src.middleware.exception_handler import validation_handler
 from src.middleware.idempotency import IdempotencyMiddleware
+from src.middleware.pii_middleware import PIIMiddleware
 from src.middleware.request_id import RequestIDMiddleware
 from src.runtime.shutdown import ShutdownCoordinator
 
@@ -471,6 +472,10 @@ app.add_middleware(IdempotencyMiddleware)
 # allowlist defined in csrf_middleware._CSRF_ALLOWLIST.
 app.add_middleware(GlobalCsrfMiddleware)
 logger.info("✅ Global CSRF middleware registered")
+
+# PII detection middleware: scans request/response JSON bodies for PII.
+# Audit-only by default; set AURORA_PII_REDACT_RESPONSES=true to enable redaction.
+app.add_middleware(PIIMiddleware)
 
 # Request-ID middleware: must be registered last so it wraps everything and
 # its ContextVar is set before any inner middleware runs.

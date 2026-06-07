@@ -13,6 +13,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import statistics
+from src.utils.persist_redact import redact_for_persistence
 
 logger = logging.getLogger(__name__)
 
@@ -345,8 +346,14 @@ class DriftDetector:
 
         try:
             self.alerts_path.parent.mkdir(parents=True, exist_ok=True)
+            alert_dict = alert.to_dict()
+            # Redact PII from metadata before persisting
+            if "metadata" in alert_dict and isinstance(alert_dict["metadata"], dict):
+                alert_dict["metadata"] = redact_for_persistence(
+                    alert_dict["metadata"], context_tag=alert.context_tag or ""
+                )
             with open(self.alerts_path, 'a') as f:
-                f.write(json.dumps(alert.to_dict(), sort_keys=True) + "\n")
+                f.write(json.dumps(alert_dict, sort_keys=True) + "\n")
         except Exception as e:
             logger.error("Failed to persist drift alert: %s", e)
 

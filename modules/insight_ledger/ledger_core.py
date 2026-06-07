@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 
 from .crypto_signatures import SignatureManager
 from .schemas import AuditQuery, InsightRecord, InsightType, LedgerEntry, LedgerStats
+from src.utils.persist_redact import redact_for_persistence
 
 # Try to import secure storage for encrypted key persistence
 try:
@@ -275,6 +276,13 @@ class InsightLedger:
             entry_id = self._generate_entry_id(entry_type)
             timestamp = datetime.now(timezone.utc)
 
+            # Redact PII from context metadata before persisting
+            safe_context = (
+                redact_for_persistence(insight.context, context_tag=entry_id)
+                if isinstance(insight.context, dict)
+                else insight.context
+            )
+
             # Prepare signable data (without signature/hash fields)
             signable_data = {
                 "entry_id": entry_id,
@@ -282,7 +290,7 @@ class InsightLedger:
                 "entry_type": entry_type.value,
                 "insight_type": insight.insight_type.value,
                 "content": insight.content,
-                "context": insight.context,
+                "context": safe_context,
                 "source": insight.source,
                 "tags": sorted(list(set(insight.tags or []))),  # Ensure tags are sorted and unique
                 "severity": insight.severity,

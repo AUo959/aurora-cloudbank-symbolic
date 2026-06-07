@@ -63,6 +63,7 @@ from src.middleware.fastapi_security import (
     sanitize_request_id,
     sanitize_session_id
 )
+from src.middleware.csrf_middleware import GlobalCsrfMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from fastapi import APIRouter
@@ -465,6 +466,11 @@ app.add_middleware(MaxBodySizeMiddleware, max_bytes=_default_max_bytes())
 # requests that carry an Idempotency-Key header. Registered before
 # RequestIDMiddleware so the ID is already set when idempotency logic fires.
 app.add_middleware(IdempotencyMiddleware)
+
+# Global CSRF enforcement: applies to all state-changing routes except the
+# allowlist defined in csrf_middleware._CSRF_ALLOWLIST.
+app.add_middleware(GlobalCsrfMiddleware)
+logger.info("✅ Global CSRF middleware registered")
 
 # Request-ID middleware: must be registered last so it wraps everything and
 # its ContextVar is set before any inner middleware runs.

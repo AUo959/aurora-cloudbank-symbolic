@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "source_repo": "aggregated",
-  "generated_at": "2026-06-08T17:50:22.358545+00:00",
+  "generated_at": "2026-06-08T17:50:46.587854+00:00",
   "aggregation_metadata": {
     "sources": {
       "qgia-knowledge-library": {
@@ -14,7 +14,7 @@
         "status": "synced",
         "document_count": 7,
         "index_version": "1.0.0",
-        "generated_at": "2026-06-08T17:47:42.964626+00:00"
+        "generated_at": "2026-06-08T17:30:48.413303+00:00"
       }
     },
     "total_documents": 27,
@@ -203,7 +203,7 @@
       "path": "frameworks/iran-war-scenario-taxonomy.md",
       "checksum": "6962cf4eb1f16231",
       "word_count": 703,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "purpose",
         "design-principles",
@@ -239,7 +239,7 @@
       "path": "methods/iran-regime-dirichlet-template.md",
       "checksum": "378be9efc7a129fe",
       "word_count": 400,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "purpose",
         "scenario-set",
@@ -355,7 +355,7 @@
       "path": "schemas/actor-card-schema.md",
       "checksum": "1bac8efd9563616c",
       "word_count": 474,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "purpose",
         "required-fields",
@@ -375,7 +375,7 @@
       "path": "schemas/probability-ledger-schema.md",
       "checksum": "141b2a222ff49354",
       "word_count": 495,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "purpose",
         "core-columns",
@@ -545,7 +545,7 @@
       "path": "01_forecasting_methodologies.md",
       "checksum": "4e683f9ba4209756",
       "word_count": 3579,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "executive-overview",
         "i-superforecasting-framework",
@@ -567,7 +567,7 @@
       "path": "02_bayesian_frameworks.md",
       "checksum": "ad88418bebf948d3",
       "word_count": 2703,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "executive-overview",
         "i-fundamental-bayesian-framework",
@@ -587,7 +587,7 @@
       "path": "03_scenario_planning.md",
       "checksum": "6094156bc2ebaeb2",
       "word_count": 1820,
-      "last_modified": "2026-06-08T13:47:11-04:00",
+      "last_modified": "2026-06-08T16:54:42Z",
       "tags": [
         "executive-overview",
         "i-shell-scenario-planning-method",

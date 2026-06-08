@@ -224,6 +224,7 @@ AURORA_VALIDATION_SUMMARY.md
 # Aurora CI/CD generated manifests (do not commit)
 aurora_ci_validation_manifest.json
 aurora_deployment_manifest.json
+shutdown_manifest.json
 
 # Security files
 *.key

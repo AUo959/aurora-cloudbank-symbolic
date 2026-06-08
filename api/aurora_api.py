@@ -53,6 +53,9 @@ from modules.symbolic_core.sonnet4_integration_hub import enable_sonnet4_globall
 # Import ChatGPT Agent Mode integration
 from src.integrations.chatgpt_agent_mode import chatgpt_agent_integration
 
+# Import canonical DLP request envelope
+from src.core.request_envelope import request_envelope
+
 # Import Gemini Agent Mode integration
 try:
     from src.integrations.gemini_agent_integration import gemini_agent_integration
@@ -1340,11 +1343,13 @@ async def execute_agent_tool(
     verify_csrf_token(token, session_id=bound_session_id)
 
     try:
-        result = await chatgpt_agent_integration.execute_tool(
-            tool_name=req.tool_name,
-            parameters=req.parameters,
-            session_id=req.session_id
-        )
+        with request_envelope("agent_execute", agent_id="api", store_to_memory=True) as ctx:
+            result = await chatgpt_agent_integration.execute_tool(
+                tool_name=req.tool_name,
+                parameters=req.parameters,
+                session_id=req.session_id
+            )
+            ctx["result_summary"] = str(result)[:200]
         _evaluate_response(
             "agent_execute",
             result,

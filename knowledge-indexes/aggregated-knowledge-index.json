@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "source_repo": "aggregated",
-  "generated_at": "2026-06-08T16:15:27.394803+00:00",
+  "generated_at": "2026-06-08T16:19:52.875523+00:00",
   "aggregation_metadata": {
     "sources": {
       "qgia-knowledge-library": {
@@ -20,7 +20,7 @@
     "total_documents": 27,
     "aggregated_by": "constellation-knowledge-aggregator",
     "drift_notes": [
-      "Added 27 documents: qgia-library:01-01-core-ir-theories, qgia-library:01-02-strategic-bargaining-theory, qgia-library:01-03-deterrence-compellence-theory, qgia-library:01-04-bargaining-focal-points, qgia-library:01-05-deterrence-compellence-coercion, qgia-library:02-01-intelligence-cycle-methods, qgia-library:02-02-structured-analytic-techniques, qgia-library:02-03-forecasting-methodologies, qgia-library:02-04-operational-doctrine-adversarial-analysis, qgia-library:02-SAT-handbook, qgia-library:03-01-china-strategic-profile, qgia-library:03-regional-threat-templates, qgia-library:06-01-lanchester-equations, qgia-library:08-crisis-escalation-ladder, qgia-library:09-confidence-calibration, qgia-library:11-osiqp-architecture, qgia-library:regions-middle-east-iran-iran-war-2026-actor-cards, qgia-library:regions-middle-east-iran-iran-war-2026-baseline-ledger, qgia-library:regions-middle-east-iran-iran-war-2026-readme, qgia-library:regions-middle-east-iran-iran-war-2026-scenario-catalog, qgia-spine:01_forecasting_methodologies, qgia-spine:02_bayesian_frameworks, qgia-spine:03_scenario_planning, qgia-spine:actor-card-schema, qgia-spine:iran-regime-dirichlet-template, qgia-spine:iran-war-scenario-taxonomy, qgia-spine:probability-ledger-schema"
+      "No content drift detected"
     ]
   },
   "documents": [

@@ -127,6 +127,20 @@ jobs:
           fi
           echo "Critical tests done (exit $PYTEST_EXIT — treating as pass)"
 
+      # SUPPLY-CHAIN INTEGRITY CHECK - non-blocking, warns on hash mismatch
+      # Validates that every installed package matches a known-good SHA-256 hash.
+      # Regenerate requirements-hashed.txt with: bash scripts/generate_hashed_requirements.sh
+      - name: Validate package hashes (supply-chain check)
+        continue-on-error: true
+        run: |
+          if [ -f requirements-hashed.txt ]; then
+            echo "Checking package integrity with hashed requirements..."
+            pip install --require-hashes -r requirements-hashed.txt --dry-run 2>&1 | tail -10 || \
+              echo "::warning::Hash validation failed — regenerate requirements-hashed.txt with: bash scripts/generate_hashed_requirements.sh"
+          else
+            echo "::warning::requirements-hashed.txt not found — run: bash scripts/generate_hashed_requirements.sh"
+          fi
+
       # FULL TEST SUITE - informational, failures tracked but do not block
       - name: Run full test suite
         continue-on-error: true

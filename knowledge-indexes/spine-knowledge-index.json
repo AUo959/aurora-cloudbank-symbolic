@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "source_repo": "qgia-knowledge-spine",
+  "generated_at": "2026-05-04T04:46:40.024026+00:00",
+  "documents": [
+    {
+      "id": "qgia-spine:01_forecasting_methodologies",
+      "title": "Forecasting Methodologies Framework",
+      "domain": "tier1-methodological-foundations",
+      "path": "01_forecasting_methodologies.md",
+      "checksum": "4e683f9ba4209756",
+      "word_count": 3579,
+      "last_modified": "2026-02-15T23:26:17-05:00",
+      "tags": [
+        "executive-overview",
+        "i-superforecasting-framework",
+        "ii-calibration-and-validation",
+        "iii-temporal-dynamics",
+        "iv-qgia-integration-protocols",
+        "v-historical-validation",
+        "vi-operational-protocols",
+        "vii-intelligence-collection-requirements",
+        "viii-references",
+        "ix-appendices"
+      ],
+      "summary": "Forecasting methodologies form the analytical backbone of QGIA's 84.7% accuracy for 12-month geopolitical forecasts. This document consolidates superforecasting principles, probabilistic aggregation techniques, and calibration methods validated through Philip Tetlock's Good Judgment Project and oper"
+    },
+    {
+      "id": "qgia-spine:02_bayesian_frameworks",
+      "title": "Bayesian Frameworks for Belief Updating",
+      "domain": "tier1-methodological-foundations",
+      "path": "02_bayesian_frameworks.md",
+      "checksum": "ad88418bebf948d3",
+      "word_count": 2703,
+      "last_modified": "2026-02-15T23:29:26-05:00",
+      "tags": [
+        "executive-overview",
+        "i-fundamental-bayesian-framework",
+        "ii-hierarchical-bayesian-models",
+        "iii-bayesian-networks",
+        "iv-advanced-bayesian-techniques",
+        "v-integration-with-qgia-quantum-frameworks",
+        "vi-operational-protocols",
+        "vii-references"
+      ],
+      "summary": "Bayesian frameworks provide the mathematical foundation for QGIA's belief updating protocols, enabling analysts to systematically revise probability estimates as new intelligence arrives. Hierarchical Bayesian modeling (HBM) captures multi-level uncertainties across the intelligence cycle\u2014from senso"
+    },
+    {
+      "id": "qgia-spine:03_scenario_planning",
+      "title": "Scenario Planning and Strategic Foresight",
+      "domain": "tier1-methodological-foundations",
+      "path": "03_scenario_planning.md",
+      "checksum": "6094156bc2ebaeb2",
+      "word_count": 1820,
+      "last_modified": "2026-02-15T23:29:26-05:00",
+      "tags": [
+        "executive-overview",
+        "i-shell-scenario-planning-method",
+        "ii-horizon-scanning",
+        "iii-integration-with-qgia-quantum-frameworks",
+        "iv-operational-protocols",
+        "v-references"
+      ],
+      "summary": "Scenario planning enables QGIA to model plausible futures under deep uncertainty, where probabilities are unknown or contested. Developed by Royal Dutch Shell in the 1970s and validated through successful navigation of oil crises, scenario methods complement probabilistic forecasting by exploring di"
+    },
+    {
+      "id": "qgia-spine:iran-war-scenario-taxonomy",
+      "title": "Iran War Scenario Taxonomy",
+      "domain": "framework",
+      "path": "frameworks/iran-war-scenario-taxonomy.md",
+      "checksum": "6962cf4eb1f16231",
+      "word_count": 703,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "design-principles",
+        "naming-convention",
+        "regime-trajectory-set",
+        "war-outcome-set-0180-days",
+        "tactical--modality-set",
+        "modeling-guidance",
+        "versioning"
+      ],
+      "summary": "This document defines a canonical `scenario_id` taxonomy for Iran War 2026 assessments. It is intended for use across QGIA forecasting workflows, including probability ledgers, actor cards, QSFE scenario sets, ABCP updates, and runtime simulation contracts."
+    },
+    {
+      "id": "qgia-spine:iran-regime-dirichlet-template",
+      "title": "Iran Regime Trajectory \u2014 Dirichlet Template",
+      "domain": "method",
+      "path": "methods/iran-regime-dirichlet-template.md",
+      "checksum": "378be9efc7a129fe",
+      "word_count": 400,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "scenario-set",
+        "initial-prior",
+        "update-logic",
+        "implementation-notes",
+        "versioning"
+      ],
+      "summary": "This template defines a four-scenario Dirichlet structure for 12-month Iran regime trajectory forecasting. It is designed to be used as an initializable prior within ABCP and QSFE, updatable as new OSINT or SIGINT evidence arrives."
+    },
+    {
+      "id": "qgia-spine:actor-card-schema",
+      "title": "Actor Card Schema",
+      "domain": "schema",
+      "path": "schemas/actor-card-schema.md",
+      "checksum": "1bac8efd9563616c",
+      "word_count": 474,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "required-fields",
+        "optional-fields",
+        "utility-encoding",
+        "trigger-rule-schema",
+        "validation-rules",
+        "minimal-valid-example",
+        "versioning"
+      ],
+      "summary": "This schema standardizes how actor behavior is encoded for QGIA forecasting, scenario simulation, and runtime ingestion. The actor card is a compact representation of decision style, utility ordering, hard constraints, and trigger-dependent behavioral shifts."
+    },
+    {
+      "id": "qgia-spine:probability-ledger-schema",
+      "title": "Probability Ledger Schema",
+      "domain": "schema",
+      "path": "schemas/probability-ledger-schema.md",
+      "checksum": "141b2a222ff49354",
+      "word_count": 495,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "core-columns",
+        "event-types",
+        "update-rules",
+        "confidence-components",
+        "minimal-csv-example",
+        "brier-score-integration",
+        "versioning"
+      ],
+      "summary": "The probability ledger is the canonical event log for forecasted scenarios, baseline priors, posterior updates, confidence metrics, and change tracking across QGIA assessments."
+    }
+  ]
+}

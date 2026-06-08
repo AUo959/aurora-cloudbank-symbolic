@@ -1,23 +1,630 @@
 {
   "version": "1.0.0",
   "source_repo": "aggregated",
-  "generated_at": "2026-03-13T15:12:04.350843+00:00",
+  "generated_at": "2026-06-08T16:15:27.394803+00:00",
   "aggregation_metadata": {
     "sources": {
       "qgia-knowledge-library": {
-        "status": "unreachable",
-        "document_count": 0
+        "status": "synced",
+        "document_count": 20,
+        "index_version": "1.0.0",
+        "generated_at": "2026-05-04T04:47:22.217069+00:00"
       },
       "qgia-knowledge-spine": {
-        "status": "unreachable",
-        "document_count": 0
+        "status": "synced",
+        "document_count": 7,
+        "index_version": "1.0.0",
+        "generated_at": "2026-05-04T04:46:40.024026+00:00"
       }
     },
-    "total_documents": 0,
+    "total_documents": 27,
     "aggregated_by": "constellation-knowledge-aggregator",
     "drift_notes": [
-      "First aggregation \u2014 no previous index to compare"
+      "Added 27 documents: qgia-library:01-01-core-ir-theories, qgia-library:01-02-strategic-bargaining-theory, qgia-library:01-03-deterrence-compellence-theory, qgia-library:01-04-bargaining-focal-points, qgia-library:01-05-deterrence-compellence-coercion, qgia-library:02-01-intelligence-cycle-methods, qgia-library:02-02-structured-analytic-techniques, qgia-library:02-03-forecasting-methodologies, qgia-library:02-04-operational-doctrine-adversarial-analysis, qgia-library:02-SAT-handbook, qgia-library:03-01-china-strategic-profile, qgia-library:03-regional-threat-templates, qgia-library:06-01-lanchester-equations, qgia-library:08-crisis-escalation-ladder, qgia-library:09-confidence-calibration, qgia-library:11-osiqp-architecture, qgia-library:regions-middle-east-iran-iran-war-2026-actor-cards, qgia-library:regions-middle-east-iran-iran-war-2026-baseline-ledger, qgia-library:regions-middle-east-iran-iran-war-2026-readme, qgia-library:regions-middle-east-iran-iran-war-2026-scenario-catalog, qgia-spine:01_forecasting_methodologies, qgia-spine:02_bayesian_frameworks, qgia-spine:03_scenario_planning, qgia-spine:actor-card-schema, qgia-spine:iran-regime-dirichlet-template, qgia-spine:iran-war-scenario-taxonomy, qgia-spine:probability-ledger-schema"
     ]
   },
-  "documents": []
+  "documents": [
+    {
+      "id": "qgia-library:regions-middle-east-iran-iran-war-2026-actor-cards",
+      "title": "Iran War 2026 \u2014 Actor Cards",
+      "domain": "actor_cards",
+      "path": "regions/middle-east/iran/iran-war-2026/actor-cards.md",
+      "checksum": "c6bc0a430b56160d",
+      "word_count": 496,
+      "last_modified": "2026-04-19T00:17:48-04:00",
+      "tags": [
+        "IRGC-QF / IRGC High Command",
+        "Netanyahu Coalition / Israeli War Cabinet",
+        "US Executive Node"
+      ],
+      "summary": "**Baseline date:** 2026-04-19T00:00:00Z"
+    },
+    {
+      "id": "qgia-library:02-01-intelligence-cycle-methods",
+      "title": "Intelligence Cycle Methods",
+      "domain": "analytical-frameworks",
+      "path": "02-analytical-frameworks/02-01-intelligence-cycle-methods.md",
+      "checksum": "5b4e4c9db039eb1f",
+      "word_count": 1837,
+      "last_modified": "2026-02-16T01:14:14-05:00",
+      "tags": [
+        "Purpose",
+        "1. INTELLIGENCE CYCLE OVERVIEW",
+        "2. PHASE 1: PLANNING & DIRECTION",
+        "3. PHASE 2: COLLECTION",
+        "4. PHASE 3: PROCESSING",
+        "5. PHASE 4: ANALYSIS & PRODUCTION",
+        "6. PHASE 5: DISSEMINATION",
+        "7. PHASE 6: FEEDBACK",
+        "8. INTELLIGENCE FAILURES: LESSONS LEARNED",
+        "9. QGIA-SPECIFIC ENHANCEMENTS",
+        "10. OPERATIONAL PROTOCOLS",
+        "11. TRAINING REQUIREMENTS",
+        "12. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "Comprehensive framework for intelligence production, from requirements definition through dissemination. Ensures systematic collection, rigorous analysis, and timely delivery of actionable intelligence."
+    },
+    {
+      "id": "qgia-library:02-02-structured-analytic-techniques",
+      "title": "Structured Analytic Techniques (SATs)",
+      "domain": "analytical-frameworks",
+      "path": "02-analytical-frameworks/02-02-structured-analytic-techniques.md",
+      "checksum": "12ea09ee84b98edd",
+      "word_count": 1768,
+      "last_modified": "2026-02-16T11:39:18-05:00",
+      "tags": [
+        "Purpose",
+        "1. DIAGNOSTIC TECHNIQUES",
+        "2. CONTRARIAN TECHNIQUES",
+        "3. HYPOTHESIS GENERATION & TESTING",
+        "4. IMAGINATIVE THINKING",
+        "5. SCENARIO ANALYSIS",
+        "6. DECISION SUPPORT TECHNIQUES",
+        "7. CHALLENGE ANALYSIS",
+        "8. QGIA INTEGRATION",
+        "9. COGNITIVE BIAS MITIGATION",
+        "10. QUALITY CONTROL",
+        "11. TRAINING REQUIREMENTS",
+        "12. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "Systematic techniques to overcome cognitive biases, challenge assumptions, and improve analytical rigor. Mandatory application for all Tier I assessments."
+    },
+    {
+      "id": "qgia-library:02-03-forecasting-methodologies",
+      "title": "Forecasting Methodologies Framework",
+      "domain": "analytical-frameworks",
+      "path": "02-analytical-frameworks/02-03-forecasting-methodologies.md",
+      "checksum": "35e144335b23c184",
+      "word_count": 3586,
+      "last_modified": "2026-02-16T13:40:04-05:00",
+      "tags": [
+        "Executive Overview",
+        "I. Superforecasting Framework",
+        "II. Calibration and Validation",
+        "III. Temporal Dynamics",
+        "IV. QGIA Integration Protocols",
+        "V. Historical Validation",
+        "VI. Operational Protocols",
+        "VII. Intelligence Collection Requirements",
+        "VIII. References",
+        "IX. Appendices"
+      ],
+      "summary": "**QGIA Knowledge Spine - Document 01**"
+    },
+    {
+      "id": "qgia-library:02-04-operational-doctrine-adversarial-analysis",
+      "title": "QGIA Operational Doctrine: Adversarial Analysis & Political Warfare",
+      "domain": "analytical-frameworks",
+      "path": "02-analytical-frameworks/02-04-operational-doctrine-adversarial-analysis.md",
+      "checksum": "9d680779ce43dc97",
+      "word_count": 5470,
+      "last_modified": "2026-03-11T22:56:34-04:00",
+      "tags": [
+        "Preamble",
+        "PART I: FOUNDATIONAL AXIOMS \u2014 THE FRACTAL LAWS OF POWER",
+        "PART II: REGIME CHANGE FAILURE DOCTRINE",
+        "PART III: EPISTEMICS OF FORECASTING UNDER DECEPTION",
+        "PART IV: TRUTH-CONDITIONS INTELLIGENCE METHODOLOGY",
+        "PART V: OPEN CHANNEL DECEPTION DOCTRINE",
+        "PART VI: FRAME ANALYSIS DOCTRINE",
+        "PART VII: PREDATOR BEHAVIORAL EXPLOITATION DOCTRINE",
+        "PART VIII: COALITION FRACTURE DOCTRINE \u2014 THE FOX/BEAR ARCHITECTURE",
+        "PART IX: THE TWO-MOVE POLITICAL WARFARE OPERATION",
+        "PART X: COUNTER-PROPAGANDA OPERATIONAL PRINCIPLES",
+        "APPENDIX: MASTER VULNERABILITY TAXONOMY",
+        "Document Control"
+      ],
+      "summary": "**Document ID:** 02-04"
+    },
+    {
+      "id": "qgia-library:02-SAT-handbook",
+      "title": "Structured Analytic Techniques Handbook",
+      "domain": "analytical-frameworks",
+      "path": "02-analytical-frameworks/02-SAT-handbook.md",
+      "checksum": "ac3af8f8ffb67629",
+      "word_count": 10405,
+      "last_modified": "2026-03-13T20:36:12-04:00",
+      "tags": [
+        "Preface",
+        "Table of Contents",
+        "1. Analysis of Competing Hypotheses (ACH)",
+        "2. Diagnostic Reasoning Protocols",
+        "3. Key Assumptions Check (KAC)",
+        "4. Deception Detection Frameworks",
+        "5. Quality of Information Assessment (QIA)",
+        "6. Structured Brainstorming Techniques",
+        "7. Cross-Impact Matrix Analysis",
+        "8. Indicators and Warning Generation",
+        "9. Devil's Advocacy and Team A/Team B",
+        "10. Red Team Analysis",
+        "11. Pre-Mortem Analysis",
+        "12. Outside-In Analysis",
+        "13. SAT Selection Matrix and Workflow Integration",
+        "14. References"
+      ],
+      "summary": "This handbook is the definitive operational reference for structured analytic techniques (SATs) employed across QGIA. It supersedes the summary treatment in QGIA-KL-AF-02-02 and constitutes the full methodology standard. Every technique herein has been selected because it systematically counteracts "
+    },
+    {
+      "id": "qgia-library:08-crisis-escalation-ladder",
+      "title": "Crisis Escalation Ladder Framework",
+      "domain": "crisis-protocols",
+      "path": "08-crisis-protocols/08-crisis-escalation-ladder.md",
+      "checksum": "b5ff79bf11e6774c",
+      "word_count": 6782,
+      "last_modified": "2026-03-13T20:36:12-04:00",
+      "tags": [
+        "Purpose",
+        "1. CRISIS PHASE DEFINITIONS",
+        "2. ESCALATION INDICATORS BY PHASE",
+        "3. DE-ESCALATION OPPORTUNITY WINDOWS",
+        "4. INTERVENTION OPTION DECISION TREES",
+        "5. BACKCHANNEL COMMUNICATION PROTOCOLS",
+        "6. RED LINE IDENTIFICATION METHODOLOGY",
+        "7. POINT-OF-NO-RETURN ASSESSMENT FRAMEWORK",
+        "8. HERMAN KAHN'S ESCALATION LADDER \u2014 ADAPTED FOR MODERN OPERATIONS",
+        "9. ESCALATION DOMINANCE ASSESSMENT",
+        "10. HORIZONTAL VS. VERTICAL ESCALATION DYNAMICS",
+        "11. CROSS-DOMAIN ESCALATION",
+        "12. NUCLEAR THRESHOLD INDICATORS",
+        "13. HISTORICAL ESCALATION PATHWAY CASE STUDIES",
+        "14. QGIA SYSTEM INTEGRATION",
+        "15. ANALYST RAPID RESPONSE CHECKLISTS",
+        "16. QUICK REFERENCE: ESCALATION MANAGEMENT PRINCIPLES",
+        "References"
+      ],
+      "summary": "This document is the authoritative operational reference for analysts managing active crises. It provides a structured methodology to identify crisis phase, assess escalation trajectory, identify intervention windows, and coordinate cross-system responses. Every section is designed for real-time use"
+    },
+    {
+      "id": "qgia-spine:iran-war-scenario-taxonomy",
+      "title": "Iran War Scenario Taxonomy",
+      "domain": "framework",
+      "path": "frameworks/iran-war-scenario-taxonomy.md",
+      "checksum": "6962cf4eb1f16231",
+      "word_count": 703,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "design-principles",
+        "naming-convention",
+        "regime-trajectory-set",
+        "war-outcome-set-0180-days",
+        "tactical--modality-set",
+        "modeling-guidance",
+        "versioning"
+      ],
+      "summary": "This document defines a canonical `scenario_id` taxonomy for Iran War 2026 assessments. It is intended for use across QGIA forecasting workflows, including probability ledgers, actor cards, QSFE scenario sets, ABCP updates, and runtime simulation contracts."
+    },
+    {
+      "id": "qgia-library:regions-middle-east-iran-iran-war-2026-baseline-ledger",
+      "title": "Iran War 2026 \u2014 Baseline Probability Ledger",
+      "domain": "ledger",
+      "path": "regions/middle-east/iran/iran-war-2026/baseline-ledger.md",
+      "checksum": "9461e22e242c98dc",
+      "word_count": 493,
+      "last_modified": "2026-04-19T00:17:48-04:00",
+      "tags": [
+        "Strategic War Outcomes (0\u2013180 days)",
+        "Regime Trajectory Set (12 months)",
+        "Composite Confidence Breakdown",
+        "Update Log"
+      ],
+      "summary": "**Baseline date:** 2026-04-19T00:00:00Z"
+    },
+    {
+      "id": "qgia-spine:iran-regime-dirichlet-template",
+      "title": "Iran Regime Trajectory \u2014 Dirichlet Template",
+      "domain": "method",
+      "path": "methods/iran-regime-dirichlet-template.md",
+      "checksum": "378be9efc7a129fe",
+      "word_count": 400,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "scenario-set",
+        "initial-prior",
+        "update-logic",
+        "implementation-notes",
+        "versioning"
+      ],
+      "summary": "This template defines a four-scenario Dirichlet structure for 12-month Iran regime trajectory forecasting. It is designed to be used as an initializable prior within ABCP and QSFE, updatable as new OSINT or SIGINT evidence arrives."
+    },
+    {
+      "id": "qgia-library:06-01-lanchester-equations",
+      "title": "Lanchester Equations: Force-on-Force Combat Modeling",
+      "domain": "quantitative-models",
+      "path": "06-quantitative-models/06-01-lanchester-equations.md",
+      "checksum": "c50908b450190b08",
+      "word_count": 1504,
+      "last_modified": "2026-02-16T11:40:54-05:00",
+      "tags": [
+        "Purpose",
+        "1. FOUNDATIONAL CONCEPTS",
+        "2. LANCHESTER'S LINEAR LAW (Ancient/Guerrilla Combat)",
+        "3. LANCHESTER'S SQUARE LAW (Modern Conventional Combat)",
+        "4. EXTENSIONS AND VARIANTS",
+        "5. LIMITATIONS AND CRITIQUES",
+        "6. EMPIRICAL VALIDATION",
+        "7. QGIA OPERATIONAL INTEGRATION",
+        "8. FORCE PLANNING APPLICATIONS",
+        "9. COMPUTATIONAL IMPLEMENTATION",
+        "10. TRAINING REQUIREMENTS",
+        "11. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "Mathematical models for predicting combat outcomes based on force sizes, attrition rates, and engagement types. Foundation for force-on-force analysis in conventional warfare scenarios."
+    },
+    {
+      "id": "qgia-library:03-01-china-strategic-profile",
+      "title": "China Strategic Profile",
+      "domain": "regional-expertise",
+      "path": "03-regional-expertise/03-01-china-strategic-profile.md",
+      "checksum": "cc43464856d2f655",
+      "word_count": 1551,
+      "last_modified": "2026-02-16T11:42:47-05:00",
+      "tags": [
+        "Purpose",
+        "1. STRATEGIC OVERVIEW",
+        "2. MILITARY CAPABILITIES",
+        "3. ECONOMIC POWER & VULNERABILITIES",
+        "4. TAIWAN CONTINGENCY",
+        "5. SOUTH CHINA SEA",
+        "6. BELT AND ROAD INITIATIVE (BRI)",
+        "7. STRATEGIC CULTURE",
+        "8. LEADERSHIP ASSESSMENT",
+        "9. QGIA FORECASTS",
+        "10. COLLECTION PRIORITIES",
+        "11. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "Comprehensive assessment of People's Republic of China strategic intentions, capabilities, vulnerabilities, and forecasted trajectories. Primary threat assessment for US national security 2026-2035."
+    },
+    {
+      "id": "qgia-library:03-regional-threat-templates",
+      "title": "Regional Threat Assessment Templates",
+      "domain": "regional-expertise",
+      "path": "03-regional-expertise/03-regional-threat-templates.md",
+      "checksum": "e61fc98d028ab288",
+      "word_count": 10390,
+      "last_modified": "2026-03-13T20:36:12-04:00",
+      "tags": [
+        "Purpose",
+        "Document Structure",
+        "Scoring Convention",
+        "Section 1: Regime Type Classification Decision Tree",
+        "Section 2: Political Stability Assessment Templates",
+        "Section 3: Economic Fragility Metrics Template",
+        "Section 4: Military Capability Assessment Framework",
+        "Section 5: Social Cohesion and Identity Conflict Template",
+        "Section 6: External Interference Vulnerability Assessment",
+        "Section 7: Regional Power Dynamics Mapping Methodology",
+        "Section 8: Trigger Event Identification Framework",
+        "Section 9: Fragile State Early Warning Indicators",
+        "Section 10: Alliance Commitment Reliability Scoring",
+        "Section 11: Information Environment Assessment",
+        "Section 12: Scenario Generation \u2014 Template-to-QSFE Integration",
+        "Section 13: Cross-Regional Comparison Methodology",
+        "Section 14: QGIA Integration Notes",
+        "Section 15: Assessment Completion Checklist",
+        "References and Data Sources"
+      ],
+      "summary": "This document provides standardized operational templates for regional threat assessment. Each template is designed for direct analyst use: score each indicator, record observations, and feed outputs into QSFE scenario generation. Templates apply across all QGIA regional desks \u2014 Indo-Pacific, Easter"
+    },
+    {
+      "id": "qgia-library:regions-middle-east-iran-iran-war-2026-scenario-catalog",
+      "title": "Iran War 2026 \u2014 Scenario Catalog",
+      "domain": "scenario_catalog",
+      "path": "regions/middle-east/iran/iran-war-2026/scenario-catalog.md",
+      "checksum": "16328f23f57a4833",
+      "word_count": 712,
+      "last_modified": "2026-04-19T00:17:48-04:00",
+      "tags": [
+        "Tier I Scenarios (P \u2265 0.25)",
+        "Tier II Scenarios (P 0.10\u20130.25)",
+        "Tier III Scenarios (P < 0.10)",
+        "Scenario Descriptions",
+        "Monitoring Indicators"
+      ],
+      "summary": "**Baseline date:** 2026-04-19T00:00:00Z"
+    },
+    {
+      "id": "qgia-spine:actor-card-schema",
+      "title": "Actor Card Schema",
+      "domain": "schema",
+      "path": "schemas/actor-card-schema.md",
+      "checksum": "1bac8efd9563616c",
+      "word_count": 474,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "required-fields",
+        "optional-fields",
+        "utility-encoding",
+        "trigger-rule-schema",
+        "validation-rules",
+        "minimal-valid-example",
+        "versioning"
+      ],
+      "summary": "This schema standardizes how actor behavior is encoded for QGIA forecasting, scenario simulation, and runtime ingestion. The actor card is a compact representation of decision style, utility ordering, hard constraints, and trigger-dependent behavioral shifts."
+    },
+    {
+      "id": "qgia-spine:probability-ledger-schema",
+      "title": "Probability Ledger Schema",
+      "domain": "schema",
+      "path": "schemas/probability-ledger-schema.md",
+      "checksum": "141b2a222ff49354",
+      "word_count": 495,
+      "last_modified": "2026-04-19T00:15:54-04:00",
+      "tags": [
+        "purpose",
+        "core-columns",
+        "event-types",
+        "update-rules",
+        "confidence-components",
+        "minimal-csv-example",
+        "brier-score-integration",
+        "versioning"
+      ],
+      "summary": "The probability ledger is the canonical event log for forecasted scenarios, baseline priors, posterior updates, confidence metrics, and change tracking across QGIA assessments."
+    },
+    {
+      "id": "qgia-library:11-osiqp-architecture",
+      "title": "OSIQP Technical Architecture Documentation",
+      "domain": "technology-systems",
+      "path": "11-technology-systems/11-osiqp-architecture.md",
+      "checksum": "1c8a50578f013a30",
+      "word_count": 7121,
+      "last_modified": "2026-03-13T20:36:12-04:00",
+      "tags": [
+        "Purpose",
+        "System Specifications Summary",
+        "1. System Architecture Overview",
+        "2. Source Ingestion Pipeline",
+        "3. NLP Processing Pipeline",
+        "4. Quantum-Classical Hybrid Processing Architecture",
+        "5. Sentiment Analysis: QGIA-SentimentNet v3.1",
+        "6. Data Pipeline: Ingestion to Storage",
+        "7. Query Engine and Latency Optimization",
+        "8. Security Architecture",
+        "9. Integration with QGIA Quantum Frameworks",
+        "10. API Documentation for Analyst Tools",
+        "11. Performance Monitoring and Alerting",
+        "12. Disaster Recovery and Failover",
+        "13. Troubleshooting and Maintenance Procedures",
+        "14. System Component Inventory",
+        "QGIA Integration Reference",
+        "References"
+      ],
+      "summary": "This document is the technical reference for the **Open-Source Intelligence Quantitative Platform (OSIQP) v4.2.1** \u2014 the primary data ingestion, processing, sentiment analysis, and query substrate supporting all QGIA analytical operations. It is intended for systems engineers, platform administrator"
+    },
+    {
+      "id": "qgia-library:regions-middle-east-iran-iran-war-2026-readme",
+      "title": "Iran War 2026 \u2014 Documentation Package",
+      "domain": "theater_readme",
+      "path": "regions/middle-east/iran/iran-war-2026/README.md",
+      "checksum": "82300bd621ae8ad9",
+      "word_count": 308,
+      "last_modified": "2026-04-19T00:17:48-04:00",
+      "tags": [
+        "Scope",
+        "Package Contents",
+        "Current Analytical Focus",
+        "Baseline Date",
+        "Dependencies",
+        "Confidence Benchmarks",
+        "Maintenance"
+      ],
+      "summary": "This package contains baseline documentation for the Iran War 2026 assessment set within the QGIA Knowledge Library. It bridges reusable QGIA schema from the Knowledge Spine with theater-specific scenario definitions, actor cards, and probability ledgers."
+    },
+    {
+      "id": "qgia-library:01-01-core-ir-theories",
+      "title": "Core International Relations Theories",
+      "domain": "theoretical-foundations",
+      "path": "01-theoretical-foundations/01-01-core-ir-theories.md",
+      "checksum": "b65422adc2bb54d6",
+      "word_count": 1903,
+      "last_modified": "2026-02-16T00:55:06-05:00",
+      "tags": [
+        "Purpose",
+        "1. REALISM PARADIGM",
+        "2. LIBERALISM PARADIGM",
+        "3. CONSTRUCTIVISM PARADIGM",
+        "4. ADDITIONAL PARADIGMS",
+        "5. MULTI-PARADIGM FORECASTING METHODOLOGY",
+        "6. OPERATIONALIZATION FOR QGIA FRAMEWORKS",
+        "7. CASE STUDY APPLICATIONS",
+        "8. THEORETICAL BLIND SPOTS AND LIMITATIONS",
+        "9. ANALYST TRAINING REQUIREMENTS",
+        "10. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "This document provides comprehensive coverage of foundational international relations theories that inform QGIA analytical frameworks. Analysts must understand these theoretical lenses to construct multi-paradigm assessments and avoid single-theory bias in geopolitical forecasting."
+    },
+    {
+      "id": "qgia-library:01-02-strategic-bargaining-theory",
+      "title": "Strategic Interaction & Bargaining Theory",
+      "domain": "theoretical-foundations",
+      "path": "01-theoretical-foundations/01-02-strategic-bargaining-theory.md",
+      "checksum": "fd77a01d72038476",
+      "word_count": 539,
+      "last_modified": "2026-02-16T14:10:19-05:00",
+      "tags": [
+        "Overview",
+        "Core Concepts",
+        "Key References",
+        "QGIA Integration Points"
+      ],
+      "summary": "**QGIA Knowledge Library - Theoretical Foundations**"
+    },
+    {
+      "id": "qgia-library:01-03-deterrence-compellence-theory",
+      "title": "Deterrence, Compellence & Coercive Diplomacy",
+      "domain": "theoretical-foundations",
+      "path": "01-theoretical-foundations/01-03-deterrence-compellence-theory.md",
+      "checksum": "3dcee54a69510a6a",
+      "word_count": 1329,
+      "last_modified": "2026-02-16T14:11:22-05:00",
+      "tags": [
+        "Overview",
+        "Core Concepts",
+        "Advanced Topics",
+        "Intelligence Analysis Framework",
+        "Key References",
+        "QGIA Integration Points"
+      ],
+      "summary": "**QGIA Knowledge Library - Theoretical Foundations**"
+    },
+    {
+      "id": "qgia-library:01-04-bargaining-focal-points",
+      "title": "Strategic Bargaining Theory and Focal Points",
+      "domain": "theoretical-foundations",
+      "path": "01-theoretical-foundations/01-04-bargaining-focal-points.md",
+      "checksum": "ccf9e65c1ef3d05d",
+      "word_count": 2068,
+      "last_modified": "2026-03-13T11:34:11-04:00",
+      "tags": [
+        "Executive Summary",
+        "1. Foundational Bargaining Models",
+        "2. Focal Points: Theory and Evidence",
+        "3. Bargaining Under Incomplete Information",
+        "4. Operational Guidance for QGIA Analysts",
+        "5. Integration with QGIA Frameworks",
+        "6. Case Studies",
+        "7. Future Research Directions",
+        "8. References and Further Reading"
+      ],
+      "summary": "Bargaining theory provides the mathematical and conceptual foundation for understanding crisis negotiations, alliance formation, and conflict termination. Focal points\u2014solutions that command attention as \"obvious\" settlement points\u2014emerge as critical coordination mechanisms in both tacit and explici"
+    },
+    {
+      "id": "qgia-library:01-05-deterrence-compellence-coercion",
+      "title": "Deterrence, Compellence, and Coercive Diplomacy",
+      "domain": "theoretical-foundations",
+      "path": "01-theoretical-foundations/01-05-deterrence-compellence-coercion.md",
+      "checksum": "2b1bc29cc3af542e",
+      "word_count": 2660,
+      "last_modified": "2026-03-13T11:34:11-04:00",
+      "tags": [
+        "Executive Summary",
+        "1. Foundational Concepts",
+        "2. Nuclear Deterrence Theory",
+        "3. Coercive Diplomacy (George & Simons, 1994)",
+        "4. Escalation Theory",
+        "5. Cross-Domain Escalation",
+        "6. Operational Guidance for QGIA Analysts",
+        "7. Case Studies",
+        "8. Integration with QGIA Frameworks",
+        "9. References and Further Reading"
+      ],
+      "summary": "Deterrence and compellence constitute the strategic foundations of coercive diplomacy\u2014the art of influencing adversary behavior through threats rather than brute force. While deterrence seeks to prevent an adversary from initiating action, compellence aims to force an adversary to undo actions alrea"
+    },
+    {
+      "id": "qgia-spine:01_forecasting_methodologies",
+      "title": "Forecasting Methodologies Framework",
+      "domain": "tier1-methodological-foundations",
+      "path": "01_forecasting_methodologies.md",
+      "checksum": "4e683f9ba4209756",
+      "word_count": 3579,
+      "last_modified": "2026-02-15T23:26:17-05:00",
+      "tags": [
+        "executive-overview",
+        "i-superforecasting-framework",
+        "ii-calibration-and-validation",
+        "iii-temporal-dynamics",
+        "iv-qgia-integration-protocols",
+        "v-historical-validation",
+        "vi-operational-protocols",
+        "vii-intelligence-collection-requirements",
+        "viii-references",
+        "ix-appendices"
+      ],
+      "summary": "Forecasting methodologies form the analytical backbone of QGIA's 84.7% accuracy for 12-month geopolitical forecasts. This document consolidates superforecasting principles, probabilistic aggregation techniques, and calibration methods validated through Philip Tetlock's Good Judgment Project and oper"
+    },
+    {
+      "id": "qgia-spine:02_bayesian_frameworks",
+      "title": "Bayesian Frameworks for Belief Updating",
+      "domain": "tier1-methodological-foundations",
+      "path": "02_bayesian_frameworks.md",
+      "checksum": "ad88418bebf948d3",
+      "word_count": 2703,
+      "last_modified": "2026-02-15T23:29:26-05:00",
+      "tags": [
+        "executive-overview",
+        "i-fundamental-bayesian-framework",
+        "ii-hierarchical-bayesian-models",
+        "iii-bayesian-networks",
+        "iv-advanced-bayesian-techniques",
+        "v-integration-with-qgia-quantum-frameworks",
+        "vi-operational-protocols",
+        "vii-references"
+      ],
+      "summary": "Bayesian frameworks provide the mathematical foundation for QGIA's belief updating protocols, enabling analysts to systematically revise probability estimates as new intelligence arrives. Hierarchical Bayesian modeling (HBM) captures multi-level uncertainties across the intelligence cycle\u2014from senso"
+    },
+    {
+      "id": "qgia-spine:03_scenario_planning",
+      "title": "Scenario Planning and Strategic Foresight",
+      "domain": "tier1-methodological-foundations",
+      "path": "03_scenario_planning.md",
+      "checksum": "6094156bc2ebaeb2",
+      "word_count": 1820,
+      "last_modified": "2026-02-15T23:29:26-05:00",
+      "tags": [
+        "executive-overview",
+        "i-shell-scenario-planning-method",
+        "ii-horizon-scanning",
+        "iii-integration-with-qgia-quantum-frameworks",
+        "iv-operational-protocols",
+        "v-references"
+      ],
+      "summary": "Scenario planning enables QGIA to model plausible futures under deep uncertainty, where probabilities are unknown or contested. Developed by Royal Dutch Shell in the 1970s and validated through successful navigation of oil crises, scenario methods complement probabilistic forecasting by exploring di"
+    },
+    {
+      "id": "qgia-library:09-confidence-calibration",
+      "title": "Confidence Calibration Guide",
+      "domain": "validation-metrics",
+      "path": "09-validation-metrics/09-confidence-calibration.md",
+      "checksum": "ae60ac978e9535a9",
+      "word_count": 6260,
+      "last_modified": "2026-03-13T20:36:12-04:00",
+      "tags": [
+        "Purpose",
+        "1. THE FOUR CONFIDENCE COMPONENTS",
+        "2. BRIER SCORE: CALCULATION AND INTERPRETATION",
+        "3. CALIBRATION CURVE GENERATION",
+        "4. INTERVAL ESTIMATION BEST PRACTICES",
+        "5. OVERCONFIDENCE DETECTION AND MITIGATION",
+        "6. DOMAIN-SPECIFIC CALIBRATION TABLES",
+        "7. EXTREMIZING: APPROPRIATE USE CASES AND METHODOLOGY",
+        "8. CALIBRATION CURVE CONSTRUCTION: WORKED CASE",
+        "9. HISTORICAL PERFORMANCE BENCHMARKING",
+        "10. INDIVIDUAL ANALYST CALIBRATION TRACKING",
+        "11. CALIBRATION EXERCISES FOR ANALYST TRAINING",
+        "12. COMMON CALIBRATION FAILURE MODES",
+        "13. QGIA SYSTEM INTEGRATION",
+        "14. DOCUMENT MAINTENANCE",
+        "REFERENCES"
+      ],
+      "summary": "Systematic methodology for quantifying, calibrating, and tracking probabilistic confidence in QGIA analytical products. This guide governs how analysts assign numerical confidence to forecasts, how those assignments are scored against outcomes, and how calibration performance is measured, reported, "
+    }
+  ]
 }

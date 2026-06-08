@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "source_repo": "qgia-knowledge-spine",
-  "generated_at": "2026-06-08T17:30:48.413303+00:00",
+  "generated_at": "2026-06-08T17:47:42.964626+00:00",
   "documents": [
     {
       "id": "qgia-spine:01_forecasting_methodologies",
@@ -10,7 +10,7 @@
       "path": "01_forecasting_methodologies.md",
       "checksum": "4e683f9ba4209756",
       "word_count": 3579,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "executive-overview",
         "i-superforecasting-framework",
@@ -32,7 +32,7 @@
       "path": "02_bayesian_frameworks.md",
       "checksum": "ad88418bebf948d3",
       "word_count": 2703,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "executive-overview",
         "i-fundamental-bayesian-framework",
@@ -52,7 +52,7 @@
       "path": "03_scenario_planning.md",
       "checksum": "6094156bc2ebaeb2",
       "word_count": 1820,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "executive-overview",
         "i-shell-scenario-planning-method",
@@ -70,7 +70,7 @@
       "path": "frameworks/iran-war-scenario-taxonomy.md",
       "checksum": "6962cf4eb1f16231",
       "word_count": 703,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "purpose",
         "design-principles",
@@ -90,7 +90,7 @@
       "path": "methods/iran-regime-dirichlet-template.md",
       "checksum": "378be9efc7a129fe",
       "word_count": 400,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "purpose",
         "scenario-set",
@@ -108,7 +108,7 @@
       "path": "schemas/actor-card-schema.md",
       "checksum": "1bac8efd9563616c",
       "word_count": 474,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "purpose",
         "required-fields",
@@ -128,7 +128,7 @@
       "path": "schemas/probability-ledger-schema.md",
       "checksum": "141b2a222ff49354",
       "word_count": 495,
-      "last_modified": "2026-06-08T16:54:42Z",
+      "last_modified": "2026-06-08T13:47:11-04:00",
       "tags": [
         "purpose",
         "core-columns",

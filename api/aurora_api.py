@@ -77,9 +77,8 @@ from src.middleware.fastapi_security import (
 from src.middleware.csrf_middleware import GlobalCsrfMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from fastapi import APIRouter
 from src.security.oauth2 import get_current_active_user, User  # authentication dependency
-from src.agents.crew.base_agent import get_crew_agent, get_all_crew_agents
+from src.agents.crew.base_agent import get_all_crew_agents
 
 # Action Guard: fire-and-forget ethics/compliance evaluation on response paths
 try:
@@ -91,80 +90,6 @@ except Exception as _action_guard_exc:  # pragma: no cover - graceful degradatio
 
     def _evaluate_response(*_args, **_kwargs) -> None:  # type: ignore[misc]
         """No-op fallback when action_guard cannot be imported."""
-
-# Crew Agents API Router (Phase 3 minimal implementation)
-crew_router = APIRouter(prefix="/api/crew", tags=["crew"])
-
-
-@crew_router.get("/all")
-async def list_all_crew(user: User = Depends(get_current_active_user)):
-    """List all registered crew agents with condensed status.
-
-    Security: Requires active user (OAuth2 token).
-    """
-    agents = get_all_crew_agents().values()
-    return {
-        "count": len(list(agents)),
-        "agents": [
-            {
-                "surname": a.surname,
-                "role": a.role.value,
-                "status": a.status,
-                "clearance": a.clearance.value,
-                "t1_state": a.t1_state,
-                "srb_resolution": a.srb_resolution,
-            }
-            for a in agents
-        ],
-    }
-
-
-@crew_router.post("/{surname}/process")
-@limiter.limit("30/minute")  # Crew collaboration - moderate rate per IP
-async def process_agent_task(
-    surname: str,
-    task: Dict[str, Any],
-    request: Request,
-    user: User = Depends(get_current_active_user),
-):
-    """Process a task with a specific crew agent.
-
-    Body: {"task_type": str, "context": {}, "priority": str}
-    Returns task execution including DLP placeholders.
-    """
-    agent = get_crew_agent(surname)
-    if not agent:
-        raise HTTPException(status_code=404, detail=f"Crew agent '{surname}' not found")
-    result = await agent.process_request(task)
-    _evaluate_response(
-        "agent_task",
-        result,
-        metadata={"endpoint": f"/api/crew/{surname}/process", "surname": surname},
-        agent_id=surname,
-        context_tag=f"crew_agent_{surname}",
-    )
-    return result
-
-
-@crew_router.post("/collaborate")
-@limiter.limit("30/minute")  # Crew collaboration - moderate rate per IP
-async def collaborate_agents(
-    payload: Dict[str, Any],
-    request: Request,
-    user: User = Depends(get_current_active_user),
-):
-    """Collaborate two agents on a task.
-
-    Body: {"primary": "Thorne", "secondary": "Markov", "task": {...}}
-    Returns collaboration result combining contributions.
-    """
-    primary = get_crew_agent(payload.get("primary"))
-    secondary = get_crew_agent(payload.get("secondary"))
-    if not primary or not secondary:
-        raise HTTPException(status_code=404, detail="One or both agents not found")
-    task_def = payload.get("task", {})
-    result = await primary.collaborate_with(secondary, task_def)
-    return result
 
 # (Moved time/hash imports into helper to satisfy lint ordering)
 
@@ -899,14 +824,21 @@ except Exception as e:
 try:
     from api.r2_telemetry_routes import router as r2_telemetry_router
     app.include_router(r2_telemetry_router)
-
-    # Crew Agents router inclusion (Phase 3)
-    app.include_router(crew_router)
     logger.info("✅ R2 Telemetry API routes integrated successfully")
 except ImportError as e:
     logger.warning("⚠️ R2 Telemetry routes not available: %s", e)
 except Exception as e:
     logger.error("❌ Failed to integrate R2 Telemetry routes: %s", e)
+
+# Include Crew Agents API routes (modules/crew_agents)
+try:
+    from modules.crew_agents.api import router as crew_agents_router
+    app.include_router(crew_agents_router)
+    logger.info("✅ Crew Agents API routes integrated successfully")
+except ImportError as e:
+    logger.warning("⚠️ Crew Agents module not available: %s", e)
+except Exception as e:
+    logger.error("❌ Failed to integrate Crew Agents routes: %s", e)
 
 # Include L2 Meta-Agent Bridge API routes
 try:

@@ -23,16 +23,19 @@ def test_list_all_crew_agents():
     if resp.status_code == 200:
         data = resp.json()
         assert "agents" in data
-        assert isinstance(data["agents"], list)
+        # Module router returns agents as a dict keyed by surname
+        assert isinstance(data["agents"], dict)
         # Ensure at least one known current agent (e.g., lin) present
-        assert any(a["surname"].lower() == "lin" for a in data["agents"])  # present
+        assert "lin" in data["agents"] or any(
+            v.get("surname", "").lower() == "lin" for v in data["agents"].values()
+        )
 
 
 @pytest.mark.unit
 def test_process_agent_task_success():
     get_noor()
     payload = {"task_type": "reflexivity_analysis", "context": {"target_system": "aurora_core"}, "priority": "low"}
-    resp = client.post("/api/crew/Noor/process", json=payload, headers=_auth_headers())
+    resp = client.post("/api/crew/noor/process", json=payload, headers=_auth_headers())
     assert resp.status_code in (200, 401)
     if resp.status_code == 200:
         data = resp.json()
@@ -47,7 +50,7 @@ def test_process_agent_task_success():
 def test_process_agent_task_invalid():
     get_noor()
     payload = {"task_type": "__invalid__", "context": {}, "priority": "low"}
-    resp = client.post("/api/crew/Noor/process", json=payload, headers=_auth_headers())
+    resp = client.post("/api/crew/noor/process", json=payload, headers=_auth_headers())
     assert resp.status_code in (200, 401)
     if resp.status_code == 200:
         data = resp.json()
@@ -59,9 +62,9 @@ def test_process_agent_task_invalid():
 def test_collaboration_endpoint():
     get_noor()
     get_lin()
+    # Module router CollaborationRequest: {"agents": [...], "task": {...}}
     payload = {
-        "primary": "Noor",
-        "secondary": "Noor",  # same agent instance type ensures shared task support
+        "agents": ["noor", "lin"],
         "task": {"task_type": "reflexivity_analysis", "context": {}, "priority": "low"}
     }
     resp = client.post("/api/crew/collaborate", json=payload, headers=_auth_headers())
@@ -69,7 +72,6 @@ def test_collaboration_endpoint():
     if resp.status_code == 200:
         data = resp.json()
         assert data["success"] is True
-        assert "my_contribution" in data and "their_contribution" in data
-        assert data["my_contribution"]["task_type"] == payload["task"]["task_type"]
-        assert "context_tag" in data["my_contribution"]
-        assert "symbolic_hash" in data["my_contribution"]
+        assert "results" in data
+        assert "primary_agent" in data
+        assert "collaborators" in data

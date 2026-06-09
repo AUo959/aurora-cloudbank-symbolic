@@ -110,7 +110,7 @@ async def health_check() -> Dict[str, Any]:
     }
 
 
-@app.post(  # verify_csrf inside"/render")
+@app.post("/render")
 async def render_glyph(
     request: RenderRequest,
     token: HTTPAuthorizationCredentials = Depends(security),
@@ -120,7 +120,7 @@ async def render_glyph(
     return await _render_glyph_impl(request)
 
 
-@app.post(  # verify_csrf inside"/generate")
+@app.post("/generate")
 async def generate_glyph(
     request: GlyphGenerationRequest,
     token: HTTPAuthorizationCredentials = Depends(security),

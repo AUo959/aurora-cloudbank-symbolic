@@ -43,7 +43,7 @@ limits==5.8.0
 mccabe==0.7.0
 mcp==1.27.2
 oauthlib==3.2.2
-packaging==24.0
+packaging==26.2
 passlib==1.7.4
 patch-ng==1.18.1
 pluggy==1.6.0

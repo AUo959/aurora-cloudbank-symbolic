@@ -1521,6 +1521,52 @@ async def execute_gemini_agent_tool(
 
 
 # ==============================================================================
+# MEMORY-AUGMENTED CHAT (RAG) ENDPOINT
+# ==============================================================================
+
+
+class RAGChatRequest(BaseModel):
+    """Request body for the memory-augmented RAG chat endpoint."""
+
+    message: str
+    context_id: str
+    user_id: str = "default"
+    top_k: int = Field(default=5, ge=1, le=20)
+    model: Optional[str] = None
+
+
+@app.post("/api/chat/rag")
+@limiter.limit("20/minute")  # AI inference - stricter rate limit per IP
+async def rag_chat_endpoint(req: RAGChatRequest, request: Request):
+    """Memory-augmented chat endpoint (RAG over AuMemManager).
+
+    Retrieves relevant memories for the given context before calling the LLM,
+    giving the model context from past conversations. The Q&A pair is stored
+    back to memory after a successful response.
+
+    Args:
+        req: RAGChatRequest containing message, context_id, user_id, top_k, model.
+
+    Returns:
+        JSON with ``response``, ``memories_used``, and ``context_id``.
+    """
+    try:
+        from modules.ai_core.rag_chat import rag_chat
+
+        result = await rag_chat(
+            req.message,
+            context_id=req.context_id,
+            user_id=req.user_id,
+            top_k=req.top_k,
+            model=req.model,
+        )
+        return result
+    except Exception as exc:
+        logger.exception("RAG chat endpoint error: %s", exc)
+        raise HTTPException(status_code=500, detail="RAG chat failed")
+
+
+# ==============================================================================
 # THREAD TRANSFER BRIDGE ENDPOINTS
 # ==============================================================================
 
@@ -3042,6 +3088,50 @@ async def get_performance_budgets(request: Request):
         "budgets": list_budgets(),
         "note": "p95/p99 latency targets in ms; error rate in percent",
     }
+
+
+# ---------------------------------------------------------------------------
+# RAG Chat endpoint (issue #775) — memory-augmented chat over AuMemManager
+# ---------------------------------------------------------------------------
+
+class RAGChatRequest(BaseModel):
+    """Request model for the memory-augmented RAG chat endpoint."""
+
+    message: str
+    context_id: str
+    user_id: str = "default"
+    top_k: int = Field(default=5, ge=1, le=20)
+    model: Optional[str] = None
+
+
+@app.post("/api/chat/rag")
+@limiter.limit("20/minute")
+async def rag_chat_endpoint(req: RAGChatRequest, request: Request):
+    """
+    Memory-augmented chat endpoint (RAG over AuMemManager).
+
+    Retrieves relevant memories for the given ``context_id``/``message`` pair,
+    injects them as context, calls the unified AI interface, and stores the
+    Q&A exchange back to memory for future retrieval.
+
+    Returns:
+        - ``response``: LLM response text.
+        - ``memories_used``: Number of memory entries injected.
+        - ``context_id``: Echo of the supplied context_id.
+    """
+    try:
+        from modules.ai_core.rag_chat import rag_chat
+        result = await rag_chat(
+            req.message,
+            context_id=req.context_id,
+            user_id=req.user_id,
+            top_k=req.top_k,
+            model=req.model,
+        )
+        return result
+    except Exception:
+        logger.exception("RAG chat endpoint failed")
+        raise HTTPException(status_code=500, detail="RAG chat failed")
 
 
 if __name__ == "__main__":

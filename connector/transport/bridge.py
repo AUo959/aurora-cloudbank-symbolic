@@ -21,6 +21,8 @@ import os
 import logging
 from typing import Any
 
+from connector import __version__ as _CONNECTOR_VERSION
+
 try:
     import httpx
 except ImportError:
@@ -58,7 +60,13 @@ class CloudbankBridge:
 
     @property
     def _headers(self) -> dict[str, str]:
-        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": f"aurora-mcp-connector/{_CONNECTOR_VERSION}",
+            "X-Source-Client": "aurora-mcp-connector",
+            "X-Connector-Version": _CONNECTOR_VERSION,
+        }
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers

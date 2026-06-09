@@ -31,8 +31,14 @@ except ImportError:
 
 log = logging.getLogger("aurora.connector.bridge")
 
+# Aurora API endpoint path constants — one source of truth for all tool handlers.
+AURORA_PATH_HEALTH = "/health"
+AURORA_PATH_AGENTS = "/api/crew/all"
+AURORA_PATH_DRIFT_ALERTS = "/api/drift/alerts"
+AURORA_PATH_ETHICS_VIOLATIONS = "/gumas/violations"
+AURORA_PATH_COMPONENTS = "/synergy/components"
+
 DEFAULT_TIMEOUT = 10.0  # seconds
-_CONNECTOR_VERSION = "0.1.0"
 _MAX_GET_RETRIES = 3
 
 
@@ -88,7 +94,7 @@ class CloudbankBridge:
         with exponential backoff. Does not retry on 4xx (client errors).
 
         Args:
-            path: API path (e.g. "/state", "/agents")
+            path: API path (e.g. "/health", "/api/crew/all")
             params: Optional query parameters
 
         Returns:
@@ -130,7 +136,7 @@ class CloudbankBridge:
         No automatic retry (non-idempotent operation).
 
         Args:
-            path: API path (e.g. "/memory/node", "/anomaly/flag")
+            path: API path (e.g. "/gumas/violations", "/memory/node")
             payload: Request body (will be JSON-encoded)
 
         Returns:

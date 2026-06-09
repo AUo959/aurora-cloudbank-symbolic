@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/AUo959/aurora-cloudbank-symbolic/releases/tag/v2.1.0) 
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/downloads/) 
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) 
-[![Status](https://img.shields.io/badge/status-production%20ready-brightgreen)](#production-status)
+[![Status](https://img.shields.io/badge/status-active%20development-blue)](#production-status)
 
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-brightgreen)](docs/CODE_QUALITY_SYSTEM.md) 
 [![Tests](https://img.shields.io/badge/tests-181%20files-blue)](#testing-excellence) 
@@ -135,7 +135,7 @@ make run
 - ☁️ **Vercel Deployment** - Production-ready serverless configuration
 - 📦 **System Cleanup** - Removed 18.5K lines of dead code (PR #379)
 - 🔄 **Pydantic V2 Migration** - Zero deprecation warnings
-- ✅ **100% Test Coverage** - 1065+ tests passing
+- ✅ **Test Suite** - 1065+ tests at v2.1.0 release (see current CI for up-to-date pass rate)
 
 **Impact:** +46,777 net lines across 426 files • Fully backwards compatible
 
@@ -1694,11 +1694,9 @@ asyncio.run(run_safety_monitoring())
 
 ---
 
-## 📊 Production Status
+## 📊 Project Status
 
-## 📊 Production Status
-
-### System Metrics (November 2025)
+### System Metrics (snapshot: November 2025)
 
 **Codebase:**
 - 📝 **48,347 lines** of production Python code
@@ -1715,9 +1713,9 @@ asyncio.run(run_safety_monitoring())
 - 🎛️ **6 Synergy Dashboard** APIs
 
 **Quality Gates:**
-- ✅ **Zero HIGH vulnerabilities** (as of Nov 12, 2025)
+- ✅ **Zero HIGH CVEs** (as of Nov 12, 2025 — see current security workflow for latest)
 - ✅ **Automated code quality** (flake8 + SonarCloud + Codacy)
-- ✅ **100% test pass rate** maintained
+- ✅ **≥95% test pass rate** — run `pytest` or check CI for current results
 - ✅ **Flake8 compliant** (120-char line limit)
 - ✅ **Type hints** throughout (Python 3.11+)
 
@@ -1727,13 +1725,16 @@ asyncio.run(run_safety_monitoring())
 - ⚡ **60-80%** quantum cache hit rate
 - ⚡ **30s** real-time dashboard refresh
 
-**Recent Sprint (Nov 10-12, 2025):**
+**Sprint highlights (Nov 10-12, 2025):**
 - ✅ Merged 6 feature PRs (24,145+ lines)
 - ✅ Closed 12 issues (including 6 HIGH security vulnerabilities)
 - ✅ Added quantum cloud backends (AWS, Azure, IBM, Google)
 - ✅ Implemented production telemetry system
 - ✅ Built drift detection & ethics monitoring
 - ✅ Created component synergy dashboard
+
+> **Note:** Metrics above are a historical snapshot from the v2.1.0 release (Nov 2025).
+> For current CI status, test results, and security audit, see the [Actions tab](https://github.com/AUo959/aurora-cloudbank-symbolic/actions) and the [Security tab](https://github.com/AUo959/aurora-cloudbank-symbolic/security).
 
 ### Component Status
 
@@ -1820,7 +1821,7 @@ Aurora CloudBank has been fully migrated to Pydantic V2 for future-proof type va
 - ✅ **Automatic Serialization** - V2 handles datetime/enum serialization natively
 - ✅ **Timezone-Aware** - All datetime operations use `datetime.now(timezone.utc)`
 - ✅ **Breaking Changes Fixed** - `max_items` → `max_length`, `class Config` → `model_config`
-- ✅ **100% Test Pass Rate** - 1065/1065 tests passing after migration
+- ✅ **Full Test Pass Rate at Migration** - 1065/1065 tests passing after Pydantic V2 migration (Nov 2025)
 
 **If you're contributing or extending Aurora:**
 ```python
